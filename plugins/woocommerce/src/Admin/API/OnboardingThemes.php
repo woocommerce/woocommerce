@@ -249,12 +249,146 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$in_app_purchase_params               = \WC_Admin_Addons::get_in_app_purchase_url_params();
+		$in_app_purchase_params['wccom-back'] = rawurlencode( '/wp-admin/admin.php?page=wc-admin&path=/customize-store' );
+
+		$core_themes = array(
+			array(
+				'name'           => 'Twenty Twenty-Four',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Black and white',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+					array(
+						'title'     => 'Brown Sugar',
+						'primary'   => '#EFEBE0',
+						'secondary' => '#AC6239',
+					),
+					array(
+						'title'     => 'Midnight',
+						'primary'   => '#161514',
+						'secondary' => '#AFADA7',
+					),
+					array(
+						'title'     => 'Olive',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+				),
+				'total_palettes' => 0,
+				'slug'           => 'twentytwentyfour',
+				'thumbnail_url'  => 'https://i0.wp.com/themes.svn.wordpress.org/twentytwentyfour/1.0/screenshot.png',
+				'link_url'       => 'https://wordpress.org/themes/twentytwentyfour/',
+			),
+			array(
+				'name'           => 'Highline',
+				/* translators: %d: price */
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
+				'is_free'        => false,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#211f1d',
+						'secondary' => '#211f1d',
+					),
+					array(
+						'title'     => 'Additional color',
+						'primary'   => '#aaaaaa',
+						'secondary' => '#aaaaaa',
+					),
+					array(
+						'title'     => 'Accent Background',
+						'primary'   => '#b04b3c',
+						'secondary' => '#b04b3c',
+					),
+					array(
+						'title'     => 'Secondary Background',
+						'primary'   => '#dabfa1',
+						'secondary' => '#dabfa1',
+					),
+				),
+				'total_palettes' => 9,
+				'slug'           => 'highline',
+				'thumbnail_url'  => 'https://woocommerce.com/wp-content/uploads/2023/12/Featured-image-538x403-1.png',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woocommerce.com/products/highline/' ),
+			),
+			array(
+				'name'           => 'Luminate',
+				/* translators: %d: price */
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
+				'is_free'        => false,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#242a2e',
+						'secondary' => '#242a2e',
+					),
+					array(
+						'title'     => 'Lite',
+						'primary'   => '#f6f5f2',
+						'secondary' => '#f6f5f2',
+					),
+					array(
+						'title'     => 'Grey',
+						'primary'   => '#a5a5a5',
+						'secondary' => '#a5a5a5',
+					),
+					array(
+						'title'     => 'Lite Grey',
+						'primary'   => '#e4e4e1',
+						'secondary' => '#e4e4e1',
+					),
+				),
+				'total_palettes' => 5,
+				'slug'           => 'luminate',
+				'thumbnail_url'  => 'https://woocommerce.com/wp-content/uploads/2022/07/Featured-image-538x403-2.png',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woocommerce.com/products/luminate/' ),
+			),
+			array(
+				'name'           => 'Gizmo',
+				/* translators: %d: price */
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
+				'is_free'        => false,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#ff5833',
+						'secondary' => '#ff5833',
+					),
+					array(
+						'title'     => 'Foreground',
+						'primary'   => '#111111',
+						'secondary' => '#111111',
+					),
+					array(
+						'title'     => 'Background',
+						'primary'   => '#FFFFFF',
+						'secondary' => '#FFFFFF',
+					),
+					array(
+						'title'     => 'Base',
+						'primary'   => '#595959',
+						'secondary' => '#595959',
+					),
+				),
+				'total_palettes' => 10,
+				'slug'           => 'gizmo',
+				'thumbnail_url'  => 'https://woocommerce.com/wp-content/uploads/2022/11/gizmo-regular-card-product-logo.jpg?w=900',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woocommerce.com/products/gizmo/' ),
+			),
+		);
+
 		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
-		$themes = array(
+		$default_themes = array(
 			array(
 				'name'           => 'Tsubaki',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(),
 				'total_palettes' => 0,
 				'slug'           => 'tsubaki',
@@ -263,17 +397,18 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Tazza',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(),
 				'total_palettes' => 0,
 				'slug'           => 'tazza',
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tazza/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/tazza/',
-				'total_palettes' => 0,
 			),
 			array(
 				'name'           => 'Amulet',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Default',
@@ -303,7 +438,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Zaino',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Default',
@@ -332,6 +468,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'link_url'       => 'https://wordpress.com/theme/zaino/',
 			),
 		);
+
+		$ai_connection_enabled = get_option( 'woocommerce_blocks_allow_ai_connection' );
+		$themes                = $ai_connection_enabled ? $default_themes : $core_themes;
 
 		// To be implemented: Filter themes based on industry.
 		if ( $industry ) {
@@ -449,6 +588,10 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 							'price'          => array(
 								'type'        => 'string',
 								'description' => 'Price',
+							),
+							'is_free'        => array(
+								'type'        => 'boolean',
+								'description' => 'Whether theme is free',
 							),
 							'is_active'      => array(
 								'type'        => 'boolean',

@@ -32,7 +32,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 			'no'
 		);
 
-		// Set status as failed in case we run out of exectuion time.
+		// Set status as failed in case we run out of execution time.
 		register_shutdown_function(
 			function () {
 				$error = error_get_last();
@@ -57,7 +57,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	}
 
 	/**
-	 * Retreive the option.
+	 * Retrieve the option.
 	 *
 	 * @return false|mixed|void
 	 */
@@ -133,7 +133,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 			'coreprofiler_store_extension_installed_and_activated',
 			array(
 				'success'       => false,
-				'extension'     => $plugin_name,
+				'extension'     => $this->get_plugin_track_key( $plugin_name ),
 				'error_message' => $error_message,
 			)
 		);
@@ -173,37 +173,37 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 * @return string - Time frame.
 	 */
 	function get_timeframe( $timeInMs ) {
-		$time_frames = [
-			[
+		$time_frames = array(
+			array(
 				'name' => '0-2s',
 				'max'  => 2,
-			],
-			[
+			),
+			array(
 				'name' => '2-5s',
 				'max'  => 5,
-			],
-			[
+			),
+			array(
 				'name' => '5-10s',
 				'max'  => 10,
-			],
-			[
+			),
+			array(
 				'name' => '10-15s',
 				'max'  => 15,
-			],
-			[
+			),
+			array(
 				'name' => '15-20s',
 				'max'  => 20,
-			],
-			[
+			),
+			array(
 				'name' => '20-30s',
 				'max'  => 30,
-			],
-			[
+			),
+			array(
 				'name' => '30-60s',
 				'max'  => 60,
-			],
-			[ 'name' => '>60s' ],
-		];
+			),
+			array( 'name' => '>60s' ),
+		);
 
 		foreach ( $time_frames as $time_frame ) {
 			if ( ! isset( $time_frame['max'] ) ) {
@@ -219,7 +219,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 		$track_data = array(
 			'success'              => true,
 			'installed_extensions' => array_map(
-				function( $extension ) {
+				function ( $extension ) {
 					return $this->get_plugin_track_key( $extension );
 				},
 				$data['installed']

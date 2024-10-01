@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 
 /**
  * WooCommercePayments Task
@@ -34,7 +34,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up WooPayments', 'woocommerce' );
+		return __( 'Get paid with WooPayments', 'woocommerce' );
 	}
 
 	/**
@@ -65,6 +65,22 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
+	 * Additional data.
+	 *
+	 * @return mixed
+	 */
+	public function get_additional_data() {
+		/**
+		 * Filter WooPayments onboarding task additional data.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param ?array $additional_data The task additional data.
+		 */
+		return apply_filters( 'woocommerce_admin_woopayments_onboarding_task_additional_data', null );
+	}
+
+	/**
 	 * Time.
 	 *
 	 * @return string
@@ -83,25 +99,15 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Additional info.
-	 *
-	 * @return string
-	 */
-	public function get_additional_info() {
-		return __(
-			'Accept credit/debit cards and other popular payment methods with no setup or monthly fees — and manage payments right from your store dashboard.',
-			'woocommerce'
-		);
-	}
-
-	/**
 	 * Task completion.
 	 *
 	 * @return bool
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::is_connected() && ! self::is_account_partially_onboarded();
+			// This task is complete if there are other ecommerce gateways enabled (offline payment methods are excluded),
+			// or if WooPayments is active and has a connected, fully onboarded account.
+			$this->is_complete_result = self::has_other_ecommerce_gateways() || ( self::is_connected() && ! self::is_account_partially_onboarded() );
 		}
 
 		return $this->is_complete_result;
@@ -113,15 +119,11 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		$payments = $this->task_list->get_task( 'payments' );
-
-		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
-			self::is_installed() &&
-			self::is_supported();
+		return self::is_supported();
 	}
 
 	/**
-	 * Check if the plugin was requested during onboarding.
+	 * Check if the WooPayments plugin was requested during onboarding.
 	 *
 	 * @return bool
 	 */
@@ -135,7 +137,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin is installed.
+	 * Check if the WooPayments plugin is installed.
 	 *
 	 * @return bool
 	 */
@@ -145,49 +147,62 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if WooCommerce Payments is connected.
+	 * Check if the WooPayments plugin is active.
+	 *
+	 * @return bool
+	 */
+	public static function is_wcpay_active() {
+		return class_exists( '\WC_Payments' );
+	}
+
+	/**
+	 * Check if WooPayments is connected.
 	 *
 	 * @return bool
 	 */
 	public static function is_connected() {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_connected' )
-				? $wc_payments_gateway->is_connected()
-				: false;
+		if ( ! self::is_wcpay_active() ) {
+			return false;
+		}
+
+		$wc_payments_gateway = self::get_gateway();
+		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_connected' ) ) {
+			return $wc_payments_gateway->is_connected();
 		}
 
 		return false;
 	}
 
 	/**
-	 * Check if WooCommerce Payments needs setup.
+	 * Check if WooPayments needs setup.
 	 * Errored data or payments not enabled.
 	 *
 	 * @return bool
 	 */
 	public static function is_account_partially_onboarded() {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' )
-				? $wc_payments_gateway->is_account_partially_onboarded()
-				: false;
+		if ( ! self::is_wcpay_active() ) {
+			return false;
+		}
+
+		$wc_payments_gateway = self::get_gateway();
+		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' ) ) {
+			return $wc_payments_gateway->is_account_partially_onboarded();
 		}
 
 		return false;
 	}
 
 	/**
-	 * Check if the store is in a supported country.
+	 * Check if the store is in a WooPayments supported country.
 	 *
 	 * @return bool
 	 */
 	public static function is_supported() {
-		$suggestions              = Suggestions::get_suggestions();
+		$suggestions              = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
 		$suggestion_plugins       = array_merge(
 			...array_filter(
 				array_column( $suggestions, 'plugins' ),
-				function( $plugins ) {
+				function ( $plugins ) {
 					return is_array( $plugins );
 				}
 			)
@@ -197,5 +212,40 @@ class WooCommercePayments extends Task {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Get the WooPayments gateway.
+	 *
+	 * @return \WC_Payments|null
+	 */
+	private static function get_gateway() {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		if ( isset( $payment_gateways['woocommerce_payments'] ) ) {
+			return $payment_gateways['woocommerce_payments'];
+		}
+		return null;
+	}
+
+	/**
+	 * Check if the store has any enabled ecommerce gateways, other than WooPayments.
+	 *
+	 * We exclude offline payment methods from this check.
+	 *
+	 * @return bool
+	 */
+	public static function has_other_ecommerce_gateways(): bool {
+		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
+		$enabled_gateways = array_filter(
+			$gateways,
+			function ( $gateway ) {
+				// Filter out any WooPayments-related or offline gateways.
+				return 'yes' === $gateway->enabled
+					&& 0 !== strpos( $gateway->id, 'woocommerce_payments' )
+					&& ! in_array( $gateway->id, array( 'bacs', 'cheque', 'cod' ), true );
+			}
+		);
+
+		return ! empty( $enabled_gateways );
 	}
 }

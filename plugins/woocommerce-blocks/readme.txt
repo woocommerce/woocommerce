@@ -12,7 +12,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages!
 
-For more information on what blocks are available, and how to use them, check out <a href="https://woo.com/document/woocommerce-blocks/
+For more information on what blocks are available, and how to use them, check out <a href="https://woocommerce.com/document/woocommerce-blocks/
 ">the official documentation</a>.
 
 **Note: Feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.**
@@ -49,11 +49,11 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 
 = Minimum Requirements =
 
-* Latest release versions of WordPress and WooCommerce ([read more here](https://developer.woo.com/2021/07/27/announcing-a-change-to-the-woocommerce-blocks-version-support-policy/))
+* Latest release versions of WordPress and WooCommerce ([read more here](https://developer.woocommerce.com/2021/07/27/announcing-a-change-to-the-woocommerce-blocks-version-support-policy/))
 * PHP version 7.3 or greater (PHP 7.4 or greater is recommended)
 * MySQL version 5.6 or greater
 
-Visit the [WooCommerce server requirements documentation](https://woo.com/document/server-requirements/) for a detailed list of server requirements.
+Visit the [WooCommerce server requirements documentation](https://woocommerce.com/document/server-requirements/) for a detailed list of server requirements.
 
 = Automatic installation =
 
@@ -67,7 +67,7 @@ The manual installation method involves downloading the plugin and uploading it 
 
 = Sample data =
 
-WooCommerce comes with some sample data you can use to populate the products and get started building Products blocks quickly and easily. You can use the core [CSV importer](https://woo.com/document/product-csv-importer-exporter/) or our [CSV Import Suite plugin](https://woo.com/products/product-csv-import-suite/) to import sample_products.csv.
+WooCommerce comes with some sample data you can use to populate the products and get started building Products blocks quickly and easily. You can use the core [CSV importer](https://woocommerce.com/document/product-csv-importer-exporter/) or our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import sample_products.csv.
 
 = Where can I report bugs or contribute to the project? =
 
@@ -2723,7 +2723,7 @@ This release fixes an error that some users experienced when their site automati
 
 - Fix - Ensure empty categories are correctly hidden in the product categories block. ([3765](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3765))
 - Fix - Added missing wrapper div within FeaturedCategory and FeatureProduct blocks. ([3746](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3746))
-- Fix - Set correct text color in BlockErrorBoundry notices. ([3738](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3738))
+- Fix - Set correct text color in BlockErrorBoundary notices. ([3738](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3738))
 - Hidden cart item meta data will not be rendered in the Cart and Checkout blocks. ([3732](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3732))
 - Fix - Improved accessibility of product image links in the products block by using correct aria tags and hiding empty image placeholders. ([3722](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3722))
 - Add missing aria-label for stars image in the review-list-item component. ([3706](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3706))

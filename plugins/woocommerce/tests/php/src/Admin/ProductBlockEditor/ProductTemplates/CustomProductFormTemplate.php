@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\ProductBlockEditor\ProductTemplates;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\AbstractProductFormTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\AbstractProductFormTemplate;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 
 class CustomProductFormTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
@@ -62,6 +62,41 @@ class CustomProductFormTemplate extends AbstractProductFormTemplate implements P
 				'id'        => 'product-pricing-group-pricing-columns',
 				'blockName' => 'core/columns',
 			]
+		);
+		$inventory_group                 = $this->add_group(
+			array(
+				'id'         => 'inventory',
+				'order'      => 20,
+				'attributes' => array(
+					'title' => 'Pricing',
+				),
+			)
+		);
+		$product_inventory_section       = $inventory_group->add_section(
+			array(
+				'id'         => 'product-inventory-section',
+				'attributes' => array(
+					'title'       => 'Inventory',
+					'description' => '',
+					'blockGap'    => 'unit-40',
+				),
+			)
+		);
+		$product_inventory_inner_section = $product_inventory_section->add_subsection(
+			array(
+				'id'         => 'product-stock-subsection',
+				'attributes' => array(
+					'title'       => 'Stock',
+					'description' => '',
+					'blockGap'    => 'unit-40',
+				),
+			)
+		);
+		$product_inventory_inner_section->add_block(
+			array(
+				'id'        => 'product-inventory-sku',
+				'blockName' => 'woocommerce/product-sku-field',
+			)
 		);
 	}
 	/**

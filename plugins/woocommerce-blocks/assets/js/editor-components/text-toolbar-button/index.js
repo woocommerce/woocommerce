@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import classnames from 'classnames';
 import './style.scss';
 
 function TextToolbarButton( { className = '', ...props } ) {
-	const classes = classnames( 'wc-block-text-toolbar-button', className );
+	const classes = clsx( 'wc-block-text-toolbar-button', className );
 	return <Button className={ classes } { ...props } />;
 }
 

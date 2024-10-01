@@ -34,7 +34,8 @@ function useProductEntityProp< T >(
 	);
 
 	const metadataItem = useMemo(
-		() => metadata.find( ( item ) => item.key === metaKey ),
+		() =>
+			metadata ? metadata.find( ( item ) => item.key === metaKey ) : null,
 		[ metadata, metaKey ]
 	);
 

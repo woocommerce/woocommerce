@@ -54,7 +54,7 @@ class EUVATNumber {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woo.com/products/eu-vat-number/?utm_medium=product',
+			'https://woocommerce.com/products/eu-vat-number/?utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);
 		return $note;

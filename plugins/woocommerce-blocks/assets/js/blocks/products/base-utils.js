@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -46,7 +46,7 @@ export const getProductLayoutConfig = ( innerBlocks ) => {
 				 * "woocommerce/product-button" block.
 				 */
 				...( block.name === addToCartButtonMetadata.name && {
-					className: classnames( block.attributes.className, {
+					className: clsx( block.attributes.className, {
 						[ `has-custom-width wp-block-button__width-${ block.attributes?.width }` ]:
 							block.attributes?.width,
 					} ),

@@ -13,7 +13,7 @@ export const COLOR_PALETTES = [
 							slug: 'primary',
 						},
 						{
-							color: '#000000',
+							color: '#636363',
 							name: 'Secondary',
 							slug: 'secondary',
 						},
@@ -32,11 +32,20 @@ export const COLOR_PALETTES = [
 							name: 'Tertiary',
 							slug: 'tertiary',
 						},
+						{ color: '#FFFFFF', name: 'Color 1', slug: 'theme-1' },
+						{
+							color: '#1a0c00',
+							name: 'Color 5',
+							slug: 'theme-5',
+						},
 					],
 				},
 			},
 		},
 		styles: {
+			blocks: {
+				'core/button': {},
+			},
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
@@ -46,6 +55,12 @@ export const COLOR_PALETTES = [
 					color: {
 						background: 'var(--wp--preset--color--primary)',
 						text: 'var(--wp--preset--color--background)',
+					},
+					':hover': {
+						color: {
+							background: 'var(--wp--preset--color--secondary)',
+							text: 'var(--wp--preset--color--background)',
+						},
 					},
 				},
 				link: {
@@ -97,6 +112,14 @@ export const COLOR_PALETTES = [
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
 			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+			},
 		},
 		wpcom_category: 'Neutral',
 	},
@@ -140,6 +163,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 		wpcom_category: 'Neutral',
@@ -228,6 +259,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 		wpcom_category: 'Neutral',
@@ -417,6 +456,14 @@ export const COLOR_PALETTES = [
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
 			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+			},
 		},
 		wpcom_category: 'Neutral',
 	},
@@ -460,6 +507,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 		wpcom_category: 'Bright',
@@ -636,6 +691,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 		wpcom_category: 'Bright',
@@ -857,6 +920,14 @@ export const COLOR_PALETTES = [
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
 			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+			},
 		},
 		wpcom_category: 'Dark',
 	},
@@ -900,6 +971,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 		wpcom_category: 'Dark',
@@ -989,6 +1068,14 @@ export const COLOR_PALETTES = [
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
 			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+			},
 		},
 		wpcom_category: 'Dark',
 	},
@@ -1032,6 +1119,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 		wpcom_category: 'Dark',
@@ -1121,6 +1216,14 @@ export const COLOR_PALETTES = [
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
 			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+			},
 		},
 		wpcom_category: 'Dark',
 	},
@@ -1164,6 +1267,14 @@ export const COLOR_PALETTES = [
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
 			},
 		},
 	},
@@ -1211,7 +1322,7 @@ export const COLOR_PALETTES = [
 			elements: {
 				button: {
 					color: {
-						background: 'var(--wp--preset--color--primary)',
+						background: 'var(--wp--preset--color--secondary)',
 						text: 'var(--wp--preset--color--background)',
 					},
 				},
@@ -1333,7 +1444,7 @@ export const COLOR_PALETTES = [
 			elements: {
 				button: {
 					color: {
-						background: 'var(--wp--preset--color--primary)',
+						background: 'var(--wp--preset--color--secondary)',
 						text: 'var(--wp--preset--color--background)',
 					},
 				},
@@ -1394,7 +1505,7 @@ export const COLOR_PALETTES = [
 			elements: {
 				button: {
 					color: {
-						background: 'var(--wp--preset--color--primary)',
+						background: 'var(--wp--preset--color--secondary)',
 						text: 'var(--wp--preset--color--background)',
 					},
 				},
@@ -1486,6 +1597,15 @@ export const COLOR_PALETTES = [
 				'core/separator': {
 					color: {
 						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+				'core/cover': {
+					elements: {
+						heading: {
+							color: {
+								text: '#ffffff',
+							},
+						},
 					},
 				},
 				'core/site-title': {

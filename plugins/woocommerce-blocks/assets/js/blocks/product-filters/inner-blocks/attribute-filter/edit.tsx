@@ -1,14 +1,6 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
-import {
-	BlockControls,
-	InnerBlocks,
-	useBlockProps,
-} from '@wordpress/block-editor';
-import { getSetting } from '@woocommerce/settings';
 import {
 	useCollection,
 	useCollectionData,
@@ -19,207 +11,202 @@ import {
 	objectHasProp,
 } from '@woocommerce/types';
 import {
-	Disabled,
-	Button,
-	ToolbarGroup,
-	withSpokenMessages,
-	Notice,
-} from '@wordpress/components';
-import { Template } from '@wordpress/blocks';
+	useBlockProps,
+	useInnerBlocksProps,
+	BlockContextProvider,
+} from '@wordpress/block-editor';
+import { withSpokenMessages } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { EditProps, isAttributeCounts } from './types';
-import {
-	NoAttributesPlaceholder,
-	AttributesPlaceholder,
-} from './components/placeholder';
-import { AttributeSelectControls } from './components/attribute-select-controls';
-import { getAttributeFromId } from './utils';
-import { Inspector } from './components/inspector-controls';
-import { AttributeCheckboxList } from './components/attribute-checkbox-list';
-import { AttributeDropdown } from './components/attribute-dropdown';
+import { Inspector } from './inspector';
+import { attributeOptionsPreview } from './constants';
 import './style.scss';
+import { EditProps, isAttributeCounts } from './types';
+import { getAttributeFromId } from './utils';
+import { getAllowedBlocks } from '../../utils';
+import { EXCLUDED_BLOCKS } from '../../constants';
+import { FilterOptionItem } from '../../types';
+import { InitialDisabled } from '../../components/initial-disabled';
+import { Notice } from '../../components/notice';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const Edit = ( props: EditProps ) => {
-	const {
-		attributes: blockAttributes,
-		setAttributes,
-		debouncedSpeak,
-	} = props;
+	const { attributes: blockAttributes } = props;
 
 	const {
 		attributeId,
-		queryParam,
 		queryType,
 		isPreview,
 		displayStyle,
 		showCounts,
+		sortOrder,
+		hideEmpty,
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
-	const [ isEditing, setIsEditing ] = useState(
-		! attributeId && ! isPreview
-	);
 	const [ attributeOptions, setAttributeOptions ] = useState<
-		AttributeTerm[]
+		FilterOptionItem[]
 	>( [] );
+	const [ isOptionsLoading, setIsOptionsLoading ] =
+		useState< boolean >( true );
 
-	const { results: attributeTerms } = useCollection< AttributeTerm >( {
-		namespace: '/wc/store/v1',
-		resourceName: 'products/attributes/terms',
-		resourceValues: [ attributeObject?.id || 0 ],
-		shouldSelect: blockAttributes.attributeId > 0,
-		query: { orderby: 'menu_order' },
-	} );
+	const { results: attributeTerms, isLoading: isTermsLoading } =
+		useCollection< AttributeTerm >( {
+			namespace: '/wc/store/v1',
+			resourceName: 'products/attributes/terms',
+			resourceValues: [ attributeObject?.id || 0 ],
+			shouldSelect: !! attributeObject?.id,
+			query: { orderby: 'menu_order', hide_empty: hideEmpty },
+		} );
 
-	const { results: filteredCounts } = useCollectionData( {
-		queryAttribute: {
-			taxonomy: attributeObject?.taxonomy || '',
-			queryType: blockAttributes.queryType,
-		},
-		queryState: {},
-		isEditor: true,
-	} );
-
-	const blockProps = useBlockProps();
-
-	const template: Template[] = [
-		[
-			'core/heading',
-			{
-				content: attributeObject
-					? sprintf(
-							// translators: %s is the attribute label.
-							__( 'Filter by %s', 'woocommerce' ),
-							attributeObject.label
-					  )
-					: __( 'Filter Products by Attribute', 'woocommerce' ),
-				level: 3,
-			},
-		],
-	];
-
-	useEffect( () => {
-		if ( ! attributeObject?.taxonomy ) {
-			return;
-		}
-		const newQueryParam = {
-			calculate_attribute_counts: {
-				taxonomy: attributeObject.taxonomy,
+	const { results: filteredCounts, isLoading: isFilterCountsLoading } =
+		useCollectionData( {
+			queryAttribute: {
+				taxonomy: attributeObject?.taxonomy || '',
 				queryType,
 			},
-		};
-		if (
-			objectHasProp( queryParam, 'calculate_attribute_counts' ) &&
-			objectHasProp(
-				queryParam.calculate_attribute_counts,
-				'taxonomy'
-			) &&
-			objectHasProp(
-				queryParam.calculate_attribute_counts,
-				'queryType'
-			) &&
-			queryParam.calculate_attribute_counts.taxonomy ===
-				attributeObject.taxonomy &&
-			queryParam.calculate_attribute_counts.queryType === queryType
-		) {
-			return;
-		}
-		setAttributes( { queryParam: newQueryParam } );
-	}, [ queryParam, queryType, setAttributes, attributeObject?.taxonomy ] );
+			queryState: {},
+			isEditor: true,
+		} );
 
 	useEffect( () => {
+		if ( isTermsLoading || isFilterCountsLoading ) return;
+
 		const termIdHasProducts =
 			objectHasProp( filteredCounts, 'attribute_counts' ) &&
 			isAttributeCounts( filteredCounts.attribute_counts )
 				? filteredCounts.attribute_counts.map( ( term ) => term.term )
 				: [];
 
-		if ( termIdHasProducts.length === 0 ) return setAttributeOptions( [] );
+		if ( termIdHasProducts.length === 0 && hideEmpty ) {
+			setAttributeOptions( [] );
+		} else {
+			setAttributeOptions(
+				attributeTerms
+					.filter( ( term ) => {
+						if ( hideEmpty )
+							return termIdHasProducts.includes( term.id );
+						return true;
+					} )
+					.sort( ( a, b ) => {
+						switch ( sortOrder ) {
+							case 'name-asc':
+								return a.name > b.name ? 1 : -1;
+							case 'name-desc':
+								return a.name < b.name ? 1 : -1;
+							case 'count-asc':
+								return a.count > b.count ? 1 : -1;
+							case 'count-desc':
+							default:
+								return a.count < b.count ? 1 : -1;
+						}
+					} )
+					.map( ( term, index ) => ( {
+						label: showCounts
+							? `${ term.name } (${ term.count })`
+							: term.name,
+						value: term.id.toString(),
+						selected: index === 1,
+						rawData: term,
+					} ) )
+			);
+		}
 
-		setAttributeOptions(
-			attributeTerms.filter( ( term ) => {
-				return termIdHasProducts.includes( term.id );
-			} )
-		);
-	}, [ attributeTerms, filteredCounts ] );
+		setIsOptionsLoading( false );
+	}, [
+		showCounts,
+		attributeTerms,
+		filteredCounts,
+		sortOrder,
+		hideEmpty,
+		isTermsLoading,
+		isFilterCountsLoading,
+	] );
 
-	const Toolbar = () => (
-		<BlockControls>
-			<ToolbarGroup
-				controls={ [
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		useBlockProps(),
+		{
+			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+			template: [
+				[
+					'core/group',
 					{
-						icon: 'edit',
-						title: __( 'Edit', 'woocommerce' ),
-						onClick: () => setIsEditing( ! isEditing ),
-						isActive: isEditing,
+						layout: {
+							type: 'flex',
+							flexWrap: 'nowrap',
+						},
+						metadata: {
+							name: __( 'Header', 'woocommerce' ),
+						},
+						style: {
+							spacing: {
+								blockGap: '0',
+							},
+						},
 					},
-				] }
-			/>
-		</BlockControls>
+					[
+						[
+							'core/heading',
+							{
+								level: 3,
+								content:
+									attributeObject?.label ||
+									__( 'Attribute', 'woocommerce' ),
+							},
+						],
+						[
+							'woocommerce/product-filter-clear-button',
+							{
+								lock: {
+									remove: true,
+									move: false,
+								},
+							},
+						],
+					],
+				],
+				[
+					displayStyle,
+					{
+						lock: {
+							remove: true,
+						},
+					},
+				],
+			],
+		}
 	);
 
-	const AttributeSelectPlaceholder = () => (
-		<AttributesPlaceholder>
-			<div className="wc-block-attribute-filter__selection">
-				<AttributeSelectControls
-					isCompact={ false }
-					attributeId={ attributeId }
-					setAttributeId={ ( id ) =>
-						setAttributes( {
-							attributeId: id,
-						} )
-					}
-				/>
-				<Button
-					variant="primary"
-					onClick={ () => {
-						setIsEditing( false );
-						debouncedSpeak(
-							__(
-								'Now displaying a preview of the Filter Products by Attribute block.',
-								'woocommerce'
-							)
-						);
-					} }
-				>
-					{ __( 'Done', 'woocommerce' ) }
-				</Button>
-			</div>
-		</AttributesPlaceholder>
-	);
+	const isLoading =
+		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
-	const Wrapper = ( { children }: { children: ReactNode } ) => (
-		<div { ...blockProps }>
-			<Toolbar />
-			{ children }
-		</div>
-	);
-
-	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )
 		return (
-			<Wrapper>
-				<NoAttributesPlaceholder />
-			</Wrapper>
-		);
-
-	if ( isEditing )
-		return (
-			<Wrapper>
-				<AttributeSelectPlaceholder />
-			</Wrapper>
+			<div { ...innerBlocksProps }>
+				<Inspector { ...props } />
+				<Notice>
+					<p>
+						{ __(
+							"Attributes are needed for filtering your products. You haven't created any attributes yet.",
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			</div>
 		);
 
 	if ( ! attributeId || ! attributeObject )
 		return (
-			<Wrapper>
-				<Notice status="warning" isDismissible={ false }>
+			<div { ...innerBlocksProps }>
+				<Inspector { ...props } />
+				<Notice>
 					<p>
 						{ __(
 							'Please select an attribute to use this filter!',
@@ -227,13 +214,14 @@ const Edit = ( props: EditProps ) => {
 						) }
 					</p>
 				</Notice>
-			</Wrapper>
+			</div>
 		);
 
-	if ( attributeOptions.length === 0 )
+	if ( ! isLoading && attributeTerms.length === 0 )
 		return (
-			<Wrapper>
-				<Notice status="warning" isDismissible={ false }>
+			<div { ...innerBlocksProps }>
+				<Inspector { ...props } />
+				<Notice>
 					<p>
 						{ __(
 							'There are no products with the selected attributes.',
@@ -241,32 +229,28 @@ const Edit = ( props: EditProps ) => {
 						) }
 					</p>
 				</Notice>
-			</Wrapper>
+			</div>
 		);
 
 	return (
-		<Wrapper>
+		<div { ...innerBlocksProps }>
 			<Inspector { ...props } />
-			<InnerBlocks
-				template={ template }
-				allowedBlocks={ [ 'core/heading' ] }
-			/>
-			<Disabled>
-				{ displayStyle === 'dropdown' ? (
-					<AttributeDropdown
-						label={
-							attributeObject.label ||
-							__( 'attribute', 'woocommerce' )
-						}
-					/>
-				) : (
-					<AttributeCheckboxList
-						showCounts={ showCounts }
-						attributeTerms={ attributeOptions }
-					/>
-				) }{ ' ' }
-			</Disabled>
-		</Wrapper>
+			<InitialDisabled>
+				<BlockContextProvider
+					value={ {
+						filterData: {
+							items:
+								attributeOptions.length === 0 && isPreview
+									? attributeOptionsPreview
+									: attributeOptions,
+							isLoading,
+						},
+					} }
+				>
+					{ children }
+				</BlockContextProvider>
+			</InitialDisabled>
+		</div>
 	);
 };
 

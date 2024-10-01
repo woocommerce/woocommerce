@@ -195,6 +195,22 @@ class FixtureData {
 	}
 
 	/**
+	 * Create a product category and return the result.
+	 *
+	 * @param array $props Category props.
+	 * @return array
+	 */
+	public function get_product_category( $props ) {
+		$category_name = $props['name'] ?? 'Test Category';
+
+		return wp_insert_term(
+			$category_name,
+			'product_cat',
+			$props
+		);
+	}
+
+	/**
 	 * Create a coupon and return the result.
 	 *
 	 * @param array $props Product props.
@@ -309,6 +325,26 @@ class FixtureData {
 	public function shipping_add_flat_rate( $cost = 10 ) {
 		$flat_rate_settings = array(
 			'enabled'      => 'yes',
+			'title'        => 'Flat rate',
+			'availability' => 'all',
+			'countries'    => '',
+			'tax_status'   => 'taxable',
+			'cost'         => $cost,
+		);
+		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		update_option( 'woocommerce_flat_rate', array() );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
+	 * Disables the flat rate method.
+	 *
+	 * @param float $cost Optional. Cost of flat rate method.
+	 */
+	public function shipping_disable_flat_rate( $cost = 10 ) {
+		$flat_rate_settings = array(
+			'enabled'      => 'no',
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',

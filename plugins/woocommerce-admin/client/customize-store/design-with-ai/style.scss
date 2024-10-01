@@ -1,43 +1,6 @@
-.woocommerce-onboarding-loader {
-	min-height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: column;
-	background-color: #fff;
-
-	.woocommerce-onboarding-loader-wrapper {
-		align-items: flex-start;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		max-width: 520px;
-		min-height: 400px;
-
-		.woocommerce-onboarding-loader-container {
-			text-align: center;
-			min-height: 400px;
-		}
-
-		.loader-hearticon {
-			position: relative;
-			top: 2px;
-			left: 2px;
-		}
-	}
-}
-
-.woocommerce-customize-store__step-designWithAi {
-	.woocommerce-onboarding-loader-wrapper {
-		min-height: auto;
-		.woocommerce-onboarding-loader-container {
-			min-height: auto;
-		}
-	}
-}
-
-.progress-bar.smooth-transition {
-	.woocommerce-onboarding-progress-bar__filler {
-		transition: width linear 2s;
+.woocommerce-cys-design-with-ai-tone-of-voice {
+	.woocommerce-cys-design-with-ai__error-notice {
+		width: 615px;
+		margin: 0 0 60px;
 	}
 }

@@ -20,7 +20,12 @@ import {
 	CustomerEffortScoreModalContainer,
 	triggerExitPageCesSurvey,
 } from '@woocommerce/customer-effort-score';
-import { getHistory, getQuery } from '@woocommerce/navigation';
+import {
+	getHistory,
+	getQuery,
+	getNewPath,
+	navigateTo,
+} from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
 	useUser,
@@ -39,7 +44,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { Controller, getPages } from './controller';
+import { Controller, usePages } from './controller';
 import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
@@ -48,16 +53,9 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
 import '~/mobile-banner';
-import './navigation';
 
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
-);
-
-const WCPayUsageModal = lazy( () =>
-	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../task-lists/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
-	)
 );
 
 export class PrimaryLayout extends Component {
@@ -120,15 +118,10 @@ function _Layout( {
 	usePageClasses( page );
 
 	function recordPageViewTrack() {
-		const navigationFlag = {
-			has_navigation: !! window.wcNavigation,
-		};
-
 		if ( isEmbedded ) {
 			const path = document.location.pathname + document.location.search;
 			recordPageView( path, {
 				is_embedded: true,
-				...navigationFlag,
 			} );
 			return;
 		}
@@ -150,7 +143,6 @@ function _Layout( {
 			jetpack_installed: installedPlugins.includes( 'jetpack' ),
 			jetpack_active: activePlugins.includes( 'jetpack' ),
 			jetpack_connected: isJetpackConnected,
-			...navigationFlag,
 		} );
 	}
 
@@ -164,15 +156,6 @@ function _Layout( {
 			triggerExitPageCesSurvey();
 		}, 0 );
 	}, [ location?.pathname ] );
-
-	function isWCPaySettingsPage() {
-		const { page: queryPage, section, tab } = getQuery();
-		return (
-			queryPage === 'wc-settings' &&
-			tab === 'checkout' &&
-			section === 'woocommerce_payments'
-		);
-	}
 
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
 	const {
@@ -191,6 +174,19 @@ function _Layout( {
 			wpbody?.classList.add( 'no-header' );
 		}
 	}, [ showHeader ] );
+
+	const isDashboardShown =
+		query.page && query.page === 'wc-admin' && ! query.path && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	useEffect( () => {
+		// Catch-all to redirect to LYS hub when it was previously opened.
+		const isLYSWaiting =
+			window.sessionStorage.getItem( 'lysWaiting' ) === 'yes';
+		if ( isDashboardShown && isLYSWaiting ) {
+			navigateTo( {
+				url: getNewPath( {}, '/launch-your-store' ),
+			} );
+		}
+	}, [ isDashboardShown ] );
 
 	return (
 		<LayoutContextProvider
@@ -226,21 +222,12 @@ function _Layout( {
 							</div>
 						</PrimaryLayout>
 					) }
-
-					{ isEmbedded && isWCPaySettingsPage() && (
-						<Suspense fallback={ null }>
-							<WCPayUsageModal />
-						</Suspense>
-					) }
 					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
 				</div>
 				{ showPluginArea && (
 					<>
 						<PluginArea scope="woocommerce-admin" />
-						{ window.wcAdminFeatures.navigation && (
-							<PluginArea scope="woocommerce-navigation" />
-						) }
 						<PluginArea scope="woocommerce-tasks" />
 					</>
 				) }
@@ -313,6 +300,7 @@ const Layout = compose(
 
 const _PageLayout = () => {
 	const { currentUserCan } = useUser();
+	const pages = usePages();
 
 	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
 	const path = document.location.pathname;
@@ -321,7 +309,7 @@ const _PageLayout = () => {
 	return (
 		<HistoryRouter history={ getHistory() }>
 			<Routes basename={ basename }>
-				{ getPages()
+				{ pages
 					.filter(
 						( page ) =>
 							! page.capability ||

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix typo that broke the CI pipeline and the build process.

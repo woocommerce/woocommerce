@@ -75,7 +75,7 @@ class CustomizingProductCatalog {
 		$note->add_action(
 			'day-after-first-product',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woo.com/document/woocommerce-customizer/?utm_source=inbox&utm_medium=product'
+			'https://woocommerce.com/document/woocommerce-customizer/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

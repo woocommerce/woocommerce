@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { withInstanceId } from '@wordpress/compose';
 import type { ChangeEventHandler } from 'react';
 
@@ -68,7 +68,7 @@ export const SortSelect = ( {
 
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'wc-block-sort-select',
 				'wc-block-components-sort-select',
 				className

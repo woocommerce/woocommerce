@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Flag, Form, TextControlWithAffixes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Icon, globe } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { CurrencyContext } from '@woocommerce/currency';
 
 const ShippingRateIcon = ( { zone } ) => (
@@ -52,7 +52,7 @@ const ShippingRateInput = ( {
 	renderInputSuffix,
 	inputProps: { className, ...restInputProps },
 } ) => {
-	const textControlClassName = classnames(
+	const textControlClassName = clsx(
 		'muriel-input-text',
 		'woocommerce-shipping-rate__control-wrapper',
 		className

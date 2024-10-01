@@ -21,7 +21,7 @@ if ( ! class_exists( 'Plugin_Command' ) ) {
  */
 class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	/**
-	 * Registers a commands for managing Woo.com extensions.
+	 * Registers a commands for managing WooCommerce.com extensions.
 	 */
 	public static function register_commands() {
 		WP_CLI::add_command( 'wc com extension', 'WC_CLI_COM_Extension_Command' );
@@ -50,7 +50,7 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Install the latest version from Woo.com and activate
+	 *     # Install the latest version from WooCommerce.com and activate
 	 *     $ wp wc com extension install automatewoo --activate
 	 *     Downloading install package from http://s3.amazonaws.com/bucketname/automatewoo.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef......
 	 *     Using cached file '/home/vagrant/.wp-cli/cache/plugin/automatewoo.zip'...

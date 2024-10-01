@@ -51,6 +51,11 @@ function mapShippingClassToSelectOption(
 	} ) );
 }
 
+/*
+ * Query to fetch shipping classes.
+ */
+const shippingClassRequestQuery = {};
+
 function extractDefaultShippingClassFromProduct(
 	categories?: PartialProduct[ 'categories' ],
 	shippingClasses?: ProductShippingClass[]
@@ -71,14 +76,14 @@ function extractDefaultShippingClassFromProduct(
 
 export function Edit( {
 	attributes,
-	context,
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
 
 	const blockProps = useWooBlockProps( attributes );
 
-	const { createProductShippingClass, invalidateResolution } = useDispatch(
+	const { createProductShippingClass } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	);
 
@@ -86,17 +91,17 @@ export function Edit( {
 
 	const [ categories ] = useEntityProp< PartialProduct[ 'categories' ] >(
 		'postType',
-		context.postType,
+		postType,
 		'categories'
 	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(
 		'postType',
-		context.postType,
+		postType,
 		'shipping_class'
 	);
 	const [ virtual ] = useEntityProp< boolean >(
 		'postType',
-		context.postType,
+		postType,
 		'virtual'
 	);
 
@@ -122,15 +127,22 @@ export function Edit( {
 		throw error;
 	}
 
-	const { shippingClasses } = useSelect( ( select ) => {
-		const { getProductShippingClasses } = select(
-			EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
-		);
-		return {
-			shippingClasses:
-				getProductShippingClasses< ProductShippingClass[] >() ?? [],
-		};
-	}, [] );
+	const { shippingClasses } = useSelect(
+		( select ) => {
+			const { getProductShippingClasses } = select(
+				EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+			);
+			return {
+				shippingClasses:
+					( isInSelectedTab &&
+						getProductShippingClasses< ProductShippingClass[] >(
+							shippingClassRequestQuery
+						) ) ||
+					[],
+			};
+		},
+		[ isInSelectedTab ]
+	);
 
 	const shippingClassControlId = useInstanceId(
 		BaseControl,
@@ -161,7 +173,7 @@ export function Edit( {
 								shippingClasses ?? []
 							),
 						] }
-						disabled={ virtual }
+						disabled={ attributes.disabled || virtual }
 						help={ createInterpolateElement(
 							__(
 								'Manage shipping classes and rates in <Link>global settings</Link>.',
@@ -207,13 +219,12 @@ export function Edit( {
 					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( shippingClassValues )
+						>( shippingClassValues, {
+							optimisticQueryUpdate: shippingClassRequestQuery,
+						} )
 							.then( ( value ) => {
 								recordEvent(
 									'product_new_shipping_class_modal_add_button_click'
-								);
-								invalidateResolution(
-									'getProductShippingClasses'
 								);
 								setShippingClass( value.slug );
 								return value;

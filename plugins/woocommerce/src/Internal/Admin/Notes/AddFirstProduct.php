@@ -67,7 +67,7 @@ class AddFirstProduct {
 			sprintf( __( 'Nice one; you\'ve created a WooCommerce store! Now it\'s time to add your first product and get ready to start selling.%s', 'woocommerce' ), '<br/><br/>' ),
 			__( 'There are three ways to add your products: you can <strong>create products manually, import them at once via CSV file</strong>, or <strong>migrate them from another service</strong>.<br/><br/>', 'woocommerce' ),
 			/* translators: %1$s is an open anchor tag (<a>) and %2$s is a close link tag (</a>). */
-			sprintf( __( '%1$1sExplore our docs%2$2s for more information, or just get started!', 'woocommerce' ), '<a href="https://woo.com/document/managing-products/?utm_source=help_panel&utm_medium=product">', '</a>' ),
+			sprintf( __( '%1$1sExplore our docs%2$2s for more information, or just get started!', 'woocommerce' ), '<a href="https://woocommerce.com/document/managing-products/?utm_source=help_panel&utm_medium=product">', '</a>' ),
 		);
 
 		$additional_data = array(

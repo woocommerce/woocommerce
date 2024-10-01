@@ -40,6 +40,7 @@ const SettingsContext = createContext< SettingsContextType >( {
 	updateLocation: () => void null,
 	isSaving: false,
 	save: () => void null,
+	isDirty: false,
 } );
 
 export const useSettingsContext = (): SettingsContextType => {
@@ -52,6 +53,7 @@ export const SettingsProvider = ( {
 	children: JSX.Element[] | JSX.Element;
 } ): JSX.Element => {
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ isDirty, setIsDirty ] = useState( false );
 	const [ pickupLocations, setPickupLocations ] = useState<
 		SortablePickupLocation[]
 	>( getInitialPickupLocations );
@@ -60,6 +62,7 @@ export const SettingsProvider = ( {
 
 	const setSettingField = useCallback(
 		( field: keyof ShippingMethodSettings ) => ( newValue: unknown ) => {
+			setIsDirty( true );
 			setSettings( ( prevValue ) => ( {
 				...prevValue,
 				[ field ]: newValue,
@@ -69,6 +72,7 @@ export const SettingsProvider = ( {
 	);
 
 	const toggleLocation = useCallback( ( rowId: UniqueIdentifier ) => {
+		setIsDirty( true );
 		setPickupLocations( ( previousLocations: SortablePickupLocation[] ) => {
 			const locationIndex = previousLocations.findIndex(
 				( { id } ) => id === rowId
@@ -85,6 +89,7 @@ export const SettingsProvider = ( {
 		locationData: SortablePickupLocation
 	) => {
 		setPickupLocations( ( prevData ) => {
+			setIsDirty( true );
 			if ( rowId === 'new' ) {
 				return [
 					...prevData,
@@ -129,6 +134,7 @@ export const SettingsProvider = ( {
 		};
 
 		setIsSaving( true );
+		setIsDirty( false );
 
 		// @todo This should be improved to include error handling in case of API failure, or invalid data being sent that
 		// does not match the schema. This would fail silently on the API side.
@@ -168,6 +174,7 @@ export const SettingsProvider = ( {
 		updateLocation,
 		isSaving,
 		save,
+		isDirty,
 	};
 
 	return (

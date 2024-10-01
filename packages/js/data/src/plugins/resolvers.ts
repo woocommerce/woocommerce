@@ -27,6 +27,7 @@ import {
 	RecommendedTypes,
 	JetpackConnectionDataResponse,
 } from './types';
+import { checkUserCapability } from '../utils';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -36,7 +37,20 @@ type PluginGetResponse = {
 } & Response;
 
 type JetpackConnectionResponse = {
+	// https://github.com/Automattic/jetpack/blob/2db5b61f15b9923f7438caaef29311b75db64ac5/tools/js-tools/types/global.d.ts#L33
 	isActive: boolean;
+	isStaging: boolean;
+	isRegistered: boolean;
+	isUserConnected: boolean;
+	hasConnectedOwner: boolean;
+	offlineMode: {
+		isActive: boolean;
+		constant: boolean;
+		url: boolean;
+		filter: boolean;
+		wpLocalConstant: boolean;
+	};
+	isPublic: boolean;
 } & Response;
 
 type ConnectJetpackResponse = {
@@ -48,6 +62,8 @@ type ConnectJetpackResponse = {
 export function* getActivePlugins() {
 	yield setIsRequesting( 'getActivePlugins', true );
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = WC_ADMIN_NAMESPACE + '/plugins/active';
 		const results: PluginGetResponse = yield apiFetch( {
 			path: url,
@@ -64,6 +80,8 @@ export function* getInstalledPlugins() {
 	yield setIsRequesting( 'getInstalledPlugins', true );
 
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = WC_ADMIN_NAMESPACE + '/plugins/installed';
 		const results: PluginGetResponse = yield apiFetch( {
 			path: url,
@@ -86,7 +104,7 @@ export function* isJetpackConnected() {
 			method: 'GET',
 		} );
 
-		yield updateIsJetpackConnected( results.isActive );
+		yield updateIsJetpackConnected( results.hasConnectedOwner );
 	} catch ( error ) {
 		yield setError( 'isJetpackConnected', error );
 	}
@@ -98,6 +116,8 @@ export function* getJetpackConnectionData() {
 	yield setIsRequesting( 'getJetpackConnectionData', true );
 
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = JETPACK_NAMESPACE + '/connection/data';
 
 		const results: JetpackConnectionDataResponse = yield apiFetch( {

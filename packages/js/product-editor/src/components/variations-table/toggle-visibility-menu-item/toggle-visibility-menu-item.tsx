@@ -22,9 +22,7 @@ export function ToggleVisibilityMenuItem( {
 	}
 
 	function handleMenuItemClick() {
-		const ids = Array.isArray( selection )
-			? selection.map( ( { id } ) => id )
-			: selection.id;
+		const ids = selection.map( ( { id } ) => id );
 
 		recordEvent( 'product_variations_menu_toggle_visibility_select', {
 			source: TRACKS_SOURCE,
@@ -32,18 +30,12 @@ export function ToggleVisibilityMenuItem( {
 			variation_id: ids,
 		} );
 
-		if ( Array.isArray( selection ) ) {
-			onChange(
-				selection.map( ( { id, status } ) => ( {
-					id,
-					status: toggleStatus( status ),
-				} ) )
-			);
-		} else {
-			onChange( {
-				status: toggleStatus( selection.status ),
-			} );
-		}
+		onChange(
+			selection.map( ( { id, status } ) => ( {
+				id,
+				status: toggleStatus( status ),
+			} ) )
+		);
 
 		recordEvent( 'product_variations_toggle_visibility_update', {
 			source: TRACKS_SOURCE,

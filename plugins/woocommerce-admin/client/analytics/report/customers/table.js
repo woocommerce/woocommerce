@@ -5,7 +5,7 @@ import { __, _n } from '@wordpress/i18n';
 import { Fragment, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Tooltip } from '@wordpress/components';
-import { Date, Link } from '@woocommerce/components';
+import { Date, Link, Pill } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
 import { defaultTableDateFormat } from '@woocommerce/date';
@@ -141,6 +141,12 @@ function CustomersReportTable( {
 				country,
 			} = customer;
 			const countryName = getCountryName( country );
+			const customerName =
+				name?.trim() !== '' ? (
+					name
+				) : (
+					<Pill>{ __( 'Guest', 'woocommerce' ) }</Pill>
+				);
 
 			const customerNameLink = userId ? (
 				<Link
@@ -150,7 +156,7 @@ function CustomersReportTable( {
 					{ name }
 				</Link>
 			) : (
-				name
+				customerName
 			);
 
 			const dateLastActiveDisplay = dateLastActive ? (

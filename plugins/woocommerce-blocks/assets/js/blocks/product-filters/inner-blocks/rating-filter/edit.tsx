@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import type { BlockEditProps, Template } from '@wordpress/blocks';
+import clsx from 'clsx';
+import { useBlockProps } from '@wordpress/block-editor';
+import type { BlockEditProps } from '@wordpress/blocks';
 import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
@@ -21,13 +21,12 @@ import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
  * Internal dependencies
  */
 import { previewOptions } from './preview';
-import './style.scss';
 import { Attributes } from './types';
 import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
-import './editor.scss';
 import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
+import './style.scss';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -41,19 +40,9 @@ const NoRatings = () => (
 );
 
 const Edit = ( props: BlockEditProps< Attributes > ) => {
-	const { className } = props.attributes;
 	const blockAttributes = props.attributes;
 
-	const blockProps = useBlockProps( {
-		className: classnames( 'wc-block-rating-filter', className ),
-	} );
-
-	const template: Template[] = [
-		[
-			'core/heading',
-			{ content: __( 'Filter by Rating', 'woocommerce' ), level: 3 },
-		],
-	];
+	const blockProps = useBlockProps();
 
 	const isEditor = true;
 
@@ -170,15 +159,10 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		<>
 			<Inspector { ...props } />
 			<div { ...blockProps }>
-				<InnerBlocks
-					template={ template }
-					allowedBlocks={ [ 'core/heading' ] }
-				/>
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
-						className={ classnames(
-							'wc-block-rating-filter',
+						className={ clsx(
 							`style-${ blockAttributes.displayStyle }`,
 							{
 								'is-loading': isLoading,
@@ -203,7 +187,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							</>
 						) : (
 							<CheckboxList
-								className={ 'wc-block-rating-filter-list' }
 								options={ displayedOptions }
 								checked={ checked }
 								onChange={ () => {

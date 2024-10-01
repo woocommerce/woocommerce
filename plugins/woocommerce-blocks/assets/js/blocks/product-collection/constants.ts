@@ -1,30 +1,32 @@
 /**
+ * Purpose of this file:
+ * This file defines constants for use in `plugins/woocommerce-blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx`.
+ * By isolating constants here, we avoid loading unnecessary JS file on the frontend (e.g., the /shop page), enhancing site performance.
+ *
+ * Context: https://github.com/woocommerce/woocommerce/pull/48141#issuecomment-2208770592.
+ */
+
+/**
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
 import { objectOmit } from '@woocommerce/utils';
-import {
-	type InnerBlockTemplate,
-	createBlock,
-	// @ts-expect-error Missing types in Gutenberg
-	createBlocksFromInnerBlocksTemplate,
-} from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
+import blockJson from './block.json';
 import {
 	ProductCollectionAttributes,
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
 	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
 	LayoutOptions,
+	WidthOptions,
 } from './types';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
-import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
-import { getDefaultValueOfInheritQueryFromTemplate } from './utils';
-import blockJson from './block.json';
+
+export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
+const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
 
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',
@@ -51,7 +53,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	orderBy: 'title',
 	search: '',
 	exclude: [],
-	inherit: null,
+	inherit: false,
 	taxQuery: {},
 	isProductCollectionBlock: true,
 	featured: false,
@@ -61,9 +63,18 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	woocommerceHandPickedProducts: [],
 	timeFrame: undefined,
 	priceRange: undefined,
+	filterable: false,
 };
 
-export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
+export const DEFAULT_ATTRIBUTES: Pick<
+	ProductCollectionAttributes,
+	| 'query'
+	| 'tagName'
+	| 'dimensions'
+	| 'displayLayout'
+	| 'queryContextIncludes'
+	| 'forcePageReload'
+> = {
 	query: DEFAULT_QUERY,
 	tagName: 'div',
 	displayLayout: {
@@ -71,36 +82,32 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 		columns: 3,
 		shrinkColumns: true,
 	},
+	dimensions: {
+		widthType: WidthOptions.FILL,
+	},
+	queryContextIncludes: [ 'collection' ],
+	forcePageReload: false,
 };
 
-export const getDefaultQuery = (
-	currentQuery: ProductCollectionQuery
-): ProductCollectionQuery => ( {
-	...currentQuery,
-	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
-	order: DEFAULT_QUERY.order as TProductCollectionOrder,
-	inherit: getDefaultValueOfInheritQueryFromTemplate(),
-} );
-
-export const getDefaultDisplayLayout = () =>
-	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
-
-export const getDefaultSettings = (
-	currentAttributes: ProductCollectionAttributes
-): Partial< ProductCollectionAttributes > => ( {
-	displayLayout: getDefaultDisplayLayout(),
-	query: getDefaultQuery( currentAttributes.query ),
-} );
-
-export const DEFAULT_FILTERS: Partial< ProductCollectionQuery > = {
+export const DEFAULT_FILTERS: Pick<
+	ProductCollectionQuery,
+	| 'woocommerceOnSale'
+	| 'woocommerceStockStatus'
+	| 'woocommerceAttributes'
+	| 'woocommerceHandPickedProducts'
+	| 'taxQuery'
+	| 'featured'
+	| 'timeFrame'
+	| 'priceRange'
+> = {
 	woocommerceOnSale: DEFAULT_QUERY.woocommerceOnSale,
-	woocommerceStockStatus: getDefaultStockStatuses(),
-	woocommerceAttributes: [],
+	woocommerceStockStatus: DEFAULT_QUERY.woocommerceStockStatus,
+	woocommerceAttributes: DEFAULT_QUERY.woocommerceAttributes,
+	woocommerceHandPickedProducts: DEFAULT_QUERY.woocommerceHandPickedProducts,
 	taxQuery: DEFAULT_QUERY.taxQuery,
-	woocommerceHandPickedProducts: [],
 	featured: DEFAULT_QUERY.featured,
-	timeFrame: undefined,
-	priceRange: undefined,
+	timeFrame: DEFAULT_QUERY.timeFrame,
+	priceRange: DEFAULT_QUERY.priceRange,
 };
 
 /**
@@ -132,7 +139,7 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 					},
 				},
 				isLink: true,
-				__woocommerceNamespace: PRODUCT_TITLE_ID,
+				__woocommerceNamespace: PRODUCT_TITLE_NAME,
 			},
 		],
 		[
@@ -172,16 +179,3 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	INNER_BLOCKS_PAGINATION_TEMPLATE,
 	INNER_BLOCKS_NO_RESULTS_TEMPLATE,
 ];
-
-export const getDefaultProductCollection = () =>
-	createBlock(
-		blockJson.name,
-		{
-			...DEFAULT_ATTRIBUTES,
-			query: {
-				...DEFAULT_ATTRIBUTES.query,
-				inherit: getDefaultValueOfInheritQueryFromTemplate(),
-			},
-		},
-		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
-	);

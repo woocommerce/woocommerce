@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -43,7 +43,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const isDescendentOfAllProductsBlock =
 		parentName === 'woocommerce/all-products';
 
-	const wrapperClassName = classnames(
+	const wrapperClassName = clsx(
 		'wc-block-components-product-price',
 		className,
 		styleProps.className,
@@ -73,7 +73,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	const pricePreview = '5000';
 	const isOnSale = prices.price !== prices.regular_price;
-	const priceClassName = classnames( {
+	const priceClassName = clsx( {
 		[ `${ parentClassName }__product-price__value` ]: parentClassName,
 		[ `${ parentClassName }__product-price__value--on-sale` ]: isOnSale,
 	} );
@@ -101,7 +101,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					? pricePreview
 					: prices.regular_price
 			}
-			regularPriceClassName={ classnames( {
+			regularPriceClassName={ clsx( {
 				[ `${ parentClassName }__product-price__regular` ]:
 					parentClassName,
 			} ) }
@@ -118,7 +118,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 };
 
 export default ( props: Props ) => {
-	// It is necessary because this block has to support serveral contexts:
+	// It is necessary because this block has to support several contexts:
 	// - Inside `All Products Block` -> `withProductDataContext` HOC
 	// - Inside `Products Block` -> Gutenberg Context
 	// - Inside `Single Product Template` -> Gutenberg Context

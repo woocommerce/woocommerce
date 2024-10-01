@@ -33,7 +33,7 @@ registerCheckoutBlock( {
 	component: lazy(
 		() =>
 			import(
-				/* webpackChunkName: "checkout-blocks/express-payment" */ './checkout-express-payment-block/block'
+				/* webpackChunkName: "checkout-blocks/express-payment" */ './checkout-express-payment-block/frontend'
 			)
 	),
 } );
@@ -110,7 +110,7 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CHECKOUT_ADDITIONAL_INFORMATION,
+	metadata: metadata.CHECKOUT_ORDER_INFORMATION,
 	component: lazy(
 		() =>
 			import(

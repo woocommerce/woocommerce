@@ -10,7 +10,7 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import Modal from '~/profile-wizard/steps/usage-modal';
+import Modal from '~/task-lists/components/usage-modal';
 
 export const UsageModal = () => {
 	const query = getQuery();
@@ -38,7 +38,7 @@ export const UsageModal = () => {
 		components: {
 			link: (
 				<Link
-					href="https://woo.com/usage-tracking?utm_medium=product"
+					href="https://woocommerce.com/usage-tracking?utm_medium=product"
 					target="_blank"
 					type="external"
 				/>

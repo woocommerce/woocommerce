@@ -31,7 +31,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		parent::__construct();
 
 		// Initialize data exporters and erasers.
-		add_action( 'plugins_loaded', array( $this, 'register_erasers_exporters' ) );
+		add_action( 'init', array( $this, 'register_erasers_exporters' ) );
 
 		// Cleanup orders daily - this is a callback on a daily cron event.
 		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );

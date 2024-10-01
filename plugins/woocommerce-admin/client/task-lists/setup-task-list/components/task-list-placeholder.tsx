@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -22,13 +22,13 @@ export const TaskListPlaceholder: React.FC< TasksPlaceholderProps > = (
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'woocommerce-task-dashboard__container setup-task-list'
 			) }
 		>
 			<div className="components-card is-size-large woocommerce-task-card woocommerce-homescreen-card is-loading">
 				<div className="components-card__header is-size-medium">
-					<div className="wooocommerce-task-card__header">
+					<div className="woocommerce-task-card__header">
 						<div className="is-placeholder"> </div>
 					</div>
 				</div>

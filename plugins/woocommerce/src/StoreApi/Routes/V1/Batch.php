@@ -30,6 +30,15 @@ class Batch extends AbstractRoute implements RouteInterface {
 	 * @return string
 	 */
 	public function get_path() {
+		return self::get_path_regex();
+	}
+
+	/**
+	 * Get the path of this rest route.
+	 *
+	 * @return string
+	 */
+	public static function get_path_regex() {
 		return '/batch';
 	}
 
@@ -119,7 +128,6 @@ class Batch extends AbstractRoute implements RouteInterface {
 		$nonce = wp_create_nonce( 'wc_store_api' );
 
 		$response->header( 'Nonce', $nonce );
-		$response->header( 'X-WC-Store-API-Nonce', $nonce );
 		$response->header( 'Nonce-Timestamp', time() );
 		$response->header( 'User-ID', get_current_user_id() );
 

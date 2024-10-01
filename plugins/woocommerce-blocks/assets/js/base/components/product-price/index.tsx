@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { formatPrice } from '@woocommerce/price-format';
 import { createInterpolateElement } from '@wordpress/element';
 import type { Currency } from '@woocommerce/types';
@@ -59,7 +59,7 @@ const PriceRange = ( {
 			</span>
 			<span aria-hidden={ true }>
 				<FormattedMonetaryAmount
-					className={ classNames(
+					className={ clsx(
 						'wc-block-components-product-price__value',
 						priceClassName
 					) }
@@ -69,7 +69,7 @@ const PriceRange = ( {
 				/>
 				&nbsp;&mdash;&nbsp;
 				<FormattedMonetaryAmount
-					className={ classNames(
+					className={ clsx(
 						'wc-block-components-product-price__value',
 						priceClassName
 					) }
@@ -139,7 +139,7 @@ const SalePrice = ( {
 				currency={ currency }
 				renderText={ ( value ) => (
 					<del
-						className={ classNames(
+						className={ clsx(
 							'wc-block-components-product-price__regular',
 							regularPriceClassName
 						) }
@@ -157,7 +157,7 @@ const SalePrice = ( {
 				currency={ currency }
 				renderText={ ( value ) => (
 					<ins
-						className={ classNames(
+						className={ clsx(
 							'wc-block-components-product-price__value',
 							'is-discounted',
 							priceClassName
@@ -262,7 +262,7 @@ const ProductPrice = ( {
 	regularPriceStyle,
 	style,
 }: ProductPriceProps ): JSX.Element => {
-	const wrapperClassName = classNames(
+	const wrapperClassName = clsx(
 		className,
 		'price',
 		'wc-block-components-product-price',
@@ -280,7 +280,7 @@ const ProductPrice = ( {
 	const isDiscounted = regularPrice && price && price < regularPrice;
 	let priceComponent = (
 		<span
-			className={ classNames(
+			className={ clsx(
 				'wc-block-components-product-price__value',
 				priceClassName
 			) }
@@ -312,7 +312,7 @@ const ProductPrice = ( {
 	} else if ( price ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
-				className={ classNames(
+				className={ clsx(
 					'wc-block-components-product-price__value',
 					priceClassName
 				) }

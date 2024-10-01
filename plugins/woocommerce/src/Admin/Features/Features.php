@@ -26,8 +26,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
-		'navigation'                 => array( 'default' => 'no' ),
-		'settings'                   => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
 		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
@@ -38,8 +36,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $beta_features = array(
-		'navigation',
-		'new-product-management-experience',
 		'settings',
 	);
 
@@ -81,7 +77,7 @@ class Features {
 	 * @return array
 	 */
 	public static function get_optional_feature_options() {
-		$features = [];
+		$features = array();
 
 		foreach ( array_keys( self::$optional_features ) as $optional_feature_key ) {
 			$feature_class = self::get_feature_class( $optional_feature_key );
@@ -148,7 +144,7 @@ class Features {
 	public static function get_available_features() {
 		$features                      = self::get_features();
 		$optional_feature_keys         = array_keys( self::$optional_features );
-		$optional_features_unavailable = [];
+		$optional_features_unavailable = array();
 
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
@@ -292,22 +288,8 @@ class Features {
 			return;
 		}
 
-		$rtl = is_rtl() ? '.rtl' : '';
-
-		wp_enqueue_style(
-			'wc-admin-beta-features-tracking-modal',
-			WCAdminAssets::get_url( "beta-features-tracking-modal/style{$rtl}", 'css' ),
-			array( 'wp-components' ),
-			WCAdminAssets::get_file_version( 'css' )
-		);
-
-		wp_enqueue_script(
-			'wc-admin-beta-features-tracking-modal',
-			WCAdminAssets::get_url( 'wp-admin-scripts/beta-features-tracking-modal', 'js' ),
-			array( 'wp-i18n', 'wp-element', WC_ADMIN_APP ),
-			WCAdminAssets::get_file_version( 'js' ),
-			true
-		);
+		WCAdminAssets::register_style( 'beta-features-tracking-modal', 'style', array( 'wp-components' ) );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'beta-features-tracking-modal', array( 'wp-i18n', 'wp-element', WC_ADMIN_APP ) );
 	}
 
 	/**
@@ -368,7 +350,6 @@ class Features {
 			'Automattic\WooCommerce\Internal\Admin\Marketing' => 'Automattic\WooCommerce\Admin\Features\Marketing',
 			'Automattic\WooCommerce\Internal\Admin\MobileAppBanner' => 'Automattic\WooCommerce\Admin\Features\MobileAppBanner',
 			'Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications' => 'Automattic\WooCommerce\Admin\Features\RemoteInboxNotifications',
-			'Automattic\WooCommerce\Internal\Admin\SettingsNavigationFeature' => 'Automattic\WooCommerce\Admin\Features\Settings',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBanner',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBannerDisplayRules',
 			'Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage' => 'Automattic\WooCommerce\Admin\Features\WcPayWelcomePage',

@@ -6,7 +6,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { PatternWithBlocks } from './use-patterns';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 
 export const useSelectedPattern = (
 	patternSelector = '.edit-site-sidebar-navigation-screen__content .block-editor-block-patterns-list__item'

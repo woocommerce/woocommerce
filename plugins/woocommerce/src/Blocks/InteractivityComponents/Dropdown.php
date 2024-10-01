@@ -35,16 +35,16 @@ class Dropdown {
 		);
 
 		$action    = $props['action'] ?? '';
-		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		ob_start();
 		?>
 		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
-			<div class="wc-interactivity-dropdown" data-wc-on--click="actions.toggleIsOpen" data-wc-context='<?php echo esc_attr( wp_json_encode( $dropdown_context ) ); ?>' >
+			<div class="wc-interactivity-dropdown" data-wc-on--click="actions.toggleIsOpen" data-wc-context='<?php echo wp_json_encode( $dropdown_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>' >
 				<div class="wc-interactivity-dropdown__dropdown" tabindex="-1" >
 					<div class="wc-interactivity-dropdown__dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
 						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
-							<?php echo esc_html( $placeholder ); ?>
+							<?php echo empty( $selected_items ) ? esc_html( $placeholder ) : ''; ?>
 						</span>
 						<?php if ( 'multiple' === $select_type ) { ?>
 							<div class="selected-options">
@@ -98,7 +98,13 @@ class Dropdown {
 							</svg>
 						</span>
 					</div>
-					<div data-wc-bind--hidden="!context.isOpen" class="wc-interactivity-dropdown__dropdown-list" aria-labelledby="options-dropdown" role="listbox">
+					<div
+						class="wc-interactivity-dropdown__dropdown-list"
+						aria-labelledby="options-dropdown"
+						role="listbox"
+						data-wc-bind--hidden="!context.isOpen"
+						<?php echo esc_attr( $dropdown_context['isOpen'] ? '' : 'hidden' ); ?>
+					>
 						<?php
 						foreach ( $items as $item ) :
 							$context = array( 'item' => $item );
@@ -112,7 +118,7 @@ class Dropdown {
 								data-wc-class--is-selected="state.isSelected"
 								class="components-form-token-field__suggestion"
 								data-wc-bind--aria-selected="state.isSelected"
-								data-wc-context='<?php echo wp_json_encode( $context ); ?>'
+								data-wc-context='<?php echo wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'
 							>
 								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>

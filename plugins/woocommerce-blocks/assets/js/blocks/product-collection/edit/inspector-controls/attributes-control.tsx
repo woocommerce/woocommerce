@@ -15,12 +15,14 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const EDIT_ATTRIBUTES_URL = `${ ADMIN_URL }edit.php?post_type=product&page=product_attributes`;
 
 const AttributesControl = ( {
 	query,
+	trackInteraction,
 	setQueryAttribute,
 }: QueryControlProps ) => {
 	const woocommerceAttributes = query.woocommerceAttributes || [];
@@ -30,10 +32,19 @@ const AttributesControl = ( {
 		} )
 	);
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceAttributes: DEFAULT_FILTERS.woocommerceAttributes,
+		} );
+		trackInteraction( CoreFilterNames.ATTRIBUTES );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Product Attributes', 'woocommerce' ) }
 			hasValue={ () => !! woocommerceAttributes?.length }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<ProductAttributeTermControl
 				messages={ {
@@ -51,6 +62,7 @@ const AttributesControl = ( {
 					setQueryAttribute( {
 						woocommerceAttributes: newValue,
 					} );
+					trackInteraction( CoreFilterNames.ATTRIBUTES );
 				} }
 				operator={ 'any' }
 				isCompact={ true }

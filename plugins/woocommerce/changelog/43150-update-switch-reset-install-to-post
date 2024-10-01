@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Improve availability of rest installation endpoint by changing the request method.

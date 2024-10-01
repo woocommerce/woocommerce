@@ -15,12 +15,7 @@ import {
  * Internal dependencies
  */
 import { TRACKS_SOURCE } from '../../constants';
-
-type CreateTagModalProps = {
-	initialTagName?: string;
-	onCancel: () => void;
-	onCreate: ( newTag: ProductTag ) => void;
-};
+import { CreateTagModalProps } from './types';
 
 export const CreateTagModal: React.FC< CreateTagModalProps > = ( {
 	initialTagName,

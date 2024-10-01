@@ -10,9 +10,12 @@ use WpOrg\Requests\Requests;
 
 /**
  * Class Connection
+ *
+ * @internal
  */
 class Connection {
 	const TEXT_COMPLETION_API_URL = 'https://public-api.wordpress.com/wpcom/v2/text-completion';
+	const MODEL                   = 'gpt-3.5-turbo-1106';
 
 	/**
 	 * The post request.
@@ -33,6 +36,7 @@ class Connection {
 			'feature' => 'woocommerce_blocks_patterns',
 			'prompt'  => $prompt,
 			'token'   => $token,
+			'model'   => self::MODEL,
 		);
 
 		if ( $response_format ) {
@@ -77,6 +81,7 @@ class Connection {
 				'feature' => 'woocommerce_blocks_patterns',
 				'prompt'  => $prompt,
 				'token'   => $token,
+				'model'   => self::MODEL,
 			);
 
 			if ( $response_format ) {

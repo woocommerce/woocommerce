@@ -37,7 +37,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	protected $rest_base = 'onboarding/tasks';
 
 	/**
-	 * Duration to milisecond mapping.
+	 * Duration to millisecond mapping.
 	 *
 	 * @var array
 	 */
@@ -365,7 +365,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$import = self::import_sample_products_from_csv( $template_path );
 
-		if ( is_wp_error( $import ) || 0 === count( $import['imported'] ) ) {
+		if ( is_wp_error( $import ) || ! is_array( $import['imported'] ) || 0 === count( $import['imported'] ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_product_creation_error',
 				/* translators: %s is template name */

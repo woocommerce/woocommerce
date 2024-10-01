@@ -33,13 +33,12 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 		...( category && { category } ),
 	};
 
-	// User sees the default extensions or themes view
-	if ( view && [ 'extensions', 'themes' ].includes( view ) && ! category ) {
-		eventProps.category = '_all';
-	}
-
-	// User clicks the `View All` button on search results
-	if ( view && view === 'search' && product_type && ! category ) {
+	// User sees the default extensions, themes or business services view
+	if (
+		view &&
+		[ 'extensions', 'themes', 'business-services' ].includes( view ) &&
+		! category
+	) {
 		eventProps.category = '_all';
 	}
 
@@ -75,11 +74,6 @@ function recordLegacyTabView( props: MarketplaceViewProps ) {
 			break;
 		case 'themes':
 			oldEventProps.section = 'themes';
-			break;
-		case 'search':
-			oldEventName = 'extensions_view_search';
-			oldEventProps.section = view;
-			oldEventProps.search_term = search_term || '';
 			break;
 		case 'my-subscriptions':
 			oldEventName = 'subscriptions_view';

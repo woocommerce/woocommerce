@@ -12,21 +12,26 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const OnSaleControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
+
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceOnSale: DEFAULT_FILTERS.woocommerceOnSale,
+		} );
+		trackInteraction( CoreFilterNames.ON_SALE );
+	};
 
 	return (
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woocommerce' ) }
 			hasValue={ () => query.woocommerceOnSale === true }
 			isShownByDefault
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceOnSale: false,
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<ToggleControl
 				label={ __( 'Show only products on sale', 'woocommerce' ) }
@@ -35,6 +40,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 					setQueryAttribute( {
 						woocommerceOnSale,
 					} );
+					trackInteraction( CoreFilterNames.ON_SALE );
 				} }
 			/>
 		</ToolsPanelItem>

@@ -1,7 +1,7 @@
 name: 'Release: Code freeze'
 on:
     schedule:
-        - cron: '0 0 * * 4' # Run at start of day UTC on Thursdays. i.e. ~Wednesdays EOD 23:59:59 UTC
+        - cron: '0 0 * * 4' # Run at start of day UTC on Thursday. i.e. ~Wednesday EOD 23:59:59 UTC
     workflow_dispatch:
         inputs:
             timeOverride:
@@ -16,9 +16,9 @@ on:
 env:
     TIME_OVERRIDE: ${{ inputs.timeOverride || 'now' }}
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
-    GIT_COMMITTER_EMAIL: 'no-reply@woo.com'
+    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
-    GIT_AUTHOR_EMAIL: 'no-reply@woo.com'
+    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
 permissions: {}
 
@@ -31,7 +31,6 @@ jobs:
             issues: write
             pull-requests: write
         outputs:
-            pnpmVersion: ${{ steps.read-pnpm-version.outputs.version }}
             isTodayAcceleratedFreeze: ${{ steps.get-versions.outputs.isTodayAcceleratedFreeze }}
             isTodayMonthlyFreeze: ${{ steps.get-versions.outputs.isTodayMonthlyFreeze }}
             acceleratedVersion: ${{ steps.get-versions.outputs.acceleratedVersion }}
@@ -47,18 +46,8 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Read PNPM Version
-              id: read-pnpm-version
-              shell: bash
-              run: |
-                version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)
-                echo "version=$version" >> $GITHUB_OUTPUT
-                echo "PNPM Version: $version"
-
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: ${{ steps.read-pnpm-version.outputs.version }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -149,9 +138,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -191,13 +178,15 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Build zip
               working-directory: plugins/woocommerce
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -219,19 +208,47 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Build zip
               working-directory: plugins/woocommerce
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   name: double-zipped-woocommerce.${{ needs.code-freeze-prep.outputs.acceleratedVersion }}
                   path: plugins/woocommerce/woocommerce.zip
                   retention-days: 2
+                  
+    r2-upload-monthly:
+      name: Upload Beta to R2
+      runs-on: ubuntu-20.04
+      needs: [ code-freeze-prep, build-monthly ]
+      if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
+      steps:
+          - id: download
+            uses: actions/download-artifact@v4
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                name: double-zipped-woocommerce.${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1
+                path: download
+
+          - run: ls -lah ${{steps.download.outputs.download-path}}
+
+          - name: Upload release zip to Cloudflare R2 bucket
+            uses: ryand56/r2-upload-action@de3eabc2e3137ce07bc3805af441df55f535c64b
+            with:
+              r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+              r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+              r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+              r2-bucket: ${{ secrets.R2_BUCKET }}
+              source-dir: ${{ steps.download.outputs.download-path }}
+              destination-dir: ./monthly/                  
 
     slack-upload-monthly:
         name: Upload Beta to Slack
@@ -245,9 +262,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -264,7 +279,7 @@ jobs:
               working-directory: tools/monorepo-utils
 
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -278,6 +293,32 @@ jobs:
               run : |
                   pnpm utils slack file "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" "Here's the generated release build for ${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1" "${{ steps.download.outputs.download-path }}/woocommerce.zip" "${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}" --reply-ts ${{ needs.notify-slack.outputs.ts }} --filename "woocommerce.${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1.zip"
 
+    r2-upload-accelerated:
+      name: Upload Accelerated to R2
+      runs-on: ubuntu-20.04
+      needs: [ code-freeze-prep, build-a ]
+      if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
+      steps:
+          - id: download
+            uses: actions/download-artifact@v4
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                name: double-zipped-woocommerce.${{ needs.code-freeze-prep.outputs.acceleratedVersion }}
+                path: download
+
+          - run: ls -lah ${{steps.download.outputs.download-path}}
+
+          - name: Upload release zip to Cloudflare R2 bucket
+            uses: ryand56/r2-upload-action@de3eabc2e3137ce07bc3805af441df55f535c64b
+            with:
+              r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+              r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+              r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+              r2-bucket: ${{ secrets.R2_BUCKET }}
+              source-dir: ${{ steps.download.outputs.download-path }}
+              destination-dir: ./accelerated/
+
     slack-upload-accelerated:
         name: Upload Accelerated to Slack
         runs-on: ubuntu-20.04
@@ -290,9 +331,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -309,7 +348,7 @@ jobs:
               working-directory: tools/monorepo-utils
 
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -330,7 +369,7 @@ jobs:
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         steps:
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -341,7 +380,7 @@ jobs:
               run: unzip ${{ steps.download.outputs.download-path }}/woocommerce.zip -d zipfile
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -356,7 +395,7 @@ jobs:
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         steps:
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -367,7 +406,7 @@ jobs:
               run: unzip ${{ steps.download.outputs.download-path }}/woocommerce.zip -d zipfile
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:

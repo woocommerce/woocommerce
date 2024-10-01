@@ -21,9 +21,7 @@ export function UpdateStockMenuItem( {
 	return (
 		<MenuItem
 			onClick={ () => {
-				const ids = Array.isArray( selection )
-					? selection.map( ( { id } ) => id )
-					: selection.id;
+				const ids = selection.map( ( { id } ) => id );
 
 				recordEvent( 'product_variations_menu_inventory_select', {
 					source: TRACKS_SOURCE,
@@ -44,20 +42,13 @@ export function UpdateStockMenuItem( {
 								variation_id: ids,
 							}
 						);
-						if ( Array.isArray( selection ) ) {
-							onChange(
-								selection.map( ( { id } ) => ( {
-									id,
-									stock_quantity: stockQuantity,
-									manage_stock: true,
-								} ) )
-							);
-						} else {
-							onChange( {
+						onChange(
+							selection.map( ( { id } ) => ( {
+								id,
 								stock_quantity: stockQuantity,
 								manage_stock: true,
-							} );
-						}
+							} ) )
+						);
 					},
 				} );
 				onClose();

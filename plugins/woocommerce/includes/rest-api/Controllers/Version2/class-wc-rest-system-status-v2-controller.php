@@ -13,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
-use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
+
 /**
  * System status controller class.
  *
@@ -50,7 +51,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action(
 			'upgrader_process_complete',
-			function( $upgrader, $extra ) {
+			function ( $upgrader, $extra ) {
 				if ( ! $extra || ! $extra['type'] ) {
 					return;
 				}
@@ -372,7 +373,41 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'plugin'            => array(
+								'description' => __( 'Plugin basename. The path to the main plugin file relative to the plugins directory.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'name'              => array(
+								'description' => __( 'Name of the plugin.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version'           => array(
+								'description' => __( 'Current plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version_latest'    => array(
+								'description' => __( 'Latest available plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'url'               => array(
+								'description' => __( 'Plugin URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_name'       => array(
+								'description' => __( 'Plugin author name.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_url'        => array(
+								'description' => __( 'Plugin author URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'network_activated' => array(
+								'description' => __( 'Whether the plugin can only be activated network-wide.', 'woocommerce' ),
+								'type'        => 'boolean',
+							),
+						),
 					),
 				),
 				'inactive_plugins'   => array(
@@ -381,7 +416,41 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'plugin'            => array(
+								'description' => __( 'Plugin basename. The path to the main plugin file relative to the plugins directory.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'name'              => array(
+								'description' => __( 'Name of the plugin.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version'           => array(
+								'description' => __( 'Current plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version_latest'    => array(
+								'description' => __( 'Latest available plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'url'               => array(
+								'description' => __( 'Plugin URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_name'       => array(
+								'description' => __( 'Plugin author name.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_url'        => array(
+								'description' => __( 'Plugin author URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'network_activated' => array(
+								'description' => __( 'Whether the plugin can only be activated network-wide.', 'woocommerce' ),
+								'type'        => 'boolean',
+							),
+						),
 					),
 				),
 				'dropins_mu_plugins' => array(
@@ -426,6 +495,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 						'is_child_theme'          => array(
 							'description' => __( 'Is this theme a child theme?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'is_block_theme'          => array(
+							'description' => __( 'Is this theme a block theme?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -485,7 +560,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 					'properties'  => array(
 						'api_enabled'                    => array(
-							'description' => __( 'REST API enabled?', 'woocommerce' ),
+							'description' => __( 'Legacy REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -557,19 +632,13 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'wccom_connected'                => array(
-							'description' => __( 'Is store connected to Woo.com?', 'woocommerce' ),
+							'description' => __( 'Is store connected to WooCommerce.com?', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'enforce_approved_download_dirs' => array(
 							'description' => __( 'Enforce approved download directories?', 'woocommerce' ),
-							'type'        => 'boolean',
-							'context'     => array( 'view' ),
-							'readonly'    => true,
-						),
-						'HPOS_feature_screen_enabled'    => array(
-							'description' => __( 'Is HPOS feature screen enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -632,6 +701,44 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
+				'logging'            => array(
+					'description' => __( 'Logging.', 'woocommerce' ),
+					'type'        => 'object',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'properties'  => array(
+						'logging_enabled'       => array(
+							'description' => __( 'Is logging enabled?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'default_handler'       => array(
+							'description' => __( 'The logging handler class.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'retention_period_days' => array(
+							'description' => __( 'The number of days log entries are retained.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'level_threshold'       => array(
+							'description' => __( 'Minimum severity level.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'log_directory_size'    => array(
+							'description' => __( 'The size of the log directory.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+					),
+				),
 			),
 		);
 
@@ -646,7 +753,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_mappings() {
 		return array(
-			'environment'        => $this->get_environment_info(),
+			'environment'        => $this->get_environment_info_per_fields( array( 'environment' ) ),
 			'database'           => $this->get_database_info(),
 			'active_plugins'     => $this->get_active_plugins(),
 			'inactive_plugins'   => $this->get_inactive_plugins(),
@@ -656,6 +763,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'security'           => $this->get_security_info(),
 			'pages'              => $this->get_pages(),
 			'post_type_counts'   => $this->get_post_type_counts(),
+			'logging'            => $this->get_logging_info(),
 		);
 	}
 
@@ -703,6 +811,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					break;
 				case 'post_type_counts':
 					$items['post_type_counts'] = $this->get_post_type_counts();
+					break;
+				case 'logging':
+					$items['logging'] = $this->get_logging_info();
 					break;
 			}
 		}
@@ -812,7 +923,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
 				$response = wp_safe_remote_get(
-					'https://woo.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
 					array(
 						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 					)
@@ -827,6 +938,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$database_version = wc_get_server_database_version();
+		$log_directory    = LoggingUtil::get_log_directory( false );
 
 		// Return all environment info. Described by JSON Schema.
 		return array(
@@ -834,8 +946,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'site_url'                  => get_option( 'siteurl' ),
 			'store_id'                  => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			'version'                   => WC()->version,
-			'log_directory'             => WC_LOG_DIR,
-			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+			'log_directory'             => $log_directory,
+			'log_directory_writable'    => wp_is_writable( $log_directory ),
 			'wp_version'                => get_bloginfo( 'version' ),
 			'wp_multisite'              => is_multisite(),
 			'wp_memory_limit'           => $wp_memory_limit,
@@ -1006,15 +1118,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				return array();
 			}
 
-			$active_plugins = (array) get_option( 'active_plugins', array() );
-			if ( is_multisite() ) {
-				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-			}
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
+			$active_plugins_data  = array();
 
-			$active_plugins_data = array();
-
-			foreach ( $active_plugins as $plugin ) {
+			foreach ( $active_valid_plugins as $plugin ) {
 				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 			}
@@ -1026,7 +1133,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get a list of inplugins active on the site.
+	 * Get a list of inactive plugins.
 	 *
 	 * @return array
 	 */
@@ -1232,6 +1339,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 				'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 				'is_child_theme'          => is_child_theme(),
+				'is_block_theme'          => wc_current_theme_is_fse_theme(),
 				'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 				'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
 				'has_outdated_templates'  => $outdated_templates,
@@ -1305,7 +1413,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'woocommerce_com_connected'      => ConnectionHelper::is_connected() ? 'yes' : 'no',
 			'enforce_approved_download_dirs' => wc_get_container()->get( Download_Directories::class )->get_mode() === Download_Directories::MODE_ENABLED,
 			'order_datastore'                => WC_Data_Store::load( 'order' )->get_current_class_name(),
-			'HPOS_feature_screen_enabled'    => wc_get_container()->get( Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'custom_order_tables' ),
 			'HPOS_enabled'                   => OrderUtil::custom_orders_table_usage_is_enabled(),
 			'HPOS_sync_enabled'              => wc_get_container()->get( Order_DataSynchronizer::class )->data_sync_is_enabled(),
 		);
@@ -1370,36 +1477,39 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$shortcode_required = false;
 			$block_present      = false;
 			$block_required     = false;
+			$page               = false;
 
 			// Page checks.
 			if ( $page_id ) {
 				$page_set = true;
-			}
-			if ( get_post( $page_id ) ) {
-				$page_exists = true;
-			}
-			if ( 'publish' === get_post_status( $page_id ) ) {
-				$page_visible = true;
+				$page     = get_post( $page_id );
+
+				if ( $page ) {
+					$page_exists = true;
+
+					if ( 'publish' === $page->post_status ) {
+						$page_visible = true;
+					}
+				}
 			}
 
 			// Shortcode checks.
-			if ( $values['shortcode'] && get_post( $page_id ) ) {
+			if ( $values['shortcode'] && $page ) {
 				$shortcode_required = true;
-				$page               = get_post( $page_id );
-				if ( strstr( $page->post_content, $values['shortcode'] ) ) {
+				if ( has_shortcode( $page->post_content, trim( $values['shortcode'], '[]' ) ) ) {
 					$shortcode_present = true;
+				}
+
+				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
+				if ( ! $shortcode_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
+					$shortcode_present = has_block( 'woocommerce/classic-shortcode', $page->post_content );
 				}
 			}
 
 			// Block checks.
-			if ( $values['block'] && get_post( $page_id ) ) {
+			if ( $values['block'] && $page ) {
 				$block_required = true;
-				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
-
-				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
-				if ( ! $block_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
-					$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/classic-shortcode', true );
-				}
+				$block_present  = has_block( $values['block'], $page->post_content );
 			}
 
 			// Wrap up our findings into an output array.
@@ -1419,6 +1529,21 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		return $pages_output;
+	}
+
+	/**
+	 * Get info about the logging system.
+	 *
+	 * @return array
+	 */
+	protected function get_logging_info() {
+		return array(
+			'logging_enabled'       => LoggingUtil::logging_is_enabled(),
+			'default_handler'       => LoggingUtil::get_default_handler(),
+			'retention_period_days' => LoggingUtil::get_retention_period(),
+			'level_threshold'       => WC_Log_Levels::get_level_label( strtolower( LoggingUtil::get_level_threshold() ) ),
+			'log_directory_size'    => size_format( LoggingUtil::get_log_directory_size() ),
+		);
 	}
 
 	/**

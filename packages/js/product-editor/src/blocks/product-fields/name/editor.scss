@@ -1,5 +1,4 @@
 .product-details-section {
-
 	&__product-link {
 		color: #757575;
 		font-size: 12px;
@@ -28,6 +27,18 @@
 
 		.components-base-control__help {
 			color: $studio-red-50;
+		}
+	}
+
+	.components-base-control .components-input-control__container {
+		.components-input-control {
+			&__input {
+				font-size: $grid-unit-20;
+				min-height: $grid-unit-60;
+			}
+			&__suffix {
+				margin-right: 0;
+			}
 		}
 	}
 }

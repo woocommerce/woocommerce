@@ -98,6 +98,15 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 
+		case types.SET_CUSTOMER_PASSWORD:
+			if ( typeof action.customerPassword !== 'undefined' ) {
+				newState = {
+					...state,
+					customerPassword: action.customerPassword,
+				};
+			}
+			break;
+
 		case types.SET_ADDITIONAL_FIELDS:
 			if ( action.additionalFields !== undefined ) {
 				newState = {
@@ -119,6 +128,20 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 					useShippingAsBilling: action.useShippingAsBilling,
 				};
 			}
+			break;
+
+		case types.SET_EDITING_BILLING_ADDRESS:
+			newState = {
+				...state,
+				editingBillingAddress: action.isEditing,
+			};
+			break;
+
+		case types.SET_EDITING_SHIPPING_ADDRESS:
+			newState = {
+				...state,
+				editingShippingAddress: action.isEditing,
+			};
 			break;
 
 		case types.SET_SHOULD_CREATE_ACCOUNT:

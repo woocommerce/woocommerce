@@ -47,16 +47,23 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			if ( empty( self::$settings ) ) {
 				$settings = array();
 
-				include_once dirname( __FILE__ ) . '/settings/class-wc-settings-page.php';
+				include_once __DIR__ . '/settings/class-wc-settings-page.php';
 
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-general.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-products.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-tax.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-shipping.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways-react.php';
+				} else {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
+				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
@@ -150,7 +157,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			// Get tabs for the settings page.
 			$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-			include dirname( __FILE__ ) . '/views/html-admin-settings.php';
+			include __DIR__ . '/views/html-admin-settings.php';
 		}
 
 		/**
@@ -253,11 +260,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['value'] = self::get_option( $value['id'], $value['default'] );
 				}
 
-				$row_class_attribute = '';
-				if ( $value['row_class'] ) {
-					$row_class_attribute = " class=\"{$value['row_class']}\"";
-				}
-
 				// Custom attribute handling.
 				$custom_attributes = array();
 
@@ -292,7 +294,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 
 					case 'info':
-						?><tr<?php echo esc_html( $row_class_attribute ); ?>>
+						?><tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
 							<td style="<?php echo esc_attr( $value['css'] ); ?>">
 						<?php
@@ -327,7 +329,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -352,7 +354,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -380,7 +382,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -406,7 +408,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -449,7 +451,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
 
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -516,18 +518,22 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$visibility_class[] = $value['row_class'];
 						}
 
-						$container_class_attribute = '';
-						if ( count( $visibility_class ) > 0 ) {
-							$container_class_attribute = ' class="' . implode( ' ', $visibility_class ) . '"';
-						}
-
 						$must_disable = $value['disabled'] ?? false;
 
+						if ( $must_disable ) {
+							$visibility_class[] = 'disabled';
+						}
+
+						$container_class = implode( ' ', $visibility_class );
+						$has_title       = isset( $value['title'] ) && '' !== $value['title'];
+						$has_legend      = isset( $value['legend'] ) && '' !== $value['legend'];
+
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
-							$has_tooltip             = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
+							$has_tooltip = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
+
 							$tooltip_container_class = $has_tooltip ? 'with-tooltip' : '';
 							?>
-								<tr<?php echo esc_html( $container_class_attribute ); ?>>
+								<tr class="<?php echo esc_attr( $container_class ); ?>">
 									<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
 									<td class="forminp forminp-checkbox <?php echo esc_html( $tooltip_container_class ); ?>">
 										<?php if ( $has_tooltip ) : ?>
@@ -537,13 +543,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							<?php
 						} else {
 							?>
-								<fieldset<?php echo esc_html( $container_class_attribute ); ?>>
+								<fieldset class="<?php echo esc_attr( $container_class ); ?>">
 							<?php
 						}
 
-						if ( ! empty( $value['title'] ) ) {
+						if ( $has_title || $has_legend ) {
 							?>
-								<legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ); ?></span></legend>
+								<legend class="<?php echo $has_legend ? '' : 'screen-reader-text'; ?>"><span><?php echo esc_html( $has_legend ? $value['legend'] : $value['title'] ); ?></span></legend>
 							<?php
 						}
 
@@ -556,7 +562,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									type="checkbox"
 									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 									value="1"
-									<?php disabled( $value['disabled'] ?? false ); ?>
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 								/> <?php echo $description; // WPCS: XSS ok. ?>
@@ -592,7 +597,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></label>
 						</th>
@@ -691,7 +696,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$state   = '*';
 						}
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -715,7 +720,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						asort( $countries );
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -744,7 +749,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						);
 						$option_value = wc_parse_relative_date_option( $value['value'] );
 						?>
-						<tr<?php echo esc_html( $row_class_attribute ); ?>>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -773,6 +778,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					case 'slotfill_placeholder':
+						?>
+						<div
+							id="<?php echo esc_attr( $value['id'] ); ?>"
+							class="<?php echo esc_attr( $value['class'] ); ?>"
+						>
+						</div>
+						<?php
+						break;
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
@@ -802,19 +816,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$description = $value['desc'];
 			}
 
-			$description_is_error    = $value['description_is_error'] ?? false;
-			$extra_description_style = $description_is_error ? " style='color:red'" : '';
+			$error_class = ( ! empty( $value['description_is_error'] ) ) ? 'is-error' : '';
 
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );
 			} elseif ( $description ) {
-				$description = '<p class="description"' . $extra_description_style . '>' . wp_kses_post( $description ) . '</p>';
+				$description = '<p class="description ' . $error_class . '">' . wp_kses_post( $description ) . '</p>';
 			}
 
 			if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ), true ) ) {
-				$tooltip_html = '<p class="description"' . $extra_description_style . '>' . $tooltip_html . '</p>';
+				$tooltip_html = '<p class="description ' . $error_class . '">' . $tooltip_html . '</p>';
 			} elseif ( $tooltip_html ) {
 				$tooltip_html = wc_help_tip( $tooltip_html );
 			}

@@ -111,6 +111,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	 */
 	public function get_items( $request ) {
 		$currencies = get_woocommerce_currencies();
+		$data       = array();
 		foreach ( array_keys( $currencies ) as $code ) {
 			$currency = $this->get_currency( $code, $request );
 			$response = $this->prepare_item_for_response( $currency, $request );

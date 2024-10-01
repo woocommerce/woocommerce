@@ -22,10 +22,6 @@ This command-line tool lets you easily set up a local WordPress environment for 
 
 This is an [ESLint](https://eslint.org/) plugin including configurations and custom rules for WooCommerce development.
 
-### [e2e-environment](https://www.npmjs.com/package/@woocommerce/e2e-environment)
-
-This is a reusable and extensible end-to-end testing environment for WooCommerce extensions. Additionally, it contains several files to serve as the base for a Docker container and Travis CI setup.
-
 ### [WordPress Scripts](https://www.npmjs.com/package/@wordpress/scripts)
 
 This is a collection of reusable scripts tailored for WordPress development.

@@ -11,9 +11,9 @@
 		display: grid;
 		grid-template-columns: 50px 1fr;
 		grid-template-areas:
-			'icon header'
-			'icon body'
-			'icon actions';
+			"icon header"
+			"icon body"
+			"icon actions";
 	}
 
 	&__button {
@@ -85,12 +85,12 @@
 		}
 	}
 
-	@include breakpoint( '>782px' ) {
+	@include breakpoint( ">782px" ) {
 		grid-area: header;
 		display: grid;
 		grid-template:
-			'title date'
-			'subtitle date' /
+			"title date"
+			"subtitle date" /
 			1fr auto;
 
 		.woocommerce-activity-card__title {
@@ -169,7 +169,7 @@
 		width: 100%;
 		margin-bottom: $gap;
 
-		@include breakpoint( '>782px' ) {
+		@include breakpoint( ">782px" ) {
 			text-align: right;
 			margin-bottom: 0;
 		}
@@ -212,9 +212,9 @@
 .woocommerce-activity-panel .woocommerce-activity-card.woocommerce-order-activity-card {
 	grid-template-columns: 1fr;
 	grid-template-areas:
-		'header'
-		'body'
-		'actions';
+		"header"
+		"body"
+		"actions";
 
 	.woocommerce-activity-card__icon {
 		display: none;
@@ -226,7 +226,7 @@
 
 	.woocommerce-activity-card__subtitle {
 		span + span::before {
-			content: ' \2022\ ';
+			content: " \2022\ ";
 		}
 	}
 }
@@ -243,7 +243,7 @@
 		transition: opacity 0.3s, height 0s, padding 0s;
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		grid-template-columns: 64px 1fr;
 	}
 
@@ -269,7 +269,7 @@
 	&.is-placeholder::before {
 		background-color: $gray-700;
 		border-radius: 2px;
-		content: '';
+		content: "";
 		position: absolute;
 		left: 0;
 		right: 0;
@@ -308,7 +308,7 @@
 			border-radius: 2px;
 			height: 30px;
 
-			&[type='number'] {
+			&[type="number"] {
 				-moz-appearance: textfield;
 
 				&::-webkit-outer-spin-button,

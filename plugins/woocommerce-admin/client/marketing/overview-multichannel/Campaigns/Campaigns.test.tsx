@@ -35,8 +35,8 @@ const createTestCampaign = ( programId: string ) => {
 		description: '',
 		cost: `USD 30`,
 		manageUrl: `https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=${ programId }`,
-		icon: 'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-		channelName: 'Google Listings and Ads',
+		icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+		channelName: 'Google for WooCommerce',
 		channelSlug: 'google-listings-and-ads',
 	};
 };
@@ -198,12 +198,12 @@ describe( 'Campaigns component', () => {
 						'Boost your product listings with a campaign that is automatically optimized to meet your goals.',
 					channel: {
 						slug: 'google-listings-and-ads',
-						name: 'Google Listings & Ads',
+						name: 'Google for WooCommerce',
 					},
 					create_url:
 						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/create',
 					icon_url:
-						'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+						'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
 				},
 			],
 		} );

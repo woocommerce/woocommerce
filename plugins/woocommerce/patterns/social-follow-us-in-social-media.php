@@ -2,7 +2,7 @@
 /**
  * Title: Social: Follow us on social media
  * Slug: woocommerce-blocks/social-follow-us-in-social-media
- * Categories: WooCommerce
+ * Categories: WooCommerce, social-media
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
@@ -15,8 +15,12 @@ $image4 = PatternsHelper::get_image_url( $images, 3, 'assets/images/pattern-plac
 $social_title = $content['titles'][0]['default'] ?? '';
 ?>
 
-<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"0","bottom":"0","left":"var:preset|spacing|30","right":"var:preset|spacing|30"},"margin":{"top":"0px","bottom":"80px"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide" style="margin-top:0px;margin-bottom:80px;padding-top:0;padding-right:var(--wp--preset--spacing--30);padding-bottom:0;padding-left:var(--wp--preset--spacing--30)">
+<!-- wp:group {"metadata":{"name":"Social: Follow us on social media"},"align":"full","style":{"spacing":{"padding":{"top":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","bottom":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","left":"var(--wp--style--root--padding-left, var(--wp--custom--gap--horizontal))","right":"var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal))"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)));padding-right:var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal));padding-bottom:calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)));padding-left:var(--wp--style--root--padding-left, var(--wp--custom--gap--horizontal))">
+	<!-- wp:spacer {"height":"calc( 0.25 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))"} -->
+	<div style="height:calc( 0.25 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:heading {"level":3,"align":"wide"} -->
@@ -37,8 +41,12 @@ $social_title = $content['titles'][0]['default'] ?? '';
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
-	<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)">
+	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
 		<!-- wp:column {"width":"25%"} -->
 		<div class="wp-block-column" style="flex-basis:25%">
 			<!-- wp:image {"aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
@@ -80,5 +88,9 @@ $social_title = $content['titles'][0]['default'] ?? '';
 		<!-- /wp:column -->
 	</div>
 	<!-- /wp:columns -->
+
+	<!-- wp:spacer {"height":"calc( 0.25 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))"} -->
+	<div style="height:calc( 0.25 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
 </div>
 <!-- /wp:group -->

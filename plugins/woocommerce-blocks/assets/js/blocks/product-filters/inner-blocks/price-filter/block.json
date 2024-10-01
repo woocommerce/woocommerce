@@ -1,25 +1,27 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/product-filters-price",
+	"name": "woocommerce/product-filter-price",
 	"version": "1.0.0",
-	"title": "Product Filters: Price",
+	"title": "Filter Options",
 	"description": "Enable customers to filter the product collection by choosing a price range.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
-	"ancestor": [ "woocommerce/product-filters" ],
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter"
+	],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"inserter": false
 	},
-	"usesContext": [ "collectionData" ],
+	"usesContext": [
+		"query",
+		"queryId"
+	],
 	"attributes": {
-		"queryParam": {
-			"type": "object",
-			"default": {
-				"calculate_price_range": "true"
-			}
-		},
 		"showInputFields": {
 			"type": "boolean",
 			"default": true

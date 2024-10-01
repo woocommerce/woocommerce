@@ -4,6 +4,10 @@
 	margin: 0 auto $gap;
 	position: relative;
 
+	&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+		flex-direction: row-reverse;
+	}
+
 	.wc-block-must-login-prompt {
 		display: block;
 	}
@@ -18,7 +22,7 @@
 
 .wc-block-components-sidebar {
 	box-sizing: border-box;
-	margin: 0;
+	margin-top: $gap-smaller;
 	padding-left: math.percentage(math.div($gap-large, 1060px));
 	width: 35%;
 

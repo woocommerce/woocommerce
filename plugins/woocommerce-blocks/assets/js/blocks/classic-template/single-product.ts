@@ -42,6 +42,7 @@ const getBlockifiedTemplate = () =>
 					} ),
 					createBlock( 'core/post-excerpt', {
 						__woocommerceNamespace: PRODUCT_SUMMARY_VARIATION_NAME,
+						excerptLength: 100,
 					} ),
 					createBlock( 'woocommerce/add-to-cart-form' ),
 					createBlock( 'woocommerce/product-meta' ),

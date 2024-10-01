@@ -30,7 +30,7 @@ const LocationSettingsDescription = () => (
 				'woocommerce'
 			) }
 		</p>
-		<ExternalLink href="https://woo.com/document/woocommerce-blocks-local-pickup/">
+		<ExternalLink href="https://woocommerce.com/document/woocommerce-blocks-local-pickup/">
 			{ __( 'Learn more', 'woocommerce' ) }
 		</ExternalLink>
 	</>

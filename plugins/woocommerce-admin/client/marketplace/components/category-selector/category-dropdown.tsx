@@ -5,7 +5,7 @@ import { Dropdown } from '@wordpress/components';
 import { chevronDown, chevronUp, Icon } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -47,7 +47,7 @@ function DropdownContent( props: {
 					key={ category.slug }
 				>
 					<button
-						className={ classNames(
+						className={ clsx(
 							'woocommerce-marketplace__category-dropdown-item-button',
 							{
 								'woocommerce-marketplace__category-dropdown-item-button--selected':

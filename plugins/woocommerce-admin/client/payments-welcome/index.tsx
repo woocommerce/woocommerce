@@ -17,29 +17,6 @@ import './style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import FrequentlyAskedQuestionsSimple from './faq-simple';
 
-declare global {
-	interface Window {
-		location: Location;
-		wcSettings: {
-			admin: {
-				wcpay_welcome_page_connect_nonce: string;
-				currentUserData: {
-					first_name: string;
-				};
-				wcpayWelcomePageIncentive: {
-					id: string;
-					description: string;
-					cta_label: string;
-					tc_url: string;
-				};
-				currency?: {
-					symbol: string;
-				};
-			};
-		};
-	}
-}
-
 interface activatePromoResponse {
 	success: boolean;
 }
@@ -60,9 +37,28 @@ const ConnectAccountPage = () => {
 				'admin.php?wcpay-connect=1&promo=' +
 				encodeURIComponent( incentive.id ) +
 				'&_wpnonce=' +
-				getAdminSetting( 'wcpay_welcome_page_connect_nonce' ),
+				getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
+				'&from=WCADMIN_PAYMENT_INCENTIVE',
 		};
 	} );
+
+	const determineTrackingSource = () => {
+		const urlParams = new URLSearchParams( window.location.search );
+		const from = urlParams.get( 'from' ) || '';
+
+		// Determine where the user came from.
+		let source = 'wcadmin';
+		switch ( from ) {
+			case 'WCADMIN_PAYMENT_TASK':
+				source = 'wcadmin-payment-task';
+				break;
+			case 'WCADMIN_PAYMENT_SETTINGS':
+				source = 'wcadmin-settings-page';
+				break;
+		}
+
+		return source;
+	};
 
 	/**
 	 * Record page view and save viewed timestamp.
@@ -71,6 +67,7 @@ const ConnectAccountPage = () => {
 		recordEvent( 'page_view', {
 			path: 'payments_connect_core_test',
 			incentive_id: incentive.id,
+			source: determineTrackingSource(),
 		} );
 		updateOptions( {
 			wcpay_welcome_page_viewed_timestamp: Math.floor(
@@ -91,12 +88,19 @@ const ConnectAccountPage = () => {
 		}
 	};
 
-	const handleSetup = async () => {
-		setSubmitted( true );
+	const trackConnectAccountClicked = () => {
 		recordEvent( 'wcpay_connect_account_clicked', {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 			incentive_id: incentive.id,
+			path: 'payments_connect_core_test',
+			source: determineTrackingSource(),
 		} );
+	};
+
+	const handleSetup = async () => {
+		setSubmitted( true );
+
+		trackConnectAccountClicked();
 
 		const pluginsToInstall = [ ...enabledApms ].map(
 			( apm ) => apm.extension

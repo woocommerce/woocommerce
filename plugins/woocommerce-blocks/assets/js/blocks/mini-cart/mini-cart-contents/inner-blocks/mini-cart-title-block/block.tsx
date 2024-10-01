@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -31,7 +31,7 @@ const Block = ( {
 	const hasTitleInnerBlocks = hasChildren( children );
 
 	return (
-		<h2 className={ classNames( className, 'wc-block-mini-cart__title' ) }>
+		<h2 className={ clsx( className, 'wc-block-mini-cart__title' ) }>
 			{ hasTitleInnerBlocks ? (
 				children
 			) : (

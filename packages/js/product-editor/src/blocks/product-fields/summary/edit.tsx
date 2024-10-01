@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
 import classNames from 'classnames';
@@ -15,7 +14,6 @@ import {
 	AlignmentControl,
 	BlockControls,
 	RichText,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 
 /**
@@ -25,6 +23,7 @@ import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 
 export function SummaryBlockEdit( {
 	attributes,
@@ -35,6 +34,7 @@ export function SummaryBlockEdit( {
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
+
 	const contentId = useInstanceId(
 		SummaryBlockEdit,
 		'wp-block-woocommerce-product-summary-field__content'
@@ -44,9 +44,11 @@ export function SummaryBlockEdit( {
 		context.postType || 'product',
 		attributes.property
 	);
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	const { clearSelectedBlock } = useDispatch( blockEditorStore );
+
+	// This is a workaround to hide the toolbar when the block is blurred.
+	// This is a temporary solution until using Gutenberg 18 with the
+	// fix from https://github.com/WordPress/gutenberg/pull/59800
+	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
 
 	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -54,15 +56,6 @@ export function SummaryBlockEdit( {
 
 	function handleDirectionChange( value: SummaryAttributes[ 'direction' ] ) {
 		setAttributes( { direction: value } );
-	}
-
-	function handleBlur( event: React.FocusEvent< 'p', Element > ) {
-		const isToolbar = event.relatedTarget?.closest(
-			'.block-editor-block-contextual-toolbar'
-		);
-		if ( ! isToolbar ) {
-			clearSelectedBlock();
-		}
 	}
 
 	return (
@@ -127,7 +120,7 @@ export function SummaryBlockEdit( {
 						} ) }
 						dir={ direction }
 						allowedFormats={ allowedFormats }
-						onBlur={ handleBlur }
+						onBlur={ hideToolbar }
 					/>
 				</div>
 			</BaseControl>

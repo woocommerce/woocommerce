@@ -25,7 +25,7 @@ function getUrl( filters: Array< string | null > ) {
 	return url.href;
 }
 
-store( 'woocommerce/product-filters-rating', {
+store( 'woocommerce/product-filter-rating', {
 	actions: {
 		onCheckboxChange: () => {
 			const checkboxContext = getContext< CheckboxListContext >(

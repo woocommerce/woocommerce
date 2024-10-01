@@ -26,7 +26,7 @@ class ExperimentalShippingRecommendation extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up shipping', 'woocommerce' );
+		return __( 'Get your products shipped', 'woocommerce' );
 	}
 
 	/**
@@ -62,7 +62,9 @@ class ExperimentalShippingRecommendation extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return Features::is_enabled( 'shipping-smart-defaults' );
+		return Features::is_enabled( 'shipping-smart-defaults' ) &&
+			! PluginsHelper::is_plugin_active( 'woocommerce-shipping' ) &&
+			! PluginsHelper::is_plugin_active( 'woocommerce-tax' );
 	}
 
 	/**

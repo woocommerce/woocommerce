@@ -16,3 +16,4 @@ export * from './debounce';
 export * from './keyby';
 export * from './pick';
 export * from './get-inline-styles';
+export * from './use-return-focus';

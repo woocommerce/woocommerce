@@ -1,16 +1,24 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-shipping-class-field",
 	"title": "Product shipping class field",
 	"category": "woocommerce",
 	"description": "The product shipping class field.",
-	"keywords": [ "products", "shipping", "class" ],
+	"keywords": [
+		"products",
+		"shipping",
+		"class"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"title": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"disabled": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
@@ -22,5 +30,8 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType",
+		"isInSelectedTab"
+	]
 }

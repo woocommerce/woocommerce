@@ -336,16 +336,17 @@ class OrdersTableQuery {
 	 * Generates a `WP_Date_Query` compatible query from a given date.
 	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
 	 *
-	 * @param mixed  $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @param mixed $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
 	private function date_to_date_query_arg( $date ): array {
-		$result    = array(
+		$result = array(
 			'year'  => '',
 			'month' => '',
 			'day'   => '',
 		);
 
+		$precision = null;
 		if ( is_numeric( $date ) ) {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
@@ -372,9 +373,11 @@ class OrdersTableQuery {
 	/**
 	 * Returns UTC-based date query arguments for a combination of local time dates and a date shorthand operator.
 	 *
-	 * @param  array $dates_raw Array of dates (in local time) to use in combination with the operator.
+	 * @param  array  $dates_raw Array of dates (in local time) to use in combination with the operator.
 	 * @param  string $operator One of the operators supported by date queries (<, <=, =, ..., >, >=).
 	 * @return array Partial date query arg with relevant dates now UTC-based.
+	 *
+	 * @throws \Exception If an invalid date shorthand operator is specified.
 	 *
 	 * @since 8.2.0
 	 */
@@ -386,7 +389,7 @@ class OrdersTableQuery {
 			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
 
-		$date1  = end( $dates_raw );
+		$date1 = end( $dates_raw );
 
 		switch ( $operator ) {
 			case '>':
@@ -409,9 +412,9 @@ class OrdersTableQuery {
 						'inclusive' => true,
 					),
 					array(
-						'before'     => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
-						'inclusive'  => false,
-					)
+						'before'    => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+						'inclusive' => false,
+					),
 				);
 				break;
 			case '<=':
@@ -473,7 +476,6 @@ class OrdersTableQuery {
 		foreach ( $date_keys as $date_key ) {
 			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
-
 			$operator   = '=';
 			$dates_raw  = array();
 			$dates      = array();
@@ -919,6 +921,23 @@ class OrdersTableQuery {
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
+
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters the count SQL query.
+			 *
+			 * @since 8.6.0
+			 *
+			 * @param string           $sql   The count SQL query.
+			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args  Query args.
+			 * @param string           $fields Prepared fields for SELECT clause.
+			 * @param string           $join Prepared JOIN clause.
+			 * @param string           $where Prepared WHERE clause.
+			 * @param string           $groupby Prepared GROUP BY clause.
+			 */
+			$this->count_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_count_sql', array( $this->count_sql, &$this, $this->args, $fields, $join, $where, $groupby ) );
+		}
 	}
 
 	/**
@@ -1131,7 +1150,7 @@ class OrdersTableQuery {
 		$values = is_array( $values ) ? $values : array( $values );
 		$ids    = array();
 		$emails = array();
-
+		$pieces = array();
 		foreach ( $values as $value ) {
 			if ( is_array( $value ) ) {
 				$sql      = $this->generate_customer_query( $value, 'AND' );

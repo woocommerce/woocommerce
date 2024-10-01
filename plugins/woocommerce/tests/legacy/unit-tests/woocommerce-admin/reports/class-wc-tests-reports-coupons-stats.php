@@ -6,7 +6,7 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Query as CouponsStatsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * Class WC_Admin_Tests_Reports_Coupons_Stats
@@ -57,7 +57,7 @@ class WC_Admin_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 		$order_2c->calculate_totals();
 		$order_2c->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsStatsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -100,8 +100,8 @@ class WC_Admin_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new CouponsStatsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'coupons-stats' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -133,7 +133,7 @@ class WC_Admin_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 		// Delete the coupon.
 		$coupon_1->delete( true );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = gmdate( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -143,8 +143,8 @@ class WC_Admin_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 			'interval' => 'day',
 		);
 
-		// Test retrieving the stats through the query class.
-		$query          = new CouponsStatsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query          = new GenericQuery( $args, 'coupons-stats' );
 		$start_datetime = new DateTime( $start_time );
 		$end_datetime   = new DateTime( $end_time );
 		$expected_data  = (object) array(

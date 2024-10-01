@@ -88,6 +88,16 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 				'expected_output' => 'Direct',
 			),
 			array(
+				'source_type'     => 'admin',
+				'source'          => '',
+				'expected_output' => 'Web admin',
+			),
+			array(
+				'source_type'     => 'mobile_app',
+				'source'          => '',
+				'expected_output' => 'Mobile app',
+			),
+			array(
 				'source_type'     => '',
 				'source'          => '',
 				'expected_output' => 'Unknown',

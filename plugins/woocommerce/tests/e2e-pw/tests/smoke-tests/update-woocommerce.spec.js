@@ -26,7 +26,7 @@ const skipTestIfUndefined = () => {
  *
  * If `GITHUB_TOKEN` is defined, use it as `Authorization` header.
  *
- * @returns Download URL of the WooCommerce ZIP. This URL depends on whether `GITHUB_TOKEN` was specified or not.
+ * @return Download URL of the WooCommerce ZIP. This URL depends on whether `GITHUB_TOKEN` was specified or not.
  *
  * If `GITHUB_TOKEN` was defined, this function assumes that you're trying to access all releases, including drafts (as draft releases don't show up in the response of an unauthenticated GET `List releases` request ).
  * In this case, the returned value will be the `asset.url`.

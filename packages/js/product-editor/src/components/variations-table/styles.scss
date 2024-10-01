@@ -1,28 +1,36 @@
-@import "./variations-actions-menu/styles.scss";
+@import "./variation-actions-menus/styles.scss";
 @import "./downloads-menu-item/styles.scss";
 @import "./pagination/styles.scss";
 @import "./table-empty-or-error-state/styles.scss";
 @import "./variations-filter/styles.scss";
 @import "./table-row-skeleton/styles.scss";
+@import "./add-image-menu-item/style.scss";
+@import "./image-actions-menu/style.scss";
+@import "./variation-stock-status-form/styles.scss";
+@import "./variation-pricing-form/styles.scss";
 
 .woocommerce-product-variations {
 	display: flex;
 	flex-direction: column;
 	position: relative;
 
+	&__attributes-cell {
+		display: flex;
+		align-items: center;
+	}
+
 	&__table {
 		&-header {
 			.woocommerce-product-variations__table-row {
 				min-height: auto;
-
-				&:last-child {
-					text-transform: uppercase;
-					color: $gray-700;
-					font-weight: 500;
-					font-size: 11px;
-					line-height: $grid-unit-20;
-					border-bottom: 1px solid $gray-200;
-				}
+			}
+			.woocommerce-product-variations__table-rowheader {
+				text-transform: uppercase;
+				color: $gray-700;
+				font-weight: 500;
+				font-size: 11px;
+				line-height: $grid-unit-20;
+				border-bottom: 1px solid $gray-200;
 			}
 		}
 		&-body {
@@ -60,7 +68,8 @@
 
 	&__notice {
 		border-left: 0px;
-		margin: 0 0 $gap-large 0;
+		margin: 0 0 $gap-small 0;
+		padding: $gap-small $gap;
 		&.is-error {
 			background-color: #fcf0f1;
 		}
@@ -153,7 +162,7 @@
 		gap: $gap-smaller;
 		margin-right: $gap-smallest;
 
-		.variations-actions-menu__toogle:disabled {
+		.variations-actions-menu__toggle:disabled {
 			cursor: not-allowed;
 		}
 
@@ -179,6 +188,41 @@
 
 		.components-button--hidden {
 			color: $alert-red;
+		}
+	}
+	&__add-image-button {
+		border-radius: 2px;
+		border: 1px dashed $gray-400;
+		margin-right: $gap-small;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		.components-spinner {
+			margin: 0;
+		}
+	}
+	&__image-button {
+		margin-right: $gap-small;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+		padding: 0;
+	}
+	&__image {
+		width: 100%;
+		height: 100%;
+		background-position: center center;
+		background-size: contain;
+		background-repeat: no-repeat;
+	}
+
+	&__stock-status-actions-menu,
+	&__pricing-actions-menu {
+		.components-popover__content {
+			padding: 0;
 		}
 	}
 }

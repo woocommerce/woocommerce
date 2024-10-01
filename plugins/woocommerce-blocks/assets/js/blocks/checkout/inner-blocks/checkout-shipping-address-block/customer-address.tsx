@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
@@ -20,19 +20,18 @@ import AddressCard from '../../address-card';
 
 const CustomerAddress = ( {
 	addressFieldsConfig,
-	defaultEditing = false,
 }: {
 	addressFieldsConfig: FormFieldsConfig;
-	defaultEditing?: boolean;
 } ) => {
 	const {
 		shippingAddress,
 		setShippingAddress,
 		setBillingAddress,
 		useShippingAsBilling,
+		editingShippingAddress: editing,
+		setEditingShippingAddress: setEditing,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const [ editing, setEditing ] = useState( defaultEditing );
 
 	// Forces editing state if store has errors.
 	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
@@ -54,7 +53,7 @@ const CustomerAddress = ( {
 		if ( invalidProps.length > 0 && editing === false ) {
 			setEditing( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length ] );
+	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
 
 	const onChangeAddress = useCallback(
 		( values: AddressFormValues ) => {
@@ -82,9 +81,10 @@ const CustomerAddress = ( {
 					setEditing( true );
 				} }
 				fieldConfig={ addressFieldsConfig }
+				isExpanded={ editing }
 			/>
 		),
-		[ shippingAddress, addressFieldsConfig ]
+		[ shippingAddress, addressFieldsConfig, editing, setEditing ]
 	);
 
 	const renderAddressFormComponent = useCallback(
@@ -96,9 +96,10 @@ const CustomerAddress = ( {
 				values={ shippingAddress }
 				fields={ ADDRESS_FORM_KEYS }
 				fieldConfig={ addressFieldsConfig }
+				isEditing={ editing }
 			/>
 		),
-		[ addressFieldsConfig, onChangeAddress, shippingAddress ]
+		[ addressFieldsConfig, onChangeAddress, shippingAddress, editing ]
 	);
 
 	return (

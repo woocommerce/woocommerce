@@ -5,7 +5,7 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { useMemo } from '@wordpress/element';
 import { BlockAttributes } from '@wordpress/blocks';
 import { PanelBody } from '@wordpress/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -43,7 +43,7 @@ export const Edit = ( {
 				attributes.layout?.verticalAlignment
 			),
 		},
-		className: classNames(
+		className: clsx(
 			'wc-block-editor-product-gallery-large-image-next-previous',
 			'wc-block-product-gallery-large-image-next-previous'
 		),
@@ -65,7 +65,7 @@ export const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<div
-				className={ classNames(
+				className={ clsx(
 					'wc-block-product-gallery-large-image-next-previous-container',
 					`wc-block-product-gallery-large-image-next-previous--${ previousNextImage?.classname }`
 				) }

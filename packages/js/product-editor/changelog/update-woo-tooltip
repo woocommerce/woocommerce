@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Use woocommerce's Tooltip component for Label and checkbox instead of wordpress Tooltip

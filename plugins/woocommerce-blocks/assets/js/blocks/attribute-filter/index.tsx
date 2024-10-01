@@ -4,7 +4,7 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Icon, category } from '@wordpress/icons';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -16,6 +16,7 @@ import metadata from './block.json';
 import deprecated from './deprecated';
 
 registerBlockType( metadata, {
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
@@ -39,7 +40,7 @@ registerBlockType( metadata, {
 		return (
 			<div
 				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
+					className: clsx( 'is-loading', className ),
 				} ) }
 			/>
 		);

@@ -101,8 +101,8 @@ const WCAddonsTour = () => {
 		}
 	};
 
-	const onNextStepHandler = ( previousStepIndex: number ) => {
-		const stepName = steps[ previousStepIndex + 1 ]?.meta?.name || '';
+	const onNextStepHandler = ( newStepIndex: number ) => {
+		const stepName = steps[ newStepIndex ]?.meta?.name || '';
 		recordEvent( 'in_app_marketplace_tour_step_viewed', {
 			step: stepName,
 		} );

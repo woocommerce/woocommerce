@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Migrate shopper e2e tests from Jest to Playwright

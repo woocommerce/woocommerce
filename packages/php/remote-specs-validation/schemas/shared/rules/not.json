@@ -1,0 +1,22 @@
+{
+	"type": "object",
+	"required": ["type", "operand"],
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["not"]
+		},
+		"operand": {
+			"type": "array",
+			"items": {
+				"anyOf": [
+					{ "$ref": "#/definitions/rules" },
+					{
+						"type": "array",
+						"items": { "$ref": "#/definitions/rules" }
+					}
+				]
+			}
+		}
+	}
+}

@@ -18,7 +18,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import EditorContainerBlock from '../editor-container-block';
-import NoReviewsPlaceholder from './no-reviews-placeholder.js';
+import NoReviewsPlaceholder from './no-reviews-placeholder';
 import {
 	getBlockControls,
 	getSharedReviewContentControls,

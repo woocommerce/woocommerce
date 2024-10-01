@@ -125,12 +125,15 @@ class ProductImage extends AbstractBlock {
 	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes ) {
 		$product_permalink = $product->get_permalink();
 
-		$pointer_events = false === $attributes['showProductLink'] ? 'pointer-events: none;' : '';
+		$is_link        = true === $attributes['showProductLink'];
+		$pointer_events = $is_link ? '' : 'pointer-events: none;';
+		$directive      = $is_link ? 'data-wc-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
 
 		return sprintf(
-			'<a href="%1$s" style="%2$s">%3$s %4$s</a>',
+			'<a href="%1$s" style="%2$s" %3$s>%4$s %5$s</a>',
 			$product_permalink,
 			$pointer_events,
+			$directive,
 			$on_sale_badge,
 			$product_image
 		);
@@ -180,7 +183,7 @@ class ProductImage extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		$this->asset_data_registry->add( 'isBlockThemeEnabled', wc_current_theme_is_fse_theme(), false );
+		$this->asset_data_registry->add( 'isBlockThemeEnabled', wc_current_theme_is_fse_theme() );
 	}
 
 
@@ -205,13 +208,29 @@ class ProductImage extends AbstractBlock {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wc-block-components-product-image wc-block-grid__product-image',
+					esc_attr( $classes_and_styles['classes'] ),
+				)
+			)
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
 		if ( $product ) {
 			return sprintf(
-				'<div class="wc-block-components-product-image wc-block-grid__product-image %1$s" style="%2$s">
-					%3$s
+				'<div %1$s>
+					%2$s
 				</div>',
-				esc_attr( $classes_and_styles['classes'] ),
-				esc_attr( $classes_and_styles['styles'] ),
+				$wrapper_attributes,
 				$this->render_anchor(
 					$product,
 					$this->render_on_sale_badge( $product, $parsed_attributes ),

@@ -7,12 +7,17 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import {
+	createIdFromOptions,
 	getProductResourceName,
 	getTotalProductCountResourceName,
 } from './utils';
 import { WPDataSelector, WPDataSelectors } from '../types';
 import { ProductState } from './reducer';
-import { PartialProduct, ProductQuery } from './types';
+import {
+	GetSuggestedProductsOptions,
+	PartialProduct,
+	ProductQuery,
+} from './types';
 import { ActionDispatchers } from './actions';
 import { PERMALINK_PRODUCT_REGEX } from './constants';
 
@@ -172,6 +177,26 @@ export const getRelatedProducts = createSelector(
 	}
 );
 
+/**
+ * Return an array of suggested products the
+ * given options.
+ *
+ * @param {ProductState}                state   - The current state.
+ * @param {GetSuggestedProductsOptions} options - The options.
+ * @return {PartialProduct[]}                     The suggested products.
+ */
+export function getSuggestedProducts(
+	state: ProductState,
+	options: GetSuggestedProductsOptions
+): PartialProduct[] {
+	const key = createIdFromOptions( options );
+	if ( ! state.suggestedProducts[ key ] ) {
+		return [];
+	}
+
+	return state.suggestedProducts[ key ].items;
+}
+
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
 	getProduct: WPDataSelector< typeof getProduct >;
@@ -181,4 +206,5 @@ export type ProductsSelectors = {
 	isPending: WPDataSelector< typeof isPending >;
 	getPermalinkParts: WPDataSelector< typeof getPermalinkParts >;
 	getRelatedProducts: WPDataSelector< typeof getRelatedProducts >;
+	getSuggestedProducts: WPDataSelector< typeof getSuggestedProducts >;
 } & WPDataSelectors;

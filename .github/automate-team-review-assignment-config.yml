@@ -15,3 +15,11 @@ when:
     assign:
       teams:
         - woo-fse
+  - author:
+      teamIs:
+        - flux
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - flux

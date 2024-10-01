@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
-import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
+import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Disabled } from '@wordpress/components';
-import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -21,25 +20,13 @@ const Edit = ( props: EditProps ) => {
 		className: 'wc-block-active-filters',
 	} );
 
-	const template: Template[] = [
-		[
-			'core/heading',
-			{ content: __( 'Active Filters', 'woocommerce' ), level: 3 },
-		],
-	];
-
 	return (
 		<div { ...blockProps }>
 			<Inspector { ...props } />
-			<InnerBlocks
-				template={ template }
-				allowedBlocks={ [ 'core/heading' ] }
-			/>
 			<Disabled>
 				<ul
-					className={ classNames( 'wc-block-active-filters__list', {
-						'wc-block-active-filters__list--chips':
-							displayStyle === 'chips',
+					className={ clsx( 'filter-list', {
+						'list-chips': displayStyle === 'chips',
 					} ) }
 				>
 					<RemovableListItem

@@ -51,14 +51,16 @@
 			margin: 0;
 			border: 0;
 			appearance: none;
-			opacity: 0.6;
+			opacity: 0.7;
 			text-decoration-line: underline;
 			text-underline-position: under;
+			transition: all 0.2s ease-in-out;
 
 			&:hover,
 			&:focus,
 			&:active {
 				opacity: 1;
+				text-decoration: none;
 			}
 		}
 	}
@@ -149,4 +151,9 @@
 	&.is-info {
 		@extend %info;
 	}
+}
+
+// To fix notice banner width for all block themes.
+.woocommerce.wc-block-store-notices.alignwide {
+	max-width: var(--wp--style--global--wide-size);
 }

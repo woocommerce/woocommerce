@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import classNames from 'classnames';
-import { __ } from '@wordpress/i18n';
-import { Template } from '@wordpress/blocks';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Disabled } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -14,29 +12,14 @@ import { PriceSlider } from './components/price-slider';
 import { Inspector } from './components/inspector';
 
 const Edit = ( props: EditProps ) => {
-	const { showInputFields, inlineInput } = props.attributes;
-
-	const blockProps = useBlockProps( {
-		className: classNames( {
-			'inline-input': inlineInput && showInputFields,
-		} ),
-	} );
-
-	const template: Template[] = [
-		[
-			'core/heading',
-			{ content: __( 'Filter by Price', 'woocommerce' ), level: 3 },
-		],
-	];
+	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>
 			<Inspector { ...props } />
-			<InnerBlocks
-				template={ template }
-				allowedBlocks={ [ 'core/heading' ] }
-			/>
-			<PriceSlider { ...props } />
+			<Disabled>
+				<PriceSlider { ...props } />
+			</Disabled>
 		</div>
 	);
 };

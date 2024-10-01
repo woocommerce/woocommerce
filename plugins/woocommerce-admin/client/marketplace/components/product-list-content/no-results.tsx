@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import { useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -22,12 +21,15 @@ export default function NoResults( props: {
 } ): JSX.Element {
 	const [ productGroups, setProductGroups ] = useState< ProductGroup[] >();
 	const [ isLoading, setIsLoading ] = useState( false );
-	const query = useQuery();
-	const showCategorySelector = query.tab === 'search' && query.section;
 	const productGroupsForSearchType = {
-		[ SearchResultType.all ]: [ 'most-popular', 'popular-themes' ],
+		[ SearchResultType.all ]: [
+			'most-popular',
+			'popular-themes',
+			'business-services',
+		],
 		[ SearchResultType.theme ]: [ 'popular-themes' ],
 		[ SearchResultType.extension ]: [ 'most-popular' ],
+		[ SearchResultType.businessService ]: [ 'business-services' ],
 	};
 
 	useEffect( () => {
@@ -68,6 +70,8 @@ export default function NoResults( props: {
 	function productListTitle( groupId: string ) {
 		if ( groupId === 'popular-themes' ) {
 			return __( 'Our favorite themes', 'woocommerce' );
+		} else if ( groupId === 'business-services' ) {
+			return __( 'Services to help your business grow', 'woocommerce' );
 		}
 
 		return __( 'Most popular extensions', 'woocommerce' );
@@ -83,6 +87,10 @@ export default function NoResults( props: {
 					/>
 					<ProductLoader
 						type={ ProductType.theme }
+						placeholderCount={ 4 }
+					/>
+					<ProductLoader
+						type={ ProductType.businessService }
 						placeholderCount={ 4 }
 					/>
 				</>
@@ -112,10 +120,6 @@ export default function NoResults( props: {
 	}
 
 	function categorySelector() {
-		if ( ! showCategorySelector ) {
-			return <></>;
-		}
-
 		if ( props.type === SearchResultType.all ) {
 			return <></>;
 		}
@@ -124,6 +128,10 @@ export default function NoResults( props: {
 
 		if ( props.type === SearchResultType.theme ) {
 			categorySelectorType = ProductType.theme;
+		}
+
+		if ( props.type === SearchResultType.businessService ) {
+			categorySelectorType = ProductType.businessService;
 		}
 
 		return <CategorySelector type={ categorySelectorType } />;

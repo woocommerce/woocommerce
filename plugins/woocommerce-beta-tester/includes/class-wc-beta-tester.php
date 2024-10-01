@@ -20,11 +20,25 @@ class WC_Beta_Tester {
 	private $plugin_config;
 
 	/**
+	 * Plugin name.
+	 *
+	 * @var string
+	 */
+	private $plugin_name;
+
+	/**
 	 * Plugin instance.
 	 *
 	 * @var WC_Beta_Tester
 	 */
 	protected static $instance = null;
+
+	/**
+	 * WP.org data
+	 *
+	 * @var object
+	 */
+	private $wporg_data;
 
 	/**
 	 * Main Instance.

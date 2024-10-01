@@ -138,7 +138,7 @@ describe( 'notifyQuantityChanges', () => {
 			}
 		);
 	} );
-	it( 'does not show notices when the the item is the one being updated', () => {
+	it( 'does not show notices when the item is the one being updated', () => {
 		const { oldCart, newCart } = getFreshCarts();
 		newCart.items[ 0 ].quantity = 5;
 		newCart.items[ 0 ].quantity_limits.maximum = 10;

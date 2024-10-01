@@ -6,6 +6,8 @@ use WP_Error;
 
 /**
  * Patterns Helper class.
+ *
+ * @internal
  */
 class PatternsHelper {
 	/**
@@ -35,16 +37,14 @@ class PatternsHelper {
 	 * @return \WP_Post|null
 	 */
 	public static function get_patterns_ai_data_post() {
-		$arg = array(
-			'post_type'      => 'patterns_ai_data',
-			'posts_per_page' => 1,
-			'no_found_rows'  => true,
-			'cache_results'  => true,
+		$posts = get_posts(
+			array(
+				'post_type'      => 'patterns_ai_data',
+				'posts_per_page' => 1,
+				'cache_results'  => true,
+			)
 		);
 
-		$query = new \WP_Query( $arg );
-
-		$posts = $query->get_posts();
 		return $posts[0] ?? null;
 	}
 
@@ -65,7 +65,7 @@ class PatternsHelper {
 	/**
 	 * Upsert the patterns AI data.
 	 *
-	 * @param array $patterns_dictionary The patterns dictionary.
+	 * @param array $patterns_dictionary The patterns' dictionary.
 	 *
 	 * @return WP_Error|null
 	 */
@@ -94,25 +94,23 @@ class PatternsHelper {
 	 * @return array|WP_Error Returns pattern dictionary or WP_Error on failure.
 	 */
 	public static function get_patterns_dictionary( $pattern_slug = null ) {
-		$patterns_dictionary_file = plugin_dir_path( __FILE__ ) . 'dictionary.json';
+		$default_patterns_dictionary = PatternsDictionary::get();
 
-		if ( ! file_exists( $patterns_dictionary_file ) ) {
+		if ( empty( $default_patterns_dictionary ) ) {
 			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
 		}
 
-		$default_patterns_dictionary = wp_json_file_decode( $patterns_dictionary_file, array( 'associative' => true ) );
-
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
-		}
-
-		$patterns_ai_data_post = self::get_patterns_ai_data_post();
 		$patterns_dictionary   = '';
-		if ( ! empty( $patterns_ai_data_post->post_content ) ) {
-			$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
+		$ai_connection_allowed = get_option( 'woocommerce_blocks_allow_ai_connection' );
 
-			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
+		if ( $ai_connection_allowed ) {
+			$patterns_ai_data_post = self::get_patterns_ai_data_post();
+			if ( ! empty( $patterns_ai_data_post->post_content ) ) {
+				$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
+
+				if ( json_last_error() !== JSON_ERROR_NONE ) {
+					return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
+				}
 			}
 		}
 

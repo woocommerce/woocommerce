@@ -17,24 +17,21 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 
-const { ancestor, ...configuration } = sharedConfig;
-
 const blockConfig: BlockConfiguration = {
-	...configuration,
-	apiVersion: 2,
+	...sharedConfig,
 	title,
 	description,
 	icon: { src: icon },
 	usesContext: [ 'query', 'queryId', 'postId' ],
 	attributes,
 	ancestor: [
-		'woocommerce/all-products',
-		'woocommerce/single-product',
-		'core/post-template',
-		'woocommerce/product-template',
+		...( sharedConfig.ancestor || [] ),
 		'woocommerce/product-meta',
 	],
 	edit,
+	save() {
+		return null;
+	},
 	supports,
 };
 

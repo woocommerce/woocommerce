@@ -20,7 +20,9 @@ import { Save } from './save';
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
-	apiVersion: 2,
+	// Product Summary is not expected to be available in Product Collection,
+	// Products (Beta) or Single Product blocks. They use core/post-summary variation.
+	ancestor: [ 'woocommerce/all-products' ],
 	title,
 	description,
 	icon: { src: icon },

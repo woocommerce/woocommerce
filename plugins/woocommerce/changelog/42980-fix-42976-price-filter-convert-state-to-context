@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-Comment: Convert the Price Filter `state` to `context` to enhance its reactivity.
-

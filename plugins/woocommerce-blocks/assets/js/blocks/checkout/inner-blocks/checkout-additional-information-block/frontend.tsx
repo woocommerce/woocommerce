@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { FormStep } from '@woocommerce/blocks-components';
-import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
+import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
  * Internal dependencies
@@ -17,21 +18,20 @@ import attributes from './attributes';
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 }: {
 	title: string;
 	description: string;
-	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
 } ) => {
+	const { showFormStepNumbers } = useCheckoutBlockContext();
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
 
-	if ( ADDITIONAL_FORM_KEYS.length === 0 ) {
+	if ( ORDER_FORM_KEYS.length === 0 ) {
 		return null;
 	}
 
@@ -39,13 +39,13 @@ const FrontendBlock = ( {
 		<FormStep
 			id="additional-information-fields"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__additional-information-fields',
 				className
 			) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block />
 			{ children }

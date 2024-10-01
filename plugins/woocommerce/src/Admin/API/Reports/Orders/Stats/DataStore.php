@@ -14,14 +14,18 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
+	use StatsDataStoreTrait;
 
 	/**
 	 * Table used to get the data.
+	 *
+	 * @override ReportsDataStore::$table_name
 	 *
 	 * @var string
 	 */
@@ -35,12 +39,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'orders_stats';
 
 	/**
 	 * Type for each column to cast values correctly later.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -65,12 +73,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'orders_stats';
 
 	/**
 	 * Dynamically sets the date column name based on configuration
+	 *
+	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
 		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
@@ -79,10 +91,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
-		// Avoid ambigious columns in SQL query.
+		// Avoid ambiguous columns in SQL query.
 		$refunds     = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
 		$gross_sales =
 			"( SUM({$table_name}.total_sales)" .
@@ -260,175 +274,160 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults = array_merge(
+			parent::get_default_query_vars(),
+			array(
+				'interval'          => 'week',
+				'segmentby'         => '',
+
+				'match'             => 'all',
+				'status_is'         => array(),
+				'status_is_not'     => array(),
+				'product_includes'  => array(),
+				'product_excludes'  => array(),
+				'coupon_includes'   => array(),
+				'coupon_excludes'   => array(),
+				'tax_rate_includes' => array(),
+				'tax_rate_excludes' => array(),
+				'customer_type'     => '',
+				'category_includes' => array(),
+			)
+		);
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_stats_data()
+	 *
+	 * @see get_data
+	 * @see get_noncached_stats_data
+	 * @param array    $query_args Query parameters.
+	 * @param array    $params                  Query limit parameters.
+	 * @param stdClass $data                    Reference to the data object to fill.
+	 * @param int      $expected_interval_count Number of expected intervals.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
-
-		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
-		$defaults   = array(
-			'per_page'          => get_option( 'posts_per_page' ),
-			'page'              => 1,
-			'order'             => 'DESC',
-			'orderby'           => 'date',
-			'before'            => TimeInterval::default_before(),
-			'after'             => TimeInterval::default_after(),
-			'interval'          => 'week',
-			'fields'            => '*',
-			'segmentby'         => '',
-
-			'match'             => 'all',
-			'status_is'         => array(),
-			'status_is_not'     => array(),
-			'product_includes'  => array(),
-			'product_excludes'  => array(),
-			'coupon_includes'   => array(),
-			'coupon_excludes'   => array(),
-			'tax_rate_includes' => array(),
-			'tax_rate_excludes' => array(),
-			'customer_type'     => '',
-			'category_includes' => array(),
-		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
-
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
 
 		if ( isset( $query_args['date_type'] ) ) {
 			$this->date_column_name = $query_args['date_type'];
 		}
 
-		if ( false === $data ) {
-			$this->initialize_queries();
+		$this->initialize_queries();
 
-			$data = (object) array(
-				'totals'    => (object) array(),
-				'intervals' => (object) array(),
-				'total'     => 0,
-				'pages'     => 0,
-				'page_no'   => 0,
-			);
+		$selections = $this->selected_columns( $query_args );
+		$this->add_time_period_sql_params( $query_args, $table_name );
+		$this->add_intervals_sql_params( $query_args, $table_name );
+		$this->add_order_by_sql_params( $query_args );
+		$where_time  = $this->get_sql_clause( 'where_time' );
+		$params      = $this->get_limit_sql_params( $query_args );
+		$coupon_join = "LEFT JOIN (
+					SELECT
+						order_id,
+						SUM(discount_amount) AS discount_amount,
+						COUNT(DISTINCT coupon_id) AS coupons_count
+					FROM
+						{$wpdb->prefix}wc_order_coupon_lookup
+					GROUP BY
+						order_id
+					) order_coupon_lookup
+					ON order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 
-			$selections = $this->selected_columns( $query_args );
-			$this->add_time_period_sql_params( $query_args, $table_name );
-			$this->add_intervals_sql_params( $query_args, $table_name );
-			$this->add_order_by_sql_params( $query_args );
-			$where_time  = $this->get_sql_clause( 'where_time' );
-			$params      = $this->get_limit_sql_params( $query_args );
-			$coupon_join = "LEFT JOIN (
-						SELECT
-							order_id,
-							SUM(discount_amount) AS discount_amount,
-							COUNT(DISTINCT coupon_id) AS coupons_count
-						FROM
-							{$wpdb->prefix}wc_order_coupon_lookup
-						GROUP BY
-							order_id
-						) order_coupon_lookup
-						ON order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id";
-
-			// Additional filtering for Orders report.
-			$this->orders_stats_sql_filter( $query_args );
-			$this->total_query->add_sql_clause( 'select', $selections );
-			$this->total_query->add_sql_clause( 'left_join', $coupon_join );
-			$this->total_query->add_sql_clause( 'where_time', $where_time );
-			$totals = $wpdb->get_results(
-				$this->total_query->get_query_statement(),
-				ARRAY_A
-			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
-			if ( null === $totals ) {
-				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
-			}
-
-			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
-			$totals_query    = array(
-				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
-				'where_time_clause' => $where_time,
-				'where_clause'      => $this->total_query->get_sql_clause( 'where' ),
-			);
-			$intervals_query = array(
-				'select_clause'     => $this->get_sql_clause( 'select' ),
-				'from_clause'       => $this->interval_query->get_sql_clause( 'join' ),
-				'where_time_clause' => $where_time,
-				'where_clause'      => $this->interval_query->get_sql_clause( 'where' ),
-				'limit'             => $this->get_sql_clause( 'limit' ),
-			);
-
-			$unique_products            = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
-			$totals[0]['products']      = $unique_products;
-			$segmenter                  = new Segmenter( $query_args, $this->report_columns );
-			$unique_coupons             = $this->get_unique_coupon_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
-			$totals[0]['coupons_count'] = $unique_coupons;
-			$totals[0]['segments']      = $segmenter->get_totals_segments( $totals_query, $table_name );
-			$totals                     = (object) $this->cast_numbers( $totals[0] );
-
-			$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
-			$this->interval_query->add_sql_clause( 'left_join', $coupon_join );
-			$this->interval_query->add_sql_clause( 'where_time', $where_time );
-			$db_intervals = $wpdb->get_col(
-				$this->interval_query->get_query_statement()
-			); // phpcs:ignore cache ok, DB call ok, , unprepared SQL ok.
-
-			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-			$total_pages             = (int) ceil( $expected_interval_count / $params['per_page'] );
-
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return $data;
-			}
-
-			$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
-			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-			$this->interval_query->add_sql_clause( 'select', ", MAX({$table_name}.date_created) AS datetime_anchor" );
-			if ( '' !== $selections ) {
-				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
-			}
-			$intervals = $wpdb->get_results(
-				$this->interval_query->get_query_statement(),
-				ARRAY_A
-			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
-
-			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
-			}
-
-			if ( isset( $intervals[0] ) ) {
-				$unique_coupons                = $this->get_unique_coupon_count( $intervals_query['from_clause'], $intervals_query['where_time_clause'], $intervals_query['where_clause'], true );
-				$intervals[0]['coupons_count'] = $unique_coupons;
-			}
-
-			$data = (object) array(
-				'totals'    => $totals,
-				'intervals' => $intervals,
-				'total'     => $expected_interval_count,
-				'pages'     => $total_pages,
-				'page_no'   => (int) $query_args['page'],
-			);
-
-			if ( TimeInterval::intervals_missing( $expected_interval_count, $db_interval_count, $params['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
-				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
-				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-				$this->remove_extra_records( $data, $query_args['page'], $params['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );
-			} else {
-				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
-			}
-			$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
-			$this->create_interval_subtotals( $data->intervals );
-
-			$this->set_cached_data( $cache_key, $data );
+		// Additional filtering for Orders report.
+		$this->orders_stats_sql_filter( $query_args );
+		$this->total_query->add_sql_clause( 'select', $selections );
+		$this->total_query->add_sql_clause( 'left_join', $coupon_join );
+		$this->total_query->add_sql_clause( 'where_time', $where_time );
+		$totals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
+			$this->total_query->get_query_statement(),
+			ARRAY_A
+		);
+		if ( null === $totals ) {
+			return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 		}
+
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// @todo Remove these assignements when refactoring segmenter classes to use query objects.
+		$totals_query    = array(
+			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
+			'where_time_clause' => $where_time,
+			'where_clause'      => $this->total_query->get_sql_clause( 'where' ),
+		);
+		$intervals_query = array(
+			'select_clause'     => $this->get_sql_clause( 'select' ),
+			'from_clause'       => $this->interval_query->get_sql_clause( 'join' ),
+			'where_time_clause' => $where_time,
+			'where_clause'      => $this->interval_query->get_sql_clause( 'where' ),
+			'limit'             => $this->get_sql_clause( 'limit' ),
+		);
+
+		$unique_products            = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
+		$totals[0]['products']      = $unique_products;
+		$segmenter                  = new Segmenter( $query_args, $this->report_columns );
+		$unique_coupons             = $this->get_unique_coupon_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
+		$totals[0]['coupons_count'] = $unique_coupons;
+		$totals[0]['segments']      = $segmenter->get_totals_segments( $totals_query, $table_name );
+		$totals                     = (object) $this->cast_numbers( $totals[0] );
+
+		$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
+		$this->interval_query->add_sql_clause( 'left_join', $coupon_join );
+		$this->interval_query->add_sql_clause( 'where_time', $where_time );
+		$db_intervals = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, , unprepared SQL ok.
+			$this->interval_query->get_query_statement()
+		);
+
+		$db_interval_count = count( $db_intervals );
+
+		$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
+		$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+		$this->interval_query->add_sql_clause( 'select', ", MAX({$table_name}.date_created) AS datetime_anchor" );
+		if ( '' !== $selections ) {
+			$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
+		}
+		$intervals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, , unprepared SQL ok.
+			$this->interval_query->get_query_statement(),
+			ARRAY_A
+		);
+
+		if ( null === $intervals ) {
+			return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
+		}
+
+		if ( isset( $intervals[0] ) ) {
+			$unique_coupons                = $this->get_unique_coupon_count( $intervals_query['from_clause'], $intervals_query['where_time_clause'], $intervals_query['where_clause'], true );
+			$intervals[0]['coupons_count'] = $unique_coupons;
+		}
+
+		$data->totals    = $totals;
+		$data->intervals = $intervals;
+
+		if ( TimeInterval::intervals_missing( $expected_interval_count, $db_interval_count, $params['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+			$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
+			$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
+			$this->remove_extra_records( $data, $query_args['page'], $params['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );
+		} else {
+			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
+		}
+		$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
 
 		return $data;
 	}
@@ -721,26 +720,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the the minimum required WordPress version.
+				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,
 				$customer_id
 			)
 		);
-	}
-
-	/**
-	 * Initialize query objects.
-	 */
-	protected function initialize_queries() {
-		$this->clear_all_clauses();
-		unset( $this->subquery );
-		$this->total_query = new SqlQuery( $this->context . '_total' );
-		$this->total_query->add_sql_clause( 'from', self::get_db_table_name() );
-
-		$this->interval_query = new SqlQuery( $this->context . '_interval' );
-		$this->interval_query->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->interval_query->add_sql_clause( 'group_by', 'time_interval' );
 	}
 }

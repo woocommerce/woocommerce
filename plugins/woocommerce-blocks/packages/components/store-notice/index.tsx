@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import NoticeBanner, {
 	NoticeBannerProps,
 } from '@woocommerce/base-components/notice-banner';
@@ -17,7 +17,7 @@ const StoreNotice = ( {
 }: NoticeBannerProps ) => {
 	return (
 		<NoticeBanner
-			className={ classnames( 'wc-block-store-notice', className ) }
+			className={ clsx( 'wc-block-store-notice', className ) }
 			status={ status }
 			{ ...props }
 		>

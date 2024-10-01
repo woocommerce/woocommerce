@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix the collection data cache being leak between `Collection Filters` blocks.
-

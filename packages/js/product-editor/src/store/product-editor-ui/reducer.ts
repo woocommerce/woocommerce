@@ -6,9 +6,12 @@ import {
 	ACTION_MODAL_EDITOR_CLOSE,
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
+	ACTION_PANEL_PREPUBLISH_CLOSE,
+	ACTION_PANEL_PREPUBLISH_OPEN,
 } from './constants';
 import type {
 	ProductEditorModalEditorAction,
+	ProductEditorPrepublishPanelAction,
 	ProductEditorUIStateProps,
 } from './types';
 
@@ -21,11 +24,14 @@ const INITIAL_STATE: ProductEditorUIStateProps = {
 		blocks: [],
 		hasChanged: false,
 	},
+	prepublishPanel: {
+		isOpen: false,
+	},
 };
 
 export default function reducer(
 	state = INITIAL_STATE,
-	action: ProductEditorModalEditorAction
+	action: ProductEditorModalEditorAction | ProductEditorPrepublishPanelAction
 ) {
 	switch ( action.type ) {
 		case ACTION_MODAL_EDITOR_OPEN:
@@ -61,6 +67,22 @@ export default function reducer(
 				modalEditor: {
 					...state.modalEditor,
 					hasChanged: action?.hasChanged || false,
+				},
+			};
+
+		case ACTION_PANEL_PREPUBLISH_OPEN:
+			return {
+				...state,
+				prepublishPanel: {
+					isOpen: true,
+				},
+			};
+
+		case ACTION_PANEL_PREPUBLISH_CLOSE:
+			return {
+				...state,
+				prepublishPanel: {
+					isOpen: false,
 				},
 			};
 	}

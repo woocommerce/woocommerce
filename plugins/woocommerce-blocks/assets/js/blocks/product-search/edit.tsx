@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { InspectorControls, PlainText } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
@@ -52,7 +52,7 @@ const Edit = ( {
 	instanceId,
 	setAttributes,
 }: EditProps ) => {
-	const classes = classnames(
+	const classes = clsx(
 		'wc-block-product-search',
 		align ? 'align' + align : '',
 		className

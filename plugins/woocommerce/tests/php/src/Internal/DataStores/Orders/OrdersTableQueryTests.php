@@ -1,14 +1,19 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Helper_Product;
+use WC_Order;
 
 /**
  * Class OrdersTableQueryTests.
  */
-class OrdersTableQueryTests extends WC_Unit_Test_Case {
+class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
@@ -24,8 +29,8 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		$this->setup_cot();
 		$this->toggle_cot_feature_and_usage( true );
 	}
 
@@ -148,7 +153,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 
 		$filters_called  = 0;
 		$filter_callback = function ( $arg ) use ( &$filters_called ) {
-			$filters_called++;
+			++$filters_called;
 			return $arg;
 		};
 
@@ -193,7 +198,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertCount( 2, wc_get_orders( array() ) );
 
 		// Force a query that returns nothing.
-		$filter_callback = function( $clauses ) {
+		$filter_callback = function ( $clauses ) {
 			$clauses['where'] .= ' AND 1=0 ';
 			return $clauses;
 		};
@@ -203,7 +208,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
 
 		// Force a query that sorts orders by id ASC (as opposed to the default date DESC) if a query arg is present.
-		$filter_callback = function( $clauses, $query, $query_args ) {
+		$filter_callback = function ( $clauses, $query, $query_args ) {
 			if ( ! empty( $query_args['my_custom_arg'] ) ) {
 				$clauses['orderby'] = $query->get_table_name( 'orders' ) . '.id ASC';
 			}
@@ -254,7 +259,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $query->found_orders );
 		$this->assertEquals( 0, $query->max_num_pages );
 
-		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+		$callback = function ( $result, $query_object, $sql ) use ( $order1 ) {
 			$this->assertNull( $result );
 			$this->assertInstanceOf( OrdersTableQuery::class, $query_object );
 			$this->assertStringContainsString( 'SELECT ', $sql );
@@ -295,7 +300,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $query->found_orders );
 		$this->assertEquals( 0, $query->max_num_pages );
 
-		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+		$callback = function ( $result, $query_object, $sql ) use ( $order1 ) {
 			$this->assertNull( $result );
 			$this->assertInstanceOf( OrdersTableQuery::class, $query_object );
 			$this->assertStringContainsString( 'SELECT ', $sql );
@@ -330,7 +335,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$order1->set_date_created( time() - HOUR_IN_SECONDS );
 		$order1->save();
 
-		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+		$callback = function () use ( $order1 ) {
 			// Do not return found_orders or max_num_pages so as to provoke a warning.
 			$order_ids = array( $order1->get_id() );
 			return array( $order_ids, 10, null );
@@ -385,7 +390,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$order1->set_date_created( time() - HOUR_IN_SECONDS );
 		$order1->save();
 
-		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+		$callback = function () use ( $order1 ) {
 			// Just return null.
 			return null;
 		};
@@ -409,7 +414,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	public function test_query_s_argument() {
 		$order1 = new \WC_Order();
 		$order1->set_billing_first_name( '%ir Woo' );
-		$order1->set_billing_email( 'test_user@woo.test' );
+		$order1->set_billing_email( 'test_user+shop@woo.test' );
 		$order1->save();
 
 		$order2 = new \WC_Order();
@@ -432,6 +437,22 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$query_args['s'] = 'test_user';
 		$query           = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'test_user+shop';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'test_user+shop@woo.test';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = rawurlencode( 'test_user+shop@woo.test' );
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+
+		$query_args['s'] = 'other_user';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order2->get_id() ), $query->orders );
 
 		$query_args['s'] = 'woo.test';
 		$query           = new OrdersTableQuery( $query_args );
@@ -523,7 +544,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 			'return' => 'ids',
 		);
 
-		$query_args['search_filter'] = 'all';
+		// Default search filter is all, so we don't need to set it explicitly.
 
 		$query_args['s'] = 'Product';
 		$query           = new OrdersTableQuery( $query_args );
@@ -536,5 +557,43 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$query_args['s'] = 'name';
 		$query           = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( $orders, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'order_id' param passed in.
+	 */
+	public function test_query_s_filters_order_id() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => $orders[0],
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'order_id';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = $orders[1];
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'customer_email' param passed in.
+	 */
+	public function test_query_s_filters_customer_email() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => 'customer@woo.t',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'customer_email';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
 	}
 }

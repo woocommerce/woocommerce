@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 
@@ -19,8 +19,11 @@ import Card from '../card';
 const RecommendedExtensions = ( {
 	extensions,
 	isLoading,
-	title,
-	description,
+	title = __( 'Recommended extensions', 'woocommerce' ),
+	description = __(
+		'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
+		'woocommerce'
+	),
 	category,
 } ) => {
 	if ( extensions.length === 0 && ! isLoading ) {
@@ -36,14 +39,14 @@ const RecommendedExtensions = ( {
 		<Card
 			title={ title }
 			description={ description }
-			className={ classnames(
+			className={ clsx(
 				'woocommerce-marketing-recommended-extensions-card',
 				categoryClass
 			) }
 		>
 			{ isLoading ? (
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-marketing-recommended-extensions-card__items',
 						`woocommerce-marketing-recommended-extensions-card__items--count-${ placholdersCount }`
 					) }
@@ -54,7 +57,7 @@ const RecommendedExtensions = ( {
 				</div>
 			) : (
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-marketing-recommended-extensions-card__items',
 						`woocommerce-marketing-recommended-extensions-card__items--count-${ extensions.length }`
 					) }
@@ -93,14 +96,6 @@ RecommendedExtensions.propTypes = {
 	 * Category of extensions to display.
 	 */
 	category: PropTypes.string,
-};
-
-RecommendedExtensions.defaultProps = {
-	title: __( 'Recommended extensions', 'woocommerce' ),
-	description: __(
-		'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
-		'woocommerce'
-	),
 };
 
 export { RecommendedExtensions };

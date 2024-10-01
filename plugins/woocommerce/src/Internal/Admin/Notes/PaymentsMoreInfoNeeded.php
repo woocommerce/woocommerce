@@ -38,8 +38,8 @@ class PaymentsMoreInfoNeeded {
 	 * @return bool
 	 */
 	public static function should_display_note() {
-		// WCPay welcome page must not be visible.
-		if ( WcPayWelcomePage::instance()->must_be_visible() ) {
+		// WooPayments incentive must not be visible.
+		if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
 			return false;
 		}
 
@@ -72,7 +72,7 @@ class PaymentsMoreInfoNeeded {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'learn-more', __( 'Learn more here', 'woocommerce' ), 'https://woo.com/payments/' );
+		$note->add_action( 'learn-more', __( 'Learn more here', 'woocommerce' ), 'https://woocommerce.com/payments/' );
 		return $note;
 	}
 }

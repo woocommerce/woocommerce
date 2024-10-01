@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { removeAllNotices, debounce, pick } from '@woocommerce/base-utils';
+import { debounce, pick } from '@woocommerce/base-utils';
 import {
 	CartBillingAddress,
 	CartShippingAddress,
@@ -68,6 +68,40 @@ const updateDirtyProps = () => {
 
 	// Update local cache of customer data so the next time this runs, it can compare against the latest data.
 	localState.customerData = newCustomerData;
+
+	const dirtyShippingAddress = localState.dirtyProps.shippingAddress;
+	const dirtyBillingAddress = localState.dirtyProps.billingAddress;
+
+	const customerShippingAddress = localState.customerData.shippingAddress;
+	const customerBillingAddress = localState.customerData.billingAddress;
+
+	// Check if country is changing without state
+	const shippingCountryChanged = dirtyShippingAddress.includes( 'country' );
+	const billingCountryChanged = dirtyBillingAddress.includes( 'country' );
+	const shippingStateChanged = dirtyShippingAddress.includes( 'state' );
+	const billingStateChanged = dirtyBillingAddress.includes( 'state' );
+	const shippingPostcodeChanged = dirtyShippingAddress.includes( 'postcode' );
+	const billingPostcodeChanged = dirtyBillingAddress.includes( 'postcode' );
+
+	if ( shippingCountryChanged && ! shippingPostcodeChanged ) {
+		dirtyShippingAddress.push( 'postcode' );
+		customerShippingAddress.postcode = '';
+	}
+
+	if ( billingCountryChanged && ! billingPostcodeChanged ) {
+		dirtyBillingAddress.push( 'postcode' );
+		customerBillingAddress.postcode = '';
+	}
+
+	if ( shippingCountryChanged && ! shippingStateChanged ) {
+		dirtyShippingAddress.push( 'state' );
+		customerShippingAddress.state = '';
+	}
+
+	if ( billingCountryChanged && ! billingStateChanged ) {
+		dirtyBillingAddress.push( 'state' );
+		customerBillingAddress.state = '';
+	}
 };
 
 /**
@@ -123,7 +157,6 @@ const updateCustomerData = (): void => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
 			localState.doingPush = false;
-			removeAllNotices();
 		} )
 		.catch( ( response ) => {
 			localState.doingPush = false;

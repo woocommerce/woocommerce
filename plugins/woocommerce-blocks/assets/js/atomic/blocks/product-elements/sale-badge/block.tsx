@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Label } from '@woocommerce/blocks-components';
 import {
 	useInnerBlockLayoutContext,
@@ -18,7 +18,8 @@ import type { HTMLAttributes } from 'react';
 import './style.scss';
 import type { BlockAttributes } from './types';
 
-type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+type Props = BlockAttributes &
+	HTMLAttributes< HTMLDivElement > & { align: boolean };
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const { className, align } = props;
@@ -40,7 +41,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-product-sale-badge',
 				className,
 				alignClass,

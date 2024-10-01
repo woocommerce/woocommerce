@@ -4,7 +4,7 @@
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { memo, useMemo } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -67,7 +67,7 @@ export const Edit = ( {
 	}, [ context.nextPreviousButtonsPosition ] );
 
 	const blockProps = useBlockProps( {
-		className: classNames(
+		className: clsx(
 			'wc-block-product-gallery-large-image',
 			'wc-block-editor-product-gallery-large-image',
 			`wc-block-editor-product-gallery-large-image-next-previous--${ previousNextImage?.className }`

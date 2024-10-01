@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
@@ -103,22 +103,21 @@ const Block = ( {
 		[]
 	);
 
+	const displayStickyContainer = positionRelativeToViewport === 'below';
+
+	const submitContainerClass = clsx( 'wc-block-cart__submit-container', {
+		'wc-block-cart__submit-container--sticky': displayStickyContainer,
+	} );
+
 	return (
-		<div className={ classnames( 'wc-block-cart__submit', className ) }>
+		<div className={ clsx( 'wc-block-cart__submit', className ) }>
 			{ positionReferenceElement }
-			{ /* The non-sticky container must always be visible because it gives height to its parent, which is required to calculate when it becomes visible in the viewport. */ }
-			<div className="wc-block-cart__submit-container">
+			<div
+				className={ submitContainerClass }
+				style={ displayStickyContainer ? { backgroundColor } : {} }
+			>
 				{ submitContainerContents }
 			</div>
-			{ /* If the positionReferenceElement is below the viewport, display the sticky container. */ }
-			{ positionRelativeToViewport === 'below' && (
-				<div
-					className="wc-block-cart__submit-container wc-block-cart__submit-container--sticky"
-					style={ { backgroundColor } }
-				>
-					{ submitContainerContents }
-				</div>
-			) }
 		</div>
 	);
 };

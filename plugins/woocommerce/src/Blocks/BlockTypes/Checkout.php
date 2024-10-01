@@ -36,11 +36,13 @@ class Checkout extends AbstractBlock {
 		// This prevents the page redirecting when the cart is empty. This is so the editor still loads the page preview.
 		add_filter(
 			'woocommerce_checkout_redirect_empty_cart',
-			function( $return ) {
+			function ( $redirect_empty_cart ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				return isset( $_GET['_wp-find-template'] ) ? false : $return;
+				return isset( $_GET['_wp-find-template'] ) ? false : $redirect_empty_cart;
 			}
 		);
+
+		add_action( 'save_post', array( $this, 'update_local_pickup_title' ), 10, 2 );
 	}
 
 	/**
@@ -92,10 +94,17 @@ class Checkout extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
+		$dependencies = [];
+
+		// Load password strength meter script asynchronously if needed.
+		if ( ! is_user_logged_in() && 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+			$dependencies[] = 'zxcvbn-async';
+		}
+
 		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
+			'dependencies' => $dependencies,
 		];
 		return $key ? $script[ $key ] : $script;
 	}
@@ -243,6 +252,73 @@ class Checkout extends AbstractBlock {
 	}
 
 	/**
+	 * Update the local pickup title in WooCommerce Settings when the checkout page containing a Checkout block is saved.
+	 *
+	 * @param int      $post_id The post ID.
+	 * @param \WP_Post $post    The post object.
+	 * @return void
+	 */
+	public function update_local_pickup_title( $post_id, $post ) {
+
+		// This is not a proper save action, maybe an autosave, so don't continue.
+		if ( empty( $post->post_status ) || 'inherit' === $post->post_status ) {
+			return;
+		}
+
+		// Check if we are editing the checkout page and that it contains a Checkout block.
+		// Cast to string for Checkout page ID comparison because get_option can return it as a string, so better to compare both values as strings.
+		if ( ! empty( $post->post_type ) && 'wp_template' !== $post->post_type && ( false === has_block( 'woocommerce/checkout', $post ) || (string) get_option( 'woocommerce_checkout_page_id' ) !== (string) $post_id ) ) {
+			return;
+		}
+
+		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && 'page-checkout' !== $post->post_name && 'wp_template' === $post->post_type ) || false === has_block( 'woocommerce/checkout', $post ) ) {
+			return;
+		}
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
+
+		if ( ! isset( $pickup_location_settings['title'] ) ) {
+			return;
+		}
+
+		if ( empty( $post->post_content ) ) {
+			return;
+		}
+
+		$post_blocks = parse_blocks( $post->post_content );
+		$title       = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
+
+		if ( $title ) {
+			$pickup_location_settings['title'] = $title;
+			update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
+		}
+	}
+
+	/**
+	 * Recurse through the blocks to find the shipping methods block, then get the value of the localPickupText attribute from it.
+	 *
+	 * @param array $blocks The block(s) to search for the local pickup text.
+	 * @return null|string  The local pickup text if found, otherwise void.
+	 */
+	private function find_local_pickup_text_in_checkout_block( $blocks ) {
+		if ( ! is_array( $blocks ) ) {
+			return null;
+		}
+		foreach ( $blocks as $block ) {
+			if ( ! empty( $block['blockName'] ) && 'woocommerce/checkout-shipping-method-block' === $block['blockName'] ) {
+				if ( ! empty( $block['attrs']['localPickupText'] ) ) {
+					return $block['attrs']['localPickupText'];
+				}
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$answer = $this->find_local_pickup_text_in_checkout_block( $block['innerBlocks'] );
+				if ( $answer ) {
+					return $answer;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
@@ -252,37 +328,53 @@ class Checkout extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data(), true );
-		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
+		$country_data    = CartCheckoutUtils::get_country_data();
+		$address_formats = WC()->countries->get_address_formats();
+
+		// Move the address format into the 'countryData' setting.
+		// We need to skip 'default' because that's not a valid country.
+		foreach ( $address_formats as $country_code => $format ) {
+			if ( 'default' === $country_code ) {
+				continue;
+			}
+			$country_data[ $country_code ]['format'] = $format;
+		}
+
+		$this->asset_data_registry->add( 'countryData', $country_data );
+		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
+		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location() );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
 			false === filter_var(
 				wc()->checkout()->is_registration_required(),
 				FILTER_VALIDATE_BOOLEAN
-			),
-			true
+			)
 		);
 		$this->asset_data_registry->add(
 			'checkoutAllowsSignup',
 			filter_var(
 				wc()->checkout()->is_registration_enabled(),
 				FILTER_VALIDATE_BOOLEAN
-			),
-			true
+			)
 		);
-		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ), true );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ), true );
-		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ), true );
-		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ), true );
-		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled(), true );
-		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled(), true );
-		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled(), true );
-		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
+		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
+		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
+		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
+		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
+		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
+		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
+		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['cartPageId'] ) ? $attributes['cartPageId'] : 0 );
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
+		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
 
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
-		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
+		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
+
+		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
+		$this->asset_data_registry->add( 'localPickupText', $pickup_location_settings['title'] );
+		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 
 		$is_block_editor = $this->is_block_editor();
 
@@ -296,8 +388,8 @@ class Checkout extends AbstractBlock {
 			$shipping_methods           = WC()->shipping()->get_shipping_methods();
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
-				function( $acc, $method ) {
-					if ( in_array( $method->id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
+				function ( $acc, $method ) use ( $local_pickup_method_ids ) {
+					if ( in_array( $method->id, $local_pickup_method_ids, true ) ) {
 						return $acc;
 					}
 					if ( $method->supports( 'settings' ) ) {
@@ -315,25 +407,7 @@ class Checkout extends AbstractBlock {
 		}
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'activeShippingZones' ) && class_exists( '\WC_Shipping_Zones' ) ) {
-			$shipping_zones             = \WC_Shipping_Zones::get_zones();
-			$formatted_shipping_zones   = array_reduce(
-				$shipping_zones,
-				function( $acc, $zone ) {
-					$acc[] = [
-						'id'          => $zone['id'],
-						'title'       => $zone['zone_name'],
-						'description' => $zone['formatted_zone_location'],
-					];
-					return $acc;
-				},
-				[]
-			);
-			$formatted_shipping_zones[] = [
-				'id'          => 0,
-				'title'       => __( 'International', 'woocommerce' ),
-				'description' => __( 'Locations outside all other zones', 'woocommerce' ),
-			];
-			$this->asset_data_registry->add( 'activeShippingZones', $formatted_shipping_zones );
+			$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones() );
 		}
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'globalPaymentMethods' ) ) {
@@ -342,7 +416,7 @@ class Checkout extends AbstractBlock {
 			$payment_methods           = $this->get_enabled_payment_gateways();
 			$formatted_payment_methods = array_reduce(
 				$payment_methods,
-				function( $acc, $method ) {
+				function ( $acc, $method ) {
 					$acc[] = [
 						'id'          => $method->id,
 						'title'       => $method->method_title,
@@ -364,7 +438,7 @@ class Checkout extends AbstractBlock {
 			$all_plugins             = \get_plugins(); // Note that `get_compatible_plugins_for_feature` calls `get_plugins` internally, so this is already in cache.
 			$incompatible_extensions = array_reduce(
 				$declared_extensions['incompatible'],
-				function( $acc, $item ) use ( $all_plugins ) {
+				function ( $acc, $item ) use ( $all_plugins ) {
 					$plugin      = $all_plugins[ $item ] ?? null;
 					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item, 2 );
 					$plugin_name = $plugin['Name'] ?? $plugin_id;
@@ -402,7 +476,7 @@ class Checkout extends AbstractBlock {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		return array_filter(
 			$payment_gateways,
-			function( $payment_gateway ) {
+			function ( $payment_gateway ) {
 				return 'yes' === $payment_gateway->enabled;
 			}
 		);
@@ -437,7 +511,7 @@ class Checkout extends AbstractBlock {
 			$payment_methods[ $payment_method_group ] = array_values(
 				array_filter(
 					$saved_payment_methods,
-					function( $saved_payment_method ) use ( $payment_gateways ) {
+					function ( $saved_payment_method ) use ( $payment_gateways ) {
 						return in_array( $saved_payment_method['method']['gateway'], array_keys( $payment_gateways ), true );
 					}
 				)
@@ -507,6 +581,7 @@ class Checkout extends AbstractBlock {
 			'CheckoutOrderSummaryShippingBlock',
 			'CheckoutOrderSummarySubtotalBlock',
 			'CheckoutOrderSummaryTaxesBlock',
+			'CheckoutOrderSummaryTotalsBlock',
 			'CheckoutPaymentBlock',
 			'CheckoutShippingAddressBlock',
 			'CheckoutShippingMethodsBlock',

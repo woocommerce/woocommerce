@@ -28,7 +28,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
+import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -58,10 +59,12 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		contents = '',
 		miniCartIcon,
 		addToCartBehaviour = 'none',
+		onCartClickBehaviour = 'open_drawer',
 		hasHiddenPrice = true,
 		priceColor = defaultColorItem,
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
+		productCountVisibility = 'greater_than_zero',
 	} = attributes;
 
 	const {
@@ -250,6 +253,11 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 			<button
 				className={ `wc-block-mini-cart__button ${ colorClassNames }` }
 				onClick={ () => {
+					if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+						window.location.href = CHECKOUT_URL;
+						return;
+					}
+
 					if ( ! isOpen ) {
 						setIsOpen( true );
 						setSkipSlideIn( false );
@@ -281,16 +289,13 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					icon={ miniCartIcon }
 					iconColor={ iconColor }
 					productCountColor={ productCountColor }
+					productCountVisibility={ productCountVisibility }
 				/>
 			</button>
 			<Drawer
-				className={ classnames(
-					'wc-block-mini-cart__drawer',
-					'is-mobile',
-					{
-						'is-loading': cartIsLoading,
-					}
-				) }
+				className={ clsx( 'wc-block-mini-cart__drawer', 'is-mobile', {
+					'is-loading': cartIsLoading,
+				} ) }
 				isOpen={ isOpen }
 				onClose={ () => {
 					setIsOpen( false );

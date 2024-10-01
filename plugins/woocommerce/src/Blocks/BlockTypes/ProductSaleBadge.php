@@ -97,16 +97,22 @@ class ProductSaleBadge extends AbstractBlock {
 			return $content;
 		}
 
-		$post_id    = $block->context['postId'];
-		$product    = wc_get_product( $post_id );
+		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$product = wc_get_product( $post_id );
+
+		if ( ! $product ) {
+			return null;
+		}
+
 		$is_on_sale = $product->is_on_sale();
 
 		if ( ! $is_on_sale ) {
 			return null;
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+
+		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 
 		$align = isset( $attributes['align'] ) ? $attributes['align'] : '';
 

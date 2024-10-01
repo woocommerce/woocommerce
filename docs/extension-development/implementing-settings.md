@@ -179,7 +179,7 @@ And these settings have attributes which you can use. These affect the way the s
 
 ### Creating Your Own Settings
 
-The built-in settings are great but you may need extra controls to create your settings page. That's why we included some methods to do this for you. First, define a setting by adding it to the `$this->form_fields` array, entering the kind of form control you want under `type`. You can override the default HTML for your form inputs by creating a method with a name of the format `generate_{ type }_html` which outputs HTML markup. To specify how buttons are rendered, you'd add a method called `generate_button_html`. For textareas, you'd add a `generate_textarea_html` method, and so on. (Check out the `generate_settings_html` method of the `WC_Settings_API` class in the WooCommerce source code to see how WooCommerce uses this.) The below example creates a button that goes to Woo.com.
+The built-in settings are great but you may need extra controls to create your settings page. That's why we included some methods to do this for you. First, define a setting by adding it to the `$this->form_fields` array, entering the kind of form control you want under `type`. You can override the default HTML for your form inputs by creating a method with a name of the format `generate_{ type }_html` which outputs HTML markup. To specify how buttons are rendered, you'd add a method called `generate_button_html`. For textareas, you'd add a `generate_textarea_html` method, and so on. (Check out the `generate_settings_html` method of the `WC_Settings_API` class in the WooCommerce source code to see how WooCommerce uses this.) The below example creates a button that goes to WooCommerce.com.
 
 ```php
 /**
@@ -194,7 +194,7 @@ public function init_form_fields() {
 			'title'             => __( 'Customize!', 'woocommerce-integration-demo' ),
 			'type'              => 'button',
 			'custom_attributes' => array(
-				'onclick' => "location.href='https://woo.com'",
+				'onclick' => "location.href='https://woocommerce.com'",
 			),
 			'description'       => __( 'Customize your settings by going to the integration site directly.', 'woocommerce-integration-demo' ),
 			'desc_tip'          => true,
@@ -227,19 +227,19 @@ public function generate_button_html( $key, $data ) {
 
 	ob_start();
 	?>
-	<tr valign="top">
-		<th scope="row" class="titledesc">
-			<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+	&lt;tr valign="top"&gt;
+		&lt;th scope="row" class="titledesc"&gt;
+			&lt;label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?>&lt;/label&gt;
 			<?php echo $this->get_tooltip_html( $data ); ?>
-		</th>
-		<td class="forminp">
-			<fieldset>
-				<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-				<button class="<?php echo esc_attr( $data['class'] ); ?>" type="button" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php echo $this->get_custom_attribute_html( $data ); ?>><?php echo wp_kses_post( $data['title'] ); ?></button>
+		&lt;/th&gt;
+		&lt;td class="forminp"&gt;
+			&lt;fieldset&lt;
+				&lt;legend class="screen-reader-text"&gt;&lt;span&gt;<?php echo wp_kses_post( $data['title'] ); ?&gt;&lt;/span&gt;&lt;/legend&gt;
+				&lt;button class="<?php echo esc_attr( $data['class'] ); ?>" type="button" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php echo $this->get_custom_attribute_html( $data ); ?>&gt;<?php echo wp_kses_post( $data['title'] ); ?>&lt;/button&gt;
 				<?php echo $this->get_description_html( $data ); ?>
-			</fieldset>
-		</td>
-	</tr>
+			&lt;/fieldset&gt;
+		&lt;/td&gt;
+	&lt;/tr&gt;
 	<?php
 	return ob_get_clean();
 }

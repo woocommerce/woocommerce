@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 
 defined( 'ABSPATH' ) || exit;
@@ -167,15 +166,17 @@ class PageController {
 			return apply_filters( 'woocommerce_navigation_get_breadcrumbs', array( '' ), $current_page );
 		}
 
-		if ( 1 === count( $current_page['title'] ) ) {
-			$breadcrumbs = $current_page['title'];
+		$page_title = ! empty( $current_page['page_title'] ) ? $current_page['page_title'] : $current_page['title'];
+		$page_title = (array) $page_title;
+		if ( 1 === count( $page_title ) ) {
+			$breadcrumbs = $page_title;
 		} else {
 			// If this page has multiple title pieces, only link the first one.
 			$breadcrumbs = array_merge(
 				array(
-					array( $current_page['path'], reset( $current_page['title'] ) ),
+					array( $current_page['path'], reset( $page_title ) ),
 				),
-				array_slice( $current_page['title'], 1 )
+				array_slice( $page_title, 1 )
 			);
 		}
 
@@ -218,7 +219,7 @@ class PageController {
 	 */
 	public function get_current_page() {
 		// If 'current_screen' hasn't fired yet, the current page calculation
-		// will fail which causes `false` to be returned for all subsquent calls.
+		// will fail which causes `false` to be returned for all subsequent calls.
 		if ( ! did_action( 'current_screen' ) ) {
 			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce' ), '0.16.0' );
 		}
@@ -392,7 +393,7 @@ class PageController {
 	}
 
 	/**
-	 * Returns true if we are on a page registed with this controller.
+	 * Returns true if we are on a page registered with this controller.
 	 *
 	 * @return boolean
 	 */
@@ -437,6 +438,7 @@ class PageController {
 			'id'         => null,
 			'parent'     => null,
 			'title'      => '',
+			'page_title' => '',
 			'capability' => 'view_woocommerce_reports',
 			'path'       => '',
 			'icon'       => '',
@@ -454,9 +456,13 @@ class PageController {
 			$options['position'] = intval( round( $options['position'] ) );
 		}
 
+		if ( empty( $options['page_title'] ) ) {
+			$options['page_title'] = $options['title'];
+		}
+
 		if ( is_null( $options['parent'] ) ) {
 			add_menu_page(
-				$options['title'],
+				$options['page_title'],
 				$options['title'],
 				$options['capability'],
 				$options['path'],
@@ -469,7 +475,7 @@ class PageController {
 			// @todo check for null path.
 			add_submenu_page(
 				$parent_path,
-				$options['title'],
+				$options['page_title'],
 				$options['title'],
 				$options['capability'],
 				$options['path'],
@@ -523,7 +529,7 @@ class PageController {
 	 */
 	public function remove_app_entry_page_menu_item() {
 		global $submenu;
-		// User does not have capabilites to see the submenu.
+		// User does not have capabilities to see the submenu.
 		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu['woocommerce'] ) ) {
 			return;
 		}
@@ -567,6 +573,6 @@ class PageController {
 	 * TODO: See usage in `admin.php`. This needs refactored and implemented properly in core.
 	 */
 	public static function is_embed_page() {
-		return wc_admin_is_connected_page() || ( ! self::is_admin_page() && class_exists( 'Automattic\WooCommerce\Admin\Features\Navigation\Screen' ) && Screen::is_woocommerce_page() );
+		return wc_admin_is_connected_page();
 	}
 }

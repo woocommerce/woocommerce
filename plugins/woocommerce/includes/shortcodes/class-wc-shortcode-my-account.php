@@ -39,66 +39,55 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
-		if ( ! is_user_logged_in() || isset( $wp->query_vars['lost-password'] ) ) {
+		self::my_account_add_notices();
+
+		// Show the lost password page. This can still be accessed directly by logged in accounts which is important for the initial create password links sent via email.
+		if ( isset( $wp->query_vars['lost-password'] ) ) {
+			self::lost_password();
+			return;
+		}
+
+		// Show login form if not logged in.
+		if ( ! is_user_logged_in() ) {
+			wc_get_template( 'myaccount/form-login.php' );
+			return;
+		}
+
+		// Output the my account page.
+		self::my_account( $atts );
+	}
+
+	/**
+	 * Add notices to the my account page.
+	 *
+	 * Historically a filter has existed to render a message above the my account page content while the user is
+	 * logged out. See `woocommerce_my_account_message`.
+	 */
+	private static function my_account_add_notices() {
+		global $wp;
+
+		if ( ! is_user_logged_in() ) {
+			/**
+			 * Filters the message shown on the 'my account' page when the user is not logged in.
+			 *
+			 * @since 2.6.0
+			 */
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
 				wc_add_notice( $message );
 			}
+		}
 
-			// After password reset, add confirmation message.
-			if ( ! empty( $_GET['password-reset'] ) ) { // WPCS: input var ok, CSRF ok.
-				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
-			}
+		// After password reset, add confirmation message.
+		if ( ! empty( $_GET['password-reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+		}
 
-			if ( isset( $wp->query_vars['lost-password'] ) ) {
-				self::lost_password();
-			} else {
-				wc_get_template( 'myaccount/form-login.php' );
-			}
-		} else {
-			// Start output buffer since the html may need discarding for BW compatibility.
-			ob_start();
-
-			if ( isset( $wp->query_vars['customer-logout'] ) ) {
-				/* translators: %s: logout url */
-				wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
-			}
-
-			// Collect notices before output.
-			$notices = wc_get_notices();
-
-			// Output the new account page.
-			self::my_account( $atts );
-
-			/**
-			 * Deprecated my-account.php template handling. This code should be
-			 * removed in a future release.
-			 *
-			 * If woocommerce_account_content did not run, this is an old template
-			 * so we need to render the endpoint content again.
-			 */
-			if ( ! did_action( 'woocommerce_account_content' ) ) {
-				if ( ! empty( $wp->query_vars ) ) {
-					foreach ( $wp->query_vars as $key => $value ) {
-						if ( 'pagename' === $key ) {
-							continue;
-						}
-						if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-							ob_clean(); // Clear previous buffer.
-							wc_set_notices( $notices );
-							wc_print_notices();
-							do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
-							break;
-						}
-					}
-
-					wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
-				}
-			}
-
-			// Send output buffer.
-			ob_end_flush();
+		// After logging out without a nonce, add confirmation message.
+		if ( isset( $wp->query_vars['customer-logout'] ) && is_user_logged_in() ) {
+			/* translators: %s: logout url */
+			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
 	}
 
@@ -369,15 +358,21 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles resetting the user's password.
 	 *
+	 * @since 9.4.0 This will log the user in after resetting the password/session.
+	 *
 	 * @param object $user     The user.
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
+		update_user_meta( $user->ID, 'default_password_nag', false );
 		self::set_reset_password_cookie();
+		wc_set_customer_auth_cookie( $user->ID );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
 		}

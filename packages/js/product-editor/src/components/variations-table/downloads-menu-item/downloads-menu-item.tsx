@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Dropdown, MenuItem } from '@wordpress/components';
+import { Dropdown, MenuItem, MenuGroup } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronRight } from '@wordpress/icons';
@@ -15,6 +15,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 const MODAL_CLASS_NAME = 'downloads_menu_item__upload_files_modal';
 const MODAL_WRAPPER_CLASS_NAME =
@@ -28,16 +29,16 @@ export function DownloadsMenuItem( {
 	selection,
 	onChange,
 	onClose,
+	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
-	const ids = Array.isArray( selection )
-		? selection.map( ( { id } ) => id )
-		: selection.id;
+	const ids = selection.map( ( { id } ) => id );
 
-	const downloadsIds: number[] = (
-		Array.isArray( selection )
-			? selection[ 0 ].downloads
-			: selection.downloads
-	).map( ( { id }: ProductDownload ) => Number.parseInt( id, 10 ) );
+	const downloadsIds: number[] =
+		selection?.length > 0
+			? selection[ 0 ].downloads.map( ( { id }: ProductDownload ) =>
+					Number.parseInt( id, 10 )
+			  )
+			: [];
 
 	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
 
@@ -53,16 +54,12 @@ export function DownloadsMenuItem( {
 			downloads,
 		};
 
-		if ( Array.isArray( selection ) ) {
-			onChange(
-				selection.map( ( { id } ) => ( {
-					...partialVariation,
-					id,
-				} ) )
-			);
-		} else {
-			onChange( partialVariation );
-		}
+		onChange(
+			selection.map( ( { id } ) => ( {
+				...partialVariation,
+				id,
+			} ) )
+		);
 
 		recordEvent( 'product_variations_menu_downloads_update', {
 			source: TRACKS_SOURCE,
@@ -96,20 +93,13 @@ export function DownloadsMenuItem( {
 			handlePrompt( {
 				message,
 				onOk( value ) {
-					if ( Array.isArray( selection ) ) {
-						onChange(
-							selection.map( ( { id } ) => ( {
-								id,
-								downloadable: true,
-								[ name ]: value,
-							} ) )
-						);
-					} else {
-						onChange( {
+					onChange(
+						selection.map( ( { id } ) => ( {
+							id,
 							downloadable: true,
 							[ name ]: value,
-						} );
-					}
+						} ) )
+					);
 					recordEvent( 'product_variations_menu_downloads_update', {
 						source: TRACKS_SOURCE,
 						action: `${ name }_set`,
@@ -146,10 +136,13 @@ export function DownloadsMenuItem( {
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {
-						recordEvent( 'product_variations_menu_shipping_click', {
-							source: TRACKS_SOURCE,
-							variation_id: ids,
-						} );
+						recordEvent(
+							'product_variations_menu_downloads_click',
+							{
+								source: TRACKS_SOURCE,
+								variation_id: ids,
+							}
+						);
 						onToggle();
 					} }
 					aria-expanded={ isOpen }
@@ -161,44 +154,53 @@ export function DownloadsMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					<MediaUpload
-						modalClass={ MODAL_CLASS_NAME }
-						// @ts-expect-error multiple also accepts string.
-						multiple={ 'add' }
-						value={ downloadsIds }
-						onSelect={ handleMediaUploadSelect }
-						render={ ( { open } ) => (
-							<MenuItem
-								onClick={ uploadFilesClickHandler( open ) }
-							>
-								{ __( 'Upload files', 'woocommerce' ) }
-							</MenuItem>
-						) }
+					<MenuGroup>
+						<MediaUpload
+							modalClass={ MODAL_CLASS_NAME }
+							// @ts-expect-error multiple also accepts string.
+							multiple={ 'add' }
+							value={ downloadsIds }
+							onSelect={ handleMediaUploadSelect }
+							render={ ( { open } ) => (
+								<MenuItem
+									onClick={ uploadFilesClickHandler( open ) }
+								>
+									{ __( 'Upload files', 'woocommerce' ) }
+								</MenuItem>
+							) }
+						/>
+
+						<MenuItem
+							onClick={ menuItemClickHandler(
+								'download_limit',
+								__(
+									'Leave blank for unlimited re-downloads',
+									'woocommerce'
+								)
+							) }
+						>
+							{ __( 'Set download limit', 'woocommerce' ) }
+						</MenuItem>
+
+						<MenuItem
+							onClick={ menuItemClickHandler(
+								'download_expiry',
+								__(
+									'Enter the number of days before a download link expires, or leave blank',
+									'woocommerce'
+								)
+							) }
+						>
+							{ __( 'Set download expiry', 'woocommerce' ) }
+						</MenuItem>
+					</MenuGroup>
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'downloads' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ supportsMultipleSelection }
 					/>
-
-					<MenuItem
-						onClick={ menuItemClickHandler(
-							'download_limit',
-							__(
-								'Leave blank for unlimited re-downloads',
-								'woocommerce'
-							)
-						) }
-					>
-						{ __( 'Set download limit', 'woocommerce' ) }
-					</MenuItem>
-
-					<MenuItem
-						onClick={ menuItemClickHandler(
-							'download_expiry',
-							__(
-								'Enter the number of days before a download link expires, or leave blank',
-								'woocommerce'
-							)
-						) }
-					>
-						{ __( 'Set download expiry', 'woocommerce' ) }
-					</MenuItem>
 				</div>
 			) }
 		/>

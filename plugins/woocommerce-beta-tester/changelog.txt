@@ -1,4 +1,35 @@
 *** WooCommerce Beta Tester Changelog ***
+2024-08-08 - version 2.4.0
+* Patch - Changed from using React.render to React.createRoot for wc beta tester as it has been deprecated since React 18
+* Minor - Fix "Creation of dynamic property WC_Beta_Tester::$wporg_data is deprecated" on PHP 8.2
+* Patch - Add reactify-classic-payments-settings feature flag
+* Minor - Add remote logging tool
+* Minor - Add tool to force the coming soon landing pages to display on the front-end
+* Minor - Product Editor Dev Tools: Improve expression evaluation tooling support.
+* Patch - Minor tooling tweaks (zip compression level, composer invocation)
+* Patch - Monorepo: minor tweaks in zip building script (use frozen lock file when installing dependecies).
+* Patch - Monorepo: tweak Webpack loaders paths filtering for better build perfromance.
+* Patch - Whitelist line with maybe_unserialize() function call from QIT security tests.
+
+2024-06-25 - version 2.3.2
+* Minor - Adds a new tool to the WCA Test Helper that helps import remote inbox notifications from staging or production for testing purposes #48735
+* Minor - Remove the new old experience #47814
+* Patch - Fix "Live Branches" item not shown in the WooCommerce menu #47691
+* Patch - Fix lint errors from the remote spec test endpoint. #47520
+
+2024-05-13 - version 2.3.1
+* Minor - Add Remote Spec Validator to WooCommerce Admin Tester
+* Minor - Remove the patterns_ai_data post from DB when resetting the CYS.
+* Patch - Comment: Fix Gutenberg links in the docs pointing to incorrect branch.
+* Patch - Add missing live-branches/install.php require to API.php
+* Minor - Add feature flag options to wc-live-branches user script
+* Patch - Update WooCommerce import path in WC Admin Tester Helper
+* Minor - Fix option search that accidentally had its wildcards removed
+* Patch - Fix beta test plugin deprecated creation dynamic property
+* Patch - add composer install to changelog script
+* Patch - [Woo Beta Tester]: add User Preference dev tool panel
+* Patch - Update @wordpress-env package to version 9.0.7
+* Patch - Update pnpm to 9.1.0
 
 2023-11-16 - version 2.3.0
 * Minor - Add ability to update block templates logging threshold.

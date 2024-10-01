@@ -20,12 +20,13 @@ import {
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
 import { z } from 'zod';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext, BusinessInfoEvent } from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { BusinessInfoEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
@@ -44,24 +45,32 @@ export const industryChoices = [
 		key: 'clothing_and_accessories' as const,
 	},
 	{
-		label: __( 'Health and beauty', 'woocommerce' ),
-		key: 'health_and_beauty' as const,
-	},
-	{
 		label: __( 'Food and drink', 'woocommerce' ),
 		key: 'food_and_drink' as const,
 	},
 	{
-		label: __( 'Home, furniture and garden', 'woocommerce' ),
-		key: 'home_furniture_and_garden' as const,
+		label: __( 'Electronics and computers', 'woocommerce' ),
+		key: 'electronics_and_computers' as const,
+	},
+	{
+		label: __( 'Health and beauty', 'woocommerce' ),
+		key: 'health_and_beauty' as const,
 	},
 	{
 		label: __( 'Education and learning', 'woocommerce' ),
 		key: 'education_and_learning' as const,
 	},
 	{
-		label: __( 'Electronics and computers', 'woocommerce' ),
-		key: 'electronics_and_computers' as const,
+		label: __( 'Home, furniture and garden', 'woocommerce' ),
+		key: 'home_furniture_and_garden' as const,
+	},
+	{
+		label: __( 'Arts and crafts', 'woocommerce' ),
+		key: 'arts_and_crafts' as const,
+	},
+	{
+		label: __( 'Sports and recreation', 'woocommerce' ),
+		key: 'sports_and_recreation' as const,
 	},
 	{
 		label: __( 'Other', 'woocommerce' ),
@@ -81,7 +90,7 @@ export const selectIndustryMapping = {
 		'woocommerce'
 	),
 	im_setting_up_a_store_for_a_client: __(
-		"Which industry is your client's business in?",
+		'Which industry is your client’s business in?',
 		'woocommerce'
 	),
 };
@@ -115,12 +124,12 @@ export const BusinessInfo = ( {
 		businessInfo,
 		countries,
 		onboardingProfile: {
-			is_store_country_set: isStoreCountrySet,
-			industry: industryFromOnboardingProfile,
-			business_choice: businessChoiceFromOnboardingProfile,
-			is_agree_marketing: isOptInMarketingFromOnboardingProfile,
-			store_email: storeEmailAddressFromOnboardingProfile,
-		},
+			is_store_country_set: isStoreCountrySet = false,
+			industry: industryFromOnboardingProfile = [],
+			business_choice: businessChoiceFromOnboardingProfile = '',
+			is_agree_marketing: isOptInMarketingFromOnboardingProfile = false,
+			store_email: storeEmailAddressFromOnboardingProfile = '',
+		} = {},
 		currentUserEmail,
 	} = context;
 
@@ -229,7 +238,7 @@ export const BusinessInfo = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						"We'll use this information to help you set up payments, shipping, and taxes, as well as recommending the best theme for your store.",
+						'We’ll use this information to help you set up payments, shipping, and taxes, as well as recommending the best theme for your store.',
 						'woocommerce'
 					) }
 				/>
@@ -259,7 +268,7 @@ export const BusinessInfo = ( {
 					/>
 					<p className="woocommerce-profiler-question-subtext">
 						{ __(
-							"Don't worry — you can always change it later!",
+							'Don’t worry — you can always change it later!',
 							'woocommerce'
 						) }
 					</p>
@@ -321,6 +330,52 @@ export const BusinessInfo = ( {
 						showAllOnFocus
 						isSearchable
 					/>
+					{ countries.length === 0 && (
+						<Notice
+							className="woocommerce-profiler-select-control__country-error"
+							isDismissible={ false }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'RETRY_PRE_BUSINESS_INFO',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+									skipButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'SKIP_BUSINESS_INFO_STEP',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'skip this step',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
 					{ /* woocommerce-profiler-select-control__country-spacer exists purely because the select-control above has an unremovable and unstyleable div and that's preventing margin collapse */ }
 					<div className="woocommerce-profiler-select-control__country-spacer" />
 					{ geolocationOverruled && ! dismissedGeolocationNotice && (
@@ -335,7 +390,7 @@ export const BusinessInfo = ( {
 								{ createInterpolateElement(
 									__(
 										// translators: first tag is filled with the country name detected by geolocation, second tag is the country name selected by the user
-										"It looks like you're located in <geolocatedCountry></geolocatedCountry>. Are you sure you want to create a store in <selectedCountry></selectedCountry>?",
+										'It looks like you’re located in <geolocatedCountry></geolocatedCountry>. Are you sure you want to create a store in <selectedCountry></selectedCountry>?',
 										'woocommerce'
 									),
 									{
@@ -387,7 +442,7 @@ export const BusinessInfo = ( {
 					{
 						<>
 							<TextControl
-								className={ classNames(
+								className={ clsx(
 									'woocommerce-profiler-business-info-email-adddress',
 									{ 'is-error': isEmailInvalid }
 								) }

@@ -8,14 +8,14 @@
 		display: flex;
 		flex-wrap: wrap;
 
-		@include breakpoint( '>600px' ) {
+		@include breakpoint( ">600px" ) {
 			> a,
 			> .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 50%;
 			}
 		}
 
-		@include breakpoint( '>960px' ) {
+		@include breakpoint( ">960px" ) {
 			> a,
 			> .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 33.3%;

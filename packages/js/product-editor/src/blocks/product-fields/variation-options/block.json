@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-variations-options-field",
 	"title": "Product variations options",
 	"category": "woocommerce",
 	"description": "The product variations options.",
-	"keywords": [ "products", "variations" ],
+	"keywords": [
+		"products",
+		"variations"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"description": {
@@ -16,11 +19,15 @@
 	"supports": {
 		"align": false,
 		"html": false,
-		"multiple": false,
+		"multiple": true,
 		"reusable": false,
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
 	},
+	"usesContext": [
+		"postType",
+		"isInSelectedTab"
+	],
 	"editorStyle": "file:./editor.css"
 }

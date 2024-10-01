@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/**
+ * External dependencies
+ */
 import path from 'path';
 import { writeFileSync } from 'fs';
 import type {
@@ -6,6 +10,7 @@ import type {
 	TestCase,
 	TestResult,
 } from '@playwright/test/reporter';
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 export type WPPerformanceResults = Record< string, number >;
 
@@ -30,7 +35,9 @@ class PerformanceReporter implements Reporter {
 			const resultsId = process.env.RESULTS_ID || testSuite;
 			const resultsPath = process.env.WP_ARTIFACTS_PATH as string;
 			const resultsBody = attachment.body.toString();
-			const results = JSON.parse( resultsBody );
+			const resultsObj = JSON.parse( resultsBody );
+			const firstKey = Object.keys( resultsObj )[ 0 ];
+			const results = resultsObj[ firstKey ];
 
 			// Save curated results to file.
 			writeFileSync(
@@ -45,7 +52,7 @@ class PerformanceReporter implements Reporter {
 		}
 	}
 
-	onEnd( result: FullResult ) {
+	onEnd( result: FullResult ): void {
 		if ( result.status !== 'passed' ) {
 			return;
 		}

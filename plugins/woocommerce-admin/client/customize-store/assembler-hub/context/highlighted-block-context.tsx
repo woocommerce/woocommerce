@@ -4,13 +4,17 @@
 import React, { createContext, useState } from '@wordpress/element';
 import type { ReactNode } from 'react';
 
-export const HighlightedBlockContext = createContext( {
-	highlightedBlockIndex: -1,
+export const HighlightedBlockContext = createContext< {
+	highlightedBlockClientId: string | null;
+	setHighlightedBlockClientId: ( clientId: string | null ) => void;
+	resetHighlightedBlockClientId: () => void;
+} >( {
+	highlightedBlockClientId: null,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	setHighlightedBlockIndex: ( index: number ) => {
+	setHighlightedBlockClientId: ( clientId: string | null ) => {
 		// No op by default.
 	},
-	resetHighlightedBlockIndex: () => {
+	resetHighlightedBlockClientId: () => {
 		// No op by default.
 	},
 } );
@@ -23,18 +27,20 @@ export const HighlightedBlockContextProvider = ( {
 	children: ReactNode;
 } ) => {
 	// Create some state
-	const [ highlightedBlockIndex, setHighlightedBlockIndex ] = useState( -1 );
+	const [ highlightedBlockClientId, setHighlightedBlockClientId ] = useState<
+		string | null
+	>( null );
 
-	const resetHighlightedBlockIndex = () => {
-		setHighlightedBlockIndex( -1 );
+	const resetHighlightedBlockClientId = () => {
+		setHighlightedBlockClientId( null );
 	};
 
 	return (
 		<HighlightedBlockContext.Provider
 			value={ {
-				highlightedBlockIndex,
-				setHighlightedBlockIndex,
-				resetHighlightedBlockIndex,
+				highlightedBlockClientId,
+				setHighlightedBlockClientId,
+				resetHighlightedBlockClientId,
 			} }
 		>
 			{ children }

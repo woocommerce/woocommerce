@@ -1,4 +1,4 @@
-/* eslint-disable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-disable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -9,41 +9,12 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
  * Internal dependencies
  */
 import { PerfUtils } from '../fixtures';
-import { median } from '../utils';
+import { getTotalBlockingTime, median } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
-
-async function editPost( admin, page, postId ) {
-	const query = new URLSearchParams();
-	query.set( 'post', String( postId ) );
-	query.set( 'action', 'edit' );
-
-	await admin.visitAdminPage( 'post.php', query.toString() );
-	await setPreferences( page, 'core/edit-post', {
-		welcomeGuide: false,
-		fullscreenMode: false,
-	} );
-}
-
-async function setPreferences( page, context, preferences ) {
-	await page.waitForFunction( () => window?.wp?.data );
-
-	await page.evaluate(
-		async ( props ) => {
-			for ( const [ key, value ] of Object.entries(
-				props.preferences
-			) ) {
-				await window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( props.context, key, value );
-			}
-		},
-		{ context, preferences }
-	);
-}
 
 test.describe( 'Editor Performance', () => {
 	test.use( {
@@ -57,11 +28,11 @@ test.describe( 'Editor Performance', () => {
 
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
-		Object.keys( results ).map( ( metric ) => {
+		Object.keys( results ).forEach( ( metric ) => {
 			medians[ metric ] = median( results[ metric ] );
 		} );
 		await testInfo.attach( 'results', {
-			body: JSON.stringify( medians, null, 2 ),
+			body: JSON.stringify( { editor: medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
 	} );
@@ -86,7 +57,7 @@ test.describe( 'Editor Performance', () => {
 				metrics,
 			} ) => {
 				// Open the test draft.
-				await editPost( admin, page, draftId );
+				await admin.editPost( draftId );
 				const canvas = await perfUtils.getCanvas();
 
 				// Wait for the first block.
@@ -95,8 +66,32 @@ test.describe( 'Editor Performance', () => {
 				// Get the durations.
 				const loadingDurations = await metrics.getLoadingDurations();
 
+				// Measure CLS
+				const cumulativeLayoutShift =
+					await metrics.getCumulativeLayoutShift();
+
+				// Measure LCP
+				const largestContentfulPaint =
+					await metrics.getLargestContentfulPaint();
+
+				// Measure TBT
+				const totalBlockingTime = await getTotalBlockingTime(
+					page,
+					BROWSER_IDLE_WAIT
+				);
+
 				// Save the results.
 				if ( i > throwaway ) {
+					results.totalBlockingTime = results.tbt || [];
+					results.totalBlockingTime.push( totalBlockingTime );
+					results.cumulativeLayoutShift =
+						results.cumulativeLayoutShift || [];
+					results.cumulativeLayoutShift.push( cumulativeLayoutShift );
+					results.largestContentfulPaint =
+						results.largestContentfulPaint || [];
+					results.largestContentfulPaint.push(
+						largestContentfulPaint
+					);
 					Object.entries( loadingDurations ).forEach(
 						( [ metric, duration ] ) => {
 							const metricKey =
@@ -122,16 +117,10 @@ test.describe( 'Editor Performance', () => {
 			await perfUtils.loadBlocksForLargePost();
 			await editor.insertBlock( { name: 'core/paragraph' } );
 			draftId = await perfUtils.saveDraft();
-			console.log( draftId );
 		} );
 
-		test( 'Run the test', async ( {
-			admin,
-			page,
-			perfUtils,
-			metrics,
-		} ) => {
-			await editPost( admin, page, draftId );
+		test( 'Run the test', async ( { admin, perfUtils, metrics } ) => {
+			await admin.editPost( draftId );
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
 
@@ -175,4 +164,4 @@ test.describe( 'Editor Performance', () => {
 	} );
 } );
 
-/* eslint-enable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-enable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */

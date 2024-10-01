@@ -95,7 +95,7 @@ In the above code snippet:
 
 ## How this all fits into Checkout Block vs Traditional Checkout
 
-The point of which stock is reserved differs between the new Block based checkout and the traditional checkout, the main difference being that the Block based checkout reserves stock on entry so the customer isn't forced to fill out the entire checkout form unnecessarily.
+The point of which stock is reserved differs between the new block-based checkout and the traditional checkout, the main difference being that the block-based checkout reserves stock on entry so the customer isn't forced to fill out the entire checkout form unnecessarily.
 
 ![Checkout Processes](checkout.jpg)
 

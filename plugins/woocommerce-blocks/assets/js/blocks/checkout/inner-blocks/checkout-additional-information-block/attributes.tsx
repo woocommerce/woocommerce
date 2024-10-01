@@ -20,7 +20,7 @@ export default {
 	lock: {
 		type: 'object',
 		default: {
-			move: true,
+			move: false,
 			remove: true,
 		},
 	},

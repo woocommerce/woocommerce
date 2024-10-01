@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 export const Tab = ( {
 	icon,
@@ -14,7 +14,7 @@ export const Tab = ( {
 	isPanelOpen,
 	onTabClick,
 } ) => {
-	const className = classnames( 'woocommerce-layout__activity-panel-tab', {
+	const className = clsx( 'woocommerce-layout__activity-panel-tab', {
 		'is-active': isPanelOpen && selected,
 		'has-unread': unread,
 	} );
@@ -29,6 +29,7 @@ export const Tab = ( {
 			aria-controls={ `activity-panel-${ name }` }
 			key={ tabKey }
 			id={ tabKey }
+			data-testid={ tabKey }
 			onClick={ () => {
 				onTabClick( name );
 			} }

@@ -12,7 +12,7 @@ import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payme
 import { getIconsFromPaymentMethods } from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
 import { PaymentEventsProvider } from '@woocommerce/base-context';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -55,9 +55,7 @@ const Block = ( {
 	const hasButtons = hasChildren( children );
 
 	return (
-		<div
-			className={ classNames( className, 'wc-block-mini-cart__footer' ) }
-		>
+		<div className={ clsx( className, 'wc-block-mini-cart__footer' ) }>
 			<TotalsItem
 				className="wc-block-mini-cart__footer-subtotal"
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }

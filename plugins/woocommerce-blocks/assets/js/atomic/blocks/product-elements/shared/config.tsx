@@ -25,10 +25,18 @@ const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 			/>
 		),
 	},
+	apiVersion: 3,
 	supports: {
 		html: false,
 	},
-	ancestor: [ 'woocommerce/all-products', 'woocommerce/single-product' ],
+	ancestor: [
+		'woocommerce/all-products',
+		'woocommerce/single-product',
+		// Product Collection product template
+		'woocommerce/product-template',
+		// Products (Beta) product template
+		'core/post-template',
+	],
 	save,
 	deprecated: [
 		{

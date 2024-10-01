@@ -11,9 +11,12 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { aiStatusResponse } from '../types';
+import { FlowType, aiStatusResponse } from '../types';
+import { isIframe } from '~/customize-store/utils';
+import { isWooExpress } from '~/utils/is-woo-express';
+import { trackEvent } from '../tracking';
 
-export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
+export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
 		'https://status.openai.com/api/v2/status.json'
 	);
@@ -30,6 +33,16 @@ export const fetchThemeCards = async () => {
 	return themes;
 };
 
+export const fetchCustomizeStoreCompleted = async () => {
+	const task = await resolveSelect( ONBOARDING_STORE_NAME ).getTask(
+		'customize-store'
+	);
+
+	return {
+		customizeStoreTaskCompleted: task?.isComplete,
+	};
+};
+
 export const fetchIntroData = async () => {
 	const currentTemplatePromise =
 		// @ts-expect-error No types for this exist yet.
@@ -39,43 +52,19 @@ export const fetchIntroData = async () => {
 		OPTIONS_STORE_NAME
 	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
 
-	const styleRevsPromise =
-		// @ts-expect-error No types for this exist yet.
-		resolveSelect( coreStore ).getCurrentThemeGlobalStylesRevisions();
-
-	// @ts-expect-error No types for this exist yet.
-	const hasModifiedPagesPromise = resolveSelect( coreStore ).getEntityRecords(
-		'postType',
-		'page',
-		{
-			per_page: 100,
-			_fields: [ 'id', '_links.version-history' ],
-			orderby: 'menu_order',
-			order: 'asc',
-		}
-	);
-
 	const getTaskPromise = resolveSelect( ONBOARDING_STORE_NAME ).getTask(
 		'customize-store'
 	);
 
 	const themeDataPromise = fetchThemeCards();
 
-	const [
-		currentTemplate,
-		maybePreviousTemplate,
-		styleRevs,
-		rawPages,
-		task,
-		themeData,
-	] = await Promise.all( [
-		currentTemplatePromise,
-		maybePreviousTemplatePromise,
-		styleRevsPromise,
-		hasModifiedPagesPromise,
-		getTaskPromise,
-		themeDataPromise,
-	] );
+	const [ currentTemplate, maybePreviousTemplate, task, themeData ] =
+		await Promise.all( [
+			currentTemplatePromise,
+			maybePreviousTemplatePromise,
+			getTaskPromise,
+			themeDataPromise,
+		] );
 
 	let currentThemeIsAiGenerated = false;
 	if (
@@ -85,23 +74,106 @@ export const fetchIntroData = async () => {
 		currentThemeIsAiGenerated = true;
 	}
 
-	const hasModifiedPages = rawPages?.some(
-		( page: { _links: { [ key: string ]: string[] } } ) => {
-			return page._links?.[ 'version-history' ]?.length > 1;
-		}
-	);
-
-	const activeThemeHasMods =
-		!! currentTemplate?.modified ||
-		styleRevs?.length > 0 ||
-		hasModifiedPages;
-
 	const customizeStoreTaskCompleted = task?.isComplete;
 
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const theme = ( await resolveSelect( 'core' ).getCurrentTheme() ) as Theme;
+
 	return {
-		activeThemeHasMods,
 		customizeStoreTaskCompleted,
 		themeData,
+		activeTheme: theme.stylesheet || '',
 		currentThemeIsAiGenerated,
 	};
+};
+
+const fetchIsFontLibraryAvailable = async () => {
+	try {
+		await apiFetch( {
+			path: '/wp/v2/font-collections?_fields=slug',
+			method: 'GET',
+		} );
+
+		return true;
+	} catch ( err ) {
+		return false;
+	}
+};
+
+const fetchIsPTKPatternsAPIAvailable = async () => {
+	try {
+		await apiFetch( {
+			path: '/wc-admin/patterns',
+			method: 'GET',
+		} );
+
+		return true;
+	} catch ( err ) {
+		return false;
+	}
+};
+
+export const setFlags = async () => {
+	if ( ! isIframe( window ) ) {
+		// To improve the readability of the code, we want to use a dictionary
+		// where the key is the feature flag name and the value is the
+		// function to retrieve flag value.
+
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _featureFlags = {
+			FONT_LIBRARY_AVAILABLE: ( async () => {
+				const isFontLibraryAvailable =
+					await fetchIsFontLibraryAvailable();
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isFontLibraryAvailable,
+				};
+			} )(),
+			PTK_PATTERNS_API_AVAILABLE: ( async () => {
+				const isPTKPatternsAPIAvailable =
+					await fetchIsPTKPatternsAPIAvailable();
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isPTKPatternsAPIAvailable,
+				};
+			} )(),
+		};
+
+		// Since the _featureFlags values are promises, we need to wait for
+		// all of them to resolve before returning.
+		await Promise.all( Object.values( _featureFlags ) );
+	}
+
+	// Set FlowType flag. We want to set the flag only in the parent window.
+	if ( isWooExpress() && ! isIframe( window ) ) {
+		try {
+			const { status } = await fetchAiStatus();
+
+			const isAiOnline =
+				status.indicator !== 'critical' && status.indicator !== 'major';
+
+			// @ts-expect-error temp workaround;
+			window.cys_aiOnline = status;
+			trackEvent( 'customize_your_store_ai_status', {
+				online: isAiOnline ? 'yes' : 'no',
+			} );
+
+			// @ts-expect-error temp workaround;
+			window.cys_aiFlow = true;
+
+			return isAiOnline ? FlowType.AIOnline : FlowType.AIOffline;
+		} catch ( e ) {
+			// @ts-expect-error temp workaround;
+			window.cys_aiOnline = false;
+			trackEvent( 'customize_your_store_ai_status', {
+				online: 'no',
+			} );
+			return FlowType.AIOffline;
+		}
+	}
+
+	return FlowType.noAI;
 };

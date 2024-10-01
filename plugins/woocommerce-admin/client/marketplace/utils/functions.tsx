@@ -17,6 +17,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -102,11 +103,15 @@ async function fetchJsonWithCache(
 	} );
 }
 
-// Fetch search results for a given set of URLSearchParams from the Woo.com API
+// Fetch search results for a given set of URLSearchParams from the WooCommerce.com API
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< Product[] > {
+): Promise< {
+	products: Product[];
+	totalPages: number;
+	totalProducts: number;
+} > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -125,9 +130,11 @@ async function fetchSearchResults(
 					( product: SearchAPIProductType ): Product => {
 						return {
 							id: product.id,
+							slug: product.slug,
 							title: product.title,
 							image: product.image,
 							type: product.type,
+							freemium_type: product.freemium_type,
 							description: product.excerpt,
 							vendorName: product.vendor_name,
 							vendorUrl: product.vendor_url,
@@ -135,18 +142,31 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
+							regularPrice: product.regular_price,
+							isOnSale: product.is_on_sale,
 							averageRating: product.rating ?? null,
 							reviewsCount: product.reviews_count ?? null,
+							isInstallable: product.is_installable,
+							featuredImage: product.featured_image,
+							productCategory: product.product_category,
+							color: product.color,
+							billingPeriod: product.billing_period,
+							billingPeriodInterval:
+								product.billing_period_interval,
+							currency: product.currency,
 						};
 					}
 				);
-				resolve( products );
+				const totalPages = ( json as SearchAPIJSONType ).total_pages;
+				const totalProducts = ( json as SearchAPIJSONType )
+					.total_products;
+				resolve( { products, totalPages, totalProducts } );
 			} )
-			.catch( () => reject );
+			.catch( reject );
 	} );
 }
 
-// Fetch data for the discover page from the Woo.com API
+// Fetch data for the discover page from the WooCommerce.com API
 async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	let url = '/wc/v3/marketplace/featured';
 
@@ -163,6 +183,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
+function getProductType( tab: string ): ProductType {
+	switch ( tab ) {
+		case 'themes':
+			return ProductType.theme;
+		case 'business-services':
+			return ProductType.businessService;
+		default:
+			return ProductType.extension;
+	}
+}
+
 function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
 	const url = new URL( MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH );
 
@@ -174,6 +205,8 @@ function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
 	// This is to ensure the old marketplace continues to work when this isn't defined
 	if ( type === ProductType.theme ) {
 		url.searchParams.set( 'parent', 'themes' );
+	} else if ( type === ProductType.businessService ) {
+		url.searchParams.set( 'parent', 'business-services' );
 	}
 
 	return (
@@ -234,6 +267,16 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+type WpAjaxReponse = {
+	success: boolean;
+	data: WpAjaxResponseData;
+};
+
+type WpAjaxResponseData = {
+	errorMessage?: string;
+	activateUrl?: string;
+};
+
 function wpAjax(
 	action: string,
 	data: {
@@ -242,7 +285,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< void > {
+): Promise< WpAjaxReponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -251,21 +294,13 @@ function wpAjax(
 
 		window.wp.updates.ajax( action, {
 			...data,
-			success: ( response: {
-				success?: boolean;
-				errorMessage?: string;
-			} ) => {
-				if ( response.success === false ) {
-					reject( {
-						success: false,
-						data: {
-							message: response.errorMessage,
-						},
-					} );
-				}
-				resolve();
+			success: ( response: WpAjaxResponseData ) => {
+				resolve( {
+					success: true,
+					data: response,
+				} );
 			},
-			error: ( error: { errorMessage: string } ) => {
+			error: ( error: WpAjaxResponseData ) => {
 				reject( {
 					success: false,
 					data: {
@@ -320,12 +355,19 @@ function getInstallUrl( subscription: Subscription ): Promise< string > {
 	} );
 }
 
+function downloadProduct( productType: string, zipSlug: string ) {
+	return wpAjax( 'install-' + productType, {
+		// The slug prefix is required for the install to use WCCOM install filters.
+		slug: zipSlug,
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
-		return wpAjax( 'install-' + subscription.product_type, {
-			// The slug prefix is required for the install to use WCCOM install filters.
-			slug: 'woocommerce-com-' + subscription.product_slug,
-		} )
+		return downloadProduct(
+			subscription.product_type,
+			subscription.zip_slug
+		)
 			.then( () => {
 				return activateProduct( subscription );
 			} )
@@ -338,7 +380,7 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< void > {
+function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
@@ -386,8 +428,12 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		icon: subscription.product_icon,
 		url: subscription.product_url,
 		price: -1,
-		averageRating: 0,
-		reviewsCount: 0,
+		regularPrice: -1,
+		isOnSale: false,
+		averageRating: null,
+		reviewsCount: null,
+		isInstallable: false,
+		currency: '',
 	};
 };
 
@@ -408,6 +454,16 @@ const appendURLParams = (
 		urlObject.searchParams.set( key, value );
 	} );
 	return urlObject.toString();
+};
+
+const enableAutorenewalUrl = ( subscription: Subscription ): string => {
+	if ( ! subscription.product_key ) {
+		// review subscriptions on the Marketplace
+		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+	}
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+		[ 'key', subscription.product_key.toString() ],
+	] );
 };
 
 const renewUrl = ( subscription: Subscription ): string => {
@@ -440,12 +496,16 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,
+	downloadProduct,
+	activateProduct,
 	installProduct,
 	updateProduct,
 	addNotice,

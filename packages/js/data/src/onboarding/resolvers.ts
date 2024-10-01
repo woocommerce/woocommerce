@@ -31,6 +31,7 @@ import {
 	TaskListType,
 } from './types';
 import { Plugin } from '../plugins/types';
+import { checkUserCapability } from '../utils';
 
 const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
@@ -68,6 +69,8 @@ export function* getEmailPrefill() {
 export function* getTaskLists() {
 	const deprecatedTasks = new DeprecatedTasks();
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const results: TaskListType[] = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/tasks',
 			method: deprecatedTasks.hasDeprecatedTasks() ? 'POST' : 'GET',

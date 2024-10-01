@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { select, resolveSelect } from '@wordpress/data';
+import { select, resolveSelect, dispatch } from '@wordpress/data';
+import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import type { Product } from '@woocommerce/data';
 
 type getRelatedProductsOptions = {
@@ -11,6 +12,7 @@ type getRelatedProductsOptions = {
 
 const POSTS_NUMBER_TO_RANDOMIZE = 30;
 const POSTS_NUMBER_TO_PICK = 3;
+const POSTS_NUMBER_TO_DISPLAY = 4;
 
 /**
  * Return related products for a given product ID.
@@ -26,11 +28,15 @@ export default async function getRelatedProducts(
 	options: getRelatedProductsOptions = {}
 ): Promise< Product[] | undefined > {
 	const { getEntityRecord } = select( 'core' );
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const product = getEntityRecord( 'postType', 'product', productId );
 	if ( ! product ) {
 		return;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	let relatedProductIds = product?.related_ids;
 	if ( ! relatedProductIds?.length ) {
 		if ( ! options?.fallbackToRandomProducts ) {
@@ -66,4 +72,51 @@ export default async function getRelatedProducts(
 			include: relatedProductIds,
 		}
 	) ) as Product[];
+}
+
+type getSuggestedProductsForOptions = {
+	postId: number;
+	postType?: 'product' | 'post' | 'page';
+	forceRequest?: boolean;
+	exclude?: number[];
+};
+
+/**
+ * Get suggested products for a given post ID.
+ *
+ *
+ * @param { getSuggestedProductsForOptions } options - Options.
+ * @return { Promise<Product[] | undefined> } Suggested products.
+ */
+export async function getSuggestedProductsFor( {
+	postId,
+	postType = 'product',
+	forceRequest = false,
+	exclude = [],
+}: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { getEditedEntityRecord } = select( 'core' );
+
+	const data: Product = getEditedEntityRecord( 'postType', postType, postId );
+
+	const options = {
+		categories: data?.categories
+			? data.categories.map( ( cat ) => cat.id )
+			: [],
+		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
+		exclude: exclude?.length ? exclude : [ postId ],
+		limit: POSTS_NUMBER_TO_DISPLAY,
+	};
+
+	if ( forceRequest ) {
+		await dispatch( PRODUCTS_STORE_NAME ).invalidateResolution(
+			'getSuggestedProducts',
+			[ options ]
+		);
+	}
+
+	return await resolveSelect( PRODUCTS_STORE_NAME ).getSuggestedProducts(
+		options
+	);
 }

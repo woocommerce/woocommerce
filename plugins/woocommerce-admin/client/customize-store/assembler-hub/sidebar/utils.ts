@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
-import { isEqual } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import { PatternWithBlocks } from '../hooks/use-patterns';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 
 export const findPatternByBlock = (
 	patterns: PatternWithBlocks[],
@@ -25,7 +24,11 @@ export const findPatternByBlock = (
 		);
 	}
 
-	return patterns.find( ( pattern ) =>
-		isEqual( pattern.blocks[ 0 ].attributes, blockAttributes )
-	);
+	return patterns.find( ( pattern ) => {
+		const patternBlocks = pattern.blocks[ 0 ];
+
+		return (
+			patternBlocks.attributes.className === block.attributes.className
+		);
+	} );
 };

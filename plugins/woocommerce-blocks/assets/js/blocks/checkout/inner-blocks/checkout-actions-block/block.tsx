@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { getSetting } from '@woocommerce/settings';
 import {
 	PlaceOrderButton,
@@ -30,6 +30,7 @@ const Block = ( {
 	placeOrderButtonLabel: string;
 } ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
+
 	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
 		defaultValue:
@@ -39,9 +40,7 @@ const Block = ( {
 	} );
 
 	return (
-		<div
-			className={ classnames( 'wc-block-checkout__actions', className ) }
-		>
+		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>

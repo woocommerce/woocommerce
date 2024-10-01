@@ -23,7 +23,7 @@ import FilterResetButton from '@woocommerce/base-components/filter-reset-button'
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl, normalizeQueryParams } from '@woocommerce/utils';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import type { ReactElement } from 'react';
 
 /**
@@ -322,7 +322,7 @@ const RatingFilterBlock = ( {
 		<>
 			{ displayNoProductRatingsNotice && noRatingsNotice }
 			<div
-				className={ classnames(
+				className={ clsx(
 					'wc-block-rating-filter',
 					`style-${ blockAttributes.displayStyle }`,
 					{
@@ -334,7 +334,7 @@ const RatingFilterBlock = ( {
 					<>
 						<FormTokenField
 							key={ remountKey }
-							className={ classnames( {
+							className={ clsx( {
 								'single-selection': ! multiple,
 								'is-loading': isLoading,
 							} ) }

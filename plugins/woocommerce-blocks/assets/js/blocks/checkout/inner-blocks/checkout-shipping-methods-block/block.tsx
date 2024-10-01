@@ -38,16 +38,24 @@ const renderShippingRatesControlOption = (
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
 		: parseInt( option.price, 10 );
-	return {
-		label: decodeEntities( option.name ),
-		value: option.rate_id,
-		description: decodeEntities( option.description ),
-		secondaryLabel: (
+
+	const secondaryLabel =
+		priceWithTaxes === 0 ? (
+			<span className="wc-block-checkout__shipping-option--free">
+				{ __( 'Free', 'woocommerce' ) }
+			</span>
+		) : (
 			<FormattedMonetaryAmount
 				currency={ getCurrencyFromPriceResponse( option ) }
 				value={ priceWithTaxes }
 			/>
-		),
+		);
+
+	return {
+		label: decodeEntities( option.name ),
+		value: option.rate_id,
+		description: decodeEntities( option.description ),
+		secondaryLabel,
 		secondaryDescription: decodeEntities( option.delivery_time ),
 	};
 };

@@ -3,7 +3,7 @@
  */
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import Button from '@woocommerce/base-components/button';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import {
 	isErrorResponse,
@@ -36,7 +36,7 @@ const Block = ( {
 
 	return (
 		<Button
-			className={ classNames(
+			className={ clsx(
 				className,
 				styleProps.className,
 				'wc-block-mini-cart__footer-checkout'

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
 let blockAttributes: BlockAttributes = {
 	headingLevel: {
@@ -22,12 +21,11 @@ let blockAttributes: BlockAttributes = {
 	},
 };
 
-if ( isFeaturePluginBuild() ) {
-	blockAttributes = {
-		...blockAttributes,
-		align: {
-			type: 'string',
-		},
-	};
-}
+blockAttributes = {
+	...blockAttributes,
+	align: {
+		type: 'string',
+	},
+};
+
 export default blockAttributes;

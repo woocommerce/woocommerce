@@ -69,19 +69,19 @@ class OnboardingThemes {
 	}
 
 	/**
-	 * Sort themes returned from Woo.com
+	 * Sort themes returned from WooCommerce.com
 	 *
-	 * @param  array $themes Array of themes from Woo.com.
+	 * @param  array $themes Array of themes from WooCommerce.com.
 	 * @return array
 	 */
 	public static function sort_woocommerce_themes( $themes ) {
 		usort(
 			$themes,
 			function ( $product_1, $product_2 ) {
-				if ( ! property_exists( $product_1, 'id' ) || ! property_exists( $product_1, 'slug' ) ) {
+				if ( ! is_object( $product_1 ) || ! property_exists( $product_1, 'id' ) || ! property_exists( $product_1, 'slug' ) ) {
 					return 1;
 				}
-				if ( ! property_exists( $product_2, 'id' ) || ! property_exists( $product_2, 'slug' ) ) {
+				if ( ! is_object( $product_2 ) || ! property_exists( $product_2, 'id' ) || ! property_exists( $product_2, 'slug' ) ) {
 					return 1;
 				}
 				if ( in_array( 'Storefront', array( $product_1->slug, $product_2->slug ), true ) ) {
@@ -110,16 +110,22 @@ class OnboardingThemes {
 			$themes     = array();
 
 			if ( ! is_wp_error( $theme_data ) ) {
-				$theme_data    = json_decode( $theme_data['body'] );
-				$woo_themes    = property_exists( $theme_data, 'products' ) ? $theme_data->products : array();
-				$sorted_themes = self::sort_woocommerce_themes( $woo_themes );
+				$theme_data = json_decode( $theme_data['body'] );
 
-				foreach ( $sorted_themes as $theme ) {
-					$slug                                       = sanitize_title_with_dashes( $theme->slug );
-					$themes[ $slug ]                            = (array) $theme;
-					$themes[ $slug ]['is_installed']            = false;
-					$themes[ $slug ]['has_woocommerce_support'] = true;
-					$themes[ $slug ]['slug']                    = $slug;
+				if ( $theme_data ) {
+					$woo_themes    = property_exists( $theme_data, 'products' ) ? $theme_data->products : array();
+					$sorted_themes = self::sort_woocommerce_themes( $woo_themes );
+
+					foreach ( $sorted_themes as $theme ) {
+						if ( ! isset( $theme->slug ) ) {
+							continue;
+						}
+						$slug                                       = sanitize_title_with_dashes( $theme->slug );
+						$themes[ $slug ]                            = (array) $theme;
+						$themes[ $slug ]['is_installed']            = false;
+						$themes[ $slug ]['has_woocommerce_support'] = true;
+						$themes[ $slug ]['slug']                    = $slug;
+					}
 				}
 			}
 

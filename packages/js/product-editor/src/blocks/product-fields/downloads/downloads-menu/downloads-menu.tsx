@@ -10,7 +10,6 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  * Internal dependencies
  */
 import { DownloadsMenuProps } from './types';
-import { MediaLibraryMenuItem } from '../media-library-menu-item';
 import { InsertUrlMenuItem } from '../insert-url-menu-item';
 import { UploadFilesMenuItem } from '../upload-files-menu-item';
 
@@ -19,6 +18,7 @@ export function DownloadsMenu( {
 	maxUploadFileSize,
 	onUploadSuccess,
 	onUploadError,
+	onLinkError,
 }: DownloadsMenuProps ) {
 	return (
 		<Dropdown
@@ -33,7 +33,7 @@ export function DownloadsMenu( {
 					icon={ isOpen ? chevronUp : chevronDown }
 					variant="secondary"
 					onClick={ onToggle }
-					className="woocommerce-downloads-menu__toogle"
+					className="woocommerce-downloads-menu__toggle"
 				>
 					<span>{ __( 'Add new', 'woocommerce' ) }</span>
 				</Button>
@@ -48,22 +48,21 @@ export function DownloadsMenu( {
 								onUploadSuccess( files );
 								onClose();
 							} }
-							onUploadError={ onUploadError }
-						/>
-						<MediaLibraryMenuItem
-							allowedTypes={ allowedTypes }
-							onUploadSuccess={ ( files ) => {
-								onUploadSuccess( files );
+							onUploadError={ ( error ) => {
+								onUploadError( error );
 								onClose();
 							} }
 						/>
 
 						<InsertUrlMenuItem
-							onUploadSuccess={ ( files ) => {
+							onLinkSuccess={ ( files ) => {
 								onUploadSuccess( files );
 								onClose();
 							} }
-							onUploadError={ onUploadError }
+							onLinkError={ ( error ) => {
+								onLinkError( error );
+								onClose();
+							} }
 						/>
 					</MenuGroup>
 				</div>

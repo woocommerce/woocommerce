@@ -1,18 +1,40 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { BlockEditProps } from '@wordpress/blocks';
+import { BlockOverlayAttribute } from './constants';
 
-export type FilterType =
-	| 'price-filter'
-	| 'attribute-filter'
-	| 'rating-filter'
-	| 'active-filters'
-	| 'stock-filter'
-	| 'product-filters';
+export type BlockOverlayAttributeOptions =
+	( typeof BlockOverlayAttribute )[ keyof typeof BlockOverlayAttribute ];
 
-export type BlockAttributes = {
-	filterType: FilterType;
+export interface BlockAttributes {
+	setAttributes: ( attributes: ProductFiltersBlockAttributes ) => void;
+	productId?: string;
+	overlay: BlockOverlayAttributeOptions;
+	overlayIcon:
+		| 'filter-icon-1'
+		| 'filter-icon-2'
+		| 'filter-icon-3'
+		| 'filter-icon-4';
+	overlayButtonStyle: 'label-icon' | 'label' | 'icon';
+	overlayIconSize?: number;
+}
+
+export type FilterOptionItem = {
+	label: string;
+	value: string;
+	selected?: boolean;
+	rawData?: Record< string, unknown >;
 };
 
-export type EditProps = BlockEditProps< BlockAttributes >;
+export type FilterBlockContext = {
+	filterData: {
+		isLoading: boolean;
+		items?: FilterOptionItem[];
+		range?: {
+			min: number;
+			max: number;
+			step: number;
+		};
+	};
+	isParentSelected: boolean;
+};

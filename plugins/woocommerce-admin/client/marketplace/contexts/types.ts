@@ -8,11 +8,25 @@ import { Options } from '@wordpress/notices';
  */
 import { Subscription } from '../components/my-subscriptions/types';
 
+export interface SearchResultsCountType {
+	extensions: number;
+	themes: number;
+	'business-services': number;
+}
+
 export type MarketplaceContextType = {
 	isLoading: boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
 	selectedTab: string;
 	setSelectedTab: ( tab: string ) => void;
+	isProductInstalled: ( slug: string ) => boolean;
+	addInstalledProduct: ( slug: string ) => void;
+	hasBusinessServices: boolean;
+	setHasBusinessServices: ( hasBusinessServices: boolean ) => void;
+	searchResultsCount: SearchResultsCountType;
+	setSearchResultsCount: (
+		updatedCounts: Partial< SearchResultsCountType >
+	) => void;
 };
 
 export type SubscriptionsContextType = {

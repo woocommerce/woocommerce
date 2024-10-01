@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -20,7 +20,7 @@ export const TaskListCompleted = ( {
 	return (
 		<>
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-task-dashboard__container setup-task-list'
 				) }
 			>
@@ -29,11 +29,11 @@ export const TaskListCompleted = ( {
 					className="woocommerce-task-card woocommerce-homescreen-card completed"
 				>
 					<CardHeader size="medium">
-						<div className="wooocommerce-task-card__header">
+						<div className="woocommerce-task-card__header">
 							<img src={ HeaderImage } alt="Completed" />
 							<h2>
 								{ __(
-									"You've completed store setup",
+									'You’ve completed store setup',
 									'woocommerce'
 								) }
 							</h2>

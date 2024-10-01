@@ -34,6 +34,26 @@ function register_helper_api() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-environment',
+		'/info',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'get_environment_info',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
+		'e2e-theme',
+		'/activate',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'activate_theme',
+			'permission_callback' => 'is_allowed',
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'register_helper_api' );
@@ -73,9 +93,6 @@ function reset_feature_flags() {
 function enable_experimental_features( $features ) {
 	$stored_features = get_option( 'e2e_feature_flags', array() );
 
-	// We always enable this for tests at the moment.
-	$features['product-variation-management'] = true;
-
 	return array_merge( $features, $stored_features );
 }
 
@@ -90,11 +107,17 @@ function api_update_option( WP_REST_Request $request ) {
 	$option_name  = sanitize_text_field( $request['option_name'] );
 	$option_value = sanitize_text_field( $request['option_value'] );
 
-	if ( update_option( $option_name, $option_value ) ) {
-		return new WP_REST_Response( 'Option updated', 200 );
+	$existing_value = get_option( $option_name );
+
+	if ( $existing_value === $option_value ) {
+		return new WP_REST_Response( 'Option ' . $option_name . ' already set to: ' . $option_value, 200 );
 	}
 
-	return new WP_REST_Response( 'Invalid request body', 400 );
+	if ( update_option( $option_name, $option_value ) ) {
+		return new WP_REST_Response( 'Update option SUCCESS: ' . $option_name . ' => ' . $option_value, 200 );
+	}
+
+	return new WP_REST_Response( 'Update option FAILED: ' . $option_name . ' => ' . $option_value, 400 );
 }
 
 /**
@@ -103,4 +126,43 @@ function api_update_option( WP_REST_Request $request ) {
  */
 function is_allowed() {
 	return current_user_can( 'manage_options' );
+}
+
+/**
+ * Get environment info
+ * @return WP_REST_Response
+ */
+function get_environment_info() {
+	$data['Core'] = get_bloginfo( 'version' );
+	$data['PHP']  = sprintf( '%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
+
+	$all_plugins = get_plugins();
+
+	foreach ( $all_plugins as $plugin_file => $plugin_data ) {
+		if ( is_plugin_active( $plugin_file ) ) {
+			$data[ $plugin_data['Name'] ] = $plugin_data['Version'];
+		}
+	}
+
+	return new WP_REST_Response( $data, 200 );
+}
+
+/**
+ * Activate a theme via the REST API.
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function activate_theme( WP_REST_Request $request ) {
+	$theme_name = sanitize_text_field( $request['theme_name'] );
+
+	if ( empty( $theme_name ) ) {
+		return new WP_REST_Response( array( 'message' => 'Theme name is empty.' ), 400 );
+	}
+
+	if ( wp_get_theme( $theme_name )->exists() ) {
+		switch_theme( $theme_name );
+		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' activated successfully." ), 200 );
+	} else {
+		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
+	}
 }

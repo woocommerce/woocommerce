@@ -52,10 +52,12 @@ export function Edit( {
 		`stock_quantity-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( manageStock && stockQuantity && stockQuantity < 0 ) {
-				return __(
-					'Stock quantity must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Stock quantity must be a positive number.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ manageStock, stockQuantity ]
@@ -82,7 +84,7 @@ export function Edit( {
 							id={ stockQuantityId }
 							name="stock_quantity"
 							ref={ stockQuantityRef }
-							label={ __( 'Available quantity', 'woocommerce' ) }
+							label={ __( 'Available stock', 'woocommerce' ) }
 							value={ stockQuantity }
 							onChange={ setStockQuantity }
 							onBlur={ validateStockQuantity }

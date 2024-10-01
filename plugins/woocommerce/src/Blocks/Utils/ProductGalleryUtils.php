@@ -26,7 +26,7 @@ class ProductGalleryUtils {
 		$product_gallery_images = array();
 		$product                = wc_get_product( $post_id );
 
-		if ( $product ) {
+		if ( $product instanceof \WC_Product ) {
 			$all_product_gallery_image_ids = self::get_product_gallery_image_ids( $product );
 
 			if ( 'full' === $size || 'full' !== $size && count( $all_product_gallery_image_ids ) > 1 ) {
@@ -59,7 +59,8 @@ class ProductGalleryUtils {
 						wp_json_encode(
 							array(
 								'imageId' => $product_gallery_image_id,
-							)
+							),
+							JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 						)
 					);
 

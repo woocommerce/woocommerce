@@ -403,4 +403,81 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
+
+	/**
+	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should also be updated.
+	 */
+	public function test_order_update_line_item_quantity_updates_product_stock() {
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => 'on-hold' ) ); // Initial qty of 4.
+		$items = $order->get_items();
+		$item  = reset( $items );
+		wc_maybe_adjust_line_item_product_stock( $item );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 6, $product->get_stock_quantity() );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 5,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product = wc_get_product( $product );
+		$this->assertEquals( 5, $product->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox When a line item in an order is removed via REST API, the product's stock should also be updated.
+	 */
+	public function test_order_remove_line_item_updates_product_stock() {
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => 'on-hold' ) ); // Initial qty of 4.
+		$items = $order->get_items();
+		$item  = reset( $items );
+		wc_maybe_adjust_line_item_product_stock( $item );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 6, $product->get_stock_quantity() );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 0,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$order = wc_get_order( $order );
+		$this->assertEmpty( $order->get_items() );
+
+		$product = wc_get_product( $product );
+		$this->assertEquals( 10, $product->get_stock_quantity() );
+	}
 }

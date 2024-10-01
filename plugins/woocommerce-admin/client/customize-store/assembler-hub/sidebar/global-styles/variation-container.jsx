@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useMemo, useContext } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
@@ -14,7 +14,40 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { isEqual, noop } from 'lodash';
 
+/**
+ * Internal dependencies
+ */
+import { trackEvent } from '~/customize-store/tracking';
+
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+
+// Removes the typography settings from the styles when the user is changing
+// to a new typography variation. Otherwise, some of the user's old
+// typography settings will persist making new typography settings
+// depend on old ones
+const resetTypographySettings = ( variation, userStyles ) => {
+	if ( variation.settings.typography ) {
+		delete userStyles.typography;
+		for ( const elementKey in userStyles.elements ) {
+			if ( userStyles.elements[ elementKey ].typography ) {
+				delete userStyles.elements[ elementKey ].typography;
+			}
+		}
+	}
+
+	return userStyles;
+};
+
+// mergeBaseAndUserConfigs is just a wrapper around deepmerge library: https://github.com/WordPress/gutenberg/blob/237865fad0864c209a7c3e771e23fe66f4fbca25/packages/edit-site/src/components/global-styles/global-styles-provider.js/#L24-L31
+// Deepmerge library merges two objects x and y deeply, returning a new merged object with the elements from both x and y.
+// In the case of the variation.title === 'New - Neutral', the core/button is an empty object, because we don't want that the classes for the core/button are created.
+// Deepmerge merges the userStyles.blocks[ 'core/button' ] with the variation.styles.blocks[ 'core/button' ] and the result is an object with values that doesn't match with the variation. For this reason it is necessary remove the userStyles.blocks[ 'core/button' ].
+const resetStyleSettings = ( variation, userStyles ) => {
+	if ( variation.title === 'New - Neutral' ) {
+		delete userStyles.blocks[ 'core/button' ];
+	}
+	return userStyles;
+};
 
 export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
@@ -51,6 +84,15 @@ export const VariationContainer = ( { variation, children } ) => {
 			}
 		}
 
+		const resetTypographySettingsStyles = resetTypographySettings(
+			variation,
+			user.styles
+		);
+		const resetStyleSettingsStyles = resetStyleSettings(
+			variation,
+			resetTypographySettingsStyles
+		);
+
 		setUserConfig( () => {
 			return {
 				settings: mergeBaseAndUserConfigs(
@@ -58,11 +100,29 @@ export const VariationContainer = ( { variation, children } ) => {
 					variation.settings
 				),
 				styles: mergeBaseAndUserConfigs(
-					user.styles,
+					resetStyleSettingsStyles,
 					variation.styles
 				),
 			};
 		} );
+
+		if ( variation.settings.color?.palette ) {
+			trackEvent(
+				'customize_your_store_assembler_hub_color_palette_item_click',
+				{
+					item: variation.title,
+				}
+			);
+		}
+
+		if ( variation.settings.typography ) {
+			trackEvent(
+				'customize_your_store_assembler_hub_typography_item_click',
+				{
+					item: variation.title,
+				}
+			);
+		}
 	};
 
 	const selectOnEnter = ( event ) => {
@@ -75,9 +135,16 @@ export const VariationContainer = ( { variation, children } ) => {
 		if ( variation.settings.color ) {
 			return isEqual( variation.settings.color, user.settings.color );
 		}
-		return isEqual(
-			variation.settings.typography,
-			user.settings.typography
+		// With the Font Library, the fontFamilies object contains an array of font families installed with the Font Library under the key 'custom'.
+		// We need to compare only the active theme font families, so we compare the theme font families with the current variation.
+		const { theme } = user.settings.typography.fontFamilies;
+		return (
+			variation.settings.typography?.fontFamilies.theme.every(
+				( { slug } ) =>
+					theme.some( ( { slug: themeSlug } ) => themeSlug === slug )
+			) &&
+			theme.length ===
+				variation.settings.typography?.fontFamilies.theme.length
 		);
 	}, [ user, variation ] );
 
@@ -100,7 +167,7 @@ export const VariationContainer = ( { variation, children } ) => {
 		>
 			<GlobalStylesContext.Provider value={ context }>
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-customize-store_global-styles-variations_item',
 						{
 							'is-active': isActive,

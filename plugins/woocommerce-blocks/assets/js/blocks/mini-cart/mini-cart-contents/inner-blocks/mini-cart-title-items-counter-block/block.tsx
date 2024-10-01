@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useStoreCart } from '@woocommerce/base-context';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { _n, sprintf } from '@wordpress/i18n';
 import { useStyleProps } from '@woocommerce/base-hooks';
 
@@ -16,7 +16,7 @@ const Block = ( props: Props ): JSX.Element => {
 
 	return (
 		<span
-			className={ classNames( props.className, styleProps.className ) }
+			className={ clsx( props.className, styleProps.className ) }
 			style={ styleProps.style }
 		>
 			{ sprintf(

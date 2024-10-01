@@ -2,12 +2,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_COUNTRIES } from '@woocommerce/block-settings';
-import type {
-	CartShippingAddress,
-	CartBillingAddress,
+import {
+	type CartShippingAddress,
+	type CartBillingAddress,
+	type CountryData,
+	objectHasProp,
+	isString,
 } from '@woocommerce/types';
-import { FormFieldsConfig } from '@woocommerce/settings';
+import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
+import { formatAddress } from '@woocommerce/blocks/checkout/utils';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
@@ -19,29 +23,49 @@ const AddressCard = ( {
 	onEdit,
 	target,
 	fieldConfig,
+	isExpanded,
 }: {
 	address: CartShippingAddress | CartBillingAddress;
 	onEdit: () => void;
 	target: string;
 	fieldConfig: FormFieldsConfig;
+	isExpanded: boolean;
 } ): JSX.Element | null => {
+	const countryData = getSetting< Record< string, CountryData > >(
+		'countryData',
+		{}
+	);
+
+	let formatToUse = getSetting< string >(
+		'defaultAddressFormat',
+		'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}'
+	);
+
+	if (
+		objectHasProp( countryData, address?.country ) &&
+		objectHasProp( countryData[ address.country ], 'format' ) &&
+		isString( countryData[ address.country ].format )
+	) {
+		// `as string` is fine here because we check if it's a string above.
+		formatToUse = countryData[ address.country ].format as string;
+	}
+	const { name: formattedName, address: formattedAddress } = formatAddress(
+		address,
+		formatToUse
+	);
+	const label =
+		target === 'shipping'
+			? __( 'Edit shipping address', 'woocommerce' )
+			: __( 'Edit billing address', 'woocommerce' );
+
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
 				<span className="wc-block-components-address-card__address-section">
-					{ address.first_name + ' ' + address.last_name }
+					{ formattedName }
 				</span>
 				<div className="wc-block-components-address-card__address-section">
-					{ [
-						address.address_1,
-						! fieldConfig.address_2.hidden && address.address_2,
-						address.city,
-						address.state,
-						address.postcode,
-						ALLOWED_COUNTRIES[ address.country ]
-							? ALLOWED_COUNTRIES[ address.country ]
-							: address.country,
-					]
+					{ formattedAddress
 						.filter( ( field ) => !! field )
 						.map( ( field, index ) => (
 							<span key={ `address-` + index }>{ field }</span>
@@ -59,18 +83,20 @@ const AddressCard = ( {
 				) }
 			</address>
 			{ onEdit && (
-				<a
-					role="button"
-					href={ '#' + target }
+				<Button
+					render={ <span /> }
 					className="wc-block-components-address-card__edit"
-					aria-label={ __( 'Edit address', 'woocommerce' ) }
+					aria-controls={ target }
+					aria-expanded={ isExpanded }
+					aria-label={ label }
 					onClick={ ( e ) => {
-						onEdit();
 						e.preventDefault();
+						onEdit();
 					} }
+					type="button"
 				>
 					{ __( 'Edit', 'woocommerce' ) }
-				</a>
+				</Button>
 			) }
 		</div>
 	);

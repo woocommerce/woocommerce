@@ -73,7 +73,7 @@ class Filterer {
 		}
 
 		$attribute_ids_for_and_filtering = array();
-
+		$clauses                         = array();
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
@@ -206,6 +206,7 @@ class Filterer {
 		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
 		$in_stock_clause   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
 
+		$query           = array();
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
 		$query['from']   = "FROM {$this->lookup_table_name}";
 		$query['join']   = "

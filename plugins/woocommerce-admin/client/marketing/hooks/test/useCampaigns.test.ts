@@ -37,18 +37,22 @@ jest.mock( '@wordpress/api-fetch', () =>
 		const campaigns: Array< APICampaign > = Array.from( { length } ).map(
 			( _, index ) => {
 				const id = `${ page }_${ index + 1 }`;
+				const value = ( ( page * perPage + index ) * 0.25 ).toString();
+
 				return {
 					id,
 					channel: 'extension-foo',
 					title: `Campaign ${ id }`,
 					manage_url: `https://test/extension-foo?path=setup&id=${ id }`,
 					cost: {
-						value: ( ( page * perPage + index ) * 0.25 ).toString(),
+						value,
 						currency: 'USD',
+						formatted: `$${ value }`,
 					},
 					sales: {
-						value: ( ( page * perPage + index ) * 0.25 ).toString(),
+						value,
 						currency: 'USD',
+						formatted: `$${ value }`,
 					},
 				};
 			}
@@ -119,8 +123,8 @@ describe( 'useCampaigns', () => {
 			id: 'extension-foo|1_1',
 			title: 'Campaign 1_1',
 			description: '',
-			cost: 'USD 1.25',
-			sales: 'USD 1.25',
+			cost: '$1.25',
+			sales: '$1.25',
 			manageUrl: 'https://test/extension-foo?path=setup&id=1_1',
 			icon: 'https://test/foo.png',
 			channelName: 'Extension Foo',

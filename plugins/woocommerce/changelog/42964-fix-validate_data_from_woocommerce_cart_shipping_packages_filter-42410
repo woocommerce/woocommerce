@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: This suppresses a warning/error on invalid data being sent to `woocommerce_cart_shipping_packages` filter on the StoreAPI CartController that would try to use count() without checking data type against an object implementing Countable. No need to communicate changelog.
-

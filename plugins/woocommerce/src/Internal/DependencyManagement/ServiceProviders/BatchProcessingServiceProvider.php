@@ -1,19 +1,20 @@
 <?php
 /**
- * Service provider for ActionUpdateController class.
+ * Service provider for the batch processing classes.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\OrderCouponDataMigrator;
 
 /**
  * Class BatchProcessingServiceProvider
  *
  * @package Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders
  */
-class BatchProcessingServiceProvider extends AbstractServiceProvider {
+class BatchProcessingServiceProvider extends AbstractInterfaceServiceProvider {
 
 	/**
 	 * Services provided by this provider.
@@ -22,6 +23,7 @@ class BatchProcessingServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		BatchProcessingController::class,
+		OrderCouponDataMigrator::class,
 	);
 
 	/**
@@ -33,5 +35,6 @@ class BatchProcessingServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( BatchProcessingController::class, new BatchProcessingController() );
+		$this->share_with_implements_tags( OrderCouponDataMigrator::class );
 	}
 }

@@ -7,6 +7,7 @@ type TemplateDetail = {
 	type: string;
 	title: string;
 	placeholder: string;
+	description?: string;
 };
 
 export type TemplateDetails = Record< string, TemplateDetail >;

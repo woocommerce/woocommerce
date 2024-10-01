@@ -1,4 +1,4 @@
-# [![WooCommerce](https://woo.com/wp-content/themes/woo/images/logo-woocommerce@2x.png 'WooCommerce')](https://woo.com/)
+# [![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png 'WooCommerce')](https://woocommerce.com/)
 
 [![License](https://poser.pugx.org/woocommerce/woocommerce/license 'License')](https://packagist.org/packages/woocommerce/woocommerce)
 ![WordPress.org downloads](https://img.shields.io/wordpress/plugin/dt/woocommerce.svg 'WordPress.org downloads')
@@ -72,7 +72,7 @@ pnpm run --filter=@woocommerce/block-library test
 Here is a collection of scripts that can help when developing the React-based admin interface.
 
 ```bash
-# Create a develoment build of the React-based admin client.
+# Create a development build of the React-based admin client.
 pnpm --filter=@woocommerce/admin-library dev 
 # Create and watch a development build of the React-based admin client.
 pnpm --filter=@woocommerce/admin-library start 
@@ -84,9 +84,9 @@ pnpm --filter=@woocommerce/admin-library ts:check
 
 ## Documentation
 
-* [WooCommerce Documentation](https://woo.com/)
+* [WooCommerce Documentation](https://woocommerce.com/)
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
-* [WooCommerce Code Reference](https://woo.com/wc-apidocs/)
+* [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
 ## Reporting Security Issues

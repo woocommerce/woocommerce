@@ -7,15 +7,17 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { Extension, ExtensionList } from '@woocommerce/data';
 import { useState } from 'react';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
+import { CoreProfilerStateMachineContext } from '../index';
 import {
-	CoreProfilerStateMachineContext,
-	PluginsLearnMoreLinkClicked,
-} from '../index';
-import { PluginsInstallationRequestedEvent, PluginsPageSkippedEvent } from '..';
+	PluginsLearnMoreLinkClickedEvent,
+	PluginsInstallationRequestedEvent,
+	PluginsPageSkippedEvent,
+} from '../events';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { PluginCard } from '../components/plugin-card/plugin-card';
@@ -45,7 +47,7 @@ export const Plugins = ( {
 		payload:
 			| PluginsInstallationRequestedEvent
 			| PluginsPageSkippedEvent
-			| PluginsLearnMoreLinkClicked
+			| PluginsLearnMoreLinkClickedEvent
 	) => void;
 	navigationProgress: number;
 } ) => {
@@ -145,6 +147,10 @@ export const Plugins = ( {
 		].includes( plugin.key )
 	);
 
+	const pluginsCardRowCount = Math.ceil(
+		context.pluginsAvailable.length / 2
+	);
+
 	return (
 		<div
 			className="woocommerce-profiler-plugins"
@@ -169,11 +175,16 @@ export const Plugins = ( {
 				{ errorMessage && (
 					<p className="plugin-error">{ errorMessage }</p>
 				) }
-				<div className="woocommerce-profiler-plugins__list">
+				<div
+					className={ clsx(
+						'woocommerce-profiler-plugins__list',
+						`rows-${ pluginsCardRowCount }`
+					) }
+				>
 					{ context.pluginsAvailable.map( ( plugin ) => {
 						const learnMoreLink = plugin.learn_more_link ? (
 							<Link
-								onClick={ () => {
+								onClick={ ( e ) => {
 									sendEvent( {
 										type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
 										payload: {
@@ -182,6 +193,7 @@ export const Plugins = ( {
 												plugin.learn_more_link ?? '',
 										},
 									} );
+									e.stopPropagation();
 								} }
 								href={ plugin.learn_more_link }
 								target="_blank"
@@ -217,51 +229,58 @@ export const Plugins = ( {
 						);
 					} ) }
 				</div>
-				<div className="woocommerce-profiler-plugins-continue-button-container">
-					<Button
-						className="woocommerce-profiler-plugins-continue-button"
-						variant="primary"
-						onClick={
-							selectedPlugins.length
-								? submitInstallationRequest
-								: skipPluginsPage
-						}
-					>
-						{ __( 'Continue', 'woocommerce' ) }
-					</Button>
-				</div>
-				{ pluginsWithAgreement.length > 0 && (
-					<p className="woocommerce-profiler-plugins-jetpack-agreement">
-						{ interpolateComponents( {
-							mixedString: sprintf(
-								/* translators: %s: a list of plugins, e.g. Jetpack */
-								_n(
-									'By installing %s plugin for free you agree to our {{link}}Terms of Service{{/link}}.',
-									'By installing %s plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
-									pluginsWithAgreement.length,
-									'woocommerce'
-								),
-								joinWithAnd(
-									pluginsWithAgreement.map(
-										( plugin ) => plugin.name
+				<div
+					className={ clsx(
+						'woocommerce-profiler-plugins__footer',
+						`rows-${ pluginsCardRowCount }`
+					) }
+				>
+					<div className="woocommerce-profiler-plugins-continue-button-container">
+						<Button
+							className="woocommerce-profiler-plugins-continue-button"
+							variant="primary"
+							onClick={
+								selectedPlugins.length
+									? submitInstallationRequest
+									: skipPluginsPage
+							}
+						>
+							{ __( 'Continue', 'woocommerce' ) }
+						</Button>
+					</div>
+					{ pluginsWithAgreement.length > 0 && (
+						<p className="woocommerce-profiler-plugins-jetpack-agreement">
+							{ interpolateComponents( {
+								mixedString: sprintf(
+									/* translators: %s: a list of plugins, e.g. Jetpack */
+									_n(
+										'By installing %s plugin for free you agree to our {{link}}Terms of Service{{/link}}.',
+										'By installing %s plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
+										pluginsWithAgreement.length,
+										'woocommerce'
+									),
+									joinWithAnd(
+										pluginsWithAgreement.map(
+											( plugin ) => plugin.name
+										)
 									)
-								)
-									.map( composeListFormatParts )
-									.join( '' )
-							),
-							components: {
-								span: <span />,
-								link: (
-									<Link
-										href="https://wordpress.com/tos/"
-										target="_blank"
-										type="external"
-									/>
+										.map( composeListFormatParts )
+										.join( '' )
 								),
-							},
-						} ) }
-					</p>
-				) }
+								components: {
+									span: <span />,
+									link: (
+										<Link
+											href="https://wordpress.com/tos/"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+							} ) }
+						</p>
+					) }
+				</div>
 			</div>
 		</div>
 	);

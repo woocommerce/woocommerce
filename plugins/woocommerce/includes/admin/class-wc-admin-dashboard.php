@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -81,40 +82,49 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		private function get_top_seller() {
 			global $wpdb;
 
-			$query            = array();
-			$query['fields']  = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
-			FROM {$wpdb->posts} as posts";
-			$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
-			$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
-			$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
-			$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
-			$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
+			$hpos_enabled         = OrderUtil::custom_orders_table_usage_is_enabled();
+			$orders_table         = OrderUtil::get_table_for_orders();
+			$orders_column_id     = $hpos_enabled ? 'id' : 'ID';
+			$orders_column_type   = $hpos_enabled ? 'type' : 'post_type';
+			$orders_column_status = $hpos_enabled ? 'status' : 'post_status';
+			$orders_column_date   = $hpos_enabled ? 'date_created_gmt' : 'post_date_gmt';
+
+			$query           = array();
+			$query['fields'] = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id FROM {$orders_table} AS orders";
+			$query['join']   = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON orders.{$orders_column_id} = order_id ";
+			$query['join']  .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
+			$query['join']  .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
+			$query['where']  = "WHERE orders.{$orders_column_type} IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
+
+			/**
+			 * Allows modifying the order statuses used in the top seller query inside the dashboard status widget.
+			 *
+			 * @since 2.2.0
+			 *
+			 * @param string[] $order_statuses Order statuses.
+			 */
+			$order_statuses  = apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
+			$query['where'] .= "AND orders.{$orders_column_status} IN ( 'wc-" . implode( "','wc-", $order_statuses ) . "' ) ";
+
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
 			$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
-			$query['where']  .= "AND posts.post_date >= '" . gmdate( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
-			$query['where']  .= "AND posts.post_date <= '" . gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
+			$query['where']  .= "AND orders.{$orders_column_date} >= '" . gmdate( 'Y-m-01', current_time( 'timestamp' ) ) . "' "; // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$query['where']  .= "AND orders.{$orders_column_date} <= '" . gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' "; // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 			$query['groupby'] = 'GROUP BY product_id';
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
 
-			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		}
+			/**
+			 * Allows modification of the query to determine the top seller product in the dashboard status widget.
+			 *
+			 * @since 2.2.0
+			 *
+			 * @param array $query SQL query parts.
+			 */
+			$query = apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query );
 
-		/**
-		 * Get sales report data.
-		 *
-		 * @return object
-		 */
-		private function get_sales_report_data() {
-			include_once dirname( __FILE__ ) . '/reports/class-wc-report-sales-by-date.php';
-
-			$sales_by_date                 = new WC_Report_Sales_By_Date();
-			$sales_by_date->start_date     = strtotime( gmdate( 'Y-m-01', current_time( 'timestamp' ) ) );
-			$sales_by_date->end_date       = strtotime( gmdate( 'Y-m-d', current_time( 'timestamp' ) ) );
-			$sales_by_date->chart_groupby  = 'day';
-			$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
-
-			return $sales_by_date->get_report_data();
+			$sql = implode( ' ', $query );
+			return $wpdb->get_row( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		/**
@@ -124,32 +134,61 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version = Constants::get_constant( 'WC_VERSION' );
 
-			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery' ), $version, true );
-
-			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
+			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'flot' ), $version, true );
 
 			//phpcs:ignore
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
 
-			$reports = new WC_Admin_Report();
+			$status_widget_reports = array(
+				'net_sales_link'      => 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period',
+				'top_seller_link'     => 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=',
+				'lowstock_link'       => 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock',
+				'outofstock_link'     => 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock',
+				'report_data'         => null,
+				'get_sales_sparkline' => array( $this, 'get_sales_sparkline' ),
+			);
 
-			$net_sales_link  = 'admin.php?page=wc-reports&tab=orders&range=month';
-			$top_seller_link = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
-			$report_data     = $is_wc_admin_disabled ? $this->get_sales_report_data() : $this->get_wc_admin_performance_data();
-			if ( ! $is_wc_admin_disabled ) {
-				$net_sales_link  = 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period';
-				$top_seller_link = 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=';
+			if ( $is_wc_admin_disabled ) {
+				/**
+				 * Filter to change the reports of the status widget on the Dashboard page.
+				 *
+				 * Please note that this filter is mainly for backward compatibility with the legacy reports.
+				 * It's not recommended to use this filter to change the data of this widget.
+				 *
+				 * @since 9.5.0
+				 */
+				$status_widget_reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $status_widget_reports );
+			} else {
+				$status_widget_reports['report_data'] = $this->get_wc_admin_performance_data();
 			}
 
 			echo '<ul class="wc_status_list">';
 
 			if ( current_user_can( 'view_woocommerce_reports' ) ) {
+				$report_data         = $status_widget_reports['report_data'];
+				$get_sales_sparkline = $status_widget_reports['get_sales_sparkline'];
+				$net_sales_link      = $status_widget_reports['net_sales_link'];
+				$top_seller_link     = $status_widget_reports['top_seller_link'];
 
-				if ( $report_data ) {
+				$days = max( 7, (int) gmdate( 'd', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+				$sparkline_allowed_html = array(
+					'span' => array(
+						'class'          => array(),
+						'data-color'     => array(),
+						'data-tip'       => array(),
+						'data-barwidth'  => array(),
+						'data-sparkline' => array(),
+					),
+				);
+
+				if ( $report_data && is_callable( $get_sales_sparkline ) ) {
+					$sparkline = call_user_func_array( $get_sales_sparkline, array( '', $days ) );
+					$sparkline = $this->sales_sparkline_markup( 'sales', $days, $sparkline['total'], $sparkline['data'] );
 					?>
 				<li class="sales-this-month">
 				<a href="<?php echo esc_url( admin_url( $net_sales_link ) ); ?>">
-					<?php echo $this->sales_sparkline( $reports, $is_wc_admin_disabled, '' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
 							/* translators: %s: net sales */
@@ -163,11 +202,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				}
 
 				$top_seller = $this->get_top_seller();
-				if ( $top_seller && $top_seller->qty ) {
+				if ( $top_seller && $top_seller->qty && is_callable( $get_sales_sparkline ) ) {
+					$sparkline = call_user_func_array( $get_sales_sparkline, array( $top_seller->product_id, $days, 'count' ) );
+					$sparkline = $this->sales_sparkline_markup( 'count', $days, $sparkline['total'], $sparkline['data'] );
 					?>
 				<li class="best-seller-this-month">
 				<a href="<?php echo esc_url( admin_url( $top_seller_link . $top_seller->product_id ) ); ?>">
-					<?php echo $this->sales_sparkline( $reports, $is_wc_admin_disabled, $top_seller->product_id, 'count' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity */
@@ -184,9 +225,18 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$this->status_widget_order_rows();
 			if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
-				$this->status_widget_stock_rows( $is_wc_admin_disabled );
+				$this->status_widget_stock_rows( $status_widget_reports['lowstock_link'], $status_widget_reports['outofstock_link'] );
 			}
 
+			/**
+			 * Filter to change the first argument passed to the `woocommerce_after_dashboard_status_widget` action.
+			 *
+			 * Please note that this filter is mainly for backward compatibility with the legacy reports.
+			 * It's not recommended to use this filter as it will soon be deprecated along with the retiring of the legacy reports.
+			 *
+			 * @since 9.5.0
+			 */
+			$reports = apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
 			echo '</ul>';
 		}
@@ -202,9 +252,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$processing_count = 0;
 
 			foreach ( wc_get_order_types( 'order-count' ) as $type ) {
-				$counts            = (array) wp_count_posts( $type );
-				$on_hold_count    += isset( $counts['wc-on-hold'] ) ? $counts['wc-on-hold'] : 0;
-				$processing_count += isset( $counts['wc-processing'] ) ? $counts['wc-processing'] : 0;
+				$counts            = OrderUtil::get_count_for_type( $type );
+				$on_hold_count    += $counts['wc-on-hold'];
+				$processing_count += $counts['wc-processing'];
 			}
 			?>
 			<li class="processing-orders">
@@ -235,9 +285,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		/**
 		 * Show stock data is status widget.
 		 *
-		 * @param bool $is_wc_admin_disabled if woocommerce admin is disabled.
+		 * @param string $lowstock_link Low stock link.
+		 * @param string $outofstock_link Out of stock link.
 		 */
-		private function status_widget_stock_rows( $is_wc_admin_disabled ) {
+		private function status_widget_stock_rows( $lowstock_link, $outofstock_link ) {
 			global $wpdb;
 
 			// Requires lookup table added in 3.6.
@@ -282,13 +333,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$transient_name   = 'wc_outofstock_count';
 			$outofstock_count = get_transient( $transient_name );
-			$lowstock_link    = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
-			$outofstock_link  = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
-
-			if ( false === $is_wc_admin_disabled ) {
-				$lowstock_link   = 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock';
-				$outofstock_link = 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock';
-			}
+			$lowstock_url     = $lowstock_link ? admin_url( $lowstock_link ) : '#';
+			$outofstock_url   = $outofstock_link ? admin_url( $outofstock_link ) : '#';
 
 			if ( false === $outofstock_count ) {
 				/**
@@ -317,7 +363,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 			?>
 			<li class="low-in-stock">
-			<a href="<?php echo esc_url( admin_url( $lowstock_link ) ); ?>">
+				<a href="<?php echo esc_url( $lowstock_url ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
@@ -328,7 +374,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				</a>
 			</li>
 			<li class="out-of-stock">
-				<a href="<?php echo esc_url( admin_url( $outofstock_link ) ); ?>">
+				<a href="<?php echo esc_url( $outofstock_url ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
@@ -499,20 +545,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Overwrites the original sparkline to use the new reports data if WooAdmin is enabled.
-		 * Prepares a sparkline to show sales in the last X days.
+		 * Prepares the data for a sparkline to show sales in the last X days.
 		 *
-		 * @param  WC_Admin_Report $reports old class for getting reports.
-		 * @param  bool            $is_wc_admin_disabled If WC Admin is disabled or not.
-		 * @param  int             $id ID of the product to show. Blank to get all orders.
-		 * @param  string          $type Type of sparkline to get. Ignored if ID is not set.
-		 * @return string
+		 * @param  int    $id ID of the product to show. Blank to get all orders.
+		 * @param  int    $days Days of stats to get. Default to 7 days.
+		 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
+		 * @return array
 		 */
-		private function sales_sparkline( $reports, $is_wc_admin_disabled = false, $id = '', $type = 'sales' ) {
-			$days = max( 7, gmdate( 'd', current_time( 'timestamp' ) ) );
-			if ( $is_wc_admin_disabled ) {
-				return $reports->sales_sparkline( $id, $days, $type );
-			}
+		private function get_sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
 			$sales_endpoint = '/wc-analytics/reports/revenue/stats';
 			$start_date     = gmdate( 'Y-m-d 00:00:00', current_time( 'timestamp' ) - ( ( $days - 1 ) * DAY_IN_SECONDS ) );
 			$end_date       = gmdate( 'Y-m-d 23:59:59', current_time( 'timestamp' ) );
@@ -549,6 +589,22 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				array_push( $sparkline_data, array( strval( strtotime( $d['interval'] ) * 1000 ), $d['subtotals']->$meta_key ) );
 			}
 
+			return array(
+				'total' => $total,
+				'data'  => $sparkline_data,
+			);
+		}
+
+		/**
+		 * Prepares the markup for a sparkline to show sales in the last X days with the given data.
+		 *
+		 * @param  string $type Type of sparkline to form the markup.
+		 * @param  int    $days Days of stats to form the markup.
+		 * @param  int    $total Total income or items sold to form the markup.
+		 * @param  array  $sparkline_data Sparkline data to form the markup.
+		 * @return string
+		 */
+		private function sales_sparkline_markup( $type, $days, $total, $sparkline_data ) {
 			if ( 'sales' === $type ) {
 				/* translators: 1: total income 2: days */
 				$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );

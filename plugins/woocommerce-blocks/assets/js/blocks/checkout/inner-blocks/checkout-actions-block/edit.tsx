@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -33,7 +33,7 @@ export const Edit = ( {
 	const blockProps = useBlockProps();
 	const {
 		cartPageId = 0,
-		showReturnToCart = true,
+		showReturnToCart = false,
 		placeOrderButtonLabel,
 	} = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
@@ -51,10 +51,14 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody title={ __( 'Account options', 'woocommerce' ) }>
+				<PanelBody title={ __( 'Navigation options', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __(
 							'Show a "Return to Cart" link',
+							'woocommerce'
+						) }
+						help={ __(
+							'Recommended to enable only if there is no Cart link in the header.',
 							'woocommerce'
 						) }
 						checked={ showReturnToCart }
@@ -101,7 +105,7 @@ export const Edit = ( {
 						) }
 					</Noninteractive>
 					<EditableButton
-						className={ classnames(
+						className={ clsx(
 							'wc-block-cart__submit-button',
 							'wc-block-components-checkout-place-order-button',
 							{

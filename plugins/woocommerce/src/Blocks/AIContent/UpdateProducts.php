@@ -4,8 +4,11 @@ namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
+
 /**
  * Pattern Images class.
+ *
+ * @internal
  */
 class UpdateProducts {
 
@@ -26,7 +29,7 @@ class UpdateProducts {
 			'price'       => 249,
 		],
 		[
-			'title'       => 'Black and White Summer Portrait',
+			'title'       => 'Black and White',
 			'image'       => 'assets/images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg',
 			'description' => 'This 24" x 30" high-quality print just exudes summer. Hang it on the wall and forget about the world outside.',
 			'price'       => 115,
@@ -113,7 +116,7 @@ class UpdateProducts {
 		$products_to_create   = max( 0, 6 - $real_products_count - $dummy_products_count );
 		while ( $products_to_create > 0 ) {
 			$this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
-			$products_to_create--;
+			--$products_to_create;
 		}
 
 		// Identify dummy products that need to have their content updated.
@@ -193,10 +196,6 @@ class UpdateProducts {
 		$image_alt        = $product_data['title'];
 		$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
 
-		if ( is_wp_error( $product_image_id ) ) {
-			return new \WP_Error( 'error_uploading_image', $product_image_id->get_error_message() );
-		}
-
 		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
 
 		if ( is_wp_error( $saved_product ) ) {
@@ -275,7 +274,7 @@ class UpdateProducts {
 	 *
 	 * @param array $ai_generated_product_content The AI-generated product content.
 	 *
-	 * @return string|void
+	 * @return void|WP_Error
 	 */
 	public function update_product_content( $ai_generated_product_content ) {
 		if ( ! isset( $ai_generated_product_content['product_id'] ) ) {
@@ -293,10 +292,6 @@ class UpdateProducts {
 		}
 
 		$product_image_id = $this->product_image_upload( $product->get_id(), $ai_generated_product_content['image']['src'], $ai_generated_product_content['image']['alt'] );
-
-		if ( is_wp_error( $product_image_id ) ) {
-			return $product_image_id->get_error_message();
-		}
 
 		$this->product_update( $product, $product_image_id, $ai_generated_product_content['title'], $ai_generated_product_content['description'], $ai_generated_product_content['price'] );
 	}
@@ -321,13 +316,7 @@ class UpdateProducts {
 		set_time_limit( 150 );
 		wp_raise_memory_limit( 'image' );
 
-		$product_image_id = media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
-
-		if ( is_wp_error( $product_image_id ) ) {
-			return $product_image_id->get_error_message();
-		}
-
-		return $product_image_id;
+		return media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
 	}
 
 	/**
@@ -341,7 +330,7 @@ class UpdateProducts {
 	public function assign_ai_selected_images_to_dummy_products( $dummy_products_to_update, $ai_selected_images ) {
 		$products_information_list = [];
 		$dummy_products_count      = count( $dummy_products_to_update );
-		for ( $i = 0; $i < $dummy_products_count; $i ++ ) {
+		for ( $i = 0; $i < $dummy_products_count; $i++ ) {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 
 			if ( wc_is_valid_url( $image_src ) ) {
@@ -410,7 +399,7 @@ class UpdateProducts {
 		$ai_request_retries = 0;
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
-			$ai_request_retries ++;
+			++$ai_request_retries;
 			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30 );
 			if ( is_wp_error( $ai_response ) ) {
 				continue;
@@ -476,24 +465,20 @@ class UpdateProducts {
 			$image_alt        = self::DUMMY_PRODUCTS[ $i ]['title'];
 			$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
 
-			if ( is_wp_error( $product_image_id ) ) {
-				continue;
-			}
-
 			$this->product_update( $product, $product_image_id, self::DUMMY_PRODUCTS[ $i ]['title'], self::DUMMY_PRODUCTS[ $i ]['description'], self::DUMMY_PRODUCTS[ $i ]['price'] );
 
-			$i++;
+			++$i;
 		}
 	}
 
 	/**
 	 * Update the product with the new content.
 	 *
-	 * @param \WC_Product $product The product.
-	 * @param int         $product_image_id The product image ID.
-	 * @param string      $product_title The product title.
-	 * @param string      $product_description The product description.
-	 * @param int         $product_price The product price.
+	 * @param \WC_Product         $product The product.
+	 * @param int|string|WP_Error $product_image_id The product image ID.
+	 * @param string              $product_title The product title.
+	 * @param string              $product_description The product description.
+	 * @param int                 $product_price The product price.
 	 *
 	 * @return int|\WP_Error
 	 */
@@ -502,7 +487,17 @@ class UpdateProducts {
 			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woocommerce' ) );
 		}
 
-		$product->set_image_id( $product_image_id );
+		if ( ! is_wp_error( $product_image_id ) ) {
+			$product->set_image_id( $product_image_id );
+		} else {
+			wc_get_logger()->warning(
+				sprintf(
+					// translators: %s is a generated error message.
+					__( 'The image upload failed: "%s", creating the product without image', 'woocommerce' ),
+					$product_image_id->get_error_message()
+				),
+			);
+		}
 		$product->set_name( $product_title );
 		$product->set_description( $product_description );
 		$product->set_price( $product_price );

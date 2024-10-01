@@ -13,6 +13,10 @@ import {
 } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+/**
+ * Internal dependencies
+ */
+import { getCountryCode } from '~/dashboard/utils';
 
 const REVIEWED_DEFAULTS_OPTION =
 	'woocommerce_admin_reviewed_default_shipping_zones';
@@ -37,6 +41,7 @@ const useShowShippingTour = () => {
 	const {
 		hasCreatedDefaultShippingZones,
 		hasReviewedDefaultShippingOptions,
+		businessCountry,
 		isLoading,
 	} = useSelect( ( select ) => {
 		const { hasFinishedResolution, getOption } =
@@ -49,11 +54,17 @@ const useShowShippingTour = () => {
 				] ) &&
 				! hasFinishedResolution( 'getOption', [
 					REVIEWED_DEFAULTS_OPTION,
+				] ) &&
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_default_country',
 				] ),
 			hasCreatedDefaultShippingZones:
 				getOption( CREATED_DEFAULTS_OPTION ) === 'yes',
 			hasReviewedDefaultShippingOptions:
 				getOption( REVIEWED_DEFAULTS_OPTION ) === 'yes',
+			businessCountry: getCountryCode(
+				getOption( 'woocommerce_default_country' ) as string
+			),
 		};
 	} );
 
@@ -64,6 +75,7 @@ const useShowShippingTour = () => {
 			! isLoading &&
 			hasCreatedDefaultShippingZones &&
 			! hasReviewedDefaultShippingOptions,
+		isUspsDhlEligible: businessCountry === 'US',
 	};
 };
 
@@ -77,7 +89,7 @@ const computeDims = ( elementsSelectors: NonEmptySelectorArray ) => {
 
 		if ( ! rect ) {
 			throw new Error(
-				"Shipping tour: Couldn't find element with selector: " +
+				'Shipping tour: Couldn’t find element with selector: ' +
 					elementSelector
 			);
 		}
@@ -160,7 +172,7 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 
 		if ( ! shippingSettingsTableElement ) {
 			throw new Error(
-				"Shipping tour: Couldn't find shipping settings table element with selector: " +
+				'Shipping tour: Couldn’t find shipping settings table element with selector: ' +
 					SHIPPING_ZONES_SETTINGS_TABLE_CLASS
 			);
 		}
@@ -178,7 +190,7 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 
 	if ( ! shippingSettingsTableParentElement ) {
 		throw new Error(
-			"Shipping tour: Couldn't find shipping settings table parent element with selector: " +
+			'Shipping tour: Couldn’t find shipping settings table parent element with selector: ' +
 				SHIPPING_ZONES_SETTINGS_TABLE_CLASS
 		);
 	}
@@ -203,7 +215,7 @@ export const ShippingTour: React.FC< {
 	showShippingRecommendationsStep: boolean;
 } > = ( { showShippingRecommendationsStep } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { show: showTour } = useShowShippingTour();
+	const { show: showTour, isUspsDhlEligible } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
 	const { createNotice } = useDispatch( 'core/notices' );
 
@@ -220,20 +232,21 @@ export const ShippingTour: React.FC< {
 					mutation: true,
 					resize: true,
 				},
+				autoScroll: true,
 			},
 			callbacks: {
-				onNextStep: ( currentStepIndex ) => {
-					setStepNumber( currentStepIndex + 1 );
+				onNextStep: ( newStepIndex ) => {
+					setStepNumber( newStepIndex );
 					recordEvent( 'walkthrough_settings_shipping_next_click', {
 						step_name:
-							tourConfig.steps[ currentStepIndex ].meta.name,
+							tourConfig.steps[ newStepIndex - 1 ].meta.name,
 					} );
 				},
-				onPreviousStep: ( currentStepIndex ) => {
-					setStepNumber( currentStepIndex - 1 );
+				onPreviousStep: ( newStepIndex ) => {
+					setStepNumber( newStepIndex );
 					recordEvent( 'walkthrough_settings_shipping_back_click', {
 						step_name:
-							tourConfig.steps[ currentStepIndex ].meta.name,
+							tourConfig.steps[ newStepIndex + 1 ].meta.name,
 					} );
 				},
 			},
@@ -251,14 +264,14 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										"Specify the areas you'd like to ship to! Give each zone a name, then list the regions you'd like to include. Your regions can be as specific as a zip code or as broad as a country. Shoppers will only see the methods available in their region.",
+										'Specify the areas you’d like to ship to! Give each zone a name, then list the regions you’d like to include. Your regions can be as specific as a zip code or as broad as a country. Shoppers will only see the methods available in their region.',
 										'woocommerce'
 									) }
 								</span>
 								<br />
 								<span>
 									{ __(
-										"We've added some shipping zones to get you started — you can manage them by selecting Edit or Delete.",
+										'We’ve added some shipping zones to get you started — you can manage them by selecting Edit or Delete.',
 										'woocommerce'
 									) }
 								</span>
@@ -279,14 +292,14 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										"Add one or more shipping methods you'd like to offer to shoppers in your zones.",
+										'Add one or more shipping methods you’d like to offer to shoppers in your zones.',
 										'woocommerce'
 									) }
 								</span>
 								<br />
 								<span>
 									{ __(
-										"For example, we've added the “Free shipping” method for shoppers in your country. You can edit, add to, or remove shipping methods by selecting Edit or Delete.",
+										'For example, we’ve added the “Free shipping” method for shoppers in your country. You can edit, add to, or remove shipping methods by selecting Edit or Delete.',
 										'woocommerce'
 									) }
 								</span>
@@ -326,7 +339,7 @@ export const ShippingTour: React.FC< {
 
 	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
 
-	if ( isWcsSectionPresent ) {
+	if ( isWcsSectionPresent && isUspsDhlEligible ) {
 		tourConfig.steps.push( {
 			referenceElements: {
 				desktop: WCS_LINK_SELECTOR,

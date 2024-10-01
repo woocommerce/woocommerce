@@ -220,16 +220,9 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Get an array of checkout fields.
-	 *
-	 * @param  string $fieldset to get.
-	 * @return array
+	 * Initialize the checkout fields.
 	 */
-	public function get_checkout_fields( $fieldset = '' ) {
-		if ( ! is_null( $this->fields ) ) {
-			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
-		}
-
+	protected function initialize_checkout_fields() {
 		// Fields are based on billing/shipping country. Grab those values but ensure they are valid for the store before using.
 		$billing_country   = $this->get_value( 'billing_country' );
 		$billing_country   = empty( $billing_country ) ? WC()->countries->get_base_country() : $billing_country;
@@ -311,8 +304,25 @@ class WC_Checkout {
 				}
 			}
 		}
+	}
 
-		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
+	/**
+	 * Get an array of checkout fields.
+	 *
+	 * @param  string $fieldset to get.
+	 * @return array
+	 */
+	public function get_checkout_fields( $fieldset = '' ) {
+		if ( is_null( $this->fields ) ) {
+			$this->initialize_checkout_fields();
+		}
+
+		// If a fieldset is specified, return only the fields for that fieldset, or array if the field set does not exist.
+		if ( $fieldset ) {
+			return $this->fields[ $fieldset ] ?? array();
+		}
+
+		return $this->fields;
 	}
 
 	/**
@@ -695,10 +705,8 @@ class WC_Checkout {
 				)
 			);
 
-			// Avoid storing used_by - it's not needed and can get large.
-			$coupon_data = $coupon->get_data();
-			unset( $coupon_data['used_by'] );
-			$item->add_meta_data( 'coupon_data', $coupon_data );
+			$coupon_info = $coupon->get_short_info();
+			$item->add_meta_data( 'coupon_info', $coupon_info );
 
 			/**
 			 * Action hook to adjust item before save.
@@ -751,7 +759,7 @@ class WC_Checkout {
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$skipped = array();
+		$skipped        = array();
 		$form_was_shown = isset( $_POST['woocommerce-process-checkout-nonce'] ); // phpcs:disable WordPress.Security.NonceVerification.Missing
 
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
@@ -783,6 +791,9 @@ class WC_Checkout {
 							$value = wc_sanitize_textarea( $value );
 							break;
 						case 'password':
+							if ( $data['createaccount'] && 'account_password' === $key ) {
+								$value = wp_slash( $value ); // Passwords are encrypted with slashes on account creation, so we need to slash here too.
+							}
 							break;
 						default:
 							$value = wc_clean( $value );
@@ -1020,6 +1031,9 @@ class WC_Checkout {
 
 		if ( is_array( $data['shipping_method'] ) ) {
 			foreach ( $data['shipping_method'] as $i => $value ) {
+				if ( ! is_string( $value ) ) {
+					continue;
+				}
 				$chosen_shipping_methods[ $i ] = $value;
 			}
 		}
@@ -1046,11 +1060,11 @@ class WC_Checkout {
 			return;
 		}
 
-		// Store Order ID in session so it can be re-used after payment failure.
+		// Store Order ID in session, so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 
 		// We save the session early because if the payment gateway hangs
-		// the request will never finish, thus the session data will neved be saved,
+		// the request will never finish, thus the session data will never be saved,
 		// and this can lead to duplicate orders if the user submits the order again.
 		WC()->session->save_data();
 
@@ -1069,6 +1083,7 @@ class WC_Checkout {
 				exit;
 			}
 
+			// Using wp_send_json will gracefully handle any problem encoding data.
 			wp_send_json( $result );
 		}
 	}
@@ -1127,7 +1142,17 @@ class WC_Checkout {
 			);
 
 			if ( is_wp_error( $customer_id ) ) {
-				throw new Exception( $customer_id->get_error_message() );
+				if ( 'registration-error-email-exists' === $customer_id->get_error_code() ) {
+					/**
+					 * Filter the notice shown when a customer tries to register with an existing email address.
+					 *
+					 * @since 3.3.0
+					 * @param string $message The notice.
+					 * @param string $email   The email address.
+					 */
+					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );
@@ -1283,6 +1308,7 @@ class WC_Checkout {
 				 * since it could be empty see:
 				 * https://github.com/woocommerce/woocommerce/issues/24631
 				 */
+
 				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
 					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
 				} else {
@@ -1351,7 +1377,7 @@ class WC_Checkout {
 
 		if ( is_callable( array( $customer_object, "get_$input" ) ) ) {
 			$value = $customer_object->{"get_$input"}();
-		} elseif ( $customer_object->meta_exists( $input ) ) {
+		} elseif ( is_callable( array( $customer_object, 'meta_exists' ) ) && $customer_object->meta_exists( $input ) ) {
 			$value = $customer_object->get_meta( $input, true );
 		}
 

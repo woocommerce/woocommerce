@@ -26,7 +26,7 @@ import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
 
 const SEE_MORE_LINK =
-	'https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
+	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 
 const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
@@ -204,6 +204,10 @@ const PaymentRecommendations: React.FC = () => {
 				),
 			};
 		} );
+
+	if ( pluginsList.length === 0 ) {
+		return null;
+	}
 
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-card">

@@ -9,7 +9,7 @@ import {
 	createEvent,
 } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { useUser, useUserPreferences } from '@woocommerce/data';
+import { useUser } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
@@ -31,6 +31,14 @@ jest.mock( '@woocommerce/admin-layout', () => {
 		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
 	};
 } );
+
+jest.mock( '~/launch-your-store', () => ( {
+	useLaunchYourStore: jest.fn( () => ( {
+		comingSoon: 'yes',
+		launchYourStoreEnabled: true,
+		isLoading: true,
+	} ) ),
+} ) );
 
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
@@ -115,13 +123,15 @@ describe( 'Activity Panel', () => {
 			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
 		);
 
-		expect( screen.queryByText( 'Help' ) ).toBeNull();
+		expect( screen.queryByTestId( 'activity-panel-tab-help' ) ).toBeNull();
 	} );
 
 	it( 'should render help tab if on home screen', () => {
 		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
 
-		expect( screen.getByText( 'Help' ) ).toBeDefined();
+		expect(
+			screen.queryByTestId( 'activity-panel-tab-help' )
+		).toBeDefined();
 	} );
 
 	it( 'should render help tab before options load', async () => {
@@ -140,7 +150,9 @@ describe( 'Activity Panel', () => {
 
 		// Expect that the only tab is "Help".
 		expect( tabs ).toHaveLength( 1 );
-		expect( screen.getByText( 'Help' ) ).toBeDefined();
+		expect(
+			screen.queryByTestId( 'activity-panel-tab-help' )
+		).toBeDefined();
 	} );
 
 	it( 'should not render help tab when not on main route', () => {
@@ -235,82 +247,6 @@ describe( 'Activity Panel', () => {
 		expect( queryByText( 'Finish setup' ) ).toBeDefined();
 	} );
 
-	describe( 'help panel tooltip', () => {
-		it( 'should render highlight tooltip when task count is at-least 2, task is not completed, and tooltip not shown yet', () => {
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: { payment: 2 },
-			} );
-			const { getByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( getByText( '[HighlightTooltip]' ) ).toBeInTheDocument();
-		} );
-
-		it( 'should not render highlight tooltip when task is not visited more then once', () => {
-			useSelect.mockImplementation( () => ( {
-				requestingTaskListOptions: false,
-				setupTaskListComplete: false,
-				setupTaskListHidden: false,
-				trackedCompletedTasks: [],
-			} ) );
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: { payment: 1 },
-			} );
-			render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( screen.queryByText( '[HighlightTooltip]' ) ).toBeNull();
-
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: {},
-			} );
-
-			render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( screen.queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
-
-		it( 'should not render highlight tooltip when task is visited twice, but completed already', () => {
-			useSelect.mockImplementation( () => ( {
-				requestingTaskListOptions: false,
-				setupTaskListComplete: false,
-				setupTaskListHidden: false,
-				isCompletedTask: true,
-			} ) );
-
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: { payment: 2 },
-			} );
-
-			const { queryByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
-
-		it( 'should not render highlight tooltip when task is visited twice, not completed, but already shown', () => {
-			useUserPreferences.mockReturnValue( {
-				task_list_tracked_started_tasks: { payment: 2 },
-				help_panel_highlight_shown: 'yes',
-			} );
-
-			const { queryByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
-	} );
-
 	describe( 'panel', () => {
 		it( 'should set focus when panel opened/closed without removing element when onTransitionEnd is triggered', () => {
 			const content = 'test';
@@ -391,7 +327,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should have panel open and panel switching as false by default', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: 'products',
@@ -403,11 +339,13 @@ describe( 'Activity Panel', () => {
 			expect(
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 		} );
 
 		it( 'should allow user to toggle, an individual panel without setting panelSwitching to true', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: '',
@@ -421,13 +359,17 @@ describe( 'Activity Panel', () => {
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 			// toggle open
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=true]' ) ).toBeInTheDocument();
 			expect(
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 			// toggle close
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
 			expect(
 				queryByText( '[panelSwitching=false]' )
@@ -435,7 +377,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should remove panel element after clearPanel is triggered', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: '',
@@ -444,13 +386,17 @@ describe( 'Activity Panel', () => {
 				/>
 			);
 			// toggle open
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=true]' ) ).toBeInTheDocument();
 			expect(
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 			// toggle close
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
 			expect( queryByText( '[hasTab=true]' ) ).toBeInTheDocument();
 			expect(

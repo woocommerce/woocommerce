@@ -30,7 +30,6 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 							displayStyle: value,
 						} )
 					}
-					className="wc-block-active-filter__style-toggle"
 				>
 					<ToggleGroupControlOption
 						value="list"

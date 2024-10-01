@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add `Sales` property to `MarketingCampaign` class; Display Sales value in Campaigns card in Marketing page.

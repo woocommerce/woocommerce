@@ -13,8 +13,9 @@ jQuery( function ( $ ) {
 				)
 				.on( 'click', 'a.debug-report', this.generateReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
-				.on( 'aftercopy', '#copy-for-support', this.copySuccess )
-				.on( 'aftercopyfailure', '#copy-for-support', this.copyFail )
+				.on( 'click', '#copy-for-github', this.copyGithubReport )
+				.on( 'aftercopy', '#copy-for-support, #copy-for-github', this.copySuccess )
+				.on( 'aftercopyfailure', '#copy-for-support, #copy-for-github', this.copyFail )
 				.on( 'click', '#download-for-support', this.downloadReport );
 		},
 
@@ -93,12 +94,51 @@ jQuery( function ( $ ) {
 			wcSetClipboard( $( '#debug-report' ).find( 'textarea' ).val(), $( this ) );
 			evt.preventDefault();
 		},
+		/**
+		 * Apply redactions
+		 */
+		applyRedactions( report ) {
+			var redactions = [
+				{
+					regex: /(WordPress address \(URL\):)[^\n]*/,
+					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(Site address \(URL\):)[^\n]*/,
+					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(### Database ###\n)([\s\S]*?)(\n### Post Type Counts ###)/,
+					replacement: "$1\n[REDACTED]\n$3"
+				}
+			];
+
+			redactions.forEach( function( redaction ) {
+				report = report.replace( redaction.regex, redaction.replacement );
+			});
+			return report;
+		},
+		/**
+		 * Copy for GitHub report.
+		 *
+		 * @param {Object} event Copy event.
+		 */
+		copyGithubReport: function( event ) {
+			wcClearClipboard();
+			var reportValue = $( '#debug-report' ).find( 'textarea' ).val();
+			var redactedReport = wcSystemStatus.applyRedactions( reportValue );
+
+			var reportForGithub = '<details><summary>System Status Report</summary>\n\n``' + redactedReport + '``\n</details>';
+
+			wcSetClipboard( reportForGithub, $( this ) );
+			event.preventDefault();
+		},
 
 		/**
 		 * Display a "Copied!" tip when success copying
 		 */
-		copySuccess: function() {
-			$( '#copy-for-support' ).tipTip({
+		copySuccess: function( event ) {
+			$( event.target ).tipTip({
 				'attribute':  'data-tip',
 				'activation': 'focus',
 				'fadeIn':     50,

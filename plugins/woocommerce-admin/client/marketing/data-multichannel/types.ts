@@ -58,10 +58,12 @@ export type Campaign = {
 	cost: {
 		value: string;
 		currency: string;
+		formatted: string;
 	} | null;
 	sales: {
 		value: string;
 		currency: string;
+		formatted: string;
 	} | null;
 };
 

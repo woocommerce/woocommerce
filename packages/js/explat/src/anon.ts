@@ -3,6 +3,11 @@
  */
 import cookie from 'cookie';
 
+/**
+ * Internal dependencies
+ */
+import { canTrack } from './assignment';
+
 let initializeAnonIdPromise: null | Promise< string | null > = null;
 const anonIdPollingIntervalMilliseconds = 50;
 const anonIdPollingIntervalMaxAttempts = 100; // 50 * 100 = 5000 = 5 seconds
@@ -25,7 +30,7 @@ export const readAnonCookie = (): string | null => {
  * can take a lot longer.
  *
  * The state of initializeAnonIdPromise should be used rather than the return of this function.
- * The return is only avaliable to make this easier to test.
+ * The return is only available to make this easier to test.
  *
  * Throws on error.
  */
@@ -53,7 +58,7 @@ export const initializeAnonId = async (): Promise< string | null > => {
 };
 
 export const getAnonId = async (): Promise< string | null > => {
-	if ( ! window.wcTracks?.isEnabled ) {
+	if ( ! canTrack ) {
 		return null;
 	}
 

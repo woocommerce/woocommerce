@@ -1,0 +1,60 @@
+.woocommerce-global-error-boundary {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	padding: 70px 20px 0;
+	box-sizing: border-box;
+
+	.woocommerce-global-error-boundary__heading {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		margin-bottom: 48px;
+		font-size: 40px;
+		line-height: 46px;
+		color: $gray-900;
+		padding: 0;
+		text-align: center;
+	}
+
+	.woocommerce-global-error-boundary__subheading {
+		text-align: center;
+	}
+
+	.woocommerce-global-error-boundary__actions {
+		display: flex;
+		justify-content: center;
+		margin-top: 48px;
+
+		button {
+			margin-left: 16px;
+		}
+	}
+
+	.woocommerce-global-error-boundary__details {
+		white-space: pre-wrap;
+		text-align: left;
+		margin: 32px auto;
+		max-width: 600px;
+
+		@media screen and (max-width: 600px) {
+			max-width: 100%;
+		}
+
+		summary {
+			text-align: center;
+		}
+
+		.woocommerce-global-error-boundary__details-content {
+			padding: 16px 24px;
+		}
+
+		p {
+			padding: 0;
+			margin: 12px 0 0;
+			max-height: 400px;
+			overflow: auto;
+		}
+	}
+}

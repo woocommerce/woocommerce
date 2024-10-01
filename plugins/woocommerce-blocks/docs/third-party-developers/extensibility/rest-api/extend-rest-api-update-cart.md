@@ -48,6 +48,7 @@ and on the client side:
 
 ```ts
 const { extensionCartUpdate } = wc.blocksCheckout;
+const { processErrorResponse } = wc.wcBlocksData;
 
 extensionCartUpdate( {
 	namespace: 'extension-unique-namespace',
@@ -58,6 +59,11 @@ extensionCartUpdate( {
 			fourth_key: true,
 		},
 	},
+} ).then( () => {
+	// Cart has been updated.
+} ).catch( ( error ) => {
+	// Handle error.
+	processErrorResponse(error);
 } );
 ```
 
@@ -187,7 +193,7 @@ Now that this is registered, when the button is pressed, the `cart/extensions` e
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
 

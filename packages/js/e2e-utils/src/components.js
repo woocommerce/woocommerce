@@ -60,172 +60,6 @@ const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
 		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	}
 };
-/**
- * Complete onboarding wizard.
- */
-const completeOnboardingWizard = async () => {
-	// Store Details section
-	await merchant.runSetupWizard();
-
-	// Fill store's address - first line
-	await expect( page ).toFill(
-		'#inspector-text-control-0',
-		config.get( 'addresses.admin.store.addressfirstline' )
-	);
-
-	// Fill store's address - second line
-	await expect( page ).toFill(
-		'#inspector-text-control-1',
-		config.get( 'addresses.admin.store.addresssecondline' )
-	);
-
-	// Fill country and state where the store is located
-	await expect( page ).toFill(
-		'.woocommerce-select-control__control-input',
-		config.get( 'addresses.admin.store.countryandstate' )
-	);
-
-	// Fill the city where the store is located
-	await expect( page ).toFill(
-		'#inspector-text-control-2',
-		config.get( 'addresses.admin.store.city' )
-	);
-
-	// Fill postcode of the store
-	await expect( page ).toFill(
-		'#inspector-text-control-3',
-		config.get( 'addresses.admin.store.postcode' )
-	);
-
-	// Verify that checkbox next to "I'm setting up a store for a client" is not selected
-	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
-
-	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	// Click on "Continue" button to move to the next step
-	await page.click( 'button.is-primary', { text: 'Continue' } );
-
-	// Wait for usage tracking pop-up window to appear on a new site
-	const usageTrackingHeader = await page.$(
-		'.components-modal__header-heading'
-	);
-	if ( usageTrackingHeader ) {
-		await expect( page ).toMatchElement(
-			'.components-modal__header-heading',
-			{
-				text: 'Build a better WooCommerce',
-			}
-		);
-
-		// Query for "No Thanks" buttons
-		const continueButtons = await page.$$(
-			'.woocommerce-usage-modal__actions button.is-secondary'
-		);
-		expect( continueButtons ).toHaveLength( 1 );
-
-		await continueButtons[ 0 ].click();
-		await expect( page ).toMatchElement(
-			'.woocommerce-usage-modal__actions button.is-secondary.is-busy'
-		);
-		await expect( page ).not.toMatchElement(
-			'.woocommerce-usage-modal__actions button.is-primary:disabled'
-		);
-	}
-	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
-
-	// Industry section
-
-	// Query for the industries checkboxes
-	const industryCheckboxes = await page.$$(
-		'.components-checkbox-control__input'
-	);
-	expect( industryCheckboxes ).toHaveLength( 8 );
-
-	// Select all industries including "Other"
-	for ( let i = 0; i < 8; i++ ) {
-		await industryCheckboxes[ i ].click();
-	}
-
-	// Fill "Other" industry
-	await expect( page ).toFill(
-		'.components-text-control__input',
-		config.get( 'onboardingwizard.industry' )
-	);
-
-	// Wait for "Continue" button to become active
-	await waitAndClickPrimary();
-
-	// Product types section
-
-	// Query for the product types checkboxes
-	const productTypesCheckboxes = await page.$$(
-		'.components-checkbox-control__input'
-	);
-	expect( productTypesCheckboxes ).toHaveLength( 7 );
-
-	// Select Physical and Downloadable products
-	for ( let i = 1; i < 2; i++ ) {
-		await productTypesCheckboxes[ i ].click();
-	}
-
-	// Wait for "Continue" button to become active
-	await waitAndClickPrimary();
-
-	// Business Details section
-
-	// Temporarily add delay to reduce test flakiness
-	await page.waitFor( 2000 );
-
-	// Query for the <SelectControl>s
-	const selectControls = await page.$$( '.woocommerce-select-control' );
-	expect( selectControls ).toHaveLength( 2 );
-
-	// Fill the number of products you plan to sell
-	await selectControls[ 0 ].click();
-	await page.waitForSelector( '.woocommerce-select-control__control' );
-	await expect( page ).toClick( '.woocommerce-select-control__option', {
-		text: config.get( 'onboardingwizard.numberofproducts' ),
-	} );
-
-	// Fill currently selling elsewhere
-	await selectControls[ 1 ].click();
-	await page.waitForSelector( '.woocommerce-select-control__control' );
-	await expect( page ).toClick( '.woocommerce-select-control__option', {
-		text: config.get( 'onboardingwizard.sellingelsewhere' ),
-	} );
-
-	// Wait for "Continue" button to become active
-	await waitAndClickPrimary( false );
-
-	// Skip installing extensions
-	await unsetCheckbox( '.components-checkbox-control__input' );
-	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
-	await waitAndClickPrimary();
-
-	// End of onboarding wizard
-	if ( IS_RETEST_MODE ) {
-		// Home screen modal can't be reset via the rest api.
-		return;
-	}
-
-	// Wait for homescreen welcome modal to appear
-	const welcomeHeader = await waitForSelectorWithoutThrow(
-		'.woocommerce__welcome-modal__page-content'
-	);
-	if ( ! welcomeHeader ) {
-		return;
-	}
-
-	// Click two Next buttons
-	for ( let b = 0; b < 2; b++ ) {
-		await page.waitForSelector( 'button.components-guide__forward-button' );
-		await page.click( 'button.components-guide__forward-button' );
-	}
-	// Wait for "Let's go" button to become active
-	await page.waitForSelector( 'button.components-guide__finish-button' );
-	await page.click( 'button.components-guide__finish-button' );
-};
 
 /**
  * Create simple product.
@@ -297,8 +131,7 @@ const createSimpleDownloadableProduct = async (
 			{
 				id: uuid.v4(),
 				name: downloadName,
-				file:
-					'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+				file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 			},
 		],
 		download_limit: downloadLimit,
@@ -578,7 +411,7 @@ const createCoupon = async (
  * Adds a shipping zone along with a shipping method.
  *
  * @param {string} zoneName     Shipping zone name.
- * @param {string} zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param {string} zoneLocation Shipping zone location. Defaults to country:US. For states use: state:US:CA
  * @param {string} zipCode      Shipping zone zip code. Defaults to empty one space.
  * @param {string} zoneMethod   Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
@@ -690,7 +523,6 @@ const deleteAllShippingZones = async () => {
 };
 
 export {
-	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
 	createGroupedProduct,

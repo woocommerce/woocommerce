@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Migrated local pickup E2E tests to Playwright

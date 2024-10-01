@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 export const getBlockClassName = ( blockClassName, attributes ) => {
 	const { className, contentVisibility } = attributes;
 
-	return classNames( blockClassName, className, {
+	return clsx( blockClassName, className, {
 		'has-image': contentVisibility && contentVisibility.image,
 		'has-title': contentVisibility && contentVisibility.title,
 		'has-rating': contentVisibility && contentVisibility.rating,

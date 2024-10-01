@@ -22,13 +22,13 @@ class AllProducts extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 		// Set this so filter blocks being used as widgets know when to render.
-		$this->asset_data_registry->add( 'hasFilterableProducts', true, true );
-		$this->asset_data_registry->add( 'minColumns', wc_get_theme_support( 'product_blocks::min_columns', 1 ), true );
-		$this->asset_data_registry->add( 'maxColumns', wc_get_theme_support( 'product_blocks::max_columns', 6 ), true );
-		$this->asset_data_registry->add( 'defaultColumns', wc_get_theme_support( 'product_blocks::default_columns', 3 ), true );
-		$this->asset_data_registry->add( 'minRows', wc_get_theme_support( 'product_blocks::min_rows', 1 ), true );
-		$this->asset_data_registry->add( 'maxRows', wc_get_theme_support( 'product_blocks::max_rows', 6 ), true );
-		$this->asset_data_registry->add( 'defaultRows', wc_get_theme_support( 'product_blocks::default_rows', 3 ), true );
+		$this->asset_data_registry->add( 'hasFilterableProducts', true );
+		$this->asset_data_registry->add( 'minColumns', wc_get_theme_support( 'product_blocks::min_columns', 1 ) );
+		$this->asset_data_registry->add( 'maxColumns', wc_get_theme_support( 'product_blocks::max_columns', 6 ) );
+		$this->asset_data_registry->add( 'defaultColumns', wc_get_theme_support( 'product_blocks::default_columns', 3 ) );
+		$this->asset_data_registry->add( 'minRows', wc_get_theme_support( 'product_blocks::min_rows', 1 ) );
+		$this->asset_data_registry->add( 'maxRows', wc_get_theme_support( 'product_blocks::max_rows', 6 ) );
+		$this->asset_data_registry->add( 'defaultRows', wc_get_theme_support( 'product_blocks::default_rows', 3 ) );
 
 		// Hydrate the All Product block with data from the API. This is for the add to cart buttons which show current quantity in cart, and events.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {

@@ -3,49 +3,43 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
-import { BlockInstance, parse } from '@wordpress/blocks';
+import { parse } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
 import { useLogoAttributes } from '../hooks/use-logo-attributes';
 import { setLogoWidth } from '../../utils';
-
-export type Pattern = {
-	blockTypes: string[];
-	categories: string[];
-	content: string;
-	name: string;
-	source: string;
-	title: string;
-};
-
-export type PatternWithBlocks = Pattern & {
-	blocks: BlockInstance[];
-};
+import { Pattern } from '~/customize-store/types/pattern';
+import { THEME_SLUG } from '~/customize-store/data/constants';
 
 export const usePatterns = () => {
-	const { blockPatterns, isLoading } = useSelect(
+	const { blockPatterns, isLoading, invalidateCache } = useSelect(
 		( select ) => ( {
 			blockPatterns: select(
 				coreStore
-				// @ts-ignore - This is valid.
+				// @ts-expect-error -- No types for this exist yet.
 			).getBlockPatterns() as Pattern[],
 			isLoading:
-				// @ts-ignore - This is valid.
+				// @ts-expect-error -- No types for this exist yet.
 				! select( coreStore ).hasFinishedResolution(
 					'getBlockPatterns'
 				),
-		} ),
-		[]
+			invalidateCache: () =>
+				// @ts-expect-error -- No types for this exist yet.
+				dispatch( coreStore ).invalidateResolutionForStoreSelector(
+					'getBlockPatterns'
+				),
+		} )
 	);
 
 	return {
 		blockPatterns,
 		isLoading,
+		invalidateCache,
 	};
 };
 
@@ -65,8 +59,12 @@ export const usePatternsByCategory = ( category: string ) => {
 	}, [ isAttributesLoading, attributes.width, currentLogoWidth ] );
 
 	const patternsByCategory = useMemo( () => {
-		return ( blockPatterns || [] ).filter( ( pattern: Pattern ) =>
-			pattern.categories?.includes( category )
+		return ( blockPatterns || [] ).filter(
+			( pattern: Pattern ) =>
+				pattern.categories?.includes( category ) &&
+				! pattern.name.includes( THEME_SLUG ) &&
+				pattern.source !== 'pattern-directory/theme' &&
+				pattern.source !== 'pattern-directory/core'
 		);
 	}, [ blockPatterns, category ] );
 

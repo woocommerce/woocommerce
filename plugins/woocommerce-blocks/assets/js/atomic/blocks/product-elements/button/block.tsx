@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	useStoreEvents,
@@ -90,7 +90,7 @@ const AddToCartButton = ( {
 			{ ...buttonProps }
 			aria-label={ buttonAriaLabel }
 			disabled={ addingToCart }
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wp-block-button__link',
 				'wp-element-button',
@@ -114,7 +114,7 @@ const AddToCartButtonPlaceholder = ( {
 }: AddToCartButtonPlaceholderAttributes ): JSX.Element => {
 	return (
 		<button
-			className={ classnames(
+			className={ clsx(
 				'wp-block-button__link',
 				'wp-element-button',
 				'add_to_cart_button',
@@ -136,7 +136,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wp-block-button',
 				'wc-block-components-product-button',

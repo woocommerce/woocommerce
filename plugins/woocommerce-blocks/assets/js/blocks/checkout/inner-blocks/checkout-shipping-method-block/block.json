@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/checkout-shipping-method-block",
 	"version": "1.0.0",
-	"title": "Shipping Method",
+	"title": "Delivery",
 	"description": "Select between shipping or local pickup.",
 	"category": "woocommerce",
 	"supports": {
@@ -21,8 +21,10 @@
 			}
 		}
 	},
-	"parent": [ "woocommerce/checkout-fields-block" ],
+	"parent": [
+		"woocommerce/checkout-fields-block"
+	],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2
+	"apiVersion": 3
 }

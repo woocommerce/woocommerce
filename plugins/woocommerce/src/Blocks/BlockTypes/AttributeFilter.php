@@ -23,7 +23,7 @@ class AttributeFilter extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'attributes', array_values( wc_get_attribute_taxonomies() ), true );
+		$this->asset_data_registry->add( 'attributes', array_values( wc_get_attribute_taxonomies() ) );
 	}
 
 	/**

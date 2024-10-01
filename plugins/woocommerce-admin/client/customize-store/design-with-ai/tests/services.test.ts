@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import { recordEvent } from '@woocommerce/tracks';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
 import { getCompletion } from '../services';
+import { trackEvent } from '~/customize-store/tracking';
 
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
+jest.mock( '~/customize-store/tracking', () => ( {
+	trackEvent: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/ai', () => ( {
@@ -55,7 +55,7 @@ describe( 'getCompletion', () => {
 
 		expect( result ).toEqual( { key: 'value' } );
 		expect( responseValidation ).toBeCalledWith( { key: 'value' } );
-		expect( recordEvent ).toBeCalledWith(
+		expect( trackEvent ).toBeCalledWith(
 			'customize_your_store_ai_completion_success',
 			{
 				query_id: 'query1',
@@ -83,7 +83,7 @@ describe( 'getCompletion', () => {
 			} )
 		).rejects.toThrow( 'API error' );
 
-		expect( recordEvent ).toBeCalledWith(
+		expect( trackEvent ).toBeCalledWith(
 			'customize_your_store_ai_completion_api_error',
 			{
 				query_id: 'query1',
@@ -114,7 +114,7 @@ describe( 'getCompletion', () => {
 			`Error validating Jetpack AI text completions response for query1`
 		);
 
-		expect( recordEvent ).toBeCalledWith(
+		expect( trackEvent ).toBeCalledWith(
 			'customize_your_store_ai_completion_response_error',
 			{
 				query_id: 'query1',
@@ -147,7 +147,7 @@ describe( 'getCompletion', () => {
 			} )
 		).rejects.toThrow( 'Validation error' );
 
-		expect( recordEvent ).toBeCalledWith(
+		expect( trackEvent ).toBeCalledWith(
 			'customize_your_store_ai_completion_response_error',
 			{
 				query_id: 'query1',

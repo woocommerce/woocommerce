@@ -13,7 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, getQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import ExternalIcon from 'gridicons/dist/external';
 
@@ -23,6 +23,7 @@ import ExternalIcon from 'gridicons/dist/external';
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
 import { WCPaySuggestion } from './components/WCPay';
+import { WCPayBNPLSuggestion } from './components/WCPayBNPL';
 import { getCountryCode } from '~/dashboard/utils';
 import {
 	getEnrichedPaymentGateways,
@@ -71,16 +72,6 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[ installedPaymentGateways, paymentGatewaySuggestions ]
 	);
 
-	useEffect( () => {
-		if ( paymentGateways.size ) {
-			recordEvent( 'tasklist_payments_options', {
-				options: Array.from( paymentGateways.values() ).map(
-					( gateway ) => gateway.id
-				),
-			} );
-		}
-	}, [ paymentGateways ] );
-
 	const enablePaymentGateway = ( id ) => {
 		if ( ! id ) {
 			return;
@@ -100,11 +91,15 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				// gateway variable doesn't have hasPlugins property.
 				! paymentGateways.get( id )?.hasPlugins
 					? {
-							redirectPath: getNewPath(
-								{ task: 'payments' },
-								{},
-								'/'
-							),
+							// If we are already on a task page, don't redirect.
+							// Otherwise, redirect to Payments task page.
+							redirectPath: getQuery()?.task
+								? getNewPath(
+										{ task: getQuery().task },
+										{},
+										'/'
+								  )
+								: getNewPath( { task: 'payments' }, {}, '/' ),
 					  }
 					: {}
 			);
@@ -161,7 +156,12 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			getIsGatewayWCPay
 		) !== -1;
 
-	const [ wcPayGateway, offlineGateways, additionalGateways ] = useMemo(
+	const [
+		wcPayGateway,
+		offlineGateways,
+		additionalGateways,
+		wcPayBnplGateway,
+	] = useMemo(
 		() =>
 			getSplitGateways(
 				paymentGateways,
@@ -176,6 +176,29 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			isWCPayOrOtherCategoryDoneSetup,
 		]
 	);
+
+	useEffect( () => {
+		let shownGateways = [];
+
+		if ( ! currentGateway ) {
+			if ( wcPayGateway.length ) {
+				shownGateways.push( wcPayGateway[ 0 ].id );
+			}
+			if ( wcPayBnplGateway.length ) {
+				shownGateways.push( wcPayBnplGateway[ 0 ].id );
+			}
+			if ( additionalGateways.length ) {
+				shownGateways = shownGateways.concat(
+					additionalGateways.map( ( g ) => g.id )
+				);
+			}
+			if ( shownGateways.length ) {
+				recordEvent( 'tasklist_payments_options', {
+					options: shownGateways,
+				} );
+			}
+		}
+	}, [ additionalGateways, currentGateway, wcPayGateway, wcPayBnplGateway ] );
 
 	const trackSeeMore = () => {
 		recordEvent( 'tasklist_payment_see_more', {} );
@@ -226,15 +249,16 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		<List
 			heading={ additionalSectionHeading }
 			headingDescription={ additionalSectionHeadingDescription }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
 				<Button
-					href="https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
+					href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 					target="_blank"
 					onClick={ trackSeeMore }
-					isTertiary
+					variant="tertiary"
 				>
 					{ __( 'See more', 'woocommerce' ) }
 					<ExternalIcon size={ 18 } />
@@ -246,7 +270,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const offlineSection = !! offlineGateways.length && (
 		<List
 			heading={ __( 'Offline payment methods', 'woocommerce' ) }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ offlineGateways }
 			markConfigured={ markConfigured }
 		/>
@@ -265,6 +290,11 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			) : (
 				<>
 					{ additionalSection }
+					{ !! wcPayBnplGateway.length && (
+						<WCPayBNPLSuggestion
+							paymentGateway={ wcPayBnplGateway[ 0 ] }
+						/>
+					) }
 					{ offlineSection }
 				</>
 			) }

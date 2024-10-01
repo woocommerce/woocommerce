@@ -17,6 +17,16 @@ jest.mock( '../../assembler-hub/site-hub', () => ( {
 jest.mock( '~/utils/react-hooks/use-network-status', () => ( {
 	useNetworkStatus: jest.fn(),
 } ) );
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...originalModule,
+		useSelect: jest.fn( () => ( {
+			is_block_theme: true,
+		} ) ),
+	};
+} );
 describe( 'Intro Modals', () => {
 	it( 'should display DesignChangeWarningModal when activeThemeHasMods and button is clicked', async () => {
 		const sendEventMock = jest.fn();
@@ -26,6 +36,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -35,7 +46,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: true,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
@@ -44,6 +54,9 @@ describe( 'Intro Modals', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
+					activeThemeHasMods: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -81,6 +94,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -90,7 +104,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: true,
 					},
@@ -99,6 +112,9 @@ describe( 'Intro Modals', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -134,6 +150,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -143,7 +160,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: false,
 					},
@@ -152,6 +168,9 @@ describe( 'Intro Modals', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

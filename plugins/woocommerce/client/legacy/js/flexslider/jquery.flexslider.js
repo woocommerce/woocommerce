@@ -65,8 +65,8 @@
 
     var namespace = slider.vars.namespace,
         touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
-        // deprecating this idea, as devices are being released with both of these events
-        eventType = "click touchend keyup",
+        // we add a custom event so we can differentiate manually triggering events when needed.
+        eventType = "click touchend keyup flexslider-click",
         watchedEvent = "",
         watchedEventClearTimer,
         easing = easings[slider.vars.easing] || "ease",
@@ -255,6 +255,7 @@
                 item = $('<img/>', {
                   onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
                   src: slide.attr('data-thumb'),
+                  srcset: slide.attr('data-thumb-srcset'),
                   alt: slide.attr('alt')
                 })
               }
@@ -301,7 +302,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -326,7 +327,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -379,7 +380,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -433,7 +434,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -496,7 +497,7 @@
 
               if ( ! scrolling || Number( new Date() ) - startT > fxms ) {
                 e.preventDefault();
-                if (!fade && slider.transitions) {
+                if (!fade) {
                   if (!slider.vars.animationLoop) {
                     dx = dx/((slider.currentSlide === 0 && dx < 0 || slider.currentSlide === slider.last && dx > 0) ? (Math.abs(dx)/cwidth+2) : 1);
                   }
@@ -684,7 +685,7 @@
             slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
           }
           slider.setProps(slideString, "", slider.vars.animationSpeed);
-          if (slider.transitions) {
+
             if (!slider.vars.animationLoop || !slider.atEnd) {
               slider.animating = false;
               slider.currentSlide = slider.animatingTo;
@@ -703,20 +704,6 @@
               slider.wrapup(dimension);
             }, slider.vars.animationSpeed + 100);
 
-          } else {
-            var prop = slider.prop;
-
-            slider.container.each(function() {
-              var container = this;
-              var currentStyle = {};
-              currentStyle[prop] = container.style[prop];
-
-              container.animate([currentStyle, slider.args], { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
-                container.style[prop] = slider.args[prop];
-                slider.wrapup(dimension);
-              };
-            });
-          }
         } else { // FADE:
           // if (!touch) calls slider.wrapup() on fade animation end; if (touch) calls slider.wrapup() immediately
           if (!touch) {
@@ -824,16 +811,17 @@
             return (posCalc * ((slider.vars.rtl)?1:-1)) + "px";
           }());
 
+      dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
+      slider.container.css("transition-duration", dur);
+
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
-        dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
-         slider.container.css("transition-duration", dur);
+      } else {
+        slider.container.css("transition-timing-function", easing);
       }
 
       slider.args[slider.prop] = target;
-      if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
-
-      slider.container.css('transform',target);
+      slider.container.css(slider.args);
     };
 
     slider.setup = function(type) {
@@ -1007,7 +995,7 @@
 
       // update slider.slides
       slider.slides = $(slider.vars.selector + ':not(.clone)', slider);
-      // re-setup the slider to accomdate new slide
+      // re-setup the slider to accommodate new slide
       slider.setup();
 
       //FlexSlider: added() Callback
@@ -1033,7 +1021,7 @@
 
       // update slider.slides
       slider.slides = $(slider.vars.selector + ':not(.clone)', slider);
-      // re-setup the slider to accomdate new slide
+      // re-setup the slider to accommodate new slide
       slider.setup();
 
       // FlexSlider: removed() Callback
@@ -1103,7 +1091,7 @@
     itemWidth: 0,                   //{NEW} Integer: Box-model width of individual carousel items, including horizontal borders and padding.
     itemMargin: 0,                  //{NEW} Integer: Margin between carousel items.
     minItems: 1,                    //{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
-    maxItems: 0,                    //{NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
+    maxItems: 0,                    //{NEW} Integer: Maximum number of carousel items that should be visible. Items will resize fluidly when above this limit.
     move: 0,                        //{NEW} Integer: Number of carousel items that should move on animation. If 0, slider will move all visible items.
     allowOneSlide: true,           //{NEW} Boolean: Whether or not to allow a slider comprised of a single slide
 

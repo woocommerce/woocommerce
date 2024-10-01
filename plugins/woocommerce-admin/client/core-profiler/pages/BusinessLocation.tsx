@@ -10,10 +10,8 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import {
-	BusinessLocationEvent,
-	CoreProfilerStateMachineContext,
-} from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { BusinessLocationEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
@@ -47,7 +45,7 @@ export const BusinessLocation = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						"We'll use this information to help you set up payments, shipping, and taxes.",
+						'We’ll use this information to help you set up payments, shipping, and taxes.',
 						'woocommerce'
 					) }
 				/>

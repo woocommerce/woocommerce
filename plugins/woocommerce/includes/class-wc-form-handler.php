@@ -353,12 +353,20 @@ class WC_Form_Handler {
 				$customer->save();
 			}
 
-			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
-
+			/**
+			 * Hook: woocommerce_save_account_details.
+			 *
+			 * @since 3.6.0
+			 * @param int $user_id User ID being saved.
+			 */
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
-			exit;
+			// Notices are checked here so that if something created a notice during the save hooks above, the redirect will not happen.
+			if ( 0 === wc_notice_count( 'error' ) ) {
+				wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
+				wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
+				exit;
+			}
 		}
 	}
 
@@ -574,7 +582,6 @@ class WC_Form_Handler {
 			wp_safe_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
 			exit();
 		}
-
 	}
 
 	/**
@@ -599,7 +606,6 @@ class WC_Form_Handler {
 			wp_safe_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
 			exit();
 		}
-
 	}
 
 	/**
@@ -645,10 +651,10 @@ class WC_Form_Handler {
 				wc_add_notice( $removed_notice, apply_filters( 'woocommerce_cart_item_removed_notice_type', 'success' ) );
 			}
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
-			wp_safe_redirect( $referer );
-			exit;
-
+			if ( wp_get_referer() ) {
+				wp_safe_redirect( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) );
+				exit;
+			}
 		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			// Undo Cart Item.
@@ -656,10 +662,10 @@ class WC_Form_Handler {
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : wc_get_cart_url();
-			wp_safe_redirect( $referer );
-			exit;
-
+			if ( wp_get_referer() ) {
+				wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) );
+				exit;
+			}
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form.
@@ -714,9 +720,11 @@ class WC_Form_Handler {
 				exit;
 			} elseif ( $cart_updated ) {
 				wc_add_notice( __( 'Cart updated.', 'woocommerce' ), apply_filters( 'woocommerce_cart_updated_notice_type', 'success' ) );
-				$referer = remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), ( wp_get_referer() ? wp_get_referer() : wc_get_cart_url() ) );
-				wp_safe_redirect( $referer );
-				exit;
+
+				if ( wp_get_referer() ) {
+					wp_safe_redirect( remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), wp_get_referer() ) );
+					exit;
+				}
 			}
 		}
 	}
@@ -901,7 +909,7 @@ class WC_Form_Handler {
 		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$variations   = array();
 
-		$product      = wc_get_product( $product_id );
+		$product = wc_get_product( $product_id );
 
 		foreach ( $_REQUEST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'attribute_' !== substr( $key, 0, 10 ) ) {
@@ -978,7 +986,7 @@ class WC_Form_Handler {
 					}
 				}
 
-				// Peform the login.
+				// Perform the login.
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {

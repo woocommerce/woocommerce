@@ -1,12 +1,12 @@
 {
 	"name": "@woocommerce/onboarding",
-	"version": "3.4.0",
+	"version": "3.6.0",
 	"description": "Onboarding utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.12.1"
+		"node": "^20.11.1",
+		"pnpm": "9.1.3"
 	},
 	"keywords": [
 		"wordpress",
@@ -71,7 +71,6 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
-		"@storybook/addon-knobs": "^7.0.2",
 		"@testing-library/react": "12.1.3",
 		"@types/jest": "^27.5.2",
 		"@types/react": "^17.0.71",
@@ -89,7 +88,7 @@
 		"jest-cli": "~27.5.1",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
@@ -117,7 +116,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}
@@ -126,6 +129,12 @@
 		"build:project:bundle": {
 			"command": "webpack",
 			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				}
+			},
 			"files": [
 				"webpack.config.js",
 				"src/**/*.scss"

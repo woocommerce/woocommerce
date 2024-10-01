@@ -1,22 +1,25 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect, CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 test.describe( 'Merchant → Cart', () => {
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
 	test.describe( 'in widget editor', () => {
 		test( "can't be inserted in a widget area", async ( {
-			editorUtils,
-			page,
+			admin,
+			editor,
 		} ) => {
-			await page.goto( '/wp-admin/widgets.php' );
-			await editorUtils.closeModalByName( 'Welcome to block Widgets' );
+			await admin.visitWidgetEditor();
 
-			await editorUtils.openGlobalBlockInserter();
-			await editorUtils.page
+			await editor.openGlobalBlockInserter();
+			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( 'woocommerce/cart' );
-			const cartButton = editorUtils.page.getByRole( 'option', {
+			const cartButton = editor.page.getByRole( 'option', {
 				name: 'Cart',
 				exact: true,
 			} );

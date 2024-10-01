@@ -5,9 +5,9 @@ on:
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
-    GIT_COMMITTER_EMAIL: 'no-reply@woo.com'
+    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
-    GIT_AUTHOR_EMAIL: 'no-reply@woo.com'
+    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
 permissions: {}
 

@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Card, CardBody } from '@wordpress/components';
 import { Stepper } from '@woocommerce/components';
 
 export const Placeholder = () => {
-	const classes = classnames(
+	const classes = clsx(
 		'is-loading',
 		'woocommerce-task-payment-method',
 		'woocommerce-task-card'

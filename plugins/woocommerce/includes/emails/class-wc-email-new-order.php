@@ -89,6 +89,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$order = wc_get_order( $order_id );
 			}
 
+			$email_already_sent = false;
 			if ( is_a( $order, 'WC_Order' ) ) {
 				$this->object                         = $order;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
@@ -108,10 +109,11 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
-				$order->update_meta_data( '_new_order_email_sent', 'true' );
-				$order->save();
+				$email_sent_successfully = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				if ( $email_sent_successfully ) {
+					$order->update_meta_data( '_new_order_email_sent', 'true' );
+					$order->save();
+				}
 			}
 
 			$this->restore_locale();
@@ -163,23 +165,6 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function get_default_additional_content() {
 			return __( 'Congratulations on the sale.', 'woocommerce' );
-		}
-
-		/**
-		 * Return content from the additional_content field.
-		 *
-		 * Displayed above the footer.
-		 *
-		 * @since 3.7.0
-		 * @return string
-		 */
-		public function get_additional_content() {
-			/**
-			 * This filter is documented in ./class-wc-email.php
-			 *
-			 * @since 7.8.0
-			 */
-			return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $this->get_option( 'additional_content' ) ), $this->object, $this );
 		}
 
 		/**

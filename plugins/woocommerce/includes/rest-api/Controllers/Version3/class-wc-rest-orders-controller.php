@@ -131,7 +131,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
 									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
+										$this->remove_item( $order, $key, $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
 									}
@@ -168,6 +168,46 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
+	}
+
+	/**
+	 * Wrapper method to remove order items.
+	 * When updating, the item ID provided is checked to ensure it is associated
+	 * with the order.
+	 *
+	 * @param WC_Order $order     The order to remove the item from.
+	 * @param string   $item_type The item type (from the request, not from the item, e.g. 'line_items' rather than 'line_item').
+	 * @param int      $item_id   The ID of the item to remove.
+	 *
+	 * @return void
+	 * @throws WC_REST_Exception If item ID is not associated with order.
+	 */
+	protected function remove_item( WC_Order $order, string $item_type, int $item_id ): void {
+		$item = $order->get_item( $item_id );
+
+		if ( ! $item ) {
+			throw new WC_REST_Exception(
+				'woocommerce_rest_invalid_item_id',
+				esc_html__( 'Order item ID provided is not associated with order.', 'woocommerce' ),
+				400
+			);
+		}
+
+		if ( 'line_items' === $item_type ) {
+			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+			wc_maybe_adjust_line_item_product_stock( $item, 0 );
+		}
+
+		/**
+		 * Allow extensions be notified before the item is removed.
+		 *
+		 * @param WC_Order_Item $item The item object.
+		 *
+		 * @since 9.3.0.
+		 */
+		do_action( 'woocommerce_rest_remove_order_item', $item );
+
+		$order->remove_item( $item_id );
 	}
 
 	/**
@@ -219,7 +259,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			// Set status.
 			if ( ! empty( $request['status'] ) ) {
-				$object->set_status( $request['status'] );
+				$manual_update = isset( $request['manual_update'] ) ? $request['manual_update'] : false;
+				$object->set_status( $request['status'], '', $manual_update );
 			}
 
 			$object->save();
@@ -251,17 +292,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$statuses = $request['status'];
 		unset( $request['status'] );
 
-		// Prevents WC_REST_Orders_V2_Controller::prepare_objects_query() from generating a meta_query for 'customer'.
-		// which COT can handle as a native field.
-		$cot_customer =
-			( OrderUtil::custom_orders_table_usage_is_enabled() && isset( $request['customer'] ) )
-			? $request['customer']
-			: null;
-
-		if ( ! is_null( $cot_customer ) ) {
-			unset( $request['customer'] );
-		}
-
 		$args = parent::prepare_objects_query( $request );
 
 		$args['post_status'] = array();
@@ -280,12 +310,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
-		// Add back 'customer' to args and request.
-		if ( ! is_null( $cot_customer ) ) {
-			$args['customer']    = $cot_customer;
-			$request['customer'] = $cot_customer;
-		}
-
 		return $args;
 	}
 
@@ -298,6 +322,13 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$schema = parent::get_item_schema();
 
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
+
+		$schema['properties']['manual_update'] = array(
+			'default'     => false,
+			'description' => __( 'Set the action as manual so that the order note registers as "added by user".', 'woocommerce' ),
+			'type'        => 'boolean',
+			'context'     => array( 'edit' ),
+		);
 
 		return $schema;
 	}

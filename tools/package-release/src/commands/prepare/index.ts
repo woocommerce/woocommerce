@@ -2,15 +2,18 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
 /**
  * Internal dependencies
  */
 import {
-	getAllPackges,
+	getAllPackages,
 	validatePackage,
 	getFilepathFromPackageName,
+	getPackageJson,
+	getComposerJson,
+	getPackageType,
 } from '../../validate';
 import {
 	getNextVersion,
@@ -66,7 +69,7 @@ export default class PackagePrepare extends Command {
 		}
 
 		if ( flags.all ) {
-			await this.preparePackages( getAllPackges() );
+			await this.preparePackages( getAllPackages() );
 			return;
 		}
 
@@ -105,6 +108,7 @@ export default class PackagePrepare extends Command {
 						writeChangelog( name );
 					} else {
 						if ( initialRelease ) {
+							// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
 							nextVersion = '1.0.0';
 						} else {
 							throw new Error(
@@ -138,16 +142,28 @@ export default class PackagePrepare extends Command {
 	 * @param {string} version Next version.
 	 */
 	private bumpPackageVersion( name: string, version: string ) {
-		const filepath = getFilepathFromPackageName( name );
-		const packageJsonFilepath = `${ filepath }/package.json`;
 		try {
-			const packageJson = JSON.parse(
-				readFileSync( packageJsonFilepath, 'utf8' )
-			);
-			packageJson.version = version;
+			const filepath = getFilepathFromPackageName( name );
+			const packageType = getPackageType( name );
+			let jsonFilepath;
+			let json;
+
+			if ( packageType === 'js' ) {
+				jsonFilepath = `${ filepath }/package.json`;
+				json = getPackageJson( name );
+			} else if ( packageType === 'php' ) {
+				jsonFilepath = `${ filepath }/composer.json`;
+				json = getComposerJson( name );
+			} else {
+				this.error(
+					`Can't bump version for ${ name }. The package does not exist.`
+				);
+			}
+
+			json.version = version;
 			writeFileSync(
-				packageJsonFilepath,
-				JSON.stringify( packageJson, null, '\t' ) + '\n'
+				jsonFilepath,
+				JSON.stringify( json, null, '\t' ) + '\n'
 			);
 		} catch ( e ) {
 			this.error( `Can't bump version for ${ name }.` );

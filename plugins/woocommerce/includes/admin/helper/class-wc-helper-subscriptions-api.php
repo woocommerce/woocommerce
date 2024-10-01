@@ -139,6 +139,8 @@ class WC_Helper_Subscriptions_API {
 	 */
 	public static function refresh() {
 		WC_Helper::refresh_helper_subscriptions();
+		WC_Helper::get_subscriptions();
+		WC_Helper::get_product_usage_notice_rules();
 		self::get_subscriptions();
 	}
 
@@ -300,7 +302,10 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
-		$install_url = WC_Helper::get_subscription_install_url( $subscription['product_key'] );
+		$install_url = WC_Helper::get_subscription_install_url(
+			$subscription['product_key'],
+			$subscription['product_slug']
+		);
 
 		if ( ! $install_url ) {
 			wp_send_json_error(

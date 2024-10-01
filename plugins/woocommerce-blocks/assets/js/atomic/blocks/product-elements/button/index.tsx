@@ -1,9 +1,9 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /**
  * External dependencies
  */
 import { Icon, button } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 /**
  * Internal dependencies
@@ -14,24 +14,23 @@ import metadata from './block.json';
 
 const featurePluginSupport = {
 	...metadata.supports,
-	...( isFeaturePluginBuild() && {
-		color: {
-			text: true,
-			background: true,
-			link: false,
+
+	color: {
+		text: true,
+		background: true,
+		link: false,
+		__experimentalSkipSerialization: true,
+	},
+	__experimentalBorder: {
+		radius: true,
+		__experimentalSkipSerialization: true,
+	},
+	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
+		spacing: {
+			margin: true,
+			padding: true,
 			__experimentalSkipSerialization: true,
 		},
-		__experimentalBorder: {
-			radius: true,
-			__experimentalSkipSerialization: true,
-		},
-		...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
-			spacing: {
-				margin: true,
-				padding: true,
-				__experimentalSkipSerialization: true,
-			},
-		} ),
 		typography: {
 			fontSize: true,
 			lineHeight: true,
@@ -48,15 +47,15 @@ const featurePluginSupport = {
 		__experimentalSelector:
 			'.wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button',
 	} ),
-	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' &&
-		! isFeaturePluginBuild() && {
-			spacing: {
-				margin: true,
-			},
-		} ),
+	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
+		spacing: {
+			margin: true,
+		},
+	} ),
 };
 // @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
 registerBlockType( metadata, {
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon

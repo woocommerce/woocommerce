@@ -3,6 +3,12 @@
 	width: 350px;
 	height: 100%;
 	border-right: 1px solid $gray-400;
+	background: $studio-white;
+	@media only screen and (max-width: $break-medium) {
+		width: 100%;
+		position: absolute;
+		z-index: 100;
+	}
 
 	&-close-button {
 		position: absolute;
@@ -22,6 +28,10 @@
 			display: flex;
 			flex-direction: column;
 			height: calc(100% - $grid-unit-60);
+			.block-editor-list-view-tree {
+				margin: 0;
+				width: 100%;
+			}
 		}
 	}
 
@@ -30,10 +40,5 @@
 		overflow-x: hidden;
 		overflow-y: auto;
 		padding: $grid-unit calc($grid-unit - 2px);
-
-		.block-editor-list-view-tree {
-			margin: 0;
-			width: 100%;
-		}
 	}
 }

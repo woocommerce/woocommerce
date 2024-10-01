@@ -1,8 +1,17 @@
 /**
  * External dependencies
  */
-import { InnerBlocks } from '@wordpress/block-editor';
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import clsx from 'clsx';
 
-export default function save() {
-	return <InnerBlocks.Content />;
-}
+/**
+ * Internal dependencies
+ */
+
+export const Save = (): JSX.Element => {
+	const blockProps = useBlockProps.save( {
+		className: clsx( 'wc-block-product-filters' ),
+	} );
+	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
+	return <div { ...innerBlocksProps } />;
+};

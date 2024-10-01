@@ -94,6 +94,7 @@
 	margin: $gap 0;
 	padding: $gap 0 0;
 	border-top: 1px solid $gray-100;
+	clear: both;
 
 	.components-base-control__field {
 		margin-bottom: $gap;
@@ -117,10 +118,14 @@
 		padding: $gap-small 0;
 		text-align: center;
 		border: none;
+		display: flex;
+		justify-content: center;
 
 		.woocommerce-search-list__not-found-icon,
 		.woocommerce-search-list__not-found-text {
-			display: inline-block;
+			display: flex;
+			align-content: center;
+			flex-wrap: wrap;
 		}
 
 		.woocommerce-search-list__not-found-icon {
@@ -172,7 +177,6 @@
 			cursor: pointer;
 
 			&::after {
-				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" fill="#{encode-color($gray-700)}" /></svg>');
 				background-position: center right;
 				background-repeat: no-repeat;
 				background-size: contain;
@@ -180,6 +184,9 @@
 				height: $gap-large;
 				margin-left: $gap-smaller;
 				width: $gap-large;
+			}
+			&:not(.is-expanded)::after {
+				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="#{encode-color($gray-700)}" /></svg>');
 			}
 
 			&[disabled]::after {
@@ -189,7 +196,7 @@
 			}
 
 			&.is-expanded::after {
-				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="#{encode-color($gray-700)}" /></svg>');
+				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" fill="#{encode-color($gray-700)}" /></svg>');
 			}
 		}
 
@@ -236,7 +243,7 @@
 
 		@for $i from 1 to 5 {
 			&.depth-#{$i} {
-				padding-left: $gap * ( $i + 1 );
+				padding-left: $gap * ($i + 1);
 			}
 
 			&.depth-#{$i} .woocommerce-search-list__item-label::before {

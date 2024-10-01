@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { FontFamiliesToInstall } from '~/customize-store/types/font';
 import { Look } from '~/customize-store/design-with-ai/types';
 
 export const FONT_PREVIEW_LARGE_WIDTH = 136;
@@ -8,6 +9,69 @@ export const FONT_PREVIEW_LARGE_HEIGHT = 106;
 export const FONT_PREVIEW_WIDTH = 120;
 export const FONT_PREVIEW_HEIGHT = 74;
 export const SYSTEM_FONT_SLUG = 'system-font';
+
+export const FONT_FAMILIES_TO_INSTALL = {
+	inter: {
+		fontFamily: 'Inter',
+		fontWeights: [ '400', '500', '600' ],
+		fontStyles: [ 'normal' ],
+	},
+	'bodoni-moda': {
+		fontFamily: 'Bodoni Moda',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	overpass: {
+		fontFamily: 'Overpass',
+		fontWeights: [ '300', '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	'albert-sans': {
+		fontFamily: 'Albert Sans',
+		fontWeights: [ '700' ],
+		fontStyles: [ 'normal' ],
+	},
+	lora: {
+		fontFamily: 'Lora',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	montserrat: {
+		fontFamily: 'Montserrat',
+		fontWeights: [ '500', '700' ],
+		fontStyles: [ 'normal' ],
+	},
+	arvo: {
+		fontFamily: 'Arvo',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	rubik: {
+		fontFamily: 'Rubik',
+		fontWeights: [ '400', '800' ],
+		fontStyles: [ 'normal' ],
+	},
+	newsreader: {
+		fontFamily: 'Newsreader',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	cormorant: {
+		fontFamily: 'Cormorant',
+		fontWeights: [ '400', '500' ],
+		fontStyles: [ 'normal' ],
+	},
+	'work-sans': {
+		fontFamily: 'Work Sans',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	raleway: {
+		fontFamily: 'Raleway',
+		fontWeights: [ '700' ],
+		fontStyles: [ 'normal' ],
+	},
+} as FontFamiliesToInstall;
 
 // Generated from /wpcom/v2/sites/{site_id}/global-styles-variation/font-pairings
 // TODO: Consider creating an API endpoint for this data
@@ -161,6 +225,15 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--albert-sans)',
+						fontSize: 'var(--wp--preset--font-size--medium)',
+					},
+				},
+			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--lora)',
 				fontStyle: 'normal',
@@ -193,8 +266,7 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 			elements: {
 				button: {
 					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
+						fontFamily: 'var(--wp--preset--font-family--arvo)',
 						fontStyle: 'normal',
 						fontWeight: '500',
 					},
@@ -319,6 +391,14 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--newsreader)',
+					},
+				},
+			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--newsreader)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
@@ -353,6 +433,13 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 						fontFamily: 'var(--wp--preset--font-family--cormorant)',
 						fontStyle: 'normal',
 						fontWeight: '500',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--cormorant)',
 					},
 				},
 			},
@@ -391,10 +478,93 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--raleway)',
+					},
+				},
+			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--cormorant)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
 				lineHeight: '1.67',
+			},
+		},
+	},
+];
+
+export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
+	{
+		title: 'Cardo Font + System Sans-serif',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Cardo',
+							// Use the theme-defined variable: https://github.com/WordPress/twentytwentyfour/blob/trunk/theme.json#L240
+							slug: 'heading',
+						},
+						{
+							fontFamily: 'System Sans-serif',
+							slug: 'system-sans-serif',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--heading)',
+						fontStyle: 'normal',
+						fontWeight: '300',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--system-sans-serif)',
+			},
+		},
+	},
+	{
+		title: 'Inter + Cardo Font',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Inter',
+							// Use the theme-defined variable: https://github.com/WordPress/twentytwentyfour/blob/trunk/theme.json#L215
+							slug: 'body',
+						},
+						{
+							fontFamily: 'Cardo',
+							// Use the theme-defined variable: https://github.com/WordPress/twentytwentyfour/blob/trunk/theme.json#L240
+							slug: 'heading',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--body)',
+						fontStyle: 'normal',
+						fontWeight: '300',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--heading)',
 			},
 		},
 	},
@@ -426,7 +596,7 @@ export const FONT_PAIRINGS = [
 				button: {
 					typography: {
 						fontFamily:
-							'var(--wp--preset--font-family--commissioner)',
+							'var(--wp--preset--font-family--crimson-pro)',
 						fontWeight: '400',
 						lineHeight: '1',
 					},
@@ -858,4 +1028,5 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	...FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	...FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 ];

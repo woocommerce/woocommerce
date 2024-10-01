@@ -15,7 +15,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -48,7 +48,7 @@ describe( 'ReviewsFrontendBlock', () => {
 		rating: 1,
 	};
 
-	it( 'Does not render when there are no reviews', () => {
+	it( 'Does not render when there are no reviews', async () => {
 		const { container } = render(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore - withReviews HOC will need refactoring to TS to fix this.
@@ -62,8 +62,9 @@ describe( 'ReviewsFrontendBlock', () => {
 				onChangeOrderby={ jest.fn() }
 			/>
 		);
-
-		expect( container.firstChild ).toBeNull();
+		await act( async () => {
+			expect( container ).toBeEmptyDOMElement();
+		} );
 	} );
 
 	it( 'Shows load more button when there are more reviews than displayed.', async () => {

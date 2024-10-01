@@ -57,7 +57,7 @@ function getProductTypeOptionsString(
 		.join( ', ' );
 }
 
-const getProductData = () => {
+export const getProductData = () => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
 

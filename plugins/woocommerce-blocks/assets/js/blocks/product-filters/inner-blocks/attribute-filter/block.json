@@ -1,27 +1,68 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/product-filters-attribute",
+	"name": "woocommerce/product-filter-attribute",
 	"version": "1.0.0",
-	"title": "Product Filters: Attribute",
+	"title": "Attribute (Experimental)",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
-	"ancestor": [ "woocommerce/product-filters" ],
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filters"
+	],
 	"supports": {
 		"interactivity": true,
 		"color": {
 			"text": true,
-			"background": false
+			"background": false,
+			"__experimentalDefaultControls": {
+				"text": false
+			}
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": false
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false,
+				"blockGap": false
+			}
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": false,
+				"radius": false,
+				"style": false,
+				"width": false
+			}
 		}
 	},
-	"usesContext": [ "collectionData" ],
+	"usesContext": [
+		"query",
+		"queryId"
+	],
 	"attributes": {
-		"queryParam": {
-			"type": "object",
-			"default": {}
-		},
 		"attributeId": {
 			"type": "number",
 			"default": 0
@@ -36,7 +77,7 @@
 		},
 		"displayStyle": {
 			"type": "string",
-			"default": "list"
+			"default": "woocommerce/product-filter-checkbox-list"
 		},
 		"selectType": {
 			"type": "string",
@@ -45,6 +86,23 @@
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"sortOrder": {
+			"type": "string",
+			"default": "count-desc"
+		},
+		"hideEmpty": {
+			"type": "boolean",
+			"default": true
+		},
+		"clearButton": {
+			"type": "boolean",
+			"default":true
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
 		}
 	}
 }

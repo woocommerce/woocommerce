@@ -1,14 +1,14 @@
 <?php
-/**
- * Tests for the HtmlSanitizer utility.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 /**
  * Tests relating to HtmlSanitizer.
  */
-class HtmlSanitizerTest extends WC_Unit_Test_Case {
+class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @var HtmlSanitizer
 	 */
@@ -77,5 +77,30 @@ class HtmlSanitizerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_no_kses_rules_specified() {
 		$this->assertEquals( 'foo', $this->sut->sanitize( '<p>foo</p>', array() ) );
+	}
+
+	/**
+	 * Describes expected behavior for the sanitizer's styled_post_content method.
+	 * @return void
+	 */
+	public function test_styled_post_content(): void {
+		$initial_html = '
+			<style> p { color: teal; } </style>
+			<script> alert( "I am bad, and I live by my own rules." ); </script>
+			<div>
+				<p>Waltz, bad nymph, for quick jigs vex.</p>
+				<p>Two driven jocks help fax my big quiz.</p>
+				<a href="http://five.quacking">Five quacking zephyrs jolt my wax bed.</a>
+			</div>
+		';
+
+		$expected_output = str_replace( '<script>', '', $initial_html );
+		$expected_output = str_replace( '</script>', '', $expected_output );
+
+		$this->assertEquals(
+			$this->sut->styled_post_content( $initial_html ),
+			$expected_output,
+			'We retain the protections offered by wp_kses_post, but also allow the use of `style` elements.'
+		);
 	}
 }

@@ -1,45 +1,46 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, calendar } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import {
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_PRODUCT_TEMPLATE,
-} from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
+	CoreCollectionNames,
+	CoreFilterNames,
+	ETimeFrameOperator,
+} from '../types';
 
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,
 	title: __( 'New Arrivals', 'woocommerce' ),
-	icon: ( <Icon icon={ calendar } /> ) as BlockIcon,
+	icon: <Icon icon={ calendar } />,
 	description: __( 'Recommend your newest products.', 'woocommerce' ),
 	keywords: [ 'newest products', 'product collection' ],
 	scope: [],
 };
 
 const attributes = {
-	...DEFAULT_ATTRIBUTES,
 	displayLayout: {
 		type: 'flex',
 		columns: 5,
 		shrinkColumns: true,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
-		inherit: false,
 		orderBy: 'date',
 		order: 'desc',
 		perPage: 5,
 		pages: 1,
+		timeFrame: {
+			operator: ETimeFrameOperator.IN,
+			value: '-7 days',
+		},
 	},
-	collection: collection.name,
-	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
+	hideControls: [ CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [

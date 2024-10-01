@@ -214,6 +214,12 @@ class WC_Structured_Data {
 			$markup['sku'] = $product->get_id();
 		}
 
+		// Prepare GTIN and load it if it's valid.
+		$gtin = $this->prepare_gtin( $product->get_global_unique_id() );
+		if ( $this->is_valid_gtin( $gtin ) ) {
+			$markup['gtin'] = $gtin;
+		}
+
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
@@ -241,6 +247,36 @@ class WC_Structured_Data {
 						'offerCount' => count( $product->get_children() ),
 					);
 				}
+			} elseif ( $product->is_type( 'grouped' ) ) {
+				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
+					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+				}
+
+				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+				$children         = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+				$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+
+				foreach ( $children as $child ) {
+					if ( '' !== $child->get_price() ) {
+						$child_prices[] = $price_function( $child );
+					}
+				}
+				if ( empty( $child_prices ) ) {
+					$min_price = 0;
+				} else {
+					$min_price = min( $child_prices );
+				}
+
+				$markup_offer = array(
+					'@type'              => 'Offer',
+					'price'              => wc_format_decimal( $min_price, wc_get_price_decimals() ),
+					'priceValidUntil'    => $price_valid_until,
+					'priceSpecification' => array(
+						'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
+						'priceCurrency'         => $currency,
+						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+					),
+				);
 			} else {
 				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
 					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
@@ -540,5 +576,31 @@ class WC_Structured_Data {
 		);
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_order', $markup, $sent_to_admin, $order ), true );
+	}
+
+	/**
+	 * Check if a GTIN is valid.
+	 * A valid GTIN is a string containing 8,12,13 or 14 digits.
+	 *
+	 * @see https://schema.org/gtin
+	 * @param string $gtin The GTIN to check.
+	 * @return bool True if valid. False otherwise.
+	 */
+	public function is_valid_gtin( $gtin ) {
+		return is_string( $gtin ) && preg_match( '/^(\d{8}|\d{12,14})$/', $gtin );
+	}
+
+	/**
+	 * Prepare a GTIN input removing everything except numbers.
+	 *
+	 * @param string $gtin The GTIN to prepare.
+	 * @return string Empty string if no GTIN is provided or the string with the replacements.
+	 */
+	public function prepare_gtin( $gtin ) {
+		if ( ! $gtin || ! is_string( $gtin ) ) {
+			return '';
+		}
+
+		return preg_replace( '/[^0-9]/', '', $gtin );
 	}
 }

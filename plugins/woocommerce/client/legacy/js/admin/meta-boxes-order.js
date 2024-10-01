@@ -636,6 +636,7 @@ jQuery( function ( $ ) {
 					} else {
 						window.alert( response.data.error );
 					}
+					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 				});
 			}
@@ -664,6 +665,7 @@ jQuery( function ( $ ) {
 				} else {
 					window.alert( response.data.error );
 				}
+				wc_meta_boxes_order.init_tiptip();
 				wc_meta_boxes_order_items.unblock();
 			});
 
@@ -1435,6 +1437,12 @@ jQuery( function ( $ ) {
 				.on( 'click', '#copy-download-link', this.copy_link )
 				.on( 'aftercopy', '#copy-download-link', this.copy_success )
 				.on( 'aftercopyfailure', '#copy-download-link', this.copy_fail );
+
+			// Work around WP's callback for '.handlediv' hiding the containing WP metabox instead of just the WC one.
+			$( '.order_download_permissions .wc-metabox .handlediv' ).on( 'click', function( e ) {
+				e.stopImmediatePropagation();
+				$( this ).closest( 'h3' ).trigger( 'click' );
+			} );
 		},
 
 		grant_access: function() {

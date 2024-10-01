@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
-use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -125,30 +125,6 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 			)
 		);
-
-		/*
-		 * This is a temporary solution to override /jetpack/v4/connection/data endpoint
-		 * registered by Jetpack Connection when Jetpack is not installed.
-		 *
-		 * For more details, see https://github.com/woocommerce/woocommerce/issues/38979
-		 */
-		if ( Constants::get_constant( 'JETPACK__VERSION' ) === null && wp_is_mobile() ) {
-			register_rest_route(
-				'jetpack/v4',
-				'/connection/data',
-				array(
-					array(
-						'methods'             => 'GET',
-						'permission_callback' => '__return_true',
-						'callback'            => function() {
-							return new WP_REST_Response( null, 404 );
-						},
-					),
-				),
-				true
-			);
-		}
-		
 		add_action( 'woocommerce_plugins_install_error', array( $this, 'log_plugins_install_error' ), 10, 4 );
 		add_action( 'woocommerce_plugins_install_api_error', array( $this, 'log_plugins_install_api_error' ), 10, 2 );
 	}
@@ -217,7 +193,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$actions = array_filter(
 			PluginsHelper::get_action_data( $actions ),
-			function( $action ) use ( $job_id ) {
+			function ( $action ) use ( $job_id ) {
 				return $action['job_id'] === $job_id;
 			}
 		);
@@ -261,19 +237,64 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		}
 
 		$redirect_url = $request->get_param( 'redirect_url' );
-		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
+		$authorization_url = add_query_arg( 'locale', $this->get_wpcom_locale(), $authorization_url );
+
+		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
+			$calypso_env = 'horizon';
+		}
 
 		return [
 			'success' => ! $errors->has_errors(),
 			'errors'  => $errors->get_error_messages(),
 			'url'     => add_query_arg(
-				[
+				array(
 					'from'        => $request->get_param( 'from' ),
 					'calypso_env' => $calypso_env,
-				],
-				$manager->get_authorization_url( null, $redirect_url )
+				),
+				$authorization_url,
 			),
 		];
+	}
+
+	/**
+	 * Return a locale string for wpcom.
+	 *
+	 * @return string
+	 */
+	private function get_wpcom_locale() {
+		// List of locales that should be used with region code.
+		$locale_to_lang = array(
+			'bre'   => 'br',
+			'de_AT' => 'de-at',
+			'de_CH' => 'de-ch',
+			'de'    => 'de_formal',
+			'el'    => 'el-po',
+			'en_GB' => 'en-gb',
+			'es_CL' => 'es-cl',
+			'es_MX' => 'es-mx',
+			'fr_BE' => 'fr-be',
+			'fr_CA' => 'fr-ca',
+			'nl_BE' => 'nl-be',
+			'nl'    => 'nl_formal',
+			'pt_BR' => 'pt-br',
+			'sr'    => 'sr_latin',
+			'zh_CN' => 'zh-cn',
+			'zh_HK' => 'zh-hk',
+			'zh_SG' => 'zh-sg',
+			'zh_TW' => 'zh-tw',
+		);
+
+		$system_locale = get_locale();
+		if ( isset( $locale_to_lang[ $system_locale ] ) ) {
+			// Return the locale with region code if it's in the list.
+			return $locale_to_lang[ $system_locale ];
+		}
+
+		// If the locale is not in the list, return the language code only.
+		return explode( '_', $system_locale )[0];
 	}
 
 	/**
@@ -425,7 +446,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 				$slug
 			),
-			'type'				    => 'plugin_info_api_error',
+			'type'                  => 'plugin_info_api_error',
 			'slug'                  => $slug,
 			'api_version'           => $api->version,
 			'api_download_link'     => $api->download_link,

@@ -32,7 +32,7 @@ export const registerBlockSingleProductTemplate = ( {
 	isAvailableOnPostEditor,
 }: {
 	blockName: string;
-	blockMetadata: Partial< BlockConfiguration >;
+	blockMetadata?: string | Partial< BlockConfiguration >;
 	blockSettings: Partial< BlockConfiguration >;
 	isAvailableOnPostEditor: boolean;
 	isVariationBlock?: boolean;
@@ -40,13 +40,18 @@ export const registerBlockSingleProductTemplate = ( {
 } ) => {
 	let currentTemplateId: string | undefined = '';
 
+	if ( ! blockMetadata ) {
+		blockMetadata = blockName;
+	}
+
+	const editSiteStore = select( 'core/edit-site' );
+
 	subscribe( () => {
 		const previousTemplateId = currentTemplateId;
-		const store = select( 'core/edit-site' );
 
 		// With GB 16.3.0 the return type can be a number: https://github.com/WordPress/gutenberg/issues/53230
 		currentTemplateId = parseTemplateId(
-			store?.getEditedPostId< string | number | undefined >()
+			editSiteStore?.getEditedPostId< string | number | undefined >()
 		);
 		const hasChangedTemplate = previousTemplateId !== currentTemplateId;
 		const hasTemplateId = Boolean( currentTemplateId );
@@ -104,7 +109,11 @@ export const registerBlockSingleProductTemplate = ( {
 		// This subscribe callback could be invoked with the core/blocks store
 		// which would cause infinite registration loops because of the `registerBlockType` call.
 		// This local cache helps prevent that.
-		if ( ! isBlockRegistered && isAvailableOnPostEditor ) {
+		if (
+			! isBlockRegistered &&
+			isAvailableOnPostEditor &&
+			! editSiteStore
+		) {
 			if ( isVariationBlock ) {
 				blocksRegistered.add( variationName );
 				registerBlockVariation(

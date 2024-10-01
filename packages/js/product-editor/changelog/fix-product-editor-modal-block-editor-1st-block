@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Handle description properly when it contains a single non-paragraph block

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<strong><?php echo esc_html( wc_attribute_label( $attribute->get_name() ) ); ?></strong>
 				<input type="hidden" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
 			<?php else : ?>
-				<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'f.e. size or color', 'woocommerce' ); ?>" />
+				<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'e.g. length or weight', 'woocommerce' ); ?>" />
 			<?php endif; ?>
 			<input type="hidden" name="attribute_position[<?php echo esc_attr( $i ); ?>]" class="attribute_position" value="<?php echo esc_attr( $attribute->get_position() ); ?>" />
 		</td>
@@ -37,10 +37,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				if ( 'select' === $attribute_taxonomy->attribute_type ) {
 					$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
+					/**
+					* Filter the length (number of terms) rendered in the list.
+					*
+					* @since 8.8.0
+					* @param int $term_limit The maximum number of terms to display in the list.
+					*/
+					$term_limit = absint( apply_filters( 'woocommerce_admin_terms_metabox_datalimit', 50 ) );
 					?>
 					<select multiple="multiple"
 							data-minimum_input_length="0"
-							data-limit="50" data-return_id="id"
+							data-limit="<?php echo esc_attr( $term_limit ); ?>" data-return_id="id"
 							data-placeholder="<?php esc_attr_e( 'Select values', 'woocommerce' ); ?>"
 							data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
 							class="multiselect attribute_values wc-taxonomy-term-search"

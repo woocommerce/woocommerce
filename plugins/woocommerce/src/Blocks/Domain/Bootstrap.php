@@ -1,12 +1,18 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Domain;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\Patterns\AIPatterns;
+use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
+use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
@@ -15,6 +21,8 @@ use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Migration;
@@ -25,13 +33,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ClassicTemplatesCompatibility;
-use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
@@ -39,6 +41,8 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
+use Automattic\WooCommerce\Blocks\TemplateOptions;
+
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -111,7 +115,7 @@ class Bootstrap {
 
 		add_action(
 			'admin_init',
-			function() {
+			function () {
 				// Delete this notification because the blocks are included in WC Core now. This will handle any sites
 				// with lingering notices.
 				InboxNotifications::delete_surface_cart_checkout_blocks_notification();
@@ -120,9 +124,23 @@ class Bootstrap {
 			0
 		);
 
-		$is_rest = wc()->is_rest_api_request();
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
+		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry at the end of `after_setup_theme`
+		// so themes had the opportunity to declare support for template parts.
+		add_action(
+			'after_setup_theme',
+			function () {
+				$is_store_api_request = wc()->is_store_api_request();
+
+				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+					$this->container->get( BlockTemplatesRegistry::class )->init();
+					$this->container->get( BlockTemplatesController::class )->init();
+				}
+			},
+			999
+		);
+
+		$is_rest              = wc()->is_rest_api_request();
+		$is_store_api_request = wc()->is_store_api_request();
 
 		// Load and init assets.
 		$this->container->get( StoreApi::class )->init();
@@ -131,7 +149,7 @@ class Bootstrap {
 		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( TasksController::class )->init();
-		$this->container->get( CheckoutFields::class );
+		$this->container->get( CheckoutFields::class )->init();
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -140,26 +158,20 @@ class Bootstrap {
 			$this->container->get( AssetsController::class );
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
-			$this->container->get( CheckoutFields::class )->init();
+			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();
 		}
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
 			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
 			// regular rest requests to maintain compatibility with the store editor.
+			$this->container->get( AIPatterns::class );
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
-			$this->container->get( BlockTemplatesController::class );
-			$this->container->get( ProductSearchResultsTemplate::class );
-			$this->container->get( ProductAttributeTemplate::class );
-			$this->container->get( CartTemplate::class );
-			$this->container->get( CheckoutTemplate::class );
-			$this->container->get( CheckoutHeaderTemplate::class );
-			$this->container->get( OrderConfirmationTemplate::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
-			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
-			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
+			$this->container->get( PTKPatternsStore::class );
+			$this->container->get( TemplateOptions::class )->init();
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -185,14 +197,15 @@ class Bootstrap {
 		}
 		add_action(
 			'admin_notices',
-			function() {
+			function () {
 				echo '<div class="error"><p>';
 				printf(
-					/* translators: %1$s is the install command, %2$s is the build command, %3$s is the watch command. */
-					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the plugin directory, run %1$s to install dependencies, %2$s to build the files or %3$s to build the files and watch for changes.', 'woocommerce' ),
-					'<code>npm install</code>',
-					'<code>npm run build</code>',
-					'<code>npm start</code>'
+					/* translators: %1$s is the node install command, %2$s is the install command, %3$s is the build command, %4$s is the watch command. */
+					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the root directory, run %1$s to ensure your node version is aligned, run %2$s to install dependencies, %3$s to build the files or %4$s to build the files and watch for changes.', 'woocommerce' ),
+					'<code>nvm use</code>',
+					'<code>pnpm install</code>',
+					'<code>pnpm --filter="@woocommerce/plugin-woocommerce" build</code>',
+					'<code>pnpm --filter="@woocommerce/plugin-woocommerce" watch:build</code>'
 				);
 				echo '</p></div>';
 			}
@@ -224,19 +237,19 @@ class Bootstrap {
 		);
 		$this->container->register(
 			AssetDataRegistry::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new AssetDataRegistry( $container->get( AssetApi::class ) );
 			}
 		);
 		$this->container->register(
 			AssetsController::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new AssetsController( $container->get( AssetApi::class ) );
 			}
 		);
 		$this->container->register(
 			PaymentMethodRegistry::class,
-			function() {
+			function () {
 				return new PaymentMethodRegistry();
 			}
 		);
@@ -255,48 +268,6 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			BlockTemplatesController::class,
-			function ( Container $container ) {
-				return new BlockTemplatesController( $container->get( Package::class ) );
-			}
-		);
-		$this->container->register(
-			ProductSearchResultsTemplate::class,
-			function () {
-				return new ProductSearchResultsTemplate();
-			}
-		);
-		$this->container->register(
-			ProductAttributeTemplate::class,
-			function () {
-				return new ProductAttributeTemplate();
-			}
-		);
-		$this->container->register(
-			CartTemplate::class,
-			function () {
-				return new CartTemplate();
-			}
-		);
-		$this->container->register(
-			CheckoutTemplate::class,
-			function () {
-				return new CheckoutTemplate();
-			}
-		);
-		$this->container->register(
-			CheckoutHeaderTemplate::class,
-			function () {
-				return new CheckoutHeaderTemplate();
-			}
-		);
-		$this->container->register(
-			OrderConfirmationTemplate::class,
-			function () {
-				return new OrderConfirmationTemplate();
-			}
-		);
-		$this->container->register(
 			ClassicTemplatesCompatibility::class,
 			function ( Container $container ) {
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
@@ -304,53 +275,54 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			ArchiveProductTemplatesCompatibility::class,
-			function () {
-				return new ArchiveProductTemplatesCompatibility();
-			}
-		);
-
-		$this->container->register(
-			SingleProductTemplateCompatibility::class,
-			function () {
-				return new SingleProductTemplateCompatibility();
-			}
-		);
-		$this->container->register(
 			DraftOrders::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new DraftOrders( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(
 			CreateAccount::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new CreateAccount( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(
 			GoogleAnalytics::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new GoogleAnalytics( $asset_api );
 			}
 		);
 		$this->container->register(
 			Notices::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new Notices( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(
 			Hydration::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new Hydration( $container->get( AssetDataRegistry::class ) );
 			}
 		);
 		$this->container->register(
 			CheckoutFields::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new CheckoutFields( $container->get( AssetDataRegistry::class ) );
+			}
+		);
+		$this->container->register(
+			CheckoutFieldsAdmin::class,
+			function ( Container $container ) {
+				$checkout_fields_controller = $container->get( CheckoutFields::class );
+				return new CheckoutFieldsAdmin( $checkout_fields_controller );
+			}
+		);
+		$this->container->register(
+			CheckoutFieldsFrontend::class,
+			function ( Container $container ) {
+				$checkout_fields_controller = $container->get( CheckoutFields::class );
+				return new CheckoutFieldsFrontend( $checkout_fields_controller );
 			}
 		);
 		$this->container->register(
@@ -367,39 +339,67 @@ class Bootstrap {
 				return new StoreApi();
 			}
 		);
+		$this->container->register(
+			TemplateOptions::class,
+			function () {
+				return new TemplateOptions();
+			}
+		);
 		// Maintains backwards compatibility with previous Store API namespace.
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\Formatters',
-			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '7.2.0', 'Automattic\WooCommerce\StoreApi\Formatters', '7.4.0' );
+			function ( Container $container ) {
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '6.4.0', 'Automattic\WooCommerce\StoreApi\Formatters', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Formatters::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi',
-			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '7.2.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '7.4.0' );
+			function ( Container $container ) {
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '6.4.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\SchemaController',
-			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '7.2.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '7.4.0' );
+			function ( Container $container ) {
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '6.4.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( SchemaController::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\RoutesController',
-			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '7.2.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '7.4.0' );
+			function ( Container $container ) {
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '6.4.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( RoutesController::class );
+			}
+		);
+		$this->container->register(
+			PTKClient::class,
+			function () {
+				return new PTKClient();
+			}
+		);
+		$this->container->register(
+			PTKPatternsStore::class,
+			function () {
+				return new PTKPatternsStore( $this->container->get( PTKClient::class ) );
 			}
 		);
 		$this->container->register(
 			BlockPatterns::class,
 			function () {
-				return new BlockPatterns( $this->package );
+				return new BlockPatterns(
+					$this->package,
+					new PatternRegistry(),
+					$this->container->get( PTKPatternsStore::class )
+				);
+			}
+		);
+		$this->container->register(
+			AIPatterns::class,
+			function () {
+				return new AIPatterns();
 			}
 		);
 		$this->container->register(
@@ -412,14 +412,26 @@ class Bootstrap {
 		);
 		$this->container->register(
 			TasksController::class,
-			function() {
+			function () {
 				return new TasksController();
 			}
 		);
 		$this->container->register(
 			QueryFilters::class,
-			function() {
+			function () {
 				return new QueryFilters();
+			}
+		);
+		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function () {
+				return new BlockTemplatesRegistry();
+			}
+		);
+		$this->container->register(
+			BlockTemplatesController::class,
+			function () {
+				return new BlockTemplatesController();
 			}
 		);
 	}
@@ -463,7 +475,7 @@ class Bootstrap {
 		}
 
 		// If the $trigger_error_version was not yet reached, only log the error.
-		if ( version_compare( $this->package->get_version(), $trigger_error_version, '<' ) ) {
+		if ( version_compare( Constants::get_constant( 'WC_VERSION' ), $trigger_error_version, '<' ) ) {
 			$log_error = true;
 		}
 
@@ -493,28 +505,28 @@ class Bootstrap {
 	protected function register_payment_methods() {
 		$this->container->register(
 			Cheque::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new Cheque( $asset_api );
 			}
 		);
 		$this->container->register(
 			PayPal::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new PayPal( $asset_api );
 			}
 		);
 		$this->container->register(
 			BankTransfer::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new BankTransfer( $asset_api );
 			}
 		);
 		$this->container->register(
 			CashOnDelivery::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new CashOnDelivery( $asset_api );
 			}

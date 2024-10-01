@@ -1,28 +1,60 @@
 {
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
 	"name": "woocommerce/product-filters",
 	"version": "1.0.0",
-	"title": "Product Filters",
-	"description": "A block that adds product filters to the product collection.",
+	"title": "Product Filters (Experimental)",
+	"description": "Let shoppers filter products displayed on the page.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "Filters" ],
-	"textdomain": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
-		"html": false,
-		"reusable": false
-	},
-	"usesContext": [ "query", "queryId" ],
-	"providesContext": {
-		"collectionData": "collectionData"
-	},
-	"attributes": {
-		"collectionData": {
-			"type": "object",
-			"default": {}
+		"align": true,
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
 		},
-		"filterType": {
-			"type": "string"
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"multiple": false,
+		"inserter": false,
+		"interactivity": true,
+		"typography": {
+			"fontSize": true,
+			"textAlign": true
+		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"justifyContent": "stretch",
+				"verticalAlignment": "top"
+			},
+			"allowVerticalAlignment": true,
+			"allowJustification": true,
+			"allowOrientation": true,
+			"allowInheriting": false
+		},
+		"spacing": {
+			"blockGap": true
 		}
 	},
-	"apiVersion": 2,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"textdomain": "woocommerce",
+	"usesContext": [ "postId" ],
+	"providesContext": {
+		"woocommerce/product-filters/overlay": "overlay"
+	},
+	"attributes": {
+		"overlay": {
+			"type": "string",
+			"default": "never"
+		}
+	},
+	"viewScript": "wc-product-filters-frontend",
+	"example": {}
 }

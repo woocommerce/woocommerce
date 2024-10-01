@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * AbstractBlock class.
@@ -89,9 +90,9 @@ abstract class AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render_callback( $attributes = [], $content = '', $block = null ) {
-
 		$render_callback_attributes = $this->parse_render_callback_attributes( $attributes );
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+			$this->register_block_type_assets();
 			$this->enqueue_assets( $render_callback_attributes, $content, $block );
 		}
 		return $this->render( $render_callback_attributes, $content, $block );
@@ -106,6 +107,7 @@ abstract class AbstractBlock {
 		if ( $this->enqueued_assets ) {
 			return;
 		}
+		$this->register_block_type_assets();
 		$this->enqueue_data();
 	}
 
@@ -121,7 +123,6 @@ abstract class AbstractBlock {
 			return false;
 		}
 		$this->integration_registry->initialize( $this->block_name . '_block' );
-		$this->register_block_type_assets();
 		$this->register_block_type();
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
@@ -194,7 +195,7 @@ abstract class AbstractBlock {
 		if ( ! is_dir( $build_path . $chunks_folder ) ) {
 			return [];
 		}
-		foreach ( new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $build_path . $chunks_folder ) ) as $block_name ) {
+		foreach ( new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $build_path . $chunks_folder, \FilesystemIterator::UNIX_PATHS ) ) as $block_name ) {
 			$blocks[] = str_replace( $build_path, '', $block_name );
 		}
 
@@ -239,7 +240,7 @@ abstract class AbstractBlock {
 			$block_settings['style'] = null;
 			add_filter(
 				'render_block',
-				function( $html, $block ) use ( $style_handles ) {
+				function ( $html, $block ) use ( $style_handles ) {
 					if ( $block['blockName'] === $this->get_block_type() ) {
 						array_map( 'wp_enqueue_style', $style_handles );
 					}
@@ -434,24 +435,37 @@ abstract class AbstractBlock {
 		}
 
 		if ( ! $this->asset_data_registry->exists( 'wcBlocksConfig' ) ) {
+			$wc_blocks_config = [
+				'pluginUrl'     => plugins_url( '/', dirname( __DIR__, 2 ) ),
+				'restApiRoutes' => [
+					'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
+				],
+				'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
+
+				/*
+				 * translators: If your word count is based on single characters (e.g. East Asian characters),
+				 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
+				 * Do not translate into your own language.
+				 */
+				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
+			];
+			if ( is_admin() && ! WC()->is_rest_api_request() ) {
+				$product_counts     = wp_count_posts( 'product' );
+				$published_products = isset( $product_counts->publish ) ? $product_counts->publish : 0;
+				$wc_blocks_config   = array_merge(
+					$wc_blocks_config,
+					[
+						// Note that while we don't have a consolidated way of doing feature-flagging
+						// we are borrowing from the WC Admin Features implementation. Also note we cannot
+						// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
+						'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
+						'productCount'              => $published_products,
+					]
+				);
+			}
 			$this->asset_data_registry->add(
 				'wcBlocksConfig',
-				[
-					'buildPhase'    => Package::feature()->get_flag(),
-					'pluginUrl'     => plugins_url( '/', dirname( __DIR__, 2 ) ),
-					'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
-					'restApiRoutes' => [
-						'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
-					],
-					'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
-
-					/*
-					 * translators: If your word count is based on single characters (e.g. East Asian characters),
-					 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
-					 * Do not translate into your own language.
-					 */
-					'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
-				]
+				$wc_blocks_config
 			);
 		}
 	}
@@ -463,6 +477,25 @@ abstract class AbstractBlock {
 	 * @return array
 	 */
 	protected function get_routes_from_namespace( $namespace ) {
+		/**
+		 * Gives opportunity to return routes without invoking the compute intensive REST API.
+		 *
+		 * @since 8.7.0
+		 * @param array  $routes    Array of routes.
+		 * @param string $namespace Namespace for routes.
+		 * @param string $context   Context, can be edit or view.
+		 */
+		$routes = apply_filters(
+			'woocommerce_blocks_pre_get_routes_from_namespace',
+			array(),
+			$namespace,
+			'view'
+		);
+
+		if ( ! empty( $routes ) ) {
+			return $routes;
+		}
+
 		$rest_server     = rest_get_server();
 		$namespace_index = $rest_server->get_namespace_index(
 			[

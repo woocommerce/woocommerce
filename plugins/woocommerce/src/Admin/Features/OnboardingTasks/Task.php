@@ -61,7 +61,7 @@ abstract class Task {
 	protected $task_list;
 
 	/**
-	 * Duration to milisecond mapping.
+	 * Duration to millisecond mapping.
 	 *
 	 * @var string
 	 */
@@ -394,11 +394,12 @@ abstract class Task {
 	 * Track task completion if task is viewable.
 	 */
 	public function possibly_track_completion() {
-		if ( ! $this->is_complete() ) {
+		if ( $this->has_previously_completed() ) {
 			return;
 		}
 
-		if ( $this->has_previously_completed() ) {
+		// Expensive check.
+		if ( ! $this->is_complete() ) {
 			return;
 		}
 

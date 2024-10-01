@@ -10,7 +10,12 @@ import { ProductCategory } from '../product-categories/types';
 import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
 
-export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
+export type ProductType =
+	| 'simple'
+	| 'grouped'
+	| 'external'
+	| 'variable'
+	| 'variation';
 export type ProductStatus =
 	| 'auto-draft'
 	| 'deleted'
@@ -28,7 +33,7 @@ export type ProductDownload = {
 	file: string;
 };
 
-export type ProductAttribute = {
+export type ProductProductAttribute = {
 	id: number;
 	name: string;
 	slug: string;
@@ -72,7 +77,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status' | 'categories'
 > & {
-	attributes: ProductAttribute[];
+	attributes: ProductProductAttribute[];
 	average_rating: string;
 	backordered: boolean;
 	backorders: 'no' | 'notify' | 'yes';
@@ -194,4 +199,16 @@ export type ProductQuery<
 	min_price?: string;
 	max_price?: string;
 	stock_status?: 'instock' | 'outofstock' | 'onbackorder';
+};
+
+export type SuggestedProductOptionsKey = string;
+
+/*
+ * Selector types
+ */
+export type GetSuggestedProductsOptions = {
+	categories?: number[];
+	tags?: number[];
+	attributes?: number[];
+	limit?: number;
 };

@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/product-editor",
-	"version": "1.2.0",
+	"version": "1.5.0",
 	"description": "React components for the WooCommerce admin product editor.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -56,6 +56,7 @@
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/core-data": "wp-6.0",
 		"@wordpress/data": "wp-6.0",
+		"@wordpress/dataviews": "^4.4.1",
 		"@wordpress/date": "wp-6.0",
 		"@wordpress/deprecated": "wp-6.0",
 		"@wordpress/edit-post": "wp-6.0",
@@ -64,12 +65,14 @@
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/html-entities": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
-		"@wordpress/icons": "wp-6.0",
+		"@wordpress/icons": "10.6.0",
 		"@wordpress/interface": "wp-6.0",
 		"@wordpress/keyboard-shortcuts": "wp-6.0",
 		"@wordpress/keycodes": "wp-6.0",
 		"@wordpress/media-utils": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
+		"@wordpress/preferences": "wp-6.0",
+		"@wordpress/private-apis": "^1.6.0",
 		"@wordpress/url": "wp-6.0",
 		"classnames": "^2.3.2",
 		"dompurify": "^2.4.7",
@@ -118,7 +121,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
@@ -171,7 +174,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}
@@ -180,6 +187,12 @@
 		"build:project:bundle": {
 			"command": "webpack",
 			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				}
+			},
 			"files": [
 				"webpack.config.js",
 				"src/**/*.scss"

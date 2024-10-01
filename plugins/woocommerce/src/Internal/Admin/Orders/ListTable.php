@@ -216,7 +216,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return mixed
 	 */
-	public function set_items_per_page( $default, string $option, int $value ) {
+	public function set_items_per_page( $default, string $option, int $value ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound -- backwards compat.
 		return 'edit_' . $this->order_type . '_per_page' === $option ? absint( $value ) : $default;
 	}
 
@@ -282,7 +282,7 @@ class ListTable extends WP_List_Table {
 				</h2>
 
 				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woo.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
 			<?php
@@ -546,8 +546,22 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_views() {
+		$view_links = array();
+
+		/**
+		 * Filters the list of available list table view links before the actual query runs.
+		 * This can be used to, e.g., remove counts from the links.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param string[] $views An array of available list table view links.
+		 */
+		$view_links = apply_filters( 'woocommerce_before_' . $this->order_type . '_list_table_view_links', $view_links );
+		if ( ! empty( $view_links ) ) {
+			return $view_links;
+		}
+
 		$view_counts = array();
-		$view_links  = array();
 		$statuses    = $this->get_visible_statuses();
 		$current     = ! empty( $this->request['status'] ) ? sanitize_text_field( $this->request['status'] ) : 'all';
 		$all_count   = 0;
@@ -625,6 +639,24 @@ class ListTable extends WP_List_Table {
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
 	private function should_render_blank_state(): bool {
+		/**
+		 * Whether we should render a blank state so that custom count queries can be used.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param null           $should_render_blank_state `null` will use the built-in counts. Sending a boolean will short-circuit that path.
+		 * @param object         ListTable The current instance of the class.
+		*/
+		$should_render_blank_state = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_should_render_blank_state',
+			null,
+			$this
+		);
+
+		if ( is_bool( $should_render_blank_state ) ) {
+			return $should_render_blank_state;
+		}
+
 		return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
 	}
 
@@ -661,7 +693,7 @@ class ListTable extends WP_List_Table {
 		$base_url = get_admin_url( null, 'admin.php?page=wc-orders' . ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type ) );
 		$url      = esc_url( add_query_arg( 'status', $slug, $base_url ) );
 		$name     = esc_html( $name );
-		$count    = absint( $count );
+		$count    = number_format_i18n( $count );
 		$class    = $current ? 'class="current"' : '';
 
 		return "<a href='$url' $class>$name <span class='count'>($count)</span></a>";
@@ -722,27 +754,26 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	private function months_filter() {
+		global $wp_locale;
+
 		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
 
-		global $wp_locale;
-		global $wpdb;
-
-		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$utc_offset   = wc_timezone_offset();
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results(
-			"
-				SELECT DISTINCT YEAR( t.date_created_local ) AS year,
-								MONTH( t.date_created_local ) AS month
-				FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE status != 'trash' ) t
-				ORDER BY year DESC, month DESC
-			"
-		);
+		/**
+		 * Filters whether to remove the 'Months' drop-down from the order list table.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param bool   $disable   Whether to disable the drop-down. Default false.
+		 */
+		if ( apply_filters( 'woocommerce_' . $this->order_type . '_list_table_disable_months_filter', false ) ) {
+			return;
+		}
 
 		$m = isset( $_GET['m'] ) ? (int) $_GET['m'] : 0;
 		echo '<select name="m" id="filter-by-date">';
 		echo '<option ' . selected( $m, 0, false ) . ' value="0">' . esc_html__( 'All dates', 'woocommerce' ) . '</option>';
+
+		$order_dates = $this->get_and_maybe_update_months_filter_cache();
 
 		foreach ( $order_dates as $date ) {
 			$month           = zeroise( $date->month, 2 );
@@ -762,6 +793,64 @@ class ListTable extends WP_List_Table {
 		}
 
 		echo '</select>';
+	}
+
+	/**
+	 * Get order year-months cache. We cache the results in the options table, since these results will change very infrequently.
+	 * We use the heuristic to always return current year-month when getting from cache to prevent an additional query.
+	 *
+	 * @return array List of year-months.
+	 */
+	protected function get_and_maybe_update_months_filter_cache(): array {
+		global $wpdb;
+
+		// We cache in the options table since it's won't be invalidated soon.
+		$cache_option_value_name = 'wc_' . $this->order_type . '_list_table_months_filter_cache_value';
+		$cache_option_date_name  = 'wc_' . $this->order_type . '_list_table_months_filter_cache_date';
+
+		$cached_timestamp = get_option( $cache_option_date_name, 0 );
+
+		// new day, new cache.
+		if ( 0 === $cached_timestamp || gmdate( 'j', time() ) !== gmdate( 'j', $cached_timestamp ) || ( time() - $cached_timestamp ) > 60 * 60 * 24 ) {
+			$cached_value = false;
+		} else {
+			$cached_value = get_option( $cache_option_value_name );
+		}
+
+		if ( false !== $cached_value ) {
+			// Always add current year month for cache stability. This allows us to not hydrate the cache on every order update.
+			$current_year_month        = new \stdClass();
+			$current_year_month->year  = gmdate( 'Y', time() );
+			$current_year_month->month = gmdate( 'n', time() );
+			if ( count( $cached_value ) === 0 || (
+				$cached_value[0]->year !== $current_year_month->year ||
+				$cached_value[0]->month !== $current_year_month->month )
+			) {
+				array_unshift( $cached_value, $current_year_month );
+			}
+			return $cached_value;
+		}
+
+		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$utc_offset   = wc_timezone_offset();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$order_dates = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+					SELECT DISTINCT YEAR( t.date_created_local ) AS year,
+									MONTH( t.date_created_local ) AS month
+					FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE type = %s AND status != 'trash' ) t
+					ORDER BY year DESC, month DESC
+				",
+				$this->order_type
+			)
+		);
+
+		update_option( $cache_option_date_name, time() );
+		update_option( $cache_option_value_name, $order_dates );
+
+		return $order_dates;
 	}
 
 	/**
@@ -930,6 +1019,14 @@ class ListTable extends WP_List_Table {
 			echo '<a href="#" class="order-preview" data-order-id="' . absint( $order->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
 			echo '<a href="' . esc_url( $this->get_order_edit_link( $order ) ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
+
+		// Used for showing date & status next to order number/buyer name on small screens.
+		echo '<div class="order_date small-screen-only">';
+		$this->render_order_date_column( $order );
+		echo '</div>';
+		echo '<div class="order_status small-screen-only">';
+		$this->render_order_status_column( $order );
+		echo '</div>';
 	}
 
 	/**
@@ -939,7 +1036,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string Edit link for the order.
 	 */
-	private function get_order_edit_link( WC_Order $order ) : string {
+	private function get_order_edit_link( WC_Order $order ): string {
 		return $this->page_controller->get_edit_url( $order->get_id() );
 	}
 
@@ -984,33 +1081,8 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function render_order_status_column( WC_Order $order ): void {
-		$tooltip = '';
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$comment_count = get_comment_count( $order->get_id() );
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$approved_comments_count = absint( $comment_count['approved'] );
-
-		if ( $approved_comments_count ) {
-			$latest_notes = wc_get_order_notes(
-				array(
-					'order_id' => $order->get_id(),
-					'limit'    => 1,
-					'orderby'  => 'date_created_gmt',
-				)
-			);
-
-			$latest_note = current( $latest_notes );
-
-			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
-				$tooltip = wc_sanitize_tooltip( $latest_note->content );
-			} elseif ( isset( $latest_note->content ) ) {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
-			} else {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
-			}
-		}
+		/* translators: %s: order status label */
+		$tooltip = wc_sanitize_tooltip( $this->get_order_status_label( $order ) );
 
 		// Gracefully handle legacy statuses.
 		if ( in_array( $order->get_status(), array( 'trash', 'draft', 'auto-draft' ), true ) ) {
@@ -1024,6 +1096,39 @@ class ListTable extends WP_List_Table {
 		} else {
 			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), esc_html( $status_name ) );
 		}
+	}
+
+	/**
+	 * Gets the order status label for an order.
+	 *
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return string
+	 */
+	private function get_order_status_label( WC_Order $order ): string {
+		$status_names = array(
+			'pending'        => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
+			'on-hold'        => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
+			'processing'     => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
+			'completed'      => __( 'Order fulfilled and complete.', 'woocommerce' ),
+			'failed'         => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
+			'checkout-draft' => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'cancelled'      => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
+			'refunded'       => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
+		);
+
+		/**
+		 * Provides an opportunity to modify and extend the order status labels.
+		 *
+		 * @param array    $action Order actions.
+		 * @param WC_Order $order  Current order object.
+		 * @since 9.1.0
+		 */
+		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names, $order );
+
+		$status_name = $order->get_status();
+
+		return isset( $status_names[ $status_name ] ) ? $status_names[ $status_name ] : '';
 	}
 
 	/**
@@ -1309,7 +1414,7 @@ class ListTable extends WP_List_Table {
 			}
 
 			do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1337,7 +1442,7 @@ class ListTable extends WP_List_Table {
 
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit.', 'woocommerce' ), true );
 			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1360,7 +1465,7 @@ class ListTable extends WP_List_Table {
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1380,7 +1485,7 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			if ( $orders_store->untrash_order( wc_get_order( $id ) ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1504,6 +1609,11 @@ class ListTable extends WP_List_Table {
 											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
+										<# if ( data.data.shipping.phone ) { #>
+											<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
+											<a href="tel:{{ data.data.shipping.phone }}">{{ data.data.shipping.phone }}</a>
+										<# } #>
+
 										<# if ( data.shipping_via ) { #>
 											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
 											{{ data.shipping_via }}
@@ -1580,14 +1690,31 @@ class ListTable extends WP_List_Table {
 	 */
 	private function search_filter() {
 		$options = array(
-			'customers' => __( 'Customers', 'woocommerce' ),
-			'products'  => __( 'Products', 'woocommerce' ),
-			'all'       => __( 'All', 'woocommerce' ),
+			'order_id'       => __( 'Order ID', 'woocommerce' ),
+			'customer_email' => __( 'Customer Email', 'woocommerce' ),
+			'customers'      => __( 'Customers', 'woocommerce' ),
+			'products'       => __( 'Products', 'woocommerce' ),
+			'all'            => __( 'All', 'woocommerce' ),
 		);
+
+		/**
+		 * Filters the search filters available in the admin order search. Can be used to add new or remove existing filters.
+		 * When adding new filters, `woocommerce_hpos_generate_where_for_search_filter` should also be used to generate the WHERE clause for the new filter
+		 *
+		 * @since 8.9.0.
+		 *
+		 * @param $options array List of available filters.
+		 */
+		$options       = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
+		$saved_setting = get_user_setting( 'wc-search-filter-hpos-admin', 'all' );
+		$selected      = sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? $saved_setting ) );
+		if ( $saved_setting !== $selected ) {
+			set_user_setting( 'wc-search-filter-hpos-admin', $selected );
+		}
 		?>
 		<select name="search-filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
-				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? 'all' ) ) ); ?>><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $selected ) ) ); ?>><?php echo esc_html( $label ); ?></option>
 				<?php
 			}
 	}

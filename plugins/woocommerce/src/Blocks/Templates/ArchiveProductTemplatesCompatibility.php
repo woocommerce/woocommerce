@@ -78,7 +78,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 
 		$block_hooks = array_filter(
 			$this->hook_data,
-			function( $hook ) use ( $block_name ) {
+			function ( $hook ) use ( $block_name ) {
 				return in_array( $block_name, $hook['block_names'], true );
 			}
 		);
@@ -98,9 +98,9 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 		}
 
 		$supported_blocks = array_merge(
-			[],
+			array(),
 			...array_map(
-				function( $hook ) {
+				function ( $hook ) {
 					return $hook['block_names'];
 				},
 				array_values( $this->hook_data )
@@ -312,7 +312,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 				continue;
 			}
 			foreach ( $data['hooked'] as $callback => $priority ) {
-				if ( ! in_array( $callback, $data['permanently_removed_actions'] ?? [], true ) ) {
+				if ( ! in_array( $callback, $data['permanently_removed_actions'] ?? array(), true ) ) {
 					add_action( $hook, $callback, $priority );
 				}
 			}
@@ -320,7 +320,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is within the product-query namespace
+	 * Check whether block is within the product-query namespace.
 	 *
 	 * @param array $block Parsed block data.
 	 */
@@ -331,7 +331,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block has isInherited attribute asigned
+	 * Check whether block has isInherited attribute assigned.
 	 *
 	 * @param array $block Parsed block data.
 	 */
@@ -357,7 +357,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is a Post template
+	 * Check whether block is a Post template.
 	 *
 	 * @param string $block_name Block name.
 	 */
@@ -366,7 +366,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is a Product Template
+	 * Check whether block is a Product Template.
 	 *
 	 * @param string $block_name Block name.
 	 */
@@ -375,7 +375,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is eaither a Post template or Product Template
+	 * Check if block is either a Post template or a Product Template
 	 *
 	 * @param string $block_name Block name.
 	 */

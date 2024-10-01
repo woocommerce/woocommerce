@@ -114,6 +114,11 @@ const restrictedImports = [
 		message:
 			'This Lodash method is not recommended. Please use native functionality instead. If using `memoize`, please use `memize` instead.',
 	},
+	{
+		name: 'classnames',
+		message:
+			"Please use `clsx` instead. It's a lighter and faster drop-in replacement for `classnames`.",
+	},
 ];
 
 module.exports = {
@@ -154,6 +159,7 @@ module.exports = {
 			'@woocommerce/settings',
 			'@woocommerce/shared-context',
 			'@woocommerce/shared-hocs',
+			'@woocommerce/tracks',
 			'@woocommerce/data',
 			'@wordpress/a11y',
 			'@wordpress/api-fetch',
@@ -168,7 +174,6 @@ module.exports = {
 			'@wordpress/url',
 			'@woocommerce/blocks-test-utils',
 			'@woocommerce/e2e-utils',
-			'@woocommerce/e2e-mocks',
 			'babel-jest',
 			'dotenv',
 			'jest-environment-puppeteer',

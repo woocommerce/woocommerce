@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSlot } from '@woocommerce/experimental';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ export const TaskListCompletionSlot = ( {
 	}
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-tasklist-completion-slot',
 				className
 			) }

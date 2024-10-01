@@ -3,14 +3,13 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { FormStepBlock } from '@woocommerce/blocks/checkout/form-step';
-import classnames from 'classnames';
-import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
+import clsx from 'clsx';
+import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
-import './editor.scss';
 
 export const Edit = ( {
 	attributes,
@@ -24,7 +23,7 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
-	if ( ADDITIONAL_FORM_KEYS.length === 0 ) {
+	if ( ORDER_FORM_KEYS.length === 0 ) {
 		return null;
 	}
 
@@ -32,7 +31,7 @@ export const Edit = ( {
 		<FormStepBlock
 			setAttributes={ setAttributes }
 			attributes={ attributes }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__additional-information-fields',
 				attributes?.className
 			) }

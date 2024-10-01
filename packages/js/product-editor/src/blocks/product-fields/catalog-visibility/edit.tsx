@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { CheckboxControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -12,6 +11,7 @@ import { Product } from '@woocommerce/data';
  */
 import { CatalogVisibilityBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { CatalogVisibility } from '../../../components/catalog-visibility';
 
 export function Edit( {
 	attributes,
@@ -24,38 +24,13 @@ export function Edit( {
 		Product[ 'catalog_visibility' ]
 	>( 'postType', 'product', 'catalog_visibility' );
 
-	const checked =
-		catalogVisibility === visibility || catalogVisibility === 'hidden';
-
-	function handleChange( selected: boolean ) {
-		if ( selected ) {
-			if ( catalogVisibility === 'visible' ) {
-				setCatalogVisibility( visibility );
-				return;
-			}
-			setCatalogVisibility( 'hidden' );
-		} else {
-			if ( catalogVisibility === 'hidden' ) {
-				if ( visibility === 'catalog' ) {
-					setCatalogVisibility( 'search' );
-					return;
-				}
-				if ( visibility === 'search' ) {
-					setCatalogVisibility( 'catalog' );
-					return;
-				}
-				return;
-			}
-			setCatalogVisibility( 'visible' );
-		}
-	}
-
 	return (
 		<div { ...blockProps }>
-			<CheckboxControl
+			<CatalogVisibility
+				catalogVisibility={ catalogVisibility }
 				label={ label }
-				checked={ checked }
-				onChange={ handleChange }
+				visibility={ visibility }
+				onCheckboxChange={ setCatalogVisibility }
 			/>
 		</div>
 	);

@@ -12,7 +12,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -42,12 +42,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 	};
 
 	return (
-		<Card
-			className={ classnames(
-				'woocommerce-collapsible-card',
-				className
-			) }
-		>
+		<Card className={ clsx( 'woocommerce-collapsible-card', className ) }>
 			<CardHeader onClick={ handleClick }>
 				<CardHeaderTitle>{ header }</CardHeaderTitle>
 				<Button

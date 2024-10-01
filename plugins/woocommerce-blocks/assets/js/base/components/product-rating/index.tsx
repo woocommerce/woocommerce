@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -14,7 +14,7 @@ const Rating = ( {
 	rating,
 	ratedProductsCount,
 }: RatingProps ): JSX.Element => {
-	const ratingClassName = classNames(
+	const ratingClassName = clsx(
 		'wc-block-components-product-rating',
 		className
 	);

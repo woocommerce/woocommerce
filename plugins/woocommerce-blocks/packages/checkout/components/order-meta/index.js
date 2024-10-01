@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import { createSlotFill, hasValidFills, useSlot } from '../../slot';
+import { createSlotFill, hasValidFills, useSlotFills } from '../../slot';
 import TotalsWrapper from '../../../components/totals-wrapper';
 
 const slotName = '__experimentalOrderMeta';
@@ -15,12 +15,13 @@ const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } =
 	createSlotFill( slotName );
 
 const Slot = ( { className, extensions, cart, context } ) => {
-	const { fills } = useSlot( slotName );
+	const fills = useSlotFills( slotName );
+
 	return (
 		hasValidFills( fills ) && (
 			<TotalsWrapper slotWrapper={ true }>
 				<OrderMetaSlot
-					className={ classnames(
+					className={ clsx(
 						className,
 						'wc-block-components-order-meta'
 					) }

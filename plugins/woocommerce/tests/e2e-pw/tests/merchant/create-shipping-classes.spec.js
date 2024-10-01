@@ -33,7 +33,9 @@ test.describe( 'Merchant can add shipping classes', () => {
 
 		// Add shipping classes
 		for ( const { name, slug, description } of shippingClasses ) {
-			await page.getByRole('link', { name: 'Add shipping class' }).click();
+			await page
+				.getByRole( 'link', { name: 'Add shipping class' } )
+				.click();
 			await page
 				.getByPlaceholder( 'e.g. Heavy', { exact: true } )
 				.fill( name );
@@ -41,7 +43,10 @@ test.describe( 'Merchant can add shipping classes', () => {
 				.getByPlaceholder( 'e.g. heavy-packages', { exact: true } )
 				.fill( slug );
 			await page
-				.getByPlaceholder( 'e.g. For heavy items requiring higher postage', { exact: true } )
+				.getByPlaceholder(
+					'e.g. For heavy items requiring higher postage',
+					{ exact: true }
+				)
 				.fill( description );
 
 			await page.getByRole( 'button', { name: 'Create' } ).click();

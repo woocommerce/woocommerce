@@ -78,6 +78,7 @@ export const getErrorDetails = (
 									message: decodeEntities(
 										additionalError.message
 									),
+									data,
 								},
 							];
 							if ( typeof additionalError.data !== 'undefined' ) {
@@ -140,8 +141,8 @@ const getErrorContextFromAdditionalFieldLocation = (
 	switch ( location ) {
 		case 'contact':
 			return noticeContexts.CONTACT_INFORMATION;
-		case 'additional':
-			return noticeContexts.ADDITIONAL_INFORMATION;
+		case 'order':
+			return noticeContexts.ORDER_INFORMATION;
 		default:
 			return undefined;
 	}
@@ -208,6 +209,9 @@ export const processErrorResponse = (
 
 	createNotice( 'error', errorMessage, {
 		id: response.code,
-		context: context || getErrorContextFromCode( response.code ),
+		context:
+			context ||
+			response?.data?.context ||
+			getErrorContextFromCode( response.code ),
 	} );
 };

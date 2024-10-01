@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-Comment: Allow adding attributes when registering custom checkout fields in the Checkout block.
-

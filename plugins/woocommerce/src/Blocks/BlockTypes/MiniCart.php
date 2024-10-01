@@ -65,6 +65,7 @@ class MiniCart extends AbstractBlock {
 			'position' => 'after',
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
+			'version'  => '8.4.0',
 		),
 	);
 
@@ -159,15 +160,13 @@ class MiniCart extends AbstractBlock {
 
 			$this->asset_data_registry->add(
 				'taxLabel',
-				$this->tax_label,
-				''
+				$this->tax_label
 			);
 		}
 
 		$this->asset_data_registry->add(
 			'displayCartPricesIncludingTax',
-			$this->display_cart_prices_including_tax,
-			true
+			$this->display_cart_prices_including_tax
 		);
 
 		$template_part_edit_uri = '';
@@ -206,8 +205,7 @@ class MiniCart extends AbstractBlock {
 
 		$this->asset_data_registry->add(
 			'templatePartEditUri',
-			$template_part_edit_uri,
-			''
+			$template_part_edit_uri
 		);
 
 		/**
@@ -416,12 +414,9 @@ class MiniCart extends AbstractBlock {
 			return '';
 		}
 
-		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family' ) );
+		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-		if ( ! empty( $attributes['className'] ) ) {
-			$wrapper_classes .= ' ' . $attributes['className'];
-		}
-		$wrapper_styles = $classes_styles['styles'];
+		$wrapper_styles  = $classes_styles['styles'];
 
 		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
 		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
@@ -437,7 +432,7 @@ class MiniCart extends AbstractBlock {
 		if ( isset( $attributes['miniCartIcon'] ) ) {
 			if ( 'bag' === $attributes['miniCartIcon'] ) {
 				$icon = '<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M12.4444 14.2222C12.9354 14.2222 13.3333 14.6202 13.3333 15.1111C13.3333 15.8183 13.6143 16.4966 14.1144 16.9967C14.6145 17.4968 15.2927 17.7778 16 17.7778C16.7072 17.7778 17.3855 17.4968 17.8856 16.9967C18.3857 16.4966 18.6667 15.8183 18.6667 15.1111C18.6667 14.6202 19.0646 14.2222 19.5555 14.2222C20.0465 14.2222 20.4444 14.6202 20.4444 15.1111C20.4444 16.2898 19.9762 17.4203 19.1427 18.2538C18.3092 19.0873 17.1787 19.5555 16 19.5555C14.8212 19.5555 13.6908 19.0873 12.8573 18.2538C12.0238 17.4203 11.5555 16.2898 11.5555 15.1111C11.5555 14.6202 11.9535 14.2222 12.4444 14.2222Z" fill="' . $icon_color . '""/>
+							<path fill-rule="evenodd" clip-rule="evenodd" d="M12.4444 14.2222C12.9354 14.2222 13.3333 14.6202 13.3333 15.1111C13.3333 15.8183 13.6143 16.4966 14.1144 16.9967C14.6145 17.4968 15.2927 17.7778 16 17.7778C16.7072 17.7778 17.3855 17.4968 17.8856 16.9967C18.3857 16.4966 18.6667 15.8183 18.6667 15.1111C18.6667 14.6202 19.0646 14.2222 19.5555 14.2222C20.0465 14.2222 20.4444 14.6202 20.4444 15.1111C20.4444 16.2898 19.9762 17.4203 19.1427 18.2538C18.3092 19.0873 17.1787 19.5555 16 19.5555C14.8212 19.5555 13.6908 19.0873 12.8573 18.2538C12.0238 17.4203 11.5555 16.2898 11.5555 15.1111C11.5555 14.6202 11.9535 14.2222 12.4444 14.2222Z" fill="' . $icon_color . '"/>
 							<path fill-rule="evenodd" clip-rule="evenodd" d="M11.2408 6.68254C11.4307 6.46089 11.7081 6.33333 12 6.33333H20C20.2919 6.33333 20.5693 6.46089 20.7593 6.68254L24.7593 11.3492C25.0134 11.6457 25.0717 12.0631 24.9085 12.4179C24.7453 12.7727 24.3905 13 24 13H8.00001C7.60948 13 7.25469 12.7727 7.0915 12.4179C6.92832 12.0631 6.9866 11.6457 7.24076 11.3492L11.2408 6.68254ZM12.4599 8.33333L10.1742 11H21.8258L19.5401 8.33333H12.4599Z" fill="' . $icon_color . '"/>
 							<path fill-rule="evenodd" clip-rule="evenodd" d="M7 12C7 11.4477 7.44772 11 8 11H24C24.5523 11 25 11.4477 25 12V25.3333C25 25.8856 24.5523 26.3333 24 26.3333H8C7.44772 26.3333 7 25.8856 7 25.3333V12ZM9 13V24.3333H23V13H9Z" fill="' . $icon_color . '"/>
 						</svg>';
@@ -462,7 +457,7 @@ class MiniCart extends AbstractBlock {
 
 			// It is not necessary to load the Mini-Cart Block on Cart and Checkout page.
 			return '<div class="' . esc_attr( $wrapper_classes ) . '" style="visibility:hidden" aria-hidden="true">
-				<button class="wc-block-mini-cart__button" disabled>' . $button_html . '</button>
+				<button class="wc-block-mini-cart__button" disabled aria-label="' . __( 'Cart', 'woocommerce' ) . '">' . $button_html . '</button>
 			</div>';
 		}
 
@@ -476,7 +471,7 @@ class MiniCart extends AbstractBlock {
 			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( 'mini-cart' );
 			$template_slug_to_load = $theme_has_mini_cart ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 		}
-		$template_part = BlockTemplateUtils::get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
+		$template_part = get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			$template_part_contents = do_blocks( $template_part->content );
@@ -490,7 +485,7 @@ class MiniCart extends AbstractBlock {
 		}
 
 		return '<div class="' . esc_attr( $wrapper_classes ) . '" style="' . esc_attr( $wrapper_styles ) . '">
-			<button class="wc-block-mini-cart__button">' . $button_html . '</button>
+			<button class="wc-block-mini-cart__button" aria-label="' . __( 'Cart', 'woocommerce' ) . '">' . $button_html . '</button>
 			<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
@@ -549,7 +544,7 @@ class MiniCart extends AbstractBlock {
 				'tax_label'                         => $tax_label,
 				'display_cart_prices_including_tax' => false,
 			);
-		};
+		}
 
 		return array(
 			'tax_label'                         => '',

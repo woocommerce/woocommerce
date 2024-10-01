@@ -2,7 +2,7 @@
 	"name": "woocommerce/checkout-pickup-options-block",
 	"version": "1.0.0",
 	"title": "Pickup Method",
-	"description": "Shows local pickup options.",
+	"description": "Shows local pickup locations.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,
@@ -21,8 +21,10 @@
 			}
 		}
 	},
-	"parent": [ "woocommerce/checkout-fields-block" ],
+	"parent": [
+		"woocommerce/checkout-fields-block"
+	],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2
+	"apiVersion": 3
 }

@@ -45,10 +45,10 @@ class ProductStockIndicator extends AbstractBlock {
 	 * - Available on backorder
 	 * - 2 left in stock
 	 *
-	 * @param [bool]     $is_in_stock Whether the product is in stock.
-	 * @param [bool]     $is_low_stock Whether the product is low in stock.
-	 * @param [int|null] $low_stock_amount The amount of stock that is considered low.
-	 * @param [bool]     $is_on_backorder Whether the product is on backorder.
+	 * @param bool     $is_in_stock Whether the product is in stock.
+	 * @param bool     $is_low_stock Whether the product is low in stock.
+	 * @param int|null $low_stock_amount The amount of stock that is considered low.
+	 * @param bool     $is_on_backorder Whether the product is on backorder.
 	 * @return string Stock text.
 	 */
 	protected static function getTextBasedOnStock( $is_in_stock, $is_low_stock, $low_stock_amount, $is_on_backorder ) {
@@ -84,8 +84,13 @@ class ProductStockIndicator extends AbstractBlock {
 			return $content;
 		}
 
-		$post_id         = $block->context['postId'];
-		$product         = wc_get_product( $post_id );
+		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$product = wc_get_product( $post_id );
+
+		if ( ! $product ) {
+			return '';
+		}
+
 		$is_in_stock     = $product->is_in_stock();
 		$is_on_backorder = $product->is_on_backorder();
 
@@ -96,7 +101,6 @@ class ProductStockIndicator extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		$classnames  = isset( $classes_and_styles['classes'] ) ? ' ' . $classes_and_styles['classes'] . ' ' : '';
-		$classnames .= isset( $attributes['className'] ) ? ' ' . $attributes['className'] . ' ' : '';
 		$classnames .= ! $is_in_stock ? ' wc-block-components-product-stock-indicator--out-of-stock ' : '';
 		$classnames .= $is_in_stock ? ' wc-block-components-product-stock-indicator--in-stock ' : '';
 		$classnames .= $is_low_stock ? ' wc-block-components-product-stock-indicator--low-stock ' : '';

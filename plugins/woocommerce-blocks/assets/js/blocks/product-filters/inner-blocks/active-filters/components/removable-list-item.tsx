@@ -39,14 +39,9 @@ export const RemovableListItem = ( {
 	);
 
 	return (
-		<li
-			className="wc-block-active-filters__list-item"
-			key={ `${ type }: ${ name }` }
-		>
+		<li className="list-item" key={ `${ type }: ${ name }` }>
 			{ showLabel && (
-				<span className="wc-block-active-filters__list-item-type">
-					{ `${ type }: ` }
-				</span>
+				<span className="list-item-type">{ `${ type }: ` }</span>
 			) }
 			{ displayStyle === 'chips' ? (
 				<RemovableChip
@@ -57,9 +52,9 @@ export const RemovableListItem = ( {
 					ariaLabel={ removeText }
 				/>
 			) : (
-				<span className="wc-block-active-filters__list-item-name">
+				<span className="list-item-name">
 					<button
-						className="wc-block-active-filters__list-item-remove"
+						className="list-item-remove"
 						onClick={ removeCallback }
 					>
 						<Icon

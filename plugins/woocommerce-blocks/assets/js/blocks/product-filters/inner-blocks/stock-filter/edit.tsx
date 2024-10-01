@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { useMemo } from '@wordpress/element';
-import classnames from 'classnames';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import clsx from 'clsx';
+import { useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import Label from '@woocommerce/base-components/filter-element-label';
-import type { BlockEditProps, Template } from '@wordpress/blocks';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 
@@ -30,21 +30,8 @@ type StockStatusCount = {
 
 const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	const blockProps = useBlockProps( {
-		className: classnames(
-			'wc-block-stock-filter',
-			props.attributes.className
-		),
+		className: clsx( 'wc-block-stock-filter', props.attributes.className ),
 	} );
-
-	const template: Template[] = [
-		[
-			'core/heading',
-			{
-				content: __( 'Filter by Stock Status', 'woocommerce' ),
-				level: 3,
-			},
-		],
-	];
 
 	const { showCounts, displayStyle } = props.attributes;
 	const stockStatusOptions: Record< string, string > = getSetting(
@@ -88,19 +75,11 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 			{
 				<div { ...blockProps }>
 					<Inspector { ...props } />
-					<InnerBlocks
-						template={ template }
-						allowedBlocks={ [ 'core/heading' ] }
-					/>
 					<Disabled>
 						<div
-							className={ classnames(
-								'wc-block-stock-filter',
-								`style-${ displayStyle }`,
-								{
-									'is-loading': false,
-								}
-							) }
+							className={ clsx( `style-${ displayStyle }`, {
+								'is-loading': false,
+							} ) }
 						>
 							{ displayStyle === 'dropdown' ? (
 								<>
