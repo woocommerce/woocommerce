@@ -16,7 +16,6 @@ import {
 	PerformanceUtils,
 	RequestUtils,
 	ShippingUtils,
-	StoreApiUtils,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -108,7 +107,6 @@ const test = base.extend<
 		editor: Editor;
 		pageUtils: PageUtils;
 		frontendUtils: FrontendUtils;
-		storeApiUtils: StoreApiUtils;
 		performanceUtils: PerformanceUtils;
 		snapshotConfig: void;
 		shippingUtils: ShippingUtils;
@@ -135,6 +133,10 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
+		// Dispose the current APIRequestContext to free up resources.
+		await page.request.dispose();
+
+		// Reset the database to the initial state via snapshot import.
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
 	},
 	pageUtils: async ( { page }, use ) => {
@@ -145,9 +147,6 @@ const test = base.extend<
 	},
 	performanceUtils: async ( { page }, use ) => {
 		await use( new PerformanceUtils( page ) );
-	},
-	storeApiUtils: async ( { requestUtils }, use ) => {
-		await use( new StoreApiUtils( requestUtils ) );
 	},
 	shippingUtils: async ( { page, admin }, use ) => {
 		await use( new ShippingUtils( page, admin ) );

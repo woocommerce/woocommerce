@@ -1220,4 +1220,24 @@ class ProductCollection extends \WP_UnitTestCase {
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
 	}
+
+	/**
+	 * Test the add_price_sorting_posts_clauses method.
+	 */
+	public function test_add_price_sorting_posts_clauses() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'price';
+
+		$parsed_block['attrs']['query']['order'] = 'asc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price ASC', $query->request );
+
+		$parsed_block['attrs']['query']['order'] = 'desc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price DESC', $query->request );
+	}
 }
