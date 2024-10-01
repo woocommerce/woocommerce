@@ -48,6 +48,20 @@ function TaxonomyControls( {
 		return null;
 	}
 
+	/**
+	 * Normalize the name so first letter of every word is capitalized.
+	 */
+	const normalizeName = ( name: string | undefined | null ) => {
+		if ( ! name ) {
+			return '';
+		}
+
+		return name
+			.split( ' ' )
+			.map( ( word ) => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
+			.join( ' ' );
+	};
+
 	return (
 		<>
 			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
@@ -75,7 +89,7 @@ function TaxonomyControls( {
 				return (
 					<ToolsPanelItem
 						key={ slug }
-						label={ name }
+						label={ normalizeName( name ) }
 						hasValue={ () => termIds.length }
 						onDeselect={ deselectCallback }
 						resetAllFilter={ deselectCallback }
