@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-# The commented variables are for troubleshooting locally.
+# The commented variables are for troubleshooting locally. The commented commands below are also for local troubleshooting.
 # GITHUB_EVENT_NAME='pull_request'
 # GITHUB_SHA=$(git rev-parse HEAD)
 # ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)/artifacts"
@@ -34,20 +34,16 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${GITHUB_SHA}_*" -print -quit)"; then
 		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
 	else
-		title "##[group]Building head"
-		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
-		pnpm run --if-present clean:build
-		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
-		pnpm --filter='@woocommerce/plugin-woocommerce' build
-		echo '##[endgroup]'
+		# title "##[group]Building head"
+		# git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
+		# pnpm run --if-present clean:build
+		# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+		# pnpm --filter='@woocommerce/plugin-woocommerce' build
+		# echo '##[endgroup]'
 
 		title "##[group]Benchmarking head"
-		for ROUND in {1..2}; do
-			# We can afford only 2 rounds, each one takes ~2 minutes.
-			echo "$(date +"%T"): Round $ROUND of 2"
-			RESULTS_ID="editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-			RESULTS_ID="product-editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-        done
+		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		echo '##[endgroup]'
 	fi
 
@@ -55,31 +51,26 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
 	else
 		title "##[group]Checkout baseline"
-		git fetch --no-tags --quiet origin trunk
+		git fetch --no-tags --quiet --unshallow origin trunk
 		echo '##[endgroup]'
 
 		title "##[group]Building baseline"
-		git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA > /dev/null && echo 'On' $(git rev-parse HEAD)
-		pnpm run --if-present clean:build
+		( git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA > /dev/null || git reset --hard $BASE_SHA ) && echo 'On' $(git rev-parse HEAD)
+		pnpm run --if-present clean:build &
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 		pnpm --filter='@woocommerce/plugin-woocommerce' build
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking baseline"
-		for ROUND in {1..3}; do
-			# Each round takes ~2 minutes, running for ~6 minutes presumable generates good enough baseline (cached for 1 week in CI).
-			echo "$(date +"%T"): Round $ROUND of 3"
-			RESULTS_ID="editor_${BASE_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-			RESULTS_ID="product-editor_${BASE_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-        done
+		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		echo '##[endgroup]'
 
-		# This step is intended for running the script locally.
-		title "##[group]Restoring codebase state back to head"
-		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
-		pnpm install --frozen-lockfile > /dev/null &
-		pnpm run --if-present clean:build
-		echo '##[endgroup]'
+		# title "##[group]Restoring codebase state back to head"
+		# git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
+		# pnpm install --frozen-lockfile > /dev/null &
+		# pnpm run --if-present clean:build
+		# echo '##[endgroup]'
 	fi
 
   	title "##[group]Processing reports under $ARTIFACTS_PATH"

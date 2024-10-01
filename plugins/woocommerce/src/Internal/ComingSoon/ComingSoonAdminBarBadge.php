@@ -4,7 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 
 /**
  * Adds hooks to add a badge to the WordPress admin bar showing site visibility.
@@ -30,7 +31,7 @@ class ComingSoonAdminBarBadge {
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
 		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
 			return;
 		}
 
@@ -68,7 +69,7 @@ class ComingSoonAdminBarBadge {
 	 */
 	public function output_css() {
 		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
 			return;
 		}
 
