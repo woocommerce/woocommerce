@@ -66,7 +66,16 @@ class Filterer {
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 		// (causes the filtering subquery to be executed only once).
 		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
-		$hide_out_of_stock = apply_filters('woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		
+		/**
+		 * Filters the woocommerce_hide_out_of_stock_items option to override the default behavior in product filtering by attribute.
+		 *
+		 * @param bool $option_value The behavior configured in WooCommerce settings.
+		 * @return bool The behavior to use in the catalog when product filtering by attribute.
+		 *
+		 * @since 9.5.0.
+		 */
+		$hide_out_of_stock = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 		if ( $hide_out_of_stock ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
@@ -204,7 +213,16 @@ class Filterer {
 
 		$meta_query_sql    = $meta_query->get_sql( 'post', $this->lookup_table_name, 'product_or_parent_id' );
 		$tax_query_sql     = $tax_query->get_sql( $this->lookup_table_name, 'product_or_parent_id' );
-		$hide_out_of_stock = apply_filters('woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		
+		/**
+		 * Filters the woocommerce_hide_out_of_stock_items option to override the default behavior in product filtering by attribute.
+		 *
+		 * @param bool $option_value The behavior configured in WooCommerce settings.
+		 * @return bool The behavior to use in the catalog when product filtering by attribute.
+		 *
+		 * @since 9.5.0.
+		 */
+		$hide_out_of_stock = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 		$in_stock_clause   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
 
 		$query           = array();
