@@ -203,6 +203,13 @@ final class AssetsController {
 	 * @return array
 	 */
 	private function get_block_asset_resource_hints( $filename = '' ) {
+		$cache_key = 'woocommerce_block_asset_resource_hints';
+		$cached    = get_site_transient( $cache_key );
+		$cached    = $cached ? $cached : array();
+		if ( isset( $cached[ $filename ] ) ) {
+			return $cached[ $filename ];
+		}
+
 		if ( ! $filename ) {
 			return array();
 		}
@@ -213,7 +220,8 @@ final class AssetsController {
 			array( esc_url( add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ) ),
 			$this->get_script_dependency_src_array( $script_data['dependencies'] )
 		);
-		return array_map(
+
+		$result = array_map(
 			function ( $src ) {
 				return array(
 					'href' => $src,
@@ -222,6 +230,11 @@ final class AssetsController {
 			},
 			array_unique( array_filter( $resources ) )
 		);
+
+		$cached[ $filename ] = $result;
+		set_site_transient( $cache_key, $cached, WEEK_IN_SECONDS );
+
+		return $result;
 	}
 
 	/**
