@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add CSS unique selectors to shipping methods names on the backend and hook after shipping zones table
