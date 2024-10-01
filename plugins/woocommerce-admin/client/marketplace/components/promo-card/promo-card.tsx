@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -36,11 +36,17 @@ const PromoCard = ( {
 		! getDismissedURIs().includes( uri )
 	);
 
-	if ( ! isVisible ) return null;
+	useEffect( () => {
+		if ( isVisible ) {
+			recordEvent( 'marketplace_promo_viewed', {
+				uri,
+			} );
+		}
+		// only run once
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ isVisible ] );
 
-	recordEvent( 'marketplace_promotion_viewed', {
-		uri,
-	} );
+	if ( ! isVisible ) return null;
 
 	const handleDismiss = () => {
 		setIsVisible( false );
@@ -49,13 +55,13 @@ const PromoCard = ( {
 			JSON.stringify( getDismissedURIs().concat( uri ) )
 		);
 
-		recordEvent( 'marketplace_promotion_dismissed', {
+		recordEvent( 'marketplace_promo_dismissed', {
 			uri,
 		} );
 	};
 
 	const handleClick = () => {
-		recordEvent( 'marketplace_promotion_actioned', {
+		recordEvent( 'marketplace_promo_actioned', {
 			uri,
 			target_uri: promotion.cta_link,
 		} );
