@@ -425,10 +425,13 @@
 		},
 		"build:project:blocks-json-to-php": {
 			"command": "node ./bin/blocks-json-to-php.js",
+			"dependencies": [
+				"build:project:bundle"
+			],
 			"files": [
 				"assets/js/blocks/**/block.json",
-				"../woocommerce/assets/client/blocks/**/block.json",
-				"bin/blocks-json-to-php.js"
+				"bin/blocks-json-to-php.js",
+				"build/**/block.json"
 			],
 			"output": [
 				"build/blocks-json.php"
