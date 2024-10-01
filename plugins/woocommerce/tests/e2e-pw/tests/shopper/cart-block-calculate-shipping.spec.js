@@ -151,7 +151,7 @@ test.describe(
 				await page.getByLabel( 'City' ).fill( 'Amsterdam' );
 				await page
 					.getByRole( 'button', {
-						name: 'Check delivery options',
+						name: 'Update',
 						exact: true,
 					} )
 					.click();
@@ -192,7 +192,7 @@ test.describe(
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
 				await page
 					.getByRole( 'button', {
-						name: 'Check delivery options',
+						name: 'Update',
 						exact: true,
 					} )
 					.click();
@@ -245,7 +245,7 @@ test.describe(
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
 				await page
 					.getByRole( 'button', {
-						name: 'Check delivery options',
+						name: 'Update',
 						exact: true,
 					} )
 					.click();
@@ -286,7 +286,7 @@ test.describe(
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
 				await page
 					.getByRole( 'button', {
-						name: 'Check delivery options',
+						name: 'Update',
 						exact: true,
 					} )
 					.click();
