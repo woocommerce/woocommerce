@@ -1,8 +1,8 @@
 <?php
 /**
- * Customer completed order email (plain text)
+ * Customer failed order email (plain text)
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-completed-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-failed-order.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 3.7.0
+ * @version 9.5.0
  */
 
 defined( 'ABSPATH' ) || exit;

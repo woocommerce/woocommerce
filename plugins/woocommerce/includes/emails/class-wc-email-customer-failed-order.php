@@ -14,7 +14,7 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 	/**
 	 * Customer failed Order Email.
 	 *
-	 * Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped.
+	 * Order failed emails are sent to the customer when their order are marked as failed.
 	 *
 	 * @class       WC_Email_Customer_Failed_Order
 	 * @version     2.0.0
