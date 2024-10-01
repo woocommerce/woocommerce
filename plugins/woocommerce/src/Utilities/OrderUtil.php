@@ -37,6 +37,15 @@ final class OrderUtil {
 	}
 
 	/**
+	 * Helper function to get whether custom order tables are enabled or not.
+	 *
+	 * @return bool
+	 */
+	public static function custom_orders_table_datastore_cache_enabled(): bool {
+		return wc_get_container()->get( CustomOrdersTableController::class )->hpos_data_caching_is_enabled();
+	}
+
+	/**
 	 * Helper function to get whether the orders cache should be used or not.
 	 *
 	 * @return bool True if the orders cache should be used, false otherwise.

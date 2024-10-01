@@ -56,6 +56,8 @@ class CustomOrdersTableController {
 
 	public const HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION = 'woocommerce_hpos_order_item_fts_index_created';
 
+	public const HPOS_DATASTORE_CACHING_ENABLED_OPTION = 'woocommerce_hpos_datastore_caching_enabled';
+
 	/**
 	 * The data store object to use.
 	 *
@@ -148,6 +150,7 @@ class CustomOrdersTableController {
 		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 		self::add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
 		self::add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
+		self::add_action( 'before_woocommerce_init', array( $this, 'maybe_set_order_cache_group_as_non_persistent' ) );
 	}
 
 	/**
@@ -197,6 +200,16 @@ class CustomOrdersTableController {
 	 */
 	public function custom_orders_table_usage_is_enabled(): bool {
 		return get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
+	}
+
+	/**
+	 * Is caching of data within the CustomerOrdersTable datastores enabled?
+	 *
+	 * @return bool True if the caching is enabled within the CustomeOrderTable Datastores.
+	 */
+	public function hpos_data_caching_is_enabled(): bool {
+		return get_option( self::HPOS_DATASTORE_CACHING_ENABLED_OPTION ) === 'yes' &&
+			$this->custom_orders_table_usage_is_enabled();
 	}
 
 	/**
@@ -310,6 +323,9 @@ class CustomOrdersTableController {
 	private function process_updated_option( $option, $old_value, $value ) {
 		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
 			$this->data_synchronizer->cleanup_synchronization_state();
+		}
+		if ( self::HPOS_DATASTORE_CACHING_ENABLED_OPTION === $option && $old_value !== $value && 'yes' === $value ) {
+			$this->data_store->clear_all_cached_data();
 		}
 	}
 
@@ -765,5 +781,20 @@ class CustomOrdersTableController {
 		}
 
 		return $link;
+	}
+
+	/**
+	 * Set the `order_objects` cache group as non-persistent if Custom Order data caching is enabled.
+	 *
+	 * With order datastore cache enabled, caching of raw data is now handled by the datastore, rather than full object
+	 * being stored in persistent cache.
+	 *
+	 * @return void
+	 */
+	private function maybe_set_order_cache_group_as_non_persistent() {
+		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			// If we're using datastore cache, we don't want to persist the order objects in cache. It should be in-memory only.
+			wp_cache_add_non_persistent_groups( array( $this->order_cache->get_object_type() ) );
+		}
 	}
 }

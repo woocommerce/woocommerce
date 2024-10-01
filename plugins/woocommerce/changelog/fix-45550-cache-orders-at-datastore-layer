@@ -1,0 +1,4 @@
+Significance: major
+Type: performance
+
+Added feature to introduce caching to HPOS Data Stores
