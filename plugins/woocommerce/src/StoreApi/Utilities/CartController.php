@@ -487,6 +487,23 @@ class CartController {
 	}
 
 	/**
+	 * When placing an order, validate that the cart is not empty.
+	 *
+	 * @throws InvalidCartException Exception if the cart is empty.
+	 */
+	public function validate_cart_not_empty() {
+		$cart_items = $this->get_cart_items();
+
+		if ( empty( $cart_items ) ) {
+			throw new InvalidCartException(
+				'woocommerce_cart_error',
+				new WP_Error( 'woocommerce_rest_cart_empty', __( 'Cannot place an order, your cart is empty.', 'woocommerce' ), 400 ),
+				400
+			);
+		}
+	}
+
+	/**
 	 * Validate all items in the cart and check for errors.
 	 *
 	 * @throws InvalidCartException Exception if invalid data is detected due to insufficient stock levels.
@@ -499,10 +516,6 @@ class CartController {
 		$too_many_in_cart_products     = [];
 		$partial_out_of_stock_products = [];
 		$not_purchasable_products      = [];
-
-		if ( empty( $cart_items ) ) {
-			$errors[] = new WP_Error( 'woocommerce_rest_cart_empty', __( 'Cannot place an order, your cart is empty.', 'woocommerce' ), 400 );
-		}
 
 		foreach ( $cart_items as $cart_item ) {
 			try {
