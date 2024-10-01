@@ -129,4 +129,62 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		$this->block_patterns->register_block_patterns();
 	}
+
+	/**
+	 * Tests if patterns are registered with the cached data.
+	 */
+	public function test_invalid_cached_block_patterns_registration() {
+		$mock_patterns = array(
+			array(
+				'title'  => 'Mock Cached',
+				'source' => __DIR__ . '/patterns/mock-cached.php'
+			),
+		);
+		$pattern_data  = array(
+			'version'  => '1.0.0-old',
+			'patterns' => $mock_patterns,
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
+
+		$this->pattern_registry
+			->expects( $this->exactly( 2 ) )
+			->method( 'register_block_pattern' )
+			->withConsecutive(
+				array(
+					__DIR__ . '/patterns/mock-footer.php',
+					array(
+						'title' => 'Mock Footer',
+						'slug' => 'woocommerce-blocks/mock-footer',
+						'description' => '',
+						'viewportWidth' => '',
+						'categories' => 'WooCommerce',
+						'keywords' => '',
+						'blockTypes' => 'core/template-part/footer',
+						'inserter' => '',
+						'featureFlag' => '',
+						'source' => __DIR__ . '/patterns/mock-footer.php',
+					),
+					PatternsHelper::get_patterns_dictionary()
+				),
+				array(
+					__DIR__ . '/patterns/mock-header.php',
+					array(
+						'title' => 'Mock Header',
+						'slug' => 'woocommerce-blocks/mock-header',
+						'description' => '',
+						'viewportWidth' => '',
+						'categories' => 'WooCommerce',
+						'keywords' => '',
+						'blockTypes' => 'core/template-part/header',
+						'inserter' => '',
+						'featureFlag' => '',
+						'source' => __DIR__ . '/patterns/mock-header.php',
+					),
+					PatternsHelper::get_patterns_dictionary()
+				),
+			);
+
+		$this->block_patterns->register_block_patterns();
+	}
 }
