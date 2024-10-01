@@ -33,7 +33,6 @@ class Settings extends \WC_REST_Data_Controller {
 	 * Register routes.
 	 */
 	public function register_routes() {
-		error_log( 'register_routes for settings' );	
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base, 
@@ -43,6 +42,7 @@ class Settings extends \WC_REST_Data_Controller {
 					'callback'            => array( $this, 'save_settings' ),
 					'permission_callback' => array( $this, 'permissions_check' ),
 				),
+				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
 	}
@@ -55,7 +55,6 @@ class Settings extends \WC_REST_Data_Controller {
 	 */
 	public function permissions_check( $request ) {
 		return true;
-		// return current_user_can( 'manage_options' );
 	}
 
 	/**
@@ -65,6 +64,25 @@ class Settings extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function save_settings( $request ) {
+		error_log('this is workign');
 		return new \WP_REST_Response( array( 'status' => 'success' ) );
+	}
+
+	public function get_item_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'options',
+			'type'       => 'object',
+			'properties' => array(
+				'options' => array(
+					'type'        => 'array',
+					'description' => __( 'Array of options with associated values.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
+		);
+
+		return $schema;
 	}
 }
