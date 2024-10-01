@@ -97,9 +97,9 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Hand-picked Products' );
+		await pageObject.addFilter( 'Show Hand-picked' );
 
-		const filterName = 'Hand-picked Products';
+		const filterName = 'Hand-picked';
 		await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
 		await expect( pageObject.products ).toHaveCount( 1 );
 
