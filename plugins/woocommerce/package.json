@@ -11,6 +11,10 @@
 	"license": "GPL-3.0+",
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:admin": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/admin-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
+		"build:blocks": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/block-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
+		"build:classic-assets": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/classic-assets...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
+		"build:zip": "./bin/build-zip.sh",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets:legacy": "wireit",
 		"build:project:copy-assets:admin": "wireit",
@@ -74,6 +78,9 @@
 		"test:unit:env:watch": "pnpm test:php:env:watch",
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:admin": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"@woocommerce/admin-library...\" --filter=\"$npm_package_name\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:blocks": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"@woocommerce/block-library...\" --filter=\"$npm_package_name\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:classic-assets": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"@woocommerce/classic-assets...\" --filter=\"$npm_package_name\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:copy-assets": "wireit",
 		"wp-env": "wp-env"
@@ -483,7 +490,6 @@
 						"start": "test:perf:ci-setup"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
@@ -504,6 +510,9 @@
 						"tests/metrics/**",
 						".wp-env.json"
 					],
+					"testEnv": {
+						"start": "env:test"
+					},
 					"events": [
 						"push"
 					],
