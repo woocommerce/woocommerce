@@ -78,10 +78,10 @@ pnpm run --filter='@woocommerce/block-library' test
 
 ## Documentation
 
-* [WooCommerce Documentation](https://woocommerce.com/)
-* [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
-* [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
-* [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+- [WooCommerce Documentation](https://woocommerce.com/)
+- [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
+- [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
+- [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
 ## Reporting Security Issues
 
