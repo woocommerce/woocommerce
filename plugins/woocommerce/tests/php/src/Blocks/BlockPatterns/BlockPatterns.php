@@ -100,4 +100,33 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		$this->block_patterns->register_block_patterns();
 	}
+
+	/**
+	 * Tests if patterns are registered with the cached data.
+	 */
+	public function test_cached_block_patterns_registration() {
+		$mock_patterns = array(
+			array(
+				'title'  => 'Mock Cached',
+				'source' => __DIR__ . '/patterns/mock-cached.php'
+			),
+		);
+		$pattern_data  = array(
+			'version'  => WOOCOMMERCE_VERSION,
+			'patterns' => $mock_patterns,
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
+
+		$this->pattern_registry
+			->expects( $this->exactly( 1 ) )
+			->method( 'register_block_pattern' )
+			->with(
+				__DIR__ . '/patterns/mock-cached.php',
+				$mock_patterns[0],
+				PatternsHelper::get_patterns_dictionary()
+			);
+
+		$this->block_patterns->register_block_patterns();
+	}
 }
