@@ -18,7 +18,8 @@ const json2php = require( 'json2php' );
 
 const blocksDir = path.join( __dirname, '../assets/js/blocks' );
 const blocksDir2 = path.join( __dirname, '../../woocommerce/assets/client/blocks' );
-const outputFile = path.join( __dirname, '../build/blocks-json.php' );
+const outputDir = path.join( __dirname, '../build' );
+const outputFile = path.join( outputDir, 'blocks-json.php' );
 
 const blocks = {};
 
@@ -40,6 +41,7 @@ const phpContent = `<?php
 return ${ printer(  blocks ) };
 `;
 
+fs.mkdirSync( outputDir, { recursive: true } );
 fs.writeFileSync( outputFile, phpContent );
 
 console.log( 'blocks-json.php has been generated.' );
