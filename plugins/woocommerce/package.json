@@ -483,7 +483,6 @@
 						"start": "test:perf:ci-setup"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
@@ -508,6 +507,7 @@
 						"start": "env:test"
 					},
 					"events": [
+						"pull_request",
 						"push"
 					],
 					"report": {
