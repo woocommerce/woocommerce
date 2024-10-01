@@ -497,6 +497,7 @@ class CartController {
 		if ( empty( $cart_items ) ) {
 			throw new InvalidCartException(
 				'woocommerce_cart_error',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Errors are converted to response objects later.
 				new WP_Error( 'woocommerce_rest_cart_empty', __( 'Cannot place an order, your cart is empty.', 'woocommerce' ), 400 ),
 				400
 			);
