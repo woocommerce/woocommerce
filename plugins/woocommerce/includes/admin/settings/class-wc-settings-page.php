@@ -188,6 +188,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 							'type' => 'script',
 							'content' => $script_contents,
 						);
+						// Remove the script here once its been handled.
 					}
 				}
 				

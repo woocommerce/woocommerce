@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
-import { applyFilters, addFilter, removeAllFilters } from '@wordpress/hooks';
+import { applyFilters, addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -62,26 +62,22 @@ export const getRoute = ( section ) => {
 	}
 
 	addFilter( 'woocommerce_admin_settings_pages', 'woocommerce', ( pages ) => {
-		return [
-			...pages,
-			{
-				page: 'my-example',
-				areas: {
-					content: <MyExample section={ section } />,
-					edit: <MyExampleEdit />,
-				},
-				widths: {
-					content: undefined,
-					edit: 380,
-				},
+		pages[ 'my-example' ] = {
+			areas: {
+				content: <MyExample section={ section } />,
+				edit: <MyExampleEdit />,
 			},
-		];
+			widths: {
+				content: undefined,
+				edit: 380,
+			},
+		};
+		return pages;
 	} );
 
-	const routes = applyFilters( 'woocommerce_admin_settings_pages', [] );
-	removeAllFilters( 'woocommerce_admin_settings_pages' );
+	const routes = applyFilters( 'woocommerce_admin_settings_pages', {} );
 
-	const pageRoute = routes.find( ( route ) => route.page === page );
+	const pageRoute = routes[ page ];
 
 	if ( ! pageRoute ) {
 		return {

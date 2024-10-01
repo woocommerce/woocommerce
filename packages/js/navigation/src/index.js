@@ -337,3 +337,9 @@ export const navigateTo = ( { url } ) => {
 
 	window.location.href = String( parsedUrl );
 };
+
+export const useSettingsLocation = () => {
+	const { section, path, ...otherQueryParams } = getQuery();
+	const page = path.split( '/settings/' ).pop();
+	return { ...otherQueryParams, section, page };
+};
