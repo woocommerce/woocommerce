@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
@@ -79,9 +80,9 @@ class AddToCartForm extends AbstractBlock {
 
 		/**
 		 * Trigger the single product add to cart action for each product type.
-		*
-		* @since 9.7.0
-		*/
+		 *
+		 * @since 9.7.0
+		 */
 		do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 
 		$product = ob_get_clean();
@@ -102,11 +103,27 @@ class AddToCartForm extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-form wc-block-add-to-cart-form',
+					esc_attr( $classes_and_styles['classes'] ),
+					esc_attr( $product_classname ),
+				)
+			)
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
 		$form = sprintf(
-			'<div class="wp-block-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s" style="%3$s">%4$s</div>',
-			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $product_classname ),
-			esc_attr( $classes_and_styles['styles'] ),
+			'<div %1$s>%2$s</div>',
+			$wrapper_attributes,
 			$product
 		);
 
