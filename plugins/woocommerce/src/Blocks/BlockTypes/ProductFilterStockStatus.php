@@ -162,7 +162,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-context'     => wp_json_encode( $filter_context['hasSelectedFilters'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilters' => $filter_context['hasSelectedFilters'] ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 		);
 
 		return sprintf(
