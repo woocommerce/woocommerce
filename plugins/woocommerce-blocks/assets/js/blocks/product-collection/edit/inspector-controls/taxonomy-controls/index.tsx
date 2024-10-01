@@ -51,9 +51,9 @@ function TaxonomyControls( {
 	/**
 	 * Normalize the name so first letter of every word is capitalized.
 	 */
-	const normalizeName = ( name: string ) => {
+	const normalizeName = ( name: string | undefined | null ) => {
 		if ( ! name ) {
-			return name;
+			return '';
 		}
 
 		return name
