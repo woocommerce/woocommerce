@@ -1,16 +1,11 @@
-.promo-card-container {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 20px;
-}
+@import "../../stylesheets/_variables.scss";
 
 .promo-card {
 	background-color: #fff;
 	border: 1px solid #ccc;
-	padding: 20px;
 	border-radius: 5px;
-	width: 300px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	padding: 20px;
 
 	&.has-background {
 		align-items: center;
@@ -19,27 +14,60 @@
 		box-shadow: none;
 		display: flex;
 		flex-direction: row;
+		gap: 12px;
 		justify-content: space-between;
 		padding: 24px;
 	}
+
+	&.wide {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		justify-content: space-between;
+
+		.promo-content-image {
+			align-items: center;
+			flex-direction: row-reverse;
+		}
+
+		.promo-links {
+			align-self: flex-end;
+			flex-direction: row-reverse;
+			margin-top: 0;
+		}
+
+		.promo-image {
+			svg {
+				width: 48px;
+			}
+		}
+	}
 }
 
-.has-background {
-	.promo-image {
-		display: flex;
-		justify-content: flex-end;
-		width: 250px;
+.promo-content {
+	.promo-text:last-child {
+		margin-bottom: 0;
+	}
+}
 
-		svg {
-			width: 80px;
-			height: auto;
-		}
+.promo-image {
+	display: none;
+
+	svg {
+		width: 80px;
+		height: auto;
 	}
 }
 
 .promo-content-links {
 	display: flex;
 	flex-direction: column;
+}
+
+.promo-content-image {
+	display: flex;
+	gap: 24px;
+	justify-content: space-between;
 }
 
 .promo-links {
@@ -51,21 +79,14 @@
 	justify-content: flex-start;
 }
 
-.woocommerce-admin-page__extensions {
-	.promo-card {
-		margin-bottom: 40px;
-		width: 100%;
-	}
-}
-
 .promo-title {
-	font-size: 1.5em;
+	font-size: 16px;
 	margin-bottom: 10px;
 	margin-top: 0;
 }
 
 .promo-text {
-	font-size: 1em;
+	font-size: 14px;
 	color: #555;
 }
 
@@ -80,6 +101,7 @@
 	display: flex;
 	padding: 10px 15px;
 	text-decoration: none;
+	white-space: nowrap;
 }
 
 .promo-cta:hover {
@@ -93,4 +115,45 @@
 	display: flex;
 	justify-content: center;
 	padding: var(--grid-unit-10, 8px) var(--grid-unit-20, 16px);
+	white-space: nowrap;
+}
+
+.woocommerce-admin-page__extensions {
+	.promo-card {
+		margin-bottom: 40px;
+		width: 100%;
+	}
+}
+
+@media screen and (min-width: 385px){
+	.promo-image {
+		display: flex;
+		justify-content: flex-end;
+	}
+}
+
+@media screen and (min-width: $breakpoint-small) {
+	.promo-card {
+		&.has-background {
+			gap: 24px;
+		}
+	}
+
+	.has-background {
+		.promo-image {
+			width: 250px;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.promo-card {
+		&.wide {
+			flex-direction: row;
+
+			.promo-links {
+				align-self: center;
+			}
+		}
+	}
 }

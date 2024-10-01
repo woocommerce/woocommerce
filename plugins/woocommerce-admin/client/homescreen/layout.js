@@ -137,11 +137,11 @@ export const Layout = ( {
 					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
-					<Promotions format="promo-card" />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
 					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
 					{ shouldShowStoreLinks && <StoreManagementLinks /> }
+					<Promotions format="promo-card" />
 				</Column>
 			</>
 		);
