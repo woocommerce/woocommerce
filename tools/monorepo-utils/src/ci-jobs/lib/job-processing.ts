@@ -256,6 +256,10 @@ async function createTestJob(
 		};
 	}
 
+	if ( createdJob.testEnv.envVars.WP_VERSION ) {
+		createdJob.name += ` [WP ${ createdJob.testEnv.envVars.WP_VERSION }]`;
+	}
+
 	return createdJob;
 }
 

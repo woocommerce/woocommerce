@@ -15,6 +15,19 @@ interface StableCheckResponse {
 	[ version: string ]: 'latest' | 'outdated' | 'insecure';
 }
 
+interface WordPressOffer {
+	version: string;
+	downloadUrl: string;
+}
+
+interface WordPressOffers {
+	stable: WordPressOffer;
+	nightly: WordPressOffer;
+	beta: WordPressOffer;
+	rc: WordPressOffer;
+	previous: WordPressOffer;
+}
+
 /**
  * Gets all of the available WordPress versions and their associated stability.
  *
@@ -52,7 +65,9 @@ function getWordPressVersions(): Promise< StableCheckResponse > {
  * @param {string} wpVersion The version of WordPress to look for.
  * @return {Promise.<string>} The precise WP version download URL.
  */
-async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
+async function getPreciseWPVersion(
+	wpVersion: string
+): Promise< WordPressOffer > {
 	const allVersions = await getWordPressVersions();
 
 	// If we're requesting a "latest" offset then we need to figure out what version line we're offsetting from.
@@ -87,7 +102,7 @@ async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
 		}
 	}
 
-	// Scan through all of the versions to find the latest version in the version line.
+	// Scan through all the versions to find the latest version in the version line.
 	let latestVersion = null;
 	let latestPatch = -1;
 	for ( const v in allVersions ) {
@@ -116,7 +131,31 @@ async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
 		);
 	}
 
-	return `https://wordpress.org/wordpress-${ latestVersion }.zip`;
+	return {
+		version: latestVersion,
+		downloadUrl: `https://wordpress.org/wordpress-${ latestVersion }.zip`,
+	};
+}
+
+export function getWordPressOffers(): Promise< WordPressOffers > {
+	const offers = {
+		stable: {
+			version: '6.6.2',
+			downloadUrl: 'https://wordpress.org/wordpress-6.6.2.zip',
+		},
+		nightly: null,
+		beta: null,
+		rc: null,
+		previous: null,
+	};
+
+	return new Promise< WordPressOffers >( async ( resolve, reject ) => {
+		offers.stable = await getPreciseWPVersion( 'latest' );
+		offers.nightly = await getPreciseWPVersion( 'latest-1' );
+
+		resolve( offers );
+		reject( { message: 'Failed to resolve WordPress offers' } );
+	} );
 }
 
 /**
@@ -125,48 +164,57 @@ async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
  * @param {string} wpVersion A display-friendly WordPress version. Supports ("master", "trunk", "nightly", "latest", "latest-X", "X.X" for version lines, and "X.X.X" for specific versions)
  * @return {Promise.<string>} A link to download the given version of WordPress.
  */
-async function parseWPVersion( wpVersion: string ): Promise< string > {
-	// Allow for download URLs in place of a version.
-	if ( wpVersion.match( /[a-z]+:\/\//i ) ) {
-		return wpVersion;
-	}
-
+async function parseWPVersion( wpVersion: string ): Promise< WordPressOffer > {
 	// Start with versions we can infer immediately.
 	switch ( wpVersion ) {
 		case 'master':
 		case 'trunk': {
-			return 'WordPress/WordPress#master';
+			return {
+				version: 'master',
+				downloadUrl: 'WordPress/WordPress#master',
+			};
 		}
 
 		case 'nightly': {
-			return 'https://wordpress.org/nightly-builds/wordpress-latest.zip';
+			return {
+				version: 'nightly',
+				downloadUrl:
+					'https://wordpress.org/nightly-builds/wordpress-latest.zip',
+			};
 		}
 
 		case 'latest': {
-			return 'https://wordpress.org/latest.zip';
+			return {
+				version: 'latest',
+				downloadUrl: 'https://wordpress.org/latest.zip',
+			};
 		}
 	}
 
 	// We can also infer X.X.X versions immediately.
 	const parsedVersion = wpVersion.match( /^([0-9]+)\.([0-9]+)\.([0-9]+)$/ );
 	if ( parsedVersion ) {
-		// Note that X.X.0 versions use a X.X download URL.
+		// Note that X.X.0 versions use an X.X download URL.
 		let urlVersion = `${ parsedVersion[ 1 ] }.${ parsedVersion[ 2 ] }`;
 		if ( parsedVersion[ 3 ] !== '0' ) {
 			urlVersion += `.${ parsedVersion[ 3 ] }`;
 		}
 
-		return `https://wordpress.org/wordpress-${ urlVersion }.zip`;
+		return {
+			version: urlVersion,
+			downloadUrl: `https://wordpress.org/wordpress-${ urlVersion }.zip`,
+		};
 	}
 
-	// Since we haven't found a URL yet we're going to use the WordPress.org API to try and infer one.
-	return getPreciseWPVersionURL( wpVersion );
+	// Since we haven't found a URL yet, we're going to use the WordPress.org API to try and infer one.
+	return await getPreciseWPVersion( wpVersion );
 }
 
 /**
  * The environment variables that should be set for the test environment.
  */
 export interface TestEnvVars {
+	WP_VERSION?: string;
 	WP_ENV_CORE?: string;
 	WP_ENV_PHP_VERSION?: string;
 	DISABLE_HPOS?: number;
@@ -187,7 +235,9 @@ export async function parseTestEnvConfig(
 	// Convert `wp-env` configuration options to environment variables.
 	if ( config.wpVersion ) {
 		try {
-			envVars.WP_ENV_CORE = await parseWPVersion( config.wpVersion );
+			const wpVersion = await parseWPVersion( config.wpVersion );
+			envVars.WP_VERSION = wpVersion.version;
+			envVars.WP_ENV_CORE = wpVersion.downloadUrl;
 		} catch ( error ) {
 			throw new Error(
 				`Failed to parse WP version: ${ error.message }.`
