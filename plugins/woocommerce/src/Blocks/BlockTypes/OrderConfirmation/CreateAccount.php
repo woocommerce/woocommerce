@@ -10,13 +10,61 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * CreateAccount class.
  */
 class CreateAccount extends AbstractOrderConfirmationBlock {
-
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'order-confirmation-create-account';
+
+	/**
+	 * Initialize this block type.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_filter( 'hooked_block_woocommerce/order-confirmation-create-account', array( $this, 'hooked_block_content' ), 10, 3 );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param array  $parsed_hooked_block Parsed hooked block.
+	 * @param array  $hooked_block_type Hooked block type.
+	 * @param string $relative_position Relative position.
+	 * @return array
+	 */
+	public function hooked_block_content( $parsed_hooked_block, $hooked_block_type, $relative_position ) {
+		if ( get_option( 'woocommerce_enable_delayed_account_creation', 'yes' ) === 'no' ) {
+			return null;
+		}
+
+		if ( 'after' !== $relative_position || is_null( $parsed_hooked_block ) ) {
+			return $parsed_hooked_block;
+		}
+
+		/* translators: %s: Site title */
+		$site_title_heading                  = sprintf( __( 'Create an account with %s', 'woocommerce' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) );
+		$parsed_hooked_block['innerContent'] = array(
+			'<div class="wp-block-woocommerce-order-confirmation-create-account alignwide">
+			<!-- wp:heading {"level":3} -->
+			<h3 class="wp-block-heading">' . esc_html( $site_title_heading ) . '</h3>
+			<!-- /wp:heading -->
+			<!-- wp:list {"className":"is-style-checkmark-list"} -->
+			<ul class="wp-block-list is-style-checkmark-list"><!-- wp:list-item -->
+			<li>' . esc_html__( 'Faster future purchases', 'woocommerce' ) . '</li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li>' . esc_html__( 'Securely save payment info', 'woocommerce' ) . '</li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li>' . esc_html__( 'Track orders &amp; view shopping history', 'woocommerce' ) . '</li>
+			<!-- /wp:list-item --></ul>
+			<!-- /wp:list -->
+			</div>',
+		);
+
+		return $parsed_hooked_block;
+	}
 
 	/**
 	 * Get the frontend script handle for this block type.
@@ -131,6 +179,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		}
 
 		$result = $this->process_form_post( $order );
+		$notice = '';
 
 		if ( is_wp_error( $result ) ) {
 			$notice = wc_print_notice( $result->get_error_message(), 'error', [], true );
