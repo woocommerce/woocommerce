@@ -340,6 +340,7 @@ export const navigateTo = ( { url } ) => {
 
 export const useSettingsLocation = () => {
 	const { section, path, ...otherQueryParams } = getQuery();
+	console.log( getQuery() );
 	const page = path.split( '/settings/' ).pop();
 	return { ...otherQueryParams, section, page };
 };

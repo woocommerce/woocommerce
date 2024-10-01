@@ -23,6 +23,7 @@ export const useSettingsLocation = () => {
 export const getRoute = ( section ) => {
 	const { page } = useSettingsLocation();
 	const settingsData = window.wcSettings?.admin?.settingsPages;
+	const nonce = settingsData[ page ]?._wpnonce;
 	const sections = settingsData[ page ]?.sections;
 	const contentData =
 		Array.isArray( sections ) && sections.length === 0
@@ -51,7 +52,7 @@ export const getRoute = ( section ) => {
 		return {
 			page,
 			areas: {
-				content: <Content data={ contentData } />,
+				content: <Content data={ contentData } nonce={ nonce } />,
 				edit: null,
 			},
 			widths: {

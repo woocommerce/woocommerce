@@ -77,6 +77,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * Save the settings.
 		 */
 		public static function save() {
+			error_log( 'save getting called' );
 			global $current_tab;
 
 			check_admin_referer( 'woocommerce-settings' );
@@ -849,6 +850,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * @return bool
 		 */
 		public static function save_fields( $options, $data = null ) {
+			error_log( 'save_fields getting called' );	
 			if ( is_null( $data ) ) {
 				$data = $_POST; // WPCS: input var okay, CSRF ok.
 			}
