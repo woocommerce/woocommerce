@@ -13,7 +13,6 @@ import { buildProjectGraph } from './lib/project-graph';
 import { getFileChanges } from './lib/file-changes';
 import { createJobsForChanges } from './lib/job-processing';
 import { isGithubCI } from '../core/environment';
-import { getWordPressOffers } from './lib/test-environment';
 
 const program = new Command( 'ci-jobs' )
 	.description(
@@ -55,10 +54,6 @@ const program = new Command( 'ci-jobs' )
 			fileChanges = getFileChanges( projectGraph, options.baseRef );
 			Logger.endTask( true );
 		}
-
-		const offers = await getWordPressOffers();
-		Logger.notice( 'WordPress Offers:' );
-		Logger.notice( JSON.stringify( offers, null, 2 ) );
 
 		Logger.startTask( 'Creating Jobs', true );
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {

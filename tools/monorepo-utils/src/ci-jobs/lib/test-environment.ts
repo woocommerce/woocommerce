@@ -20,16 +20,8 @@ interface WordPressOffer {
 	downloadUrl: string;
 }
 
-interface WordPressOffers {
-	stable: WordPressOffer;
-	nightly: WordPressOffer;
-	beta: WordPressOffer;
-	rc: WordPressOffer;
-	previous: WordPressOffer;
-}
-
 /**
- * Gets all of the available WordPress versions and their associated stability.
+ * Gets all the available WordPress versions and their associated stability.
  *
  * @return {Promise.<Object>} The response from the WordPress.org API.
  */
@@ -56,6 +48,13 @@ function getWordPressVersions(): Promise< StableCheckResponse > {
 			reject( error );
 		} );
 	} );
+}
+
+async function getStableVersion() {
+	const allVersions = await getWordPressVersions();
+	return Object.keys( allVersions ).find(
+		( key ) => allVersions[ key ] === 'latest'
+	);
 }
 
 /**
@@ -137,25 +136,64 @@ async function getPreciseWPVersion(
 	};
 }
 
-export function getWordPressOffers(): Promise< WordPressOffers > {
-	const offers = {
-		stable: {
-			version: '6.6.2',
-			downloadUrl: 'https://wordpress.org/wordpress-6.6.2.zip',
-		},
-		nightly: null,
-		beta: null,
-		rc: null,
-		previous: null,
-	};
+async function getWordPressOffers(
+	wpVersion: string,
+	channel: string
+): Promise< any > {
+	return new Promise< any >( ( resolve, reject ) => {
+		const url = new URL(
+			'http://api.wordpress.org/core/version-check/1.7/'
+		);
+		const params = new URLSearchParams();
 
-	return new Promise< WordPressOffers >( async ( resolve, reject ) => {
-		offers.stable = await getPreciseWPVersion( 'latest' );
-		offers.nightly = await getPreciseWPVersion( 'latest-1' );
+		if ( channel ) {
+			params.append( 'channel', channel );
+		}
 
-		resolve( offers );
-		reject( { message: 'Failed to resolve WordPress offers' } );
+		if ( wpVersion ) {
+			params.append( 'version', wpVersion );
+		}
+
+		url.search = params.toString();
+
+		const request = https.get( url.toString(), ( response ) => {
+			// Listen for the response data.
+			let responseData = '';
+			response.on( 'data', ( chunk ) => {
+				responseData += chunk;
+			} );
+
+			// Once we have the entire response we can process it.
+			response.on( 'end', () => resolve( JSON.parse( responseData ) ) );
+		} );
+
+		request.on( 'error', ( error ) => {
+			reject( error );
+		} );
 	} );
+}
+
+/**
+ * Uses the WordPress API to get the version number and the download URL to the beta offer, it such offer exists.
+ *
+ * @param {string} forVersion The current version.
+ * @return {Promise.<string>} The precise WP version download URL.
+ */
+async function getBetaChannelOffer(
+	forVersion: string
+): Promise< WordPressOffer > {
+	const response = await getWordPressOffers( forVersion, 'beta' );
+	const targetOffer = response.offers.find(
+		( offer: any ) => offer.response === 'development'
+	);
+
+	if ( targetOffer ) {
+		return {
+			version: targetOffer.version,
+			downloadUrl: targetOffer.download,
+		};
+	}
+	return null;
 }
 
 /**
@@ -188,6 +226,13 @@ async function parseWPVersion( wpVersion: string ): Promise< WordPressOffer > {
 				version: 'latest',
 				downloadUrl: 'https://wordpress.org/latest.zip',
 			};
+		}
+
+		// Use 'prerelease' as a broader terms to catch both beta and RC.
+		// The version-check API returns both beta and RC offers for channel=beta under the 'development' response.
+		case 'prerelease': {
+			const stableVersion = await getStableVersion();
+			return getBetaChannelOffer( stableVersion );
 		}
 	}
 
@@ -239,9 +284,17 @@ export async function parseTestEnvConfig(
 			envVars.WP_VERSION = wpVersion.version;
 			envVars.WP_ENV_CORE = wpVersion.downloadUrl;
 		} catch ( error ) {
-			throw new Error(
-				`Failed to parse WP version: ${ error.message }.`
-			);
+			// Pre-release offers like beta or RC are not always available, and we should not throw if that's the case.
+			// We should only throw if the version is one that should always be available.
+			if (
+				! [ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
+					config.wpVersion
+				)
+			) {
+				throw new Error(
+					`Failed to parse WP version: ${ error.message }.`
+				);
+			}
 		}
 	}
 	if ( config.phpVersion ) {
