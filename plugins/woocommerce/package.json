@@ -483,7 +483,6 @@
 						"start": "test:perf:ci-setup"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
@@ -504,6 +503,9 @@
 						"tests/metrics/**",
 						".wp-env.json"
 					],
+					"testEnv": {
+						"start": "env:test"
+					},
 					"events": [
 						"push"
 					],
