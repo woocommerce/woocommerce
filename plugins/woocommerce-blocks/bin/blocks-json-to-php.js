@@ -17,7 +17,7 @@ const glob = require( 'glob' );
 const json2php = require( 'json2php' );
 
 const blocksDir = path.join( __dirname, '../assets/js/blocks' );
-const blocksDir2 = path.join( __dirname, '../../woocommerce/assets/client/blocks' );
+const blocksDir2 = path.join( __dirname, '../build' );
 const outputDir = path.join( __dirname, '../build' );
 const outputFile = path.join( outputDir, 'blocks-json.php' );
 
@@ -35,7 +35,7 @@ blockMetadataFiles.forEach( ( file ) => {
 	blocks[ directoryName ] = blockJson;
 } );
 
-const printer = json2php.make({linebreak:'\n', indent:'\t', shortArraySyntax: true});
+const printer = json2php.make( { linebreak:'\n', indent:'\t', shortArraySyntax: true } );
 const phpContent = `<?php
 // This file is generated. Do not modify it manually.
 return ${ printer(  blocks ) };
