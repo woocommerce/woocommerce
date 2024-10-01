@@ -66,7 +66,7 @@ class Filterer {
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 		// (causes the filtering subquery to be executed only once).
 		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
-		
+
 		/**
 		 * Filters the woocommerce_hide_out_of_stock_items option to override the default behavior in product filtering by attribute.
 		 *
@@ -211,9 +211,9 @@ class Filterer {
 	private function get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids ) {
 		global $wpdb;
 
-		$meta_query_sql    = $meta_query->get_sql( 'post', $this->lookup_table_name, 'product_or_parent_id' );
-		$tax_query_sql     = $tax_query->get_sql( $this->lookup_table_name, 'product_or_parent_id' );
-		
+		$meta_query_sql = $meta_query->get_sql( 'post', $this->lookup_table_name, 'product_or_parent_id' );
+		$tax_query_sql  = $tax_query->get_sql( $this->lookup_table_name, 'product_or_parent_id' );
+
 		/**
 		 * Filters the woocommerce_hide_out_of_stock_items option to override the default behavior in product filtering by attribute.
 		 *
