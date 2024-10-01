@@ -492,7 +492,6 @@ class CartController {
 	 * @throws InvalidCartException Exception if invalid data is detected due to insufficient stock levels.
 	 */
 	public function validate_cart_items() {
-		$cart       = $this->get_cart_instance();
 		$cart_items = $this->get_cart_items();
 
 		$errors                        = [];
@@ -501,7 +500,11 @@ class CartController {
 		$partial_out_of_stock_products = [];
 		$not_purchasable_products      = [];
 
-		foreach ( $cart_items as $cart_item_key => $cart_item ) {
+		if ( empty( $cart_items ) ) {
+			$errors[] = new WP_Error( 'woocommerce_rest_cart_empty', __( 'Cannot place an order, your cart is empty.', 'woocommerce' ), 400 );
+		}
+
+		foreach ( $cart_items as $cart_item ) {
 			try {
 				$this->validate_cart_item( $cart_item );
 			} catch ( RouteException $error ) {
