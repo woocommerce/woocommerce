@@ -1,9 +1,9 @@
 /**
  * This script generates a PHP file from block JSON files.
- * To run it ( this script only ):
- *   pnpm run watch:build:project:blocks-json-to-php
+ * To run it (this script only):
+ *   pnpm run build:project:blocks-json-to-php
  * Or, it will be run automatically when you run:
- *   pnpm run watch:build
+ *   pnpm run build
  *
  * In watch mode:
  *   pnpm run watch:build:project:blocks-json-to-php
