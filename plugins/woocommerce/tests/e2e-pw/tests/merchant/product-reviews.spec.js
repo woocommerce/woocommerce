@@ -246,6 +246,14 @@ test.describe(
 				'wp-admin/edit.php?post_type=product&page=product-reviews'
 			);
 
+			// Handle notice if present
+			await page.addLocatorHandler(
+				page.getByRole( 'link', { name: 'Dismiss' } ),
+				async () => {
+					await page.getByRole( 'link', { name: 'Dismiss' } ).click();
+				}
+			);
+
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
 			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
@@ -256,7 +264,12 @@ test.describe(
 			const replyText = `Thank you for your feedback! (replied ${ Date.now() })`;
 			await replyTextArea.fill( replyText );
 
-			await page.locator( 'button.save.button.button-primary' ).click();
+			await page
+				.getByRole( 'cell', { name: 'Reply to Comment' } )
+				.getByRole( 'button', { name: 'Reply', exact: true } )
+				.click();
+
+			await expect( replyTextArea ).toBeHidden();
 
 			const productLink = await reviewRow
 				.locator( 'a.comments-view-item-link' )
