@@ -4,7 +4,6 @@
 import {
 	BlockContextProvider,
 	useBlockProps,
-	InnerBlocks,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { useCollectionData } from '@woocommerce/base-context/hooks';

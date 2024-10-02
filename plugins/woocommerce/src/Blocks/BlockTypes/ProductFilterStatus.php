@@ -8,14 +8,14 @@ use Automattic\WooCommerce\Blocks\Package;
 /**
  * Product Filter: Stock Status Block.
  */
-final class ProductFilterStockStatus extends AbstractBlock {
+final class ProductFilterStatus extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-stock-status';
+	protected $block_name = 'product-filter-status';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 

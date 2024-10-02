@@ -10,7 +10,7 @@ import { ProductFiltersContext } from '../../frontend';
 
 const filterStockStatusKey = 'filter_stock_status';
 
-store( 'woocommerce/product-filter-stock-status', {
+store( 'woocommerce/product-filter-status', {
 	actions: {
 		toggleFilter: () => {
 			const productFiltersContext = getContext< ProductFiltersContext >(
