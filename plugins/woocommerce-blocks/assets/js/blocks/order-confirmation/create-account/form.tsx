@@ -4,7 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import { useState, createInterpolateElement } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
-import PasswordStrengthMeter from '@woocommerce/base-components/cart-checkout/password-strength-meter';
+import {
+	PasswordStrengthMeter,
+	getPasswordStrength,
+} from '@woocommerce/base-components/cart-checkout/password-strength-meter';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
@@ -36,8 +39,6 @@ const PasswordField = ( {
 	password: string;
 	setPassword: ( password: string ) => void;
 } ) => {
-	const [ passwordStrength, setPasswordStrength ] = useState( 0 );
-
 	return (
 		<div>
 			<ValidatedTextInput
@@ -63,7 +64,7 @@ const PasswordField = ( {
 					}
 				} }
 				customValidation={ ( inputObject ) => {
-					if ( passwordStrength < 2 ) {
+					if ( getPasswordStrength( inputObject.value ) < 2 ) {
 						inputObject.setCustomValidity(
 							__(
 								'Please create a stronger password',
@@ -75,14 +76,7 @@ const PasswordField = ( {
 					return true;
 				} }
 				onChange={ ( value: string ) => setPassword( value ) }
-				feedback={
-					<PasswordStrengthMeter
-						password={ password }
-						onChange={ ( strength: number ) =>
-							setPasswordStrength( strength )
-						}
-					/>
-				}
+				feedback={ <PasswordStrengthMeter password={ password } /> }
 			/>
 		</div>
 	);
@@ -111,6 +105,10 @@ const Form = ( {
 		false
 	);
 	const needsPassword = ! registrationGeneratePassword && ! password;
+
+	if ( ! customerEmail ) {
+		return null;
+	}
 
 	return (
 		<form

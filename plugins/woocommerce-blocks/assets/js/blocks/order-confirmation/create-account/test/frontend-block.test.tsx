@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { act, render } from '@testing-library/react';
+import { act, render, fireEvent, waitFor } from '@testing-library/react';
 import { getSetting } from '@woocommerce/settings';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -15,16 +16,19 @@ jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
 	getSetting: jest
 		.fn()
-		.mockImplementation( ( key: string, defaultValue: unknown ) => {
-			if ( key === 'registrationGeneratePassword' ) {
-				return true;
-			}
-			return defaultValue;
-		} ),
+		.mockImplementation(
+			( key: string, defaultValue: unknown ) => defaultValue
+		),
 } ) );
 
-describe( 'CreateAccountFrontendBlock', () => {
-	it( 'Renders password field if registrationGeneratePassword is false', async () => {
+jest.mock( '@wordpress/i18n', () => ( {
+	__esModule: true,
+	...jest.requireActual( '@wordpress/i18n' ),
+	__: jest.fn( ( msg ) => msg ),
+} ) );
+
+describe( 'CreateAccountFrontendBlock - Automatic password generation off', () => {
+	beforeEach( () => {
 		( getSetting as jest.Mock ).mockImplementation(
 			( key: string, defaultValue: unknown ) => {
 				if ( key === 'registrationGeneratePassword' ) {
@@ -33,8 +37,10 @@ describe( 'CreateAccountFrontendBlock', () => {
 				return defaultValue;
 			}
 		);
+	} );
 
-		const { findByText } = render(
+	it( 'Renders "Set a password" prompt', async () => {
+		const { queryByText } = render(
 			<CreateAccountBlock
 				attributes={ {
 					customerEmail: 'test@test.com',
@@ -45,14 +51,45 @@ describe( 'CreateAccountFrontendBlock', () => {
 
 		await act( async () => {
 			expect(
-				await findByText(
+				await queryByText(
 					textContentMatcher( 'Set a password for test@test.com' )
 				)
 			).toBeInTheDocument();
 		} );
 	} );
 
-	it( 'Renders no password field if registrationGeneratePassword is true', async () => {
+	it( 'Disables submit button when password is required but empty', async () => {
+		const { getByRole, getByLabelText } = render(
+			<CreateAccountBlock
+				attributes={ { customerEmail: 'test@example.com' } }
+				isEditor={ false }
+			/>
+		);
+
+		await act( async () => {
+			const passwordInput = getByLabelText( 'Password' );
+			const submitButton = getByRole( 'button', {
+				name: 'Create account',
+			} );
+			expect( submitButton ).toBeDisabled();
+
+			// Weak password.
+			fireEvent.change( passwordInput, {
+				target: { value: '12345' },
+			} );
+			expect( submitButton ).toBeDisabled();
+
+			// Strong password.
+			fireEvent.change( passwordInput, {
+				target: { value: 'StrongP@ssw0rd123!' },
+			} );
+			expect( submitButton ).toBeEnabled();
+		} );
+	} );
+} );
+
+describe( 'CreateAccountFrontendBlock - Automatic password generation on', () => {
+	beforeEach( () => {
 		( getSetting as jest.Mock ).mockImplementation(
 			( key: string, defaultValue: unknown ) => {
 				if ( key === 'registrationGeneratePassword' ) {
@@ -61,8 +98,10 @@ describe( 'CreateAccountFrontendBlock', () => {
 				return defaultValue;
 			}
 		);
+	} );
 
-		const { findByText } = render(
+	it( 'Does not render "Set a password" prompt', async () => {
+		const { queryByText } = render(
 			<CreateAccountBlock
 				attributes={ {
 					customerEmail: 'test@test.com',
@@ -73,81 +112,257 @@ describe( 'CreateAccountFrontendBlock', () => {
 
 		await act( async () => {
 			expect(
-				await findByText(
+				await queryByText(
 					textContentMatcher( 'Set a password for test@test.com' )
 				)
 			).not.toBeInTheDocument();
 		} );
 	} );
 
-	/*
-	it( 'Shows load more button when there are more reviews than displayed.', async () => {
-		( getReviews as jest.Mock ).mockResolvedValue( {
-			reviews: [ dummyReview, dummyReview, dummyReview ],
-			totalReviews: 3,
-		} );
-
-		const { findByText } = render(
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore - we can't fix this until withReviews is converted to TS.
-			<ReviewsFrontendBlock
-				attributes={ { showLoadMore: 'true' } }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 1 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onChangeOrderby={ jest.fn() }
+	it( 'Submit button is not disabled', async () => {
+		const { getByRole } = render(
+			<CreateAccountBlock
+				attributes={ { customerEmail: 'test@example.com' } }
+				isEditor={ false }
 			/>
 		);
 
-		const loadMoreButton = await findByText( 'Load more' );
-		expect( loadMoreButton ).toBeInTheDocument();
+		await act( async () => {
+			const submitButton = getByRole( 'button', {
+				name: 'Create account',
+			} );
+			expect( submitButton ).toBeEnabled();
+		} );
 	} );
 
-	it( 'renders a order by select when showOrderby is passed as attribute and reviewRatingsEnabled is not set (defaults to true).', async () => {
-		( getReviews as jest.Mock ).mockResolvedValue( {
-			reviews: [ dummyReview, dummyReview, dummyReview ],
-			totalReviews: 3,
-		} );
-
-		const { findByText } = render(
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore - we can't fix this until withReviews is converted to TS.
-			<ReviewsFrontendBlock
-				attributes={ { showLoadMore: true, showOrderby: true } }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 1 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onChangeOrderby={ jest.fn() }
+	it( 'Renders a notice stating that a password will be emailed to the user', async () => {
+		const { queryByText } = render(
+			<CreateAccountBlock
+				attributes={ {
+					customerEmail: 'test@test.com',
+				} }
+				isEditor={ false }
 			/>
 		);
 
-		const orderBySelect = await findByText( 'Set a password' );
-		expect( orderBySelect ).toBeInTheDocument();
+		await act( async () => {
+			expect(
+				await queryByText(
+					textContentMatcher(
+						"We'll email you a link to set up an account password."
+					)
+				)
+			).toBeInTheDocument();
+		} );
+	} );
+} );
+
+describe( 'CreateAccountFrontendBlock - Editor mode', () => {
+	beforeEach( () => {
+		( getSetting as jest.Mock ).mockImplementation(
+			( key: string, defaultValue: unknown ) => {
+				if ( key === 'registrationGeneratePassword' ) {
+					return false;
+				}
+				return defaultValue;
+			}
+		);
 	} );
 
-	it( 'when reviewRatingsEnabled is set to false the order by select is not shown.', async () => {
-		( getReviews as jest.Mock ).mockResolvedValue( {
-			reviews: [ dummyReview, dummyReview, dummyReview ],
-			totalReviews: 3,
+	it( 'Renders a placeholder in editor mode', async () => {
+		const { queryByText } = render(
+			<CreateAccountBlock attributes={ {} } isEditor={ true } />
+		);
+
+		await act( async () => {
+			expect(
+				await queryByText( textContentMatcher( 'Create account' ) )
+			).toBeInTheDocument();
 		} );
 
-		( getSetting as jest.Mock ).mockReturnValue( false );
+		expect(
+			await queryByText(
+				textContentMatcher( 'Set a password for customer@email.com' )
+			)
+		).toBeInTheDocument();
+	} );
+} );
 
-		const { findByText } = render(
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore - we can't fix this until withReviews is converted to TS.
-			<ReviewsFrontendBlock
-				attributes={ { showLoadMore: true, showOrderby: true } }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 1 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onChangeOrderby={ jest.fn() }
+describe( 'CreateAccountFrontendBlock - Edge cases', () => {
+	it( 'Does not render anything when email is empty', async () => {
+		const { container } = render(
+			<CreateAccountBlock
+				attributes={ { customerEmail: '' } }
+				isEditor={ false }
 			/>
 		);
 
-		expect( () => findByText( 'Order by' ) ).rejects.toThrow();
-	} );*/
+		await act( async () => {
+			expect( container ).toBeEmptyDOMElement();
+		} );
+	} );
+} );
+
+describe( 'CreateAccountFrontendBlock - Password strength (check-password-strength)', () => {
+	beforeEach( () => {
+		( getSetting as jest.Mock ).mockImplementation(
+			( key: string, defaultValue: unknown ) => {
+				if ( key === 'registrationGeneratePassword' ) {
+					return false;
+				}
+				return defaultValue;
+			}
+		);
+	} );
+
+	describe( 'Shows password strength meter and updates accordingly', () => {
+		it( 'Very weak password', async () => {
+			const { getByLabelText, getByText } = render(
+				<CreateAccountBlock
+					attributes={ { customerEmail: 'test@example.com' } }
+					isEditor={ false }
+				/>
+			);
+			const passwordInput = getByLabelText( 'Password' );
+			fireEvent.change( passwordInput, {
+				target: { value: 'we' },
+			} );
+			await waitFor( () => {
+				expect(
+					getByText( 'Too weak', {
+						selector:
+							'.wc-block-components-password-strength__meter',
+					} )
+				).toBeInTheDocument();
+			} );
+		} );
+
+		it( 'Weak password', async () => {
+			const { getByLabelText, getByText } = render(
+				<CreateAccountBlock
+					attributes={ { customerEmail: 'test@example.com' } }
+					isEditor={ false }
+				/>
+			);
+			const passwordInput = getByLabelText( 'Password' );
+			fireEvent.change( passwordInput, {
+				target: { value: 'weak' },
+			} );
+			await waitFor( () => {
+				expect(
+					getByText( 'Weak', {
+						selector:
+							'.wc-block-components-password-strength__meter',
+					} )
+				).toBeInTheDocument();
+			} );
+		} );
+
+		it( 'Medium password', async () => {
+			const { getByLabelText, getByText } = render(
+				<CreateAccountBlock
+					attributes={ { customerEmail: 'test@example.com' } }
+					isEditor={ false }
+				/>
+			);
+			const passwordInput = getByLabelText( 'Password' );
+			fireEvent.change( passwordInput, {
+				target: { value: 'M3dium!!' },
+			} );
+			await waitFor( () => {
+				expect(
+					getByText( 'Medium', {
+						selector:
+							'.wc-block-components-password-strength__meter',
+					} )
+				).toBeInTheDocument();
+			} );
+		} );
+
+		it( 'Strong password', async () => {
+			const { getByLabelText, getByText } = render(
+				<CreateAccountBlock
+					attributes={ { customerEmail: 'test@example.com' } }
+					isEditor={ false }
+				/>
+			);
+			const passwordInput = getByLabelText( 'Password' );
+			fireEvent.change( passwordInput, {
+				target: { value: 'StrongP@ssw0rd123!' },
+			} );
+			await waitFor( () => {
+				expect(
+					getByText( 'Strong', {
+						selector:
+							'.wc-block-components-password-strength__meter',
+					} )
+				).toBeInTheDocument();
+			} );
+		} );
+
+		it( 'Very strong password', async () => {
+			const { getByLabelText, getByText } = render(
+				<CreateAccountBlock
+					attributes={ { customerEmail: 'test@example.com' } }
+					isEditor={ false }
+				/>
+			);
+			const passwordInput = getByLabelText( 'Password' );
+			fireEvent.change( passwordInput, {
+				target: { value: 'V3ryStrongP@ssw0rd123!' },
+			} );
+			await waitFor( () => {
+				expect(
+					getByText( 'Very strong', {
+						selector:
+							'.wc-block-components-password-strength__meter',
+					} )
+				).toBeInTheDocument();
+			} );
+		} );
+	} );
+} );
+
+describe( 'CreateAccountFrontendBlock - Email handling', () => {
+	it( 'Correctly handles email addresses with special characters', async () => {
+		const { queryByText } = render(
+			<CreateAccountBlock
+				attributes={ { customerEmail: 'test+special@example.com' } }
+				isEditor={ false }
+			/>
+		);
+
+		await act( async () => {
+			expect(
+				await queryByText(
+					textContentMatcher(
+						'Set a password for test+special@example.com'
+					)
+				)
+			).toBeInTheDocument();
+		} );
+	} );
+} );
+
+describe( 'CreateAccountFrontendBlock - Localization', () => {
+	it( 'Displays translated strings when locale is changed', async () => {
+		// Mock the translation function
+		( __ as jest.Mock ).mockImplementation( ( text: string ) =>
+			text === 'Create account' ? 'Créer un compte' : text
+		);
+
+		const { getByText } = render(
+			<CreateAccountBlock
+				attributes={ { customerEmail: 'test@example.com' } }
+				isEditor={ false }
+			/>
+		);
+
+		await act( async () => {
+			expect( getByText( 'Créer un compte' ) ).toBeInTheDocument();
+		} );
+
+		// Clean up the mock
+		jest.unmock( '@wordpress/i18n' );
+	} );
 } );
