@@ -36,14 +36,14 @@ const Promotions: ( { format }: { format: string } ) => null | JSX.Element = ( {
 	const handleLoad = () => {
 		recordEvent( 'marketplace_promotion_viewed', {
 			path: pathname,
-			format: 'notice',
+			format,
 		} );
 	};
 
 	const handleClose = () => {
 		recordEvent( 'marketplace_promotion_dismissed', {
 			path: pathname,
-			format: 'notice',
+			format,
 		} );
 	};
 
