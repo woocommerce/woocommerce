@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales' );
 
 
 	/**
@@ -1064,6 +1064,14 @@ class ProductCollection extends AbstractBlock {
 			);
 		}
 
+		if ( 'sales' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
+		}
+
 		$meta_keys = array(
 			'popularity' => 'total_sales',
 			'rating'     => '_wc_average_rating',
@@ -1719,18 +1727,18 @@ class ProductCollection extends AbstractBlock {
 		$min_price = $price_range['min'] ?? null;
 		if ( $min_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'min_price', '>=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'max_price', '>=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price >= %f ', $min_price );
 			}
 		}
 
 		$max_price = $price_range['max'] ?? null;
 		if ( $max_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'max_price', '<=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'min_price', '<=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price <= %f ', $max_price );
 			}
 		}
 
@@ -1763,6 +1771,36 @@ class ProductCollection extends AbstractBlock {
 		$clauses['orderby'] = $is_ascending_order ?
 			'wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC' :
 			'wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC';
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add sales-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_sales_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+		if ( 'sales' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.total_sales ASC' :
+			'wc_product_meta_lookup.total_sales DESC';
 
 		return $clauses;
 	}
