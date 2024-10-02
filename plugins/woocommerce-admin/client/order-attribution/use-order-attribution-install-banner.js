@@ -8,6 +8,7 @@ import {
 	useUser,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { getPath } from '@woocommerce/navigation';
 
 const OPTION_NAME_BANNER_DISMISSED =
 	'woocommerce_order_attribution_install_banner_dismissed';
@@ -17,11 +18,14 @@ const useOrderAttributionInstallBanner = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { currentUserCan } = useUser();
 
-	const dismissOrderAttributionInstallBanner = () => {
+	const dismiss = ( eventContext = 'analytics-overview' ) => {
 		updateOptions( {
 			[ OPTION_NAME_BANNER_DISMISSED ]: OPTION_VALUE_YES,
 		} );
-		recordEvent( 'order_attribution_install_banner_dismissed' );
+		recordEvent( 'order_attribution_install_banner_dismissed', {
+			path: getPath(),
+			context: eventContext,
+		} );
 	};
 
 	const { canUserInstallPlugins, orderAttributionInstallState } = useSelect(
@@ -53,9 +57,8 @@ const useOrderAttributionInstallBanner = () => {
 
 	return {
 		loading,
-		isOrderAttributionInstallBannerDismissed:
-			isBannerDismissed === OPTION_VALUE_YES,
-		dismissOrderAttributionInstallBanner,
+		isDismissed: isBannerDismissed === OPTION_VALUE_YES,
+		dismiss,
 		shouldShowBanner:
 			! loading &&
 			canUserInstallPlugins &&

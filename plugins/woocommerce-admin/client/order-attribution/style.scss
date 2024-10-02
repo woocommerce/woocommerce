@@ -2,7 +2,6 @@
 
 	margin: 0 15px 10px 0;
 	animation: isLoaded;
-	min-width: 550px; // for smaller screens
 	animation-duration: 250ms;
 
 	&.components-card {
@@ -14,12 +13,15 @@
 	.woocommerce-order-attribution-install-analytics-overview-banner__body {
 		display: flex;
 		align-items: center;
+
+		@media (max-width: $break-small) {
+			flex-direction: column;
+		}
 	}
 
 	.woocommerce-order-attribution-install-analytics-overview-banner__image_container {
 		display: flex;
 		padding-left: 15px;
-		min-width: 200px; // for smaller screens
 	}
 
 	.woocommerce-order-attribution-install-analytics-overview-banner__text_container {
@@ -34,14 +36,12 @@
 		}
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__text-chip {
-		display: flex;
-		align-items: center;
+	.woocommerce-order-attribution-install-analytics-overview-banner__text-badge {
+		display: inline-flex;
 		justify-content: center;
 		background: $studio-gray-0;
 		border-radius: 2px;
-		width: 42px;
-		height: 24px;
+		padding: 2px 5px;
 
 		p {
 			color: $studio-gray-80;
@@ -51,11 +51,12 @@
 	.woocommerce-order-attribution-install-analytics-overview-banner__text-title {
 		color: $studio-gray-90;
 		line-height: 24px;
-		font-weight: 590;
+		font-weight: 600;
 	}
 
 	.woocommerce-order-attribution-install-analytics-overview-banner__text-description {
 		color: $studio-gray-90;
 		line-height: 16px;
+		max-width: 580px;
 	}
 }

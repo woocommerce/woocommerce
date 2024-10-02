@@ -1,8 +1,3 @@
-/**
- * External dependencies
- */
-import { createElement } from '@wordpress/element';
-
 const OrderAttributionInstallBannerImage = () => (
 	<svg
 		width="156"

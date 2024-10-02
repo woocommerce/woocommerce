@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { createInterpolateElement } from '@wordpress/element';
 import { Button, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
+import { getPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -16,18 +16,19 @@ import './style.scss';
 
 export const OrderAttributionInstallBanner = ( {
 	bannerImage = <OrderAttributionInstallBannerImage />,
+	eventContext = 'analytics-overview',
 } ) => {
-	const {
-		isOrderAttributionInstallBannerDismissed,
-		dismissOrderAttributionInstallBanner,
-		shouldShowBanner,
-	} = useOrderAttributionInstallBanner();
+	const { isDismissed, dismiss, shouldShowBanner } =
+		useOrderAttributionInstallBanner();
 
-	if ( ! shouldShowBanner || isOrderAttributionInstallBannerDismissed ) {
+	if ( ! shouldShowBanner || isDismissed ) {
 		return null;
 	}
 
-	recordEvent( 'order_attribution_install_banner_viewed' );
+	recordEvent( 'order_attribution_install_banner_viewed', {
+		path: getPath(),
+		context: eventContext,
+	} );
 
 	return (
 		<Card
@@ -39,7 +40,7 @@ export const OrderAttributionInstallBanner = ( {
 					{ bannerImage }
 				</div>
 				<div className="woocommerce-order-attribution-install-analytics-overview-banner__text_container">
-					<div className="woocommerce-order-attribution-install-analytics-overview-banner__text-chip">
+					<div className="woocommerce-order-attribution-install-analytics-overview-banner__text-badge">
 						<Text
 							className="woocommerce-order-attribution-install-analytics-overview-banner__text-description"
 							as="p"
@@ -64,12 +65,9 @@ export const OrderAttributionInstallBanner = ( {
 						as="p"
 						size="12"
 					>
-						{ createInterpolateElement(
-							__(
-								'Understand what truly drives revenue with our powerful order attribution extension. Use it to track<br/>your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
-								'woocommerce'
-							),
-							{ br: <br /> }
+						{ __(
+							'Understand what truly drives revenue with our powerful order attribution extension. Use it to track your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
+							'woocommerce'
 						) }
 					</Text>
 					<div>
@@ -78,7 +76,11 @@ export const OrderAttributionInstallBanner = ( {
 							variant="primary"
 							onClick={ () =>
 								recordEvent(
-									'order_attribution_install_banner_clicked'
+									'order_attribution_install_banner_clicked',
+									{
+										path: getPath(),
+										context: eventContext,
+									}
 								)
 							}
 						>
@@ -86,7 +88,7 @@ export const OrderAttributionInstallBanner = ( {
 						</Button>
 						<Button
 							variant="tertiary"
-							onClick={ dismissOrderAttributionInstallBanner }
+							onClick={ () => dismiss( eventContext ) }
 						>
 							{ __( 'Dismiss', 'woocommerce' ) }
 						</Button>

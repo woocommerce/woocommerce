@@ -7,8 +7,8 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
+import { OrderAttributionInstallBanner } from '~/order-attribution';
 import './style.scss';
-import { OrderAttributionInstallBanner } from '../order-attribution';
 
 const CustomizableDashboard = lazy( () =>
 	import( /* webpackChunkName: "customizable-dashboard" */ './customizable' )
@@ -20,7 +20,7 @@ class Dashboard extends Component {
 
 		return (
 			<Suspense fallback={ <Spinner /> }>
-				<OrderAttributionInstallBanner />
+				<OrderAttributionInstallBanner eventContext="analytics-overview" />
 				<CustomizableDashboard query={ query } path={ path } />
 			</Suspense>
 		);
