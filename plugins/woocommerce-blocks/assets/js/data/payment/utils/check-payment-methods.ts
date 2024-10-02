@@ -163,11 +163,30 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			| PaymentMethodConfigInstance
 			| ExpressPaymentMethodConfigInstance
 	) => {
-		const { name } = paymentMethod;
-		availablePaymentMethods = {
-			...availablePaymentMethods,
-			[ paymentMethod.name ]: { name },
-		};
+		if ( express ) {
+			const { name, title, description, gatewayId, supports } =
+				paymentMethod as ExpressPaymentMethodConfigInstance;
+
+			availablePaymentMethods = {
+				...availablePaymentMethods,
+				[ paymentMethod.name ]: {
+					name,
+					title,
+					description,
+					gatewayId,
+					supportsStyle: supports?.style,
+				},
+			};
+		} else {
+			const { name } = paymentMethod as PaymentMethodConfigInstance;
+
+			availablePaymentMethods = {
+				...availablePaymentMethods,
+				[ paymentMethod.name ]: {
+					name,
+				},
+			};
+		}
 	};
 
 	// Order payment methods.

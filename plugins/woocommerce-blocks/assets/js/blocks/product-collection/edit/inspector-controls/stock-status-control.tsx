@@ -49,7 +49,7 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Stock status', 'woocommerce' ) }
+			label={ __( 'Stock Status', 'woocommerce' ) }
 			hasValue={ () =>
 				! fastDeepEqual(
 					query.woocommerceStockStatus,
@@ -61,7 +61,7 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 			isShownByDefault
 		>
 			<FormTokenField
-				label={ __( 'Stock status', 'woocommerce' ) }
+				label={ __( 'Stock Status', 'woocommerce' ) }
 				onChange={ ( statusLabels ) => {
 					const woocommerceStockStatus = statusLabels
 						.map( getStockStatusIdByLabel )

@@ -4,6 +4,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
+
 /**
  * Adds hooks to add a badge to the WordPress admin bar showing site visibility.
  */
@@ -27,6 +30,11 @@ class ComingSoonAdminBarBadge {
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
+		// Early exit if LYS feature is disabled.
+		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
+			return;
+		}
+
 		$labels = array(
 			'coming-soon'       => __( 'Coming soon', 'woocommerce' ),
 			'store-coming-soon' => __( 'Store coming soon', 'woocommerce' ),
@@ -60,16 +68,33 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 */
 	public function output_css() {
+		// Early exit if LYS feature is disabled.
+		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
+			return;
+		}
+
 		if ( is_admin_bar_showing() ) {
 			echo '<style>
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge {
+					padding: 7px 0;
+				}
+
 				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item {
+					/* Layout  */
 					background-color: #F6F7F7;
-					color: black;
-					margin-top:7px;
-					padding: 0 6px;
-					height: 18px;
-					line-height: 17px;
 					border-radius: 2px;
+					display: flex;
+					height: 18px;
+					padding: 0px 6px;
+					align-items: center;
+					gap: 8px;
+
+					/* Typography  */
+					color: #3C434A;
+					font-size: 12px;
+					font-style: normal;
+					font-weight: 500;
+					line-height: 16px;
 				}
 
 				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item:hover,

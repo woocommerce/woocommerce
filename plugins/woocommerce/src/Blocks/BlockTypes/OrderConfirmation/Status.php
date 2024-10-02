@@ -28,7 +28,7 @@ class Status extends AbstractOrderConfirmationBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$order     = $this->get_order();
-		$classname = $attributes['className'] ?? '';
+		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 
 		if ( isset( $attributes['align'] ) ) {
 			$classname .= " align{$attributes['align']}";
@@ -265,7 +265,7 @@ class Status extends AbstractOrderConfirmationBlock {
 				</p>',
 				esc_attr( 'verify-email-submit' ),
 				esc_html__( 'Confirm email and view order', 'woocommerce' ),
-				wp_nonce_field( 'wc_verify_email', 'check_submission', true, false ),
+				wp_nonce_field( 'wc_verify_email', '_wpnonce', true, false ),
 				esc_attr( wc_wp_theme_get_element_class_name( 'button' ) )
 			) .
 			'</form>';

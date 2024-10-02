@@ -4,8 +4,11 @@ namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
+
 /**
  * Pattern Images class.
+ *
+ * @internal
  */
 class UpdateProducts {
 
@@ -471,11 +474,11 @@ class UpdateProducts {
 	/**
 	 * Update the product with the new content.
 	 *
-	 * @param \WC_Product $product The product.
-	 * @param int         $product_image_id The product image ID.
-	 * @param string      $product_title The product title.
-	 * @param string      $product_description The product description.
-	 * @param int         $product_price The product price.
+	 * @param \WC_Product         $product The product.
+	 * @param int|string|WP_Error $product_image_id The product image ID.
+	 * @param string              $product_title The product title.
+	 * @param string              $product_description The product description.
+	 * @param int                 $product_price The product price.
 	 *
 	 * @return int|\WP_Error
 	 */

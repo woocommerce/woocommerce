@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { createRoot, useEffect, Suspense } from '@wordpress/element';
+import { render, Suspense } from '@wordpress/element';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
-import type { Root } from 'react-dom/client';
 
 // Some blocks take care of rendering their inner blocks automatically. For
 // example, the empty cart. In those cases, we don't want to trigger the render
@@ -27,11 +26,6 @@ export type GetPropsFn<
 	TProps extends Record< string, unknown >,
 	TAttributes extends Record< string, unknown >
 > = ( el: HTMLElement, i: number ) => BlockProps< TProps, TAttributes >;
-
-export type ReactRootWithContainer = {
-	container: HTMLElement;
-	root: Root;
-};
 
 interface RenderBlockParams<
 	TProps extends Record< string, unknown >,
@@ -61,32 +55,20 @@ export const renderBlock = <
 	attributes = {} as TAttributes,
 	props = {} as BlockProps< TProps, TAttributes >,
 	errorBoundaryProps = {},
-}: RenderBlockParams< TProps, TAttributes > ): Root => {
-	const BlockWrapper = () => {
-		useEffect( () => {
+}: RenderBlockParams< TProps, TAttributes > ): void => {
+	render(
+		<BlockErrorBoundary { ...errorBoundaryProps }>
+			<Suspense fallback={ <div className="wc-block-placeholder" /> }>
+				{ Block && <Block { ...props } attributes={ attributes } /> }
+			</Suspense>
+		</BlockErrorBoundary>,
+		container,
+		() => {
 			if ( container.classList ) {
 				container.classList.remove( 'is-loading' );
 			}
-		}, [] );
-
-		return (
-			<BlockErrorBoundary { ...errorBoundaryProps }>
-				<Suspense
-					fallback={
-						<div className="wc-block-placeholder">Loading...</div>
-					}
-				>
-					{ Block && (
-						<Block { ...props } attributes={ attributes } />
-					) }
-				</Suspense>
-			</BlockErrorBoundary>
-		);
-	};
-
-	const root = createRoot( container );
-	root.render( <BlockWrapper /> );
-	return root;
+		}
+	);
 };
 
 interface RenderBlockInContainersParams<
@@ -117,14 +99,10 @@ const renderBlockInContainers = <
 	containers,
 	getProps = () => ( {} as BlockProps< TProps, TAttributes > ),
 	getErrorBoundaryProps = () => ( {} ),
-}: RenderBlockInContainersParams<
-	TProps,
-	TAttributes
-> ): ReactRootWithContainer[] => {
+}: RenderBlockInContainersParams< TProps, TAttributes > ): void => {
 	if ( containers.length === 0 ) {
-		return [];
+		return;
 	}
-	const roots: ReactRootWithContainer[] = [];
 
 	// Use Array.forEach for IE11 compatibility.
 	Array.prototype.forEach.call( containers, ( el, i ) => {
@@ -136,19 +114,14 @@ const renderBlockInContainers = <
 			...( props.attributes || {} ),
 		};
 
-		roots.push( {
+		renderBlock( {
+			Block,
 			container: el,
-			root: renderBlock( {
-				Block,
-				container: el,
-				props,
-				attributes,
-				errorBoundaryProps,
-			} ),
+			props,
+			attributes,
+			errorBoundaryProps,
 		} );
 	} );
-
-	return roots;
 };
 
 // Given an element and a list of wrappers, check if the element is inside at
@@ -184,10 +157,7 @@ const renderBlockOutsideWrappers = <
 	getErrorBoundaryProps,
 	selector,
 	wrappers,
-}: RenderBlockOutsideWrappersParams<
-	TProps,
-	TAttributes
-> ): ReactRootWithContainer[] => {
+}: RenderBlockOutsideWrappersParams< TProps, TAttributes > ): void => {
 	const containers = document.body.querySelectorAll( selector );
 	// Filter out blocks inside the wrappers.
 	if ( wrappers && wrappers.length > 0 ) {
@@ -195,8 +165,7 @@ const renderBlockOutsideWrappers = <
 			return ! isElementInsideWrappers( el, wrappers );
 		} );
 	}
-
-	return renderBlockInContainers( {
+	renderBlockInContainers( {
 		Block,
 		containers,
 		getProps,
@@ -265,21 +234,20 @@ export const renderFrontend = <
 	props:
 		| RenderBlockOutsideWrappersParams< TProps, TAttributes >
 		| RenderBlockInsideWrapperParams< TProps, TAttributes >
-): ReactRootWithContainer[] => {
+): void => {
 	const wrappersToSkipOnLoad = document.body.querySelectorAll(
 		selectorsToSkipOnLoad.join( ',' )
 	);
 
 	const { Block, getProps, getErrorBoundaryProps, selector } = props;
 
-	const roots = renderBlockOutsideWrappers( {
+	renderBlockOutsideWrappers( {
 		Block,
 		getProps,
 		getErrorBoundaryProps,
 		selector,
 		wrappers: wrappersToSkipOnLoad,
 	} );
-
 	// For each wrapper, add an event listener to render the inner blocks when
 	// `wc-blocks_render_blocks_frontend` event is triggered.
 	Array.prototype.forEach.call( wrappersToSkipOnLoad, ( wrapper ) => {
@@ -287,8 +255,6 @@ export const renderFrontend = <
 			renderBlockInsideWrapper( { ...props, wrapper } );
 		} );
 	} );
-
-	return roots;
 };
 
 export default renderFrontend;

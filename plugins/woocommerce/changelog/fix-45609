@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow verified parameter to be set by REST API request

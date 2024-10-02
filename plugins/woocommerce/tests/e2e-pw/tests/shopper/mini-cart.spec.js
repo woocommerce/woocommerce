@@ -1,8 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const {
-	disableWelcomeModal,
 	openEditorSettings,
 	getCanvas,
+	goToPageEditor,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
@@ -133,9 +133,7 @@ test.describe(
 			const greenColor = '00cc09';
 
 			// go to create a new page
-			await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-			await disableWelcomeModal( { page } );
+			await goToPageEditor( { page } );
 
 			const canvas = await getCanvas( page );
 

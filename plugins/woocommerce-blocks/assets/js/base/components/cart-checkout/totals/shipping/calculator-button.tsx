@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Button } from '@ariakit/react';
 import { __ } from '@wordpress/i18n';
 
 export interface CalculatorButtonProps {
@@ -15,7 +16,8 @@ export const CalculatorButton = ( {
 	setIsShippingCalculatorOpen,
 }: CalculatorButtonProps ): JSX.Element => {
 	return (
-		<button
+		<Button
+			render={ <span /> }
 			className="wc-block-components-totals-shipping__change-address__link"
 			id="wc-block-components-totals-shipping__change-address__link"
 			onClick={ ( e ) => {
@@ -26,7 +28,7 @@ export const CalculatorButton = ( {
 			aria-expanded={ isShippingCalculatorOpen }
 		>
 			{ label }
-		</button>
+		</Button>
 	);
 };
 

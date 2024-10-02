@@ -370,8 +370,11 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
 
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
+		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
+
 		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
 		$this->asset_data_registry->add( 'localPickupText', $pickup_location_settings['title'] );
+		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 
 		$is_block_editor = $this->is_block_editor();
 
@@ -385,8 +388,8 @@ class Checkout extends AbstractBlock {
 			$shipping_methods           = WC()->shipping()->get_shipping_methods();
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
-				function ( $acc, $method ) {
-					if ( in_array( $method->id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
+				function ( $acc, $method ) use ( $local_pickup_method_ids ) {
+					if ( in_array( $method->id, $local_pickup_method_ids, true ) ) {
 						return $acc;
 					}
 					if ( $method->supports( 'settings' ) ) {

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
-use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil };
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 
 /**
  * System status controller class.
@@ -51,7 +51,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action(
 			'upgrader_process_complete',
-			function( $upgrader, $extra ) {
+			function ( $upgrader, $extra ) {
 				if ( ! $extra || ! $extra['type'] ) {
 					return;
 				}
@@ -373,7 +373,41 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'plugin'            => array(
+								'description' => __( 'Plugin basename. The path to the main plugin file relative to the plugins directory.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'name'              => array(
+								'description' => __( 'Name of the plugin.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version'           => array(
+								'description' => __( 'Current plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version_latest'    => array(
+								'description' => __( 'Latest available plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'url'               => array(
+								'description' => __( 'Plugin URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_name'       => array(
+								'description' => __( 'Plugin author name.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_url'        => array(
+								'description' => __( 'Plugin author URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'network_activated' => array(
+								'description' => __( 'Whether the plugin can only be activated network-wide.', 'woocommerce' ),
+								'type'        => 'boolean',
+							),
+						),
 					),
 				),
 				'inactive_plugins'   => array(
@@ -382,7 +416,41 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'plugin'            => array(
+								'description' => __( 'Plugin basename. The path to the main plugin file relative to the plugins directory.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'name'              => array(
+								'description' => __( 'Name of the plugin.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version'           => array(
+								'description' => __( 'Current plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version_latest'    => array(
+								'description' => __( 'Latest available plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'url'               => array(
+								'description' => __( 'Plugin URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_name'       => array(
+								'description' => __( 'Plugin author name.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_url'        => array(
+								'description' => __( 'Plugin author URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'network_activated' => array(
+								'description' => __( 'Whether the plugin can only be activated network-wide.', 'woocommerce' ),
+								'type'        => 'boolean',
+							),
+						),
 					),
 				),
 				'dropins_mu_plugins' => array(
@@ -427,6 +495,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 						'is_child_theme'          => array(
 							'description' => __( 'Is this theme a child theme?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'is_block_theme'          => array(
+							'description' => __( 'Is this theme a block theme?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -1044,15 +1118,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				return array();
 			}
 
-			$active_plugins = (array) get_option( 'active_plugins', array() );
-			if ( is_multisite() ) {
-				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-			}
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
+			$active_plugins_data  = array();
 
-			$active_plugins_data = array();
-
-			foreach ( $active_plugins as $plugin ) {
+			foreach ( $active_valid_plugins as $plugin ) {
 				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 			}
@@ -1270,6 +1339,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 				'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 				'is_child_theme'          => is_child_theme(),
+				'is_block_theme'          => wc_current_theme_is_fse_theme(),
 				'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 				'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
 				'has_outdated_templates'  => $outdated_templates,

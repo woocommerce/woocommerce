@@ -15,78 +15,83 @@ test.describe( 'Marketing page', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Marketing Overview page have relevant content', async ( {
-		page,
-	} ) => {
-		// Go to the Marketing page.
-		await page.goto( 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing' );
+	test(
+		'Marketing Overview page have relevant content',
+		{ tag: '@skip-on-default-wpcom' },
+		async ( { page } ) => {
+			// Go to the Marketing page.
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
+			);
 
-		// Heading should be overview
-		await expect(
-			page.getByRole( 'heading', { name: 'Overview' } )
-		).toBeVisible();
+			// Heading should be overview
+			await expect(
+				page.getByRole( 'heading', { name: 'Overview' } )
+			).toBeVisible();
 
-		// Sections present
-		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Channels', { exact: true } )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Discover more marketing tools' )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'Email' } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'Automations' } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'Conversion' } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'CRM', exact: true } )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Learn about marketing a store' )
-		).toBeVisible();
-	} );
-
-	test( 'Introduction can be dismissed', async ( { page } ) => {
-		// Go to the Marketing page.
-		await page.goto( 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing' );
-
-		// Dismiss the introduction (if it's visible)
-		try {
-			await page
-				.locator(
-					'.woocommerce-marketing-introduction-banner-illustration > .components-button'
-				)
-				.click( { timeout: 2000 } );
-		} catch ( e ) {
-			console.log( 'Info: introduction already hidden' );
+			// Sections present
+			await expect(
+				page.getByText( 'Channels', { exact: true } )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Discover more marketing tools' )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'Email' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'Automations' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'Conversion' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'CRM', exact: true } )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Learn about marketing a store' )
+			).toBeVisible();
 		}
+	);
 
-		// The introduction should be hidden.
-		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeHidden();
+	test(
+		'Introduction can be dismissed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { page } ) => {
+			// Go to the Marketing page.
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
+			);
 
-		// Refresh the page to make sure the state is saved.
-		await page.reload();
+			// Dismiss the introduction (if it's visible)
+			try {
+				await page
+					.locator(
+						'.woocommerce-marketing-introduction-banner-illustration > .components-button'
+					)
+					.click( { timeout: 2000 } );
+			} catch ( e ) {
+				console.log( 'Info: introduction already hidden' );
+			}
 
-		// The introduction should still be hidden.
-		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeHidden();
-	} );
+			// The introduction should be hidden.
+			await expect(
+				page.getByText(
+					'Reach new customers and increase sales without leaving WooCommerce'
+				)
+			).toBeHidden();
+
+			// Refresh the page to make sure the state is saved.
+			await page.reload();
+
+			// The introduction should still be hidden.
+			await expect(
+				page.getByText(
+					'Reach new customers and increase sales without leaving WooCommerce'
+				)
+			).toBeHidden();
+		}
+	);
 
 	test( 'Learning section can be expanded', async ( { page } ) => {
 		// Go to the Dashboard page (this adds time for posts to be created)

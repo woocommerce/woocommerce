@@ -44,6 +44,16 @@ function register_helper_api() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-theme',
+		'/activate',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'activate_theme',
+			'permission_callback' => 'is_allowed',
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'register_helper_api' );
@@ -135,4 +145,24 @@ function get_environment_info() {
 	}
 
 	return new WP_REST_Response( $data, 200 );
+}
+
+/**
+ * Activate a theme via the REST API.
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function activate_theme( WP_REST_Request $request ) {
+	$theme_name = sanitize_text_field( $request['theme_name'] );
+
+	if ( empty( $theme_name ) ) {
+		return new WP_REST_Response( array( 'message' => 'Theme name is empty.' ), 400 );
+	}
+
+	if ( wp_get_theme( $theme_name )->exists() ) {
+		switch_theme( $theme_name );
+		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' activated successfully." ), 200 );
+	} else {
+		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
+	}
 }

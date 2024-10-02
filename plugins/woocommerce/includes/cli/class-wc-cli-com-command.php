@@ -137,7 +137,7 @@ class WC_CLI_COM_Command {
 	 *     # force connecting to WCCOM even if site is already connected.
 	 *     $ wp wc com connect --force
 	 *
-	 *     # Pass password to comman.
+	 *     # Pass password to command.
 	 *     $ wp wc com connect --password=PASSWORD
 	 *
 	 * @param array $args Positional arguments to include when calling the command.

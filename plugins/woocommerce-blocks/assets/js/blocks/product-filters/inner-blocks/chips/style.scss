@@ -1,0 +1,55 @@
+:where(.wc-block-product-filter-chips__items) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $gap-smallest;
+}
+
+:where(.wc-block-product-filter-chips__item) {
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	padding: $gap-smallest $gap-smaller;
+	appearance: none;
+	background: transparent;
+	border-radius: 2px;
+	font-size: 0.875em;
+	cursor: pointer;
+
+	.has-chip-text & {
+		color: var(--wc-product-filter-chips-text);
+	}
+	.has-chip-background & {
+		background: var(--wc-product-filter-chips-background);
+	}
+	.has-chip-border & {
+		border-color: var(--wc-product-filter-chips-border);
+	}
+}
+
+:where(.wc-block-product-filter-chips__item[aria-checked="true"]) {
+	background: currentColor;
+
+	.has-selected-chip-text & {
+		color: var(--wc-product-filter-chips-selected-text);
+	}
+	.has-selected-chip-background & {
+		background: var(--wc-product-filter-chips-selected-background);
+	}
+	.has-selected-chip-border & {
+		border-color: var(--wc-product-filter-chips-selected-border);
+	}
+}
+
+:where(
+.wc-block-product-filter-chips:not(.has-selected-chip-text)
+.wc-block-product-filter-chips__item[aria-checked="true"]
+> .wc-block-product-filter-chips__label
+) {
+	filter: invert(100%);
+}
+
+:where(.wc-block-product-filter-chips__show-more) {
+	text-decoration: underline;
+	appearance: none;
+	background: transparent;
+	border: none;
+	padding: 0;
+}

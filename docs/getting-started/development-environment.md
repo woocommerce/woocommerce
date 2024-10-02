@@ -14,7 +14,7 @@ If you would like to contribute to the WooCommerce core platform; please read ou
 
 ## Prerequisites
 
-WooCommerce does adhere to WordPress code standards and guidelines, so it’s best to familiarize yourself with [WordPress Development](https://learn.wordpress.org/tutorial/introduction-to-wordpress/) as well as [PHP](https://www.php.net/). 
+WooCommerce does adhere to WordPress code standards and guidelines, so it's best to familiarize yourself with [WordPress Development](https://learn.wordpress.org/tutorial/introduction-to-wordpress/) as well as [PHP](https://www.php.net/). 
 
 Knowledge and understanding of [WooCommerce Hooks and Filters](https://woocommerce.com/document/introduction-to-hooks-actions-and-filters/) will allow you to add and change code without editing core files. You can learn more about WordPress hooks and filters in the [WordPress Plugin Development Handbook](https://developer.wordpress.org/plugins/hooks/).
 
@@ -80,22 +80,16 @@ git clone https://github.com/woocommerce/woocommerce.git
 cd woocommerce
 ```
 
-### Activate the required Node version
+### Install and Activate the required Node version
 
 ```sh
-nvm use
-Found '/path/to/woocommerce/.nvmrc' with version <v12>
-Now using node v12.21.0 (npm v6.14.11)
+nvm install
+Found '/path/to/woocommerce/.nvmrc' with version <v20>
+v20.17.0 is already installed.
+Now using node v20.17.0 (npm v10.8.2)
 ```
 
-Note: if you don't have the required version of Node installed, NVM will alert you so you can install it:
-
-```sh
-Found '/path/to/woocommerce/.nvmrc' with version <v12>
-N/A: version "v12 -> N/A" is not yet installed.
-
-You need to run "nvm install v12" to install it before using it.
-```
+Note: if you don't have the required version of Node installed, NVM will install it.
 
 ### Install dependencies
 
