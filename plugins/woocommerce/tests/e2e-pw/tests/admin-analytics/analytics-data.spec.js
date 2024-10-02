@@ -26,12 +26,7 @@ const test = baseTest.extend( {
 test.describe(
 	'Analytics-related tests',
 	{
-		tag: [
-			'@payments',
-			'@services',
-			'@skip-on-default-pressable',
-			'@skip-on-default-wpcom',
-		],
+		tag: [ '@payments', '@services' ],
 	},
 	() => {
 		let categoryIds, productIds, orderIds, setupPage;

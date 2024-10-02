@@ -29,6 +29,7 @@ import {
 } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import clsx from 'clsx';
+import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -58,6 +59,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		contents = '',
 		miniCartIcon,
 		addToCartBehaviour = 'none',
+		onCartClickBehaviour = 'open_drawer',
 		hasHiddenPrice = true,
 		priceColor = defaultColorItem,
 		iconColor = defaultColorItem,
@@ -251,6 +253,11 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 			<button
 				className={ `wc-block-mini-cart__button ${ colorClassNames }` }
 				onClick={ () => {
+					if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+						window.location.href = CHECKOUT_URL;
+						return;
+					}
+
 					if ( ! isOpen ) {
 						setIsOpen( true );
 						setSkipSlideIn( false );

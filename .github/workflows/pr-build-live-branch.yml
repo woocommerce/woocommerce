@@ -16,6 +16,9 @@ concurrency:
     group: build-${{ github.event_name == 'push' && github.run_id || 'pr' }}-${{ github.ref }}
     cancel-in-progress: true
 
+env:
+  FORCE_COLOR: 1
+
 permissions: {}
 
 jobs:

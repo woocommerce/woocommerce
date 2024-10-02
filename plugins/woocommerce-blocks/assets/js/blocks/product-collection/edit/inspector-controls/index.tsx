@@ -53,6 +53,7 @@ import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 import PriceRangeControl from './price-range-control';
 import LinkedProductControl from './linked-product-control';
+import WidthOptionsControl from './width-options-control';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -63,7 +64,7 @@ const ProductCollectionInspectorControls = (
 	props: ProductCollectionContentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, displayLayout } = attributes;
+	const { query, hideControls, dimensions, displayLayout } = attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -116,6 +117,11 @@ const ProductCollectionInspectorControls = (
 		displayLayout,
 	};
 
+	const dimensionsControlProps = {
+		setAttributes,
+		dimensions,
+	};
+
 	const queryControlProps = {
 		setQueryAttribute: setQueryAttributeBind,
 		trackInteraction,
@@ -151,6 +157,18 @@ const ProductCollectionInspectorControls = (
 				{ showOrderControl && (
 					<OrderByControl { ...queryControlProps } />
 				) }
+			</ToolsPanel>
+
+			<ToolsPanel
+				label={ __( 'Dimensions', 'woocommerce' ) }
+				resetAll={ () => {
+					const defaultSettings = getDefaultSettings(
+						props.attributes
+					);
+					props.setAttributes( defaultSettings );
+				} }
+			>
+				<WidthOptionsControl { ...dimensionsControlProps } />
 			</ToolsPanel>
 
 			{ showQueryControls ? (
