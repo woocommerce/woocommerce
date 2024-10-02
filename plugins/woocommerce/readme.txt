@@ -220,6 +220,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Use `get_filtered_ids` consistently in `reports/taxes` and `reports/taxes/stats` datastores [#51219](https://github.com/woocommerce/woocommerce/pull/51219)
 * Fix - wc_get_cart_url should only return current URL if on the cart page. This excludes the usage of WOOCOMMERCE_CART. [#51384](https://github.com/woocommerce/woocommerce/pull/51384)
 * Fix - Wrap parse_str under a check to resolve deprecation notice [#51474](https://github.com/woocommerce/woocommerce/pull/51474)
+* Add - Add core feature for site visibility badge [#51664](https://github.com/woocommerce/woocommerce/pull/51664)
 * Add - Added a Load More button to product lists on the Extensions page, to request additional search results from WooCommerce.com. [#51413](https://github.com/woocommerce/woocommerce/pull/51413)
 * Add - Add endpoint title to the document title. [#50900](https://github.com/woocommerce/woocommerce/pull/50900)
 * Add - Add global_unique_id parameter to products REST API [#51264](https://github.com/woocommerce/woocommerce/pull/51264)
