@@ -1,10 +1,13 @@
 const { expect } = require( '@playwright/test' );
 
 const closeChoosePatternModal = async ( { page } ) => {
-	const closeModal = page.getByRole( 'button', {
-		name: 'Close',
-		exact: true,
-	} );
+	const closeModal = page
+		.getByLabel( 'Scrollable section' )
+		.filter()
+		.getByRole( 'button', {
+			name: 'Close',
+			exact: true,
+		} );
 	await page.addLocatorHandler( closeModal, async () => {
 		await closeModal.click();
 	} );

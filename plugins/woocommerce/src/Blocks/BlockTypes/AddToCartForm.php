@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
@@ -144,9 +145,9 @@ class AddToCartForm extends AbstractBlock {
 
 		/**
 		 * Trigger the single product add to cart action for each product type.
-		*
-		* @since 9.7.0
-		*/
+		 *
+		 * @since 9.7.0
+		 */
 		do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 
 		$product = ob_get_clean();
@@ -170,23 +171,37 @@ class AddToCartForm extends AbstractBlock {
 
 		$product = $this->add_classes_to_add_to_cart_form_input( $product, $attributes );
 
-		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-form wc-block-add-to-cart-form',
+					esc_attr( $classes_and_styles['classes'] ),
+					esc_attr( $product_classname ),
+					$is_stepper_style ? 'wc-block-add-to-cart-form--stepper' : 'wc-block-add-to-cart-form--input',
+				)
+			)
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
 		$form = sprintf(
-			'<div class="wp-block-add-to-cart-form wp-block-woocommerce-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s %4$s" %5$s style="%6$s">%7$s</div>',
-			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $classname ),
-			esc_attr( $product_classname ),
-			$is_stepper_style ? 'wc-block-add-to-cart-form--stepper' : 'wc-block-add-to-cart-form--input',
+			'<div %1$s %2$s>%3$s</div>',
+			$wrapper_attributes,
 			$is_stepper_style ? 'data-wc-interactive=\'' . wp_json_encode(
 				array(
 					'namespace' => 'woocommerce/add-to-cart-form',
 				),
 				JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			) . '\'' : '',
-			esc_attr( $classes_and_styles['styles'] ),
 			$product
 		);
 

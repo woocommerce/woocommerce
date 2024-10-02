@@ -11,7 +11,6 @@
 		text-transform: uppercase;
 	}
 
-
 	.wc-block-components-shipping-address {
 		margin-top: $gap;
 		display: block;
@@ -49,6 +48,10 @@
 		&:active {
 			opacity: 0.8;
 		}
+	}
+
+	.wc-block-components-shipping-placeholder__value {
+		@include font-size(small);
 	}
 }
 
