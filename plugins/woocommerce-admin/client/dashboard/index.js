@@ -7,7 +7,7 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { OrderAttributionInstallBanner } from '~/order-attribution';
+import { OrderAttributionInstallBanner } from '~/order-attribution-install-banner';
 import './style.scss';
 
 const CustomizableDashboard = lazy( () =>
