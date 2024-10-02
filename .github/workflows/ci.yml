@@ -63,7 +63,7 @@ jobs:
             }
             // github.event.before is only available for push events
             if ( githubEvent == 'push' && refType == 'branch' && refName == 'trunk' ) {
-              // baseRef = '--base-ref ${{ toJson( github.event.before ) }}';
+              baseRef = '--base-ref ${{ toJson( github.event.before ) }}';
             }
                         
             if ( refType === 'tag' && refName !== 'nightly' ) {
