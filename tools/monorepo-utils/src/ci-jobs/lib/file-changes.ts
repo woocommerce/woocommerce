@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { execSync } from 'node:child_process';
+import path from 'path';
 
 /**
  * Internal dependencies
@@ -66,14 +67,16 @@ function getChangedFilesForProject(
 		}
 
 		// Track the file relative to the project.
-		projectChanges.push( filePath.slice( projectPath.length + 1 ) );
+		projectChanges.push(
+			filePath.slice( projectPath.length + Number( projectPath !== '' ) )
+		);
 	}
 
 	return projectChanges;
 }
 
 /**
- * Pulls all of the files that have changed in the project graph since the given git ref.
+ * Pulls all files except changelog entries that have changed in the project graph since the given git ref.
  *
  * @param {Object} projectGraph The project graph to assign changes for.
  * @param {string} baseRef      The git ref to compare against for changes.
@@ -87,7 +90,13 @@ export function getFileChanges(
 	const output = execSync( `git diff --name-only ${ baseRef }`, {
 		encoding: 'utf8',
 	} );
-	const changedFilePaths = output.split( '\n' );
+	const changedFilePaths = output
+		.trim()
+		.split( '\n' )
+		.filter(
+			( changedFile ) =>
+				path.basename( path.dirname( changedFile ) ) !== 'changelog'
+		);
 
 	// If the root lockfile has been changed we have no easy way
 	// of knowing which projects have been impacted. We want
@@ -96,6 +105,9 @@ export function getFileChanges(
 		return true;
 	}
 
+	const ownedFilePaths = [];
+
+	// At the very first iteration, we will identify files ownership by monorepo packages.
 	const projectPaths = getProjectPaths( projectGraph );
 	const changes: ProjectFileChanges = {};
 	for ( const projectName in projectPaths ) {
@@ -113,6 +125,32 @@ export function getFileChanges(
 		}
 
 		changes[ projectName ] = projectChanges;
+		ownedFilePaths.push(
+			...projectChanges.map(
+				( filePath ) => projectPaths[ projectName ] + '/' + filePath
+			)
+		);
+	}
+
+	// Additional iteration will mark remaining files ownership by the monorepo itself.
+	const orphanFilePaths = changedFilePaths.filter(
+		( filePath ) => ! ownedFilePaths.includes( filePath )
+	);
+	for ( const projectName in projectPaths ) {
+		if ( projectPaths[ projectName ] ) {
+			continue;
+		}
+
+		const projectChanges = getChangedFilesForProject(
+			projectPaths[ projectName ],
+			orphanFilePaths
+		);
+		if ( projectChanges.length === 0 ) {
+			continue;
+		}
+
+		changes[ projectName ] = projectChanges;
+		break;
 	}
 
 	return changes;

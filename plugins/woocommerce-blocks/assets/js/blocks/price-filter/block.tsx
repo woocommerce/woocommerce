@@ -18,6 +18,7 @@ import { changeUrl, getUrlParameter } from '@woocommerce/utils';
 import {
 	CurrencyResponse,
 	isBoolean,
+	isObject,
 	isString,
 	objectHasProp,
 } from '@woocommerce/types';
@@ -112,9 +113,17 @@ const PriceFilterBlock = ( {
 	const minPriceParam = getUrlParameter( 'min_price' );
 	const maxPriceParam = getUrlParameter( 'max_price' );
 	const [ queryState ] = useQueryStateByContext();
+	const backendQueryState = getSettingWithCoercion(
+		'queryState',
+		{},
+		isObject
+	);
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
-		queryState,
+		queryState: {
+			...backendQueryState,
+			...queryState,
+		},
 		isEditor,
 	} );
 
