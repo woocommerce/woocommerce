@@ -8,11 +8,6 @@
  */
 import { store, getContext } from '@woocommerce/interactivity';
 
-/**
- * Internal dependencies
- */
-import { navigate } from '../../frontend';
-
 const getQueryParams = ( e: Event ) => {
 	const filterNavContainer = ( e.target as HTMLElement )?.closest(
 		'nav.wp-block-woocommerce-product-filter'
@@ -49,7 +44,7 @@ type ProductFilterContext = {
 
 store( 'woocommerce/product-filter', {
 	actions: {
-		clear: ( e: Event ) => {
+		*clear( e: Event ) {
 			const params = getQueryParams( e );
 
 			const url = new URL( window.location.href );
@@ -70,7 +65,10 @@ store( 'woocommerce/product-filter', {
 			productFilterContext.hasSelectedFilter = false;
 
 			if ( needsNavigate ) {
-				navigate( url.href );
+				const { navigate } = yield import(
+					'../product-filter/frontend'
+				);
+				yield navigate( url.href );
 			}
 		},
 	},

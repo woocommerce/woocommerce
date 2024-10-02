@@ -346,10 +346,10 @@ class ProductCollection extends AbstractBlock {
 	private function enable_client_side_navigation( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
-		// Add `data-wc-navigation-id to the product collection block.
+		// Add `data-wc-router-region to the product collection block.
 		if ( $this->is_next_tag_product_collection( $p ) ) {
 			$p->set_attribute(
-				'data-wc-navigation-id',
+				'data-wc-router-region',
 				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 			);
 			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ) ?? '{}', true );

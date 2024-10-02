@@ -148,7 +148,7 @@ class ProductFilters extends AbstractBlock {
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
-			$tags->set_attribute( 'data-wc-navigation-id', $this->generate_navigation_id( $block ) );
+			$tags->set_attribute( 'data-wc-router-region', $this->generate_navigation_id( $block ) );
 			$tags->set_attribute( 'data-wc-watch', 'callbacks.maybeNavigate' );
 
 			if (
