@@ -9,7 +9,7 @@ use Automattic\Jetpack\Constants;
  *
  * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
  *
- * @version 9.4.0
+ * @version 9.5.0
  */
 class WC_Brands {
 
