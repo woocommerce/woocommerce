@@ -17,7 +17,8 @@ const getProps = ( el: HTMLElement ) => {
 };
 
 renderFrontend( {
-	selector: '.wp-block-woocommerce-attribute-filter',
+	selector:
+		'div:not(.wp-block-woocommerce-filter-wrapper) > .wp-block-woocommerce-attribute-filter',
 	Block,
 	getProps,
 } );
