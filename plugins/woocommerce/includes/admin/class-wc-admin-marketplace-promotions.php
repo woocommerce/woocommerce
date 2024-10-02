@@ -269,8 +269,10 @@ class WC_Admin_Marketplace_Promotions {
 		$now_date_time     = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 		$active_promotions = array();
 
-		/* Promos arrive as an array of arrays with the key 'promos'.
-		We merge them into the main array. */
+		/*
+		 * Promos arrive as an array of arrays with the key 'promos'.
+		 * We merge them into the main array.
+		 * */
 		if (
 			! empty( $promotions['promos'] )
 			&& is_array( $promotions['promos'] )
