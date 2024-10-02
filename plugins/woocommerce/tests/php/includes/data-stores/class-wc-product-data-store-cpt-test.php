@@ -196,12 +196,21 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_cogs_is_not_persisted_when_feature_is_disabled() {
 		$this->disable_cogs_feature();
+		$error_message = '';
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_doing_it_wrong' => function ( $function_name, $message ) use ( &$error_message ) {
+					$error_message = $message; },
+			)
+		);
 
 		$product = new WC_Product();
 		$product->set_cogs_value( 12.34 );
 		$product->save();
 
 		$this->assertEmpty( get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+		$this->assertMatchesRegularExpression( '/The Cost of Goods sold feature is disabled, thus the method called will do nothing and will return dummy data/', $error_message );
 	}
 
 	/**

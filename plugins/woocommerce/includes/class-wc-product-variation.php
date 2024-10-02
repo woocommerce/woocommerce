@@ -616,7 +616,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 *
 	 * @return float
 	 */
-	public function get_cogs_effective_value(): float {
+	protected function get_cogs_effective_value_core(): float {
 		if ( $this->get_cogs_value_overrides_parent() ) {
 			return parent::get_cogs_value();
 		}

@@ -9,9 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
-use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
 /**
  * Legacy product contains all deprecated methods for this class and can be
@@ -28,6 +27,7 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php';
  * @package WooCommerce\Abstracts
  */
 class WC_Product extends WC_Abstract_Legacy_Product {
+	use CogsAwareTrait;
 
 	/**
 	 * This is the name of this object type.
@@ -2204,25 +2204,41 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set the defined value of the Cost of Goods Sold for this product.
 	 *
-	 * WARNING! If the Cost of Goods Sold feature is disabled this value will NOT be persisted when the product is saved.
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will have no effect.
 	 *
 	 * @param float $value The value to set for this product.
 	 */
 	public function set_cogs_value( float $value ): void {
-		$this->set_prop( 'cogs_value', $value );
+		if ( $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ) {
+			$this->set_prop( 'cogs_value', $value );
+		}
 	}
 
 	/**
 	 * Get the defined value of the Cost of Goods Sold for this product.
 	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will always return zero.
+	 *
 	 * @return float The current value for this product.
 	 */
 	public function get_cogs_value(): float {
-		return (float) $this->get_prop( 'cogs_value' );
+		return $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ? (float) $this->get_prop( 'cogs_value' ) : 0;
 	}
 
 	/**
 	 * Get the effective value of the Cost of Goods Sold for this product.
+	 * (the final, actual monetary value).
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will always return zero.
+	 *
+	 * @return float The effective value for this product.
+	 */
+	public function get_cogs_effective_value(): float {
+		return $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ? $this->get_cogs_effective_value_core() : 0;
+	}
+
+	/**
+	 * Core method to get the effective value of the Cost of Goods Sold for this product.
 	 * (the final, actual monetary value).
 	 *
 	 * Derived classes can override this method to provide an alternative way
@@ -2231,7 +2247,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @return float The effective value for this product.
 	 */
-	public function get_cogs_effective_value(): float {
+	protected function get_cogs_effective_value_core(): float {
 		return $this->get_cogs_value();
 	}
 
@@ -2239,9 +2255,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get the effective total value of the Cost of Goods Sold for this product
 	 * (the monetary value that will be applied to orders and used for analytics purposes).
 	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will always return zero.
+	 *
 	 * @return float The effective total value for this product.
 	 */
 	public function get_cogs_total_value(): float {
+		if ( ! $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ) {
+			return 0;
+		}
+
 		/**
 		 * Filter to customize the total Cost of Goods Sold value that get_cogs_total_value returns for a given product.
 		 *
@@ -2255,6 +2277,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Core function to get the effective total value of the Cost of Goods Sold for this product.
+	 *
 	 * Derived classes can override this method to provide an alternative way
 	 * of calculating the total effective value from the single effective value
 	 * and/or the defined value.

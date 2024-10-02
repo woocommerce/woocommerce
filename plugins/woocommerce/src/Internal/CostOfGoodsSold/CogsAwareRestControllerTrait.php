@@ -8,14 +8,7 @@ namespace Automattic\WooCommerce\Internal\CostOfGoodsSold;
  */
 trait CogsAwareRestControllerTrait {
 
-	/**
-	 * Check if the Cost of Goods Sold feature is enabled.
-	 *
-	 * @return bool True if the feature is enabled.
-	 */
-	private function cogs_is_enabled(): bool {
-		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
-	}
+	use CogsAwareTrait;
 
 	/**
 	 * Add Cost of Goods Sold related information for a given product to the array of data that will become the REST response.
