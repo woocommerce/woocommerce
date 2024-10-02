@@ -130,7 +130,7 @@
 							"wpVersion": "latest"
 						}
 					},
-					"events": []
+					"events": [ "on-demand" ]
 				},
 				{
 					"name": "PHP WP: latest - 1",
@@ -154,7 +154,7 @@
 							"wpVersion": "latest-1"
 						}
 					},
-					"events": []
+					"events": [ "on-demand" ]
 				},
 				{
 					"name": "PHP WP: nightly",
@@ -179,7 +179,7 @@
 							"wpVersion": "nightly"
 						}
 					},
-					"events": []
+					"events": [ "on-demand" ]
 				},
 				{
 					"name": "Core e2e tests",
@@ -209,7 +209,7 @@
 					"testEnv": {
 						"start": "env:test"
 					},
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -228,7 +228,7 @@
 						"--shard=5/5"
 					],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -250,7 +250,7 @@
 						"--shard=5/5"
 					],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -266,7 +266,7 @@
 					"command": "test:e2e:with-env woocommerce-payments",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -282,7 +282,7 @@
 					"command": "test:e2e:with-env woocommerce-paypal-payments",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -298,7 +298,7 @@
 					"command": "test:e2e:with-env woocommerce-services",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -313,7 +313,7 @@
 					"testType": "e2e",
 					"command": "test:e2e:with-env default-hpos-disabled --project=ui",
 					"shardingArguments": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"changes": [],
 					"testEnv": {
 						"start": "env:test",
@@ -345,7 +345,7 @@
 							"phpVersion": "8.1"
 						}
 					},
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-8.1",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -370,7 +370,7 @@
 							"wpVersion": "latest-1"
 						}
 					},
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-latest-1",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -398,7 +398,7 @@
 					"testEnv": {
 						"start": "env:test"
 					},
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "core-api-report",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -423,7 +423,7 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
-					"events": [],
+					"events": [ "on-demand" ],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -447,7 +447,7 @@
 					"testEnv": {
 						"start": "test:perf:ci-setup"
 					},
-					"events": []
+					"events": [ "on-demand" ]
 				},
 				{
 					"name": "Metrics",
@@ -499,7 +499,7 @@
 					"testEnv": {
 						"start": "env:start:blocks"
 					},
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
 						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
@@ -512,7 +512,7 @@
 					"command": "test:e2e:with-env default-pressable",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -525,7 +525,7 @@
 					"command": "test:e2e:with-env default-wpcom",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [],
+					"events": [ "on-demand" ],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
