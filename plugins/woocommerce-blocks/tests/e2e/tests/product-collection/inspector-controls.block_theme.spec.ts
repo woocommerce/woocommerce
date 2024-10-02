@@ -97,9 +97,9 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Hand-picked Products' );
+		await pageObject.addFilter( 'Show Hand-picked' );
 
-		const filterName = 'Hand-picked Products';
+		const filterName = 'Hand-picked';
 		await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
 		await expect( pageObject.products ).toHaveCount( 1 );
 
@@ -289,7 +289,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 		await pageObject.addFilter( 'Price Range' );
 		await pageObject.setPriceRange( {
-			min: '18.33',
+			min: '25',
 		} );
 
 		await expect( pageObject.products ).toHaveCount( 7 );
@@ -299,17 +299,17 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			max: '17.21',
 		} );
 
-		await expect( pageObject.products ).toHaveCount( 1 );
+		await expect( pageObject.products ).toHaveCount( 2 );
 
 		await pageObject.setPriceRange( {
 			max: '17.29',
 		} );
 
-		await expect( pageObject.products ).toHaveCount( 4 );
+		await expect( pageObject.products ).toHaveCount( 5 );
 
 		await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 4 );
+		await expect( pageObject.products ).toHaveCount( 5 );
 	} );
 
 	// See https://github.com/woocommerce/woocommerce/pull/49917

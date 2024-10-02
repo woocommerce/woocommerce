@@ -831,7 +831,7 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = new WP_Query( $merged_query );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price >= 1.', $query->request );
 	}
 
 	/**
@@ -854,7 +854,7 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = new WP_Query( $merged_query );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price <= 1.', $query->request );
 	}
 
 	/**
@@ -879,8 +879,8 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = new WP_Query( $merged_query );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
-		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 2.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price <= 2.', $query->request );
 	}
 
 	/**
@@ -911,8 +911,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		delete_option( 'woocommerce_tax_display_shop' );
 		delete_option( 'woocommerce_prices_include_tax' );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
-		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 2.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price <= 2.', $query->request );
 	}
 
 	/**
@@ -950,8 +950,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product->delete();
 		WC_Tax::delete_tax_class_by( 'slug', 'collection-test' );
 
-		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`min_price` >= 1.", $query->request );
-		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`max_price` <= 2.", $query->request );
+		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`max_price` >= 1.", $query->request );
+		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`min_price` <= 2.", $query->request );
 	}
 
 	/**
