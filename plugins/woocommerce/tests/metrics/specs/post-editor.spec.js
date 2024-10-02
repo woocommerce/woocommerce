@@ -25,7 +25,140 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Editor Performance', () => {
+let draftId = null;
+
+test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
+	await admin.createNewPost();
+	await page.waitForFunction( () => {
+		return window.wp && window.wp.data && window.wp.blocks;
+	} );
+
+	const blocks = [
+		{
+			name: 'woocommerce/all-products',
+		},
+		{
+			name: 'woocommerce/all-reviews',
+		},
+		{
+			name: 'woocommerce/featured-category',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Featured Category'
+				);
+
+				await block
+					.getByRole( 'radio', { name: /Accessories/ } )
+					.check();
+				await block.getByRole( 'button', { name: 'Done' } ).click();
+			},
+		},
+		{
+			name: 'woocommerce/featured-product',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Featured Product'
+				);
+
+				await block
+					.getByLabel( 'Beanie with Logo', { exact: true } )
+					.check();
+				await block.getByRole( 'button', { name: 'Done' } ).click();
+			},
+		},
+		{
+			name: 'woocommerce/product-best-sellers',
+		},
+		{
+			name: 'woocommerce/product-category',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Products by Category'
+				);
+
+				await block.getByLabel( 'Clothing' ).check();
+				await block.getByRole( 'button', { name: 'Done' } ).click();
+			},
+		},
+		{
+			name: 'woocommerce/product-collection',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Product Collection'
+				);
+
+				await block
+					.getByRole( 'button', { name: 'create your own' } )
+					.click();
+			},
+		},
+		{
+			name: 'woocommerce/product-new',
+		},
+		{
+			name: 'woocommerce/product-on-sale',
+		},
+		{
+			name: 'woocommerce/product-tag',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Products by Tag'
+				);
+
+				await block.getByLabel( 'Recommended' ).check();
+				await block.getByRole( 'button', { name: 'Done' } ).click();
+			},
+		},
+		{
+			name: 'woocommerce/product-top-rated',
+		},
+		{
+			name: 'woocommerce/products-by-attribute',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Products by Attribute'
+				);
+
+				await block.getByLabel( 'Color' ).check();
+				await block.getByRole( 'button', { name: 'Done' } ).click();
+			},
+		},
+		{
+			name: 'woocommerce/single-product',
+			setup: async () => {
+				const block = editor.canvas.getByLabel(
+					'Block: Single Product'
+				);
+
+				await block.getByLabel( 'Album', { exact: true } ).check();
+				await block.getByRole( 'button', { name: 'Done' } ).click();
+			},
+		},
+		{
+			name: 'woocommerce/cart',
+		},
+		{
+			name: 'woocommerce/checkout',
+		},
+	];
+
+	for ( const block of blocks ) {
+		await editor.insertBlock( {
+			name: 'core/heading',
+			attributes: { level: 3, content: block.name },
+		} );
+
+		await editor.insertBlock( { name: block.name } );
+
+		if ( block.setup ) {
+			await block.setup();
+		}
+	}
+
+	draftId = await perfUtils.saveDraft();
+} );
+
+test.describe( 'Post Editor Performance', () => {
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
 		Object.keys( results ).forEach( ( metric ) => {
@@ -38,17 +171,7 @@ test.describe( 'Editor Performance', () => {
 	} );
 
 	test.describe( 'Loading', () => {
-		let draftId = null;
-
-		test( 'Setup the test post', async ( { admin, perfUtils } ) => {
-			await admin.createNewPost();
-			await perfUtils.loadBlocksFromHtml(
-				'post-with-woocommerce-blocks.html'
-			);
-			draftId = await perfUtils.saveDraft();
-		} );
-
-		const samples = 2;
+		const samples = 10;
 		const throwaway = 1;
 		const iterations = samples + throwaway;
 		for ( let i = 1; i <= iterations; i++ ) {
@@ -112,22 +235,17 @@ test.describe( 'Editor Performance', () => {
 	} );
 
 	test.describe( 'Typing', () => {
-		let draftId = null;
-
-		test( 'Setup the test post', async ( { admin, perfUtils, editor } ) => {
-			await admin.createNewPost();
-			await perfUtils.loadBlocksFromHtml(
-				'post-with-woocommerce-blocks.html'
-			);
-			await editor.insertBlock( { name: 'core/paragraph' } );
-			draftId = await perfUtils.saveDraft();
-		} );
-
-		test( 'Run the test', async ( { admin, perfUtils, metrics } ) => {
+		test( 'Run the test', async ( {
+			admin,
+			editor,
+			perfUtils,
+			metrics,
+		} ) => {
 			await admin.editPost( draftId );
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
 
+			await editor.insertBlock( { name: 'core/paragraph' } );
 			const paragraph = canvas.getByRole( 'document', {
 				name: /Empty block/i,
 			} );
