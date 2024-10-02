@@ -161,7 +161,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( $result === false ) {
+		if ( false === $result ) {
 			wc_get_logger()->warning(
 				sprintf(
 					'Failed to obtain SKU lock for product: ID "%d" with SKU "%s" after %d attempts.',
