@@ -24,7 +24,9 @@ store( 'woocommerce/product-filter-stock-status', {
 				currentFilters === undefined ? [] : currentFilters.split( ',' );
 
 			const { ref } = getElement();
-			const value = ref.getAttribute( 'data-target-value' ) ?? 'value';
+			const value =
+				ref.getAttribute( 'data-target-value' ) ??
+				ref.getAttribute( 'value' );
 
 			const newFilterArr = filtersArr.includes( value )
 				? [ ...filtersArr.filter( ( filter ) => filter !== value ) ]
