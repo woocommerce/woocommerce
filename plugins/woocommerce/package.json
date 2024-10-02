@@ -20,7 +20,6 @@
 		"build:project:copy-assets:admin": "wireit",
 		"build:project:copy-assets:blocks": "wireit",
 		"build:project:actualize-translation-domains": "wireit",
-		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",

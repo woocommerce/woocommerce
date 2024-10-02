@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/product-filter-stock-status",
+	"name": "woocommerce/product-filter-status",
 	"version": "1.0.0",
 	"title": "Stock (Experimental)",
 	"description": "Let shoppers filter products by choosing stock status.",
