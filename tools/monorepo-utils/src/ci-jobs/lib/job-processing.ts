@@ -260,7 +260,7 @@ async function createTestJob(
 	// Pre-release versions (beta, RC) are not always available, and we should not create the job if that's the case.
 	if (
 		[ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
-			config.testEnv.config.wpVersion
+			config?.testEnv?.config?.wpVersion
 		) &&
 		! createdJob.testEnv.envVars.WP_VERSION
 	) {
