@@ -42,11 +42,7 @@ test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
 		},
 		{
 			name: 'woocommerce/featured-category',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Featured Category'
-				);
-
+			setup: async ( block ) => {
 				await block
 					.getByRole( 'radio', { name: /Accessories/ } )
 					.check();
@@ -55,11 +51,7 @@ test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
 		},
 		{
 			name: 'woocommerce/featured-product',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Featured Product'
-				);
-
+			setup: async ( block ) => {
 				await block
 					.getByLabel( 'Beanie with Logo', { exact: true } )
 					.check();
@@ -71,22 +63,14 @@ test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
 		},
 		{
 			name: 'woocommerce/product-category',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Products by Category'
-				);
-
+			setup: async ( block ) => {
 				await block.getByLabel( 'Clothing' ).check();
 				await block.getByRole( 'button', { name: 'Done' } ).click();
 			},
 		},
 		{
 			name: 'woocommerce/product-collection',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Product Collection'
-				);
-
+			setup: async ( block ) => {
 				await block
 					.getByRole( 'button', { name: 'create your own' } )
 					.click();
@@ -100,11 +84,7 @@ test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
 		},
 		{
 			name: 'woocommerce/product-tag',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Products by Tag'
-				);
-
+			setup: async ( block ) => {
 				await block.getByLabel( 'Recommended' ).check();
 				await block.getByRole( 'button', { name: 'Done' } ).click();
 			},
@@ -114,22 +94,14 @@ test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
 		},
 		{
 			name: 'woocommerce/products-by-attribute',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Products by Attribute'
-				);
-
+			setup: async ( block ) => {
 				await block.getByLabel( 'Color' ).check();
 				await block.getByRole( 'button', { name: 'Done' } ).click();
 			},
 		},
 		{
 			name: 'woocommerce/single-product',
-			setup: async () => {
-				const block = editor.canvas.getByLabel(
-					'Block: Single Product'
-				);
-
+			setup: async ( block ) => {
 				await block.getByLabel( 'Album', { exact: true } ).check();
 				await block.getByRole( 'button', { name: 'Done' } ).click();
 			},
@@ -151,7 +123,9 @@ test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
 		await editor.insertBlock( { name: block.name } );
 
 		if ( block.setup ) {
-			await block.setup();
+			await block.setup(
+				editor.canvas.locator( `[data-type="${ block.name }"]` )
+			);
 		}
 	}
 
