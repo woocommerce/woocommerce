@@ -56,33 +56,17 @@
 		}
 	},
 	"attributes": {
-		"attributeId": {
-			"type": "number",
-			"default": 0
-		},
 		"showCounts": {
 			"type": "boolean",
 			"default": false
 		},
-		"queryType": {
-			"type": "string",
-			"default": "or"
-		},
 		"displayStyle": {
 			"type": "string",
-			"default": "woocommerce/product-filter-checkbox-list"
-		},
-		"selectType": {
-			"type": "string",
-			"default": "multiple"
+			"default": "list"
 		},
 		"isPreview": {
 			"type": "boolean",
 			"default": false
-		},
-		"sortOrder": {
-			"type": "string",
-			"default": "count-desc"
 		},
 		"hideEmpty": {
 			"type": "boolean",
