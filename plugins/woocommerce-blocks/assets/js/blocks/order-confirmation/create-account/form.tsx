@@ -144,7 +144,7 @@ const Form = ( {
 			) }
 			<Button
 				className={ clsx(
-					'wc-block-order-confirmation--create-account-button',
+					'wc-block-order-confirmation-create-account-button',
 					{
 						'is-loading': isLoading,
 					}
