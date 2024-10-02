@@ -42,10 +42,10 @@ module.exports = {
 			include: /node_modules/,
 			type: 'javascript/auto',
 		} );
-		config.externals = [ 'react-dom/client' ];
 		// https://github.com/storybookjs/storybook/discussions/22650#discussioncomment-6414161
 		config.resolve.alias = {
 			...config.resolve.alias,
+			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
 			react: path.resolve( __dirname, '../node_modules/react' ),
 			'react-dom': path.resolve( __dirname, '../node_modules/react-dom' ),
 		};

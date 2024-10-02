@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Log deprecation warnings for `Query` class usage.

@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales' );
 
 
 	/**
@@ -134,6 +134,46 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
 		$this->register_core_collections();
+	}
+
+	/**
+	 * Get the styles for the list element (fixed width).
+	 *
+	 * @param string $fixed_width Fixed width value.
+	 * @return string
+	 */
+	protected function get_list_styles( $fixed_width ) {
+		$style = '';
+
+		if ( isset( $fixed_width ) ) {
+			$style .= sprintf( 'width:%s;', esc_attr( $fixed_width ) );
+			$style .= 'margin: 0 auto;';
+		}
+		return $style;
+	}
+
+	/**
+	 * Set the style attribute for fixed width.
+	 *
+	 * @param WP_HTML_Tag_Processor $p          The HTML tag processor.
+	 * @param string                $fixed_width The fixed width value.
+	 */
+	private function set_fixed_width_style( $p, $fixed_width ) {
+		$p->set_attribute( 'style', $this->get_list_styles( $fixed_width ) );
+	}
+
+	/**
+	 * Handle block dimensions if width type is set to 'fixed'.
+	 *
+	 * @param WP_HTML_Tag_Processor $p     The HTML tag processor.
+	 * @param array                 $block The block details.
+	 */
+	private function handle_block_dimensions( $p, $block ) {
+		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
+			}
+		}
 	}
 
 	/**
@@ -382,6 +422,8 @@ class ProductCollection extends AbstractBlock {
 			if ( $this->is_next_tag_product_collection( $p ) ) {
 				$this->set_product_collection_namespace( $p );
 			}
+			// Check if dimensions need to be set and handle accordingly.
+			$this->handle_block_dimensions( $p, $block );
 			$block_content = $p->get_updated_html();
 
 			$collection    = $block['attrs']['collection'] ?? '';
@@ -392,8 +434,7 @@ class ProductCollection extends AbstractBlock {
 				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
-
-		return $block_content;
+		return sprintf( '<div>%s</div>', $block_content );
 	}
 
 	/**
@@ -665,7 +706,7 @@ class ProductCollection extends AbstractBlock {
 			return $this->get_preview_query_args( $collection_args, $query, $request );
 		}
 
-		$orderby             = $request->get_param( 'orderBy' );
+		$orderby             = $request->get_param( 'orderby' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
@@ -1013,6 +1054,22 @@ class ProductCollection extends AbstractBlock {
 	private function get_custom_orderby_query( $orderby ) {
 		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
+		}
+
+		if ( 'price' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_price_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
+		}
+
+		if ( 'sales' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
 		}
 
 		$meta_keys = array(
@@ -1670,20 +1727,80 @@ class ProductCollection extends AbstractBlock {
 		$min_price = $price_range['min'] ?? null;
 		if ( $min_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'min_price', '>=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'max_price', '>=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price >= %f ', $min_price );
 			}
 		}
 
 		$max_price = $price_range['max'] ?? null;
 		if ( $max_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'max_price', '<=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'min_price', '<=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price <= %f ', $max_price );
 			}
 		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add price-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_price_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+		if ( 'price' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC';
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add sales-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_sales_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+		if ( 'sales' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.total_sales ASC' :
+			'wc_product_meta_lookup.total_sales DESC';
 
 		return $clauses;
 	}
@@ -1923,7 +2040,7 @@ class ProductCollection extends AbstractBlock {
 							$product->get_upsell_ids()
 						);
 					},
-					[]
+					array()
 				);
 
 				// Remove duplicates and product references. We don't want to display

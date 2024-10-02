@@ -74,7 +74,7 @@ async function runComingSoonTests( themeContext = '' ) {
 
 test.describe(
 	'Launch Your Store front end - logged out',
-	{ tag: [ '@skip-on-default-wpcom', '@skip-on-default-pressable' ] },
+	{ tag: '@skip-on-default-wpcom' },
 	() => {
 		test.afterAll( async ( { baseURL } ) => {
 			try {
@@ -90,26 +90,26 @@ test.describe(
 		} );
 
 		test.describe( 'Block Theme (Twenty Twenty Four)', () => {
-			test.beforeAll( async () => {
-				await activateTheme( 'twentytwentyfour' );
+			test.beforeAll( async ( { baseURL } ) => {
+				await activateTheme( baseURL, 'twentytwentyfour' );
 			} );
 
-			test.afterAll( async () => {
+			test.afterAll( async ( { baseURL } ) => {
 				// Reset theme to the default.
-				await activateTheme( DEFAULT_THEME );
+				await activateTheme( baseURL, DEFAULT_THEME );
 			} );
 
 			runComingSoonTests( test.step, test.use );
 		} );
 
 		test.describe( 'Classic Theme (Storefront)', () => {
-			test.beforeAll( async () => {
-				await activateTheme( 'storefront' );
+			test.beforeAll( async ( { baseURL } ) => {
+				await activateTheme( baseURL, 'storefront' );
 			} );
 
-			test.afterAll( async () => {
+			test.afterAll( async ( { baseURL } ) => {
 				// Reset theme to the default.
-				await activateTheme( DEFAULT_THEME );
+				await activateTheme( baseURL, DEFAULT_THEME );
 			} );
 
 			runComingSoonTests(

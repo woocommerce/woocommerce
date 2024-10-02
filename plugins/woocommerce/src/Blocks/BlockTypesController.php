@@ -53,8 +53,9 @@ final class BlockTypesController {
 	/**
 	 * Initialize class features.
 	 */
-	protected function init() {
+	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
@@ -152,6 +153,52 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Register block patterns
+	 */
+	public function register_block_patterns() {
+		register_block_pattern(
+			'woocommerce/order-confirmation-totals-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/order-confirmation-downloads-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/order-confirmation-shipping-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/order-confirmation-billing-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/order-confirmation-additional-fields-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
 	}
 
 	/**
