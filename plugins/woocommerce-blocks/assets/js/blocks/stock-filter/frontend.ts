@@ -18,7 +18,7 @@ const getProps = ( el: HTMLElement ) => {
 
 renderFrontend( {
 	selector:
-		'div:not(.wp-block-woocommerce-filter-wrapper) > .wp-block-woocommerce-stock-filter',
+		'.wp-block-woocommerce-stock-filter:not(.wp-block-woocommerce-filter-wrapper .wp-block-woocommerce-stock-filter)',
 	Block,
 	getProps,
 } );
