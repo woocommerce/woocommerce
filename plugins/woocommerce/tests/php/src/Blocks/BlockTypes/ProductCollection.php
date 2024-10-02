@@ -253,19 +253,6 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging order by popularity queries.
-	 */
-	public function test_merging_order_by_popularity_queries() {
-		$parsed_block                              = $this->get_base_parsed_block();
-		$parsed_block['attrs']['query']['orderBy'] = 'popularity';
-
-		$merged_query = $this->initialize_merged_query( $parsed_block );
-
-		$this->assertEquals( 'meta_value_num', $merged_query['orderby'] );
-		$this->assertEquals( 'total_sales', $merged_query['meta_key'] );
-	}
-
-	/**
 	 * Test product visibility query exist in merged query.
 	 */
 	public function test_product_visibility_query_exist_in_merged_query() {
@@ -1239,5 +1226,25 @@ class ProductCollection extends \WP_UnitTestCase {
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price DESC', $query->request );
+	}
+
+	/**
+	 * Test the add_sales_sorting_posts_clauses method.
+	 */
+	public function test_add_sales_sorting_posts_clauses() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'sales';
+
+		$parsed_block['attrs']['query']['order'] = 'asc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales ASC', $query->request );
+
+		$parsed_block['attrs']['query']['order'] = 'desc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales DESC', $query->request );
 	}
 }
