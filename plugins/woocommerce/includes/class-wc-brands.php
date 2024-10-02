@@ -269,6 +269,7 @@ class WC_Brands {
 					'labels'                => array(
 						'name'              => __( 'Brands', 'woocommerce' ),
 						'singular_name'     => __( 'Brand', 'woocommerce' ),
+						'template_name'     => _x( 'Products by Brand', 'Template name', 'woocommerce' ),
 						'search_items'      => __( 'Search Brands', 'woocommerce' ),
 						'all_items'         => __( 'All Brands', 'woocommerce' ),
 						'parent_item'       => __( 'Parent Brand', 'woocommerce' ),
