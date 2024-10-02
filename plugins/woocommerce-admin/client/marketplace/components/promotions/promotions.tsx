@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { recordEvent } from '@woocommerce/tracks';
+
+/**
  * Internal dependencies
  */
 import { LOCALE } from '../../../utils/admin-settings';
@@ -27,6 +32,20 @@ const Promotions: ( { format }: { format: string } ) => null | JSX.Element = ( {
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
 	const currentTab = urlParams.get( 'tab' );
 	const pathname = window.location.pathname + window.location.search;
+
+	const handleLoad = () => {
+		recordEvent( 'marketplace_promotion_viewed', {
+			path: pathname,
+			format: 'notice',
+		} );
+	};
+
+	const handleClose = () => {
+		recordEvent( 'marketplace_promotion_dismissed', {
+			path: pathname,
+			format: 'notice',
+		} );
+	};
 
 	return (
 		<>
@@ -98,6 +117,8 @@ const Promotions: ( { format }: { format: string } ) => null | JSX.Element = ( {
 							}
 							icon={ promotion?.icon || '' }
 							isDismissible={ promotion.is_dismissible || false }
+							onLoad={ handleLoad }
+							onClose={ handleClose }
 						/>
 					);
 				}

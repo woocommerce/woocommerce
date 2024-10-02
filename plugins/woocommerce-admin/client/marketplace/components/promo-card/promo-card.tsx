@@ -25,7 +25,7 @@ const imageComponents = {
 const PromoCard = ( {
 	promotion,
 }: PromoCardProps ): React.ReactElement | null => {
-	const uri = window.location.pathname + window.location.search;
+	const path = window.location.pathname + window.location.search;
 
 	const getDismissedURIs = () =>
 		JSON.parse(
@@ -33,13 +33,14 @@ const PromoCard = ( {
 		);
 
 	const [ isVisible, setIsVisible ] = useState(
-		! getDismissedURIs().includes( uri )
+		! getDismissedURIs().includes( path )
 	);
 
 	useEffect( () => {
 		if ( isVisible ) {
-			recordEvent( 'marketplace_promo_viewed', {
-				uri,
+			recordEvent( 'marketplace_promotion_viewed', {
+				path,
+				format: 'promo-card',
 			} );
 		}
 		// only run once
@@ -52,18 +53,20 @@ const PromoCard = ( {
 		setIsVisible( false );
 		localStorage.setItem(
 			'wc-marketplaceDismissedPromos',
-			JSON.stringify( getDismissedURIs().concat( uri ) )
+			JSON.stringify( getDismissedURIs().concat( path ) )
 		);
 
-		recordEvent( 'marketplace_promo_dismissed', {
-			uri,
+		recordEvent( 'marketplace_promotion_dismissed', {
+			path,
+			format: 'promo-card',
 		} );
 	};
 
 	const handleClick = () => {
-		recordEvent( 'marketplace_promo_actioned', {
-			uri,
+		recordEvent( 'marketplace_promotion_actioned', {
+			path,
 			target_uri: promotion.cta_link,
+			format: 'promo-card',
 		} );
 
 		return true;
