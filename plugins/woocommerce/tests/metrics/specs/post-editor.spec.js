@@ -27,11 +27,8 @@ const test = base.extend( {
 
 let draftId = null;
 
-test( 'Setup the test post', async ( { admin, page, editor, perfUtils } ) => {
+test( 'Setup the test post', async ( { admin, editor, perfUtils } ) => {
 	await admin.createNewPost();
-	await page.waitForFunction( () => {
-		return window.wp && window.wp.data && window.wp.blocks;
-	} );
 
 	const blocks = [
 		{
