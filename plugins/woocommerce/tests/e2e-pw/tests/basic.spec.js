@@ -23,6 +23,7 @@ test( 'Load the home page', async ( { page } ) => {
 	await expect(
 		page.getByRole( 'link', { name: 'WordPress' } )
 	).toBeVisible();
+	// Minor change to test the retry action.
 } );
 
 test( 'Load wp-admin as admin', async ( { page } ) => {
