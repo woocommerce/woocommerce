@@ -26,7 +26,7 @@ class WC_Brands {
 	public function __construct() {
 		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
-		add_action( 'plugins_loaded', array( $this, 'register_hooks' ), 2 );
+		add_action( 'plugins_loaded', array( $this, 'register_hooks' ), 11 );
 
 		$this->register_shortcodes();
 	}
