@@ -48,21 +48,24 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
+            let githubEvent = ${{ toJson( github.event_name ) }};
+            const refType   = ${{ toJson( github.ref_type ) }};
+            const refName   = ${{ toJson( github.ref_name ) }};
+
             // Intended behaviour of the jobs generation:
             // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
-            // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
+            // - Pushes: run CI jobs aiming pushes without filtering based on the content changes (until merge changes changelog files only)
             
             // github.base_ref is only available for pull_request events
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
             }
-            
-            let githubEvent = ${{ toJson( github.event_name ) }};
-            
-            const refType = ${{ toJson( github.ref_type ) }};
-            const refName = ${{ toJson( github.ref_name ) }};
-            
+            // github.event.before is only available for push events
+            if ( githubEvent == 'push' && refType == 'branch' && refName == 'trunk' ) {
+              // baseRef = '--base-ref ${{ toJson( github.event.before ) }}';
+            }
+                        
             if ( refType === 'tag' && refName !== 'nightly' ) {
               githubEvent = 'release-checks';
             }
