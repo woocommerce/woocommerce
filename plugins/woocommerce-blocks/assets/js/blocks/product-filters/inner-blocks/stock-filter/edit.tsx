@@ -108,7 +108,6 @@ const Edit = ( props: EditProps ) => {
 					value={ {
 						filterData: {
 							items: data,
-							stock,
 							isLoading,
 						},
 					} }
