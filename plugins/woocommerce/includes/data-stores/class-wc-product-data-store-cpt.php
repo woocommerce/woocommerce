@@ -265,7 +265,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_extra_data( $product );
 		$product->set_object_read( true );
 
-		do_action( 'woocommerce_product_read', $product->get_id() );
+		do_action( 'woocommerce_product_read', $product->get_id(), $product );
 	}
 
 	/**
