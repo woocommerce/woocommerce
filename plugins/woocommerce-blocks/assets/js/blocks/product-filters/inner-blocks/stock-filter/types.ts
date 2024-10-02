@@ -4,11 +4,9 @@
 import { BlockEditProps } from '@wordpress/blocks';
 
 export type BlockAttributes = {
-	attributeId: number;
+	classname?: string;
 	showCounts: boolean;
-	queryType: 'or' | 'and';
 	displayStyle: string;
-	selectType: string;
 	isPreview: boolean;
 	hideEmpty: boolean;
 	clearButton: boolean;
