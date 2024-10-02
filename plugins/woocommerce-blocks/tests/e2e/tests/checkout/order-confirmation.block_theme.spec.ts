@@ -154,7 +154,10 @@ test.describe( 'Shopper (guest) → Order Confirmation', () => {
 test.describe( 'Shopper (guest) → Order Confirmation → Create Account', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeEach( async ( { frontendUtils, pageObject } ) => {
+	test.beforeEach( async ( { frontendUtils, pageObject, requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
