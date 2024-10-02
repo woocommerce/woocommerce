@@ -136,12 +136,12 @@ export const Layout = ( {
 					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
 					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
+					<Promotions format="promo-card" />
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
 					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
 					{ shouldShowStoreLinks && <StoreManagementLinks /> }
-					<Promotions format="promo-card" />
 				</Column>
 			</>
 		);
