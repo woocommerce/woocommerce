@@ -116,6 +116,8 @@ class WC_Admin_Marketplace_Promotions {
 			return array();
 		}
 
+		$promotions = self::merge_promos( $promotions );
+
 		return self::filter_out_inactive_promotions( $promotions );
 	}
 
@@ -269,18 +271,6 @@ class WC_Admin_Marketplace_Promotions {
 		$now_date_time     = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 		$active_promotions = array();
 
-		/*
-		 * Promos arrive as an array of arrays with the key 'promos'.
-		 * We merge them into the main array.
-		 * */
-		if (
-			! empty( $promotions['promos'] )
-			&& is_array( $promotions['promos'] )
-		) {
-			$promotions = array_merge( $promotions, $promotions['promos'] );
-			unset( $promotions['promos'] );
-		}
-
 		foreach ( $promotions as $promotion ) {
 			if ( ! isset( $promotion['date_from_gmt'] ) || ! isset( $promotion['date_to_gmt'] ) ) {
 				continue;
@@ -307,6 +297,27 @@ class WC_Admin_Marketplace_Promotions {
 		);
 
 		return $active_promotions;
+	}
+
+	/**
+	 * Promos arrive in the array of promotions as an array of arrays with the key 'promos'.
+	 * We merge them into the main array.
+	 *
+	 * @param ?array $promotions  Promotions data received from WCCOM.
+	 *                            May have an element with the key 'promos', which contains an array.
+	 *
+	 * @return array
+	 * */
+	private static function merge_promos( ? array $promotions = array() ): array {
+		if (
+			! empty( $promotions['promos'] )
+			&& is_array( $promotions['promos'] )
+		) {
+			$promotions = array_merge( $promotions, $promotions['promos'] );
+			unset( $promotions['promos'] );
+		}
+
+		return $promotions;
 	}
 
 	/**
