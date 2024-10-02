@@ -150,11 +150,29 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// and incorrectly products not being created.
 		// To mitigate this, we will retry the query 3 times before giving up.
 		for ( $attempts = 0; $attempts < 3; $attempts++ ) {
+			if ( $attempts > 1 ) {
+				usleep( 10000 );
+			}
+
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$result = $wpdb->query( $query );
 			if ( false !== $result ) {
 				break;
 			}
+		}
+
+		if ( $result === false ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'Failed to obtain SKU lock for product: ID "%d" with SKU "%s" after %d attempts.',
+					$product_id,
+					$sku,
+					$attempts,
+				),
+				array(
+					'error' => $wpdb->last_error,
+				)
+			);
 		}
 
 		return (bool) $result;
