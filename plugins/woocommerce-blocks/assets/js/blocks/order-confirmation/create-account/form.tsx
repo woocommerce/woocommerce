@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useState, createInterpolateElement } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
@@ -9,7 +10,7 @@ import {
 	getPasswordStrength,
 } from '@woocommerce/base-components/cart-checkout/password-strength-meter';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
-import { ValidatedTextInput } from '@woocommerce/blocks-components';
+import { ValidatedTextInput, Spinner } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { getSetting } from '@woocommerce/settings';
@@ -142,14 +143,19 @@ const Form = ( {
 				</>
 			) }
 			<Button
-				className={
-					'wc-block-order-confirmation-create-account-button'
-				}
+				className={ clsx(
+					'wc-block-order-confirmation--create-account-button',
+					{
+						'is-loading': isLoading,
+					}
+				) }
 				type="submit"
 				disabled={ !! hasValidationError || needsPassword || isLoading }
-				showSpinner={ isLoading }
 			>
-				{ __( 'Create account', 'woocommerce' ) }
+				{ !! isLoading && <Spinner /> }
+				<span className="wc-block-order-confirmation-create-account-button-text">
+					{ __( 'Create account', 'woocommerce' ) }
+				</span>
 			</Button>
 			<input type="hidden" name="email" value={ customerEmail } />
 			<input type="hidden" name="password" value={ password } />

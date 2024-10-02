@@ -19,7 +19,7 @@
 		margin-bottom: 0;
 	}
 
-	.woocommerce-order-confirmation-create-account-content,
+	.wc-block-order-confirmation-create-account-content,
 	.block-editor-block-list__layout {
 		> :first-child {
 			margin-top: 0 !important;
@@ -70,7 +70,7 @@
 		}
 	}
 
-	.woocommerce-order-confirmation-create-account-success {
+	.wc-block-order-confirmation-create-account-success {
 		text-align: center;
 		padding: $gap-larger 0;
 
@@ -79,6 +79,19 @@
 		}
 		> :last-child {
 			margin-bottom: 0 !important;
+		}
+	}
+
+	.wc-block-order-confirmation--create-account-button {
+		.wc-block-components-button__text {
+			position: relative;
+		}
+		&.is-loading {
+			pointer-events: none;
+
+			.wc-block-components-spinner + .wc-block-order-confirmation-create-account-button-text {
+				visibility: hidden;
+			}
 		}
 	}
 }
