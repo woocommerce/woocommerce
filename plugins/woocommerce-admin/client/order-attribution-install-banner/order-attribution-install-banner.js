@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Button, Card, CardBody } from '@wordpress/components';
+import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
@@ -21,14 +22,19 @@ export const OrderAttributionInstallBanner = ( {
 	const { isDismissed, dismiss, shouldShowBanner } =
 		useOrderAttributionInstallBanner();
 
+	useEffect( () => {
+		if ( ! shouldShowBanner || isDismissed ) {
+			return;
+		}
+		recordEvent( 'order_attribution_install_banner_viewed', {
+			path: getPath(),
+			context: eventContext,
+		} );
+	}, [ eventContext, shouldShowBanner, isDismissed ] );
+
 	if ( ! shouldShowBanner || isDismissed ) {
 		return null;
 	}
-
-	recordEvent( 'order_attribution_install_banner_viewed', {
-		path: getPath(),
-		context: eventContext,
-	} );
 
 	return (
 		<Card
