@@ -12,5 +12,48 @@
 	"supports": {
 		"interactivity": true,
 		"html": false
+	},
+	"attributes": {
+		"attributeId": {
+			"type": "number",
+			"default": 0
+		},
+		"showCounts": {
+			"type": "boolean",
+			"default": false
+		},
+		"queryType": {
+			"type": "string",
+			"default": "or"
+		},
+		"displayStyle": {
+			"type": "string",
+			"default": "woocommerce/product-filter-checkbox-list"
+		},
+		"selectType": {
+			"type": "string",
+			"default": "multiple"
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		},
+		"sortOrder": {
+			"type": "string",
+			"default": "count-desc"
+		},
+		"hideEmpty": {
+			"type": "boolean",
+			"default": true
+		},
+		"clearButton": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
 	}
 }

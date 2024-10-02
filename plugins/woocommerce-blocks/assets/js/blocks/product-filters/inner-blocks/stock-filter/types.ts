@@ -3,14 +3,16 @@
  */
 import { BlockEditProps } from '@wordpress/blocks';
 
-export interface BlockProps {
-	className?: string;
+export type BlockAttributes = {
+	attributeId: number;
 	showCounts: boolean;
-	isPreview?: boolean;
+	queryType: 'or' | 'and';
 	displayStyle: string;
 	selectType: string;
-	isEditor: boolean;
-}
+	isPreview: boolean;
+	hideEmpty: boolean;
+	clearButton: boolean;
+};
 
 export interface DisplayOption {
 	value: string;
@@ -24,4 +26,4 @@ export type Current = {
 	name: string;
 };
 
-export type EditProps = BlockEditProps< BlockProps >;
+export type EditProps = BlockEditProps< BlockAttributes >;

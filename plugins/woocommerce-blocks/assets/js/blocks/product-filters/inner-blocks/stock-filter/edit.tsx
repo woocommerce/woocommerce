@@ -16,8 +16,10 @@ import { useMemo } from '@wordpress/element';
  */
 import { InitialDisabled } from '../../components/initial-disabled';
 import { getStockFilterData } from './utils';
+import { Inspector } from './inspector';
+import { EditProps } from './types';
 
-const Edit = () => {
+const Edit = ( props: EditProps ) => {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
@@ -58,7 +60,7 @@ const Edit = () => {
 					],
 				],
 				[
-					'woocommerce/product-filter-chips',
+					'woocommerce/product-filter-checkbox-list',
 					{
 						lock: {
 							remove: true,
@@ -89,13 +91,18 @@ const Edit = () => {
 	const data = stock.map( ( { status, count } ) => {
 		const label = labels[ status ];
 		return {
-			label: label + ` (${ count.toString() })`,
+			label:
+				label +
+				( props.attributes.showCounts
+					? ` (${ count.toString() })`
+					: '' ),
 			value: status,
 		};
 	} );
 
 	return (
 		<div { ...innerBlocksProps }>
+			<Inspector { ...props } />
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {

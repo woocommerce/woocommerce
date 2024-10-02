@@ -30,7 +30,6 @@ final class ProductFilterStockStatus extends AbstractBlock {
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
-		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 	}
 
 	/**
@@ -116,24 +115,25 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	/**
 	 * Get the block context.
 	 *
-	 * @param array $stock_count The block attributes.
+	 * @param array $stock_status_data The stock count data.
+	 * @param array $attributes  The block attributes.
 	 * @return array
 	 */
-	private function create_context_by_stock_counts( $stock_count ) {
+	private function create_context_by_stock_status_data( $stock_status_data, $attributes ) {
 		$stock_statuses          = wc_get_product_stock_status_options();
 		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$selected_stock_statuses = explode( ',', $query );
 
 		$stock = array_map(
-			function ( $item ) use ( $stock_statuses, $selected_stock_statuses ) {
-				$label = $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')';
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
+				$label = $stock_statuses[ $item['status'] ] . ( $attributes['showCounts'] ? ' (' . $item['count'] . ')' : '' );
 				return array(
 					'label'    => $label,
 					'value'    => $item['status'],
 					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
 				);
 			},
-			$stock_count
+			$stock_status_data
 		);
 
 		return array(
@@ -157,8 +157,8 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 
-		$stock_counts   = $this->get_stock_status_counts( $block );
-		$filter_context = $this->create_context_by_stock_counts( $stock_counts );
+		$stock_status_data = $this->get_stock_status_data( $block );
+		$filter_context    = $this->create_context_by_stock_status_data( $stock_status_data, $attributes );
 
 		$wrapper_attributes = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
@@ -186,7 +186,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 *
 	 * @param WP_Block $block Block instance.
 	 */
-	private function get_stock_status_counts( $block ) {
+	private function get_stock_status_data( $block ) {
 		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
@@ -212,44 +212,6 @@ final class ProductFilterStockStatus extends AbstractBlock {
 			function ( $stock_count ) {
 				return $stock_count['count'] > 0;
 			}
-		);
-	}
-
-	/**
-	 * Register pattern for default product attribute.
-	 */
-	public function register_block_patterns() {
-		register_block_pattern(
-			'woocommerce/default-stock-filter',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '
-<!-- wp:woocommerce/product-filter-stock-status -->
-<div class="wp-block-woocommerce-product-filter-stock-status">
-  <!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-  <div class="wp-block-group">
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">Status</h3>
-    <!-- /wp:heading -->
-    <!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
-    <!-- wp:buttons {"layout":{"type":"flex"}} -->
-    <div class="wp-block-buttons">
-      <!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
-      <div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
-      <!-- /wp:button -->
-    </div>
-    <!-- /wp:buttons -->
-    <!-- /wp:woocommerce/product-filter-clear-button -->
-  </div>
-  <!-- /wp:group -->
-  <!-- wp:woocommerce/product-filter-chips {"lock":{"remove":true}} -->
-  <div class="wp-block-woocommerce-product-filter-chips wc-block-product-filter-chips"></div>
-  <!-- /wp:woocommerce/product-filter-chips -->
-</div>
-<!-- /wp:woocommerce/product-filter-stock-status -->
-				',
-			)
 		);
 	}
 }

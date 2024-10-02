@@ -30,6 +30,11 @@ store( 'woocommerce/product-filter-stock-status', {
 				? [ ...filtersArr.filter( ( filter ) => filter !== value ) ]
 				: [ ...filtersArr, value ];
 
+			if ( newFilterArr.length === 0 ) {
+				delete productFiltersContext.params[ filterStockStatusKey ];
+				return;
+			}
+
 			productFiltersContext.params = {
 				...productFiltersContext.params,
 				[ filterStockStatusKey ]: newFilterArr.join( ',' ),
@@ -41,9 +46,10 @@ store( 'woocommerce/product-filter-stock-status', {
 			);
 			const updatedParams = productFiltersContext.params;
 
+			delete updatedParams[ filterStockStatusKey ];
+
 			productFiltersContext.params = {
 				...updatedParams,
-				[ filterStockStatusKey ]: '',
 			};
 		},
 	},
