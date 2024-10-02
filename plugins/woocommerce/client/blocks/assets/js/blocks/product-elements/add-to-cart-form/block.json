@@ -13,6 +13,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"autoselectOnPageLoad": {
+			"type": "boolean",
+			"default": false
+		},
 		"unattachedAction": {
 			"type": "string",
 			"default": "hide"

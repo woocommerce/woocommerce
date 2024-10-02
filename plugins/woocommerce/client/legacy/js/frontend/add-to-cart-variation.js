@@ -4,7 +4,10 @@
 	 * VariationForm class which handles variation forms and attributes.
 	 */
 	var VariationForm = function( $form ) {
-		var self = this;
+		var self = this,
+			autoselect_on_page_load =
+				$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'autoselectOnPageLoad' ) ||
+				false;
 
 		self.$form                = $form;
 		self.$attributeFields     = $form.find( '.variations select' );
@@ -54,6 +57,26 @@
 		// Init after gallery.
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
+
+			if ( autoselect_on_page_load ) {
+				// Autoselect for all selects if there is only 1 option for each select
+				let doCheckVariations = false;
+				self.$attributeFields.each( function() {
+					const $el = $( this );
+						const $options = $el.find( 'option:not([value=""], [disabled], [class*="disabled"])' );
+						if ( $options.length === 1 ) {
+							// There is only one attribute to choose from
+							$el.val( $options.val() );
+							doCheckVariations = true;
+						} else {
+							// More than one attribute to choose from, let the user choose
+						}
+				} );
+				if ( doCheckVariations ) {
+					$form.trigger( 'check_variations' );
+				}
+			}
+
 			$form.trigger( 'wc_variation_form', self );
 			self.loading = false;
 		}, 100 );
