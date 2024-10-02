@@ -2,6 +2,7 @@
 /**
  * Class WC_Report_Customers file.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Reports
  */
 
@@ -12,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Customers
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -20,6 +22,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	/**
 	 * Chart colors.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $chart_colours = array();
@@ -27,6 +30,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	/**
 	 * Customers.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $customers = array();
@@ -34,6 +38,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -52,6 +57,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	/**
 	 * Get chart widgets.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -67,6 +73,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * Output customers vs guests chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function customers_vs_guests() {
 
@@ -163,6 +171,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -230,6 +240,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * Output an export link.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {
 
@@ -250,6 +262,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * Output the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {
 		global $wp_locale;

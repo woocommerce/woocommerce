@@ -8,6 +8,7 @@
  * @category    Admin
  * @package     WooCommerce\Admin\Reports
  * @version     2.0.0
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,11 +21,15 @@ if ( class_exists( 'WC_Admin_Reports', false ) ) {
 
 /**
  * WC_Admin_Reports Class.
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Admin_Reports {
 
 	/**
 	 * Register the proper hook handlers.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public static function register_hook_handlers() {
 		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_report_instance' ) );
@@ -34,6 +39,7 @@ class WC_Admin_Reports {
 	/**
 	 * Get an instance of WC_Admin_Report.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return WC_Admin_Report
 	 */
 	public static function get_report_instance() {
@@ -44,6 +50,7 @@ class WC_Admin_Reports {
 	/**
 	 * Filter handler for replacing the data of the status widget on the Dashboard page.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param array $status_widget_reports The data to display in the status widget.
 	 */
 	public static function replace_dashboard_status_widget_reports( $status_widget_reports ) {
@@ -69,6 +76,8 @@ class WC_Admin_Reports {
 
 	/**
 	 * Handles output of the reports page in admin.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public static function output() {
 		$reports        = self::get_reports();
@@ -83,6 +92,7 @@ class WC_Admin_Reports {
 	/**
 	 * Returns the definitions for the reports to show in admin.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public static function get_reports() {
@@ -249,6 +259,7 @@ class WC_Admin_Reports {
 	/**
 	 * Get a report from our reports subfolder.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $name
 	 */
 	public static function get_report( $name ) {

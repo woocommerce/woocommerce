@@ -2,10 +2,9 @@
 /**
  * Admin report functionality.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead. *
  * @package WooCommerce\Admin\Reports
  */
-
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -25,6 +24,7 @@ class WC_Admin_Report {
 	/**
 	 * List of transients name that have been updated and need persisting.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	protected static $transients_to_update = array();
@@ -32,6 +32,7 @@ class WC_Admin_Report {
 	/**
 	 * The list of transients.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	protected static $cached_results = array();
@@ -39,6 +40,7 @@ class WC_Admin_Report {
 	/**
 	 * The chart interval.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int
 	 */
 	public $chart_interval;
@@ -46,6 +48,7 @@ class WC_Admin_Report {
 	/**
 	 * Group by SQL query.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var string
 	 */
 	public $group_by_query;
@@ -53,6 +56,7 @@ class WC_Admin_Report {
 	/**
 	 * The bar width.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int
 	 */
 	public $barwidth;
@@ -60,6 +64,7 @@ class WC_Admin_Report {
 	/**
 	 * Group chart item by day or month.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var string
 	 */
 	public $chart_groupby;
@@ -67,6 +72,7 @@ class WC_Admin_Report {
 	/**
 	 * The start date of the report.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int timestamp
 	 */
 	public $start_date;
@@ -74,9 +80,19 @@ class WC_Admin_Report {
 	/**
 	 * The end date of the report.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int timestamp
 	 */
 	public $end_date;
+
+	/**
+	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
+	 */
+	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
+	}
 
 	/**
 	 * Get report totals such as order totals and discount amounts.
@@ -89,6 +105,7 @@ class WC_Admin_Report {
 	 *     'name'     => 'total_sales'
 	 * )
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param  array $args arguments for the report.
 	 * @return mixed depending on query_type
 	 */
@@ -406,6 +423,8 @@ class WC_Admin_Report {
 
 	/**
 	 * Init the static hooks of the class.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	protected static function add_update_transients_hook() {
 		if ( ! has_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) ) ) {
@@ -415,6 +434,8 @@ class WC_Admin_Report {
 
 	/**
 	 * Enables big mysql selects for reports, just once for this session.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	protected static function enable_big_selects() {
 		static $big_selects = false;
@@ -430,6 +451,7 @@ class WC_Admin_Report {
 	/**
 	 * Get the cached query result or null if it's not in the cache.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $query_hash The query hash.
 	 *
 	 * @return mixed
@@ -451,6 +473,7 @@ class WC_Admin_Report {
 	/**
 	 * Set the cached query result.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $query_hash The query hash.
 	 * @param mixed  $data The data to cache.
 	 */
@@ -473,6 +496,8 @@ class WC_Admin_Report {
 
 	/**
 	 * Function to update the modified transients at the end of the request.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public static function maybe_update_transients() {
 		foreach ( self::$transients_to_update as $key => $transient_name ) {
@@ -485,6 +510,7 @@ class WC_Admin_Report {
 	/**
 	 * Put data with post_date's into an array of times.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param  array  $data array of your data.
 	 * @param  string $date_key key for the 'date' field. e.g. 'post_date'.
 	 * @param  string $data_key key for the data you are charting.
@@ -557,6 +583,7 @@ class WC_Admin_Report {
 	/**
 	 * Prepares the data for a sparkline to show sales in the last X days.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param  int    $id ID of the product to show. Blank to get all orders.
 	 * @param  int    $days Days of stats to get. Default to 7 days.
 	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
@@ -655,6 +682,7 @@ class WC_Admin_Report {
 	/**
 	 * Prepares the markup for a sparkline to show sales in the last X days.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param  int    $id ID of the product to show. Blank to get all orders.
 	 * @param  int    $days Days of stats to get. Default to 7 days.
 	 * @param  string $type Type of sparkline to get.
@@ -680,6 +708,7 @@ class WC_Admin_Report {
 	/**
 	 * Get the current range and calculate the start and end dates.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param  string $current_range Type of range.
 	 */
 	public function calculate_current_range( $current_range ) {
@@ -771,6 +800,7 @@ class WC_Admin_Report {
 	/**
 	 * Return currency tooltip JS based on WooCommerce currency position settings.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return string
 	 */
 	public function get_currency_tooltip() {
@@ -795,12 +825,15 @@ class WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {}
 
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -810,6 +843,7 @@ class WC_Admin_Report {
 	/**
 	 * Get chart widgets.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -818,17 +852,22 @@ class WC_Admin_Report {
 
 	/**
 	 * Get an export link if needed.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {}
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {}
 
 	/**
 	 * Check nonce for current range.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @since  3.0.4
 	 * @param  string $current_range Current range.
 	 */
