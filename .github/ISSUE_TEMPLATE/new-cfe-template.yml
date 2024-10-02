@@ -1,0 +1,79 @@
+name: 🚧 Code freeze exception request
+description: Request handling one or more pull requests(s) as code freeze exception(s).
+title: "[CFE]: "
+labels: ["code freeze exception"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request changes to be included in a version of WooCommerce that is past its code freeze date.
+        **The request will be reviewed** and accepted or denied:
+        
+        * If accepted, please test your changes in against the release branch and merge.
+        * If rejected, please change the base against `trunk` and merge it.
+        
+        In either case you are responsible for managing the pull request as usual (provide a description, assign reviewers, ensure that CI jobs pass...)
+  - type: input
+    id: release-number
+    attributes:
+      label: "Which release does this exception apply to?"
+      description: "Format: X.Y"
+      placeholder: "7.0"
+    validations:
+      required: true
+  - type: textarea
+    id: pr-urls
+    attributes:
+      label: "What PR implement the changes for which the exception is requested? (please do not enter multiple PRs)"
+      description: "Pull request URL against the release branch"
+      placeholder: |
+        https://github.com/woocommerce/woocommerce/pull/1234
+    validations:
+      required: true
+  - type: textarea
+    id: why-needed
+    attributes:
+      label: "Why do these PRs need to break the code freeze?"
+      placeholder: "This is a revert of ... which introduced a bug that causes ..."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      id: consequence-if-not-included
+      label: "What is the consequence if this exception does not get included?"
+      placeholder: "The ... flow will be broken for ... users"
+    validations:
+      required: true
+  - type: textarea
+    id: plan-if-defects-discovered
+    attributes:
+      label: "What is the plan should defects to be discovered in these PRs ahead of final release?"
+      placeholder: "Reverting this PR and ... would be enough"
+    validations:
+      required: true
+  - type: textarea
+    id: how-to-communicate
+    attributes:
+      label: "How should this change be communicated in the release post on the public developer blog:"
+      description: "See the blog at [https://developer.woo.com/blog/](https://developer.woo.com/blog/) cc @woocommerce/developer-advocacy"
+      placeholder: "There is no need to add new communication to the already planned one."
+    validations:
+      required: true
+  - type: textarea
+    id: who-to-ask
+    attributes:
+      label: "If you’re not available and we have questions about this request, is there another person(s) and/or a team that we can ping?"
+      placeholder: "@person or anyone from the ... team"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Escape Analysis
+        For the sake of expediting this request, the details below can be completed at a later time should you so choose.
+        However, the Escape Analysis section is **required** for any accepted Code Freeze Exception.
+        In this section:
+        * Think about how the bug escaped your team.
+        * Write down ideas on how you could prevent this bug – for example, by writing automated tests, creating a new process, or updating documentation.
+        * Make a plan with your team to implement the changes proposed above in order to catch the bug earlier next time and add the related tasks to your backlog.
+        * Please, add a separate comment that includes the details for the Escape Analysis. Together with this Escape Analysis, please make sure to include an actionable item that covers the gap exposed by this analysis. It could be a GitHub issue, the reference of a new item to discuss in a team meeting, etc. Anything that prevents this analysis from getting lost in P2 will be useful.

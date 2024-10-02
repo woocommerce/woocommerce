@@ -332,7 +332,7 @@ $tt2-gray: #f7f7f7;
 
 		}
 
-		a.reset_variations {
+		button.reset_variations {
 			margin-left: 0.5em;
 		}
 
@@ -1214,5 +1214,18 @@ form.checkout_coupon {
 
 	.input-text.has-error:focus {
 		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+ .woocommerce-checkout {
+	form .form-row.woocommerce-invalid input.input-text {
+		border-color: var(--wc-red);
+	}
+
+	.checkout-inline-error-message {
+		@include checkout-inline-error-message();
 	}
 }
