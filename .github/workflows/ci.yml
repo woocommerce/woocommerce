@@ -48,7 +48,6 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
-            
             let githubEvent = ${{ toJson( github.event_name ) }};
             const refType   = ${{ toJson( github.ref_type ) }};
             const refName   = ${{ toJson( github.ref_name ) }};
