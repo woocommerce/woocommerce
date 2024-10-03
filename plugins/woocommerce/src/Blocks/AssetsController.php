@@ -243,9 +243,10 @@ final class AssetsController {
 	 * @return array
 	 */
 	private function get_block_asset_resource_hints( $filename = '' ) {
-		$cached    = $this->get_block_asset_resource_hints_cache();
-		if ( isset( $cached['files'][ $filename ] ) ) {
-			return $cached['files'][ $filename ];
+		$cached = $this->get_block_asset_resource_hints_cache();
+
+		if ( isset( $cached[ $filename ] ) ) {
+			return $cached[ $filename ];
 		}
 
 		if ( ! $filename ) {
