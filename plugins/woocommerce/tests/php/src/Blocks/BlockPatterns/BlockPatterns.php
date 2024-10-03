@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Blocks;
+namespace Automattic\WooCommerce\Tests\Blocks\BlockPatterns;
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\BlockPatterns as TestedBlockPatterns;
@@ -45,7 +45,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		delete_site_transient( 'woocommerce_blocks_patterns' );
 
-		$package = new Package( '0.1.0', __DIR__, new FeatureGating() );
+		$package                  = new Package( '0.1.0', __DIR__, new FeatureGating() );
 		$this->pattern_registry   = $this->createMock( PatternRegistry::class );
 		$this->ptk_patterns_store = $this->createMock( PTKPatternsStore::class );
 
@@ -67,34 +67,34 @@ class BlockPatterns extends \WP_UnitTestCase {
 				array(
 					__DIR__ . '/patterns/mock-footer.php',
 					array(
-						'title' => 'Mock Footer',
-						'slug' => 'woocommerce-blocks/mock-footer',
-						'description' => '',
+						'title'         => 'Mock Footer',
+						'slug'          => 'woocommerce-blocks/mock-footer',
+						'description'   => '',
 						'viewportWidth' => '',
-						'categories' => 'WooCommerce',
-						'keywords' => '',
-						'blockTypes' => 'core/template-part/footer',
-						'inserter' => '',
-						'featureFlag' => '',
-						'source' => __DIR__ . '/patterns/mock-footer.php',
+						'categories'    => 'WooCommerce',
+						'keywords'      => '',
+						'blockTypes'    => 'core/template-part/footer',
+						'inserter'      => '',
+						'featureFlag'   => '',
+						'source'        => __DIR__ . '/patterns/mock-footer.php',
 					),
-					PatternsHelper::get_patterns_dictionary()
+					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
 					array(
-						'title' => 'Mock Header',
-						'slug' => 'woocommerce-blocks/mock-header',
-						'description' => '',
+						'title'         => 'Mock Header',
+						'slug'          => 'woocommerce-blocks/mock-header',
+						'description'   => '',
 						'viewportWidth' => '',
-						'categories' => 'WooCommerce',
-						'keywords' => '',
-						'blockTypes' => 'core/template-part/header',
-						'inserter' => '',
-						'featureFlag' => '',
-						'source' => __DIR__ . '/patterns/mock-header.php',
+						'categories'    => 'WooCommerce',
+						'keywords'      => '',
+						'blockTypes'    => 'core/template-part/header',
+						'inserter'      => '',
+						'featureFlag'   => '',
+						'source'        => __DIR__ . '/patterns/mock-header.php',
 					),
-					PatternsHelper::get_patterns_dictionary()
+					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 
@@ -108,7 +108,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 		$mock_patterns = array(
 			array(
 				'title'  => 'Mock Cached',
-				'source' => __DIR__ . '/patterns/mock-cached.php'
+				'source' => __DIR__ . '/patterns/mock-cached.php',
 			),
 		);
 		$pattern_data  = array(
@@ -137,7 +137,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 		$mock_patterns = array(
 			array(
 				'title'  => 'Mock Cached',
-				'source' => __DIR__ . '/patterns/mock-cached.php'
+				'source' => __DIR__ . '/patterns/mock-cached.php',
 			),
 		);
 		$pattern_data  = array(
@@ -154,34 +154,34 @@ class BlockPatterns extends \WP_UnitTestCase {
 				array(
 					__DIR__ . '/patterns/mock-footer.php',
 					array(
-						'title' => 'Mock Footer',
-						'slug' => 'woocommerce-blocks/mock-footer',
-						'description' => '',
+						'title'         => 'Mock Footer',
+						'slug'          => 'woocommerce-blocks/mock-footer',
+						'description'   => '',
 						'viewportWidth' => '',
-						'categories' => 'WooCommerce',
-						'keywords' => '',
-						'blockTypes' => 'core/template-part/footer',
-						'inserter' => '',
-						'featureFlag' => '',
-						'source' => __DIR__ . '/patterns/mock-footer.php',
+						'categories'    => 'WooCommerce',
+						'keywords'      => '',
+						'blockTypes'    => 'core/template-part/footer',
+						'inserter'      => '',
+						'featureFlag'   => '',
+						'source'        => __DIR__ . '/patterns/mock-footer.php',
 					),
-					PatternsHelper::get_patterns_dictionary()
+					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
 					array(
-						'title' => 'Mock Header',
-						'slug' => 'woocommerce-blocks/mock-header',
-						'description' => '',
+						'title'         => 'Mock Header',
+						'slug'          => 'woocommerce-blocks/mock-header',
+						'description'   => '',
 						'viewportWidth' => '',
-						'categories' => 'WooCommerce',
-						'keywords' => '',
-						'blockTypes' => 'core/template-part/header',
-						'inserter' => '',
-						'featureFlag' => '',
-						'source' => __DIR__ . '/patterns/mock-header.php',
+						'categories'    => 'WooCommerce',
+						'keywords'      => '',
+						'blockTypes'    => 'core/template-part/header',
+						'inserter'      => '',
+						'featureFlag'   => '',
+						'source'        => __DIR__ . '/patterns/mock-header.php',
 					),
-					PatternsHelper::get_patterns_dictionary()
+					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 
