@@ -46,6 +46,14 @@ const orderOptions = [
 		value: 'price/asc',
 	},
 	{
+		label: __( 'Sales, high to low', 'woocommerce' ),
+		value: 'sales/desc',
+	},
+	{
+		label: __( 'Sales, low to high', 'woocommerce' ),
+		value: 'sales/asc',
+	},
+	{
 		value: 'popularity/desc',
 		label: __( 'Best Selling', 'woocommerce' ),
 	},
