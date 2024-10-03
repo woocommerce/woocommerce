@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed geolocation so if it geolocates to a non-allowed country, no country is selected in checkout.
