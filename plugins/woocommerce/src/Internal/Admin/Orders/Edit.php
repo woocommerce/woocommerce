@@ -179,6 +179,15 @@ class Edit {
 			do_action( 'add_meta_boxes_' . $this->screen_id, $order_post );
 		}
 
+		/**
+		 * Provides an opportunity to inject custom meta boxes into the order editor screen.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param WC_Order $order The order being edited.
+		 */
+		do_action( 'woocommerce_order_editor_add_meta_boxes', $this->order );
+
 		$this->enqueue_scripts();
 	}
 
