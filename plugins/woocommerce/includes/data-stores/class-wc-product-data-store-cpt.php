@@ -145,8 +145,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return boolval( $locked );
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$result = $wpdb->query( $query );
+		// The insert query can potentially result in a deadlock if there is high concurrency
+		// when trying to insert products, which will result in a false negative for SKU lock
+		// and incorrectly products not being created.
+		// To mitigate this, we will retry the query 3 times before giving up.
+		for ( $attempts = 0; $attempts < 3; $attempts++ ) {
+			if ( $attempts > 1 ) {
+				usleep( 10000 );
+			}
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$result = $wpdb->query( $query );
+			if ( false !== $result ) {
+				break;
+			}
+		}
+
+		if ( false === $result ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'Failed to obtain SKU lock for product: ID "%d" with SKU "%s" after %d attempts.',
+					$product_id,
+					$sku,
+					$attempts,
+				),
+				array(
+					'error' => $wpdb->last_error,
+				)
+			);
+		}
 
 		return (bool) $result;
 	}
@@ -656,21 +683,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					// Fire actions to let 3rd parties know the stock is about to be changed.
 					if ( $product->is_type( 'variation' ) ) {
 						/**
-						 * Action to signal that the value of 'stock_quantity' for a variation is about to change.
-						 *
-						 * @param WC_Product $product The variation whose stock is about to change.
-						 *
-						 * @since 4.9
-						 */
+						* Action to signal that the value of 'stock_quantity' for a variation is about to change.
+						*
+						* @since 4.9
+						*
+						* @param int $product The variation whose stock is about to change.
+						*/
 						do_action( 'woocommerce_variation_before_set_stock', $product );
 					} else {
 						/**
-						 * Action to signal that the value of 'stock_quantity' for a product is about to change.
-						 *
-						 * @param WC_Product $product The product whose stock is about to change.
-						 *
-						 * @since 4.9
-						 */
+						* Action to signal that the value of 'stock_quantity' for a product is about to change.
+						*
+						* @since 4.9
+						*
+						* @param int $product The product whose stock is about to change.
+						*/
 						do_action( 'woocommerce_product_before_set_stock', $product );
 					}
 					break;

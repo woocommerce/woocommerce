@@ -59,6 +59,7 @@ const ShippingCalculatorAddress = ( {
 			<Button
 				className="wc-block-components-shipping-calculator-address__button"
 				disabled={ isCustomerDataUpdating }
+				variant="outlined"
 				onClick={ ( e ) => {
 					e.preventDefault();
 					const addressChanged = ! isShallowEqual(
@@ -84,7 +85,7 @@ const ShippingCalculatorAddress = ( {
 				} }
 				type="submit"
 			>
-				{ __( 'Update', 'woocommerce' ) }
+				{ __( 'Check delivery options', 'woocommerce' ) }
 			</Button>
 		</form>
 	);

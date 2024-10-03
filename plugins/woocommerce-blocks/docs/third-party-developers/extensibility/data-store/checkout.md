@@ -1,5 +1,7 @@
 # Checkout Store (`wc/store/checkout`) <!-- omit in toc -->
 
+<!-- markdownlint-disable MD024 -->
+
 > 💡 What's the difference between the Cart Store and the Checkout Store?
 >
 > The **Cart Store (`wc/store/cart`)** manages and retrieves data about the shopping cart, including items, customer data, and interactions like coupons.
@@ -173,6 +175,36 @@ const store = select( CHECKOUT_STORE_KEY );
 const useShippingAsBilling = store.getUseShippingAsBilling();
 ```
 
+### getEditingBillingAddress
+
+Returns true if the billing address is being edited.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if the billing address is being edited.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( CHECKOUT_STORE_KEY );
+const editingBillingAddress = store.getEditingBillingAddress();
+```
+
+### getEditingShippingAddress
+
+Returns true if the shipping address is being edited.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if the shipping address is being edited.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( CHECKOUT_STORE_KEY );
+const editingShippingAddress = store.getEditingShippingAddress();
+```
+
 ### hasError
 
 Returns true if an error occurred, and false otherwise.
@@ -293,7 +325,6 @@ const store = select( CHECKOUT_STORE_KEY );
 const isCalculating = store.isCalculating();
 ```
 
-
 ### prefersCollection
 
 Returns true if the customer prefers to collect their order, and false otherwise.
@@ -324,6 +355,36 @@ Sets the `prefersCollection` flag to true or false.
 ```js
 const store = dispatch( CHECKOUT_STORE_KEY );
 store.setPrefersCollection( true );
+```
+
+### setEditingBillingAddress
+
+Set the billing address to editing state or collapsed state. Note that if the address has invalid fields, it will not be set to collapsed state.
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _isEditing_ `boolean`: True to set the billing address to editing state, false to set it to collapsed state.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = dispatch( CHECKOUT_STORE_KEY );
+store.setEditingBillingAddress( true );
+```
+
+### setEditingShippingAddress
+
+Set the shipping address to editing state or collapsed state. Note that if the address has invalid fields, it will not be set to collapsed state.
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _isEditing_ `boolean`: True to set the shipping address to editing state, false to set it to collapsed state.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = dispatch( CHECKOUT_STORE_KEY );
+store.setEditingShippingAddress( true );
 ```
 
 <!-- FEEDBACK -->

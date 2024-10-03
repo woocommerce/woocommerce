@@ -412,12 +412,12 @@ function wc_cart_round_discount( $value, $precision ) {
  * @return string[]
  */
 function wc_get_chosen_shipping_method_ids() {
-	$method_ids     = array();
-	$chosen_methods = array();
-
-	if ( is_callable( array( WC()->session, 'get' ) ) ) {
-		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return array();
 	}
+
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$method_ids     = array();
 
 	foreach ( $chosen_methods as $chosen_method ) {
 		if ( ! is_string( $chosen_method ) ) {
@@ -439,11 +439,15 @@ function wc_get_chosen_shipping_method_ids() {
  * @return string|bool Either the chosen method ID or false if nothing is chosen yet.
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return false;
+	}
+
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
 	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
 	$changed        = wc_shipping_methods_have_changed( $key, $package );
 
-	// This is deprecated but here for BW compat. TODO: Remove in 4.0.0.
+	// This is deprecated but here for BW compat. Remove in 4.0.0.
 	$method_counts = WC()->session->get( 'shipping_method_counts' );
 
 	if ( ! empty( $method_counts[ $key ] ) ) {
@@ -465,6 +469,12 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
 		WC()->session->set( 'shipping_method_counts', $method_counts );
 
+		/**
+		 * Fires when a shipping method is chosen.
+		 *
+		 * @since 3.2.0
+		 * @param string $chosen_method Chosen shipping method. e.g. flat_rate:1.
+		 */
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
 	return $chosen_method;
@@ -536,6 +546,10 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
  * @return bool
  */
 function wc_shipping_methods_have_changed( $key, $package ) {
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return false;
+	}
+
 	// Lookup previous methods from session.
 	$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 	// Get new and old rates.

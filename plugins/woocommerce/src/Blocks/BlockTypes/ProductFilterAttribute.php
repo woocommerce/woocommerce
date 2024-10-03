@@ -26,7 +26,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
-		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
 		parent::initialize();
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
@@ -130,10 +129,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 					return array(
 						'title'      => $term_object->name,
 						'attributes' => array(
-							'data-wc-on--click' => "$action_namespace::actions.removeFilter",
+							'value'             => $term,
+							'data-wc-on--click' => "$action_namespace::actions.toggleFilter",
 							'data-wc-context'   => "$action_namespace::" . wp_json_encode(
 								array(
-									'value'         => $term,
 									'attributeSlug' => $product_attribute,
 									'queryType'     => get_query_var( "query_type_{$product_attribute}" ),
 								),
@@ -176,17 +175,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
 		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
 
-		if ( empty( $attribute_counts ) ) {
-			return sprintf(
-				'<div %s></div>',
-				get_block_wrapper_attributes(
-					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					)
-				),
-			);
-		}
-
 		$attribute_terms = get_terms(
 			array(
 				'taxonomy' => $product_attribute->slug,
@@ -201,39 +189,41 @@ final class ProductFilterAttribute extends AbstractBlock {
 			)
 		);
 
-		$attribute_options = array_map(
-			function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
-				$term             = (array) $term;
-				$term['count']    = $attribute_counts[ $term['term_id'] ];
-				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
-				return array(
-					'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
-					'value'    => $term['slug'],
-					'selected' => $term['selected'],
-					'rawData'  => $term,
-				);
-			},
-			$attribute_terms
-		);
+		$filter_context = array();
 
-		$filtered_options = array_filter(
-			$attribute_options,
-			function ( $option ) use ( $block_attributes ) {
-				$hide_empty = $block_attributes['hideEmpty'] ?? true;
-				if ( $hide_empty ) {
-					return $option['rawData']['count'] > 0;
+		if ( ! empty( $attribute_counts ) ) {
+			$attribute_options = array_map(
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
+					$term             = (array) $term;
+					$term['count']    = $attribute_counts[ $term['term_id'] ] ?? 0;
+					$term['selected'] = in_array( $term['slug'], $selected_terms, true );
+					return array(
+						'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
+						'value'    => $term['slug'],
+						'selected' => $term['selected'],
+						'rawData'  => $term,
+					);
+				},
+				$attribute_terms
+			);
+
+			$filtered_options = array_filter(
+				$attribute_options,
+				function ( $option ) use ( $block_attributes ) {
+					$hide_empty = $block_attributes['hideEmpty'] ?? true;
+					if ( $hide_empty ) {
+						return $option['rawData']['count'] > 0;
+					}
+					return true;
 				}
-				return true;
-			}
-		);
+			);
 
-		$filter_context = array(
-			'on_change' => "{$this->get_full_block_name()}::actions.updateProducts",
-			'items'     => $filtered_options,
-		);
-
-		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-			$content .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
+			$filter_context = array(
+				'items'   => $filtered_options,
+				'actions' => array(
+					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+				),
+			);
 		}
 
 		$context = array(
@@ -241,17 +231,27 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'queryType'          => $block_attributes['queryType'],
 			'selectType'         => 'multiple',
 			'hasSelectedFilters' => count( $selected_terms ) > 0,
+			'hasFilterOptions'   => ! empty( $filter_context ),
+		);
+
+		$wrapper_attributes = array(
+			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-key'          => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
+			'data-wc-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
-			get_block_wrapper_attributes(
-				array(
-					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-				)
-			),
-			$content
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 
@@ -395,22 +395,25 @@ final class ProductFilterAttribute extends AbstractBlock {
 					'
 <!-- wp:woocommerce/product-filter-attribute {"attributeId":{{attribute_id}}} -->
 <div class="wp-block-woocommerce-product-filter-attribute">
-  <!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-  <div class="wp-block-group">
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">{{attribute_label}}</h3>
-    <!-- /wp:heading -->
+	<!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+	<div class="wp-block-group">
+		<!-- wp:heading {"level":3} -->
+		<h3 class="wp-block-heading">{{attribute_label}}</h3>
+		<!-- /wp:heading -->
 
-    <!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
-    <!-- wp:buttons {"layout":{"type":"flex"}} -->
-    <div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
-      <div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
-      <!-- /wp:button --></div>
-    <!-- /wp:buttons -->
-    <!-- /wp:woocommerce/product-filter-clear-button --></div>
-  <!-- /wp:group -->
+		<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
+		<!-- wp:buttons {"layout":{"type":"flex"}} -->
+		<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+			<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
+			<!-- /wp:button --></div>
+		<!-- /wp:buttons -->
+		<!-- /wp:woocommerce/product-filter-clear-button --></div>
+	<!-- /wp:group -->
 
-  <!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true},"className":"wp-block-woocommerce-product-filter-checkbox-list"} /-->
+	<!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true}} -->
+	<div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
+	<!-- /wp:woocommerce/product-filter-checkbox-list -->
+
 </div>
 <!-- /wp:woocommerce/product-filter-attribute -->
 					',
@@ -421,19 +424,5 @@ final class ProductFilterAttribute extends AbstractBlock {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Skip default rendering routine for inner blocks.
-	 *
-	 * @param array $settings Array of determined settings for registering a block type.
-	 * @param array $metadata Metadata provided for registering a block type.
-	 * @return array
-	 */
-	public function add_block_type_metadata_settings( $settings, $metadata ) {
-		if ( ! empty( $metadata['name'] ) && "woocommerce/{$this->block_name}" === $metadata['name'] ) {
-			$settings['skip_inner_blocks'] = true;
-		}
-		return $settings;
 	}
 }
