@@ -88,7 +88,6 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\AI\StoreTitle',
 				'Automattic\WooCommerce\Admin\API\AI\BusinessDescription',
 				'Automattic\WooCommerce\Admin\API\AI\StoreInfo',
-				'Automattic\WooCommerce\Admin\API\AI\Images',
 			);
 		}
 

@@ -239,7 +239,7 @@ export const updateStorePatterns = async (
 			ai_content_generated: boolean;
 			images: { images: Array< unknown >; search_term: string };
 		} >( {
-			path: '/wc-admin/ai/images',
+			path: '/wc/private/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
