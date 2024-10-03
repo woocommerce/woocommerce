@@ -300,7 +300,7 @@ export const updateStorePatterns = async (
 		const productContents = response.product_content.map(
 			( product, index ) => {
 				return apiFetch( {
-					path: '/wc-admin/ai/product',
+					path: '/wc/private/ai/product',
 					method: 'POST',
 					data: {
 						products_information: product,
