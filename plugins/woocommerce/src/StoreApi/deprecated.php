@@ -66,6 +66,19 @@ $class_aliases = [
 	Automattic\WooCommerce\StoreApi\Routes\V1\Products::class => Automattic\WooCommerce\Blocks\StoreApi\Routes\Products::class,
 	Automattic\WooCommerce\StoreApi\Routes\V1\ProductsById::class => Automattic\WooCommerce\Blocks\StoreApi\Routes\ProductsById::class,
 	Automattic\WooCommerce\StoreApi\Routes\V1\ProductTags::class => Automattic\WooCommerce\Blocks\StoreApi\Routes\ProductTags::class,
+
+	// Old internal schemas move to new namespace.
+	''                                                     => Automattic\WooCommerce\StoreApi\Schemas\V1\AI\ProductsSchema::class,
+	''                                                     => Automattic\WooCommerce\StoreApi\Schemas\V1\AI\PatternsSchema::class,
+
+	// Old internal routes move to new namespace.
+	Automattic\WooCommerce\Admin\API\AI\Products::class    => Automattic\WooCommerce\StoreApi\Routes\V1\AI\Products::class,
+	Automattic\WooCommerce\Admin\API\AI\Patterns::class    => Automattic\WooCommerce\StoreApi\Routes\V1\AI\Patterns::class,
+
+
+
+
+
 ];
 
 foreach ( $class_aliases as $class => $alias ) {
