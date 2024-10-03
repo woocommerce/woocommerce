@@ -308,7 +308,7 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @return array
 	 * */
-	private static function merge_promos( ? array $promotions = array() ): array {
+	private static function merge_promos( ?array $promotions = array() ): array {
 		if (
 			! empty( $promotions['promos'] )
 			&& is_array( $promotions['promos'] )
