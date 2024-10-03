@@ -197,17 +197,55 @@ final class AssetsController {
 	}
 
 	/**
+	 * Get the block asset resource hints in the cache or null if not found.
+	 *
+	 * @return array|null Array of resource hints.
+	 */
+	private function get_block_asset_resource_hints_cache() {
+		$cache = get_site_transient( 'woocommerce_block_asset_resource_hints' );
+
+		$current_version = array(
+			'woocommerce' => WOOCOMMERCE_VERSION,
+			'wordpress'   => get_bloginfo( 'version' ),
+		);
+
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
+			return $cache['files'];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set the block asset resource hints in the cache.
+	 *
+	 * @param string $filename File name.
+	 * @param array  $data Array of resource hints.
+	 */
+	private function set_block_asset_resource_hints_cache( $filename, $data ) {
+		$cache   = $this->get_block_asset_resource_hints_cache();
+		$updated = array(
+			'files'   => $cache ?? array(),
+			'version' => array(
+				'woocommerce' => WOOCOMMERCE_VERSION,
+				'wordpress'   => get_bloginfo( 'version' ),
+			),
+		);
+
+		$updated['files'][ $filename ] = $data;
+		set_site_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
+	}
+
+	/**
 	 * Get resource hint for a block by name.
 	 *
 	 * @param string $filename Block filename.
 	 * @return array
 	 */
 	private function get_block_asset_resource_hints( $filename = '' ) {
-		$cache_key = 'woocommerce_block_asset_resource_hints';
-		$cached    = get_site_transient( $cache_key );
-		$cached    = $cached ? $cached : array();
-		if ( isset( $cached[ $filename ] ) ) {
-			return $cached[ $filename ];
+		$cached    = $this->get_block_asset_resource_hints_cache();
+		if ( isset( $cached['files'][ $filename ] ) ) {
+			return $cached['files'][ $filename ];
 		}
 
 		if ( ! $filename ) {
@@ -221,7 +259,7 @@ final class AssetsController {
 			$this->get_script_dependency_src_array( $script_data['dependencies'] )
 		);
 
-		$result = array_map(
+		$data = array_map(
 			function ( $src ) {
 				return array(
 					'href' => $src,
@@ -231,10 +269,9 @@ final class AssetsController {
 			array_unique( array_filter( $resources ) )
 		);
 
-		$cached[ $filename ] = $result;
-		set_site_transient( $cache_key, $cached, WEEK_IN_SECONDS );
+		$this->set_block_asset_resource_hints_cache( $filename, $data );
 
-		return $result;
+		return $data;
 	}
 
 	/**
