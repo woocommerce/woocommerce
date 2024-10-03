@@ -229,7 +229,7 @@ export function* resetCustomizeYourStore() {
 		} );
 
 		yield apiFetch( {
-			path: '/wc-admin/ai/patterns',
+			path: '/wc/private/ai/patterns',
 			method: 'DELETE',
 		} );
 	} );
