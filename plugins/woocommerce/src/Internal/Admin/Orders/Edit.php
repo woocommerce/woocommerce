@@ -497,17 +497,14 @@ class Edit {
 	 * Helper function to render meta boxes.
 	 */
 	private function render_meta_boxes() {
-		$order_post = get_post( $this->order->get_id() );
 		?>
 		<div id="postbox-container-1" class="postbox-container">
 			<?php do_meta_boxes( $this->screen_id, 'side', $this->order ); ?>
 		</div>
 		<div id="postbox-container-2" class="postbox-container">
 			<?php
-			if ( $order_post instanceof WP_Post ) {
-				do_meta_boxes( $this->screen_id, 'normal', $order_post );
-				do_meta_boxes( $this->screen_id, 'advanced', $order_post );
-			}
+			do_meta_boxes( $this->screen_id, 'normal', $this->order );
+			do_meta_boxes( $this->screen_id, 'advanced', $this->order );
 			?>
 		</div>
 		<?php
