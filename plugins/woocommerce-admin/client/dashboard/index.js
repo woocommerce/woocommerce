@@ -7,6 +7,7 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
+import { OrderAttributionInstallBanner } from '~/order-attribution-install-banner';
 import './style.scss';
 
 const CustomizableDashboard = lazy( () =>
@@ -19,6 +20,7 @@ class Dashboard extends Component {
 
 		return (
 			<Suspense fallback={ <Spinner /> }>
+				<OrderAttributionInstallBanner />
 				<CustomizableDashboard query={ query } path={ path } />
 			</Suspense>
 		);

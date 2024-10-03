@@ -1,0 +1,62 @@
+.woocommerce-order-attribution-install-banner {
+
+	margin: 0 15px 10px 0;
+	animation: isLoaded;
+	animation-duration: 250ms;
+
+	&.components-card {
+		box-shadow: none;
+		border: 1px solid $table-border;
+		border-radius: 8px;
+	}
+
+	.woocommerce-order-attribution-install-banner__body {
+		display: flex;
+		align-items: center;
+
+		@media (max-width: $break-small) {
+			flex-direction: column;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__image_container {
+		display: flex;
+		padding-left: 15px;
+	}
+
+	.woocommerce-order-attribution-install-banner__text_container {
+		margin-inline: 24px;
+
+		> * {
+			margin-block: 1rem;
+		}
+
+		p {
+			margin-block: 0.1rem;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__text-badge {
+		display: inline-flex;
+		justify-content: center;
+		background: $studio-gray-0;
+		border-radius: 2px;
+		padding: 2px 5px;
+
+		p {
+			color: $studio-gray-80;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__text-title {
+		color: $studio-gray-90;
+		line-height: 24px;
+		font-weight: 600;
+	}
+
+	.woocommerce-order-attribution-install-banner__text-description {
+		color: $studio-gray-90;
+		line-height: 16px;
+		max-width: 580px;
+	}
+}
