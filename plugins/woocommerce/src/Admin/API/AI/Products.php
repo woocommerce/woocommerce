@@ -17,19 +17,28 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class Products extends AIEndpoint {
+class Products {
 	/**
-	 * Endpoint.
+	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $endpoint = 'products';
+	protected $namespace = 'wc-admin';
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'ai';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		$this->register(
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/products',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
