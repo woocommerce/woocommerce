@@ -82,8 +82,7 @@
 			],
 			"dependencies": [
 				"import-wp-css-for-storybook",
-				"dependencyOutputs",
-				"../../plugins/woocommerce-blocks:build:project:storybook"
+				"dependencyOutputs"
 			]
 		},
 		"watch:build:project:storybook": {
