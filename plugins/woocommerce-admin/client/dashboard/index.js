@@ -20,7 +20,7 @@ class Dashboard extends Component {
 
 		return (
 			<Suspense fallback={ <Spinner /> }>
-				<OrderAttributionInstallBanner eventContext="analytics-overview" />
+				<OrderAttributionInstallBanner />
 				<CustomizableDashboard query={ query } path={ path } />
 			</Suspense>
 		);
