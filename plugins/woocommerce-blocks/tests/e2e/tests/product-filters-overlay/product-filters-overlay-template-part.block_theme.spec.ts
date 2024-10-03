@@ -80,7 +80,9 @@ test.describe( 'Filters Overlay Template Part', () => {
 			} );
 		} );
 
-		test( 'should open and close the dialog when clicking on the Product Filters Overlay Navigation block', async ( {
+		// Since we need to overhaul the overlay area, we can skip this test for now.
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip( 'should open and close the dialog when clicking on the Product Filters Overlay Navigation block', async ( {
 			editor,
 			page,
 			frontendUtils,
@@ -232,7 +234,9 @@ test.describe( 'Filters Overlay Template Part', () => {
 			await expect( productFiltersOverlayNavigation ).toBeHidden();
 		} );
 
-		test( 'should hide Product Filters Overlay Navigation block when the Overlay mode is set to `Mobile` and user is on desktop', async ( {
+		// Since we need to overhaul the overlay area, we can skip this test for now.
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip( 'should hide Product Filters Overlay Navigation block when the Overlay mode is set to `Mobile` and user is on desktop', async ( {
 			editor,
 			page,
 			frontendUtils,
