@@ -53,6 +53,16 @@ const program = new Command( 'ci-jobs' )
 			Logger.startTask( 'Pulling File Changes', true );
 			fileChanges = getFileChanges( projectGraph, options.baseRef );
 			Logger.endTask( true );
+
+			if ( Object.keys( fileChanges ).length > 0 ) {
+				const shouldTriggerAllJobs = options.event === 'push';
+				if ( shouldTriggerAllJobs ) {
+					Logger.warn(
+						'Re-considering: forcing all projects to be marked as changed for this push.'
+					);
+					fileChanges = true;
+				}
+			}
 		}
 
 		Logger.startTask( 'Creating Jobs', true );
