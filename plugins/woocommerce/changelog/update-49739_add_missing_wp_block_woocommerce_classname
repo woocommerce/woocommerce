@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update the Catalog searching, average rating, and product button blocks to make sure they render with the wp-block-<block-name> class.
