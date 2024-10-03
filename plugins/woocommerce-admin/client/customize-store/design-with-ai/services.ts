@@ -206,7 +206,7 @@ const resetPatternsAndProducts = () => async () => {
 	const response = await apiFetch< {
 		is_ai_generated: boolean;
 	} >( {
-		path: '/wc-admin/ai/store-info',
+		path: '/wc/private/ai/store-info',
 		method: 'GET',
 	} );
 
