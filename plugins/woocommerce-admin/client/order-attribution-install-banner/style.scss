@@ -1,4 +1,4 @@
-.woocommerce-order-attribution-install-analytics-overview-banner {
+.woocommerce-order-attribution-install-banner {
 
 	margin: 0 15px 10px 0;
 	animation: isLoaded;
@@ -10,7 +10,7 @@
 		border-radius: 8px;
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__body {
+	.woocommerce-order-attribution-install-banner__body {
 		display: flex;
 		align-items: center;
 
@@ -19,12 +19,12 @@
 		}
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__image_container {
+	.woocommerce-order-attribution-install-banner__image_container {
 		display: flex;
 		padding-left: 15px;
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__text_container {
+	.woocommerce-order-attribution-install-banner__text_container {
 		margin-inline: 24px;
 
 		> * {
@@ -36,7 +36,7 @@
 		}
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__text-badge {
+	.woocommerce-order-attribution-install-banner__text-badge {
 		display: inline-flex;
 		justify-content: center;
 		background: $studio-gray-0;
@@ -48,13 +48,13 @@
 		}
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__text-title {
+	.woocommerce-order-attribution-install-banner__text-title {
 		color: $studio-gray-90;
 		line-height: 24px;
 		font-weight: 600;
 	}
 
-	.woocommerce-order-attribution-install-analytics-overview-banner__text-description {
+	.woocommerce-order-attribution-install-banner__text-description {
 		color: $studio-gray-90;
 		line-height: 16px;
 		max-width: 580px;

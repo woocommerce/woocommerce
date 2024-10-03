@@ -39,16 +39,16 @@ export const OrderAttributionInstallBanner = ( {
 	return (
 		<Card
 			size="medium"
-			className="woocommerce-order-attribution-install-analytics-overview-banner"
+			className="woocommerce-order-attribution-install-banner"
 		>
-			<CardBody className="woocommerce-order-attribution-install-analytics-overview-banner__body">
-				<div className="woocommerce-order-attribution-install-analytics-overview-banner__image_container">
+			<CardBody className="woocommerce-order-attribution-install-banner__body">
+				<div className="woocommerce-order-attribution-install-banner__image_container">
 					{ bannerImage }
 				</div>
-				<div className="woocommerce-order-attribution-install-analytics-overview-banner__text_container">
-					<div className="woocommerce-order-attribution-install-analytics-overview-banner__text-badge">
+				<div className="woocommerce-order-attribution-install-banner__text_container">
+					<div className="woocommerce-order-attribution-install-banner__text-badge">
 						<Text
-							className="woocommerce-order-attribution-install-analytics-overview-banner__text-description"
+							className="woocommerce-order-attribution-install-banner__text-description"
 							as="p"
 							size="12"
 							align="center"
@@ -57,7 +57,7 @@ export const OrderAttributionInstallBanner = ( {
 						</Text>
 					</div>
 					<Text
-						className="woocommerce-order-attribution-install-analytics-overview-banner__text-title"
+						className="woocommerce-order-attribution-install-banner__text-title"
 						as="p"
 						size="16"
 					>
@@ -67,7 +67,7 @@ export const OrderAttributionInstallBanner = ( {
 						) }
 					</Text>
 					<Text
-						className="woocommerce-order-attribution-install-analytics-overview-banner__text-description"
+						className="woocommerce-order-attribution-install-banner__text-description"
 						as="p"
 						size="12"
 					>
