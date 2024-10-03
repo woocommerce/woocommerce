@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { execSync } from 'node:child_process';
-import path from 'path';
 
 /**
  * Internal dependencies
@@ -76,7 +75,7 @@ function getChangedFilesForProject(
 }
 
 /**
- * Pulls all files except changelog entries that have changed in the project graph since the given git ref.
+ * Pulls all of the files that have changed in the project graph since the given git ref.
  *
  * @param {Object} projectGraph The project graph to assign changes for.
  * @param {string} baseRef      The git ref to compare against for changes.
@@ -90,13 +89,7 @@ export function getFileChanges(
 	const output = execSync( `git diff --name-only ${ baseRef }`, {
 		encoding: 'utf8',
 	} );
-	const changedFilePaths = output
-		.trim()
-		.split( '\n' )
-		.filter(
-			( changedFile ) =>
-				path.basename( path.dirname( changedFile ) ) !== 'changelog'
-		);
+	const changedFilePaths = output.split( '\n' );
 
 	// If the root lockfile has been changed we have no easy way
 	// of knowing which projects have been impacted. We want
