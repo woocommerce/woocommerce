@@ -434,7 +434,7 @@ class ProductCollection extends AbstractBlock {
 				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
-		return sprintf( '<div>%s</div>', $block_content );
+		return $block_content;
 	}
 
 	/**
