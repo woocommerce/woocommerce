@@ -1801,8 +1801,8 @@ class ProductCollection extends AbstractBlock {
 		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
 
 		$clauses['orderby'] = $is_ascending_order ?
-			'wc_product_meta_lookup.total_sales ASC' :
-			'wc_product_meta_lookup.total_sales DESC';
+			'wc_product_meta_lookup.total_sales ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.total_sales DESC, wc_product_meta_lookup.product_id DESC';
 
 		return $clauses;
 	}
