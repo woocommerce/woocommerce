@@ -91,9 +91,9 @@
 }
 
 .promo-cta {
-	background-color: #0073aa;
-	border-radius: 3px;
-	color: #fff;
+	background-color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #0073aa));
+	border-radius: 2px;
+	color: var(--wp-components-color-accent-inverted, #fff);
 	display: flex;
 	padding: 10px 15px;
 	text-decoration: none;
@@ -101,13 +101,14 @@
 }
 
 .promo-cta:hover {
-	background-color: #005a8a;
+	background-color: var(--wp-components-color-accent-darker-10, var(--wp-admin-theme-color-darker-10, #005a8a));
 	color: #fff;
 }
 
 .promo-cta-link {
 	align-items: center;
 	align-self: stretch;
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #0073aa));
 	display: flex;
 	justify-content: center;
 	padding: var(--grid-unit-10, 8px) var(--grid-unit-20, 16px);
