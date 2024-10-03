@@ -21,7 +21,6 @@ import { SiteHub } from '../assembler-hub/site-hub';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
-import { navigateOrParent } from '../utils';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
