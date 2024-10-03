@@ -31,6 +31,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		unset( $GLOBALS['wp_filesystem'] );
 		$this->reset_legacy_proxy_mocks();
+		Constants::clear_constants();
 
 		parent::tearDown();
 	}
