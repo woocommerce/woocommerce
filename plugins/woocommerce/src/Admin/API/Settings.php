@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use WC_Admin_Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -64,7 +66,23 @@ class Settings extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function save_settings( $request ) {
-		error_log('this is workign');
+		global $current_section, $current_tab;
+
+		$params = $request->get_params();
+		// Get all registered WooCommerce settings pages
+		$settings_pages = WC_Admin_Settings::get_settings_pages();
+
+		// Loop through each settings page and save its settings
+		foreach ( $settings_pages as $settings_page ) {
+			if ( $settings_page->get_id() === $params['tab'] ) {
+				if ( method_exists( $settings_page, 'save' ) ) {
+					$current_section = $params['section'];
+					$current_tab = $params['tab'];
+					$settings_page->save();
+				}
+			}
+		}
+
 		return new \WP_REST_Response( array( 'status' => 'success' ) );
 	}
 

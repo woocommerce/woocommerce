@@ -26,7 +26,7 @@ const SettingsScript = ( { content } ) => {
 	return null;
 };
 
-export const Content = ( { data, nonce } ) => {
+export const Content = ( { data, section } ) => {
 	const { settings } = data;
 	console.log( settings );
 	const [ isBusy, setIsBusy ] = useState( false );
@@ -61,39 +61,21 @@ export const Content = ( { data, nonce } ) => {
 
 		try {
 			setIsBusy( true );
-			// const response = await fetch( '/wp-json/wc-admin/options', {
-			// 	method: 'POST',
-			// 	headers: { 'content-type': 'application/json' },
-			// 	body: JSON.stringify( gatherFormInputs() ),
-			// } );
-
 			const { page } = useSettingsLocation();
 			const formData = new FormData();
 			const formInputs = gatherFormInputs();
 			for ( const [ key, value ] of Object.entries( formInputs ) ) {
 				formData.append( key, value );
 			}
-			// Add _wpnonce to form data
-			// formData.append( '_wpnonce', nonce );
+
 			formData.append( 'save', 'Save changes' );
+			formData.append( 'tab', page );
+			formData.append( 'section', section );
 
-			const response = await fetch(
-				// `/wp-admin/admin.php?page=wc-settings&tab=${ page }`,
-				// `/wp-json/wc/v3/modern-settings`,
-				'/wp-json/wc-admin/settings',
-				{
-					method: 'POST',
-					body: formData,
-				}
-			);
-
-			// const response = await fetch( '/wp-json/wc-admin/settings', {
-			// 	method: 'POST',
-			// 	headers: { 'content-type': 'application/json' },
-			// 	body: JSON.stringify( gatherFormInputs() ),
-			// } );
-
-			console.log( response );
+			const response = await fetch( '/wp-json/wc-admin/settings', {
+				method: 'POST',
+				body: formData,
+			} );
 
 			setIsBusy( false );
 

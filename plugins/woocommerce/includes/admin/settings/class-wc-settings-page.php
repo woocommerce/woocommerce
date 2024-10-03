@@ -208,7 +208,6 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				'label'   => html_entity_decode( $this->label ),
 				'sections' => $sections_data,
 				'is_modern' => $this->is_modern,
-				'_wpnonce' => wp_create_nonce( 'woocommerce-settings' ),
 			);
 
 			return $pages;
