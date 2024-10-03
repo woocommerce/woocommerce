@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 use WP_Filesystem_Base;
@@ -64,7 +65,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	 * @testdox 'get_wp_filesystem_method_or_direct' returns 'direct' if no FS_METHOD constant, not 'ftp_credentials' option and not FTP_HOST constant exist.
 	 */
 	public function test_get_wp_filesystem_method_with_no_fs_method_nor_ftp_constant() {
-		$this->register_constant_mock( 'FS_METHOD', null );
+		Constants::set_constant( 'FS_METHOD', null );
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'get_option'            => fn( $name, $default_value = false ) => 'ftp_credentials' === $name ? false : get_option( $name, $default_value ),
@@ -72,7 +73,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 					throw new \Exception( 'Unexpected call to get_filesystem_method' ); },
 			)
 		);
-		$this->register_constant_mock( 'FTP_HOST', null );
+		Constants::set_constant( 'FTP_HOST', null );
 
 		$this->assertEquals( 'direct', FilesystemUtil::get_wp_filesystem_method_or_direct() );
 	}
@@ -89,14 +90,14 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	 * @param string|false $ftp_host_option_value The value of the FTP_HOST constant to test.
 	 */
 	public function test_get_wp_filesystem_method_with_fs_method_or_ftp_constant( $fs_method_constant_value, $ftp_credentials_option_value, $ftp_host_option_value ) {
-		$this->register_constant_mock( 'FS_METHOD', $fs_method_constant_value );
+		Constants::set_constant( 'FS_METHOD', $fs_method_constant_value );
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'get_option'            => fn( $name, $default_value = false ) => 'ftp_credentials' === $name ? $ftp_credentials_option_value : get_option( $name, $default_value ),
 				'get_filesystem_method' => fn() => 'method',
 			)
 		);
-		$this->register_constant_mock( 'FTP_HOST', $ftp_host_option_value );
+		Constants::set_constant( 'FTP_HOST', $ftp_host_option_value );
 
 		$this->assertEquals( 'method', FilesystemUtil::get_wp_filesystem_method_or_direct() );
 	}
@@ -113,14 +114,14 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	 * @param string|false $ftp_host_option_value The value of the FTP_HOST constant to test.
 	 */
 	public function test_get_wp_filesystem_method_with_fs_method_or_ftp_constant_and_no_wp_filesystem( $fs_method_constant_value, $ftp_credentials_option_value, $ftp_host_option_value ) {
-		$this->register_constant_mock( 'FS_METHOD', $fs_method_constant_value );
+		Constants::set_constant( 'FS_METHOD', $fs_method_constant_value );
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'get_option'            => fn( $name, $default_value = false ) => 'ftp_credentials' === $name ? $ftp_credentials_option_value : get_option( $name, $default_value ),
 				'get_filesystem_method' => fn() => false,
 			)
 		);
-		$this->register_constant_mock( 'FTP_HOST', $ftp_host_option_value );
+		Constants::set_constant( 'FTP_HOST', $ftp_host_option_value );
 
 		$this->assertEquals( 'direct', FilesystemUtil::get_wp_filesystem_method_or_direct() );
 	}

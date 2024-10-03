@@ -39,7 +39,7 @@ class FilesystemUtil {
 	 */
 	public static function get_wp_filesystem_method_or_direct() {
 		$proxy = wc_get_container()->get( LegacyProxy::class );
-		if ( ! $proxy->constant_is_defined( 'FS_METHOD' ) && false === $proxy->call_function( 'get_option', 'ftp_credentials' ) && ! $proxy->constant_is_defined( 'FTP_HOST' ) ) {
+		if ( ! self::constant_exists( 'FS_METHOD' ) && false === $proxy->call_function( 'get_option', 'ftp_credentials' ) && ! self::constant_exists( 'FTP_HOST' ) ) {
 			return 'direct';
 		}
 
@@ -51,6 +51,15 @@ class FilesystemUtil {
 		return 'direct';
 	}
 
+	/**
+	 * Check if a constant exists and is not null.
+	 *
+	 * @param string $name Constant name.
+	 * @return bool True if the constant exists and its value is not null.
+	 */
+	private static function constant_exists( string $name ): bool {
+		return Constants::is_defined( $name ) && ! is_null( Constants::get_constant( $name ) );
+	}
 
 	/**
 	 * Recursively creates a directory (if it doesn't exist) and adds an empty index.html and a .htaccess to prevent
