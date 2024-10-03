@@ -2,10 +2,9 @@
 
 .promo-card {
 	background-color: #fff;
-	border: 1px solid #ccc;
-	border-radius: 5px;
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	padding: 20px;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 1px;
+	border-radius: 1px;
+	padding: 24px;
 
 	&.has-background {
 		align-items: center;
@@ -16,7 +15,6 @@
 		flex-direction: row;
 		gap: 12px;
 		justify-content: space-between;
-		padding: 24px;
 	}
 
 	&.wide {
@@ -81,8 +79,9 @@
 }
 
 .promo-title {
-	font-size: 16px;
-	margin-bottom: 10px;
+	font-size: 20px;
+	font-weight: normal;
+	margin-bottom: 8px;
 	margin-top: 0;
 }
 
@@ -115,10 +114,22 @@
 	white-space: nowrap;
 }
 
+// WooCommerce > Extensions
 .woocommerce-admin-page__extensions {
 	.promo-card {
+		border-radius: 4px;
 		margin-bottom: 40px;
 		width: 100%;
+	}
+}
+
+// Marketing > Coupons
+.woocommerce-marketing-coupons {
+	.promo-card {
+		margin-bottom: 24px;
+	}
+	.promo-title {
+		font-size: 16px;
 	}
 }
 

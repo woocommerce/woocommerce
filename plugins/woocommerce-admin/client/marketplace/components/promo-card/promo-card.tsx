@@ -78,7 +78,7 @@ const PromoCard = ( {
 	const content = (
 		<div className="promo-content">
 			<h2 className="promo-title">{ promotion.title?.en_US }</h2>
-			<p
+			<div
 				className="promo-text"
 				dangerouslySetInnerHTML={ sanitizeHTML(
 					promotion.content?.en_US

@@ -22,12 +22,19 @@ declare global {
 const Promotions: ( { format }: { format: string } ) => null | JSX.Element = ( {
 	format,
 } ) => {
+	if (
+		! window?.wcMarketplace?.promotions ||
+		! Array.isArray( window?.wcMarketplace?.promotions )
+	) {
+		return null;
+	}
+
+	const promotions = (
+		( window?.wcMarketplace?.promotions as Promotion[] ) ?? []
+	).filter( ( x: Promotion ) => x.format === format );
+
 	const urlParams = new URLSearchParams( window.location.search );
 	const currentPage = urlParams.get( 'page' );
-
-	const promotions = ( window?.wcMarketplace?.promotions ?? [] ).filter(
-		( x ) => x.format === format
-	);
 	const currentDateUTC = Date.now();
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
 	const currentTab = urlParams.get( 'tab' );
