@@ -78,7 +78,7 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Your {site_title} order has failed', 'woocommerce' );
+			return __( 'The payment for your order at {site_title} has failed', 'woocommerce' );
 		}
 
 		/**
@@ -88,7 +88,7 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Your {site_title} order has failed', 'woocommerce' );
+			return __( 'The payment for your order at {site_title} has failed', 'woocommerce' );
 		}
 
 		/**
