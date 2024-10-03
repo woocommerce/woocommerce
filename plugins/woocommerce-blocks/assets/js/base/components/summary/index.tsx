@@ -16,16 +16,18 @@ interface SummaryProps {
 	maxLength?: number;
 	countType?: WordCountType;
 	style?: CSSProperties;
+	truncateToFirstParagraph?: boolean;
 }
 /**
  * Summary component.
  *
- * @param {Object}        props           Component props.
- * @param {string}        props.source    Source text.
- * @param {number}        props.maxLength Max length of the summary, using countType.
- * @param {string}        props.countType One of words, characters_excluding_spaces, or characters_including_spaces.
- * @param {string}        props.className Class name for rendered component.
- * @param {CSSProperties} props.style     Style Object for rendered component.
+ * @param {Object}        props                          Component props.
+ * @param {string}        props.source                   Source text.
+ * @param {number}        props.maxLength                Max length of the summary, using countType.
+ * @param {string}        props.countType                One of words, characters_excluding_spaces, or characters_including_spaces.
+ * @param {string}        props.className                Class name for rendered component.
+ * @param {CSSProperties} props.style                    Style Object for rendered component.
+ * @param {boolean}       props.truncateToFirstParagraph Whether source should be truncated to first paragraph or exact word count.
  *
  */
 export const Summary = ( {
@@ -34,10 +36,16 @@ export const Summary = ( {
 	countType = 'words',
 	className = '',
 	style = {},
+	truncateToFirstParagraph = true,
 }: SummaryProps ): JSX.Element => {
 	const summaryText = useMemo( () => {
-		return generateSummary( source, maxLength, countType );
-	}, [ source, maxLength, countType ] );
+		return generateSummary(
+			source,
+			maxLength,
+			countType,
+			truncateToFirstParagraph
+		);
+	}, [ source, maxLength, countType, truncateToFirstParagraph ] );
 
 	return (
 		<RawHTML style={ style } className={ className }>

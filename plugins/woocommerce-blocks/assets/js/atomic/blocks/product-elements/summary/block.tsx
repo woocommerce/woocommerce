@@ -139,6 +139,7 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 				maxLength={ maxLength }
 				countType={ blocksConfig.wordCountType || 'words' }
 				style={ styleProps.style }
+				truncateToFirstParagraph={ isDescendantOfAllProducts }
 			/>
 			{ isDescendantOfAllProducts && showLink && linkText ? (
 				<a href={ `${ product.permalink }#tab-description` }>

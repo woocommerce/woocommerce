@@ -21,6 +21,122 @@ const getFirstParagraph = ( source: string ) => {
 	return source.substr( 0, pIndex + 4 );
 };
 
+const wrapElementByTag = ( element: string, tag: string ) => {
+	const tagLower = tag.toLowerCase();
+	return `<${ tagLower }>${ element }</${ tagLower }>`;
+};
+
+const getTextFromDomElements = (
+	paragraphs: HTMLCollection,
+	{
+		maxLength,
+		countType,
+	}: {
+		maxLength: number;
+		countType: CountType;
+	},
+	currentStatus: {
+		text: string;
+		html: string[];
+		currentLength?: number;
+		remainingLength?: number;
+	}
+) => {
+	return Array.from( paragraphs ).reduce(
+		(
+			acc,
+			paragraph
+		): {
+			text: string;
+			html: string[];
+			currentLength?: number;
+			remainingLength?: number;
+			isLast?: boolean;
+		} => {
+			const paragraphText = paragraph.textContent ?? '';
+			const paragraphHtml = paragraph.innerHTML;
+			const childElements = paragraph.children;
+			const tag = paragraph.tagName;
+
+			const currentLength = count( acc.text, countType );
+			const remainingLength = maxLength - currentLength;
+
+			if ( acc.isLast === true ) {
+				return acc;
+			}
+
+			if (
+				Array.from( childElements ).some(
+					( element ) => element?.textContent?.length > 0
+				)
+			) {
+				const childText = getTextFromDomElements(
+					childElements,
+					{ maxLength, countType },
+					{
+						text: acc.text,
+						html: [],
+					}
+				);
+
+				return {
+					text: childText.text,
+					html: acc.html.concat(
+						wrapElementByTag( childText.html.join( ' ' ), tag )
+					),
+					isLast: childText.isLast,
+				} as { text: string; html: string[] };
+			}
+
+			if (
+				currentLength + count( paragraphText, countType ) >
+				maxLength
+			) {
+				const trimmedText = paragraphText
+					.split( ' ' )
+					.slice( 0, remainingLength )
+					.join( ' ' );
+
+				return {
+					text: acc.text + ' ' + trimmedText,
+					html: acc.html.concat(
+						wrapElementByTag( trimmedText + '...', tag )
+					),
+					isLast: true,
+				} as { text: string; html: string[] };
+			}
+
+			return {
+				text: acc.text + ' ' + paragraphText,
+				html: acc.html.concat( wrapElementByTag( paragraphHtml, tag ) ),
+			} as { text: string; html: string[] };
+		},
+		currentStatus as { text: string; html: string[]; isLast?: boolean }
+	);
+};
+
+const getTrimmedDomElements = (
+	source: string,
+	maxLength: number,
+	countType: CountType
+) => {
+	const parsedHtml = new DOMParser().parseFromString( source, 'text/html' );
+	const paragraphs = parsedHtml.body.children;
+
+	const res = {
+		text: '',
+		html: [] as Array< string >,
+	};
+
+	const final = getTextFromDomElements(
+		paragraphs,
+		{ maxLength, countType },
+		res
+	);
+
+	return final.html.join( '' );
+};
+
 /**
  * Generates the summary text from a string of text.
  *
@@ -35,26 +151,6 @@ export const generateSummary = (
 	countType: CountType = 'words'
 ) => {
 	const sourceWithParagraphs = autop( source );
-	const sourceWordCount = count( sourceWithParagraphs, countType );
 
-	if ( sourceWordCount <= maxLength ) {
-		return sourceWithParagraphs;
-	}
-
-	const firstParagraph = getFirstParagraph( sourceWithParagraphs );
-	const firstParagraphWordCount = count( firstParagraph, countType );
-
-	if ( firstParagraphWordCount <= maxLength ) {
-		return firstParagraph;
-	}
-
-	if ( countType === 'words' ) {
-		return trimWords( firstParagraph, maxLength );
-	}
-
-	return trimCharacters(
-		firstParagraph,
-		maxLength,
-		countType === 'characters_including_spaces'
-	);
+	return getTrimmedDomElements( sourceWithParagraphs, maxLength, countType );
 };
