@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.5.0",
+	"version": "9.4.0.40",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -20,7 +20,6 @@
 		"build:project:copy-assets:admin": "wireit",
 		"build:project:copy-assets:blocks": "wireit",
 		"build:project:actualize-translation-domains": "wireit",
-		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
