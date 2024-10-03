@@ -178,7 +178,7 @@ class BlockPatterns {
 			'patterns' => $patterns,
 		);
 
-		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, WEEK_IN_SECONDS );
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, MONTH_IN_SECONDS );
 	}
 
 	/**
