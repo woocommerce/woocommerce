@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
@@ -83,7 +84,7 @@ class Cart extends ControllerTestCase {
 
 		// Draft order.
 		$order = new \WC_Order();
-		$order->set_status( 'checkout-draft' );
+		$order->set_status( DraftOrders::STATUS );
 		$order->save();
 		wc()->session->set( 'store_api_draft_order', $order->get_id() );
 	}

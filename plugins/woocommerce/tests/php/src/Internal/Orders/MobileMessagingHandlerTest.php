@@ -164,7 +164,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 	public static function generate_ipp_eligible_order(): WC_Order {
 		$ipp_eligible_order = new WC_Order();
 		$ipp_eligible_order->set_id( self::ORDER_ID );
-		$ipp_eligible_order->set_status( 'pending' );
+		$ipp_eligible_order->set_status( WC_Order::STATUS_PENDING );
 		try {
 			$ipp_eligible_order->set_payment_method( 'cod' );
 		} catch ( WC_Data_Exception $e ) {
