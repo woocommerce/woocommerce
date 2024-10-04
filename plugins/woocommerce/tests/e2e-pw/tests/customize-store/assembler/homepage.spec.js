@@ -259,9 +259,10 @@ test.describe( 'Homepage tracking banner', () => {
 				'no'
 			);
 
-		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
-			route.fulfill( {
-				status: 500,
+			await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+				route.fulfill( {
+					status: 500,
+				} );
 			} );
 
 			await prepareAssembler( pageObject, baseURL );
