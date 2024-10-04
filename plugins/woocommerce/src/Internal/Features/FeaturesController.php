@@ -164,7 +164,7 @@ class FeaturesController {
 	private function get_feature_definitions() {
 		if ( empty( $this->features ) ) {
 			$legacy_features = array(
-				'analytics'            => array(
+				'analytics'             => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
 					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 					'option_key'         => Analytics::TOGGLE_OPTION_NAME,
@@ -173,7 +173,7 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
-				'product_block_editor' => array(
+				'product_block_editor'  => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 					'is_experimental' => true,
@@ -194,13 +194,13 @@ class FeaturesController {
 						return $string;
 					},
 				),
-				'cart_checkout_blocks' => array(
+				'cart_checkout_blocks'  => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 					'is_experimental' => false,
 					'disable_ui'      => true,
 				),
-				'marketplace'          => array(
+				'marketplace'           => array(
 					'name'               => __( 'Marketplace', 'woocommerce' ),
 					'description'        => __(
 						'New, faster way to find extensions and themes for your WooCommerce store',
@@ -213,7 +213,7 @@ class FeaturesController {
 				),
 				// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 				// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-				'order_attribution'    => array(
+				'order_attribution'     => array(
 					'name'               => __( 'Order Attribution', 'woocommerce' ),
 					'description'        => __(
 						'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
@@ -224,7 +224,19 @@ class FeaturesController {
 					'is_legacy'          => true,
 					'is_experimental'    => false,
 				),
-				'hpos_fts_indexes'     => array(
+				'site_visibility_badge' => array(
+					'name'               => __( 'Site visibility badge', 'woocommerce' ),
+					'description'        => __(
+						'Enable the site visibility badge in the WordPress admin bar',
+						'woocommerce'
+					),
+					'enabled_by_default' => true,
+					'disable_ui'         => false,
+					'is_legacy'          => true,
+					'is_experimental'    => false,
+					'disabled'           => false,
+				),
+				'hpos_fts_indexes'      => array(
 					'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
 					'description'        => __(
 						'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
@@ -235,7 +247,7 @@ class FeaturesController {
 					'is_legacy'          => true,
 					'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 				),
-				'remote_logging'       => array(
+				'remote_logging'        => array(
 					'name'               => __( 'Remote Logging', 'woocommerce' ),
 					'description'        => __(
 						'Enable this feature to log errors and related data to Automattic servers for debugging purposes and to improve WooCommerce',
