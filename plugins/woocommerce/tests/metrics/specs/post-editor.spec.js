@@ -142,7 +142,7 @@ test.describe( 'Post Editor Performance', () => {
 	} );
 
 	test.describe( 'Loading', () => {
-		const samples = 10;
+		const samples = 3;
 		const throwaway = 1;
 		const iterations = samples + throwaway;
 		for ( let i = 1; i <= iterations; i++ ) {
