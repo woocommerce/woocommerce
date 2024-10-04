@@ -39,7 +39,7 @@
 		},
 		"content": {
 			"type": "string",
-			"default": ""
+			"default": null
 		}
 	},
 	"apiVersion": 3,

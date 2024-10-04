@@ -75,7 +75,9 @@ const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 			/>
 			<PlainText
 				className="wc-block-cart-link__text"
-				value={ content ?? __( 'Cart', 'woocommerce' ) }
+				value={
+					content !== null ? content : __( 'Cart', 'woocommerce' )
+				}
 				__experimentalVersion={ 2 }
 				onChange={ ( value: string ) =>
 					setAttributes( {

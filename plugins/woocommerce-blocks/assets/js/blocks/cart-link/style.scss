@@ -2,13 +2,16 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: $gap-small;
+	gap: $gap-smallest;
+	text-decoration: none;
 
 	.wc-block-cart-link__text {
 		display: inline-flex;
 	}
 
-	.wc-block-mini-cart__quantity-badge {
+	.wc-block-mini-cart__icon {
 		display: inline-flex;
+		margin: 0;
+		height: auto;
 	}
 }
