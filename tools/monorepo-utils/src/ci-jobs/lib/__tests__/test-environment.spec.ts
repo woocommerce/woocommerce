@@ -58,6 +58,7 @@ describe( 'Test Environment', () => {
 
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE: 'WordPress/WordPress#master',
+					WP_VERSION: 'master',
 				} );
 
 				envVars = await parseTestEnvConfig( {
@@ -66,6 +67,7 @@ describe( 'Test Environment', () => {
 
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE: 'WordPress/WordPress#master',
+					WP_VERSION: 'master',
 				} );
 			} );
 
@@ -77,6 +79,7 @@ describe( 'Test Environment', () => {
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE:
 						'https://wordpress.org/nightly-builds/wordpress-latest.zip',
+					WP_VERSION: 'nightly',
 				} );
 			} );
 
@@ -87,6 +90,7 @@ describe( 'Test Environment', () => {
 
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE: 'https://wordpress.org/latest.zip',
+					WP_VERSION: 'latest',
 				} );
 			} );
 
@@ -97,6 +101,7 @@ describe( 'Test Environment', () => {
 
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE: 'https://wordpress.org/wordpress-5.9.zip',
+					WP_VERSION: '5.9',
 				} );
 			} );
 
@@ -107,6 +112,7 @@ describe( 'Test Environment', () => {
 
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE: 'https://wordpress.org/wordpress-6.0.1.zip',
+					WP_VERSION: '6.0.1',
 				} );
 			} );
 
@@ -128,6 +134,7 @@ describe( 'Test Environment', () => {
 
 				expect( envVars ).toEqual( {
 					WP_ENV_CORE: 'https://wordpress.org/wordpress-6.1.2.zip',
+					WP_VERSION: '6.1.2',
 				} );
 			} );
 

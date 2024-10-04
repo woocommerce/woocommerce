@@ -269,7 +269,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			visible:
 				( isEmbedded || ! isHomescreen ) &&
 				! isPerformingSetupTask() &&
-				! isProductScreen(),
+				! isProductScreen() &&
+				currentUserCan( 'manage_woocommerce' ),
 		};
 
 		const feedback = {

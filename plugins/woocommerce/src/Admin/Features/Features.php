@@ -26,7 +26,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
-		'navigation'                 => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
 		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
@@ -37,7 +36,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $beta_features = array(
-		'navigation',
 		'settings',
 	);
 

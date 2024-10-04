@@ -59,3 +59,5 @@ export enum StatusLevel {
 	Error = 'error',
 	Info = 'info',
 }
+
+export type MySubscriptionsTable = 'installed' | 'available';

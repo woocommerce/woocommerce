@@ -11,10 +11,10 @@ import { setQueryAttribute } from '../../utils';
 import DisplaySettingsToolbar from './display-settings-toolbar';
 import DisplayLayoutToolbar from './display-layout-toolbar';
 import CollectionChooserToolbar from './collection-chooser-toolbar';
-import type { ProductCollectionEditComponentProps } from '../../types';
+import type { ProductCollectionContentProps } from '../../types';
 
 export default function ToolbarControls(
-	props: Omit< ProductCollectionEditComponentProps, 'preview' >
+	props: ProductCollectionContentProps
 ) {
 	const { attributes, openCollectionSelectionModal, setAttributes } = props;
 	const { query, displayLayout } = attributes;

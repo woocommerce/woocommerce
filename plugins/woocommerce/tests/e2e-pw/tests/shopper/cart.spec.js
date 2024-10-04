@@ -83,7 +83,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should display no item in the cart',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			await page.goto( '/cart/' );
 			await expect(
@@ -94,7 +94,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should add the product to the cart from the shop page',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
@@ -107,7 +107,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should increase item quantity when "Add to cart" of the same product is clicked',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			let qty = 2;
 			while ( qty-- ) {
@@ -121,7 +121,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should update quantity when updated via quantity input',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
@@ -137,7 +137,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should remove the item from the cart when remove is clicked',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 			await page.goto( '/cart/' );
@@ -160,7 +160,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should update subtotal in cart totals when adding product to the cart',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
@@ -180,7 +180,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'should go to the checkout page when "Proceed to Checkout" is clicked',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 

@@ -61,7 +61,6 @@ export default function useLayoutAreas() {
 				),
 			},
 			widths: {
-				content: isListLayout ? 380 : undefined,
 				edit: showQuickEdit && ! isListLayout ? 380 : undefined,
 			},
 		};

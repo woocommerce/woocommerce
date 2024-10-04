@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatals resulting from incorrect reference to `WC_Site_Tracking` during admin notes API requests.
