@@ -111,7 +111,7 @@ test.describe(
 			);
 
 			await page.goto( TRANSITIONAL_URL );
-			const assembler = await pageObject.getAssembler();
+			const assembler = pageObject.getAssembler();
 
 			const newTabPromise = page.waitForEvent( 'popup' );
 			await assembler
