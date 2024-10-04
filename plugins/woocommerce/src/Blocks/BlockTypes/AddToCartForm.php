@@ -100,7 +100,7 @@ class AddToCartForm extends AbstractBlock {
 			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$classes = implode(
