@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
@@ -192,9 +194,10 @@ class UpdateProducts {
 	 */
 	public function create_new_product( $product_data ) {
 		$product          = new \WC_Product();
-		$image_src        = plugins_url( $product_data['image'], dirname( __DIR__, 2 ) );
-		$image_alt        = $product_data['title'];
-		$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
+		$image_src        = $product->get_external_product_image_url( $product_data['image'] );
+
+		// TODO: Add a scheduled action to replace/update these images with ones that have been correctly uploaded.
+		$product_image_id = $this->add_external_product_image( $product->get_id(), $image_src );
 
 		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
 
@@ -317,6 +320,18 @@ class UpdateProducts {
 		wp_raise_memory_limit( 'image' );
 
 		return media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
+	}
+
+	/**
+	 * Add an external product image.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param string $image_src The image source.
+	 *
+	 * @return int
+	 */
+	private function add_external_product_image( $product_id, $image_src ) {
+		return wc_create_external_media_attachment( $image_src, $product_id );
 	}
 
 	/**
@@ -493,8 +508,7 @@ class UpdateProducts {
 			wc_get_logger()->warning(
 				sprintf(
 					// translators: %s is a generated error message.
-					__( 'The image upload failed: "%s", creating the product without image', 'woocommerce' ),
-					$product_image_id->get_error_message()
+					__( 'The image upload failed: "%s", creating the product without image', 'woocommerce' )
 				),
 			);
 		}

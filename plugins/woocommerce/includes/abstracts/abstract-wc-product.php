@@ -2198,4 +2198,21 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
 	}
+
+	/**
+	 * Return the external image URL.
+	 *
+	 * @param string $image_src The image source.
+	 *
+	 * @return string
+	 */
+	public function get_external_product_image_url( $image_src ) {
+		$external_image_url = '';
+
+		if ( ! empty( $image_src ) ) {
+			$external_image_url = 'https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce/' . $image_src . '?raw=true';
+		}
+
+		return $external_image_url;
+	}
 }
