@@ -407,6 +407,9 @@
 			],
 			"output": [
 				"storybook/dist"
+			],
+			"dependencies": [
+				"dependencyOutputs"
 			]
 		},
 		"watch:build:project:bundle": {
