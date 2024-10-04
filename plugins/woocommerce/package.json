@@ -415,6 +415,34 @@
 					}
 				},
 				{
+					"name": "Core e2e tests - WP pre-release",
+					"testType": "e2e",
+					"command": "test:e2e",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "prerelease"
+						}
+					},
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-wp-pre-release",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api",
@@ -553,6 +581,43 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
+						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Blocks e2e tests - WP pre-release",
+					"testType": "e2e",
+					"command": "test:e2e:blocks",
+					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
+					],
+					"changes": [
+						"src/Blocks/**",
+						"templates/**",
+						"patterns/**"
+					],
+					"testEnv": {
+						"start": "env:start:blocks",
+						"config": {
+							"wpVersion": "prerelease"
+						}
+					},
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
+					"report": {
+						"resultsBlobName": "blocks-e2e-report-wp-pre-release",
 						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
 						"allure": true
 					}
