@@ -249,6 +249,10 @@ jobs:
           if-no-files-found: ignore
           overwrite: true
 
+      - name: Dump docker logs
+        if: always()
+        uses: jwalton/gh-docker-logs@v2
+
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
         uses: actions/upload-artifact@v4
