@@ -49,7 +49,7 @@ export const OptInSubscribe = () => {
 		await apiFetch< {
 			success: boolean;
 		} >( {
-			path: '/wc-admin/patterns',
+			path: '/wc/private/patterns',
 			method: 'POST',
 		} );
 	};
