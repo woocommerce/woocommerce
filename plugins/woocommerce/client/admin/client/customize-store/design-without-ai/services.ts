@@ -168,7 +168,7 @@ export const installPatterns = async () => {
 		const { success } = await apiFetch< {
 			success: boolean;
 		} >( {
-			path: '/wc-admin/patterns',
+			path: '/wc/private/patterns',
 			method: 'POST',
 		} );
 
