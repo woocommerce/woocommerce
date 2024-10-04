@@ -56,7 +56,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_order_status_name() {
 
 		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
-		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
+		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( WC_Order::STATUS_PENDING ) );
 	}
 
 	/**
@@ -124,14 +124,14 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000, 2 );
 
 		// Check counts for specific order types.
-		$this->assertEquals( 2, wc_orders_count( 'on-hold', 'shop_order' ) );
-		$this->assertEquals( 1, wc_orders_count( 'trash', 'shop_order' ) );
-		$this->assertEquals( 3, wc_orders_count( 'on-hold', 'order-fake-type' ) );
-		$this->assertEquals( 0, wc_orders_count( 'trash', 'order-fake-type' ) );
+		$this->assertEquals( 2, wc_orders_count( WC_Order::STATUS_ON_HOLD, 'shop_order' ) );
+		$this->assertEquals( 1, wc_orders_count( WC_Order::STATUS_TRASH, 'shop_order' ) );
+		$this->assertEquals( 3, wc_orders_count( WC_Order::STATUS_ON_HOLD, 'order-fake-type' ) );
+		$this->assertEquals( 0, wc_orders_count( WC_Order::STATUS_TRASH, 'order-fake-type' ) );
 
 		// Check that counts with no order type include all order types.
-		$this->assertEquals( 5, wc_orders_count( 'on-hold' ) );
-		$this->assertEquals( 1, wc_orders_count( 'trash' ) );
+		$this->assertEquals( 5, wc_orders_count( WC_Order::STATUS_ON_HOLD ) );
+		$this->assertEquals( 1, wc_orders_count( WC_Order::STATUS_TRASH ) );
 
 		remove_filter( 'woocommerce_data_stores', $add_mock_datastores );
 		remove_filter( 'wc_order_types', $add_mock_order_type );
@@ -139,7 +139,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		// Confirm that everything's back to normal.
 		wp_cache_flush();
-		$this->assertEquals( 0, wc_orders_count( 'on-hold' ) );
+		$this->assertEquals( 0, wc_orders_count( WC_Order::STATUS_ON_HOLD ) );
 	}
 
 	/**
@@ -393,15 +393,15 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_status_param() {
 		$order1 = WC_Helper_Order::create_order();
-		$order1->set_status( 'pending' );
+		$order1->set_status( WC_Order::STATUS_PENDING );
 		$order1->save();
 		$order2 = WC_Helper_Order::create_order();
-		$order2->set_status( 'completed' );
+		$order2->set_status( WC_Order::STATUS_COMPLETED );
 		$order2->save();
 
 		$orders   = wc_get_orders(
 			array(
-				'status' => 'pending',
+				'status' => WC_Order::STATUS_PENDING,
 				'return' => 'ids',
 			)
 		);
@@ -410,7 +410,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$orders   = wc_get_orders(
 			array(
-				'status' => 'completed',
+				'status' => WC_Order::STATUS_COMPLETED,
 				'return' => 'ids',
 			)
 		);
@@ -1588,7 +1588,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
 
 		$order = new WC_Order( $order_id );
-		$order->update_status( 'processing' );
+		$order->update_status( WC_Order::STATUS_PROCESSING );
 
 		$this->assertEquals( 1, get_post_meta( $coupon->get_id(), 'usage_count', true ) );
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
@@ -1629,7 +1629,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
 
 		$order = new WC_Order( $order_id );
-		$order->update_status( 'cancelled' );
+		$order->update_status( WC_Order::STATUS_CANCELLED );
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
 		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
@@ -1670,7 +1670,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
 
 		$order = new WC_Order( $order_id );
-		$order->update_status( 'processing' );
+		$order->update_status( WC_Order::STATUS_PROCESSING );
 
 		$this->assertEquals( 1, get_post_meta( $coupon->get_id(), 'usage_count', true ) );
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );

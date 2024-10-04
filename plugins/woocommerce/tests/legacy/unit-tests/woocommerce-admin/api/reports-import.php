@@ -98,12 +98,12 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order_1 = WC_Helper_Order::create_order( $this->customer, $product );
-		$order_1->set_status( 'completed' );
+		$order_1->set_status( WC_Order::STATUS_COMPLETED );
 		$order_1->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
 		$order_1->save();
 		$order_2 = WC_Helper_Order::create_order( $this->customer, $product );
 		$order_2->set_total( 100 );
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( WC_Order::STATUS_COMPLETED );
 		$order_2->save();
 
 		// Delete order stats so we can test import API.
@@ -139,7 +139,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		// Use the skip existing params to skip processing customers/orders.
 		// Compare against order status to make sure previously imported order was skipped.
-		$order_2->set_status( 'processing' );
+		$order_2->set_status( WC_Order::STATUS_PROCESSING );
 		$order_2->save();
 
 		// Compare against name to make sure previously imported customer was skipped.
@@ -178,7 +178,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 2, $reports );
-		$this->assertEquals( 'completed', $reports[0]['status'] );
+		$this->assertEquals( WC_Order::STATUS_COMPLETED, $reports[0]['status'] );
 	}
 
 	/**
@@ -194,7 +194,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
 		$order->save();
 
@@ -242,7 +242,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		for ( $i = 0; $i < 25; $i++ ) {
 			$order = WC_Helper_Order::create_order( 1, $product );
-			$order->set_status( 'completed' );
+			$order->set_status( WC_Order::STATUS_COMPLETED );
 			$order->save();
 		}
 
@@ -309,19 +309,19 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		// Create 5 completed orders.
 		for ( $i = 0; $i < 5; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->customer, $product );
-			$order->set_status( 'completed' );
+			$order->set_status( WC_Order::STATUS_COMPLETED );
 			$order->set_date_created( time() - ( ( $i + 1 ) * DAY_IN_SECONDS ) );
 			$order->save();
 		}
 
 		// Trash one test order - excludes it from totals.
-		$order->set_status( 'trash' );
+		$order->set_status( WC_Order::STATUS_TRASH );
 		$order->save();
 
 		// Create 1 draft order - to be excluded from totals.
 		$order = WC_Helper_Order::create_order( $this->customer, $product );
 		$order->set_date_created( time() - ( 5 * DAY_IN_SECONDS ) );
-		$order->set_status( 'auto-draft' );
+		$order->set_status( WC_Order::STATUS_AUTO_DRAFT );
 		$order->save();
 
 		// Test totals and total params.
