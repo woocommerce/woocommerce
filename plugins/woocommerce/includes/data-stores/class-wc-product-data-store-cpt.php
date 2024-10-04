@@ -292,6 +292,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_extra_data( $product );
 		$product->set_object_read( true );
 
+		/**
+		 * Fires when a product is read into memory.
+		 *
+		 * @since 3.7.0 Introduced.
+		 * @since 9.5.0 Made $product available.
+		 *
+		 * @param int        $product_id The product ID.
+		 * @param WC_Product $product    Product instance.
+		 */
 		do_action( 'woocommerce_product_read', $product->get_id(), $product );
 	}
 
