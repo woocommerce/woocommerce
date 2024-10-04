@@ -1,0 +1,14 @@
+.wc-block-cart-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: $gap-small;
+
+	.wc-block-cart-link__text {
+		display: inline-flex;
+	}
+
+	.wc-block-mini-cart__quantity-badge {
+		display: inline-flex;
+	}
+}
