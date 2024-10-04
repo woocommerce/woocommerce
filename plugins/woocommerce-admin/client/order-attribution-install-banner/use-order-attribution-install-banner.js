@@ -18,7 +18,7 @@ const OPTION_VALUE_YES = 'yes';
  * A utility hook designed specifically for the order attribution install banner,
  * which determines if the banner should be displayed, checks if it has been dismissed, and provides a function to dismiss it.
  */
-const useOrderAttributionInstallBanner = () => {
+export const useOrderAttributionInstallBanner = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { currentUserCan } = useUser();
 
@@ -71,5 +71,3 @@ const useOrderAttributionInstallBanner = () => {
 			),
 	};
 };
-
-export default useOrderAttributionInstallBanner;

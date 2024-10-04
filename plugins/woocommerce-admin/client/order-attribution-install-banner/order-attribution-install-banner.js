@@ -12,7 +12,7 @@ import { getPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import OrderAttributionInstallBannerImage from './order-attribution-install-banner-image';
-import useOrderAttributionInstallBanner from './use-order-attribution-install-banner';
+import { useOrderAttributionInstallBanner } from './use-order-attribution-install-banner';
 import './style.scss';
 
 export const OrderAttributionInstallBanner = ( {
