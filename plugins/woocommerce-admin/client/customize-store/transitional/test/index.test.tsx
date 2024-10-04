@@ -69,20 +69,24 @@ describe( 'Transitional', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should record an event when clicking on "View store" button', () => {
-		window.open = jest.fn();
-		// @ts-ignore
-		render( <Transitional { ...props } /> );
-
-		screen
-			.getByRole( 'link', {
-				name: /View store/i,
-			} )
-			.click();
-
-		expect( trackEvent ).toHaveBeenCalledWith(
-			'customize_your_store_transitional_preview_store_click'
+	it( 'Clicking on "View store" should go to the store home page', async ( {
+		pageObject,
+		baseURL,
+		page,
+	} ) => {
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_admin_customize_store_completed',
+			'yes'
 		);
+
+		await page.goto( TRANSITIONAL_URL );
+		const assembler = await pageObject.getAssembler();
+
+		await assembler.getByRole( 'link', { name: 'View store' } ).click();
+
+		await expect( page ).toHaveURL( '/' );
 	} );
 
 	it( 'should record an event when clicking on "Go to the Editor" button', () => {
