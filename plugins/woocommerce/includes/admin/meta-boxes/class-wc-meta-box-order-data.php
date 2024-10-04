@@ -753,7 +753,7 @@ class WC_Meta_Box_Order_Data {
 		$props['date_created'] = $date;
 
 		// Set created via prop if new post.
-		if ( isset( $_POST['original_post_status'] ) && 'auto-draft' === $_POST['original_post_status'] ) {
+		if ( isset( $_POST['original_post_status'] ) && WC_Order::STATUS_AUTO_DRAFT === $_POST['original_post_status'] ) {
 			$props['created_via'] = 'admin';
 		}
 

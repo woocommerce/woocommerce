@@ -1088,7 +1088,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_order_statuses() {
-		$order_statuses = array( 'auto-draft' );
+		$order_statuses = array( WC_Order::STATUS_AUTO_DRAFT );
 
 		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
 			$order_statuses[] = str_replace( 'wc-', '', $status );
@@ -1146,7 +1146,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				'status'               => array(
 					'description' => __( 'Order status.', 'woocommerce' ),
 					'type'        => 'string',
-					'default'     => 'pending',
+					'default'     => WC_Order::STATUS_PENDING,
 					'enum'        => $this->get_order_statuses(),
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -2023,7 +2023,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array( 'any', 'trash' ), $this->get_order_statuses() ),
+			'enum'              => array_merge( array( 'any', WC_Order::STATUS_TRASH ), $this->get_order_statuses() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

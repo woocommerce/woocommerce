@@ -440,7 +440,7 @@ final class WC_Cart_Session {
 	private function populate_cart_from_order( $order_id, $cart ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order->get_id() || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
+		if ( ! $order->get_id() || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( WC_Order::STATUS_COMPLETED ) ) ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
 			return;
 		}
 

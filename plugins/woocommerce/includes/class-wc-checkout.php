@@ -393,7 +393,7 @@ class WC_Checkout {
 			 * different items or cost, create a new order. We use a hash to
 			 * detect changes which is based on cart items + order total.
 			 */
-			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( WC_Order::STATUS_PENDING, WC_Order::STATUS_FAILED ) ) ) {
 				/**
 				 * Indicates that we are resuming checkout for an existing order (which is pending payment, and which
 				 * has not changed since it was added to the current shopping session).

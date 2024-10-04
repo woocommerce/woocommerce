@@ -743,7 +743,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
 
-			if ( ! $product || ! $product->exists() || 'trash' === $product->get_status() ) {
+			if ( ! $product || ! $product->exists() || WC_Order::STATUS_TRASH === $product->get_status() ) {
 				$this->set_quantity( $cart_item_key, 0 );
 				$return = new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
 			}
@@ -1036,7 +1036,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
 			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
 
-			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
+			if ( $quantity <= 0 || ! $product_data || WC_Order::STATUS_TRASH === $product_data->get_status() ) {
 				return false;
 			}
 
