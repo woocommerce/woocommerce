@@ -1,0 +1,10 @@
+.components-button.woocommerce-order-attribution-install-header-banner {
+	@media (max-width: $break-small) {
+		text-wrap: wrap;
+		font-size: 11px;
+
+		svg {
+			display: none;
+		}
+	}
+}
