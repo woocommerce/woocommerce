@@ -117,7 +117,7 @@ test.describe(
 
 			await expect( page ).toHaveURL( '/' );
 		} );
-		
+
 		test( 'Clicking on "Share feedback" should open the survey modal', async ( {
 			pageObject,
 			baseURL,
