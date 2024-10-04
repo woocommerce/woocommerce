@@ -46,18 +46,18 @@ describe( 'Transitional', () => {
 		).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole( 'link', {
 				name: /View store/i,
 			} )
 		).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole( 'link', {
 				name: /Go to Products/i,
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole( 'link', {
 				name: /Go to the Editor/i,
 			} )
 		).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe( 'Transitional', () => {
 		render( <Transitional { ...props } /> );
 
 		screen
-			.getByRole( 'button', {
+			.getByRole( 'link', {
 				name: /View store/i,
 			} )
 			.click();
@@ -97,7 +97,7 @@ describe( 'Transitional', () => {
 		render( <Transitional { ...props } /> );
 
 		screen
-			.getByRole( 'button', {
+			.getByRole( 'link', {
 				name: /Go to the Editor/i,
 			} )
 			.click();
