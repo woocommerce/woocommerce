@@ -198,10 +198,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_geolocate_ip',
 			function () {
-				return array(
-					'country' => 'FR',
-					'state'   => '',
-				);
+				return 'FR';
 			},
 			10
 		);
@@ -218,10 +215,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_geolocate_ip',
 			function () {
-				return array(
-					'country' => 'FR',
-					'state'   => '',
-				);
+				return 'FR';
 			},
 			10
 		);
