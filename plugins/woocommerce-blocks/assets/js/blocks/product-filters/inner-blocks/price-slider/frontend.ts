@@ -4,13 +4,18 @@
 import { store, getContext, getElement } from '@woocommerce/interactivity';
 import { formatPrice, getCurrency } from '@woocommerce/price-format';
 import { HTMLElementEvent } from '@woocommerce/types';
+import { debounce } from '@woocommerce/base-utils';
 
-type PriceFilterContext = {
+type PriceSliderContext = {
 	minPrice: number;
 	maxPrice: number;
 	minRange: number;
 	maxRange: number;
 };
+
+function inRange( value: number, min: number, max: number ) {
+	return value >= min && value <= max;
+}
 
 const constrainRangeSliderValues = (
 	/**
@@ -74,11 +79,79 @@ const constrainRangeSliderValues = (
 	return { minPrice: minValue, maxPrice: maxValue };
 };
 
+const _updateRange = (
+	event: HTMLElementEvent< HTMLInputElement >,
+	context: PriceSliderContext
+) => {
+	const { minPrice, maxPrice, minRange, maxRange } = context;
+	const isMin = event.target.classList.contains( 'min' );
+	const targetValue = Number( event.target.value );
+	const stepValue = 1;
+	const currentValues: [ number, number ] = isMin
+		? [ Math.round( targetValue / stepValue ) * stepValue, maxPrice ]
+		: [ minPrice, Math.round( targetValue / stepValue ) * stepValue ];
+	const values = constrainRangeSliderValues(
+		currentValues,
+		minRange,
+		maxRange,
+		stepValue,
+		isMin
+	);
+
+	if ( targetValue >= maxPrice ) {
+		context.maxPrice = minPrice + 1;
+	} else if ( targetValue <= minPrice ) {
+		context.minPrice = maxPrice - 1;
+	}
+
+	if ( isMin ) {
+		context.minPrice = values.minPrice;
+	} else {
+		context.maxPrice = values.maxPrice;
+	}
+};
+
+const _debounceUpdateRange = debounce(
+	(
+		event: HTMLElementEvent< HTMLInputElement >,
+		context: PriceSliderContext
+	) => {
+		const isMin = event.target.classList.contains( 'min' );
+		const targetValue = Number( event.target.value );
+		if (
+			isMin &&
+			targetValue &&
+			inRange( targetValue, context.minRange, context.maxRange ) &&
+			targetValue < context.maxPrice
+		) {
+			context.minPrice = targetValue;
+			event.target.setAttribute(
+				'data-min-price',
+				context.minPrice.toString()
+			);
+		}
+		if (
+			! isMin &&
+			targetValue &&
+			inRange( targetValue, context.minRange, context.maxRange ) &&
+			targetValue > context.minPrice
+		) {
+			context.maxPrice = targetValue;
+			event.target.setAttribute(
+				'data-max-price',
+				context.maxPrice.toString()
+			);
+		}
+		event.target.dispatchEvent( new Event( 'change' ) );
+	},
+	1000
+);
+
 store( 'woocommerce/product-filter-price-slider', {
 	state: {
 		rangeStyle: () => {
 			const { minPrice, maxPrice, minRange, maxRange } =
-				getContext< PriceFilterContext >();
+				getContext< PriceSliderContext >();
 
 			return `--low: ${
 				( 100 * ( minPrice - minRange ) ) / ( maxRange - minRange )
@@ -87,11 +160,11 @@ store( 'woocommerce/product-filter-price-slider', {
 			}%;`;
 		},
 		formattedMinPrice: () => {
-			const { minPrice } = getContext< PriceFilterContext >();
+			const { minPrice } = getContext< PriceSliderContext >();
 			return formatPrice( minPrice, getCurrency( { minorUnit: 0 } ) );
 		},
 		formattedMaxPrice: () => {
-			const { maxPrice } = getContext< PriceFilterContext >();
+			const { maxPrice } = getContext< PriceSliderContext >();
 			return formatPrice( maxPrice, getCurrency( { minorUnit: 0 } ) );
 		},
 	},
@@ -103,39 +176,14 @@ store( 'woocommerce/product-filter-price-slider', {
 			}
 		},
 		updateRange: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-			const context = getContext< PriceFilterContext >();
-			const { minPrice, maxPrice, minRange, maxRange } = context;
-			const isMin = event.target.classList.contains( 'min' );
-			const targetValue = Number( event.target.value );
-			const stepValue = 1;
-			const currentValues: [ number, number ] = isMin
-				? [
-						Math.round( targetValue / stepValue ) * stepValue,
-						maxPrice,
-				  ]
-				: [
-						minPrice,
-						Math.round( targetValue / stepValue ) * stepValue,
-				  ];
-			const values = constrainRangeSliderValues(
-				currentValues,
-				minRange,
-				maxRange,
-				stepValue,
-				isMin
-			);
-
-			if ( targetValue >= maxPrice ) {
-				context.maxPrice = minPrice + 1;
-			} else if ( targetValue <= minPrice ) {
-				context.minPrice = maxPrice - 1;
-			}
-
-			if ( isMin ) {
-				context.minPrice = values.minPrice;
-			} else {
-				context.maxPrice = values.maxPrice;
-			}
+			const context = getContext< PriceSliderContext >();
+			_updateRange( event, context );
+		},
+		debounceUpdateRange: (
+			event: HTMLElementEvent< HTMLInputElement >
+		) => {
+			const context = getContext< PriceSliderContext >();
+			_debounceUpdateRange( event, context );
 		},
 	},
 } );

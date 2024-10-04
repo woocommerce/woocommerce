@@ -158,6 +158,7 @@ final class ProductFilterPrice extends AbstractBlock {
 			),
 			'data-wc-key'          => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
 			'data-wc-bind--hidden' => '!context.hasFilterOptions',
+			'data-wc-watch'        => 'callbacks.updatePriceContext',
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
