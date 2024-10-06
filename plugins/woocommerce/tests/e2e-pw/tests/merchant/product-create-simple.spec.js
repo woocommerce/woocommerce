@@ -136,6 +136,7 @@ for ( const productType of Object.keys( productData ) ) {
 				await page
 					.getByRole( 'link' )
 					.filter( { hasText: 'Advanced' } )
+					.first()
 					.click();
 				await page
 					.getByLabel( 'Purchase note' )
