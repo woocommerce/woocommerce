@@ -12,6 +12,8 @@ import ProductCollectionPage, {
 	SELECTORS,
 } from './product-collection.page';
 
+// tmp: trigger CI tests
+
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
