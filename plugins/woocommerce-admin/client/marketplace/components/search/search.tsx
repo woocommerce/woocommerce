@@ -36,7 +36,7 @@ function Search(): JSX.Element {
 		}
 	}, [ query.term ] );
 
-	const runSearch = () => {
+	const runSearch = ( term?: string ) => {
 		const newQuery: { term?: string; tab?: string } = query;
 
 		// If we're on 'Discover' or 'My subscriptions' when a search is initiated, move to the extensions tab
@@ -44,7 +44,10 @@ function Search(): JSX.Element {
 			newQuery.tab = 'extensions';
 		}
 
-		newQuery.term = searchTerm.trim();
+		newQuery.term = typeof term !== 'undefined' ? term : searchTerm.trim();
+		if ( ! newQuery.term ) {
+			delete newQuery.term;
+		}
 
 		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
@@ -64,6 +67,11 @@ function Search(): JSX.Element {
 		}
 	};
 
+	const onClose = () => {
+		setSearchTerm( '' );
+		runSearch( '' );
+	};
+
 	return (
 		<SearchControl
 			label={ searchPlaceholder }
@@ -71,6 +79,7 @@ function Search(): JSX.Element {
 			value={ searchTerm }
 			onChange={ setSearchTerm }
 			onKeyUp={ handleKeyUp }
+			onClose={ onClose }
 			className="woocommerce-marketplace__search"
 		/>
 	);
