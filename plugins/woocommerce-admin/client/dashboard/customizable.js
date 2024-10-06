@@ -27,7 +27,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import defaultSections from './default-sections';
+import defaultSections, { DEFAULT_SECTIONS_FILTER } from './default-sections';
 import Section from './section';
 import ReportFilters from '../analytics/components/report-filters';
 
@@ -51,6 +51,13 @@ const mergeSectionsWithDefaults = ( prefSections ) => {
 			return [ ...sections, { ...section } ];
 		}, [] );
 	}
+
+	if ( ! Array.isArray( defaultSections ) ) {
+		throw new Error(
+			`The \`defaultSections\` is not an array, please make sure \`${ DEFAULT_SECTIONS_FILTER }\` filter is used correctly.`
+		);
+	}
+
 	const defaultKeys = defaultSections.map( ( section ) => section.key );
 	const prefKeys = prefSections.map( ( section ) => section.key );
 	const keys = new Set( [ ...prefKeys, ...defaultKeys ] );
