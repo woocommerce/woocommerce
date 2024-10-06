@@ -130,7 +130,10 @@
 							"wpVersion": "latest"
 						}
 					},
-					"events": [ "on-demand" ]
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 1",
@@ -154,7 +157,10 @@
 							"wpVersion": "latest-1"
 						}
 					},
-					"events": [ "on-demand" ]
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: nightly",
@@ -179,7 +185,10 @@
 							"wpVersion": "nightly"
 						}
 					},
-					"events": [ "on-demand" ]
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core e2e tests",
@@ -209,7 +218,11 @@
 					"testEnv": {
 						"start": "env:test"
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks"
+					],
 					"report": {
 						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -228,7 +241,10 @@
 						"--shard=5/5"
 					],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -250,7 +266,10 @@
 						"--shard=5/5"
 					],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -266,7 +285,10 @@
 					"command": "test:e2e:with-env woocommerce-payments",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -282,7 +304,10 @@
 					"command": "test:e2e:with-env woocommerce-paypal-payments",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -298,7 +323,10 @@
 					"command": "test:e2e:with-env woocommerce-services",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -313,7 +341,10 @@
 					"testType": "e2e",
 					"command": "test:e2e:with-env default-hpos-disabled --project=ui",
 					"shardingArguments": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"changes": [],
 					"testEnv": {
 						"start": "env:test",
@@ -345,7 +376,10 @@
 							"phpVersion": "8.1"
 						}
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-8.1",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -370,7 +404,10 @@
 							"wpVersion": "latest-1"
 						}
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-latest-1",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -395,7 +432,10 @@
 							"wpVersion": "prerelease"
 						}
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-pre-release",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -423,7 +463,10 @@
 					"testEnv": {
 						"start": "env:test"
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"pull_request",
+						"push"
+					],
 					"report": {
 						"resultsBlobName": "core-api-report",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -448,7 +491,9 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
-					"events": [ "on-demand" ],
+					"events": [
+						"push"
+					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -472,7 +517,9 @@
 					"testEnv": {
 						"start": "test:perf:ci-setup"
 					},
-					"events": [ "on-demand" ]
+					"events": [
+						"push"
+					]
 				},
 				{
 					"name": "Metrics",
@@ -494,7 +541,9 @@
 					"testEnv": {
 						"start": "env:test"
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"push"
+					],
 					"report": {
 						"resultsBlobName": "core-metrics-report",
 						"resultsPath": "../../tools/compare-perf/artifacts/"
@@ -505,8 +554,16 @@
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
 						"--shard=6/10",
-						"--shard=7/10"
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
 					],
 					"changes": [
 						"src/Blocks/**",
@@ -516,7 +573,12 @@
 					"testEnv": {
 						"start": "env:start:blocks"
 					},
-					"events": [ "pull_request" ],
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks",
+						"nightly-checks"
+					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
 						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
@@ -550,7 +612,10 @@
 							"wpVersion": "prerelease"
 						}
 					},
-					"events": [ "on-demand" ],
+					"events": [
+						"daily-checks",
+						"release-checks"
+					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-pre-release",
 						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
@@ -563,7 +628,10 @@
 					"command": "test:e2e:with-env default-pressable",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"release-checks",
+						"on-demand"
+					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
@@ -576,7 +644,10 @@
 					"command": "test:e2e:with-env default-wpcom",
 					"shardingArguments": [],
 					"changes": [],
-					"events": [ "on-demand" ],
+					"events": [
+						"release-checks",
+						"on-demand"
+					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
