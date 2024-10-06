@@ -46,7 +46,11 @@ const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
 const mergeSectionsWithDefaults = ( prefSections ) => {
-	if ( ! prefSections || prefSections.length === 0 ) {
+	if (
+		! prefSections ||
+		! Array.isArray( prefSections ) ||
+		prefSections.length === 0
+	) {
 		return defaultSections.reduce( ( sections, section ) => {
 			return [ ...sections, { ...section } ];
 		}, [] );
