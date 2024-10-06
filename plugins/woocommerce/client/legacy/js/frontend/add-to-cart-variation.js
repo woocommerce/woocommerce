@@ -432,6 +432,42 @@
 
 				refSelect.find( 'option' ).removeAttr( 'attached' ).prop( 'disabled', false ).prop( 'selected', false );
 
+				// Variations that are not "possible" are likely unpublished, such as not "enabled"
+				var all_possible_variations = form.variationData;
+				var all_possible_attributes = {};
+
+				// Get all possible values for all possible attributes
+				for ( var num in all_possible_variations ) {
+					var variation = all_possible_variations[ num ];
+
+					if ( typeof( variation ) !== 'undefined' ) {
+						var variationAttributes = variation.attributes;
+
+						for ( var attr_name in variationAttributes ) {
+							if ( ! ( attr_name in all_possible_attributes ) ) {
+								all_possible_attributes[ attr_name ] = new Set();
+							}
+							// special cases for "Any ATTRIBUTE NAME" are handled later
+							all_possible_attributes[ attr_name ].add( variationAttributes[ attr_name ] );
+						}
+					}
+				}
+				// Filter initial options to match those of possible variations
+				const attribute = all_possible_attributes[ 'attribute_' + refSelect.attr( 'id' ) ];
+				if ( attribute.has( '' ) ) {
+					// "Any ATTRIBUTE NAME" is specified in the variation data
+					// Keep all attributes
+				} else {
+					// A specific attribute is specified in the variation data
+					refSelect.find( 'option' ).each( function () {
+						const $el = $( this );
+						if ( $el.val() !== '' && ! attribute.has( $el.val() ) ) {
+							// This attribute is not in any possible variation
+							$el.remove();
+						}
+					} );
+				}
+
 				// Legacy data attribute.
 				current_attr_select.data(
 					'attribute_options',
@@ -448,9 +484,7 @@
 
 			checkAttributes[ current_attr_name ] = '';
 
-			// Variations that are not "possible" are likely unpublished, such as not "enabled"
-			var all_possible_variations = form.variationData;
-			var matching_variations = form.findMatchingVariations( all_possible_variations, checkAttributes );
+			var matching_variations = form.findMatchingVariations( form.variationData, checkAttributes );
 
 			for ( var num in matching_variations ) {
 				const variation = matching_variations[ num ];
@@ -481,11 +515,7 @@
 												option_value = $option_element.val();
 
 											if ( attr_val === option_value ) {
-												$possibleOptions = $possibleOptions.add( $option_element );
-
-												if ( matching_variations.includes( variation ) ) {
-													$option_element.addClass( 'attached ' + variation_active );
-												}
+												$option_element.addClass( 'attached ' + variation_active );
 												break;
 											}
 										}
