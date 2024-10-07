@@ -26,7 +26,7 @@ Setup tasks appear on the WooCommerce Admin home screen and prompt a merchant to
 To register your task as an extended task list item, you'll need to start by creating a new PHP class that extends the Task class. This class will define the properties and behavior of your custom task.
 
 ```php
-<?php
+&lt;?php
 /**
  * Custom task example.
  *
@@ -113,37 +113,37 @@ import {
 } from '@woocommerce/onboarding';
 import { registerPlugin } from '@wordpress/plugins';
 
-const Task = ( { onComplete, task, query } ) => {
+const Task = ( { onComplete, task, query } ) =&gt; {
 	// Implement your task UI/feature here.
-	return <div></div>;
+	return &lt;div&gt;&lt;/div&gt;;
 };
 
 registerPlugin( 'add-task-content', {
-	render: () => (
-		<WooOnboardingTask id="my-task">
-			{ ( { onComplete, query, task } ) => (
-				<Task onComplete={ onComplete } task={ task } query={ query } />
+	render: () =&gt; (
+		&lt;WooOnboardingTask id="my-task"&gt;
+			{ ( { onComplete, query, task } ) =&gt; (
+				&lt;Task onComplete={ onComplete } task={ task } query={ query } /&gt;
 			) }
-		</WooOnboardingTask>
+		&lt;/WooOnboardingTask&gt;
 	),
 } );
 
 registerPlugin( 'add-task-list-item', {
 	scope: 'woocommerce-tasks',
-	render: () => (
-		<WooOnboardingTaskListItem id="my-task">
-			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
+	render: () =&gt; (
+		&lt;WooOnboardingTaskListItem id="my-task"&gt;
+			{ ( { defaultTaskItem: DefaultTaskItem } ) =&gt; (
 				// Add a custom wrapper around the default task item.
-				<div
+				&lt;div
 					className="woocommerce-custom-tasklist-item"
 					style={ {
 						border: '1px solid red',
 					} }
-				>
-					<DefaultTaskItem />
-				</div>
+				&gt;
+					&lt;DefaultTaskItem /&gt;
+				&lt;/div&gt;
 			) }
-		</WooOnboardingTaskListItem>
+		&lt;/WooOnboardingTaskListItem&gt;
 	),
 } );
 ```
@@ -168,37 +168,37 @@ import { registerPlugin } from '@wordpress/plugins';
 Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we're using here is called JSX. If you're unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
 
 ```js
-const Task = ( { onComplete, task } ) => {
+const Task = ( { onComplete, task } ) =&gt; {
 	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
 	const { isActioned } = task;
 
 	return (
-		<Card className="woocommerce-task-card">
-			<CardBody>
+		&lt;Card className="woocommerce-task-card"&gt;
+			&lt;CardBody&gt;
 				{ __(
 					"This task's completion status is dependent on being actioned. The action button below will action this task, while the complete button will optimistically complete the task in the task list and redirect back to the task list. Note that in this example, the task must be actioned for completion to persist.",
 					'plugin-domain'
 				) }{ ' ' }
-				<br />
-				<br />
+				&lt;br /&gt;
+				&lt;br /&gt;
 				{ __( 'Task actioned status: ', 'plugin-domain' ) }{ ' ' }
 				{ isActioned ? 'actioned' : 'not actioned' }
-				<br />
-				<br />
-				<div>
-					<button
-						onClick={ () => {
+				&lt;br /&gt;
+				&lt;br /&gt;
+				&lt;div&gt;
+					&lt;button
+						onClick={ () =&gt; {
 							actionTask( 'my-task' );
 						} }
-					>
+					&gt;
 						{ __( 'Action task', 'plugin-domain' ) }
-					</button>
-					<button onClick={ onComplete }>
+					&lt;/button&gt;
+					&lt;button onClick={ onComplete }&gt;
 						{ __( 'Complete', 'plugin-domain' ) }
-					</button>
-				</div>
-			</CardBody>
-		</Card>
+					&lt;/button&gt;
+				&lt;/div&gt;
+			&lt;/CardBody&gt;
+		&lt;/Card&gt;
 	);
 };
 ```
@@ -211,14 +211,14 @@ Next, we register the Task component as a plugin named "add-task-content" using 
 
 ```js
 registerPlugin( 'add-task-content', {
-	render: () => (
+	render: () =&gt; (
 		
 			{ ( {
 				onComplete,
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				query,
 				task,
-			} ) =>  }
+			} ) =&gt;  }
 		
 	),
 	scope: 'woocommerce-tasks',
@@ -232,20 +232,20 @@ Finally, we register another plugin named "my-task-list-item-plugin." This plugi
 ```js
 registerPlugin( 'my-task-list-item-plugin', {
   scope: 'woocommerce-tasks',
-  render: () => (
-    <WooOnboardingTaskListItem id="my-task">
-      { ( { defaultTaskItem: DefaultTaskItem } ) => (
+  render: () =&gt; (
+    &lt;WooOnboardingTaskListItem id="my-task"&gt;
+      { ( { defaultTaskItem: DefaultTaskItem } ) =&gt; (
         // Add a custom wrapper around the default task item.
-        <div
+        &lt;div
           className="woocommerce-custom-tasklist-item"
           style={ {
             border: '1px solid red',
           } }
-        >
-          <DefaultTaskItem />
-        </div>
+        &gt;
+          &lt;DefaultTaskItem /&gt;
+        &lt;/div&gt;
       ) }
-    </WooOnboardingTaskListItem>
+    &lt;/WooOnboardingTaskListItem&gt;
   ),
 } );
 ```
@@ -344,7 +344,7 @@ import { addFilter } from '@wordpress/hooks';
 addFilter(
     'woocommerce_admin_homescreen_quicklinks',
     'my-extension',
-    ( quickLinks ) => {
+    ( quickLinks ) =&gt; {
         return [
             ...quickLinks,
             {
@@ -374,7 +374,7 @@ Despite being a part of the new React-powered admin experience in WooCommerce, A
 The recommended approach for using Admin Notes is to encapsulate your note within its own class that uses the [NoteTraits](https://github.com/woocommerce/woocommerce-admin/blob/831c9ff13a862f22cf53d3ae676daeabbefe90ad/src/Notes/NoteTraits.php) trait included with WooCommerce Admin. Below is a simple example of what this might look like:
 
 ```php
-<?php
+&lt;?php
 /**
  * Simple note provider
  *
@@ -423,10 +423,10 @@ class ExampleNote {
         $note = new Automattic\WooCommerce\Admin\Notes\Note();
  
         // Set our note's title.
-        $note->set_title( 'Getting Started' );
+        $note-&gt;set_title( 'Getting Started' );
  
         // Set our note's content.
-        $note->set_content(
+        $note-&gt;set_content(
             sprintf(
                 'Extension activated on %s.', $activated_time_formatted
             )
@@ -436,41 +436,41 @@ class ExampleNote {
         // You can use this property to re-localize notes on the fly, but
         // that is just one use. You can store other data here too. This
         // is backed by a longtext column in the database.
-        $note->set_content_data( (object) array(
-            'getting_started'       => true,
-            'activated'             => $activated_time,
-            'activated_formatted'   => $activated_time_formatted
+        $note-&gt;set_content_data( (object) array(
+            'getting_started'       =&gt; true,
+            'activated'             =&gt; $activated_time,
+            'activated_formatted'   =&gt; $activated_time_formatted
         ) );
  
         // Set the type of the note. Note types are defined as enum-style
         // constants in the Note class. Available note types are:
         // error, warning, update, info, marketing.
-        $note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+        $note-&gt;set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
  
         // Set the type of layout the note uses. Supported layout types are:
-        // 'banner', 'plain', 'thumbnail'
-        $note->set_layout( 'plain' );
+        // 'plain', 'thumbnail'
+        $note-&gt;set_layout( 'plain' );
  
         // Set the image for the note. This property renders as the src
         // attribute for an img tag, so use a string here.
-        $note->set_image( '' );
+        $note-&gt;set_image( '' );
  
  
         // Set the note name and source.  You should store your extension's
         //   name (slug) in the source property of the note.  You can use
         //   the name property of the note to support multiple sub-types of
         //   notes.  This also gives you a handy way of namespacing your notes.
-        $note->set_source( 'inbox-note-example');
-        $note->set_name( self::NOTE_NAME );
+        $note-&gt;set_source( 'inbox-note-example');
+        $note-&gt;set_name( self::NOTE_NAME );
  
         // Add action buttons to the note.  A note can support 0, 1, or 2 actions.
         //   The first parameter is the action name, which can be used for event handling.
         //   The second parameter renders as the label for the button.
         //   The third parameter is an optional URL for actions that require navigation.
-        $note->add_action(
+        $note-&gt;add_action(
             'settings', 'Open Settings', '?page=wc-settings&tab=general'
         );
-        $note->add_action(
+        $note-&gt;add_action(
             'learn_more', 'Learn More', 'https://example.com'
         );
  
@@ -559,12 +559,12 @@ Next, we'll instantiate a new `Note` object.
 
 Once we have an instance of the Note class, we can work with its API to set its properties, starting with its title.
 
-`$note->set_title( 'Getting Started' );`
+`$note-&gt;set_title( 'Getting Started' );`
 
 Then we'll use some of the timestamp data we collected above to set the note's content.
 
 ```php
-$note->set_content(
+$note-&gt;set_content(
     sprintf(
         'Extension activated on %s.', $activated_time_formatted
     )
@@ -574,41 +574,41 @@ $note->set_content(
 In addition to regular content, notes also support structured content using the `content_data` property. You can use this property to re-localize notes on the fly, but that is just one use case. You can store other data here too. This is backed by a `longtext` column in the database.
 
 ```php
-$note->set_content_data( (object) array(
-    'getting_started'     => true,
-    'activated'           => $activated_time,
-    'activated_formatted' => $activated_time_formatted
+$note-&gt;set_content_data( (object) array(
+    'getting_started'     =&gt; true,
+    'activated'           =&gt; $activated_time,
+    'activated_formatted' =&gt; $activated_time_formatted
 ) );
 ```
 
 Next, we'll set the note's `type` property. Note types are defined as enum-style class constants in the `Note` class. Available note types are _error_, _warning_, _update_, _info_, and _marketing_. When selecting a note type, be aware that the _error_ and _update_ result in the note being shown as a Store Alert, not in the Inbox. It's best to avoid using these types of notes unless you absolutely need to.
 
-`$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );`
+`$note-&gt;set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );`
 
 Admin Notes also support a few different layouts. You can specify `banner`, `plain`, or `thumbnail` as the layout. If you're interested in seeing the different layouts in action, take a look at [this simple plugin](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) that you can install to experiment with them.
 
 We'll choose `plain` as our layout, but it's also the default, so we could leave this property alone and the effect would be the same.
 
-`$note->set_layout( 'plain' );`
+`$note-&gt;set_layout( 'plain' );`
 
 If you have an image that you want to add to your Admin Note, you can specify it using the `set_image` function. This property ultimately renders as the `src` attribute on an `img` tag, so use a string here.
 
-`$note->set_image( '' );`
+`$note-&gt;set_image( '' );`
 
 Next, we'll set the values for our Admin Note's `name` and `source` properties. As a best practice, you should store your extension's name (i.e. its slug) in the `source` property of the note. You can use the `name` property to support multiple sub-types of notes. This gives you a handy way of namespacing your notes and managing them at both a high and low level.
 
 ```php
-$note->set_source( 'inbox-note-example');
-$note->set_name( self::NOTE_NAME );
+$note-&gt;set_source( 'inbox-note-example');
+$note-&gt;set_name( self::NOTE_NAME );
 ```
 
 Admin Notes can support 0, 1, or 2 actions (buttons). You can use these actions to capture events that trigger asynchronous processes or help the merchant navigate to a particular view to complete a step, or even simply to provide an external link for further information. The `add_action()` function takes up to three arguments. The first is the action name, which can be used for event handling, the second renders as a label for the action's button, and the third is an optional URL for actions that require navigation.
 
 ```php
-$note->add_action(
+$note-&gt;add_action(
     'settings', 'Open Settings', '?page=wc-settings&tab=general'
 );
-$note->add_action(
+$note-&gt;add_action(
     'learn_more', 'Learn More', 'https://example.com'
 );
 ```

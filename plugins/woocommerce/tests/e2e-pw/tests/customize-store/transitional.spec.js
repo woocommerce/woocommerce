@@ -31,7 +31,7 @@ test.describe(
 			);
 
 			// Need a block enabled theme to test
-			await activateTheme( 'twentytwentyfour' );
+			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
@@ -49,7 +49,7 @@ test.describe(
 
 		test.afterAll( async ( { baseURL } ) => {
 			// Reset theme back to default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 
 			// Reset tour to visible.
 			await setOption(
@@ -98,7 +98,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "View store" should go to the store home page in a new page', async ( {
+		test( 'Clicking on "View store" should go to the store home page', async ( {
 			pageObject,
 			baseURL,
 			page,
@@ -113,15 +113,9 @@ test.describe(
 			await page.goto( TRANSITIONAL_URL );
 			const assembler = await pageObject.getAssembler();
 
-			const newTabPromise = page.waitForEvent( 'popup' );
-			await assembler
-				.getByRole( 'button', { name: 'View store' } )
-				.click();
+			await assembler.getByRole( 'link', { name: 'View store' } ).click();
 
-			const newTab = await newTabPromise;
-			await newTab.waitForLoadState();
-
-			await expect( newTab ).toHaveURL( '/' );
+			await expect( page ).toHaveURL( '/' );
 		} );
 
 		test( 'Clicking on "Share feedback" should open the survey modal', async ( {

@@ -7,8 +7,8 @@ export type BlockOverlayAttributeOptions =
 	( typeof BlockOverlayAttribute )[ keyof typeof BlockOverlayAttribute ];
 
 export interface BlockAttributes {
-	productId?: string;
 	setAttributes: ( attributes: ProductFiltersBlockAttributes ) => void;
+	productId?: string;
 	overlay: BlockOverlayAttributeOptions;
 	overlayIcon:
 		| 'filter-icon-1'
@@ -18,3 +18,23 @@ export interface BlockAttributes {
 	overlayButtonStyle: 'label-icon' | 'label' | 'icon';
 	overlayIconSize?: number;
 }
+
+export type FilterOptionItem = {
+	label: string;
+	value: string;
+	selected?: boolean;
+	rawData?: Record< string, unknown >;
+};
+
+export type FilterBlockContext = {
+	filterData: {
+		isLoading: boolean;
+		items?: FilterOptionItem[];
+		price?: {
+			minPrice: number;
+			minRange: number;
+			maxPrice: number;
+			maxRange: number;
+		};
+	};
+};

@@ -90,25 +90,26 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				'no'
 			);
 
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
 	} );
 
-	test( 'The list of categories should be displayed', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-		const assembler = await pageObject.getAssembler();
+	test(
+		'The list of categories should be displayed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { pageObject, baseURL } ) => {
+			await prepareAssembler( pageObject, baseURL );
+			const assembler = await pageObject.getAssembler();
 
-		const categories = assembler.locator(
-			'.woocommerce-customize-store__sidebar-homepage-content .components-item-group'
-		);
+			const categories = assembler.locator(
+				'.woocommerce-customize-store__sidebar-homepage-content .components-item-group'
+			);
 
-		await expect( categories ).toHaveCount( 6 );
-	} );
+			await expect( categories ).toHaveCount( 6 );
+		}
+	);
 
 	test( 'Clicking on "Design your homepage" should open the Intro sidebar by default', async ( {
 		pageObject,

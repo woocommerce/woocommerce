@@ -95,6 +95,7 @@
 	padding-top: 0;
 }
 
+.is-medium,
 .is-small,
 .is-mobile {
 	.wc-block-cart-item__total {
@@ -107,7 +108,7 @@
 	}
 	.wc-block-components-shipping-rates-control
 	.wc-block-components-radio-control__option {
-		padding: 0 0 0 em($gap-huge);
+		padding-left: em($gap-huge);
 	}
 }
 
@@ -145,7 +146,9 @@
 		margin-top: 0;
 
 		.wc-block-components-shipping-calculator,
-		.wc-block-components-shipping-rates-control__package:not(.wc-block-components-panel) {
+		.wc-block-components-shipping-rates-control__package:not(
+			.wc-block-components-panel
+		) {
 			padding-left: $gap;
 			padding-right: $gap;
 		}

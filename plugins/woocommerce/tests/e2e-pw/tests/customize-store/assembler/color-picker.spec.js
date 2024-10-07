@@ -260,7 +260,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 			);
 
 			// Reset theme back to default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 			await customizeStorePageObject.resetCustomizeStoreChanges(
 				baseURL
 			);
@@ -512,121 +512,123 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 		}
 	);
 
-	test( 'Create "your own" pickers should be visible', async ( {
-		assemblerPageObject,
-		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
-		const wordPressVersion = await getInstalledWordPressVersion();
+	test(
+		'Create "your own" pickers should be visible',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { assemblerPageObject, baseURL }, testInfo ) => {
+			testInfo.snapshotSuffix = '';
+			const wordPressVersion = await getInstalledWordPressVersion();
 
-		const assembler = await assemblerPageObject.getAssembler();
-		const colorPicker = assembler.getByText( 'Create your own' );
+			const assembler = await assemblerPageObject.getAssembler();
+			const colorPicker = assembler.getByText( 'Create your own' );
 
-		await colorPicker.click();
+			await colorPicker.click();
 
-		// Check if Gutenberg is installed
-		const apiContext = await request.newContext( {
-			baseURL,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ encodeCredentials(
-					admin.username,
-					admin.password
-				) }`,
-				cookie: '',
-			},
-		} );
-		const listPluginsResponse = await apiContext.get(
-			`/wp-json/wp/v2/plugins`,
-			{
-				failOnStatusCode: true,
-			}
-		);
-		const pluginsList = await listPluginsResponse.json();
-		const gutenbergPlugin = pluginsList.find(
-			( { textdomain } ) => textdomain === 'gutenberg'
-		);
-
-		const mapTypeFeatures = {
-			background: [ 'solid', 'gradient' ],
-			text: [],
-			heading: [ 'text', 'background', 'gradient' ],
-			button: [ 'text', 'background', 'gradient' ],
-			link: [ 'default', 'hover' ],
-			captions: [],
-		};
-		const mapTypeFeaturesGutenberg = {
-			background: [ 'color', 'gradient' ],
-			text: [],
-			heading: [ 'text', 'background', 'gradient' ],
-			button: [ 'text', 'background', 'gradient' ],
-			link: [ 'default', 'hover' ],
-			captions: [],
-		};
-
-		const customColorSelector =
-			'.components-color-palette__custom-color-button';
-		const gradientColorSelector =
-			'.components-custom-gradient-picker__gradient-bar-background';
-
-		const mapFeatureSelectors = {
-			solid: customColorSelector,
-			text: customColorSelector,
-			background: customColorSelector,
-			default: customColorSelector,
-			hover: customColorSelector,
-			gradient: gradientColorSelector,
-		};
-		const mapFeatureSelectorsGutenberg = {
-			color: customColorSelector,
-			text: customColorSelector,
-			background: customColorSelector,
-			default: customColorSelector,
-			hover: customColorSelector,
-			gradient: gradientColorSelector,
-		};
-
-		for ( const type of Object.keys( mapTypeFeatures ) ) {
-			await assembler
-				.locator(
-					'.woocommerce-customize-store__color-panel-container'
-				)
-				.getByText( type )
-				.click();
-
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( gutenbergPlugin || wordPressVersion >= 6.6 ) {
-				for ( const feature of mapTypeFeaturesGutenberg[ type ] ) {
-					const container = assembler.locator(
-						'.block-editor-panel-color-gradient-settings__dropdown-content'
-					);
-					await container
-						.getByRole( 'tab', {
-							name: feature,
-						} )
-						.click();
-
-					const selector = mapFeatureSelectorsGutenberg[ feature ];
-					const featureSelector = container.locator( selector );
-
-					await expect( featureSelector ).toBeVisible();
+			// Check if Gutenberg is installed
+			const apiContext = await request.newContext( {
+				baseURL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ encodeCredentials(
+						admin.username,
+						admin.password
+					) }`,
+					cookie: '',
+				},
+			} );
+			const listPluginsResponse = await apiContext.get(
+				`/wp-json/wp/v2/plugins`,
+				{
+					failOnStatusCode: true,
 				}
-			} else {
-				for ( const feature of mapTypeFeatures[ type ] ) {
-					const container = assembler.locator(
-						'.block-editor-panel-color-gradient-settings__dropdown-content'
-					);
-					await container
-						.getByRole( 'tab', {
-							name: feature,
-						} )
-						.click();
+			);
+			const pluginsList = await listPluginsResponse.json();
+			const gutenbergPlugin = pluginsList.find(
+				( { textdomain } ) => textdomain === 'gutenberg'
+			);
 
-					const selector = mapFeatureSelectors[ feature ];
-					const featureSelector = container.locator( selector );
+			const mapTypeFeatures = {
+				background: [ 'solid', 'gradient' ],
+				text: [],
+				heading: [ 'text', 'background', 'gradient' ],
+				button: [ 'text', 'background', 'gradient' ],
+				link: [ 'default', 'hover' ],
+				captions: [],
+			};
+			const mapTypeFeaturesGutenberg = {
+				background: [ 'color', 'gradient' ],
+				text: [],
+				heading: [ 'text', 'background', 'gradient' ],
+				button: [ 'text', 'background', 'gradient' ],
+				link: [ 'default', 'hover' ],
+				captions: [],
+			};
 
-					await expect( featureSelector ).toBeVisible();
+			const customColorSelector =
+				'.components-color-palette__custom-color-button';
+			const gradientColorSelector =
+				'.components-custom-gradient-picker__gradient-bar-background';
+
+			const mapFeatureSelectors = {
+				solid: customColorSelector,
+				text: customColorSelector,
+				background: customColorSelector,
+				default: customColorSelector,
+				hover: customColorSelector,
+				gradient: gradientColorSelector,
+			};
+			const mapFeatureSelectorsGutenberg = {
+				color: customColorSelector,
+				text: customColorSelector,
+				background: customColorSelector,
+				default: customColorSelector,
+				hover: customColorSelector,
+				gradient: gradientColorSelector,
+			};
+
+			for ( const type of Object.keys( mapTypeFeatures ) ) {
+				await assembler
+					.locator(
+						'.woocommerce-customize-store__color-panel-container'
+					)
+					.getByText( type )
+					.click();
+
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( gutenbergPlugin || wordPressVersion >= 6.6 ) {
+					for ( const feature of mapTypeFeaturesGutenberg[ type ] ) {
+						const container = assembler.locator(
+							'.block-editor-panel-color-gradient-settings__dropdown-content'
+						);
+						await container
+							.getByRole( 'tab', {
+								name: feature,
+							} )
+							.click();
+
+						const selector =
+							mapFeatureSelectorsGutenberg[ feature ];
+						const featureSelector = container.locator( selector );
+
+						await expect( featureSelector ).toBeVisible();
+					}
+				} else {
+					for ( const feature of mapTypeFeatures[ type ] ) {
+						const container = assembler.locator(
+							'.block-editor-panel-color-gradient-settings__dropdown-content'
+						);
+						await container
+							.getByRole( 'tab', {
+								name: feature,
+							} )
+							.click();
+
+						const selector = mapFeatureSelectors[ feature ];
+						const featureSelector = container.locator( selector );
+
+						await expect( featureSelector ).toBeVisible();
+					}
 				}
 			}
 		}
-	} );
+	);
 } );

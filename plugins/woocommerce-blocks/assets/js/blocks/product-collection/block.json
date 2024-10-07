@@ -6,11 +6,7 @@
 	"title": "Product Collection",
 	"description": "Display a collection of products from your store.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce",
-		"Products (Beta)",
-		"products"
-	],
+	"keywords": [ "WooCommerce", "Products (Beta)", "products" ],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"queryId": {
@@ -23,6 +19,9 @@
 			"type": "string"
 		},
 		"displayLayout": {
+			"type": "object"
+		},
+		"dimensions": {
 			"type": "object"
 		},
 		"convertedFromProducts": {
@@ -51,16 +50,14 @@
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout",
+		"dimensions": "dimensions",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug", "postId" ],
 	"supports": {
-		"align": [
-			"wide",
-			"full"
-		],
+		"align": [ "wide", "full" ],
 		"anchor": true,
 		"html": false,
 		"__experimentalLayout": true,

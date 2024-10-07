@@ -64,7 +64,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->set_status( 'completed' );
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -143,7 +143,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			)
 		);
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -255,7 +255,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order2->set_status( 'completed' );
 		$order2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -310,7 +310,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order_2->set_status( 'completed' );
 		$order_2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );

@@ -36,6 +36,14 @@ export const getUseShippingAsBilling = ( state: CheckoutState ) => {
 	return state.useShippingAsBilling;
 };
 
+export const getEditingBillingAddress = ( state: CheckoutState ) => {
+	return state.editingBillingAddress;
+};
+
+export const getEditingShippingAddress = ( state: CheckoutState ) => {
+	return state.editingShippingAddress;
+};
+
 export const getExtensionData = ( state: CheckoutState ) => {
 	return state.extensionData;
 };
