@@ -1231,7 +1231,7 @@ importers:
         version: 12.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@testing-library/react-hooks':
         specifier: 7.0.2
-        version: 7.0.2(react-dom@18.3.1(react@18.3.1))(react-test-renderer@17.0.2(react@18.3.1))(react@18.3.1)
+        version: 7.0.2(react-dom@18.3.1(react@18.3.1))(react-test-renderer@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1281,8 +1281,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
       react-test-renderer:
-        specifier: 17.0.2
-        version: 17.0.2(react@18.3.1)
+        specifier: ^18.3.0
+        version: 18.3.1(react@18.3.1)
       redux:
         specifier: ^4.2.1
         version: 4.2.1
@@ -21697,9 +21697,6 @@ packages:
   react-is@18.1.0:
     resolution: {integrity: sha512-Fl7FuabXsJnV5Q1qIOQwx/sagGF18kogb4gpfcG4gjLBWO0WDiiz1ko/ExayuxE7InyQkBLkxRFG5oxY6Uu3Kg==}
 
-  react-is@18.2.0:
-    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
-
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
@@ -40520,7 +40517,7 @@ snapshots:
 
   '@wordpress/data@6.15.0(react@17.0.2)':
     dependencies:
-      '@babel/runtime': 7.25.0
+      '@babel/runtime': 7.24.7
       '@wordpress/compose': 5.20.0(react@17.0.2)
       '@wordpress/deprecated': 3.41.0
       '@wordpress/element': 4.20.0
@@ -57635,8 +57632,6 @@ snapshots:
 
   react-is@18.1.0: {}
 
-  react-is@18.2.0: {}
-
   react-is@18.3.1: {}
 
   react-lifecycles-compat@3.0.4: {}
@@ -57909,7 +57904,7 @@ snapshots:
     dependencies:
       object-assign: 4.1.1
       react: 18.3.1
-      react-is: 18.2.0
+      react-is: 18.3.1
 
   react-slider@2.0.6(react@18.3.1):
     dependencies:
