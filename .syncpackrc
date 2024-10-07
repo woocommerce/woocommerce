@@ -137,7 +137,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^18.3.0 || ^17.0.2"
+			"pinVersion": "^18.3.0"
 		},
 		{
 			"dependencies": [
