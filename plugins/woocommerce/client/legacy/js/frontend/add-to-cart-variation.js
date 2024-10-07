@@ -420,7 +420,6 @@
 			var current_attr_select     = $( el ),
 				current_attr_name       = current_attr_select.data( 'attribute_name' ) || current_attr_select.attr( 'name' ),
 				show_option_none        = $( el ).data( 'show_option_none' ),
-				option_gt_filter        = ':gt(0)',
 				attached_options_count  = 0,
 				new_attr_select         = $( '<select/>' ),
 				selected_attr_val       = current_attr_select.val() || '',
@@ -471,7 +470,7 @@
 				// Legacy data attribute.
 				current_attr_select.data(
 					'attribute_options',
-					refSelect.find( 'option' + option_gt_filter ).get()
+					refSelect.find( 'option:not([value=""])' ).get()
 				);
 				current_attr_select.data( 'attribute_html', refSelect.html() );
 			}
@@ -522,7 +521,7 @@
 									}
 								} else {
 									// Attach all apart from placeholder.
-									new_attr_select.find( 'option' + option_gt_filter ).addClass( 'attached ' + variation_active );
+									new_attr_select.find( 'option:not([value=""])' ).addClass( 'attached ' + variation_active );
 								}
 							}
 						}
@@ -556,10 +555,9 @@
 			// - Placeholders are not set to be permanently visible.
 			if ( attached_options_count > 0 && selected_attr_val && selected_attr_val_valid && ( 'no' === show_option_none ) ) {
 				new_attr_select.find( 'option:first' ).remove();
-				option_gt_filter = '';
 			}
 
-			const $unattached_options = new_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' );
+			const $unattached_options = new_attr_select.find( 'option:not([value=""], .attached)' );
 			switch ( unattached_action ) {
 				case 'hide':
 					// Hide unattached
@@ -578,7 +576,7 @@
 
 			// Finally, copy to DOM and set value.
 			current_attr_select.html( new_attr_select.html() );
-			current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).prop( 'disabled', true );
+			current_attr_select.find( 'option:not([value=""], .enabled)' ).prop( 'disabled', true );
 
 			// Choose selected value.
 			if ( selected_attr_val ) {
