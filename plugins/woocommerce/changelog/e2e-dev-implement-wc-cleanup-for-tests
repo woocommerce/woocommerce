@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a site reset plugin for e2e testing with externally hosted sites
