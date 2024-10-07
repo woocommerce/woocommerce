@@ -64,11 +64,11 @@ class CheckoutFieldsFrontend {
 	 * @return string
 	 */
 	protected function render_additional_field( $field ) {
-		return sprintf(
-			'<dt>%1$s</dt><dd>%2$s</dd>',
-			esc_html( $field['label'] ),
-			esc_html( $field['value'] )
-		);
+		$label  = esc_html( $field['label'] );
+		$value  = esc_html( $field['value'] );
+		$render = sprintf( '<dt>%s</dt><dd>%s</dd>', $label, $value );
+
+		return apply_filters( 'woocommerce_checkout_render_additional_field', $render, $label, $value, $this );
 	}
 
 	/**
@@ -130,7 +130,11 @@ class CheckoutFieldsFrontend {
 				continue;
 			}
 
-			printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $value ) );
+			$label  = wp_kses_post( $field['label'] );
+			$value  = wp_kses_post( $value );
+			$render = sprintf( '<br><strong>%s</strong>: %s', $label, $value );
+
+			echo apply_filters( 'woocommerce_checkout_render_additional_field', $render, $label, $value, $this );
 		}
 	}
 
