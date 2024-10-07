@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 
 /**
  * Internal dependencies
@@ -33,7 +34,16 @@ module.exports = {
 	},
 	module: {
 		parser: webpackConfig.parser,
-		rules: webpackConfig.rules,
+		rules: [
+			...webpackConfig.rules,
+			{
+				test: /.([cm]?ts|tsx)$/,
+				loader: 'ts-loader',
+				options: {
+					transpileOnly: true
+				}
+			},
+		],
 	},
 	plugins: [
 		new RemoveEmptyScriptsPlugin(),
@@ -73,5 +83,6 @@ module.exports = {
 			],
 		} ),
 		new StyleAssetPlugin(),
+		new ForkTsCheckerWebpackPlugin(),
 	],
 };
