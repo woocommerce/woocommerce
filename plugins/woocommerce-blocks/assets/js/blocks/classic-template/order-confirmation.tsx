@@ -37,7 +37,7 @@ const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 			'core/columns',
 			{
 				...inheritedAttributes,
-				className: 'woocommerce-order-confirmation-address-wrapper',
+				className: 'wc-block-order-confirmation-address-wrapper',
 			},
 			[
 				createBlock( 'core/column', inheritedAttributes, [
