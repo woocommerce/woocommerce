@@ -1292,6 +1292,9 @@ importers:
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.23.5))(esbuild@0.18.20)(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
+      ts-loader:
+        specifier: 9.2.9
+        version: 9.2.9(typescript@5.3.3)(webpack@5.91.0)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
