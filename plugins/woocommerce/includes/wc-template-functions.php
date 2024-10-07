@@ -1683,7 +1683,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 			'data-large_image_width'  => esc_attr( $full_src[1] ),
 			'data-large_image_height' => esc_attr( $full_src[2] ),
 			'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
-			'alt'                     => $alt_text,
+			'alt'                     => esc_attr( $alt_text ),
 		),
 		$attachment_id,
 		$image_size,
