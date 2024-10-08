@@ -17,9 +17,9 @@ import './dismissable-list.scss';
 // using a context provider for the option name so that the option name prop doesn't need to be passed to the `DismissableListHeading` too
 const OptionNameContext = createContext( '' );
 
-export const DismissableListHeading: React.FC< {
+export const DismissableListHeading: React.FC< React.PropsWithChildren < {
 	onDismiss?: () => void;
-} > = ( { children, onDismiss = () => null } ) => {
+} > > = ( { children, onDismiss = () => null } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const dismissOptionName = useContext( OptionNameContext );
 
@@ -51,10 +51,10 @@ export const DismissableListHeading: React.FC< {
 	);
 };
 
-export const DismissableList: React.FC< {
+export const DismissableList: React.FC< React.PropsWithChildren < {
 	dismissOptionName: string;
 	className?: string;
-} > = ( { children, className, dismissOptionName } ) => {
+} > > = ( { children, className, dismissOptionName } ) => {
 	const isVisible = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
