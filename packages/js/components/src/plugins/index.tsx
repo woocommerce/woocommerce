@@ -124,7 +124,7 @@ export const Plugins = ( {
 		if ( autoInstall ) {
 			installAndActivate();
 		}
-	}, [ autoInstall, installAndActivate ] );
+	}, [ autoInstall ] );
 
 	if ( hasErrors ) {
 		return (
