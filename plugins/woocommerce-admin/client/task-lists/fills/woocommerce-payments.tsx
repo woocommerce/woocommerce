@@ -7,21 +7,21 @@ import {
 	WooOnboardingTaskListItem,
 	WooOnboardingTask,
 } from '@woocommerce/onboarding';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
-import { useDispatch } from '@wordpress/data';
+import { updateQueryString } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { installActivateAndConnectWcpay } from './PaymentGatewaySuggestions/components/WCPay';
 import { PaymentGatewaySuggestions } from './PaymentGatewaySuggestions';
+import { getPluginTrackKey } from '~/utils';
 
 const WoocommercePaymentsTaskItem = () => {
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { createNotice } = useDispatch( 'core/notices' );
+	const task = 'woocommerce-payments';
+	const gatewayId = 'woocommerce_payments';
 
 	return (
-		<WooOnboardingTaskListItem id="woocommerce-payments">
+		<WooOnboardingTaskListItem id={ task }>
 			{ ( {
 				defaultTaskItem: DefaultTaskItem,
 			}: {
@@ -30,14 +30,23 @@ const WoocommercePaymentsTaskItem = () => {
 				} ) => JSX.Element;
 			} ) => (
 				<DefaultTaskItem
-					// Intercept the click on the task list item so that we don't have to see an intermediate page before installing WooPayments.
+					// Intercept the click on the task list item so that we don't have to see
+					// the task page before installing WooPayments.
 					onClick={ () => {
-						return new Promise( ( resolve, reject ) => {
-							return installActivateAndConnectWcpay(
-								reject,
-								createNotice,
-								installAndActivatePlugins
-							);
+						// Fire both the WooPayments install event (backward compatibility)
+						// and the tasklist_payment_setup event.
+						recordEvent( 'woocommerce_payments_install', {
+							context: 'tasklist',
+						} );
+						recordEvent( 'tasklist_payment_setup', {
+							selected: getPluginTrackKey( gatewayId ),
+						} );
+
+						// Just updating the query string to show the task page and target a specific recommendation
+						// will trigger the plugin installation.
+						updateQueryString( {
+							task,
+							id: gatewayId,
 						} );
 					} }
 				/>
