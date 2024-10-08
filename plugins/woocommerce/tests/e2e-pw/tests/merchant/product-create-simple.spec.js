@@ -35,8 +35,6 @@ const productData = {
 	},
 };
 
-const categoryName = `cat_${ Date.now() }`;
-
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	product: async ( { api }, use ) => {
@@ -50,7 +48,7 @@ const test = baseTest.extend( {
 
 		await api
 			.post( 'products/categories', {
-				name: categoryName,
+				name: `cat_${ Date.now() }`,
 			} )
 			.then( ( response ) => {
 				category = response.data;
@@ -147,10 +145,12 @@ for ( const productType of Object.keys( productData ) ) {
 			} );
 
 			await test.step( 'add product categories', async () => {
-				await page.getByText( categoryName ).first().check();
+				await page.getByText( category.name ).first().check();
 
 				await expect(
-					page.locator( '#product_cat-all' ).getByText( categoryName )
+					page
+						.locator( '#product_cat-all' )
+						.getByText( category.name )
 				).toBeVisible();
 			} );
 
