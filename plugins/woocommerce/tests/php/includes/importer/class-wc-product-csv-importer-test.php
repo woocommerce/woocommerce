@@ -88,4 +88,30 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $importer->get_percent_complete() );
 	}
+
+	public function test_import_skipping_existing_product_sku_46505() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( '46505-sku' );
+		$product->save();
+
+		$csv_file = __DIR__ . '/import-skipping-existing-products-46505-data.csv';
+		$args     = array(
+			'parse'   => true,
+			'mapping' => array(
+				'ID'  => 'id',
+				'SKU' => 'sku',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		WC_Helper_Product::delete_product( $product->get_id() );
+		$this->assertEmpty( $data['updated'], 'Expected 0 updated products, got ' . count( $data['updated'] ) );
+		$this->assertEmpty( $data['imported'], 'Expected 0 imported products, got ' . count( $data['imported'] ) );
+		$this->assertEmpty( $data['failed'], 'Expected 0 failed products, got ' . count( $data['failed'] ) );
+		$this->assertEquals( 1, count( $data['skipped'] ), 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+
+		$error = $data['skipped'][0];
+		$this->assertInstanceOf( WP_Error::class, $error );
+		$this->assertEquals( 'A product with this SKU already exists.', $error->get_error_message() );
+	}
 }
