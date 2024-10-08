@@ -9,11 +9,17 @@ const DEFAULT_STATE = {
 	cronJobs: false,
 	isEmailDisabled: '',
 	messages: {},
-	params: [],
+	params: {
+		updateComingSoonMode: {},
+		updateBlockTemplateLoggingThreshold: {},
+		runSelectedUpdateCallbacks: {},
+		updateWccomRequestErrorsMode: {},
+		fakeWooPayments: {},
+		updateWccomBaseUrl: { url: '' },
+	},
 	status: '',
 	dbUpdateVersions: [],
 	loggingLevels: null,
-	blockTemplateLoggingThreshold: null,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -48,7 +54,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				currentlyRunning: {
-					...state,
+					...state.currentlyRunning,
 					[ action.command ]: true,
 				},
 			};
@@ -56,7 +62,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				currentlyRunning: {
-					...state,
+					...state.currentlyRunning,
 					[ action.command ]: false,
 				},
 			};
@@ -74,6 +80,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				params: {
+					...state.params,
 					[ action.source ]: action.params,
 				},
 			};
@@ -86,12 +93,6 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				loggingLevels: action.loggingLevels,
-			};
-		case TYPES.SET_BLOCK_TEMPLATE_LOGGING_THRESHOLD:
-			return {
-				...state,
-				blockTemplateLoggingThreshold:
-					action.blockTemplateLoggingThreshold,
 			};
 		default:
 			return state;

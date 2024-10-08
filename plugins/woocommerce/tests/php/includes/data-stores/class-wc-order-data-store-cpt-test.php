@@ -466,4 +466,74 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_new_order', $callback );
 	}
+
+	/**
+	 * @testDox Updating an order status correctly triggers the "woocommerce_new_order" action.
+	 */
+	public function test_update_order_status_correctly_triggers_new_order_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		$order = new WC_Order();
+		$order->set_status( 'draft' );
+
+		$this->assertEquals( 0, $new_count );
+
+		$order->set_status( 'checkout-draft' );
+		$order_data_store_cpt->update( $order );
+		$order->save();
+		$this->assertEquals( 0, $new_count );
+
+		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
+
+		foreach ( $triggering_order_statuses as $k => $status ) {
+			$current_status = $order->get_status( 'edit' );
+			$order->set_status( $status );
+			$order_data_store_cpt->update( $order );
+			$order->set_status( 'checkout-draft' ); // Revert back to draft.
+			$order->save();
+			$this->assertEquals(
+				$k + 1,
+				$new_count,
+				'Failed to trigger new order hook changing status: ' . $current_status . ' -> ' . $status
+			);
+		}
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
+
+	/**
+	 * @testDox Create a new order with processing status without saving and updating it should trigger the "woocommerce_new_order" action.
+	 */
+	public function test_update_new_processing_order_correctly_triggers_new_order_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		$order = new WC_Order();
+		$order->set_status( 'processing' );
+
+		$this->assertEquals( 0, $new_count );
+
+		$order_data_store_cpt->update( $order );
+
+		$this->assertEquals( 1, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
 }

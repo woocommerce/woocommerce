@@ -7,16 +7,11 @@
 
 The checkout API facilitates the creation of orders (from the current cart) and handling payments for payment methods.
 
-All checkout endpoints require [Nonce Tokens](nonce-tokens.md).
-
--   [Get Checkout Data](#get-checkout-data)
--   [Process Order and Payment](#process-order-and-payment)
+All checkout endpoints require either a [Nonce Token](nonce-tokens.md) or a [Cart Token](cart-tokens.md) otherwise these endpoints will return an error.
 
 ## Get Checkout Data
 
 Returns data required for the checkout. This includes a draft order (created from the current cart) and customer billing and shipping addresses. The payment information will be empty, as it's only persisted when the order gets updated via POST requests (right before payment processing).
-
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
 ```http
 GET /wc/store/v1/checkout
@@ -75,8 +70,6 @@ curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/
 Accepts the final customer addresses and chosen payment method, and any additional payment data, then attempts payment and
 returns the result.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
-
 ```http
 POST /wc/store/v1/checkout
 ```
@@ -88,6 +81,7 @@ POST /wc/store/v1/checkout
 | `customer_note`    | string |    No    | Note added to the order by the customer during checkout.            |
 | `payment_method`   | string |   Yes    | The ID of the payment method being used to process the payment.     |
 | `payment_data`     | array  |    No    | Data to pass through to the payment method when processing payment. |
+| `customer_password`| string |    No    | Optionally define a password for new accounts.                      |
 
 ```sh
 curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value

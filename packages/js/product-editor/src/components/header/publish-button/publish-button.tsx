@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { store as productEditorUiStore } from '../../../store/product-editor-ui';
-import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -33,6 +33,7 @@ export function PublishButton( {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
@@ -61,11 +62,9 @@ export function PublishButton( {
 				navigateTo( { url } );
 			}
 		},
-		onPublishError( error ) {
-			const { message, errorProps } = getProductErrorMessageAndProps(
-				error,
-				visibleTab
-			);
+		async onPublishError( error ) {
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps( error, visibleTab );
 			createErrorNotice( message, errorProps );
 		},
 	} );

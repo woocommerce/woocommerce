@@ -17,7 +17,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchro
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
-use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 
 defined( 'ABSPATH' ) || exit;
@@ -257,6 +257,18 @@ class WC_Install {
 		),
 		'9.1.0' => array(
 			'wc_update_910_add_launch_your_store_tour_option',
+			'wc_update_910_remove_obsolete_user_meta',
+		),
+		'9.2.0' => array(
+			'wc_update_920_add_wc_hooked_blocks_version_option',
+		),
+		'9.3.0' => array(
+			'wc_update_930_add_woocommerce_coming_soon_option',
+			'wc_update_930_migrate_user_meta_for_launch_your_store_tour',
+		),
+		'9.4.0' => array(
+			'wc_update_940_add_phone_to_order_address_fts_index',
+			'wc_update_940_remove_help_panel_highlight_shown',
 		),
 	);
 
@@ -288,6 +300,7 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
@@ -983,6 +996,17 @@ class WC_Install {
 	}
 
 	/**
+	 * Add the woocommerce_coming_soon option for new shops.
+	 *
+	 * Ensure that the option is set for all shops, even if core profiler is disabled on the host.
+	 *
+	 * @since 9.3.0
+	 */
+	public static function add_coming_soon_option() {
+		add_option( 'woocommerce_coming_soon', 'no' );
+	}
+
+	/**
 	 * Checks whether HPOS should be enabled for new shops.
 	 *
 	 * @return bool
@@ -1263,7 +1287,8 @@ class WC_Install {
 				return;
 			}
 
-			if ( in_array( $legacy_api_plugin, wp_get_active_and_valid_plugins(), true ) ) {
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
+			if ( in_array( $legacy_api_plugin, $active_valid_plugins, true ) ) {
 				return;
 			}
 
@@ -2545,9 +2570,9 @@ $hpos_table_schema;
 </ul>
 <!-- /wp:list -->
 
-<!-- wp:paragraph -->
-<h2>Refunds</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Refunds</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Once your return is received and inspected, we will send you an email to notify you that we have received your returned item. We will also notify you of the approval or rejection of your refund.</p>
@@ -2585,17 +2610,17 @@ $hpos_table_schema;
 <p>Only regular priced items may be refunded. Sale items cannot be refunded.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Exchanges</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Exchanges</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>We only replace items if they are defective or damaged. If you need to exchange it for the same item, send us an email at {email address} and send your item to: {physical address}.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Gifts</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Gifts</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>If the item was marked as a gift when purchased and shipped directly to you, you’ll receive a gift credit for the value of your return. Once the returned item is received, a gift certificate will be mailed to you.</p>
@@ -2605,9 +2630,9 @@ $hpos_table_schema;
 <p>If the item wasn’t marked as a gift when purchased, or the gift giver had the order shipped to themselves to give to you later, we will send a refund to the gift giver and they will find out about your return.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Shipping returns</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Shipping returns</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>To return your product, you should mail your product to: {physical address}.</p>
@@ -2625,9 +2650,9 @@ $hpos_table_schema;
 <p>If you are returning more expensive items, you may consider using a trackable shipping service or purchasing shipping insurance. We don’t guarantee that we will receive your returned item.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Need help?</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Need help?</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Contact us at {email} for questions related to refunds and returns.</p>

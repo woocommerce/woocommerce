@@ -10,7 +10,9 @@ import StateInput from './state-input';
 import type { StateInputProps } from './StateInputProps';
 
 const BillingStateInput = ( props: StateInputProps ): JSX.Element => {
-	return <StateInput states={ ALLOWED_STATES } { ...props } />;
+	const { ...restOfProps } = props;
+
+	return <StateInput states={ ALLOWED_STATES } { ...restOfProps } />;
 };
 
 export default BillingStateInput;

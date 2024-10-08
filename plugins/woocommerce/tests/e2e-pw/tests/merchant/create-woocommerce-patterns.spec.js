@@ -5,7 +5,9 @@ const {
 	insertBlock,
 	getCanvas,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
@@ -26,18 +28,34 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Add WooCommerce Patterns Into Page',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{
+		tag: [
+			'@gutenberg',
+			'@services',
+			'@skip-on-default-pressable',
+			'@skip-on-default-wpcom',
+		],
+	},
 	() => {
 		test( 'can insert WooCommerce patterns into page', async ( {
 			page,
 			testPage,
 		} ) => {
 			await goToPageEditor( { page } );
+
+			await closeChoosePatternModal( { page } );
+
 			await fillPageTitle( page, testPage.title );
+
+			const wordPressVersion = await getInstalledWordPressVersion();
 
 			for ( let i = 0; i < wooPatterns.length; i++ ) {
 				await test.step( `Insert ${ wooPatterns[ i ].name } pattern`, async () => {
-					await insertBlock( page, wooPatterns[ i ].name );
+					await insertBlock(
+						page,
+						wooPatterns[ i ].name,
+						wordPressVersion
+					);
 
 					await expect(
 						page.getByLabel( 'Dismiss this notice' ).filter( {
@@ -75,7 +93,9 @@ test.describe(
 			// check some elements from added patterns
 			for ( let i = 1; i < wooPatterns.length; i++ ) {
 				await expect(
-					page.getByText( `${ wooPatterns[ i ].button }` )
+					page.getByRole( 'link', {
+						name: `${ wooPatterns[ i ].button }`,
+					} )
 				).toBeVisible();
 			}
 		} );

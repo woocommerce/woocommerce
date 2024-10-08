@@ -229,7 +229,7 @@ The backfill command can be used to selectively migrate order data (or whole ord
 The exact syntax for this command is as follows:
 
 ```plaintext
-wp wc hpos backfill <order_id> --from=<datastore> --to=<datastore> [--meta_keys=<meta_keys>] [--props=<props>]
+wp wc hpos backfill &lt;order_id&gt; --from=&lt;datastore&gt; --to=&lt;datastore&gt; [--meta_keys=&lt;meta_keys&gt;] [--props=&lt;props&gt;]
 ```
 
 You have to specify which datastore to use as source (either `posts` or `hpos`) and which one to use as destination. The `--meta_keys` and `--props` arguments receive a comma separated list of meta keys and order properties, which can be used to move only certain data from one datastore to the other, instead of the whole order.

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
@@ -73,13 +74,15 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
+		$is_external_product_with_url = $product instanceof \WC_Product_External && $product->get_product_url();
+
 		ob_start();
 
 		/**
 		 * Trigger the single product add to cart action for each product type.
-		*
-		* @since 9.7.0
-		*/
+		 *
+		 * @since 9.7.0
+		 */
 		do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 
 		$product = ob_get_clean();
@@ -92,18 +95,35 @@ class AddToCartForm extends AbstractBlock {
 
 		$parsed_attributes                     = $this->parse_attributes( $attributes );
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
-		$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 
-		$classname          = $attributes['className'] ?? '';
+		if ( ! $is_external_product_with_url ) {
+			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
+		}
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-form wc-block-add-to-cart-form',
+					esc_attr( $classes_and_styles['classes'] ),
+					esc_attr( $product_classname ),
+				)
+			)
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
 		$form = sprintf(
-			'<div class="wp-block-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s" style="%4$s">%5$s</div>',
-			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $classname ),
-			esc_attr( $product_classname ),
-			esc_attr( $classes_and_styles['styles'] ),
+			'<div %1$s>%2$s</div>',
+			$wrapper_attributes,
 			$product
 		);
 
@@ -192,7 +212,7 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
-	 * It isn't necessary register block assets because it is a server side block.
+	 * It isn't necessary to register block assets because it is a server side block.
 	 */
 	protected function register_block_type_assets() {
 		return null;

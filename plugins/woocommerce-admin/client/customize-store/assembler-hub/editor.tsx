@@ -23,6 +23,7 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
 /**
  * Internal dependencies
  */
+import { trackEvent } from '../tracking';
 import { editorIsLoaded } from '../utils';
 import { BlockEditorContainer } from './block-editor-container';
 
@@ -63,6 +64,7 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 	useEffect( () => {
 		if ( ! isLoading ) {
 			editorIsLoaded();
+			trackEvent( 'customize_your_store_assembler_hub_editor_loaded' );
 		}
 	}, [ isLoading ] );
 

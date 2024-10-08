@@ -9,7 +9,6 @@ import {
 	CartShippingRate,
 	CartShippingPackageShippingRate,
 } from '@woocommerce/type-defs/cart';
-import * as blockSettings from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -38,6 +37,7 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 	...jest.requireActual( '@woocommerce/block-settings' ),
 	LOCAL_PICKUP_ENABLED: true,
 } ) );
+const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
 
 // Returns a rate object with the given values
 const generateRate = (
@@ -133,8 +133,7 @@ describe( 'isPackageRateCollectable', () => {
 			expect( hasCollectableRate( ratesToTest2 ) ).toBe( false );
 		} );
 		it( 'returns false for all rates if local pickup is disabled', () => {
-			// Attempt to assign to const or readonly variable error on next line is OK because it is mocked by jest
-			blockSettings.LOCAL_PICKUP_ENABLED = false;
+			blockSettingsMock.LOCAL_PICKUP_ENABLED = false;
 			const ratesToTest = [ 'flat_rate', 'local_pickup' ];
 			expect( hasCollectableRate( ratesToTest ) ).toBe( false );
 		} );

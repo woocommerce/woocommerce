@@ -10,7 +10,7 @@ import { TreeProps } from '../types';
 export function useTree( {
 	items,
 	level = 1,
-	role = 'tree',
+	role = 'listbox',
 	multiple,
 	selected,
 	getItemLabel,
@@ -24,6 +24,9 @@ export function useTree( {
 	onCreateNew,
 	shouldShowCreateButton,
 	onFirstItemLoop,
+	onEscape,
+	highlightedIndex,
+	onExpand,
 	...props
 }: TreeProps ) {
 	return {

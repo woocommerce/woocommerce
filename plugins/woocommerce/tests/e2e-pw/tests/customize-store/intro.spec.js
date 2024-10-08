@@ -29,7 +29,7 @@ test.describe(
 			);
 
 			// Need a block enabled theme to test
-			await activateTheme( 'twentytwentyfour' );
+			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
@@ -47,7 +47,7 @@ test.describe(
 
 		test.afterAll( async ( { baseURL } ) => {
 			// Reset theme to the default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 
 			// Reset tour to visible.
 			await setOption(
@@ -111,49 +111,36 @@ test.describe(
 				'Customize your theme'
 			);
 			await expect(
-				page.getByRole( 'button', { name: 'Customize your theme' } )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "Customize your theme" with a block theme should go to the assembler', async ( {
-			page,
-			assemblerPageObject,
-		} ) => {
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page.click( 'text=Start designing' );
-			await assemblerPageObject.waitForLoadingScreenFinish();
-
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page
-				.getByRole( 'button', { name: 'Customize your theme' } )
-				.click();
-
-			const assembler = await assemblerPageObject.getAssembler();
-			await expect(
-				assembler.locator( "text=Let's get creative" )
-			).toBeVisible();
-		} );
-
-		test( 'clicking on "Customize your theme" with a classic theme should go to the customizer', async ( {
+		test( 'it shows the "non default block theme" banner when the theme is a block theme different than TT4', async ( {
 			page,
 			baseURL,
 		} ) => {
-			await activateTheme( 'twentytwenty' );
+			await activateTheme( baseURL, 'twentytwentythree' );
 
-			try {
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_admin_customize_store_completed',
-					'yes'
-				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
+			await page.goto( CUSTOMIZE_STORE_URL );
+
+			await expect( page.locator( 'h1' ) ).toHaveText(
+				'Customize your theme'
+			);
+			await expect(
+				page.getByRole( 'button', { name: 'Go to the Editor' } )
+			).toBeVisible();
+		} );
+
+		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
+			page,
+			baseURL,
+		} ) => {
+			await activateTheme( baseURL, 'twentytwenty' );
+
 			await page.goto( CUSTOMIZE_STORE_URL );
 
 			await page
-				.getByRole( 'button', { name: 'Customize your theme' } )
+				.getByRole( 'button', { name: 'Go to the Customizer' } )
 				.click();
 
 			await page.waitForNavigation();

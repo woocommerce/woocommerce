@@ -14,7 +14,6 @@ test.describe(
 	'Can create a new post',
 	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
-		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create new post', async ( { page, testPost } ) => {
 			await goToPostEditor( { page } );
 
@@ -32,7 +31,7 @@ test.describe(
 				} )
 				.fill( 'Test Post' );
 
-			await publishPage( page, testPost.title );
+			await publishPage( page, testPost.title, true );
 		} );
 	}
 );

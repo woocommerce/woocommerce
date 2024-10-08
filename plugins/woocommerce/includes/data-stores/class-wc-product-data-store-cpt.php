@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -70,6 +71,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_wp_old_slug',
 		'_edit_last',
 		'_edit_lock',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -131,8 +133,49 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$sku,
 			$sku
 		);
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$result = $wpdb->query( $query );
+
+		/**
+		 * Filter to bail early on the SKU lock query.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param bool|null  $locked  Set to a boolean value to short-circuit the SKU lock query.
+		 * @param WC_Product $product The product being created.
+		 */
+		$locked = apply_filters( 'wc_product_pre_lock_on_sku', null, $product );
+		if ( ! is_null( $locked ) ) {
+			return boolval( $locked );
+		}
+
+		// The insert query can potentially result in a deadlock if there is high concurrency
+		// when trying to insert products, which will result in a false negative for SKU lock
+		// and incorrectly products not being created.
+		// To mitigate this, we will retry the query 3 times before giving up.
+		for ( $attempts = 0; $attempts < 3; $attempts++ ) {
+			if ( $attempts > 1 ) {
+				usleep( 10000 );
+			}
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$result = $wpdb->query( $query );
+			if ( false !== $result ) {
+				break;
+			}
+		}
+
+		if ( false === $result ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'Failed to obtain SKU lock for product: ID "%d" with SKU "%s" after %d attempts.',
+					$product_id,
+					$sku,
+					$attempts,
+				),
+				array(
+					'error' => $wpdb->last_error,
+				)
+			);
+		}
 
 		return (bool) $result;
 	}
@@ -334,7 +377,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->apply_changes();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
+		do_action( 'woocommerce_update_product', $product->get_id(), $product );
 	}
 
 	/**
@@ -424,7 +467,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : null;
+			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -434,6 +477,31 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
 		$product->set_props( $set_props );
+
+		if ( $this->cogs_feature_is_enabled() ) {
+			$this->load_cogs_data( $product );
+		}
+	}
+
+	/**
+	 * Load the Cost of Goods Sold related data for a given product.
+	 *
+	 * @param WC_Product $product The product to apply the loaded data to.
+	 */
+	protected function load_cogs_data( $product ) {
+		$cogs_value = (float) ( get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given product.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float $cogs_value The value as read from the database.
+		 * @param WC_Product $product The product for which the value is being loaded.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_load_cogs_value', $cogs_value, $product );
+
+		$product->set_props( array( 'cogs_value' => $cogs_value ) );
 	}
 
 	/**
@@ -669,6 +737,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		if ( $this->cogs_feature_is_enabled() ) {
+			$cogs_value = $product->get_cogs_value();
+
+			/**
+			 * Filter to customize the Cost of Goods Sold value that gets saved for a given product,
+			 * or to suppress the saving of the value (so that custom storage can be used).
+			 *
+			 * @since 9.5.0
+			 *
+			 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+			 * @param WC_Product $product The product for which the value is being saved.
+			 */
+			$cogs_value = apply_filters( 'woocommerce_save_cogs_value', $cogs_value, $product );
+
+			if ( ! is_null( $cogs_value ) ) {
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', 0.0 === $cogs_value ? '' : $cogs_value );
+				if ( $updated ) {
+					$this->updated_props[] = 'cogs_value';
+				}
+			}
+		}
+
 		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
 			foreach ( $extra_data_keys as $key ) {
@@ -732,16 +822,48 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Action to signal that the value of 'stock_quantity' for a variation has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param WC_Product $product The variation whose stock has changed.
+				 */
 				do_action( 'woocommerce_variation_set_stock', $product );
 			} else {
+				/**
+				 * Action to signal that the value of 'stock_quantity' for a product has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param WC_Product $product The variation whose stock has changed.
+				 */
 				do_action( 'woocommerce_product_set_stock', $product );
 			}
 		}
 
 		if ( in_array( 'stock_status', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Action to signal that the `stock_status` for a variation has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param int        $product_id   The ID of the variation.
+				 * @param string     $stock_status The new stock status of the variation.
+				 * @param WC_Product $product      The product object.
+				 */
 				do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			} else {
+				/**
+				 * Action to signal that the `stock_status` for a product has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param int        $product_id   The ID of the product.
+				 * @param string     $stock_status The new stock status of the product.
+				 * @param WC_Product $product      The product object.
+				 */
 				do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			}
 		}
@@ -2237,23 +2359,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
-			return array(
-				'product_id'       => absint( $id ),
-				'sku'              => get_post_meta( $id, '_sku', true ),
-				'global_unique_id' => get_post_meta( $id, '_global_unique_id', true ),
-				'virtual'          => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
-				'downloadable'     => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
-				'min_price'        => reset( $price_meta ),
-				'max_price'        => end( $price_meta ),
-				'onsale'           => $sale_price && $price === $sale_price ? 1 : 0,
-				'stock_quantity'   => $stock,
-				'stock_status'     => get_post_meta( $id, '_stock_status', true ),
-				'rating_count'     => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
-				'average_rating'   => get_post_meta( $id, '_wc_average_rating', true ),
-				'total_sales'      => get_post_meta( $id, 'total_sales', true ),
-				'tax_status'       => get_post_meta( $id, '_tax_status', true ),
-				'tax_class'        => get_post_meta( $id, '_tax_class', true ),
+			$product_data = array(
+				'product_id'     => absint( $id ),
+				'sku'            => get_post_meta( $id, '_sku', true ),
+				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
+				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
+				'min_price'      => reset( $price_meta ),
+				'max_price'      => end( $price_meta ),
+				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
+				'stock_quantity' => $stock,
+				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
+				'rating_count'   => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
+				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
+				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
+				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
+				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			return $product_data;
 		}
 		return array();
 	}
@@ -2289,5 +2414,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			",
 			$product_id
 		);
+	}
+
+	/**
+	 * Check if the Cost of Goods Sold feature is enabled.
+	 *
+	 * @return bool True if the feature is enabled.
+	 */
+	protected function cogs_feature_is_enabled(): bool {
+		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 	}
 }

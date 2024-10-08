@@ -13,10 +13,10 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message-and-props';
+import { WPError } from '../../../../hooks/use-error-handler';
 import { useProductURL } from '../../../../hooks/use-product-url';
 import { PreviewButtonProps } from '../../preview-button';
-import { errorHandler } from '../../../../hooks/use-product-manager';
+import { formatProductError } from '../../../../utils/format-product-error';
 
 export function usePreview( {
 	productStatus,
@@ -129,7 +129,10 @@ export function usePreview( {
 		} catch ( error ) {
 			if ( onSaveError ) {
 				onSaveError(
-					errorHandler( error as WPError, productStatus ) as WPError
+					formatProductError(
+						error as WPError,
+						productStatus
+					) as WPError
 				);
 			}
 		}

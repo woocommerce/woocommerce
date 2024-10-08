@@ -54,7 +54,7 @@ test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			await activateTheme( baseURL, 'twentynineteen' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -123,7 +123,9 @@ test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 		await pageObject.waitForLoadingScreenFinish();
 
 		const assembler = await pageObject.getAssembler();
-		await assembler.getByRole( 'button', { name: 'Save' } ).click();
+		await assembler
+			.getByRole( 'button', { name: 'Finish customizing' } )
+			.click();
 		await assembler.getByText( 'Your store looks great!' ).waitFor();
 		// Abort any additional unnecessary requests
 		await page.evaluate( () => window.stop() );

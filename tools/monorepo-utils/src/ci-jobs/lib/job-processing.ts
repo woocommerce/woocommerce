@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { Logger } from '../../core/logger';
 import {
 	CommandVarOptions,
 	JobType,
@@ -256,6 +257,23 @@ async function createTestJob(
 		};
 	}
 
+	// Pre-release versions (beta, RC) are not always available, and we should not create the job if that's the case.
+	if (
+		[ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
+			config?.testEnv?.config?.wpVersion
+		) &&
+		! createdJob.testEnv.envVars.WP_VERSION
+	) {
+		Logger.warn(
+			`No WP offer was found for config.wpVersion:${ config.testEnv.config.wpVersion }. Job was not created.`
+		);
+		return null;
+	}
+
+	if ( createdJob.testEnv.envVars.WP_VERSION ) {
+		createdJob.name += ` [WP ${ createdJob.testEnv.envVars.WP_VERSION }]`;
+	}
+
 	return createdJob;
 }
 
@@ -302,13 +320,14 @@ async function createJobsForProject(
 			dependencyCascade
 		);
 
-		if (
-			dependencyChanges === false &&
-			Object.values( dependencyJobs ).some(
-				( array ) => array.length > 0
-			)
-		) {
-			dependencyChanges = true;
+		if ( dependencyChanges === false ) {
+			// First line of detection: implicit changes list points to the dependency.
+			dependencyChanges = ( changes[ dependency.name ] || [] ).length > 0;
+			if ( dependencyChanges === false ) {
+				// Second line of detection: the dependency spawns jobs.
+				dependencyChanges =
+					dependencyJobs.test.length + dependencyJobs.lint.length > 0;
+			}
 		}
 
 		newJobs.lint.push( ...dependencyJobs.lint );

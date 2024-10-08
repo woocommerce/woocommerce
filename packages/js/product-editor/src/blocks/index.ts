@@ -1,6 +1,6 @@
 export { init as initCatalogVisibility } from './product-fields/catalog-visibility';
 export { init as initCustomFields } from './product-fields/custom-fields';
-export { init as initCustomFieldsToogle } from './product-fields/custom-fields-toggle';
+export { init as initCustomFieldsToggle } from './product-fields/custom-fields-toggle';
 export { init as initCheckbox } from './generic/checkbox';
 export { init as initCollapsible } from './generic/collapsible';
 export { init as initConditional } from './generic/conditional';
@@ -32,7 +32,7 @@ export { init as initProductDetailsSectionDescription } from './product-fields/p
 export { init as initProductList } from './product-fields/product-list';
 export { init as initVariationItems } from './product-fields/variation-items';
 export { init as initVariationOptions } from './product-fields/variation-options';
-export { init as initNotice } from './product-fields/notice-edit-single-variation';
+export { init as initNoticeSingleVariation } from './product-fields/notice-edit-single-variation';
 export { init as initNoticeHasVariations } from './product-fields/notice-has-variations';
 export { init as initTaxonomy } from './generic/taxonomy';
 export { init as initText } from './generic/text';
@@ -40,3 +40,4 @@ export { init as initNumber } from './generic/number';
 export { init as initLinkedProductList } from './generic/linked-product-list';
 export { init as initTextArea } from './generic/text-area';
 export { init as initSelect } from './generic/select';
+export { init as initNotice } from './generic/notice';

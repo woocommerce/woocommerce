@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update Settings to disable Save button unless modifications are made.  #### Comment <!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->

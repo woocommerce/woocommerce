@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/types';
 import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
 import { formatAddress } from '@woocommerce/blocks/checkout/utils';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
@@ -22,11 +23,13 @@ const AddressCard = ( {
 	onEdit,
 	target,
 	fieldConfig,
+	isExpanded,
 }: {
 	address: CartShippingAddress | CartBillingAddress;
 	onEdit: () => void;
 	target: string;
 	fieldConfig: FormFieldsConfig;
+	isExpanded: boolean;
 } ): JSX.Element | null => {
 	const countryData = getSetting< Record< string, CountryData > >(
 		'countryData',
@@ -50,6 +53,10 @@ const AddressCard = ( {
 		address,
 		formatToUse
 	);
+	const label =
+		target === 'shipping'
+			? __( 'Edit shipping address', 'woocommerce' )
+			: __( 'Edit billing address', 'woocommerce' );
 
 	return (
 		<div className="wc-block-components-address-card">
@@ -76,18 +83,20 @@ const AddressCard = ( {
 				) }
 			</address>
 			{ onEdit && (
-				<a
-					role="button"
-					href={ '#' + target }
+				<Button
+					render={ <span /> }
 					className="wc-block-components-address-card__edit"
-					aria-label={ __( 'Edit address', 'woocommerce' ) }
+					aria-controls={ target }
+					aria-expanded={ isExpanded }
+					aria-label={ label }
 					onClick={ ( e ) => {
-						onEdit();
 						e.preventDefault();
+						onEdit();
 					} }
+					type="button"
 				>
 					{ __( 'Edit', 'woocommerce' ) }
-				</a>
+				</Button>
 			) }
 		</div>
 	);

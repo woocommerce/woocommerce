@@ -111,7 +111,7 @@ class Loader {
 
 	/**
 	 * Set up a div for the header embed to render into.
-	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
+	 * The initial contents here are meant as a place loader for when the PHP page initially loads.
 	 */
 	public static function embed_page_header() {
 		if ( ! PageController::is_admin_page() && ! PageController::is_embed_page() ) {
@@ -126,12 +126,16 @@ class Loader {
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 
 		$page_title      = '';
-		$pages_with_tabs = array( 'Settings', 'Reports', 'Status' );
+		$pages_with_tabs = array(
+			'admin.php?page=wc-settings',
+			'admin.php?page=wc-reports',
+			'admin.php?page=wc-status',
+		);
 
 		if (
 			count( $sections ) > 2 &&
 			is_array( $sections[1] ) &&
-			in_array( $sections[1][1], $pages_with_tabs, true )
+			in_array( $sections[1][0], $pages_with_tabs, true )
 		) {
 			$page_title = $sections[1][1];
 		} else {
@@ -541,7 +545,7 @@ class Loader {
 	}
 
 	/**
-	 * Return an object defining the currecy options for the site's current currency
+	 * Return an object defining the currency options for the site's current currency
 	 *
 	 * @return  array  Settings for the current currency {
 	 *     Array of settings.

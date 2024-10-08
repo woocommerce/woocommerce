@@ -17,6 +17,7 @@ module.exports = {
 		'/node_modules/',
 		'<rootDir>/build/',
 		'<rootDir>/.*/build/',
+		'<rootDir>/vendor',
 		'<rootDir>/tests',
 	],
 	transformIgnorePatterns: [

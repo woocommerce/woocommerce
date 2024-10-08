@@ -8,6 +8,9 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -123,42 +126,42 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_tools() {
 		$tools = array(
-			'clear_transients'                   => array(
+			'clear_transients'                     => array(
 				'name'   => __( 'WooCommerce transients', 'woocommerce' ),
 				'button' => __( 'Clear transients', 'woocommerce' ),
 				'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 			),
-			'clear_expired_transients'           => array(
+			'clear_expired_transients'             => array(
 				'name'   => __( 'Expired transients', 'woocommerce' ),
 				'button' => __( 'Clear transients', 'woocommerce' ),
 				'desc'   => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
-			'delete_orphaned_variations'         => array(
+			'delete_orphaned_variations'           => array(
 				'name'   => __( 'Orphaned variations', 'woocommerce' ),
 				'button' => __( 'Delete orphaned variations', 'woocommerce' ),
 				'desc'   => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
 			),
-			'clear_expired_download_permissions' => array(
+			'clear_expired_download_permissions'   => array(
 				'name'   => __( 'Used-up download permissions', 'woocommerce' ),
 				'button' => __( 'Clean up download permissions', 'woocommerce' ),
 				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
 			),
-			'regenerate_product_lookup_tables'   => array(
+			'regenerate_product_lookup_tables'     => array(
 				'name'   => __( 'Product lookup tables', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
 			),
-			'recount_terms'                      => array(
+			'recount_terms'                        => array(
 				'name'   => __( 'Term counts', 'woocommerce' ),
 				'button' => __( 'Recount terms', 'woocommerce' ),
 				'desc'   => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
 			),
-			'reset_roles'                        => array(
+			'reset_roles'                          => array(
 				'name'   => __( 'Capabilities', 'woocommerce' ),
 				'button' => __( 'Reset capabilities', 'woocommerce' ),
 				'desc'   => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 			),
-			'clear_sessions'                     => array(
+			'clear_sessions'                       => array(
 				'name'   => __( 'Clear customer sessions', 'woocommerce' ),
 				'button' => __( 'Clear', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -167,7 +170,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'This tool will delete all customer session data from the database, including current carts and saved carts in the database.', 'woocommerce' )
 				),
 			),
-			'clear_template_cache'               => array(
+			'clear_template_cache'                 => array(
 				'name'   => __( 'Clear template cache', 'woocommerce' ),
 				'button' => __( 'Clear', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -176,7 +179,16 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'This tool will empty the template cache.', 'woocommerce' )
 				),
 			),
-			'install_pages'                      => array(
+			'clear_system_status_theme_info_cache' => array(
+				'name'   => __( 'Clear system status theme info cache', 'woocommerce' ),
+				'button' => __( 'Clear', 'woocommerce' ),
+				'desc'   => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce' ),
+					__( 'This tool will empty the system status theme info cache.', 'woocommerce' )
+				),
+			),
+			'install_pages'                        => array(
 				'name'   => __( 'Create default WooCommerce pages', 'woocommerce' ),
 				'button' => __( 'Create pages', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -185,7 +197,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' )
 				),
 			),
-			'delete_taxes'                       => array(
+			'delete_taxes'                         => array(
 				'name'   => __( 'Delete WooCommerce tax rates', 'woocommerce' ),
 				'button' => __( 'Delete tax rates', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -194,12 +206,12 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce' )
 				),
 			),
-			'regenerate_thumbnails'              => array(
+			'regenerate_thumbnails'                => array(
 				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
 			),
-			'db_update_routine'                  => array(
+			'db_update_routine'                    => array(
 				'name'   => __( 'Update database', 'woocommerce' ),
 				'button' => __( 'Update database', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -207,6 +219,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'Note:', 'woocommerce' ),
 					__( 'This tool will update your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce' )
 				),
+			),
+			'recreate_order_address_fts_index'     => array(
+				'name'   => __( 'Re-create Order Address FTS index', 'woocommerce' ),
+				'button' => __( 'Recreate index', 'woocommerce' ),
+				'desc'   => __( 'This tool will recreate the full text search index for order addresses. If the index does not exist, it will try to create it.', 'woocommerce' ),
 			),
 		);
 		if ( method_exists( 'WC_Install', 'verify_base_tables' ) ) {
@@ -567,6 +584,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				}
 				break;
 
+			case 'clear_system_status_theme_info_cache':
+				wc_clear_system_status_theme_info_cache();
+				$message = __( 'System status theme info cache cleared.', 'woocommerce' );
+				break;
+
 			case 'verify_db_tables':
 				if ( ! method_exists( 'WC_Install', 'verify_base_tables' ) ) {
 					$message = __( 'You need WooCommerce 4.2 or newer to run this tool.', 'woocommerce' );
@@ -582,6 +604,13 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$message .= implode( ', ', $missing_tables );
 					$ran      = false;
 				}
+				break;
+
+			case 'recreate_order_address_fts_index':
+				$hpos_controller = wc_get_container()->get( CustomOrdersTableController::class );
+				$results         = $hpos_controller->recreate_order_address_fts_index();
+				$ran             = $results['status'];
+				$message         = $results['message'];
 				break;
 
 			default:

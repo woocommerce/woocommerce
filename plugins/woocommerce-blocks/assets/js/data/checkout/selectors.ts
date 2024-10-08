@@ -16,6 +16,10 @@ export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;
 };
 
+export const getCustomerPassword = ( state: CheckoutState ) => {
+	return state.customerPassword;
+};
+
 export const getOrderId = ( state: CheckoutState ) => {
 	return state.orderId;
 };
@@ -30,6 +34,14 @@ export const getRedirectUrl = ( state: CheckoutState ) => {
 
 export const getUseShippingAsBilling = ( state: CheckoutState ) => {
 	return state.useShippingAsBilling;
+};
+
+export const getEditingBillingAddress = ( state: CheckoutState ) => {
+	return state.editingBillingAddress;
+};
+
+export const getEditingShippingAddress = ( state: CheckoutState ) => {
+	return state.editingShippingAddress;
 };
 
 export const getExtensionData = ( state: CheckoutState ) => {

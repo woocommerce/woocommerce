@@ -5,15 +5,16 @@
 	white-space: nowrap;
 
 	label {
+		@include reset-color();
 		@include reset-typography();
 		@include font-size(regular);
 		position: absolute;
-		transform: translateY(em($gap));
-		line-height: 1;
+		transform: translateY(-50%);
+		line-height: 1.5;
 		left: em($gap-smaller + 1px);
-		top: 0;
+		top: 25px;
 		transform-origin: top left;
-		color: currentColor;
+		color: $universal-body-low-emphasis;
 		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
@@ -42,26 +43,28 @@
 	input[type="url"],
 	input[type="text"],
 	input[type="number"],
+	input[type="password"],
 	input[type="email"] {
 		@include font-size(regular);
 		padding: em($gap) em($gap-smaller);
 		line-height: em($gap);
 		width: 100%;
 		border-radius: $universal-border-radius;
-		border: 1px solid $universal-border-light;
+		border: 1px solid $universal-border-strong;
 
 		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
-		max-height: 52px;
+		height: 50px;
 		background-color: #fff;
-		color: currentColor;
+		color: $input-text-active;
 
 		&:focus {
 			background-color: #fff;
+			color: $input-text-active;
 			outline: 0;
-			box-shadow: 0 0 0 2px currentColor;
+			border: 1.5px solid currentColor;
 		}
 
 		.has-dark-controls & {
@@ -72,7 +75,7 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 2px $input-border-dark;
+				border: 1.5px solid currentColor;
 			}
 		}
 	}
@@ -82,13 +85,15 @@
 	&.is-active input[type="url"],
 	&.is-active input[type="text"],
 	&.is-active input[type="number"],
+	&.is-active input[type="password"],
 	&.is-active input[type="email"] {
 		padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
 	}
 
 	&.is-active label,
 	input:-webkit-autofill + label {
-		transform: translateY(25%) scale(0.75);
+		transform: translateY(#{$gap-smallest}) scale(0.75);
+		top: 0;
 	}
 
 	&.has-error input {
@@ -99,7 +104,7 @@
 			border-color: $alert-red;
 		}
 		&:focus {
-			box-shadow: 0 0 0 1px $alert-red;
+			box-shadow: 0 0 0 0.5px $alert-red;
 		}
 
 		.has-dark-controls &,
@@ -110,7 +115,7 @@
 		}
 
 		.has-dark-controls &:focus {
-			box-shadow: 0 0 0 1px color.adjust($alert-red, $lightness: 30%);
+			box-shadow: 0 0 0 0.5px color.adjust($alert-red, $lightness: 30%);
 		}
 	}
 

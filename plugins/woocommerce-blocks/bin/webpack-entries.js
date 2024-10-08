@@ -16,7 +16,6 @@ const glob = require( 'glob' );
 // when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -86,40 +85,47 @@ const blocks = {
 	},
 	'single-product': {},
 	'stock-filter': {},
-	'product-filter': {
-		isExperimental: true,
-	},
 	'product-filters': {
 		isExperimental: true,
 	},
 	'product-filters-overlay': {
 		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/overlay',
 	},
 	'product-filters-overlay-navigation': {
 		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/overlay-navigation',
 	},
 	'product-filter-stock-status': {
 		isExperimental: true,
-		customDir: 'product-filter/inner-blocks/stock-filter',
+		customDir: 'product-filters/inner-blocks/stock-filter',
 	},
 	'product-filter-price': {
-		customDir: 'product-filter/inner-blocks/price-filter',
+		customDir: 'product-filters/inner-blocks/price-filter',
 		isExperimental: true,
 	},
 	'product-filter-attribute': {
-		customDir: 'product-filter/inner-blocks/attribute-filter',
+		customDir: 'product-filters/inner-blocks/attribute-filter',
 		isExperimental: true,
 	},
 	'product-filter-rating': {
-		customDir: 'product-filter/inner-blocks/rating-filter',
+		customDir: 'product-filters/inner-blocks/rating-filter',
 		isExperimental: true,
 	},
 	'product-filter-active': {
-		customDir: 'product-filter/inner-blocks/active-filters',
+		customDir: 'product-filters/inner-blocks/active-filters',
 		isExperimental: true,
 	},
 	'product-filter-clear-button': {
-		customDir: 'product-filter/inner-blocks/clear-button',
+		customDir: 'product-filters/inner-blocks/clear-button',
+		isExperimental: true,
+	},
+	'product-filter-checkbox-list': {
+		customDir: 'product-filters/inner-blocks/checkbox-list',
+		isExperimental: true,
+	},
+	'product-filter-chips': {
+		customDir: 'product-filters/inner-blocks/chips',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -160,6 +166,10 @@ const blocks = {
 	},
 	'order-confirmation-additional-fields': {
 		customDir: 'order-confirmation/additional-fields',
+	},
+	'order-confirmation-create-account': {
+		customDir: 'order-confirmation/create-account',
+		isExperimental: true,
 	},
 };
 

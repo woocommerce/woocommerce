@@ -4,8 +4,6 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Payments;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init;
 
 /**
@@ -98,7 +96,7 @@ class AdditionalPayments extends Payments {
 			return $this->can_view_result;
 		}
 
-		// Show task if woocommerce-payments is connected or if there are any suggested gateways in other category enabled.
+		// Show task if WooPayments is connected or if there are any suggested gateways in other category enabled.
 		$this->can_view_result = (
 			WooCommercePayments::is_connected() ||
 			self::has_enabled_other_category_gateways()
@@ -188,7 +186,7 @@ class AdditionalPayments extends Payments {
 	 */
 	private static function get_suggestion_gateways( $filter_by = 'category_additional' ) {
 		$country            = wc_get_base_location()['country'];
-		$plugin_suggestions = Init::get_suggestions();
+		$plugin_suggestions = Init::get_cached_or_default_suggestions();
 		$plugin_suggestions = array_filter(
 			$plugin_suggestions,
 			function( $plugin ) use ( $country, $filter_by ) {

@@ -50,6 +50,31 @@
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
 
+	<rule ref="Suin.Classes.PSR4">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>tests/php/src/</include-pattern>
+		<exclude-pattern>plugins/woocommerce/src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Proxies/ExampleClasses/</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Internal/DependencyManagement/ExampleClasses/</exclude-pattern>
+		<properties>
+			<property name="composerJsonPath" value="composer.json"/>
+		</properties>
+	</rule>
+
+	<rule ref="Generic.CodeAnalysis.UselessOverridingMethod.Found">
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Blocks/Mocks/</exclude-pattern>
+	</rule>
+
+	<rule ref="Generic.PHP.RequireStrictTypes">
+		<include-pattern>includes/</include-pattern>
+		<include-pattern>lib/</include-pattern>
+		<include-pattern>src/</include-pattern>
+		<include-pattern>tests/</include-pattern>
+		<exclude-pattern>plugins/woocommerce/includes/admin/views/</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/includes/emails/</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/includes/react-admin/emails/</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
 		<exclude-pattern>tests/src</exclude-pattern>
 	</rule>

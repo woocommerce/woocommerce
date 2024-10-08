@@ -53,16 +53,9 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
 import '~/mobile-banner';
-import './navigation';
 
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
-);
-
-const WCPayUsageModal = lazy( () =>
-	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../task-lists/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
-	)
 );
 
 export class PrimaryLayout extends Component {
@@ -125,15 +118,10 @@ function _Layout( {
 	usePageClasses( page );
 
 	function recordPageViewTrack() {
-		const navigationFlag = {
-			has_navigation: !! window.wcNavigation,
-		};
-
 		if ( isEmbedded ) {
 			const path = document.location.pathname + document.location.search;
 			recordPageView( path, {
 				is_embedded: true,
-				...navigationFlag,
 			} );
 			return;
 		}
@@ -155,7 +143,6 @@ function _Layout( {
 			jetpack_installed: installedPlugins.includes( 'jetpack' ),
 			jetpack_active: activePlugins.includes( 'jetpack' ),
 			jetpack_connected: isJetpackConnected,
-			...navigationFlag,
 		} );
 	}
 
@@ -169,15 +156,6 @@ function _Layout( {
 			triggerExitPageCesSurvey();
 		}, 0 );
 	}, [ location?.pathname ] );
-
-	function isWCPaySettingsPage() {
-		const { page: queryPage, section, tab } = getQuery();
-		return (
-			queryPage === 'wc-settings' &&
-			tab === 'checkout' &&
-			section === 'woocommerce_payments'
-		);
-	}
 
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
 	const {
@@ -244,21 +222,12 @@ function _Layout( {
 							</div>
 						</PrimaryLayout>
 					) }
-
-					{ isEmbedded && isWCPaySettingsPage() && (
-						<Suspense fallback={ null }>
-							<WCPayUsageModal />
-						</Suspense>
-					) }
 					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
 				</div>
 				{ showPluginArea && (
 					<>
 						<PluginArea scope="woocommerce-admin" />
-						{ window.wcAdminFeatures.navigation && (
-							<PluginArea scope="woocommerce-navigation" />
-						) }
 						<PluginArea scope="woocommerce-tasks" />
 					</>
 				) }

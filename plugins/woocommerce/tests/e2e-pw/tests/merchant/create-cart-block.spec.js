@@ -5,7 +5,9 @@ const {
 	insertBlock,
 	transformIntoBlocks,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
@@ -14,7 +16,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Transform Classic Cart To Cart Block',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@skip-on-default-pressable' ] },
 	() => {
 		test( 'can transform classic cart to cart block', async ( {
 			page,
@@ -22,8 +24,11 @@ test.describe(
 		} ) => {
 			await goToPageEditor( { page } );
 
+			await closeChoosePatternModal( { page } );
+
 			await fillPageTitle( page, testPage.title );
-			await insertBlock( page, 'Classic Cart' );
+			const wordPressVersion = await getInstalledWordPressVersion();
+			await insertBlock( page, 'Classic Cart', wordPressVersion );
 			await transformIntoBlocks( page );
 			await publishPage( page, testPage.title );
 

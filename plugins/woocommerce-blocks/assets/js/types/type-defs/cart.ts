@@ -11,7 +11,7 @@ import {
 	ShippingRateItem,
 	ExtensionsData,
 } from './cart-response';
-
+import { ApiErrorResponse } from './api-error-response';
 import {
 	ProductResponseItemData,
 	ProductResponseItem,
@@ -182,11 +182,6 @@ export interface CartTotals extends CurrencyInfo {
 	tax_lines: Array< CartTotalsTaxLineItem >;
 }
 
-export interface CartErrorItem {
-	code: string;
-	message: string;
-}
-
 export interface Cart extends Record< string, unknown > {
 	coupons: Array< CartCouponItem >;
 	shippingRates: Array< CartShippingRate >;
@@ -201,7 +196,7 @@ export interface Cart extends Record< string, unknown > {
 	hasCalculatedShipping: boolean;
 	fees: Array< CartFeeItem >;
 	totals: CartTotals;
-	errors: Array< CartErrorItem >;
+	errors: Array< ApiErrorResponse >;
 	paymentMethods: Array< string >;
 	paymentRequirements: Array< string >;
 	extensions: ExtensionsData;

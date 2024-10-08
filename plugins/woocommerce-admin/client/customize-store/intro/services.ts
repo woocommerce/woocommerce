@@ -106,7 +106,7 @@ const fetchIsFontLibraryAvailable = async () => {
 const fetchIsPTKPatternsAPIAvailable = async () => {
 	try {
 		await apiFetch( {
-			path: '/wc/private/patterns',
+			path: '/wc-admin/patterns',
 			method: 'GET',
 		} );
 
@@ -160,6 +160,9 @@ export const setFlags = async () => {
 			trackEvent( 'customize_your_store_ai_status', {
 				online: isAiOnline ? 'yes' : 'no',
 			} );
+
+			// @ts-expect-error temp workaround;
+			window.cys_aiFlow = true;
 
 			return isAiOnline ? FlowType.AIOnline : FlowType.AIOffline;
 		} catch ( e ) {

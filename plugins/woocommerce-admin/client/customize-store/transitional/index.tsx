@@ -21,7 +21,6 @@ import { SiteHub } from '../assembler-hub/site-hub';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
-import { navigateOrParent } from '../utils';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
@@ -93,7 +92,7 @@ export const Transitional = ( {
 				<h2 className="woocommerce-customize-store__transitional-subheading">
 					{ isEntrepreneurFlow()
 						? __(
-								"Congratuations! You've successfully designed your store. Now you can go back to the Home screen to complete your store setup and start selling.",
+								"Congratulations! You've successfully designed your store. Now you can go back to the Home screen to complete your store setup and start selling.",
 								'woocommerce'
 						  )
 						: __(
@@ -122,6 +121,7 @@ export const Transitional = ( {
 					) }
 
 					<Button
+						href={ homeUrl }
 						className="woocommerce-customize-store__transitional-preview-button"
 						variant={
 							isEntrepreneurFlow() ? 'secondary' : 'primary'
@@ -130,7 +130,6 @@ export const Transitional = ( {
 							trackEvent(
 								'customize_your_store_transitional_preview_store_click'
 							);
-							window.open( homeUrl, '_blank' );
 						} }
 					>
 						{ __( 'View store', 'woocommerce' ) }
@@ -180,13 +179,10 @@ export const Transitional = ( {
 									</p>
 									<Button
 										variant="link"
+										href={ `${ ADMIN_URL }edit.php?post_type=product` }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_product_list_click'
-											);
-											navigateOrParent(
-												window,
-												`${ ADMIN_URL }edit.php?post_type=product`
 											);
 										} }
 									>
@@ -220,13 +216,10 @@ export const Transitional = ( {
 									</p>
 									<Button
 										variant="link"
+										href={ `${ ADMIN_URL }site-editor.php` }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_editor_click'
-											);
-											navigateOrParent(
-												window,
-												`${ ADMIN_URL }site-editor.php`
 											);
 										} }
 									>

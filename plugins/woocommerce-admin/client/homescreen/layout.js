@@ -24,10 +24,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import ActivityHeader from '~/activity-panel/activity-header';
+import Promotions from '~/marketplace/components/promotions/promotions';
 import { ActivityPanel } from './activity-panel';
 import { Column } from './column';
 import InboxPanel from '../inbox-panel';
-import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
 import {
@@ -128,7 +128,7 @@ export const Layout = ( {
 							className="your-store-today"
 							title={ __( 'Your store today', 'woocommerce' ) }
 							subtitle={ __(
-								"To do's, tips, and insights for your business",
+								'To do’s, tips, and insights for your business',
 								'woocommerce'
 							) }
 						/>
@@ -136,6 +136,7 @@ export const Layout = ( {
 					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
 					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
+					<Promotions format="promo-card" />
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
@@ -162,9 +163,6 @@ export const Layout = ( {
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
-				{ window.wcAdminFeatures.navigation && (
-					<NavigationIntroModal />
-				) }
 			</div>
 		</>
 	);

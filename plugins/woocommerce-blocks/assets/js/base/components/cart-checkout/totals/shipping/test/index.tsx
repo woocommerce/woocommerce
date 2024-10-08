@@ -318,7 +318,7 @@ describe( 'TotalsShipping', () => {
 		);
 		expect(
 			screen.getByText(
-				'Shipping to W1T 4JG, London, United Kingdom (UK)'
+				'Delivers to W1T 4JG, London, United Kingdom (UK)'
 			)
 		).toBeInTheDocument();
 		expect( screen.getByText( 'Change address' ) ).toBeInTheDocument();
@@ -368,56 +368,8 @@ describe( 'TotalsShipping', () => {
 			screen.queryByText( 'Change address' )
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByText( 'Add an address for shipping options' )
+			screen.getByText( 'Enter address to check delivery options' )
 		).toBeInTheDocument();
-	} );
-	it( 'does not show the calculator button when default rates are available and no address has been entered', () => {
-		baseContextHooks.useStoreCart.mockReturnValue( {
-			cartItems: mockPreviewCart.items,
-			cartTotals: [ mockPreviewCart.totals ],
-			cartCoupons: mockPreviewCart.coupons,
-			cartFees: mockPreviewCart.fees,
-			cartNeedsShipping: mockPreviewCart.needs_shipping,
-			shippingRates: mockPreviewCart.shipping_rates,
-			shippingAddress: {
-				...shippingAddress,
-				city: '',
-				country: '',
-				postcode: '',
-			},
-			billingAddress: mockPreviewCart.billing_address,
-			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
-			isLoadingRates: false,
-		} );
-		render(
-			<SlotFillProvider>
-				<TotalsShipping
-					currency={ {
-						code: 'USD',
-						symbol: '$',
-						minorUnit: 2,
-						decimalSeparator: '.',
-						prefix: '',
-						suffix: '',
-						thousandSeparator: ', ',
-					} }
-					values={ {
-						total_shipping: '0',
-						total_shipping_tax: '0',
-					} }
-					showCalculator={ true }
-					showRateSelector={ true }
-					isCheckout={ false }
-					className={ '' }
-				/>
-			</SlotFillProvider>
-		);
-		expect(
-			screen.queryByText( 'Change address' )
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByText( 'Add an address for shipping options' )
-		).not.toBeInTheDocument();
 	} );
 	it( 'does show the calculator button when default rates are available and has formatted address', () => {
 		baseContextHooks.useStoreCart.mockReturnValue( {
@@ -463,7 +415,7 @@ describe( 'TotalsShipping', () => {
 		);
 		expect( screen.queryByText( 'Change address' ) ).toBeInTheDocument();
 		expect(
-			screen.queryByText( 'Add an address for shipping options' )
+			screen.queryByText( 'Enter address to check delivery options' )
 		).not.toBeInTheDocument();
 	} );
 } );

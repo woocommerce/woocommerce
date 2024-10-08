@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: BlockTemplatesController: move all hooks into methods instead of being inline
-
-

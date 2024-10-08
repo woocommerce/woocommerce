@@ -83,9 +83,16 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\OnboardingThemes',
 				'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 				'Automattic\WooCommerce\Admin\API\OnboardingProducts',
-				'Automattic\WooCommerce\Admin\API\NavigationFavorites',
 				'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 				'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
+				'Automattic\WooCommerce\Admin\API\AI\StoreTitle',
+				'Automattic\WooCommerce\Admin\API\AI\BusinessDescription',
+				'Automattic\WooCommerce\Admin\API\AI\StoreInfo',
+				'Automattic\WooCommerce\Admin\API\AI\Images',
+				'Automattic\WooCommerce\Admin\API\AI\Patterns',
+				'Automattic\WooCommerce\Admin\API\AI\Product',
+				'Automattic\WooCommerce\Admin\API\AI\Products',
+				'Automattic\WooCommerce\Admin\API\Patterns',
 			);
 		}
 

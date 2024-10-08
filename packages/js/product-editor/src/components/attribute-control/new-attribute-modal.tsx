@@ -363,7 +363,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									| React.MouseEvent< Element >
 									| React.FocusEvent< Element >
 							) => {
-								if ( ! event.isPropagationStopped() ) {
+								if ( ! event?.isPropagationStopped() ) {
 									onCancel();
 								}
 							} }

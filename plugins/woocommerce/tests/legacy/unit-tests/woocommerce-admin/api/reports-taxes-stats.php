@@ -99,7 +99,7 @@ class WC_Admin_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 			$wc_refund = wc_create_refund( $refund );
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();

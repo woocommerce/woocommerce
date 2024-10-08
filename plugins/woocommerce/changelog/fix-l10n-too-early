@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Removes several side effects in the code bases that caused translations to be loaded too early.

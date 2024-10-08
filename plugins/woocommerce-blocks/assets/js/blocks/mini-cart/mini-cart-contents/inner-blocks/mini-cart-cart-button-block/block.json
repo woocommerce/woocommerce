@@ -35,8 +35,10 @@
 			"isDefault": true
 		}
 	],
-	"parent": [ "woocommerce/mini-cart-footer-block" ],
+	"parent": [
+		"woocommerce/mini-cart-footer-block"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

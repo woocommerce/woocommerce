@@ -134,7 +134,7 @@ const setup = ( params: SetupParams = {} ) => {
 			: [];
 
 		const checkbox = Array.from( checkboxes ).find(
-			( input ) => input.id === value
+			( input ) => input.value === value
 		);
 
 		return checkbox;

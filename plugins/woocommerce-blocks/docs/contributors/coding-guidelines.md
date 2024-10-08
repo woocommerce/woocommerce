@@ -141,7 +141,7 @@ And these are the styles of the block:
 }
 ```
 
-As you can see, the styles coming from the themes have higher specificity, so our styles would be overriden. In order to solve this:
+As you can see, the styles coming from the themes have higher specificity, so our styles would be overridden. In order to solve this:
 
 1. Never use `!important` rules in CSS to engage in a specificity war with a theme.
 2. Never use ID selectors.

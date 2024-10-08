@@ -35,17 +35,17 @@ module.exports = {
 	},
 	// webpackFinal field was added in following PR: https://github.com/woocommerce/woocommerce-blocks/pull/7514
 	// This fixes "storybook build issue" related to framer-motion library.
-	// Solution is from this commment: https://github.com/storybookjs/storybook/issues/16690#issuecomment-971579785
+	// Solution is from this comment: https://github.com/storybookjs/storybook/issues/16690#issuecomment-971579785
 	webpackFinal: async ( config ) => {
 		config.module.rules.push( {
 			test: /\.mjs$/,
 			include: /node_modules/,
 			type: 'javascript/auto',
 		} );
-		config.externals = [ 'react-dom/client' ];
 		// https://github.com/storybookjs/storybook/discussions/22650#discussioncomment-6414161
 		config.resolve.alias = {
 			...config.resolve.alias,
+			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
 			react: path.resolve( __dirname, '../node_modules/react' ),
 			'react-dom': path.resolve( __dirname, '../node_modules/react-dom' ),
 		};

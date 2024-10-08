@@ -14,6 +14,7 @@ $border-width: 1px;
 		> li {
 			margin: 0;
 			width: 100%;
+			overflow: hidden;
 
 			> img {
 				width: 100%;
@@ -30,8 +31,8 @@ $border-width: 1px;
 	.wc-block-components-express-payment__event-buttons {
 		list-style: none;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(calc(33% - 10px), 1fr));
-		grid-gap: 10px;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		grid-gap: 12px;
 
 		@include breakpoint("<782px") {
 			grid-template-columns: 1fr;
@@ -58,7 +59,7 @@ $border-width: 1px;
 			height: $universal-border-radius - $border-width;
 			margin-right: $gap-small;
 			pointer-events: none;
-			width: #{$gap-large - $gap-small - $border-width * 2};
+			flex-grow: 1;
 		}
 
 		&::after {
@@ -73,6 +74,13 @@ $border-width: 1px;
 			pointer-events: none;
 			flex-grow: 1;
 		}
+
+		.has-dark-controls & {
+			&::before,
+			&::after {
+				border-color: $input-border-dark;
+			}
+		}
 	}
 
 	.wc-block-components-express-payment__title {
@@ -86,6 +94,10 @@ $border-width: 1px;
 		padding: #{$gap-large - $universal-border-radius} $gap-large $gap-large;
 		border-radius: 0 0 $universal-border-radius $universal-border-radius;
 
+		.has-dark-controls & {
+			border-color: $input-border-dark;
+		}
+
 		> p {
 			margin-bottom: em($gap);
 		}
@@ -95,7 +107,7 @@ $border-width: 1px;
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
 		> li {
-			padding-bottom: $gap;
+			padding-bottom: $gap-small;
 			text-align: center;
 			width: 100%;
 
@@ -111,7 +123,7 @@ $border-width: 1px;
 	align-items: center;
 	text-align: center;
 	padding: 0 $gap-large;
-	margin: $gap-larger 0 ( 3.5 * $grid-unit );
+	margin: $gap-larger 0 (3.5 * $grid-unit);
 
 	&::before {
 		margin-right: 10px;
@@ -126,6 +138,10 @@ $border-width: 1px;
 		content: " ";
 		flex: 1;
 		border-bottom: 1px solid $universal-border-light;
+
+		.has-dark-controls & {
+			border-color: $input-border-dark;
+		}
 	}
 }
 
@@ -142,7 +158,8 @@ $border-width: 1px;
 
 // For Twenty Twenty we need to increase specificity of the title.
 .theme-twentytwenty {
-	.wc-block-components-express-payment .wc-block-components-express-payment__title {
+	.wc-block-components-express-payment
+	.wc-block-components-express-payment__title {
 		padding-left: $gap-small;
 		padding-right: $gap-small;
 	}
