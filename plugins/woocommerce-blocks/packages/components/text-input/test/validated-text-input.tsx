@@ -141,10 +141,6 @@ describe( 'ValidatedTextInput', () => {
 		);
 		const errorMessageElement = await screen.getByText( 'Error message 3' );
 		await expect( errorMessageElement ).toBeInTheDocument();
-		expect( errorMessageElement ).toHaveAttribute(
-			'id',
-			'validate-error-textinput-3'
-		);
 		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
 			'Error message 3'
 		);

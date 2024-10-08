@@ -255,6 +255,7 @@ const ValidatedTextInput = forwardRef<
 						<ValidationInputError
 							errorMessage={ passedErrorMessage }
 							propertyName={ errorIdString }
+							elementId={ errorIdString }
 						/>
 					) : (
 						feedback
