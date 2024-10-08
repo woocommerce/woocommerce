@@ -1,6 +1,6 @@
 <?php
 /**
- * A class for handling the overwriting of version strings in the Jetpack Autoloader for merged feature plugins.
+ * class for handling the overwriting of version strings in the Jetpack Autoloader for merged feature plugins.
  *
  * @package woocommerce/monorepo-plugin
  */
