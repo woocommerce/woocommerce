@@ -41,7 +41,7 @@ export function TabButton( {
 
 	return (
 		<Fill name={ TABS_SLOT_NAME }>
-			{ ( fillProps: TabsFillProps ) => {
+			{ ( ( fillProps: TabsFillProps ) => {
 				const { onClick } = fillProps;
 				return (
 					<OrderedWrapper order={ order }>
@@ -59,7 +59,7 @@ export function TabButton( {
 						</Button>
 					</OrderedWrapper>
 				);
-			} }
+			} ) as any }
 		</Fill>
 	);
 }

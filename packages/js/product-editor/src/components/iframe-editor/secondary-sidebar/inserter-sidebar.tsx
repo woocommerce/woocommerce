@@ -42,7 +42,7 @@ export default function InserterSidebar() {
 	}, [ setIsInserterOpened ] );
 
 	const closeOnEscape = useCallback(
-		( event ) => {
+		( event: any ) => {
 			if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
 				event.preventDefault();
 				closeInserter();

@@ -374,7 +374,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} }
 				/>
 			) }
-			{ renderEmptyState() }
+			{ renderEmptyState() as any }
 		</div>
 	);
 };

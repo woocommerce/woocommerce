@@ -10,14 +10,14 @@ import { __experimentalWooProductFieldItem as WooProductFieldItem } from '@wooco
  */
 import { ProductSectionLayout } from './product-section-layout';
 
-type ProductFieldSectionProps = {
+interface ProductFieldSectionProps extends React.Attributes {
 	id: string;
 	title: string;
 	description: string | JSX.Element;
 	className?: string;
-};
+}
 
-export const ProductFieldSection: React.FC< ProductFieldSectionProps > = ( {
+export const ProductFieldSection: React.FC< React.PropsWithChildren< ProductFieldSectionProps > > = ( {
 	id,
 	title,
 	description,
