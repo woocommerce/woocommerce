@@ -298,7 +298,7 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 		// If everything was a success and we both installed and activated, make the success message more informative.
 		if (
 			installations.success &&
-			installations.data.results.length &&
+			Object.keys( installations.data.results ).length &&
 			activations.success &&
 			activations.data.activated.length
 		) {
