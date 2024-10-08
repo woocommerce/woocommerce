@@ -5,7 +5,7 @@ import { TableRow } from '@woocommerce/components/build-types/table/types';
 /**
  * Internal dependencies
  */
-import { Subscription } from '../types';
+import { Subscription, MySubscriptionsTable } from '../types';
 import {
 	actions,
 	subscriptionStatus,
@@ -14,22 +14,15 @@ import {
 	version,
 } from './rows/functions';
 
-export function availableSubscriptionRow( item: Subscription ): TableRow[] {
+export function subscriptionRow(
+	item: Subscription,
+	table: MySubscriptionsTable
+): TableRow[] {
 	return [
 		nameAndStatus( item ),
 		expiry( item ),
-		subscriptionStatus( item ),
-		version( item ),
-		actions( item ),
-	];
-}
-
-export function installedSubscriptionRow( item: Subscription ): TableRow[] {
-	return [
-		nameAndStatus( item ),
-		expiry( item ),
-		subscriptionStatus( item ),
-		version( item ),
+		subscriptionStatus( item, table ),
+		version( item, table ),
 		actions( item ),
 	];
 }

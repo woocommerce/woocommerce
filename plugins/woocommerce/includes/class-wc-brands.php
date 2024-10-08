@@ -9,7 +9,7 @@ use Automattic\Jetpack\Constants;
  *
  * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
  *
- * @version 9.4.0
+ * @version 9.5.0
  */
 class WC_Brands {
 
@@ -26,7 +26,7 @@ class WC_Brands {
 	public function __construct() {
 		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
-		add_action( 'plugins_loaded', array( $this, 'register_hooks' ), 2 );
+		add_action( 'plugins_loaded', array( $this, 'register_hooks' ), 11 );
 
 		$this->register_shortcodes();
 	}
@@ -269,6 +269,7 @@ class WC_Brands {
 					'labels'                => array(
 						'name'              => __( 'Brands', 'woocommerce' ),
 						'singular_name'     => __( 'Brand', 'woocommerce' ),
+						'template_name'     => _x( 'Products by Brand', 'Template name', 'woocommerce' ),
 						'search_items'      => __( 'Search Brands', 'woocommerce' ),
 						'all_items'         => __( 'All Brands', 'woocommerce' ),
 						'parent_item'       => __( 'Parent Brand', 'woocommerce' ),
