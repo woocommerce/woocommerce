@@ -50,7 +50,7 @@
 		"d3-time-format": "^2.3.0",
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest-cli": "^29.7.0",
 		"rimraf": "5.0.5",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",

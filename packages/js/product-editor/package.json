@@ -115,7 +115,7 @@
 		"eslint": "^8.55.0",
 		"fork-ts-checker-webpack-plugin": "^8.0.0",
 		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest-cli": "^29.7.0",
 		"mini-css-extract-plugin": "^2.7.6",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
