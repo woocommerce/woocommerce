@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix - Accessibility: Give "Change address" link in classic cart `role="button"`
