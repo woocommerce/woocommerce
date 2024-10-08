@@ -112,7 +112,7 @@ export const SidebarNavigationScreenHeader = ( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
 	const onClickHeaderPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: any, selectedBlocks: any ) => {
 			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},

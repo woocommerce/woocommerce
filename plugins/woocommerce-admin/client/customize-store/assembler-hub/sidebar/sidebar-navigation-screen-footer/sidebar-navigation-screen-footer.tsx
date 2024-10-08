@@ -117,7 +117,7 @@ export const SidebarNavigationScreenFooter = ( {
 	}, [ blocks, footerPatterns ] );
 
 	const onClickFooterPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: any, selectedBlocks: any ) => {
 			setSelectedPattern( pattern );
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},

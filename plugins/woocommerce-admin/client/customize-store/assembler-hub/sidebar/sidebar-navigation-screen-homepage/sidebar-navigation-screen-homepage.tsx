@@ -68,7 +68,7 @@ export const SidebarNavigationScreenHomepage = ( {
 	);
 
 	const onClickPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: any, selectedBlocks: any ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}

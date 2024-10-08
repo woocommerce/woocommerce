@@ -51,7 +51,7 @@ export const useInsertPattern = () => {
 	}, [ blocks ] );
 
 	const insertPattern = useCallback(
-		( pattern ) => {
+		( pattern: any ) => {
 			const parsedPattern = unlock(
 				select( blockEditorStore )
 			).__experimentalGetParsedPattern( pattern.name );

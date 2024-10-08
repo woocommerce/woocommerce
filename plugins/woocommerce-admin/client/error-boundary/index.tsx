@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<
 		bumpStat( 'error', 'unhandled-js-error-during-render' );
 
 		// Limit the component stack to 10 calls so we don't send too much data.
-		const componentStack = errorInfo.componentStack
+		const componentStack = ( errorInfo.componentStack || '' )
 			.trim()
 			.split( '\n' )
 			.slice( 0, 10 )
