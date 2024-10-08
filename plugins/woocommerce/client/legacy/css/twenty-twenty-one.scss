@@ -682,9 +682,13 @@ a.reset_variations {
 	}
 }
 
-button.woocommerce-product-gallery__trigger {
+.woocommerce-product-gallery__trigger {
 	@include woocommerce-product-gallery__trigger;
-	background: var(--global--color-white) !important;
+
+	&:focus {
+		outline-offset: 2px;
+    	outline: 2px dotted var(--form--border-color) !important;
+	}
 }
 
 .woocommerce-tabs {
