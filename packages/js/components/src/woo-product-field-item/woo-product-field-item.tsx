@@ -79,7 +79,7 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
+export const WooProductFieldItem: React.FC< React.PropsWithChildren < WooProductFieldItemProps > > & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
 } = ( { children, sections, id } ) => {
 	return (

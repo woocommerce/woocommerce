@@ -69,7 +69,7 @@ export function ImageGalleryToolbarDropdown( {
 						/>
 					</MenuGroup>
 					{ typeof children === 'function'
-						? children( { onClose } )
+						? ( children as ( props: any ) => React.ReactNode )( { onClose } )
 						: Children.map(
 								children,
 								( child ) =>

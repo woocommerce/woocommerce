@@ -16,6 +16,7 @@ type WooProductSectionItemProps = {
 	id: string;
 	tabs: ProductFillLocationType[];
 	pluginId: string;
+	children?: React.ReactNode;
 };
 
 type WooProductSectionSlotProps = {

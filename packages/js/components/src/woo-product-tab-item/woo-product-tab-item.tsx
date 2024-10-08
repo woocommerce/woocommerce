@@ -33,7 +33,7 @@ type WooProductFieldSlotProps = {
 
 const DEFAULT_TAB_ORDER = 20;
 
-export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
+export const WooProductTabItem: React.FC< React.PropsWithChildren < WooProductTabItemProps > > & {
 	Slot: React.VFC<
 		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
 	>;

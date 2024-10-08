@@ -14,7 +14,7 @@ type ProductSectionLayoutProps = {
 	className?: string;
 };
 
-export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
+export const ProductSectionLayout: React.FC< React.PropsWithChildren< ProductSectionLayoutProps > > = ( {
 	title,
 	description,
 	className,

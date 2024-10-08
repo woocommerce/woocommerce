@@ -10,7 +10,7 @@ type FormSectionProps = {
 	className?: string;
 };
 
-export const FormSection: React.FC< FormSectionProps > = ( {
+export const FormSection: React.FC< React.PropsWithChildren< FormSectionProps > > = ( {
 	title,
 	description,
 	className,
