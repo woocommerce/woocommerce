@@ -65,21 +65,27 @@ class CartExtensionsSchema extends AbstractSchema {
 		} catch ( \Exception $e ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_extensions_error',
-				$e->getMessage(),
+				esc_html( $e->getMessage() ),
 				400
 			);
 		}
 
-		$controller = new CartController();
+		// Run the callback. Exceptions are not caught here.
+		$callback( $request['data'] );
 
-		if ( is_callable( $callback ) ) {
-			$callback( $request['data'] );
+		try {
 			// We recalculate the cart if we had something to run.
-			$controller->calculate_totals();
+			$controller = new CartController();
+			$cart       = $controller->calculate_totals();
+			$response   = $this->cart_schema->get_item_response( $cart );
+
+			return rest_ensure_response( $response );
+		} catch ( \Exception $e ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_extensions_error',
+				esc_html( $e->getMessage() ),
+				400
+			);
 		}
-
-		$cart = $controller->get_cart_instance();
-
-		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );
 	}
 }

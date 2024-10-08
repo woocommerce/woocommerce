@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: update perfromance metrics job and improve execution time.

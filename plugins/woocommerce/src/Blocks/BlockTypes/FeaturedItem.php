@@ -37,6 +37,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		'font_size',
 		'padding',
 		'text_color',
+		'extra_classes',
 	);
 
 	/**
@@ -270,10 +271,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		if ( isset( $attributes['contentAlign'] ) && 'center' !== $attributes['contentAlign'] ) {
 			$classes[] = "has-{$attributes['contentAlign']}-content";
-		}
-
-		if ( isset( $attributes['className'] ) ) {
-			$classes[] = $attributes['className'];
 		}
 
 		$global_style_classes = StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );

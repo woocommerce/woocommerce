@@ -1007,6 +1007,7 @@ class WC_Helper {
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 	}
 
 	/**
@@ -1099,7 +1100,7 @@ class WC_Helper {
 
 		// Attempt to activate this plugin.
 		$local = self::_get_local_from_product_id( $product_id );
-		if ( $local && 'plugin' == $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
+		if ( $local && 'plugin' === $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
 			activate_plugin( $local['_filename'] );
 		}
 
@@ -1335,6 +1336,34 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the user's unconnected subscriptions.
+	 *
+	 * @return array
+	 */
+	public static function get_unconnected_subscriptions() {
+		static $unconnected_subscriptions = null;
+
+		// Cache unconnected_subscriptions in the current request.
+		if ( is_null( $unconnected_subscriptions ) ) {
+			$auth    = WC_Helper_Options::get( 'auth' );
+			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+			if ( 0 === $site_id ) {
+				$unconnected_subscriptions = array();
+				return $unconnected_subscriptions;
+			}
+
+			$unconnected_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return empty( $subscription['connections'] );
+				}
+			);
+		}
+
+		return $unconnected_subscriptions;
+	}
+
+	/**
 	 * Get subscription state of a given product ID.
 	 *
 	 * @since TBD
@@ -1561,6 +1590,7 @@ class WC_Helper {
 			'product-usage-notice-rules',
 			array(
 				'authenticated' => false,
+				'timeout'       => 2,
 			)
 		);
 
@@ -2187,6 +2217,13 @@ class WC_Helper {
 	}
 
 	/**
+	 * Flush product-usage-notice-rules cache.
+	 */
+	public static function flush_product_usage_notice_rules_cache() {
+		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
+	}
+
+	/**
 	 * Flush auth cache.
 	 */
 	public static function _flush_authentication_cache() {
@@ -2285,6 +2322,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 	}
 
 	/**
@@ -2374,7 +2412,23 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 	}
+
+	/**
+	 * Get WooCommerce.com base URL.
+	 *
+	 * @return string
+	 */
+	public static function get_woocommerce_com_base_url() {
+		/**
+		 * Filter the base URL used to install the Woo hosted plugins.
+		 *
+		 * @since 8.7.0
+		 */
+		return trailingslashit( apply_filters( 'woo_com_base_url', 'https://woocommerce.com/' ) );
+	}
+
 
 	/**
 	 * Get base URL for plugin auto installer.
@@ -2382,14 +2436,7 @@ class WC_Helper {
 	 * @return string
 	 */
 	public static function get_install_base_url() {
-		/**
-		 * Filter the base URL used to install the Woo hosted plugins.
-		 *
-		 * @since 8.7.0
-		 */
-		$woo_com_base_url = apply_filters( 'woo_com_base_url', 'https://woocommerce.com/' );
-
-		return $woo_com_base_url . 'auto-install-init/';
+		return self::get_woocommerce_com_base_url() . 'auto-install-init/';
 	}
 
 	/**

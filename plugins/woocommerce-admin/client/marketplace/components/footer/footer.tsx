@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { check, commentContent, shield } from '@wordpress/icons';
+import { check, commentContent, shield, people } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
 
 /**
@@ -10,7 +10,6 @@ import { createInterpolateElement } from '@wordpress/element';
  */
 import './footer.scss';
 import IconWithText from '../icon-with-text/icon-with-text';
-import WooIcon from '../../assets/images/woo-icon.svg';
 import { MARKETPLACE_HOST } from '../constants';
 
 const refundPolicyTitle = createInterpolateElement(
@@ -71,10 +70,14 @@ function FooterContent(): JSX.Element {
 						'woocommerce'
 					) }
 				/>
-			</div>
-			<div className="woocommerce-marketplace__footer-logo">
-				<img src={ WooIcon } alt="Woo Logo" aria-hidden="true" />
-				<span>{ __( 'Woo Marketplace', 'woocommerce' ) }</span>
+				<IconWithText
+					icon={ people }
+					title={ __( 'Support the ecosystem', 'woocommerce' ) }
+					description={ __(
+						'Our team and partners are continuously improving your extensions, themes, and WooCommerce experience.',
+						'woocommerce'
+					) }
+				/>
 			</div>
 		</div>
 	);

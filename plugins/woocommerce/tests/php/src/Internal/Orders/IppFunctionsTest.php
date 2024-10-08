@@ -1,10 +1,9 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Orders\IppFunctions;
-use MobileMessagingHandlerTest;
-
 
 /**
  * Tests for IppFunctions.

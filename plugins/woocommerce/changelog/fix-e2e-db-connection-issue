@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix an issue where database is randomly disconnected while running Blocks E2E tests.

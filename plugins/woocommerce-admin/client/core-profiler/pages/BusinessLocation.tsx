@@ -45,7 +45,7 @@ export const BusinessLocation = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						"We'll use this information to help you set up payments, shipping, and taxes.",
+						'We’ll use this information to help you set up payments, shipping, and taxes.',
 						'woocommerce'
 					) }
 				/>

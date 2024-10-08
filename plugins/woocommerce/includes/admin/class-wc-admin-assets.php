@@ -149,7 +149,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), $version );
 			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-backbone-modal' ), $version, array( 'in_footer' => false ) );
 			wp_register_script( 'wc-clipboard', WC()->plugin_url() . '/assets/js/admin/wc-clipboard' . $suffix . '.js', array( 'jquery' ), $version );
-			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
+			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3', array( 'in_footer' => false ) );
 			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
 			wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), $version );
 			wp_register_script( 'js-cookie', WC()->plugin_url() . '/assets/js/js-cookie/js.cookie' . $suffix . '.js', array(), '2.1.4', true );
@@ -472,7 +472,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// Reports Pages.
 			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports', 'dashboard' ) ) ) ) {
+			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports' ) ) ) ) {
 				wp_register_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), $version );
 
 				wp_enqueue_script( 'wc-reports' );
@@ -557,7 +557,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Marketplace promotions.
-			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
+			if ( in_array( $screen_id, array( 'edit-shop_coupon', 'woocommerce_page_wc-admin' ), true ) ) {
 
 				$promotions = WC_Admin_Marketplace_Promotions::get_active_promotions();
 

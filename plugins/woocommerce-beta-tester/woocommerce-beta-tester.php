@@ -64,6 +64,7 @@ function _wc_beta_tester_bootstrap() {
 		// Tools.
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-version-picker.php';
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-override-coming-soon-options.php';
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-wccom-requests.php';
 
 		register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
 
@@ -142,10 +143,30 @@ add_action(
 /**
  * Simulate a WooCommerce error for remote logging testing.
  *
- * @throws Exception A simulated WooCommerce error if the option is set.
+ * This function adds a filter to the 'woocommerce_template_path' hook
+ * that throws an exception, then triggers the filter by calling WC()->template_path().
+ *
+ * @throws Exception A simulated WooCommerce error for testing purposes.
  */
 function simulate_woocommerce_error() {
-	throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+	// Return if WooCommerce is not loaded.
+	if ( ! function_exists( 'WC' ) || ! class_exists( 'WooCommerce' ) ) {
+		return;
+	}
+
+	// Define a constant to prevent the error from being caught by the WP Error Handler.
+	if ( ! defined( 'WP_SANDBOX_SCRAPING' ) ) {
+		define( 'WP_SANDBOX_SCRAPING', true );
+	}
+
+	add_filter(
+		'woocommerce_template_path',
+		function() {
+			throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+		}
+	);
+
+	WC()->template_path();
 }
 
 $simulate_error = get_option( 'wc_beta_tester_simulate_woocommerce_php_error', false );
@@ -154,7 +175,8 @@ if ( $simulate_error ) {
 	delete_option( 'wc_beta_tester_simulate_woocommerce_php_error' );
 
 	if ( 'core' === $simulate_error ) {
-		add_action( 'woocommerce_loaded', 'simulate_woocommerce_error' );
+		// Hook into the plugin_loaded action to simulate the error early before WP fully initializes.
+		add_action( 'plugin_loaded', 'simulate_woocommerce_error' );
 	} elseif ( 'beta-tester' === $simulate_error ) {
 		throw new Exception( 'Test PHP exception from WooCommerce Beta Tester' );
 	}

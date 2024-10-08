@@ -297,16 +297,26 @@ const LogoEdit = ( {
 		);
 	}
 
+	function handleMediaUploadSelect( media: { id: string; url: string } ) {
+		onInitialSelectLogo( media );
+		trackEvent( 'customize_your_store_assembler_hub_logo_select' );
+	}
+
 	if ( ! logoUrl ) {
 		return (
 			<MediaUploadCheck>
 				<MediaUpload
-					onSelect={ onInitialSelectLogo }
+					onSelect={ handleMediaUploadSelect }
 					allowedTypes={ ALLOWED_MEDIA_TYPES }
 					render={ ( { open }: { open: () => void } ) => (
 						<Button
 							variant="link"
-							onClick={ open }
+							onClick={ () => {
+								open();
+								trackEvent(
+									'customize_your_store_assembler_hub_logo_add_click'
+								);
+							} }
 							className="block-library-site-logo__inspector-upload-container"
 						>
 							<span>
@@ -351,10 +361,17 @@ const LogoEdit = ( {
 		<>
 			<MediaUploadCheck>
 				<MediaUpload
-					onSelect={ onInitialSelectLogo }
+					onSelect={ handleMediaUploadSelect }
 					allowedTypes={ ALLOWED_MEDIA_TYPES }
 					render={ ( { open }: { open: () => void } ) =>
-						cloneElement( logoImg, { onClick: open } )
+						cloneElement( logoImg, {
+							onClick() {
+								open();
+								trackEvent(
+									'customize_your_store_assembler_hub_logo_edit_click'
+								);
+							},
+						} )
 					}
 				/>
 			</MediaUploadCheck>
@@ -478,6 +495,9 @@ export const SidebarNavigationScreenLogo = ( {
 															media
 														);
 														onClose();
+														trackEvent(
+															'customize_your_store_assembler_hub_logo_select'
+														);
 													} }
 													allowedTypes={
 														ALLOWED_MEDIA_TYPES
@@ -490,6 +510,9 @@ export const SidebarNavigationScreenLogo = ( {
 														<MenuItem
 															onClick={ () => {
 																open();
+																trackEvent(
+																	'customize_your_store_assembler_hub_logo_replace_click'
+																);
 															} }
 														>
 															{ __(
@@ -508,6 +531,9 @@ export const SidebarNavigationScreenLogo = ( {
 												onClick={ () => {
 													onClose();
 													onRemoveLogo();
+													trackEvent(
+														'customize_your_store_assembler_hub_logo_remove_click'
+													);
 												} }
 											>
 												{ __(
@@ -542,7 +568,7 @@ export const SidebarNavigationScreenLogo = ( {
 								components: {
 									link: (
 										<Link
-											href="https://www.fiverr.com/logo-maker/woo?utm_source=917527&utm_medium=cx_affiliate&utm_campaign=&afp=&cxd_token=917527_36243864&show_join=true"
+											href="https://go.fiverr.com/visit/?bta=917527&brand=logomaker&landingPage=https%253A%252F%252Fwww.fiverr.com%252Flogo-maker%252Fwoo"
 											target="_blank"
 											type="external"
 											rel="noreferrer"

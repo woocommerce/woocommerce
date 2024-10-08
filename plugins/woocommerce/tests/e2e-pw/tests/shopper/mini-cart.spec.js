@@ -1,7 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const {
-	disableWelcomeModal,
 	openEditorSettings,
+	getCanvas,
+	goToPageEditor,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
@@ -132,15 +133,15 @@ test.describe(
 			const greenColor = '00cc09';
 
 			// go to create a new page
-			await page.goto( 'wp-admin/post-new.php?post_type=page' );
+			await goToPageEditor( { page } );
 
-			await disableWelcomeModal( { page } );
+			const canvas = await getCanvas( page );
 
 			// add page title and mini cart block
-			await page
+			await canvas
 				.getByRole( 'textbox', { name: 'Add title' } )
 				.fill( miniCartPageTitle );
-			await page.getByLabel( 'Add block' ).click();
+			await canvas.getByLabel( 'Add block' ).click();
 			await page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( '/mini cart' );
@@ -148,13 +149,15 @@ test.describe(
 				.getByRole( 'option' )
 				.filter( { hasText: 'Mini-Cart' } )
 				.click();
-			await expect( page.getByLabel( 'Block: Mini-Cart' ) ).toBeVisible();
+			await expect(
+				canvas.getByLabel( 'Block: Mini-Cart' )
+			).toBeVisible();
 
 			// Open Settings sidebar if closed
 			await openEditorSettings( { page } );
 
 			// customize mini cart block
-			await page.getByLabel( 'Block: Mini-Cart' ).click();
+			await canvas.getByLabel( 'Block: Mini-Cart' ).click();
 			// display total price
 			await page.getByLabel( 'Display total price' ).click();
 			// open drawer when a product

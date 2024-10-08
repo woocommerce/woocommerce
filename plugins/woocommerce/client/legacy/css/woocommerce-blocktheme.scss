@@ -146,11 +146,12 @@
 		}
 	}
 
-	.price ins,
-	bdi {
-		// Ensure discounted prices aren't underlined.
-		// For details see https://github.com/woocommerce/woocommerce-blocks/pull/5684.
-		text-decoration: none;
+	.price, .woocommerce-grouped-product-list-item__price, .wc-block-components-product-price {
+		ins, bdi {
+			// Ensure discounted prices aren't underlined.
+			// For details see https://github.com/woocommerce/woocommerce-blocks/pull/5684.
+			text-decoration: none;
+		}
 	}
 
 	span.onsale {
@@ -310,6 +311,7 @@ a.added_to_cart {
 		.coupon {
 			display: flex;
 			align-items: center;
+			flex-wrap: wrap;
 		}
 
 		#coupon_code {

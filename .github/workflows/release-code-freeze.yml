@@ -116,14 +116,6 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
 
-            - name: Generate changelog changes
-              id: changelog
-              if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
-              
-
     notify-slack:
         name: 'Sends code freeze notification to Slack'
         runs-on: ubuntu-20.04
@@ -186,7 +178,7 @@ jobs:
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -216,7 +208,7 @@ jobs:
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -231,7 +223,7 @@ jobs:
       if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
       steps:
           - id: download
-            uses: actions/download-artifact@v3
+            uses: actions/download-artifact@v4
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
@@ -279,7 +271,7 @@ jobs:
               working-directory: tools/monorepo-utils
 
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -300,7 +292,7 @@ jobs:
       if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
       steps:
           - id: download
-            uses: actions/download-artifact@v3
+            uses: actions/download-artifact@v4
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
@@ -348,7 +340,7 @@ jobs:
               working-directory: tools/monorepo-utils
 
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -369,7 +361,7 @@ jobs:
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         steps:
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -380,7 +372,7 @@ jobs:
               run: unzip ${{ steps.download.outputs.download-path }}/woocommerce.zip -d zipfile
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -395,7 +387,7 @@ jobs:
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         steps:
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -406,7 +398,7 @@ jobs:
               run: unzip ${{ steps.download.outputs.download-path }}/woocommerce.zip -d zipfile
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:

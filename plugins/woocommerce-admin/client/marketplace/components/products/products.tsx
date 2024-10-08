@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import {
 	createInterpolateElement,
 	useContext,
@@ -24,7 +24,6 @@ import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
-import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 
@@ -54,12 +53,10 @@ const LABELS = {
 
 export default function Products( props: ProductsProps ) {
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { isLoading, selectedTab } = marketplaceContextValue;
+	const { isLoading } = marketplaceContextValue;
 	const label = LABELS[ props.type ].label;
-	const singularLabel = LABELS[ props.type ].singularLabel;
 	const query = useQuery();
 	const category = query?.category;
-	const perPage = props.perPage ?? MARKETPLACE_ITEMS_PER_PAGE;
 	interface Theme {
 		stylesheet?: string;
 	}
@@ -94,41 +91,29 @@ export default function Products( props: ProductsProps ) {
 	}
 
 	// Store the total number of products before we slice it later.
-	const productTotalCount = props.products?.length ?? 0;
-	const products = props.products?.slice( 0, perPage ) ?? [];
-
-	let title = sprintf(
-		// translators: %s: plural item type (e.g. extensions, themes)
-		__( '0 %s found', 'woocommerce' ),
-		label
-	);
-
-	if ( productTotalCount > 0 ) {
-		title = sprintf(
-			// translators: %1$s: number of items, %2$s: singular item label, %3$s: plural item label
-			_n( '%1$s %2$s', '%1$s %3$s', productTotalCount, 'woocommerce' ),
-			productTotalCount,
-			singularLabel,
-			label
-		);
-	}
+	const products = props.products ?? [];
 
 	const labelForClassName =
 		label === 'business services' ? 'business-services' : label;
 
 	const baseContainerClass = 'woocommerce-marketplace__search-';
-	const baseProductListTitleClass = 'product-list-title--';
 
 	const containerClassName = clsx( baseContainerClass + labelForClassName );
-	const productListTitleClassName = clsx(
-		'woocommerce-marketplace__product-list-title',
-		baseContainerClass + baseProductListTitleClass + labelForClassName,
-		{ 'is-loading': isLoading }
-	);
 	const viewAllButonClassName = clsx(
 		'woocommerce-marketplace__view-all-button',
 		baseContainerClass + 'button-' + labelForClassName
 	);
+
+	if ( isLoading ) {
+		return (
+			<>
+				{ props.categorySelector && (
+					<CategorySelector type={ props.type } />
+				) }
+				<ProductLoader hasTitle={ false } type={ props.type } />
+			</>
+		);
+	}
 
 	if ( products.length === 0 ) {
 		let type = SearchResultType.all;
@@ -154,28 +139,14 @@ export default function Products( props: ProductsProps ) {
 			: ''
 	);
 
-	if ( isLoading ) {
-		return (
-			<>
-				{ props.categorySelector && (
-					<CategorySelector type={ props.type } />
-				) }
-				<ProductLoader hasTitle={ false } type={ props.type } />
-			</>
-		);
-	}
-
 	return (
 		<div className={ containerClassName }>
-			{ selectedTab !== 'business-services' && (
-				<h2 className={ productListTitleClassName }>
-					{ isLoading ? ' ' : title }
-				</h2>
-			) }
-			<div className="woocommerce-marketplace__sub-header">
-				{ props.categorySelector && (
-					<CategorySelector type={ props.type } />
-				) }
+			<nav className="woocommerce-marketplace__sub-header">
+				<div className="woocommerce-marketplace__sub-header__categories">
+					{ props.categorySelector && (
+						<CategorySelector type={ props.type } />
+					) }
+				</div>
 				{ props.type === 'theme' && (
 					<Button
 						className="woocommerce-marketplace__customize-your-store-button"
@@ -192,7 +163,7 @@ export default function Products( props: ProductsProps ) {
 						} }
 					/>
 				) }
-			</div>
+			</nav>
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }

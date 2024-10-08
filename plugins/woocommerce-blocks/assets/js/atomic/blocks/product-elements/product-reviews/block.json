@@ -5,11 +5,15 @@
 	"title": "Product Reviews",
 	"description": "A block that shows the reviews for a product.",
 	"category": "woocommerce-product-elements",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {},
 	"attributes": {},
-	"usesContext": [ "postId" ],
+	"usesContext": [
+		"postId"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

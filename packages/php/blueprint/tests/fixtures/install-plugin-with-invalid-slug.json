@@ -1,0 +1,14 @@
+{
+  "steps": [
+	{
+	  "step": "installPlugin",
+	  "pluginZipFile": {
+		"resource": "self\/plugins",
+		"slug": "woocommerce1"
+	  },
+	  "options": {
+		"activate": true
+	  }
+	}
+  ]
+}

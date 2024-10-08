@@ -1,10 +1,13 @@
 const { expect } = require( '@playwright/test' );
 
 const closeChoosePatternModal = async ( { page } ) => {
-	const closeModal = page.getByRole( 'button', {
-		name: 'Close',
-		exact: true,
-	} );
+	const closeModal = page
+		.getByLabel( 'Scrollable section' )
+		.filter()
+		.getByRole( 'button', {
+			name: 'Close',
+			exact: true,
+		} );
 	await page.addLocatorHandler( closeModal, async () => {
 		await closeModal.click();
 	} );
@@ -39,21 +42,24 @@ const getCanvas = async ( page ) => {
 };
 
 const goToPageEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-	await disableWelcomeModal( { page } );
-	await page.waitForResponse(
+	const responsePromise = page.waitForResponse(
 		( response ) =>
 			response.url().includes( '//page' ) && response.status() === 200
 	);
+	await page.goto( 'wp-admin/post-new.php?post_type=page' );
+	await disableWelcomeModal( { page } );
+	await closeChoosePatternModal( { page } );
+	await responsePromise;
 };
 
 const goToPostEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php' );
-	await disableWelcomeModal( { page } );
-	await page.waitForResponse(
+	const responsePromise = page.waitForResponse(
 		( response ) =>
 			response.url().includes( '//single' ) && response.status() === 200
 	);
+	await page.goto( 'wp-admin/post-new.php' );
+	await disableWelcomeModal( { page } );
+	await responsePromise;
 };
 
 const fillPageTitle = async ( page, title ) => {
@@ -104,7 +110,7 @@ const insertBlockByShortcut = async ( page, blockName ) => {
 	).toBeVisible();
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 	await expect(
-		page.getByLabel( `Block: ${ blockName }` ).first()
+		canvas.getByLabel( `Block: ${ blockName }` ).first()
 	).toBeVisible();
 };
 
@@ -126,17 +132,35 @@ const transformIntoBlocks = async ( page ) => {
 	);
 };
 
-const publishPage = async ( page, pageTitle ) => {
+const publishPage = async ( page, pageTitle, isPost = false ) => {
 	await page
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.dispatchEvent( 'click' );
+
+	const createPageResponse = page.waitForResponse( ( response ) => {
+		return (
+			response.url().includes( isPost ? '/posts/' : '/pages/' ) &&
+			response.ok() &&
+			response.request().method() === 'POST' &&
+			response
+				.json()
+				.then(
+					( json ) =>
+						json.title.rendered === pageTitle &&
+						json.status === 'publish'
+				)
+		);
+	} );
+
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.click();
-	await expect(
-		page.getByText( `${ pageTitle } is now live.` )
-	).toBeVisible();
+
+	// Validating that page was published via UI elements is not reliable,
+	// installed plugins (e.g. WooCommerce PayPal Payments) can interfere and add flakiness to the flow.
+	// In WC context, checking the API response is possibly the most reliable way to ensure the page was published.
+	await createPageResponse;
 };
 
 module.exports = {

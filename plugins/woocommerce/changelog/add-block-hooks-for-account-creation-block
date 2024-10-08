@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Use Block Hooks to insert Account Creation block into templates automatically.

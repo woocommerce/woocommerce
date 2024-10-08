@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use WP_Block_Patterns_Registry;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Package;
@@ -480,7 +481,7 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function theme_has_template( $template_name ) {
-		return ! ! self::get_theme_template_path( $template_name, 'wp_template' );
+		return (bool) self::get_theme_template_path( $template_name, 'wp_template' );
 	}
 
 	/**
@@ -490,7 +491,7 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function theme_has_template_part( $template_name ) {
-		return ! ! self::get_theme_template_path( $template_name, 'wp_template_part' );
+		return (bool) self::get_theme_template_path( $template_name, 'wp_template_part' );
 	}
 
 	/**
@@ -510,43 +511,27 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Checks if we can fall back to the `archive-product` template for a given slug.
-	 *
-	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
-	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
-	 *
-	 * @param string $template_slug Slug to check for fallbacks.
-	 * @return boolean
-	 */
-	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
-		$registered_template = self::get_template( $template_slug );
-		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
-		}
-		return false;
-	}
-
-	/**
 	 * Checks if we can fall back to an `archive-product` template stored on the db for a given slug.
 	 *
 	 * @param string $template_slug Slug to check for fallbacks.
 	 * @param array  $db_templates Templates that have already been found on the db.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $db_templates ) {
-		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
-		if ( ! $eligible_for_fallback ) {
-			return false;
+	public static function template_is_eligible_for_fallback_from_db( $template_slug, $db_templates ) {
+		$registered_template = self::get_template( $template_slug );
+
+		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
+			$array_filter = array_filter(
+				$db_templates,
+				function ( $template ) use ( $registered_template ) {
+					return isset( $registered_template->fallback_template ) && $registered_template->fallback_template === $template->slug;
+				}
+			);
+
+			return count( $array_filter ) > 0;
 		}
 
-		$array_filter = array_filter(
-			$db_templates,
-			function ( $template ) use ( $template_slug ) {
-				return ProductCatalogTemplate::SLUG === $template->slug;
-			}
-		);
-
-		return count( $array_filter ) > 0;
+		return false;
 	}
 
 	/**
@@ -557,14 +542,13 @@ class BlockTemplateUtils {
 	 * @return boolean|object
 	 */
 	public static function get_fallback_template_from_db( $template_slug, $db_templates ) {
-		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
-		if ( ! $eligible_for_fallback ) {
-			return false;
-		}
+		$registered_template = self::get_template( $template_slug );
 
-		foreach ( $db_templates as $template ) {
-			if ( ProductCatalogTemplate::SLUG === $template->slug ) {
-				return $template;
+		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
+			foreach ( $db_templates as $template ) {
+				if ( $registered_template->fallback_template === $template->slug ) {
+					return $template;
+				}
 			}
 		}
 
@@ -580,10 +564,12 @@ class BlockTemplateUtils {
 	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
-		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
+	public static function template_is_eligible_for_fallback_from_theme( $template_slug ) {
+		$registered_template = self::get_template( $template_slug );
+
+		return $registered_template && isset( $registered_template->fallback_template )
 			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( ProductCatalogTemplate::SLUG );
+			&& self::theme_has_template( $registered_template->fallback_template );
 	}
 
 	/**
@@ -609,7 +595,7 @@ class BlockTemplateUtils {
 				$query_result_template->slug === $template->slug
 				&& $query_result_template->theme === $template->theme
 			) {
-				if ( self::template_is_eligible_for_product_archive_fallback_from_theme( $template->slug ) ) {
+				if ( self::template_is_eligible_for_fallback_from_theme( $template->slug ) ) {
 					$query_result_template->has_theme_file = true;
 				}
 
@@ -712,13 +698,51 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Determines whether the provided $blocks contains any of the $block_names,
+	 * or if they contain a pattern that contains any of the $block_names.
+	 *
+	 * @param string[]   $block_names Full block types to look for.
+	 * @param WP_Block[] $blocks      Array of block objects.
+	 * @return bool Whether the content contains the specified block.
+	 */
+	public static function has_block_including_patterns( $block_names, $blocks ) {
+		$flattened_blocks = self::flatten_blocks( $blocks );
+
+		foreach ( $flattened_blocks as &$block ) {
+			if ( isset( $block['blockName'] ) && in_array( $block['blockName'], $block_names, true ) ) {
+				return true;
+			}
+			if (
+				'core/pattern' === $block['blockName'] &&
+				isset( $block['attrs']['slug'] )
+			) {
+				$registry       = WP_Block_Patterns_Registry::get_instance();
+				$pattern        = $registry->get_registered( $block['attrs']['slug'] );
+				$pattern_blocks = parse_blocks( $pattern['content'] );
+
+				if ( self::has_block_including_patterns( $block_names, $pattern_blocks ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns whether the passed `$template` has the legacy template block.
 	 *
 	 * @param object $template The template object.
 	 * @return boolean
 	 */
 	public static function template_has_legacy_template_block( $template ) {
-		return has_block( 'woocommerce/legacy-template', $template->content );
+		if ( has_block( 'woocommerce/legacy-template', $template->content ) ) {
+			return true;
+		}
+
+		$blocks = parse_blocks( $template->content );
+
+		return self::has_block_including_patterns( array( 'woocommerce/legacy-template' ), $blocks );
 	}
 
 	/**

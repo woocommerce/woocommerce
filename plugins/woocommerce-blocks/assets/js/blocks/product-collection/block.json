@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-collection",
 	"version": "1.0.0",
 	"title": "Product Collection",
@@ -19,6 +19,9 @@
 			"type": "string"
 		},
 		"displayLayout": {
+			"type": "object"
+		},
+		"dimensions": {
 			"type": "object"
 		},
 		"convertedFromProducts": {
@@ -47,6 +50,7 @@
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout",
+		"dimensions": "dimensions",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"

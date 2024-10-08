@@ -561,7 +561,7 @@ export function getReportTableQuery(
 		before: noIntervals
 			? undefined
 			: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-		page: query.paged || 1,
+		page: query.paged || '1',
 		per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 		...filterQuery,
 		...tableQuery,
