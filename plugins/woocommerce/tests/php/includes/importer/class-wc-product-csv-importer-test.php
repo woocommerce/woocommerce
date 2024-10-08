@@ -89,6 +89,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 100, $importer->get_percent_complete() );
 	}
 
+	/**
+	 * @testdox Test that the importer skips updating products with the same SKU.
+	 */
 	public function test_import_skipping_existing_product_sku_46505() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_sku( '46505-sku' );
