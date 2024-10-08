@@ -79,7 +79,7 @@
 		"@babel/runtime": "^7.23.5",
 		"@testing-library/react": "^13.4.0",
 		"react-test-renderer": "^18.3.0",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "^29.5.13",
 		"@types/lodash": "^4.14.202",
 		"@types/md5": "^2.3.5",
 		"@types/node": "^16.18.68",
