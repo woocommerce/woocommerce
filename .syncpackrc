@@ -362,7 +362,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~27.5.1"
+			"pinVersion": "^29.7.0"
 		},
 		{
 			"dependencies": [
