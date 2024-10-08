@@ -42,9 +42,9 @@ export const ExperimentalWooTaskListFooterItem = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
-			} }
+			} ) as any }
 		</Fill>
 	);
 };

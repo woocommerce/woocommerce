@@ -33,7 +33,7 @@ import { ManualConfiguration } from './manual-configuration';
 import { Partners } from './components/partners';
 import { WooCommerceTax } from './woocommerce-tax';
 
-const TaskCard: React.FC = ( { children } ) => {
+const TaskCard: React.FC< React.PropsWithChildren > = ( { children } ) => {
 	return (
 		<Card className="woocommerce-task-card">
 			<CardBody>{ children }</CardBody>

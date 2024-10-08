@@ -19,9 +19,9 @@ export const WooTaskListProgressTitleItem: React.FC< {
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
-			} }
+			} ) as any }
 		</Fill>
 	);
 };
