@@ -262,7 +262,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 					mountOnEnter={ true }
 					unmountOnExit={ false }
 				>
-					{ (
+					{ ( (
 						state: 'entering' | 'entered' | 'exiting' | 'exited'
 					) => {
 						const transitionStyles = getTransitionStyle(
@@ -312,7 +312,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 								</TransitionGroup>
 							</div>
 						);
-					} }
+					} ) as any }
 				</Transition>,
 				direction === 'up' && hiddenChildren,
 			] }

@@ -83,10 +83,8 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 		state: 'entering' | 'entered' | 'exiting' | 'exited'
 	) => {
 		const timeouts = getTimeouts();
-		const appearing =
-			cssTransitionRef.current &&
-			cssTransitionRef.current.context &&
-			cssTransitionRef.current.context.isMounting;
+		// @ts-ignore
+		const appearing = cssTransitionRef?.current?.context?.isMounting;
 		let duration;
 		if ( state.startsWith( 'enter' ) ) {
 			duration = timeouts[ appearing ? 'enter' : 'appear' ];
@@ -121,15 +119,15 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 			in={ transitionIn }
 			ref={ cssTransitionRef }
 		>
-			{ ( state: 'entering' | 'entered' | 'exiting' | 'exited' ) => (
+			{ ( ( state: 'entering' | 'entered' | 'exiting' | 'exited' ) => (
 				<div
 					className="vertical-css-transition-container"
 					style={ getTransitionStyle( state ) }
 					ref={ collapseContainerRef }
 				>
-					{ children }
+					{ children as any }
 				</div>
-			) }
+			) ) as any }
 		</CSSTransition>
 	);
 };

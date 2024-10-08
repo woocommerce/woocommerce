@@ -84,10 +84,10 @@ const OptionalTaskTooltip: React.FC< {
 	return <Tooltip text={ tooltip }>{ children }</Tooltip>;
 };
 
-const OptionalExpansionWrapper: React.FC< {
+const OptionalExpansionWrapper: React.FC< React.PropsWithChildren < {
 	expandable: boolean;
 	expanded: boolean;
-} > = ( { children, expandable, expanded } ) => {
+} > > = ( { children, expandable, expanded } ) => {
 	if ( ! expandable ) {
 		return expanded ? <>{ children }</> : null;
 	}
