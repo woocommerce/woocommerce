@@ -218,6 +218,8 @@ jQuery( function ( $ ) {
 			$( 'select.country_to_state, input.country_to_state' ).trigger(
 				'change'
 			);
+			const newAriaExpanded = $( '.shipping-calculator-button' ).attr( 'aria-expanded' ) !== 'true';
+			$( '.shipping-calculator-button' ).attr( 'aria-expanded', newAriaExpanded );
 			$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
 			return false;
 		},
@@ -249,7 +251,7 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
-					
+
 					var newCurrentTarget = document.getElementById( event.currentTarget.id );
 
 					if ( newCurrentTarget ) {
