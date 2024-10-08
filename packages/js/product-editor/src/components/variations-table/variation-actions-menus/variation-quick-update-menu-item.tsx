@@ -60,14 +60,14 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 			key={ updateType }
 			name={ getGroupName( group, updateType === MULTIPLE_UPDATE ) }
 		>
-			{ ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
+			{ ( ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
 				createOrderedChildren(
 					<MenuItem { ...props } onClick={ handleClick( fillProps ) }>
 						{ children }
 					</MenuItem>,
 					order,
 					fillProps
-				)
+				) ) as any
 			}
 		</Fill>
 	);

@@ -58,7 +58,7 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
-			{ ( fillProps: Fill.Props ) =>
+			{ ( ( fillProps: Fill.Props ) =>
 				createOrderedChildren<
 					Fill.Props &
 						SlotContextHelpersType & {
@@ -74,13 +74,13 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 						...getFillHelpers(),
 					},
 					{ _id: fieldId }
-				)
+				) ) as any
 			}
 		</Fill>
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
+export const WooProductFieldItem: React.FC< React.PropsWithChildren< WooProductFieldItemProps > > & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
 } = ( { children, sections, id } ) => {
 	return (

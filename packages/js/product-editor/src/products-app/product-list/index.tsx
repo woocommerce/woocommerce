@@ -186,7 +186,7 @@ export default function ProductList( {
 	}, [ location.params, view ] );
 
 	const onChangeSelection = useCallback(
-		( items ) => {
+		( items: any ) => {
 			setSelection( items );
 			history.push( {
 				...location.params,
