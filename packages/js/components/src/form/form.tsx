@@ -396,7 +396,7 @@ function FormComponent< Values extends Record< string, any > >(
 
 	function getChildren() {
 		if ( typeof children === 'function' ) {
-			const element = children( getStateAndHelpers() );
+			const element = ( children as ( input: any ) => any )( getStateAndHelpers() );
 			return cloneElement( element );
 		}
 		return children;

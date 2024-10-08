@@ -8,14 +8,14 @@ import { createElement } from '@wordpress/element';
  */
 import { Level } from './context';
 
-type SectionProps = {
+interface SectionProps extends React.Attributes {
 	/** The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props passed to Section are passed on to the component. */
 	component?: React.ComponentType | string | false;
 	/** Optional classname */
 	className?: string;
 	/** The children inside this section, rendered in the `component`. This increases the context level for the next heading used. */
 	children: React.ReactNode;
-};
+}
 
 /**
  * The section wrapper, used to indicate a sub-section (and change the header level context).
