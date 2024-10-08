@@ -64,7 +64,7 @@
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
+		"jest": "^29.7.0",
 		"jest-cli": "^29.7.0",
 		"jest-mock-extended": "^1.0.18",
 		"rimraf": "5.0.5",
