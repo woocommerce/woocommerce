@@ -362,4 +362,16 @@
 		transform: rotate(-45deg);
 		width: 2px;
 	}
+
+	& span[aria-hidden="true"] {
+		border: 0;
+		clip-path: inset(50%);
+		height: 1px;
+		left: 50%;
+		margin: -1px;
+		overflow: hidden;
+		position: absolute;
+		top: 50%;
+		width: 1px;
+	}
 }
