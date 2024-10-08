@@ -104,24 +104,6 @@
 		},
 		{
 			"dependencies": [
-				"@types/react"
-			],
-			"pinVersion": "^18.3.0",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@types/react-dom"
-			],
-			"pinVersion": "^18.3.0",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
 				"config"
 			],
 			"packages": [
@@ -132,7 +114,9 @@
 		{
 			"dependencies": [
 				"react",
-				"react-dom"
+				"react-dom",
+				"@types/react-dom",
+				"@types/react",
 			],
 			"packages": [
 				"**"
