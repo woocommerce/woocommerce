@@ -19,6 +19,12 @@
 			position: absolute;
 		}
 
+		.has-dark-controls & {
+			&::after {
+				background: $input-border-dark;
+			}
+		}
+
 		// The first child doesn't need a fake border-top because it's handled by its parent's border-top. This stops
 		// a double border.
 		&:first-child::after {
@@ -35,7 +41,7 @@
 	// and right of the selected element, and top and bottom of the first/last elements.
 	label.wc-block-components-radio-control__option--checked-option-highlighted,
 	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
-		box-shadow: 0 0 0 2px currentColor inset;
+		box-shadow: 0 0 0 1.5px currentColor inset;
 		border-radius: 4px;
 	}
 
@@ -54,6 +60,12 @@
 		border-radius: 4px;
 		width: 100%;
 		box-sizing: border-box;
+	}
+
+	.has-dark-controls & {
+		&::after {
+			border-color: $input-border-dark;
+		}
 	}
 
 	// Remove the top border when the first element is selected, this is so we don't get a double border with the
@@ -77,7 +89,6 @@
 	}
 
 	.wc-block-components-radio-control__option {
-
 		// Add a fake border to the top of each radio option. This is because using CSS borders would result in an
 		// overlap and two transparent borders combining to make a darker pixel. This fake border allows us to bring the
 		// border in by one pixel on each side to avoid the overlap.
@@ -89,6 +100,12 @@
 			left: 1px;
 			top: 0;
 			position: absolute;
+		}
+
+		.has-dark-controls & {
+			&::after {
+				background: $input-border-dark;
+			}
 		}
 
 		// The first child doesn't need a fake border-top because it's handled by its parent's border-top.
@@ -202,8 +219,17 @@
 			border-color: $controls-border-dark;
 			background-color: $input-background-dark;
 
+			&:checked {
+				border-color: $input-text-dark;
+			}
+
 			&:checked::before {
 				background: $input-text-dark;
+			}
+
+			&:focus {
+				outline: 1px solid $input-text-dark;
+				outline-offset: 1px;
 			}
 		}
 

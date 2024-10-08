@@ -314,6 +314,10 @@
 					text-align: center;
 				}
 			}
+
+			&-description {
+				@include visually-hidden();
+			}
 		}
 
 		.theme-card__free {

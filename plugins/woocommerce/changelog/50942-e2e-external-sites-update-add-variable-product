@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update `add-variable-product` e2e tests, so they are passing against Pressable env.
