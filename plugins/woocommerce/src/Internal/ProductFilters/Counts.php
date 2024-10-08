@@ -96,6 +96,35 @@ class Counts {
 		return $this->cache->set_transient_cache( $transient_key, $wpdb->get_row( $price_filter_sql ) ); // phpcs:ignore
 	}
 
+	public function get_price_range_counts( $query_vars, $range ) {
+		$min = $range['min'] ?? null;
+		$max = $range['max'] ?? null;
+
+		if ( empty( $min ) && empty( $max ) ) {
+			return array();
+		}
+
+		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10, 2 );
+
+		$query_vars['no_found_rows']  = true;
+		$query_vars['posts_per_page'] = -1;
+		$query_vars['fields']         = 'ids';
+
+		if ( $min ) {
+			$query_vars['min_price'] = $min;
+		}
+
+		if ( $max ) {
+			$query_vars['max_price'] = $max;
+		}
+
+		$query = new \WP_Query( $query_vars );
+
+		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
+
+		return $query->post_count;
+	}
+
 	/**
 	 * Get stock status counts for the current products.
 	 *
