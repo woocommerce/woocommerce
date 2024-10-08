@@ -23,7 +23,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
 
 	/**
 	 * Composer object.
-	 *
+	 * test fix
 	 * @var Composer Composer object.
 	 */
 	private $composer;
