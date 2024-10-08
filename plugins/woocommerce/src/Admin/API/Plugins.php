@@ -606,7 +606,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			$connect_url = add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/overview' ) );
 		} else {
 			// Redirect directly to the WooPayments onboarding flow if no account connected.
-			$args = array(
+			$args        = array(
 				'wcpay-connect' => '1',
 				'from'          => 'WCADMIN_PAYMENT_TASK',
 				'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
