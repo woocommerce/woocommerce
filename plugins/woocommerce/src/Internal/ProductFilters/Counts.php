@@ -22,6 +22,11 @@ class Counts {
 	private $query_clauses;
 
 	/**
+	 * @var Cache
+	 */
+	private $cache;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -30,8 +35,9 @@ class Counts {
 	 *
 	 * @return void
 	 */
-	final public function init( QueryClausesGenerator $query_clauses ): void {
+	final public function init( QueryClausesGenerator $query_clauses, Cache $cache ): void {
 		$this->set_query_clauses( $query_clauses );
+		$this->cache = $cache;
 	}
 
 	/**
@@ -52,14 +58,14 @@ class Counts {
 	 * @return object
 	 */
 	public function get_filtered_price( $query_vars ) {
-		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'price' );
+		$pre_filter_data = $this->pre_get_counts( $query_vars, 'price' );
 
 		if ( ! empty( $pre_filter_data ) ) {
 			return $pre_filter_data;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'price' );
-		$cached_data   = $this->get_cache( $transient_key );
+		$transient_key = $this->cache->get_transient_key( 'price', $query_vars );
+		$cached_data   = $this->cache->get_transient_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -87,11 +93,7 @@ class Counts {
 		WHERE product_id IN ( {$product_query_sql} )
 		";
 
-		$results = $wpdb->get_row( $price_filter_sql ); // phpcs:ignore
-
-		$this->set_cache( $transient_key, $results );
-
-		return $results;
+		return $this->cache->set_transient_cache( $transient_key, $wpdb->get_row( $price_filter_sql ) ); // phpcs:ignore
 	}
 
 	/**
@@ -101,14 +103,14 @@ class Counts {
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( $query_vars ) {
-		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'stock' );
+		$pre_filter_data = $this->pre_get_counts( $query_vars, 'stock' );
 
 		if ( ! empty( $pre_filter_data ) ) {
 			return $pre_filter_data;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'stock' );
-		$cached_data   = $this->get_cache( $transient_key );
+		$transient_key = $this->cache->get_transient_key( 'stock', $query_vars );
+		$cached_data   = $this->cache->get_transient_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -140,7 +142,7 @@ class Counts {
 			$stock_status_counts[ $status ] = $result->status_count;
 		}
 
-		$this->set_cache( $transient_key, $stock_status_counts );
+		$this->cache->set_transient_cache( $transient_key, $stock_status_counts );
 
 		return $stock_status_counts;
 	}
@@ -152,14 +154,14 @@ class Counts {
 	 * @return array rating=>count pairs.
 	 */
 	public function get_rating_counts( $query_vars ) {
-		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'rating' );
+		$pre_filter_data = $this->pre_get_counts( $query_vars, 'rating' );
 
 		if ( ! empty( $pre_filter_data ) ) {
 			return $pre_filter_data;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'rating' );
-		$cached_data   = $this->get_cache( $transient_key );
+		$transient_key = $this->cache->get_transient_key( 'rating', $query_vars );
+		$cached_data   = $this->cache->get_transient_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -193,7 +195,7 @@ class Counts {
 		$results = $wpdb->get_results( $rating_count_sql ); // phpcs:ignore
 		$results = array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
 
-		$this->set_cache( $transient_key, $results );
+		$this->cache->set_transient_cache( $transient_key, $results );
 
 		return $results;
 	}
@@ -206,14 +208,14 @@ class Counts {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( $query_vars, $attribute_to_count ) {
-		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
+		$pre_filter_data = $this->pre_get_counts( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
 
 		if ( ! empty( $pre_filter_data ) ) {
 			return $pre_filter_data;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
-		$cached_data   = $this->get_cache( $transient_key );
+		$transient_key = $this->cache->get_transient_key( 'attribute', $query_vars, $attribute_to_count );
+		$cached_data   = $this->cache->get_transient_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -250,7 +252,7 @@ class Counts {
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
 		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 
-		$this->set_cache( $transient_key, $results );
+		$this->cache->set_transient_cache( $transient_key, $results );
 
 		return $results;
 	}
@@ -281,13 +283,13 @@ class Counts {
 	}
 
 	/**
-	 * Get the offload filter data.
+	 * Get the offload processing filter counts.
 	 *
 	 * @param array  $query_vars   The query arguments to calculate the filter data.
 	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
 	 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
 	 */
-	private function pre_get_filter_data( $query_vars, $filter_type, $extra = array() ) {
+	private function pre_get_counts( $query_vars, $filter_type, $extra = array() ) {
 		/**
 		 * Allows offloading the filter data.
 		 *
@@ -300,66 +302,6 @@ class Counts {
 		 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
 		 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
 		 */
-		return apply_filters( 'woocommerce_pre_filter_data', array(), $query_vars, $filter_type, $extra );
-	}
-
-	/**
-	 * Get filter data transient key.
-	 *
-	 * @param array  $query_vars   The query arguments to calculate the filter data.
-	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-	 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
-	 */
-	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
-		return sprintf(
-			'wc_%s_%s',
-			Controller::TRANSIENT_GROUP,
-			md5(
-				wp_json_encode(
-					array(
-						'query_vars'  => $query_vars,
-						'extra'       => $extra,
-						'filter_type' => $filter_type,
-					)
-				)
-			)
-		);
-	}
-
-	/**
-	 * Get cached filter data.
-	 *
-	 * @param string $key Transient key.
-	 */
-	private function get_cache( $key ) {
-		$cache             = get_transient( $key );
-		$transient_version = WC_Cache_Helper::get_transient_version( Controller::TRANSIENT_GROUP );
-
-		if ( empty( $cache['version'] ) ||
-			empty( $cache['value'] ) ||
-			$transient_version !== $cache['version']
-		) {
-			return null;
-		}
-
-		return $cache['value'];
-	}
-
-	/**
-	 * Set the cache with transient version to invalidate all at once when needed.
-	 *
-	 * @param string $key   Transient key.
-	 * @param mix    $value Value to set.
-	 */
-	private function set_cache( $key, $value ) {
-		$transient_version = WC_Cache_Helper::get_transient_version( Controller::TRANSIENT_GROUP );
-		$transient_value   = array(
-			'version' => $transient_version,
-			'value'   => $value,
-		);
-
-		$result = set_transient( $key, $transient_value );
-
-		return $result;
+		return apply_filters( 'woocommerce_pre_filter_count', array(), $query_vars, $filter_type, $extra );
 	}
 }
