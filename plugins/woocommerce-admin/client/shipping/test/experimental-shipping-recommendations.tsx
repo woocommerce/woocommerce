@@ -14,8 +14,8 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
-	DismissableList: ( ( { children } ) => children ) as React.FC,
-	DismissableListHeading: ( ( { children } ) => children ) as React.FC,
+	DismissableList: ( ( { children } ) => children ) as React.FC< React.PropsWithChildren >,
+	DismissableListHeading: ( ( { children } ) => children ) as React.FC< React.PropsWithChildren >,
 } ) );
 jest.mock( '@woocommerce/admin-layout', () => {
 	const mockContext = {

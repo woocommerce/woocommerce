@@ -12,7 +12,7 @@ import clsx from 'clsx';
 import { TaxChildProps } from '../utils';
 import './partners.scss';
 
-export const Partners: React.FC< TaxChildProps > = ( {
+export const Partners: React.FC< React.PropsWithChildren< TaxChildProps > > = ( {
 	children,
 	isPending,
 	onManual,

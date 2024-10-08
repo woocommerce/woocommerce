@@ -127,7 +127,7 @@ const StoreLocation = ( {
 			onSubmit={ onSubmit }
 			validate={ validate }
 		>
-			{ ( {
+			{ ( ( {
 				getInputProps,
 				handleSubmit,
 				setValue,
@@ -146,7 +146,7 @@ const StoreLocation = ( {
 						{ buttonText }
 					</Button>
 				</Fragment>
-			) }
+			) ) as any }
 		</Form>
 	);
 };

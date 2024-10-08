@@ -236,9 +236,9 @@ registerPlugin( 'wc-admin-onboarding-task-marketing', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="marketing">
-			{ ( { onComplete }: MarketingProps ) => {
+			{ ( ( { onComplete }: MarketingProps ) => {
 				return <Marketing onComplete={ onComplete } />;
-			} }
+			} ) as any }
 		</WooOnboardingTask>
 	),
 } );

@@ -22,7 +22,7 @@ const WoocommercePaymentsTaskItem = () => {
 
 	return (
 		<WooOnboardingTaskListItem id="woocommerce-payments">
-			{ ( {
+			{ ( ( {
 				defaultTaskItem: DefaultTaskItem,
 			}: {
 				defaultTaskItem: ( props: {
@@ -41,7 +41,7 @@ const WoocommercePaymentsTaskItem = () => {
 						} );
 					} }
 				/>
-			) }
+			) ) as any }
 		</WooOnboardingTaskListItem>
 	);
 };
@@ -55,7 +55,7 @@ registerPlugin( 'woocommerce-admin-task-wcpay', {
 // Shows up at http://host/wp-admin/admin.php?page=wc-admin&task=woocommerce-payments which is the default url for woocommerce-payments task
 const WoocommercePaymentsTaskPage = () => (
 	<WooOnboardingTask id="woocommerce-payments">
-		{ ( {
+		{ ( ( {
 			onComplete,
 			query,
 		}: {
@@ -66,7 +66,7 @@ const WoocommercePaymentsTaskPage = () => (
 				onComplete={ onComplete }
 				query={ query }
 			/>
-		) }
+		) ) as any }
 	</WooOnboardingTask>
 );
 

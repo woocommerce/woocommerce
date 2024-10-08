@@ -262,9 +262,9 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="tax">
-			{ ( { onComplete, query, task }: TaxProps ) => (
+			{ ( ( { onComplete, query, task }: TaxProps ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />
-			) }
+			) ) as any }
 		</WooOnboardingTask>
 	),
 } );

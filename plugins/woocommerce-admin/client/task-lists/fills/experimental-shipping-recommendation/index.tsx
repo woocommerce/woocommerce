@@ -47,13 +47,13 @@ registerPlugin( 'wc-admin-onboarding-task-shipping-recommendation', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="shipping-recommendation">
-			{ ( { onComplete, query, task }: TaskProps ) => (
+			{ ( ( { onComplete, query, task }: TaskProps ) => (
 				<ShippingRecommendationWrapper
 					onComplete={ onComplete }
 					query={ query }
 					task={ task }
 				/>
-			) }
+			) ) as any }
 		</WooOnboardingTask>
 	),
 } );

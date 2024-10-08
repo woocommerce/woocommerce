@@ -7,7 +7,7 @@ import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 const LaunchYourStoreTaskItem = () => {
 	return (
 		<WooOnboardingTaskListItem id="launch-your-store">
-			{ ( {
+			{ ( ( {
 				defaultTaskItem: DefaultTaskItem,
 				isComplete,
 			}: {
@@ -18,7 +18,7 @@ const LaunchYourStoreTaskItem = () => {
 				isComplete: boolean;
 			} ) => {
 				return <DefaultTaskItem isClickable={ ! isComplete } />;
-			} }
+			} ) as any }
 		</WooOnboardingTaskListItem>
 	);
 };

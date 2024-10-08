@@ -161,7 +161,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	};
 
 	const DefaultTaskItem = useCallback(
-		( props ) => {
+		( props: any ) => {
 			const onClickActions = () => {
 				trackClick();
 
