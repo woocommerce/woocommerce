@@ -40,7 +40,7 @@ export const WooTaskListCompletion = ( {
 		<Fill name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }>
 			{ ( ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
-			} as any }
+			} ) as any }
 		</Fill>
 	);
 };
