@@ -3220,7 +3220,7 @@ importers:
     dependencies:
       '@automattic/components':
         specifier: ^2.1.1
-        version: 2.1.1(@types/react@17.0.71)(@wordpress/data@10.8.1(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@automattic/explat-client':
         specifier: ^0.0.5
         version: 0.0.5
@@ -3263,6 +3263,9 @@ importers:
       '@wordpress/core-data':
         specifier: wp-6.0
         version: 4.4.5(react@18.3.1)
+      '@wordpress/data':
+        specifier: wp-6.0
+        version: 6.6.2(react@18.3.1)
       '@wordpress/data-controls':
         specifier: wp-6.0
         version: 2.6.1(react@18.3.1)
@@ -10917,6 +10920,12 @@ packages:
 
   '@wordpress/data@6.6.1':
     resolution: {integrity: sha512-QvXE8LoLqSTgkZub4A7EcfcPqAQQAXw1my9DRcxuCUYjYyxWdVM3I6JcQ+A5osy76Poh8b0Al6Kd7hUxg4SEoQ==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+
+  '@wordpress/data@6.6.2':
+    resolution: {integrity: sha512-k3FTSY2HUPEBJ2xsV5QK/3EVb2jp1cOI1ym1fOBgAZn5cdxNeyIL7Ya7JlAHG+NzYeK+jb3cIHoX6kePMHA4LA==}
     engines: {node: '>=12'}
     peerDependencies:
       react: ^17.0.0
@@ -25472,7 +25481,7 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@automattic/components@2.1.1(@types/react@17.0.71)(@wordpress/data@10.8.1(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@automattic/components@2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.1(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@automattic/calypso-analytics': 1.1.2
       '@automattic/calypso-url': 1.1.0
@@ -25483,7 +25492,7 @@ snapshots:
       '@automattic/viewport-react': 1.0.0(react@18.3.1)
       '@wordpress/base-styles': 4.48.0
       '@wordpress/components': 27.5.0(@types/react@17.0.71)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/data': 10.8.1(react@18.3.1)
+      '@wordpress/data': 6.6.1(react@18.3.1)
       '@wordpress/icons': 9.48.0
       '@wordpress/react-i18n': 3.55.0
       canvas-confetti: 1.9.2
@@ -25503,7 +25512,7 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@automattic/components@2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.1(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@automattic/components@2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@automattic/calypso-analytics': 1.1.2
       '@automattic/calypso-url': 1.1.0
@@ -25514,7 +25523,7 @@ snapshots:
       '@automattic/viewport-react': 1.0.0(react@18.3.1)
       '@wordpress/base-styles': 4.48.0
       '@wordpress/components': 27.5.0(@types/react@17.0.71)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/data': 6.6.1(react@18.3.1)
+      '@wordpress/data': 6.6.2(react@18.3.1)
       '@wordpress/icons': 9.48.0
       '@wordpress/react-i18n': 3.55.0
       canvas-confetti: 1.9.2
@@ -37863,7 +37872,7 @@ snapshots:
   '@types/wordpress__notices@3.27.6(react@18.3.1)':
     dependencies:
       '@types/react': 17.0.71
-      '@wordpress/data': 9.17.0(react@18.3.1)
+      '@wordpress/data': 9.27.0(react@18.3.1)
     transitivePeerDependencies:
       - react
 
@@ -40121,9 +40130,9 @@ snapshots:
       '@wordpress/deprecated': 3.57.0
       '@wordpress/dom': 3.57.0
       '@wordpress/element': 5.34.0
-      '@wordpress/is-shallow-equal': 4.47.0
+      '@wordpress/is-shallow-equal': 4.57.0
       '@wordpress/keycodes': 3.47.0
-      '@wordpress/priority-queue': 2.47.0
+      '@wordpress/priority-queue': 2.57.0
       '@wordpress/undo-manager': 0.7.0
       change-case: 4.1.2
       clipboard: 2.0.11
@@ -40478,6 +40487,23 @@ snapshots:
       turbo-combine-reducers: 1.0.2
       use-memo-one: 1.1.3(react@18.3.1)
 
+  '@wordpress/data@6.6.2(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.25.0
+      '@wordpress/compose': 5.5.0(react@18.3.1)
+      '@wordpress/deprecated': 3.6.1
+      '@wordpress/element': 4.20.0
+      '@wordpress/is-shallow-equal': 4.24.0
+      '@wordpress/priority-queue': 2.57.0
+      '@wordpress/redux-routine': 4.57.0(redux@4.2.1)
+      equivalent-key-map: 0.2.2
+      is-promise: 4.0.0
+      lodash: 4.17.21
+      react: 18.3.1
+      redux: 4.2.1
+      turbo-combine-reducers: 1.0.2
+      use-memo-one: 1.1.3(react@18.3.1)
+
   '@wordpress/data@7.6.0(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.25.0
@@ -40517,7 +40543,7 @@ snapshots:
 
   '@wordpress/data@9.27.0(react@18.3.1)':
     dependencies:
-      '@babel/runtime': 7.25.0
+      '@babel/runtime': 7.24.7
       '@wordpress/compose': 6.34.0(react@18.3.1)
       '@wordpress/deprecated': 3.57.0
       '@wordpress/element': 5.34.0
@@ -42920,7 +42946,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.23.5
       '@wordpress/compose': 5.4.1(react@18.3.1)
-      '@wordpress/data': 6.6.1(react@18.3.1)
+      '@wordpress/data': 6.6.2(react@18.3.1)
       lodash: 4.17.21
       react: 18.3.1
 
