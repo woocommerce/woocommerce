@@ -244,6 +244,11 @@ const ValidatedTextInput = forwardRef<
 				} ) }
 				aria-invalid={ hasError === true }
 				id={ textInputId }
+				aria-errormessage={
+					showError && hasError && validationErrorId
+						? validationErrorId
+						: undefined
+				}
 				type={ type }
 				feedback={
 					showError && hasError ? (

@@ -14,6 +14,7 @@ export interface ValidationInputErrorProps {
 	errorMessage?: string;
 	propertyName?: string;
 	elementId?: string;
+	id?: string;
 }
 
 export const ValidationInputError = ( {

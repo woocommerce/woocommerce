@@ -117,6 +117,7 @@ describe( 'ValidatedTextInput', () => {
 			screen.queryByText( 'Error message in data store' )
 		).not.toBeInTheDocument();
 		await expect( customErrorMessageElement ).toBeInTheDocument();
+		expect(screen.getByRole('textbox')).toHaveAccessibleErrorMessage('Custom error message');
 	} );
 	it( 'Displays an error message from the data store', async () => {
 		render(
@@ -138,6 +139,11 @@ describe( 'ValidatedTextInput', () => {
 		);
 		const errorMessageElement = await screen.getByText( 'Error message 3' );
 		await expect( errorMessageElement ).toBeInTheDocument();
+		expect( errorMessageElement ).toHaveAttribute(
+			'id',
+			'validate-error-textinput-3'
+		);
+		expect(screen.getByRole('textbox')).toHaveAccessibleErrorMessage('Error message 3');
 	} );
 	it( 'Runs custom validation on the input', async () => {
 		const user = userEvent.setup();
