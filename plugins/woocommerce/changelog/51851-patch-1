@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Makes the product instance available as the second parameter of the `woocommerce_product_read` action hook.
+Pass product instance into `woocommerce_product_read` action as second argument
