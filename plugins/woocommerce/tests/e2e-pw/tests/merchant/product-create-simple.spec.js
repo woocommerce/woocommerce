@@ -35,6 +35,8 @@ const productData = {
 	},
 };
 
+const categoryName = `cat_${ Date.now() }`;
+
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	product: async ( { api }, use ) => {
@@ -48,7 +50,7 @@ const test = baseTest.extend( {
 
 		await api
 			.post( 'products/categories', {
-				name: `cat_${ Date.now() }`,
+				name: categoryName,
 			} )
 			.then( ( response ) => {
 				category = response.data;
@@ -145,17 +147,10 @@ for ( const productType of Object.keys( productData ) ) {
 			} );
 
 			await test.step( 'add product categories', async () => {
-				// Using getByRole here is unreliable
-				const categoryCheckbox = page.locator(
-					`#in-product_cat-${ category.id }`
-				);
-				await categoryCheckbox.check();
-				await expect( categoryCheckbox ).toBeChecked();
+				await page.getByText( categoryName ).first().check();
 
 				await expect(
-					page
-						.locator( '#product_cat-all' )
-						.getByText( category.name )
+					page.locator( '#product_cat-all' ).getByText( categoryName )
 				).toBeVisible();
 			} );
 
