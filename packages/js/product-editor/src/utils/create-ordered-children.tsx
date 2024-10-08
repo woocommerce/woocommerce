@@ -27,7 +27,7 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
 ) {
 	if ( typeof children === 'function' ) {
 		return {
-			children: children( { ...props, order, ...injectProps } ),
+			children: ( children as ( props: any) => any )( { ...props, order, ...injectProps } ),
 			props: { order, ...injectProps },
 		};
 	} else if ( isValidElement( children ) ) {

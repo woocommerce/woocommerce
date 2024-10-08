@@ -102,7 +102,7 @@ export const WCPayBannerBody: React.VFC< {
 	);
 };
 
-export const WCPayBanner: React.FC = ( { children } ) => {
+export const WCPayBanner: React.FC< React.PropsWithChildren > = ( { children } ) => {
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-banner">
 			{ children }

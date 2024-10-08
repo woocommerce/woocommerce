@@ -21,7 +21,7 @@ export const PluginHeaderItemPopover: React.FC<
 	const [ isVisible, setVisible ] = useState( false );
 	const childrenToRender =
 		typeof children === 'function'
-			? children( { isVisible, setVisible } )
+			? ( children as ( props: any) => any )( { isVisible, setVisible } )
 			: children;
 	return (
 		<PinnedItems scope={ HEADER_PINNED_ITEMS_SCOPE }>

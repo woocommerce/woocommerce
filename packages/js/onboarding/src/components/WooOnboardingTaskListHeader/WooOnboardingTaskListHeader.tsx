@@ -19,7 +19,7 @@ type WooOnboardingTaskListHeaderProps = {
 export const WooOnboardingTaskListHeader = ( {
 	id,
 	...props
-}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+}: React.PropsWithChildren< WooOnboardingTaskListHeaderProps & Slot.Props > ) => (
 	<Fill
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		{ ...props }
@@ -29,7 +29,7 @@ export const WooOnboardingTaskListHeader = ( {
 WooOnboardingTaskListHeader.Slot = ( {
 	id,
 	fillProps,
-}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+}: React.PropsWithChildren< WooOnboardingTaskListHeaderProps & Slot.Props > ) => (
 	<Slot
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		fillProps={ fillProps }
