@@ -56,7 +56,7 @@ export const WooProductTabItem: React.FC< React.PropsWithChildren < WooProductTa
 					name={ `woocommerce_product_tab_${ templateData.name }` }
 					key={ templateData.name }
 				>
-					{ ( fillProps: Fill.Props ) => {
+					{ ( ( fillProps: Fill.Props ) => {
 						return createOrderedChildren< Fill.Props >(
 							children,
 							templateData.order || DEFAULT_TAB_ORDER,
@@ -68,7 +68,7 @@ export const WooProductTabItem: React.FC< React.PropsWithChildren < WooProductTa
 								...fillProps,
 							}
 						);
-					} }
+					} ) as any }
 				</Fill>
 			) ) }
 		</>
