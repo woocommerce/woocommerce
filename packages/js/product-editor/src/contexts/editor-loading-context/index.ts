@@ -3,4 +3,4 @@
  */
 import { createContext } from '@wordpress/element';
 
-export const EditorLoadingContext = createContext( false );
+export const EditorLoadingContext = createContext( false ) as any;

@@ -3,8 +3,6 @@
  */
 import {
 	createElement,
-	StrictMode,
-	Fragment,
 	useCallback,
 	useState,
 } from '@wordpress/element';
@@ -27,6 +25,7 @@ import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { InterfaceSkeleton } from '@wordpress/interface';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -58,7 +57,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
-			<StrictMode>
+			<React.StrictMode>
 				<EntityProvider
 					kind="postType"
 					type={ postType }
@@ -81,7 +80,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 										/>
 									}
 									content={
-										<>
+										<React.Fragment>
 											<BlockEditor
 												postType={ postType }
 												productId={ productId }
@@ -94,7 +93,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 													setIsEditorLoading
 												}
 											/>
-										</>
+										</React.Fragment>
 									}
 									actions={
 										isPrepublishPanelOpen && (
@@ -109,7 +108,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 						</ValidationProvider>
 					</ShortcutProvider>
 				</EntityProvider>
-			</StrictMode>
+			</React.StrictMode>
 		</LayoutContextProvider>
 	);
 }
