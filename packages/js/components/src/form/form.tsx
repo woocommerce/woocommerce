@@ -9,11 +9,10 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
-	forwardRef,
 	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
-import { ChangeEvent, PropsWithChildren, useRef } from 'react';
+import { ChangeEvent, PropsWithChildren, useRef, forwardRef } from 'react';
 import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
@@ -404,7 +403,7 @@ function FormComponent< Values extends Record< string, any > >(
 
 	return (
 		<FormContext.Provider value={ getStateAndHelpers() }>
-			{ getChildren() }
+			{ getChildren() as any }
 		</FormContext.Provider>
 	);
 }
@@ -417,6 +416,6 @@ const Form = forwardRef( FormComponent as any ) as <
 		ref?: React.ForwardedRef< FormRef< Values > >;
 	},
 	ref: React.Ref< FormRef< Values > >
-) => React.ReactElement | null;
+) => any;
 
 export { Form };
