@@ -3,9 +3,9 @@
  */
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import { Component } from '@wordpress/element';
 import { Icon } from '@wordpress/icons';
 import { camelCase } from 'lodash';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ import { camelCase } from 'lodash';
 import './style.scss';
 import * as icons from './icons';
 
-class ProductIcon extends Component {
+class ProductIcon extends React.Component {
 	render() {
 		const product = camelCase( this.props.product );
 		let iconComponent = icons.blank;

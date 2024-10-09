@@ -36,7 +36,7 @@ import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subs
 import LoadMoreButton from '../load-more-button/load-more-button';
 
 export default function Content(): JSX.Element {
-	const marketplaceContextValue = useContext( MarketplaceContext );
+	const marketplaceContextValue = useContext( MarketplaceContext ) as any;
 	const [ allProducts, setAllProducts ] = useState< Product[] >( [] );
 	const [ filteredProducts, setFilteredProducts ] = useState< Product[] >(
 		[]

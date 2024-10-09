@@ -48,7 +48,7 @@ function FooterContent(): JSX.Element {
 			<div className="woocommerce-marketplace__footer-columns">
 				<IconWithText
 					icon={ check }
-					title={ refundPolicyTitle }
+					title={ refundPolicyTitle as any }
 					description={ __(
 						"If you change your mind within 30 days of your purchase, we'll give you a full refund — hassle-free.",
 						'woocommerce'
@@ -56,7 +56,7 @@ function FooterContent(): JSX.Element {
 				/>
 				<IconWithText
 					icon={ commentContent }
-					title={ supportTitle }
+					title={ supportTitle as any }
 					description={ __(
 						'With detailed documentation and a global support team, help is always available if you need it.',
 						'woocommerce'
