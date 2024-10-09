@@ -270,16 +270,19 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		if ( WooCommercePayments::is_supported() ) {
+		if ( self::is_supported() ) {
 			// If WooPayments is active, point to the WooPayments client surfaces/flows.
-			if ( WooCommercePayments::is_wcpay_active() ) {
+			if ( self::is_wcpay_active() ) {
 				// Point to a WooPayments connect link to let the WooPayments client figure out the proper
 				// place to redirect the user to.
-				return add_query_arg( array(
-					'wcpay-connect' => '1',
-					'from'          => 'WCADMIN_PAYMENT_TASK',
-					'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
-				), admin_url( 'admin.php' ) );
+				return add_query_arg(
+					array(
+						'wcpay-connect' => '1',
+						'from'          => 'WCADMIN_PAYMENT_TASK',
+						'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+					),
+					admin_url( 'admin.php' )
+				);
 			}
 
 			// Check if there is an active WooPayments incentive via the welcome page.
@@ -290,10 +293,13 @@ class WooCommercePayments extends Task {
 
 			// WooPayments is not active.
 			// Trigger the WooPayments plugin installation and/or activation by pointing to the task suggestion URL.
-			return add_query_arg( array(
-				'task' => $this->get_id(),
-				'id'   => self::get_suggestion()->id,
-			), admin_url( 'admin.php?page=wc-admin' ) );
+			return add_query_arg(
+				array(
+					'task' => $this->get_id(),
+					'id'   => self::get_suggestion()->id,
+				),
+				admin_url( 'admin.php?page=wc-admin' )
+			);
 		}
 
 		// Fall back to the WooPayments task page URL.
