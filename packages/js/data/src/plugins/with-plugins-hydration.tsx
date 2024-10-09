@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { SelectFromMap } from '@automattic/data-stores';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -69,7 +69,7 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 				finishResolution( 'isJetpackConnected', [] );
 			}, [ shouldHydrate ] );
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withPluginsHydration'
 	);

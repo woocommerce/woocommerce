@@ -3,7 +3,7 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import React from 'react';
 
 /**
@@ -19,7 +19,7 @@ import { MenuItem } from './types';
  * @param {MenuItem[]} data.menuItems Menu items to hydrate.
  */
 export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
-	createHigherOrderComponent< Record< string, React.Component > >(
+	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const shouldHydrate = useSelect( ( select ) => {
 				if ( ! data ) {
@@ -45,7 +45,7 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 				finishResolution( 'getMenuItems', [] );
 			}, [ shouldHydrate ] );
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withNavigationHydration'
 	);

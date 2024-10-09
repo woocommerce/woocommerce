@@ -3,7 +3,8 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -57,7 +58,7 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 				clearIsDirty,
 			] );
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withSettingsHydration'
 	);
