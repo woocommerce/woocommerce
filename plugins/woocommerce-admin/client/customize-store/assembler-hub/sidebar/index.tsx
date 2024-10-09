@@ -107,7 +107,7 @@ const getComponentByPathParams = (
 function SidebarScreens() {
 	const params = useQuery().path;
 
-	const { navigate } = useContext( SidebarNavigationContext );
+	const { navigate } = useContext( SidebarNavigationContext ) as any;
 
 	const onNavigateBackClick = useCallback( () => {
 		const assemblerUrl = getNewPath(

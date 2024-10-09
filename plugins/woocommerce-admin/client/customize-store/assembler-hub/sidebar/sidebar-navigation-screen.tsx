@@ -55,7 +55,7 @@ export const SidebarNavigationScreen = ( {
 	backPath?: string;
 	onNavigateBackClick?: () => void;
 } ) => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 	const [ openWarningModal, setOpenWarningModal ] =
 		useState< boolean >( false );
 	const location = useLocation();

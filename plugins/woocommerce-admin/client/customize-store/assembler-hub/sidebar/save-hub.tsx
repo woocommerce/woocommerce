@@ -49,7 +49,7 @@ let shouldTriggerSave = true;
 
 export const SaveHub = () => {
 	const urlParams = useQuery();
-	const { sendEvent } = useContext( CustomizeStoreContext );
+	const { sendEvent } = useContext( CustomizeStoreContext ) as any;
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
 
 	const currentTemplate:

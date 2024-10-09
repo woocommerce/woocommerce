@@ -139,7 +139,7 @@ export const Toolbar = () => {
 		return selectedBlock?.name === 'core/template-part';
 	}, [ allBlocks, selectedBlockClientId ] );
 
-	const { selectedBlockRef } = useContext( SelectedBlockContext );
+	const { selectedBlockRef } = useContext( SelectedBlockContext ) as any;
 
 	const blockPopoverRef = useRef< HTMLDivElement | null >( null );
 

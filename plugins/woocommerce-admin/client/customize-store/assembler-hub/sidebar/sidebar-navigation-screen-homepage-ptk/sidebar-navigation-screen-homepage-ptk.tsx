@@ -61,7 +61,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;

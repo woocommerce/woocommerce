@@ -65,7 +65,7 @@ export const BlockEditorContainer = () => {
 	);
 
 	const urlParams = useQuery();
-	const { currentState } = useContext( CustomizeStoreContext );
+	const { currentState } = useContext( CustomizeStoreContext ) as any;
 
 	const scrollDirection =
 		urlParams.path === '/customize-store/assembler-hub/footer'
@@ -77,7 +77,7 @@ export const BlockEditorContainer = () => {
 		scrollDirection
 	);
 
-	const { highlightedBlockClientId } = useContext( HighlightedBlockContext );
+	const { highlightedBlockClientId } = useContext( HighlightedBlockContext ) as any;
 	const isHighlighting = highlightedBlockClientId !== null;
 	const additionalStyles = isHighlighting
 		? `

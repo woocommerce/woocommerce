@@ -69,7 +69,7 @@ export const SidebarNavigationScreenColorPalette = ( {
 } ) => {
 	const {
 		context: { flowType },
-	} = useContext( CustomizeStoreContext );
+	} = useContext( CustomizeStoreContext ) as any;
 
 	const aiOnline = flowType === FlowType.AIOnline;
 

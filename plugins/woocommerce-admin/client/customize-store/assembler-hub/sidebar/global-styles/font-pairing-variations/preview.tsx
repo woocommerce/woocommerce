@@ -98,7 +98,7 @@ export const FontPairingVariationPreview = () => {
 		( { slug } ) => slug !== 'system-font'
 	);
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 
 	const [ isLoaded, setIsLoaded ] = useState(
 		( isAIFlow( context.flowType ) && ! externalFontFamilies.length ) ||

@@ -64,7 +64,7 @@ export const Layout = () => {
 
 	const { sendEvent, currentState, context } = useContext(
 		CustomizeStoreContext
-	);
+	) as any;
 
 	const { customizing } = useQuery();
 
