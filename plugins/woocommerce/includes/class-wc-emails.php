@@ -192,7 +192,7 @@ class WC_Emails {
 		$this->init();
 
 		// Email Header, Footer and content hooks.
-		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
+		add_action( 'woocommerce_email_header', array( $this, 'email_header' ), 10, 2 );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_downloads' ), 10, 4 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
@@ -268,9 +268,10 @@ class WC_Emails {
 	 * Get the email header.
 	 *
 	 * @param mixed $email_heading Heading for the email.
+  	 * @param mixed $email         Email object.
 	 */
-	public function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+	public function email_header( $email_heading, $email ) {
+		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading, 'email' => $email ) );
 	}
 
 	/**
