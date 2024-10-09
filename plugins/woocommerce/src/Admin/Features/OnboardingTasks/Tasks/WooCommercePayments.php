@@ -200,13 +200,16 @@ class WooCommercePayments extends Task {
 	 */
 	public static function get_suggestion() {
 		$suggestions       = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
-		$wcpay_suggestions = array_filter( $suggestions, function ( $suggestion ) {
-			if ( empty( $suggestion->plugins ) || ! is_array( $suggestion->plugins ) ) {
-				return false;
-			}
+		$wcpay_suggestions = array_filter(
+			$suggestions,
+			function ( $suggestion ) {
+				if ( empty( $suggestion->plugins ) || ! is_array( $suggestion->plugins ) ) {
+					return false;
+				}
 
-			return in_array( 'woocommerce-payments', $suggestion->plugins, true );
-		} );
+				return in_array( 'woocommerce-payments', $suggestion->plugins, true );
+			}
+		);
 
 		if ( empty( $wcpay_suggestions ) ) {
 			return null;
