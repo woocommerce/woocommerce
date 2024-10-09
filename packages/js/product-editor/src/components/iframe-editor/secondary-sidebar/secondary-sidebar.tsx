@@ -12,7 +12,7 @@ import { DocumentOverviewSidebar } from './document-overview-sidebar';
 
 export function SecondarySidebar() {
 	const { isInserterOpened, isDocumentOverviewOpened: isListViewOpened } =
-		useContext( EditorContext );
+		useContext( EditorContext ) as any;
 
 	if ( isInserterOpened ) {
 		return <InserterSidebar />;

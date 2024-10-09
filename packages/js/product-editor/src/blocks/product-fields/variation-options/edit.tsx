@@ -112,7 +112,7 @@ export function Edit( {
 					/>
 				),
 			}
-		);
+		) as any;
 	}
 
 	function mapDefaultAttributes() {
