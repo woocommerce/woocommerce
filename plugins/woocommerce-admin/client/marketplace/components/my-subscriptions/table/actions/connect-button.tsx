@@ -26,7 +26,7 @@ interface ConnectProps {
 
 export default function ConnectButton( props: ConnectProps ) {
 	const [ isConnecting, setIsConnecting ] = useState( false );
-	const { loadSubscriptions } = useContext( SubscriptionsContext );
+	const { loadSubscriptions } = useContext( SubscriptionsContext ) as any;
 
 	const connect = () => {
 		recordEvent( 'marketplace_product_connect_button_clicked', {

@@ -16,7 +16,7 @@ import { NoticeStatus } from '../../../../contexts/types';
 const NOTICE_ID = 'woocommerce-marketplace-refresh-subscriptions';
 
 export function RefreshButton() {
-	const { refreshSubscriptions } = useContext( SubscriptionsContext );
+	const { refreshSubscriptions } = useContext( SubscriptionsContext ) as any;
 	const [ isLoading, setIsLoading ] = useState( false );
 
 	const refresh = () => {
@@ -35,7 +35,7 @@ export function RefreshButton() {
 					NoticeStatus.Success
 				);
 			} )
-			.catch( ( error ) => {
+			.catch( ( error: any ) => {
 				addNotice(
 					NOTICE_ID,
 					sprintf(

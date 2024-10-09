@@ -93,7 +93,7 @@ export function InstalledSubscriptionsTable( props: {
 
 		return (
 			<EmptyTable numberOfRows={ 4 }>
-				{ noInstalledSubscriptionsHTML }
+				{ noInstalledSubscriptionsHTML as any }
 			</EmptyTable>
 		);
 	}

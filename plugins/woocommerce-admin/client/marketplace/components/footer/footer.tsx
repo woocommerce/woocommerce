@@ -64,7 +64,7 @@ function FooterContent(): JSX.Element {
 				/>
 				<IconWithText
 					icon={ shield }
-					title={ paymentTitle }
+					title={ paymentTitle as any }
 					description={ __(
 						'Everything in the Marketplace has been built by our own team or by our trusted partners, so you can be sure of its quality.',
 						'woocommerce'

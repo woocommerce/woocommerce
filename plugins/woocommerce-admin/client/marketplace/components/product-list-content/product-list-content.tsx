@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { Fragment, useEffect, useState } from '@wordpress/element';
-import clsx from 'clsx';
+import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import clsx from 'clsx';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -62,7 +63,7 @@ export default function ProductListContent( props: {
 		<>
 			<div className={ classes }>
 				{ props.products.map( ( product, index ) => (
-					<Fragment key={ product.id }>
+					<React.Fragment key={ product.id }>
 						<ProductCard
 							key={ product.id }
 							type={ props.type }
@@ -146,7 +147,7 @@ export default function ProductListContent( props: {
 									} }
 								/>
 							) }
-					</Fragment>
+					</React.Fragment>
 				) ) }
 			</div>
 		</>

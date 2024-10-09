@@ -204,7 +204,7 @@ export default function Products( props: ProductsProps ) {
 								/>
 							),
 						}
-					) }
+					) as any }
 				</div>
 			) }
 			{ showAllButton && (

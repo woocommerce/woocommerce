@@ -34,7 +34,7 @@ export default function InstallModal() {
 	const [ showModal, setShowModal ] = useState< boolean >( false );
 	const [ isInstalled, setIsInstalled ] = useState< boolean >( false );
 
-	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
+	const { subscriptions, isLoading } = useContext( SubscriptionsContext ) as any;
 
 	const subscription: Subscription | undefined = subscriptions.find(
 		( s: Subscription ) => s.product_key === installingProductKey
