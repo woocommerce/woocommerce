@@ -56,11 +56,11 @@ export const FormContext: React.Context< FormContextType< any > > =
 	createContext< FormContextType< any > >(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		{} as FormContextType< any >
-	);
+	) as any;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useFormContext< Values extends Record< string, any > >() {
-	const formContext = useContext< FormContextType< Values > >( FormContext );
+	const formContext = useContext< FormContextType< Values > >( FormContext as any );
 
 	return formContext;
 }

@@ -409,7 +409,7 @@ function FormComponent< Values extends Record< string, any > >(
 	);
 }
 
-const Form = forwardRef( FormComponent ) as <
+const Form = forwardRef( FormComponent as any ) as <
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	Values extends Record< string, any >
 >(
