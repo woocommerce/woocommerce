@@ -9,7 +9,7 @@ import {
 } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
-import { ComponentType } from 'react';
+import { ComponentClass, ComponentType } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet, natively (not until 7.0.0).
 // Including `@types/wordpress__data` as a devDependency causes build issues,
@@ -42,7 +42,7 @@ function getEdit<
 	edit: ComponentType< BlockEditProps< T > >,
 	useEvaluationContext: UseEvaluationContext
 ): ComponentType< BlockEditProps< T > > {
-	return ( props ) => {
+	return ( ( props: any ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore context is added to the block props by the block editor.
 		const { context } = props;
@@ -79,14 +79,14 @@ function getEdit<
 			return null;
 		}
 
-		return createElement( edit, {
+		return createElement( edit as any, {
 			...props,
 			attributes: {
 				...props.attributes,
 				disabled: props.attributes.disabled || shouldDisable,
 			},
 		} );
-	};
+	} ) as any;
 }
 
 function augmentAttributes<
