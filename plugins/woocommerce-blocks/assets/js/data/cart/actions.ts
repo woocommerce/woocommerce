@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import type { Cart, CartResponseItem } from '@woocommerce/types';
+import type {
+	ApiErrorResponse,
+	Cart,
+	CartResponseItem,
+} from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 
 /**
@@ -9,7 +13,7 @@ import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
  */
 import { ACTION_TYPES as types } from './action-types';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
-import type { PersistenceLayer, Thunks } from './thunks';
+import type { Thunks } from './thunks';
 
 // Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
@@ -21,6 +25,16 @@ export function setCartData( cart: Cart ) {
 	return {
 		type: types.SET_CART_DATA,
 		response: cart,
+	};
+}
+
+/**
+ * An action creator that dispatches the plain action responsible for setting the cart error data in the store.
+ */
+export function setErrorData( error: ApiErrorResponse | null ) {
+	return {
+		type: types.SET_ERROR_DATA,
+		error,
 	};
 }
 
@@ -153,6 +167,7 @@ export type Actions =
 	| typeof receiveRemovingCoupon
 	| typeof setBillingAddress
 	| typeof setCartData
+	| typeof setErrorData
 	| typeof setIsCartDataStale
 	| typeof setShippingAddress
 	| typeof shippingRatesBeingSelected
