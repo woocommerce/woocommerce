@@ -155,9 +155,9 @@ export function registerWooBlockType<
 		{
 			...settings,
 			edit: getEdit< T >(
-				edit,
+				edit as any,
 				useEvaluationContext ?? defaultUseEvaluationContext
 			),
 		}
-	);
+	) as any;
 }
