@@ -81,24 +81,6 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		}
 	}, [ cartIsLoading, cartIsLoadingForTheFirstTime ] );
 
-	useEffect( () => {
-		if (
-			! cartIsLoading &&
-			isCartResponseTotals( cartTotalsFromApi ) &&
-			isNumber( cartItemsCountFromApi )
-		) {
-			// Save server data to local storage, so we can re-fetch it faster
-			// on the next page load.
-			localStorage.setItem(
-				'wc-blocks_mini_cart_totals',
-				JSON.stringify( {
-					totals: cartTotalsFromApi,
-					itemsCount: cartItemsCountFromApi,
-				} )
-			);
-		}
-	} );
-
 	const [ isOpen, setIsOpen ] = useState< boolean >( isInitiallyOpen );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
 	// slide in animation.
