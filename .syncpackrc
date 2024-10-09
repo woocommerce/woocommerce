@@ -83,7 +83,6 @@
 				"glob*",
 				"jest*",
 				"postcss*",
-				"react*",
 				"typescript",
 				"webpack*"
 			],
