@@ -127,7 +127,7 @@ export const SidebarNavigationScreenFooter = ( {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
-	const { context } = useContext( CustomizeStoreContext ) asa ny;
+	const { context } = useContext( CustomizeStoreContext ) as any;
 	const aiOnline = context.flowType === FlowType.AIOnline;
 
 	const title = aiOnline
