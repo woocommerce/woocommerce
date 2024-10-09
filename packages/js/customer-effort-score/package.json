@@ -101,8 +101,8 @@
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
-		"react": "18.3.0",
-		"react-dom": "18.3.0"
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
 	},
 	"config": {
 		"ci": {

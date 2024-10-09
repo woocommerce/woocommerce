@@ -90,8 +90,8 @@
 		"memize": "^1.1.0",
 		"qrcode.react": "^3.1.0",
 		"qs": "^6.11.2",
-		"react": "18.3.0",
-		"react-dom": "18.3.0",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
 		"react-router-dom": "~6.3.0",
 		"react-transition-group": "^4.4.5",
 		"react-visibility-sensor": "^5.1.1",
@@ -127,7 +127,7 @@
 		"@types/lodash": "^4.14.202",
 		"@types/puppeteer": "^4.0.3",
 		"@types/qs": "^6.9.10",
-		"@types/react": "18.3.0",
+		"@types/react": "18.2.0",
 		"@types/react-router-dom": "^5.3.3",
 		"@types/react-transition-group": "^4.4.10",
 		"@types/testing-library__jest-dom": "^5.14.9",
@@ -238,8 +238,8 @@
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.0",
-		"react": "18.3.0",
-		"react-dom": "18.3.0"
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
 	},
 	"engines": {
 		"node": "^20.11.1",

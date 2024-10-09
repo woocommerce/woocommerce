@@ -121,7 +121,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "18.3.0"
+			"pinVersion": "18.2.0"
 		},
 		{
 			"dependencies": [
