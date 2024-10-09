@@ -70,7 +70,7 @@ export const CustomizeStoreContext = createContext< {
 	sendEvent: () => {},
 	context: {} as CustomizeStoreComponentProps[ 'context' ],
 	currentState: 'assemblerHub',
-} );
+} ) as any;
 
 export type events =
 	| { type: 'FINISH_CUSTOMIZATION' }

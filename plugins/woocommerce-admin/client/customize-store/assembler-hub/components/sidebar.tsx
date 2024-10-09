@@ -21,7 +21,7 @@ type SidebarNavigationContextType = {
 export const SidebarNavigationContext =
 	createContext< SidebarNavigationContextType >( {
 		navigate: () => void 0,
-	} );
+	} ) as any;
 
 export function SidebarContent( { children }: { children: JSX.Element } ) {
 	const [ navState, setNavState ] = useState< {

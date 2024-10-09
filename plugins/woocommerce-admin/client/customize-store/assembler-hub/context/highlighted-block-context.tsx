@@ -17,7 +17,7 @@ export const HighlightedBlockContext = createContext< {
 	resetHighlightedBlockClientId: () => {
 		// No op by default.
 	},
-} );
+} ) as any;
 
 // A Provider that keeps track of which block is "focussed" in the Assembler Hub.
 // This is used to highlight the block in the BlockEditor currently.

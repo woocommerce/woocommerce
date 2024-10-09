@@ -76,7 +76,7 @@ export const FontPairing = () => {
 			) === 'yes'
 	);
 
-	const { optInFlowStatus } = useContext( OptInContext );
+	const { optInFlowStatus } = useContext( OptInContext ) as any;
 
 	const fontPairings = useMemo( () => {
 		if ( isAIFlow( context.flowType ) ) {

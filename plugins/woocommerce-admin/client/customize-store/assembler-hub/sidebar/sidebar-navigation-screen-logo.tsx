@@ -396,7 +396,7 @@ export const SidebarNavigationScreenLogo = ( {
 	onNavigateBackClick: () => void;
 } ) => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
-	const { logoBlockIds } = useContext( LogoBlockContext );
+	const { logoBlockIds } = useContext( LogoBlockContext ) as any;
 	const { attributes, isAttributesLoading } = useLogoAttributes();
 
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
@@ -442,7 +442,7 @@ export const SidebarNavigationScreenLogo = ( {
 		if ( ! logoBlockIds.length ) {
 			return;
 		}
-		logoBlockIds.forEach( ( clientId ) =>
+		logoBlockIds.forEach( ( clientId: any ) =>
 			updateBlockAttributes( clientId, newAttributes )
 		);
 	};
