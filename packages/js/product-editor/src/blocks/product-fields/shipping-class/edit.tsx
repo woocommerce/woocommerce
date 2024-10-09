@@ -14,13 +14,13 @@ import { BaseControl, SelectControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
-	Fragment,
 	createElement,
 	createInterpolateElement,
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useEntityProp } from '@wordpress/core-data';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -199,11 +199,11 @@ export function Edit( {
 											);
 										} }
 									>
-										<Fragment />
+										<React.Fragment />
 									</Link>
 								),
 							}
-						) }
+						) as any }
 					/>
 				</div>
 

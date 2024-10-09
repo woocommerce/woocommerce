@@ -530,4 +530,4 @@ export const VariationsTable = forwardRef<
 			</div>
 		</div>
 	);
-} );
+} ) as any;

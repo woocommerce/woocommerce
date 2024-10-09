@@ -53,4 +53,4 @@ export const TextControl = forwardRef( function ForwardedTextControl(
 			onBlur={ onBlur }
 		/>
 	);
-} );
+} ) as any;
