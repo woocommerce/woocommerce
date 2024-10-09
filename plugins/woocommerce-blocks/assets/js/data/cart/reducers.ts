@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import type { CartItem } from '@woocommerce/types';
-import type { Reducer } from 'redux';
+import type { Reducer, AnyAction } from 'redux';
 
 /**
  * Internal dependencies
@@ -10,46 +9,15 @@ import type { Reducer } from 'redux';
 import { ACTION_TYPES as types } from './action-types';
 import { defaultCartState, CartState } from './default-state';
 import { EMPTY_CART_ERRORS } from '../constants';
-import type { CartAction } from './actions';
-
-/**
- * Sub-reducer for cart items array.
- *
- * @param {Array<CartItem>} state  cartData.items state slice.
- * @param {CartAction}      action Action object.
- */
-const cartItemsReducer = (
-	state: Array< CartItem > = [],
-	action: Partial< CartAction >
-) => {
-	switch ( action.type ) {
-		case types.RECEIVE_CART_ITEM:
-			// Replace specified cart element with the new data from server.
-			return state.map( ( cartItem ) => {
-				if ( cartItem.key === action.cartItem?.key ) {
-					return action.cartItem;
-				}
-				return cartItem;
-			} );
-	}
-	return state;
-};
+import { persistenceLayer } from './persistence-layer';
 
 /**
  * Reducer for receiving items related to the cart.
- *
- * @param {CartState}  state  The current state in the store.
- * @param {CartAction} action Action object.
- *
- * @return  {CartState}          New or existing state.
  */
-const reducer: Reducer< CartState > = (
-	state = defaultCartState,
-	action: Partial< CartAction >
-) => {
+const reducer = ( state = defaultCartState, action: AnyAction ): CartState => {
 	switch ( action.type ) {
 		case types.SET_ERROR_DATA:
-			if ( action.error ) {
+			if ( 'error' in action && action.error ) {
 				state = {
 					...state,
 					errors: [ action.error ],
@@ -142,14 +110,18 @@ const reducer: Reducer< CartState > = (
 				cartItemsPendingDelete: keysPendingDelete,
 			};
 			break;
-		// Delegate to cartItemsReducer.
 		case types.RECEIVE_CART_ITEM:
 			state = {
 				...state,
 				errors: EMPTY_CART_ERRORS,
 				cartData: {
 					...state.cartData,
-					items: cartItemsReducer( state.cartData.items, action ),
+					items: state.cartData.items.map( ( cartItem ) => {
+						if ( cartItem.key === action.cartItem?.key ) {
+							return action.cartItem;
+						}
+						return cartItem;
+					} ),
 				},
 			};
 			break;
@@ -186,4 +158,19 @@ const reducer: Reducer< CartState > = (
 
 export type State = ReturnType< typeof reducer >;
 
-export default reducer;
+/**
+ * Updates cached cart data in local storage.
+ */
+function withPersistenceLayer( cartReducer: Reducer< CartState > ) {
+	return ( state: CartState, action: AnyAction ) => {
+		const nextState = cartReducer( state, action );
+
+		if ( nextState.cartData ) {
+			persistenceLayer.set( nextState.cartData );
+		}
+
+		return nextState;
+	};
+}
+
+export default withPersistenceLayer( reducer );
