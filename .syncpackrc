@@ -121,7 +121,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^18.3.0"
+			"pinVersion": "18.3.0"
 		},
 		{
 			"dependencies": [
@@ -386,7 +386,6 @@
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@types/node",
-				"@types/react",
 				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"@wordpress/**",
@@ -396,8 +395,6 @@
 				"pnpm",
 				"postcss",
 				"postcss-loader",
-				"react",
-				"react-dom",
 				"typescript"
 			],
 			"packages": [
