@@ -76,7 +76,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 	} >( {} );
 	const [ activeTaskId, setActiveTaskId ] = useState( '' );
 	const [ showDismissModal, setShowDismissModal ] = useState( false );
-	const { layoutString } = useLayoutContext();
+	const { layoutString } = useLayoutContext() as any;
 
 	const prevQueryRef = useRef( query );
 
@@ -309,7 +309,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 							) : (
 								headerData?.task &&
 								createElement(
-									taskHeaders[ headerData.task.id ],
+									taskHeaders[ headerData.task.id ] as any,
 									headerData
 								)
 							) }

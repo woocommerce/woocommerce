@@ -17,7 +17,7 @@ import WooIcon from './woo-icon.svg';
 const WooCommerceServicesItem: React.FC< {
 	isWCSInstalled: boolean | undefined;
 } > = ( { isWCSInstalled } ) => {
-	const { layoutString } = useLayoutContext();
+	const { layoutString } = useLayoutContext() as any;
 
 	const handleSetupClick = () => {
 		recordEvent( 'tasklist_click', {

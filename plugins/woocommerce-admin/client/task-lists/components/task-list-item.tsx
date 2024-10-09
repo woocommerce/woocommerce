@@ -36,7 +36,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { layoutString } = useLayoutContext();
+	const { layoutString } = useLayoutContext() as any;
 
 	const {
 		dismissTask,

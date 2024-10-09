@@ -239,7 +239,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		return (
 			<TaskCard>
 				{ currentPartner.component &&
-					createElement( currentPartner.component, childProps ) }
+					createElement( currentPartner.component as any, childProps ) }
 			</TaskCard>
 		);
 	}
@@ -248,7 +248,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			{ partners.map(
 				( partner ) =>
 					partner.card &&
-					createElement( partner.card, {
+					createElement( partner.card as any, {
 						key: partner.id,
 						...childProps,
 					} )

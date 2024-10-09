@@ -15,7 +15,7 @@ import clsx from 'clsx';
 import './dismissable-list.scss';
 
 // using a context provider for the option name so that the option name prop doesn't need to be passed to the `DismissableListHeading` too
-const OptionNameContext = createContext( '' );
+const OptionNameContext = createContext( '' ) as any;
 
 export const DismissableListHeading: React.FC< React.PropsWithChildren < {
 	onDismiss?: () => void;

@@ -209,4 +209,4 @@ export const AllCategoryList = forwardRef<
 			</ul>
 		</>
 	);
-} );
+} ) as any;

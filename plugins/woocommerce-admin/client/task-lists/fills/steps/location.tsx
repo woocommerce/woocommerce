@@ -4,10 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
 import { Status, Options } from 'wordpress__notices';
+import React from 'react';
 /**
  * Internal dependencies
  */
@@ -132,7 +133,7 @@ const StoreLocation = ( {
 				handleSubmit,
 				setValue,
 			}: FormContextType< FormValues > ) => (
-				<Fragment>
+				<React.Fragment>
 					<StoreAddress
 						// @ts-expect-error return type doesn't match, but they do work. We should revisit and refactor them in a follow up issue.
 						getInputProps={ getInputProps }
@@ -145,7 +146,7 @@ const StoreLocation = ( {
 					>
 						{ buttonText }
 					</Button>
-				</Fragment>
+				</React.Fragment>
 			) ) as any }
 		</Form>
 	);

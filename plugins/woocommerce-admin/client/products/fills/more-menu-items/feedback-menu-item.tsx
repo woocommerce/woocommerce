@@ -115,7 +115,7 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 												</span>
 											),
 										}
-									) }
+									) as any }
 								>
 									<TextControl
 										value={ values.email || '' }
