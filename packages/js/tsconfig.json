@@ -7,7 +7,7 @@
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"jsx": "react",
+		"jsx": "preserve",
 		"jsxFactory": "createElement",
 		"jsxFragmentFactory": "Fragment",
 		"typeRoots": []
