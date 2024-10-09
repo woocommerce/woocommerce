@@ -534,4 +534,4 @@ export const DateTimePickerControl = forwardRef(
 			/>
 		);
 	}
-);
+) as any;
