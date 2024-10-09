@@ -282,18 +282,18 @@ class WooCommercePayments extends Task {
 				), admin_url( 'admin.php' ) );
 			}
 
+			// Check if there is an active WooPayments incentive via the welcome page.
+			if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
+				// Point to the WooPayments welcome page.
+				return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
+			}
+
 			// WooPayments is not active.
 			// Trigger the WooPayments plugin installation and/or activation by pointing to the task suggestion URL.
 			return add_query_arg( array(
 				'task' => $this->get_id(),
 				'id'   => self::get_suggestion()->id,
 			), admin_url( 'admin.php?page=wc-admin' ) );
-		}
-
-		// Check if there is an active WooPayments incentive via the welcome page.
-		if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
-			// Point to the WooPayments welcome page.
-			return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
 		}
 
 		// Fall back to the WooPayments task page URL.
