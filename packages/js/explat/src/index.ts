@@ -46,7 +46,7 @@ export const { loadExperimentAssignment, dangerouslyGetExperimentAssignment } =
 	exPlatClient;
 
 export const { useExperiment, Experiment, ProvideExperimentData } =
-	createExPlatClientReactHelpers( exPlatClient );
+	createExPlatClientReactHelpers( exPlatClient ) as any;
 
 // Create another auth client that send request to wpcom as auth user.
 const exPlatClientWithAuth = createExPlatClient( {
@@ -66,4 +66,4 @@ export const {
 	useExperiment: useExperimentWithAuth,
 	Experiment: ExperimentWithAuth,
 	ProvideExperimentData: ProvideExperimentDataWithAuth,
-} = createExPlatClientReactHelpers( exPlatClientWithAuth );
+} = createExPlatClientReactHelpers( exPlatClientWithAuth ) as any;
