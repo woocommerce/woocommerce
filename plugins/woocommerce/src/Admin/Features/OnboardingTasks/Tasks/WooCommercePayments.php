@@ -270,13 +270,8 @@ class WooCommercePayments extends Task {
 		if ( WooCommercePayments::is_supported() ) {
 			// If WooPayments is active, point to the WooPayments client surfaces/flows.
 			if ( WooCommercePayments::is_wcpay_active() ) {
-				// If WooPayments is connected, point to the WooPayments overview page.
-				if ( WooCommercePayments::is_connected() ) {
-					return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/overview' ) );
-				}
-
-				// There is no connected WooPayments account.
-				// Point to a WooPayments connect link to let the WooPayments client figure out the proper onboarding flow.
+				// Point to a WooPayments connect link to let the WooPayments client figure out the proper
+				// place to redirect the user to.
 				return add_query_arg( array(
 					'wcpay-connect' => '1',
 					'from'          => 'WCADMIN_PAYMENT_TASK',
