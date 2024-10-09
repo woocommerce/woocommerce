@@ -18,7 +18,7 @@ import { useReducedMotion } from '@wordpress/compose';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import { decodeEntities } from '@wordpress/html-entities';
-import { forwardRef } from '@wordpress/element';
+import { forwardRef } from 'react';
 // @ts-ignore No types for this exist yet.
 import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
@@ -135,4 +135,4 @@ export const SiteHub = forwardRef(
 			</motion.div>
 		);
 	}
-);
+) as any;

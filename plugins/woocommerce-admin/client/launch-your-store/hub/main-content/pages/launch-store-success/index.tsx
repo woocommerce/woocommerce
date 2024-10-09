@@ -146,7 +146,7 @@ export const LaunchYourStoreSuccess = ( {
 											</a>
 										),
 									}
-							  )
+							  ) as any
 							: __(
 									'You’ve successfully launched your store and are ready to start selling! We can’t wait to see your business grow.',
 									'woocommerce'

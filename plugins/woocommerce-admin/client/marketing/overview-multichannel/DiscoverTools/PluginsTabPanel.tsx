@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
@@ -9,6 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Pill } from '@woocommerce/components';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { flatMapDeep, uniqBy } from 'lodash';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -147,7 +148,7 @@ export const PluginsTabPanel = ( {
 				return (
 					<>
 						{ subcategoryPlugins.map( ( plugin ) => (
-							<Fragment key={ plugin.product }>
+							<React.Fragment key={ plugin.product }>
 								<CardDivider />
 								<PluginCardBody
 									icon={
@@ -165,7 +166,7 @@ export const PluginsTabPanel = ( {
 									description={ plugin.description }
 									button={ renderButton( plugin ) }
 								/>
-							</Fragment>
+							</React.Fragment>
 						) ) }
 					</>
 				);

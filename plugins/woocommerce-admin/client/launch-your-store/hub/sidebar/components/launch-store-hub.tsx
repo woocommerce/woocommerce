@@ -204,7 +204,8 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 										</Button>
 									),
 								}
-							) }
+							) as any }
+							) as any }
 						</Notice>
 					) }
 					<Button variant="primary" onClick={ launchStoreAction }>

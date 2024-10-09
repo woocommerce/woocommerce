@@ -75,7 +75,7 @@ export const ReportDateTour: React.FC< {
 									),
 								} ),
 							}
-						),
+						) as any,
 					},
 					primaryButton: {
 						text: __( 'Got it', 'woocommerce' ),

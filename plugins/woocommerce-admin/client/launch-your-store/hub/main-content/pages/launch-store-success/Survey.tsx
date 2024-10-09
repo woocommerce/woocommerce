@@ -101,7 +101,7 @@ export const LysSurvey = ( {
 													<span className="small-text" />
 												),
 											}
-										) }
+										) as any }
 									</label>
 									<TextareaControl
 										id="launch-your-store-comment"
@@ -128,7 +128,7 @@ export const LysSurvey = ( {
 													</Link>
 												),
 											}
-										) }
+										) as any }
 									</span>
 								</div>
 							) }

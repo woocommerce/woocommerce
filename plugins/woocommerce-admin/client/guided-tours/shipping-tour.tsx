@@ -143,7 +143,7 @@ const spotlitElementsSelectors: Array< NonEmptySelectorArray > = [
 	],
 ];
 
-const TourFloaterWrapper = ( { step }: { step: number } ) => {
+const TourFloaterWrapper = ( { step }: { step: number } ): any => {
 	const thisRef = useRef< HTMLDivElement >( null );
 	useLayoutEffect( () => {
 		// this moves the element to the correct place which is right before the table element
