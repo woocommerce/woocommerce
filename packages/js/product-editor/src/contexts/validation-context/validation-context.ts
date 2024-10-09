@@ -18,4 +18,4 @@ export const ValidationContext = createContext< ValidationContextProps< any > >(
 		validateField: () => Promise.resolve( undefined ),
 		validateAll: () => Promise.resolve( {} ),
 	}
-);
+) as any;

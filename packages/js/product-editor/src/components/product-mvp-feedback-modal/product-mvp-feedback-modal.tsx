@@ -153,7 +153,7 @@ function ProductMVPFeedbackModal( {
 							{
 								optional: optionalElement,
 							}
-						) }
+						) as any }
 						value={ comments }
 						onChange={ ( value: string ) => setComments( value ) }
 						rows={ 5 }
@@ -169,7 +169,7 @@ function ProductMVPFeedbackModal( {
 							{
 								optional: optionalElement,
 							}
-						) }
+						) as any }
 						value={ email }
 						onChange={ ( value: string ) => setEmail( value ) }
 						rows={ 5 }

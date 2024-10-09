@@ -45,7 +45,7 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	order,
 	children,
 } ) => {
-	const { registerFill, getFillHelpers } = useSlotContext();
+	const { registerFill, getFillHelpers } = useSlotContext() as any;
 
 	const fieldId = `product_field/${ sectionName }/${ fieldName }`;
 
@@ -103,7 +103,7 @@ export const WooProductFieldItem: React.FC< React.PropsWithChildren< WooProductF
 
 WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const { filterRegisteredFills } = useSlotContext();
+	const { filterRegisteredFills } = useSlotContext() as any;
 
 	return (
 		<Slot

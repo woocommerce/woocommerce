@@ -226,4 +226,4 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 			</BaseControl>
 		);
 	}
-);
+) as any;

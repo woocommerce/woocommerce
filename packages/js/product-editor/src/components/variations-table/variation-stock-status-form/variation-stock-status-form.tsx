@@ -144,7 +144,7 @@ export function VariationStockStatusForm( {
 					disabled={ isLoadingManageStockOption || ! canManageStock }
 					checked={ value.manage_stock }
 					onChange={ handleTrackInventoryToggleChange }
-					help={ renderTrackInventoryToggleHelp() }
+					help={ renderTrackInventoryToggleHelp() as any }
 				/>
 			</div>
 

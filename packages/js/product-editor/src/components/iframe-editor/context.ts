@@ -23,4 +23,4 @@ export const EditorContext = createContext< EditorContextType >( {
 	setIsDocumentOverviewOpened: () => {},
 	setIsInserterOpened: () => {},
 	undo: () => {},
-} );
+} ) as any;

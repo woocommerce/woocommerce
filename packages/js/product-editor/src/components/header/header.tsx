@@ -8,9 +8,7 @@ import {
 	createElement,
 	useContext,
 	useEffect,
-	Fragment,
 	lazy,
-	Suspense,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
@@ -18,6 +16,7 @@ import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
+import React from 'react';
 import { Tag } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -43,7 +42,7 @@ const PublishButton = lazy( () =>
 	import( './publish-button' ).then( ( module ) => ( {
 		default: module.PublishButton,
 	} ) )
-);
+) as any;
 
 const RETURN_TO_MAIN_PRODUCT = __(
 	'Return to the main product',
@@ -225,12 +224,12 @@ export function Header( {
 					</div>
 					<h1 className="woocommerce-product-header__title">
 						{ isVariation ? (
-							<>
+							<React.Fragment>
 								{ lastPersistedProduct?.name }
 								<span className="woocommerce-product-header__variable-product-id">
 									# { lastPersistedProduct?.id }
 								</span>
-							</>
+							</React.Fragment>
 						) : (
 							getHeaderTitle(
 								editedProductName,
@@ -264,14 +263,14 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					<Suspense fallback={ null }>
+					<React.Suspense fallback={ null }>
 						<PublishButton
 							productType={ productType }
 							isPrePublishPanelVisible={ showPrepublishChecks }
 							isMenuButton
 							visibleTab={ selectedTab }
 						/>
-					</Suspense>
+					</React.Suspense>
 
 					<WooHeaderItem.Slot name="product" />
 					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />

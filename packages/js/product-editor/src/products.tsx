@@ -3,20 +3,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	StrictMode,
-	Suspense,
 	createElement,
 	// @ts-expect-error createRoot is available.
 	createRoot,
-	lazy,
 } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
 import { getGutenbergVersion } from './utils/get-gutenberg-version';
 
-const ProductsApp = lazy( () =>
+const ProductsApp = React.lazy( () =>
 	import( './products-app' ).then( ( module ) => ( {
 		default: module.ProductsApp,
 	} ) )
@@ -33,11 +31,11 @@ export function initializeProductsDashboard( id: string ) {
 	const isGutenbergEnabled = getGutenbergVersion() > 0;
 
 	root.render(
-		<StrictMode>
+		<React.StrictMode>
 			{ isGutenbergEnabled ? (
-				<Suspense fallback={ null }>
+				<React.Suspense fallback={ null }>
 					<ProductsApp />
-				</Suspense>
+				</React.Suspense>
 			) : (
 				<div>
 					{ __(
@@ -46,7 +44,7 @@ export function initializeProductsDashboard( id: string ) {
 					) }
 				</div>
 			) }
-		</StrictMode>
+		</React.StrictMode>
 	);
 
 	return root;

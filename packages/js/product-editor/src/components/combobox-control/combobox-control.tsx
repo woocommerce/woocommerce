@@ -132,4 +132,4 @@ export const ComboboxControl = forwardRef( function ForwardedComboboxControl(
 			__experimentalRenderItem={ __experimentalRenderItem }
 		/>
 	);
-} );
+} ) as any;

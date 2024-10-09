@@ -14,7 +14,7 @@ type NewNavigationContextType = {
 };
 const NewNavigationContext = createContext< NewNavigationContextType | null >(
 	null
-);
+) as any;
 
 export function NewNavigationProvider( {
 	children,
@@ -31,7 +31,7 @@ export function NewNavigationProvider( {
 	);
 }
 export function useNewNavigation(): [ boolean, ( nav: boolean ) => void ] {
-	const context = useContext( NewNavigationContext );
+	const context = useContext( NewNavigationContext ) as any;
 	if ( context ) {
 		const { showNewNavigation, setShowNewNavigation } = context;
 		return [ showNewNavigation, setShowNewNavigation ];
