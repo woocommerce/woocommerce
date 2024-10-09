@@ -21,6 +21,8 @@ export type AddressFormFields = {
  * Internal dependencies
  */
 import { FieldProps } from './utils';
+import { Schema } from '@wordpress/core-data';
+import SearchResult = Schema.SearchResult;
 
 export interface AddressFormProps< T > {
 	// Id for component.
@@ -60,6 +62,7 @@ export interface AddressLineFieldsProps< T >
 	addressType: FormType;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
 	onChange: ( key: keyof T, value: string ) => void;
+	suggestions: SearchResult[];
 }
 
 export interface AddressLineFieldProps< T > {

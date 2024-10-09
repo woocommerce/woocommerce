@@ -3,7 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-
+use Automattic\WooCommerce\Blocks\Domain\Services\AutocompleteInterface;
 /**
  * Checkout class.
  *
@@ -318,6 +318,16 @@ class Checkout extends AbstractBlock {
 		}
 	}
 
+	private function has_address_suggestion() {
+		/**
+		 * Filter to add an address autocomplete provider is registered.
+		 */
+		$provider = apply_filters( 'woocommerce_store_api_address_autocomplete_provider_registration', null );
+		if ( $provider instanceof AutocompleteInterface ) {
+			return $provider->get_fields();
+		}
+		return false;
+	}
 	/**
 	 * Extra data passed through from server to client for block.
 	 *
@@ -371,7 +381,7 @@ class Checkout extends AbstractBlock {
 
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
 		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
-
+		$this->asset_data_registry->add( 'hasAddressSuggestion', $this->has_address_suggestion() );
 		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
 		$this->asset_data_registry->add( 'localPickupText', $pickup_location_settings['title'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );

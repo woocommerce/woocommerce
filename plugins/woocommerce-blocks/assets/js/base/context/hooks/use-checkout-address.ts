@@ -37,6 +37,8 @@ interface CheckoutAddress {
 	useBillingAsShipping: boolean;
 	needsShipping: boolean;
 	showShippingMethods: boolean;
+	addressAutocompleteActive: boolean;
+	setAddressAutocompleteActive: ( active: boolean ) => void;
 }
 
 /**
@@ -49,6 +51,7 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		prefersCollection,
 		editingBillingAddress,
 		editingShippingAddress,
+		addressAutocompleteActive,
 	} = useSelect( ( select ) => ( {
 		useShippingAsBilling:
 			select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling(),
@@ -57,11 +60,14 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 			select( CHECKOUT_STORE_KEY ).getEditingBillingAddress(),
 		editingShippingAddress:
 			select( CHECKOUT_STORE_KEY ).getEditingShippingAddress(),
+		addressAutocompleteActive:
+			select( CHECKOUT_STORE_KEY ).getAddressAutocompleteActive(),
 	} ) );
 	const {
 		__internalSetUseShippingAsBilling,
 		setEditingBillingAddress,
 		setEditingShippingAddress,
+		setAddressAutocompleteActive,
 	} = useDispatch( CHECKOUT_STORE_KEY );
 	const {
 		billingAddress,
@@ -103,5 +109,7 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 			! needsShipping || ! useShippingAsBilling || !! prefersCollection,
 		forcedBillingAddress,
 		useBillingAsShipping: forcedBillingAddress || !! prefersCollection,
+		setAddressAutocompleteActive,
+		addressAutocompleteActive,
 	};
 };

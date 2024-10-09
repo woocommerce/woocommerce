@@ -39,6 +39,8 @@ class RoutesController {
 			'v1' => [
 				Routes\V1\Batch::IDENTIFIER              => Routes\V1\Batch::class,
 				Routes\V1\Cart::IDENTIFIER               => Routes\V1\Cart::class,
+				Routes\V1\CartAddressSuggestion::IDENTIFIER => Routes\V1\CartAddressSuggestion::class,
+				Routes\V1\CartSelectAddress::IDENTIFIER  => Routes\V1\CartSelectAddress::class,
 				Routes\V1\CartAddItem::IDENTIFIER        => Routes\V1\CartAddItem::class,
 				Routes\V1\CartApplyCoupon::IDENTIFIER    => Routes\V1\CartApplyCoupon::class,
 				Routes\V1\CartCoupons::IDENTIFIER        => Routes\V1\CartCoupons::class,

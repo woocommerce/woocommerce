@@ -158,7 +158,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$billing  = $this->schema->billing_address_schema->sanitize_callback( $billing, $request, 'billing_address' );
 		$shipping = $this->schema->shipping_address_schema->sanitize_callback( $shipping, $request, 'shipping_address' );
 
-		// Validate data now everything is clean..
+		// Validate data now everything is clean.
 		$validation_check = $this->validate_address_params( $request, $billing, $shipping );
 
 		if ( is_wp_error( $validation_check ) ) {

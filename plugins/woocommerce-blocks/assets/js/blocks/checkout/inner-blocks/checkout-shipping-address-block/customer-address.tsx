@@ -30,6 +30,8 @@ const CustomerAddress = ( {
 		useShippingAsBilling,
 		editingShippingAddress: editing,
 		setEditingShippingAddress: setEditing,
+		setAddressAutocompleteActive,
+		addressAutocompleteActive,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 

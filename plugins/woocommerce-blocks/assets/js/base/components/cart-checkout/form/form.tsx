@@ -14,7 +14,13 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
-import { useEffect, useMemo, useRef } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -23,6 +29,7 @@ import {
 	AddressFormValues,
 	ContactFormValues,
 	FormFieldsConfig,
+	getSetting,
 } from '@woocommerce/settings';
 import { objectHasProp } from '@woocommerce/types';
 
@@ -41,6 +48,7 @@ import {
 } from './utils';
 import { Select } from '../../select';
 import { validateState } from './validate-state';
+import { getAddressSuggestionProvider } from '../../../../blocks-registry/autocomplete-providers';
 
 /**
  * Checkout form.
@@ -57,6 +65,23 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 }: AddressFormProps< T > ): JSX.Element => {
 	const instanceId = useInstanceId( Form );
 	const isFirstRender = useRef( true );
+	const addressProvider = getAddressSuggestionProvider();
+
+	const [ addressSuggestions, setAddressSuggestions ] = useState( [] );
+
+	const addressOnChange = useCallback(
+		( key, value ) => {
+			onChange( {
+				...values,
+				[ key ]: value,
+			} );
+			if ( value.length >= 3 ) {
+				console.log( 'about to search' );
+				setAddressSuggestions( addressProvider?.search( value ) );
+			}
+		},
+		[ onChange, values, addressProvider ]
+	);
 
 	// Track incoming props.
 	const currentFields = useShallowEqual( fields );
@@ -209,12 +234,8 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							addressType={ addressType }
 							formId={ id }
 							key={ field.key }
-							onChange={ ( key, value ) => {
-								onChange( {
-									...values,
-									[ key ]: value,
-								} );
-							} }
+							onChange={ addressOnChange }
+							suggestions={ addressSuggestions }
 						/>
 					);
 				}

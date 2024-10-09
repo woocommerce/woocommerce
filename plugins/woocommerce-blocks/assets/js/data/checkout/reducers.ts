@@ -19,6 +19,20 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 					: state;
 			break;
 
+		case types.SET_ADDRESS_AUTOCOMPLETE_ACTIVE:
+			if (
+				action.isAddressAutocompleteActive !== undefined &&
+				action.isAddressAutocompleteActive !==
+					state.addressAutocompleteActive
+			) {
+				newState = {
+					...state,
+					addressAutocompleteActive:
+						action.isAddressAutocompleteActive,
+				};
+			}
+			break;
+
 		case types.SET_REDIRECT_URL:
 			newState =
 				action.redirectUrl !== undefined &&

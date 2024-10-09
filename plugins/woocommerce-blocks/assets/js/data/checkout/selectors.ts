@@ -16,6 +16,10 @@ export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;
 };
 
+export const getAddressAutocompleteActive = ( state: CheckoutState ) => {
+	return state.addressAutocompleteActive;
+};
+
 export const getCustomerPassword = ( state: CheckoutState ) => {
 	return state.customerPassword;
 };

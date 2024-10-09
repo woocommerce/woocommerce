@@ -10,6 +10,7 @@ import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
 import AddressLine2Field from './address-line-2-field';
 import { AddressLineFieldsProps } from './types';
 import { createFieldProps } from './utils';
+import { getAddressSuggestionProvider } from '../../../../blocks-registry/autocomplete-providers';
 
 const AddressLineFields = < T extends AddressFormValues | ContactFormValues >( {
 	formId,
@@ -17,7 +18,10 @@ const AddressLineFields = < T extends AddressFormValues | ContactFormValues >( {
 	address2,
 	addressType,
 	onChange,
+	suggestions,
 }: AddressLineFieldsProps< T > ): JSX.Element => {
+	const addressProvider = getAddressSuggestionProvider();
+
 	const address1FieldProps = address1
 		? createFieldProps( address1.field, formId, addressType )
 		: undefined;
@@ -38,6 +42,22 @@ const AddressLineFields = < T extends AddressFormValues | ContactFormValues >( {
 						onChange( address1.field?.key as keyof T, newValue )
 					}
 				/>
+			) }
+			{ suggestions.length > 0 && (
+				<div className="wc-block-components-address-form__suggestions">
+					{ suggestions.map( ( suggestion ) => (
+						<button
+							key={ suggestion.label }
+							onClick={ () => {
+								const address =
+									addressProvider?.getAddress( suggestion );
+								console.log( address );
+							} }
+						>
+							{ suggestion.label }
+						</button>
+					) ) }
+				</div>
 			) }
 			{ address2?.field && ! address2?.field?.hidden && (
 				<AddressLine2Field

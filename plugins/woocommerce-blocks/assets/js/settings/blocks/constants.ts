@@ -157,3 +157,8 @@ export const ADDRESS_FORM_FIELDS = getSetting< CheckoutField[] >(
 	'additionalAddressFields',
 	{}
 );
+
+export const HAS_ADDRESS_SUGGESTION = getSetting< boolean >(
+	'hasAddressSuggestion',
+	false
+);

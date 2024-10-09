@@ -19,6 +19,13 @@ export const __internalSetIdle = () => ( {
 	type: types.SET_IDLE,
 } );
 
+export const setAddressAutocompleteActive = (
+	isAddressAutocompleteActive: boolean
+) => ( {
+	type: types.SET_ADDRESS_AUTOCOMPLETE_ACTIVE,
+	isAddressAutocompleteActive,
+} );
+
 /**
  * Set the checkout status to `before_processing`
  */
@@ -213,5 +220,6 @@ export type CheckoutAction =
 			| typeof setPrefersCollection
 			| typeof __internalSetExtensionData
 			| typeof setAdditionalFields
+			| typeof setAddressAutocompleteActive
 	  >
 	| Record< string, never >;
