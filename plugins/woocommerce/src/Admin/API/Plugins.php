@@ -601,20 +601,17 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		if ( WooCommercePayments::is_connected() ) {
-			// Redirect to the WooPayments overview page if the merchant started onboarding (aka WooPayments is already connected).
-			$connect_url = add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/overview' ) );
-		} else {
-			// Redirect directly to the WooPayments onboarding flow if no account connected.
-			$args        = array(
-				'wcpay-connect' => '1',
-				'from'          => 'WCADMIN_PAYMENT_TASK',
-				'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
-			);
-			$connect_url = add_query_arg( $args, admin_url( 'admin.php' ) );
-		}
-
-		return array( 'connectUrl' => $connect_url );
+		// Use a WooPayments connect link to let the WooPayments plugin handle the connection flow.
+		return array(
+			'connectUrl' => add_query_arg(
+				array(
+					'wcpay-connect' => '1',
+					'from'          => 'WCADMIN_PAYMENT_TASK',
+					'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+				),
+				admin_url( 'admin.php' )
+			),
+		);
 	}
 
 	/**
