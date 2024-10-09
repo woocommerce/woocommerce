@@ -151,13 +151,13 @@ export function registerWooBlockType<
 	};
 
 	return registerBlockType< T >(
-		{ name, ...augmentedMetadata },
+		{ name, ...augmentedMetadata } as BlockConfiguration< T >,
 		{
 			...settings,
 			edit: getEdit< T >(
 				edit as any,
 				useEvaluationContext ?? defaultUseEvaluationContext
 			),
-		}
-	) as any;
+		} as Partial< BlockConfiguration< T > >
+	);
 }
