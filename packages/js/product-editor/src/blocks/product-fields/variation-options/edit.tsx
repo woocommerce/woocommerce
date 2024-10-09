@@ -80,8 +80,8 @@ export function Edit( {
 	}, [ isInSelectedTab, entityAttributes ] );
 
 	const localAttributeNames = attributes
-		.filter( ( attr ) => attr.id === 0 )
-		.map( ( attr ) => attr.name );
+		.filter( ( attr: any ) => attr.id === 0 )
+		.map( ( attr: any ) => attr.name );
 	let notice: string | React.ReactElement = '';
 	if (
 		localAttributeNames.length > 0 &&
@@ -116,7 +116,7 @@ export function Edit( {
 	}
 
 	function mapDefaultAttributes() {
-		return attributes.map( ( attribute ) => ( {
+		return attributes.map( ( attribute: any ) => ( {
 			...attribute,
 			isDefault: entityDefaultAttributes.some(
 				( defaultAttribute ) =>
