@@ -168,7 +168,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							}
 						}
 
-						$thumbnails_count++;
+						++$thumbnails_count;
 					}
 
 					return sprintf(
@@ -178,7 +178,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 						esc_attr( $classes_and_styles['classes'] ),
 						esc_attr( $classes_and_styles['styles'] ),
 						$html,
-						wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) )
+						wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 					);
 				}
 			}

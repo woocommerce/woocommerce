@@ -113,7 +113,10 @@ test(
 				.getByRole( 'heading', { name: 'Attributes' } )
 				.isVisible();
 
-			await page.getByRole( 'button', { name: 'Add new' } ).click();
+			await page
+				// Using a selector because there are many "Add new" buttons on the page
+				.locator( '.woocommerce-add-attribute-list-item__add-button' )
+				.click();
 
 			await page
 				.getByRole( 'heading', { name: 'Add variation options' } )
@@ -267,7 +270,7 @@ test(
 	}
 );
 
-test.skip(
+test(
 	'can add existing attributes',
 	{ tag: '@gutenberg' },
 	async ( { page, product, attributes } ) => {
@@ -275,28 +278,26 @@ test.skip(
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-			const getAttributesResponsePromise = page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/terms?attribute_id=' ) &&
-					response.status() === 200
-			);
 			await page.getByRole( 'tab', { name: 'Organization' } ).click();
-			await getAttributesResponsePromise;
 		} );
 
 		await test.step( 'add an existing attribute', async () => {
-			await page.getByRole( 'button', { name: 'Add new' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add new' } )
+				.first()
+				.click();
 
 			await page.waitForLoadState( 'domcontentloaded' );
 
-			// Add attributes that do not exist
-			await page.getByPlaceholder( 'Search or create attribute' ).click();
+			await page
+				.locator( '.woocommerce-attributes-combobox input' )
+				.click();
 
 			// Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
 			await waitForAttributeList( page );
 
 			await page
-				.getByPlaceholder( 'Search or create attribute' )
+				.locator( '.woocommerce-attributes-combobox input' )
 				.fill( attributes.attribute.name );
 			await page
 				.getByRole( 'option', { name: attributes.attribute.name } )
@@ -306,7 +307,7 @@ test.skip(
 			await page.getByPlaceholder( 'Search or create value' ).click();
 
 			for ( const term of attributes.terms ) {
-				await page.getByLabel( term.name, { exact: true } ).check();
+				await page.getByText( term.name, { exact: true } ).click();
 			}
 
 			await page.keyboard.press( 'Escape' );
@@ -355,9 +356,7 @@ test.skip(
 	}
 );
 
-// Test skipped because an issue with the options not always loading makes it flaky.
-// See https://github.com/woocommerce/woocommerce/issues/44925
-test.skip(
+test(
 	'can update product attributes',
 	{ tag: '@gutenberg' },
 	async ( { page, productWithAttributes } ) => {
@@ -374,9 +373,18 @@ test.skip(
 			await expect(
 				async () => {
 					await page.reload();
+					// Waiting for the "Block: Product attributes" will ensure
+					// that test will pass against the Pressable environment
+					await expect(
+						page.locator(
+							`[aria-label="Block: Product attributes"]`
+						)
+					).toBeVisible();
 					await page.getByRole( 'button', { name: 'Edit' } ).click();
 					await expect(
-						page.getByLabel( `Remove ${ attribute.options[ 0 ] }` )
+						page.locator(
+							`button[aria-label="Remove ${ attribute.options[ 0 ] }"]`
+						)
 					).toBeVisible( { timeout: 2000 } );
 				},
 				{

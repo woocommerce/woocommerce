@@ -34,6 +34,13 @@ class WC_Beta_Tester {
 	protected static $instance = null;
 
 	/**
+	 * WP.org data
+	 *
+	 * @var object
+	 */
+	private $wporg_data;
+
+	/**
 	 * Main Instance.
 	 */
 	public static function instance() {

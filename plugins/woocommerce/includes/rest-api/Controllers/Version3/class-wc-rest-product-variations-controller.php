@@ -8,6 +8,7 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,6 +22,7 @@ use Automattic\Jetpack\Constants;
  * @extends WC_REST_Product_Variations_V2_Controller
  */
 class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V2_Controller {
+	use CogsAwareRestControllerTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -149,8 +151,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'parent_id'             => $object->get_parent_id(),
 		);
 
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
+		$data = $this->add_additional_fields_to_object( $data, $request );
+		$data = $this->filter_response_by_context( $data, $context );
+
+		if ( $this->cogs_is_enabled() ) {
+			$this->add_cogs_info_to_returned_data( $data, $object );
+		}
+
 		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
@@ -378,6 +385,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			}
 		}
 
+		if ( $this->cogs_is_enabled() ) {
+			$this->set_cogs_info_in_product_object( $request, $variation );
+		}
+
 		/**
 		 * Filters an object before it is inserted via the REST API.
 		 *
@@ -446,7 +457,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 				if ( is_wp_error( $upload ) ) {
 					/**
-					 * Filter to check if it should supress the image upload error, false by default.
+					 * Filter to check if it should suppress the image upload error, false by default.
 					 *
 					 * @since 4.5.0
 					 * @param bool false   If it should suppress.
@@ -860,6 +871,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 			),
 		);
+
+		if ( $this->cogs_is_enabled() ) {
+			$schema = $this->add_cogs_related_schema( $schema, true );
+		}
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 

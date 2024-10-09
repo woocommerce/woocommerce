@@ -25,6 +25,7 @@ export interface ProductCollectionConfig extends BlockVariation {
 		setPreviewState?: SetPreviewState;
 		initialPreviewState?: PreviewState;
 	};
+	usesReference?: string[];
 }
 
 /**
@@ -237,6 +238,13 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 			'Invalid displayLayout: displayLayout must be an object.'
 		);
 	}
+	// attributes.dimensions
+	if (
+		config.attributes?.dimensions !== undefined &&
+		typeof config.attributes.dimensions !== 'object'
+	) {
+		console.warn( 'Invalid dimensions: dimensions must be an object.' );
+	}
 	// attributes.hideControls
 	if (
 		config.attributes?.hideControls !== undefined &&
@@ -302,6 +310,17 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		}
 	}
 
+	// usesReference
+	if (
+		config.usesReference !== undefined &&
+		! Array.isArray( config.usesReference )
+	) {
+		console.error(
+			'Invalid usesReference: usesReference must be an array of strings.'
+		);
+		return false;
+	}
+
 	return true;
 };
 
@@ -323,7 +342,10 @@ export const __experimentalRegisterProductCollection = (
 		return;
 	}
 
-	const { preview: { setPreviewState, initialPreviewState } = {} } = config;
+	const {
+		preview: { setPreviewState, initialPreviewState } = {},
+		usesReference,
+	} = config;
 
 	const isActive = (
 		blockAttrs: BlockAttributes,
@@ -411,8 +433,17 @@ export const __experimentalRegisterProductCollection = (
 	 * If setPreviewState or initialPreviewState is provided, inject the setPreviewState & initialPreviewState props.
 	 * This is useful for handling preview mode in the editor.
 	 */
-	if ( setPreviewState || initialPreviewState ) {
-		const withSetPreviewState =
+	if (
+		setPreviewState ||
+		initialPreviewState ||
+		( Array.isArray( usesReference ) && usesReference.length > 0 )
+	) {
+		/**
+		 * This function is used to inject following props to the BlockEdit component:
+		 * 1. preview: { setPreviewState, initialPreviewState }
+		 * 2. usesReference
+		 */
+		const withAdditionalProps =
 			< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 			( props: BlockEditProps< ProductCollectionAttributes > ) => {
 				// If collection name does not match, return the original BlockEdit component.
@@ -427,17 +458,23 @@ export const __experimentalRegisterProductCollection = (
 				return (
 					<BlockEdit
 						{ ...props }
-						preview={ {
-							setPreviewState,
-							initialPreviewState,
-						} }
+						// Inject preview prop only if setPreviewState or initialPreviewState is provided.
+						{ ...( initialPreviewState || setPreviewState
+							? {
+									preview: {
+										setPreviewState,
+										initialPreviewState,
+									},
+							  }
+							: {} ) }
+						usesReference={ usesReference }
 					/>
 				);
 			};
 		addFilter(
 			'editor.BlockEdit',
 			collectionConfigWithoutExtraArgs.name,
-			withSetPreviewState
+			withAdditionalProps
 		);
 	}
 

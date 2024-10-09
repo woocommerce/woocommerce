@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Address timing issue with React 18 when unregistering blocks and add missing dependency to editor bootstrapping code.

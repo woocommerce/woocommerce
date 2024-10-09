@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Return HTTP 404 when trying to read or delete a non-existent product review.

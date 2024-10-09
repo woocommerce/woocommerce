@@ -32,6 +32,9 @@ export function useTreeItem( {
 	onFirstItemLoop,
 	onTreeBlur,
 	onEscape,
+	highlightedIndex,
+	isHighlighted,
+	onExpand,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;
@@ -79,16 +82,19 @@ export function useTreeItem( {
 		getLabel,
 		treeItemProps: {
 			...props,
-			role: 'none',
+			id:
+				'woocommerce-experimental-tree-control__menu-item-' +
+				item.index,
+			role: 'option',
 		},
 		headingProps: {
 			role: 'treeitem',
 			'aria-selected': selection.checkedStatus !== 'unchecked',
 			'aria-expanded': item.children.length
-				? expander.isExpanded
+				? item.data.isExpanded
 				: undefined,
 			'aria-owns':
-				item.children.length && expander.isExpanded
+				item.children.length && item.data.isExpanded
 					? subTreeId
 					: undefined,
 			style: {

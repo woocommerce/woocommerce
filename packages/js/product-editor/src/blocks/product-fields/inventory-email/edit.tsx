@@ -57,7 +57,6 @@ export function Edit( {
 						'This field must be a positive number.',
 						'woocommerce'
 					),
-					context: clientId,
 				};
 			}
 		},

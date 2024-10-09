@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
@@ -98,8 +100,8 @@ class ProductButton extends AbstractBlock {
 			$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 			$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
 			$html_element             = $is_ajax_button ? 'button' : 'a';
-			$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$classname                = $attributes['className'] ?? '';
+			$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+			$classname                = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 			$custom_width_classes     = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
 			$custom_align_classes     = isset( $attributes['textAlign'] ) ? 'align-' . $attributes['textAlign'] : '';
 			$html_classes             = implode(
@@ -167,13 +169,17 @@ class ProductButton extends AbstractBlock {
 			);
 
 			$div_directives = '
-				data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK ) . '\'
-				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK ) . '\'
+				data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
 			';
 
 			$button_directives = '
 				data-wc-on--click="actions.addToCart"
 				data-wc-class--loading="context.isLoading"
+			';
+
+			$anchor_directive = '
+				data-wc-on--click="woocommerce/product-collection::actions.viewProduct"
 			';
 
 			$span_button_directives = '
@@ -185,6 +191,20 @@ class ProductButton extends AbstractBlock {
 				data-wc-layout-init="callbacks.syncTemporaryNumberOfItemsOnLoad"
 			';
 
+			$wrapper_attributes = get_block_wrapper_attributes(
+				array(
+					'class' => implode(
+						' ',
+						array_filter(
+							[
+								'wp-block-button wc-block-components-product-button',
+								esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
+							]
+						)
+					),
+				)
+			);
+
 			/**
 			 * Filters the add to cart button class.
 			 *
@@ -195,7 +215,7 @@ class ProductButton extends AbstractBlock {
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				strtr(
-					'<div class="wp-block-button wc-block-components-product-button {classes} {custom_classes}"
+					'<div {wrapper_attributes}
 						{div_directives}
 					>
 						<{html_element}
@@ -210,8 +230,7 @@ class ProductButton extends AbstractBlock {
 						{view_cart_html}
 					</div>',
 					array(
-						'{classes}'                => esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-						'{custom_classes}'         => esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
+						'{wrapper_attributes}'     => $wrapper_attributes,
 						'{html_element}'           => $html_element,
 						'{add_to_cart_url}'        => esc_url( $product->add_to_cart_url() ),
 						'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',
@@ -219,7 +238,7 @@ class ProductButton extends AbstractBlock {
 						'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
 						'{add_to_cart_text}'       => esc_html( $initial_product_text ),
 						'{div_directives}'         => $is_ajax_button ? $div_directives : '',
-						'{button_directives}'      => $is_ajax_button ? $button_directives : '',
+						'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 						'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
 						'{view_cart_html}'         => $is_ajax_button ? $this->get_view_cart_html() : '',
 					)

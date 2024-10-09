@@ -10,7 +10,7 @@ const wcPages = [
 				name: 'Home',
 				heading: 'Home',
 				element:
-					'.wooocommerce-inbox-card__header > .components-truncate',
+					'.woocommerce-inbox-card__header > .components-truncate',
 				text: 'Inbox',
 			},
 			{
@@ -22,8 +22,8 @@ const wcPages = [
 			{
 				name: 'Customers',
 				heading: 'Customers',
-				element: '#search-inline-input-0',
-				text: 'Move backward for selected items',
+				element: '.woocommerce-dropdown-button__labels',
+				text: 'All Customers',
 			},
 			{
 				name: 'Reports',
@@ -87,8 +87,8 @@ const wcPages = [
 			{
 				name: 'Overview',
 				heading: 'Overview',
-				element: '.woocommerce-marketing-card-header-description',
-				text: 'Start by adding a channel to your store',
+				element: '.woocommerce-marketing-channels-card',
+				text: 'Channels',
 			},
 			{
 				name: 'Coupons',
@@ -201,30 +201,31 @@ for ( const currentPage of wcPages ) {
 			} );
 
 			for ( let i = 0; i < currentPage.subpages.length; i++ ) {
-				test( `Can load ${ currentPage.subpages[ i ].name }`, async ( {
-					page,
-				} ) => {
-					await page
-						.locator(
-							`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
-							{ waitForLoadState: 'networkidle' }
-						)
-						.click();
+				test(
+					`Can load ${ currentPage.subpages[ i ].name }`,
+					{ tag: '@skip-on-default-wpcom' },
+					async ( { page } ) => {
+						await page
+							.locator(
+								`li.wp-menu-open > ul.wp-submenu > li a:text-is("${ currentPage.subpages[ i ].name }")`
+							)
+							.click();
 
-					await expect(
-						page.locator( 'h1.components-text' )
-					).toContainText( currentPage.subpages[ i ].heading );
+						await expect(
+							page.locator( 'h1.components-text' )
+						).toContainText( currentPage.subpages[ i ].heading );
 
-					await expect(
-						page
-							.locator( currentPage.subpages[ i ].element )
-							.first()
-					).toBeVisible();
+						await expect(
+							page
+								.locator( currentPage.subpages[ i ].element )
+								.first()
+						).toBeVisible();
 
-					await expect(
-						page.locator( currentPage.subpages[ i ].element )
-					).toContainText( currentPage.subpages[ i ].text );
-				} );
+						await expect(
+							page.locator( currentPage.subpages[ i ].element )
+						).toContainText( currentPage.subpages[ i ].text );
+					}
+				);
 			}
 		}
 	);

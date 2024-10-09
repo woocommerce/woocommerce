@@ -9,6 +9,7 @@ const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
+const { logIn } = require( '../../utils/login' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 
 const {
@@ -24,7 +25,7 @@ const newAccountEmail = `marge-${ new Date()
 const newAccountEmailWithCustomPassword = `homer-${ new Date()
 	.getTime()
 	.toString() }@woocommercecoree2etestsuite.com`;
-const newAccountCustomPassword = 'supersecurepassword123';
+const newAccountCustomPassword = 'sup3rS3cur3P4ssw0rd!#123';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
@@ -57,7 +58,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Checkout Block page',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@skip-on-default-wpcom' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
@@ -440,7 +441,7 @@ test.describe(
 
 			// verify shipping details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 			await expect(
@@ -471,7 +472,7 @@ test.describe(
 
 			// verify billing details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit billing address', { exact: true } )
 				.last()
 				.click();
 			await expect(
@@ -721,9 +722,7 @@ test.describe(
 			).toBeVisible();
 
 			await page.goto( 'wp-login.php' );
-			await page.locator( 'input[name="log"]' ).fill( admin.username );
-			await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-			await page.locator( 'text=Log In' ).click();
+			await logIn( page, admin.username, admin.password, false );
 
 			// load the order placed as a guest
 			await page.goto(
@@ -782,7 +781,7 @@ test.describe(
 			).toBeVisible();
 
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 
@@ -820,9 +819,7 @@ test.describe(
 
 			// Switch to admin user.
 			await page.goto( 'wp-login.php?loggedout=true' );
-			await page.locator( 'input[name="log"]' ).fill( admin.username );
-			await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-			await page.locator( 'text=Log In' ).click();
+			await logIn( page, admin.username, admin.password, false );
 
 			// load the order placed as a customer
 			await page.goto(
@@ -913,9 +910,7 @@ test.describe(
 
 			// sign in as admin to confirm account creation
 			await page.goto( 'wp-admin/users.php' );
-			await page.locator( 'input[name="log"]' ).fill( admin.username );
-			await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-			await page.locator( 'text=Log in' ).click();
+			await logIn( page, admin.username, admin.password, false );
 			await expect( page.locator( 'tbody#the-list' ) ).toContainText(
 				newAccountEmail
 			);
@@ -1014,11 +1009,12 @@ test.describe(
 
 			// Log in again.
 			await page.goto( '/my-account/' );
-			await page
-				.locator( '#username' )
-				.fill( newAccountEmailWithCustomPassword );
-			await page.locator( '#password' ).fill( newAccountCustomPassword );
-			await page.locator( 'text=Log in' ).click();
+			await logIn(
+				page,
+				newAccountEmailWithCustomPassword,
+				newAccountCustomPassword,
+				false
+			);
 			await expect(
 				page.getByRole( 'heading', { name: 'My account' } )
 			).toBeVisible();

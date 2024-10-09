@@ -17,14 +17,21 @@ const fs = require( 'fs' );
  *
  * @type {string}
  */
-const ROOT_DIR = path.resolve( __dirname, '../' );
+const ROOT_DIR = path.resolve( __dirname, '../../../' );
+
+/**
+ * Path to root Blocks project directory.
+ *
+ * @type {string}
+ */
+const BLOCK_LIBRARY_ROOT_DIR = path.resolve( __dirname, '../' );
 
 /**
  * Path to blocks directory.
  *
  * @type {string}
  */
-const BLOCK_LIBRARY_DIR = path.resolve( ROOT_DIR, 'assets/js' );
+const BLOCK_LIBRARY_DIR = path.resolve( BLOCK_LIBRARY_ROOT_DIR, 'assets/js' );
 
 /**
  * Path to docs file.
@@ -33,7 +40,7 @@ const BLOCK_LIBRARY_DIR = path.resolve( ROOT_DIR, 'assets/js' );
  */
 const BLOCK_LIBRARY_DOCS_FILE = path.resolve(
 	ROOT_DIR,
-	'docs/block-references/block-references.md'
+	'docs/building-a-woo-store/block-references.md'
 );
 
 /**
@@ -103,13 +110,13 @@ function processObjWithInnerKeys( obj ) {
  * not disabled. So adding { color: 'link' } support also brings along
  * background and text.
  *
- * @param {Object} supports - keys supported by blokc
+ * @param {Object} supports - keys supported by block
  * @return {Object} supports augmented with defaults
  */
 function augmentSupports( supports ) {
 	if ( supports && 'color' in supports ) {
-		// If backgroud or text is not specified (true or false)
-		// then add it as true.a
+		// If background or text is not specified (true or false)
+		// then add it as true.
 		if (
 			typeof supports.color === 'object' &&
 			! ( 'background' in supports.color )

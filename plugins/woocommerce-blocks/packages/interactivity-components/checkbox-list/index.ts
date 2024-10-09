@@ -20,11 +20,17 @@ export type CheckboxListContext = {
 		value: string;
 		checked: boolean;
 	}[];
+	showAll: boolean;
 };
 
 store( 'woocommerce/interactivity-checkbox-list', {
 	state: {},
 	actions: {
+		showAllItems: () => {
+			const context = getContext< CheckboxListContext >();
+			context.showAll = true;
+		},
+
 		selectCheckboxItem: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			const context = getContext< CheckboxListContext >();
 			const value = event.target.value;

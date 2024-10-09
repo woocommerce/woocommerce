@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: If either the upcoming WooCommerce Shipping or WooCommerce Tax extension is active, don't display information about setting up WooCommerce Shipping & Tax in the task steppers for "Collect sales tax" and "Select your shipping options".  The changes in this PR only adjust the help items merchants see.
-

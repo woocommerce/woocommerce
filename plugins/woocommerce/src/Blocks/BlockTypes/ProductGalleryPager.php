@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * ProductGalleryPager class.
@@ -55,7 +56,7 @@ class ProductGalleryPager extends AbstractBlock {
 		}
 
 		$number_of_thumbnails = $block->context['thumbnailsNumberOfThumbnails'] ?? 0;
-		$classname            = $attributes['className'] ?? '';
+		$classname            = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		$wrapper_attributes   = get_block_wrapper_attributes( array( 'class' => trim( $classname ) ) );
 		$post_id              = $block->context['postId'] ?? '';
 		$product              = wc_get_product( $post_id );
@@ -74,7 +75,7 @@ class ProductGalleryPager extends AbstractBlock {
 					</div>',
 					$wrapper_attributes,
 					$html,
-					wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) )
+					wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 				);
 			}
 			return '';
@@ -127,7 +128,10 @@ class ProductGalleryPager extends AbstractBlock {
 				$p->set_attribute(
 					'data-wc-context',
 					wp_json_encode(
-						array( 'imageId' => strval( $product_gallery_image_id ) ),
+						array(
+							'imageId' => strval( $product_gallery_image_id ),
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 					)
 				);
 				$p->set_attribute(

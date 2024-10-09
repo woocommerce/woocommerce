@@ -13,7 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, getQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import ExternalIcon from 'gridicons/dist/external';
 
@@ -34,6 +34,7 @@ import {
 } from './utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
+import { getPluginSlug } from '~/utils';
 
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
@@ -91,11 +92,15 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				// gateway variable doesn't have hasPlugins property.
 				! paymentGateways.get( id )?.hasPlugins
 					? {
-							redirectPath: getNewPath(
-								{ task: 'payments' },
-								{},
-								'/'
-							),
+							// If we are already on a task page, don't redirect.
+							// Otherwise, redirect to Payments task page.
+							redirectPath: getQuery()?.task
+								? getNewPath(
+										{ task: getQuery().task },
+										{},
+										'/'
+								  )
+								: getNewPath( { task: 'payments' }, {}, '/' ),
 					  }
 					: {}
 			);
@@ -132,7 +137,14 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			return null;
 		}
 
-		const gateway = paymentGateways.get( query.id );
+		// The payment gateways are keyed by the payment gateway suggestion ID, not the plugin ID/slug.
+		// The payment gateway suggestion ID is sometimes the same as the plugin ID/slug, but not always.
+		// Sometimes it features a : separator, e.g. 'woocommerce-payments:bnpl'.
+		// We will discard the part after the : separator when searching for the current gateway.
+		const processedQueryId = getPluginSlug( query.id );
+		const gateway = Array.from( paymentGateways.entries() ).find(
+			( [ key ] ) => getPluginSlug( key ) === processedQueryId
+		)?.[ 1 ];
 
 		if ( ! gateway ) {
 			throw `Current gateway ${ query.id } not found in available gateways list`;
@@ -245,7 +257,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		<List
 			heading={ additionalSectionHeading }
 			headingDescription={ additionalSectionHeadingDescription }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
@@ -265,7 +278,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const offlineSection = !! offlineGateways.length && (
 		<List
 			heading={ __( 'Offline payment methods', 'woocommerce' ) }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ offlineGateways }
 			markConfigured={ markConfigured }
 		/>

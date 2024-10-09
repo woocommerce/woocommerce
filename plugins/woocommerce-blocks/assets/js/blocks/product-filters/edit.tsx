@@ -1,34 +1,40 @@
 /**
  * External dependencies
  */
+import { getSetting } from '@woocommerce/settings';
 import {
 	InnerBlocks,
+	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
-	InspectorControls,
 } from '@wordpress/block-editor';
-import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { __, sprintf } from '@wordpress/i18n';
-import { useCollection } from '@woocommerce/base-context/hooks';
-import { AttributeTerm } from '@woocommerce/types';
 import {
-	PanelBody,
-	RadioControl,
-	Spinner,
+	BlockEditProps,
+	BlockInstance,
+	InnerBlockTemplate,
+	createBlock,
+} from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
+import { select, dispatch } from '@wordpress/data';
+import { useLocalStorageState } from '@woocommerce/base-hooks';
+import {
 	ExternalLink,
-	RangeControl,
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	PanelBody,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { Icon, settings, menu } from '@wordpress/icons';
-import { filter, filterThreeLines } from '@woocommerce/icons';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import type { BlockAttributes } from './types';
 import './editor.scss';
+import { type BlockAttributes } from './types';
+import { BlockOverlayAttribute } from './constants';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -39,42 +45,8 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			content: __( 'Filters', 'woocommerce' ),
 		},
 	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'active-filters',
-			heading: __( 'Active', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'price-filter',
-			heading: __( 'Price', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'stock-filter',
-			heading: __( 'Status', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'attribute-filter',
-			heading: __( 'Attribute', 'woocommerce' ),
-			attributeId: 0,
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'rating-filter',
-			heading: __( 'Rating', 'woocommerce' ),
-		},
-	],
+	[ 'woocommerce/product-filter-active' ],
+	[ 'woocommerce/product-filter-attribute' ],
 	[
 		'core/buttons',
 		{ layout: { type: 'flex' } },
@@ -101,78 +73,95 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	],
 ];
 
-const addHighestProductCountAttributeToTemplate = (
-	template: InnerBlockTemplate[],
-	highestProductCountAttribute: AttributeTerm | null
-): InnerBlockTemplate[] => {
-	if ( highestProductCountAttribute === null ) return template;
-
-	return template.map( ( block ) => {
-		const blockNameIndex = 0;
-		const blockAttributesIndex = 1;
-		const blockName = block[ blockNameIndex ];
-		const blockAttributes = block[ blockAttributesIndex ];
-		if (
-			blockName === 'woocommerce/product-filter' &&
-			blockAttributes?.filterType === 'attribute-filter'
-		) {
-			return [
-				blockName,
-				{
-					...blockAttributes,
-					heading: highestProductCountAttribute.name,
-					attributeId: highestProductCountAttribute.id,
-					metadata: {
-						name: sprintf(
-							/* translators: %s is referring to the filter attribute name. For example: Color, Size, etc. */
-							__( '%s (Experimental)', 'woocommerce' ),
-							highestProductCountAttribute.name
-						),
-					},
-				},
-			];
-		}
-
-		return block;
-	} );
-};
-
 export const Edit = ( {
 	setAttributes,
 	attributes,
+	clientId,
 }: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps();
-	const { results: attributeTerms, isLoading } =
-		useCollection< AttributeTerm >( {
-			namespace: '/wc/store/v1',
-			resourceName: 'products/attributes',
-		} );
-
-	const highestProductCountAttribute =
-		attributeTerms.reduce< AttributeTerm | null >(
-			( attributeWithMostProducts, attribute ) => {
-				if ( attributeWithMostProducts === null ) {
-					return attribute;
-				}
-				return attribute.count > attributeWithMostProducts.count
-					? attribute
-					: attributeWithMostProducts;
-			},
-			null
-		);
-	const updatedTemplate = addHighestProductCountAttributeToTemplate(
-		TEMPLATE,
-		highestProductCountAttribute
-	);
-
-	if ( isLoading ) {
-		return <Spinner />;
-	}
 
 	const templatePartEditUri = getSetting< string >(
 		'templatePartProductFiltersOverlayEditUri',
 		''
 	);
+
+	const [
+		productFiltersOverlayNavigationAttributes,
+		setProductFiltersOverlayNavigationAttributes,
+	] = useLocalStorageState< Record< string, unknown > >(
+		'product-filters-overlay-navigation-attributes',
+		{}
+	);
+
+	useEffect( () => {
+		const filtersClientIds = select( 'core/block-editor' ).getBlocksByName(
+			'woocommerce/product-filters'
+		);
+
+		let overlayBlock:
+			| BlockInstance< { [ k: string ]: unknown } >
+			| undefined;
+
+		for ( const filterClientId of filtersClientIds ) {
+			const filterBlock =
+				select( 'core/block-editor' ).getBlock( filterClientId );
+
+			if ( filterBlock ) {
+				for ( const innerBlock of filterBlock.innerBlocks ) {
+					if (
+						innerBlock.name ===
+							'woocommerce/product-filters-overlay-navigation' &&
+						innerBlock.attributes.triggerType === 'open-overlay'
+					) {
+						overlayBlock = innerBlock;
+					}
+				}
+			}
+		}
+
+		if ( attributes.overlay === 'never' && overlayBlock ) {
+			setProductFiltersOverlayNavigationAttributes(
+				overlayBlock.attributes
+			);
+
+			dispatch( 'core/block-editor' ).updateBlockAttributes(
+				overlayBlock.clientId,
+				{
+					lock: {},
+				}
+			);
+
+			dispatch( 'core/block-editor' ).removeBlock(
+				overlayBlock.clientId
+			);
+		} else if ( attributes.overlay !== 'never' && ! overlayBlock ) {
+			if ( productFiltersOverlayNavigationAttributes ) {
+				productFiltersOverlayNavigationAttributes.triggerType =
+					'open-overlay';
+			}
+
+			dispatch( 'core/block-editor' ).insertBlock(
+				createBlock(
+					'woocommerce/product-filters-overlay-navigation',
+					productFiltersOverlayNavigationAttributes
+						? productFiltersOverlayNavigationAttributes
+						: {
+								align: 'left',
+								triggerType: 'open-overlay',
+								lock: { move: true, remove: true },
+						  }
+				),
+				0,
+				clientId,
+				false
+			);
+		}
+	}, [
+		attributes.overlay,
+		clientId,
+		productFiltersOverlayNavigationAttributes,
+		setProductFiltersOverlayNavigationAttributes,
+	] );
 
 	return (
 		<div { ...blockProps }>
@@ -187,138 +176,18 @@ export const Edit = ( {
 						} }
 					>
 						<ToggleGroupControlOption
-							value={ 'never' }
+							value={ BlockOverlayAttribute.NEVER }
 							label={ __( 'Never', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value={ 'mobile' }
+							value={ BlockOverlayAttribute.MOBILE }
 							label={ __( 'Mobile', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value={ 'always' }
+							value={ BlockOverlayAttribute.ALWAYS }
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
-					{ attributes.overlay === 'mobile' && (
-						<>
-							<RadioControl
-								className="wc-block-editor-product-filters__overlay-button-style-toggle"
-								label={ __( 'Button', 'woocommerce' ) }
-								selected={ attributes.overlayButtonStyle }
-								onChange={ (
-									value: BlockAttributes[ 'overlayButtonStyle' ]
-								) => {
-									setAttributes( {
-										overlayButtonStyle: value,
-									} );
-								} }
-								options={ [
-									{
-										value: 'label-icon',
-										label: __(
-											'Label and icon',
-											'woocommerce'
-										),
-									},
-									{
-										value: 'label',
-										label: __(
-											'Label only',
-											'woocommerce'
-										),
-									},
-									{
-										value: 'icon',
-										label: __( 'Icon only', 'woocommerce' ),
-									},
-								] }
-							/>
-							{ attributes.overlayButtonStyle !== 'label' && (
-								<>
-									<ToggleGroupControl
-										className="wc-block-editor-product-filters__overlay-button-toggle"
-										isBlock={ true }
-										value={ attributes.overlayIcon }
-										onChange={ (
-											value: BlockAttributes[ 'overlayIcon' ]
-										) => {
-											setAttributes( {
-												overlayIcon: value,
-											} );
-										} }
-									>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-1' }
-											aria-label={ __(
-												'Filter icon 1',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ filter }
-												/>
-											}
-										/>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-2' }
-											aria-label={ __(
-												'Filter icon 2',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ filterThreeLines }
-												/>
-											}
-										/>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-3' }
-											aria-label={ __(
-												'Filter icon 3',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ menu }
-												/>
-											}
-										/>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-4' }
-											aria-label={ __(
-												'Filter icon 4',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ settings }
-												/>
-											}
-										/>
-									</ToggleGroupControl>
-									<RangeControl
-										label={ __(
-											'Icon size',
-											'woocommerce'
-										) }
-										className="wc-block-editor-product-filters__overlay-button-size"
-										value={ attributes.overlayIconSize }
-										onChange={ ( value: number ) =>
-											setAttributes( {
-												overlayIconSize: value,
-											} )
-										}
-										min={ 20 }
-										max={ 80 }
-									/>
-								</>
-							) }
-						</>
-					) }
 					{ attributes.overlay !== 'never' && (
 						<ExternalLink
 							href={ templatePartEditUri }
@@ -329,7 +198,7 @@ export const Edit = ( {
 					) }
 				</PanelBody>
 			</InspectorControls>
-			<InnerBlocks templateLock={ false } template={ updatedTemplate } />
+			<InnerBlocks templateLock={ false } template={ TEMPLATE } />
 		</div>
 	);
 };

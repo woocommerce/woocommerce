@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -32,7 +31,6 @@ import {
 } from '../../headers.js';
 
 export function cartApplyCoupon() {
-	let response;
 	let apply_coupon_nonce;
 	// let item_name;
 	let woocommerce_cart_nonce;
@@ -46,7 +44,7 @@ export function cartApplyCoupon() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/?wc-ajax=add_to_cart`,
 			{
 				product_sku: `${ product_sku }`,
@@ -74,15 +72,14 @@ export function cartApplyCoupon() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/cart`, {
+		const response = http.get( `${ base_url }/cart`, {
 			headers: requestheaders,
 			tags: { name: 'Shopper - View Cart' },
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body does not contain: 'your cart is currently empty'": (
-				response
-			) => ! response.body.includes( 'Your cart is currently empty.' ),
+			"body does not contain: 'your cart is currently empty'": ( r ) =>
+				! r.body.includes( 'Your cart is currently empty.' ),
 		} );
 
 		// Correlate cart item value for use in subsequent requests.
@@ -111,7 +108,7 @@ export function cartApplyCoupon() {
 			contentTypeRequestHeader
 		);
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/?wc-ajax=apply_coupon`,
 			{
 				coupon_code: `${ coupon_code }`,
@@ -125,11 +122,11 @@ export function cartApplyCoupon() {
 
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Coupon code applied successfully'": ( response ) =>
-				response.body.includes( 'Coupon code applied successfully' ),
+			"body contains: 'Coupon code applied successfully'": ( r ) =>
+				r.body.includes( 'Coupon code applied successfully' ),
 		} );
 
-		response = http.post(
+		const cartResponse = http.post(
 			`${ base_url }/cart`,
 			{
 				_wp_http_referer: '%2Fcart',
@@ -142,10 +139,10 @@ export function cartApplyCoupon() {
 				tags: { name: 'Shopper - Update Cart' },
 			}
 		);
-		check( response, {
+		check( cartResponse, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'woocommerce-remove-coupon' class": ( response ) =>
-				response.body.includes( 'class="woocommerce-remove-coupon"' ),
+			"body contains: 'woocommerce-remove-coupon' class": ( r ) =>
+				r.body.includes( 'class="woocommerce-remove-coupon"' ),
 		} );
 	} );
 

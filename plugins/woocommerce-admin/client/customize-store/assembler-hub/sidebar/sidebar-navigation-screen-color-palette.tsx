@@ -4,8 +4,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
+import { useContext } from '@wordpress/element';
 import { PanelBody } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
@@ -17,10 +16,9 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  */
 import { CustomizeStoreContext } from '../';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { ColorPalette, ColorPanel } from './global-styles';
-import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
+import { FlowType } from '~/customize-store/types';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -30,6 +28,14 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 	const hasCreatedOwnColors = !! (
 		user.settings.color && user.settings.color.palette.hasCreatedOwnColors
 	);
+
+	function handlePanelBodyToggle( open?: boolean ) {
+		trackEvent(
+			'customize_your_store_assembler_hub_color_palette_create_toggle',
+			{ open }
+		);
+	}
+
 	// Wrap in a BlockEditorProvider to ensure that the Iframe's dependencies are
 	// loaded. This is necessary because the Iframe component waits until
 	// the block editor store's `__internalIsInitialized` is true before
@@ -48,6 +54,7 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 				className="woocommerce-customize-store__color-panel-container"
 				title={ __( 'or create your own', 'woocommerce' ) }
 				initialOpen={ hasCreatedOwnColors }
+				onToggle={ handlePanelBodyToggle }
 			>
 				<ColorPanel />
 			</PanelBody>
@@ -71,11 +78,11 @@ export const SidebarNavigationScreenColorPalette = ( {
 		: __( 'Choose your color palette', 'woocommerce' );
 	const description = aiOnline
 		? __(
-				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in Editor.',
 				'woocommerce'
 		  )
 		: __(
-				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in Editor.',
 				'woocommerce'
 		  );
 
@@ -83,44 +90,7 @@ export const SidebarNavigationScreenColorPalette = ( {
 		<SidebarNavigationScreen
 			title={ title }
 			onNavigateBackClick={ onNavigateBackClick }
-			description={ createInterpolateElement( description, {
-				EditorLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_editor_link_click',
-								{
-									source: 'color-palette',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
-				StyleLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_style_link_click',
-								{
-									source: 'color-palette',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
-			} ) }
+			description={ description }
 			content={ <SidebarNavigationScreenColorPaletteContent /> }
 		/>
 	);

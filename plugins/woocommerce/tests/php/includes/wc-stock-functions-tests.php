@@ -356,5 +356,4 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertIsIntAndEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
-
 }

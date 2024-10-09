@@ -29,7 +29,7 @@ test.describe(
 			);
 
 			// Need a block enabled theme to test
-			await activateTheme( 'twentytwentyfour' );
+			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
@@ -47,7 +47,7 @@ test.describe(
 
 		test.afterAll( async ( { baseURL } ) => {
 			// Reset theme to the default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 
 			// Reset tour to visible.
 			await setOption(
@@ -111,26 +111,23 @@ test.describe(
 				'Customize your theme'
 			);
 			await expect(
-				page.getByRole( 'button', { name: 'Go to the Editor' } )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "Go to the Editor" with a block theme should go to the assembler', async ( {
+		test( 'it shows the "non default block theme" banner when the theme is a block theme different than TT4', async ( {
 			page,
-			assemblerPageObject,
+			baseURL,
 		} ) => {
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page.click( 'text=Start designing' );
-			await assemblerPageObject.waitForLoadingScreenFinish();
+			await activateTheme( baseURL, 'twentytwentythree' );
 
 			await page.goto( CUSTOMIZE_STORE_URL );
-			await page
-				.getByRole( 'button', { name: 'Go to the Editor' } )
-				.click();
 
-			const assembler = await assemblerPageObject.getAssembler();
+			await expect( page.locator( 'h1' ) ).toHaveText(
+				'Customize your theme'
+			);
 			await expect(
-				assembler.locator( "text=Let's get creative" )
+				page.getByRole( 'button', { name: 'Go to the Editor' } )
 			).toBeVisible();
 		} );
 
@@ -138,18 +135,8 @@ test.describe(
 			page,
 			baseURL,
 		} ) => {
-			await activateTheme( 'twentytwenty' );
+			await activateTheme( baseURL, 'twentytwenty' );
 
-			try {
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_admin_customize_store_completed',
-					'yes'
-				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
 			await page.goto( CUSTOMIZE_STORE_URL );
 
 			await page

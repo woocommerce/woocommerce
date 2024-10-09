@@ -14,38 +14,10 @@
 				width: 100%;
 			}
 
-			// Keeps the text in the DOM but not visible, so it doesn't cause the button to resize while showing the spinner.
-			.wc-block-components-checkout-place-order-button__text--visually-hidden {
-				visibility: hidden;
-			}
-
-			.wc-block-components-checkout-place-order-button__text {
-				display: flex;
-				align-items: center;
-
-				// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
-				text-wrap: balance;
-				text-wrap: pretty;
-			}
-
-			.wc-block-components-checkout-place-order-button__separator {
-				margin: 0 20px;
-
-				// This selector displays the separator so it can be targeted and edited by extensions.
-				&::after {
-					content: "·";
-				}
-			}
-
 			.wc-block-components-button__text {
-
 				> svg {
 					fill: $white;
 					vertical-align: top;
-					position: absolute;
-					top: 50%;
-					left: 50%;
-					transform: translate(-50%, -50%);
 				}
 			}
 		}

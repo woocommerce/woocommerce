@@ -7,18 +7,22 @@
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
 	"scripts": {
-		"compare": "node index.js",
+		"compare": "node -r ts-node/register index.js",
 		"log": "node log-to-codevitals.js"
 	},
 	"dependencies": {
-		"@wordpress/env": "^9.7.0",
+		"@types/node": "^16.18.68",
+		"@tsconfig/node16": "^1.0.4",
+		"@wordpress/env": "^10.1.0",
 		"commander": "9.5.0",
 		"chalk": "^4.1.2",
 		"inquirer": "^7.1.0",
-		"simple-git": "^3.21.0"
+		"simple-git": "^3.21.0",
+		"ts-node": "^10.9.2",
+		"tslib": "^2.6.2"
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	}
 }

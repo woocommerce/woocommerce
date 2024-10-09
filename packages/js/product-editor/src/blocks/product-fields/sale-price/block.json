@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-sale-price-field",
 	"description": "A product price block with currency display.",
 	"title": "Product sale price",
 	"category": "widgets",
-	"keywords": [ "products", "price" ],
+	"keywords": [
+		"products",
+		"price"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -32,6 +35,8 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "postType" ],
+	"usesContext": [
+		"postType"
+	],
 	"editorStyle": "file:./editor.css"
 }

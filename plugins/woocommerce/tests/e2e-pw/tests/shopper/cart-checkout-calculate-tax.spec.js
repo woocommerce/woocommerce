@@ -24,7 +24,14 @@ let productId,
 
 test.describe.serial(
 	'Tax rates in the cart and checkout',
-	{ tag: [ '@payments', '@services' ] },
+	{
+		tag: [
+			'@payments',
+			'@services',
+			'@hpos',
+			'@could-be-lower-level-test',
+		],
+	},
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
@@ -962,8 +969,6 @@ test.describe.serial(
 							name: 'Subtotal $230.00 (incl. tax)',
 						} )
 					).toBeVisible();
-
-					await page.pause();
 
 					await expect(
 						page.getByRole( 'cell', {

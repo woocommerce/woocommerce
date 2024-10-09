@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Migrate the cart and checkout block's state, country and custom field input to a native select

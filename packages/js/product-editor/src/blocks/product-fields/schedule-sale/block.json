@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-schedule-sale-fields",
 	"title": "Product schedule sale fields",
 	"category": "woocommerce",
 	"description": "The product schedule sale fields.",
-	"keywords": [ "products", "schedule", "sale" ],
+	"keywords": [
+		"products",
+		"schedule",
+		"sale"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
@@ -23,5 +27,7 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

@@ -1,3 +1,4 @@
+// Deprecated styles since 9.2. Please use *.scss file instead.
 export const generateStyles = ( color = '#bea0f2' ) => {
 	return `
     /* Reset */
@@ -25,10 +26,6 @@ export const generateStyles = ( color = '#bea0f2' ) => {
     body .is-layout-constrained > .alignwide {
         margin: 0 auto;
     }
-	.block-editor-block-preview__content-iframe body {
-		/* Set ratio to 1:1 so height is always equal to width for the preview. */
-		aspect-ratio: 1 / 1;
-	}
     .wp-container-core-group-is-layout-4.wp-container-core-group-is-layout-4 {
         justify-content: space-between;
     }
@@ -126,7 +123,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
     .woocommerce-coming-soon-header {
         height: 40px;
     }
-    h1.wp-block-heading.woocommerce-coming-soon-banner {
+    .woocommerce-coming-soon-banner {
         font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
         font-weight: 400;
         line-height: 58px;

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: improve flacky tests reporting job execution time.

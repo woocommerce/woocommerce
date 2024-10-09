@@ -78,7 +78,7 @@ class WC_Beta_Tester_Import_Export {
 		// show error/update messages.
 		if ( ! empty( $this->message ) ) {
 			?>
-			<div class="notice 
+			<div class="notice
 			<?php
 				echo ! empty( $this->message['type'] ) ? esc_attr( $this->message['type'] ) : '';
 			?>
@@ -172,6 +172,7 @@ class WC_Beta_Tester_Import_Export {
 				if ( ! isset( $settings[ $option_name ] ) ) {
 					continue;
 				}
+				// nosemgrep scanner.php.wp.security.object-injection, audit.php.wp.security.object-injection
 				$setting = maybe_unserialize( $settings[ $option_name ] );
 				if ( is_null( $setting ) ) {
 					delete_option( $option_name );

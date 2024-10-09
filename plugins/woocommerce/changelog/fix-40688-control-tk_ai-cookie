@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Do not set the `tk_ai` tracking cookie if tracking is disabled.

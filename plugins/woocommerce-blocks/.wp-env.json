@@ -1,5 +1,6 @@
 {
-	"core": "https://wordpress.org/wordpress-6.6-RC2.zip",
+	"core": "https://wordpress.org/wordpress-latest.zip",
+	"phpVersion": "7.4",
 	"plugins": [
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",

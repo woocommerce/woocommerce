@@ -15,7 +15,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 
 ## Getting Setup
 
-> This guide presumes that you're familar with basic Git and GitHub functionality, that you're signed into a GitHub account, and that you have Git setup locally. If you're new to GitHub, we recommend reading their [quickstart](https://docs.github.com/en/get-started/quickstart/hello-world) and [working with forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) guides before getting started.
+> This guide presumes that you're familiar with basic Git and GitHub functionality, that you're signed into a GitHub account, and that you have Git setup locally. If you're new to GitHub, we recommend reading their [quickstart](https://docs.github.com/en/get-started/quickstart/hello-world) and [working with forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) guides before getting started.
 
 ### Initial Setup
 
@@ -33,7 +33,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 6. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) that merges your branch with the WooCommerce monorepo's trunk branch.
     * To do this, when creating the pull request, set the `base repository` to `woocommerce/woocommerce`, the `base` to `trunk`, the `head repository` to `yourgithubusername/woocommerce` and the `compare` to the branch you created (eg: `docs/improve-extension-performance`).
     * When creating the pull request, set a descriptive title. Additionally, ensure you fill out the template provided in the description. For purely docs changes, your testing instructions should reference any major changes you think should be checked.
-7. The WooCommerce Developer Advocacy team will review your pull request and provide feedback via the comments as neccesary. Once the content is ready, we'll merge it into `trunk` and it'll appear on the Woo Developer Docs site!
+7. The WooCommerce Developer Advocacy team will review your pull request and provide feedback via the comments as necessary. Once the content is ready, we'll merge it into `trunk` and it'll appear on the Woo Developer Docs site!
 
 ## Creating New Pages
 
@@ -127,3 +127,9 @@ These instructions presume you're currently have your `docs/` branch open and yo
 If you are a non-technical contributor who isn't experienced with command line tools, we're still happy to receive your contributions. If you're unable to include an updated manifest, please ensure that you mention this in your pull request's description.
 
 If you're a technical contributor who is able to regenerate the manifest, we request that you do so where possible.
+
+## Caveats 
+
+* Emojis are not supported.
+* Avoid copy pasting content from editors such as Google docs. For example, quotation-mark characters in these editors may not translate properly when ingested by our plugin. 
+* You may want to references HTML like content, however, our plugin is set up to strip non-allowlisted HTML elements. You may use an [HTML named references](https://developer.mozilla.org/en-US/docs/Glossary/Character_reference) to create an HTML like tag, by using the less-than (<) and greater-than (>) symbol named references. 

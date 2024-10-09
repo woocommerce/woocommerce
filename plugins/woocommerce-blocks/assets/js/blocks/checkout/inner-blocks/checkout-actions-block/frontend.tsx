@@ -8,9 +8,5 @@ import { withFilteredAttributes } from '@woocommerce/shared-hocs';
  */
 import Block from './block';
 import attributes from './attributes';
-import metadata from './block.json';
 
-export default withFilteredAttributes( {
-	...attributes,
-	...metadata.attributes,
-} )( Block );
+export default withFilteredAttributes( attributes )( Block );

@@ -75,13 +75,7 @@ class NumberFilter extends Component {
 		if ( type === 'currency' ) {
 			return symbolPosition.indexOf( 'right' ) === 0 ? (
 				<TextControlWithAffixes
-					suffix={
-						<span
-							dangerouslySetInnerHTML={ {
-								__html: currencySymbol,
-							} }
-						/>
-					}
+					suffix={ <span>{ currencySymbol }</span> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
@@ -90,13 +84,7 @@ class NumberFilter extends Component {
 				/>
 			) : (
 				<TextControlWithAffixes
-					prefix={
-						<span
-							dangerouslySetInnerHTML={ {
-								__html: currencySymbol,
-							} }
-						/>
-					}
+					prefix={ <span>{ currencySymbol }</span> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }

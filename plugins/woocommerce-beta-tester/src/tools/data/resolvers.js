@@ -17,6 +17,9 @@ import {
 import { UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME } from '../commands/update-block-template-logging-threshold';
 import { UPDATE_COMING_SOON_MODE_ACTION_NAME } from '../commands/set-coming-soon-mode';
 import { TRIGGER_UPDATE_CALLBACKS_ACTION_NAME } from '../commands/trigger-update-callbacks';
+import { UPDATE_WCCOM_REQUEST_ERRORS_MODE } from '../commands/set-wccom-request-errors';
+import { FAKE_WOO_PAYMENTS_ACTION_NAME } from '../commands/fake-woo-payments';
+import { UPDATE_WCCOM_BASE_URL_ACTION_NAME } from '../commands/set-wccom-base-url';
 
 export function* getCronJobs() {
 	const path = `${ API_NAMESPACE }/tools/get-cron-list/v1`;
@@ -112,6 +115,53 @@ export function* getComingSoonMode() {
 		} );
 		yield updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {
 			mode: mode || 'disabled',
+		} );
+	} catch ( error ) {
+		throw new Error( error );
+	}
+}
+
+export function* getWccomRequestErrorsMode() {
+	const path = `${ API_NAMESPACE }/tools/get-wccom-request-errors/v1`;
+
+	try {
+		const mode = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+
+		yield updateCommandParams( UPDATE_WCCOM_REQUEST_ERRORS_MODE, {
+			mode: mode || 'disabled',
+		} );
+	} catch ( error ) {
+		throw new Error( error );
+	}
+}
+
+export function* getIsFakeWooPaymentsEnabled() {
+	try {
+		const response = yield apiFetch( {
+			path: API_NAMESPACE + '/tools/fake-wcpay-completion/v1',
+			method: 'GET',
+		} );
+		yield updateCommandParams( FAKE_WOO_PAYMENTS_ACTION_NAME, {
+			enabled: response.enabled || 'no',
+		} );
+	} catch ( error ) {
+		throw new Error( error );
+	}
+}
+
+export function* getWccomBaseUrl() {
+	const path = `${ API_NAMESPACE }/tools/get-wccom-base-url/v1`;
+
+	try {
+		const url = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+		yield updateCommandParams( UPDATE_WCCOM_BASE_URL_ACTION_NAME, {
+			url: url || 'https://woocommerce.com/',
 		} );
 	} catch ( error ) {
 		throw new Error( error );

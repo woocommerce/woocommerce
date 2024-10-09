@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+[E2E tests]: Add aria-expanded and rename ToolbarItem label #50232

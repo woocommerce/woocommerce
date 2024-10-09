@@ -31,7 +31,7 @@ test.describe(
 			);
 
 			// Need a block enabled theme to test
-			await activateTheme( 'twentytwentyfour' );
+			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
@@ -49,7 +49,7 @@ test.describe(
 
 		test.afterAll( async ( { baseURL } ) => {
 			// Reset theme back to default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 
 			// Reset tour to visible.
 			await setOption(
@@ -72,7 +72,7 @@ test.describe(
 			await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
 		} );
 
-		test( 'Clicking on "Save" in the assembler should go to the transitional page', async ( {
+		test( 'Clicking on "Finish customizing" in the assembler should go to the transitional page', async ( {
 			pageObject,
 			baseURL,
 		} ) => {
@@ -80,7 +80,9 @@ test.describe(
 			await pageObject.waitForLoadingScreenFinish();
 
 			const assembler = await pageObject.getAssembler();
-			await assembler.getByRole( 'button', { name: 'Save' } ).click();
+			await assembler
+				.getByRole( 'button', { name: 'Finish customizing' } )
+				.click();
 
 			await expect(
 				assembler.locator( 'text=Your store looks great!' )
@@ -96,7 +98,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "View store" should go to the store home page in a new page', async ( {
+		test( 'Clicking on "View store" should go to the store home page', async ( {
 			pageObject,
 			baseURL,
 			page,
@@ -111,15 +113,9 @@ test.describe(
 			await page.goto( TRANSITIONAL_URL );
 			const assembler = await pageObject.getAssembler();
 
-			const newTabPromise = page.waitForEvent( 'popup' );
-			await assembler
-				.getByRole( 'button', { name: 'View store' } )
-				.click();
+			await assembler.getByRole( 'link', { name: 'View store' } ).click();
 
-			const newTab = await newTabPromise;
-			await newTab.waitForLoadState();
-
-			await expect( newTab ).toHaveURL( '/' );
+			await expect( page ).toHaveURL( '/' );
 		} );
 
 		test( 'Clicking on "Share feedback" should open the survey modal', async ( {

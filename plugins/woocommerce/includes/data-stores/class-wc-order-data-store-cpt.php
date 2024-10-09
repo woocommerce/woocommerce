@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -189,22 +191,37 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		// Also grab the current status so we can compare.
 		$previous_status = get_post_status( $order->get_id() );
+		// If the order doesn't exist in the DB, we will consider it as new.
+		if ( ! $previous_status && $order->get_id() === 0 ) {
+			$previous_status = 'new';
+		}
 
 		// Update the order.
 		parent::update( $order );
 
-		// Fire a hook depending on the status - this should be considered a creation if it was previously draft status.
-		$new_status = $order->get_status( 'edit' );
+		$current_status = $order->get_status( 'edit' );
 
-		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
-			do_action( 'woocommerce_new_order', $order->get_id(), $order );
-		} else {
-			do_action( 'woocommerce_update_order', $order->get_id(), $order );
+		// We need to remove the wc- prefix from the status for comparison and proper evaluation of new vs updated orders.
+		$previous_status = OrderUtil::remove_status_prefix( $previous_status );
+		$current_status  = OrderUtil::remove_status_prefix( $current_status );
+
+		$draft_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft' );
+
+		// This hook should be fired only if the new status is not one of draft statuses and the previous status was one of the draft statuses.
+		if (
+			$current_status !== $previous_status
+			&& ! in_array( $current_status, $draft_statuses, true )
+			&& in_array( $previous_status, $draft_statuses, true )
+		) {
+			do_action( 'woocommerce_new_order', $order->get_id(), $order );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			return;
 		}
+
+		do_action( 'woocommerce_update_order', $order->get_id(), $order );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**
-	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
+	 * Helper method that updates all the post meta for an order based on its settings in the WC_Order class.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @since 3.0.0

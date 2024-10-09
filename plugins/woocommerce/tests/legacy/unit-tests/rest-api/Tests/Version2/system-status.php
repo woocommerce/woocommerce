@@ -154,9 +154,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_active_plugins() {
-		$this->skip_on_php_8_1();
-
 		wp_set_current_user( self::$administrator_user );
+		delete_transient( 'wc_system_status_active_plugins' );
 
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
@@ -165,9 +164,20 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$data    = $response->get_data();
 		$plugins = (array) $data['active_plugins'];
-
 		$this->assertEquals( 1, count( $plugins ) );
-		$this->assertEquals( 'Hello Dolly', $plugins[0]['name'] );
+
+		$plugin = reset( $plugins );
+		$this->assertArrayHasKey( 'plugin', $plugin );
+		$this->assertEquals( 'hello.php', $plugin['plugin'] );
+		$this->assertArrayHasKey( 'name', $plugin );
+		$this->assertEquals( 'Hello Dolly', $plugin['name'] );
+		$this->assertArrayHasKey( 'version', $plugin );
+		$this->assertArrayHasKey( 'version_latest', $plugin );
+		$this->assertArrayHasKey( 'url', $plugin );
+		$this->assertArrayHasKey( 'author_name', $plugin );
+		$this->assertArrayHasKey( 'author_url', $plugin );
+		$this->assertArrayHasKey( 'network_activated', $plugin );
+		$this->assertEquals( false, $plugin['network_activated'] );
 	}
 
 	/**
@@ -180,7 +190,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$active_theme = wp_get_theme();
 		$theme        = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['theme'];
 
-		$this->assertEquals( 13, count( $theme ) );
+		$this->assertEquals( 14, count( $theme ) );
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$this->assertEquals( $active_theme->Name, $theme['name'] );
 	}
@@ -275,7 +285,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$matching_tool_data = current(
 			array_filter(
 				$data,
-				function( $tool ) {
+				function ( $tool ) {
 					return 'regenerate_thumbnails' === $tool['id'];
 				}
 			)

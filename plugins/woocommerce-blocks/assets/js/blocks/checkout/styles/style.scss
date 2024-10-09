@@ -36,6 +36,12 @@
 			border-top: 0;
 		}
 	}
+
+	&.has-dark-controls {
+		.wp-block-woocommerce-checkout-order-summary-block {
+			border-color: $input-border-dark;
+		}
+	}
 }
 
 .wp-block-woocommerce-checkout.is-loading {
@@ -43,6 +49,11 @@
 	flex-wrap: wrap;
 	margin: 0 auto $gap;
 	position: relative;
+
+	&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+		flex-direction: row-reverse;
+	}
+
 	.wp-block-woocommerce-checkout-totals-block {
 		width: 35%;
 		padding-left: math.percentage(math.div($gap-large, 1060px));

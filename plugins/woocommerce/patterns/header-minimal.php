@@ -19,6 +19,9 @@
 	<!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 	<div class="wp-block-group">
 		<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true} /-->
+
+		<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconStyle":"line","iconClass":"wc-block-customer-account__account-icon","style":{"spacing":{"padding":{"right":"0","left":"0"}}}} /-->
+
 		<!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","justifyContent":"left"}} /-->
 	</div>
 	<!-- /wp:group -->

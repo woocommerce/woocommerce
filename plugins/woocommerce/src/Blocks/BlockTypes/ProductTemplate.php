@@ -18,6 +18,18 @@ class ProductTemplate extends AbstractBlock {
 	protected $block_name = 'product-template';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 * - Hook into pre_render_block to update the query.
+	 */
+	protected function initialize() {
+		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
+		parent::initialize();
+	}
+
+	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
@@ -73,6 +85,7 @@ class ProductTemplate extends AbstractBlock {
 
 			// Get an instance of the current Post Template block.
 			$block_instance = $block->parsed_block;
+			$product_id     = get_the_ID();
 
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
@@ -85,14 +98,39 @@ class ProductTemplate extends AbstractBlock {
 				$block_instance,
 				array(
 					'postType' => get_post_type(),
-					'postId'   => get_the_ID(),
+					'postId'   => $product_id,
 				)
 			)
 			)->render( array( 'dynamic' => false ) );
 
+			$interactive = array(
+				'namespace' => 'woocommerce/product-collection',
+			);
+
+			$context = array(
+				'productId' => $product_id,
+			);
+
+			$li_directives = '
+				data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wc-key="product-item-' . $product_id . '"
+			';
+
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.
 			$post_classes = implode( ' ', get_post_class( 'wc-block-product' ) );
-			$content     .= '<li data-wc-key="product-item-' . get_the_ID() . '" class="' . esc_attr( $post_classes ) . '">' . $block_content . '</li>';
+			$content     .= strtr(
+				'<li class="{classes}"
+					{li_directives}
+				>
+					{content}
+				</li>',
+				array(
+					'{classes}'       => esc_attr( $post_classes ),
+					'{li_directives}' => $li_directives,
+					'{content}'       => $block_content,
+				)
+			);
 		}
 
 		/*
@@ -133,5 +171,20 @@ class ProductTemplate extends AbstractBlock {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Product Template renders inner blocks manually so we need to skip default
+	 * rendering routine for its inner blocks
+	 *
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata Metadata provided for registering a block type.
+	 * @return array
+	 */
+	public function add_block_type_metadata_settings( $settings, $metadata ) {
+		if ( ! empty( $metadata['name'] ) && 'woocommerce/product-template' === $metadata['name'] ) {
+			$settings['skip_inner_blocks'] = true;
+		}
+			return $settings;
 	}
 }

@@ -19,7 +19,7 @@ test.describe( 'Test the checkout template', () => {
 		} );
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place order',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -37,7 +37,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place order',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 
@@ -47,7 +47,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place order',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -67,7 +67,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place order',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );

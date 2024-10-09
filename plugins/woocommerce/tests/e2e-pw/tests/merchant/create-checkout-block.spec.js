@@ -7,6 +7,7 @@ const {
 	transformIntoBlocks,
 	publishPage,
 	openEditorSettings,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
@@ -67,102 +68,111 @@ test.describe(
 			} );
 		} );
 
-		test( 'can transform classic checkout to checkout block', async ( {
-			page,
-			api,
-			testPage,
-		} ) => {
-			await goToPageEditor( { page } );
+		test(
+			'can transform classic checkout to checkout block',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page, api, testPage } ) => {
+				await goToPageEditor( { page } );
 
-			await fillPageTitle( page, testPage.title );
-			const wordPressVersion = await getInstalledWordPressVersion();
-			await insertBlock( page, 'Classic Checkout', wordPressVersion );
-			await transformIntoBlocks( page );
+				await closeChoosePatternModal( { page } );
 
-			// When Gutenberg is active, the canvas is in an iframe
-			let canvas = await getCanvas( page );
+				await fillPageTitle( page, testPage.title );
+				const wordPressVersion = await getInstalledWordPressVersion();
+				await insertBlock( page, 'Classic Checkout', wordPressVersion );
+				await transformIntoBlocks( page );
 
-			// Open Settings sidebar if closed
-			await openEditorSettings( { page } );
+				// When Gutenberg is active, the canvas is in an iframe
+				let canvas = await getCanvas( page );
 
-			// Activate the terms and conditions checkbox
-			await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
-			await page.getByLabel( 'Require checkbox' ).check();
+				// Open Settings sidebar if closed
+				await openEditorSettings( { page } );
 
-			await publishPage( page, testPage.title );
+				// Activate the terms and conditions checkbox
+				await canvas
+					.getByLabel( 'Block: Terms and Conditions' )
+					.click();
+				await page.getByLabel( 'Require checkbox' ).check();
 
-			// add additional payment option after page creation
-			await api.put( 'payment_gateways/bacs', {
-				enabled: true,
-			} );
-			await page.reload();
+				await publishPage( page, testPage.title );
 
-			// Mandatory to wait for the editor content, to ensure the iframe is loaded (if Gutenberg is active)
-			await expect( page.getByLabel( 'Editor content' ) ).toBeVisible();
+				// add additional payment option after page creation
+				const r = await api.put( 'payment_gateways/bacs', {
+					enabled: true,
+				} );
+				expect( r.data.enabled ).toBe( true );
+				await page.reload();
 
-			// Get the canvas again after the page reload
-			canvas = await getCanvas( page );
+				// Mandatory to wait for the editor content, to ensure the iframe is loaded (if Gutenberg is active)
+				await expect(
+					page.getByLabel( 'Editor content' )
+				).toBeVisible();
 
-			await expect(
-				canvas.getByText( 'Direct bank transfer' )
-			).toBeVisible();
-			await expect(
-				canvas.getByText( 'Cash on delivery' )
-			).toBeVisible();
+				// Get the canvas again after the page reload
+				canvas = await getCanvas( page );
 
-			// add additional shipping methods after page creation
-			await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
-				method_id: 'flat_rate',
-				settings: {
-					cost: '5.00',
-				},
-			} );
-			await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
-				method_id: 'local_pickup',
-			} );
-			await page.reload();
+				await expect(
+					canvas.getByText( 'Direct bank transfer' )
+				).toBeVisible();
+				await expect(
+					canvas.getByText( 'Cash on delivery' )
+				).toBeVisible();
 
-			// verify that added shipping methods are present
-			// there is issue in blocks: #45747 unable to verify the shipping methods
-			// please uncomment below when the issue is resolved
-			// await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
-			// await expect( page.getByLabel( 'Local pickup' ) ).toBeVisible();
-			// await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
+				// add additional shipping methods after page creation
+				await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+					method_id: 'flat_rate',
+					settings: {
+						cost: '5.00',
+					},
+				} );
+				await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+					method_id: 'local_pickup',
+				} );
+				await page.reload();
 
-			// go to frontend to verify transformed checkout block
-			// before that add product to cart to be able to visit checkout page
-			await page.goto( `/cart/?add-to-cart=${ productId }` );
-			await page.goto( testPage.slug );
-			await expect(
-				page.getByRole( 'heading', { name: testPage.title } )
-			).toBeVisible();
-			await expect(
-				page
-					.getByRole( 'group', { name: 'Contact information' } )
-					.locator( 'legend' )
-			).toBeVisible();
-			await expect(
-				page.locator(
-					'.wp-block-woocommerce-checkout-order-summary-block'
-				)
-			).toBeVisible();
-			await expect(
-				page.locator( '.wc-block-components-address-form' ).first()
-			).toBeVisible();
+				// verify that added shipping methods are present
+				// there is issue in blocks: #45747 unable to verify the shipping methods
+				// please uncomment below when the issue is resolved
+				// await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
+				// await expect( page.getByLabel( 'Local pickup' ) ).toBeVisible();
+				// await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
 
-			// verify existence of the terms & conditions and privacy policy checkbox
-			await expect(
-				page.getByText(
-					'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
-				)
-			).toBeVisible();
-			await expect(
-				page.locator( '#terms-and-conditions' )
-			).toBeVisible();
-			await page.locator( '#terms-and-conditions' ).check();
-			await expect(
-				page.locator( '#terms-and-conditions' )
-			).toBeChecked();
-		} );
+				// go to frontend to verify transformed checkout block
+				// before that add product to cart to be able to visit checkout page
+				await page.goto( `/cart/?add-to-cart=${ productId }` );
+				await page.goto( testPage.slug );
+				await expect(
+					page.getByRole( 'heading', { name: testPage.title } )
+				).toBeVisible();
+				await expect(
+					page
+						.getByRole( 'group', { name: 'Contact information' } )
+						.locator( 'legend' )
+				).toBeVisible();
+				await expect(
+					page
+						.locator(
+							'.wp-block-woocommerce-checkout-order-summary-block'
+						)
+						.first()
+				).toBeVisible();
+				await expect(
+					page.locator( '.wc-block-components-address-form' ).first()
+				).toBeVisible();
+
+				// verify existence of the terms & conditions and privacy policy checkbox
+				await expect(
+					page.getByText(
+						'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
+					)
+				).toBeVisible();
+				await expect(
+					page.locator( '#terms-and-conditions' )
+				).toBeVisible();
+				await page.locator( '#terms-and-conditions' ).check();
+				await expect(
+					page.locator( '#terms-and-conditions' )
+				).toBeChecked();
+			}
+		);
 	}
 );
