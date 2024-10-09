@@ -3,19 +3,38 @@
  */
 import type { Cart } from '@woocommerce/types';
 
+function getCookie( name: string ): string | Record< string, string > {
+	const cookies = document.cookie
+		.split( ';' )
+		.reduce< Record< string, string > >( ( acc, cookieString ) => {
+			const [ key, value ] = cookieString
+				.split( '=' )
+				.map( ( s ) => s.trim() );
+			if ( key && value ) {
+				acc[ key ] = decodeURIComponent( value );
+			}
+			return acc;
+		}, {} );
+	return name ? cookies[ name ] || '' : cookies;
+}
+
+export const hasCartSession = () => {
+	return !! getCookie( 'woocommerce_items_in_cart' );
+};
+
+export const isAddingToCart = () => {
+	return !! window.location.search.match( /add-to-cart/ );
+};
+
 export const persistenceLayer = {
 	get: () => {
-		const cached = window.localStorage?.getItem( 'CART_DATA' );
-
-		if ( ! cached ) {
+		if ( ! hasCartSession() || isAddingToCart() ) {
 			return {};
 		}
 
-		const queryString = window.location.search;
-		const urlParams = new URLSearchParams( queryString );
+		const cached = window.localStorage?.getItem( 'CART_DATA' );
 
-		// If the URL has an 'add-to-cart' parameter, return an empty object because the local storage will be stale.
-		if ( urlParams.get( 'add-to-cart' ) ) {
+		if ( ! cached ) {
 			return {};
 		}
 

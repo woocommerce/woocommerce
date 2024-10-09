@@ -5,7 +5,8 @@ import {
 	register,
 	subscribe,
 	createReduxStore,
-	select as selectData,
+	select as wpSelect,
+	dispatch as wpDispatch,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
 
@@ -24,6 +25,7 @@ import {
 	debouncedUpdatePaymentMethods,
 } from './update-payment-methods';
 import { ResolveSelectFromMap } from '../mapped-types';
+import { hasCartSession } from './persistence-layer';
 
 // Please update from deprecated "registerStore" to "createReduxStore" when this PR is merged:
 // https://github.com/WordPress/gutenberg/pull/45513
@@ -50,14 +52,13 @@ declare module '@wordpress/data' {
 	};
 }
 
-// Triggers JS event whenever the cart store is updated.
-subscribe( () => {
-	window.dispatchEvent(
-		new CustomEvent( 'wc-blocks-cart-updated', {
-			detail: selectData( STORE_KEY ).getCartData(),
-		} )
-	);
-}, store );
+// The resolver for getCartData fires off an API request. But if we know the cart is empty, we can skip the request.
+// The only reliable way to check if the cart is empty is to check the cookies.
+window.addEventListener( 'load', () => {
+	if ( ! hasCartSession() ) {
+		wpDispatch( STORE_KEY ).finishResolution( 'getCartData' );
+	}
+} );
 
 // Pushes changes whenever the store is updated.
 subscribe( pushChanges, store );
