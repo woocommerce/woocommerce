@@ -25,7 +25,7 @@ import {
 import { EditorContext } from '../context';
 
 export default function InserterSidebar() {
-	const { setIsInserterOpened } = useContext( EditorContext );
+	const { setIsInserterOpened } = useContext( EditorContext ) as any;
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const { rootClientId } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment

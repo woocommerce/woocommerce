@@ -197,7 +197,7 @@ export function Edit( {
 							) }
 							dateTimeFormat={ dateTimeFormat }
 							currentDate={ dateOnSaleToGmt }
-							onChange={ ( value ) =>
+							onChange={ ( value: any ) =>
 								setDateOnSaleToGmt(
 									moment( value )
 										.startOf( 'minute' )

@@ -123,7 +123,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 							</span>
 						),
 					}
-				) }
+				) as any }
 				onBlur={ getSlugSuggestion }
 				ref={ nameRef }
 			/>

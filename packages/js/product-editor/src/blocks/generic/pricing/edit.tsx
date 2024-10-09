@@ -64,7 +64,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl id={ priceId } help={ interpolatedHelp }>
+			<BaseControl id={ priceId } help={ interpolatedHelp as any }>
 				<InputControl
 					{ ...inputProps }
 					disabled={ disabled }

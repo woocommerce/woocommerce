@@ -257,7 +257,7 @@ export function DownloadBlockEdit( {
 												/>
 											),
 										}
-									) }
+									) as any }
 								</p>
 							</div>
 						) : (
