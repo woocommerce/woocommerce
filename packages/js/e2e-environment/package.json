@@ -58,7 +58,7 @@
 		"app-root-path": "^3.1.0",
 		"commander": "4.1.1",
 		"config": "3.3.7",
-		"jest": "^29.7.0",
+		"jest": "29.7.x",
 		"jest-circus": "27.5.1",
 		"jest-each": "27.5.1",
 		"jest-puppeteer": "^5.0.4",

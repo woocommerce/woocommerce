@@ -115,21 +115,13 @@
 			"dependencies": [
 				"react",
 				"react-dom",
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "18.3.x"
-		},
-		{
-			"dependencies": [
 				"@types/react-dom",
 				"@types/react",
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "17.0.x"
+			"pinVersion": "18.3.x"
 		},
 		{
 			"dependencies": [
@@ -370,7 +362,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^29.7.0"
+			"pinVersion": "29.7.x"
 		},
 		{
 			"dependencies": [
@@ -379,7 +371,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^29.1.1"
+			"pinVersion": "29.1.x"
 		},
 		{
 			"dependencies": [
