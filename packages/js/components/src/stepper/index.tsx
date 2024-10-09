@@ -2,8 +2,8 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement, Fragment } from '@wordpress/element';
-import type React from 'react';
+import { createElement } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -96,7 +96,7 @@ export const Stepper: React.FC< StepperProps > = ( {
 					const LabelWrapper =
 						typeof onClick === 'function' ? 'button' : 'div';
 					return (
-						<Fragment key={ key }>
+						<React.Fragment key={ key }>
 							<div className={ stepClassName }>
 								<LabelWrapper
 									className="woocommerce-stepper__step-label-wrapper"
@@ -125,7 +125,7 @@ export const Stepper: React.FC< StepperProps > = ( {
 							{ ! isVertical && (
 								<div className="woocommerce-stepper__step-divider" />
 							) }
-						</Fragment>
+						</React.Fragment>
 					);
 				} ) }
 			</div>

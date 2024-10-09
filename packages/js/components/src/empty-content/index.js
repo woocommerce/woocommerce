@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { createElement, Component } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -15,7 +16,7 @@ import { H } from '../section';
  * A component to be used when there is no data to show.
  * It can be used as an opportunity to provide explanation or guidance to help a user progress.
  */
-class EmptyContent extends Component {
+class EmptyContent extends React.Component {
 	renderIllustration() {
 		const { illustrationWidth, illustrationHeight, illustration } =
 			this.props;

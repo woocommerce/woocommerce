@@ -5,7 +5,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	createElement,
 	useRef,
-	Fragment,
 	useState,
 	useEffect,
 } from '@wordpress/element';
@@ -261,7 +260,7 @@ const Table: React.VFC< TableProps > = ( {
 									  );
 
 							const textLabel = (
-								<Fragment>
+								<React.Fragment>
 									<span
 										aria-hidden={ Boolean(
 											screenReaderLabel
@@ -274,7 +273,7 @@ const Table: React.VFC< TableProps > = ( {
 											{ screenReaderLabel }
 										</span>
 									) }
-								</Fragment>
+								</React.Fragment>
 							);
 
 							return (
@@ -285,7 +284,7 @@ const Table: React.VFC< TableProps > = ( {
 									{ ...thProps }
 								>
 									{ isSortable ? (
-										<Fragment>
+										<React.Fragment>
 											<Button
 												aria-describedby={ labelId }
 												onClick={
@@ -310,7 +309,7 @@ const Table: React.VFC< TableProps > = ( {
 											>
 												{ iconLabel }
 											</span>
-										</Fragment>
+										</React.Fragment>
 									) : (
 										textLabel
 									) }

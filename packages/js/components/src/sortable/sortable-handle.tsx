@@ -20,7 +20,7 @@ export const SortableHandle = ( {
 	itemIndex,
 }: SortableHandleProps ) => {
 	const { onDragStart, onDragEnd }: SortableContextType =
-		useContext( SortableContext );
+		useContext( SortableContext as any );
 
 	return (
 		<div

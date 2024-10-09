@@ -4,8 +4,9 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Icon, cancelCircleFilled } from '@wordpress/icons';
-import { createElement, Component, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { findIndex, isArray } from 'lodash';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -33,7 +34,7 @@ type Props = {
 /**
  * A list of tags to display selected items.
  */
-class Tags extends Component< Props > {
+class Tags extends React.Component< Props > {
 	constructor( props: Props ) {
 		super( props );
 		this.removeAll = this.removeAll.bind( this );
@@ -67,7 +68,7 @@ class Tags extends Component< Props > {
 		}
 
 		return (
-			<Fragment>
+			<React.Fragment>
 				<div className="woocommerce-select-control__tags">
 					{ selected.map( ( item, i ) => {
 						if ( ! item.label ) {
@@ -85,7 +86,6 @@ class Tags extends Component< Props > {
 								key={ item.key }
 								id={ item.key }
 								label={ item.label }
-								// @ts-expect-error key is a string or undefined here
 								remove={ this.removeResult }
 								screenReaderLabel={ screenReaderLabel }
 							/>
@@ -107,7 +107,7 @@ class Tags extends Component< Props > {
 						</span>
 					</Button>
 				) }
-			</Fragment>
+			</React.Fragment>
 		);
 	}
 }

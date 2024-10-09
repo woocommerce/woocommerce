@@ -3,11 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
-import { createElement, Component, createRef } from '@wordpress/element';
+import { createElement, createRef } from '@wordpress/element';
 import { Icon, search } from '@wordpress/icons';
 import classnames from 'classnames';
 import { isArray } from 'lodash';
-import {
+import React, {
 	RefObject,
 	ChangeEvent,
 	FocusEvent,
@@ -145,7 +145,7 @@ type State = {
 /**
  * A search control to allow user input to filter the options.
  */
-class Control extends Component< Props, State > {
+class Control extends React.Component< Props, State > {
 	input: RefObject< HTMLInputElement >;
 
 	constructor( props: Props ) {
