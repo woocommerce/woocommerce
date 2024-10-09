@@ -4397,6 +4397,9 @@ importers:
       jest-circus:
         specifier: 27.5.1
         version: 27.5.1
+      jest-environment-jsdom:
+        specifier: ^29.7.0
+        version: 29.7.0
       jest-environment-puppeteer:
         specifier: 6.1.1
         version: 6.1.1
