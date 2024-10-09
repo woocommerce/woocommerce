@@ -69,7 +69,7 @@ export function useProductAttributes( {
 	isVariationAttributes = false,
 	onChange,
 	productId,
-}: useProductAttributesProps ) {
+}: useProductAttributesProps ): any {
 	const [ attributes, setAttributes ] = useState<
 		EnhancedProductAttribute[]
 	>( getFilteredAttributes( allAttributes, isVariationAttributes ) );

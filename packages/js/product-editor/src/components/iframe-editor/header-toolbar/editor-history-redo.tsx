@@ -3,10 +3,10 @@
  */
 import { __, isRTL } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { createElement, forwardRef, useContext } from '@wordpress/element';
+import { createElement, useContext } from '@wordpress/element';
 
 import { redo as redoIcon, undo as undoIcon } from '@wordpress/icons';
-import { Ref } from 'react';
+import { Ref, forwardRef } from 'react';
 // @ts-expect-error missing types.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { displayShortcut, isAppleOS } from '@wordpress/keycodes';

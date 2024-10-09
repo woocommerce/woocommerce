@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { createElement, forwardRef, useContext } from '@wordpress/element';
+import { createElement, useContext } from '@wordpress/element';
 import { listView as listViewIcon } from '@wordpress/icons';
 import { displayShortcut } from '@wordpress/keycodes';
 import { __ } from '@wordpress/i18n';
-import { Ref } from 'react';
+import { Ref, forwardRef } from 'react';
 
 /**
  * Internal dependencies
