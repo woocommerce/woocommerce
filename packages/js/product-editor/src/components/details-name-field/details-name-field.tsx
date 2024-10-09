@@ -52,7 +52,7 @@ export const DetailsNameField = ( {} ) => {
 							</span>
 						),
 					}
-				) }
+				) as any }
 				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 				{ ...getInputProps( 'name', {

@@ -24,7 +24,7 @@ function EditorHistoryRedo(
 		? displayShortcut.primaryShift( 'z' )
 		: displayShortcut.primary( 'y' );
 
-	const { hasRedo, redo } = useContext( EditorContext );
+	const { hasRedo, redo } = useContext( EditorContext ) as any;
 
 	return (
 		<Button

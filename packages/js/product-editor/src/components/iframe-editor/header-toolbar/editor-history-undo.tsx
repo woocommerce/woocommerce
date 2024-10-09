@@ -17,7 +17,7 @@ function EditorHistoryUndo(
 	props: { [ key: string ]: unknown },
 	ref: Ref< HTMLButtonElement >
 ) {
-	const { hasUndo, undo } = useContext( EditorContext );
+	const { hasUndo, undo } = useContext( EditorContext ) as any;
 	return (
 		<Button
 			{ ...props }

@@ -24,7 +24,7 @@ export const KeyboardShortcuts = () => {
 		redo,
 		setIsDocumentOverviewOpened: setIsListViewOpened,
 		undo,
-	} = useContext( EditorContext );
+	} = useContext( EditorContext ) as any;
 
 	const { isSettingsSidebarOpen } = useSelect( ( select ) => {
 		// @ts-expect-error These selectors are available in the interface data store.

@@ -20,7 +20,7 @@ export const DocumentOverview = forwardRef(
 		ref: Ref< HTMLButtonElement >
 	) {
 		const { isDocumentOverviewOpened, setIsDocumentOverviewOpened } =
-			useContext( EditorContext );
+			useContext( EditorContext ) as any;
 
 		function handleClick() {
 			setIsDocumentOverviewOpened( ! isDocumentOverviewOpened );

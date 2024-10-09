@@ -196,7 +196,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 	};
 
 	return (
-		<>
+		<React.Fragment>
 			{ shouldShowFeedbackBar && (
 				<div className="woocommerce-product-mvp-ces-footer">
 					<Pill>Beta</Pill>
@@ -223,7 +223,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 									/>
 								),
 							}
-						) }
+						) as any }
 					</div>
 					<Button
 						className="woocommerce-product-mvp-ces-footer__close-button"
@@ -233,6 +233,6 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 					></Button>
 				</div>
 			) }
-		</>
+		</React.Fragment>
 	);
 }

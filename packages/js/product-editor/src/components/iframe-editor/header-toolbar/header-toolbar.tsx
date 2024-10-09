@@ -62,7 +62,7 @@ export function HeaderToolbar( {
 	onCancel = () => {},
 }: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
-		useContext( EditorContext );
+		useContext( EditorContext ) as any;
 	const [ isBlockToolsCollapsed, setIsBlockToolsCollapsed ] =
 		useState( true );
 	const isLargeViewport = useViewportMatch( 'medium' );

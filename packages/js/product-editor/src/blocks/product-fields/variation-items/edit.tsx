@@ -213,13 +213,13 @@ export function Edit( {
 						className: 'is-destructive',
 					},
 				] }
-				onVariationTableChange={ ( type, update ) => {
+				onVariationTableChange={ ( type: any, update: any ) => {
 					if (
 						type === 'delete' ||
 						( type === 'update' &&
 							update &&
 							update.find(
-								( variation ) =>
+								( variation: any ) =>
 									'regular_price' in variation ||
 									'sale_price' in variation
 							) )
