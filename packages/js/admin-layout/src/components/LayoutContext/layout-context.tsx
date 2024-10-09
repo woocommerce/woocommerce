@@ -22,7 +22,7 @@ type LayoutContextProviderProps = {
 
 export const LayoutContext = createContext< LayoutContextType | undefined >(
 	undefined
-);
+) as any;
 
 export const getLayoutContextValue = (
 	layoutParts: LayoutContextType[ 'layoutParts' ] = []
@@ -62,7 +62,7 @@ export const useLayoutContext = () => {
 };
 
 export const useExtendLayout = ( item: string ) => {
-	const { extendLayout } = useLayoutContext();
+	const { extendLayout } = useLayoutContext() as any;
 
 	return useMemo( () => extendLayout( item ), [ extendLayout, item ] );
 };
