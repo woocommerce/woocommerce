@@ -115,13 +115,21 @@
 			"dependencies": [
 				"react",
 				"react-dom",
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "18.3.x"
+		},
+		{
+			"dependencies": [
 				"@types/react-dom",
 				"@types/react",
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "18.2.0"
+			"pinVersion": "17.0.x"
 		},
 		{
 			"dependencies": [

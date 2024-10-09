@@ -86,8 +86,8 @@
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
-		"react": "18.2.0",
-		"react-dom": "18.2.0"
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
