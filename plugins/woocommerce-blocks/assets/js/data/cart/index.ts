@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import {
+	register,
+	subscribe,
+	createReduxStore,
+	select as selectData,
+} from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
 
 /**
@@ -11,7 +16,7 @@ import { STORE_KEY } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
-import reducer, { State } from './reducers';
+import reducer from './reducers';
 import type { SelectFromMap, DispatchFromMap } from '../mapped-types';
 import { pushChanges, flushChanges } from './push-changes';
 import {
@@ -22,7 +27,7 @@ import { ResolveSelectFromMap } from '../mapped-types';
 
 // Please update from deprecated "registerStore" to "createReduxStore" when this PR is merged:
 // https://github.com/WordPress/gutenberg/pull/45513
-const registeredStore = registerStore< State >( STORE_KEY, {
+const store = createReduxStore( STORE_KEY, {
 	reducer,
 	actions,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,8 +37,30 @@ const registeredStore = registerStore< State >( STORE_KEY, {
 	__experimentalUseThunks: true,
 } );
 
+register( store );
+
+declare module '@wordpress/data' {
+	function dispatch(
+		key: typeof STORE_KEY
+	): DispatchFromMap< typeof actions >;
+	function select( key: typeof STORE_KEY ): SelectFromMap<
+		typeof selectors
+	> & {
+		hasFinishedResolution: ( selector: string ) => boolean;
+	};
+}
+
+// Triggers JS event whenever the cart store is updated.
+subscribe( () => {
+	window.dispatchEvent(
+		new CustomEvent( 'wc-blocks-cart-updated', {
+			detail: selectData( STORE_KEY ).getCartData(),
+		} )
+	);
+}, store );
+
 // Pushes changes whenever the store is updated.
-registeredStore.subscribe( pushChanges );
+subscribe( pushChanges, store );
 
 // This will skip the debounce and immediately push changes to the server when a field is blurred.
 document.body.addEventListener( 'focusout', ( event: FocusEvent ) => {
@@ -49,29 +76,18 @@ document.body.addEventListener( 'focusout', ( event: FocusEvent ) => {
 // First we will run the updatePaymentMethods function without any debounce to ensure payment methods are ready as soon
 // as the cart is loaded. After that, we will unsubscribe this function and instead run the
 // debouncedUpdatePaymentMethods function on subsequent cart updates.
-const unsubscribeUpdatePaymentMethods = registeredStore.subscribe( async () => {
+const unsubscribeUpdatePaymentMethods = subscribe( async () => {
 	const didActionDispatch = await updatePaymentMethods();
 	if ( didActionDispatch ) {
 		// The function we're currently in will unsubscribe itself. When we reach this line, this will be the last time
 		// this function is called.
 		unsubscribeUpdatePaymentMethods();
 		// Resubscribe, but with the debounced version of updatePaymentMethods.
-		registeredStore.subscribe( debouncedUpdatePaymentMethods );
+		subscribe( debouncedUpdatePaymentMethods, store );
 	}
-} );
+}, store );
 
 export const CART_STORE_KEY = STORE_KEY;
-
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof CART_STORE_KEY
-	): DispatchFromMap< typeof actions >;
-	function select( key: typeof CART_STORE_KEY ): SelectFromMap<
-		typeof selectors
-	> & {
-		hasFinishedResolution: ( selector: string ) => boolean;
-	};
-}
 
 /**
  * CartDispatchFromMap is a type that maps the cart store's action creators to the dispatch function passed to thunks.

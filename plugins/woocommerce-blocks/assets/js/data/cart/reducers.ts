@@ -14,7 +14,7 @@ import { persistenceLayer } from './persistence-layer';
 /**
  * Reducer for receiving items related to the cart.
  */
-const reducer = ( state = defaultCartState, action: AnyAction ): CartState => {
+const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 	switch ( action.type ) {
 		case types.SET_ERROR_DATA:
 			if ( 'error' in action && action.error ) {
@@ -162,7 +162,7 @@ export type State = ReturnType< typeof reducer >;
  * Updates cached cart data in local storage.
  */
 function withPersistenceLayer( cartReducer: Reducer< CartState > ) {
-	return ( state: CartState, action: AnyAction ) => {
+	return ( state: CartState | undefined, action: AnyAction ): CartState => {
 		const nextState = cartReducer( state, action );
 
 		if ( nextState.cartData ) {

@@ -9,6 +9,7 @@ import {
 import { CartResponseTotals, isBoolean } from '@woocommerce/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import type { ColorPaletteOption } from '@woocommerce/editor-components/color-panel/types';
+import type { Cart } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -26,7 +27,7 @@ const getPrice = ( totals: CartResponseTotals, showIncludingTax: boolean ) => {
 	return formatPrice( subTotal, currency );
 };
 
-export const updateTotals = ( cartData ) => {
+export const updateTotals = ( cartData: Cart ) => {
 	if ( ! cartData ) {
 		return;
 	}

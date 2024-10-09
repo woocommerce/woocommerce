@@ -28,8 +28,6 @@ import { apiFetchWithHeaders } from '../shared-controls';
 /**
  * A thunk used in updating the store with the cart items retrieved from a request. This also notifies the shopper
  * of any unexpected quantity changes occurred.
- *
- * @param {CartResponse} response
  */
 export const receiveCart =
 	( response: Partial< CartResponse > ) =>
