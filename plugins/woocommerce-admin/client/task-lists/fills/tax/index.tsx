@@ -252,7 +252,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 						key: partner.id,
 						...childProps,
 					} )
-			) }
+			) as any }
 		</Partners>
 	);
 };

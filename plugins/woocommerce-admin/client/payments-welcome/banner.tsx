@@ -68,10 +68,10 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 				</Button>
 				<p>
 					{ isWooPayEligible
-						? strings.TosAndPpWooPay
-						: strings.TosAndPp }
+						? strings.TosAndPpWooPay as any
+						: strings.TosAndPp as any }
 				</p>
-				<p>{ strings.termsAndConditions( tc_url ) }</p>
+				<p>{ strings.termsAndConditions( tc_url ) as any }</p>
 			</CardBody>
 			<CardDivider />
 			<CardBody className="woopayments-welcome-page__payments">

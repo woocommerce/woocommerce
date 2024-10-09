@@ -11,12 +11,12 @@ import {
 import {
 	createElement,
 	createInterpolateElement,
-	Fragment,
 } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { useLayoutContext } from '@woocommerce/admin-layout';
 import { isValidEmail } from '@woocommerce/product-editor';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -25,7 +25,7 @@ import { FeedbackIcon } from '../../images/feedback-icon';
 
 export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
-	const { isDescendantOf } = useLayoutContext();
+	const { isDescendantOf } = useLayoutContext() as any;
 
 	return (
 		<MenuItem
@@ -61,7 +61,7 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 							} ) => void,
 							errors: Record< string, string > | undefined
 						) => (
-							<Fragment>
+							<React.Fragment>
 								<BaseControl
 									id={ 'feedback_additional_thoughts' }
 									className="woocommerce-product-feedback__additional-thoughts"
@@ -80,7 +80,7 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 												</span>
 											),
 										}
-									) }
+									) as any }
 								>
 									<TextareaControl
 										value={
@@ -134,7 +134,7 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 										) }
 									</span>
 								</BaseControl>
-							</Fragment>
+							</React.Fragment>
 						),
 						validateExtraFields: ( {
 							email = '',

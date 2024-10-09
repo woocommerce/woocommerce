@@ -26,7 +26,7 @@ export const DismissableListHeading: React.FC< React.PropsWithChildren < {
 	const handleDismissClick = () => {
 		onDismiss();
 		updateOptions( {
-			[ dismissOptionName ]: 'yes',
+			[ dismissOptionName as any ]: 'yes',
 		} );
 	};
 
