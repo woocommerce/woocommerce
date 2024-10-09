@@ -273,7 +273,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												variant="link"
 											/>
 										),
-									} ) }
+									} ) as any }
 								</p>
 								{ isModalOpen && (
 									<Modal

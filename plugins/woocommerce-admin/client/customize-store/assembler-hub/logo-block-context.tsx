@@ -9,4 +9,4 @@ export const LogoBlockContext = createContext< {
 } >( {
 	logoBlockIds: [],
 	setLogoBlockIds: () => {},
-} );
+} ) as any;

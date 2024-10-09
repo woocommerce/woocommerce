@@ -52,7 +52,7 @@ export const DesignChangeWarningModal = ( {
 							/>
 						),
 					}
-				) }
+				) as any }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
 				<Button
@@ -111,7 +111,7 @@ export const StartNewDesignWarningModal = ( {
 							/>
 						),
 					}
-				) }
+				) as any }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
 				<Button
@@ -170,7 +170,7 @@ export const StartOverWarningModal = ( {
 							/>
 						),
 					}
-				) }
+				) as any }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
 				<Button
@@ -241,7 +241,7 @@ export const ThemeSwitchWarningModal = ( {
 									/>
 								),
 							}
-					  ) }
+					  ) as any }
 			</p>
 			<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
 				<Button

@@ -4,7 +4,8 @@
 /**
  * External dependencies
  */
-import { memo, useCallback, useContext } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -132,4 +133,4 @@ function Sidebar() {
 	);
 }
 
-export default memo( Sidebar );
+export default React.memo( Sidebar );

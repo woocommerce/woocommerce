@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import {
 	useState,
 	createPortal,
-	forwardRef,
 	useMemo,
 	useEffect,
 } from '@wordpress/element';
@@ -21,6 +20,7 @@ import {
 } from '@wordpress/compose';
 import { __experimentalStyleProvider as StyleProvider } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import React from 'react';
 
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
@@ -184,4 +184,4 @@ function IframeIfReady( props, ref ) {
 	return <Iframe { ...props } forwardedRef={ ref } />;
 }
 
-export default forwardRef( IframeIfReady );
+export default React.forwardRef( IframeIfReady );

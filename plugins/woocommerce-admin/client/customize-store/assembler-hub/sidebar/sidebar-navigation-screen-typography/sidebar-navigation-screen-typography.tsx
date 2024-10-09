@@ -127,7 +127,7 @@ export const SidebarNavigationScreenTypography = ( {
 											variant="link"
 										/>
 									),
-								} ) }
+								} ) as any }
 							</p>
 							{ isModalOpen && (
 								<Modal
