@@ -34,7 +34,7 @@ describe( 'TagField', () => {
 	it( 'should render a dropdown select control', () => {
 		const { queryByText, queryByPlaceholderText } = render(
 			<Form initialValues={ { tags: [] } }>
-				{ ( { getInputProps }: FormContextType< Product > ) => (
+				{ ( ( { getInputProps }: FormContextType< Product > ) => (
 					<TagField
 						id="tag-field"
 						isVisible={ true }
@@ -42,7 +42,7 @@ describe( 'TagField', () => {
 						placeholder="Search or create tag…"
 						{ ...getInputProps< ProductTagNodeProps[] >( 'tags' ) }
 					/>
-				) }
+				) ) as any }
 			</Form>
 		);
 		queryByPlaceholderText( 'Search or create tag…' )?.focus();
@@ -59,7 +59,7 @@ describe( 'TagField', () => {
 					],
 				} }
 			>
-				{ ( { getInputProps }: FormContextType< Product > ) => (
+				{ ( ( { getInputProps }: FormContextType< Product > ) => (
 					<TagField
 						id="another-tag-field"
 						isVisible={ true }
@@ -67,7 +67,7 @@ describe( 'TagField', () => {
 						placeholder="Search or create tag…"
 						{ ...getInputProps< ProductTagNodeProps[] >( 'tags' ) }
 					/>
-				) }
+				) ) as any }
 			</Form>
 		);
 		queryByPlaceholderText( 'Search or create tag…' )?.focus();
