@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
+use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
 
 /**
  * WooCommercePayments Task
@@ -258,5 +259,46 @@ class WooCommercePayments extends Task {
 		);
 
 		return ! empty( $enabled_gateways );
+	}
+
+	/**
+	 * The task action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		if ( WooCommercePayments::is_supported() ) {
+			// If WooPayments is active, point to the WooPayments client surfaces/flows.
+			if ( WooCommercePayments::is_wcpay_active() ) {
+				// If WooPayments is connected, point to the WooPayments overview page.
+				if ( WooCommercePayments::is_connected() ) {
+					return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/overview' ) );
+				}
+
+				// There is no connected WooPayments account.
+				// Point to a WooPayments connect link to let the WooPayments client figure out the proper onboarding flow.
+				return add_query_arg( array(
+					'wcpay-connect' => '1',
+					'from'          => 'WCADMIN_PAYMENT_TASK',
+					'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+				), admin_url( 'admin.php' ) );
+			}
+
+			// WooPayments is not active.
+			// Trigger the WooPayments plugin installation and/or activation by pointing to the task suggestion URL.
+			return add_query_arg( array(
+				'task' => $this->get_id(),
+				'id'   => self::get_suggestion()->id,
+			), admin_url( 'admin.php?page=wc-admin' ) );
+		}
+
+		// Check if there is an active WooPayments incentive via the welcome page.
+		if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
+			// Point to the WooPayments welcome page.
+			return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
+		}
+
+		// Fall back to the WooPayments task page URL.
+		return add_query_arg( 'task', $this->get_id(), admin_url( 'admin.php?page=wc-admin' ) );
 	}
 }
