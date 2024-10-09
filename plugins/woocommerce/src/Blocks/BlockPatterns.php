@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -99,6 +101,24 @@ class BlockPatterns {
 			return;
 		}
 
+		$patterns = $this->get_block_patterns();
+		foreach ( $patterns as $pattern ) {
+			$this->pattern_registry->register_block_pattern( $pattern['source'], $pattern, $this->dictionary );
+		}
+	}
+
+	/**
+	 * Gets block pattern data from the cache if available
+	 *
+	 * @return array Block pattern data.
+	 */
+	private function get_block_patterns() {
+		$pattern_data = $this->get_pattern_cache();
+
+		if ( is_array( $pattern_data ) ) {
+			return $pattern_data;
+		}
+
 		$default_headers = array(
 			'title'         => 'Title',
 			'slug'          => 'Slug',
@@ -112,19 +132,53 @@ class BlockPatterns {
 		);
 
 		if ( ! file_exists( $this->patterns_path ) ) {
-			return;
+			return array();
 		}
 
 		$files = glob( $this->patterns_path . '/*.php' );
 		if ( ! $files ) {
-			return;
+			return array();
 		}
+
+		$patterns = array();
 
 		foreach ( $files as $file ) {
-			$pattern_data = get_file_data( $file, $default_headers );
-
-			$this->pattern_registry->register_block_pattern( $file, $pattern_data, $this->dictionary );
+			$data           = get_file_data( $file, $default_headers );
+			$data['source'] = $file;
+			$patterns[]     = $data;
 		}
+
+		$this->set_pattern_cache( $patterns );
+		return $patterns;
+	}
+
+	/**
+	 * Gets block pattern cache.
+	 *
+	 * @return array|false Returns an array of patterns if cache is found, otherwise false.
+	 */
+	private function get_pattern_cache() {
+		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
+
+		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
+			return $pattern_data['patterns'];
+		}
+
+		return false;
+	}
+
+	/**
+	 * Sets block pattern cache.
+	 *
+	 * @param array $patterns Block patterns data to set in cache.
+	 */
+	private function set_pattern_cache( array $patterns ) {
+		$pattern_data = array(
+			'version'  => WOOCOMMERCE_VERSION,
+			'patterns' => $patterns,
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, MONTH_IN_SECONDS );
 	}
 
 	/**
