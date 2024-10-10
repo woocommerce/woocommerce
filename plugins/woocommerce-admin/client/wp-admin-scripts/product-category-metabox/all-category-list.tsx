@@ -209,4 +209,4 @@ export const AllCategoryList = forwardRef<
 			</ul>
 		</>
 	);
-} ) as any;
+} ) /* as any */ /* commented out to test emitting TS errors and not breaking build */;

@@ -5,7 +5,6 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 
 /**
  * Internal dependencies
@@ -14,6 +13,8 @@ const {
 	webpackConfig,
 	plugin,
 	StyleAssetPlugin,
+	ForkTsCheckerWebpackPlugin,
+	TypeScriptWarnOnlyWebpackPlugin
 } = require( '@woocommerce/internal-style-build' );
 const {
 	blockEntryPoints,
@@ -84,5 +85,6 @@ module.exports = {
 		} ),
 		new StyleAssetPlugin(),
 		new ForkTsCheckerWebpackPlugin(),
+		new TypeScriptWarnOnlyWebpackPlugin(),
 	],
 };
