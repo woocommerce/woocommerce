@@ -81,7 +81,6 @@
 				"babel*",
 				"eslint*",
 				"glob*",
-				"jest*",
 				"postcss*",
 				"typescript",
 				"webpack*"
@@ -351,9 +350,13 @@
 			"pinVersion": "^16.18.68"
 		},
 		{
+			"label": "Jest-related dependencies: aiming React 18",
 			"dependencies": [
+				"@jest/test-sequencer",
 				"jest",
 				"jest-cli",
+				"jest-circus",
+				"jest-each",
 				"jest-environment-jsdom",
 				"jest-environment-node",
 				"babel-jest"
