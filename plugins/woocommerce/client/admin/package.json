@@ -16,7 +16,7 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
-		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
+		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
@@ -29,7 +29,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
-		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../woocommerce/bin/generate-feature-config.php"
+		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../../bin/generate-feature-config.php"
 	},
 	"lint-staged": {
 		"*.scss": [
