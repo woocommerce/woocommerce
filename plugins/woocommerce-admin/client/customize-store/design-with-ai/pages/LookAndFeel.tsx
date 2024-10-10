@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
 import { getAdminLink } from '@woocommerce/settings';
@@ -51,7 +51,7 @@ export const LookAndFeel = ( {
 			),
 		},
 		{
-			title: __( 'Bold', 'woocommerce' ),
+			title: _x( 'Bold', 'Design style', 'woocommerce' ),
 			key: 'Bold' as const,
 			subtitle: __(
 				'Vibrant with eye-catching colors and visuals.',

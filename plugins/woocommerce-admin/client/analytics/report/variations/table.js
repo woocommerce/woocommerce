@@ -242,7 +242,7 @@ class VariationsReportTable extends Component {
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: _n( 'orders', 'orders', ordersCount, 'woocommerce' ),
+				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
