@@ -113,7 +113,7 @@
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
-		"fork-ts-checker-webpack-plugin": "^8.0.0",
+		"fork-ts-checker-webpack-plugin": "9.0.x",
 		"jest": "29.7.x",
 		"jest-cli": "29.7.x",
 		"mini-css-extract-plugin": "^2.7.6",
