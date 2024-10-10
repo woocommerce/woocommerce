@@ -45,7 +45,7 @@ class StoreNotices extends AbstractBlock {
 			return;
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',

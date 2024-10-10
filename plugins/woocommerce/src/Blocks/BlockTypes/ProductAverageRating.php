@@ -90,7 +90,7 @@ class ProductAverageRating extends AbstractBlock {
 			return '';
 		}
 
-		$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
 		$wrapper_attributes = get_block_wrapper_attributes(
