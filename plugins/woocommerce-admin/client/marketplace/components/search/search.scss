@@ -5,7 +5,7 @@
 	margin-top: 15px;
 	width: 320px;
 
-	@media (width <= $breakpoint-medium) {
+	@media screen and (max-width: $breakpoint-medium) {
 		margin: $grid-unit-20 $grid-unit-20 $grid-unit-10 $grid-unit-20;
 		width: calc(100% - $grid-unit-20 * 2);
 
