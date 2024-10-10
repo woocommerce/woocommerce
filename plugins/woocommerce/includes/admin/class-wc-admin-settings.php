@@ -65,6 +65,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
+				$settings[] = include __DIR__ . '/settings/class-wc-settings-my-example.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 			}

@@ -29,7 +29,6 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 		parent::__construct();
 	}
 
-
 	/**
 	 * Get settings for the default section.
 	 *

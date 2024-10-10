@@ -14,7 +14,7 @@ import {
 	useEffect,
 	useRef,
 } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';

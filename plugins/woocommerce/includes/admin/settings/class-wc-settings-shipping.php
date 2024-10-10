@@ -454,6 +454,12 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php';
+
+		?>
+		<script type="text/javascript" id="sealock">
+			console.log( 'shipping-classes inline script' );
+		</script>
+		<?php
 	}
 }
 

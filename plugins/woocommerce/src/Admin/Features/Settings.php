@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\Jetpack\Constants;
 
 /**
  * Contains backend logic for the Settings feature.
@@ -53,14 +54,36 @@ class Settings {
 			return $settings;
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$page = sanitize_text_field( wp_unslash( $_GET['page'] ) );
+		$path = sanitize_text_field( wp_unslash( $_GET['path'] ) );
+
+		// Only add data when we are on the settings page.
+		if ( 'wc-admin' !== $page && 0 !== strpos( $path, '/settings' ) ) {
+			return $settings;
+		}
+		// phpcs:enable
+
 		$setting_pages = \WC_Admin_Settings::get_settings_pages();
 		$pages         = array();
 		foreach ( $setting_pages as $setting_page ) {
-			$pages = $setting_page->add_settings_page( $pages );
+			$pages = $setting_page->get_settings_page_data( $pages );
 		}
 
 		$settings['settingsPages'] = $pages;
+		$settings['settingsNonce'] = wp_create_nonce( 'woocommerce-settings' );
 
+		global $wp_scripts;
+		$settings['scripts'] = array();
+
+		foreach ( $wp_scripts->queue as $script ) {
+			$registered_script = $wp_scripts->registered[ $script ];
+			if ( isset( $registered_script ) ) {
+				$settings['settingsScripts'][ $script ] = array(
+					'src' => $registered_script->src,
+				);
+			}
+		}
 		return $settings;
 	}
 

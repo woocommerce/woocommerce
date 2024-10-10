@@ -6,6 +6,8 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -30,6 +32,49 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @var string
 		 */
 		protected $label = '';
+
+		/**
+		 * Is setting page modern.
+		 *
+		 * @var boolean
+		 */
+		protected $is_modern = false;
+
+		/**
+		 * Setting page label.
+		 *
+		 * @var string
+		 */
+		protected $types = array(
+			'title',
+			'info',
+			'sectionend',
+			'text',
+			'password',
+			'datetime',
+			'datetime-local',
+			'date',
+			'month',
+			'time',
+			'week',
+			'number',
+			'email',
+			'url',
+			'tel',
+			'color',
+			'textarea',
+			'select',
+			'multiselect',
+			'radio',
+			'checkbox',
+			'image_width',
+			'single_select_page',
+			'single_select_page_with_search',
+			'single_select_country',
+			'multi_select_countries',
+			'relative_date_selector',
+			'slotfill_placeholder',
+		);
 
 		/**
 		 * Constructor.
@@ -80,6 +125,90 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function add_settings_page( $pages ) {
 			$pages[ $this->id ] = $this->label;
+
+			return $pages;
+		}
+
+		/**
+		 * Get page settings data.
+		 *
+		 * @param array $pages The settings array where we'll add data.
+		 *
+		 * @return mixed
+		 */
+		public function get_settings_page_data( $pages ) {
+			$sections = $this->get_sections();
+			$sections_data = array();
+
+			foreach ( $sections as $section_id => $section_label ) {
+				$section_settings = $this->get_settings_for_section( $section_id );
+				$section_settings_data = array();
+
+				global $current_section;
+				// Make sure the current section is set to the sectionid here. Reset it after the loop.
+				$saved_current_section = $current_section;
+				$current_section = $section_id;
+				ob_start();
+				do_action( 'woocommerce_settings_' . $this->id );
+				$html = ob_get_contents();
+				ob_end_clean();
+
+				$should_render_section_from_config = strpos( $html, 'THIS IS THE PARENT OUTPUT') !== false;
+
+				// We only want to loop through the settings object if the parent class's output method is being rendered.
+				if ( $should_render_section_from_config ) {
+					foreach( $section_settings as $section_setting ) {
+						if ( isset( $section_setting['id'] ) ) {
+								$section_setting['value'] = isset( $section_setting['default'] ) ? get_option( $section_setting['id'], $section_setting['default'] ) : get_option( $section_setting['id'] );
+						}
+						
+						// If the setting is a custom type, we need to render it using the output of the woocommerce_admin_field_ action.
+						if ( ! in_array( $section_setting['type'], $this->types ) ) {
+							ob_start();
+							do_action( 'woocommerce_admin_field_' . $section_setting['type'], $section_setting);
+							$field_html = ob_get_contents();
+							$section_setting['content'] = trim( $field_html );
+							$section_setting['id'] = $section_setting['type'];
+							$section_setting['type'] = 'custom';
+							ob_end_clean();
+						}
+	
+						$section_settings_data[] = $section_setting;
+					}
+				} 
+				
+				// Otherwise, render the page's output method.
+				$html = str_replace('THIS IS THE PARENT OUTPUT', '', $html);
+				$tags = new WP_HTML_Tag_Processor( $html );
+				while( $tags->next_tag( array( 'tag_name' => 'script' ) ) ) {
+					$script_type = $tags->get_attribute( 'type' );
+					if ( 'text/javascript' === $script_type ) {
+						$script_contents = $tags->get_modifiable_text();
+						$section_settings_data[] = array(
+							'type' => 'script',
+							'content' => $script_contents,
+						);
+						// Remove the script here once its been handled.
+					}
+				}
+				
+				$section_settings_data[] = array(
+					'type' => 'custom',
+					'content' => trim( $html ),
+				);
+
+				$sections_data[ $section_id ] = array(
+					'label'   => html_entity_decode( $section_label ),
+					'settings' => $section_settings_data,
+				);
+
+				$current_section = $saved_current_section;
+			}
+			$pages[ $this->id ] = array(
+				'label'   => html_entity_decode( $this->label ),
+				'sections' => $sections_data,
+				'is_modern' => $this->is_modern,
+			);
 
 			return $pages;
 		}
@@ -221,6 +350,11 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function output() {
 			global $current_section;
+
+			if ( Features::is_enabled( 'settings' ) ) {
+				echo 'THIS IS THE PARENT OUTPUT';
+				return;
+			}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
