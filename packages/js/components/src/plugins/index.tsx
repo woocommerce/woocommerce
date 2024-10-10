@@ -123,13 +123,13 @@ export const Plugins = ( {
 		if ( autoInstall ) {
 			installAndActivate();
 		}
-	}, [ autoInstall, installAndActivate ] );
+	}, [ autoInstall ] );
 
 	if ( hasErrors ) {
 		return (
 			<>
 				<Button
-					isPrimary
+					variant="primary"
 					isBusy={ isRequesting }
 					onClick={ installAndActivate }
 				>
@@ -151,7 +151,11 @@ export const Plugins = ( {
 	if ( ! pluginSlugs.length ) {
 		return (
 			<Fragment>
-				<Button isPrimary isBusy={ isRequesting } onClick={ onSkip }>
+				<Button
+					variant="primary"
+					isBusy={ isRequesting }
+					onClick={ onSkip }
+				>
 					{ __( 'Continue', 'woocommerce' ) }
 				</Button>
 			</Fragment>
@@ -177,19 +181,19 @@ export const Plugins = ( {
 				{ installText }
 			</Button>
 			{ onSkip && (
-				<Button isTertiary onClick={ onSkip }>
+				<Button variant="tertiary" onClick={ onSkip }>
 					{ skipText }
 				</Button>
 			) }
 			{ learnMoreLink && (
 				<a href={ learnMoreLink } target="_blank" rel="noreferrer">
-					<Button isTertiary onClick={ onLearnMore }>
+					<Button variant="tertiary" onClick={ onLearnMore }>
 						{ learnMoreText }
 					</Button>
 				</a>
 			) }
 			{ onAbort && (
-				<Button isTertiary onClick={ onAbort }>
+				<Button variant="tertiary" onClick={ onAbort }>
 					{ abortText }
 				</Button>
 			) }

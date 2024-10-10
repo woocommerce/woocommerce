@@ -34,6 +34,7 @@ import {
 } from './utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
+import { getPluginSlug } from '~/utils';
 
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
@@ -136,7 +137,14 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			return null;
 		}
 
-		const gateway = paymentGateways.get( query.id );
+		// The payment gateways are keyed by the payment gateway suggestion ID, not the plugin ID/slug.
+		// The payment gateway suggestion ID is sometimes the same as the plugin ID/slug, but not always.
+		// Sometimes it features a : separator, e.g. 'woocommerce-payments:bnpl'.
+		// We will discard the part after the : separator when searching for the current gateway.
+		const processedQueryId = getPluginSlug( query.id );
+		const gateway = Array.from( paymentGateways.entries() ).find(
+			( [ key ] ) => getPluginSlug( key ) === processedQueryId
+		)?.[ 1 ];
 
 		if ( ! gateway ) {
 			throw `Current gateway ${ query.id } not found in available gateways list`;
