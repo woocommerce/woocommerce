@@ -238,6 +238,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
+					),
+					array(
 						'expression' => 'editedProduct.type === "grouped"',
 					),
 				),
@@ -264,6 +266,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
+					),
+					array(
 						'expression' => 'editedProduct.type === "grouped"',
 					),
 				),
