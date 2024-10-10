@@ -1,7 +1,8 @@
 /**
  * Internal dependencies
  */
-const { webpackConfig } = require( '@woocommerce/internal-style-build' );
+const { webpackConfig, ForkTsCheckerWebpackPlugin, TypeScriptWarnOnlyWebpackPlugin } = require( '@woocommerce/internal-style-build' );
+const path = require("path");
 
 module.exports = {
 	mode: process.env.NODE_ENV || 'development',
@@ -13,7 +14,21 @@ module.exports = {
 	},
 	module: {
 		parser: webpackConfig.parser,
-		rules: webpackConfig.rules,
+		rules: [
+			...webpackConfig.rules,
+			{
+				test: /\.tsx?$/,
+				loader: 'ts-loader',
+				options: {
+					transpileOnly: true
+				},
+				include: [ path.resolve( __dirname, './src/' ) ],
+			},
+		],
 	},
-	plugins: webpackConfig.plugins,
+	plugins: [
+		...webpackConfig.plugins,
+		new ForkTsCheckerWebpackPlugin(),
+		new TypeScriptWarnOnlyWebpackPlugin(),
+	],
 };

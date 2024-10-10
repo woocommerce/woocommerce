@@ -38,11 +38,12 @@ module.exports = {
 		rules: [
 			...webpackConfig.rules,
 			{
-				test: /.([cm]?ts|tsx)$/,
+				test: /\.tsx?$/,
 				loader: 'ts-loader',
 				options: {
 					transpileOnly: true
-				}
+				},
+				include: [ path.resolve( __dirname, './src/' ) ],
 			},
 		],
 	},
