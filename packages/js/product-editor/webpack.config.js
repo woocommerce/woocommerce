@@ -13,6 +13,8 @@ const {
 	webpackConfig,
 	plugin,
 	StyleAssetPlugin,
+	ForkTsCheckerWebpackPlugin,
+	TypeScriptWarnOnlyWebpackPlugin
 } = require( '@woocommerce/internal-style-build' );
 const {
 	blockEntryPoints,
@@ -33,7 +35,17 @@ module.exports = {
 	},
 	module: {
 		parser: webpackConfig.parser,
-		rules: webpackConfig.rules,
+		rules: [
+			...webpackConfig.rules,
+			{
+				test: /\.tsx?$/,
+				loader: 'ts-loader',
+				options: {
+					transpileOnly: true
+				},
+				include: [ path.resolve( __dirname, './src/' ) ],
+			},
+		],
 	},
 	plugins: [
 		new RemoveEmptyScriptsPlugin(),
@@ -73,5 +85,7 @@ module.exports = {
 			],
 		} ),
 		new StyleAssetPlugin(),
+		new ForkTsCheckerWebpackPlugin(),
+		new TypeScriptWarnOnlyWebpackPlugin(),
 	],
 };

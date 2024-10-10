@@ -373,7 +373,7 @@ export const BusinessInfo = ( {
 										</Button>
 									),
 								}
-							) }
+							) as any }
 						</Notice>
 					) }
 					{ /* woocommerce-profiler-select-control__country-spacer exists purely because the select-control above has an unremovable and unstyleable div and that's preventing margin collapse */ }
@@ -415,7 +415,7 @@ export const BusinessInfo = ( {
 											</span>
 										),
 									}
-								) }
+								) as any }
 							</p>
 							<p>
 								{ __(

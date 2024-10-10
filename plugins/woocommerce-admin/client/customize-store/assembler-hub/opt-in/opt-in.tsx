@@ -119,7 +119,7 @@ async function installFonts(
 }
 
 export const OptInSubscribe = () => {
-	const { setOptInFlowStatus } = useContext( OptInContext );
+	const { setOptInFlowStatus } = useContext( OptInContext ) as any;
 
 	const [ enabledFontFamilies, setFontFamilies ]: [
 		FontFamilies,

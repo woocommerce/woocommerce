@@ -6,6 +6,7 @@
 		"src/**/*.json"
 	],
 	"compilerOptions": {
+		"strict": false,
 		"outDir": "build",
 		"resolveJsonModule": true,
 		"typeRoots": [

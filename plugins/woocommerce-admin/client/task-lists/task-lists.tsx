@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
@@ -13,6 +12,7 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -117,7 +117,7 @@ export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 						id === 'setup' ? SetupTaskList : TaskList;
 
 					return (
-						<Fragment key={ id }>
+						<React.Fragment key={ id }>
 							<TaskListComponent
 								isExpandable={ false }
 								query={ query }
@@ -148,7 +148,7 @@ export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 									</MenuGroup>
 								</DisplayOption>
 							) }
-						</Fragment>
+						</React.Fragment>
 					);
 				} ) }
 		</>

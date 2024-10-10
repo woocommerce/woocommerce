@@ -23,7 +23,7 @@ type WooProductSectionSlotProps = {
 
 const DEFAULT_SECTION_ORDER = 20;
 
-export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
+export const WooProductSectionItem: React.FC< React.PropsWithChildren< WooProductSectionItemProps > > & {
 	Slot: React.FC< Slot.Props & WooProductSectionSlotProps >;
 } = ( { children, tabs } ) => {
 	return (
@@ -33,14 +33,14 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
 				>
-					{ ( fillProps: Fill.Props ) => {
+					{ ( ( fillProps: Fill.Props ) => {
 						return createOrderedChildren<
 							Fill.Props & { tabName: string }
 						>( children, sectionOrder || DEFAULT_SECTION_ORDER, {
 							tabName,
 							...fillProps,
 						} );
-					} }
+					} ) as any }
 				</Fill>
 			) ) }
 		</>

@@ -68,7 +68,7 @@ const ApmNotice = ( { enabledApms }: { enabledApms: Set< Apm > } ) => {
 			className="woopayments-welcome-page__apms-notice"
 		>
 			<Icon icon={ download } />
-			<div>{ strings.apms.installText( extensions ) }</div>
+			<div>{ strings.apms.installText( extensions ) as any }</div>
 		</Notice>
 	);
 };

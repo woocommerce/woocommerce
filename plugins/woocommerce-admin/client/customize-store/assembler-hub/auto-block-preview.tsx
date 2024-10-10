@@ -82,7 +82,7 @@ function ScaledBlockPreview( {
 	const [ contentHeight, setContentHeight ] = useState< number | null >(
 		null
 	);
-	const { setLogoBlockIds, logoBlockIds } = useContext( LogoBlockContext );
+	const { setLogoBlockIds, logoBlockIds } = useContext( LogoBlockContext ) as any;
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
 	) as [ FontFamily[] ];
@@ -90,7 +90,7 @@ function ScaledBlockPreview( {
 		( { slug } ) => slug !== SYSTEM_FONT_SLUG
 	);
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
@@ -112,7 +112,7 @@ function ScaledBlockPreview( {
 	// @ts-expect-error No types for this exist yet.
 	const { getBlockParents } = useSelect( blockEditorStore );
 
-	const { setSelectedBlockRef } = useContext( SelectedBlockContext );
+	const { setSelectedBlockRef } = useContext( SelectedBlockContext ) as any;
 
 	const selectedBlockClientId = useSelect( ( select ) => {
 		const block = select( 'core/block-editor' ).getSelectedBlock();

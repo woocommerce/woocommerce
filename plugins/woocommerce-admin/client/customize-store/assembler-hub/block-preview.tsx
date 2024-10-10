@@ -7,8 +7,9 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -65,4 +66,4 @@ export const BlockPreview = ( {
 	);
 };
 
-export default memo( BlockPreview );
+export default React.memo( BlockPreview );

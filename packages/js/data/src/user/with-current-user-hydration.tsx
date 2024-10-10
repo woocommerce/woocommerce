@@ -3,7 +3,7 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -46,7 +46,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				finishResolution( 'getCurrentUser', [] );
 			}
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withCurrentUserHydration'
 	);

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { createElement, Fragment, useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { find, first, without } from 'lodash';
 import React from 'react';
 import {
@@ -147,7 +147,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 							'woocommerce'
 						) }
 						renderContent={ () => (
-							<Fragment>
+							<React.Fragment>
 								<MenuTitle>
 									{ __( 'Columns:', 'woocommerce' ) }
 								</MenuTitle>
@@ -175,7 +175,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 										);
 									}
 								) }
-							</Fragment>
+							</React.Fragment>
 						) }
 					/>
 				) }
@@ -184,7 +184,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 			{ /* @ts-expect-error: size must be one of small, medium, largel, xSmall, extraSmall. */ }
 			<CardBody size={ null }>
 				{ isLoading ? (
-					<Fragment>
+					<React.Fragment>
 						<span className="screen-reader-text">
 							{ __(
 								'Your requested data is loading',
@@ -198,7 +198,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 							caption={ title }
 							query={ query }
 						/>
-					</Fragment>
+					</React.Fragment>
 				) : (
 					<Table
 						rows={ visibleRows as TableCardProps[ 'rows' ] }
@@ -226,7 +226,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 				{ isLoading ? (
 					<TableSummaryPlaceholder />
 				) : (
-					<Fragment>
+					<React.Fragment>
 						<Pagination
 							key={ parseInt( query.paged as string, 10 ) || 1 }
 							page={ parseInt( query.paged as string, 10 ) || 1 }
@@ -241,7 +241,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 						/>
 
 						{ summary && <TableSummary data={ summary } /> }
-					</Fragment>
+					</React.Fragment>
 				) }
 			</CardFooter>
 		</Card>

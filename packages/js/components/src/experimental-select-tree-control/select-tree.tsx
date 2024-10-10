@@ -45,6 +45,7 @@ interface SelectTreeProps extends TreeControlProps {
 	disabled?: boolean;
 	label: string | JSX.Element;
 	help?: string | JSX.Element;
+	placeholder?: string;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
 	isClearingAllowed?: boolean;

@@ -9,7 +9,6 @@ import {
 	useEffect,
 	useState,
 	lazy,
-	Suspense,
 } from '@wordpress/element';
 import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -40,6 +39,7 @@ import {
 	// @ts-ignore store should be included.
 	useEntityRecord,
 } from '@wordpress/core-data';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -57,14 +57,14 @@ import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-temp
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
 		default: module.PluginArea,
-	} ) )
+	} ) ) as any
 );
 
 const ModalEditor = lazy( () =>
 	import( '../modal-editor' ).then( ( module ) => ( {
 		default: module.ModalEditor,
 	} ) )
-);
+) as any;
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined | null,
@@ -349,7 +349,7 @@ export function BlockEditor( {
 
 	if ( isModalEditorOpen ) {
 		return (
-			<Suspense fallback={ null }>
+			<React.Suspense fallback={ null }>
 				<ModalEditor
 					onClose={
 						dispatch( productEditorUiStore ).closeModalEditor
@@ -361,7 +361,7 @@ export function BlockEditor( {
 							: product.name
 					}
 				/>
-			</Suspense>
+			</React.Suspense>
 		);
 	}
 
@@ -385,10 +385,10 @@ export function BlockEditor( {
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
 					<PostTypeContext.Provider value={ context.postType! }>
-						<Suspense fallback={ null }>
+						<React.Suspense fallback={ null }>
 							{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 							<PluginArea scope="woocommerce-product-block-editor" />
-						</Suspense>
+						</React.Suspense>
 					</PostTypeContext.Provider>
 				</BlockEditorProvider>
 			</BlockContextProvider>

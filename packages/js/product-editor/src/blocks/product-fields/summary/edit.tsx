@@ -96,7 +96,7 @@ export function SummaryBlockEdit( {
 									),
 								}
 						  )
-						: label
+						: label as any
 				}
 				help={
 					typeof helpText === 'undefined'

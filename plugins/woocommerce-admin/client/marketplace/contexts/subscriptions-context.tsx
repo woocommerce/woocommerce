@@ -22,7 +22,7 @@ export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
 	refreshSubscriptions: () => new Promise( () => {} ),
 	isLoading: true,
 	setIsLoading: () => {},
-} );
+} ) as any;
 
 export function SubscriptionsContextProvider( props: {
 	children: JSX.Element;

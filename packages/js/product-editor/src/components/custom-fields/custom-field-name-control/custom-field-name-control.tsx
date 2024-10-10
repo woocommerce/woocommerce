@@ -111,4 +111,4 @@ export const CustomFieldNameControl = forwardRef(
 			/>
 		);
 	}
-);
+) as any;

@@ -52,7 +52,7 @@ const LABELS = {
 };
 
 export default function Products( props: ProductsProps ) {
-	const marketplaceContextValue = useContext( MarketplaceContext );
+	const marketplaceContextValue = useContext( MarketplaceContext ) as any;
 	const { isLoading } = marketplaceContextValue;
 	const label = LABELS[ props.type ].label;
 	const query = useQuery();
@@ -204,7 +204,7 @@ export default function Products( props: ProductsProps ) {
 								/>
 							),
 						}
-					) }
+					) as any }
 				</div>
 			) }
 			{ showAllButton && (

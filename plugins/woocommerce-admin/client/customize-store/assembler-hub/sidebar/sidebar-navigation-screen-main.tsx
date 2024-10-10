@@ -41,9 +41,9 @@ import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-comp
 export const SidebarNavigationScreenMain = () => {
 	const {
 		context: { flowType },
-	} = useContext( CustomizeStoreContext );
+	} = useContext( CustomizeStoreContext ) as any;
 	const aiOnline = flowType === FlowType.AIOnline;
-	const { navigate } = useContext( SidebarNavigationContext );
+	const { navigate } = useContext( SidebarNavigationContext ) as any;
 
 	return (
 		<SidebarNavigationScreen

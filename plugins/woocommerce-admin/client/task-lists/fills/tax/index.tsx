@@ -33,7 +33,7 @@ import { ManualConfiguration } from './manual-configuration';
 import { Partners } from './components/partners';
 import { WooCommerceTax } from './woocommerce-tax';
 
-const TaskCard: React.FC = ( { children } ) => {
+const TaskCard: React.FC< React.PropsWithChildren > = ( { children } ) => {
 	return (
 		<Card className="woocommerce-task-card">
 			<CardBody>{ children }</CardBody>
@@ -239,7 +239,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		return (
 			<TaskCard>
 				{ currentPartner.component &&
-					createElement( currentPartner.component, childProps ) }
+					createElement( currentPartner.component as any, childProps ) }
 			</TaskCard>
 		);
 	}
@@ -248,11 +248,11 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			{ partners.map(
 				( partner ) =>
 					partner.card &&
-					createElement( partner.card, {
+					createElement( partner.card as any, {
 						key: partner.id,
 						...childProps,
 					} )
-			) }
+			) as any }
 		</Partners>
 	);
 };
@@ -262,9 +262,9 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="tax">
-			{ ( { onComplete, query, task }: TaxProps ) => (
+			{ ( ( { onComplete, query, task }: TaxProps ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />
-			) }
+			) ) as any }
 		</WooOnboardingTask>
 	),
 } );

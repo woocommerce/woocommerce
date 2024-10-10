@@ -156,7 +156,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 			) || [];
 		let hiddenChildren = allChildren;
 		if ( show > 0 ) {
-			shownChildren = allChildren.slice( 0, show );
+			shownChildren = allChildren.slice( 0, show ) as any;
 			hiddenChildren = allChildren.slice( show );
 		}
 		if ( hiddenChildren.length > 0 ) {
@@ -165,9 +165,9 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 			setFooterLabels( { expand: expandLabel, collapse: collapseLabel } );
 		}
 		setDisplayedChildren( {
-			all: allChildren,
+			all: allChildren as any,
 			shown: shownChildren,
-			hidden: hiddenChildren,
+			hidden: hiddenChildren as any,
 		} );
 	};
 
@@ -192,7 +192,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 				shown: getUpdatedShownChildren(
 					displayedChildren.all,
 					displayedChildren.shown,
-					allChildren
+					allChildren as any
 				),
 			} );
 			// Update the hidden children after the remove/add transition is done, making the transition less busy.
@@ -262,7 +262,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 					mountOnEnter={ true }
 					unmountOnExit={ false }
 				>
-					{ (
+					{ ( (
 						state: 'entering' | 'entered' | 'exiting' | 'exited'
 					) => {
 						const transitionStyles = getTransitionStyle(
@@ -300,7 +300,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 													exit={ exit }
 													classNames="woocommerce-list__item"
 												>
-													{ cloneElement( child, {
+													{ cloneElement( child as any, {
 														animation:
 															animationProp,
 														...remainingProps,
@@ -312,7 +312,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 								</TransitionGroup>
 							</div>
 						);
-					} }
+					} ) as any }
 				</Transition>,
 				direction === 'up' && hiddenChildren,
 			] }

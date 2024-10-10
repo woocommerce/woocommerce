@@ -44,9 +44,9 @@ export const WooCYSSecondaryButton: React.FC< {
 				EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME
 			}
 		>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
-			} }
+			} ) as any }
 		</Fill>
 	);
 };

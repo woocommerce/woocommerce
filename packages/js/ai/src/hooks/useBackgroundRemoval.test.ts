@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { renderHook, act } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 
 /**

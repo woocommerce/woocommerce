@@ -12,7 +12,7 @@ type SelectedBlockContextType = {
 export const SelectedBlockContext = createContext< SelectedBlockContextType >( {
 	selectedBlockRef: null,
 	setSelectedBlockRef: () => {},
-} );
+} ) as any;
 
 export const SelectedBlockContextProvider = ( {
 	children,

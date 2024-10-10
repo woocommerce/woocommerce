@@ -31,7 +31,7 @@ export const SidebarNavigationScreenTypography = ( {
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
@@ -127,7 +127,7 @@ export const SidebarNavigationScreenTypography = ( {
 											variant="link"
 										/>
 									),
-								} ) }
+								} ) as any }
 							</p>
 							{ isModalOpen && (
 								<Modal

@@ -48,7 +48,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 		message: string;
 		status: Status;
 	} >();
-	const { addInstalledProduct } = useContext( MarketplaceContext );
+	const { addInstalledProduct } = useContext( MarketplaceContext ) as any;
 
 	const query = useQuery();
 

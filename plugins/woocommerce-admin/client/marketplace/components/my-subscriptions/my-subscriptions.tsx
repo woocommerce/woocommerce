@@ -24,7 +24,7 @@ import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
 
 export default function MySubscriptions(): JSX.Element {
-	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
+	const { subscriptions, isLoading } = useContext( SubscriptionsContext ) as any;
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	const installedTableDescription = createInterpolateElement(
@@ -94,7 +94,7 @@ export default function MySubscriptions(): JSX.Element {
 							{ __( 'Installed on this store', 'woocommerce' ) }
 						</h2>
 						<p className="woocommerce-marketplace__my-subscriptions__table-description">
-							{ installedTableDescription }
+							{ installedTableDescription as any }
 						</p>
 					</div>
 					<div className="woocommerce-marketplace__my-subscriptions__header-refresh">

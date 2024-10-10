@@ -5,11 +5,10 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import {
 	createElement,
-	Fragment,
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import { SyntheticEvent, useCallback } from 'react';
+import { SyntheticEvent, useCallback, Fragment } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import type {

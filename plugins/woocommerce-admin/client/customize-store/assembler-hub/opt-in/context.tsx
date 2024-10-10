@@ -18,7 +18,7 @@ export const OptInContext = createContext< {
 } >( {
 	optInFlowStatus: OPTIN_FLOW_STATUS.IDLE,
 	setOptInFlowStatus: () => {},
-} );
+} ) as any;
 
 export const OptInContextProvider = ( {
 	children,

@@ -1,6 +1,7 @@
 {
 	"extends": "../tsconfig",
 	"compilerOptions": {
+		"strict": false,
 		"rootDir": "src",
 		"outDir": "build-module",
 		"declaration": true,

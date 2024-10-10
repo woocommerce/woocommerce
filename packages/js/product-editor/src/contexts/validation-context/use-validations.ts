@@ -14,7 +14,7 @@ function isInvalid( errors: ValidationErrors ) {
 }
 
 export function useValidations< T = unknown >() {
-	const context = useContext( ValidationContext );
+	const context = useContext( ValidationContext ) as any;
 	const [ isValidating, setIsValidating ] = useState( false );
 
 	async function focusByValidatorId( validatorId: string ) {
@@ -47,7 +47,7 @@ export function useValidations< T = unknown >() {
 			return new Promise< void >( ( resolve, reject ) => {
 				context
 					.validateAll( newData )
-					.then( ( errors ) => {
+					.then( ( errors: any ) => {
 						if ( isInvalid( errors ) ) {
 							reject( errors );
 						} else {

@@ -77,9 +77,9 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 const PurchaseTaskItemFill = () => {
 	return (
 		<WooOnboardingTaskListItem id="purchase">
-			{ ( { defaultTaskItem }: PurchaseTaskItemProps ) => (
+			{ ( ( { defaultTaskItem }: PurchaseTaskItemProps ) => (
 				<PurchaseTaskItem defaultTaskItem={ defaultTaskItem } />
-			) }
+			) ) as any }
 		</WooOnboardingTaskListItem>
 	);
 };

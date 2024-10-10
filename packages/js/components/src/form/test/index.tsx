@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextControl } from '@wordpress/components';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ const TestInputWithContext = () => {
 	const fieldValue = formProps.values.foo;
 
 	return (
-		<Fragment>
+		<React.Fragment>
 			<span>foo: { fieldValue }</span>
 			<button
 				onClick={ () => {
@@ -27,7 +28,7 @@ const TestInputWithContext = () => {
 			>
 				Submit
 			</button>
-		</Fragment>
+		</React.Fragment>
 	);
 };
 
@@ -42,11 +43,11 @@ describe( 'Form', () => {
 				onSubmit={ onSubmit }
 				validate={ () => ( {} ) }
 			>
-				{ ( {
+				{ ( ( {
 					handleSubmit,
 				}: FormContextType< Record< string, string > > ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -71,7 +72,7 @@ describe( 'Form', () => {
 				onChange={ mockOnChange }
 				validate={ () => ( {} ) }
 			>
-				{ ( { setValue }: FormContextType< Record< string, string > > ) => {
+				{ ( ( { setValue }: FormContextType< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -81,7 +82,7 @@ describe( 'Form', () => {
 							Change
 						</button>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -101,11 +102,11 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onSubmit={ mockOnSubmit } validate={ () => ( {} ) }>
-				{ ( {
+				{ ( ( {
 					handleSubmit,
 				}: FormContextType< Record< string, string > > ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -124,7 +125,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
-				{ ( { setValue }: FormContextType< Record< string, string > > ) => {
+				{ ( ( { setValue }: FormContextType< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -134,7 +135,7 @@ describe( 'Form', () => {
 							Submit
 						</button>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -153,7 +154,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
-				{ ( {
+				{ ( ( {
 					setValue,
 					getInputProps,
 				}: FormContextType< Record< string, string > > ) => {
@@ -163,7 +164,7 @@ describe( 'Form', () => {
 							{ ...getInputProps( 'firstName' ) }
 						/>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -203,7 +204,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
-				{ ( {
+				{ ( ( {
 					setValue,
 					getInputProps,
 				}: FormContextType< Record< string, string > > ) => {
@@ -213,7 +214,7 @@ describe( 'Form', () => {
 							{ ...getInputProps( 'firstName' ) }
 						/>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -240,7 +241,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
-				{ ( {
+				{ ( ( {
 					setValue,
 					getInputProps,
 				}: FormContextType< Record< string, string > > ) => {
@@ -250,7 +251,7 @@ describe( 'Form', () => {
 							{ ...getInputProps( 'firstName' ) }
 						/>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -290,7 +291,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form< TestData > onChanges={ mockOnChanges } validate={ validate }>
-				{ ( {
+				{ ( ( {
 					setValue,
 					getInputProps,
 				}: FormContextType< Record< string, string > > ) => {
@@ -300,7 +301,7 @@ describe( 'Form', () => {
 							{ ...getInputProps( 'firstName' ) }
 						/>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -327,7 +328,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
-				{ ( {
+				{ ( ( {
 					setValues,
 				}: FormContextType< Record< string, string > > ) => {
 					return (
@@ -339,7 +340,7 @@ describe( 'Form', () => {
 							Submit
 						</button>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -377,7 +378,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChanges={ mockOnChanges } validate={ validate }>
-				{ ( {
+				{ ( ( {
 					setValues,
 				}: FormContextType< Record< string, string > > ) => {
 					return (
@@ -389,7 +390,7 @@ describe( 'Form', () => {
 							Submit
 						</button>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 
@@ -428,7 +429,7 @@ describe( 'Form', () => {
 
 		const { container, queryByText } = render(
 			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
-				{ ( { getInputProps, values }: FormContextType< TestData > ) => {
+				{ ( ( { getInputProps, values }: FormContextType< TestData > ) => {
 					return (
 						<DateTimePickerControl
 							label={ 'Date' }
@@ -437,7 +438,7 @@ describe( 'Form', () => {
 							{ ...getInputProps( 'date' ) }
 						/>
 					);
-				} }
+				} ) as any }
 			</Form>
 		);
 

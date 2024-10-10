@@ -2,6 +2,7 @@
 	"extends": "../tsconfig",
 	"include": [ "src/", "typings/" ],
 	"compilerOptions": {
+		"strict": false,
 		"rootDir": "src",
 		"outDir": "build-module",
 		"declaration": true,

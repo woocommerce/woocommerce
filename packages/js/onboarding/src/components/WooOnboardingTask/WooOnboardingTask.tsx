@@ -53,7 +53,7 @@ type WooOnboardingTaskSlotProps = Slot.Props & {
  * @param {Object} props.children  React component children
  * @param {string} props.id        Task id.
  */
-const WooOnboardingTask: React.FC< WooOnboardingTaskProps > & {
+const WooOnboardingTask: React.FC< React.PropsWithChildren< WooOnboardingTaskProps> > & {
 	Slot: React.VFC< WooOnboardingTaskSlotProps >;
 } = ( { id, ...props } ) => {
 	return <Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />;

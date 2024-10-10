@@ -100,7 +100,7 @@ export const Label: React.FC< LabelProps > = ( {
 		<div className="woocommerce-product-form-label__label">
 			{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
 			<span id={ labelId } onClick={ onClick } { ...spanAdditionalProps }>
-				{ isValidElement( labelElement ) ? labelElement : null }
+				{ isValidElement( labelElement ) ? labelElement : null as any }
 			</span>
 
 			{ tooltip && (

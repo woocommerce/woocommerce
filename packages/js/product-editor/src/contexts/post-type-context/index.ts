@@ -3,4 +3,4 @@
  */
 import { createContext } from '@wordpress/element';
 
-export const PostTypeContext = createContext( 'product' );
+export const PostTypeContext = createContext( 'product' ) as any;

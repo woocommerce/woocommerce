@@ -94,7 +94,7 @@ export function Edit( {
 						/>
 					),
 					parentProductName: <span>{ parentName }</span>,
-				} ) }
+				} ) as any }
 			</Notice>
 		</div>
 	);

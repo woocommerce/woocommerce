@@ -18,6 +18,7 @@ import {
 	Icon,
 } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -92,12 +93,12 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 
 				{ /* Registered channels section. */ }
 				{ registeredChannels.map( ( el, idx ) => (
-					<Fragment key={ el.slug }>
+					<React.Fragment key={ el.slug }>
 						<RegisteredChannelCardBody registeredChannel={ el } />
 						{ idx !== registeredChannels.length - 1 && (
 							<CardDivider />
 						) }
-					</Fragment>
+					</React.Fragment>
 				) ) }
 
 				{ /* Recommended channels section. */ }
@@ -129,7 +130,7 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 						) }
 						{ expanded &&
 							recommendedChannels.map( ( el, idx ) => (
-								<Fragment key={ el.plugin }>
+								<React.Fragment key={ el.plugin }>
 									<SmartPluginCardBody
 										plugin={ el }
 										onInstalledAndActivated={
@@ -140,11 +141,11 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 										recommendedChannels.length - 1 && (
 										<CardDivider />
 									) }
-								</Fragment>
+								</React.Fragment>
 							) ) }
 					</div>
 				) }
 			</Card>
 		);
 	}
-);
+) as any;

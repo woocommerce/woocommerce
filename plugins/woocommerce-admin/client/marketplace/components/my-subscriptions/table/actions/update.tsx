@@ -30,7 +30,7 @@ interface UpdateProps {
 export default function Update( props: UpdateProps ) {
 	const [ showModal, setShowModal ] = useState( false );
 	const [ isUpdating, setIsUpdating ] = useState( false );
-	const { loadSubscriptions } = useContext( SubscriptionsContext );
+	const { loadSubscriptions } = useContext( SubscriptionsContext ) as any;
 
 	const canUpdate =
 		props.subscription.active &&

@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component, createElement } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import {
 	debounce,
 	escapeRegExp,
@@ -14,7 +14,7 @@ import {
 } from 'lodash';
 import { withFocusOutside, withSpokenMessages } from '@wordpress/components';
 import { withInstanceId, compose } from '@wordpress/compose';
-import { ChangeEvent, InputHTMLAttributes } from 'react';
+import React, { ChangeEvent, InputHTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
@@ -177,7 +177,7 @@ const initialState: State = {
  * A search box which filters options while typing,
  * allowing a user to select from an option from a filtered list.
  */
-export class SelectControl extends Component< Props, State > {
+export class SelectControl extends React.Component< Props, State > {
 	static defaultProps: Partial< Props > = {
 		excludeSelectedOptions: true,
 		getSearchExpression: identity,

@@ -19,7 +19,7 @@ export const createOrderedChildren = (
 	props: Fill.Props
 ) => {
 	if ( typeof children === 'function' ) {
-		return cloneElement( children( props ), { order } );
+		return cloneElement( ( children as ( props: any ) => any )( props ), { order } );
 	} else if ( isValidElement( children ) ) {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore

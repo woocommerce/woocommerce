@@ -18,7 +18,7 @@ function ProductCardFooter( props: { product: Product } ) {
 	const { product } = props;
 	const { user, currentUserCan } = useUser();
 	const { selectedTab, isProductInstalled } =
-		useContext( MarketplaceContext );
+		useContext( MarketplaceContext ) as any;
 
 	function openInstallModal() {
 		recordEvent( 'marketplace_add_to_store_clicked', {

@@ -75,7 +75,7 @@ export const SidebarNavigationScreenFooter = ( {
 	);
 
 	const { setHighlightedBlockClientId, resetHighlightedBlockClientId } =
-		useContext( HighlightedBlockContext );
+		useContext( HighlightedBlockContext ) as any;
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
@@ -117,7 +117,7 @@ export const SidebarNavigationScreenFooter = ( {
 	}, [ blocks, footerPatterns ] );
 
 	const onClickFooterPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: any, selectedBlocks: any ) => {
 			setSelectedPattern( pattern );
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},
@@ -127,7 +127,7 @@ export const SidebarNavigationScreenFooter = ( {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 	const aiOnline = context.flowType === FlowType.AIOnline;
 
 	const title = aiOnline

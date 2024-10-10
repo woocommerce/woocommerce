@@ -16,7 +16,7 @@ import Content from './components/content/content';
 import Footer from './components/footer/footer';
 
 function MarketplaceComponents() {
-	const { selectedTab } = useContext( MarketplaceContext );
+	const { selectedTab } = useContext( MarketplaceContext ) as any;
 
 	const classNames =
 		'woocommerce-marketplace' +

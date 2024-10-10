@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { RefObject } from 'react';
+import React, { RefObject } from 'react';
 import classnames from 'classnames';
-import { createElement, Component, createRef } from '@wordpress/element';
-import { isEqual, isNumber } from 'lodash';
+import { createElement, createRef } from '@wordpress/element';
 import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT, TAB } from '@wordpress/keycodes';
+import { isEqual, isNumber } from 'lodash';
 
 /**
  * Internal dependencies
@@ -63,7 +63,7 @@ type Props = {
 /**
  * A list box that displays filtered options after search.
  */
-class List extends Component< Props > {
+class List extends React.Component< Props > {
 	optionRefs: { [ key: number ]: RefObject< HTMLButtonElement > };
 	listbox: RefObject< HTMLDivElement >;
 

@@ -74,7 +74,7 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 			onSubmit={ onSubmit }
 			validate={ validate }
 		>
-			{ ( {
+			{ ( ( {
 				getInputProps,
 				handleSubmit,
 			}: {
@@ -118,7 +118,7 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 						</Button>
 					</div>
 				);
-			} }
+			} ) as any }
 		</Form>
 	);
 };

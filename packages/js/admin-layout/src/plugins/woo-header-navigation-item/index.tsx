@@ -39,9 +39,9 @@ export const WooHeaderNavigationItem: React.FC< {
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_HEADER_NAVIGATION_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
-			} }
+			} ) as any }
 		</Fill>
 	);
 };

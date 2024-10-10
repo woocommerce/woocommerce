@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { decodeEntities } from '@wordpress/html-entities';
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { Country } from '@woocommerce/data';
+import React from 'react';
+
 /**
  * Internal dependencies
  */
@@ -64,7 +66,7 @@ const completer: AutoCompleter = {
 		const match = computeSuggestionMatch( name, query );
 
 		return (
-			<Fragment>
+			<React.Fragment>
 				{ /* @ts-expect-error TODO: migrate Flag component to TS. */ }
 				<Flag
 					key="thumbnail"
@@ -80,18 +82,18 @@ const completer: AutoCompleter = {
 					aria-label={ name }
 				>
 					{ query ? (
-						<Fragment>
+						<React.Fragment>
 							{ match?.suggestionBeforeMatch }
 							<strong className="components-form-token-field__suggestion-match">
 								{ match?.suggestionMatch }
 							</strong>
 							{ match?.suggestionAfterMatch }
-						</Fragment>
+						</React.Fragment>
 					) : (
 						name
 					) }
 				</span>
-			</Fragment>
+			</React.Fragment>
 		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods

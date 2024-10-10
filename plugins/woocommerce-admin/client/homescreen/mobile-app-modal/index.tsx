@@ -161,7 +161,7 @@ export const MobileAppHelpMenuEntryLoader = () => {
 	const { state } = useJetpackPluginState();
 
 	const filterHelpMenuEntries = useCallback(
-		( helpMenuEntries ) => {
+		( helpMenuEntries: any ) => {
 			if (
 				state === JetpackPluginStates.INITIALIZING ||
 				state === JetpackPluginStates.USER_CANNOT_INSTALL ||

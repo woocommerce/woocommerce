@@ -32,7 +32,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 						{
 							br: lineBreak,
 						}
-					),
+					) as any,
 				},
 			},
 		},
@@ -73,7 +73,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 						{
 							br: lineBreak,
 						}
-					),
+					) as any,
 				},
 			},
 		},
@@ -96,7 +96,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 						{
 							br: lineBreak,
 						}
-					),
+					) as any,
 				},
 			},
 		},
@@ -147,7 +147,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 							),
 							br: lineBreak,
 						}
-					),
+					) as any,
 				},
 			},
 		},

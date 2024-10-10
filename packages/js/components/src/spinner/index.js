@@ -1,14 +1,15 @@
 /**
  * External dependencies
  */
-import { createElement, Component } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import React from 'react';
 
 /**
  * Spinner - An indeterminate circular progress indicator.
  */
-class Spinner extends Component {
+class Spinner extends React.Component {
 	render() {
 		const { className } = this.props;
 		const classes = classnames( 'woocommerce-spinner', className );

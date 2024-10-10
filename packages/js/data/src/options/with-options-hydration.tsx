@@ -3,13 +3,15 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch, select as WPSelect } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
 import { Options } from './types';
+
 
 export const useOptionsHydration = ( data: Options ) => {
 	const shouldHydrate = useSelect( ( select: typeof WPSelect ) => {
@@ -48,7 +50,7 @@ export const withOptionsHydration = ( data: Options ) =>
 		( OriginalComponent ) => ( props ) => {
 			useOptionsHydration( data );
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withOptionsHydration'
 	);

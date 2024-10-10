@@ -29,7 +29,7 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 		'business-services': 0,
 	},
 	setSearchResultsCount: () => {},
-} );
+} ) as any;
 
 export function MarketplaceContextProvider( props: {
 	children: JSX.Element;

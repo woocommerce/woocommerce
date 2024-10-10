@@ -26,7 +26,7 @@ export type LogoAttributes = Partial< {
 
 export const useLogoAttributes = () => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
-	const { logoBlockIds } = useContext( LogoBlockContext );
+	const { logoBlockIds } = useContext( LogoBlockContext ) as any;
 	const {
 		attributes,
 		isAttributesLoading,

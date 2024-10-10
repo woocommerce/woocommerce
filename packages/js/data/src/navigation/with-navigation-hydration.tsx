@@ -3,7 +3,8 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -44,7 +45,7 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 				finishResolution( 'getMenuItems', [] );
 			}, [ shouldHydrate ] );
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withNavigationHydration'
 	);

@@ -27,7 +27,7 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
 ) {
 	if ( typeof children === 'function' ) {
 		return {
-			children: children( { ...props, order, ...injectProps } ),
+			children: ( children as ( props: any ) => any )( { ...props, order, ...injectProps } ),
 			props: { order, ...injectProps },
 		};
 	} else if ( isValidElement( children ) ) {
@@ -64,7 +64,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	order: number,
 	props: T,
 	injectProps?: S
-): React.ReactElement {
+): React.ReactNode {
 	const { children: childrenToRender, props: propsToRender } =
 		getChildrenAndProps( children, order, props, injectProps );
 	return cloneElement( childrenToRender, propsToRender );

@@ -19,7 +19,7 @@ export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
-	const marketplaceContextValue = useContext( MarketplaceContext );
+	const marketplaceContextValue = useContext( MarketplaceContext ) as any;
 	const { isLoading, setIsLoading } = marketplaceContextValue;
 
 	function recordTracksEvent( products: ProductGroup[] ) {

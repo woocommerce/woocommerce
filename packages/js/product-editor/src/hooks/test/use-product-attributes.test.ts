@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react';
 import type {
 	ProductProductAttribute,
 	ProductAttributeTerm,

@@ -16,6 +16,7 @@ type WooProductSectionItemProps = {
 	id: string;
 	tabs: ProductFillLocationType[];
 	pluginId: string;
+	children?: React.ReactNode;
 };
 
 type WooProductSectionSlotProps = {
@@ -40,14 +41,14 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
 				>
-					{ ( fillProps: Fill.Props ) => {
+					{ ( ( fillProps: Fill.Props ) => {
 						return createOrderedChildren<
 							Fill.Props & { tabName: string }
 						>( children, sectionOrder || DEFAULT_SECTION_ORDER, {
 							tabName,
 							...fillProps,
 						} );
-					} }
+					} ) as any }
 				</Fill>
 			) ) }
 		</>

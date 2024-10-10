@@ -413,7 +413,7 @@ export const DateTimePickerControl = forwardRef(
 			onBlurRef.current = onBlur;
 		}, [ onBlur ] );
 
-		const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
+		const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen: any ) => {
 			if (
 				! willOpen &&
 				typeof onBlurRef.current === 'function' &&
@@ -534,4 +534,4 @@ export const DateTimePickerControl = forwardRef(
 			/>
 		);
 	}
-);
+) as any;

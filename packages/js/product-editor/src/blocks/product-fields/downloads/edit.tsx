@@ -6,7 +6,6 @@ import { Button, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	createElement,
-	Fragment,
 	createInterpolateElement,
 	useState,
 } from '@wordpress/element';
@@ -24,6 +23,7 @@ import { Product, ProductDownload } from '@woocommerce/data';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -240,10 +240,10 @@ export function DownloadBlockEdit( {
 										),
 										{
 											Types: (
-												<Fragment>
+												<React.Fragment>
 													PNG, JPG, PDF, PPT, DOC,
 													MP3, MP4
-												</Fragment>
+												</React.Fragment>
 											),
 											link: (
 												// eslint-disable-next-line jsx-a11y/anchor-has-content
@@ -257,7 +257,7 @@ export function DownloadBlockEdit( {
 												/>
 											),
 										}
-									) }
+									) as any }
 								</p>
 							</div>
 						) : (

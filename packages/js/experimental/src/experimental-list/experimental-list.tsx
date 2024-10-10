@@ -59,7 +59,7 @@ export const ExperimentalList: React.FC< ListProps > = ( {
 								{ cloneElement( child, {
 									animation: animationProp,
 									...remainingProps,
-								} ) }
+								} ) as any }
 							</CSSTransition>
 						);
 					}

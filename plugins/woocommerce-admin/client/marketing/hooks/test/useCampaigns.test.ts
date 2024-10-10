@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
 import 'whatwg-fetch'; /* eslint-disable-line import/no-unresolved */ /* To make sure Response is available */
 
@@ -155,12 +154,12 @@ describe( 'useCampaigns', () => {
 
 	it( 'should handle pagination according to the page and perPage arguments', async () => {
 		// Initial page
-		const { result, rerender } = renderHook<
-			{ page: number; perPage: number },
-			ReturnType< typeof useCampaigns >
-		>( ( { page, perPage } ) => useCampaigns( page, perPage ), {
-			initialProps: { page: 1, perPage: 5 },
-		} );
+		const { result, rerender } = renderHook(
+			( { page, perPage } ) => useCampaigns( page, perPage ),
+			{
+				initialProps: { page: 1, perPage: 5 },
+			}
+		);
 
 		await waitFor( () => expect( result.current.loading ).toBe( false ) );
 		expect( result.current.meta ).toEqual( { total: 9 } );

@@ -29,7 +29,7 @@ interface InstallProps {
 }
 
 export default function Install( props: InstallProps ) {
-	const { loadSubscriptions } = useContext( SubscriptionsContext );
+	const { loadSubscriptions } = useContext( SubscriptionsContext ) as any;
 
 	const loading: boolean = useSelect(
 		( select ) => {

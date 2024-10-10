@@ -53,9 +53,9 @@ export const WooHeaderItem: React.FC< {
 } = ( { children, order = 1, name = '' } ) => {
 	return (
 		<Fill name={ getSlotFillName( name ) }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
-			} }
+			} ) as any }
 		</Fill>
 	);
 };

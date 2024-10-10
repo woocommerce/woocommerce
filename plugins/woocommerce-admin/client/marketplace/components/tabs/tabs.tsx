@@ -129,7 +129,7 @@ const renderTabs = (
 
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
-	const marketplaceContextValue = useContext( MarketplaceContext );
+	const marketplaceContextValue = useContext( MarketplaceContext ) as any;
 	const { selectedTab, isLoading, setSelectedTab, hasBusinessServices } =
 		marketplaceContextValue;
 	const { searchResultsCount } = marketplaceContextValue;
@@ -201,7 +201,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue, visibleTabs, tabs, query ) }
+			{ renderTabs( marketplaceContextValue as any, visibleTabs, tabs, query ) }
 		</nav>
 	);
 };

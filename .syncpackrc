@@ -81,9 +81,7 @@
 				"babel*",
 				"eslint*",
 				"glob*",
-				"jest*",
 				"postcss*",
-				"react*",
 				"typescript",
 				"webpack*"
 			],
@@ -104,24 +102,6 @@
 		},
 		{
 			"dependencies": [
-				"@types/react"
-			],
-			"pinVersion": "^17.0.71",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@types/react-dom"
-			],
-			"pinVersion": "^17.0.25",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
 				"config"
 			],
 			"packages": [
@@ -132,12 +112,14 @@
 		{
 			"dependencies": [
 				"react",
-				"react-dom"
+				"react-dom",
+				"@types/react-dom",
+				"@types/react",
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^17.0.2"
+			"pinVersion": "18.3.x"
 		},
 		{
 			"dependencies": [
@@ -156,6 +138,15 @@
 				"**"
 			],
 			"pinVersion": "^8.55.0"
+		},
+		{
+			"dependencies": [
+				"fork-ts-checker-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "9.0.x"
 		},
 		{
 			"dependencies": [
@@ -368,9 +359,13 @@
 			"pinVersion": "^16.18.68"
 		},
 		{
+			"label": "Jest-related dependencies: aiming React 18",
 			"dependencies": [
+				"@jest/test-sequencer",
 				"jest",
 				"jest-cli",
+				"jest-circus",
+				"jest-each",
 				"jest-environment-jsdom",
 				"jest-environment-node",
 				"babel-jest"
@@ -378,7 +373,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~27.5.1"
+			"pinVersion": "29.7.x"
 		},
 		{
 			"dependencies": [
@@ -387,7 +382,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~29.1.1"
+			"pinVersion": "29.1.x"
 		},
 		{
 			"dependencies": [
@@ -402,7 +397,6 @@
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@types/node",
-				"@types/react",
 				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"@wordpress/**",
@@ -412,8 +406,6 @@
 				"pnpm",
 				"postcss",
 				"postcss-loader",
-				"react",
-				"react-dom",
 				"typescript"
 			],
 			"packages": [

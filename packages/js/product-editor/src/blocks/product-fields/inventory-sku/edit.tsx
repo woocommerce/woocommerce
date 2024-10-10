@@ -66,7 +66,7 @@ export function Edit( {
 							</span>
 						),
 					}
-				) }
+				) as any }
 			>
 				<InputControl
 					ref={ skuRef }

@@ -3,9 +3,9 @@
  */
 import { __, isRTL } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { createElement, forwardRef, useContext } from '@wordpress/element';
+import { createElement, useContext } from '@wordpress/element';
 import { displayShortcut } from '@wordpress/keycodes';
-import { Ref } from 'react';
+import { Ref, forwardRef } from 'react';
 import { undo as undoIcon, redo as redoIcon } from '@wordpress/icons';
 
 /**
@@ -17,7 +17,7 @@ function EditorHistoryUndo(
 	props: { [ key: string ]: unknown },
 	ref: Ref< HTMLButtonElement >
 ) {
-	const { hasUndo, undo } = useContext( EditorContext );
+	const { hasUndo, undo } = useContext( EditorContext ) as any;
 	return (
 		<Button
 			{ ...props }

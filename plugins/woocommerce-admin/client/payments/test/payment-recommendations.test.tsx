@@ -37,7 +37,7 @@ jest.mock( '@woocommerce/components', () => ( {
 			{ items.map( ( item ) => (
 				<div key={ item.key }>
 					<span>{ item.title }</span>
-					{ item.after }
+					{ item.after as any }
 				</div>
 			) ) }
 		</div>

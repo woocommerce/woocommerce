@@ -33,7 +33,7 @@ export const SortableItem = ( {
 	...props
 }: SortableItemProps ) => {
 	const ref = useRef< HTMLDivElement >( null );
-	const sortableContext = useContext( SortableContext );
+	const sortableContext = useContext( SortableContext as any ) as any;
 
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
 		onDragStart( event );

@@ -27,7 +27,7 @@ import { EditorContext } from '../../context';
 
 export function DocumentOverviewSidebar() {
 	const { setIsDocumentOverviewOpened: setIsListViewOpened } =
-		useContext( EditorContext );
+		useContext( EditorContext ) as any;
 
 	// This hook handles focus when the sidebar first renders.
 	const focusOnMountRef = useFocusOnMount( 'firstElement' );

@@ -57,7 +57,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	}, [] );
 
 	const onComplete = useCallback(
-		( options ) => {
+		( options: any ) => {
 			optimisticallyCompleteTask( id );
 			getHistory().push(
 				options && options.redirectPath

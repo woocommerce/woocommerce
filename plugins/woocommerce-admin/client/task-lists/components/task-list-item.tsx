@@ -36,7 +36,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { layoutString } = useLayoutContext();
+	const { layoutString } = useLayoutContext() as any;
 
 	const {
 		dismissTask,
@@ -161,7 +161,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	};
 
 	const DefaultTaskItem = useCallback(
-		( props ) => {
+		( props: any ) => {
 			const onClickActions = () => {
 				trackClick();
 

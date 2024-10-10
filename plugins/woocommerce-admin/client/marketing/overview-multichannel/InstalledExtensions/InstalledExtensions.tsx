@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -83,7 +83,7 @@ export const InstalledExtensions = () => {
 		<CollapsibleCard header={ __( 'Installed extensions', 'woocommerce' ) }>
 			{ data.map( ( el, idx ) => {
 				return (
-					<Fragment key={ el.slug }>
+					<React.Fragment key={ el.slug }>
 						<PluginCardBody
 							icon={ <ProductIcon product={ el.slug } /> }
 							name={ el.name }
@@ -91,7 +91,7 @@ export const InstalledExtensions = () => {
 							button={ getButton( el ) }
 						/>
 						{ idx !== data.length - 1 && <CardDivider /> }
-					</Fragment>
+					</React.Fragment>
 				);
 			} ) }
 		</CollapsibleCard>

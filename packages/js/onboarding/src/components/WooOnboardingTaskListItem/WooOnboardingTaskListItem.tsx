@@ -16,7 +16,7 @@ type WooOnboardingTaskListItemProps = {
  * @param {Object} props    React props.
  * @param {string} props.id Task id.
  */
-export const WooOnboardingTaskListItem: React.FC< WooOnboardingTaskListItemProps > & {
+export const WooOnboardingTaskListItem: React.FC< React.PropsWithChildren< WooOnboardingTaskListItemProps > > & {
 	Slot: React.VFC< Slot.Props & { id: string } >;
 } = ( { id, ...props } ) => (
 	<Fill name={ 'woocommerce_onboarding_task_list_item_' + id } { ...props } />

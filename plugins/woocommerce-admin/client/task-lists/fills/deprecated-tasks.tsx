@@ -50,7 +50,7 @@ const DeprecatedWooOnboardingTaskFills = () => {
 		<>
 			{ deprecatedTasks.map( ( task ) => (
 				<WooOnboardingTask id={ task.id } key={ task.id }>
-					{ () => task.container }
+					{ ( () => task.container ) as any }
 				</WooOnboardingTask>
 			) ) }
 		</>

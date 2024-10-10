@@ -99,7 +99,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 						{
 							link: <strong>{ newProductLinkLabel }</strong>,
 						}
-					) }
+					) as any }
 				/>
 				<div className="woocommerce-product-link-edit-modal__buttons">
 					<Button isSecondary onClick={ () => onCancel() }>

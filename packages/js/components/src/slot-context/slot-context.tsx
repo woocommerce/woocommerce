@@ -30,9 +30,9 @@ export type SlotContextType = {
 	filterRegisteredFills: ( fillsArrays: FillCollection ) => FillCollection;
 };
 
-const SlotContext = createContext< SlotContextType | undefined >( undefined );
+const SlotContext = createContext< SlotContextType | undefined >( undefined ) as any;
 
-export const SlotContextProvider: React.FC = ( { children } ) => {
+export const SlotContextProvider: React.FC< React.PropsWithChildren > = ( { children } ) => {
 	const [ fills, updateFills ] = useReducer(
 		( data: FillType, updates: FillType ) => ( { ...data, ...updates } ),
 		{}

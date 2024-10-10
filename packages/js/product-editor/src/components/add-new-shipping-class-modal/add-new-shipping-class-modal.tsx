@@ -123,7 +123,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 							</span>
 						),
 					}
-				) }
+				) as any }
 				onBlur={ getSlugSuggestion }
 				ref={ nameRef }
 			/>
@@ -241,14 +241,14 @@ export function AddNewShippingClassModal( {
 				errors={ {} }
 				onSubmit={ handleSubmit }
 			>
-				{ ( childrenProps: {
+				{ ( ( childrenProps: {
 					handleSubmit: () => Promise< ProductShippingClass >;
 				} ) => (
 					<ShippingClassForm
 						onAdd={ childrenProps.handleSubmit }
 						onCancel={ onCancel }
 					/>
-				) }
+				) ) as any }
 			</Form>
 		</Modal>
 	);

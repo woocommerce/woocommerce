@@ -51,7 +51,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} );
 	const prevQueryRef = useRef( query );
 	const visibleTasks = getVisibleTasks( tasks );
-	const { layoutString } = useLayoutContext();
+	const { layoutString } = useLayoutContext() as any;
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed

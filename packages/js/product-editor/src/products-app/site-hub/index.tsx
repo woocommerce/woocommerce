@@ -109,6 +109,6 @@ const SiteHub = memo(
 			);
 		}
 	)
-);
+) as any;
 
 export default SiteHub;

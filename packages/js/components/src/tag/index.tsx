@@ -5,14 +5,13 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	createElement,
 	forwardRef,
-	Fragment,
 	useState,
 } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
-import { Ref } from 'react';
+import React from 'react';
 import { useInstanceId } from '@wordpress/compose';
 
 type Props = {
@@ -42,7 +41,7 @@ const Tag = forwardRef(
 			screenReaderLabel,
 			className,
 		}: Props,
-		removeButtonRef: Ref< HTMLButtonElement >
+		removeButtonRef: React.Ref< HTMLButtonElement >
 	) => {
 		const [ isVisible, setIsVisible ] = useState( false );
 
@@ -60,12 +59,12 @@ const Tag = forwardRef(
 		} );
 		const labelId = `woocommerce-tag__label-${ instanceId }`;
 		const labelTextNode = (
-			<Fragment>
+			<React.Fragment>
 				<span className="screen-reader-text">
 					{ screenReaderLabel }
 				</span>
 				<span aria-hidden="true">{ label }</span>
-			</Fragment>
+			</React.Fragment>
 		);
 
 		return (
@@ -110,6 +109,6 @@ const Tag = forwardRef(
 			</span>
 		);
 	}
-);
+) as any;
 
 export default Tag;

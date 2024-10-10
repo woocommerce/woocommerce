@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: log TS compile errors then build with babel
+
+

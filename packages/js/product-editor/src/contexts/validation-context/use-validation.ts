@@ -15,7 +15,7 @@ export function useValidation< T >(
 	validator: Validator< T >,
 	deps: DependencyList = []
 ) {
-	const context = useContext( ValidationContext );
+	const context = useContext( ValidationContext ) as any;
 	const [ isValidating, setIsValidating ] = useState( false );
 
 	const ref = useMemo(

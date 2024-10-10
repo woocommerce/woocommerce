@@ -42,7 +42,7 @@ export const PreloadFonts = () => {
 		'base'
 	);
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 
 	const allFontChoices = FONT_PAIRINGS.map(
 		( fontPair ) => fontPair?.settings?.typography?.fontFamilies?.theme

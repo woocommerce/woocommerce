@@ -3,8 +3,9 @@
  */
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { getQuery } from '@woocommerce/navigation';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -96,7 +97,7 @@ const completer: AutoCompleter = {
 			query
 		);
 		return (
-			<Fragment>
+			<React.Fragment>
 				<ProductImage
 					key="thumbnail"
 					className="woocommerce-search__result-thumbnail"
@@ -116,7 +117,7 @@ const completer: AutoCompleter = {
 					</strong>
 					{ match?.suggestionAfterMatch }
 				</span>
-			</Fragment>
+			</React.Fragment>
 		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods

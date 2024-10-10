@@ -3,7 +3,8 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -68,7 +69,7 @@ export const withOnboardingHydration = ( data: {
 				hasFinishedResolutionGroup,
 			] );
 
-			return <OriginalComponent { ...props } />;
+			return React.createElement( OriginalComponent, props );
 		},
 		'withOnboardingHydration'
 	);

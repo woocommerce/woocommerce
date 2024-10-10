@@ -84,7 +84,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 											isTransparent={ false }
 										/>
 										<SidebarContent routeKey={ routeKey }>
-											{ areas.sidebar }
+											{ areas.sidebar as any }
 										</SidebarContent>
 									</motion.div>
 								</AnimatePresence>
@@ -100,7 +100,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 								maxWidth: widths?.content,
 							} }
 						>
-							{ areas.content }
+							{ areas.content as any }
 						</div>
 					) }
 
@@ -111,7 +111,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 								maxWidth: widths?.edit,
 							} }
 						>
-							{ areas.edit }
+							{ areas.edit as any }
 						</div>
 					) }
 				</div>

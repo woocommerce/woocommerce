@@ -68,7 +68,7 @@ export const SidebarNavigationScreenHomepage = ( {
 	);
 
 	const onClickPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: any, selectedBlocks: any ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}
@@ -204,7 +204,7 @@ export const SidebarNavigationScreenHomepage = ( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns, isLoading, isEditorLoading ] );
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 	const aiOnline = context.flowType === FlowType.AIOnline;
 
 	const title = aiOnline

@@ -11,12 +11,12 @@ import {
 import {
 	createElement,
 	createInterpolateElement,
-	Fragment,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { Pill } from '@woocommerce/components';
 import { useCustomerEffortScoreModal } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -79,7 +79,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 					} ) => void,
 					errors: Record< string, string > | undefined
 				) => (
-					<Fragment>
+					<React.Fragment>
 						<BaseControl
 							id={ 'feedback_additional_thoughts' }
 							className="woocommerce-product-feedback__additional-thoughts"
@@ -98,7 +98,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 										</span>
 									),
 								}
-							) }
+							) as any }
 						>
 							<TextareaControl
 								value={ values.additional_thoughts || '' }
@@ -129,7 +129,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 										</span>
 									),
 								}
-							) }
+							) as any }
 						>
 							<TextControl
 								value={ values.email || '' }
@@ -145,7 +145,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 								) }
 							</span>
 						</BaseControl>
-					</Fragment>
+					</React.Fragment>
 				),
 				validateExtraFields: ( {
 					email = '',
@@ -196,7 +196,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 	};
 
 	return (
-		<>
+		<React.Fragment>
 			{ shouldShowFeedbackBar && (
 				<div className="woocommerce-product-mvp-ces-footer">
 					<Pill>Beta</Pill>
@@ -223,7 +223,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 									/>
 								),
 							}
-						) }
+						) as any }
 					</div>
 					<Button
 						className="woocommerce-product-mvp-ces-footer__close-button"
@@ -233,6 +233,6 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 					></Button>
 				</div>
 			) }
-		</>
+		</React.Fragment>
 	);
 }

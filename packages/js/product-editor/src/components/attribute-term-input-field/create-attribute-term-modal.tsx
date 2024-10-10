@@ -112,7 +112,7 @@ export const CreateAttributeTermModal: React.FC<
 				errors={ {} }
 				onSubmit={ onAdd }
 			>
-				{ ( {
+				{ ( ( {
 					getInputProps,
 					handleSubmit,
 					isValidForm,
@@ -168,7 +168,7 @@ export const CreateAttributeTermModal: React.FC<
 							</div>
 						</>
 					);
-				} }
+				} ) as any }
 			</Form>
 		</Modal>
 	);

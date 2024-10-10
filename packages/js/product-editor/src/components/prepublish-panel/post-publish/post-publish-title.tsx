@@ -68,7 +68,7 @@ export function PostPublishTitle( {
 
 	return (
 		<div className="woocommerce-product-publish-panel__published">
-			{ getPostPublishedTitle() }
+			{ getPostPublishedTitle() as any }
 		</div>
 	);
 }

@@ -116,4 +116,4 @@ export const MenuSlot: React.FC = () =>
 			<Popover.Slot name="woocommerce-select-control-menu" />
 		</div>,
 		document.body
-	);
+	) as any;

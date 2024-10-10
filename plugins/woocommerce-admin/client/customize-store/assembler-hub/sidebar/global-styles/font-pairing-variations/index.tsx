@@ -66,7 +66,7 @@ export const FontPairing = () => {
 		}
 	];
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext ) as any;
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 	const trackingAllowed = useSelect(
@@ -76,7 +76,7 @@ export const FontPairing = () => {
 			) === 'yes'
 	);
 
-	const { optInFlowStatus } = useContext( OptInContext );
+	const { optInFlowStatus } = useContext( OptInContext ) as any;
 
 	const fontPairings = useMemo( () => {
 		if ( isAIFlow( context.flowType ) ) {

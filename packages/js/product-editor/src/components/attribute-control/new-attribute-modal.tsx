@@ -216,7 +216,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					attributes: [ defaultSearch ? initialAttribute : null ],
 				} }
 			>
-				{ ( {
+				{ (( {
 					values,
 					setValue,
 				}: {
@@ -489,7 +489,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							</div>
 						</Modal>
 					);
-				} }
+				} ) as any }
 			</Form>
 			{ /* Add slot so select control menu renders correctly within Modal */ }
 			<SelectControlMenuSlot />

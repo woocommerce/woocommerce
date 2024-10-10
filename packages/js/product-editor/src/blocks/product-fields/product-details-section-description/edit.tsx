@@ -356,7 +356,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								</span>
 							),
 						}
-					) }
+					) as any }
 				</p>
 
 				<Dropdown

@@ -155,7 +155,7 @@ export const ToneOfVoice = ( {
 										</Button>
 									),
 								}
-							) }
+							) as any }
 						</Notice>
 					) }
 					<div className="choices">

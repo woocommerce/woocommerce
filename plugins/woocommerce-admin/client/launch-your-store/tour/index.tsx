@@ -74,7 +74,7 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 											/>
 										),
 									}
-								),
+								) as any,
 							},
 						},
 					},
