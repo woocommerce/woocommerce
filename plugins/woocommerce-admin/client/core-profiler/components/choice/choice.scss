@@ -64,6 +64,18 @@
 	}
 }
 
+body.rtl .woocommerce-profiler-choice {
+	input + label::before {
+		margin-left: $gap;
+		margin-right: 0;
+	}
+
+	input[data-selected] + label::after {
+		left: auto;
+		right: 4px;
+	}
+}
+
 .woocommerce-profiler-choice-sub-options {
 	margin-top: $gap-large;
 	width: 100%;
