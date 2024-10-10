@@ -1,17 +1,16 @@
 const { request } = require( '@playwright/test' );
 
-import { admin } from './test-data/data';
 import { encodeCredentials } from './plugin-utils';
 
 export const DEFAULT_THEME = 'twentytwentythree';
 
-export const activateTheme = async ( baseURL, theme ) => {
+export const activateTheme = async ( baseURL, theme, adminCredentials = {} ) => {
 	const requestContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				admin.username,
-				admin.password
+				adminCredentials.username,
+				adminCredentials.password
 			) }`,
 			cookie: '',
 		},

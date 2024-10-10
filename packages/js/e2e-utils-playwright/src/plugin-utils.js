@@ -17,55 +17,6 @@ export const encodeCredentials = ( username, password ) => {
 };
 
 /**
- * Deactivate and delete a plugin specified by the given `slug` using the WordPress API.
- *
- * @param {object} params
- * @param {APIRequest} params.request
- * @param {string} params.baseURL
- * @param {string} params.slug
- * @param {string} params.username
- * @param {string} params.password
- */
-export const deletePlugin = async ( {
-	request,
-	baseURL,
-	slug,
-	username,
-	password,
-} ) => {
-	// Check if plugin is installed by getting the list of installed plugins, and then finding the one whose `textdomain` property equals `slug`.
-	const apiContext = await request.newContext( {
-		baseURL,
-		extraHTTPHeaders: {
-			Authorization: `Basic ${ encodeCredentials( username, password ) }`,
-			cookie: '',
-		},
-	} );
-	const listPluginsResponse = await apiContext.get(
-		`/wp-json/wp/v2/plugins`,
-		{
-			failOnStatusCode: true,
-		}
-	);
-	const pluginsList = await listPluginsResponse.json();
-	const pluginToDelete = pluginsList.find(
-		( { textdomain } ) => textdomain === slug
-	);
-
-	// If installed, get its `plugin` value and use it to deactivate and delete it.
-	if ( pluginToDelete ) {
-		const { plugin } = pluginToDelete;
-		const requestURL = `/wp-json/wp/v2/plugins/${ plugin }`;
-
-		await apiContext.put( requestURL, {
-			data: { status: 'inactive' },
-		} );
-
-		await apiContext.delete( requestURL );
-	}
-};
-
-/**
  * Download the zip file from a remote location.
  *
  * @param {object} param
@@ -225,36 +176,4 @@ export const getLatestReleaseZipUrl = async ( {
 		const tagName = release.tag_name;
 		return `https://github.com/${ repository }/archive/${ tagName }.zip`;
 	}
-};
-
-/**
- * Install a plugin using WP CLI within a WP ENV environment.
- * This is a workaround to the "The uploaded file exceeds the upload_max_filesize directive in php.ini" error encountered when uploading a plugin to the local WP Env E2E environment through the UI.
- *
- * @see https://github.com/WordPress/gutenberg/issues/29430
- *
- * @param {string} pluginPath
- */
-export const installPluginThruWpCli = async ( pluginPath ) => {
-	const runWpCliCommand = async ( command ) => {
-		const { stdout, stderr } = await execAsync(
-			`pnpm exec wp-env run tests-cli -- ${ command }`
-		);
-
-		console.log( stdout );
-		console.error( stderr );
-	};
-
-	const wpEnvPluginPath = pluginPath.replace(
-		/.*\/plugins\/woocommerce/,
-		'wp-content/plugins/woocommerce'
-	);
-
-	await runWpCliCommand( `ls  ${ wpEnvPluginPath }` );
-
-	await runWpCliCommand(
-		`wp plugin install --activate --force ${ wpEnvPluginPath }`
-	);
-
-	await runWpCliCommand( `wp plugin list` );
 };

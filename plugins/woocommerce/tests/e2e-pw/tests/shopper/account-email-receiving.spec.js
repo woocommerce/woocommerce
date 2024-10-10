@@ -1,5 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-import { admin, customer } from '@woocommerce/e2e-utils-playwright';
+const { admin, customer } = require( '../../test-data/data' );
 
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentHtml = '#wp-mail-logging-modal-format-html';

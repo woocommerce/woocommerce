@@ -2,20 +2,20 @@
  * Internal dependencies
  */
 import { encodeCredentials } from './plugin-utils';
-import { admin } from './test-data/data';
 
 export const setOption = async (
 	request,
 	baseURL,
 	optionName,
-	optionValue
+	optionValue,
+	adminCredentials = {},
 ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				admin.username,
-				admin.password
+				adminCredentials.username,
+				adminCredentials.password
 			) }`,
 			cookie: '',
 		},
