@@ -41,7 +41,7 @@ type Context = {
 	queryId: string;
 };
 
-interface Props extends BlockEditProps< BlockAttributes > {
+export interface Props extends BlockEditProps< BlockAttributes > {
 	context: Context;
 }
 

@@ -1,21 +1,14 @@
 /**
  * External dependencies
  */
-import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
-import edit from './edit';
 import './style.scss';
+import { ProductReviewsBlockSettings } from './settings';
 
-registerBlockSingleProductTemplate( {
-	blockName: metadata.name,
-	// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
-	blockMetadata: metadata,
-	blockSettings: {
-		edit,
-	},
-	isAvailableOnPostEditor: false,
-} );
+// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
+registerBlockType( metadata, ProductReviewsBlockSettings );

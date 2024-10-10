@@ -7,10 +7,10 @@ import domReady from '@wordpress/dom-ready';
  * Internal dependencies
  */
 import { BlockRegistrationManager } from './blocks-registration-manager';
-import { TemplateChangeDetector } from './template-change-detector';
+import { EditorViewChangeDetector } from './editor-view-change-detector';
 
 domReady( () => {
-	const templateChangeDetector = new TemplateChangeDetector();
+	const editorViewChangeDetector = new EditorViewChangeDetector();
 	const blockRegistrationManager = new BlockRegistrationManager();
-	templateChangeDetector.add( blockRegistrationManager );
+	editorViewChangeDetector.add( blockRegistrationManager );
 } );

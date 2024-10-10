@@ -1,65 +1,40 @@
 /**
  * External dependencies
  */
-import {
-	test as base,
-	expect,
-	Editor,
-	BlockData,
-} from '@woocommerce/e2e-utils';
+import { Locator } from '@playwright/test';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 
-const blockData: BlockData = {
-	name: 'Add to Cart with Options',
-	slug: 'woocommerce/add-to-cart-form',
-	mainClass: '.wc-block-add-to-cart-form',
-	selectors: {
-		frontend: {},
-		editor: {},
-	},
+const blockData = {
+	name: 'Product Rating',
+	slug: 'woocommerce/product-rating',
 };
 
-class BlockUtils {
-	editor: Editor;
+const selectProductForSingleProductBlock = async (
+	singleProductBlock: Locator
+) => {
+	await singleProductBlock.locator( 'input[type="radio"]' ).nth( 0 ).click();
 
-	constructor( { editor }: { editor: Editor } ) {
-		this.editor = editor;
-	}
+	await singleProductBlock.getByText( 'Done' ).click();
+};
 
-	async configureSingleProductBlock() {
-		const singleProductBlock = await this.editor.getBlockByName(
-			'woocommerce/single-product'
-		);
-
-		await singleProductBlock
-			.locator( 'input[type="radio"]' )
-			.nth( 0 )
-			.click();
-
-		await singleProductBlock.getByText( 'Done' ).click();
-	}
-}
-
-const test = base.extend< { blockUtils: BlockUtils } >( {
-	blockUtils: async ( { editor }, use ) => {
-		await use( new BlockUtils( { editor } ) );
-	},
-} );
-
-test.describe( `${ blockData.name } Block`, () => {
+test.describe( `${ blockData.slug } Block`, () => {
 	test( 'can be added in the Post Editor only as inner block of the Single Product Block', async ( {
 		admin,
 		editor,
-		blockUtils,
 	} ) => {
 		// Add to Cart with Options in the Post Editor is only available as inner block of the Single Product Block.
 		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-		await blockUtils.configureSingleProductBlock();
+		const singleProductBlock = await editor.getBlockByName(
+			'woocommerce/single-product'
+		);
+
+		await selectProductForSingleProductBlock( singleProductBlock );
 
 		await expect(
 			await editor.getBlockByName( blockData.slug )
@@ -77,7 +52,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		requestUtils,
-		blockUtils,
 	} ) => {
 		// Add to Cart with Options in the Site Editor is only available as
 		// inner block of the Single Product Block except for the Single Product
@@ -98,7 +72,11 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-		await blockUtils.configureSingleProductBlock();
+		const singleProductBlock = await editor.getBlockByName(
+			'woocommerce/single-product'
+		);
+
+		await selectProductForSingleProductBlock( singleProductBlock );
 
 		await expect(
 			await editor.getBlockByName( blockData.slug )
@@ -158,28 +136,28 @@ test.describe( `${ blockData.name } Block`, () => {
 			} );
 			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
-			const addToCartWithOptions = page
+			const blockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
 				.getByRole( 'option', { name: blockData.name } );
 
-			await expect( addToCartWithOptions ).toBeVisible();
+			await expect( blockOption ).toBeVisible();
 		} );
 
-		test( 'should be hidden in the block inserter on the Post Editor', async ( {
+		test( 'should be unregistered on the Post Editor', async ( {
 			admin,
 			page,
 			editor,
 		} ) => {
 			await admin.createNewPost();
 			await editor.openGlobalBlockInserter();
-			const addToCartWithOptions = page
+			const blockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.slug } );
+				.getByRole( 'option', { name: blockData.name } );
 
-			await expect( addToCartWithOptions ).toBeHidden();
+			await expect( blockOption ).toBeHidden();
 		} );
 
-		test( 'should be hidden in the block inserter on the Page Editor', async ( {
+		test( 'should be unregistered on the Page Editor', async ( {
 			admin,
 			page,
 			editor,
@@ -189,11 +167,11 @@ test.describe( `${ blockData.name } Block`, () => {
 				title: 'New Page',
 			} );
 			await editor.openGlobalBlockInserter();
-			const addToCartWithOptions = page
+			const blockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.slug } );
+				.getByRole( 'option', { name: blockData.name } );
 
-			await expect( addToCartWithOptions ).toBeHidden();
+			await expect( blockOption ).toBeHidden();
 		} );
 	} );
 } );

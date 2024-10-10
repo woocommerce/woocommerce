@@ -1,24 +1,13 @@
 /**
  * External dependencies
  */
-import { box as icon } from '@wordpress/icons';
-import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import edit from './edit';
-import save from './save';
 import metadata from './block.json';
+import { RelatedProductsBlockSettings } from './settings';
 
-registerBlockSingleProductTemplate( {
-	blockName: metadata.name,
-	// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
-	blockMetadata: metadata,
-	blockSettings: {
-		icon,
-		edit,
-		save,
-	},
-	isAvailableOnPostEditor: false,
-} );
+// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
+registerBlockType( metadata, RelatedProductsBlockSettings );
