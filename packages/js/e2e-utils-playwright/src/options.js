@@ -14,8 +14,8 @@ export const setOption = async (
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				adminCredentials.username,
-				adminCredentials.password
+				adminCredentials?.username,
+				adminCredentials?.password
 			) }`,
 			cookie: '',
 		},
