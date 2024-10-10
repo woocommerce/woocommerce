@@ -7,6 +7,18 @@ const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
 const StyleAssetPlugin = require( './style-asset-plugin' );
+const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
+
+// https://github.com/woocommerce/woocommerce/pull/47486: do not break build if TS emits errors - React 18 migration related.
+// The solution is based https://github.com/TypeStrong/fork-ts-checker-webpack-plugin/issues/232#issuecomment-1322651312.
+class TypeScriptWarnOnlyWebpackPlugin {
+	apply(compiler) {
+		const hooks = ForkTsCheckerWebpackPlugin.getCompilerHooks( compiler );
+		hooks.issues.tap( 'TypeScriptWarnOnlyWebpackPlugin', ( issues ) =>
+			issues.map( ( issue ) => ( { ...issue, severity: "warning" } ) )
+		);
+	}
+}
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -85,4 +97,6 @@ module.exports = {
 		],
 	},
 	StyleAssetPlugin,
+	ForkTsCheckerWebpackPlugin,
+	TypeScriptWarnOnlyWebpackPlugin,
 };
