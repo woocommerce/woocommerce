@@ -7,12 +7,15 @@ import { __ } from '@wordpress/i18n';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { BlockEditProps } from '@wordpress/blocks';
+import { isSiteEditorPage } from '@woocommerce/utils';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
+
 export interface Attributes {
 	className?: string;
 	isDescendentOfSingleProductBlock: boolean;
@@ -34,6 +37,11 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		} );
 	}, [ setAttributes, isDescendentOfSingleProductBlock ] );
 
+	const isSiteEditor = useSelect(
+		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
+		[]
+	);
+
 	return (
 		<div { ...blockProps }>
 			<Tooltip
@@ -45,6 +53,18 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 					<Disabled>
 						<div className="quantity">
 							<input
+								style={
+									// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
+									! isSiteEditor
+										? {
+												backgroundColor: '#ffffff',
+												lineHeight: 'unset',
+												minHeight: 'unset',
+												boxSizing: 'unset',
+												borderRadius: 'unset',
+										  }
+										: {}
+								}
 								type={ 'number' }
 								value={ '1' }
 								className={ 'input-text qty text' }
@@ -52,7 +72,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							/>
 						</div>
 						<button
-							className={ `single_add_to_cart_button button alt wp-element-button` }
+							className={ `single_add_to_cart_button alt wp-element-button` }
 						>
 							{ __( 'Add to cart', 'woocommerce' ) }
 						</button>
