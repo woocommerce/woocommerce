@@ -75,7 +75,7 @@ module.exports = {
 			new RemoveEmptyScriptsPlugin(),
 			new MiniCssExtractPlugin( {
 				filename: '[name]/style.css',
-				chunkFilename: 'chunks/[id].style.css?ver=[contenthash]',
+				chunkFilename: 'chunks/[name].style.css?ver=[contenthash]',
 			} ),
 			new WebpackRTLPlugin( {
 				filename: '[name]/style-rtl.css',

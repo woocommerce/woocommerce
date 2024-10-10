@@ -31,8 +31,12 @@ productApiFetchMiddleware();
 
 // Lazy load components
 const BlockEditorTourWrapper = lazy(
-	() => import( './tour/block-editor/block-editor-tour-wrapper' )
+	() =>
+		import(
+			/* webpackChunkName: "block-editor-tour-wrapper" */ './tour/block-editor/block-editor-tour-wrapper'
+		)
 );
+
 const ProductMVPFeedbackModalContainer = lazy( () =>
 	import( '@woocommerce/product-editor' ).then( ( module ) => ( {
 		default: module.__experimentalProductMVPFeedbackModalContainer,

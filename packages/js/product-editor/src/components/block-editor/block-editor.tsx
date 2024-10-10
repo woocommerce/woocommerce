@@ -61,9 +61,9 @@ const PluginArea = lazy( () =>
 );
 
 const ModalEditor = lazy( () =>
-	import( '../modal-editor' ).then( ( module ) => ( {
-		default: module.ModalEditor,
-	} ) )
+	import( /* webpackChunkName: "modal-editor" */ '../modal-editor' ).then(
+		( module ) => ( { default: module.ModalEditor } )
+	)
 );
 
 function getLayoutTemplateId(

@@ -43,7 +43,6 @@ module.exports = {
 					? `[name].css`
 					: `[name]/style.css`;
 			},
-			chunkFilename: 'chunks/[id].style.css',
 		} ),
 		new WebpackRTLPlugin( {
 			test: /(?<!style)\.css$/,
