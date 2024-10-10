@@ -51,6 +51,8 @@ import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
 import { OptInSubscribe } from './opt-in/opt-in';
 import { OptInContextProvider } from './opt-in/context';
+import { ZoomOutContextProvider } from './context/zoom-out-context';
+
 import './tracking';
 
 const { RouterProvider } = unlock( routerPrivateApis );
@@ -150,7 +152,15 @@ const initializeAssembleHub = () => {
 export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	const isInitializedRef = useRef( false );
 
+	// @ts-expect-error temp fix
+	const isAiFlow = window.parent?.window.cys_aiFlow ? true : false;
+
 	useBodyClass( 'woocommerce-assembler' );
+	useBodyClass(
+		isAiFlow
+			? 'woocommerce-assembler--with-ai'
+			: 'woocommerce-assembler--without-ai'
+	);
 
 	if ( ! isInitializedRef.current ) {
 		initializeAssembleHub();
@@ -184,7 +194,9 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 					<OptInContextProvider>
 						<GlobalStylesProvider>
 							<RouterProvider>
-								<Layout />
+								<ZoomOutContextProvider>
+									<Layout />
+								</ZoomOutContextProvider>
 							</RouterProvider>
 							<OptInSubscribe />
 						</GlobalStylesProvider>

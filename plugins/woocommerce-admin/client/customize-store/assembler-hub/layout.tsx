@@ -52,12 +52,14 @@ import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
+import { DeviceToolbar } from './components/device-toolbar';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
-const ANIMATION_DURATION = 0.5;
+const ANIMATION_DURATION = 0.3;
 
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
@@ -115,6 +117,11 @@ export const Layout = () => {
 
 	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
+	const innerContentStyle = isEditorLoading
+		? {
+				background: gradientValue ?? backgroundColor,
+		  }
+		: undefined;
 
 	if (
 		typeof currentState === 'object' &&
@@ -203,6 +210,18 @@ export const Layout = () => {
 
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">
+										{ isFullComposabilityFeatureAndAPIAvailable() && (
+											<motion.div
+												initial={ false }
+												layout="position"
+											>
+												<DeviceToolbar
+													isEditorLoading={
+														isEditorLoading
+													}
+												/>
+											</motion.div>
+										) }
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
@@ -234,11 +253,12 @@ export const Layout = () => {
 														setIsOversized={
 															setIsResizableFrameOversized
 														}
-														innerContentStyle={ {
-															background:
-																gradientValue ??
-																backgroundColor,
-														} }
+														isResizingHandleEnabled={
+															! isFullComposabilityFeatureAndAPIAvailable()
+														}
+														innerContentStyle={
+															innerContentStyle
+														}
 													>
 														{ editor }
 													</ResizableFrame>
