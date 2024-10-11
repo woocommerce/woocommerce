@@ -6,26 +6,14 @@ import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
+import { CheckoutPage } from './checkout.page';
 import {
 	FREE_SHIPPING_NAME,
 	FREE_SHIPPING_PRICE,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
+	TEST_ADDRESS,
 } from './constants';
-import { CheckoutPage } from './checkout.page';
-
-const testData = {
-	firstname: 'John',
-	lastname: 'Doe',
-	addressfirstline: '123 Easy Street',
-	addresssecondline: 'Testville',
-	country: 'United States (US)',
-	city: 'New York',
-	state: 'New York',
-	postcode: '90210',
-	email: 'john.doe@test.com',
-	phone: '01234567890',
-};
 
 const test = base.extend< { pageObject: CheckoutPage } >( {
 	pageObject: async ( { page }, use ) => {
@@ -36,7 +24,7 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 	},
 } );
 
-test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
+test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 	test.beforeEach( async ( { admin, editor, localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickup();
 
@@ -64,7 +52,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 				FREE_SHIPPING_PRICE
 			)
 		).toBe( true );
-		await pageObject.fillInCheckoutWithTestData( testData );
+		await pageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
 		await pageObject.placeOrder();
 
 		// Confirm Order Confirmation Block sections are visible when logged in
@@ -132,7 +120,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Order Confirmation (guest user)', () => {
+test.describe( 'Shopper (guest) → Order Confirmation', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
@@ -154,12 +142,87 @@ test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 			)
 		).toBe( true );
 
-		await pageObject.fillInCheckoutWithTestData( testData );
+		await pageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
 		await pageObject.placeOrder();
 
 		await expect(
 			page.getByText( 'Thank you. Your order has been received.' )
 		).toBeVisible();
+	} );
+} );
+
+test.describe( 'Shopper (guest) → Order Confirmation → Create Account', () => {
+	test.use( { storageState: guestFile } );
+
+	test.beforeEach( async ( { frontendUtils, pageObject, requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+		expect(
+			await pageObject.selectAndVerifyShippingOption(
+				FREE_SHIPPING_NAME,
+				FREE_SHIPPING_PRICE
+			)
+		).toBe( true );
+		await pageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
+		await pageObject.placeOrder();
+	} );
+
+	test( 'Delayed account creation flows', async ( {
+		page,
+		requestUtils,
+	} ) => {
+		// If delayed account creation is off, no form is shown.
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/account/woocommerce_enable_delayed_account_creation',
+			data: { value: 'no' },
+		} );
+		await page.reload();
+		await expect( page.getByText( 'Create an account with' ) ).toBeHidden();
+
+		// Turn on delayed account creation.
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/account/woocommerce_enable_delayed_account_creation',
+			data: { value: 'yes' },
+		} );
+		await page.reload();
+		await expect(
+			page.getByText( 'Create an account with' )
+		).toBeVisible();
+
+		// Configure so password field is visible.
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/account/woocommerce_registration_generate_password',
+			data: { value: 'no' },
+		} );
+		await page.reload();
+
+		// Check visible form elements.
+		await expect(
+			page.getByText( 'Set a password for john.doe@test.com' )
+		).toBeVisible();
+
+		// Fill out the form and test creation works.
+		await page
+			.getByLabel( 'Password', { exact: true } )
+			.fill( 'V3ryStrongP@ssw0rd123!' );
+		await page.getByRole( 'button', { name: 'Create account' } ).click();
+		await page.waitForURL( /\/checkout\/order-received\// );
+
+		// Verify the account was created.
+		await expect(
+			page.getByText( 'Your account has been successfully created' )
+		).toBeVisible();
+
+		// Verify the user was logged in.
+		await page.goto( '/my-account' );
+		await expect( page.getByText( 'Hello John Doe' ) ).toBeVisible();
 	} );
 } );
 
