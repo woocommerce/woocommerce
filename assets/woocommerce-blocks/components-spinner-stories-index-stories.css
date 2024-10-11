@@ -1,0 +1,3 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-spinner{box-sizing:content-box;color:inherit;font-size:1.25em;height:100%;position:absolute;text-align:center;width:100%}.wc-block-components-spinner:after{animation:spinner__animation 1s linear infinite;backface-visibility:hidden;border:.2em solid;border-left:.2em solid transparent;border-radius:50%;box-sizing:border-box;content:" ";height:1em;left:50%;margin:-.5em 0 0 -.5em;position:absolute;top:50%;transform:translateZ(0) scale(.5);transform-origin:50% 50%;width:1em}
+
+/*# sourceMappingURL=components-spinner-stories-index-stories.css.map*/

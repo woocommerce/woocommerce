@@ -1,0 +1,92 @@
+// css resets some wp-admin specific rules so that the app fits better in the extension container
+.woocommerce-admin-page {
+	.wrap {
+		margin: 0;
+	}
+
+	#wpcontent,
+	&.woocommerce_page_wc-admin #wpbody-content {
+		padding: 0;
+		overflow-x: hidden !important;
+		min-height: calc(100vh - #{$adminbar-height});
+	}
+
+	@include breakpoint( ">782px" ) {
+		#wpbody-content {
+			padding-left: 0;
+		}
+	}
+
+	@include breakpoint( "<782px" ) {
+		// WP breakpoint for mobile menu
+		.wp-responsive-open #woocommerce-embedded-root,
+		.wp-responsive-open #wpbody {
+			position: relative;
+			right: -14.5em;
+		}
+
+		#wpcontent,
+		#wpbody-content {
+			min-height: calc(100vh - #{$adminbar-height-mobile});
+		}
+	}
+
+	@include breakpoint( ">960px" ) {
+		#toplevel_page_woocommerce.menu-top > a:focus,
+		#toplevel_page_wcadmin--analytics.menu-top > a:focus {
+			padding-bottom: 1px;
+		}
+	}
+}
+
+.woocommerce-layout * {
+	box-sizing: border-box;
+}
+
+#wpbody {
+	display: inline-block;
+	width: 100%;
+	box-sizing: border-box;
+	padding-top: 0;
+	margin-top: $header-height;
+}
+
+#wpfooter {
+	display: none;
+}
+
+.woocommerce_page_wc-admin {
+	.woocommerce-filters-date__content:not(.is-mobile) {
+		z-index: 2; /* below of woocommerce-layout__header */
+	}
+}
+
+@include breakpoint( "<600px" ) {
+	div #wpadminbar {
+		position: fixed;
+	}
+
+	html.wp-toolbar {
+		padding-top: $adminbar-height-mobile;
+	}
+}
+
+// Temporary fix for compatibility with the Jetpack masterbar
+// See https://github.com/Automattic/jetpack/issues/9608
+@include breakpoint( "<782px" ) {
+	.jetpack-masterbar {
+		#wpadminbar #wp-admin-bar-menu-toggle {
+			margin-top: -10px;
+		}
+
+		// #wpwrap id added for specificity
+		#wpwrap .woocommerce-layout__header-heading {
+			padding-left: 60px;
+		}
+
+		&.wp-admin .wrap h1,
+		&.wp-admin .wrap h2 {
+			padding-left: 0;
+		}
+	}
+}

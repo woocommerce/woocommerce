@@ -1,0 +1,31 @@
+@include wordpress-admin-schemes;
+
+// Import our wp-admin reset.
+@import "./shared/_reset.scss";
+
+// Some WooCommerce Admin page specific resets.
+.woocommerce-admin-page {
+	.wp-has-current-submenu::after {
+		right: 0;
+		border: 8px solid transparent;
+		content: " ";
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+		border-right-color: #f1f1f1;
+		top: 0;
+		margin-top: 10px;
+
+		@include breakpoint( "<960px" ) {
+			border-width: 4px;
+			margin-top: 14px;
+		}
+	}
+}
+
+// Import any global styles.
+@import "./shared/_global.scss";
+
+// Import the embed-specific styles.
+@import "./shared/_embed.scss";

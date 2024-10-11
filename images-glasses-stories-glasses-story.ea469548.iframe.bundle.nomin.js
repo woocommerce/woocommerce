@@ -1,0 +1,290 @@
+(self["webpackChunk_woocommerce_storybook"] = self["webpackChunk_woocommerce_storybook"] || []).push([[9585],{
+
+/***/ "../../node_modules/.pnpm/@wordpress+primitives@3.4.1/node_modules/@wordpress/primitives/build-module/svg/index.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   G: () => (/* binding */ G),
+/* harmony export */   rw: () => (/* binding */ Rect),
+/* harmony export */   t4: () => (/* binding */ SVG),
+/* harmony export */   wA: () => (/* binding */ Path)
+/* harmony export */ });
+/* unused harmony exports Circle, Polygon, Defs, RadialGradient, LinearGradient, Stop */
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/.pnpm/classnames@2.3.2/node_modules/classnames/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/.pnpm/react@18.3.1/node_modules/react/index.js");
+/**
+ * External dependencies
+ */
+
+/**
+ * WordPress dependencies
+ */
+
+
+/** @typedef {{isPressed?: boolean} & import('react').ComponentPropsWithoutRef<'svg'>} SVGProps */
+
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'circle'>} props
+ *
+ * @return {JSX.Element} Circle component
+ */
+
+const Circle = props => createElement('circle', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'g'>} props
+ *
+ * @return {JSX.Element} G component
+ */
+
+const G = props => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)('g', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'path'>} props
+ *
+ * @return {JSX.Element} Path component
+ */
+
+const Path = props => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)('path', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'polygon'>} props
+ *
+ * @return {JSX.Element} Polygon component
+ */
+
+const Polygon = props => createElement('polygon', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'rect'>} props
+ *
+ * @return {JSX.Element} Rect component
+ */
+
+const Rect = props => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)('rect', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'defs'>} props
+ *
+ * @return {JSX.Element} Defs component
+ */
+
+const Defs = props => createElement('defs', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'radialGradient'>} props
+ *
+ * @return {JSX.Element} RadialGradient component
+ */
+
+const RadialGradient = props => createElement('radialGradient', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'linearGradient'>} props
+ *
+ * @return {JSX.Element} LinearGradient component
+ */
+
+const LinearGradient = props => createElement('linearGradient', props);
+/**
+ * @param {import('react').ComponentPropsWithoutRef<'stop'>} props
+ *
+ * @return {JSX.Element} Stop component
+ */
+
+const Stop = props => createElement('stop', props);
+/**
+ *
+ * @param {SVGProps} props isPressed indicates whether the SVG should appear as pressed.
+ *                         Other props will be passed through to svg component.
+ *
+ * @return {JSX.Element} Stop component
+ */
+
+const SVG = _ref => {
+  let {
+    className,
+    isPressed,
+    ...props
+  } = _ref;
+  const appliedProps = { ...props,
+    className: classnames__WEBPACK_IMPORTED_MODULE_0___default()(className, {
+      'is-pressed': isPressed
+    }) || undefined,
+    'aria-hidden': true,
+    focusable: false
+  }; // Disable reason: We need to have a way to render HTML tag for web.
+  // eslint-disable-next-line react/forbid-elements
+
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("svg", appliedProps);
+};
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "../../packages/js/product-editor/src/images/glasses/index.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   l: () => (/* binding */ Glasses)
+/* harmony export */ });
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/.pnpm/react@18.3.1/node_modules/react/index.js");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/.pnpm/@wordpress+primitives@3.4.1/node_modules/@wordpress/primitives/build-module/svg/index.js");
+
+/**
+ * External dependencies
+ */
+
+function Glasses(_ref) {
+  var _ref$colorOne = _ref.colorOne,
+    colorOne = _ref$colorOne === void 0 ? '#E0E0E0' : _ref$colorOne,
+    _ref$colorTwo = _ref.colorTwo,
+    colorTwo = _ref$colorTwo === void 0 ? '#F0F0F0' : _ref$colorTwo,
+    _ref$size = _ref.size,
+    size = _ref$size === void 0 ? 72 : _ref$size,
+    _ref$style = _ref.style,
+    style = _ref$style === void 0 ? {} : _ref$style;
+  var rate = 72 / 33;
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__/* .SVG */ .t4, {
+    width: size,
+    height: Math.round(size / rate),
+    viewBox: "0 0 72 33",
+    fill: "none",
+    xmlns: "http://www.w3.org/2000/svg",
+    style: style
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__/* .Path */ .wA, {
+    d: "M1.82318 26.2927C2.40837 25.6395 12.1796 15.8683 13.4588 14.6027C14.6156 13.4596 16.0853 12.9696 17.8409 12.8336C19.2426 12.7383 65.159 9.36328 65.159 9.36328L65.9075 12.9016C65.9075 12.9016 17.3782 17.7736 17.3509 17.7736C13.5132 22.8633 8.01523 30.7156 7.49809 31.3008C6.10999 32.8658 3.71482 33.0019 2.13618 31.6274C0.598377 30.2257 0.448677 27.8306 1.83679 26.2655L1.82318 26.2927Z",
+    fill: colorTwo
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__/* .Path */ .wA, {
+    d: "M70.4378 26.2927C69.8526 25.6395 60.0815 15.8683 58.8022 14.6027C57.6455 13.4596 56.1757 12.9696 54.4202 12.8336C53.0184 12.7383 7.10201 9.36328 7.10201 9.36328L6.35352 12.9016C6.35352 12.9016 54.8829 17.7736 54.9101 17.7736C58.7478 22.8633 64.2458 30.7156 64.7629 31.3008C66.151 32.8658 68.5462 33.0019 70.1248 31.6274C71.6626 30.2257 71.8123 27.8306 70.4242 26.2655L70.4378 26.2927Z",
+    fill: colorTwo
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__/* .Path */ .wA, {
+    d: "M53.3189 0C46.4328 0 41.6016 2.5993 38.4715 8.70969C38.1449 8.4103 37.1379 8.01564 36.1172 8.01564C35.0965 8.01564 34.1031 8.42391 33.7629 8.70969C30.6328 2.5993 25.8017 0 18.9156 0C12.0295 0 4.49012 4.53176 0.666016 6.38257V11.9078H4.77591C5.34748 15.4461 8.61362 25.68 19.0244 25.68C28.1288 25.68 30.9322 19.2838 32.9736 15.378C33.6812 14.0172 34.5658 12.0711 36.1172 12.0711C37.6686 12.0711 38.5532 14.0172 39.2609 15.378C41.2886 19.2838 44.092 25.68 53.21 25.68C63.6208 25.68 66.8869 15.4597 67.4585 11.9078H71.5684V6.38257C67.7443 4.54537 60.3683 0 53.3189 0ZM19.0517 22.3186C12.9277 22.3186 8.83136 16.9022 8.83136 11.4723C8.83136 5.53882 14.1797 3.2117 19.1605 3.2117C24.1414 3.2117 29.8027 5.811 29.8027 11.0912C29.8027 17.1336 25.3662 22.305 19.0517 22.305V22.3186ZM53.21 22.3186C46.9091 22.3186 42.459 17.1472 42.459 11.1049C42.459 5.83822 48.1066 3.22531 53.1011 3.22531C58.0956 3.22531 63.4303 5.55243 63.4303 11.4859C63.4303 16.9159 59.3204 22.3322 53.21 22.3322V22.3186Z",
+    fill: colorOne
+  }));
+}
+try {
+    // @ts-ignore
+    Glasses.displayName = "Glasses";
+    // @ts-ignore
+    Glasses.__docgenInfo = { "description": "", "displayName": "Glasses", "props": { "colorOne": { "defaultValue": { value: "#E0E0E0" }, "description": "", "name": "colorOne", "required": false, "type": { "name": "string" } }, "colorTwo": { "defaultValue": { value: "#F0F0F0" }, "description": "", "name": "colorTwo", "required": false, "type": { "name": "string" } }, "size": { "defaultValue": { value: "72" }, "description": "", "name": "size", "required": false, "type": { "name": "number" } }, "style": { "defaultValue": { value: "{}" }, "description": "", "name": "style", "required": false, "type": { "name": "{}" } } } };
+    // @ts-ignore
+    if (typeof STORYBOOK_REACT_CLASSES !== "undefined")
+        // @ts-ignore
+        STORYBOOK_REACT_CLASSES["../../packages/js/product-editor/src/images/glasses/index.tsx#Glasses"] = { docgenInfo: Glasses.__docgenInfo, name: "Glasses", path: "../../packages/js/product-editor/src/images/glasses/index.tsx#Glasses" };
+}
+catch (__react_docgen_typescript_loader_error) { }
+
+/***/ }),
+
+/***/ "../../node_modules/.pnpm/classnames@2.3.2/node_modules/classnames/index.js":
+/***/ ((module, exports) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	Copyright (c) 2018 Jed Watson.
+	Licensed under the MIT License (MIT), see
+	http://jedwatson.github.io/classnames
+*/
+/* global define */
+
+(function () {
+	'use strict';
+
+	var hasOwn = {}.hasOwnProperty;
+	var nativeCodeString = '[native code]';
+
+	function classNames() {
+		var classes = [];
+
+		for (var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			if (!arg) continue;
+
+			var argType = typeof arg;
+
+			if (argType === 'string' || argType === 'number') {
+				classes.push(arg);
+			} else if (Array.isArray(arg)) {
+				if (arg.length) {
+					var inner = classNames.apply(null, arg);
+					if (inner) {
+						classes.push(inner);
+					}
+				}
+			} else if (argType === 'object') {
+				if (arg.toString !== Object.prototype.toString && !arg.toString.toString().includes('[native code]')) {
+					classes.push(arg.toString());
+					continue;
+				}
+
+				for (var key in arg) {
+					if (hasOwn.call(arg, key) && arg[key]) {
+						classes.push(key);
+					}
+				}
+			}
+		}
+
+		return classes.join(' ');
+	}
+
+	if ( true && module.exports) {
+		classNames.default = classNames;
+		module.exports = classNames;
+	} else if (true) {
+		// register as 'classnames', consistent with npm package name
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+			return classNames;
+		}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else {}
+}());
+
+
+/***/ }),
+
+/***/ "../../packages/js/product-editor/src/images/glasses/stories/glasses.story.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Default: () => (/* binding */ Default),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../packages/js/product-editor/src/images/glasses/index.tsx");
+/**
+ * Internal dependencies
+ */
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  title: 'Product Editor/images/Glasses',
+  component: _index__WEBPACK_IMPORTED_MODULE_0__/* .Glasses */ .l,
+  args: {
+    size: 72,
+    colorOne: '#E0E0E0',
+    colorTwo: '#F0F0F0'
+  }
+});
+var Default = _index__WEBPACK_IMPORTED_MODULE_0__/* .Glasses */ .l;
+Default.parameters = {
+  ...Default.parameters,
+  docs: {
+    ...Default.parameters?.docs,
+    source: {
+      originalSource: "Glasses",
+      ...Default.parameters?.docs?.source
+    }
+  }
+};
+try {
+    // @ts-ignore
+    Default.displayName = "Default";
+    // @ts-ignore
+    Default.__docgenInfo = { "description": "", "displayName": "Default", "props": { "colorOne": { "defaultValue": null, "description": "", "name": "colorOne", "required": false, "type": { "name": "string" } }, "colorTwo": { "defaultValue": null, "description": "", "name": "colorTwo", "required": false, "type": { "name": "string" } }, "size": { "defaultValue": null, "description": "", "name": "size", "required": false, "type": { "name": "number" } }, "style": { "defaultValue": null, "description": "", "name": "style", "required": false, "type": { "name": "{}" } } } };
+    // @ts-ignore
+    if (typeof STORYBOOK_REACT_CLASSES !== "undefined")
+        // @ts-ignore
+        STORYBOOK_REACT_CLASSES["../../packages/js/product-editor/src/images/glasses/stories/glasses.story.tsx#Default"] = { docgenInfo: Default.__docgenInfo, name: "Default", path: "../../packages/js/product-editor/src/images/glasses/stories/glasses.story.tsx#Default" };
+}
+catch (__react_docgen_typescript_loader_error) { }
+
+/***/ })
+
+}]);

@@ -1,0 +1,3 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-product-name{font-size:1em;overflow-wrap:anywhere;word-break:break-word}
+
+/*# sourceMappingURL=base-components-product-name-stories-index-stories.css.map*/

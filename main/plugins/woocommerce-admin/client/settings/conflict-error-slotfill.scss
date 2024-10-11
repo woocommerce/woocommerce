@@ -1,0 +1,39 @@
+.woocommerce_tax_settings_conflict_error {
+	padding: 15px 10px;
+	min-width: 400px;
+	width: 400px;
+}
+
+.woocommerce_tax_settings_conflict_error_card_body {
+	display: flex;
+	flex-direction: row;
+	padding-right: 16px !important; // override core styles
+}
+
+.woocommerce_tax_settings_conflict_error_card_body__warning_icon {
+	width: 20px;
+	height: 20px;
+	margin-block: 10px;
+	margin-right: 16px;
+}
+
+.woocommerce_tax_settings_conflict_error_card_body__body_text {
+	margin-bottom: 16px;
+}
+
+.woocommerce_tax_settings_conflict_error_card_body__close_icon {
+	padding: 0;
+	height: 24px;
+	color: #808080;
+}
+
+.woocommerce_admin_tax_settings_slotfill_th,
+.woocommerce_admin_tax_settings_slotfill_td {
+	padding: 0 !important;
+}
+
+[aria-labelledby="select2-woocommerce_tax_display_shop-container"].is-conflict {
+	border: #f00 !important;
+	border-style: solid !important;
+	border-width: 1px !important;
+}

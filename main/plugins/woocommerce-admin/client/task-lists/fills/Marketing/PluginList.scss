@@ -1,0 +1,15 @@
+.woocommerce-plugin-list__title {
+	padding: $gap-large 30px 0 30px;
+	position: relative;
+
+	h3 {
+		font-weight: 500;
+		color: $black;
+		text-transform: uppercase;
+	}
+}
+
+.woocommerce-plugin-list__plugin {
+	border-top: none;
+	border-bottom: 1px solid #e0e0e0;
+}

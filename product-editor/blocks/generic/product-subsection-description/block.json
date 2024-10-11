@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-subsection-description",
+	"title": "Product subsection description",
+	"category": "woocommerce",
+	"description": "The product subsection description.",
+	"keywords": [
+		"products",
+		"subsection",
+		"description"
+	],
+	"textdomain": "default",
+	"attributes": {
+		"content": {
+			"type": "string",
+			"__experimentalRole": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	}
+}

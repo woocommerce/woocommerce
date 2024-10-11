@@ -1,0 +1,81 @@
+.woocommerce-block-editor-guide {
+	&__header {
+		width: 312px;
+		height: 222px;
+		background-color: #f6f7f7; /* WP Gray 0; no var available */
+		background-size: cover;
+
+		&-1 {
+			background-image: url(./images/guide-1.png);
+		}
+
+		&-2 {
+			background-image: url(./images/guide-2.png);
+		}
+
+		&-3 {
+			background-image: url(./images/guide-3.png);
+		}
+
+		&-4 {
+			background-image: url(./images/guide-4.png);
+		}
+	}
+
+	&.components-modal__frame {
+		max-width: 312px;
+	}
+	&__heading,
+	&__text {
+		margin: $gap-small $gap-large;
+	}
+
+	&__heading {
+		font-size: 24px;
+		line-height: 30px;
+	}
+
+	.components-guide {
+		&__page-control {
+			margin-top: $gap-small;
+		}
+		&__footer {
+			width: unset;
+			margin: $gap-large $gap-large;
+			.components-guide__back-button {
+				left: 0;
+				padding: $gap-smaller $gap-small;
+			}
+			.components-guide__forward-button {
+				right: 0;
+				padding: $gap-smaller $gap-small;
+			}
+			.components-guide__finish-button {
+				right: 0;
+			}
+		}
+	}
+}
+
+.woocommerce-block-editor-tourkit {
+	.woocommerce-tour-kit-step {
+		width: 381px;
+
+		.components-card__header {
+			align-items: flex-start;
+			height: 194px;
+			background-color: #d4aaf6; /* no var available */
+			background-image: url(./images/tour-header.svg);
+			border-bottom: 1px solid $gray-200;
+			margin-bottom: $gap;
+		}
+
+		&__heading {
+			.woocommerce-pill {
+				margin-left: $gap-small;
+				background-color: $studio-yellow-5;
+				border: 0;
+			}
+		}
+	}
+}

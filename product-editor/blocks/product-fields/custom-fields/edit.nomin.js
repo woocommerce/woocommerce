@@ -1,0 +1,19 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Edit = void 0;
+/**
+ * External dependencies
+ */
+const element_1 = require("@wordpress/element");
+const block_templates_1 = require("@woocommerce/block-templates");
+/**
+ * Internal dependencies
+ */
+const block_slot_fill_1 = require("../../../components/block-slot-fill");
+const custom_fields_1 = require("../../../components/custom-fields");
+function Edit({ attributes, }) {
+    const blockProps = (0, block_templates_1.useWooBlockProps)(attributes);
+    return ((0, element_1.createElement)("div", { ...blockProps },
+        (0, element_1.createElement)(custom_fields_1.CustomFields, { renderActionButtonsWrapper: (buttons) => ((0, element_1.createElement)(block_slot_fill_1.SectionActions, null, buttons)) })));
+}
+exports.Edit = Edit;

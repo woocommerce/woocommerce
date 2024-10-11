@@ -1,0 +1,107 @@
+.woocommerce-embed-page {
+	#wpbody .woocommerce-layout,
+	.woocommerce-layout__notice-list-hide + .wrap {
+		padding-top: 10px;
+	}
+
+	#wpcontent,
+	#wpbody-content {
+		overflow-x: initial !important;
+	}
+
+	#wpbody-content {
+		padding-top: 0;
+	}
+
+	#wpbody-content .notice {
+		margin-top: 15px;
+	}
+
+	.wrap {
+		padding: 0 20px;
+
+		@include breakpoint( "<782px" ) {
+			p.search-box {
+				width: calc(100% - 40px);
+			}
+		}
+		.wrap {
+			padding: 0;
+		}
+	}
+
+	#screen-meta {
+		border-right: 0;
+		margin: 0;
+	}
+
+	#screen-meta-links {
+		position: relative;
+	}
+
+	.notice {
+		padding: 1px 12px;
+	}
+
+	.woocommerce-layout__header {
+		&.is-scrolled {
+			box-shadow: 0 8px 16px 0 rgba(85, 93, 102, 0.3);
+		}
+
+		.woocommerce-layout__header-heading {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+
+	/**
+	* Hides screen meta and links when notices are open since the elements get moved around.
+	* The !important overwrites an inline wp-admin style.
+	*/
+	#screen-meta.is-hidden-by-notices,
+	#screen-meta-links.is-hidden-by-notices {
+		display: none !important;
+	}
+
+	.woocommerce-layout__primary {
+		margin: 0;
+
+		@include breakpoint( "<782px" ) {
+			padding-top: 10px;
+		}
+	}
+
+	@keyframes isLoaded {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	.woocommerce-layout__activity-panel-tabs {
+		animation: isLoaded;
+		animation-duration: 2000ms;
+	}
+
+	.woocommerce-layout__notice-list-show {
+		margin-top: 10px;
+		margin-bottom: 16px;
+
+		@include breakpoint( "<600px" ) {
+			margin-top: 80px;
+			margin-bottom: -16px;
+		}
+
+		@include breakpoint( "600px-782px" ) {
+			margin-top: 32px;
+		}
+	}
+
+	.woocommerce-activity-card__actions {
+		a.components-button:not(.is-primary) {
+			color: $gray-text;
+		}
+	}
+}

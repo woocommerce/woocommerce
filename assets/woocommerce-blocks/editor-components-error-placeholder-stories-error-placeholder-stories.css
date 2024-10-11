@@ -1,0 +1,3 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-error-message{margin-bottom:16px;margin-top:8px}.wc-block-api-error .components-placeholder__fieldset{display:block}.wc-block-api-error .wc-block-error-message{margin-top:0}.wc-block-api-error .components-spinner{float:none}
+
+/*# sourceMappingURL=editor-components-error-placeholder-stories-error-placeholder-stories.css.map*/

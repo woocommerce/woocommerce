@@ -1,0 +1,3 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-title.wc-block-components-title{border:0;border-radius:0;font-size:1.25em;margin:0;padding:0;vertical-align:baseline;word-break:break-word}.wc-block-components-title.wc-block-components-title textarea{font-style:inherit;font-weight:inherit;letter-spacing:inherit;text-transform:inherit}.theme-twentytwenty .wc-block-components-title.wc-block-components-title{border:0;border-radius:0;font-size:1.25em;margin:0;padding:0;vertical-align:baseline;word-break:break-word}
+
+/*# sourceMappingURL=components-title-stories-index-stories.css.map*/

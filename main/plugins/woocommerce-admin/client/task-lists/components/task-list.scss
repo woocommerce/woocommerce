@@ -1,0 +1,23 @@
+.woocommerce-task-list__item {
+	&.woocommerce-list__item-enter {
+		opacity: 0;
+		max-height: 0;
+	}
+
+	&.woocommerce-list__item-enter-active {
+		opacity: 1;
+		max-height: 100px;
+		transition: opacity 500ms, max-height 500ms;
+	}
+
+	&.woocommerce-list__item-exit {
+		opacity: 1;
+		max-height: 100px;
+	}
+
+	&.woocommerce-list__item-exit-active {
+		opacity: 0;
+		max-height: 0;
+		transition: opacity 500ms, max-height 500ms;
+	}
+}

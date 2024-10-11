@@ -1,0 +1,4 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-totals-item{box-sizing:border-box;display:flex;flex-wrap:wrap;width:100%}.wc-block-components-totals-item__label{flex-grow:1}.wc-block-components-totals-item__description{font-size:.875em;width:100%}
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-formatted-money-amount{white-space:nowrap}
+
+/*# sourceMappingURL=components-totals-taxes-stories-index-stories.css.map*/

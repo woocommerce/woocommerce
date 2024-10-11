@@ -1,0 +1,14 @@
+.woocommerce-dismissable-list {
+	margin: 0 20px 10px 20px;
+	animation: isLoaded;
+	animation-duration: 250ms;
+
+	@media (min-width: #{ ($break-medium) }) {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	.woocommerce-dismissable-list__controls {
+		text-align: center;
+	}
+}

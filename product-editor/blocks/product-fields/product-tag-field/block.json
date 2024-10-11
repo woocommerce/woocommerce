@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-tag-field",
+	"title": "Product Tag",
+	"category": "widgets",
+	"description": "A field to select product tags.",
+	"keywords": [
+		"products",
+		"tag"
+	],
+	"textdomain": "default",
+	"attributes": {
+		"name": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"label": {
+			"type": "string"
+		},
+		"placeholder": {
+			"type": "string"
+		}
+	},
+	"usesContext": [
+		"postType",
+		"isInSelectedTab"
+	],
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css"
+}

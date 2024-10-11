@@ -1,0 +1,37 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "woocommerce/product-shipping-dimensions-fields",
+    "title": "Product shipping dimensions fields",
+    "category": "woocommerce",
+    "description": "The product shipping dimensions fields.",
+    "keywords": [
+        "products",
+        "shipping",
+        "dimensions"
+    ],
+    "textdomain": "default",
+    "attributes": {
+        "__contentEditable": {
+            "type": "string",
+            "__experimentalRole": "content"
+        },
+        "disabled": {
+            "type": "boolean",
+            "default": false
+        }
+    },
+    "supports": {
+        "align": false,
+        "html": false,
+        "multiple": true,
+        "reusable": false,
+        "inserter": false,
+        "lock": false,
+        "__experimentalToolbar": false
+    },
+    "editorStyle": "file:./editor.css",
+    "usesContext": [
+        "postType"
+    ]
+}

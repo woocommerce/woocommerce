@@ -1,0 +1,29 @@
+.woocommerce-marketplace {
+	&__search-extensions,
+	&__search-themes,
+	&__search-business-services {
+		margin-bottom: 48px;
+	}
+	&__view-all-button {
+		margin-top: 24px;
+	}
+}
+
+
+.woocommerce-marketplace__sub-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 32px;
+}
+
+.woocommerce-marketplace__sub-header__categories {
+	flex: 1;
+	overflow-x: auto;
+	position: relative;
+}
+
+.woocommerce-marketplace__customize-your-store-button {
+	flex-shrink: 0;
+}
+

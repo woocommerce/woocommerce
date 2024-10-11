@@ -1,0 +1,3 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-sort-select{margin-bottom:12px}.wc-block-components-sort-select__label{display:inline-block;font-weight:400;margin-right:12px}.wc-block-components-sort-select__select{font-size:inherit;width:-moz-max-content;width:max-content}
+
+/*# sourceMappingURL=components-sort-select-stories-index-stories.css.map*/

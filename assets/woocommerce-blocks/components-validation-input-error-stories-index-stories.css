@@ -1,0 +1,3 @@
+@keyframes spinner__animation{0%{animation-timing-function:cubic-bezier(.5856,.0703,.4143,.9297);transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes loading__animation{to{transform:translateX(100%)}}.wc-block-components-validation-error{color:#cc1818;font-size:.75em;max-width:100%;white-space:normal}.wc-block-components-validation-error>p{align-items:center;display:flex;gap:2px;margin:0;padding:8px 0 0}.wc-block-components-validation-error svg{fill:currentColor;height:1.5em;margin-top:-1px;width:1.5em}.has-dark-controls .wc-block-components-validation-error{color:#f18c8c}.wc-block-components-select+.wc-block-components-validation-error{margin-bottom:24px}
+
+/*# sourceMappingURL=components-validation-input-error-stories-index-stories.css.map*/
