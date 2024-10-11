@@ -222,11 +222,13 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
+		$s             = microtime( true );
 		$cart          = $this->get_cart_instance();
 		$is_cart_empty = $cart && $cart->is_empty();
 		$cache         = $is_cart_empty ? $this->get_empty_frontend_dependencies_cache() : $this->get_non_empty_frontend_dependencies_cache();
 		if ( $cache ) {
 			$this->add_inline_script_data( $cache );
+			error_log( 'with cache: ' . ( microtime( true ) - $s ) );
 			return;
 		}
 		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
@@ -297,6 +299,7 @@ class MiniCart extends AbstractBlock {
 			$this->set_non_empty_frontend_dependencies_cache( $data );
 		}
 		$this->add_inline_script_data( $data );
+		error_log( 'without cache: ' . ( microtime( true ) - $s ) );
 	}
 
 	/**
@@ -333,7 +336,7 @@ class MiniCart extends AbstractBlock {
 			return null;
 		}
 
-		$cache = get_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies' );
+		$cache = get_site_transient( 'woocommerce_mini_cart_empty_frontend_dependencies' );
 
 		$current_version = array(
 			'woocommerce' => WOOCOMMERCE_VERSION,
