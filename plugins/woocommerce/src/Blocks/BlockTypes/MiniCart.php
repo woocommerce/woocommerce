@@ -220,7 +220,9 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
-		$cache = get_site_transient( 'woocommerce_mini_cart_frontend_dependencies' );
+		$cart          = $this->get_cart_instance();
+		$is_cart_empty = $cart && $cart->is_empty();
+		$cache         = $is_cart_empty ? $this->get_empty_frontend_dependencies_cache() : $this->get_non_empty_frontend_dependencies_cache();
 		if ( $cache ) {
 			$this->add_inline_script_data( $cache );
 			return;
@@ -259,10 +261,9 @@ class MiniCart extends AbstractBlock {
 		);
 
 		$inner_blocks_frontend_scripts = array();
-		$cart                          = $this->get_cart_instance();
 		if ( $cart ) {
 			// Preload inner blocks frontend scripts.
-			$inner_blocks_frontend_scripts = $cart->is_empty() ? array(
+			$inner_blocks_frontend_scripts = $is_cart_empty ? array(
 				'empty-cart-frontend',
 				'filled-cart-frontend',
 				'shopping-button-frontend',
@@ -288,8 +289,92 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$data = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
-		set_site_transient( 'woocommerce_mini_cart_frontend_dependencies', $data, MONTH_IN_SECONDS );
+		if ( $is_cart_empty ) {
+			$this->set_empty_frontend_dependencies_cache( $data );
+		} else {
+			$this->set_non_empty_frontend_dependencies_cache( $data );
+		}
 		$this->add_inline_script_data( $data );
+	}
+
+	/**
+	 * Get the frontend dependencies cache when the cart has items.
+	 *
+	 * @return string|null String of JSON data.
+	 */
+	protected function get_non_empty_frontend_dependencies_cache() {
+		if ( wp_is_development_mode( 'plugin' ) ) {
+			return null;
+		}
+
+		$cache = get_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies' );
+
+		$current_version = array(
+			'woocommerce' => WOOCOMMERCE_VERSION,
+			'wordpress'   => get_bloginfo( 'version' ),
+		);
+
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
+			return $cache['data'];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the frontend dependencies cache when the cart is empty.
+	 *
+	 * @return string|null String of JSON data.
+	 */
+	protected function get_empty_frontend_dependencies_cache() {
+		if ( wp_is_development_mode( 'plugin' ) ) {
+			return null;
+		}
+
+		$cache = get_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies' );
+
+		$current_version = array(
+			'woocommerce' => WOOCOMMERCE_VERSION,
+			'wordpress'   => get_bloginfo( 'version' ),
+		);
+
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
+			return $cache['data'];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set frontend dependencies cache when the cart has items.
+	 *
+	 * @param string String of JSON data.
+	 */
+	protected function set_non_empty_frontend_dependencies_cache( $data ) {
+		$cache = array(
+			'version' => array(
+				'woocommerce' => WOOCOMMERCE_VERSION,
+				'wordpress'   => get_bloginfo( 'version' ),
+			),
+			'data'    => $data,
+		);
+		set_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies', $cache, MONTH_IN_SECONDS );
+	}
+
+	/**
+	 * Set frontend dependencies cache when the cart is empty.
+	 *
+	 * @param string String of JSON data.
+	 */
+	protected function set_empty_frontend_dependencies_cache( $data ) {
+		$cache = array(
+			'version' => array(
+				'woocommerce' => WOOCOMMERCE_VERSION,
+				'wordpress'   => get_bloginfo( 'version' ),
+			),
+			'data'    => $data,
+		);
+		set_site_transient( 'woocommerce_mini_cart_empty_frontend_dependencies', $cache, MONTH_IN_SECONDS );
 	}
 
 	/**
