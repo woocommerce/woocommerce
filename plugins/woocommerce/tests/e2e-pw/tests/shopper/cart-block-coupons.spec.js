@@ -1,11 +1,12 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const {
+
+import {
 	goToPageEditor,
 	fillPageTitle,
 	insertBlockByShortcut,
 	publishPage,
-} = require( '../../utils/editor' );
-const { addAProductToCart } = require( '../../utils/cart' );
+	addAProductToCart
+} from '@woocommerce/e2e-utils-playwright';
 
 const simpleProductName = 'Cart Coupons Product';
 const singleProductFullPrice = '110.00';
