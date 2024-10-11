@@ -31,21 +31,27 @@ jobs:
     if: github.event.label.name == 'CFE Approved'
     runs-on: ubuntu-20.04
     steps:
-      - name: Extract PR URL from issue body
+      - name: Extract PR info from issue body
         id: extract-pr
         run: |
-          PR_URL=$(echo "${{ github.event.issue.body }}" | grep -oP 'https://github.com/[^/]+/[^/]+/pull/\d+')
+          BODY="${{ github.event.issue.body }}"
 
-          if [[ -z "$PR_URL" ]]; then
-            echo "No valid PR URL found in the issue body. Exiting."
-            exit 1
+          PR_NUMBER=$(echo "$BODY" | grep -oP 'pull\/\K\d+')
+
+          # Validate input: strictly numeric
+          if [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "Valid PR number: $PR_NUMBER"
+            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
           else
-            echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+            echo "Invalid PR number. Exiting."
+            exit 1
           fi
 
       - name: Add label 'cherry pick to trunk' to PR
         run: |
-          gh pr edit $PR_URL --add-label "cherry pick to trunk"
+          OWNER="${{ github.event.repository.owner.login }}"
+          REPO="${{ github.event.repository.name }}"
+          gh pr edit $PR_NUMBER --add-label "cherry pick to trunk" --repo $OWNER/$REPO
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ env.PR_URL }}
@@ -53,11 +59,18 @@ jobs:
       - name: Extract Release Number from Issue Body
         id: extract-release
         run: |
-          RELEASE_NUMBER=$(echo "${{ github.event.issue.body }}" | grep -oP '\b\d+\.\d+\b')
-          if [[ -z "$RELEASE_NUMBER" ]]; then
-            echo "No valid release number found in the issue body. Aborting."
+          BODY="${{ github.event.issue.body }}"
+
+          # Extract the release number using a strict pattern match
+          RELEASE_NUMBER=$(echo "$BODY" | grep -oP '\b\d+\.\d+\b')
+
+          # Validate that the release number is in the expected format (X.Y or similar)
+          if [[ ! "$RELEASE_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release number format. Aborting."
             exit 1
           fi
+
+          # Safely output the release number and export it as an environment variable
           echo "RELEASE_NUMBER=$RELEASE_NUMBER" >> $GITHUB_ENV
           echo "Extracted Release Number: $RELEASE_NUMBER"
 
@@ -90,11 +103,18 @@ jobs:
       - name: Extract Release Number from Issue Body
         id: extract-release
         run: |
-          RELEASE_NUMBER=$(echo "${{ github.event.issue.body }}" | grep -oP '\b\d+\.\d+\b')
-          if [[ -z "$RELEASE_NUMBER" ]]; then
-            echo "No valid release number found in the issue body. Aborting."
+          BODY="${{ github.event.issue.body }}"
+
+          # Extract the release number using a strict pattern match
+          RELEASE_NUMBER=$(echo "$BODY" | grep -oP '\b\d+\.\d+\b')
+
+          # Validate that the release number is in the expected format (X.Y or similar)
+          if [[ ! "$RELEASE_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release number format. Aborting."
             exit 1
           fi
+
+          # Safely output the release number and export it as an environment variable
           echo "RELEASE_NUMBER=$RELEASE_NUMBER" >> $GITHUB_ENV
           echo "Extracted Release Number: $RELEASE_NUMBER"
 
