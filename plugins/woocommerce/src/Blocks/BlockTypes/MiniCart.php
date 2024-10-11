@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
@@ -348,7 +350,7 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Set frontend dependencies cache when the cart has items.
 	 *
-	 * @param string String of JSON data.
+	 * @param string $data String of JSON data.
 	 */
 	protected function set_non_empty_frontend_dependencies_cache( $data ) {
 		$cache = array(
@@ -364,7 +366,7 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Set frontend dependencies cache when the cart is empty.
 	 *
-	 * @param string String of JSON data.
+	 * @param string $data String of JSON data.
 	 */
 	protected function set_empty_frontend_dependencies_cache( $data ) {
 		$cache = array(
@@ -380,7 +382,7 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Add inline script data.
 	 *
-	 * @param string JSON string to pass to the frontend scripts.
+	 * @param string $data JSON string to pass to the frontend scripts.
 	 */
 	protected function add_inline_script_data( $data ) {
 		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
