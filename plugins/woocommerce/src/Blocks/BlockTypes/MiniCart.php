@@ -333,7 +333,7 @@ class MiniCart extends AbstractBlock {
 			return null;
 		}
 
-		$cache = get_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies' );
+		$cache = get_site_transient( 'woocommerce_mini_cart_empty_frontend_dependencies' );
 
 		$current_version = array(
 			'woocommerce' => WOOCOMMERCE_VERSION,
