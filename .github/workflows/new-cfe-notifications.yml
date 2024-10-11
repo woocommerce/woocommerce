@@ -64,7 +64,7 @@ jobs:
           # Extract the release number using a strict pattern match
           RELEASE_NUMBER=$(echo "$BODY" | grep -oP '\b\d+\.\d+\b')
 
-          # Validate that the release number is in the expected format (X.Y or similar)
+          # Validate that the release number is in the expected format (X.Y)
           if [[ ! "$RELEASE_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]]; then
             echo "Invalid release number format. Aborting."
             exit 1
@@ -108,7 +108,7 @@ jobs:
           # Extract the release number using a strict pattern match
           RELEASE_NUMBER=$(echo "$BODY" | grep -oP '\b\d+\.\d+\b')
 
-          # Validate that the release number is in the expected format (X.Y or similar)
+          # Validate that the release number is in the expected format (X.Y)
           if [[ ! "$RELEASE_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]]; then
             echo "Invalid release number format. Aborting."
             exit 1
