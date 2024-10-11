@@ -1,0 +1,76 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace__header {
+	align-items: center;
+	background: #fff;
+	border-bottom: 1px solid $gutenberg-gray-300;
+	display: grid;
+	gap: $medium-gap;
+	grid-template: "mktpl-title mktpl-search mktpl-meta" 60px
+		"mktpl-tabs mktpl-tabs mktpl-tabs" auto / 1fr 320px 36px;
+	padding: 0 $content-spacing-large;
+	width: 100%;
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 32px);
+	z-index: 1;
+
+	// On narrow screens, "stack" header items and hide the bottom border
+	@media screen and (max-width: $breakpoint-medium) {
+		border-bottom: 0;
+		grid-template: "mktpl-title mktpl-meta" 60px
+			"mktpl-tabs mktpl-tabs" 48px
+			"mktpl-search mktpl-search" auto / auto 48px;
+		padding: 0;
+	}
+
+	.woocommerce-marketplace__header-title {
+		font-size: 14px;
+		font-weight: 600;
+		margin: 0;
+		padding: 10px 0 0;
+
+		@media screen and (max-width: $breakpoint-medium) {
+			padding-left: var(--large-gap);
+		}
+	}
+}
+
+.woocommerce-marketplace--my-subscriptions {
+	@media screen and (max-width: $breakpoint-medium) {
+		.woocommerce-marketplace__search {
+			display: none;
+		}
+	}
+}
+
+.woocommerce-marketplace__header-title {
+	align-items: center;
+	align-self: stretch;
+	display: flex;
+	grid-area: mktpl-title;
+	line-height: 18px;
+
+	@media screen and (max-width: $breakpoint-medium) {
+		padding: 0 $content-spacing-small;
+	}
+}
+
+.woocommerce-marketplace__header-meta {
+	grid-area: mktpl-meta;
+	justify-self: end;
+	padding-top: 10px;
+
+	@media screen and (max-width: $breakpoint-medium) {
+		margin-right: $content-spacing-small;
+		padding: 0;
+	}
+}
+
+.woocommerce-marketplace__header-tabs {
+	align-self: end;
+	grid-area: mktpl-tabs;
+
+	@media screen and (max-width: $breakpoint-medium) {
+		padding: 0 $content-spacing-small;
+	}
+}
