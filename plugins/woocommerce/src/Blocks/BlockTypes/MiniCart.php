@@ -220,6 +220,11 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
+		$cache = get_site_transient( 'woocommerce_mini_cart_frontend_dependencies' );
+		if ( $cache ) {
+			$this->add_inline_script_data( $cache );
+			return;
+		}
 		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
 
 		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
@@ -282,7 +287,17 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
-		$data                          = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
+		$data = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
+		set_site_transient( 'woocommerce_mini_cart_frontend_dependencies', $data, MONTH_IN_SECONDS );
+		$this->add_inline_script_data( $data );
+	}
+
+	/**
+	 * Add inline script data.
+	 *
+	 * @param string JSON string to pass to the frontend scripts.
+	 */
+	protected function add_inline_script_data( $data ) {
 		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 
 		wp_add_inline_script(
