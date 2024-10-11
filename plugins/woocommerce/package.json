@@ -744,9 +744,9 @@
 			]
 		},
 		"build:project:copy-assets:admin": {
-			"command": "rsync -avhW --checksum --delete --quiet ../woocommerce-admin/build/ assets/client/admin",
+			"command": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin",
 			"files": [
-				"../woocommerce-admin/build/**/*.*"
+				"client/admin/build/**/*.*"
 			],
 			"output": [
 				"assets/client/admin"

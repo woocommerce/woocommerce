@@ -19,7 +19,7 @@ const UnminifyWebpackPlugin = require( './unminify' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-style-build' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js/dependency-extraction-webpack-plugin/src/index' );
+const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -34,7 +34,7 @@ const getSubdirectoriesAt = ( searchPath ) => {
 		.map( ( entry ) => entry.name );
 };
 
-const WC_ADMIN_PACKAGES_DIR = '../../packages/js';
+const WC_ADMIN_PACKAGES_DIR = '../../../../packages/js';
 const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
 
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
@@ -143,7 +143,7 @@ const webpackConfig = {
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
-							'../../node_modules/.cache/babel-loader'
+							'../../../../node_modules/.cache/babel-loader'
 						),
 						cacheCompression: false,
 					},
@@ -194,7 +194,7 @@ const webpackConfig = {
 		new CopyWebpackPlugin( {
 			patterns: wcAdminPackages.map( ( packageName ) => ( {
 				// Copy css and style.asset.php files.
-				from: `../../packages/js/${ packageName }/build-style/*.{css,php}`,
+				from: `../../../../packages/js/${ packageName }/build-style/*.{css,php}`,
 				to: `./${ packageName }/[name][ext]`,
 				noErrorOnMissing: true,
 				// Overwrites files already in compilation.assets to ensure we use the assets from the build-style.
@@ -207,7 +207,7 @@ const webpackConfig = {
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
-					from: '../../packages/js/product-editor/build/blocks',
+					from: '../../../../packages/js/product-editor/build/blocks',
 					to: './product-editor/blocks',
 				},
 			],

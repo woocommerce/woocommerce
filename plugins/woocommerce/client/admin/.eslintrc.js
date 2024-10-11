@@ -47,7 +47,7 @@ module.exports = {
 			node: {},
 			webpack: {},
 			typescript: {
-				project: [ 'plugins/woocommerce-admin/tsconfig.json' ],
+				project: [ 'plugins/woocommerce/client/admin/tsconfig.json' ],
 			},
 		},
 	},
