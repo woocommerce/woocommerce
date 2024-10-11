@@ -114,6 +114,7 @@ export const TotalsShipping = ( {
 								<ShippingPlaceholder
 									showCalculator={ showCalculator }
 									isCheckout={ isCheckout }
+									addressProvided={ addressComplete }
 									isShippingCalculatorOpen={
 										isShippingCalculatorOpen
 									}

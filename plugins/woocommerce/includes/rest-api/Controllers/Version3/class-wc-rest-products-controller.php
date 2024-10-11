@@ -8,6 +8,7 @@
  * @since   2.6.0
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,6 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_Products_V2_Controller
  */
 class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
+
+	use CogsAwareRestControllerTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -895,6 +898,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 		}
 
+		if ( $this->cogs_is_enabled() ) {
+			$this->set_cogs_info_in_product_object( $request, $product );
+		}
+
 		/**
 		 * Filters an object before it is inserted via the REST API.
 		 *
@@ -1559,6 +1566,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
+		if ( $this->cogs_is_enabled() ) {
+			$schema = $this->add_cogs_related_schema( $schema, false );
+		}
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -1746,5 +1757,24 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$this->suggested_products_ids = array_slice( $this->suggested_products_ids, 0, $limit );
 
 		return parent::get_items( $request );
+	}
+
+	/**
+	 * Core function to prepare a single product output for response
+	 * (doesn't fire hooks, ensure_response, or add links).
+	 *
+	 * @param WC_Data         $object_data Object data.
+	 * @param WP_REST_Request $request Request object.
+	 * @param string          $context Request context.
+	 * @return array Product data to be included in the response.
+	 */
+	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
+		$data = parent::prepare_object_for_response_core( $object_data, $request, $context );
+
+		if ( $this->cogs_is_enabled() ) {
+			$this->add_cogs_info_to_returned_data( $data, $object_data );
+		}
+
+		return $data;
 	}
 }
