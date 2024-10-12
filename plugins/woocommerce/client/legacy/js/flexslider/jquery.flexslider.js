@@ -556,7 +556,7 @@
       smoothHeight: function(dur) {
         if (!vertical || fade) {
           var $obj = (fade) ? slider : slider.viewport;
-          (dur) ? $obj.css({"height": slider.slides.eq(slider.animatingTo).innerHeight(), "transition": "height " + dur + "ms"}) : $obj.innerHeight(slider.slides.eq(slider.animatingTo).innerHeight());
+          $obj.css({"height": slider.slides.eq(slider.animatingTo).innerHeight(), "transition": dur ? ("height " + dur + "ms") : "none"});
         }
       },
       sync: function(action) {
