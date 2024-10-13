@@ -1064,7 +1064,8 @@ class ProductCollection extends AbstractBlock {
 			);
 		}
 
-		if ( 'sales' === $orderby ) {
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' === $orderby || 'popularity' === $orderby ) {
 			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
 			return array(
 				'isProductCollection' => true,
@@ -1073,8 +1074,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$meta_keys = array(
-			'popularity' => 'total_sales',
-			'rating'     => '_wc_average_rating',
+			'rating' => '_wc_average_rating',
 		);
 
 		return array(
@@ -1791,7 +1791,9 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby = $query_vars['orderby'] ?? null;
-		if ( 'sales' !== $orderby ) {
+
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' !== $orderby && 'popularity' !== $orderby ) {
 			return $clauses;
 		}
 
@@ -1799,8 +1801,8 @@ class ProductCollection extends AbstractBlock {
 		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
 
 		$clauses['orderby'] = $is_ascending_order ?
-			'wc_product_meta_lookup.total_sales ASC' :
-			'wc_product_meta_lookup.total_sales DESC';
+			'wc_product_meta_lookup.total_sales ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.total_sales DESC, wc_product_meta_lookup.product_id DESC';
 
 		return $clauses;
 	}
