@@ -389,6 +389,23 @@ class WC_Meta_Box_Order_Data {
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
+					<?php
+						/**
+						 * Hook allowing extenders to control visibility of the
+						 * Billing details.
+						 *
+						 * This allows control over the visibility of the billing
+						 * details. Example: Hide sensitive customer data for specific
+						 * types of WordPress users.
+						 *
+						 * @param boolean $is_billing_visible Is billing visible to users.
+						 * @since TBD
+						 */
+
+						$is_billing_visible = (bool) apply_filters( 'woocommerce_admin_order_data_display_billing_details', true );
+
+						if ( $is_billing_visible ):
+					?>
 					<div class="order_data_column">
 						<h3>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
@@ -513,6 +530,25 @@ class WC_Meta_Box_Order_Data {
 						</div>
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
+					<?php
+						endif;
+
+						/**
+						 * Hook allowing extenders to control visibility of the
+						 * Shipping details.
+						 *
+						 * This allows control over the visibility of the shipping
+						 * details. Example: Hide sensitive customer data for specific
+						 * types of WordPress users.
+						 *
+						 * @param boolean $is_shipping_visible Is shipping visible to users.
+						 * @since TBD
+						 */
+
+						$is_shipping_visible = (bool) apply_filters( 'woocommerce_admin_order_data_display_shipping_details', true );
+
+						if ( $is_shipping_visible ):
+					?>
 					<div class="order_data_column">
 						<h3>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
@@ -622,6 +658,7 @@ class WC_Meta_Box_Order_Data {
 
 						<?php do_action( 'woocommerce_admin_order_data_after_shipping_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
+					<?php endif; ?>
 				</div>
 				<div class="clear"></div>
 			</div>
