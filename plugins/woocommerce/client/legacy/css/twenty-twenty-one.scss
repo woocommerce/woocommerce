@@ -66,6 +66,10 @@ a.button {
 	.woocommerce-form-login__rememberme {
 		margin: 1rem 0 3rem 0;
 	}
+
+	.asterisk {
+		@include asterisk();
+	}
 }
 
 .woocommerce-notices-wrapper:empty {
@@ -582,7 +586,7 @@ table.variations {
 	}
 }
 
-a.reset_variations {
+button.reset_variations {
 	margin-left: 0.5em;
 }
 

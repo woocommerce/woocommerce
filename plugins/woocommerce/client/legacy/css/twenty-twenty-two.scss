@@ -332,7 +332,7 @@ $tt2-gray: #f7f7f7;
 
 		}
 
-		a.reset_variations {
+		button.reset_variations {
 			margin-left: 0.5em;
 		}
 
@@ -523,6 +523,10 @@ $tt2-gray: #f7f7f7;
 			border: 2px solid var(--wp--preset--color--primary);
 			padding: 0.7rem 2rem;
 		}
+	}
+
+	.asterisk {
+		@include asterisk();
 	}
 }
 

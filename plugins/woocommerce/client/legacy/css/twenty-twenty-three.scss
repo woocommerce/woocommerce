@@ -331,7 +331,7 @@
 
 		}
 
-		a.reset_variations {
+		button.reset_variations {
 			margin-left: 0.5em;
 		}
 
@@ -515,6 +515,10 @@
 				}
 			}
 		}
+	}
+
+	.asterisk {
+		@include asterisk();
 	}
 }
 

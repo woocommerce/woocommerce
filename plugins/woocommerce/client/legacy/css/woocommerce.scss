@@ -58,6 +58,10 @@ p.demo_store,
 	clear: both;
 }
 
+.asterisk {
+	@include asterisk();
+}
+
 /**
  * Main WooCommerce styles
  */

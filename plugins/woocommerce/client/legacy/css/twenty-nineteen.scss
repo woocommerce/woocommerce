@@ -48,6 +48,10 @@ a.button {
 			visibility: visible;
 		}
 	}
+
+	.asterisk {
+		@include asterisk();
+	}
 }
 
 .woocommerce-breadcrumb {
