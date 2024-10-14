@@ -2540,8 +2540,7 @@ function wc_get_server_database_version() {
 		);
 	}
 
-	// phpcs:ignore WordPress.DB.RestrictedFunctions
-	$server_info = mysqli_get_server_info( $wpdb->dbh );
+	$server_info = $wpdb->get_var( 'SELECT VERSION()' );
 
 	return array(
 		'string' => $server_info,
