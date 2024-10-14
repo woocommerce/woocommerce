@@ -1,4 +1,3 @@
-const path = require( 'path' );
 const CopyPlugin = require( 'copy-webpack-plugin' );
 
 const buildMode = process.env.NODE_ENV || 'production';
@@ -12,7 +11,7 @@ module.exports = {
 			{
 				test: /\.tsx?$/,
 				use: 'ts-loader',
-				exclude: /node_modules/,
+				include: [ __dirname + '/src' ],
 			},
 		],
 	},
@@ -22,13 +21,16 @@ module.exports = {
 	plugins: [
 		new CopyPlugin( {
 			patterns: [
-				{ from: 'node_modules/figlet/fonts/Standard.flf', to: '../fonts/Standard.flf' },
+				{
+					from: 'node_modules/figlet/fonts/Standard.flf',
+					to: '../fonts/Standard.flf',
+				},
 			],
 		} ),
 	],
 	output: {
 		filename: 'index.js',
-		path: path.resolve( __dirname, 'dist' ),
+		path: __dirname + '/dist',
 		clean: true,
 	},
 };
