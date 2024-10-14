@@ -32,7 +32,7 @@ const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 async function installPatterns() {
 	await apiFetch( {
-		path: '/wc-admin/patterns',
+		path: '/wc/private/patterns',
 		method: 'POST',
 	} );
 
