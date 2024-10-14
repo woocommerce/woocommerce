@@ -301,8 +301,8 @@
 		"wordpress-components-slotfill": "npm:@wordpress/components@wp-6.5"
 	},
 	"peerDependencies": {
-		"react": "^18.3.0",
-		"react-dom": "^18.3.0"
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
 	},
 	"optionalDependencies": {
 		"ndb": "1.1.5"

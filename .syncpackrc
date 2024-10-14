@@ -83,7 +83,6 @@
 				"glob*",
 				"jest*",
 				"postcss*",
-				"react*",
 				"typescript",
 				"webpack*"
 			],
@@ -100,6 +99,20 @@
 			"pinVersion": "^5.62.0",
 			"packages": [
 				"**"
+			]
+		},
+		{
+			"label": "React-related dependencies: React 18",
+			"dependencies": [
+				"react",
+				"react-dom",
+				"@types/react-dom",
+				"@types/react",
+			],
+			"pinVersion": "18.3.x",
+			"packages": [
+				"@woocommerce/block-library",
+				"@woocommerce/storybook"
 			]
 		},
 		{
