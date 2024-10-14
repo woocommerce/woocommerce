@@ -26,12 +26,15 @@ The various template files on your WooCommerce site can be found via an FTP clie
 
 | Latest Version | Files |
 | -------------- | ----- | 
-| 8.9            | [View template files](https://github.com/woocommerce/woocommerce/tree/8.9.0/plugins/woocommerce/templates) |
+| 9.2.0            | [View template files](https://github.com/woocommerce/woocommerce/tree/9.2.0/plugins/woocommerce/templates) |
 
 Below are the links to the files of all major previous WooCommerce versions: 
 
 | Version        | Files |
 | -------------- | ----- | 
+| 9.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/9.1.0/plugins/woocommerce/templates) |
+| 9.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/9.0.0/plugins/woocommerce/templates) |
+| 8.9.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.9.0/plugins/woocommerce/templates) |
 | 8.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.8.0/plugins/woocommerce/templates) |
 | 8.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.7.0/plugins/woocommerce/templates) |
 | 8.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.6.0/plugins/woocommerce/templates) |
