@@ -31,9 +31,18 @@ class CheckoutActionsBlock extends AbstractInnerBlock {
 		register_block_style(
 			$this->get_full_block_name(),
 			array(
-				'name'       => 'default-separator',
-				'label'      => __( 'Default Separator', 'woocommerce' ),
+				'name'       => 'dot-separator',
+				'label'      => __( '"Dot" Separator', 'woocommerce' ),
 				'is_default' => true,
+			)
+		);
+
+		register_block_style(
+			$this->get_full_block_name(),
+			array(
+				'name'       => 'dash-separator',
+				'label'      => __( '"Dash" Separator', 'woocommerce' ),
+				'is_default' => false,
 			)
 		);
 	}
