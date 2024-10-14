@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Don't load fonts for the Coming soon page when the site is live
