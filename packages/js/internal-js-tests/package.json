@@ -52,10 +52,10 @@
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"babel-jest": "~27.5.1",
+		"babel-jest": "27.5.x",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
 		"resize-observer-polyfill": "1.5.1",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",

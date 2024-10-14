@@ -375,9 +375,13 @@
 			"pinVersion": "^16.18.68"
 		},
 		{
+			"label": "Testing related dependencies: React 17",
 			"dependencies": [
+				"@jest/test-sequencer",
 				"jest",
 				"jest-cli",
+				"jest-circus",
+				"jest-each",
 				"jest-environment-jsdom",
 				"jest-environment-node",
 				"babel-jest"
@@ -385,7 +389,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~27.5.1"
+			"pinVersion": "27.5.x"
 		},
 		{
 			"dependencies": [
