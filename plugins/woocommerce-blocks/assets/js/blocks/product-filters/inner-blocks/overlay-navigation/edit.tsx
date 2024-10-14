@@ -17,7 +17,6 @@ import type {
 	BlockContext,
 	BlockVariationTriggerType,
 } from './types';
-import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../../constants';
 import './editor.scss';
 import { Inspector } from './inspector-controls';
 
@@ -130,7 +129,7 @@ const OverlayNavigationContent = ( {
 
 type BlockProps = BlockEditProps< BlockAttributes > & { context: BlockContext };
 
-export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
+export const Edit = ( { attributes, setAttributes }: BlockProps ) => {
 	const {
 		navigationStyle,
 		buttonStyle,
@@ -139,57 +138,19 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 		style,
 		triggerType,
 	} = attributes;
-	const { 'woocommerce/product-filters/overlay': productFiltersOverlayMode } =
-		context;
+
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters-overlay-navigation', {
 			'wp-block-button__link wp-element-button': buttonStyle !== 'link',
 		} ),
 	} );
-	const {
-		isWithinProductFiltersOverlayTemplatePart,
-	}: {
-		isWithinProductFiltersOverlayTemplatePart: boolean;
-	} = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const { getCurrentPostId, getCurrentPostType } =
-			select( 'core/editor' );
-		const currentPostId = getCurrentPostId< string >();
-		const currentPostIdParts = currentPostId?.split( '//' );
-		const currentPostType = getCurrentPostType< string >();
-		let isProductFiltersOverlayTemplatePart = false;
-
-		if (
-			currentPostType === 'wp_template_part' &&
-			currentPostIdParts?.length > 1
-		) {
-			const [ , postId ] = currentPostIdParts;
-			isProductFiltersOverlayTemplatePart =
-				postId === 'product-filters-overlay';
-		}
-
-		return {
-			isWithinProductFiltersOverlayTemplatePart:
-				isProductFiltersOverlayTemplatePart,
-		};
-	} );
 
 	const shouldHideBlock = () => {
 		if ( triggerType === 'open-overlay' ) {
-			if (
-				productFiltersOverlayMode ===
-				ProductFiltersBlockOverlayAttribute.NEVER
-			) {
-				return true;
-			}
-
-			if ( isWithinProductFiltersOverlayTemplatePart ) {
-				return true;
-			}
+			return false;
 		}
 
-		return false;
+		return true;
 	};
 	// We need useInnerBlocksProps because Gutenberg only applies layout classes
 	// to parent block. We don't have any inner blocks but we want to use the
