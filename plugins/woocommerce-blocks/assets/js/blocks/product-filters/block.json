@@ -21,8 +21,8 @@
 			"background": true,
 			"text": true
 		},
-		"multiple": false,
-		"inserter": false,
+		"multiple": true,
+		"inserter": true,
 		"interactivity": true,
 		"typography": {
 			"fontSize": true,
