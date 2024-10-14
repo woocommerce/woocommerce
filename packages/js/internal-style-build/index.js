@@ -15,7 +15,7 @@ const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 
 /**
  * https://github.com/woocommerce/woocommerce/pull/47486: do not break build if TS emits errors - React 18 migration related.
- * The solution is based https://github.com/TypeStrong/fork-ts-checker-webpack-plugin/issues/232#issuecomment-1322651312.
+ * The solution is based on https://github.com/TypeStrong/fork-ts-checker-webpack-plugin/issues/232#issuecomment-1322651312.
  *
  * @deprecated intended for React version migration and can be dropped from exports any time without further notice.
  */
