@@ -366,7 +366,7 @@ class ReceiptRenderingEngine {
 
 		$line_items_info[] = array(
 			'type'   => 'amount_paid',
-			'title'  => $is_order_failed ? __( 'Amount', 'woocommerce' ) :  __( 'Amount Paid', 'woocommerce' ),
+			'title'  => $is_order_failed ? __( 'Amount', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
 			'amount' => wc_price( $order->get_total(), $get_price_args ),
 		);
 
@@ -383,8 +383,8 @@ class ReceiptRenderingEngine {
 			),
 			'texts'            => array(
 				'receipt_title'                => $receipt_title,
-				'amount_paid_section_title'    => $is_order_failed ? __( 'Order Total', 'woocommerce' ) :  __( 'Amount Paid', 'woocommerce' ),
-				'date_paid_section_title'      => $is_order_failed ? __( 'Order Date' ) : __( 'Date Paid', 'woocommerce' ),
+				'amount_paid_section_title'    => $is_order_failed ? __( 'Order Total', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
+				'date_paid_section_title'      => $is_order_failed ? __( 'Order Date', 'woocommerce' ) : __( 'Date Paid', 'woocommerce' ),
 				'payment_method_section_title' => __( 'Payment method', 'woocommerce' ),
 				'summary_section_title'        => $summary_title,
 				'order_notes_section_title'    => __( 'Notes', 'woocommerce' ),
