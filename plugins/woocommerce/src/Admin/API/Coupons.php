@@ -1,5 +1,5 @@
 <?php
-/**
+/** 
  * REST API Coupons Controller
  *
  * Handles requests to /coupons/*
