@@ -39,7 +39,7 @@ const StorePerformance = ( props ) => (
 	</Suspense>
 );
 
-const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
+export const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
 
 /**
  * An object defining a dashboard section.
