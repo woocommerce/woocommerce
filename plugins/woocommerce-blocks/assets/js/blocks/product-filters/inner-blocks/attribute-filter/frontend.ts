@@ -19,7 +19,7 @@ store( 'woocommerce/product-filter-attribute', {
 		toggleFilter: () => {
 			const { ref } = getElement();
 			const targetAttribute =
-				ref.getAttribute( 'data-attribute-value' ) ?? 'value';
+				ref.getAttribute( 'data-target-value' ) ?? 'value';
 			const termSlug = ref.getAttribute( targetAttribute );
 
 			if ( ! termSlug ) return;
