@@ -1,46 +1,78 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
-import { Disabled } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { EditProps } from './types';
 import { Inspector } from './components/inspector';
-import { RemovableListItem } from './components/removable-list-item';
+import { InitialDisabled } from '../../components/initial-disabled';
+import { EXCLUDED_BLOCKS } from '../../constants';
+import { getAllowedBlocks } from '../../utils';
 
 const Edit = ( props: EditProps ) => {
-	const { displayStyle } = props.attributes;
+	const { attributes: blockAttributes } = props;
 
-	const blockProps = useBlockProps( {
-		className: 'wc-block-active-filters',
-	} );
+	const { displayStyle } = blockAttributes;
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		useBlockProps(),
+		{
+			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+			template: [
+				[
+					'core/group',
+					{
+						layout: {
+							type: 'flex',
+							flexWrap: 'nowrap',
+						},
+						metadata: {
+							name: __( 'Header', 'woocommerce' ),
+						},
+						style: {
+							spacing: {
+								blockGap: '0',
+							},
+						},
+					},
+					[
+						[
+							'core/heading',
+							{
+								level: 3,
+								content: __( 'Active', 'woocommerce' ),
+							},
+						],
+						[
+							'woocommerce/product-filter-clear-button',
+							{
+								lock: {
+									remove: true,
+									move: false,
+								},
+							},
+						],
+					],
+				],
+				[
+					displayStyle,
+					{
+						lock: {
+							remove: true,
+						},
+					},
+				],
+			],
+		}
+	);
 
 	return (
-		<div { ...blockProps }>
+		<div { ...innerBlocksProps }>
 			<Inspector { ...props } />
-			<Disabled>
-				<ul
-					className={ clsx( 'filter-list', {
-						'list-chips': displayStyle === 'chips',
-					} ) }
-				>
-					<RemovableListItem
-						type={ __( 'Size', 'woocommerce' ) }
-						name={ __( 'Small', 'woocommerce' ) }
-						displayStyle={ displayStyle }
-					/>
-					<RemovableListItem
-						type={ __( 'Color', 'woocommerce' ) }
-						name={ __( 'Blue', 'woocommerce' ) }
-						displayStyle={ displayStyle }
-					/>
-				</ul>
-			</Disabled>
+			<InitialDisabled>{ children }</InitialDisabled>
 		</div>
 	);
 };

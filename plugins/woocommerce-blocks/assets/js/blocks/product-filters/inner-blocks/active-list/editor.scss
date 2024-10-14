@@ -1,0 +1,10 @@
+.wc-block-product-filter-active-list.is-loading {
+	.wc-block-product-filter-active-list__list {
+		padding: 0;
+
+		li {
+			@include placeholder();
+			margin: 5px 0;
+		}
+	}
+}

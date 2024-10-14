@@ -4,7 +4,7 @@
 import { BlockEditProps } from '@wordpress/blocks';
 
 export type BlockAttributes = {
-	displayStyle: 'list' | 'chips';
+	displayStyle: string;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

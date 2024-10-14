@@ -26,7 +26,11 @@
 	"attributes": {
 		"displayStyle": {
 			"type": "string",
-			"default": "chips"
+			"default": "woocommerce/product-filter-active-chips"
+		},
+		"clearButton": {
+			"type": "boolean",
+			"default":true
 		}
 	}
 }

@@ -3,6 +3,9 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { dispatch, useSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
+import { Block, getBlockTypes, createBlock } from '@wordpress/blocks';
 import {
 	PanelBody,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -15,30 +18,75 @@ import {
  * Internal dependencies
  */
 import type { EditProps, BlockAttributes } from '../types';
+import { getInnerBlockByName } from '../../../utils';
 
-export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
+let displayStyleOptions: Block[] = [];
+
+export const Inspector = ( {
+	clientId,
+	attributes,
+	setAttributes,
+}: EditProps ) => {
 	const { displayStyle } = attributes;
+	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
+	const filterBlock = useSelect(
+		( select ) => {
+			return select( 'core/block-editor' ).getBlock( clientId );
+		},
+		[ clientId ]
+	);
+	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
+		useState< Record< string, unknown > >( {} );
+
+	if ( displayStyleOptions.length === 0 ) {
+		displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
+			blockType.ancestor?.includes( 'woocommerce/product-filter-active' )
+		);
+	}
 
 	return (
-		<InspectorControls>
-			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
+		<InspectorControls group="styles">
+			<PanelBody title={ __( 'Display', 'woocommerce' ) }>
 				<ToggleGroupControl
-					label={ __( 'Display Style', 'woocommerce' ) }
 					value={ displayStyle }
-					onChange={ ( value: BlockAttributes[ 'displayStyle' ] ) =>
-						setAttributes( {
-							displayStyle: value,
-						} )
-					}
+					onChange={ ( value: BlockAttributes[ 'displayStyle' ] ) => {
+						if ( ! filterBlock ) return;
+						const currentStyleBlock = getInnerBlockByName(
+							filterBlock,
+							displayStyle
+						);
+
+						if ( currentStyleBlock ) {
+							setDisplayStyleBlocksAttributes( {
+								...displayStyleBlocksAttributes,
+								[ displayStyle ]: currentStyleBlock.attributes,
+							} );
+							replaceBlock(
+								currentStyleBlock.clientId,
+								createBlock(
+									value,
+									displayStyleBlocksAttributes[ value ] || {}
+								)
+							);
+						} else {
+							insertBlock(
+								createBlock( value ),
+								filterBlock.innerBlocks.length,
+								filterBlock.clientId,
+								false
+							);
+						}
+						setAttributes( { displayStyle: value } );
+					} }
+					style={ { width: '100%' } }
 				>
-					<ToggleGroupControlOption
-						value="list"
-						label={ __( 'List', 'woocommerce' ) }
-					/>
-					<ToggleGroupControlOption
-						value="chips"
-						label={ __( 'Chips', 'woocommerce' ) }
-					/>
+					{ displayStyleOptions.map( ( blockType ) => (
+						<ToggleGroupControlOption
+							key={ blockType.name }
+							label={ blockType.title }
+							value={ blockType.name }
+						/>
+					) ) }
 				</ToggleGroupControl>
 			</PanelBody>
 		</InspectorControls>

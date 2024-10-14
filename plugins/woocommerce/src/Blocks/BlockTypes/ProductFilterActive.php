@@ -57,7 +57,7 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$list_classes = 'filter-list';
 
-		if ( 'chips' === $attributes['displayStyle'] ) {
+		if ( 'woocommerce/product-filter-active-chips' === $attributes['displayStyle'] ) {
 			$list_classes .= ' list-chips';
 		}
 
@@ -95,7 +95,7 @@ final class ProductFilterActive extends AbstractBlock {
 	 */
 	private function render_items( $items, $style ) {
 		foreach ( $items as $item ) {
-			if ( 'chips' === $style ) {
+			if ( 'woocommerce/product-filter-active-chips' === $style ) {
 				$this->render_chip_item( $item );
 			} else {
 				$this->render_list_item( $item );

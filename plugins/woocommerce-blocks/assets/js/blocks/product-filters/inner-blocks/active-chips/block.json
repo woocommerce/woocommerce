@@ -1,0 +1,58 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-active-chips",
+	"version": "1.0.0",
+	"title": "Chips",
+	"description": "Display active filters as chips.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-active"
+	],
+	"supports": {},
+	"usesContext": [
+		"filterData"
+	],
+	"attributes": {
+		"chipText":{
+			"type": "string"
+		},
+		"customChipText":{
+			"type": "string"
+		},
+		"chipBackground":{
+			"type": "string"
+		},
+		"customChipBackground":{
+			"type": "string"
+		},
+		"chipBorder":{
+			"type": "string"
+		},
+		"customChipBorder":{
+			"type": "string"
+		},
+		"selectedChipText":{
+			"type": "string"
+		},
+		"customSelectedChipText":{
+			"type": "string"
+		},
+		"selectedChipBackground":{
+			"type": "string"
+		},
+		"customSelectedChipBackground":{
+			"type": "string"
+		},
+		"selectedChipBorder":{
+			"type": "string"
+		},
+		"customSelectedChipBorder":{
+			"type": "string"
+		}
+	}
+}

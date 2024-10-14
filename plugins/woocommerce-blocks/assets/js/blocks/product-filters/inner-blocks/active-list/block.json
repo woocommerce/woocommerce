@@ -1,0 +1,50 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-active-list",
+	"version": "1.0.0",
+	"title": "List",
+	"description": "Display active filters as lists.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-active"
+	],
+	"supports": {
+		"color": {
+			"enableContrastChecker": false
+		}
+	},
+	"usesContext": [
+		"filterData"
+	],
+	"attributes": {
+		"optionElementBorder": {
+			"type": "string",
+			"default": ""
+		},
+		"customOptionElementBorder": {
+			"type": "string",
+			"default": ""
+		},
+		"optionElementSelected": {
+			"type": "string",
+			"default": ""
+		},
+		"customOptionElementSelected": {
+			"type": "string",
+			"default": ""
+		},
+		"optionElement": {
+			"type": "string",
+			"default": ""
+		},
+		"customOptionElement": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
