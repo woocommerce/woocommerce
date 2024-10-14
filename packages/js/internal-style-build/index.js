@@ -20,10 +20,22 @@ const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
  * @deprecated intended for React version migration and can be dropped from exports any time without further notice.
  */
 class TypeScriptWarnOnlyWebpackPlugin {
+	constructor( error_codes ) {
+		this.error_codes = error_codes;
+	}
+
 	apply( compiler ) {
 		const hooks = ForkTsCheckerWebpackPlugin.getCompilerHooks( compiler );
 		hooks.issues.tap( 'TypeScriptWarnOnlyWebpackPlugin', ( issues ) =>
-			issues.map( ( issue ) => ( { ...issue, severity: 'warning' } ) )
+			issues.map( function ( issue ) {
+				const mutate =
+					issue.severity === 'error' &&
+					this.error_codes.includes( issue.code );
+				return {
+					...issue,
+					severity: mutate ? 'warning' : issue.severity,
+				};
+			} )
 		);
 	}
 }
