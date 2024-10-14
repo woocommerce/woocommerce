@@ -225,7 +225,7 @@
 		"style-loader": "^0.23.1",
 		"stylelint": "^14.16.1",
 		"ts-jest": "29.1.x",
-		"typescript": "^5.3.3",
+		"typescript": "5.3.x",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.89.0",
 		"webpack-bundle-analyzer": "^3.9.0",

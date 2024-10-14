@@ -82,7 +82,6 @@
 				"eslint*",
 				"glob*",
 				"postcss*",
-				"typescript",
 				"webpack*"
 			],
 			"packages": [
@@ -143,7 +142,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^5.3.3"
+			"pinVersion": "5.3.x"
 		},
 		{
 			"dependencies": [
@@ -419,6 +418,15 @@
 		},
 		{
 			"dependencies": [
+				"ts-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "9.5.x"
+		},
+		{
+			"dependencies": [
 				"wireit"
 			],
 			"packages": [
@@ -439,7 +447,6 @@
 				"pnpm",
 				"postcss",
 				"postcss-loader",
-				"typescript"
 			],
 			"packages": [
 				"**"

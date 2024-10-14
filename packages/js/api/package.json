@@ -64,7 +64,7 @@
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"ts-jest": "29.1.x",
-		"typescript": "^5.3.3",
+		"typescript": "5.3.x",
 		"wireit": "0.14.3"
 	},
 	"publishConfig": {

@@ -33,8 +33,8 @@
 		"babel-jest": "27.5.x",
 		"eslint": "^8.55.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
-		"ts-loader": "^9.5.1",
-		"typescript": "^5.3.3",
+		"ts-loader": "9.5.x",
+		"typescript": "5.3.x",
 		"uglify-js": "^3.17.4",
 		"wireit": "0.14.3"
 	},

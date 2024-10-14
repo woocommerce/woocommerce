@@ -62,7 +62,7 @@
 		"jest-cli": "27.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "^5.3.3",
+		"typescript": "5.3.x",
 		"wireit": "0.14.3"
 	},
 	"lint-staged": {
