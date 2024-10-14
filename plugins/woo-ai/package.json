@@ -21,8 +21,8 @@
 		"@testing-library/user-event": "13.5.0",
 		"@types/debug": "^4.1.12",
 		"@types/jquery": "^3.5.29",
-		"@types/react": "^17.0.71",
-		"@types/react-dom": "^17.0.25",
+		"@types/react": "17.0.x",
+		"@types/react-dom": "17.0.x",
 		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -89,8 +89,8 @@
 		"react-query": "^3.39.3"
 	},
 	"peerDependencies": {
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "17.0.x",
+		"react-dom": "17.0.x"
 	},
 	"engines": {
 		"node": "^20.11.1",

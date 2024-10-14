@@ -85,7 +85,7 @@
 		"@types/md5": "^2.3.5",
 		"@types/node": "^16.18.68",
 		"@types/qs": "^6.9.10",
-		"@types/react": "^17.0.71",
+		"@types/react": "17.0.x",
 		"@types/wordpress__compose": "4.0.1",
 		"@types/wordpress__core-data": "2.4.5",
 		"@types/wordpress__data": "6.0.0",
@@ -98,15 +98,15 @@
 		"jest-cli": "~27.5.1",
 		"redux": "^4.2.1",
 		"rimraf": "5.0.5",
-		"ts-jest": "~29.1.1",
+		"ts-jest": "29.1.x",
 		"typescript": "^5.3.3",
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
 		"@wordpress/core-data": "wp-6.0",
 		"moment": "^2.18.1",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "17.0.x",
+		"react-dom": "17.0.x"
 	},
 	"config": {
 		"ci": {

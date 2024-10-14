@@ -103,19 +103,14 @@
 			]
 		},
 		{
+			"label": "React-related dependencies: React 17",
 			"dependencies": [
-				"@types/react"
+				"react",
+				"react-dom",
+				"@types/react-dom",
+				"@types/react",
 			],
-			"pinVersion": "^17.0.71",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@types/react-dom"
-			],
-			"pinVersion": "^17.0.25",
+			"pinVersion": "17.0.x",
 			"packages": [
 				"**"
 			]
@@ -128,16 +123,6 @@
 				"**"
 			],
 			"pinVersion": "3.3.7"
-		},
-		{
-			"dependencies": [
-				"react",
-				"react-dom"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^17.0.2"
 		},
 		{
 			"dependencies": [
@@ -396,7 +381,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~29.1.1"
+			"pinVersion": "29.1.x"
 		},
 		{
 			"dependencies": [
@@ -411,7 +396,6 @@
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@types/node",
-				"@types/react",
 				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"@wordpress/**",
@@ -421,8 +405,6 @@
 				"pnpm",
 				"postcss",
 				"postcss-loader",
-				"react",
-				"react-dom",
 				"typescript"
 			],
 			"packages": [
