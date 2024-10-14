@@ -24,14 +24,21 @@ const PaymentMethods = () => {
 		paymentMethodsInitialized,
 		availablePaymentMethods,
 		savedPaymentMethods,
+		isExpressPaymentMethodActive,
 	} = useSelect( ( select ) => {
 		const store = select( PAYMENT_STORE_KEY );
 		return {
 			paymentMethodsInitialized: store.paymentMethodsInitialized(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
 			savedPaymentMethods: store.getSavedPaymentMethods(),
+			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
 		};
 	} );
+
+	// If using an express payment method, don't show the regular payment methods.
+	if ( isExpressPaymentMethodActive ) {
+		return null;
+	}
 
 	if (
 		paymentMethodsInitialized &&

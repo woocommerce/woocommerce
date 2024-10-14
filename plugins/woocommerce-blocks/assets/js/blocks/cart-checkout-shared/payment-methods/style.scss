@@ -149,6 +149,13 @@
 	pointer-events: all; // Overrides parent disabled component in editor context
 }
 
+.wc-payment-method-options-placeholder {
+	display: block;
+	height: 100px;
+	width: 100%;
+	@include placeholder();
+}
+
 .is-mobile,
 .is-small {
 	.wc-block-card-elements {
