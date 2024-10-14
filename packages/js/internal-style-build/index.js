@@ -25,12 +25,12 @@ class TypeScriptWarnOnlyWebpackPlugin {
 	}
 
 	apply( compiler ) {
+		const codes = this.error_codes;
 		const hooks = ForkTsCheckerWebpackPlugin.getCompilerHooks( compiler );
 		hooks.issues.tap( 'TypeScriptWarnOnlyWebpackPlugin', ( issues ) =>
 			issues.map( function ( issue ) {
 				const mutate =
-					issue.severity === 'error' &&
-					this.error_codes.includes( issue.code );
+					issue.severity === 'error' && codes.includes( issue.code );
 				return {
 					...issue,
 					severity: mutate ? 'warning' : issue.severity,
