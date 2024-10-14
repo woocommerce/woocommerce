@@ -11,4 +11,30 @@ class CheckoutActionsBlock extends AbstractInnerBlock {
 	 * @var string
 	 */
 	protected $block_name = 'checkout-actions-block';
+
+	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+
+		add_action( 'wp_loaded', array( $this, 'register_style_variations' ) );
+	}
+
+	/**
+	 * Register style variations for the block.
+	 */
+	public function register_style_variations() {
+		register_block_style(
+			$this->get_full_block_name(),
+			array(
+				'name'       => 'default-separator',
+				'label'      => __( 'Default Separator', 'woocommerce' ),
+				'is_default' => true,
+			)
+		);
+	}
 }

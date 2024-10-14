@@ -18,17 +18,21 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { defaultPlaceOrderButtonLabel } from './constants';
 import './style.scss';
 
-const Block = ( {
-	cartPageId,
-	showReturnToCart,
-	className,
-	placeOrderButtonLabel,
-}: {
+export type BlockAttributes = {
 	cartPageId: number;
 	showReturnToCart: boolean;
 	className?: string;
 	placeOrderButtonLabel: string;
-} ): JSX.Element => {
+	showPrice: boolean;
+};
+
+const Block = ( {
+	cartPageId,
+	showReturnToCart,
+	className,
+	showPrice,
+	placeOrderButtonLabel,
+}: BlockAttributes ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
 
 	const label = applyCheckoutFilter( {
@@ -53,6 +57,7 @@ const Block = ( {
 				<PlaceOrderButton
 					label={ label }
 					fullWidth={ ! showReturnToCart }
+					showPrice={ showPrice }
 				/>
 			</div>
 		</div>

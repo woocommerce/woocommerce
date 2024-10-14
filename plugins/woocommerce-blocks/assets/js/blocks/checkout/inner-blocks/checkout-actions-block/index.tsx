@@ -10,6 +10,7 @@ import type { BlockConfiguration } from '@wordpress/blocks';
  */
 import attributes from './attributes';
 import { Edit, Save } from './edit';
+import metadata from './block.json';
 import './style.scss';
 
 const blockConfig: BlockConfiguration = {
@@ -21,7 +22,7 @@ const blockConfig: BlockConfiguration = {
 			/>
 		),
 	},
-	attributes,
+	attributes: { ...attributes, ...metadata.attributes },
 	save: Save,
 	edit: Edit,
 };
