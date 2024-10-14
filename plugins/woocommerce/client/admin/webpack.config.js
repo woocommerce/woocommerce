@@ -179,7 +179,9 @@ const webpackConfig = {
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
 		! process.env.STORYBOOK &&
-			new TypeScriptWarnOnlyWebpackPlugin( [ 'TS2322' ] ),
+			new TypeScriptWarnOnlyWebpackPlugin( [
+				/* specify TS error codes here, e.g. 'TS2322' */
+			] ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
