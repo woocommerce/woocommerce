@@ -49,11 +49,10 @@ export const TotalsCoupon = ( {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
 		useState( displayCouponForm );
-	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 	const { validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
-			validationErrorId: store.getValidationErrorId( textInputId ),
+			validationErrorId: store.getValidationErrorId( instanceId ),
 		};
 	} );
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
@@ -96,7 +95,7 @@ export const TotalsCoupon = ( {
 						id="wc-block-components-totals-coupon__form"
 					>
 						<ValidatedTextInput
-							id={ textInputId }
+							id={ instanceId }
 							errorId="coupon"
 							className="wc-block-components-totals-coupon__input"
 							label={ __( 'Enter code', 'woocommerce' ) }
@@ -122,7 +121,7 @@ export const TotalsCoupon = ( {
 					</form>
 					<ValidationInputError
 						propertyName="coupon"
-						elementId={ textInputId }
+						elementId={ instanceId }
 					/>
 				</div>
 			</LoadingMask>
@@ -130,4 +129,4 @@ export const TotalsCoupon = ( {
 	);
 };
 
-export default withInstanceId( TotalsCoupon );
+export default TotalsCoupon;
