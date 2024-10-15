@@ -2,8 +2,8 @@ const webpackOverride = require( '../webpack.config' );
 
 const staticDirs = [
 	{
-		from: '../../../plugins/woocommerce-admin/client',
-		to: 'main/plugins/woocommerce-admin/client',
+		from: '../../../plugins/woocommerce/client/admin/client',
+		to: 'main/plugins/woocommerce/client/admin/client',
 	},
 ];
 if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
@@ -22,7 +22,7 @@ module.exports = {
 		// WooCommerce Admin / @woocommerce/onboarding components
 		'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
 		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
-		'../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)',
+		'../../../plugins/woocommerce/client/admin/client/**/stories/*.story.@(js|tsx)',
 	],
 	refs: ( config, { configType } ) => {
 		if ( configType === 'DEVELOPMENT' ) {
