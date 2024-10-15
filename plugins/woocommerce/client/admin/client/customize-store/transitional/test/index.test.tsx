@@ -63,7 +63,7 @@ describe( 'Transitional', () => {
 		).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole( 'link', {
 				name: /Back to Home/i,
 			} )
 		).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe( 'Transitional', () => {
 		render( <Transitional { ...props } /> );
 
 		screen
-			.getByRole( 'button', {
+			.getByRole( 'link', {
 				name: /Back to Home/i,
 			} )
 			.click();
