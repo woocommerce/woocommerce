@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+CYS: Remove GO_BACK_TO_HOME state from the Transitional screen
