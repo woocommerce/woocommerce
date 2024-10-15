@@ -238,11 +238,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 
 		$wp_rewrite = $this->getMockBuilder( 'WP_Rewrite' )->getMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$permalink_structure = array(
-			'category_base' => 'product-category',
-			'tag_base'      => 'product-tag',
-		);
-
 		$wp_rewrite->expects( $this->any() )
 			->method( 'generate_rewrite_rule' )
 			->willReturn( array( 'shop/(.+?)/?$' => 'index.php?product_cat=$matches[1]&year=$matches[2]' ) );
