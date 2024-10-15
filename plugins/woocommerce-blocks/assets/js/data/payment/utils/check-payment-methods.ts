@@ -5,6 +5,8 @@ import {
 	CanMakePaymentArgument,
 	ExpressPaymentMethodConfigInstance,
 	PaymentMethodConfigInstance,
+	PlainExpressPaymentMethods,
+	PlainPaymentMethods,
 } from '@woocommerce/types';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 import { dispatch, select } from '@wordpress/data';
@@ -151,12 +153,34 @@ const registrationErrorNotice = (
 	} );
 };
 
-export const checkPaymentMethodsCanPay = async ( express = false ) => {
-	let availablePaymentMethods = {};
+const compareAvailablePaymentMethods = (
+	paymentMethods: PlainPaymentMethods | PlainExpressPaymentMethods,
+	availablePaymentMethods: PlainPaymentMethods | PlainExpressPaymentMethods
+) => {
+	const compareKeys1 = Object.keys( paymentMethods );
+	const compareKeys2 = Object.keys( availablePaymentMethods );
 
+	return (
+		compareKeys1.length === compareKeys2.length &&
+		compareKeys1.every( ( current ) => compareKeys2.includes( current ) )
+	);
+};
+
+/**
+ * Iterates over registered payment methods and checks if they can make payment after the cart has initialized.
+ */
+export const checkPaymentMethodsCanPay = async ( express = false ) => {
+	const availablePaymentMethods:
+		| PlainPaymentMethods
+		| PlainExpressPaymentMethods = {};
 	const paymentMethods = express
 		? getExpressPaymentMethods()
 		: getPaymentMethods();
+	const currentPaymentMethods = express
+		? select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
+		: select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods();
+	const canPayArgument = getCanMakePaymentArg();
+	const isEditor = !! select( 'core/editor' );
 
 	const addAvailablePaymentMethod = (
 		paymentMethod:
@@ -167,30 +191,23 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			const { name, title, description, gatewayId, supports } =
 				paymentMethod as ExpressPaymentMethodConfigInstance;
 
-			availablePaymentMethods = {
-				...availablePaymentMethods,
-				[ paymentMethod.name ]: {
-					name,
-					title,
-					description,
-					gatewayId,
-					supportsStyle: supports?.style,
-				},
+			availablePaymentMethods[ name ] = {
+				name,
+				title,
+				description,
+				gatewayId,
+				supportsStyle: supports?.style || [],
 			};
 		} else {
 			const { name } = paymentMethod as PaymentMethodConfigInstance;
 
-			availablePaymentMethods = {
-				...availablePaymentMethods,
-				[ paymentMethod.name ]: {
-					name,
-				},
+			availablePaymentMethods[ name ] = {
+				name,
 			};
 		}
 	};
 
-	// Order payment methods.
-	const paymentMethodsOrder = express
+	const sortedPaymentMethods = express
 		? Object.keys( paymentMethods )
 		: Array.from(
 				new Set( [
@@ -198,13 +215,10 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 					...Object.keys( paymentMethods ),
 				] )
 		  );
-	const canPayArgument = getCanMakePaymentArg();
-	const cartPaymentMethods = canPayArgument.paymentMethods as string[];
-	const isEditor = !! select( 'core/editor' );
 
-	for ( let i = 0; i < paymentMethodsOrder.length; i++ ) {
-		const paymentMethodName = paymentMethodsOrder[ i ];
-		const paymentMethod = paymentMethods[ paymentMethodName ];
+	for ( let i = 0; i < sortedPaymentMethods.length; i++ ) {
+		const paymentMethodName = sortedPaymentMethods[ i ];
+		const paymentMethod = paymentMethods[ paymentMethodName ] || {};
 
 		if ( ! paymentMethod ) {
 			continue;
@@ -215,18 +229,25 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			const validForCart =
 				isEditor || express
 					? true
-					: cartPaymentMethods.includes( paymentMethodName );
+					: canPayArgument.paymentMethods.includes(
+							paymentMethodName
+					  );
+
+			if ( ! validForCart ) {
+				continue;
+			}
+
 			const canPay = isEditor
 				? true
-				: validForCart &&
-				  ( await Promise.resolve(
+				: await Promise.resolve(
 						paymentMethod.canMakePayment( canPayArgument )
-				  ) );
+				  );
+
+			if ( typeof canPay === 'object' && canPay?.error ) {
+				throw new Error( canPay.error.message );
+			}
 
 			if ( canPay ) {
-				if ( typeof canPay === 'object' && canPay.error ) {
-					throw new Error( canPay.error.message );
-				}
 				addAvailablePaymentMethod( paymentMethod );
 			}
 		} catch ( e ) {
@@ -236,31 +257,27 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		}
 	}
 
-	const availablePaymentMethodNames = Object.keys( availablePaymentMethods );
-	const currentlyAvailablePaymentMethods = express
-		? select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
-		: select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods();
-
 	if (
-		Object.keys( currentlyAvailablePaymentMethods ).length ===
-			availablePaymentMethodNames.length &&
-		Object.keys( currentlyAvailablePaymentMethods ).every( ( current ) =>
-			availablePaymentMethodNames.includes( current )
+		! compareAvailablePaymentMethods(
+			availablePaymentMethods,
+			currentPaymentMethods
 		)
 	) {
-		// All the names are the same, no need to dispatch more actions.
-		return true;
+		const {
+			__internalSetAvailablePaymentMethods,
+			__internalSetAvailableExpressPaymentMethods,
+		} = dispatch( PAYMENT_STORE_KEY );
+
+		if ( express ) {
+			__internalSetAvailableExpressPaymentMethods(
+				availablePaymentMethods as PlainExpressPaymentMethods
+			);
+		} else {
+			__internalSetAvailablePaymentMethods(
+				availablePaymentMethods as PlainPaymentMethods
+			);
+		}
 	}
 
-	const {
-		__internalSetAvailablePaymentMethods,
-		__internalSetAvailableExpressPaymentMethods,
-	} = dispatch( PAYMENT_STORE_KEY );
-
-	const setCallback = express
-		? __internalSetAvailableExpressPaymentMethods
-		: __internalSetAvailablePaymentMethods;
-
-	setCallback( availablePaymentMethods );
 	return true;
 };
