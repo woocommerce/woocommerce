@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useState, useRef } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import { withInstanceId } from '@wordpress/compose';
 import {
 	ValidatedTextInput,
 	ValidationInputError,
