@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WC_Download_Handler buffer handling WC_Download_Handler error default status set to 403 to prevent files from not being served if 404 are cached by a page cache and to ensure the PHP status header matches the downstream reverse-proxy status
