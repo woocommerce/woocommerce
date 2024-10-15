@@ -196,7 +196,6 @@
 		"eslint-plugin-import": "^2.29.0",
 		"eslint-plugin-react": "^7.33.2",
 		"expose-loader": "^3.1.0",
-		"fork-ts-checker-webpack-plugin": "^8.0.0",
 		"fs-extra": "11.1.1",
 		"jest": "~27.5.1",
 		"jest-environment-jsdom": "~27.5.1",
