@@ -258,7 +258,17 @@ function woocommerce_wp_select( $field, WC_Data $data = null ) {
 		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
 			<?php
 			foreach ( $field['options'] as $key => $value ) {
-				echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
+				if(is_array($value)){
+					echo '<optgroup label="' . esc_attr( $key ) . '">';
+
+					foreach ( $value as $k => $v ) {
+						echo '<option value="' . esc_attr( $k ) . '"' . wc_selected( $k, $field['value'] ) . '>' . esc_html( $v ) . '</option>';
+					}
+
+					echo '</optgroup>';
+				} else {
+					echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
+				}
 			}
 			?>
 		</select>
