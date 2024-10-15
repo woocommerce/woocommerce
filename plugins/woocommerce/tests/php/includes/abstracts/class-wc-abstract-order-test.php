@@ -413,4 +413,51 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $item2->get_id(), array_keys( $order2->get_items( 'line_item' ) )[0] );
 	}
+
+	/**
+	 * @testDox In case order::save() is canceled in WC_Abstract_Order (maybe by a hook throwing an Exception),
+	 *          hooks dependent on Wc_Order::$status_transition should not be called
+	 */
+	public function test_status_transition_hooks_shouldnot_be_called_when_order_save_canceled() {
+		$initial_status  = 'auto-draft';
+		$refunded_status = 'refunded';
+
+		// add an action that will cancel the save in case the new status is "refunded".
+		$callback = static function ( WC_Order $order ) use ( $refunded_status ) {
+			$changes = $order->get_changes();
+			if ( ! empty( $changes ) && isset( $changes['status'] ) && $changes['status'] === $refunded_status ) {
+				throw new \RuntimeException( 'to prove my point' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $callback );
+
+		// Simple action to make sure hook is not triggered.
+		$triggered                     = false;
+		$should_not_be_called_callback = static function () use ( &$triggered ) {
+			$triggered = true;
+		};
+		add_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+
+		$order = new Wc_Order();
+		$order->set_status( $initial_status );
+		$order->save();
+
+		$order->set_status( $refunded_status );
+		$order->save();
+
+		// Make sure status update has not been saved to database and our RuntimeException('to prove my point') worked.
+		$this->assertEquals(
+			$order->get_data()['status'],
+			$initial_status,
+			'Status ' . $refunded_status . ' has been saved to database'
+		);
+		$this->assertEquals(
+			$triggered,
+			false,
+			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
+		);
+
+		remove_action( 'woocommerce_before_order_object_save', $callback );
+		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+	}
 }
