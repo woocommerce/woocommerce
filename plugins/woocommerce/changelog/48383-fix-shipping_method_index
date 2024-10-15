@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Set the correct shipping method indexes in the cart/cart-shipping template.
