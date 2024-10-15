@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pass second parameter of manage_{$this->screen->id}_custom_column action as integer
