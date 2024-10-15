@@ -12,11 +12,7 @@ import { filter, filterThreeLines } from '@woocommerce/icons';
 /**
  * Internal dependencies
  */
-import type {
-	BlockAttributes,
-	BlockContext,
-	BlockVariationTriggerType,
-} from './types';
+import type { BlockAttributes, BlockVariationTriggerType } from './types';
 import './editor.scss';
 import { Inspector } from './inspector-controls';
 
@@ -127,7 +123,7 @@ const OverlayNavigationContent = ( {
 	return null;
 };
 
-type BlockProps = BlockEditProps< BlockAttributes > & { context: BlockContext };
+type BlockProps = BlockEditProps< BlockAttributes >;
 
 export const Edit = ( { attributes, setAttributes }: BlockProps ) => {
 	const {
