@@ -250,17 +250,17 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			$this->assertEquals( $expected_result, $result );
 		}
 
-		$callback = function($value) {
+		$callback = function ( $value ) {
 			$value['product_base'] = 'product/';
 			return $value;
 		};
 
-		add_filter('pre_option_woocommerce_permalinks', $callback, 10, 1);
+		add_filter( 'pre_option_woocommerce_permalinks', $callback, 10, 1 );
 
 		// Pages with name "products-demo" shouldn't be considered as a store page when product_base is set to "product/".
 		$this->assertEquals( false, WCAdminHelper::is_store_page( 'https://example.com/products-demo/' ) );
 
-		remove_filter('pre_option_woocommerce_permalinks', $callback);
+		remove_filter( 'pre_option_woocommerce_permalinks', $callback );
 	}
 
 	/**
