@@ -75,9 +75,9 @@ Available resources in the Store API are listed below, with links to more detail
 | [`Product Attributes`](docs/product-attributes.md)           | `GET`                          | [`/wc/store/v1/products/attributes`](docs/product-attributes.md#list-product-attributes)      |
 |                                                              | `GET`                          | [`/wc/store/v1/products/attributes/:id`](docs/product-attributes.md#single-product-attribute) |
 | [`Product Attribute Terms`](docs/product-attribute-terms.md) | `GET`                          | [`/wc/store/v1/products/attributes/:id/terms`](docs/product-attribute-terms.md)               |
-| [`Product Categories`](docs/product-categories.md)           | `GET`                          | [`/wc/store/v1/products/categories`](docs/product-attribute-terms.md)                         |
-| [`Product Reviews`](docs/product-reviews.md)                 | `GET`                          | [`/wc/store/v1/products/reviews`](docs/product-attribute-terms.md)                            |
-| [`Product Tags`](docs/product-tags.md)                       | `GET`                          | [`/wc/store/v1/products/tags`](docs/product-attribute-terms.md)                               |
+| [`Product Categories`](docs/product-categories.md)           | `GET`                          | [`/[wc/store/v1/products/categories`](docs/product-categories.md)                             |
+| [`Product Reviews`](docs/product-reviews.md)                 | `GET`                          | [`/wc/store/v1/products/reviews`](docs/product-reviews.md)                                    |
+| [`Product Tags`](docs/product-tags.md)                       | `GET`                          | [`/wc/store/v1/products/tags`](docs/product-tags.md)                                          |
 
 ## Pagination
 
