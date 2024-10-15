@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
@@ -36,7 +38,7 @@ class RoutesController {
 	public function __construct( SchemaController $schema_controller ) {
 		$this->schema_controller = $schema_controller;
 		$this->routes            = [
-			'v1' => [
+			'v1'      => [
 				Routes\V1\Batch::IDENTIFIER              => Routes\V1\Batch::class,
 				Routes\V1\Cart::IDENTIFIER               => Routes\V1\Cart::class,
 				Routes\V1\CartAddItem::IDENTIFIER        => Routes\V1\CartAddItem::class,
@@ -65,6 +67,10 @@ class RoutesController {
 				Routes\V1\Products::IDENTIFIER           => Routes\V1\Products::class,
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
+			],
+			'private' => [
+				Routes\V1\AI\Products::IDENTIFIER => Routes\V1\AI\Products::class,
+				Routes\V1\Patterns::IDENTIFIER    => Routes\V1\Patterns::class,
 			],
 		];
 	}
