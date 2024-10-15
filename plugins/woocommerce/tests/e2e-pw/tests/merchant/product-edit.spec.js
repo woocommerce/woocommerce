@@ -150,6 +150,10 @@ test(
 			await page.getByRole( 'button', { name: 'Update' } ).click();
 		} );
 
+		// Wait for the Update button to be visible, enabled, and stable
+		await updateButton.waitFor({ state: 'visible' });
+        await updateButton.waitFor({ state: 'enabled' });
+
 		await test.step( 'verify the changes', async () => {
 			for ( const product of products ) {
 				await page.goto( `product/${ product.slug }` );
