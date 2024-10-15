@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useObservedViewport } from '@woocommerce/base-hooks';
+
 const FrontendBlock = ( {
 	children,
 	className,

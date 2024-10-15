@@ -23,10 +23,25 @@ import BlockErrorBoundary from '../components/error-boundary';
  * @param {Array} fills The list of fills to check for a valid one in.
  * @return {boolean} True if this slot contains any valid fills.
  */
-export const hasValidFills = ( fills ) =>
+export const hasValidFills = ( fills: [] ) =>
 	Array.isArray( fills ) && fills.filter( Boolean ).length > 0;
 
 export { useSlot, useSlotFills };
+
+type SlotFill = {
+	Fill: (
+		props: Partial< {
+			bubblesVirtually: boolean;
+			children: React.ReactNode;
+		} >
+	) => JSX.Element;
+	Slot: (
+		props: Partial< {
+			bubblesVirtually: boolean;
+			children: React.ReactNode;
+		} >
+	) => JSX.Element;
+};
 
 /**
  * Abstracts @wordpress/components createSlotFill, wraps Fill in an error boundary and passes down fillProps.
@@ -36,8 +51,10 @@ export { useSlot, useSlotFills };
  *
  * @return {Object} Returns a newly wrapped Fill and Slot.
  */
-export const createSlotFill = ( slotName, onError = null ) => {
-	const { Fill: BaseFill, Slot: BaseSlot } = baseCreateSlotFill( slotName );
+export const createSlotFill = ( slotName: string, onError = null ) => {
+	const { Fill: BaseFill, Slot: BaseSlot } = baseCreateSlotFill(
+		slotName
+	) as SlotFill;
 
 	/**
 	 * A Fill that will get rendered inside associate slot.
@@ -47,9 +64,9 @@ export const createSlotFill = ( slotName, onError = null ) => {
 	 * @param {Object} props          Items props.
 	 * @param {Array}  props.children Children to be rendered.
 	 */
-	const Fill = ( { children } ) => (
+	const Fill = ( { children }: { children: React.ReactNode } ) => (
 		<BaseFill>
-			{ ( fillProps ) =>
+			{ ( fillProps: unknown ) =>
 				Children.map( children, ( fill ) => (
 					<BlockErrorBoundary
 						/* Returning null would trigger the default error display.
@@ -59,6 +76,7 @@ export const createSlotFill = ( slotName, onError = null ) => {
 							CURRENT_USER_IS_ADMIN ? onError : () => null
 						}
 					>
+						{ /* @ts-expect-error It's not clear how to accurately type `fill`. */ }
 						{ cloneElement( fill, fillProps ) }
 					</BlockErrorBoundary>
 				) )
@@ -76,7 +94,9 @@ export const createSlotFill = ( slotName, onError = null ) => {
 	 * @param {Element|string} props.as        Element used to render the slot, defaults to div.
 	 *
 	 */
-	const Slot = ( props ) => <BaseSlot { ...props } bubblesVirtually />;
+	const Slot = ( props: object ) => (
+		<BaseSlot { ...props } bubblesVirtually />
+	);
 
 	return {
 		Fill,

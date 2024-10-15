@@ -17,6 +17,7 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
 import './style.scss';
+import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 
 const Block = ( {
 	cartPageId,
@@ -40,22 +41,25 @@ const Block = ( {
 	} );
 
 	return (
-		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
-			<StoreNoticesContainer
-				context={ noticeContexts.CHECKOUT_ACTIONS }
-			/>
-			<div className="wc-block-checkout__actions_row">
-				{ showReturnToCart && (
-					<ReturnToCartButton
-						link={ getSetting( 'page-' + cartPageId, false ) }
-					/>
-				) }
-				<PlaceOrderButton
-					label={ label }
-					fullWidth={ ! showReturnToCart }
+		<>
+			<CheckoutOrderSummarySlot />
+			<div className={ clsx( 'wc-block-checkout__actions', className ) }>
+				<StoreNoticesContainer
+					context={ noticeContexts.CHECKOUT_ACTIONS }
 				/>
+				<div className="wc-block-checkout__actions_row">
+					{ showReturnToCart && (
+						<ReturnToCartButton
+							link={ getSetting( 'page-' + cartPageId, false ) }
+						/>
+					) }
+					<PlaceOrderButton
+						label={ label }
+						fullWidth={ ! showReturnToCart }
+					/>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 
