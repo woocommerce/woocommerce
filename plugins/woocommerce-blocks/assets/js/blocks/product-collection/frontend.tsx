@@ -170,8 +170,9 @@ const productCollectionStore = {
 			}
 		},
 		*viewProduct() {
-			const { collection, productId } =
-				getContext< ProductCollectionStoreContext >();
+			const ctx = getContext< ProductCollectionStoreContext >() || {};
+			const collection = ctx?.collection;
+			const productId = ctx?.productId;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
@@ -200,8 +201,8 @@ const productCollectionStore = {
 			}
 		},
 		*onRender() {
-			const { collection } =
-				getContext< ProductCollectionStoreContext >();
+			const ctx = getContext< ProductCollectionStoreContext >();
+			const collection = ctx?.collection;
 
 			triggerProductListRenderedEvent( { collection } );
 		},
