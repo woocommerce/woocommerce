@@ -228,10 +228,10 @@ class WCAdminHelper {
 				// Check if the URL path starts with the matching base.
 				if ( 0 === strncmp( $url_path, trim( $permalink_structure[ $key ], '/' ), strlen( trim( $permalink_structure[ $key ], '/' ) ) ) ) {
 					$base_length = strlen( trim( $permalink_structure[ $key ], '/' ) );
-					$next_char = substr( $url_path, $base_length, 1 );
+					$next_char   = substr( $url_path, $base_length, 1 );
 
 					// If the next character is a slash, we're confident we're on a valid product page.
-					if ( $next_char === '/' ) {
+					if ( '/' === $next_char ) {
 						return true;
 					}
 				}
