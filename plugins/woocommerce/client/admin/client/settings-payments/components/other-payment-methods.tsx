@@ -2,9 +2,7 @@
  * External dependencies
  */
 import React, { useMemo } from '@wordpress/element';
-import { Button } from '@wordpress/components';
-import ExternalIcon from 'gridicons/dist/external';
-import { __, _x } from '@wordpress/i18n';
+import { Button, ExternalLink, Panel, PanelBody } from '@wordpress/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
@@ -27,6 +25,7 @@ type PaymentGateway = {
 	id: string;
 	image_72x72: string;
 	title: string;
+	content: string;
 	enabled: boolean;
 	needsSetup: boolean;
 	// Add other properties as needed...
@@ -53,27 +52,73 @@ const usePaymentGatewayData = () => {
 	}, [] );
 };
 
-const AdditionalGatewayImages = ( {
-	additionalGateways,
-}: {
-	additionalGateways: PaymentGateway[];
-} ) => (
-	<>
-		{ additionalGateways.map( ( gateway ) => (
-			<img
-				key={ gateway.id }
-				src={ gateway.image_72x72 }
-				alt={ gateway.title }
-				width="24"
-				height="24"
-				className="other-payment-methods__image"
-			/>
-		) ) }
-		{ _x( '& more.', 'More payment providers to discover', 'woocommerce' ) }
-	</>
-);
+// TODO implement gateway images.
+// const AdditionalGatewayImages = ( {
+// 	additionalGateways,
+// }: {
+// 	additionalGateways: PaymentGateway[];
+// } ) => (
+// 	<>
+// 		{ additionalGateways.map( ( gateway ) => (
+// 			<img
+// 				key={ gateway.id }
+// 				src={ gateway.image_72x72 }
+// 				alt={ gateway.title }
+// 				width="24"
+// 				height="24"
+// 				className="other-payment-methods__image"
+// 			/>
+// 		) ) }
+// 		{ _x( '& more.', 'More payment providers to discover', 'woocommerce' ) }
+// 	</>
+// );
 
 export const OtherPaymentMethods = () => {
+	// Mock other payment methods for now.
+	// TODO Get the list of plugins via the API in future PR.
+	const mockOtherPaymentMethods = [
+		{
+			id: 'amazon-pay',
+			title: 'Amazon Pay',
+			content:
+				'Enable a familiar, fast checkout for hundreds of millions of active Amazon customers globally.',
+			image_72x72:
+				'https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/72x72/paypal.png',
+			enabled: false,
+			needsSetup: false,
+		},
+		{
+			id: 'affirm',
+			title: 'Affirm Payments',
+			content:
+				"Safe and secure payments using credit cards or your customer's PayPal account.",
+			image_72x72:
+				'https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/72x72/paypal.png',
+			enabled: false,
+			needsSetup: false,
+		},
+		{
+			id: 'afterpay',
+			title: 'Afterpay',
+			content:
+				'Afterpay allows customers to purchase products and choose to pay in four installments over six weeks or pay monthly.',
+			image_72x72:
+				'https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/72x72/paypal.png',
+			enabled: false,
+			needsSetup: false,
+		},
+		{
+			id: 'klarna',
+			title: 'Klarna Payments',
+			content:
+				'Grow your business for increased sales and enhanced shopping experiences at no extra cost.',
+			image_72x72:
+				'https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/72x72/paypal.png',
+			enabled: false,
+			needsSetup: false,
+		},
+	];
+
 	const {
 		paymentGatewaySuggestions,
 		installedPaymentGateways,
@@ -121,35 +166,35 @@ export const OtherPaymentMethods = () => {
 		return null;
 	}
 
-	const hasWcPaySetup = wcPayGateway.enabled && ! wcPayGateway.needsSetup;
-
 	return (
-		<>
-			<Button
-				className="is-tertiary"
-				href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
-				target="_blank"
-				value="tertiary"
-				rel="noreferrer"
-			>
-				<span className="other-payment-methods__button-text">
-					{ hasWcPaySetup
-						? __(
-								'Discover additional payment providers',
-								'woocommerce'
-						  )
-						: __(
-								'Discover other payment providers',
-								'woocommerce'
-						  ) }
-				</span>
-				<ExternalIcon size={ 18 } />
-			</Button>
-			{ additionalGateways.length > 0 && (
-				<AdditionalGatewayImages
-					additionalGateways={ additionalGateways }
-				/>
-			) }
-		</>
+		<Panel className="other-payment-methods">
+			<PanelBody title="Other payment methods">
+				<div className="other-payment-methods__grid">
+					{ mockOtherPaymentMethods.map(
+						( gateway: PaymentGateway ) => (
+							<div className="other-payment-methods__grid-item">
+								<img src={ gateway.image_72x72 } alt="" />
+								<div className="other-payment-methods__grid-item__content">
+									<span className="other-payment-methods__grid-item__content__title">
+										{ gateway.title }
+									</span>
+									<span className="other-payment-methods__grid-item__content__description">
+										{ gateway.content }
+									</span>
+									<div className="other-payment-methods__grid-item__content__actions">
+										<Button variant={ 'primary' }>
+											Install
+										</Button>
+									</div>
+								</div>
+							</div>
+						)
+					) }
+				</div>
+				<ExternalLink href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/">
+					More payment options
+				</ExternalLink>
+			</PanelBody>
+		</Panel>
 	);
 };
