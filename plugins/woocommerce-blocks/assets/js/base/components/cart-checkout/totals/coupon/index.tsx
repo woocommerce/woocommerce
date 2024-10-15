@@ -48,6 +48,7 @@ export const TotalsCoupon = ( {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
 		useState( displayCouponForm );
+	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 	const { validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
@@ -94,7 +95,7 @@ export const TotalsCoupon = ( {
 						id="wc-block-components-totals-coupon__form"
 					>
 						<ValidatedTextInput
-							id={ instanceId }
+							id={ textInputId }
 							errorId="coupon"
 							className="wc-block-components-totals-coupon__input"
 							label={ __( 'Enter code', 'woocommerce' ) }
