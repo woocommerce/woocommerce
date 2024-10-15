@@ -172,7 +172,10 @@ export const OtherPaymentMethods = () => {
 				<div className="other-payment-methods__grid">
 					{ mockOtherPaymentMethods.map(
 						( gateway: PaymentGateway ) => (
-							<div className="other-payment-methods__grid-item">
+							<div
+								className="other-payment-methods__grid-item"
+								key={ gateway.id }
+							>
 								<img src={ gateway.image_72x72 } alt="" />
 								<div className="other-payment-methods__grid-item__content">
 									<span className="other-payment-methods__grid-item__content__title">
