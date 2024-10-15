@@ -170,7 +170,7 @@ const productCollectionStore = {
 			}
 		},
 		*viewProduct() {
-			const ctx = getContext< ProductCollectionStoreContext >() || {};
+			const ctx = getContext< ProductCollectionStoreContext >();
 			const collection = ctx?.collection;
 			const productId = ctx?.productId;
 
