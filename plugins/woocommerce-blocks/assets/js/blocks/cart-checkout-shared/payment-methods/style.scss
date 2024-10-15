@@ -156,6 +156,20 @@
 	@include placeholder();
 }
 
+.wc-block-components-show-payment-methods__link {
+	font-weight: normal;
+	background: none;
+	border: none;
+	padding: 0;
+	text-decoration: underline;
+	cursor: pointer;
+	text-align: left;
+
+	&[aria-expanded="true"] {
+		text-decoration: none;
+	}
+}
+
 .is-mobile,
 .is-small {
 	.wc-block-card-elements {
