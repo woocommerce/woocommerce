@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: relax webpack towards TS errors in admin package.

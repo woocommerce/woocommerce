@@ -246,6 +246,11 @@ class Checkout extends AbstractCartRoute {
 		$this->cart_controller->calculate_totals();
 
 		/**
+		 * Validate that the cart is not empty.
+		 */
+		$this->cart_controller->validate_cart_not_empty();
+
+		/**
 		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();

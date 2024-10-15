@@ -2,6 +2,7 @@ packages:
     - 'packages/js/*'
     - 'packages/php/*'
     - 'plugins/*'
+    - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/legacy'
     - 'plugins/woocommerce-blocks/bin/eslint-plugin-woocommerce'
     - 'tools/monorepo-merge'

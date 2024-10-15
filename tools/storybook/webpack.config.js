@@ -8,7 +8,7 @@ const webpack = require( 'webpack' );
 /**
  * External dependencies
  */
-const wcAdminWebpackConfig = require( '../../plugins/woocommerce-admin/webpack.config.js' );
+const wcAdminWebpackConfig = require( '../../plugins/woocommerce/client/admin/webpack.config.js' );
 
 const wcAdminPackages = [
 	'components',
@@ -54,7 +54,7 @@ module.exports = ( storybookConfig ) => {
 		'@storybook/react-dom-shim/dist/react-18';
 
 	storybookConfig.resolve.modules = [
-		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
+		path.join( __dirname, '../../plugins/woocommerce/client/admin/client' ),
 		path.join( __dirname, '../../packages/js/product-editor/src' ),
 		'node_modules',
 	];

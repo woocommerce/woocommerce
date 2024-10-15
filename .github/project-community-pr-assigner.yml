@@ -106,7 +106,7 @@
   - team: rubik
   - team: woo-fse
 
-"plugins/woocommerce-admin/**/*":
+"plugins/woocommerce/client/admin/**/*":
   - team: woo-fse
   - team: ghidorah
 

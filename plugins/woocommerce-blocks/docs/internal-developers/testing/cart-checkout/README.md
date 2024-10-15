@@ -56,7 +56,7 @@ Advanced:
 
 ## How to report issues
 
-Ideally, we would prefer it if you can submit an issue via [this link](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?template=---bug-report.md), however, you can also submit issues here in this thread.
+Ideally, we would prefer it if you can submit an issue via [this link](https://github.com/woocommerce/woocommerce/issues/new?template=1-bug-report.yml), however, you can also submit issues here in this thread.
 
 It would be preferable to have a look at this [list of issues](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues?q=is%3Aissue+label%3A%22type%3A+bug%22+milestone%3A2.6.0+) to see if the issue you're submitting has already been submitted.
 

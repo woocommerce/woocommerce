@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `Error: Failed opening required '.../wp-content/plugins/woocommerce/src/StoreApi/Schemas/V1/AI/ProductsSchema.php` fatal error
