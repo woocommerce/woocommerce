@@ -57,7 +57,15 @@ $fixed-section-height: 224px;
 			width: $grid-unit-30;
 			height: $grid-unit-30;
 			min-width: inherit;
-			padding: 0;
+			
+			&:not(.has-external-icon) {
+				padding: 0;
+			}
+
+			&.has-external-icon {
+				// Give button little bit more padding to make icon smaller thus making the size more inline with the other icon(s)
+				padding: 2px;
+			}
 		}
 	}
 
