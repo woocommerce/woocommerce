@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+[fix] Classic Checkout: Mark fields as invalid on change when they only contain space characters  </details>  <details>  <summary>Changelog Entry Comment</summary>

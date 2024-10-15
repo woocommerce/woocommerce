@@ -218,7 +218,7 @@ jQuery( function( $ ) {
 					if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
 						$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 						validated = false;
-					} else if ( $this.val() === '' ) {
+					} else if ( $this.val().trim() === '' ) {
 						$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 						validated = false;
 					}
