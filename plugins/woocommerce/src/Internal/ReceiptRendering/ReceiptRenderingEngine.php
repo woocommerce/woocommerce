@@ -362,11 +362,11 @@ class ReceiptRenderingEngine {
 			);
 		}
 
-		$is_order_failed = $order->has_status( 'failed' );
+		$is_order_paid = $order->is_paid();
 
 		$line_items_info[] = array(
 			'type'   => 'amount_paid',
-			'title'  => $is_order_failed ? __( 'Amount', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
+			'title'  => $is_order_paid ? __( 'Amount Paid', 'woocommerce' ) : __( 'Amount', 'woocommerce' ),
 			'amount' => wc_price( $order->get_total(), $get_price_args ),
 		);
 
@@ -383,23 +383,23 @@ class ReceiptRenderingEngine {
 			),
 			'texts'            => array(
 				'receipt_title'                => $receipt_title,
-				'amount_paid_section_title'    => $is_order_failed ? __( 'Order Total', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
-				'date_paid_section_title'      => $is_order_failed ? __( 'Order Date', 'woocommerce' ) : __( 'Date Paid', 'woocommerce' ),
+				'amount_paid_section_title'    => $is_order_paid ? __( 'Amount Paid', 'woocommerce' ) : __( 'Order Total', 'woocommerce' ),
+				'date_paid_section_title'      => $is_order_paid ? __( 'Date Paid', 'woocommerce' ) : __( 'Order Date', 'woocommerce' ),
 				'payment_method_section_title' => __( 'Payment method', 'woocommerce' ),
+				'order_status_section_title'   => __( 'Order status', 'woocommerce' ),
+				'order_status'                 => wc_get_order_status_name( $order->get_status() ),
 				'summary_section_title'        => $summary_title,
 				'order_notes_section_title'    => __( 'Notes', 'woocommerce' ),
 				'app_name'                     => __( 'Application Name', 'woocommerce' ),
 				'aid'                          => __( 'AID', 'woocommerce' ),
 				'account_type'                 => __( 'Account Type', 'woocommerce' ),
-				'order_failed_title'           => __( 'Order Failed', 'woocommerce' ),
 			),
 			'formatted_amount' => wc_price( $order->get_total(), $get_price_args ),
-			'formatted_date'   => wc_format_datetime( $is_order_failed ? $order->get_date_created() : $order->get_date_paid() ),
+			'formatted_date'   => wc_format_datetime( $is_order_paid ? $order->get_date_paid() : $order->get_date_created() ),
 			'line_items'       => $line_items_info,
 			'payment_method'   => $order->get_payment_method_title(),
 			'notes'            => array_map( 'get_comment_text', $order->get_customer_order_notes() ),
 			'payment_info'     => $this->get_woo_pay_data( $order ),
-			'is_order_failed'  => $is_order_failed,
 		);
 	}
 
