@@ -166,21 +166,14 @@ const compareAvailablePaymentMethods = (
 	);
 };
 
-/**
- * Iterates over registered payment methods and checks if they can make payment after the cart has initialized.
- */
 export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const availablePaymentMethods:
 		| PlainPaymentMethods
 		| PlainExpressPaymentMethods = {};
+
 	const paymentMethods = express
 		? getExpressPaymentMethods()
 		: getPaymentMethods();
-	const currentPaymentMethods = express
-		? select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
-		: select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods();
-	const canPayArgument = getCanMakePaymentArg();
-	const isEditor = !! select( 'core/editor' );
 
 	const addAvailablePaymentMethod = (
 		paymentMethod:
@@ -207,6 +200,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		}
 	};
 
+	// Order payment methods.
 	const sortedPaymentMethods = express
 		? Object.keys( paymentMethods )
 		: Array.from(
@@ -215,6 +209,9 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 					...Object.keys( paymentMethods ),
 				] )
 		  );
+	const canPayArgument = getCanMakePaymentArg();
+	const cartPaymentMethods = canPayArgument.paymentMethods as string[];
+	const isEditor = !! select( 'core/editor' );
 
 	for ( let i = 0; i < sortedPaymentMethods.length; i++ ) {
 		const paymentMethodName = sortedPaymentMethods[ i ];
@@ -229,25 +226,18 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			const validForCart =
 				isEditor || express
 					? true
-					: canPayArgument.paymentMethods.includes(
-							paymentMethodName
-					  );
-
-			if ( ! validForCart ) {
-				continue;
-			}
-
+					: cartPaymentMethods.includes( paymentMethodName );
 			const canPay = isEditor
 				? true
-				: await Promise.resolve(
+				: validForCart &&
+				  ( await Promise.resolve(
 						paymentMethod.canMakePayment( canPayArgument )
-				  );
-
-			if ( typeof canPay === 'object' && canPay?.error ) {
-				throw new Error( canPay.error.message );
-			}
+				  ) );
 
 			if ( canPay ) {
+				if ( typeof canPay === 'object' && canPay?.error ) {
+					throw new Error( canPay.error.message );
+				}
 				addAvailablePaymentMethod( paymentMethod );
 			}
 		} catch ( e ) {
@@ -256,6 +246,10 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			}
 		}
 	}
+
+	const currentPaymentMethods = express
+		? select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
+		: select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods();
 
 	if (
 		! compareAvailablePaymentMethods(
