@@ -1,4 +1,6 @@
 <?php
+// Test changes: should be linted
+
 /**
  * Single Product Meta
  *

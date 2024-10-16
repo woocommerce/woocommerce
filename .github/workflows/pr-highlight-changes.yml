@@ -3,7 +3,6 @@ on:
   pull_request:
     paths:
       - 'plugins/woocommerce/**/templates/**/*.php'
-      - '!plugins/woocommerce/templates/templates/**'
       - '!plugins/woocommerce/tests/**'
       - '.github/workflows/pr-highlight-changes.yml'
 
@@ -30,7 +29,7 @@ jobs:
           GIT_CLONE_PROTECTION_ACTIVE: false
         run: |
           HEAD_REF=$(git rev-parse HEAD)
-          exclude="plugins/woocommerce/tests plugins/woocommerce/templates/templates"
+          exclude="plugins/woocommerce/tests"
           version=$(pnpm analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
           pnpm analyzer "$HEAD_REF" $version --outputStyle "github" --exclude $exclude
       - uses: 'actions/github-script@v6'
