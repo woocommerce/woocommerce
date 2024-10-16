@@ -1,4 +1,5 @@
 <?php
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
@@ -45,9 +46,9 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	 * Permission check for REST API endpoint.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
-	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
+	 * @return bool|WP_Error True if the current user has the capability, otherwise a WP_Error object.
 	 */
-	private function check_permissions( WP_REST_Request $request ): WP_Error|bool {
+	private function check_permissions( WP_REST_Request $request ) {
 		$order_id = $request->get_param( 'id' );
 		$order    = wc_get_order( $order_id );
 
@@ -92,7 +93,9 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Handle the POST /orders/{id}/details:
+	 * Handle the POST /orders/{id}/details.
+	 *
+	 * Sends the order details email to the customer.
 	 *
 	 * @param WP_REST_Request $request The received request.
 	 * @return array|WP_Error Request response or an error.
