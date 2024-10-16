@@ -419,8 +419,8 @@ class Checkout extends AbstractBlock {
 				function ( $acc, $method ) {
 					$acc[] = [
 						'id'          => $method->id,
-						'title'       => $method->get_method_title() || $method->get_title(),
-						'description' => $method->get_method_description() || $method->get_description(),
+						'title'       => $method->get_method_title() !== '' ? $method->get_method_title() : $method->get_title(),
+						'description' => $method->get_method_description() !== '' ? $method->get_method_description() : $method->get_description(),
 					];
 					return $acc;
 				},
