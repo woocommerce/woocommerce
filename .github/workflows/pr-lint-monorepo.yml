@@ -3,6 +3,8 @@ on:
     pull_request:
         paths-ignore:
             - '**/changelog/**'
+            - '.github/**'
+            - '!.github/workflows/pr-lint-monorepo.yml'
         branches:
             - 'trunk'
 
