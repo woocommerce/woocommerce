@@ -139,7 +139,8 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_tracking_data() {
-		$data = array();
+		$data       = array();
+		$start_time = microtime( true );
 
 		// General site info.
 		$data['url']      = home_url();
@@ -224,7 +225,12 @@ class WC_Tracker {
 		 *
 		 * @since 2.3.0
 		 */
-		return apply_filters( 'woocommerce_tracker_data', $data );
+		$data = apply_filters( 'woocommerce_tracker_data', $data );
+
+		// Total seconds taken to generate snapshot (including filtered data).
+		$data['snapshot_generation_time'] = microtime( true ) - $start_time;
+
+		return $data;
 	}
 
 	/**
