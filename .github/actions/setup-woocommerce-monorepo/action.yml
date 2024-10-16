@@ -17,11 +17,11 @@ inputs:
         description: 'Given a string value, will pull the package specific dependencies cache.'
         default: false
     pull-playwright-cache:
-      description: 'Given a boolean value, invokes Playwright dependencies caching.'
-      default: false
+        description: 'Given a boolean value, invokes Playwright dependencies caching.'
+        default: false
     pull-package-composer-deps:
-      description: 'Given a string value, will pull the package specific dependencies cache. Not necessary if pull-package-deps is specified.'
-      default: false
+        description: 'Given a string value, will pull the package specific dependencies cache. Not necessary if pull-package-deps is specified.'
+        default: false
 runs:
     using: 'composite'
     steps:
