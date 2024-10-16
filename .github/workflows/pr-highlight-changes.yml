@@ -5,6 +5,8 @@ on:
       - 'plugins/woocommerce/**/templates/**/*.php'
       - '!plugins/woocommerce/tests/**'
       - '.github/workflows/pr-highlight-changes.yml'
+    branches:
+      - 'trunk'
 
 jobs:
   analyze:
