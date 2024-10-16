@@ -4,6 +4,8 @@ on:
         paths:
             - '**/*.md'
             - '!.github/**/*.md'
+        branches:
+            - 'trunk'
 
 jobs:
     lint:
