@@ -2015,19 +2015,19 @@ class ProductCollection extends AbstractBlock {
 				);
 			},
 			function ( $collection_args, $query ) {
-				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				$product_reference = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_references ) ) {
+				if ( empty( $product_reference ) ) {
 					$location = $collection_args['productCollectionLocation'];
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
-						$product_references = array( $location['sourceData']['productId'] );
+						$product_reference = array( $location['sourceData']['productId'] );
 					}
 					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-						$product_references = $location['sourceData']['productIds'];
+						$product_reference = $location['sourceData']['productIds'];
 					}
 				}
 
-				$collection_args['upsellsProductReferences'] = $product_references;
+				$collection_args['upsellsProductReferences'] = $product_reference;
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
