@@ -198,10 +198,11 @@ final class ProductFilterStatus extends AbstractBlock {
 		<div data-wc-interactive='<?php echo esc_attr( $data_directive ); ?>'>
 			<?php if ( 'list' === $display_style ) { ?>
 				<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CheckboxList::render() escapes output.
 				echo CheckboxList::render(
 					array(
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'items'     => $list_items,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
 					)
 				);
@@ -210,13 +211,17 @@ final class ProductFilterStatus extends AbstractBlock {
 
 			<?php if ( 'dropdown' === $display_style ) : ?>
 				<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo Dropdown::render(
 					array(
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'items'          => $list_items,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'selected_items' => $selected_items,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'select_type'    => $select_type,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'placeholder'    => $placeholder_text,
 					)
 				);
