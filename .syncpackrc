@@ -385,6 +385,7 @@
 			"label": "Testing related dependencies: React 18",
 			"dependencies": [
 				"@jest/test-sequencer",
+				"@types/jest",
 				"jest",
 				"jest-cli",
 				"jest-circus",
@@ -403,6 +404,7 @@
 			"label": "Testing related dependencies: React 17",
 			"dependencies": [
 				"@jest/test-sequencer",
+				"@types/jest",
 				"jest",
 				"jest-cli",
 				"jest-circus",

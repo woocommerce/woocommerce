@@ -64,7 +64,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
 		"@types/cookie": "^0.4.1",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/node": "^16.18.68",
 		"@types/qs": "^6.9.10",
 		"@types/react": "17.0.x",

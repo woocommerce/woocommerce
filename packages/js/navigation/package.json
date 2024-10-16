@@ -75,7 +75,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
 		"@babel/runtime": "^7.23.5",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/qs": "^6.9.10",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

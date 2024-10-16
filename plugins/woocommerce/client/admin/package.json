@@ -124,7 +124,7 @@
 		"@types/cookie": "^0.4.1",
 		"@types/dompurify": "^2.4.0",
 		"@types/expect-puppeteer": "^4.4.7",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/puppeteer": "^4.0.3",
 		"@types/qs": "^6.9.10",

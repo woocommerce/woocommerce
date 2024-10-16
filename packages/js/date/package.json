@@ -40,7 +40,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^16.18.68",
 		"@types/qs": "^6.9.10",

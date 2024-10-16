@@ -62,7 +62,7 @@
 		"@babel/runtime": "^7.23.5",
 		"@testing-library/jest-dom": "5.16.2",
 		"@testing-library/react-hooks": "8.0.1",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/react": "17.0.x",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/wordpress__block-editor": "7.0.0",

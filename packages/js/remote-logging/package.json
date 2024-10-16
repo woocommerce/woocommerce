@@ -61,7 +61,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
 		"@types/debug": "^4.1.12",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
