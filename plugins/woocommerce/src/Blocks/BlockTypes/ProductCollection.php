@@ -321,12 +321,10 @@ class ProductCollection extends AbstractBlock {
 			);
 			$p->set_attribute(
 				'data-wc-context',
-				wp_json_encode(
-					$collection ? array(
-						'collection' => $collection,
-					) : '{}',
+				$collection ? wp_json_encode(
+					array( 'collection' => $collection ),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				)
+				) : '{}'
 			);
 		}
 
