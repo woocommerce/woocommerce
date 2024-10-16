@@ -1,8 +1,9 @@
 name: MarkdownLint on PR
 on:
     pull_request:
-        paths-ignore:
-            - '**/changelog/**'
+        paths:
+            - '**/*.md'
+            - '!.github/**/*.md'
 
 jobs:
     lint:
