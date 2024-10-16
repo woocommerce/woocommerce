@@ -51,7 +51,7 @@ const collection = {
 		'woocommerce'
 	),
 	keywords: [ 'specific', 'choose', 'recommend' ],
-	scope: [],
+	scope: [ 'block' ],
 };
 
 const attributes = {

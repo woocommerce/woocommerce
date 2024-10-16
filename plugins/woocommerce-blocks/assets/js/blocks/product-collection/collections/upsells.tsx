@@ -20,7 +20,7 @@ const collection = {
 		'woocommerce'
 	),
 	keywords: [ 'boost', 'promotion' ],
-	scope: [],
+	scope: [ 'block' ],
 	usesReference: [ 'product', 'cart' ],
 };
 

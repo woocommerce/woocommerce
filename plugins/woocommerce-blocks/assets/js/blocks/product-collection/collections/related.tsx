@@ -17,7 +17,7 @@ const collection = {
 	icon: <Icon icon={ loop } />,
 	description: __( 'Recommend products like this one.', 'woocommerce' ),
 	keywords: [ 'product collection' ],
-	scope: [],
+	scope: [ 'block' ],
 	usesReference: [ 'product' ],
 };
 
