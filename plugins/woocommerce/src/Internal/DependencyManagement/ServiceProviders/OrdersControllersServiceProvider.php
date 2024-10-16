@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Internal\Orders\TaxesController;
 /**
  * Service provider for the orders controller classes in the Automattic\WooCommerce\Internal\Orders namespace.
  */
-class OrdersControllersServiceProvider extends AbstractServiceProvider {
+class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.
@@ -32,6 +32,6 @@ class OrdersControllersServiceProvider extends AbstractServiceProvider {
 	public function register() {
 		$this->share( CouponsController::class );
 		$this->share( TaxesController::class );
-		$this->share( OrderDetailsRestController::class );
+		$this->share_with_implements_tags( OrderDetailsRestController::class );
 	}
 }

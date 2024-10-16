@@ -1,6 +1,10 @@
 <?php
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Orders\OrderDetailsRestController;
+use WC_REST_Unit_Test_Case;
 
 /**
  * OrderDetailsRestController API controller test.
