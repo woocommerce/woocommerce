@@ -3,6 +3,10 @@
 echo -e 'Activate default theme \n'
 wp-env run tests-cli wp theme activate twentytwentythree
 
+echo -e 'Install twentytwenty and storefront themes \n'
+wp-env run tests-cli wp theme install twentytwenty
+wp-env run tests-cli wp theme install storefront
+
 echo -e 'Update URL structure \n'
 wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
 

@@ -52,13 +52,7 @@ test.describe( 'Product Filters Template Part', () => {
 		const block = editor.canvas.getByLabel( `Block: ${ blockData.name }` );
 		await expect( block ).toBeVisible();
 
-		const searchTerms = [
-			'Status (Experimental)',
-			'Price (Experimental)',
-			'Rating (Experimental)',
-			'Attribute (Experimental)',
-			'Active (Experimental)',
-		];
+		const searchTerms = [ 'Color (Experimental)', 'Active (Experimental)' ];
 
 		for ( const filter of searchTerms ) {
 			await editor.selectBlocks( blockData.selectors.editor.block );
@@ -78,13 +72,7 @@ test.describe( 'Product Filters Template Part', () => {
 
 			await searchResult.click();
 
-			let _locator = `[aria-label="Block: ${ filter }"]`;
-
-			// We need to treat the attributes filter different because
-			// the variation of the block label depends on the product attribute.
-			if ( filter === 'Attribute (Experimental)' ) {
-				_locator = '.wp-block-woocommerce-product-filter-attribute';
-			}
+			const _locator = `[aria-label="Block: ${ filter }"]`;
 
 			await expect( editor.canvas.locator( _locator ) ).toHaveCount( 2 );
 		}

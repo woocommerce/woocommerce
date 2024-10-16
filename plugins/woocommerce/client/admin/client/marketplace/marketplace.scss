@@ -1,0 +1,29 @@
+@import "./stylesheets/_variables.scss";
+
+.woocommerce-admin-page__extensions {
+	background: #fff;
+
+	#wpbody {
+		margin: 0;
+	}
+
+	.woocommerce-layout__primary {
+		margin: 0;
+	}
+
+	.woocommerce-layout__main {
+		padding: 0;
+	}
+
+	/* On marketplace pages, reposition store alerts so they don't collide with other components */
+	.woocommerce-store-alerts {
+		margin-left: 24px;
+		margin-right: 16px;
+		margin-top: 16px;
+
+		@include breakpoint("<782px") {
+			margin-left: 16px;
+			width: 100%;
+		}
+	}
+}

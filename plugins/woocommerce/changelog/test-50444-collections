@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Move collections e2e tests from product collection file to its own file

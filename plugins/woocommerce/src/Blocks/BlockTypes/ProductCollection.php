@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use InvalidArgumentException;
 use WP_Query;
 use WC_Tax;
 
@@ -17,6 +18,14 @@ class ProductCollection extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-collection';
+
+	/**
+	 * An associative array of collection handlers.
+	 *
+	 * @var array<string, callable> $collection_handler_store
+	 * Keys are collection names, values are callable handlers for custom collection behavior.
+	 */
+	protected $collection_handler_store = array();
 
 	/**
 	 * The Block with its attributes before it gets rendered
@@ -44,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales' );
 
 
 	/**
@@ -123,6 +132,48 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+
+		$this->register_core_collections();
+	}
+
+	/**
+	 * Get the styles for the list element (fixed width).
+	 *
+	 * @param string $fixed_width Fixed width value.
+	 * @return string
+	 */
+	protected function get_list_styles( $fixed_width ) {
+		$style = '';
+
+		if ( isset( $fixed_width ) ) {
+			$style .= sprintf( 'width:%s;', esc_attr( $fixed_width ) );
+			$style .= 'margin: 0 auto;';
+		}
+		return $style;
+	}
+
+	/**
+	 * Set the style attribute for fixed width.
+	 *
+	 * @param WP_HTML_Tag_Processor $p          The HTML tag processor.
+	 * @param string                $fixed_width The fixed width value.
+	 */
+	private function set_fixed_width_style( $p, $fixed_width ) {
+		$p->set_attribute( 'style', $this->get_list_styles( $fixed_width ) );
+	}
+
+	/**
+	 * Handle block dimensions if width type is set to 'fixed'.
+	 *
+	 * @param WP_HTML_Tag_Processor $p     The HTML tag processor.
+	 * @param array                 $block The block details.
+	 */
+	private function handle_block_dimensions( $p, $block ) {
+		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
+			}
+		}
 	}
 
 	/**
@@ -371,6 +422,8 @@ class ProductCollection extends AbstractBlock {
 			if ( $this->is_next_tag_product_collection( $p ) ) {
 				$this->set_product_collection_namespace( $p );
 			}
+			// Check if dimensions need to be set and handle accordingly.
+			$this->handle_block_dimensions( $p, $block );
 			$block_content = $p->get_updated_html();
 
 			$collection    = $block['attrs']['collection'] ?? '';
@@ -381,7 +434,6 @@ class ProductCollection extends AbstractBlock {
 				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
-
 		return $block_content;
 	}
 
@@ -499,11 +551,18 @@ class ProductCollection extends AbstractBlock {
 	 */
 	private function is_block_compatible( $block_name ) {
 		// Check for explicitly unsupported blocks.
-		if (
-			'core/post-content' === $block_name ||
-			'woocommerce/mini-cart' === $block_name ||
-			'woocommerce/featured-product' === $block_name
-		) {
+		$unsupported_blocks = array(
+			'core/post-content',
+			'woocommerce/mini-cart',
+			'woocommerce/featured-product',
+			'woocommerce/active-filters',
+			'woocommerce/price-filter',
+			'woocommerce/stock-filter',
+			'woocommerce/attribute-filter',
+			'woocommerce/rating-filter',
+		);
+
+		if ( in_array( $block_name, $unsupported_blocks, true ) ) {
 			return false;
 		}
 
@@ -617,25 +676,37 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Update the query for the product query block in Editor.
 	 *
-	 * @param array           $args    Query args.
+	 * @param array           $query   Query args.
 	 * @param WP_REST_Request $request Request.
 	 */
-	public function update_rest_query_in_editor( $args, $request ): array {
+	public function update_rest_query_in_editor( $query, $request ): array {
 		// Only update the query if this is a product collection block.
 		$is_product_collection_block = $request->get_param( 'isProductCollectionBlock' );
 		if ( ! $is_product_collection_block ) {
-			return $args;
+			return $query;
 		}
 
-		// Is this a preview mode request?
-		// If yes, short-circuit the query and return the preview query args.
 		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
-		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
-		if ( 'true' === $is_preview ) {
-			return $this->get_preview_query_args( $args, $request );
+		$collection_args                  = array(
+			'name'                      => $product_collection_query_context['collection'] ?? '',
+			// The editor uses a REST query to grab product post types. This means we don't have a block
+			// instance to work with and the client needs to provide the location context.
+			'productCollectionLocation' => $request->get_param( 'productCollectionLocation' ),
+		);
+
+		// Allow collections to modify the collection arguments passed to the query builder.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['editor_args'] ) ) {
+			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query, $request );
 		}
 
-		$orderby             = $request->get_param( 'orderBy' );
+		// When requested, short-circuit the query and return the preview query args.
+		$preview_state = $request->get_param( 'previewState' );
+		if ( isset( $preview_state['isPreview'] ) && 'true' === $preview_state['isPreview'] ) {
+			return $this->get_preview_query_args( $collection_args, $query, $request );
+		}
+
+		$orderby             = $request->get_param( 'orderby' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
@@ -645,10 +716,11 @@ class ProductCollection extends AbstractBlock {
 		$price_range         = $request->get_param( 'priceRange' );
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
-		$args['author'] = '';
+		$query['author'] = '';
 
-		return $this->get_final_query_args(
-			$args,
+		$final_query = $this->get_final_query_args(
+			$collection_args,
+			$query,
 			array(
 				'orderby'             => $orderby,
 				'on_sale'             => $on_sale,
@@ -660,6 +732,8 @@ class ProductCollection extends AbstractBlock {
 				'priceRange'          => $price_range,
 			)
 		);
+
+		return $final_query;
 	}
 
 	/**
@@ -716,28 +790,40 @@ class ProductCollection extends AbstractBlock {
 
 		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
-		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
+		$collection_args = array(
+			'name'                      => $block->context['collection'] ?? '',
+			'productCollectionLocation' => $block->context['productCollectionLocation'] ?? null,
+		);
+
+		return $this->get_final_frontend_query(
+			$collection_args,
+			$block_context_query,
+			$page,
+			$is_exclude_applied_filters
+		);
 	}
 
 
 	/**
 	 * Get the final query arguments for the frontend.
 	 *
-	 * @param array $query The query arguments.
-	 * @param int   $page  The page number.
+	 * @param array $collection_args            Any special arguments that should change the behavior of the query.
+	 * @param array $query                      The query arguments.
+	 * @param int   $page                       The page number.
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
-	private function get_final_frontend_query( $query, $page = 1, $is_exclude_applied_filters = false ) {
-		$offset   = $query['offset'] ?? 0;
-		$per_page = $query['perPage'] ?? 9;
+	private function get_final_frontend_query( $collection_args, $query, $page = 1, $is_exclude_applied_filters = false ) {
+		$product_ids = $query['post__in'] ?? array();
+		$offset      = $query['offset'] ?? 0;
+		$per_page    = $query['perPage'] ?? 9;
 
 		$common_query_values = array(
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'     => array(),
-			'posts_per_page' => $query['perPage'],
+			'posts_per_page' => $per_page,
 			'order'          => $query['order'],
 			'offset'         => ( $per_page * ( $page - 1 ) ) + $offset,
-			'post__in'       => array(),
+			'post__in'       => $product_ids,
 			'post_status'    => 'publish',
 			'post_type'      => 'product',
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
@@ -753,7 +839,14 @@ class ProductCollection extends AbstractBlock {
 		$time_frame          = $query['timeFrame'] ?? null;
 		$price_range         = $query['priceRange'] ?? null;
 
+		// Allow collections to modify the collection arguments passed to the query builder.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['frontend_args'] ) ) {
+			$collection_args = call_user_func( $handlers['frontend_args'], $collection_args, $query );
+		}
+
 		$final_query = $this->get_final_query_args(
+			$collection_args,
 			$common_query_values,
 			array(
 				'on_sale'             => $is_on_sale,
@@ -775,51 +868,75 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Get final query args based on provided values
 	 *
-	 * @param array $common_query_values Common query values.
-	 * @param array $query               Query from block context.
+	 * @param array $collection_args            Any special arguments that should change the behavior of the query.
+	 * @param array $common_query_values        Common query values.
+	 * @param array $query                      Query from block context.
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
-	private function get_final_query_args( $common_query_values, $query, $is_exclude_applied_filters = false ) {
-		$handpicked_products = $query['handpicked_products'] ?? array();
-		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
-		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
-		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
-		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
-		$featured_query      = $this->get_featured_query( $query['featured'] ?? false );
-		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
-		$taxonomies_query    = $query['taxonomies_query'] ?? array();
-		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
-		$date_query          = $this->get_date_query( $query['timeFrame'] ?? array() );
-		$price_query_args    = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
+	private function get_final_query_args(
+		$collection_args,
+		$common_query_values,
+		$query,
+		$is_exclude_applied_filters = false
+	) {
+		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
+		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
+		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
+		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
+		$featured_query   = $this->get_featured_query( $query['featured'] ?? false );
+		$attributes_query = $this->get_product_attributes_query( $query['product_attributes'] );
+		$taxonomies_query = $query['taxonomies_query'] ?? array();
+		$tax_query        = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
+		$date_query       = $this->get_date_query( $query['timeFrame'] ?? array() );
+		$price_query_args = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
+		$handpicked_query = $this->get_handpicked_query( $query['handpicked_products'] ?? false );
 
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
-		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query, $price_query_args );
+		// Allow collections to provide their own query parameters.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['build_query'] ) ) {
+			$collection_query = call_user_func(
+				$handlers['build_query'],
+				$collection_args,
+				$common_query_values,
+				$query,
+				$is_exclude_applied_filters
+			);
+		} else {
+			$collection_query = array();
+		}
 
-		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
-
-		return $result;
+		return $this->merge_queries(
+			$common_query_values,
+			$orderby_query,
+			$on_sale_query,
+			$stock_query,
+			$tax_query,
+			$applied_filters_query,
+			$date_query,
+			$price_query_args,
+			$handpicked_query,
+			$collection_query
+		);
 	}
 
 	/**
 	 * Get query args for preview mode. These query args will be used with WP_Query to fetch the products.
 	 *
-	 * @param array           $args    Query args.
-	 * @param WP_REST_Request $request Request.
+	 * @param array           $collection_args Any collection-specific arguments.
+	 * @param array           $args            Query args.
+	 * @param WP_REST_Request $request         Request.
 	 */
-	private function get_preview_query_args( $args, $request ) {
+	private function get_preview_query_args( $collection_args, $args, $request ) {
 		$collection_query = array();
 
-		/**
-		 * In future, Here we will modify the preview query based on the collection name. For example:
-		 *
-		 * $product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
-		 * $collection_name                  = $product_collection_query_context['collection'] ?? '';
-		 * if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
-		 *      $collection_query = $this->get_on_sale_products_query( true );
-		 * }.
-		 */
+		// Allow collections to override the preview mode behavior.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['preview_query'] ) ) {
+			$collection_query = call_user_func( $handlers['preview_query'], $collection_args, $args, $request );
+		}
 
 		$args = $this->merge_queries( $args, $collection_query );
 		return $args;
@@ -848,40 +965,83 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	private function merge_queries( ...$queries ) {
+		// Rather than a simple merge, some query vars should be held aside and merged differently.
+		$special_query_vars = array(
+			'post__in' => array(),
+		);
+		$special_query_keys = array_keys( $special_query_vars );
+
 		$merged_query = array_reduce(
 			$queries,
-			function ( $acc, $query ) {
+			function ( $acc, $query ) use ( $special_query_keys, &$special_query_vars ) {
 				if ( ! is_array( $query ) ) {
 					return $acc;
 				}
-				// If the $query doesn't contain any valid query keys, we unpack/spread it then merge.
-				if ( empty( array_intersect( $this->get_valid_query_vars(), array_keys( $query ) ) ) ) {
+
+				// When the $query has keys but doesn't contain any valid query keys, we unpack/spread it then merge.
+				if ( ! empty( $query ) && empty( array_intersect( $this->get_valid_query_vars(), array_keys( $query ) ) ) ) {
 					return $this->merge_queries( $acc, ...array_values( $query ) );
 				}
+
+				// Pull out the special query vars so we can merge them separately.
+				foreach ( $special_query_keys as $query_var ) {
+					if ( isset( $query[ $query_var ] ) ) {
+						$special_query_vars[ $query_var ][] = $query[ $query_var ];
+						unset( $query[ $query_var ] );
+					}
+				}
+
 				return $this->array_merge_recursive_replace_non_array_properties( $acc, $query );
 			},
 			array()
 		);
 
-		/**
-		 * If there are duplicated items in post__in, it means that we need to
-		 * use the intersection of the results, which in this case, are the
-		 * duplicated items.
-		 */
-		if (
-			! empty( $merged_query['post__in'] ) &&
-			is_array( $merged_query['post__in'] ) &&
-			count( $merged_query['post__in'] ) > count( array_unique( $merged_query['post__in'] ) )
-		) {
-			$merged_query['post__in'] = array_unique(
-				array_diff(
-					$merged_query['post__in'],
-					array_unique( $merged_query['post__in'] )
-				)
-			);
-		}
+		// Perform any necessary special merges.
+		$merged_query['post__in'] = $this->merge_post__in( ...$special_query_vars['post__in'] );
 
 		return $merged_query;
+	}
+
+	/**
+	 * Merge all of the 'post__in' values and return an array containing only values that are present in all arrays.
+	 *
+	 * @param int[][] ...$post__in The 'post__in' values to be merged.
+	 *
+	 * @return int[] The merged 'post__in' values.
+	 */
+	private function merge_post__in( ...$post__in ) {
+		if ( empty( $post__in ) ) {
+			return array();
+		}
+
+		// Since we're using array_intersect, any array that is empty will result
+		// in an empty output array. To avoid this we need to make sure every
+		// argument is a non-empty array.
+		$post__in = array_filter(
+			$post__in,
+			function ( $val ) {
+				return is_array( $val ) && ! empty( $val );
+			}
+		);
+		if ( empty( $post__in ) ) {
+			return array();
+		}
+
+		// Since the 'post__in' filter is exclusionary we need to use an intersection of
+		// all of the arrays. This ensures one query doesn't add options that another
+		// has otherwise excluded from the results.
+		if ( count( $post__in ) > 1 ) {
+			$post__in = array_intersect( ...$post__in );
+			// An empty array means that there was no overlap between the filters and so
+			// the query should return no results.
+			if ( empty( $post__in ) ) {
+				return array( -1 );
+			}
+		} else {
+			$post__in = reset( $post__in );
+		}
+
+		return array_values( array_unique( $post__in, SORT_NUMERIC ) );
 	}
 
 	/**
@@ -892,13 +1052,29 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_custom_orderby_query( $orderby ) {
-		if ( ! in_array( $orderby, $this->custom_order_opts, true ) ) {
+		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
 		}
 
+		if ( 'price' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_price_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
+		}
+
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' === $orderby || 'popularity' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
+		}
+
 		$meta_keys = array(
-			'popularity' => 'total_sales',
-			'rating'     => '_wc_average_rating',
+			'rating' => '_wc_average_rating',
 		);
 
 		return array(
@@ -1136,6 +1312,23 @@ class ProductCollection extends AbstractBlock {
 		);
 	}
 
+	/**
+	 * Generates a post__in query to filter products to the set of provided IDs.
+	 *
+	 * @param int[]|false $handpicked_products The products to filter.
+	 *
+	 * @return array The post__in query.
+	 */
+	private function get_handpicked_query( $handpicked_products ) {
+		if ( false === $handpicked_products ) {
+			return array();
+		}
+
+		return array(
+			'post__in' => $handpicked_products,
+		);
+	}
+
 
 	/**
 	 * Merge tax_queries from various queries.
@@ -1234,23 +1427,6 @@ class ProductCollection extends AbstractBlock {
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		return ! empty( $result ) ? array( 'tax_query' => $result ) : array();
-	}
-
-	/**
-	 * Apply the query only to a subset of products
-	 *
-	 * @param array $query  The query.
-	 * @param array $ids  Array of selected product ids.
-	 *
-	 * @return array
-	 */
-	private function filter_query_to_only_include_ids( $query, $ids ) {
-		if ( ! empty( $ids ) ) {
-			$query['post__in'] = empty( $query['post__in'] ) ?
-				$ids : array_intersect( $ids, $query['post__in'] );
-		}
-
-		return $query;
 	}
 
 	/**
@@ -1551,20 +1727,82 @@ class ProductCollection extends AbstractBlock {
 		$min_price = $price_range['min'] ?? null;
 		if ( $min_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'min_price', '>=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'max_price', '>=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price >= %f ', $min_price );
 			}
 		}
 
 		$max_price = $price_range['max'] ?? null;
 		if ( $max_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'max_price', '<=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'min_price', '<=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price <= %f ', $max_price );
 			}
 		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add price-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_price_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+		if ( 'price' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC';
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add sales-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_sales_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' !== $orderby && 'popularity' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.total_sales ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.total_sales DESC, wc_product_meta_lookup.product_id DESC';
 
 		return $clauses;
 	}
@@ -1680,5 +1918,171 @@ class ProductCollection extends AbstractBlock {
 		$taxes = WC_Tax::calc_tax( $price_filter, $tax_rates, false );
 
 		return $price_filter + array_sum( $taxes );
+	}
+
+	/**
+	 * Registers handlers for a collection.
+	 *
+	 * @param string        $collection_name The name of the custom collection.
+	 * @param callable      $build_query     A hook returning any custom query arguments to merge with the collection's query.
+	 * @param callable|null $frontend_args   An optional hook that returns any frontend collection arguments to pass to the query builder.
+	 * @param callable|null $editor_args     An optional hook that returns any REST collection arguments to pass to the query builder.
+	 * @param callable|null $preview_query   An optional hook that returns a query to use in preview mode.
+	 *
+	 * @throws \InvalidArgumentException If collection handlers are already registered for the given collection name.
+	 */
+	protected function register_collection_handlers( $collection_name, $build_query, $frontend_args = null, $editor_args = null, $preview_query = null ) {
+		if ( isset( $this->collection_handler_store[ $collection_name ] ) ) {
+			throw new \InvalidArgumentException( 'Collection handlers already registered for ' . esc_html( $collection_name ) );
+		}
+
+		$this->collection_handler_store[ $collection_name ] = array(
+			'build_query'   => $build_query,
+			'frontend_args' => $frontend_args,
+			'editor_args'   => $editor_args,
+			'preview_query' => $preview_query,
+		);
+	}
+
+	/**
+	 * Registers any handlers for the core collections.
+	 */
+	protected function register_core_collections() {
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/hand-picked',
+			function ( $collection_args, $common_query_values, $query ) {
+				// For Hand-Picked collection, if no products are selected, we should return an empty result set.
+				// This ensures that the collection doesn't display any products until the user explicitly chooses them.
+				if ( empty( $query['handpicked_products'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/related',
+			function ( $collection_args ) {
+				// No products should be shown if no related product reference is set.
+				if ( empty( $collection_args['relatedProductReference'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$related_products = wc_get_related_products(
+					$collection_args['relatedProductReference'],
+					// Use a higher limit so that the result set contains enough products for the collection to subsequently filter.
+					100
+				);
+				if ( empty( $related_products ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				// Have it filter the results to products related to the one provided.
+				return array(
+					'post__in' => $related_products,
+				);
+			},
+			function ( $collection_args, $query ) {
+				$product_reference = $query['productReference'] ?? null;
+				// Infer the product reference from the location if an explicit product is not set.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['relatedProductReference'] = $product_reference;
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$product_reference = $request->get_param( 'productReference' );
+				// In some cases the editor will send along block location context that we can infer the product reference from.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['relatedProductReference'] = $product_reference;
+				return $collection_args;
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/upsells',
+			function ( $collection_args ) {
+				$product_reference = $collection_args['upsellsProductReferences'] ?? null;
+				// No products should be shown if no upsells product reference is set.
+				if ( empty( $product_reference ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$products = array_map( 'wc_get_product', $product_reference );
+
+				if ( empty( $products ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$all_upsells = array_reduce(
+					$products,
+					function ( $acc, $product ) {
+						return array_merge(
+							$acc,
+							$product->get_upsell_ids()
+						);
+					},
+					array()
+				);
+
+				// Remove duplicates and product references. We don't want to display
+				// what's already in cart.
+				$unique_upsells = array_unique( $all_upsells );
+				$upsells        = array_diff( $unique_upsells, $product_reference );
+
+				return array(
+					'post__in' => empty( $upsells ) ? array( -1 ) : $upsells,
+				);
+			},
+			function ( $collection_args, $query ) {
+				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				// Infer the product reference from the location if an explicit product is not set.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_references = array( $location['sourceData']['productId'] );
+					}
+					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+						$product_references = $location['sourceData']['productIds'];
+					}
+				}
+
+				$collection_args['upsellsProductReferences'] = $product_references;
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$product_reference = $request->get_param( 'productReference' );
+				// In some cases the editor will send along block location context that we can infer the product reference from.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['upsellsProductReferences'] = array( $product_reference );
+				return $collection_args;
+			}
+		);
 	}
 }

@@ -16,6 +16,9 @@ const glob = require( 'glob' );
 // when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
+	'add-to-cart-form': {
+		customDir: 'product-elements/add-to-cart-form',
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -88,10 +91,6 @@ const blocks = {
 	'product-filters': {
 		isExperimental: true,
 	},
-	'product-filter': {
-		isExperimental: true,
-		customDir: 'product-filters/inner-blocks/product-filter',
-	},
 	'product-filters-overlay': {
 		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/overlay',
@@ -122,6 +121,14 @@ const blocks = {
 	},
 	'product-filter-clear-button': {
 		customDir: 'product-filters/inner-blocks/clear-button',
+		isExperimental: true,
+	},
+	'product-filter-checkbox-list': {
+		customDir: 'product-filters/inner-blocks/checkbox-list',
+		isExperimental: true,
+	},
+	'product-filter-chips': {
+		customDir: 'product-filters/inner-blocks/chips',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -214,8 +221,6 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
-		'add-to-cart-form':
-			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
 			...blocks,
 			...cartAndCheckoutBlocks,

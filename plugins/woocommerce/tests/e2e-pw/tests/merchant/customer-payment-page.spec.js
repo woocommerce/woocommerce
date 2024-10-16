@@ -110,6 +110,17 @@ test.describe(
 			await test.step( 'Select payment method and pay for the order', async () => {
 				// explicitly select the payment method
 				await page.getByText( 'Direct bank transfer' ).click();
+
+				// Handle notice if present
+				await page.addLocatorHandler(
+					page.getByRole( 'link', { name: 'Dismiss' } ),
+					async () => {
+						await page
+							.getByRole( 'link', { name: 'Dismiss' } )
+							.click();
+					}
+				);
+
 				// pay for the order
 				await page
 					.getByRole( 'button', { name: 'Pay for order' } )
