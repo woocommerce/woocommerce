@@ -209,23 +209,35 @@ class WCAdminHelper {
 			}
 		}
 
-		// Check product, category and tag pages.
-		$permalink_structure = wc_get_permalink_structure();
-		$permalink_keys      = array(
-			'category_base',
-			'tag_base',
-			'product_base',
-		);
-
 		$url_path = wp_parse_url( $normalized_path, PHP_URL_PATH );
 
+		// Check if the URL matches any of the WooCommerce permalink structures.
 		if ( $url_path ) {
+			$permalink_structure = wc_get_permalink_structure();
+			$permalink_keys      = array(
+				'category_base',
+				'tag_base',
+				'product_base',
+			);
+
 			foreach ( $permalink_keys as $key ) {
 				if ( ! isset( $permalink_structure[ $key ] ) || ! is_string( $permalink_structure[ $key ] ) ) {
 					continue;
 				}
 
-				// Check if the URL path starts with the matching base.
+				/**
+				 * Check if the URL path starts with a URL segment matching the permalink base.
+				 *
+				 * Match examples:
+				 *    1. product_base = 'product'
+				 *       $url_path: '/product/blue-t-shirt'
+				 *    2. category_base = 'product-category'
+				 *       $url_path: '/product-category/clothing/'
+				 *
+				 * Non-match examples:
+				 *    1. product_base = 'product'
+				 *       $url_path: '/products' (URL segment partial match)
+				 */
 				if ( 0 === strncmp( $url_path, trim( $permalink_structure[ $key ], '/' ), strlen( trim( $permalink_structure[ $key ], '/' ) ) ) ) {
 					$base_length = strlen( trim( $permalink_structure[ $key ], '/' ) );
 					$next_char   = substr( $url_path, $base_length, 1 );
@@ -236,7 +248,25 @@ class WCAdminHelper {
 					}
 				}
 
-				// If the permalink structure contains placeholders, we need to check if the URL matches the structure using regex.
+				/**
+				 * If the permalink structure contains placeholders, we need to check if the URL matches the structure using regex.
+				 *
+				 * Match examples:
+				 *    1. product_base = 'product/%product_cat%'
+				 *       $url_path: '/product/t-shirts/blue-t-shirt'
+				 *       $url_path: '/product/electronics/smartphones/iphone-12'
+				 *    2. product_base = 'shop/%product_cat%/%product%'
+				 *       $url_path: '/shop/clothing/mens/summer-shirt'
+				 *    3. product_base = '%product_cat%'
+				 *       $url_path: '/electronics/laptops/macbook-pro'
+				 *
+				 * Non-match examples:
+				 *    1. product_base = 'product/%product_cat%'
+				 *       $url_path: '/blog/top-10-products'
+				 *       $url_path: '/product-reviews/best-sellers'
+				 *    2. product_base = 'shop/%product_cat%/%product%'
+				 *       $url_path: '/shop/new-arrivals'
+				 */
 				if ( strpos( $permalink_structure[ $key ], '%' ) !== false ) {
 					global $wp_rewrite;
 					$rules = $wp_rewrite->generate_rewrite_rule( $permalink_structure[ $key ] );
