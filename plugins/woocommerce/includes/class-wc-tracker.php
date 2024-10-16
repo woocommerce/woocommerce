@@ -180,6 +180,9 @@ class WC_Tracker {
 		$data['reviews']    = self::get_review_counts();
 		$data['categories'] = self::get_category_counts();
 
+		// Get order snapshot
+		$data['order_snapshot'] = self::get_order_snapshot();
+
 		// Payment gateway info.
 		$data['gateways'] = self::get_active_payment_gateways();
 
@@ -1168,5 +1171,158 @@ class WC_Tracker {
 	 */
 	public static function get_woocommerce_mobile_usage() {
 		return get_option( 'woocommerce_mobile_app_usage' );
+	}
+
+	/**
+	 * Fetch main order data.
+	 *
+	 * @param string  $sort_order Date sort order (ASC or DESC).
+	 * @param integer $limit      Limit the amount of orders to return (default 20).
+	 * @return array Found orders indexed by ID.
+	 */
+	private static function get_order_data( $sort_order = 'ASC', $limit = 20 ) {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_table_name = OrdersTableDataStore::get_orders_table_name();
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$orders = $wpdb->get_results(
+				"SELECT
+					id,
+					row_number() OVER (ORDER BY date_created_gmt) AS order_rank,
+					date_created_gmt AS order_created_at,
+					date_updated_gmt AS order_updated_at,
+					currency,
+					total_amount,
+					payment_method,
+					payment_method_title
+				FROM $order_table_name
+				WHERE
+					type = 'shop_order'
+					AND status IN ('wc-completed', 'wc-refunded')
+				ORDER BY date_created_gmt $sort_order
+				LIMIT $limit;",
+				ARRAY_A
+			);
+			// phpcs:enable
+		}
+
+		return array_column( $orders, null, 'id' );
+	}
+
+	/**
+	 * Fetch additional data for a specific set of orders.
+	 *
+	 * @param array $order_ids List of order ID's to fetch data for.
+	 * @return array Additional data, indexed by order ID.
+	 */
+	private static function get_additional_order_data( $order_ids ) {
+		global $wpdb;
+
+		if ( empty( $order_ids ) || ! is_array( $order_ids ) ) {
+			return array();
+		}
+		$joined_ids      = implode( ',', $order_ids );
+		$additional_data = array();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$op_table_name = OrdersTableDataStore::get_operational_data_table_name();
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$data = $wpdb->get_results(
+				"SELECT order_id, woocommerce_version, recorded_sales
+				FROM $op_table_name
+				WHERE order_id IN ($joined_ids)",
+				ARRAY_A
+			);
+			// phpcs:enable
+
+			foreach ( $data as $row ) {
+				$additional_data[ $row['order_id'] ] = array(
+					'woocommerce_version' => $row['woocommerce_version'],
+					'recorded_sales'      => $row['recorded_sales'],
+				);
+			}
+		}
+
+		return $additional_data;
+	}
+
+	/**
+	 * Fetch refund data for a specific set of orders.
+	 *
+	 * @param array $order_ids List of order ID's to fetch data for.
+	 * @return array Refund data, indexed by order ID.
+	 */
+	private static function get_refund_order_data( $order_ids ) {
+		global $wpdb;
+
+		if ( empty( $order_ids ) || ! is_array( $order_ids ) ) {
+			return array();
+		}
+		$joined_ids  = implode( ',', $order_ids );
+		$refund_data = array();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_table_name = OrdersTableDataStore::get_orders_table_name();
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$data = $wpdb->get_results(
+				"SELECT
+					parent_order_id AS order_id,
+					SUM(total_amount) AS refund_amount
+				FROM $order_table_name
+				WHERE
+					type = 'shop_order_refund'
+					AND status = 'wc-completed'
+					AND parent_order_id IN ($joined_ids)
+				GROUP BY parent_order_id",
+				ARRAY_A
+			);
+			// phpcs:enable
+
+			foreach ( $data as $row ) {
+				$refund_data[ $row['order_id'] ] = array(
+					'refund_amount' => $row['refund_amount'],
+				);
+			}
+		}
+
+		return $refund_data;
+	}
+
+	/**
+	 * Get a snapshot of the first 20 orders and the last 20 orders.
+	 *
+	 * @return array
+	 */
+	private static function get_order_snapshot() {
+		$first_20  = self::get_order_data( 'ASC', 20 );
+		$last_20   = self::get_order_data( 'DESC', 20 );
+		$order_ids = array_unique( array_merge( array_keys( $first_20 ), array_keys( $last_20 ) ) );
+
+		foreach ( self::get_additional_order_data( $order_ids ) as $order_id => $data ) {
+			if ( isset( $first_20[ $order_id ] ) ) {
+				$first_20[ $order_id ] = array_merge( $first_20[ $order_id ], $data );
+			}
+			if ( isset( $last_20[ $order_id ] ) ) {
+				$last_20[ $order_id ] = array_merge( $last_20[ $order_id ], $data );
+			}
+		}
+
+		foreach ( self::get_refund_order_data( $order_ids ) as $order_id => $data ) {
+			if ( isset( $first_20[ $order_id ] ) ) {
+				$first_20[ $order_id ] = array_merge( $first_20[ $order_id ], $data );
+			}
+			if ( isset( $last_20[ $order_id ] ) ) {
+				$last_20[ $order_id ] = array_merge( $last_20[ $order_id ], $data );
+			}
+		}
+
+		return array(
+			'first_20_orders' => $first_20,
+			'last_20_orders'  => $last_20,
+		);
 	}
 }
