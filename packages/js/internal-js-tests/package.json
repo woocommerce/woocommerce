@@ -30,7 +30,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -52,14 +52,14 @@
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"babel-jest": "~27.5.1",
+		"babel-jest": "27.5.x",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
 		"resize-observer-polyfill": "1.5.1",
 		"rimraf": "5.0.5",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
+		"ts-jest": "29.1.x",
+		"typescript": "5.3.x",
 		"wireit": "0.14.3"
 	},
 	"lint-staged": {
