@@ -13,12 +13,6 @@ import { type BlockAttributes } from './types';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
-		'woocommerce/product-filters-overlay-navigation',
-		{
-			triggerType: 'open-overlay',
-		},
-	],
-	[
 		'core/heading',
 		{
 			level: 3,
