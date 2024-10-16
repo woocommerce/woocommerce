@@ -657,6 +657,7 @@ class OrdersTableMetaQuery {
 				return "CAST({$clause['alias']}.meta_value AS {$clause['cast']}) {$meta_compare} {$where}";
 			}
 		}
-	}
 
+		return '';
+	}
 }
