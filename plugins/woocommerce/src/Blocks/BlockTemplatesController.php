@@ -46,31 +46,10 @@ class BlockTemplatesController {
 			$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
 
 			if ( $template_part && ! empty( $template_part->content ) ) {
-				$content            = do_blocks( $template_part->content );
-				$uncategorized_area = defined( 'WP_TEMPLATE_PART_AREA_UNCATEGORIZED' ) ? \WP_TEMPLATE_PART_AREA_UNCATEGORIZED : 'uncategorized';
-				$area               = $uncategorized_area;
-
-				// Look up area definition.
-				$area_definition = null;
-				$defined_areas   = get_allowed_block_template_part_areas();
-				foreach ( $defined_areas as $defined_area ) {
-					if ( $defined_area['area'] === $area ) {
-						$area_definition = $defined_area;
-						break;
-					}
-				}
-
-				// If $area is not allowed, set it back to the uncategorized default.
-				if ( ! $area_definition ) {
-					$area = $uncategorized_area;
-				}
+				$content = do_blocks( $template_part->content );
 
 				if ( empty( $attributes['tagName'] ) || tag_escape( $attributes['tagName'] ) !== $attributes['tagName'] ) {
-					$area_tag = 'div';
-					if ( $area_definition && isset( $area_definition['area_tag'] ) ) {
-						$area_tag = $area_definition['area_tag'];
-					}
-					$html_tag = $area_tag;
+					$html_tag = 'div';
 				} else {
 					$html_tag = esc_attr( $attributes['tagName'] );
 				}
