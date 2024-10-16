@@ -25,6 +25,9 @@ export const scanForTemplateChanges = async (
 ) => {
 	const changes: Map< string, TemplateChangeDescription > = new Map();
 
+	if ( ! content.match( /diff --git a\/(.+)\.php/g ) ) {
+		return changes;
+	}
 	if ( ! content.match( /diff --git a\/(.+)\/templates\/(.+)\.php/g ) ) {
 		return changes;
 	}
