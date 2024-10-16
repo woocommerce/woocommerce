@@ -4,8 +4,6 @@ menu_title: Performance best practices
 tags: reference
 ---
 
-# Performance Best Practices for WooCommerce Extensions
-
 Optimizing the performance of WooCommerce extensions is vital for ensuring that online stores run smoothly, provide a superior user experience, and rank well in search engine results. This guide is tailored for developers looking to enhance the speed and efficiency of their WooCommerce extensions, with a focus on understanding performance impacts, benchmarking, testing, and implementing strategies for improvement.
 
 ## Performance Optimization
