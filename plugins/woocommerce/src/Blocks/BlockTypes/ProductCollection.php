@@ -2080,5 +2080,79 @@ class ProductCollection extends AbstractBlock {
 				return $collection_args;
 			}
 		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/cross-sells',
+			function ( $collection_args ) {
+				$product_references = $collection_args['crossSellsProductReferences'] ?? null;
+				// No products should be shown if no cross-sells product reference is set.
+				if ( empty( $product_references ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$products = array_filter(array_map( 'wc_get_product', $product_references ));
+
+				if ( empty( $products ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$product_ids = array_map( function( $product ) {
+					return $product->get_id();
+				}, $products );
+
+				$all_cross_sells = array_reduce(
+					$products,
+					function ( $acc, $product ) {
+						return array_merge(
+							$acc,
+							$product->get_cross_sell_ids()
+						);
+					},
+					array()
+				);
+
+				// Remove duplicates and product references. We don't want to display
+				// what's already in cart.
+				$unique_cross_sells = array_unique( $all_cross_sells );
+				$cross_sells        = array_diff( $unique_cross_sells, $product_ids );
+
+				return array(
+					'post__in' => empty( $cross_sells ) ? array( -1 ) : $cross_sells,
+				);
+			},
+			function ( $collection_args, $query ) {
+				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				// Infer the product reference from the location if an explicit product is not set.
+				if ( empty( $product_references ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_references = array( $location['sourceData']['productId'] );
+					}
+					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+						$product_references = $location['sourceData']['productIds'];
+					}
+				}
+
+				$collection_args['crossSellsProductReferences'] = $product_references;
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$product_reference = $request->get_param( 'productReference' );
+				// In some cases the editor will send along block location context that we can infer the product reference from.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['crossSellsProductReferences'] = array( $product_reference );
+				return $collection_args;
+			}
+		);
 	}
 }
