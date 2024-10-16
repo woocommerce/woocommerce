@@ -10,7 +10,7 @@
 		"pnpm": "9.1.3"
 	},
 	"scripts": {
-		"changelog": "composer install && composer exec -- changelogger"
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
 	},
 	"repository": {
 		"type": "git",
