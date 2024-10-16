@@ -1174,6 +1174,31 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Map legacy order meta keys to a column name.
+	 *
+	 * @param string $meta_key Legacy meta key name.
+	 * @return string Mapped column name.
+	 */
+	private static function map_legacy_meta_key_name( $meta_key ) {
+		switch ( $meta_key ) {
+			case '_order_currency':
+				return 'currency';
+			case '_order_total':
+				return 'total_amount';
+			case '_payment_method':
+				return 'payment_method';
+			case '_payment_method_title':
+				return 'payment_method_title';
+			case '_recorded_sales':
+				return 'recorded_sales';
+			case '_order_version':
+				return 'woocommerce_version';
+			default:
+				return $meta_key;
+		}
+	}
+
+	/**
 	 * Fetch main order data.
 	 *
 	 * @param string  $sort_order Date sort order (ASC or DESC).
@@ -1202,6 +1227,23 @@ class WC_Tracker {
 					type = 'shop_order'
 					AND status IN ('wc-completed', 'wc-refunded')
 				ORDER BY date_created_gmt $sort_order
+				LIMIT $limit;",
+				ARRAY_A
+			);
+			// phpcs:enable
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$orders = $wpdb->get_results(
+				"SELECT
+					ID AS id,
+					row_number() OVER (ORDER BY post_date_gmt) AS order_rank,
+					post_date_gmt AS order_created_at,
+					post_modified_gmt AS order_updated_at
+				FROM $wpdb->posts
+				WHERE
+					post_type = 'shop_order'
+					AND post_status IN ('wc-completed', 'wc-refunded')
+				ORDER BY post_date_gmt $sort_order
 				LIMIT $limit;",
 				ARRAY_A
 			);
@@ -1241,8 +1283,32 @@ class WC_Tracker {
 			foreach ( $data as $row ) {
 				$additional_data[ $row['order_id'] ] = array(
 					'woocommerce_version' => $row['woocommerce_version'],
-					'recorded_sales'      => $row['recorded_sales'],
+					'recorded_sales'      => $row['recorded_sales'] ? 'yes' : 'no',
 				);
+			}
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$data = $wpdb->get_results(
+				"SELECT post_id AS order_id, meta_key, meta_value
+				FROM $wpdb->postmeta
+				WHERE
+					meta_key IN (
+						'_order_currency',
+						'_order_total',
+						'_payment_method',
+						'_payment_method_title',
+						'_recorded_sales',
+						'_order_version'
+					)
+					AND post_id IN ($joined_ids)
+				",
+				ARRAY_A
+			);
+			// phpcs:enable
+
+			foreach ( $data as $row ) {
+				$meta_key = self::map_legacy_meta_key_name( $row['meta_key'] );
+				$additional_data[ $row['order_id'] ][ $meta_key ] = $row['meta_value'];
 			}
 		}
 
@@ -1281,12 +1347,28 @@ class WC_Tracker {
 				ARRAY_A
 			);
 			// phpcs:enable
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$data = $wpdb->get_results(
+				"SELECT
+					refunds.post_parent AS order_id,
+					SUM(amount.meta_value) AS refund_amount
+				FROM $wpdb->posts AS refunds
+				LEFT JOIN $wpdb->postmeta AS amount ON amount.post_id = refunds.ID AND amount.meta_key = '_order_total'
+				WHERE
+					refunds.post_type = 'shop_order_refund'
+					AND refunds.post_status = 'wc-completed'
+					AND refunds.post_parent IN ($joined_ids)
+				GROUP BY refunds.post_parent",
+				ARRAY_A
+			);
+			// phpcs:enable
+		}
 
-			foreach ( $data as $row ) {
-				$refund_data[ $row['order_id'] ] = array(
-					'refund_amount' => $row['refund_amount'],
-				);
-			}
+		foreach ( $data as $row ) {
+			$refund_data[ $row['order_id'] ] = array(
+				'refund_amount' => $row['refund_amount'],
+			);
 		}
 
 		return $refund_data;
