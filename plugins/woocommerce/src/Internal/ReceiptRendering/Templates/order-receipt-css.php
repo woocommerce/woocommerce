@@ -30,6 +30,3 @@ p { line-height: <?php echo $data['constants']['line_height']; ?>pt; margin: 0 0
 	background-image: url("data:image/svg+xml;base64,<?php echo $data['payment_info']['card_icon']; ?>");
 }
 <?php } ?>
-.order-status-failed {
-	color: #FF0000;
-}
