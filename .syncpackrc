@@ -164,15 +164,6 @@
 		},
 		{
 			"dependencies": [
-				"fork-ts-checker-webpack-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "9.0.x"
-		},
-		{
-			"dependencies": [
 				"github-label-sync"
 			],
 			"packages": [
