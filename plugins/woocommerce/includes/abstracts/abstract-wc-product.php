@@ -2272,7 +2272,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 * @param float $total_value The effective total value of the product.
 		 * @param WC_Product $product The product for which the total value is being retrieved.
 		 */
-		return apply_filters( 'woocommerce_get_cogs_total_value', $this->get_cogs_total_value_core(), $this );
+		return apply_filters( 'woocommerce_get_product_cogs_total_value', $this->get_cogs_total_value_core(), $this );
 	}
 
 	/**

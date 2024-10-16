@@ -1567,7 +1567,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		if ( $this->cogs_is_enabled() ) {
-			$schema = $this->add_cogs_related_schema( $schema, false );
+			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
 		return $this->add_additional_fields_schema( $schema );
@@ -1772,7 +1772,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$data = parent::prepare_object_for_response_core( $object_data, $request, $context );
 
 		if ( $this->cogs_is_enabled() ) {
-			$this->add_cogs_info_to_returned_data( $data, $object_data );
+			$this->add_cogs_info_to_returned_product_data( $data, $object_data );
 		}
 
 		return $data;
