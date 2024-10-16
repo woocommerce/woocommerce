@@ -69,8 +69,8 @@ runs:
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' &&  inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
-              restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-package-deps }}-'
+              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
+              restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-"
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
