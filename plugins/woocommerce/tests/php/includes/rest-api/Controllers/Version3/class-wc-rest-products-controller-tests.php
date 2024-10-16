@@ -1,10 +1,22 @@
 <?php
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V3 REST API.
  */
 class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
+	use CogsAwareUnitTestSuiteTrait;
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->disable_cogs_feature();
+	}
+
 	/**
 	 * @var WC_Product_Simple[]
 	 */
@@ -79,9 +91,11 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Get all expected fields.
+	 *
+	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
-	public function get_expected_response_fields() {
-		return array(
+	public function get_expected_response_fields( bool $with_cogs_enabled ) {
+		$fields = array(
 			'id',
 			'name',
 			'slug',
@@ -152,14 +166,29 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'meta_data',
 			'post_password',
 		);
+
+		if ( $with_cogs_enabled ) {
+			$fields[] = 'cost_of_goods_sold';
+		}
+
+		return $fields;
 	}
 
 	/**
 	 * Test that all expected response fields are present.
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
 	 */
-	public function test_product_api_get_all_fields() {
-		$expected_response_fields = $this->get_expected_response_fields();
+	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
+		if ( $with_cogs_enabled ) {
+			$this->enable_cogs_feature();
+		}
+
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 
 		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
@@ -168,9 +197,11 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response_fields = array_keys( $response->get_data() );
 
+		// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( array_diff( $expected_response_fields, $response_fields ), 'These fields were expected but not present in API response: ' . print_r( array_diff( $expected_response_fields, $response_fields ), true ) );
 
 		$this->assertEmpty( array_diff( $response_fields, $expected_response_fields ), 'These fields were not expected in the API response: ' . print_r( array_diff( $response_fields, $expected_response_fields ), true ) );
+		// phpcs:enable WordPress.PHP.DevelopmentFunctions.error_log_print_r
 	}
 
 	/**
@@ -190,9 +221,18 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test that all fields are returned when requested one by one.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
 	 */
-	public function test_products_get_each_field_one_by_one() {
-		$expected_response_fields = $this->get_expected_response_fields();
+	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
+		if ( $with_cogs_enabled ) {
+			$this->enable_cogs_feature();
+		}
+
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
 		foreach ( $expected_response_fields as $field ) {
@@ -536,5 +576,116 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'new-name (Copy)', $duplicated_product->get_name() );
 		$this->assertTrue( $duplicated_product->get_manage_stock() );
 		$this->assertEquals( 10, $duplicated_product->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox The product GET endpoint returns the expected Cost of Goods information for a simple product.
+	 */
+	public function test_cogs_values_received_for_simple_product() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$expected = array(
+			'values'      => array(
+				array(
+					'defined_value'   => 12.34,
+					'effective_value' => 12.34,
+				),
+			),
+			'total_value' => 12.34,
+		);
+
+		$this->assertEquals( $expected, $data['cost_of_goods_sold'] );
+	}
+
+	/**
+	 * @testdox The product GET endpoint returns the expected Cost of Goods information for a variation.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $set_override_flag Value of the "override parent" flag to use.
+	 */
+	public function test_cogs_values_received_for_variation_product( bool $set_override_flag ) {
+		$this->enable_cogs_feature();
+
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product->set_cogs_value( 12.34 );
+		$parent_product->save();
+
+		$variation = wc_get_product( $parent_product->get_children()[0] );
+		$variation->set_cogs_value( 56.78 );
+		$variation->set_cogs_value_overrides_parent( $set_override_flag );
+		$variation->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $variation->get_id() ) );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$expected_effective_value = $set_override_flag ? 56.78 : 12.34 + 56.78;
+		$expected                 = array(
+			'values'                         => array(
+				array(
+					'defined_value'   => 56.78,
+					'effective_value' => $expected_effective_value,
+				),
+			),
+			'defined_value_overrides_parent' => $set_override_flag,
+			'total_value'                    => $expected_effective_value,
+		);
+
+		$this->assertEquals( $expected, $data['cost_of_goods_sold'] );
+	}
+
+	/**
+	 * @testdox The product POST endpoint properly updates the Cost of Goods information for a product.
+	 */
+	public function test_set_cogs_value_for_simple_product_via_post_request() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertEquals( 0, $product->get_cogs_value() );
+
+		$request_body = array(
+			'cost_of_goods_sold' => array(
+				'values' => array(
+					array(
+						'defined_value' => 12.34,
+					),
+					array(
+						'defined_value' => 56.78,
+					),
+				),
+			),
+		);
+
+		$this->update_product_via_post_request( $product, $request_body );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 12.34 + 56.78, $product->get_cogs_value() );
+	}
+
+	/**
+	 * Perform a REST POST request to update a product.
+	 *
+	 * @param WC_Product $product The product to update.
+	 * @param array      $request_body Data to be sent (JSON-encoded) as the body of the request.
+	 */
+	private function update_product_via_post_request( WC_Product $product, array $request_body ) {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( $request_body ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
 	}
 }
