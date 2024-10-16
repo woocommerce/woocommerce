@@ -71,6 +71,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			],
 		],
 	],
+	[ 'woocommerce/product-filter-stock-status' ],
 ];
 
 export const Edit = ( {
