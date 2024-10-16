@@ -99,6 +99,11 @@
 		&:active {
 			opacity: 1;
 		}
+
+		&:focus {
+			outline: 2px solid currentColor !important;
+			outline-offset: 0;
+		}
 	}
 }
 
