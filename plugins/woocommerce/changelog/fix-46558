@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix min amount check in is_available method of WC_Shipping_Free_Shipping class
