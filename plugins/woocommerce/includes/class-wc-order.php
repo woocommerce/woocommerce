@@ -90,6 +90,8 @@ class WC_Order extends WC_Abstract_Order {
 		'new_order_email_sent'         => false,
 		'recorded_sales'               => false,
 		'recorded_coupon_usage_counts' => false,
+
+		'cogs_total_value'             => 0,
 	);
 
 	/**
@@ -2356,5 +2358,15 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function untrash(): bool {
 		return (bool) $this->data_store->untrash_order( $this );
+	}
+
+	/**
+	 * Indicates that regular orders have an associated Cost of Goods Sold value.
+	 * Note that this is true even if the order has no line items with COGS values (in that case the COGS value for the order will be zero)-
+	 *
+	 * @return bool Always true.
+	 */
+	public function has_cogs() {
+		return true;
 	}
 }
