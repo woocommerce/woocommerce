@@ -1,6 +1,3 @@
-Test change ...
-
-
 # Contributing to WooCommerce ✨
 
 WooCommerce powers many online stores across the internet, and your help making it even more awesome will be greatly appreciated :)
