@@ -198,6 +198,7 @@ final class ProductFilterStatus extends AbstractBlock {
 		<div data-wc-interactive='<?php echo esc_attr( $data_directive ); ?>'>
 			<?php if ( 'list' === $display_style ) { ?>
 				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo CheckboxList::render(
 					array(
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
@@ -211,6 +212,7 @@ final class ProductFilterStatus extends AbstractBlock {
 
 			<?php if ( 'dropdown' === $display_style ) : ?>
 				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo Dropdown::render(
 					array(
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
