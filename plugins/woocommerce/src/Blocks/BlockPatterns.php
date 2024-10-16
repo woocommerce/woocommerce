@@ -95,7 +95,7 @@ class BlockPatterns {
 	 * @return array|WP_Error
 	 */
 	private function get_patterns_dictionary() {
-		if ( $this->dictionary === null ) {
+		if ( null === $this->dictionary ) {
 			$this->dictionary = PatternsHelper::get_patterns_dictionary();
 		}
 
