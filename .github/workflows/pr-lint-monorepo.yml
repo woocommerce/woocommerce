@@ -9,6 +9,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
     changelogger_used:
         name: Changelogger use
