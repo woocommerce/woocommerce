@@ -2209,7 +2209,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float $value The value to set for this product.
 	 */
 	public function set_cogs_value( float $value ): void {
-		if ( $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ) {
+		if ( $this->cogs_is_enabled( __METHOD__ ) ) {
 			$this->set_prop( 'cogs_value', $value );
 		}
 	}
@@ -2222,7 +2222,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return float The current value for this product.
 	 */
 	public function get_cogs_value(): float {
-		return $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ? (float) $this->get_prop( 'cogs_value' ) : 0;
+		return $this->cogs_is_enabled( __METHOD__ ) ? (float) $this->get_prop( 'cogs_value' ) : 0;
 	}
 
 	/**
@@ -2234,7 +2234,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return float The effective value for this product.
 	 */
 	public function get_cogs_effective_value(): float {
-		return $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ? $this->get_cogs_effective_value_core() : 0;
+		return $this->cogs_is_enabled( __METHOD__ ) ? $this->get_cogs_effective_value_core() : 0;
 	}
 
 	/**
@@ -2260,7 +2260,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return float The effective total value for this product.
 	 */
 	public function get_cogs_total_value(): float {
-		if ( ! $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ) {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) ) {
 			return 0;
 		}
 
