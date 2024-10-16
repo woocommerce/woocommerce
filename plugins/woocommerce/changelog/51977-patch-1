@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Load Cardo and Inter fonts only when site is not live reducing HTML size and potential network requests

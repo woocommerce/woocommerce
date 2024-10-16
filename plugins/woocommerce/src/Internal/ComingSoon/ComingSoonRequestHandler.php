@@ -166,6 +166,10 @@ class ComingSoonRequestHandler {
 			return $theme_json;
 		}
 
+		if ( $this->coming_soon_helper->is_site_live() ) {
+			return $theme_json;
+		}
+
 		$theme_data = $theme_json->get_data();
 		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
 
