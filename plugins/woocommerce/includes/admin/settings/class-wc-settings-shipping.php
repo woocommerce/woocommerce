@@ -89,18 +89,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the default section.
-	 *
-	 * The original implementation of 'get_settings' was returning the settings for the "Options" section
-	 * when the supplied value for $current_section was ''.
-	 *
-	 * @return array
-	 */
-	protected function get_settings_for_default_section() {
-		return $this->get_settings_for_options_section();
-	}
-
-	/**
 	 * Get settings for the options section.
 	 *
 	 * @return array
