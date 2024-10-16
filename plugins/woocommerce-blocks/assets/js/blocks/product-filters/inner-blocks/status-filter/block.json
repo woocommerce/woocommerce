@@ -1,7 +1,7 @@
 {
-	"name": "woocommerce/product-filter-stock-status",
+	"name": "woocommerce/product-filter-status",
 	"version": "1.0.0",
-	"title": "Filter Options",
+	"title": "Status",
 	"description": "Enable customers to filter the product collection by stock status.",
 	"category": "woocommerce",
 	"keywords": [
@@ -12,7 +12,7 @@
 	"supports": {
 		"interactivity": true,
 		"html": false,
-		"inserter": false,
+		"inserter": true,
 		"color": {
 			"text": true,
 			"background": false
