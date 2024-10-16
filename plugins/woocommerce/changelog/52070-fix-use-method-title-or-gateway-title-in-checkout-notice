@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an issue in which certain incompatible payment gatways wouldn't surface in the Checkout editor page.
