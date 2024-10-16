@@ -208,19 +208,8 @@ final class QueryFilters {
 			return $args;
 		}
 
-		$args['join'] = $this->append_product_sorting_table_join( $args['join'] );
-
-		$stock_statuses = explode( ',', $wp_query->get( 'filter_stock_status' ) );
-		$valid_statuses = array_intersect( $stock_statuses, array_keys( wc_get_product_stock_status_options() ) );
-
-		if ( ! empty( $valid_statuses ) ) {
-			global $wpdb;
-			$placeholders   = implode( ',', array_fill( 0, count( $valid_statuses ), '%s' ) );
-			$args['where'] .= $wpdb->prepare(
-				" AND wc_product_meta_lookup.stock_status IN ($placeholders)",
-				$valid_statuses
-			);
-		}
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where'] .= " AND wc_product_meta_lookup.stock_status IN ('" . implode( "','", array_map( 'esc_sql', explode( ',', $wp_query->get( 'filter_stock_status' ) ) ) ) . "')";
 
 		return $args;
 	}
