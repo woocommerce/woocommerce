@@ -24,6 +24,9 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  # The package has majority of composer-deps, therefore referencing it
+                  pull-package-composer-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Check change files are touched for touched projects
               env:
