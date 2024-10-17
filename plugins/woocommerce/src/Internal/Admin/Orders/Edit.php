@@ -506,14 +506,24 @@ class Edit {
 	 * Helper function to render meta boxes.
 	 */
 	private function render_meta_boxes() {
+		$order_post = get_post( $this->order->get_id() );
+
+		// We need to supply WP_Post objects since, for compatibility reasons, we are also supplying objects of that
+		// type when we trigger 'add_meta_boxes` from within the setup() method. Meta box callbacks can reasonably
+		// assume they will receive data objects of that same type.
+		if ( ! $order_post instanceof WP_Post ) {
+			wc_get_logger()->warning( 'Unable to render order editor meta boxes, as it was not possible to acquire a post object.' );
+			return;
+		}
+
 		?>
 		<div id="postbox-container-1" class="postbox-container">
-			<?php do_meta_boxes( $this->screen_id, 'side', $this->order ); ?>
+			<?php do_meta_boxes( $this->screen_id, 'side', $order_post ); ?>
 		</div>
 		<div id="postbox-container-2" class="postbox-container">
 			<?php
-			do_meta_boxes( $this->screen_id, 'normal', $this->order );
-			do_meta_boxes( $this->screen_id, 'advanced', $this->order );
+			do_meta_boxes( $this->screen_id, 'normal', $order_post );
+			do_meta_boxes( $this->screen_id, 'advanced', $order_post );
 			?>
 		</div>
 		<?php
