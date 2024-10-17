@@ -198,7 +198,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		// In a separate operation, the status will be updated to an actual non-draft order status. This should also be
 		// observed by the DataSynchronizer and a further update made to the COT table.
 		$order = wc_get_order( $order_id );
-		$order->set_status( 'pending' );
+		$order->set_status( WC_Order::STATUS_PENDING );
 		$order->save();
 		$this->assertEquals(
 			'wc-pending',
@@ -523,16 +523,16 @@ class DataSynchronizerTests extends \HposTestCase {
 		OrderHelper::toggle_cot_feature_and_usage( true );
 
 		$order1 = new \WC_Order();
-		$order1->set_status( 'auto-draft' );
+		$order1->set_status( WC_Order::STATUS_AUTO_DRAFT );
 		$order1->set_date_created( strtotime( '-10 days' ) );
 		$order1->save();
 
 		$order2 = new \WC_Order();
-		$order2->set_status( 'auto-draft' );
+		$order2->set_status( WC_Order::STATUS_AUTO_DRAFT );
 		$order2->save();
 
 		$order3 = new \WC_Order();
-		$order3->set_status( 'processing' );
+		$order3->set_status( WC_Order::STATUS_PROCESSING );
 		$order3->save();
 
 		// Run WP's auto-draft delete.
@@ -568,7 +568,7 @@ class DataSynchronizerTests extends \HposTestCase {
 
 		// Trashed orders should be deleted by the collection mechanism.
 		$order->get_data_store()->delete( $order );
-		$this->assertEquals( $order->get_status(), 'trash' );
+		$this->assertEquals( $order->get_status(), WC_Order::STATUS_TRASH );
 		$order->save();
 
 		// Run scheduled deletion.

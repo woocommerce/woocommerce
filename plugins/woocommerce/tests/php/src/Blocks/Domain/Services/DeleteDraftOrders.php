@@ -64,7 +64,7 @@ class DeleteDraftOrders extends TestCase {
 
 		// set a non-draft order to make sure it's unaffected
 		$order = new WC_Order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order->save();
 		$wpdb->update(
 			$wpdb->posts,
@@ -153,7 +153,7 @@ class DeleteDraftOrders extends TestCase {
 		$sample_results = function( $results, $args ) {
 			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
 				$test_order = new WC_Order();
-				$test_order->set_status( 'on-hold' );
+				$test_order->set_status( WC_Order::STATUS_ON_HOLD );
 				return [ $test_order ];
 			}
 			return $results;

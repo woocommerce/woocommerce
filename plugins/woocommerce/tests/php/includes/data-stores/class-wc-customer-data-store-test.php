@@ -76,7 +76,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
 		WC_Helper_Order::create_order( $customer_1->get_id() );
 		$last_valid_order_of_1 = WC_Helper_Order::create_order( $customer_1->get_id() );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => WC_Order::STATUS_COMPLETED ) );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 
@@ -165,7 +165,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		WC_Helper_Order::create_order( $customer_1->get_id() );
 		WC_Helper_Order::create_order( $customer_1->get_id() );
 		WC_Helper_Order::create_order( $customer_1->get_id() );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => WC_Order::STATUS_COMPLETED ) );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 
@@ -216,10 +216,10 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
 		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'pending' ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => WC_Order::STATUS_COMPLETED ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => WC_Order::STATUS_COMPLETED ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => WC_Order::STATUS_COMPLETED ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => WC_Order::STATUS_PENDING ) );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 

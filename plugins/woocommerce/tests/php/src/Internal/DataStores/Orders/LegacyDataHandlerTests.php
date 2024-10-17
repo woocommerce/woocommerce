@@ -203,13 +203,13 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		// Test order.
 		$this->enable_cot_sync();
 		$order = new \WC_Order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( \WC_Order::ON_HOLD );
 		$order->add_meta_data( 'my_meta', 'hpos+posts' );
 		$order->save();
 		$this->disable_cot_sync();
 
 		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
-		$order_hpos->set_status( 'completed' );
+		$order_hpos->set_status( \WC_Order::STATUS_COMPLETED );
 		$order_hpos->set_billing_first_name( 'Mr. HPOS' );
 		$order_hpos->set_billing_address_1( 'HPOS Street' );
 		$order_hpos->update_meta_data( 'my_meta', 'hpos' );

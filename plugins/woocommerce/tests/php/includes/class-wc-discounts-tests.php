@@ -62,7 +62,7 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$data_store = WC_Data_Store::load( 'coupon' );
 		$order      = wc_create_order(
 			array(
-				'status'      => 'pending',
+				'status'      => WC_Order::STATUS_PENDING,
 				'customer_id' => $customer->get_id(),
 			)
 		);
