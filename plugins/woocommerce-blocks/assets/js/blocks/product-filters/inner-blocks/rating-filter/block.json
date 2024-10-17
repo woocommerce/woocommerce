@@ -13,7 +13,7 @@
 		}
 	},
 	"ancestor": [
-		"woocommerce/product-filter"
+		"woocommerce/product-filters"
 	],
 	"usesContext": [
 		"query",
