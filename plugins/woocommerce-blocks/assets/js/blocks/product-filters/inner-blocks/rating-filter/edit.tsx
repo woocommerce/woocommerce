@@ -91,7 +91,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					],
 				],
 				[
-					displayStyle,
+					'woocommerce/product-filter-checkbox-list',
 					{
 						lock: {
 							remove: true,
