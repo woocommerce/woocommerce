@@ -25,28 +25,28 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @var string
 	 */
-	const STATUS_PENDING    = 'pending';
+	const STATUS_PENDING = 'pending';
 
 	/**
 	 * The customer’s payment failed or was declined, and no payment has been successfully made.
 	 *
 	 * @var string
 	 */
-	const STATUS_FAILED     = 'failed';
+	const STATUS_FAILED = 'failed';
 
 	/**
 	 * The order is awaiting payment confirmation.
 	 *
 	 * @var string
 	 */
-	const STATUS_ON_HOLD    = 'on-hold';
+	const STATUS_ON_HOLD = 'on-hold';
 
 	/**
 	 * Order fulfilled and complete.
 	 *
 	 * @var string
 	 */
-	const STATUS_COMPLETED  = 'completed';
+	const STATUS_COMPLETED = 'completed';
 
 	/**
 	 * Payment has been received (paid), and the stock has been reduced.
@@ -60,7 +60,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @var string
 	 */
-	const STATUS_REFUNDED   = 'refunded';
+	const STATUS_REFUNDED = 'refunded';
 
 	/**
 	 * The order was canceled by an admin or the customer.
@@ -76,7 +76,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @var string
 	 */
-	const STATUS_DRAFT	    = 'draft';
+	const STATUS_DRAFT = 'draft';
 
 	/**
 	 * Order statuses that are for internal use only.
