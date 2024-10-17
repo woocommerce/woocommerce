@@ -35,11 +35,6 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 				'class' => 'wc-block-product-filters-overlay-navigation',
 			)
 		);
-		$overlay_mode       = isset( $block->context['woocommerce/product-filters/overlay'] ) ? $block->context['woocommerce/product-filters/overlay'] : 'never';
-
-		if ( 'open-overlay' === $attributes['triggerType'] && ( 'never' === $overlay_mode || ( ! wp_is_mobile() && 'mobile' === $overlay_mode ) ) ) {
-			return null;
-		}
 
 		$html = strtr(
 			'<div {{wrapper_attributes}}>
