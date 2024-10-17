@@ -14,11 +14,36 @@ defined( 'ABSPATH' ) || exit;
  * These are regular WooCommerce orders, which extend the abstract order class.
  */
 class WC_Order extends WC_Abstract_Order {
+	/**
+	 * The following constants are used to define the order status.
+	 * For a full documentation on the public order statuses, please refer to the following link:
+	 * https://woocommerce.com/document/managing-orders/order-statuses/
+	 */
 
+	/**
+	 * The order has been received, but no payment has been made.
+	 *
+	 * @var string
+	 */
 	const STATUS_PENDING    = 'pending';
 	const STATUS_FAILED     = 'failed';
+	/**
+	 * The order is awaiting payment confirmation.
+	 *
+	 * @var string
+	 */
 	const STATUS_ON_HOLD    = 'on-hold';
+	/**
+	 * Order fulfilled and complete.
+	 *
+	 * @var string
+	 */
 	const STATUS_COMPLETED  = 'completed';
+	/**
+	 * Payment has been received (paid), and the stock has been reduced.
+	 *
+	 * @var string
+	 */
 	const STATUS_PROCESSING = 'processing';
 	const STATUS_REFUNDED   = 'refunded';
 	const STATUS_CANCELLED  = 'cancelled';
