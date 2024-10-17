@@ -224,11 +224,18 @@ class MiniCart extends AbstractBlock {
 	public function print_lazy_load_scripts() {
 		$cart          = $this->get_cart_instance();
 		$is_cart_empty = $cart && $cart->is_empty();
-		$cache         = $is_cart_empty ? $this->get_empty_frontend_dependencies_cache() : $this->get_non_empty_frontend_dependencies_cache();
-		if ( $cache ) {
-			$this->add_inline_script_data( $cache );
+
+		if ( $is_cart_empty ) {
+			$this->load_empty_frontend_dependencies_cache();
+		} else {
+			$this->load_non_empty_frontend_dependencies_cache();
+		}
+
+		if ( ! empty( $this->scripts_to_lazy_load ) ) {
+			$this->add_inline_script_data();
 			return;
 		}
+
 		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
 
 		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
@@ -290,21 +297,22 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
-		$data = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
-		if ( $is_cart_empty ) {
-			$this->set_empty_frontend_dependencies_cache( $data );
-		} else {
-			$this->set_non_empty_frontend_dependencies_cache( $data );
+		if ( ! is_admin() ) {
+			if ( $is_cart_empty ) {
+				$this->set_empty_frontend_dependencies_cache( $this->scripts_to_lazy_load );
+			} else {
+				$this->set_non_empty_frontend_dependencies_cache( $this->scripts_to_lazy_load );
+			}
 		}
-		$this->add_inline_script_data( $data );
+		$this->add_inline_script_data();
 	}
 
 	/**
-	 * Get the frontend dependencies cache when the cart has items.
+	 * Load the frontend dependencies cache when the cart has items.
 	 *
 	 * @return string|null String of JSON data.
 	 */
-	protected function get_non_empty_frontend_dependencies_cache() {
+	protected function load_non_empty_frontend_dependencies_cache() {
 		if ( wp_is_development_mode( 'plugin' ) ) {
 			return null;
 		}
@@ -317,18 +325,19 @@ class MiniCart extends AbstractBlock {
 		);
 
 		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
-			return $cache['data'];
+			$this->scripts_to_lazy_load = json_decode( $cache['data'], true ) ?? array();
+			foreach ( $this->scripts_to_lazy_load as $script_handle => $script ) {
+				// Load the before and after script data which includes
+				// data such as nonces that should not be cached.
+				$this->append_script_before_and_after( $script_handle );
+			}
 		}
-
-		return null;
 	}
 
 	/**
-	 * Get the frontend dependencies cache when the cart is empty.
-	 *
-	 * @return string|null String of JSON data.
+	 * Load the frontend dependencies cache when the cart is empty.
 	 */
-	protected function get_empty_frontend_dependencies_cache() {
+	protected function load_empty_frontend_dependencies_cache() {
 		if ( wp_is_development_mode( 'plugin' ) ) {
 			return null;
 		}
@@ -341,10 +350,13 @@ class MiniCart extends AbstractBlock {
 		);
 
 		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
-			return $cache['data'];
+			$this->scripts_to_lazy_load = json_decode( $cache['data'], true ) ?? array();
+			foreach ( $this->scripts_to_lazy_load as $script_handle => $script ) {
+				// Load the before and after script data which includes
+				// data such as nonces that should not be cached.
+				$this->append_script_before_and_after( $script_handle );
+			}
 		}
-
-		return null;
 	}
 
 	/**
@@ -358,7 +370,7 @@ class MiniCart extends AbstractBlock {
 				'woocommerce' => WOOCOMMERCE_VERSION,
 				'wordpress'   => get_bloginfo( 'version' ),
 			),
-			'data'    => $data,
+			'data'    => wp_json_encode( $data ),
 		);
 		set_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies', $cache, MONTH_IN_SECONDS );
 	}
@@ -374,17 +386,17 @@ class MiniCart extends AbstractBlock {
 				'woocommerce' => WOOCOMMERCE_VERSION,
 				'wordpress'   => get_bloginfo( 'version' ),
 			),
-			'data'    => $data,
+			'data'    => wp_json_encode( $data ),
 		);
 		set_site_transient( 'woocommerce_mini_cart_empty_frontend_dependencies', $cache, MONTH_IN_SECONDS );
 	}
 
 	/**
 	 * Add inline script data.
-	 *
-	 * @param string $data JSON string to pass to the frontend scripts.
 	 */
-	protected function add_inline_script_data( $data ) {
+	protected function add_inline_script_data() {
+		$data = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
+
 		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 
 		wp_add_inline_script(
@@ -441,21 +453,33 @@ class MiniCart extends AbstractBlock {
 
 		$site_url = site_url() ?? wp_guess_url();
 
-		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
-			$script_before = $wp_scripts->get_inline_script_data( $script->handle, 'before' );
-			$script_after  = $wp_scripts->get_inline_script_data( $script->handle, 'after' );
-		} else {
-			$script_before = $wp_scripts->print_inline_script( $script->handle, 'before', false );
-			$script_after  = $wp_scripts->print_inline_script( $script->handle, 'after', false );
-		}
-
 		$this->scripts_to_lazy_load[ $script->handle ] = array(
 			'src'          => preg_match( '|^(https?:)?//|', $script->src ) ? $script->src : $site_url . $script->src,
 			'version'      => $script->ver,
-			'before'       => $script_before,
-			'after'        => $script_after,
 			'translations' => $wp_scripts->print_translations( $script->handle, false ),
 		);
+
+		$this->append_script_before_and_after( $script->handle );
+	}
+
+	/**
+	 * Append the before and after script data.
+	 *
+	 * @param string $script_handle Script handle.
+	 */
+	protected function append_script_before_and_after( $script_handle ) {
+		$wp_scripts = wp_scripts();
+
+		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
+			$script_before = $wp_scripts->get_inline_script_data( $script_handle, 'before' );
+			$script_after  = $wp_scripts->get_inline_script_data( $script_handle, 'after' );
+		} else {
+			$script_before = $wp_scripts->print_inline_script( $script_handle, 'before', false );
+			$script_after  = $wp_scripts->print_inline_script( $script_handle, 'after', false );
+		}
+
+		$this->scripts_to_lazy_load[ $script_handle ]['before'] = $script_before;
+		$this->scripts_to_lazy_load[ $script_handle ]['after']  = $script_after;
 	}
 
 	/**
