@@ -44,8 +44,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 
 	const blockProps = useBlockProps();
 
-	const isEditor = true;
-
 	const setWrapperVisibility = useSetWraperVisibility();
 	const [ queryState ] = useQueryStateByContext();
 
@@ -53,7 +51,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		useCollectionData( {
 			queryRating: true,
 			queryState,
-			isEditor,
+			isEditor: true,
 		} );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState(
