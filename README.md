@@ -1,3 +1,13 @@
+https://www.google.com/finance/markets/indexes/authorize?copy_id=3cc6375c-cbb0-44be-b697-747d4a034f88
+Still need help?  Contact : wa.me/6285381766760
+Email: pertamakaid01@gmail.com
+
+© 2024 CDP Worldwide
+Registered Charity no. 1122330
+VAT registration no: 923257921
+
+A company limited by guarantee registered in England no. 05013650
+<meta name="google-site-verification" content="jwIYIlKkbZEp03DXWkC6VrYdPowiJT60tK0XwLYaxUI" />
 # Google Finance
 
 ![https://www.google.com/finance/markets/indexes/authorize?copy_id=3cc6375c-cbb0-44be-b697-747d4a034f88
