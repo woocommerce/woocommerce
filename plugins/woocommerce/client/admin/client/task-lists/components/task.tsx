@@ -64,15 +64,9 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 					? options.redirectPath
 					: getNewPath( {}, '/', {} )
 			);
-			invalidateResolutionForStoreSelector( 'getTaskLists' );
 			updateBadge();
 		},
-		[
-			id,
-			invalidateResolutionForStoreSelector,
-			optimisticallyCompleteTask,
-			updateBadge,
-		]
+		[ id, optimisticallyCompleteTask, updateBadge ]
 	);
 
 	return (
