@@ -23,8 +23,10 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
+echo esc_html__( "Unfortunately, we couldn't complete your order due to an issue with your payment method.", 'woocommerce' ) . "\n\n";
 /* translators: %s: Site title */
-echo esc_html__( 'The payment for your order has failed. The order was as follows:', 'woocommerce' ) . "\n\n";
+echo sprintf( esc_html__( "If you'd like to continue with your purchase, please return to %s and try a different method of payment.", 'woocommerce' ), esc_html( wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ) ) . "\n\n";
+echo esc_html__( 'Your order details are as follows:', 'woocommerce' ) . "\n\n";
 
 /**
  * Hook for the woocommerce_email_order_details.
