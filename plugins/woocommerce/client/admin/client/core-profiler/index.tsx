@@ -12,6 +12,7 @@ import {
 	DoneActorEvent,
 	fromCallback,
 	or,
+	and,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -1338,16 +1339,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							} );
 							return promiseDelay( 3000 );
 						} ),
-						onDone: [
-							{
-								target: 'isJetpackConnected',
-								guard: or( [
-									'hasJetpackSelectedForInstallation',
-									'hasJetpackActivated',
-								] ),
-							},
-							{ actions: [ 'redirectToWooHome' ] },
-						],
+						onDone: [ { actions: [ 'redirectToWooHome' ] } ],
 					},
 					meta: {
 						component: CoreProfilerLoader,
@@ -1419,7 +1411,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: or( [
+								guard: and( [
 									'hasJetpackSelectedForInstallation',
 									'hasJetpackActivated',
 								] ),
