@@ -26,12 +26,11 @@ export default function ToolbarControls(
 	);
 
 	const collection = getCollectionByName( props.attributes.collection );
-	const isShowCollectionChooserToolbar =
-		collection?.scope?.includes( 'block' );
+	const showCollectionChooserToolbar = collection?.scope?.includes( 'block' );
 
 	return (
 		<BlockControls>
-			{ isShowCollectionChooserToolbar && (
+			{ showCollectionChooserToolbar && (
 				<CollectionChooserToolbar
 					openCollectionSelectionModal={
 						openCollectionSelectionModal
