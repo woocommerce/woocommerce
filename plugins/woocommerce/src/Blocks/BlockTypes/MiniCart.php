@@ -23,6 +23,20 @@ class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
 
 	/**
+	 * The key used to retrieve the cache for empty cart dependencies.
+	 *
+	 * @var string
+	 */
+	const EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY = 'woocommerce_mini_cart_empty_frontend_dependencies';
+
+	/**
+	 * The key used to retrieve the cache for empty cart dependencies.
+	 *
+	 * @var string
+	 */
+	const NON_EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY = 'woocommerce_mini_cart_non_empty_frontend_dependencies';
+
+	/**
 	 * Block name.
 	 *
 	 * @var string
@@ -56,6 +70,13 @@ class MiniCart extends AbstractBlock {
 	 * @var string
 	 */
 	protected $display_cart_prices_including_tax = false;
+
+	/**
+	 * Whether or not the cart contains items.
+	 *
+	 * @var bool
+	 */
+	protected $is_cart_empty = true;
 
 	/**
 	 * Block Hook API placements.
@@ -223,15 +244,10 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
-		$cart          = $this->get_cart_instance();
-		$is_cart_empty = $cart && $cart->is_empty();
+		$cart                = $this->get_cart_instance();
+		$this->is_cart_empty = $cart && $cart->is_empty();
 
-		if ( $is_cart_empty ) {
-			$this->load_empty_frontend_dependencies_cache();
-		} else {
-			$this->load_non_empty_frontend_dependencies_cache();
-		}
-
+		$this->load_frontend_dependencies_cache();
 		if ( ! empty( $this->scripts_to_lazy_load ) ) {
 			$this->add_inline_script_data();
 			return;
@@ -273,7 +289,7 @@ class MiniCart extends AbstractBlock {
 		$inner_blocks_frontend_scripts = array();
 		if ( $cart ) {
 			// Preload inner blocks frontend scripts.
-			$inner_blocks_frontend_scripts = $is_cart_empty ? array(
+			$inner_blocks_frontend_scripts = $this->is_cart_empty ? array(
 				'empty-cart-frontend',
 				'filled-cart-frontend',
 				'shopping-button-frontend',
@@ -306,12 +322,16 @@ class MiniCart extends AbstractBlock {
 	 *
 	 * @return string|null String of JSON data.
 	 */
-	protected function load_non_empty_frontend_dependencies_cache() {
+	protected function load_frontend_dependencies_cache() {
 		if ( wp_is_development_mode( 'plugin' ) ) {
 			return null;
 		}
 
-		$cache = get_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies' );
+		$cache = get_site_transient(
+			$this->is_cart_empty
+				? self::EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY
+				: self::NON_EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY
+		);
 
 		$current_version = array(
 			'woocommerce' => WOOCOMMERCE_VERSION,
@@ -357,20 +377,18 @@ class MiniCart extends AbstractBlock {
 	 * Update frontend dependencies cache.
 	 */
 	public function update_frontend_dependencies_cache() {
-		$cache         = array(
+		$cache = array(
 			'version' => array(
 				'woocommerce' => WOOCOMMERCE_VERSION,
 				'wordpress'   => get_bloginfo( 'version' ),
 			),
 			'data'    => wp_json_encode( $this->scripts_to_lazy_load ),
 		);
-		$cart          = $this->get_cart_instance();
-		$is_cart_empty = $cart && $cart->is_empty();
 
 		set_site_transient(
-			$is_cart_empty
-				? 'woocommerce_mini_cart_empty_frontend_dependencies'
-				: 'woocommerce_mini_cart_non_empty_frontend_dependencies',
+			$this->is_cart_empty
+				? self::EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY
+				: self::NON_EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY,
 			$cache,
 			MONTH_IN_SECONDS
 		);
