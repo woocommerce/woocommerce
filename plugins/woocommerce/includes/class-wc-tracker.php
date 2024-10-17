@@ -181,7 +181,7 @@ class WC_Tracker {
 		$data['reviews']    = self::get_review_counts();
 		$data['categories'] = self::get_category_counts();
 
-		// Get order snapshot
+		// Get order snapshot.
 		$data['order_snapshot'] = self::get_order_snapshot();
 
 		// Payment gateway info.
