@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Add a retry mechanism to the query to obtain the SKU lock for product creation through the API. [#51735](https://github.com/woocommerce/woocommerce/pull/51735)
 * Fix - Fix `Error: Failed opening required '.../wp-content/plugins/woocommerce/src/StoreApi/Schemas/V1/AI/ProductsSchema.php` fatal error [#51912](https://github.com/woocommerce/woocommerce/pull/51912)
 * Fix - Resolved fatal error when applying Brands-restricted coupon [#51577](https://github.com/woocommerce/woocommerce/pull/51577)
 * Fix - Fix CSS issue with Safari 18.0 on the product form page. [#51734](https://github.com/woocommerce/woocommerce/pull/51734)
