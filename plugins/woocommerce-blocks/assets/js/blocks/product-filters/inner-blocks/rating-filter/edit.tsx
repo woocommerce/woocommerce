@@ -40,7 +40,7 @@ const NoRatings = () => (
 );
 
 const Edit = ( props: BlockEditProps< Attributes > ) => {
-	const blockAttributes = props.attributes;
+	const { attributes, setAttributes } = props;
 
 	const blockProps = useBlockProps();
 
@@ -57,15 +57,15 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		} );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState(
-		blockAttributes.isPreview ? previewOptions : []
+		attributes.isPreview ? previewOptions : []
 	);
 
 	const isLoading =
-		! blockAttributes.isPreview &&
+		! attributes.isPreview &&
 		filteredCountsLoading &&
 		displayedOptions.length === 0;
 
-	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
+	const isDisabled = ! attributes.isPreview && filteredCountsLoading;
 
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
@@ -93,7 +93,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		 * @param {string} queryStatus The status slug to check.
 		 */
 
-		if ( filteredCountsLoading || blockAttributes.isPreview ) {
+		if ( filteredCountsLoading || attributes.isPreview ) {
 			return;
 		}
 
@@ -121,7 +121,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							key={ item?.rating }
 							rating={ item?.rating }
 							ratedProductsCount={
-								blockAttributes.showCounts ? item?.count : null
+								attributes.showCounts ? item?.count : null
 							}
 						/>
 					),
@@ -131,8 +131,8 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 
 		setDisplayedOptions( newOptions );
 	}, [
-		blockAttributes.showCounts,
-		blockAttributes.isPreview,
+		attributes.showCounts,
+		attributes.isPreview,
 		filteredCounts,
 		filteredCountsLoading,
 		productRatingsQuery,
@@ -158,35 +158,30 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 
 	return (
 		<>
-			<Inspector { ...props } />
+			<Inspector
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+			/>
 
 			<div { ...blockProps }>
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
 						className={ clsx(
-							`style-${ blockAttributes.displayStyle }`,
+							`style-${ attributes.displayStyle }`,
 							{
 								'is-loading': isLoading,
 							}
 						) }
 					>
-						{ blockAttributes.displayStyle === 'dropdown' ? (
-							<>
-								<PreviewDropdown
-									placeholder={
-										blockAttributes.selectType === 'single'
-											? __(
-													'Select a rating',
-													'woocommerce'
-											  )
-											: __(
-													'Select ratings',
-													'woocommerce'
-											  )
-									}
-								/>
-							</>
+						{ attributes.displayStyle === 'dropdown' ? (
+							<PreviewDropdown
+								placeholder={
+									attributes.selectType === 'single'
+										? __( 'Select a rating', 'woocommerce' )
+										: __( 'Select ratings', 'woocommerce' )
+								}
+							/>
 						) : (
 							<CheckboxList
 								options={ displayedOptions }
