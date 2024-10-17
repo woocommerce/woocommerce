@@ -2,7 +2,7 @@
 /**
  * WooCommerce Navigation Menu
  *
- * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.4.
+ * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.5.
  * @package Woocommerce Navigation
  */
 
