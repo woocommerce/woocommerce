@@ -6,7 +6,6 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
 import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { getHistory } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskListType,
