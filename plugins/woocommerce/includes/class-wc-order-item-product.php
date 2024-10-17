@@ -39,18 +39,19 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @var array
 	 */
 	protected $extra_data = array(
-		'product_id'   => 0,
-		'variation_id' => 0,
-		'quantity'     => 1,
-		'tax_class'    => '',
-		'subtotal'     => 0,
-		'subtotal_tax' => 0,
-		'total'        => 0,
-		'total_tax'    => 0,
-		'taxes'        => array(
-			'subtotal' => array(),
-			'total'    => array(),
+		'product_id'     => 0,
+		'variation_id'   => 0,
+		'quantity'       => 1,
+		'tax_class'      => '',
+		'subtotal'       => 0,
+		'subtotal_tax'   => 0,
+		'total'          => 0,
+		'total_tax'      => 0,
+		'taxes'          => array(
+			'subtotal'   => array(),
+			'total'      => array(),
 		),
+		'line_discount' => 0,
 	);
 
 	/*
@@ -66,6 +67,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_quantity( $value ) {
 		$this->set_prop( 'quantity', wc_stock_amount( $value ) );
+		$this->calculate_line_discount();
 	}
 
 	/**
@@ -77,6 +79,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value && ! in_array( $value, WC_Tax::get_tax_class_slugs(), true ) ) {
 			$this->error( 'order_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
+	
 		$this->set_prop( 'tax_class', $value );
 	}
 
@@ -178,7 +181,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 		$this->set_prop( 'taxes', $tax_data );
-
 		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
 			$this->set_total_tax( NumberUtil::array_sum( $tax_data['total'] ) );
 			$this->set_subtotal_tax( NumberUtil::array_sum( $tax_data['subtotal'] ) );
@@ -219,6 +221,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+		$this->calculate_line_discount();
 	}
 
 	/**
@@ -229,6 +232,45 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
 			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
+	}
+
+	/**
+	 * Calculate and set the line discount.
+	 */
+	protected function calculate_line_discount() {
+		$product = $this->get_product();
+		$line_discount = 0;
+
+		if ( $product ) {
+			$regular_price = $product->get_regular_price();
+			$sale_price = $product->get_sale_price();
+
+			if ( '' !== $sale_price && $sale_price < $regular_price ) {
+				$line_discount = ((float) $regular_price - (float) $sale_price) * $this->get_quantity();
+			}
+		}
+
+		$line_discount = wc_format_decimal($line_discount);
+		$line_discount = apply_filters('woocommerce_order_item_line_discount', $line_discount, $this);
+
+		$this->set_line_discount($line_discount);
+	}
+
+	/**
+	 * Set line discount.
+	 *
+	 * @param float $value Line discount.
+	 */
+	public function set_line_discount( $value ) {
+		$this->set_prop( 'line_discount', wc_format_decimal( $value ) );
+	}
+
+	/**
+	 * Hook to recalculate line discount when saving.
+	 */
+	protected function before_save() {
+		parent::before_save();
+		$this->calculate_line_discount();
 	}
 
 	/*
@@ -432,6 +474,17 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$product = $this->get_product();
 		return $product ? $product->get_tax_status() : 'taxable';
 	}
+	
+	/**
+	 * Get line discount.
+	 *
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return float
+	 */
+	public function get_line_discount( $context = 'view' ) {
+		return $this->get_prop( 'line_discount', $context );
+	}
+
 
 	/*
 	|--------------------------------------------------------------------------
