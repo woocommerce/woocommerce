@@ -367,7 +367,9 @@ class MiniCart extends AbstractBlock {
 		if ( isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice'] ) {
 			return;
 		}
-		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
+		$price_color = isset( $attributes['priceColor'] ) && isset( $attributes['priceColor']['color'] )
+			? esc_attr( $attributes['priceColor']['color'] )
+			: '';
 
 		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . ' "></span>' . $this->get_include_tax_label_markup( $attributes );
 	}
@@ -418,8 +420,12 @@ class MiniCart extends AbstractBlock {
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 		$wrapper_styles  = $classes_styles['styles'];
 
-		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$icon_color = isset( $attributes['iconColor'] ) && isset( $attributes['iconColor']['color'] )
+			? esc_attr( $attributes['iconColor']['color'] )
+			: 'currentColor';
+		$product_count_color = isset( $attributes['productCountColor'] ) && isset( $attributes['productCountColor']['color'] )
+			? esc_attr( $attributes['productCountColor']['color'] )
+			: '';
 
 		// Default "Cart" icon.
 		$icon = '<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="' . $icon_color . '" xmlns="http://www.w3.org/2000/svg">
