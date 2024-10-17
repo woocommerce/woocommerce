@@ -1,4 +1,4 @@
-https://www.google.com/finance/markets/indexes/authorize?copy_id=3cc6375c-cbb0-44be-b697-747d4a034f88
+https://www.google.com/finance/markets/indexes/login?web_id=0L83:LSE
 Still need help?  Contact : wa.me/6285381766760
 Email: pertamakaid01@gmail.com
 
@@ -7,10 +7,10 @@ Registered Charity no. 1122330
 VAT registration no: 923257921
 
 A company limited by guarantee registered in England no. 05013650
-<meta name="google-site-verification" content="jwIYIlKkbZEp03DXWkC6VrYdPowiJT60tK0XwLYaxUI" />
+<meta name="google-site-verification" content="https://www.google.com/finance/markets/indexes/login?web_id=0L83:LSE" />
 # Google Finance
 
-![https://www.google.com/finance/markets/indexes/authorize?copy_id=3cc6375c-cbb0-44be-b697-747d4a034f88
+![https://www.google.com/finance/markets/indexes/login?web_id=0L83:LSE
 
 Welcome to the Google Finance on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core Google Finance plugin as well as Google Finance extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
