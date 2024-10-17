@@ -39,7 +39,7 @@ const NoRatings = () => (
 	</Notice>
 );
 
-const Edit = ( props: BlockEditProps< Attributes > ) => {
+const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { attributes, setAttributes } = props;
 
 	const blockProps = useBlockProps();
@@ -198,4 +198,4 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default withSpokenMessages( RatingFilterEdit );
