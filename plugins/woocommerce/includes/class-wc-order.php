@@ -26,19 +26,28 @@ class WC_Order extends WC_Abstract_Order {
 	 * @var string
 	 */
 	const STATUS_PENDING    = 'pending';
+
+	/**
+	 * The customer’s payment failed or was declined, and no payment has been successfully made.
+	 *
+	 * @var string
+	 */
 	const STATUS_FAILED     = 'failed';
+
 	/**
 	 * The order is awaiting payment confirmation.
 	 *
 	 * @var string
 	 */
 	const STATUS_ON_HOLD    = 'on-hold';
+
 	/**
 	 * Order fulfilled and complete.
 	 *
 	 * @var string
 	 */
 	const STATUS_COMPLETED  = 'completed';
+
 	/**
 	 * Payment has been received (paid), and the stock has been reduced.
 	 *
@@ -46,9 +55,21 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	const STATUS_PROCESSING = 'processing';
 	const STATUS_REFUNDED   = 'refunded';
+
+	/**
+	 * The order was canceled by an admin or the customer.
+	 *
+	 * @var string
+	 */
 	const STATUS_CANCELLED  = 'cancelled';
 	const STATUS_TRASH      = 'trash';
 	const STATUS_AUTO_DRAFT = 'auto-draft';
+
+	/**
+	 * Draft orders are created when customers start the checkout process while the block version of the checkout is in place.
+	 *
+	 * @var string
+	 */
 	const STATUS_DRAFT	    = 'draft';
 
 	/**
