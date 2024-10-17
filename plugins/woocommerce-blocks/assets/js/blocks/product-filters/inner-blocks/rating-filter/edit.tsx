@@ -17,7 +17,7 @@ import {
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
-import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
+import { Notice, withSpokenMessages } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
@@ -27,11 +27,12 @@ import { previewOptions } from './preview';
 import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import { Inspector } from './components/inspector';
+import { InitialDisabled } from '../../components/initial-disabled';
 import { PreviewDropdown } from '../components/preview-dropdown';
-import type { Attributes } from './types';
-import './style.scss';
 import { getAllowedBlocks } from '../../utils';
 import { EXCLUDED_BLOCKS } from '../../constants';
+import './style.scss';
+import type { Attributes } from './types';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -213,7 +214,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 			/>
 
 			<div { ...innerBlocksProps }>
-				<Disabled>
+				<InitialDisabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
 						className={ clsx( `style-${ displayStyle }`, {
@@ -241,7 +242,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 							</BlockContextProvider>
 						) }
 					</div>
-				</Disabled>
+				</InitialDisabled>
 			</div>
 		</>
 	);
