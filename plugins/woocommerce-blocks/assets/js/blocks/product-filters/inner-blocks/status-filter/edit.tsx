@@ -20,10 +20,10 @@ import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
 
 type CollectionData = {
-	stock_status_counts: StockStatusCount[];
+	stock_status_counts: StatusCount[];
 };
 
-type StockStatusCount = {
+type StatusCount = {
 	status: string;
 	count: number;
 };
@@ -51,7 +51,7 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 				const count = (
 					filteredCounts as unknown as CollectionData
 				 )?.stock_status_counts?.find(
-					( item: StockStatusCount ) => item.status === key
+					( item: StatusCount ) => item.status === key
 				)?.count;
 
 				return {
