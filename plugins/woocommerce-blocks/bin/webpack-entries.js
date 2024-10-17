@@ -179,6 +179,7 @@ const blocks = {
 // Intentional separation of cart and checkout entry points to allow for better code splitting.
 const cartAndCheckoutBlocks = {
 	cart: {},
+	'cart-link': {},
 	checkout: {},
 	'mini-cart': {},
 	'mini-cart-contents': {
