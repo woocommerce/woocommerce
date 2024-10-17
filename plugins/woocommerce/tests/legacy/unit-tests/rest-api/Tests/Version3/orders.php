@@ -77,10 +77,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order1 = OrderHelper::create_order( $this->user );
 		$order2 = OrderHelper::create_order( $this->user );
 
-		$order1->set_status( 'completed' );
+		$order1->set_status( WC_Order::STATUS_COMPLETED );
 		$order1->save();
 		sleep( 1 );
-		$order2->set_status( 'completed' );
+		$order2->set_status( WC_Order::STATUS_COMPLETED );
 		$order2->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );

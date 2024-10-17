@@ -70,7 +70,7 @@ class WC_Admin_Tests_API_Init extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 

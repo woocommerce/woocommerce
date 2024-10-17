@@ -46,7 +46,7 @@ class WC_Admin_Tests_API_ProductsLowInStock extends WC_REST_Unit_Test_Case {
 		// Order enough of the product to trigger low stock status.
 		$order_time = '2020-11-24T10:00:00';
 		$order      = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_date_created( $order_time );
 		$order->save();
 
