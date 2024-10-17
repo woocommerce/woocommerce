@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { Gridicon } from '@automattic/components';
 import { Button, Card, CardHeader, SelectControl } from '@wordpress/components';
-import React from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { EllipsisMenu, List, Pill } from '@woocommerce/components';

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -21,7 +22,7 @@ import ExternalIcon from 'gridicons/dist/external';
  * Internal dependencies
  */
 import './payment-recommendations.scss';
-import { createNoticesFromResponse } from '../lib/notices';
+import { createNoticesFromResponse } from '~/lib/notices';
 import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
 
