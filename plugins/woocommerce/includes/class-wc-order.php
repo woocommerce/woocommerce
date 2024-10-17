@@ -54,6 +54,12 @@ class WC_Order extends WC_Abstract_Order {
 	 * @var string
 	 */
 	const STATUS_PROCESSING = 'processing';
+
+	/**
+	 * Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.
+	 *
+	 * @var string
+	 */
 	const STATUS_REFUNDED   = 'refunded';
 
 	/**
