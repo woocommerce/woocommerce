@@ -7,7 +7,6 @@
 	"keywords": [],
 	"supports": {
 		"interactivity": true,
-		"inserter": false,
 		"color": {
 			"background": false,
 			"text": true
