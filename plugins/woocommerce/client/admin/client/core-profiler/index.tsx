@@ -12,7 +12,6 @@ import {
 	DoneActorEvent,
 	fromCallback,
 	or,
-	and,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -1411,10 +1410,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: and( [
-									'hasJetpackSelectedForInstallation',
-									'hasJetpackActivated',
-								] ),
+								guard: 'hasJetpackSelectedForInstallation',
 							},
 							{ actions: 'redirectToWooHome' },
 						],
