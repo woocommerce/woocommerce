@@ -20,6 +20,7 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 			<TotalsCoupon
 				onSubmit={ applyCoupon }
 				isLoading={ isApplyingCoupon }
+				instanceId="coupon"
 			/>
 		</TotalsWrapper>
 	);
