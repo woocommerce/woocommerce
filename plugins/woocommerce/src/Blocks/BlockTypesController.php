@@ -146,12 +146,23 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
 		foreach ( $block_types as $block_type ) {
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
+		}
+	}
+
+	public function register_block_metadata() {
+		$meta_file_path = WC_ABSPATH . 'assets/client/blocks/blocks-json.php';
+		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $meta_file_path ) ) {
+			wp_register_block_metadata_collection(
+				WC_ABSPATH . 'assets/client/blocks/',
+				$meta_file_path
+			);
 		}
 	}
 
