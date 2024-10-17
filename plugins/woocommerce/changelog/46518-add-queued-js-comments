@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add handles to enqueued JS, making it easier to filter.
