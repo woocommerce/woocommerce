@@ -42,6 +42,8 @@ const NoRatings = () => (
 const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { attributes, setAttributes } = props;
 
+	const { displayStyle, isPreview, showCounts, selectType } = attributes;
+
 	const blockProps = useBlockProps();
 
 	const setWrapperVisibility = useSetWraperVisibility();
@@ -55,15 +57,13 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 		} );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState(
-		attributes.isPreview ? previewOptions : []
+		isPreview ? previewOptions : []
 	);
 
 	const isLoading =
-		! attributes.isPreview &&
-		filteredCountsLoading &&
-		displayedOptions.length === 0;
+		! isPreview && filteredCountsLoading && displayedOptions.length === 0;
 
-	const isDisabled = ! attributes.isPreview && filteredCountsLoading;
+	const isDisabled = ! isPreview && filteredCountsLoading;
 
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
@@ -91,7 +91,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 		 * @param {string} queryStatus The status slug to check.
 		 */
 
-		if ( filteredCountsLoading || attributes.isPreview ) {
+		if ( filteredCountsLoading || isPreview ) {
 			return;
 		}
 
@@ -119,7 +119,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 							key={ item?.rating }
 							rating={ item?.rating }
 							ratedProductsCount={
-								attributes.showCounts ? item?.count : null
+								showCounts ? item?.count : null
 							}
 						/>
 					),
@@ -129,8 +129,8 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 
 		setDisplayedOptions( newOptions );
 	}, [
-		attributes.showCounts,
-		attributes.isPreview,
+		showCounts,
+		isPreview,
 		filteredCounts,
 		filteredCountsLoading,
 		productRatingsQuery,
@@ -165,17 +165,14 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
-						className={ clsx(
-							`style-${ attributes.displayStyle }`,
-							{
-								'is-loading': isLoading,
-							}
-						) }
+						className={ clsx( `style-${ displayStyle }`, {
+							'is-loading': isLoading,
+						} ) }
 					>
-						{ attributes.displayStyle === 'dropdown' ? (
+						{ displayStyle === 'dropdown' ? (
 							<PreviewDropdown
 								placeholder={
-									attributes.selectType === 'single'
+									selectType === 'single'
 										? __( 'Select a rating', 'woocommerce' )
 										: __( 'Select ratings', 'woocommerce' )
 								}
