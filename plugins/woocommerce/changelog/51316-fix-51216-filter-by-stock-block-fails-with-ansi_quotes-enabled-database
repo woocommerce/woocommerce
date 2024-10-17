@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Fix: "Filter by stock" returns no results when used with MySQL having `ANSI_QUOTES` enabled
+Fix: Multiple issues related to MySQL having `ANSI_QUOTES` enabled in Product Filters
