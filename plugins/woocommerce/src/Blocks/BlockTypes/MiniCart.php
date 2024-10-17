@@ -93,6 +93,7 @@ class MiniCart extends AbstractBlock {
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
+		add_action( 'shutdown', array( $this, 'update_frontend_dependencies_cache' ), 20 );
 	}
 
 	/**
@@ -297,13 +298,6 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
-		if ( ! is_admin() ) {
-			if ( $is_cart_empty ) {
-				$this->set_empty_frontend_dependencies_cache( $this->scripts_to_lazy_load );
-			} else {
-				$this->set_non_empty_frontend_dependencies_cache( $this->scripts_to_lazy_load );
-			}
-		}
 		$this->add_inline_script_data();
 	}
 
@@ -360,35 +354,26 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Set frontend dependencies cache when the cart has items.
-	 *
-	 * @param string $data String of JSON data.
+	 * Update frontend dependencies cache.
 	 */
-	protected function set_non_empty_frontend_dependencies_cache( $data ) {
-		$cache = array(
+	public function update_frontend_dependencies_cache() {
+		$cache         = array(
 			'version' => array(
 				'woocommerce' => WOOCOMMERCE_VERSION,
 				'wordpress'   => get_bloginfo( 'version' ),
 			),
-			'data'    => wp_json_encode( $data ),
+			'data'    => wp_json_encode( $this->scripts_to_lazy_load ),
 		);
-		set_site_transient( 'woocommerce_mini_cart_non_empty_frontend_dependencies', $cache, MONTH_IN_SECONDS );
-	}
+		$cart          = $this->get_cart_instance();
+		$is_cart_empty = $cart && $cart->is_empty();
 
-	/**
-	 * Set frontend dependencies cache when the cart is empty.
-	 *
-	 * @param string $data String of JSON data.
-	 */
-	protected function set_empty_frontend_dependencies_cache( $data ) {
-		$cache = array(
-			'version' => array(
-				'woocommerce' => WOOCOMMERCE_VERSION,
-				'wordpress'   => get_bloginfo( 'version' ),
-			),
-			'data'    => wp_json_encode( $data ),
+		set_site_transient(
+			$is_cart_empty
+				? 'woocommerce_mini_cart_empty_frontend_dependencies'
+				: 'woocommerce_mini_cart_non_empty_frontend_dependencies',
+			$cache,
+			MONTH_IN_SECONDS
 		);
-		set_site_transient( 'woocommerce_mini_cart_empty_frontend_dependencies', $cache, MONTH_IN_SECONDS );
 	}
 
 	/**
