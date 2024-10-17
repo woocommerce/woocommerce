@@ -8,7 +8,7 @@ $headings: var(--heading--font-family);
 $body: var(--global--font-secondary);
 
 $body-color: currentColor;
-$highlights-color: #88a171;
+$highlights-color: var(--wc-highlight, #777335);
 
 /**
  * Fonts
