@@ -197,12 +197,15 @@ const CollectionChooser = (
 
 	const collectionVariations = useMemo(
 		() =>
-			blockCollections.filter(
-				( { name, scope } ) =>
+			blockCollections.filter( ( { name, scope } ) => {
+				return (
 					name !== CoreCollectionNames.PRODUCT_CATALOG &&
-					// Only show variations with scope "block"
-					scope?.includes( 'block' )
-			) as BlockVariation[],
+					// Display collections in the Collection Chooser if:
+					// 1. They have an explicit "block" scope
+					// 2. The scope is undefined (scope defaults to both block and inserter)
+					( scope === undefined || scope?.includes( 'block' ) )
+				);
+			} ) as BlockVariation[],
 		[ blockCollections ]
 	);
 

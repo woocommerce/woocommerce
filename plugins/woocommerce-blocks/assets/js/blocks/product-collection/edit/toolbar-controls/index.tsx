@@ -26,7 +26,9 @@ export default function ToolbarControls(
 	);
 
 	const collection = getCollectionByName( props.attributes.collection );
-	const showCollectionChooserToolbar = collection?.scope?.includes( 'block' );
+	const showCollectionChooserToolbar =
+		collection?.scope?.includes( 'block' ) ||
+		collection?.scope === undefined;
 
 	return (
 		<BlockControls>

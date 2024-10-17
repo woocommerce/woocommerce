@@ -55,6 +55,8 @@ A Collection is defined by an object that can contain the following fields:
 - `isDefault`: It's set to `false` for all collections. Third party developers don't need to pass this argument.
 - `isActive`: It will be managed by us. Third party developers don't need to pass this argument.
 - `usesReference` (optional, type `Array[]`): An array of strings specifying the required reference for the collection. Acceptable values are `product`, `archive`, `cart`, and `order`. When the required reference isn't available on Editor side but will be available in Frontend, we will show a preview label.
+- `scope` (optional, type `Array[]`): The list of scopes where the collection is applicable. Acceptable values are `block`, `inserter`, and `transform`. Defaults to `["block", "inserter"]`.
+   	- **Note:** For Product Collection block, `block` scope means that the collection will be shown in Collection Chooser and "Choose Collection" toolbar button will be visible. For other scopes, you can refer to the [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation) documentation.
 
 ### Attributes
 
@@ -85,6 +87,7 @@ Attributes are the properties that define the behavior of the collection. All th
     - `type` (type `string`): The type of layout. Accepted values are `grid` and `stack`.
     - `columns` (type `number`): The number of columns to display.
     - `shrinkColumns` (type `boolean`): Whether the layout should be responsive.
+
 - `hideControls` (type `array`): The controls to hide. Possible values:
     - `order` - "Order by" setting
     - `attributes` - "Product Attributes" filter
@@ -286,6 +289,49 @@ __experimentalRegisterProductCollection({
   usesReference: ["product", "order"],
 });
 ```
+
+### Example 6: Scope argument
+
+When you don't specify the `scope` argument, its default value is `["block", "inserter"]`. This default behavior is inherited from the [Block Variation API](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
+
+The Product Collection block uses the `block` scope to control:
+
+1. Visibility in the Collection Chooser
+2. Display of the "Choose Collection" toolbar button
+
+#### Don't show collection in Collection Chooser
+
+If you don't want to show your collection in the Collection Chooser, you can set the `scope` argument to an empty array or any other value that doesn't include the `block` value. 
+
+For example:
+
+```tsx
+__experimentalRegisterProductCollection({
+  name: "your-plugin-name/product-collection/my-custom-collection",
+  title: "My Custom Collection",
+  icon: "games",
+  description: "This is a custom collection.",
+  keywords: ["custom collection", "product collection"],
+  scope: [],
+});
+```
+
+#### Show collection in the block inserter only
+
+If you want to show your collection exclusively in the block inserter and not in the Collection Chooser, you can set the `scope` argument to `["inserter"]`. This allows users to add your custom collection directly from the block inserter while keeping it hidden from the Collection Chooser interface.
+
+For example:
+
+```tsx
+__experimentalRegisterProductCollection({
+  name: "your-plugin-name/product-collection/my-custom-collection",
+  title: "My Custom Collection",
+  description: "This is a custom collection.",
+  keywords: ["custom collection", "product collection"],
+  scope: ["inserter"],
+});
+```
+
 
 ---
 

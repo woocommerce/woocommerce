@@ -16,7 +16,6 @@ __experimentalRegisterProductCollection( {
 		},
 		hideControls: [ 'keyword', 'on-sale' ],
 	},
-	scope: [ 'block' ],
 } );
 
 // Register a new collection with a preview.
@@ -32,7 +31,6 @@ __experimentalRegisterProductCollection( {
 				'This is a preview message for my custom collection with preview.',
 		},
 	},
-	scope: [ 'block' ],
 } );
 
 // Advanced usage of preview.
@@ -64,7 +62,6 @@ __experimentalRegisterProductCollection( {
 				'This is a preview message for my custom collection with advanced preview.',
 		},
 	},
-	scope: [ 'block' ],
 } );
 
 /**
@@ -76,7 +73,6 @@ __experimentalRegisterProductCollection( {
 	title: 'My Custom Collection - Product Context',
 	description: 'This is a custom collection with product context.',
 	usesReference: [ 'product' ],
-	scope: [ 'block' ],
 } );
 
 // Cart context
@@ -85,7 +81,6 @@ __experimentalRegisterProductCollection( {
 	title: 'My Custom Collection - Cart Context',
 	description: 'This is a custom collection with cart context.',
 	usesReference: [ 'cart' ],
-	scope: [ 'block' ],
 } );
 
 // Order context
@@ -94,7 +89,6 @@ __experimentalRegisterProductCollection( {
 	title: 'My Custom Collection - Order Context',
 	description: 'This is a custom collection with order context.',
 	usesReference: [ 'order' ],
-	scope: [ 'block' ],
 } );
 
 // Archive context
@@ -103,7 +97,6 @@ __experimentalRegisterProductCollection( {
 	title: 'My Custom Collection - Archive Context',
 	description: 'This is a custom collection with archive context.',
 	usesReference: [ 'archive' ],
-	scope: [ 'block' ],
 } );
 
 // Multiple contexts
@@ -112,5 +105,4 @@ __experimentalRegisterProductCollection( {
 	title: 'My Custom Collection - Multiple Contexts',
 	description: 'This is a custom collection with multiple contexts.',
 	usesReference: [ 'product', 'order' ],
-	scope: [ 'block' ],
 } );
