@@ -536,7 +536,9 @@ test.describe(
 
 			// Recalculate taxes
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
-			await page.locator( 'text=Recalculate' ).click();
+			await page
+				.getByRole( 'button', { name: 'Recalculate', exact: true } )
+				.click();
 
 			// verify tax names
 			let i = 0;
