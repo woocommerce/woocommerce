@@ -68,7 +68,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'calculate_cogs' returns false, and 'doing it wrong' is thrown, if the Cost of Goods Sold feature is disabled.
+	 * @testdox 'calculate_cogs_value' returns false, and 'doing it wrong' is thrown, if the Cost of Goods Sold feature is disabled.
 	 */
 	public function test_calculate_cogs_simply_returns_false_if_cogs_disabled() {
 		$this->sut->has_cogs_value = true;
@@ -78,7 +78,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'calculate_cogs' returns false if the Cost of Goods Sold feature is enabled but the class doesn't manage it.
+	 * @testdox 'calculate_cogs_value' returns false if the Cost of Goods Sold feature is enabled but the class doesn't manage it.
 	 */
 	public function test_calculate_cogs_simply_returns_false_if_cogs_enabled_but_class_has_no_cogs() {
 		$this->enable_cogs_feature();
@@ -87,7 +87,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'calculate_cogs' throws an exception if the derived class doesn't override the default method implementation.
+	 * @testdox 'calculate_cogs_value' throws an exception if the derived class doesn't override the default method implementation.
 	 */
 	public function test_calculate_cogs_throws_if_class_does_not_override_core_calculation() {
 		$this->sut->has_cogs_value = true;
@@ -99,7 +99,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'calculate_cogs' sets the value returned by the 'calculate_cogs_core' override, and returns true.
+	 * @testdox 'calculate_cogs_value' sets the value returned by the 'calculate_cogs_core' override, and returns true.
 	 */
 	public function test_calculate_cogs_sets_value_from_core_calculation_overriden_in_child_class() {
 		$this->sut->has_cogs_value = true;
