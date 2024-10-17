@@ -2084,15 +2084,15 @@ class ProductCollection extends AbstractBlock {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/cross-sells',
 			function ( $collection_args ) {
-				$product_references = $collection_args['crossSellsProductReferences'] ?? null;
+				$product_reference = $collection_args['crossSellsProductReferences'] ?? null;
 				// No products should be shown if no cross-sells product reference is set.
-				if ( empty( $product_references ) ) {
+				if ( empty( $product_reference ) ) {
 					return array(
 						'post__in' => array( -1 ),
 					);
 				}
 
-				$products = array_filter(array_map( 'wc_get_product', $product_references ));
+				$products = array_filter(array_map( 'wc_get_product', $product_reference ));
 
 				if ( empty( $products ) ) {
 					return array(
@@ -2125,19 +2125,19 @@ class ProductCollection extends AbstractBlock {
 				);
 			},
 			function ( $collection_args, $query ) {
-				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				$product_reference = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_references ) ) {
+				if ( empty( $product_reference ) ) {
 					$location = $collection_args['productCollectionLocation'];
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
-						$product_references = array( $location['sourceData']['productId'] );
+						$product_reference = array( $location['sourceData']['productId'] );
 					}
 					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-						$product_references = $location['sourceData']['productIds'];
+						$product_reference = $location['sourceData']['productIds'];
 					}
 				}
 
-				$collection_args['crossSellsProductReferences'] = $product_references;
+				$collection_args['crossSellsProductReferences'] = $product_reference;
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
