@@ -285,8 +285,11 @@ class WC_Structured_Data {
 					'@type'              => 'Offer',
 					'price'              => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
 					'priceValidUntil'    => $price_valid_until,
+					// @link https://developers.google.com/search/docs/appearance/structured-data/merchant-listing#sale-pricing-example
 					'priceSpecification' => array(
-						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+						'@type'                 => 'UnitPriceSpecification',
+						'priceType'             => 'https://schema.org/ListPrice',
+						'price'                 => wc_format_decimal( $product->get_regular_price(), wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
 						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
 					),
