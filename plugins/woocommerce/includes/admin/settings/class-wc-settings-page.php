@@ -141,7 +141,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$sections_data = array();
 
 			foreach ( $sections as $section_id => $section_label ) {
-				$section_settings = $this->get_settings_for_section( $section_id );
+				$section_settings = count( $sections ) > 1 ? $this->get_settings_for_section( $section_id ) : $this->get_settings();
 				$section_settings_data = array();
 
 				global $current_section;
