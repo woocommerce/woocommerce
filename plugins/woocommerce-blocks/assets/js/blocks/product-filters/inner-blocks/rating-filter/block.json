@@ -30,7 +30,7 @@
 		},
 		"displayStyle": {
 			"type": "string",
-			"default": "woocommerce/product-filter-checkbox-list"
+			"default": "list"
 		},
 		"selectType": {
 			"type": "string",
