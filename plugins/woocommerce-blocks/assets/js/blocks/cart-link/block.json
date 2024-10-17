@@ -14,7 +14,8 @@
 			"fontSize": true
 		},
 		"color": {
-			"text": true
+			"text": false,
+			"link": true
 		},
 		"spacing": {
 			"padding": true
@@ -23,7 +24,6 @@
 	"example": {
 		"attributes": {
 			"isPreview": true,
-			"className": "wc-block-cart-link--preview",
 			"cartIcon": "cart",
 			"content": "Cart"
 		}

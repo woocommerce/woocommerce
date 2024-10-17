@@ -35,9 +35,7 @@ interface Props {
 const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	const { cartIcon, content } = attributes;
 
-	const blockProps = useBlockProps( {
-		className: 'wc-block-cart-link',
-	} );
+	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>
@@ -69,23 +67,25 @@ const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 					</ToggleGroupControl>
 				</PanelBody>
 			</InspectorControls>
-			<QuantityBadge
-				icon={ cartIcon }
-				productCountVisibility={ 'never' }
-			/>
-			<PlainText
-				className="wc-block-cart-link__text"
-				value={
-					content !== null ? content : __( 'Cart', 'woocommerce' )
-				}
-				__experimentalVersion={ 2 }
-				onChange={ ( value: string ) =>
-					setAttributes( {
-						content: value,
-					} )
-				}
-				style={ { backgroundColor: 'transparent', resize: 'none' } }
-			/>
+			<a className="wc-block-cart-link" href={ '#cart-pseudo-link' }>
+				<QuantityBadge
+					icon={ cartIcon }
+					productCountVisibility={ 'never' }
+				/>
+				<PlainText
+					className="wc-block-cart-link__text"
+					value={
+						content !== null ? content : __( 'Cart', 'woocommerce' )
+					}
+					__experimentalVersion={ 2 }
+					onChange={ ( value: string ) =>
+						setAttributes( {
+							content: value,
+						} )
+					}
+					style={ { backgroundColor: 'transparent', resize: 'none' } }
+				/>
+			</a>
 		</div>
 	);
 };

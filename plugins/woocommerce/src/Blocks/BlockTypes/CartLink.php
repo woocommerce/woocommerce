@@ -27,20 +27,20 @@ class CartLink extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$link_text          = array_key_exists( 'content', $attributes ) ? esc_html( $attributes['content'] ) : esc_html__( 'Cart', 'woocommerce' );
 		$icon               = MiniCartUtils::get_svg_icon( $attributes['cartIcon'] ?? '' );
+		$text               = array_key_exists( 'content', $attributes ) ? esc_html( $attributes['content'] ) : esc_html__( 'Cart', 'woocommerce' );
 
 		return sprintf(
-			'<a %1$s>%2$s<span class="wc-block-cart-link__text">%3$s</span></a>',
+			'<div %1$s><a class="wc-block-cart-link" href="%2$s">%3$s<span class="wc-block-cart-link__text">%4$s</span></a></div>',
 			get_block_wrapper_attributes(
 				array(
-					'class' => 'wc-block-cart-link ' . esc_attr( $classes_and_styles['classes'] ),
+					'class' => esc_attr( $classes_and_styles['classes'] ),
 					'style' => $classes_and_styles['styles'],
-					'href'  => esc_url( wc_get_cart_url() ),
 				)
 			),
+			esc_url( wc_get_cart_url() ),
 			$icon,
-			$link_text
+			$text
 		);
 	}
 

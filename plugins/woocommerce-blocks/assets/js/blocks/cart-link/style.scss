@@ -2,7 +2,6 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: $gap-smallest;
 	text-decoration: none;
 
 	.wc-block-cart-link__text {
@@ -13,5 +12,9 @@
 		display: inline-flex;
 		margin: 0;
 		height: auto;
+	}
+
+	.has-background > & {
+		padding: $gap-smallest;
 	}
 }
