@@ -268,8 +268,19 @@ jQuery( function ( $ ) {
 		/**
 		 * Toggle Shipping Calculator panel
 		 */
-		toggle_shipping: function () {
-			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+		toggle_shipping: function ( event ) {
+			var $target = $( event.currentTarget );
+
+			$( '.shipping-calculator-form' ).slideToggle( 'slow', function () {
+				var self = this;
+
+				setTimeout( function () {
+					var $form = $( self );
+
+					$target.attr( 'aria-expanded', $form.is( ':visible' ) ? 'true' : 'false' );
+				}, 0 );
+			} );
+			
 			$( 'select.country_to_state, input.country_to_state' ).trigger(
 				'change'
 			);
