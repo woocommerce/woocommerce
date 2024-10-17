@@ -346,7 +346,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		if ( $order->get_total() > 0 ) {
 			// Mark as processing or on-hold (payment won't be taken until delivery).
-			$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', $order->has_downloadable_item() ? 'on-hold' : 'processing', $order ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
+			$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', $order->has_downloadable_item() ? WC_Order::STATUS_ON_HOLD : WC_Order::STATUS_PROCESSING, $order ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();
 		}
@@ -381,7 +381,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
 		if ( $order && 'cod' === $order->get_payment_method() ) {
-			$status = 'completed';
+			$status = WC_Order::STATUS_COMPLETED;
 		}
 		return $status;
 	}

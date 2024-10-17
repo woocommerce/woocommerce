@@ -158,7 +158,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			$order->add_meta_data( '_paypal_status', $status );
 			$order->set_transaction_id( $transaction );
 
-			if ( 'completed' === $status ) {
+			if ( WC_Order::STATUS_COMPLETED === $status ) {
 				if ( number_format( $order->get_total(), 2, '.', '' ) !== number_format( $amount, 2, '.', '' ) ) {
 					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
 					/* translators: 1: Payment amount */

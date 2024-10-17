@@ -127,7 +127,7 @@ class WC_Orders_Tracking {
 		}
 
 		$order = wc_get_order( $id );
-		if ( ! $order || 'auto-draft' === $order->get_status() ) {
+		if ( ! $order || WC_Order::STATUS_AUTO_DRAFT === $order->get_status() ) {
 			return;
 		}
 

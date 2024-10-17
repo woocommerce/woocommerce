@@ -103,7 +103,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			 *
 			 * @param string[] $order_statuses Order statuses.
 			 */
-			$order_statuses  = apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
+			$order_statuses  = apply_filters( 'woocommerce_reports_order_statuses', array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD ) );
 			$query['where'] .= "AND orders.{$orders_column_status} IN ( 'wc-" . implode( "','wc-", $order_statuses ) . "' ) ";
 
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";

@@ -63,7 +63,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 * @param  string   $note Payment note.
 	 */
 	protected function payment_complete( $order, $txn_id = '', $note = '' ) {
-		if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
+		if ( ! $order->has_status( array( WC_Order::STATUS_PROCESSING, WC_Order::STATUS_COMPLETED ) ) ) {
 			$order->add_order_note( $note );
 			$order->payment_complete( $txn_id );
 
@@ -80,7 +80,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 * @param  string   $reason Reason why the payment is on hold.
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
-		$order->update_status( 'on-hold', $reason );
+		$order->update_status( WC_Order::STATUS_ON_HOLD, $reason );
 
 		if ( isset( WC()->cart ) ) {
 			WC()->cart->empty_cart();

@@ -104,7 +104,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		parent::create( $order );
 
 		// Do not fire 'woocommerce_new_order' for draft statuses.
-		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
+		if ( in_array( $order->get_status( 'edit' ), array( WC_Order::STATUS_AUTO_DRAFT, WC_Order::STATUS_DRAFT, \Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders::STATUS ), true ) ) {
 			return;
 		}
 
@@ -185,7 +185,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function update( &$order ) {
 		// Before updating, ensure date paid is set if missing.
-		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) {
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? WC_Order::STATUS_PROCESSING : WC_Order::STATUS_COMPLETED, $order->get_id(), $order ) ) ) {
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
 
@@ -205,7 +205,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$previous_status = OrderUtil::remove_status_prefix( $previous_status );
 		$current_status  = OrderUtil::remove_status_prefix( $current_status );
 
-		$draft_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft' );
+		$draft_statuses = array( 'new', WC_Order::STATUS_AUTO_DRAFT, WC_Order::STATUS_DRAFT, \Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders::STATUS );
 
 		// This hook should be fired only if the new status is not one of draft statuses and the previous status was one of the draft statuses.
 		if (

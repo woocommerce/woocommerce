@@ -113,7 +113,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 				'query_type'   => 'get_results',
 				'filter_range' => true,
 				'order_types'  => wc_get_order_types( 'sales-reports' ),
-				'order_status' => array( 'completed', 'processing', 'refunded' ),
+				'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -140,7 +140,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_types'         => array( 'shop_order_refund' ),
-				'parent_order_status' => array( 'refunded' ),
+				'parent_order_status' => array( WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -152,7 +152,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_types'         => array( 'shop_order_refund' ),
-				'parent_order_status' => array( 'completed', 'processing' ), // Partial refunds inside refunded orders should be ignored.
+				'parent_order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING ), // Partial refunds inside refunded orders should be ignored.
 			)
 		);
 

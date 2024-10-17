@@ -74,7 +74,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_subject() {
-			if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
+			if ( $this->object->has_status( array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING ) ) ) {
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
 				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
