@@ -123,6 +123,10 @@ Current list of events:
 -   `experimental__woocommerce_blocks-product-search` - Fired when a search is submitted.
 -   `experimental__woocommerce_blocks-store-notice-create` - Fired when a store notice is created.
 -   `experimental__woocommerce_blocks-product-render` - Fired when a single product block is rendered.
+-   `experimental__woocommerce_blocks-checkout-calculate-shipping` - Fired when shipping costs are calculated.
+-   `experimental__woocommerce_blocks-checkout-cart-render` - Fired when a cart block is rendered.
+-   `experimental__woocommerce_blocks-checkout-mini-cart-open` - Fired when the mini cart drawer is opened.
+-   `experimental__woocommerce_blocks-checkout-mini-cart-close` - Fired when the mini cart drawer is closed.
 -   `experimental__woocommerce_blocks-checkout-submit` - Fired when the checkout form is submitted.
 -   `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` - Fired when a shipping rate is chosen on checkout.
 -   `experimental__woocommerce_blocks-checkout-set-active-payment-method` - Fired when a payment method is chosen on checkout.
