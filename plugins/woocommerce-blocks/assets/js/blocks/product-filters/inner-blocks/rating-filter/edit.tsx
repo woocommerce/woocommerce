@@ -3,7 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { useBlockProps } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	useInnerBlocksProps,
+	BlockContextProvider,
+} from '@wordpress/block-editor';
 import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
@@ -13,7 +17,6 @@ import {
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
-import { CheckboxList } from '@woocommerce/blocks-components';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
 
@@ -27,6 +30,8 @@ import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
 import type { Attributes } from './types';
 import './style.scss';
+import { getAllowedBlocks } from '../../utils';
+import { EXCLUDED_BLOCKS } from '../../constants';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -44,7 +49,57 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 
 	const { displayStyle, isPreview, showCounts, selectType } = attributes;
 
-	const blockProps = useBlockProps();
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		useBlockProps(),
+		{
+			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+			template: [
+				[
+					'core/group',
+					{
+						layout: {
+							type: 'flex',
+							flexWrap: 'nowrap',
+						},
+						metadata: {
+							name: __( 'Header', 'woocommerce' ),
+						},
+						style: {
+							spacing: {
+								blockGap: '0',
+							},
+						},
+					},
+					[
+						[
+							'core/heading',
+							{
+								level: 3,
+								content: __( 'Rating', 'woocommerce' ),
+							},
+						],
+						[
+							'woocommerce/product-filter-clear-button',
+							{
+								lock: {
+									remove: true,
+									move: false,
+								},
+							},
+						],
+					],
+				],
+				[
+					displayStyle,
+					{
+						lock: {
+							remove: true,
+						},
+					},
+				],
+			],
+		}
+	);
 
 	const setWrapperVisibility = useSetWraperVisibility();
 	const [ queryState ] = useQueryStateByContext();
@@ -63,14 +118,10 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const isLoading =
 		! isPreview && filteredCountsLoading && displayedOptions.length === 0;
 
-	const isDisabled = ! isPreview && filteredCountsLoading;
-
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
 		[]
 	);
-
-	const [ checked ] = useState( initialFilters );
 
 	const [ productRatingsQuery ] = useQueryStateByKey(
 		'rating',
@@ -161,7 +212,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 				setAttributes={ setAttributes }
 			/>
 
-			<div { ...blockProps }>
+			<div { ...innerBlocksProps }>
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
@@ -178,15 +229,16 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 								}
 							/>
 						) : (
-							<CheckboxList
-								options={ displayedOptions }
-								checked={ checked }
-								onChange={ () => {
-									// noop
+							<BlockContextProvider
+								value={ {
+									filterData: {
+										items: displayedOptions,
+										isLoading,
+									},
 								} }
-								isLoading={ isLoading }
-								isDisabled={ isDisabled }
-							/>
+							>
+								{ children }
+							</BlockContextProvider>
 						) }
 					</div>
 				</Disabled>
