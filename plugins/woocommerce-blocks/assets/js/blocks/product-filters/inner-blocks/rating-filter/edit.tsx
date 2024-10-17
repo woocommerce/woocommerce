@@ -96,6 +96,9 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 						lock: {
 							remove: true,
 						},
+						metadata: {
+							name: __( 'Stars', 'woocommerce' ),
+						},
 					},
 				],
 			],
