@@ -111,6 +111,7 @@ export default function ProductListContent( props: {
 								currency: product.currency,
 								isOnSale: product.isOnSale,
 								regularPrice: product.regularPrice,
+								isBusinessService: product.isBusinessService,
 							} }
 							tracksData={ {
 								position: index + 1,
