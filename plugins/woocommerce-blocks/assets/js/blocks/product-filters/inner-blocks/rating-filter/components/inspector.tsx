@@ -23,7 +23,7 @@ import { Attributes } from '../types';
 export const Inspector = ( {
 	attributes,
 	setAttributes,
-}: BlockEditProps< Attributes > ) => {
+}: Pick< BlockEditProps< Attributes >, 'attributes' | 'setAttributes' > ) => {
 	const { showCounts, displayStyle, selectType } = attributes;
 	return (
 		<InspectorControls key="inspector">
