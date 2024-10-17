@@ -17,6 +17,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+$original_post = $GLOBALS['post'];
+
 if ( $cross_sells ) : ?>
 
 	<div class="cross-sells">
@@ -35,7 +37,9 @@ if ( $cross_sells ) : ?>
 				<?php
 					$post_object = get_post( $cross_sell->get_id() );
 
-					setup_postdata( $GLOBALS['post'] =& $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
+					$GLOBALS['post'] = $post_object;
+
+					setup_postdata( $GLOBALS['post'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
 
 					wc_get_template_part( 'content', 'product' );
 				?>
@@ -48,4 +52,5 @@ if ( $cross_sells ) : ?>
 	<?php
 endif;
 
+$GLOBALS['post'] = $original_post;
 wp_reset_postdata();
