@@ -30,6 +30,14 @@
 			}
 		}
 	}
+
+	// Settings specific style override for the pill component.
+	.woocommerce-pill {
+		background-color: $gray-100;
+		border: none;
+		border-radius: 4px;
+	}
+
 	.woocommerce-list__item-inner {
 		align-items: flex-start;
 		padding: 24px;
