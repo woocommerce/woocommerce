@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
-import type { BlockEditProps } from '@wordpress/blocks';
 import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
@@ -16,6 +15,7 @@ import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
+import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
