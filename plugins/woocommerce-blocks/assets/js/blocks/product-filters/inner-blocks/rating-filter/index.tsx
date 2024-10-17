@@ -3,7 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
-import { productFilterOptions } from '@woocommerce/icons';
+import { productFilterRating as icon } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ import metadata from './block.json';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
-		icon: productFilterOptions,
+		icon,
 		attributes: {
 			...metadata.attributes,
 		},
