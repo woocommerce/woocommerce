@@ -471,7 +471,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function calculate_cogs_value(): bool {
 		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
-			return 0;
+			return false;
 		}
 
 		$value = $this->calculate_cogs_value_core();
