@@ -2777,6 +2777,34 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 	}
 
+
+	/**
+	 * @testDox Test that perform_custom_order_validation throws a RouteException with a custom error.
+	 */
+	public function test_perform_custom_order_validation() {
+			$order_controller = new OrderController();
+			$order = new WC_Order();
+
+			// Set up a test action to add a custom validation error.
+			add_action('woocommerce_checkout_validate_order_before_payment', function($order, $errors) {
+					$errors->add('custom_error', 'This is a custom validation error');
+			}, 10, 2);
+
+			// Use reflection to make the protected method accessible.
+			$reflection = new ReflectionClass( $order_controller );
+			$method = $reflection->getMethod( 'perform_custom_order_validation' );
+			$method->setAccessible( true );
+
+			// Assert that the method throws a RouteException with our custom error.
+			$this->expectException( RouteException::class );
+			$this->expectExceptionMessage( 'This is a custom validation error' );
+
+			$method->invoke( $order_controller, $order );
+
+			// Clean up the test action.
+			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+	}
+
 	/**
 	 * @testDox Checks that order new/updated hooks are fired at appropriate times in HPOS (vs CPT).
 	 * @testWith [true]
