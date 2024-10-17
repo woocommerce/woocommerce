@@ -21,11 +21,11 @@ import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
  * Internal dependencies
  */
 import { previewOptions } from './preview';
-import { Attributes } from './types';
 import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
+import type { Attributes } from './types';
 import './style.scss';
 
 const NoRatings = () => (
@@ -83,7 +83,8 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		useState( false );
 
 	/**
-	 * Compare intersection of all ratings and filtered counts to get a list of options to display.
+	 * Compare intersection of all ratings
+	 * and filtered counts to get a list of options to display.
 	 */
 	useEffect( () => {
 		/**
@@ -158,6 +159,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 	return (
 		<>
 			<Inspector { ...props } />
+
 			<div { ...blockProps }>
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
