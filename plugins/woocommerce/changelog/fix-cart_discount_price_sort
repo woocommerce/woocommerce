@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sort items for before applying discounts by the price property
