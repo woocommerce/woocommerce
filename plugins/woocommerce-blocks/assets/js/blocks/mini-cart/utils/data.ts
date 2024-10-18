@@ -6,14 +6,10 @@ import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
 } from '@woocommerce/price-format';
-import {
-	CartResponse,
-	CartResponseTotals,
-	isBoolean,
-} from '@woocommerce/types';
+import { CartResponseTotals, isBoolean } from '@woocommerce/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import type { ColorPaletteOption } from '@woocommerce/editor-components/color-panel/types';
-import apiFetch from '@wordpress/api-fetch';
+import type { Cart } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -31,13 +27,11 @@ const getPrice = ( totals: CartResponseTotals, showIncludingTax: boolean ) => {
 	return formatPrice( subTotal, currency );
 };
 
-export const updateTotals = (
-	cartData: [ CartResponseTotals, number ] | undefined
-) => {
+export const updateTotals = ( cartData: Cart ) => {
 	if ( ! cartData ) {
 		return;
 	}
-	const [ totals, quantity ] = cartData;
+	const { totals, itemsCount: quantity } = cartData;
 	const showIncludingTax = getSettingWithCoercion(
 		'displayCartPricesIncludingTax',
 		false,
@@ -108,50 +102,6 @@ export const updateTotals = (
 			miniCartTaxLabel.removeAttribute( 'hidden' );
 		} );
 	}
-};
-
-export const getMiniCartTotalsFromLocalStorage = ():
-	| [ CartResponseTotals, number ]
-	| undefined => {
-	const rawMiniCartTotals = localStorage.getItem(
-		'wc-blocks_mini_cart_totals'
-	);
-	if ( ! rawMiniCartTotals ) {
-		return undefined;
-	}
-	const cartData = JSON.parse( rawMiniCartTotals );
-	return [ cartData.totals, cartData.itemsCount ] as [
-		CartResponseTotals,
-		number
-	];
-};
-
-export const getMiniCartTotalsFromServer = async (): Promise<
-	[ CartResponseTotals, number ] | undefined
-> => {
-	return apiFetch< CartResponse >( {
-		path: '/wc/store/v1/cart',
-	} )
-		.then( ( data: CartResponse ) => {
-			// Save server data to local storage, so we can re-fetch it faster
-			// on the next page load.
-			localStorage.setItem(
-				'wc-blocks_mini_cart_totals',
-				JSON.stringify( {
-					totals: data.totals,
-					itemsCount: data.items_count,
-				} )
-			);
-			return [ data.totals, data.items_count ] as [
-				CartResponseTotals,
-				number
-			];
-		} )
-		.catch( ( error ) => {
-			// eslint-disable-next-line no-console
-			console.error( error );
-			return undefined;
-		} );
 };
 
 interface MaybeInCompatibleAttributes
