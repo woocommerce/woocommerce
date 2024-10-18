@@ -7,6 +7,7 @@ config = {
 		{
 			name: 'default subdomain',
 			use: { ...devices[ 'Desktop Chrome' ] },
+			testMatch: [ '**/basic.spec.js' ],
 		},
 	],
 };
