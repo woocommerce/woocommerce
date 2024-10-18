@@ -67,3 +67,4 @@ require 'remote-inbox-notifications/class-wca-test-helper-remote-inbox-notificat
 require 'remote-logging/remote-logging.php';
 require 'tools/wccom-request-errors.php';
 require 'tools/set-wccom-base-url.php';
+require 'tools/reset-launch-your-store.php';
