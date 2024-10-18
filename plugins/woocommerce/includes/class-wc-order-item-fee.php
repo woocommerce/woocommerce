@@ -18,6 +18,21 @@ defined( 'ABSPATH' ) || exit;
  * Order item fee.
  */
 class WC_Order_Item_Fee extends WC_Order_Item {
+	/**
+	 * Legacy fee data.
+	 *
+	 * @deprecated 4.4.0 For legacy actions.
+	 * @var object
+	 */
+	public $legacy_fee = '';
+
+	/**
+	 * Legacy fee key.
+	 *
+	 * @deprecated 4.4.0 For legacy actions.
+	 * @var string
+	 */
+	public $legacy_fee_key = '';
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
