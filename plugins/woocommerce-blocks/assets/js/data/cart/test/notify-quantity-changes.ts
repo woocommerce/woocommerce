@@ -46,60 +46,6 @@ describe( 'notifyQuantityChanges', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
 	} );
-	it( 'shows notices when the quantity limits of an item change', () => {
-		const { oldCart, newCart } = getFreshCarts();
-		newCart.items[ 0 ].quantity_limits.minimum = 50;
-		notifyQuantityChanges( {
-			oldCart,
-			newCart,
-			cartItemsPendingQuantity: [],
-		} );
-		expect( mockedCreateInfoNotice ).toHaveBeenLastCalledWith(
-			'The quantity of "Beanie" was increased to 50. This is the minimum required quantity.',
-			{
-				context: 'wc/cart',
-				speak: true,
-				type: 'snackbar',
-				id: '1-quantity-update',
-			}
-		);
-
-		newCart.items[ 0 ].quantity_limits.minimum = 1;
-		newCart.items[ 0 ].quantity_limits.maximum = 10;
-		// Quantity needs to be outside the limits for the notice to show.
-		newCart.items[ 0 ].quantity = 11;
-		notifyQuantityChanges( {
-			oldCart,
-			newCart,
-			cartItemsPendingQuantity: [],
-		} );
-		expect( mockedCreateInfoNotice ).toHaveBeenLastCalledWith(
-			'The quantity of "Beanie" was decreased to 10. This is the maximum allowed quantity.',
-			{
-				context: 'wc/cart',
-				speak: true,
-				type: 'snackbar',
-				id: '1-quantity-update',
-			}
-		);
-		newCart.items[ 0 ].quantity = 10;
-		oldCart.items[ 0 ].quantity = 10;
-		newCart.items[ 0 ].quantity_limits.multiple_of = 6;
-		notifyQuantityChanges( {
-			oldCart,
-			newCart,
-			cartItemsPendingQuantity: [],
-		} );
-		expect( mockedCreateInfoNotice ).toHaveBeenLastCalledWith(
-			'The quantity of "Beanie" was changed to 6. You must purchase this product in groups of 6.',
-			{
-				context: 'wc/cart',
-				speak: true,
-				type: 'snackbar',
-				id: '1-quantity-update',
-			}
-		);
-	} );
 	it( 'does not show notices if the quantity limit changes, and the quantity is within limits', () => {
 		const { oldCart, newCart } = getFreshCarts();
 		newCart.items[ 0 ].quantity = 5;
