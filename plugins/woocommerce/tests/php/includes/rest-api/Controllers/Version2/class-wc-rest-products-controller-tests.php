@@ -33,6 +33,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		wp_set_current_user( 1 );
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
