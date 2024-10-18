@@ -44,6 +44,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		undoDismissTask,
 		undoSnoozeTask,
 		visitedTask,
+		invalidateResolutionForStoreSelector,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 
@@ -116,13 +117,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	};
 
 	// @todo This would be better as a task endpoint that handles updating the count.
-	const updateTrackStartedCount = () => {
+	const updateTrackStartedCount = async () => {
 		const newCount = getTaskStartedCount() + 1;
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
 		visitedTask( id );
-		userPreferences.updateUserPreferences( {
+		await userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
 				[ id ]: newCount,
@@ -130,14 +131,14 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		} );
 	};
 
-	const trackClick = () => {
+	const trackClick = async () => {
 		recordEvent( 'tasklist_click', {
 			task_name: id,
 			context: layoutString,
 		} );
 
 		if ( ! isComplete ) {
-			updateTrackStartedCount();
+			await updateTrackStartedCount();
 		}
 	};
 
@@ -163,7 +164,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const DefaultTaskItem = useCallback(
 		( props ) => {
 			const onClickActions = () => {
-				trackClick();
+				trackClick().then( () => {
+					if ( ! isComplete ) {
+						// Invalidate the task list selector cache to force a re-fetch.
+						// This ensures the task completion status is up-to-date after visiting a task.
+						invalidateResolutionForStoreSelector( 'getTaskLists' );
+					}
+				} );
 
 				if ( props.onClick ) {
 					return props.onClick();
