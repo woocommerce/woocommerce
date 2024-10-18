@@ -31,7 +31,7 @@ import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneu
 export * as actions from './actions';
 export * as services from './services';
 
-export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
+export type events = { type: 'COMPLETE_SURVEY' };
 
 export const Transitional = ( {
 	sendEvent,
@@ -138,13 +138,11 @@ export const Transitional = ( {
 					{ isEntrepreneurFlow() && (
 						<Button
 							variant="primary"
+							href={ homeUrl }
 							onClick={ () => {
 								trackEvent(
 									'customize_your_store_entrepreneur_home_click'
 								);
-								sendEvent( {
-									type: 'GO_BACK_TO_HOME',
-								} );
 							} }
 						>
 							{ __( 'Back to Home', 'woocommerce' ) }
@@ -253,13 +251,11 @@ export const Transitional = ( {
 									</p>
 									<Button
 										variant="link"
+										href={ homeUrl }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_home_click'
 											);
-											sendEvent( {
-												type: 'GO_BACK_TO_HOME',
-											} );
 										} }
 									>
 										{ __( 'Back to Home', 'woocommerce' ) }
