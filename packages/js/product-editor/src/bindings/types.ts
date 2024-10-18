@@ -2,26 +2,14 @@
  * External dependencies
  */
 import type { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
-import {
-	// @ts-expect-error no exported member.
-	type ComponentType,
-} from '@wordpress/element';
 
-export type AttributeBindingProps = {
+/**
+ * Internal dependencies
+ */
+export type ExternalSourceProps = {
 	source: string;
-	args: { prop: string };
+	args: Record< string, string | object | number | null | undefined >;
 };
-
-export type MetadataBindingsProps = Record< string, AttributeBindingProps >;
-
-export type BoundBlockAttributes = BlockAttributes & {
-	metadata?: {
-		bindings: MetadataBindingsProps;
-	};
-};
-
-export type BoundBlockEditInstance = CoreBlockEditProps< BoundBlockAttributes >;
-export type BoundBlockEditComponent = ComponentType< BoundBlockEditInstance >;
 
 /*
  * Block Binding API
@@ -40,8 +28,9 @@ export type BindingUseSourceProps = {
 	 */
 	updateValue: ( newValue: any ) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
-
-export interface BindingSourceHandlerProps< T > {
+export interface BindingSourceHandlerProps<
+	T = ExternalSourceProps[ 'args' ]
+> {
 	/*
 	 * The name of the binding source handler.
 	 */
