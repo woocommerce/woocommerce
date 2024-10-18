@@ -258,7 +258,7 @@ const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 
 	// List all pages
 	const response_list = await request.get(
-		'/wp-json/wp/v2/pages?slug=cart,checkout',
+		'./wp-json/wp/v2/pages?slug=cart,checkout',
 		{
 			data: {
 				_fields: [ 'id', 'slug' ],
@@ -274,7 +274,7 @@ const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 	const checkout = list.find( ( page ) => page.slug === 'checkout' );
 
 	// Convert their contents to shortcodes
-	await request.put( `/wp-json/wp/v2/pages/${ cart.id }`, {
+	await request.put( `./wp-json/wp/v2/pages/${ cart.id }`, {
 		data: {
 			content: {
 				raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
@@ -284,7 +284,7 @@ const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 	} );
 	console.log( 'Cart page converted to shortcode.' );
 
-	await request.put( `/wp-json/wp/v2/pages/${ checkout.id }`, {
+	await request.put( `./wp-json/wp/v2/pages/${ checkout.id }`, {
 		data: {
 			content: {
 				raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
