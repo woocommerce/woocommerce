@@ -279,7 +279,7 @@ class WC_Privacy_Exporters {
 					break;
 				case 'formatted_billing_address':
 				case 'formatted_shipping_address':
-					$value = preg_replace( '#<br\s*/?>#i', ', ', $order->{"get_$prop"}() );
+					$value = wc_get_address_plain_text( $order->{"get_$prop"}() );
 					break;
 				default:
 					if ( is_callable( array( $order, 'get_' . $prop ) ) ) {
