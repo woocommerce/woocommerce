@@ -184,7 +184,7 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox It's possible to modify the Cost of Goods Sold value that gets loaded from the database for an order item using the 'woocommerce_load_order_item_cogs_value' filter.
 	 */
-	public function loaded_cogs_value_can_be_modified_via_filter() {
+	public function test_loaded_cogs_value_can_be_modified_via_filter() {
 		$received_filter_cogs_value = null;
 		$received_filter_item       = null;
 
@@ -205,10 +205,10 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 			2
 		);
 
-		$this->assertEquals( 12.34, $received_filter_cogs_value );
-		$this->assertSame( $item, $received_filter_item );
-
 		$item2 = new WC_Order_Item_Product( $item->get_id() );
+
+		$this->assertEquals( 12.34, $received_filter_cogs_value );
+		$this->assertSame( $item2, $received_filter_item );
 
 		$this->assertEquals( 56.78, $item2->get_cogs_value() );
 	}
