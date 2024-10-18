@@ -319,17 +319,13 @@ class ProductCollection extends AbstractBlock {
 				'data-wc-init',
 				'callbacks.onRender'
 			);
-			if ( $collection ) {
-				$p->set_attribute(
-					'data-wc-context',
-					wp_json_encode(
-						array(
-							'collection' => $collection,
-						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-					)
-				);
-			}
+			$p->set_attribute(
+				'data-wc-context',
+				$collection ? wp_json_encode(
+					array( 'collection' => $collection ),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				) : '{}'
+			);
 		}
 
 		return $p->get_updated_html();
@@ -1064,7 +1060,8 @@ class ProductCollection extends AbstractBlock {
 			);
 		}
 
-		if ( 'sales' === $orderby ) {
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' === $orderby || 'popularity' === $orderby ) {
 			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
 			return array(
 				'isProductCollection' => true,
@@ -1073,8 +1070,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$meta_keys = array(
-			'popularity' => 'total_sales',
-			'rating'     => '_wc_average_rating',
+			'rating' => '_wc_average_rating',
 		);
 
 		return array(
@@ -1791,7 +1787,9 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby = $query_vars['orderby'] ?? null;
-		if ( 'sales' !== $orderby ) {
+
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' !== $orderby && 'popularity' !== $orderby ) {
 			return $clauses;
 		}
 
