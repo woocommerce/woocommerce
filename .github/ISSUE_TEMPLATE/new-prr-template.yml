@@ -24,7 +24,7 @@ body:
   - type: textarea
     id: pr-urls
     attributes:
-      label: "What PRs need to be included in the point release? (please do not enter multiple PRs)"
+      label: "Which PR need to be included in the point release? (please do not enter multiple PRs)"
       description: "Pull request URL against the release branch"
       placeholder: |
         https://github.com/woocommerce/woocommerce/pull/1234
@@ -47,7 +47,7 @@ body:
   - type: textarea
     id: plan-if-defects-discovered
     attributes:
-      label: "What is the plan should defects to be discovered in these PRs after the point release?"
+      label: "What is the plan should defects to be discovered in these PR after the point release?"
       placeholder: "Reverting this PR and ... would be enough"
     validations:
       required: true
