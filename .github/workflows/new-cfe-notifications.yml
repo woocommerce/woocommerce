@@ -39,7 +39,7 @@ jobs:
             const body = event.issue.body;
 
             // Define a regular expression to match the PR link that follows the specific question
-            const prRegex = /Which PR needs to be included\? \(please do not enter multiple PRs\)\?.*?\n(https:\/\/github\.com\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\/pull\/([0-9]+))/s;
+            const prRegex = /Which PR needs to be included\?.*?\n(https:\/\/github\.com\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\/pull\/([0-9]+))/s;
 
             // Match the body against the regex
             const match = body.match(prRegex);
