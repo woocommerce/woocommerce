@@ -200,7 +200,7 @@ jobs:
               uses: actions/github-script@v7
               with:
                   script: |
-                      let cherryPickPRBody = "This PR cherry-picks the following PRs into the frozen release branch `${needs.prep.outputs.frozenRelease}`:\n";
+                      let cherryPickPRBody = "This PR cherry-picks the following PRs into the frozen release branch:\n";
 
                       cherryPickPRBody = `${cherryPickPRBody}` + `* #${{ needs.prep.outputs.pr }}` + "\n";
 
