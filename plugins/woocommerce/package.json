@@ -628,7 +628,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"release-checks",
+						"release-checks"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e-and-api",
@@ -643,7 +643,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"release-checks",
+						"release-checks"
 					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e-and-api",
