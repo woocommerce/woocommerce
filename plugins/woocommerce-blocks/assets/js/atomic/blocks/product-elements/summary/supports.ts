@@ -1,6 +1,12 @@
 export const supports = {
 	color: {
-		background: false,
+		text: true,
+		background: true,
+		link: true,
+	},
+	spacing: {
+		margin: true,
+		padding: true,
 	},
 	typography: {
 		fontSize: true,

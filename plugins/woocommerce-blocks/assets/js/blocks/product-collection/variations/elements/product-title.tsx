@@ -23,6 +23,7 @@ const registerProductTitle = () => {
 		blockIcon: <Icon icon={ heading } />,
 		blockTitle: BLOCK_TITLE,
 		variationName: VARIATION_NAME,
+		scope: [ 'block', 'inserter' ],
 	} );
 };
 
