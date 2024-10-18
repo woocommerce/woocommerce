@@ -117,14 +117,13 @@ jobs:
           gh pr edit ${{ steps.extract-pr.outputs.PR_NUMBER }} --add-label "cherry pick to trunk" --repo $OWNER/$REPO
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ env.PR_URL }}
 
       - name: Add label 'cherry pick to frozen release' to PR
         if: contains(github.event.issue.labels.*.name, 'point release request')
         run: |
           OWNER="${{ github.event.repository.owner.login }}"
           REPO="${{ github.event.repository.name }}"
-          gh pr edit $PR_NUMBER --add-label "cherry pick to frozen release" --repo $OWNER/$REPO
+          gh pr edit ${{ steps.extract-pr.outputs.PR_NUMBER }} --add-label "cherry pick to frozen release" --repo $OWNER/$REPO
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
