@@ -537,9 +537,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						component: AssemblerHub,
 					},
 					on: {
-						GO_BACK_TO_HOME: {
-							actions: 'redirectToWooHome',
-						},
 						COMPLETE_SURVEY: {
 							actions: 'completeSurvey',
 						},

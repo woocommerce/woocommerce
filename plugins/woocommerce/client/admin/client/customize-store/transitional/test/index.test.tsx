@@ -63,7 +63,7 @@ describe( 'Transitional', () => {
 		).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole( 'link', {
 				name: /Back to Home/i,
 			} )
 		).toBeInTheDocument();
@@ -107,19 +107,16 @@ describe( 'Transitional', () => {
 		);
 	} );
 
-	it( 'should send GO_BACK_TO_HOME event when clicking on "Back to Home" button', () => {
+	it( 'should track "customize_your_store_transitional_home_click" event when clicking on "Back to Home" button', () => {
 		// @ts-ignore
 		render( <Transitional { ...props } /> );
 
 		screen
-			.getByRole( 'button', {
+			.getByRole( 'link', {
 				name: /Back to Home/i,
 			} )
 			.click();
 
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
-			type: 'GO_BACK_TO_HOME',
-		} );
 		expect( trackEvent ).toHaveBeenCalledWith(
 			'customize_your_store_transitional_home_click'
 		);
