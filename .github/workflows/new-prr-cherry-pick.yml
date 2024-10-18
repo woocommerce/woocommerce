@@ -76,6 +76,7 @@ jobs:
         needs: verify
         outputs:
             release: ${{ steps.prep-inputs.outputs.release }}
+            frozenRelease: ${{ steps.prep-inputs.outputs.frozenRelease }}
             pr: ${{ steps.prep-inputs.outputs.pr }}
             version: ${{ steps.prep-inputs.outputs.version }}
         steps:
