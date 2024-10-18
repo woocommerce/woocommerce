@@ -1,29 +1,145 @@
-@import "~/wp-admin-scripts/payment-method-promotions/payment-promotion-row.scss";
-
 .settings-payments-main__container {
-	.settings-payments-main__spinner {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		position: absolute;
-		width: 100%;
+	.settings-payment-gateways {
+		&__header-title {
+			font-size: 16px;
+			font-weight: 600;
+			line-height: 24px;
+		}
+
+		&__header-select-container {
+			.components-input-control__prefix {
+				min-width: fit-content;
+				padding-left: 12px;
+				color: $gray-700;
+			}
+		}
+
+		// Override styles for woocommerce list items.
+		.woocommerce-list {
+			&__item {
+				&:hover {
+					background-color: $white;
+
+					.woocommerce-list__item-title {
+						color: $gray-900;
+					}
+				}
+			}
+
+			&__item-inner {
+				align-items: flex-start;
+				padding: 24px;
+			}
+
+			&__item-title {
+				font-size: 14px;
+				color: $gray-900;
+				font-weight: 600;
+				display: inline-flex;
+				gap: 10px;
+				align-items: center;
+			}
+
+			&__item-after {
+				&__actions {
+					display: flex;
+					gap: 16px;
+				}
+			}
+
+			&__item-before {
+				img {
+					max-width: 96px;
+					height: 36px;
+					border-radius: 8px;
+				}
+			}
+		}
 	}
 
+	.other-payment-gateways {
+		margin-top: 32px;
 
-	table.wc_gateways {
-		.other-payment-methods__button-text {
+		&__button-text {
 			margin-right: 4px;
 		}
 
-		td.other-payment-methods-row {
-			border-top: 1px solid #c3c4c7;
-			background-color: #fff;
-
-		}
-
-		.other-payment-methods__image {
+		&__image {
 			vertical-align: middle;
 			margin-right: 8px;
+		}
+
+		&__grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr); /* 3 columns */
+			gap: 16px; /* Space between columns */
+			padding: 16px 0;
+		}
+
+		&__grid-item {
+			display: flex; /* Use Flexbox to align image and content */
+			align-items: flex-start; /* Align items to the top */
+			padding: 16px 0;
+
+			img {
+				width: 40px;
+				height: 40px;
+				margin-right: 20px; /* Space between image and text */
+			}
+
+			&__content {
+				display: flex;
+				flex-direction: column; /* Stack title, description, and button vertically */
+				gap: 4px;
+
+				&__title {
+					display: block;
+					font-size: 14px;
+					font-weight: 600;
+					line-height: 20px;
+				}
+
+				&__description {
+					display: block;
+					font-size: 13px;
+					font-weight: 400;
+					line-height: 20px;
+					color: $gray-700;
+				}
+
+				&__actions {
+					display: flex;
+					gap: 8px; /* Space between buttons */
+					padding-top: 4px; /* Space between description and buttons */
+					button {
+						align-self: flex-start; /* Align button to the left */
+					}
+				}
+			}
+		}
+
+		.components-panel__body.is-opened {
+			padding: $gap-large;
+
+			h2 {
+				margin: -24px -24px 5px;
+			}
+		}
+
+		button.components-panel__body-toggle {
+			font-size: 16px;
+			font-weight: 600;
+			line-height: 24px;
+			padding: $gap $gap-large !important;
+
+			&:focus {
+				box-shadow: none !important;
+			}
+
+			&:hover {
+				background: #fff !important;
+				box-shadow: none !important;
+			}
 		}
 	}
 }
