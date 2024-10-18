@@ -106,3 +106,22 @@ __experimentalRegisterProductCollection( {
 	description: 'This is a custom collection with multiple contexts.',
 	usesReference: [ 'product', 'order' ],
 } );
+
+/**
+ * Scope argument
+ */
+// Collection with only `inserter` scope
+__experimentalRegisterProductCollection( {
+	name: 'woocommerce/product-collection/my-custom-collection-with-inserter-scope',
+	title: 'My Custom Collection - With Inserter Scope',
+	description: 'This is a custom collection with only inserter scope.',
+	scope: [ 'inserter' ],
+} );
+
+// Collection with only `block` scope
+__experimentalRegisterProductCollection( {
+	name: 'woocommerce/product-collection/my-custom-collection-with-block-scope',
+	title: 'My Custom Collection - With Block Scope',
+	description: 'This is a custom collection with only block scope.',
+	scope: [ 'block' ],
+} );

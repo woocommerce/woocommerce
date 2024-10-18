@@ -17,7 +17,7 @@ const collection = {
 	icon: <Icon icon={ chartBar } />,
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
 	keywords: [ 'best selling', 'product collection' ],
-	scope: [],
+	scope: [ 'block' ],
 };
 
 const attributes = {
