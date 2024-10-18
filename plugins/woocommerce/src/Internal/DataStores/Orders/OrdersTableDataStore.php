@@ -1271,12 +1271,22 @@ WHERE
 	 *
 	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
 	 */
-	private function read_cogs_data( \WC_Abstract_Order $order ) {
-		$meta_entry = current( $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' ) );
-		if ( $meta_entry ) {
-			$order->set_cogs_total_value( (float) $meta_entry->meta_value );
-			$order->apply_changes();
-		}
+	private function read_cogs_data( WC_Abstract_Order $order ) {
+		$meta_entry = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+		$cogs_value = false === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float $cogs_value The value as read from the database.
+		 * @param WC_Abstract_Order $product The order for which the value is being loaded.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_load_order_cogs_value', $cogs_value, $order );
+
+		$order->set_cogs_total_value( (float) $cogs_value );
+		$order->apply_changes();
 	}
 
 	/**
@@ -1931,17 +1941,34 @@ FROM $order_meta_table
 	/**
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
-	 * @param \WC_Abstract_Order $order The order to save the COGS value for.
+	 * @param WC_Abstract_Order $order The order to save the COGS value for.
 	 */
-	private function save_cogs_data( \WC_Abstract_Order $order ) {
-		$cogs_value    = $order->get_cogs_total_value();
-		$existing_meta = current( $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' ) );
+	private function save_cogs_data( WC_Abstract_Order $order ) {
+		$cogs_value = $order->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
+		 * or to suppress the saving of the value (so that custom storage can be used).
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
+		if ( is_null( $cogs_value ) ) {
+			return;
+		}
+
+		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
 
 		if ( 0.0 === $cogs_value ) {
 			if ( $existing_meta ) {
+				$existing_meta = current( $existing_meta );
 				$this->data_store_meta->delete_meta( $order, $existing_meta );
 			}
 		} elseif ( $existing_meta ) {
+				$existing_meta        = current( $existing_meta );
 				$existing_meta->key   = '_cogs_total_value';
 				$existing_meta->value = $cogs_value;
 				$this->data_store_meta->update_meta( $order, $existing_meta );

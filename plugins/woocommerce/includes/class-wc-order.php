@@ -90,8 +90,6 @@ class WC_Order extends WC_Abstract_Order {
 		'new_order_email_sent'         => false,
 		'recorded_sales'               => false,
 		'recorded_coupon_usage_counts' => false,
-
-		'cogs_total_value'             => 0,
 	);
 
 	/**

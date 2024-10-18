@@ -114,6 +114,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  int|object|WC_Order $order Order to read.
 	 */
 	public function __construct( $order = 0 ) {
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->data['cogs_total_value'] = 0;
+		}
+
 		parent::__construct( $order );
 
 		if ( is_numeric( $order ) && $order > 0 ) {
@@ -2516,7 +2520,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float The current value for this order.
 	 */
 	public function get_cogs_total_value() {
-		return (float) ( $this->has_cogs() && $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ? $this->get_prop( 'cogs_total_value' ) : 0 );
+		return (float) ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ? $this->get_prop( 'cogs_total_value' ) : 0 );
 	}
 
 	/**
@@ -2529,7 +2533,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @internal This method is intended for data store usage only, the value set here will be overridden by calculate_cogs_total_value.
 	 */
 	public function set_cogs_total_value( float $value ) {
-		if ( $this->has_cogs() && $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ) {
+		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
 			$this->set_prop( 'cogs_total_value', $value );
 		}
 	}
