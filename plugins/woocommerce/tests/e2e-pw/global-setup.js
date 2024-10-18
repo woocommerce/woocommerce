@@ -60,11 +60,11 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `/wp-admin` );
+			await adminPage.goto( `./wp-admin` );
 			await logIn( adminPage, admin.username, admin.password, false );
 			// eslint-disable-next-line playwright/no-networkidle
 			await adminPage.waitForLoadState( 'networkidle' );
-			await adminPage.goto( `/wp-admin` );
+			await adminPage.goto( `./wp-admin` );
 			await expect(
 				adminPage.getByRole( 'heading', { name: 'Dashboard' } )
 			).toBeVisible();
@@ -100,7 +100,7 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to add consumer token...' );
 			await adminPage.goto(
-				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
+				`./wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
 			await adminPage
 				.locator( '#key_description' )
@@ -146,7 +146,7 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/my-account` );
+			await customerPage.goto( `./my-account` );
 			await logIn(
 				customerPage,
 				customer.username,

@@ -19,7 +19,7 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < keysRetries; i++ ) {
 		try {
 			console.log( 'Trying to clear consumer token... Try:' + i );
-			await adminPage.goto( `/wp-admin` );
+			await adminPage.goto( `./wp-admin` );
 			await adminPage
 				.locator( 'input[name="log"]' )
 				.fill( admin.username );
@@ -30,7 +30,7 @@ module.exports = async ( config ) => {
 			// eslint-disable-next-line playwright/no-networkidle
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto(
-				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
+				`./wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);
 			await adminPage
 				.getByRole( 'link', { name: 'Revoke', includeHidden: true } )
@@ -42,7 +42,7 @@ module.exports = async ( config ) => {
 			console.log( 'Clearing pages...' );
 			// clear pages created
 			await adminPage.goto(
-				'/wp-admin/edit.php?s=page-&post_status=all&post_type=page'
+				'./wp-admin/edit.php?s=page-&post_status=all&post_type=page'
 			);
 			if ( ! adminPage.getByText( 'No pages found.' ) ) {
 				await adminPage.locator( '#cb-select-all-1' ).check();
@@ -54,7 +54,7 @@ module.exports = async ( config ) => {
 
 			// clear mini cart pages
 			await adminPage.goto(
-				'/wp-admin/edit.php?s=Mini+Cart&post_status=all&post_type=page'
+				'./wp-admin/edit.php?s=Mini+Cart&post_status=all&post_type=page'
 			);
 			if ( ! adminPage.getByText( 'No pages found.' ) ) {
 				await adminPage.locator( '#cb-select-all-1' ).check();
@@ -66,7 +66,7 @@ module.exports = async ( config ) => {
 
 			// clear product showcase pages
 			await adminPage.goto(
-				'/wp-admin/edit.php?s=Product+Showcase&post_status=all&post_type=page'
+				'./wp-admin/edit.php?s=Product+Showcase&post_status=all&post_type=page'
 			);
 			if ( ! adminPage.getByText( 'No pages found.' ) ) {
 				await adminPage.locator( '#cb-select-all-1' ).check();
@@ -79,7 +79,7 @@ module.exports = async ( config ) => {
 			console.log( 'Clearing posts...' );
 			// clear posts
 			await adminPage.goto(
-				'/wp-admin/edit.php?s=Post-&post_status=all&post_type=post'
+				'./wp-admin/edit.php?s=Post-&post_status=all&post_type=post'
 			);
 			if ( ! adminPage.getByText( 'No posts found.' ) ) {
 				await adminPage.locator( '#cb-select-all-1' ).check();
