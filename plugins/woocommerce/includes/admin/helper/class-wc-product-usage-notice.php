@@ -69,10 +69,6 @@ class WC_Product_Usage_Notice {
 	 * @return void
 	 */
 	public static function load() {
-		add_action( 'current_screen', array( __CLASS__, 'maybe_show_product_usage_notice' ) );
-
-		add_action( 'wp_ajax_woocommerce_dismiss_product_usage_notice', array( __CLASS__, 'ajax_dismiss' ) );
-		add_action( 'wp_ajax_woocommerce_remind_later_product_usage_notice', array( __CLASS__, 'ajax_remind_later' ) );
 	}
 
 	/**
