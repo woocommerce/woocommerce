@@ -29,11 +29,10 @@ class CartControllerTests extends TestCase {
 		$product_key = wc()->cart->add_to_cart( $product->get_id(), 5 );
 		add_filter(
 			'woocommerce_store_api_product_quantity_maximum',
-			function ( $value, $product, $cart_item ) {
+			function () {
 				return 2;
 			},
-			10,
-			3
+			10
 		);
 		$class->normalize_cart();
 		$this->assertEquals( 2, wc()->cart->get_cart_item( $product_key )['quantity'] );
@@ -44,11 +43,10 @@ class CartControllerTests extends TestCase {
 		$product_key = wc()->cart->add_to_cart( $product->get_id(), 1 );
 		add_filter(
 			'woocommerce_store_api_product_quantity_minimum',
-			function ( $value, $product, $cart_item ) {
+			function () {
 				return 5;
 			},
-			10,
-			3
+			10
 		);
 		$class->normalize_cart();
 		$this->assertEquals( 5, wc()->cart->get_cart_item( $product_key )['quantity'] );
@@ -59,11 +57,10 @@ class CartControllerTests extends TestCase {
 		$product_key = wc()->cart->add_to_cart( $product->get_id(), 7 );
 		add_filter(
 			'woocommerce_store_api_product_quantity_multiple_of',
-			function ( $value, $product, $cart_item ) {
+			function () {
 				return 3;
 			},
-			10,
-			3
+			10
 		);
 		$class->normalize_cart();
 		$this->assertEquals( 6, wc()->cart->get_cart_item( $product_key )['quantity'] );
