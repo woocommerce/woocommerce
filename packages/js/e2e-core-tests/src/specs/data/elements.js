@@ -14,21 +14,21 @@ export const MENUS = [
 				'Orders',
 			],
 			[
-				'Reports',
-				'#toplevel_page_woocommerce > ul > li:nth-child(6) > a',
-				'Orders',
-			],
-			[
 				'Settings',
-				'#toplevel_page_woocommerce > ul > li:nth-child(7) > a',
+				'#toplevel_page_woocommerce > ul > li:nth-child(6) > a',
 				'General',
 			],
 			[
 				'Status',
-				'#toplevel_page_woocommerce > ul > li:nth-child(8) > a',
+				'#toplevel_page_woocommerce > ul > li:nth-child(7) > a',
 				'System status',
 			],
-			// [ 'Extensions', '#toplevel_page_woocommerce > ul > li:nth-child(9)', 'Extensions' ],
+			// [ 'Extensions', '#toplevel_page_woocommerce > ul > li:nth-child(8)', 'Extensions' ],
+			[
+				'Reports',
+				'#toplevel_page_woocommerce > ul > li:last-child > a',
+				'Orders',
+			],
 		],
 	],
 	[

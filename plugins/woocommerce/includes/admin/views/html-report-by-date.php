@@ -2,6 +2,7 @@
 /**
  * Admin View: Report by Date (with date filters)
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Admin\Reporting
  */
 

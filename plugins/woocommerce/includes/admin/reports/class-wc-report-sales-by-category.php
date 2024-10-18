@@ -2,6 +2,7 @@
 /**
  * Sales by category report functionality
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Admin\Reporting
  */
 
@@ -12,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Sales_By_Category
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -20,6 +22,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Chart colors.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $chart_colours = array();
@@ -27,6 +30,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Categories ids.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $show_categories = array();
@@ -34,6 +38,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Item sales.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	private $item_sales = array();
@@ -41,14 +46,19 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Item sales and times.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	private $item_sales_and_times = array();
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
+
 		if ( isset( $_GET['show_categories'] ) ) {
 			$this->show_categories = is_array( $_GET['show_categories'] ) ? array_map( 'absint', $_GET['show_categories'] ) : array( absint( $_GET['show_categories'] ) );
 		}
@@ -57,6 +67,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Get all product ids in a category (and its children).
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param  int $category_id Category ID.
 	 * @return array
 	 */
@@ -65,12 +76,21 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		$term_ids[]  = $category_id;
 		$product_ids = get_objects_in_term( $term_ids, 'product_cat' );
 
-		return array_unique( apply_filters( 'woocommerce_report_sales_by_category_get_products_in_category', $product_ids, $category_id ) );
+		return array_unique(
+			apply_filters_deprecated(
+				'woocommerce_report_sales_by_category_get_products_in_category',
+				array( $product_ids, $category_id ),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+			)
+		);
 	}
 
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -110,6 +130,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -190,6 +212,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Get chart widgets.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -204,6 +227,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
 	 * Output category widget.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function category_widget() {
 
@@ -259,6 +284,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
 	 * Output an export link.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {
 
@@ -279,6 +306,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {
 		global $wp_locale;

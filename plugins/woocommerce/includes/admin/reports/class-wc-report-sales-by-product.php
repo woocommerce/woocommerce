@@ -2,6 +2,7 @@
 /**
  * Sales By Product Reporting
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Admin\Reporting
  */
 
@@ -12,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Sales_By_Product
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -20,6 +22,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	/**
 	 * Chart colors.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $chart_colours = array();
@@ -27,6 +30,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	/**
 	 * Product ids.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $product_ids = array();
@@ -34,14 +38,19 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	/**
 	 * Product ids with titles.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $product_ids_titles = array();
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
+
 		// @codingStandardsIgnoreStart
 		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) ) {
 			$this->product_ids = array_filter( array_map( 'absint', $_GET['product_ids'] ) );
@@ -54,6 +63,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -135,6 +145,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -165,6 +177,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	/**
 	 * Get chart widgets.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -188,6 +201,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Output current filters.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function current_filters() {
 
@@ -210,6 +225,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Output products widget.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function products_widget() {
 		?>
@@ -398,6 +415,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Output an export link.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {
 
@@ -418,6 +437,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {
 		global $wp_locale;
