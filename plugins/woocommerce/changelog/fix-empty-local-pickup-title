@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed a bug where the Local Pickup title in the Shipping Method block would not save correctly if it was the same as the default "Pickup"
