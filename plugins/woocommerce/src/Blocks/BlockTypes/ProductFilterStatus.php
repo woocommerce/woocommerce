@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
@@ -8,16 +9,16 @@ use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
 /**
- * Product Filter: Stock Status Block.
+ * Product Filter: Status Block.
  */
-final class ProductFilterStockStatus extends AbstractBlock {
+final class ProductFilterStatus extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-stock-status';
+	protected $block_name = 'product-filter-status';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 
@@ -94,7 +95,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		);
 
 		$data['stock'] = array(
-			'type'  => __( 'Stock Status', 'woocommerce' ),
+			'type'  => __( 'Status', 'woocommerce' ),
 			'items' => $active_stock_statuses,
 		);
 
@@ -197,10 +198,12 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		<div data-wc-interactive='<?php echo esc_attr( $data_directive ); ?>'>
 			<?php if ( 'list' === $display_style ) { ?>
 				<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CheckboxList::render() escapes output.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo CheckboxList::render(
 					array(
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'items'     => $list_items,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
 					)
 				);
@@ -212,10 +215,15 @@ final class ProductFilterStockStatus extends AbstractBlock {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo Dropdown::render(
 					array(
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'items'          => $list_items,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'selected_items' => $selected_items,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'select_type'    => $select_type,
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 						'placeholder'    => $placeholder_text,
 					)
 				);
@@ -228,7 +236,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	}
 
 	/**
-	 * Retrieve the stock status filter data for current block.
+	 * Retrieve the status filter data for current block.
 	 *
 	 * @param WP_Block $block Block instance.
 	 */
