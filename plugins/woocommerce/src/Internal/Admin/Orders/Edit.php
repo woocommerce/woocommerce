@@ -180,6 +180,7 @@ class Edit {
 	/**
 	 * Set the current action for the form.
 	 *
+	 * @param string $action Action name.
 	 */
 	public function set_current_action( string $action ) {
 		$this->current_action = $action;
