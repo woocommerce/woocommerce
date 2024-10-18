@@ -15,7 +15,7 @@
 	],
 	"supports": {},
 	"usesContext": [
-		"filterData"
+		"queryId"
 	],
 	"attributes": {
 		"chipText":{
@@ -34,24 +34,6 @@
 			"type": "string"
 		},
 		"customChipBorder":{
-			"type": "string"
-		},
-		"selectedChipText":{
-			"type": "string"
-		},
-		"customSelectedChipText":{
-			"type": "string"
-		},
-		"selectedChipBackground":{
-			"type": "string"
-		},
-		"customSelectedChipBackground":{
-			"type": "string"
-		},
-		"selectedChipBorder":{
-			"type": "string"
-		},
-		"customSelectedChipBorder":{
 			"type": "string"
 		}
 	}

@@ -12,7 +12,8 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [
-		"woocommerce/product-filter"
+		"woocommerce/product-filter",
+		"woocommerce/product-filter-active"
 	],
 	"supports": {
 		"interactivity": true,

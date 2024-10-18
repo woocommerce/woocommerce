@@ -10,7 +10,7 @@ import { ProductFiltersContext } from '../../frontend';
 
 store( 'woocommerce/product-filter-active', {
 	actions: {
-		clearAll: () => {
+		clearFilters: () => {
 			const productFiltersContext = getContext< ProductFiltersContext >(
 				'woocommerce/product-filters'
 			);

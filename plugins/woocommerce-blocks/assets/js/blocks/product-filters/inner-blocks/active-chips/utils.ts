@@ -15,19 +15,16 @@ export function getColorVars( attributes: BlockAttributes ) {
 		chipText,
 		chipBackground,
 		chipBorder,
-		selectedChipText,
-		selectedChipBackground,
-		selectedChipBorder,
 		customChipText,
 		customChipBackground,
 		customChipBorder,
-		customSelectedChipText,
-		customSelectedChipBackground,
-		customSelectedChipBorder,
 	} = attributes;
 
 	const vars: Record< string, string > = {
-		'--wc-product-filter-active-chips-text': getCSSVar( chipText, customChipText ),
+		'--wc-product-filter-active-chips-text': getCSSVar(
+			chipText,
+			customChipText
+		),
 		'--wc-product-filter-active-chips-background': getCSSVar(
 			chipBackground,
 			customChipBackground
@@ -35,18 +32,6 @@ export function getColorVars( attributes: BlockAttributes ) {
 		'--wc-product-filter-active-chips-border': getCSSVar(
 			chipBorder,
 			customChipBorder
-		),
-		'--wc-product-filter-active-chips-selected-text': getCSSVar(
-			selectedChipText,
-			customSelectedChipText
-		),
-		'--wc-product-filter-active-chips-selected-background': getCSSVar(
-			selectedChipBackground,
-			customSelectedChipBackground
-		),
-		'--wc-product-filter-active-chips-selected-border': getCSSVar(
-			selectedChipBorder,
-			customSelectedChipBorder
 		),
 	};
 
@@ -66,26 +51,14 @@ export function getColorClasses( attributes: BlockAttributes ) {
 		chipText,
 		chipBackground,
 		chipBorder,
-		selectedChipText,
-		selectedChipBackground,
-		selectedChipBorder,
 		customChipText,
 		customChipBackground,
 		customChipBorder,
-		customSelectedChipText,
-		customSelectedChipBackground,
-		customSelectedChipBorder,
 	} = attributes;
 
 	return {
 		'has-chip-text-color': chipText || customChipText,
 		'has-chip-background-color': chipBackground || customChipBackground,
 		'has-chip-border-color': chipBorder || customChipBorder,
-		'has-selected-chip-text-color':
-			selectedChipText || customSelectedChipText,
-		'has-selected-chip-background-color':
-			selectedChipBackground || customSelectedChipBackground,
-		'has-selected-chip-border-color':
-			selectedChipBorder || customSelectedChipBorder,
 	};
 }

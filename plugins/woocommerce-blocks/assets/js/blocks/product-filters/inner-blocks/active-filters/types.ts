@@ -4,7 +4,7 @@
 import { BlockEditProps } from '@wordpress/blocks';
 
 export type BlockAttributes = {
-	displayStyle: string;
+	clearButton: boolean;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

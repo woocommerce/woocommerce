@@ -7,16 +7,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { EditProps } from './types';
-import { Inspector } from './components/inspector';
+import { Inspector } from './inspector';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { getAllowedBlocks } from '../../utils';
+import { EditProps } from './types';
 
 const Edit = ( props: EditProps ) => {
-	const { attributes: blockAttributes } = props;
-
-	const { displayStyle } = blockAttributes;
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
@@ -58,7 +55,7 @@ const Edit = ( props: EditProps ) => {
 					],
 				],
 				[
-					displayStyle,
+					'woocommerce/product-filter-active-chips',
 					{
 						lock: {
 							remove: true,

@@ -10,11 +10,12 @@ import { productFilterActive } from '@woocommerce/icons';
  */
 import metadata from './block.json';
 import Edit from './edit';
-import './style.scss';
+import Save from './save';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		icon: productFilterActive,
 		edit: Edit,
+		save: Save,
 	} );
 }

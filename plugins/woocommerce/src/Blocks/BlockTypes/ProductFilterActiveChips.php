@@ -24,16 +24,34 @@ final class ProductFilterActiveChips extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( empty( $block->context['filterData'] ) || empty( $block->context['filterData']['items'] ) ) {
-			return '';
-		}
-		$classes               = '';
-		$style                 = '';
-		$context               = $block->context['filterData'];
-		$items                 = $context['items'] ?? array();
-		$checkbox_list_context = array( 'items' => $items );
-		$action                = $context['actions']['toggleFilter'] ?? '';
-		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-active-chips' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+		$query_id = $block->context['queryId'] ?? 0;
+
+		/**
+		 * Filters the active filter data provided by filter blocks.
+		 *
+		 * $data = array(
+		 *     <id> => array(
+		 *         'type' => string,
+		 *         'items' => array(
+		 *             array(
+		 *                 'title' => string,
+		 *                 'attributes' => array(
+		 *                     <key> => string
+		 *                 )
+		 *             )
+		 *         )
+		 *     ),
+		 * );
+		 *
+		 * @since 11.7.0
+		 *
+		 * @param array $data   The active filters data
+		 * @param array $params The query param parsed from the URL.
+		 * @return array Active filters data.
+		 */
+		$active_filters = apply_filters( 'collection_active_filters_data', array(), $this->get_filter_query_params( $query_id ) );
+
+		$style = '';
 
 		$tags = new \WP_HTML_Tag_Processor( $content );
 		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-active-chips' ) ) ) {
@@ -41,66 +59,124 @@ final class ProductFilterActiveChips extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$checked_items               = array_filter(
-			$items,
-			function ( $item ) {
-				return $item['selected'];
-			}
-		);
-		$show_initially              = $context['show_initially'] ?? 15;
-		$remaining_initial_unchecked = count( $checked_items ) > $show_initially ? count( $checked_items ) : $show_initially - count( $checked_items );
-		$count                       = 0;
-
-		$wrapper_attributes = array(
-			'data-wc-interactive' => esc_attr( $namespace ),
-			'data-wc-context'     => wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'class'               => esc_attr( $classes ),
-			'style'               => esc_attr( $style ),
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+				'data-wc-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'class'               => esc_attr( $classes ),
+				'style'               => esc_attr( $style ),
+			)
 		);
 
 		ob_start();
 		?>
-		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="wc-block-product-filter-active-chips__items" aria-label="<?php echo esc_attr__( 'Filter Options', 'woocommerce' ); ?>">
-				<?php foreach ( $items as $item ) { ?>
-					<?php $item['id'] = $item['id'] ?? uniqid( 'chips-' ); ?>
-					<button
-						data-wc-key="<?php echo esc_attr( $item['id'] ); ?>"
-						<?php
-						if ( ! $item['selected'] ) :
-							if ( $count >= $remaining_initial_unchecked ) :
-								?>
-								class="wc-block-product-filter-active-chips__item"
-								data-wc-bind--hidden="!context.showAll"
-								hidden
-							<?php else : ?>
-								<?php ++$count; ?>
-							<?php endif; ?>
-						<?php endif; ?>
-						class="wc-block-product-filter-active-chips__item"
-						data-wc-on--click--select-item="actions.selectItem"
-						data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
-						value="<?php echo esc_attr( $item['value'] ); ?>"
-						aria-checked="<?php echo $item['selected'] ? 'true' : 'false'; ?>"
-					>
-						<span class="wc-block-product-filter-active-chips__label">
-							<?php echo wp_kses_post( $item['label'] ); ?>
-						</span>
-					</button>
-				<?php } ?>
-			</div>
-			<?php if ( count( $items ) > $show_initially ) : ?>
-				<button
-					class="wc-block-product-filter-active-chips__show-more"
-					data-wc-bind--hidden="context.showAll"
-					data-wc-on--click="actions.showAllItems"
-					hidden
-				>
-					<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
-				</button>
+
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<?php if ( ! empty( $active_filters ) ) : ?>
+				<ul class="wc-block-product-filter-active-chips__items">
+					<?php foreach ( $active_filters as $filter ) : ?>
+						<?php foreach ( $filter['items'] as $item ) : ?>
+							<?php $this->render_chip_item( $filter['type'], $item ); ?>
+						<?php endforeach; ?>
+					<?php endforeach; ?>
+				</ul>
 			<?php endif; ?>
 		</div>
+
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Render the chip item of an active filter.
+	 *
+	 * @param string $type Filter type.
+	 * @param array $item Item data.
+	 * @return string Item HTML.
+	 */
+	private function render_chip_item( $type, $item ) {
+		list ( 'title' => $title, 'attributes' => $attributes ) = wp_parse_args(
+			$item,
+			array(
+				'title'      => '',
+				'attributes' => array(),
+			)
+		);
+
+		if ( ! $title || empty( $attributes ) ) {
+			return;
+		}
+
+		$remove_label = sprintf( 'Remove %s filter', wp_strip_all_tags( $title ) );
+		?>
+		<li class="wc-block-product-filter-active-chips__item">
+			<span class="wc-block-product-filter-active-chips__label">
+				<?php printf( '%s: %s', esc_html( $type ), wp_kses_post( $title ) ); ?>
+			</span>
+			<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<button class="wc-block-product-filter-active-chips__remove" aria-label="<?php echo esc_attr( $remove_label ); ?>" <?php echo $this->get_html_attributes( $attributes ); ?>>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" class="wc-block-product-filter-active-chips__remove-icon" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path></svg>
+				<span class="screen-reader-text"><?php echo esc_attr( $remove_label ); ?></span>
+			</button>
+		</li>
+		<?php
+	}
+
+	/**
+	 * Build HTML attributes string from assoc array.
+	 *
+	 * @param array $attributes Attributes data as an assoc array.
+	 * @return string Escaped HTML attributes string.
+	 */
+	private function get_html_attributes( $attributes ) {
+		return array_reduce(
+			array_keys( $attributes ),
+			function ( $acc, $key ) use ( $attributes ) {
+				$acc .= sprintf( ' %1$s="%2$s"', esc_attr( $key ), esc_attr( $attributes[ $key ] ) );
+				return $acc;
+			},
+			''
+		);
+	}
+
+	/**
+	 * Parse the filter parameters from the URL.
+	 * For now we only get the global query params from the URL. In the future,
+	 * we should get the query params based on $query_id.
+	 *
+	 * @param int $query_id Query ID.
+	 * @return array Parsed filter params.
+	 */
+	private function get_filter_query_params( $query_id ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+
+		$parsed_url = wp_parse_url( esc_url_raw( $request_uri ) );
+
+		if ( empty( $parsed_url['query'] ) ) {
+			return array();
+		}
+
+		parse_str( $parsed_url['query'], $url_query_params );
+
+		/**
+		 * Filters the active filter data provided by filter blocks.
+		 *
+		 * @since 11.7.0
+		 *
+		 * @param array $filter_param_keys The active filters data
+		 * @param array $url_param_keys    The query param parsed from the URL.
+		 *
+		 * @return array Active filters params.
+		 */
+		$filter_param_keys = array_unique( apply_filters( 'collection_filter_query_param_keys', array(), array_keys( $url_query_params ) ) );
+
+		return array_filter(
+			$url_query_params,
+			function ( $key ) use ( $filter_param_keys ) {
+				return in_array( $key, $filter_param_keys, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
 	}
 }
