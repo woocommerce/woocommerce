@@ -1,5 +1,21 @@
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+#wpcontent {
+	background-color: white;
+}
+
 .settings-payments-main__container {
+	margin: 0 -20px;
+	padding-bottom: 32px;
+	font-family: $font-sf-pro-display;
 	.settings-payment-gateways {
+		&__header {
+			display: flex;
+			justify-content: space-between;
+			padding: 24px 48px;
+			align-items: center;
+		}
+
 		&__header-title {
 			font-size: 16px;
 			font-weight: 600;
@@ -12,11 +28,20 @@
 				padding-left: 12px;
 				color: $gray-700;
 			}
+			.components-select-control__input {
+				min-height: 32px;
+			}
+			.components-base-control__field {
+				margin-bottom: 0;
+			}
 		}
 
 		// Override styles for woocommerce list items.
 		.woocommerce-list {
+			border-top: 1px solid #f0f0f0;
+			border-bottom: 1px solid #f0f0f0;
 			&__item {
+				padding: 0 48px;
 				&:hover {
 					background-color: $white;
 
@@ -28,16 +53,24 @@
 
 			&__item-inner {
 				align-items: flex-start;
-				padding: 24px;
+				padding: 24px 0;
 			}
 
 			&__item-title {
-				font-size: 14px;
+				font-size: 16px;
+				line-height: 24px;
 				color: $gray-900;
 				font-weight: 600;
 				display: inline-flex;
 				gap: 10px;
 				align-items: center;
+			}
+
+			&__item-content {
+				font-size: 13px;
+				font-weight: 400;
+				line-height: 20px;
+				color: $gray-700;
 			}
 
 			&__item-after {
@@ -50,15 +83,26 @@
 			&__item-before {
 				img {
 					max-width: 96px;
-					height: 36px;
-					border-radius: 8px;
+					height: 40px;
+					border-radius: 4px;
 				}
 			}
 		}
 	}
 
 	.other-payment-gateways {
-		margin-top: 32px;
+		margin: 32px 48px 0 48px;
+
+		// Override style for external link.
+		.components-external-link {
+			display: flex;
+			justify-content: flex-end;
+			flex-direction: row-reverse;
+			gap: 4px;
+			&__contents {
+				text-decoration: none;
+			}
+		}
 
 		&__button-text {
 			margin-right: 4px;

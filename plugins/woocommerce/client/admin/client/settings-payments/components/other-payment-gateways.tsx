@@ -169,7 +169,7 @@ export const OtherPaymentGateways = () => {
 
 	return (
 		<Panel className="other-payment-gateways">
-			<PanelBody title="Other payment providers">
+			<PanelBody title={ __( 'Other payment options', 'woocommerce' ) }>
 				<div className="other-payment-gateways__grid">
 					{ mockOtherPaymentGateways.map(
 						( gateway: PaymentGateway ) => (
