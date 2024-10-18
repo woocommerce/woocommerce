@@ -1,0 +1,26 @@
+query {
+	order(id: 1234) {
+		id
+		total_amount(decimals: 4)
+		date_created
+		applied_coupons {
+		    amount(decimals: 4)
+		    type
+		}
+		lines(first: 200) {
+		    edges {
+		        cursor
+		        nodes {
+		            id
+		            name
+		            quantity
+		            line_amount
+		        }
+		    }
+		    pageInfo {
+			    hasNextPage
+		    }
+		}
+		customer_ip_address
+	}
+}
