@@ -233,12 +233,12 @@ class WC_Structured_Data {
 						'@type'              => 'Offer',
 						'priceSpecification' => array(
 							array(
-								'@type'					=> "UnitPriceSpecification",
-								'priceType'				=> "https://schema.org/ListPrice",
+								'@type'                 => 'UnitPriceSpecification',
+								'priceType'             => 'https://schema.org/ListPrice',
 								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
 								'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-								'validThrough'			=> $price_valid_until,
+								'validThrough'          => $price_valid_until,
 							),
 						),
 					);
@@ -257,10 +257,10 @@ class WC_Structured_Data {
 
 				foreach ( $children as $child ) {
 					if ( '' !== $child->get_regular_price() ) {
-						$child_prices[] = $price_function( $child, [ 'price' => $child->get_regular_price() ] );
+						$child_prices[] = $price_function( $child, array( 'price' => $child->get_regular_price() ) );
 					}
 					if ( '' !== $child->get_sale_price() ) {
-						$child_sale_prices[] = $price_function( $child, [ 'price' => $child->get_sale_price() ] );
+						$child_sale_prices[] = $price_function( $child, array( 'price' => $child->get_sale_price() ) );
 					}
 				}
 				if ( empty( $child_prices ) ) {
@@ -278,28 +278,28 @@ class WC_Structured_Data {
 					'@type'              => 'Offer',
 					'priceSpecification' => array(
 						array(
-							'@type'					=> "UnitPriceSpecification",
-							'priceType'				=> "https://schema.org/ListPrice",
+							'@type'                 => 'UnitPriceSpecification',
+							'priceType'             => 'https://schema.org/ListPrice',
 							'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
 							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-							'validThrough'			=> $price_valid_until,
+							'validThrough'          => $price_valid_until,
 						),
 					),
 				);
 
-				if ($product->is_on_sale()) {
+				if ( $product->is_on_sale() ) {
 					if ( $product->get_date_on_sale_to() ) {
 						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
 					}
 
 					$markup_offer['priceSpecification'][] = array(
-						'@type'					=> "UnitPriceSpecification",
-						'priceType'				=> "https://schema.org/SalePrice",
+						'@type'                 => 'UnitPriceSpecification',
+						'priceType'             => 'https://schema.org/SalePrice',
 						'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
 						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-						'validThrough'			=> !empty($sale_price_valid_until) ? $sale_price_valid_until : $price_valid_until
+						'validThrough'          => ! empty( $sale_price_valid_until ) ? $sale_price_valid_until : $price_valid_until,
 					);
 				}
 			} else {
@@ -307,28 +307,28 @@ class WC_Structured_Data {
 					'@type'              => 'Offer',
 					'priceSpecification' => array(
 						array(
-							'@type'					=> "UnitPriceSpecification",
-							'priceType'				=> "https://schema.org/ListPrice",
+							'@type'                 => 'UnitPriceSpecification',
+							'priceType'             => 'https://schema.org/ListPrice',
 							'price'                 => wc_format_decimal( $product->get_regular_price(), wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
 							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-							'validThrough'			=> $price_valid_until,
+							'validThrough'          => $price_valid_until,
 						),
 					),
 				);
 
-				if ($product->is_on_sale()) {
-					if ($product->get_date_on_sale_to() ) {
+				if ( $product->is_on_sale() ) {
+					if ( $product->get_date_on_sale_to() ) {
 						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
 					}
 
 					$markup_offer['priceSpecification'][] = array(
-						'@type'					=> "UnitPriceSpecification",
-						'priceType'				=> "https://schema.org/SalePrice",
+						'@type'                 => 'UnitPriceSpecification',
+						'priceType'             => 'https://schema.org/SalePrice',
 						'price'                 => wc_format_decimal( $product->get_sale_price(), wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
 						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-						'validThrough'			=> !empty($sale_price_valid_until) ? $sale_price_valid_until : $price_valid_until
+						'validThrough'          => ! empty( $sale_price_valid_until ) ? $sale_price_valid_until : $price_valid_until,
 					);
 				}
 			}
