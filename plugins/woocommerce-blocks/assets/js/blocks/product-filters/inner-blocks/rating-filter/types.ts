@@ -3,6 +3,5 @@ export interface Attributes {
 	displayStyle: string;
 	selectType: string;
 	showCounts: boolean;
-	showFilterButton: boolean;
 	isPreview?: boolean;
 }
