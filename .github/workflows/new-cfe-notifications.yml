@@ -5,7 +5,6 @@ on:
 
 permissions:
   issues: write
-  contents: write
   pull-requests: write
 
 jobs:
@@ -31,35 +30,65 @@ jobs:
     if: github.event.label.name == 'CFE Approved'
     runs-on: ubuntu-20.04
     steps:
-      - name: Extract PR URL from issue body
+      - name: Extract PR number from issue body
         id: extract-pr
-        run: |
-          PR_URL=$(echo "${{ github.event.issue.body }}" | grep -oP 'https://github.com/[^/]+/[^/]+/pull/\d+')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const event = ${{ toJSON( github.event ) }}
+            const body = event.issue.body;
 
-          if [[ -z "$PR_URL" ]]; then
-            echo "No valid PR URL found in the issue body. Exiting."
-            exit 1
-          else
-            echo "PR_URL=$PR_URL" >> $GITHUB_ENV
-          fi
+            // Regular expression to match the PR link that follows the specific question
+            const prRegex = /Which PR needs to be included\?.*?\n(https:\/\/github\.com\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\/pull\/([0-9]+))/s;
+
+            // Match the body against the regex
+            const match = body.match(prRegex);
+
+            // Check if a valid PR number was found
+            if (match && match[2]) {
+              const prNumber = match[2];
+
+              // Log the PR number and set it as a GitHub output
+              console.log(`Valid PR number: ${prNumber}`);
+              core.setOutput('PR_NUMBER', prNumber);
+            } else {
+              // If no valid PR number is found, fail the step
+              core.setFailed("No valid PR found after the 'Which PR' section. Aborting.");
+            }
 
       - name: Add label 'cherry pick to trunk' to PR
         run: |
-          gh pr edit $PR_URL --add-label "cherry pick to trunk"
+          OWNER="${{ github.event.repository.owner.login }}"
+          REPO="${{ github.event.repository.name }}"
+          gh pr edit ${{ steps.extract-pr.outputs.PR_NUMBER }} --add-label "cherry pick to trunk" --repo $OWNER/$REPO
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ env.PR_URL }}
 
       - name: Extract Release Number from Issue Body
         id: extract-release
-        run: |
-          RELEASE_NUMBER=$(echo "${{ github.event.issue.body }}" | grep -oP '\b\d+\.\d+\b')
-          if [[ -z "$RELEASE_NUMBER" ]]; then
-            echo "No valid release number found in the issue body. Aborting."
-            exit 1
-          fi
-          echo "RELEASE_NUMBER=$RELEASE_NUMBER" >> $GITHUB_ENV
-          echo "Extracted Release Number: $RELEASE_NUMBER"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const event = ${{ toJSON( github.event ) }}
+            const body = event.issue.body;
+
+            // Regular expression to match the release number after the specific question
+            const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
+
+            // Match the body against the regex
+            const match = body.match(releaseRegex);
+
+            // Check if a valid release number was found
+            if (match && match[1]) {
+              const releaseNumber = match[1];
+
+              // Log the release number and set it as a GitHub output
+              console.log(`Valid release number: ${releaseNumber}`);
+              core.setOutput('RELEASE_NUMBER', releaseNumber);
+            } else {
+              // If no valid release number is found, fail the step
+              core.setFailed("No valid release number found after the 'Which release does this request apply to?' section. Aborting.");
+            }
 
       - name: Apply Milestone to the Issue
         run: |
@@ -67,7 +96,7 @@ jobs:
           echo "Applying milestone: $MILESTONE"
           gh issue edit ${{ github.event.issue.html_url }} --milestone "$MILESTONE"
         env:
-          RELEASE_NUMBER: ${{ env.RELEASE_NUMBER }}
+          RELEASE_NUMBER: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
           GH_TOKEN: ${{ github.token }}
 
       - name: Notify Slack
@@ -89,14 +118,29 @@ jobs:
     steps:
       - name: Extract Release Number from Issue Body
         id: extract-release
-        run: |
-          RELEASE_NUMBER=$(echo "${{ github.event.issue.body }}" | grep -oP '\b\d+\.\d+\b')
-          if [[ -z "$RELEASE_NUMBER" ]]; then
-            echo "No valid release number found in the issue body. Aborting."
-            exit 1
-          fi
-          echo "RELEASE_NUMBER=$RELEASE_NUMBER" >> $GITHUB_ENV
-          echo "Extracted Release Number: $RELEASE_NUMBER"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const event = ${{ toJSON( github.event ) }}
+            const body = event.issue.body;
+
+            // Regular expression to match the release number after the specific question
+            const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
+
+            // Match the body against the regex
+            const match = body.match(releaseRegex);
+
+            // Check if a valid release number was found
+            if (match && match[1]) {
+              const releaseNumber = match[1];
+
+              // Log the release number and set it as a GitHub output
+              console.log(`Valid release number: ${releaseNumber}`);
+              core.setOutput('RELEASE_NUMBER', releaseNumber);
+            } else {
+              // If no valid release number is found, fail the step
+              core.setFailed("No valid release number found after the 'Which release does this request apply to?' section. Aborting.");
+            }
 
       - name: Apply Milestone to the Issue
         run: |
@@ -104,7 +148,7 @@ jobs:
           echo "Applying milestone: $MILESTONE"
           gh issue edit ${{ github.event.issue.html_url }} --milestone "$MILESTONE"
         env:
-          RELEASE_NUMBER: ${{ env.RELEASE_NUMBER }}
+          RELEASE_NUMBER: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
           GH_TOKEN: ${{ github.token }}
 
       - name: Close CFE Issue
