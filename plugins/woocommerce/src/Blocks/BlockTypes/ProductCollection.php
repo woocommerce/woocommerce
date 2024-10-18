@@ -2092,7 +2092,7 @@ class ProductCollection extends AbstractBlock {
 					);
 				}
 
-				$products = array_filter(array_map( 'wc_get_product', $product_reference ));
+				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -2100,9 +2100,12 @@ class ProductCollection extends AbstractBlock {
 					);
 				}
 
-				$product_ids = array_map( function( $product ) {
-					return $product->get_id();
-				}, $products );
+				$product_ids = array_map(
+					function ( $product ) {
+						return $product->get_id();
+					},
+					$products
+				);
 
 				$all_cross_sells = array_reduce(
 					$products,
