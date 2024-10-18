@@ -12,7 +12,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		&__header {
 			display: flex;
 			justify-content: space-between;
-			padding: 8px 48px 24px;
+			padding: $gap-smaller 48px $gap-large;
 			align-items: center;
 		}
 
@@ -53,7 +53,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 
 			&__item-inner {
 				align-items: flex-start;
-				padding: 24px 0;
+				padding: $gap-large 0;
 			}
 
 			&__item-title {
@@ -81,7 +81,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 			&__item-after {
 				&__actions {
 					display: flex;
-					gap: 16px;
+					gap: $gap;
 				}
 			}
 
@@ -121,14 +121,17 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		&__grid {
 			display: grid;
 			grid-template-columns: repeat(3, 1fr); /* 3 columns */
-			gap: 16px; /* Space between columns */
-			padding: 16px 0;
+			gap: $gap; /* Space between columns */
+			padding: $gap 0;
+			@media screen and (max-width: 768px) {
+				grid-template-columns: repeat(2, 1fr); /* w columns */
+			}
 		}
 
 		&__grid-item {
 			display: flex; /* Use Flexbox to align image and content */
 			align-items: flex-start; /* Align items to the top */
-			padding: 16px 0;
+			padding: $gap 0;
 
 			img {
 				width: 40px;
@@ -158,7 +161,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 
 				&__actions {
 					display: flex;
-					gap: 8px; /* Space between buttons */
+					gap: $gap-smaller; /* Space between buttons */
 					padding-top: 4px; /* Space between description and buttons */
 					button {
 						align-self: flex-start; /* Align button to the left */
