@@ -31,15 +31,21 @@ jobs:
     if: github.event.label.name == 'CFE Approved'
     runs-on: ubuntu-20.04
     steps:
-      - name: Extract PR info from issue body
+      - name: Extract PR number from issue body
         id: extract-pr
+        env:
+          BODY: ${{ github.event.issue.body }}
         run: |
-          BODY="${{ github.event.issue.body }}"
+          # Use Bash regex to extract the PR number from the pull request URL
+          if [[ "$BODY" =~ https:\/\/github\.com\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\/pull\/([0-9]+) ]]; then
+            PR_NUMBER="${BASH_REMATCH[1]}"
+          else
+            echo "No valid PR number found in the issue body. Aborting."
+            exit 1
+          fi
 
-          PR_NUMBER=$(echo "$BODY" | grep -oP 'pull\/\K\d+')
-
-          # Validate input: strictly numeric
-          if [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+          # Validate that the extracted PR number is numeric and non-empty
+          if [[ -n "$PR_NUMBER" && "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
             echo "Valid PR number: $PR_NUMBER"
             echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
           else
@@ -58,11 +64,16 @@ jobs:
 
       - name: Extract Release Number from Issue Body
         id: extract-release
+        env:
+          BODY: ${{ github.event.issue.body }}
         run: |
-          BODY="${{ github.event.issue.body }}"
-
-          # Extract the release number using a strict pattern match
-          RELEASE_NUMBER=$(echo "$BODY" | grep -oP '\b\d+\.\d+\b')
+          # Extract release number using a regular expression in Bash
+          if [[ "$BODY" =~ ([0-9]+\.[0-9]+) ]]; then
+            RELEASE_NUMBER="${BASH_REMATCH[1]}"
+          else
+            echo "No valid release number found in the format X.Y. Aborting."
+            exit 1
+          fi
 
           # Validate that the release number is in the expected format (X.Y)
           if [[ ! "$RELEASE_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]]; then
@@ -102,11 +113,16 @@ jobs:
     steps:
       - name: Extract Release Number from Issue Body
         id: extract-release
+        env:
+          BODY: ${{ github.event.issue.body }}
         run: |
-          BODY="${{ github.event.issue.body }}"
-
-          # Extract the release number using a strict pattern match
-          RELEASE_NUMBER=$(echo "$BODY" | grep -oP '\b\d+\.\d+\b')
+          # Extract release number using a regular expression in Bash
+          if [[ "$BODY" =~ ([0-9]+\.[0-9]+) ]]; then
+            RELEASE_NUMBER="${BASH_REMATCH[1]}"
+          else
+            echo "No valid release number found in the format X.Y. Aborting."
+            exit 1
+          fi
 
           # Validate that the release number is in the expected format (X.Y)
           if [[ ! "$RELEASE_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]]; then
