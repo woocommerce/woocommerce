@@ -17,8 +17,6 @@ class WC_Plugin_Api_Updater {
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
-		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api' ), 20, 3 );
-		add_filter( 'themes_api', array( __CLASS__, 'themes_api' ), 20, 3 );
 	}
 
 	/**

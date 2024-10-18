@@ -20,7 +20,6 @@ class WC_Helper_Compat {
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
-		add_action( 'woocommerce_helper_loaded', array( __CLASS__, 'helper_loaded' ) );
 	}
 
 	/**
