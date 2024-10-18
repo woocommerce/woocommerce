@@ -76,6 +76,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function create( &$order ) {
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
+		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+
 		if ( ! $order->get_date_created( 'edit' ) ) {
 			$order->set_date_created( time() );
 		}
