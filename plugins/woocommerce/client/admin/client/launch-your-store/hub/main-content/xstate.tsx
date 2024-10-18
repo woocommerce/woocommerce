@@ -85,10 +85,6 @@ export const mainContentMachine = setup( {
 			window.open( homeUrl, '_blank' );
 		},
 		navigateToHome: () => {
-			const { invalidateResolutionForStoreSelector } = dispatch(
-				ONBOARDING_STORE_NAME
-			);
-			invalidateResolutionForStoreSelector( 'getTaskLists' );
 			navigateTo( { url: '/' } );
 		},
 	},

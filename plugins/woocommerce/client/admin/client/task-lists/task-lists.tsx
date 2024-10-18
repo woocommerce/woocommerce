@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
@@ -34,10 +34,13 @@ export type TaskListsProps = {
 	context?: string;
 };
 
+let didInit = false;
+
 export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 	const { task } = query;
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
-
+	const { hideTaskList, invalidateResolutionForStoreSelector } = useDispatch(
+		ONBOARDING_STORE_NAME
+	);
 	const { isResolving, taskLists } = useSelect(
 		( select: WCDataSelector ) => {
 			return {
@@ -48,6 +51,16 @@ export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 			};
 		}
 	);
+
+	// Refresh the task lists data when the user navigates back to the task lists page to ensure the latest data is displayed.
+	useEffect( () => {
+		if ( ! didInit ) {
+			didInit = true;
+			return;
+		}
+
+		invalidateResolutionForStoreSelector( 'getTaskLists' );
+	}, [ invalidateResolutionForStoreSelector ] );
 
 	const getCurrentTask = () => {
 		if ( ! task ) {
