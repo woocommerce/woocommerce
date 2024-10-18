@@ -41,9 +41,41 @@ type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
 	[ Property in Key ]-?: Type[ Property ];
 };
 
+export type CrudCreateItemActionOptions = {
+	optimisticQueryUpdate?: ItemQuery;
+	optimisticUrlParameters?: IdType[];
+	optimisticPropagation?: boolean;
+
+	/*
+	 * This is a temporary ID that is used to identify the item in the store
+	 * before the actual ID is known. This is used for optimistic updates.
+	 */
+	tempId?: IdType;
+};
+
 export type CrudActionOptions = {
 	optimisticQueryUpdate?: ItemQuery;
 	optimisticUrlParameters?: IdType[];
+};
+
+export type CreateAction< ResourceName extends string, ItemType > = {
+	[ Property in `create${ Capitalize< ResourceName > }` ]: (
+		query: Partial< ItemType >,
+		options?: CrudCreateItemActionOptions
+	) => Generator< unknown, ItemType >;
+};
+
+export type DeleteAction< ResourceName extends string, ItemType > = {
+	[ Property in `delete${ Capitalize< ResourceName > }` ]: (
+		idQuery: IdQuery,
+		force?: boolean
+	) => Generator< unknown, ItemType >;
+};
+
+export type UpdateAction< ResourceName extends string, ItemType > = {
+	[ Property in `update${ Capitalize< ResourceName > }` ]: (
+		query: Partial< ItemType >
+	) => Generator< unknown, ItemType >;
 };
 
 export type CrudActions<

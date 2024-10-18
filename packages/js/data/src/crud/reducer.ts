@@ -339,17 +339,67 @@ export const createReducer = (
 						},
 					};
 
-				case TYPES.CREATE_ITEM_REQUEST:
+				case TYPES.CREATE_ITEM_REQUEST: {
+					const isCreatingQueryId = getRequestIdentifier(
+						CRUD_ACTIONS.CREATE_ITEM,
+						payload.query
+					);
+
+					/*
+					 * Optimistic propagation
+					 */
+					if (
+						payload?.options?.optimisticPropagation &&
+						payload?.options?.tempId
+					) {
+						const isRequestingQueryId = getRequestIdentifier(
+							CRUD_ACTIONS.GET_ITEMS,
+							payload.options.optimisticQueryUpdate || {}
+						);
+
+						const tempItem: Item = {
+							...payload.query,
+							id: payload.options.tempId,
+						};
+
+						const { objItems: temporaryItems, ids: temporaryIds } =
+							organizeItemsById(
+								[ tempItem ],
+								payload.options.optimisticUrlParameters,
+								state.data
+							);
+
+						return {
+							...state,
+							items: {
+								...state.items,
+								[ isRequestingQueryId ]: {
+									data: [
+										...( state.items[ isRequestingQueryId ]
+											?.data || [] ),
+										...temporaryIds,
+									],
+								},
+							},
+							data: {
+								...state.data,
+								...temporaryItems,
+							},
+							requesting: {
+								...state.requesting,
+								[ isCreatingQueryId ]: true,
+							},
+						};
+					}
+
 					return {
 						...state,
 						requesting: {
 							...state.requesting,
-							[ getRequestIdentifier(
-								CRUD_ACTIONS.CREATE_ITEM,
-								payload.query
-							) ]: true,
+							[ isCreatingQueryId ]: true,
 						},
 					};
+				}
 
 				case TYPES.DELETE_ITEM_REQUEST:
 					return {
