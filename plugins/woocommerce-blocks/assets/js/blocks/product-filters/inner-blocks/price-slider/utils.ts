@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import {
+	formatPrice,
+	getCurrency,
+	getCurrencyFromPriceResponse,
+} from '@woocommerce/price-format';
 import {
 	objectHasProp,
 	CurrencyResponse,
@@ -14,13 +18,17 @@ function formatPriceInt( price: string | number, currency: Currency ) {
 	return priceInt / 10 ** currency.minorUnit;
 }
 
-export function getPriceFilterData( results: unknown[] ) {
+export function getFormattedPrice( results: unknown[] ) {
+	const currencyWithoutDecimal = getCurrency( { minorUnit: 0 } );
+
 	if ( ! objectHasProp( results, 'price_range' ) ) {
 		return {
 			minPrice: 0,
 			maxPrice: 0,
 			minRange: 0,
 			maxRange: 0,
+			formattedMinPrice: formatPrice( 0, currencyWithoutDecimal ),
+			formattedMaxPrice: formatPrice( 0, currencyWithoutDecimal ),
 		};
 	}
 
@@ -44,5 +52,7 @@ export function getPriceFilterData( results: unknown[] ) {
 		maxPrice,
 		minRange: minPrice,
 		maxRange: maxPrice,
+		formattedMinPrice: formatPrice( minPrice, currencyWithoutDecimal ),
+		formattedMaxPrice: formatPrice( maxPrice, currencyWithoutDecimal ),
 	};
 }
