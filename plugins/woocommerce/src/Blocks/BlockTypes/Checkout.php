@@ -287,10 +287,13 @@ class Checkout extends AbstractBlock {
 		$post_blocks = parse_blocks( $post->post_content );
 		$title       = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
 
-		if ( $title ) {
-			$pickup_location_settings['title'] = $title;
-			update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
+		// Set the title to be an empty string if it isn't a string. This will make it fall back to the default value of "Pickup".
+		if ( ! is_string( $title ) ) {
+			$title = '';
 		}
+
+		$pickup_location_settings['title'] = $title;
+		update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
 	}
 
 	/**
