@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Core functions tests
  *
@@ -60,7 +60,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_wc_get_rounding_precision( $decimals, $expected ) {
 		add_filter(
 			'wc_get_price_decimals',
-			function() use ( $decimals ) {
+			function () use ( $decimals ) {
 				return $decimals;
 			}
 		);
@@ -91,7 +91,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_wc_add_number_precision( $decimals, $value, $round, $expected ) {
 		add_filter(
 			'wc_get_price_decimals',
-			function() use ( $decimals ) {
+			function () use ( $decimals ) {
 				return $decimals;
 			}
 		);
@@ -114,7 +114,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_wc_remove_number_precision( $decimals, $value, $expected ) {
 		add_filter(
 			'wc_get_price_decimals',
-			function() use ( $decimals ) {
+			function () use ( $decimals ) {
 				return $decimals;
 			}
 		);
@@ -132,5 +132,96 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$expected = '<span class="woocommerce-help-tip" tabindex="0" aria-label="Strong text regular text" data-tip="&lt;strong&gt;Strong text&lt;/strong&gt; regular text"></span>';
 		$this->assertEquals( $expected, wc_help_tip( '<strong>Strong text</strong> regular text', false ) );
 		$this->assertEquals( $expected, wc_help_tip( '<strong>Strong text</strong> regular text', true ) );
+	}
+
+	/**
+	 * Test wc_get_customer_default_location() function.
+	 */
+	public function test_wc_get_customer_default_location() {
+		/**
+		 * Test with none of the options set. In this case the location should be empty.
+		 *
+		 * woocommerce_default_country is set to 'US:CA' by default unless it was defined during setup.
+		 */
+		delete_option( 'woocommerce_default_customer_address' );
+		delete_option( 'woocommerce_default_country' );
+		delete_option( 'woocommerce_allowed_countries' );
+		delete_option( 'woocommerce_specific_allowed_countries' );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'US', $result['country'] );
+		$this->assertEquals( 'CA', $result['state'] );
+
+		// Test with a default address defined during setup. This country has states.
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_default_country', 'DE:LS' );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'DE', $result['country'] );
+		$this->assertEquals( 'LS', $result['state'] );
+
+		// Test with a default address defined during setup. This country has no states.
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'GB', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+
+		// Test with default address, but specific countries set. Address is allowed.
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_default_country', 'DE:LS' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'DE', 'AT', 'CH' ) );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'DE', $result['country'] );
+		$this->assertEquals( 'LS', $result['state'] );
+
+		// Test with default address, but specific countries set. Address is not allowed.
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_default_country', 'DE:LS' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'GB' ) );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( '', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+
+		// Test with no default address.
+		update_option( 'woocommerce_default_customer_address', '' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( '', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+
+		// Test with geolocation.
+		update_option( 'woocommerce_default_customer_address', 'geolocation' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		delete_option( 'woocommerce_allowed_countries' );
+		delete_option( 'woocommerce_specific_allowed_countries' );
+		add_filter(
+			'woocommerce_geolocate_ip',
+			function () {
+				return 'FR';
+			},
+			10
+		);
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'FR', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+		remove_all_filters( 'woocommerce_geolocate_ip' );
+
+		// Test with geolocation but geolocated country is not allowed.
+		update_option( 'woocommerce_default_customer_address', 'geolocation' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'GB' ) );
+		add_filter(
+			'woocommerce_geolocate_ip',
+			function () {
+				return 'FR';
+			},
+			10
+		);
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'GB', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+		remove_all_filters( 'woocommerce_geolocate_ip' );
 	}
 }
