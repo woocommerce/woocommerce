@@ -16,7 +16,7 @@ body:
   - type: input
     id: release-number
     attributes:
-      label: "Which release does this exception apply to?"
+      label: "Which release does this request apply to?"
       description: "Format: X.Y"
       placeholder: "7.0"
     validations:
@@ -24,7 +24,7 @@ body:
   - type: textarea
     id: pr-urls
     attributes:
-      label: "What PR implement the changes for which the exception is requested? (please do not enter multiple PRs)"
+      label: "Which PR needs to be included? (please do not enter multiple PRs)"
       description: "Pull request URL against the release branch"
       placeholder: |
         https://github.com/woocommerce/woocommerce/pull/1234
