@@ -436,12 +436,14 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$data = parent::prepare_object_for_response_core( $order, $request );
 
-		foreach ( $data['line_items'] as &$line_item_data ) {
-			if ( isset( $line_item_data['cogs_value'] ) ) {
-				if ( $cogs_is_enabled ) {
-					$line_item_data['cost_of_goods_sold']['value'] = $line_item_data['cogs_value'];
+		if ( isset( $data['line_items'] ) ) {
+			foreach ( $data['line_items'] as &$line_item_data ) {
+				if ( isset( $line_item_data['cogs_value'] ) ) {
+					if ( $cogs_is_enabled ) {
+						$line_item_data['cost_of_goods_sold']['value'] = $line_item_data['cogs_value'];
+					}
+					unset( $line_item_data['cogs_value'] );
 				}
-				unset( $line_item_data['cogs_value'] );
 			}
 		}
 
