@@ -8,7 +8,7 @@ tags: how-to
 
 The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
 
-🚨 **Caution:** It's experimental and may change in the future. Please use it with caution.
+**CAUTION:** It's experimental and may change in the future. Please use it with caution.
 
 **There are two ways to use this function:**
 
@@ -40,7 +40,7 @@ Be sure to add `wc-blocks-registry` as a dependency to your script if you opt to
   add_action( 'enqueue_block_editor_assets', 'enqueue_my_custom_product_collection_script' );
   ```
 
-💡 **Tip:** The first method is recommended if you are using Webpack.
+**Tip:** The first method is recommended if you are using Webpack.
 
 ## Defining a Collection
 
@@ -258,7 +258,7 @@ This will create a collection with a heading, product image, and product price. 
 
 ![image](https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca)
 
-💡 **Tip:** You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
+**Tip:** You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
 
 ### Example 5: Collection with `usesReference` argument
 
@@ -332,7 +332,6 @@ __experimentalRegisterProductCollection({
 });
 ```
 
-
 ---
 
-💡 **Tip:** You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.
+**Tip:** You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.
