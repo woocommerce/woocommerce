@@ -135,8 +135,8 @@ jQuery( function ( $ ) {
 			if ( $( '.woocommerce-checkout' ).length ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
-			
-			// Store the old coupon error message and value before the 
+
+			// Store the old coupon error message and value before the
 			// .woocommerce-cart-form is replaced with the new form.
 			var $old_coupon_field_val = $( '#coupon_code' ).val();
 			var $old_coupon_error_msg = $( '#coupon_code' )
@@ -151,7 +151,7 @@ jQuery( function ( $ ) {
 			if ( preserve_notices && $old_coupon_error_msg.length > 0 ) {
 				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
 				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
-				
+
 				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
@@ -210,11 +210,11 @@ jQuery( function ( $ ) {
 
 		if ( typeof html_element === 'string' ) {
 			var msg = $( $.parseHTML( html_element ) ).text().trim();
-			
+
 			if ( msg === '' ) {
 				return;
 			}
-			
+
 			$coupon_error_el = $( '<p class="coupon-error-notice" id="coupon-error-notice">' + msg + '</p>' );
 		} else {
 			$coupon_error_el = html_element;
@@ -223,13 +223,21 @@ jQuery( function ( $ ) {
 		if ( is_live_region ) {
 			$coupon_error_el.attr( 'role', 'alert' );
 		}
-		
+
 		$target.find( '#coupon_code' )
 			.addClass( 'has-error' )
 			.attr( 'aria-invalid', 'true' )
 			.attr( 'aria-describedby', 'coupon-error-notice' );
 		$target.append( $coupon_error_el );
-	};	
+	};
+
+	var toggle_shipping = function () {
+		$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+		$( 'select.country_to_state, input.country_to_state' ).trigger(
+			'change'
+		);
+		$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
+	};
 
 	/**
 	 * Object to handle AJAX calls for cart shipping changes.
@@ -252,6 +260,11 @@ jQuery( function ( $ ) {
 				this.toggle_shipping
 			);
 			$( document ).on(
+				'keydown',
+				'.shipping-calculator-button',
+				this.toggle_shipping_on_keydown
+			);
+			$( document ).on(
 				'change',
 				'select.shipping_method, :input[name^=shipping_method]',
 				this.shipping_method_selected
@@ -269,12 +282,18 @@ jQuery( function ( $ ) {
 		 * Toggle Shipping Calculator panel
 		 */
 		toggle_shipping: function () {
-			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
-			$( 'select.country_to_state, input.country_to_state' ).trigger(
-				'change'
-			);
-			$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
+			toggle_shipping();
 			return false;
+		},
+
+		/**
+		 * Toggle Shipping Calculator panel after pressing Space
+		 */
+		toggle_shipping_on_keydown: function ( event ) {
+			if ( 32 === event.which ) {
+				event.preventDefault();
+				toggle_shipping();
+			}
 		},
 
 		/**
@@ -304,7 +323,7 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
-					
+
 					var newCurrentTarget = document.getElementById( event.currentTarget.id );
 
 					if ( newCurrentTarget ) {
@@ -589,17 +608,17 @@ jQuery( function ( $ ) {
 						'.woocommerce-error, .woocommerce-message, .woocommerce-info, ' +
 						'.is-error, .is-info, .is-success, .coupon-error-notice'
 					).remove();
-					
+
 					// We only want to show coupon notices if they are not errors.
 					// Coupon errors are shown under the input.
 					if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
-						show_notice( response );						
+						show_notice( response );
 					} else {
 						var $coupon_wrapper = $text_field.closest( '.coupon' );
 
 						if ( $coupon_wrapper.length > 0 ) {
 							show_coupon_error( response, $coupon_wrapper, false );
-						}						
+						}
 					}
 
 					$( document.body ).trigger( 'applied_coupon', [
