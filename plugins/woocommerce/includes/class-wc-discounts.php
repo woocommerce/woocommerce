@@ -1010,7 +1010,7 @@ class WC_Discounts {
 
 			if ( $this->object->get_prices_include_tax() ) {
 				// Add tax to tax-exclusive subtotal.
-				$subtotal = $subtotal + wc_add_number_precision( NumberUtil::round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
+				$subtotal = $subtotal + wc_add_number_precision( NumberUtil::round( $this->object->get_subtotal_tax(), wc_get_price_decimals() ) );
 			}
 
 			return $subtotal;
