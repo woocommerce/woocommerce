@@ -50,7 +50,8 @@ jobs:
           else
             MESSAGE=":arrow_right: New PRR request: ${{ github.event.issue.title }} ${{ github.event.issue.html_url }}"
           fi
-          echo "SLACK_MESSAGE=$MESSAGE" >> $GITHUB_ENV
+          printf -v SAFE_MESSAGE "%q" "$MESSAGE"
+          echo "SLACK_MESSAGE=$SAFE_MESSAGE" >> $GITHUB_ENV
 
       - name: Notify Slack
         uses: archive/github-actions-slack@v2.0.0
@@ -129,7 +130,8 @@ jobs:
           else
             MESSAGE=":white_check_mark: PRR request approved: ${{ github.event.issue.title }}\n${{ github.event.issue.html_url }}"
           fi
-          echo "SLACK_MESSAGE=$MESSAGE" >> $GITHUB_ENV
+          printf -v SAFE_MESSAGE "%q" "$MESSAGE"
+          echo "SLACK_MESSAGE=$SAFE_MESSAGE" >> $GITHUB_ENV
 
       - name: Notify Slack
         uses: archive/github-actions-slack@v2.0.0
@@ -176,7 +178,8 @@ jobs:
           else
             MESSAGE=":x: PRR request rejected: ${{ github.event.issue.title }}\n${{ github.event.issue.html_url }}"
           fi
-          echo "SLACK_MESSAGE=$MESSAGE" >> $GITHUB_ENV
+          printf -v SAFE_MESSAGE "%q" "$MESSAGE"
+          echo "SLACK_MESSAGE=$SAFE_MESSAGE" >> $GITHUB_ENV
 
       - name: Notify Slack
         uses: archive/github-actions-slack@v2.0.0
