@@ -9,6 +9,7 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -73,10 +74,10 @@ const usePaymentGatewayData = () => {
 // 	</>
 // );
 
-export const OtherPaymentMethods = () => {
-	// Mock other payment methods for now.
-	// TODO Get the list of plugins via the API in future PR.
-	const mockOtherPaymentMethods = [
+export const OtherPaymentGateways = () => {
+	// Mock other payment gateways for now.
+	// TODO Get the list of gateways via the API in future PR.
+	const mockOtherPaymentGateways = [
 		{
 			id: 'amazon-pay',
 			title: 'Amazon Pay',
@@ -167,26 +168,29 @@ export const OtherPaymentMethods = () => {
 	}
 
 	return (
-		<Panel className="other-payment-methods">
-			<PanelBody title="Other payment methods">
-				<div className="other-payment-methods__grid">
-					{ mockOtherPaymentMethods.map(
+		<Panel className="other-payment-gateways">
+			<PanelBody title="Other payment providers">
+				<div className="other-payment-gateways__grid">
+					{ mockOtherPaymentGateways.map(
 						( gateway: PaymentGateway ) => (
 							<div
-								className="other-payment-methods__grid-item"
+								className="other-payment-gateways__grid-item"
 								key={ gateway.id }
 							>
-								<img src={ gateway.image_72x72 } alt="" />
-								<div className="other-payment-methods__grid-item__content">
-									<span className="other-payment-methods__grid-item__content__title">
+								<img
+									src={ gateway.image_72x72 }
+									alt={ gateway.title }
+								/>
+								<div className="other-payment-gateways__grid-item__content">
+									<span className="other-payment-gateways__grid-item__content__title">
 										{ gateway.title }
 									</span>
-									<span className="other-payment-methods__grid-item__content__description">
+									<span className="other-payment-gateways__grid-item__content__description">
 										{ gateway.content }
 									</span>
-									<div className="other-payment-methods__grid-item__content__actions">
+									<div className="other-payment-gateways__grid-item__content__actions">
 										<Button variant={ 'primary' }>
-											Install
+											{ __( 'Install', 'woocommerce' ) }
 										</Button>
 									</div>
 								</div>
@@ -195,7 +199,7 @@ export const OtherPaymentMethods = () => {
 					) }
 				</div>
 				<ExternalLink href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/">
-					More payment options
+					{ __( 'More payment options', 'woocommerce' ) }
 				</ExternalLink>
 			</PanelBody>
 		</Panel>

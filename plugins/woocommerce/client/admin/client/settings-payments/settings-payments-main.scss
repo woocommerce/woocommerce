@@ -1,81 +1,126 @@
 .settings-payments-main__container {
-	.settings-payments-main__spinner {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		position: absolute;
-		width: 100%;
-	}
-
-	.settings-payment-providers__header-title {
-		font-size: 16px;
-		font-weight: 600;
-		line-height: 24px;
-	}
-	.settings-payment-providers__header-select-container {
-		.components-input-control__prefix {
-			min-width: fit-content;
-			padding-left: 12px;
-			color: $gray-700;
+	.settings-payment-gateways {
+		&__header-title {
+			font-size: 16px;
+			font-weight: 600;
+			line-height: 24px;
 		}
-	}
 
-	// Override styles for woocommerce list items.
-	.woocommerce-list__item {
-		&:hover {
-			background-color: $white;
+		&__header-select-container {
+			.components-input-control__prefix {
+				min-width: fit-content;
+				padding-left: 12px;
+				color: $gray-700;
+			}
+		}
 
-			.woocommerce-list__item-title {
+		// Override styles for woocommerce list items.
+		.woocommerce-list {
+			&__item {
+				&:hover {
+					background-color: $white;
+
+					.woocommerce-list__item-title {
+						color: $gray-900;
+					}
+				}
+			}
+
+			&__item-inner {
+				align-items: flex-start;
+				padding: 24px;
+			}
+
+			&__item-title {
+				font-size: 14px;
 				color: $gray-900;
+				font-weight: 600;
+				display: inline-flex;
+				gap: 10px;
+				align-items: center;
+			}
+
+			&__item-after {
+				&__actions {
+					display: flex;
+					gap: 16px;
+				}
+			}
+
+			&__item-before {
+				img {
+					max-width: 96px;
+					height: 36px;
+					border-radius: 8px;
+				}
 			}
 		}
 	}
-	.woocommerce-list__item-inner {
-		align-items: flex-start;
-		padding: 24px;
-	}
 
-	.woocommerce-list__item-title {
-		font-size: 14px;
-		color: $gray-900;
-		font-weight: 600;
-		display: inline-flex;
-		gap: 10px;
-		align-items: center;
-	}
-
-	.woocommerce-list__item-after {
-		&__actions {
-			display: flex;
-			gap: 16px;
-		}
-	}
-
-	.woocommerce-list__item-before img {
-		max-width: 96px;
-		height: 36px;
-		border-radius: 8px;
-	}
-
-	.other-payment-methods__button-text {
-		margin-right: 4px;
-	}
-
-	td.other-payment-methods-row {
-		border-top: 1px solid #c3c4c7;
-		background-color: #fff;
-
-	}
-
-	.other-payment-methods__image {
-		vertical-align: middle;
-		margin-right: 8px;
-	}
-	.other-payment-methods {
+	.other-payment-gateways {
 		margin-top: 32px;
+
+		&__button-text {
+			margin-right: 4px;
+		}
+
+		&__image {
+			vertical-align: middle;
+			margin-right: 8px;
+		}
+
+		&__grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr); /* 3 columns */
+			gap: 16px; /* Space between columns */
+			padding: 16px 0;
+		}
+
+		&__grid-item {
+			display: flex; /* Use Flexbox to align image and content */
+			align-items: flex-start; /* Align items to the top */
+			padding: 16px 0;
+
+			img {
+				width: 40px;
+				height: 40px;
+				margin-right: 20px; /* Space between image and text */
+			}
+
+			&__content {
+				display: flex;
+				flex-direction: column; /* Stack title, description, and button vertically */
+				gap: 4px;
+
+				&__title {
+					display: block;
+					font-size: 14px;
+					font-weight: 600;
+					line-height: 20px;
+				}
+
+				&__description {
+					display: block;
+					font-size: 13px;
+					font-weight: 400;
+					line-height: 20px;
+					color: $gray-700;
+				}
+
+				&__actions {
+					display: flex;
+					gap: 8px; /* Space between buttons */
+					padding-top: 4px; /* Space between description and buttons */
+					button {
+						align-self: flex-start; /* Align button to the left */
+					}
+				}
+			}
+		}
 
 		.components-panel__body.is-opened {
 			padding: $gap-large;
+
 			h2 {
 				margin: -24px -24px 5px;
 			}
@@ -86,55 +131,14 @@
 			font-weight: 600;
 			line-height: 24px;
 			padding: $gap $gap-large !important;
+
 			&:focus {
 				box-shadow: none !important;
 			}
+
 			&:hover {
 				background: #fff !important;
 				box-shadow: none !important;
-			}
-		}
-	}
-	.other-payment-methods__grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr); /* 3 columns */
-		gap: 16px; /* Space between columns */
-		padding: 16px 0;
-	}
-
-	.other-payment-methods__grid-item {
-		display: flex; /* Use Flexbox to align image and content */
-		align-items: flex-start; /* Align items to the top */
-		padding: 16px 0;
-		img {
-			width: 40px;
-			height: 40px;
-			margin-right: 20px; /* Space between image and text */
-		}
-		&__content {
-			display: flex;
-			flex-direction: column; /* Stack title, description, and button vertically */
-			gap: 4px;
-			&__title {
-				display: block;
-				font-size: 14px;
-				font-weight: 600;
-				line-height: 20px;
-			}
-			&__description {
-				display: block;
-				font-size: 13px;
-				font-weight: 400;
-				line-height: 20px;
-				color: $gray-700;
-			}
-			&__actions {
-				display: flex;
-				gap: 8px; /* Space between buttons */
-				padding-top: 4px; /* Space between description and buttons */
-				button {
-					align-self: flex-start; /* Align button to the left */
-				}
 			}
 		}
 	}
