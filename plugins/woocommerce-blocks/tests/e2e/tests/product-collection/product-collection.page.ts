@@ -84,7 +84,9 @@ export type Collections =
 	| 'myCustomCollectionWithOrderContext'
 	| 'myCustomCollectionWithCartContext'
 	| 'myCustomCollectionWithArchiveContext'
-	| 'myCustomCollectionMultipleContexts';
+	| 'myCustomCollectionMultipleContexts'
+	| 'myCustomCollectionWithInserterScope'
+	| 'myCustomCollectionWithBlockScope';
 
 const collectionToButtonNameMap = {
 	newArrivals: 'New Arrivals',
@@ -105,6 +107,9 @@ const collectionToButtonNameMap = {
 		'My Custom Collection - Archive Context',
 	myCustomCollectionMultipleContexts:
 		'My Custom Collection - Multiple Contexts',
+	myCustomCollectionWithInserterScope:
+		'My Custom Collection - With Inserter Scope',
+	myCustomCollectionWithBlockScope: 'My Custom Collection - With Block Scope',
 };
 
 class ProductCollectionPage {
