@@ -99,7 +99,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
 		// Provide location context into block's context.
-		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 2 );
 
 		// Disable block render if the ProductTemplate block is empty.
 		add_filter(
@@ -214,8 +214,6 @@ class ProductCollection extends AbstractBlock {
 		);
 	}
 
-
-
 	/**
 	 * Provides the location context to each inner block of the product collection block.
 	 * Hint: Only blocks using the 'query' context will be affected.
@@ -232,7 +230,9 @@ class ProductCollection extends AbstractBlock {
 	 *   'sourceData' => array( 'productId' => 123 ),
 	 * )
 	 *
-	 * @param array $context  The block context.
+	 * @param array $context      The block context.
+	 * @param array $parsed_block The parsed block.
+	 *
 	 * @return array $context {
 	 *     The block context including the product collection location context.
 	 *
@@ -242,15 +242,14 @@ class ProductCollection extends AbstractBlock {
 	 *     }
 	 * }
 	 */
-	public function provide_location_context_for_inner_blocks( $context ) {
-		// Run only on frontend.
-		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
-		if ( is_admin() || \WC()->is_rest_api_request() ) {
+	public function provide_location_context_for_inner_blocks( $context, $parsed_block ) {
+		if ( 'woocommerce/product-collection' !== $parsed_block['blockName'] ) {
 			return $context;
 		}
 
-		// Target only product collection's inner blocks that use the 'query' context.
-		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
+		// Run only on frontend.
+		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
+		if ( is_admin() || \WC()->is_rest_api_request() ) {
 			return $context;
 		}
 
