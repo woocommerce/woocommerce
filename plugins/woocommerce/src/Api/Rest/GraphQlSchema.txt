@@ -1,0 +1,50 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+interface ObjectWithId {
+	id: Int
+}
+
+type Query {
+  order(id: Int): Order
+  orders(first: Int = 100, last: Int, after: String, before: String, date_from: datetime, date_to: datetime): OrderConnection
+}
+
+type Order implements ObjectWithId {
+	total_amount(decimals: Int): Float
+	date_created: datetime
+	applied_coupons: [AppliedCoupon]
+	lines(first: int = 100, last: int, after: string, before: string): OrderLineConnection
+	customer_ip_address: string
+}
+
+type OrderLine implements ObjectWithId {
+	name: String
+	quantity: Int
+	line_amount(decimals: Int): Float
+}
+
+type AppliedCoupon {
+	amount(decimals: Int): Float
+	type: CouponType
+}
+
+enum CouponType {
+	FIXED_CART,
+	PERCENT
+}
+
+type Mutation {
+	create_order(order_data: NewOrder): Order
+}
+
+type NewOrder {
+	id: Int
+	total_amount: Float
+	date_created: datetime
+	applied_coupons: [AppliedCoupon]
+	lines: OrderLineConnection
+	customer_ip_address: string
+}
