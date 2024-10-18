@@ -85,7 +85,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
 	 */
 	public function __construct( $item = 0 ) {
-		if ( $this->has_cogs() ) {
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
 			$this->data['cogs_value'] = null;
 		}
 
