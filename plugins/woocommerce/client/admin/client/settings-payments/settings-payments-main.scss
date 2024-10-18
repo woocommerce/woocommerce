@@ -8,6 +8,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	margin: 0 -20px;
 	padding-bottom: 32px;
 	font-family: $font-sf-pro-display;
+
 	.settings-payment-gateways {
 		&__header {
 			display: flex;
@@ -38,8 +39,8 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 
 		// Override styles for woocommerce list items.
 		.woocommerce-list {
-			border-top: 1px solid #f0f0f0;
-			border-bottom: 1px solid #f0f0f0;
+			border-top: 1px solid $gray-200;
+			border-bottom: 1px solid $gray-200;
 			&__item {
 				padding: 0 48px;
 				&:hover {
@@ -48,6 +49,9 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 					.woocommerce-list__item-title {
 						color: $gray-900;
 					}
+				}
+				&:not(:first-child) {
+					border-top: 1px solid $gray-200;
 				}
 			}
 
@@ -76,6 +80,9 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				font-weight: 400;
 				line-height: 20px;
 				color: $gray-700;
+				.woocommerce-woopayments-payment-methods-logos {
+					flex-wrap: wrap;
+				}
 			}
 
 			&__item-after {
@@ -96,101 +103,93 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 
 	.other-payment-gateways {
+		border: 1px solid $gray-200;
+		border-radius: 4px;
 		margin: 32px 48px 0 48px;
+		padding: 8px 24px;
 
-		// Override style for external link.
-		.components-external-link {
+		&__header {
+			padding: 20px 0;
 			display: flex;
-			justify-content: flex-end;
-			flex-direction: row-reverse;
-			gap: 4px;
-			&__contents {
-				text-decoration: none;
-			}
-		}
+			justify-content: space-between;
 
-		&__button-text {
-			margin-right: 4px;
-		}
-
-		&__image {
-			vertical-align: middle;
-			margin-right: 8px;
-		}
-
-		&__grid {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr); /* 3 columns */
-			gap: $gap; /* Space between columns */
-			padding: $gap 0;
-			@media screen and (max-width: 768px) {
-				grid-template-columns: repeat(2, 1fr); /* w columns */
-			}
-		}
-
-		&__grid-item {
-			display: flex; /* Use Flexbox to align image and content */
-			align-items: flex-start; /* Align items to the top */
-			padding: $gap 0;
-
-			img {
-				width: 40px;
-				height: 40px;
-				margin-right: 20px; /* Space between image and text */
-			}
-
-			&__content {
+			&__title {
 				display: flex;
-				flex-direction: column; /* Stack title, description, and button vertically */
-				gap: 4px;
+				gap: 10px;
+				font-size: 16px;
+				font-weight: 600;
+				line-height: 24px;
+			}
+		}
 
-				&__title {
-					display: block;
-					font-size: 14px;
-					font-weight: 600;
-					line-height: 20px;
+		&__content {
+			margin-top: 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+
+			&__grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr); /* 3 columns */
+				gap: $gap; /* Space between columns */
+				padding: $gap 0;
+				@media screen and (max-width: 768px) {
+					grid-template-columns: repeat(2, 1fr); /* w columns */
+				}
+			}
+
+			&__grid-item {
+				display: flex; /* Use Flexbox to align image and content */
+				align-items: flex-start; /* Align items to the top */
+				padding: $gap 0;
+
+				img {
+					width: 40px;
+					height: 40px;
+					margin-right: 20px; /* Space between image and text */
 				}
 
-				&__description {
-					display: block;
-					font-size: 13px;
-					font-weight: 400;
-					line-height: 20px;
-					color: $gray-700;
-				}
-
-				&__actions {
+				&__content {
 					display: flex;
-					gap: $gap-smaller; /* Space between buttons */
-					padding-top: 4px; /* Space between description and buttons */
-					button {
-						align-self: flex-start; /* Align button to the left */
+					flex-direction: column; /* Stack title, description, and button vertically */
+					gap: 4px;
+
+					&__title {
+						display: block;
+						font-size: 14px;
+						font-weight: 600;
+						line-height: 20px;
+					}
+
+					&__description {
+						display: block;
+						font-size: 13px;
+						font-weight: 400;
+						line-height: 20px;
+						color: $gray-700;
+					}
+
+					&__actions {
+						display: flex;
+						gap: $gap-smaller; /* Space between buttons */
+						padding-top: 4px; /* Space between description and buttons */
+						button {
+							align-self: flex-start; /* Align button to the left */
+						}
 					}
 				}
 			}
-		}
 
-		.components-panel__body.is-opened {
-			padding: $gap-large;
-
-			h2 {
-				margin: -24px -24px 5px;
-			}
-		}
-
-		button.components-panel__body-toggle {
-			font-size: 16px;
-			font-weight: 600;
-			line-height: 24px;
-			padding: $gap $gap-large !important;
-
-			&:focus {
-				box-shadow: none !important;
-			}
-
-			&:hover {
-				background: #fff !important;
-				box-shadow: none !important;
+			// Override style for external link.
+			.components-external-link {
+				display: flex;
+				justify-content: flex-end;
+				flex-direction: row-reverse;
+				gap: 4px;
+				padding: 16px 0;
+				&__contents {
+					text-decoration: none;
+				}
 			}
 		}
 	}
