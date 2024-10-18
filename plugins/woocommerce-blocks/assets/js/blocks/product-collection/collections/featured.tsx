@@ -17,7 +17,7 @@ const collection = {
 	icon: <Icon icon={ starFilled } />,
 	description: __( 'Showcase your featured products.', 'woocommerce' ),
 	keywords: [ 'product collection' ],
-	scope: [],
+	scope: [ 'block' ],
 };
 
 const attributes = {

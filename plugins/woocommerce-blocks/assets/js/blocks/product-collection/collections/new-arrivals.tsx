@@ -21,7 +21,7 @@ const collection = {
 	icon: <Icon icon={ calendar } />,
 	description: __( 'Recommend your newest products.', 'woocommerce' ),
 	keywords: [ 'newest products', 'product collection' ],
-	scope: [],
+	scope: [ 'block' ],
 };
 
 const attributes = {
