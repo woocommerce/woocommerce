@@ -80,8 +80,22 @@ const reducer: Reducer< CartState > = (
 			}
 			break;
 		case types.SET_BILLING_ADDRESS:
+			const billingAddressChanged = Object.keys(
+				action.billingAddress
+			).some( ( key ) => {
+				return (
+					action.billingAddress[ key ] !==
+					state.cartData.billingAddress?.[ key ]
+				);
+			} );
 			state = {
 				...state,
+				metaData: {
+					...state.metaData,
+					isCustomerDataDirty:
+						state.metaData.isCustomerDataDirty ||
+						billingAddressChanged,
+				},
 				cartData: {
 					...state.cartData,
 					billingAddress: {
@@ -92,8 +106,20 @@ const reducer: Reducer< CartState > = (
 			};
 			break;
 		case types.SET_SHIPPING_ADDRESS:
+			const shippingAddressChanged = Object.keys(
+				action.shippingAddress
+			).some( ( key ) => {
+				return (
+					action.shippingAddress[ key ] !==
+					state.cartData.shippingAddress?.[ key ]
+				);
+			} );
 			state = {
 				...state,
+				metaData: {
+					...state.metaData,
+					isCustomerDataDirty: shippingAddressChanged,
+				},
 				cartData: {
 					...state.cartData,
 					shippingAddress: {
@@ -168,6 +194,15 @@ const reducer: Reducer< CartState > = (
 				metaData: {
 					...state.metaData,
 					updatingSelectedRate: !! action.isResolving,
+				},
+			};
+			break;
+		case types.SET_IS_CUSTOMER_DATA_DIRTY:
+			state = {
+				...state,
+				metaData: {
+					...state.metaData,
+					isCustomerDataDirty: action.isCustomerDataDirty,
 				},
 			};
 			break;

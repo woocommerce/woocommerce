@@ -166,7 +166,13 @@ export const shippingRatesBeingSelected = ( isResolving: boolean ) =>
  */
 export const applyExtensionCartUpdate =
 	( args: ExtensionCartUpdateArgs ) =>
-	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+	async ( {
+		dispatch,
+		select,
+	}: {
+		select: CartSelectFromMap;
+		dispatch: CartDispatchFromMap;
+	} ) => {
 		try {
 			const { response } = await apiFetchWithHeaders( {
 				path: '/wc/store/v1/cart/extensions',
@@ -174,8 +180,22 @@ export const applyExtensionCartUpdate =
 				data: { namespace: args.namespace, data: args.data },
 				cache: 'no-store',
 			} );
-			dispatch.receiveCart( response );
-			return response;
+			if ( args.overwriteDirtyCustomerData === true ) {
+				dispatch.receiveCart( response );
+				return response;
+			}
+			// If the customer data is dirty, we don't want to overwrite it with the response.
+			// Remove shipping and billing address from the response and then receive the cart.
+			const {
+				shipping_address: _,
+				billing_address: __,
+				...responseWithoutShippingOrBilling
+			} = response;
+			if ( ! select.isCustomerDataDirty() ) {
+				dispatch.receiveCart( response );
+				return;
+			}
+			dispatch.receiveCart( responseWithoutShippingOrBilling );
 		} catch ( error ) {
 			dispatch.receiveError( error );
 			return Promise.reject( error );
@@ -442,6 +462,15 @@ export const setShippingAddress = (
 ) => ( { type: types.SET_SHIPPING_ADDRESS, shippingAddress } as const );
 
 /**
+ * Sets a flag to indicate whether the customer data has been modified.
+ */
+export const setIsCustomerDataDirty = ( isCustomerDataDirty: boolean ) =>
+	( {
+		type: types.SET_IS_CUSTOMER_DATA_DIRTY,
+		isCustomerDataDirty,
+	} as const );
+
+/**
  * Updates the shipping and/or billing address for the customer and returns an updated cart.
  */
 export const updateCustomerData =
@@ -465,9 +494,11 @@ export const updateCustomerData =
 			} else {
 				dispatch.receiveCart( response );
 			}
+			dispatch.setIsCustomerDataDirty( false );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( error );
+			dispatch.setIsCustomerDataDirty( true );
 			return Promise.reject( error );
 		} finally {
 			dispatch.updatingCustomerData( false );
@@ -489,6 +520,7 @@ type Actions =
 	| typeof setBillingAddress
 	| typeof setCartData
 	| typeof setErrorData
+	| typeof setIsCustomerDataDirty
 	| typeof setIsCartDataStale
 	| typeof setShippingAddress
 	| typeof shippingRatesBeingSelected

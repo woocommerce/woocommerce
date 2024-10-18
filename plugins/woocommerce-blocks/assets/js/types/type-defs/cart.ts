@@ -204,6 +204,7 @@ export interface Cart extends Record< string, unknown > {
 export interface CartMeta {
 	updatingCustomerData: boolean;
 	updatingSelectedRate: boolean;
+	isCustomerDataDirty: boolean;
 	isCartDataStale: boolean;
 	applyingCoupon: string;
 	removingCoupon: string;
@@ -211,6 +212,7 @@ export interface CartMeta {
 export interface ExtensionCartUpdateArgs {
 	data: Record< string, unknown >;
 	namespace: string;
+	overwriteDirtyCustomerData?: undefined | boolean;
 }
 
 export interface BillingAddressShippingAddress {

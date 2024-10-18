@@ -116,6 +116,16 @@ export const isCartDataStale = ( state: CartState ): boolean => {
 };
 
 /**
+ * Returns true if customer data has been modified but not pushed.
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} True if the customer data is stale.
+ */
+export const isCustomerDataDirty = ( state: CartState ): boolean => {
+	return state.metaData.isCustomerDataDirty;
+};
+
+/**
  * Retrieves the coupon code currently being applied.
  *
  * @param {CartState} state The current state.

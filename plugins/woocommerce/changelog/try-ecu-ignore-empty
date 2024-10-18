@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure local state is not overwritten by server when using `extensionCartUpdate`

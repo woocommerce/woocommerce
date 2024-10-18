@@ -101,6 +101,7 @@ export const defaultCartState: CartState = {
 		applyingCoupon: '',
 		removingCoupon: '',
 		isCartDataStale: false,
+		isCustomerDataDirty: false,
 	},
 	errors: EMPTY_CART_ERRORS,
 };
