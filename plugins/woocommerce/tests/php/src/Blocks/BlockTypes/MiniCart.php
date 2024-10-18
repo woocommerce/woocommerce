@@ -3,14 +3,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 /**
  * Tests for the Checkout block type
  *
  * @since $VID:$
  */
-class MiniCart extends MockeryTestCase {
+class MiniCart extends \WP_UnitTestCase {
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -30,7 +29,7 @@ class MiniCart extends MockeryTestCase {
 			),
 		);
 		wc_empty_cart();
-		add_filter( 'woocommerce_is_rest_api_request', '__return_false' );
+		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
 	}
 
 	/**
@@ -38,7 +37,8 @@ class MiniCart extends MockeryTestCase {
 	 * @return void
 	 */
 	protected function tearDown(): void {
-		remove_filter( 'woocommerce_is_rest_api_request', '__return_false' );
+		parent::tearDown();
+		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
 	}
 
 	/**
