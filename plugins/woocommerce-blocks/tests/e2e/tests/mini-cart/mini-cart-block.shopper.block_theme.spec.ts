@@ -7,10 +7,12 @@ import { expect, test, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import { getTestTranslation } from '../../utils/get-test-translations';
+import { translations } from '../../test-data/data/data';
 
 test.describe( 'Shopper → Translations', () => {
 	test.beforeEach( async () => {
-		await wpCLI( 'site switch-language nl_NL' );
+		await wpCLI( `site switch-language ${ translations.locale }` );
 	} );
 
 	test( 'User can see translation in empty Mini-Cart', async ( {
@@ -22,11 +24,15 @@ test.describe( 'Shopper → Translations', () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect(
-			page.getByText( 'Je winkelwagen is momenteel leeg!' )
+			page.getByText(
+				getTestTranslation( 'Your cart is currently empty!' )
+			)
 		).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'Begin met winkelen' } )
+			page.getByRole( 'link', {
+				name: getTestTranslation( 'Start shopping' ),
+			} )
 		).toBeVisible();
 	} );
 
@@ -36,19 +42,27 @@ test.describe( 'Shopper → Translations', () => {
 		miniCartUtils,
 	} ) => {
 		await frontendUtils.goToShop();
-		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
+		await page
+			.getByLabel( getTestTranslation( 'Add to cart: “Beanie“' ) )
+			.click();
 		await miniCartUtils.openMiniCart();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Je winkelwagen (1 artikel)' } )
+			page.getByRole( 'heading', {
+				name: getTestTranslation( 'Your cart (1 item)' ),
+			} )
 		).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'Bekijk mijn winkelwagen' } )
+			page.getByRole( 'link', {
+				name: getTestTranslation( 'View my cart' ),
+			} )
 		).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'Naar afrekenen' } )
+			page.getByRole( 'link', {
+				name: getTestTranslation( 'Go to checkout' ),
+			} )
 		).toBeVisible();
 	} );
 } );

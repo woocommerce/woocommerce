@@ -19,6 +19,8 @@ import {
  */
 import { customer, admin } from './test-data/data/data';
 
+console.log( customer );
+
 const prepareAttributes = async () => {
 	const browser = await chromium.launch();
 	const context = await browser.newContext( {
