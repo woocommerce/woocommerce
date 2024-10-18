@@ -276,7 +276,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$order_item_name   = $data['name'];
 			$data['meta_data'] = array_filter(
 				$data['meta_data'],
-				function( $meta ) use ( $product, $order_item_name ) {
+				function ( $meta ) use ( $product, $order_item_name ) {
 					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
 
 					// Skip items with values already in the product details area of the product name.
@@ -537,13 +537,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$this->request       = $request;
-		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$request['context']  = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data                = $this->get_formatted_item_data( $object );
-		$data                = $this->add_additional_fields_to_object( $data, $request );
-		$data                = $this->filter_response_by_context( $data, $request['context'] );
-		$response            = rest_ensure_response( $data );
+		$data     = $this->prepare_object_for_response_core( $object, $request );
+		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
 		/**
@@ -559,6 +554,26 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @since 4.5.0
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+	}
+
+	/**
+	 * Core method to prepare a single order object for response
+	 * (doesn't fire hooks, execute rest_ensure_response, or add links).
+	 *
+	 * @param  WC_Data         $order  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return array Prepared response data.
+	 * @since  9.5.0
+	 */
+	protected function prepare_object_for_response_core( $order, $request ): array {
+		$this->request       = $request;
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
+		$request['context']  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                = $this->get_formatted_item_data( $order );
+		$data                = $this->add_additional_fields_to_object( $data, $request );
+		$data                = $this->filter_response_by_context( $data, $request['context'] );
+
+		return $data;
 	}
 
 	/**
