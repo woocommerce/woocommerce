@@ -33,7 +33,7 @@ import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';
 import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
-import { useSetWraperVisibility } from '../filter-wrapper/context';
+import { useSetWrapperVisibility } from '../filter-wrapper/context';
 
 export const QUERY_PARAM_KEY = 'rating_filter';
 
@@ -64,7 +64,7 @@ const RatingFilterBlock = ( {
 	isEditor: boolean;
 	noRatingsNotice?: ReactElement | null;
 } ) => {
-	const setWrapperVisibility = useSetWraperVisibility();
+	const setWrapperVisibility = useSetWrapperVisibility();
 
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'isRenderingPhpTemplate',
