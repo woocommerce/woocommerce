@@ -628,8 +628,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"release-checks",
-						"on-demand"
+						"release-checks"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e-and-api",
@@ -644,11 +643,25 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"release-checks",
-						"on-demand"
+						"release-checks"
 					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e-and-api",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - default Subdomain site",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default-subdomain",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"on-demand"
+					],
+					"report": {
+						"resultsBlobName": "default-subdomain-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
