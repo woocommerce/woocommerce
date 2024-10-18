@@ -5,8 +5,6 @@ import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import type { Currency, CartResponseTotals } from '@woocommerce/types';
-import { Panel } from '@woocommerce/blocks-components';
-import { useContainerWidthContext } from '@woocommerce/base-context';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -20,13 +18,13 @@ const CheckoutOrderSummary = ( {
 	totalsCurrency,
 	cartTotals,
 }: {
-	className: string;
+	className?: string;
 	children: JSX.Element | JSX.Element[];
 	totalsCurrency: Currency;
 	cartTotals: CartResponseTotals;
 } ) => {
 	return (
-		<div className={ className }>
+		<>
 			{ children }
 			<div className="wc-block-components-totals-wrapper">
 				<TotalsFooterItem
@@ -35,7 +33,7 @@ const CheckoutOrderSummary = ( {
 				/>
 			</div>
 			<OrderMetaSlotFill />
-		</div>
+		</>
 	);
 };
 
@@ -52,15 +50,17 @@ const FrontendBlock = ( {
 	// Render once here and once in the fill. The fill can be slotted once elsewhere.
 	return (
 		<>
-			<div className="wc-block-components-order-summary">
+			<div className={ className }>
 				<CheckoutOrderSummary
-					className={ className }
 					totalsCurrency={ totalsCurrency }
 					cartTotals={ cartTotals }
 				>
-					<span className="wc-block-components-order-summary__button-text">
+					<p
+						className="wc-block-components-checkout-order-summary__title-text"
+						role="heading"
+					>
 						{ __( 'Order summary', 'woocommerce' ) }
-					</span>
+					</p>
 					<>{ children }</>
 				</CheckoutOrderSummary>
 			</div>
