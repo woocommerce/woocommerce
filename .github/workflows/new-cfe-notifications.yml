@@ -38,7 +38,7 @@ jobs:
             const event = ${{ toJSON( github.event ) }}
             const body = event.issue.body;
 
-            // Define a regular expression to match the PR link that follows the specific question
+            // Regular expression to match the PR link that follows the specific question
             const prRegex = /Which PR needs to be included\?.*?\n(https:\/\/github\.com\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\/pull\/([0-9]+))/s;
 
             // Match the body against the regex
@@ -72,7 +72,7 @@ jobs:
             const event = ${{ toJSON( github.event ) }}
             const body = event.issue.body;
 
-            // Define a regular expression to match the release number after the specific question
+            // Regular expression to match the release number after the specific question
             const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
 
             // Match the body against the regex
@@ -124,7 +124,7 @@ jobs:
             const event = ${{ toJSON( github.event ) }}
             const body = event.issue.body;
 
-            // Define a regular expression to match the release number after the specific question
+            // Regular expression to match the release number after the specific question
             const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
 
             // Match the body against the regex
