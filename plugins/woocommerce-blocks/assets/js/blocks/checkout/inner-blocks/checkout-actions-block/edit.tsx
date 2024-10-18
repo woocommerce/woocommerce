@@ -13,29 +13,33 @@ import { getSetting } from '@woocommerce/settings';
 import { ReturnToCartButton } from '@woocommerce/base-components/cart-checkout';
 import EditableButton from '@woocommerce/editor-components/editable-button';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import { useStoreCart } from '@woocommerce/base-context';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
+import { BlockAttributes } from './block';
+import './editor.scss';
 
 export const Edit = ( {
 	attributes,
 	setAttributes,
 }: {
-	attributes: {
-		showReturnToCart: boolean;
-		cartPageId: number;
-		placeOrderButtonLabel: string;
-	};
+	attributes: BlockAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const {
 		cartPageId = 0,
 		showReturnToCart = false,
+		showPrice = false,
 		placeOrderButtonLabel,
 	} = attributes;
+	const { cartTotals } = useStoreCart();
+	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
 		( select ) => {
@@ -65,6 +69,18 @@ export const Edit = ( {
 						onChange={ () =>
 							setAttributes( {
 								showReturnToCart: ! showReturnToCart,
+							} )
+						}
+					/>
+					<ToggleControl
+						label={ __(
+							'Show price in the button',
+							'woocommerce'
+						) }
+						checked={ showPrice }
+						onChange={ () =>
+							setAttributes( {
+								showPrice: ! showPrice,
 							} )
 						}
 					/>
@@ -120,7 +136,19 @@ export const Edit = ( {
 								placeOrderButtonLabel: content,
 							} );
 						} }
-					/>
+					>
+						{ showPrice && (
+							<>
+								<div className="wc-block-components-checkout-place-order-button__separator"></div>
+								<div className="wc-block-components-checkout-place-order-button__price">
+									<FormattedMonetaryAmount
+										value={ cartTotals.total_price }
+										currency={ totalsCurrency }
+									/>
+								</div>
+							</>
+						) }
+					</EditableButton>
 				</div>
 			</div>
 		</div>
