@@ -43,7 +43,7 @@ const DisplaySettingsToolbar = ( {
 		const parsedValue = Number( value );
 		if (
 			! isNaN( parsedValue ) &&
-			parsedValue >= 1 &&
+			parsedValue >= 0 &&
 			parsedValue <= 100
 		) {
 			setQueryAttribute( { perPage: parsedValue } );
@@ -87,7 +87,7 @@ const DisplaySettingsToolbar = ( {
 						<NumberControl
 							{ ...numberControlProps }
 							label={ __( 'Items per Page', 'woocommerce' ) }
-							min={ 1 }
+							min={ 0 }
 							max={ 100 }
 							onChange={ handlePerPageChange }
 							value={ query.perPage }
