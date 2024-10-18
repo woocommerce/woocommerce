@@ -2,6 +2,7 @@
 /**
  * Class WC_Report_Customer_List file.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Reports
  */
 
@@ -16,6 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * WC_Report_Customer_List.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -23,8 +25,11 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
 
 		parent::__construct(
 			array(
@@ -37,6 +42,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
 	 * No items found text.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function no_items() {
 		esc_html_e( 'No customers found.', 'woocommerce' );
@@ -44,6 +51,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 		$this->prepare_items();
@@ -79,6 +88,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param WP_User $user WP User object.
 	 * @param string  $column_name Column name.
 	 * @return string
@@ -148,7 +158,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 				ob_start();
 				?><p>
 					<?php
-					do_action( 'woocommerce_admin_user_actions_start', $user );
+					wc_do_deprecated_action(
+						'woocommerce_admin_user_actions_start',
+						array( $user ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 
 					$actions = array();
 
@@ -186,13 +202,25 @@ class WC_Report_Customer_List extends WP_List_Table {
 						);
 					}
 
-					$actions = apply_filters( 'woocommerce_admin_user_actions', $actions, $user );
+					$actions = apply_filters_deprecated(
+						'woocommerce_admin_user_actions',
+						array( $actions, $user ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 
 					foreach ( $actions as $action ) {
 						printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
 					}
 
-					do_action( 'woocommerce_admin_user_actions_end', $user );
+					wc_do_deprecated_action(
+						'woocommerce_admin_user_actions_end',
+						array( $user ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 					?>
 				</p>
 				<?php
@@ -208,6 +236,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * Get columns.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_columns() {
@@ -228,6 +257,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * Order users by name.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param WP_User_Query $query Query that gets passed through.
 	 * @return WP_User_Query
 	 */
@@ -251,6 +281,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
 	 * Prepare customer list items.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function prepare_items() {
 		$current_page = absint( $this->get_pagenum() );
@@ -281,13 +313,18 @@ class WC_Report_Customer_List extends WP_List_Table {
 		);
 
 		$query = new WP_User_Query(
-			apply_filters(
+			apply_filters_deprecated(
 				'woocommerce_admin_report_customer_list_user_query_args',
 				array(
-					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
-					'number'  => $per_page,
-					'offset'  => ( $current_page - 1 ) * $per_page,
-				)
+					array(
+						'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+						'number'  => $per_page,
+						'offset'  => ( $current_page - 1 ) * $per_page,
+					),
+				),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.'
 			)
 		);
 

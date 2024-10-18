@@ -2,6 +2,7 @@
 /**
  * Download report.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce\Admin\Reports
@@ -18,20 +19,26 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 
 /**
  * WC_Report_Downloads.
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * Max items.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int
 	 */
 	protected $max_items;
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
 
 		parent::__construct(
 			array(
@@ -45,6 +52,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Don't need this.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $position Top or bottom.
 	 */
 	public function display_tablenav( $position ) {
@@ -55,6 +63,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -132,6 +142,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param mixed  $item Item being displayed.
 	 * @param string $column_name Column name.
 	 */
@@ -211,6 +222,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get columns.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_columns() {
@@ -228,13 +240,24 @@ class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * Prepare download list items.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function prepare_items() {
 
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
 		// Allow filtering per_page value, but ensure it's at least 1.
-		$per_page = max( 1, apply_filters( 'woocommerce_admin_downloads_report_downloads_per_page', 20 ) );
+		$per_page = max(
+			1,
+			apply_filters_deprecated(
+				'woocommerce_admin_downloads_report_downloads_per_page',
+				array( 20 ),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+			),
+		);
 
 		$this->get_items( $current_page, $per_page );
 
@@ -252,6 +275,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * No items found text.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function no_items() {
 		esc_html_e( 'No customer downloads found.', 'woocommerce' );
@@ -260,6 +285,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get filters from querystring.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return object
 	 */
 	protected function get_filter_vars() {
@@ -283,6 +309,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get downloads matching criteria.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param int $current_page Current viewed page.
 	 * @param int $per_page How many results to show per page.
 	 */
@@ -327,7 +354,13 @@ class WC_Report_Downloads extends WP_List_Table {
 			$query_from .= $wpdb->prepare( ' AND user_ip_address = %s ', $filters->user_ip_address );
 		}
 
-		$query_from  = apply_filters( 'woocommerce_report_downloads_query_from', $query_from );
+		$query_from  = apply_filters_deprecated(
+			'woocommerce_report_downloads_query_from',
+			array( $query_from ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 		$query_order = $wpdb->prepare( 'ORDER BY timestamp DESC LIMIT %d, %d;', ( $current_page - 1 ) * $per_page, $per_page );
 
 		$this->items     = $wpdb->get_results( "SELECT * {$query_from} {$query_order}" ); // WPCS: cache ok, db call ok, unprepared SQL ok.

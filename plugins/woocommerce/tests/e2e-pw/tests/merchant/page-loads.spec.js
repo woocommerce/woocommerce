@@ -26,12 +26,6 @@ const wcPages = [
 				text: 'All Customers',
 			},
 			{
-				name: 'Reports',
-				heading: 'Reports',
-				element: '.nav-tab-wrapper > .nav-tab-active',
-				text: 'Orders',
-			},
-			{
 				name: 'Settings',
 				heading: 'Settings',
 				element: '#store_address-description',
@@ -42,6 +36,12 @@ const wcPages = [
 				heading: 'Status',
 				element: '.nav-tab-active',
 				text: 'System status',
+			},
+			{
+				name: 'Reports (deprecated)',
+				heading: 'Reports (deprecated)',
+				element: '.nav-tab-wrapper > .nav-tab-active',
+				text: 'Orders',
 			},
 		],
 	},
