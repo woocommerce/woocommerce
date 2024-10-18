@@ -497,7 +497,7 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	public function get_core_fields() {
-		return [
+		$fields = [
 			'email'      => [
 				'label'          => __( 'Email address', 'woocommerce' ),
 				'optionalLabel'  => __(
@@ -618,20 +618,25 @@ class CheckoutFields {
 				'autocapitalize' => 'characters',
 				'index'          => 90,
 			],
-			'phone'      => [
-				'label'          => __( 'Phone', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Phone (optional)',
-					'woocommerce'
-				),
-				'required'       => false,
-				'hidden'         => false,
-				'type'           => 'tel',
-				'autocomplete'   => 'tel',
-				'autocapitalize' => 'characters',
-				'index'          => 100,
-			],
 		];
+
+		$phone_options = get_option( 'woocommerce_checkout_phone_field', '' );
+
+		$fields['phone'] = [
+			'label'          => __( 'Phone', 'woocommerce' ),
+			'optionalLabel'  => __(
+				'Phone (optional)',
+				'woocommerce'
+			),
+			'required'       => 'required' === $phone_options,
+			'hidden'         => 'hidden' === $phone_options,
+			'type'           => 'tel',
+			'autocomplete'   => 'tel',
+			'autocapitalize' => 'characters',
+			'index'          => 100,
+		];
+
+		return $fields;
 	}
 
 	/**

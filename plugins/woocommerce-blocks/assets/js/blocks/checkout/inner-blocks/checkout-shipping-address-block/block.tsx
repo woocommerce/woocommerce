@@ -99,18 +99,12 @@ const Block = ( {
 				hidden: ! showApartmentField,
 				required: requireApartmentField,
 			},
-			phone: {
-				hidden: ! showPhoneField,
-				required: requirePhoneField,
-			},
 		};
 	}, [
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
 		requireApartmentField,
-		showPhoneField,
-		requirePhoneField,
 	] ) as FormFieldsConfig;
 
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
