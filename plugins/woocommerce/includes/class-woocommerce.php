@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Hooks;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -313,12 +314,18 @@ final class WooCommerce {
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 		self::add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
 
+		Hooks::init();
+
+		/* TODO: Put all the hookings below in Hooks::$built_in_hookings,
+		 * then remove all the class instantiations below.
+		 */
+
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
 		$container->get( ProductDownloadDirectories::class );
 		$container->get( DownloadPermissionsAdjuster::class );
 		$container->get( AssignDefaultCategory::class );
-		$container->get( DataRegenerator::class );
+		//$container->get( DataRegenerator::class );
 		$container->get( LookupDataStore::class );
 		$container->get( MatchImageBySKU::class );
 		$container->get( RestockRefundedItemsAdjuster::class );
