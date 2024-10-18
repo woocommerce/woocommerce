@@ -99,6 +99,7 @@ class WC_Emails {
 				'woocommerce_order_status_on-hold_to_cancelled',
 				'woocommerce_order_status_on-hold_to_failed',
 				'woocommerce_order_status_completed',
+				'woocommerce_order_status_failed',
 				'woocommerce_order_fully_refunded',
 				'woocommerce_order_partially_refunded',
 				'woocommerce_new_customer_note',
@@ -225,6 +226,7 @@ class WC_Emails {
 		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
 		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
 		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
+		$this->emails['WC_Email_Customer_Failed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
 		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
 		$this->emails['WC_Email_Customer_Processing_Order'] = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
 		$this->emails['WC_Email_Customer_Completed_Order']  = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';

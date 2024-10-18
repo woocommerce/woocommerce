@@ -21,8 +21,8 @@
 			"background": true,
 			"text": true
 		},
-		"multiple": false,
-		"inserter": false,
+		"multiple": true,
+		"inserter": true,
 		"interactivity": true,
 		"typography": {
 			"fontSize": true,
@@ -46,15 +46,6 @@
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
-	"providesContext": {
-		"woocommerce/product-filters/overlay": "overlay"
-	},
-	"attributes": {
-		"overlay": {
-			"type": "string",
-			"default": "never"
-		}
-	},
 	"viewScript": "wc-product-filters-frontend",
 	"example": {}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the `.distignore` file to exclude the ./client/admin folder from zip

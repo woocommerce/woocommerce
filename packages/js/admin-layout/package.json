@@ -39,7 +39,7 @@
 		"build:project:bundle": "wireit",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -57,7 +57,7 @@
 		"@wordpress/element": "wp-6.0"
 	},
 	"devDependencies": {
-		"@types/react": "^17.0.71",
+		"@types/react": "17.0.x",
 		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
@@ -65,23 +65,23 @@
 		"concurrently": "^7.6.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
 		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"react": "17.0.x",
+		"react-dom": "17.0.x",
 		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
+		"ts-jest": "29.1.x",
+		"typescript": "5.3.x",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"@types/react": "17.0.x",
+		"react": "17.0.x",
+		"react-dom": "17.0.x"
 	},
 	"config": {
 		"ci": {

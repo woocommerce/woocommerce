@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Create HPOS tables when enabling the compatibility mode if tables do not exist.
