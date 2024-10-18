@@ -53,7 +53,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		currency: '',
 		isOnSale: false,
 		regularPrice: 0,
-		isBusinessService: false,
+		type: '',
 	};
 
 	function isSponsored(): boolean {
@@ -278,7 +278,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							{ ! isLoading && decodedDescription }
 						</p>
 					) }
-					{ ! product.isBusinessService && (
+					{ ProductType.businessService !== props?.product?.type && (
 						<footer className="woocommerce-marketplace__product-card__footer">
 							{ isLoading && (
 								<div className="woocommerce-marketplace__product-card__price" />
