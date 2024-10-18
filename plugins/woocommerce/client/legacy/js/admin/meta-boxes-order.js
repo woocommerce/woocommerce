@@ -25,14 +25,14 @@ jQuery( function ( $ ) {
 			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
-			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
+			$( document.body ).on( 'click', '#woocommerce-order-actions input, #woocommerce-order-actions a', function() {
 				window.onbeforeunload = '';
 			});
-			$( 'a.edit_address' ).on( 'click', this.edit_address );
-			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
-			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
-			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
-			$( '#customer_user' ).on( 'change', this.change_customer_user );
+			$( document.body ).on( 'click', 'a.edit_address', this.edit_address );
+			$( document.body ).on( 'click', 'a.billing-same-as-shipping', this.copy_billing_to_shipping );
+			$( document.body ).on( 'click', 'a.load_customer_billing', this.load_billing );
+			$( document.body ).on( 'click', 'a.load_customer_shipping', this.load_shipping );
+			$( document.body ).on( 'change', '#customer_user', this.change_customer_user );
 		},
 
 		change_country: function( e, stickValue ) {
