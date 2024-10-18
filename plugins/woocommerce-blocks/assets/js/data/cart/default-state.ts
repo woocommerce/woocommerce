@@ -26,6 +26,7 @@ import {
 	EMPTY_PAYMENT_REQUIREMENTS,
 	EMPTY_EXTENSIONS,
 } from '../constants';
+import { persistenceLayer } from './persistence-layer';
 
 const EMPTY_PENDING_QUANTITY: [] = [];
 const EMPTY_PENDING_DELETE: [] = [];
@@ -94,6 +95,7 @@ export const defaultCartState: CartState = {
 		paymentMethods: EMPTY_PAYMENT_METHODS,
 		paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 		extensions: EMPTY_EXTENSIONS,
+		...persistenceLayer.get(),
 	},
 	metaData: {
 		updatingCustomerData: false,
