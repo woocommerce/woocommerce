@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure `prices_include_tax` is correctly set when manually creating orders via WP Admin, aligning with the store's tax settings.
