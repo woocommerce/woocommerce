@@ -78,6 +78,10 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_ip_address() {
+		if ( array_key_exists( 'HTTP_CF_CONNECTING_IP', $_SERVER ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_CONNECTING_IP'] ) );
+		}
+
 		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
 			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
