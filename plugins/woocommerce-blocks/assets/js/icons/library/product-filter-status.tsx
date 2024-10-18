@@ -3,7 +3,7 @@
  */
 import { SVG, Path } from '@wordpress/primitives';
 
-const productFilterStockStatus = () => (
+const productFilterStatus = () => (
 	<SVG
 		width="24"
 		height="24"
@@ -37,4 +37,4 @@ const productFilterStockStatus = () => (
 	</SVG>
 );
 
-export default productFilterStockStatus;
+export default productFilterStatus;

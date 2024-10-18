@@ -99,9 +99,9 @@ const blocks = {
 		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/overlay-navigation',
 	},
-	'product-filter-stock-status': {
+	'product-filter-status': {
 		isExperimental: true,
-		customDir: 'product-filters/inner-blocks/stock-filter',
+		customDir: 'product-filters/inner-blocks/status-filter',
 	},
 	'product-filter-price': {
 		customDir: 'product-filters/inner-blocks/price-filter',

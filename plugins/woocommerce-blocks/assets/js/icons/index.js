@@ -25,7 +25,7 @@ export { default as productFilterAttribute } from './library/product-filter-attr
 export { default as productFilterOptions } from './library/product-filter-options';
 export { default as productFilterPrice } from './library/product-filter-price';
 export { default as productFilterRating } from './library/product-filter-rating';
-export { default as productFilterStockStatus } from './library/product-filter-stock-status';
+export { default as productFilterStatus } from './library/product-filter-status';
 export { default as productMeta } from './library/product-meta';
 export { default as removeCart } from './library/remove-cart';
 export { default as sparkles } from './library/sparkles';
