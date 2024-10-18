@@ -18,12 +18,18 @@ export interface EditableButtonProps
 	 * The current value of the editable button.
 	 */
 	value: string;
+
+	/**
+	 * The children of the editable button.
+	 */
+	children?: React.ReactNode;
 }
 
 const EditableButton = ( {
 	onChange,
 	placeholder,
 	value,
+	children,
 	...props
 }: EditableButtonProps ) => {
 	return (
@@ -35,6 +41,7 @@ const EditableButton = ( {
 				placeholder={ placeholder }
 				onChange={ onChange }
 			/>
+			{ children }
 		</Button>
 	);
 };
