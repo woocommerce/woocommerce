@@ -209,7 +209,7 @@ jobs:
                         repo: context.repo.repo,
                         title: "Cherry pick ${{ needs.prep.outputs.pr }} into frozen release",
                         head: "cherry-pick-${{ needs.prep.outputs.frozenRelease }}/${{ needs.prep.outputs.pr }}",
-                        base: ${{ needs.prep.outputs.frozenRelease }},
+                        base: "${{ needs.prep.outputs.frozenRelease }}",
                         body: cherryPickPRBody
                       })
 
