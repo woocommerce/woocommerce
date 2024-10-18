@@ -64,6 +64,7 @@ export interface Product {
 	currency: string;
 	isOnSale: boolean;
 	regularPrice: number;
+	isBusinessService?: boolean;
 }
 
 export interface ProductTracksData {
