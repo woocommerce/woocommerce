@@ -11,6 +11,7 @@
  */
 
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -590,6 +591,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			array( 'id' => $this->get_id() ),
 			$this->data
 		);
+	}
+
+	/**
+	 * Get info about the card used for payment in the order.
+	 *
+	 * @return array
+	 */
+	public function get_payment_card_info() {
+		return PaymentInfo::get_card_info( $this );
 	}
 
 	/*
