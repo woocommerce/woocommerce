@@ -1,0 +1,4 @@
+Significance: major
+Type: fix
+
+The Single Product block now correctly passes context to children and sets the global post state for inner blocks.

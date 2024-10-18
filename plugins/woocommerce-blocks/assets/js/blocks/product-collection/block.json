@@ -55,7 +55,12 @@
 		"collection": "collection",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
-	"usesContext": [ "templateSlug", "postId" ],
+	"usesContext": [
+		"templateSlug",
+		"postId",
+		"singleProduct",
+		"productCollectionLocation"
+	],
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,
