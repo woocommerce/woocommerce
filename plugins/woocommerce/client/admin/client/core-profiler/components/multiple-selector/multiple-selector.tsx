@@ -32,6 +32,7 @@ export const MultipleSelector = ( {
 }: Props ) => {
 	return (
 		<SelectControl
+			className="woocommerce-profiler-platform-selector"
 			label=""
 			multiple
 			__experimentalOpenMenuOnFocus

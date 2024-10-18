@@ -3,6 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import { TreeSelectControl } from '@woocommerce/components';
+import { __ } from '@wordpress/i18n';
 
 export const RegionPicker = ( { options, initialValues } ) => {
 	const [ selected, setSelected ] = useState( initialValues );
@@ -18,8 +19,8 @@ export const RegionPicker = ( { options, initialValues } ) => {
 			value={ selected }
 			onChange={ onChange }
 			options={ options }
-			placeholder="Start typing to filter zones"
-			selectAllLabel="Select all countries"
+			placeholder={ __( 'Start typing to filter zones', 'woocommerce' ) }
+			selectAllLabel={ __( 'Select all countries', 'woocommerce' ) }
 			individuallySelectParent
 			maxVisibleTags={ 5 }
 		/>
