@@ -1,9 +1,9 @@
 {
 	"name": "woocommerce/product-rating",
 	"version": "1.0.0",
-	"icon": "info",
 	"title": "Product Rating",
 	"description": "Display the average rating of a product.",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"productId": {
 			"type": "number",
@@ -26,17 +26,14 @@
 			"default": false
 		}
 	},
-	"usesContext": [
-		"query",
-		"queryId",
-		"postId"
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
 	],
-	"keywords": [
-		"WooCommerce"
-	],
-	"supports": {
-		"align": true
-	},
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
