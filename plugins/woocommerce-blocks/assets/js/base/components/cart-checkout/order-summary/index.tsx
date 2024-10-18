@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useContainerWidthContext } from '@woocommerce/base-context';
 import { Panel } from '@woocommerce/blocks-components';
 import type { CartItem } from '@woocommerce/types';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -36,7 +37,11 @@ const OrderSummary = ( {
 		// 		</span>
 		// 	}
 		// >
-		<div className="wc-block-components-order-summary">
+		<div
+			className={ clsx( 'wc-block-components-order-summary', {
+				'is-large': isLarge,
+			} ) }
+		>
 			<div className="wc-block-components-order-summary__content">
 				{ cartItems.map( ( cartItem ) => {
 					return (

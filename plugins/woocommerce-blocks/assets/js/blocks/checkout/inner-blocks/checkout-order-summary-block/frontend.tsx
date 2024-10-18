@@ -48,29 +48,22 @@ const FrontendBlock = ( {
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const { isLarge } = useContainerWidthContext();
 
 	// Render once here and once in the fill. The fill can be slotted once elsewhere.
 	return (
 		<>
-			<Panel
-				className="wc-block-components-order-summary"
-				initialOpen={ isLarge }
-				hasBorder={ false }
-				title={
-					<span className="wc-block-components-order-summary__button-text">
-						{ __( 'Order summary', 'woocommerce' ) }
-					</span>
-				}
-			>
+			<div className="wc-block-components-order-summary">
 				<CheckoutOrderSummary
 					className={ className }
 					totalsCurrency={ totalsCurrency }
 					cartTotals={ cartTotals }
 				>
-					{ children }
+					<span className="wc-block-components-order-summary__button-text">
+						{ __( 'Order summary', 'woocommerce' ) }
+					</span>
+					<>{ children }</>
 				</CheckoutOrderSummary>
-			</Panel>
+			</div>
 			<CheckoutOrderSummaryFill>
 				<CheckoutOrderSummary
 					className={ className }
