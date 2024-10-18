@@ -115,48 +115,36 @@ final class ProductFilterRating extends AbstractBlock {
 		}
 
 		$rating_counts = $this->get_rating_counts( $block );
-		$display_style = $attributes['displayStyle'] ?? 'list';
-		$show_counts   = $attributes['showCounts'] ?? false;
 
-		$filtered_rating_counts = array_filter(
-			$rating_counts,
-			function( $rating ) {
-				return $rating['count'] > 0;
-			}
+		$filter_context = array(
+			'filterData' => array(
+				'items'   => $this->get_checkbox_list_items( $rating_counts, '', $attributes['showCounts'] ?? false ),
+				'actions' => array(
+					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+				),
+			),
 		);
+		$display_style  = $attributes['displayStyle'] ?? 'list';
+		$show_counts    = $attributes['showCounts'] ?? false;
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => $this->get_full_block_name(),
-				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
+				'data-has-filter'     => 'yes',
 			)
-		);
-
-		if ( empty( $filtered_rating_counts ) ) {
-			return sprintf(
-				'<div %s></div>',
-				$wrapper_attributes
-			);
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
-
-		$input = 'list' === $display_style ? CheckboxList::render(
-			array(
-				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
-				'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
-			)
-		) : Dropdown::render(
-			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
 		);
 
 		return sprintf(
-			'<div %1$s>
-				%2$s
-			</div>',
+			'<div %1$s>%2$s</div>',
 			$wrapper_attributes,
-			$input
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context['filterData'] ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 
@@ -216,7 +204,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 				return array(
 					'id'         => 'rating-' . $rating_str,
-					'checked'    => in_array( $rating_str, $ratings_array, true ),
+					'selected'   => in_array( $rating_str, $ratings_array, true ),
 					'label'      => $this->render_rating_label( (int) $rating_str, $count_label ),
 					'aria_label' => $aria_label,
 					'value'      => $rating_str,
