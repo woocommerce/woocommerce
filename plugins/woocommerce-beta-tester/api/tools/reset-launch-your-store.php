@@ -15,7 +15,6 @@ register_woocommerce_admin_test_helper_rest_route(
  * - Template changes
  * - Survey completion state
  * - Essential task list completion tracking
- * - Task list completion tracking
  *
  * @return bool True if the reset was successful, false otherwise.
  */
