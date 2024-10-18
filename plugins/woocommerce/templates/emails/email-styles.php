@@ -20,12 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load colors.
-$bg          = get_option( 'woocommerce_email_background_color' );
-$body        = get_option( 'woocommerce_email_body_background_color' );
-$base        = get_option( 'woocommerce_email_base_color' );
+$bg          = $style_overrides['bg_color'] ?? get_option( 'woocommerce_email_background_color' );
+$body        = $style_overrides['body_bg_color'] ?? get_option( 'woocommerce_email_body_background_color' );
+$base        = $style_overrides['base_color'] ?? get_option( 'woocommerce_email_base_color' );
 $base_text   = wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text        = get_option( 'woocommerce_email_text_color' );
-$footer_text = get_option( 'woocommerce_email_footer_text_color' );
+$text        = $style_overrides['text_color'] ?? get_option( 'woocommerce_email_text_color' );
+$footer_text = $style_overrides['footer_text_color'] ?? get_option( 'woocommerce_email_footer_text_color' );
 
 // Pick a contrasting color for links.
 $link_color = wc_hex_is_light( $base ) ? $base : $base_text;
@@ -63,16 +63,15 @@ body {
 }
 
 #template_container {
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
 	background-color: <?php echo esc_attr( $body ); ?>;
-	border: 1px solid <?php echo esc_attr( $bg_darker_10 ); ?>;
+	border: 0;
 	border-radius: 3px !important;
 }
 
 #template_header {
-	background-color: <?php echo esc_attr( $base ); ?>;
+	background-color: <?php echo esc_attr( $body ); ?>;
 	border-radius: 3px 3px 0 0 !important;
-	color: <?php echo esc_attr( $base_text ); ?>;
+	color: <?php echo esc_attr( $text ); ?>;
 	border-bottom: 0;
 	font-weight: bold;
 	line-height: 100%;
@@ -82,13 +81,40 @@ body {
 
 #template_header h1,
 #template_header h1 a {
-	color: <?php echo esc_attr( $base_text ); ?>;
+	color: <?php echo esc_attr( $text ); ?>;
 	background-color: inherit;
 }
 
+#template_header_image {
+	background-color: <?php echo esc_attr( $body ); ?>;
+	padding: 60px 60px 0;
+	text-align: left;
+}
+
+#template_header_image p {
+	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	margin: 0;
+	text-transform: uppercase;
+}
+
 #template_header_image img {
-	margin-left: 0;
-	margin-right: 0;
+	width: 160px;
+}
+
+.order-summary {
+	font-size: 20px;
+	margin: 30px 0 0;
+}
+
+.order-summary + p {
+	color: #aaa;
+	margin-bottom: 20px !important;
+}
+
+.order-summary + p a {
+	color: #aaa;
 }
 
 #template_footer td {
@@ -115,15 +141,15 @@ body {
 }
 
 #body_content table td {
-	padding: 48px 48px 32px;
+	padding: 0 60px 60px;
 }
 
 #body_content table td td {
-	padding: 12px;
+	padding: 8px 0 0;
 }
 
 #body_content table td th {
-	padding: 12px;
+	padding: 8px 0 0;
 }
 
 #body_content td ul.wc-item-meta {
@@ -156,14 +182,38 @@ body {
 
 .td {
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
-	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+	border: 0;
 	vertical-align: middle;
 }
 
+.total .td {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.order_item:last-of-type .td {
+	padding-bottom: 20px !important;
+}
+
+tfoot .td {
+	font-weight: normal;
+}
+
+tfoot tr:first-child .td {
+	border-top: 1px solid <?php echo esc_attr( $body_darker_10 ); ?> !important;
+	padding-top: 20px !important;
+}
+
+thead .td:last-child,
+tfoot .td:last-child,
+.order_item .td:last-child {
+	text-align: right !important;
+}
+
 .address {
-	padding: 12px;
+	padding: 0;
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
-	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+	border: 0;
 }
 
 .additional-fields {
@@ -187,7 +237,7 @@ body {
 }
 
 #header_wrapper {
-	padding: 36px 48px;
+	padding: 20px 60px 30px;
 	display: block;
 }
 
@@ -200,11 +250,10 @@ h1 {
 	color: <?php echo esc_attr( $base ); ?>;
 	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 	font-size: 30px;
-	font-weight: 300;
+	font-weight: 700;
 	line-height: 150%;
 	margin: 0;
 	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
-	text-shadow: 0 1px 0 <?php echo esc_attr( $base_lighter_20 ); ?>;
 }
 
 h2 {
