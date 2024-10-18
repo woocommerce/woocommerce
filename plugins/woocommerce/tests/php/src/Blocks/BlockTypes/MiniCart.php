@@ -30,6 +30,15 @@ class MiniCart extends MockeryTestCase {
 			),
 		);
 		wc_empty_cart();
+		add_filter( 'woocommerce_is_rest_api_request', '__return_false' );
+	}
+
+	/**
+	 * Tear down test. Called after every test.
+	 * @return void
+	 */
+	protected function tearDown(): void {
+		remove_filter( 'woocommerce_is_rest_api_request', '__return_false' );
 	}
 
 	/**
