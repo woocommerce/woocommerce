@@ -213,7 +213,7 @@ export function WriteItForMeButtonContainer() {
 		const truncatedProductName = productName.slice( 0, MAX_TITLE_LENGTH );
 
 		const instructions = [
-			`Compose an engaging product description for a product named "${ truncatedProductName }."`,
+			`You are a WooCommerce and SEO expert. Compose an engaging product description for a product named "${ truncatedProductName }."`,
 			...productPropsInstructions,
 			`Use a 9th grade reading level.`,
 			`Ensure the description is concise, containing no more than ${ DESCRIPTION_MAX_LENGTH } words.`,
@@ -221,6 +221,11 @@ export function WriteItForMeButtonContainer() {
 			'Identify the language used in the product name, and craft the description in the same language.',
 			'Only if appropriate, use <ul> and <li> tags to list product features.',
 			'Do not include a top-level heading at the beginning of the description.',
+			`For SEO benefits, determine the main keyword (2 to 3 words) contained within "${ productName }".`,
+			'For example, if the product name is "Premium Italian Espresso Machine with Milk Frother", the main keyword could be "Italian Espresso Machine".',
+			'Utilize this keyword within the description content within the first 10% of the content.',
+			'To avoid keyword stuffing, do not write the keyword more than 3 times in the description.',
+			'Do not explicitly state what the keyword is in the description.',
 		];
 
 		if ( includedProps.length > 0 ) {
