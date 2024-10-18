@@ -270,6 +270,9 @@ class WC_Install {
 			'wc_update_940_add_phone_to_order_address_fts_index',
 			'wc_update_940_remove_help_panel_highlight_shown',
 		),
+		'9.5.0' => array(
+			'wc_update_950_add_brands_enabled_option',
+		),
 	);
 
 	/**
