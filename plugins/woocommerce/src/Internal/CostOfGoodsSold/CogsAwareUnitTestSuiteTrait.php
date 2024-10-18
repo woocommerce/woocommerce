@@ -26,7 +26,7 @@ trait CogsAwareUnitTestSuiteTrait {
 	 *
 	 * @param string $method_name The method name inside the error message.
 	 */
-	private function expect_doing_it_wrong(string $method_name ) {
+	private function expect_doing_it_wrong( string $method_name ) {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_doing_it_wrong' => function ( $function_name, $message ) {

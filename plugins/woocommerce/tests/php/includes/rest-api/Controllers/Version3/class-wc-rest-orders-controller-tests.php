@@ -27,6 +27,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Get all expected fields.
+	 *
+	 * @param bool $with_cogs_enabled True to return the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
 	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(

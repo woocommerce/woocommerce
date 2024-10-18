@@ -2793,6 +2793,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$new_count    = 0;
 		$update_count = 0;
 
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 		$callback = function ( $order_id ) use ( &$new_count, &$update_count ) {
 			$new_count    += 'woocommerce_new_order' === current_action() ? 1 : 0;
 			$update_count += 'woocommerce_update_order' === current_action() ? 1 : 0;
@@ -3213,6 +3214,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
+				// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 				'current_time' => function ( $type, $gmt ) use ( &$current_time_called, $now ) {
 					$current_time_called = true;
 					return $now;

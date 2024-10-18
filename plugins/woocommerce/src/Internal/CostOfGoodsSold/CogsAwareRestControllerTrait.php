@@ -16,7 +16,7 @@ trait CogsAwareRestControllerTrait {
 	 * @param array      $data Array of response data.
 	 * @param WC_Product $product Product to get the information from.
 	 */
-	private function add_cogs_info_to_returned_product_data(array &$data, $product ): void {
+	private function add_cogs_info_to_returned_product_data( array &$data, $product ): void {
 		if ( ! $this->cogs_is_enabled() ) {
 			return;
 		}
