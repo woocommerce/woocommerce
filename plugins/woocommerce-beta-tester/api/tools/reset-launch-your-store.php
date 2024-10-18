@@ -10,8 +10,12 @@ register_woocommerce_admin_test_helper_rest_route(
 /**
  * Reset Launch Your Store settings.
  *
- * This function resets various options and settings related to the Launch Your Store feature.
- * It is intended to be used during development or testing to reset the state of the feature.
+ * This function resets the following:
+ * - Site visibility settings
+ * - Template changes
+ * - Survey completion state
+ * - Essential task list completion tracking
+ * - Task list completion tracking
  *
  * @return bool True if the reset was successful, false otherwise.
  */
