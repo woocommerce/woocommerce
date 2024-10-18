@@ -8,12 +8,14 @@ export interface CalculatorButtonProps {
 	label?: string;
 	isShippingCalculatorOpen: boolean;
 	setIsShippingCalculatorOpen: ( isShippingCalculatorOpen: boolean ) => void;
+	shippingCalculatorID: string;
 }
 
 export const CalculatorButton = ( {
 	label = __( 'Calculate', 'woocommerce' ),
 	isShippingCalculatorOpen,
 	setIsShippingCalculatorOpen,
+	shippingCalculatorID,
 }: CalculatorButtonProps ): JSX.Element => {
 	return (
 		<Button
@@ -26,6 +28,7 @@ export const CalculatorButton = ( {
 			} }
 			aria-label={ label }
 			aria-expanded={ isShippingCalculatorOpen }
+			aria-controls={ shippingCalculatorID }
 		>
 			{ label }
 		</Button>
