@@ -1,3 +1,4 @@
+# This workflow is used to cherry pick PRs from release branche into trunk.
 name: New CFE workflow - Cherry pick
 on:
     pull_request:
