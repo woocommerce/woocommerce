@@ -32,10 +32,12 @@ export const renderPackageRateOption = (
 					value={ priceWithTaxes }
 				/>
 			) }
-			{ Number.isFinite( priceWithTaxes ) && rate.delivery_time
-				? ' — '
-				: null }
-			{ decodeEntities( rate.delivery_time ) }
+			<span className="wc-block-components-shipping-rates-control__package__delivery_time">
+				{ Number.isFinite( priceWithTaxes ) && rate.delivery_time
+					? ' — '
+					: null }
+				{ decodeEntities( rate.delivery_time ) }
+			</span>
 		</>
 	);
 
@@ -43,6 +45,10 @@ export const renderPackageRateOption = (
 		description = (
 			<span className="wc-block-components-shipping-rates-control__package__description--free">
 				{ __( 'Free', 'woocommerce' ) }
+				<span className="wc-block-components-shipping-rates-control__package__delivery_time">
+					{ rate.delivery_time &&
+						' — ' + decodeEntities( rate.delivery_time ) }
+				</span>
 			</span>
 		);
 	}
