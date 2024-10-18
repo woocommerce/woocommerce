@@ -83,7 +83,7 @@ class OnboardingHelper {
 			$help_tab['content'] .= '<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
 				'<p><a href="' . wc_admin_url( '&path=/setup-wizard' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce' ) . '</a></p>';
 
-			if ( ! $setup_list->has_previously_completed() ) {
+			if ( ! $setup_list->is_complete() ) {
 				$help_tab['content'] .= '<h3>' . __( 'Task List', 'woocommerce' ) . '</h3>';
 				$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the task lists, please click on the button below.', 'woocommerce' ) . '</p>' .
 				( $setup_list->is_hidden()
