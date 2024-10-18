@@ -1,35 +1,50 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
-import type { BlockConfiguration } from '@wordpress/blocks';
+import type { BlockConfiguration, BlockAttributes } from '@wordpress/blocks';
+import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
+import { isEmptyObject } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import sharedConfig from '../shared/config';
-import attributes from './attributes';
 import edit from './edit';
 import { supports } from './supports';
-import {
-	BLOCK_TITLE as title,
-	BLOCK_ICON as icon,
-	BLOCK_DESCRIPTION as description,
-} from './constants';
-import { Save } from './save';
+import { BLOCK_ICON as icon } from './constants';
+import metadata from './block.json';
+import './upgrade';
 
-const blockConfig: BlockConfiguration = {
+const deprecated = [
+	{
+		save: sharedConfig.save,
+		migrate: ( attributes: BlockAttributes ) => {
+			// We don't deprecate attributes, but adding new ones.
+			// For backwards compatibility, some new attributes require
+			// different defaults than new ones.
+			return {
+				...attributes,
+				showDescriptionIfEmpty: true,
+				summaryLength: 150,
+			};
+		},
+		isEligible: ( attributes: BlockAttributes ) =>
+			isEmptyObject( attributes ),
+	},
+];
+
+const blockSettings: BlockConfiguration = {
 	...sharedConfig,
-	// Product Summary is not expected to be available in Product Collection,
-	// Products (Beta) or Single Product blocks. They use core/post-summary variation.
-	ancestor: [ 'woocommerce/all-products' ],
-	title,
-	description,
 	icon: { src: icon },
-	attributes,
+	attributes: metadata.attributes,
 	supports,
+	deprecated,
 	edit,
-	save: Save,
 };
 
-registerBlockType( 'woocommerce/product-summary', blockConfig );
+registerBlockSingleProductTemplate( {
+	blockName: 'woocommerce/product-summary',
+	blockMetadata: metadata,
+	blockSettings,
+	isAvailableOnPostEditor: true,
+} );
