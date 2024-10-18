@@ -42,7 +42,7 @@ import { previewOptions } from './preview';
 import './style.scss';
 import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
 import { Attributes, DisplayOption, Current } from './types';
-import { useSetWraperVisibility } from '../filter-wrapper/context';
+import { useSetWrapperVisibility } from '../filter-wrapper/context';
 
 export const QUERY_PARAM_KEY = PREFIX_QUERY_ARG_FILTER_TYPE + 'stock_status';
 
@@ -60,7 +60,7 @@ const StockStatusFilterBlock = ( {
 	attributes: Attributes;
 	isEditor?: boolean;
 } ) => {
-	const setWrapperVisibility = useSetWraperVisibility();
+	const setWrapperVisibility = useSetWrapperVisibility();
 
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'isRenderingPhpTemplate',

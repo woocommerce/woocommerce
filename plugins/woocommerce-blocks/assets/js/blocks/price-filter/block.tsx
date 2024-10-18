@@ -29,7 +29,7 @@ import {
 import usePriceConstraints from './use-price-constraints';
 import './style.scss';
 import { Attributes } from './types';
-import { useSetWraperVisibility } from '../filter-wrapper/context';
+import { useSetWrapperVisibility } from '../filter-wrapper/context';
 
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
@@ -94,7 +94,7 @@ const PriceFilterBlock = ( {
 	attributes,
 	isEditor = false,
 }: PriceFilterBlockProps ) => {
-	const setWrapperVisibility = useSetWraperVisibility();
+	const setWrapperVisibility = useSetWrapperVisibility();
 	const hasFilterableProducts = getSettingWithCoercion(
 		'hasFilterableProducts',
 		false,

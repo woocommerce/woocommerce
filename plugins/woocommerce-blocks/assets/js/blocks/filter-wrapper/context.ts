@@ -17,7 +17,7 @@ export const useFilterBlockContext = (): FilterContextProps => {
 	return useContext( FilterBlockContext );
 };
 
-export const useSetWraperVisibility = () => {
+export const useSetWrapperVisibility = () => {
 	const { wrapper } = useFilterBlockContext();
 	return ( isVisible: boolean ) => {
 		if ( ! wrapper ) {
