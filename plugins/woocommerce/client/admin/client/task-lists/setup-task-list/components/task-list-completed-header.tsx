@@ -26,7 +26,6 @@ import HeaderImage from '../assets/completed-celebration-header.svg';
 
 type TaskListCompletedHeaderProps = {
 	hideTasks: () => void;
-	keepTasks: () => void;
 	customerEffortScore: boolean;
 };
 
@@ -47,7 +46,7 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 
 export const TaskListCompletedHeader: React.FC<
 	TaskListCompletedHeaderProps
-> = ( { hideTasks, keepTasks, customerEffortScore } ) => {
+> = ( { hideTasks, customerEffortScore } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
@@ -190,14 +189,6 @@ export const TaskListCompletedHeader: React.FC<
 									) }
 									renderContent={ () => (
 										<div className="woocommerce-task-card__section-controls">
-											<Button
-												onClick={ () => keepTasks() }
-											>
-												{ __(
-													'Show setup task list',
-													'woocommerce'
-												) }
-											</Button>
 											<Button
 												onClick={ () => hideTasks() }
 											>
