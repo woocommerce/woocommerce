@@ -24,7 +24,7 @@ body:
   - type: textarea
     id: pr-urls
     attributes:
-      label: "Which PR need to be included in the point release? (please do not enter multiple PRs)"
+      label: "Which PR needs to be included? (please do not enter multiple PRs)"
       description: "Pull request URL against the release branch"
       placeholder: |
         https://github.com/woocommerce/woocommerce/pull/1234
