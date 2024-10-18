@@ -26,16 +26,17 @@ const OrderSummary = ( {
 	}
 
 	return (
-		<Panel
-			className="wc-block-components-order-summary"
-			initialOpen={ isLarge }
-			hasBorder={ false }
-			title={
-				<span className="wc-block-components-order-summary__button-text">
-					{ __( 'Order summary', 'woocommerce' ) }
-				</span>
-			}
-		>
+		// <Panel
+		// 	className="wc-block-components-order-summary"
+		// 	initialOpen={ isLarge }
+		// 	hasBorder={ false }
+		// 	title={
+		// 		<span className="wc-block-components-order-summary__button-text">
+		// 			{ __( 'Order summary', 'woocommerce' ) }
+		// 		</span>
+		// 	}
+		// >
+		<div className="wc-block-components-order-summary">
 			<div className="wc-block-components-order-summary__content">
 				{ cartItems.map( ( cartItem ) => {
 					return (
@@ -46,7 +47,8 @@ const OrderSummary = ( {
 					);
 				} ) }
 			</div>
-		</Panel>
+		</div>
+		// </Panel>
 	);
 };
 
