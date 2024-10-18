@@ -265,14 +265,10 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 				{ cesHeader ? (
 					<TaskListCompletedHeader
 						hideTasks={ hideTasks }
-						keepTasks={ keepTasks }
 						customerEffortScore={ true }
 					/>
 				) : (
-					<TaskListCompleted
-						hideTasks={ hideTasks }
-						keepTasks={ keepTasks }
-					/>
+					<TaskListCompleted hideTasks={ hideTasks } />
 				) }
 			</>
 		);

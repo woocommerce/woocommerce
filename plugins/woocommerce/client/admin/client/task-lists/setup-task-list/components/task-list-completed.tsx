@@ -12,10 +12,8 @@ import HeaderImage from '../assets/task-list-completed.svg';
 
 export const TaskListCompleted = ( {
 	hideTasks,
-	keepTasks,
 }: {
 	hideTasks: () => void;
-	keepTasks: () => void;
 } ) => {
 	return (
 		<>
@@ -37,10 +35,7 @@ export const TaskListCompleted = ( {
 									'woocommerce'
 								) }
 							</h2>
-							<Button isSecondary onClick={ keepTasks }>
-								{ __( 'Keep list', 'woocommerce' ) }
-							</Button>
-							<Button isPrimary onClick={ hideTasks }>
+							<Button variant="primary" onClick={ hideTasks }>
 								{ __( 'Hide this list', 'woocommerce' ) }
 							</Button>
 						</div>
