@@ -54,8 +54,15 @@ function tools_reset_launch_your_store() {
 	);
 	update_option( \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task::COMPLETED_OPTION, $tasks_completed );
 
-	// Reset task list completion tracking.
-	delete_option( \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList::COMPLETED_OPTION );
+	// Reset setup task list completion tracking.
+	$task_lists_completed = get_option( \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList::COMPLETED_OPTION, array() );
+	$task_lists_completed = array_filter(
+		$task_lists_completed,
+		function( $task_list ) {
+			return 'setup' !== $task_list;
+		}
+	);
+	update_option( \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList::COMPLETED_OPTION, $task_lists_completed );
 
 	return true;
 }
