@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
-import { ReactNode } from 'react';
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
+import { Extension } from '@woocommerce/data';
+import { Link } from '@woocommerce/components';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -13,24 +15,44 @@ import sanitizeHTML from '~/lib/sanitize-html';
 import './plugin-card.scss';
 
 export const PluginCard = ( {
-	installed = false,
-	icon,
-	title,
+	plugin: {
+		is_activated: installed = false,
+		image_url: imageUrl,
+		key: pluginKey,
+		label: title,
+		description,
+		learn_more_link: learnMoreLinkUrl,
+	},
 	onChange = () => {},
 	checked = false,
-	description,
-	learnMoreLink,
+	children,
 }: {
-	// Checkbox will be hidden if true
+	plugin: Pick<
+		Extension,
+		| 'is_activated'
+		| 'image_url'
+		| 'key'
+		| 'label'
+		| 'description'
+		| 'learn_more_link'
+	>;
 	installed?: boolean;
-	key?: string;
-	icon: ReactNode;
-	title: string | ReactNode;
-	description: string | ReactNode;
+	onChange?: ( arg0: unknown ) => void;
 	checked?: boolean;
-	onChange?: () => void;
-	learnMoreLink?: ReactNode;
+	children?: React.ReactNode;
 } ) => {
+	let learnMoreLink = null;
+	React.Children.forEach( children, ( child ) => {
+		if (
+			React.isValidElement( child ) &&
+			child.type === PluginCard.LearnMoreLink
+		) {
+			learnMoreLink = React.cloneElement( child, {
+				// @ts-expect-error -- @types/react is deficient here
+				learnMoreLink: learnMoreLinkUrl,
+			} );
+		}
+	} );
 	return (
 		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
 		<div
@@ -48,7 +70,7 @@ export const PluginCard = ( {
 						onClick={ ( e ) => e.stopPropagation() }
 					/>
 				) }
-				{ icon }
+				{ imageUrl ? <img src={ imageUrl } alt={ pluginKey } /> : null }
 				<div
 					className={ clsx(
 						'woocommerce-profiler-plugins-plugin-card-text-header',
@@ -76,3 +98,25 @@ export const PluginCard = ( {
 		</div>
 	);
 };
+
+PluginCard.LearnMoreLink = ( {
+	learnMoreLink,
+	onClick,
+}: {
+	learnMoreLink?: Extension[ 'learn_more_link' ];
+	onClick?: React.MouseEventHandler< HTMLAnchorElement >;
+} ) => (
+	<Link
+		onClick={ ( event ) => {
+			if ( typeof onClick === 'function' ) {
+				event.stopPropagation();
+				onClick( event );
+			}
+		} }
+		href={ learnMoreLink ?? '' }
+		target="_blank"
+		type="external"
+	>
+		{ __( 'Learn More', 'woocommerce' ) }
+	</Link>
+);

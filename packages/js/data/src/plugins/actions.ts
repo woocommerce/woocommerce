@@ -310,6 +310,7 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 
 		return response;
 	} catch ( error ) {
+		console.error( error );
 		throw error;
 	}
 }

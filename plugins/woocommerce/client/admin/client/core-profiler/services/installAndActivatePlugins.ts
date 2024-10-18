@@ -39,6 +39,7 @@ export type InstallationCompletedResult = {
 export type PluginInstallError = {
 	plugin: string;
 	error: string;
+	errorDetails: Pick< InstallAndActivateErrorResponse, 'data' >;
 };
 
 const createInstallationCompletedWithErrorsEvent = (
@@ -81,6 +82,12 @@ export type PluginInstallerMachineContext = {
 export type InstallAndActivateErrorResponse = {
 	error: string;
 	message: string;
+	data: {
+		code: string | 'woocommerce_rest_cannot_update';
+		data: {
+			status: number;
+		};
+	};
 };
 
 type InstallAndActivateSuccessResponse = {
@@ -245,6 +252,7 @@ export const pluginInstallerMachine = createMachine(
 			} ),
 			assignInstallationErrorDetails: assign( {
 				errors: ( { context, event } ) => {
+					console.log("inside", context.errors, event)
 					return [
 						...context.errors,
 						{
@@ -252,6 +260,9 @@ export const pluginInstallerMachine = createMachine(
 							error: (
 								event as ErrorActorEvent< InstallAndActivateErrorResponse >
 							 ).error.message,
+							errorDetails: (
+								event as ErrorActorEvent< InstallAndActivateErrorResponse >
+							 ).error,
 						},
 					];
 				},
@@ -305,6 +316,7 @@ export const pluginInstallerMachine = createMachine(
 				}: {
 					input: { pluginsInstallationQueue: PluginNames[] };
 				} ) => {
+					console.log("yety")
 					return dispatch(
 						PLUGINS_STORE_NAME
 					).installAndActivatePlugins( [

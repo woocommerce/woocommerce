@@ -1,4 +1,4 @@
-@import "../../shared.scss";
+@import "../../../../shared.scss";
 
 .woocommerce-profiler-plugins-plugin-card {
 	max-width: 492px;
@@ -9,7 +9,7 @@
 	border-radius: 2px;
 	padding: 26px;
 	align-items: flex-start;
-	flex: 0 0 48%;
+	flex: 1 0 48%;
 
 	&:hover {
 		cursor: pointer;

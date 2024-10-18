@@ -60,7 +60,8 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { BuilderIntro } from './pages/BuilderIntro';
 import { getCountryStateOptions } from './services/country';
 import { CoreProfilerLoader } from './components/loader/Loader';
-import { Plugins } from './pages/Plugins';
+import { Plugins } from './pages/Plugins/Plugins';
+import { PluginsInstallationError } from './pages/Plugins/PluginsInstallationError';
 import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
@@ -1354,6 +1355,30 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 				},
 				plugins: {
+					initial: 'init',
+					states: {
+						init: {
+							always: [
+								{
+									guard: 'hasPluginInstallationErrors',
+									target: 'error',
+								},
+								{ target: 'default' },
+							],
+						},
+						default: {
+							meta: {
+								progress: 80,
+								component: Plugins,
+							},
+						},
+						error: {
+							meta: {
+								progress: 80,
+								component: PluginsInstallationError,
+							},
+						},
+					},
 					entry: [
 						{
 							type: 'recordTracksStepViewed',
@@ -1389,10 +1414,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								'recordTracksPluginsInstallationRequest',
 							],
 						},
-					},
-					meta: {
-						progress: 80,
-						component: Plugins,
 					},
 				},
 				postPluginInstallation: {
@@ -1613,6 +1634,9 @@ export const CoreProfilerController = ( {
 								plugin.key === 'jetpack' && plugin.is_activated
 						) !== undefined
 					);
+				},
+				hasPluginInstallationErrors: ( { context } ) => {
+					return context.pluginsInstallationErrors.length > 0;
 				},
 			},
 		} );

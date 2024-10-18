@@ -1,3 +1,4 @@
+// @ts-nocheck --
 /**
  * External dependencies
  */
@@ -12,15 +13,15 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext } from '../index';
+import { CoreProfilerStateMachineContext } from '../../index';
 import {
 	PluginsLearnMoreLinkClickedEvent,
 	PluginsInstallationRequestedEvent,
 	PluginsPageSkippedEvent,
-} from '../events';
-import { Heading } from '../components/heading/heading';
-import { Navigation } from '../components/navigation/navigation';
-import { PluginCard } from '../components/plugin-card/plugin-card';
+} from '../../events';
+import { Heading } from '../../components/heading/heading';
+import { Navigation } from '../../components/navigation/navigation';
+import { PluginCard } from './components/plugin-card/plugin-card';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const locale = ( getAdminSetting( 'locale' )?.siteLocale || 'en_US' ).replace(
@@ -34,7 +35,7 @@ const joinWithAnd = ( items: string[] ) => {
 	} ).formatToParts( items );
 };
 
-export const Plugins = ( {
+export const PluginsInstallationError = ( {
 	context,
 	navigationProgress,
 	sendEvent,
@@ -114,12 +115,16 @@ export const Plugins = ( {
 		}
 		return part.value;
 	};
+	console.log(
+		'page',
+		context.pluginsInstallationErrors[ 0 ].errorDetails.data
+	);
 	const errorMessage = context.pluginsInstallationErrors.length
 		? interpolateComponents( {
 				mixedString: sprintf(
 					// Translators: %s is a list of plugins that does not need to be translated
 					__(
-						'Oops! We encountered a problem while installing %s. {{link}}Please try again{{/link}}.',
+						'Oops! We encountered EREEERRRZ a problem while installing %s. {{link}}Please try again{{/link}}.',
 						'woocommerce'
 					),
 					joinWithAnd(
