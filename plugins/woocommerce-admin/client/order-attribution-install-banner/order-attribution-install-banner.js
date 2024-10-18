@@ -3,6 +3,7 @@
  */
 import { Button, Card, CardBody } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
+import { plugins } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
@@ -12,28 +13,58 @@ import { getPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import OrderAttributionInstallBannerImage from './order-attribution-install-banner-image';
-import useOrderAttributionInstallBanner from './use-order-attribution-install-banner';
+import { useOrderAttributionInstallBanner } from './use-order-attribution-install-banner';
 import './style.scss';
+
+const WC_ANALYTICS_PRODUCT_URL =
+	'https://woocommerce.com/products/woocommerce-analytics';
 
 export const OrderAttributionInstallBanner = ( {
 	bannerImage = <OrderAttributionInstallBannerImage />,
 	eventContext = 'analytics-overview',
+	isHeaderBanner = false,
 } ) => {
 	const { isDismissed, dismiss, shouldShowBanner } =
 		useOrderAttributionInstallBanner();
 
+	const shouldRender =
+		( isHeaderBanner && shouldShowBanner && isDismissed ) ||
+		( ! isHeaderBanner && shouldShowBanner && ! isDismissed );
+
+	const onButtonClick = () => {
+		recordEvent( 'order_attribution_install_banner_clicked', {
+			path: getPath(),
+			context: eventContext,
+		} );
+	};
+
 	useEffect( () => {
-		if ( ! shouldShowBanner || isDismissed ) {
+		if ( ! shouldRender ) {
 			return;
 		}
 		recordEvent( 'order_attribution_install_banner_viewed', {
 			path: getPath(),
 			context: eventContext,
 		} );
-	}, [ eventContext, shouldShowBanner, isDismissed ] );
+	}, [ eventContext, shouldRender ] );
 
-	if ( ! shouldShowBanner || isDismissed ) {
+	if ( ! shouldRender ) {
 		return null;
+	}
+
+	if ( isHeaderBanner ) {
+		return (
+			<Button
+				className="woocommerce-order-attribution-install-header-banner"
+				href={ WC_ANALYTICS_PRODUCT_URL }
+				variant="secondary"
+				icon={ plugins }
+				size="default"
+				onClick={ onButtonClick }
+			>
+				{ __( 'Try Order Attribution', 'woocommerce' ) }
+			</Button>
+		);
 	}
 
 	return (
@@ -78,17 +109,9 @@ export const OrderAttributionInstallBanner = ( {
 					</Text>
 					<div>
 						<Button
-							href="https://woocommerce.com/products/woocommerce-analytics"
+							href={ WC_ANALYTICS_PRODUCT_URL }
 							variant="primary"
-							onClick={ () =>
-								recordEvent(
-									'order_attribution_install_banner_clicked',
-									{
-										path: getPath(),
-										context: eventContext,
-									}
-								)
-							}
+							onClick={ onButtonClick }
 						>
 							{ __( 'Try it now', 'woocommerce' ) }
 						</Button>
