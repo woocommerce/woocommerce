@@ -3551,7 +3551,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_saving_order_does_not_save_cogs_value_if_cogs_disabled() {
 		$this->toggle_cot_feature_and_usage( true );
-		$this->expect_doing_it_wrong( 'WC_Abstract_Order::set_cogs_total_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::set_cogs_total_value' );
 
 		$meta_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
 
@@ -3631,7 +3631,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		if ( $cogs_enabled ) {
 			$this->enable_cogs_feature();
 		} elseif ( $order_has_cogs ) {
-			$this->expect_doing_it_wrong( 'WC_Abstract_Order::get_cogs_total_value' );
+			$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::get_cogs_total_value' );
 		}
 
 		$meta_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );

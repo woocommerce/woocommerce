@@ -72,7 +72,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	 */
 	public function test_calculate_cogs_simply_returns_false_if_cogs_disabled() {
 		$this->sut->has_cogs_value = true;
-		$this->expect_doing_it_wrong( 'WC_Order_Item::calculate_cogs_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Order_Item::calculate_cogs_value' );
 
 		$this->assertFalse( $this->sut->calculate_cogs_value() );
 	}
@@ -127,7 +127,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	public function test_get_cogs_value_returns_zero_if_cogs_feature_is_not_enabled() {
 		$this->sut->cogs_core_value = 12.34;
 		$this->sut->has_cogs_value  = true;
-		$this->expect_doing_it_wrong( 'WC_Order_Item::get_cogs_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Order_Item::get_cogs_value' );
 
 		$this->assertEquals( 0, $this->sut->get_cogs_value() );
 	}
@@ -147,7 +147,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	 */
 	public function test_set_cogs_value_does_nothing_if_cogs_feature_is_not_enabled() {
 		$this->sut->has_cogs_value = true;
-		$this->expect_doing_it_wrong( 'WC_Order_Item::set_cogs_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Order_Item::set_cogs_value' );
 
 		$this->sut->set_cogs_value( 12.34 );
 		$this->assertEquals( 0, $this->sut->get_cogs_value() );

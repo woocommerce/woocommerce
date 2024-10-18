@@ -442,7 +442,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	public function test_calculate_total_cogs_simply_returns_false_if_cogs_disabled() {
 		$order = new WC_Order();
 
-		$this->expect_doing_it_wrong( 'WC_Abstract_Order::calculate_cogs_total_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::calculate_cogs_total_value' );
 		$this->assertEquals( 0, $order->calculate_cogs_total_value() );
 	}
 

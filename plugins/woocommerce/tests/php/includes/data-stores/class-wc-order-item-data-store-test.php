@@ -45,7 +45,7 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_cogs_is_not_persisted_when_cogs_is_disabled() {
 		$item = new WC_Order_Item_Product();
-		$this->expect_doing_it_wrong( 'WC_Order_Item::set_cogs_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Order_Item::set_cogs_value' );
 		$item->set_cogs_value( 12.34 );
 		$item->save();
 
@@ -139,7 +139,7 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 
 		$item2 = new WC_Order_Item_Product( $item->get_id() );
 
-		$this->expect_doing_it_wrong( 'WC_Order_Item::get_cogs_value' );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Order_Item::get_cogs_value' );
 		$this->assertEquals( 0, $item2->get_cogs_value() );
 	}
 
