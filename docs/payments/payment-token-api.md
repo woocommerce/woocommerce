@@ -322,7 +322,7 @@ Supported types/labels:
 
 ```php
 array(
-	'mastercard'       => __( 'MasterCard', 'woocommerce' ),
+	'mastercard'       => __( 'Mastercard', 'woocommerce' ),
 	'visa'             => __( 'Visa', 'woocommerce' ),
 	'discover'         => __( 'Discover', 'woocommerce' ),
 	'american express' => __( 'American Express', 'woocommerce' ),
