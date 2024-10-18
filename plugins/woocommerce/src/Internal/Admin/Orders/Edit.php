@@ -160,6 +160,11 @@ class Edit {
 		 *
 		 * Fires after all built-in meta boxes have been added. Custom metaboxes may be enqueued here.
 		 *
+		 * Note that the documentation for this hook (and for the corresponding 'add_meta_boxes_<SCREEN_ID>' hook)
+		 * suggest that a post type will be supplied for the first parameter, and and an instance of WP_Post will be
+		 * supplied as the second parameter. We are not doing that here, however WordPress itself also deviates from
+		 * this in respect of comments and (though now less relevant) links.
+		 *
 		 * @since 3.8.0.
 		 */
 		do_action( 'add_meta_boxes', $this->screen_id, $this->order );
