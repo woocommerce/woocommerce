@@ -1,25 +1,87 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
+import {
+	BlockContextProvider,
+	useBlockProps,
+	InnerBlocks,
+} from '@wordpress/block-editor';
+import { useCollectionData } from '@woocommerce/base-context/hooks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { EditProps } from './types';
-import { PriceSlider } from './components/price-slider';
-import { Inspector } from './components/inspector';
+import { getAllowedBlocks } from '../../utils';
+import { getPriceFilterData } from './utils';
+import { InitialDisabled } from '../../components/initial-disabled';
 
-const Edit = ( props: EditProps ) => {
+const Edit = () => {
 	const blockProps = useBlockProps();
+
+	const { results, isLoading } = useCollectionData( {
+		queryPrices: true,
+		queryState: {},
+		isEditor: true,
+	} );
 
 	return (
 		<div { ...blockProps }>
-			<Inspector { ...props } />
-			<Disabled>
-				<PriceSlider { ...props } />
-			</Disabled>
+			<InitialDisabled>
+				<BlockContextProvider
+					value={ {
+						filterData: {
+							price: getPriceFilterData( results ),
+							isLoading,
+						},
+					} }
+				>
+					<InnerBlocks
+						allowedBlocks={ getAllowedBlocks() }
+						template={ [
+							[
+								'core/group',
+								{
+									layout: {
+										type: 'flex',
+										flexWrap: 'nowrap',
+									},
+									metadata: {
+										name: __( 'Header', 'woocommerce' ),
+									},
+									style: {
+										spacing: {
+											blockGap: '0',
+										},
+									},
+								},
+								[
+									[
+										'core/heading',
+										{
+											level: 3,
+											content: __(
+												'Price',
+												'woocommerce'
+											),
+										},
+									],
+									[
+										'woocommerce/product-filter-clear-button',
+										{
+											lock: {
+												remove: true,
+												move: false,
+											},
+										},
+									],
+								],
+							],
+							[ 'woocommerce/product-filter-price-slider', {} ],
+						] }
+					/>
+				</BlockContextProvider>
+			</InitialDisabled>
 		</div>
 	);
 };

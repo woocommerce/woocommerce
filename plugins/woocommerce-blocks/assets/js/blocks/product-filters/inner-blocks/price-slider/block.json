@@ -1,0 +1,26 @@
+{
+	"name": "woocommerce/product-filter-price-slider",
+	"version": "1.0.0",
+	"title": "Price Slider",
+	"description": "A slider helps shopper choose a price range.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"html": false
+	},
+	"attributes": {
+		"showInputFields": {
+			"type": "boolean",
+			"default": true
+		},
+		"inlineInput": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"ancestor": [ "woocommerce/product-filter-price" ],
+	"usesContext": [ "filterData" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
