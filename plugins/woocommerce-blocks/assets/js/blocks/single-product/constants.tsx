@@ -25,20 +25,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 		'core/columns',
 		{},
 		[
-			[
-				'core/column',
-				{},
-				[
-					[
-						'woocommerce/product-image',
-						{
-							showSaleBadge: false,
-							isDescendentOfSingleProductBlock: true,
-							imageSizing: ImageSizing.SINGLE,
-						},
-					],
-				],
-			],
+			[ 'core/column', {}, [ [ 'woocommerce/product-gallery' ] ] ],
 			[
 				'core/column',
 				{},
