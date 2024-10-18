@@ -294,7 +294,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_cogs_value( 12.34 );
 
-		add_filter( 'woocommerce_get_cogs_total_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
+		add_filter( 'woocommerce_get_product_cogs_total_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
 		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_total_value() );
 	}

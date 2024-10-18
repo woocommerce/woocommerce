@@ -11,6 +11,7 @@
  */
 
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -25,6 +26,7 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php';
  */
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	use WC_Item_Totals;
+	use CogsAwareTrait;
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
@@ -852,16 +854,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function type_to_group( $type ) {
 		$type_to_group = apply_filters(
 			'woocommerce_order_type_to_group',
-			array(
-				'line_item' => 'line_items',
-				'tax'       => 'tax_lines',
-				'shipping'  => 'shipping_lines',
-				'fee'       => 'fee_lines',
-				'coupon'    => 'coupon_lines',
-			)
+			$this->item_types_to_group
 		);
-		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
+		return $type_to_group[ $type ] ?? '';
 	}
+
+	/**
+	 * Mappings of order item types to groups.
+	 *
+	 * @var array
+	 */
+	protected array $item_types_to_group = array(
+		'line_item' => 'line_items',
+		'tax'       => 'tax_lines',
+		'shipping'  => 'shipping_lines',
+		'fee'       => 'fee_lines',
+		'coupon'    => 'coupon_lines',
+	);
 
 	/**
 	 * Return an array of items/products within this order.
@@ -1807,7 +1816,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_total_fees() {
 		return array_reduce(
 			$this->get_fees(),
-			function( $carry, $item ) {
+			function ( $carry, $item ) {
 				return $carry + (float) $item->get_total();
 			},
 			0.0
@@ -1963,6 +1972,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, wc_get_price_decimals() ) );
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
 		$this->set_total( NumberUtil::round( $cart_total + $fees_total + (float) $this->get_shipping_total() + (float) $this->get_cart_tax() + (float) $this->get_shipping_tax(), wc_get_price_decimals() ) );
+
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->calculate_cogs_total_value();
+		}
 
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
@@ -2420,11 +2433,104 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @return string Order title.
 	 */
-	public function get_title() : string {
+	public function get_title(): string {
 		if ( method_exists( $this->data_store, 'get_title' ) ) {
 			return $this->data_store->get_title( $this );
 		} else {
 			return __( 'Order', 'woocommerce' );
+		}
+	}
+
+	/**
+	 * Indicates if the current order has an associated Cost of Goods Sold value.
+	 *
+	 * Derived classes representing orders that have a COGS value should override this method to return "true".
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return bool True if this order has an associated Cost of Goods Sold value.
+	 */
+	public function has_cogs() {
+		return false;
+	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value and set it as the actual value for this order.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return float The calculated value.
+	 */
+	public function calculate_cogs_total_value(): float {
+		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
+			return 0;
+		}
+
+		$cogs_value = $this->calculate_cogs_total_value_core();
+
+		/**
+		 * Filter to modify the Cost of Goods Sold value that gets calculated for a given order.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float $value The value originally calculated.
+		 * @param WC_Abstract_Order $order The order for which the value is calculated.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_calculated_order_cogs_value', $cogs_value, $this );
+
+		$this->set_cogs_total_value( $cogs_value );
+
+		return $cogs_value;
+	}
+
+	/**
+	 * Core method to calculate the Cost of Goods Sold value for this order:
+	 * it doesn't check if COGS is enabled at class or system level, doesn't fire hooks, and doesn't set the value as the current one for the order.
+	 *
+	 * @return float The calculated value.
+	 */
+	protected function calculate_cogs_total_value_core(): float {
+		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
+			return 0;
+		}
+
+		$value = 0;
+		foreach ( array_keys( $this->item_types_to_group ) as $item_type ) {
+			$order_items = $this->get_items( $item_type );
+			foreach ( $order_items as $item ) {
+				if ( $item->has_cogs() ) {
+					$item->calculate_cogs_value();
+					$value += $item->get_cogs_value();
+				}
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get the value of the Cost of Goods Sold for this order.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will always return zero.
+	 *
+	 * @return float The current value for this order.
+	 */
+	public function get_cogs_total_value() {
+		return (float) ( $this->has_cogs() && $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ? $this->get_prop( 'cogs_total_value' ) : 0 );
+	}
+
+	/**
+	 * Set the value of the Cost of Goods Sold for this order.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will have no effect.
+	 *
+	 * @param float $value The value to set for this order.
+	 *
+	 * @internal This method is intended for data store usage only, the value set here will be overridden by calculate_cogs_total_value.
+	 */
+	public function set_cogs_total_value( float $value ) {
+		if ( $this->has_cogs() && $this->cogs_is_enabled( __CLASS__ . '::' . __METHOD__ ) ) {
+			$this->set_prop( 'cogs_total_value', $value );
 		}
 	}
 }
