@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore total_formatted column in exported reports
