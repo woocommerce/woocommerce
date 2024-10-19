@@ -3,7 +3,7 @@ const addAProductToCart = async ( page, productId, quantity = 1 ) => {
 		const responsePromise = page.waitForResponse(
 			'**/wp-json/wc/store/v1/cart?**'
 		);
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.goto( `shop/?add-to-cart=${ productId }` );
 		await responsePromise;
 		await page.getByRole( 'alert' ).waitFor( { state: 'visible' } );
 	}

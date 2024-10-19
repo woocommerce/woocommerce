@@ -237,7 +237,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 			const month = ( date.getMonth() + 1 ).toString().padStart( 2, '0' );
 			await expect(
 				page.goto(
-					`/wp-content/uploads/${ date.getFullYear() }/${ month }/image-03-100x100.png`
+					`wp-content/uploads/${ date.getFullYear() }/${ month }/image-03-100x100.png`
 				)
 			).toBeTruthy();
 		}

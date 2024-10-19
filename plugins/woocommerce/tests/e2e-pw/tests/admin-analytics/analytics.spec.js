@@ -21,7 +21,7 @@ test.describe( 'Analytics pages', { tag: [ '@payments', '@services' ] }, () => {
 		} ) => {
 			const urlTitle = aPages.toLowerCase();
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2F${ urlTitle }`
+				`wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2F${ urlTitle }`
 			);
 			const pageTitle = page.locator(
 				'.woocommerce-layout__header-wrapper > h1'

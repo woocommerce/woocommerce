@@ -196,7 +196,7 @@ test.describe(
 			page,
 		} ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
 
 			await expect(
@@ -228,7 +228,7 @@ test.describe(
 
 		test( 'downloads revenue report as CSV', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 			);
 
 			// the revenue report can either download immediately, or get mailed.
@@ -253,7 +253,7 @@ test.describe(
 
 		test( 'use date filter on overview page', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
 
 			// assert that current month is shown and that values are for that
@@ -319,7 +319,7 @@ test.describe(
 
 		test( 'use date filter on revenue report', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 			);
 
 			// assert that current month is shown and that values are for that
@@ -405,7 +405,7 @@ test.describe(
 
 		test( 'set custom date range on revenue report', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 			);
 
 			// assert that current month is shown and that values are for that
@@ -506,7 +506,7 @@ test.describe(
 
 		test( 'use advanced filters on orders report', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders'
 			);
 
 			// no filters applied
@@ -600,7 +600,7 @@ test.describe(
 			page,
 		} ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
 			);
 
 			// no filters applied
@@ -692,7 +692,7 @@ test.describe(
 
 		test( 'analytics settings', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fsettings'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fsettings'
 			);
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 
