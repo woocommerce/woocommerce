@@ -654,7 +654,7 @@ test.describe(
 			} );
 			// workaround to fill shipping details since there is an issue with showing
 			// shipping calculator on the cart block-based experience for logged out user
-			await page.goto( '/cart/' ); // we will use the old cart for this purpose
+			await page.goto( 'cart/' ); // we will use the old cart for this purpose
 			await page.locator( '.shipping-calculator-button' ).click();
 			await page.getByLabel( 'Town / City' ).fill( 'Sacramento' );
 			await page.getByLabel( 'ZIP Code' ).fill( '55555' );

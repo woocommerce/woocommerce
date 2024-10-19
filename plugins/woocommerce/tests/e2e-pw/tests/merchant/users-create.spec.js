@@ -94,7 +94,7 @@ for ( const userData of users ) {
 
 			await test.step( 'verify the new user can login', async () => {
 				await page.context().clearCookies();
-				await page.goto( '/wp-login.php' );
+				await page.goto( 'wp-login.php' );
 				await expect(
 					page.getByLabel( 'Username or Email Address' )
 				).toBeVisible();

@@ -74,7 +74,7 @@ test.describe(
 
 			await addAProductToCart( page, productId );
 
-			await page.goto( '/checkout/' );
+			await page.goto( 'checkout/' );
 
 			await page
 				.locator( '#billing_first_name' )

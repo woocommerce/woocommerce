@@ -88,7 +88,7 @@ test.describe( 'Edit order', { tag: [ '@services', '@hpos' ] }, () => {
 		if ( process.env.DISABLE_HPOS === '1' ) {
 			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
 		} else {
-			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
+			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 		}
 
 		// confirm we're on the orders page
@@ -125,7 +125,7 @@ test.describe( 'Edit order', { tag: [ '@services', '@hpos' ] }, () => {
 		).toContainText( 'Order status changed from Processing to Completed.' );
 
 		// load the orders listing and confirm order is completed
-		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
 		await expect(
 			page
@@ -155,7 +155,7 @@ test.describe( 'Edit order', { tag: [ '@services', '@hpos' ] }, () => {
 		).toBeVisible();
 
 		// load the orders listing and confirm order is cancelled
-		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
 		await expect(
 			page

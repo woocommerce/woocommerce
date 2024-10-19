@@ -209,7 +209,7 @@ test.describe(
 				console.log( error );
 			}
 
-			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
 				page.getByRole( 'menuitem', {
@@ -241,7 +241,7 @@ test.describe(
 				console.log( error );
 			}
 
-			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
 				page.getByRole( 'menuitem', {
@@ -270,7 +270,7 @@ test.describe(
 				console.log( error );
 			}
 
-			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
 				page.getByRole( 'menuitem', {

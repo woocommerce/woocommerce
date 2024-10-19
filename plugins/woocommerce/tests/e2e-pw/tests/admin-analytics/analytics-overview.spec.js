@@ -122,7 +122,7 @@ test.describe( 'Analytics pages', { tag: [ '@payments', '@services' ] }, () => {
 			const data = {
 				_fields: 'id',
 			};
-			const response = await request.get( '/wp-json/wp/v2/users/me', {
+			const response = await request.get( 'wp-json/wp/v2/users/me', {
 				data,
 				headers,
 			} );

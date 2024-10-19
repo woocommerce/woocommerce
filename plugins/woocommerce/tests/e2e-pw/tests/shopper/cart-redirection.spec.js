@@ -59,7 +59,7 @@ test.describe(
 		test( 'can redirect user to cart from shop page', async ( {
 			page,
 		} ) => {
-			await page.goto( '/shop/' );
+			await page.goto( 'shop/' );
 			await page
 				.locator(
 					`a[data-product_id='${ productId }'][href*=add-to-cart]`
@@ -75,7 +75,7 @@ test.describe(
 		test( 'can redirect user to cart from detail page', async ( {
 			page,
 		} ) => {
-			await page.goto( '/shop/' );
+			await page.goto( 'shop/' );
 			await page.locator( `text=${ productName }` ).click();
 
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();

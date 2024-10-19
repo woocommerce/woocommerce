@@ -189,7 +189,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await expect( productId ).toBeDefined();
 				await expect( title ).toHaveText( productData.name );
 
-				await page.goto( `/?post_type=product&p=${ productId }` );
+				await page.goto( `?post_type=product&p=${ productId }` );
 
 				await expect(
 					page.getByRole( 'heading', { name: productData.name } )

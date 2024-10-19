@@ -56,7 +56,7 @@ test.describe.serial(
 		);
 
 		test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
-			await page.goto( '/wp-admin/edit.php?post_type=product' );
+			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectBlockProductEditor( page );
 		} );
@@ -86,7 +86,7 @@ test.describe.serial(
 
 		test( 'can be disabled from settings', async ( { page } ) => {
 			await toggleBlockProductEditor( 'disable', page );
-			await page.goto( '/wp-admin/edit.php?post_type=product' );
+			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectOldProductEditor( page );
 		} );

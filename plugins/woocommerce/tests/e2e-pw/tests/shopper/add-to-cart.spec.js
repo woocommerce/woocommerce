@@ -71,7 +71,7 @@ test.describe(
 				}
 			);
 			await addAProductToCart( page, productId );
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 			await expect( page.locator( 'td.product-name' ) ).toContainText(
 				productName
 			);

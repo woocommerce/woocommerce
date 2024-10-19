@@ -487,7 +487,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 		test( 'can a shopper add the simple product to the cart', async ( {
 			page,
 		} ) => {
-			await page.goto( `/?post_type=product&p=${ productId }` );
+			await page.goto( `?post_type=product&p=${ productId }` );
 
 			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();

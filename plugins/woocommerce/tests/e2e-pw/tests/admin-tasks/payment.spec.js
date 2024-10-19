@@ -22,7 +22,7 @@ const test = baseTest.extend( {
 		const codInitialState = await api.get( 'payment_gateways/cod' );
 
 		// Disable the help popover.
-		await wpApi.post( '/wp-json/wp/v2/users/1?_locale=user', {
+		await wpApi.post( 'wp-json/wp/v2/users/1?_locale=user', {
 			data: {
 				woocommerce_meta: {
 					help_panel_highlight_shown: '"yes"',

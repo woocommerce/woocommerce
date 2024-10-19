@@ -76,7 +76,7 @@ test.describe(
 		} );
 
 		test( 'can apply a coupon', async ( { page } ) => {
-			await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
+			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 
 			// open modal for adding line items
 			await page.locator( 'button.add-line-item' ).click();

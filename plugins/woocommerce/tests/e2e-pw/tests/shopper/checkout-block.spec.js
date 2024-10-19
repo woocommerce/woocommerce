@@ -902,7 +902,7 @@ test.describe(
 			newAccountOrderId = getOrderIdFromUrl( page );
 
 			// confirms that an account was created
-			await page.goto( '/my-account/' );
+			await page.goto( 'my-account/' );
 			await expect(
 				page.getByRole( 'heading', { name: 'My account' } )
 			).toBeVisible();
@@ -1003,7 +1003,7 @@ test.describe(
 			newAccountOrderId = getOrderIdFromUrl( page );
 
 			// confirms that an account was created
-			await page.goto( '/my-account/' );
+			await page.goto( 'my-account/' );
 			await expect(
 				page.getByRole( 'heading', { name: 'My account' } )
 			).toBeVisible();
@@ -1013,7 +1013,7 @@ test.describe(
 				.click();
 
 			// Log in again.
-			await page.goto( '/my-account/' );
+			await page.goto( 'my-account/' );
 			await page
 				.locator( '#username' )
 				.fill( newAccountEmailWithCustomPassword );

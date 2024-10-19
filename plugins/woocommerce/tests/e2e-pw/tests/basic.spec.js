@@ -12,7 +12,7 @@ test.beforeAll( async ( { baseURL } ) => {
 } );
 
 test( 'Load the home page', async ( { page } ) => {
-	await page.goto( '/' );
+	await page.goto( '' );
 	await expect(
 		await page
 			.getByRole( 'link', { name: 'WooCommerce Core E2E Test' } )
@@ -27,7 +27,7 @@ test( 'Load the home page', async ( { page } ) => {
 
 test( 'Load wp-admin as admin', async ( { page } ) => {
 	await page.context().clearCookies();
-	await page.goto( '/wp-admin' );
+	await page.goto( 'wp-admin' );
 	await logIn( page, admin.username, admin.password );
 	await expect(
 		page.getByRole( 'heading', { name: 'Dashboard' } )
@@ -36,7 +36,7 @@ test( 'Load wp-admin as admin', async ( { page } ) => {
 
 test( 'Load my account page as customer', async ( { page } ) => {
 	await page.context().clearCookies();
-	await page.goto( '/my-account' );
+	await page.goto( 'my-account' );
 	await logIn( page, customer.username, customer.password, false );
 	await expect(
 		page.getByRole( 'heading', { name: 'My Account' } )

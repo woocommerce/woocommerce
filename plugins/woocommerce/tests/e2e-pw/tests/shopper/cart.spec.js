@@ -71,7 +71,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 	} );
 
 	async function goToShopPageAndAddProductToCart( page, prodName ) {
-		await page.goto( '/shop/?orderby=date' );
+		await page.goto( 'shop/?orderby=date' );
 		const responsePromise = page.waitForResponse(
 			'**/wp-json/wc/store/v1/batch?**'
 		);
@@ -85,7 +85,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		'should display no item in the cart',
 		{ tag: [ '@could-be-unit-test' ] },
 		async ( { page } ) => {
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 			await expect(
 				page.getByText( 'Your cart is currently empty.' )
 			).toBeVisible();
@@ -98,7 +98,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 			await expect( page.locator( 'td.product-name' ) ).toContainText(
 				productName
 			);
@@ -114,7 +114,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 				await goToShopPageAndAddProductToCart( page, productName );
 			}
 
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 			await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
 		}
 	);
@@ -125,7 +125,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 			await page.locator( 'input.qty' ).fill( '2' );
 			await page.locator( 'text=Update cart' ).click();
 
@@ -140,7 +140,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		{ tag: [ '@could-be-unit-test' ] },
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 
 			// make sure that the product is in the cart
 			await expect(
@@ -164,7 +164,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 			await expect(
 				page.locator( '.cart-subtotal .amount' )
 			).toContainText( `$${ productPrice }` );
@@ -184,7 +184,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		async ( { page } ) => {
 			await goToShopPageAndAddProductToCart( page, productName );
 
-			await page.goto( '/cart/' );
+			await page.goto( 'cart/' );
 
 			await page.locator( '.checkout-button' ).click();
 
@@ -197,7 +197,7 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 	} ) => {
 		// add same product to cart twice time
 		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
+			await page.goto( `shop/?add-to-cart=${ productId }` );
 			await expect(
 				page.getByText(
 					`“${ productName }” has been added to your cart.`
@@ -206,13 +206,13 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		}
 
 		// add the same product the third time
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.goto( `shop/?add-to-cart=${ productId }` );
 		await expect(
 			page.getByText(
 				'You cannot add that amount to the cart — we have 2 in stock and you already have 2 in your cart.'
 			)
 		).toBeVisible();
-		await page.goto( '/cart/' );
+		await page.goto( 'cart/' );
 
 		// attempt to increase quantity over quantity limit
 		await page.getByLabel( 'Product quantity' ).fill( '3' );

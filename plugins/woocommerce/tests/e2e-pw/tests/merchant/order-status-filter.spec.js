@@ -60,7 +60,7 @@ test.describe(
 			test( `should filter by ${ orderStatus[ i ][ 0 ] }`, async ( {
 				page,
 			} ) => {
-				await page.goto( '/wp-admin/admin.php?page=wc-orders' );
+				await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
 				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
 				await expect(

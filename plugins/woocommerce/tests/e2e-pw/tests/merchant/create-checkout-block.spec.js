@@ -138,7 +138,7 @@ test.describe(
 
 				// go to frontend to verify transformed checkout block
 				// before that add product to cart to be able to visit checkout page
-				await page.goto( `/cart/?add-to-cart=${ productId }` );
+				await page.goto( `cart/?add-to-cart=${ productId }` );
 				await page.goto( testPage.slug );
 				await expect(
 					page.getByRole( 'heading', { name: testPage.title } )

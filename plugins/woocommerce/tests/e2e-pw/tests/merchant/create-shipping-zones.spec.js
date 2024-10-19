@@ -471,7 +471,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.goto( `shop/?add-to-cart=${ productId }` );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

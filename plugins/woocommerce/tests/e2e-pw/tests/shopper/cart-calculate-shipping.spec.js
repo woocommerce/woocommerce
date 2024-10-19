@@ -129,7 +129,7 @@ test.describe(
 			'allows customer to calculate Free Shipping if in Germany',
 			{ tag: [ '@could-be-unit-test' ] },
 			async ( { page } ) => {
-				await page.goto( '/cart/' );
+				await page.goto( 'cart/' );
 				// Set shipping country to Germany
 				await page.locator( 'a.shipping-calculator-button' ).click();
 				await page
@@ -151,7 +151,7 @@ test.describe(
 			'allows customer to calculate Flat rate and Local pickup if in France',
 			{ tag: [ '@could-be-unit-test' ] },
 			async ( { page } ) => {
-				await page.goto( '/cart/' );
+				await page.goto( 'cart/' );
 				// Set shipping country to France
 				await page.locator( 'a.shipping-calculator-button' ).click();
 				await page
@@ -181,7 +181,7 @@ test.describe(
 			'should show correct total cart price after updating quantity',
 			{ tag: [ '@could-be-unit-test' ] },
 			async ( { page } ) => {
-				await page.goto( '/cart/' );
+				await page.goto( 'cart/' );
 				await page.locator( 'input.qty' ).fill( '4' );
 				await page.locator( 'text=Update cart' ).click();
 
@@ -204,7 +204,7 @@ test.describe(
 			async ( { page } ) => {
 				await addAProductToCart( page, secondProductId );
 
-				await page.goto( '/cart/' );
+				await page.goto( 'cart/' );
 				await page.locator( 'a.shipping-calculator-button' ).click();
 				await page
 					.locator( '#calc_shipping_country' )
@@ -227,7 +227,7 @@ test.describe(
 				await addAProductToCart( page, secondProductId );
 
 				// Set shipping country to Spain
-				await page.goto( '/cart/' );
+				await page.goto( 'cart/' );
 				await page.locator( 'a.shipping-calculator-button' ).click();
 				await page
 					.locator( '#calc_shipping_country' )

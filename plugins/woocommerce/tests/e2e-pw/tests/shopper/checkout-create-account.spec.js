@@ -169,7 +169,7 @@ test.describe(
 
 			orderId = getOrderIdFromUrl( page );
 
-			await page.goto( '/my-account/' );
+			await page.goto( 'my-account/' );
 			// confirms that an account was created
 			await expect(
 				page.getByRole( 'heading', { name: 'My account' } )
