@@ -1,7 +1,5 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { order } = require( '../../../data' );
-const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL !== undefined;
 
 /**
  * Billing properties to update.
@@ -257,10 +255,8 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			test( `can update status of an order to ${ expectedOrderStatus }`, async ( {
 				request,
 			} ) => {
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( shouldSkip ) {
-					await delay( 1000 ); // if this runs too fast on an external host, it fails
-				}
+				await delay( 1000 ); // if this runs too fast on an external host, it fails
+
 				const requestPayload = {
 					status: expectedOrderStatus,
 				};
