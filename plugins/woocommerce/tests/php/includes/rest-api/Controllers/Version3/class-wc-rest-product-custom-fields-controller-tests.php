@@ -34,6 +34,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		wp_set_current_user( 1 );
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
