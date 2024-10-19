@@ -93,7 +93,7 @@ test.describe(
 					} );
 				// search to narrow it down to just the messages we want
 				await page.goto(
-					`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
 						customerBilling.email
 					) }`
 				);
@@ -238,7 +238,7 @@ test.describe(
 
 			// search to narrow it down to just the messages we want
 			await page.goto(
-				`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
 					customerBilling.email
 				) }`
 			);

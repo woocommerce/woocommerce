@@ -121,7 +121,7 @@ test.describe(
 			}
 
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-settings&tab=site-visibility'
+				'wp-admin/admin.php?page=wc-settings&tab=site-visibility'
 			);
 
 			// The Coming soon radio should not be checked.

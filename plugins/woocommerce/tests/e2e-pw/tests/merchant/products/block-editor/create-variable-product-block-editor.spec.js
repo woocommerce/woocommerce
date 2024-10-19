@@ -246,7 +246,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 		test( 'can edit a variation', async ( { page } ) => {
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_editVariations }`
+				`wp-admin/admin.php?page=wc-admin&path=/product/${ productId_editVariations }`
 			);
 
 			await disableVariableProductBlockTour( { page } );
@@ -341,7 +341,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 		test( 'can delete a variation', async ( { page } ) => {
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
+				`wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
 
 			const getVariationsResponsePromise = page.waitForResponse(
@@ -391,7 +391,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			page,
 		} ) => {
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
+				`wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
 
 			for ( const tab of tabs ) {
@@ -428,7 +428,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			page,
 		} ) => {
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_singleVariation }&tab=variations`
+				`wp-admin/admin.php?page=wc-admin&path=/product/${ productId_singleVariation }&tab=variations`
 			);
 
 			await page

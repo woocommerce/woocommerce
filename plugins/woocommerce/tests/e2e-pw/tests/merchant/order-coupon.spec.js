@@ -121,7 +121,7 @@ test.describe(
 
 		test( 'can remove a coupon', async ( { page } ) => {
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);
 			// assert that there is a coupon on the order
 			await expect(

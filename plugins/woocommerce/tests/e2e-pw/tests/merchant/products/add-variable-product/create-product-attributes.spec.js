@@ -54,7 +54,7 @@ test.describe( 'Add product attributes', { tag: '@gutenberg' }, () => {
 
 		await test.step( `Open "Edit product" page of product id ${ productId }`, async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId }&action=edit`
+				`wp-admin/post.php?post=${ productId }&action=edit`
 			);
 		} );
 

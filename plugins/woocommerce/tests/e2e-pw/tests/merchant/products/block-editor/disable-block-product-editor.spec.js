@@ -63,7 +63,7 @@ test.describe.serial(
 
 		test( 'can be disabled from the header', async ( { page } ) => {
 			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
 			);
 
 			try {

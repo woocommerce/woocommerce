@@ -42,7 +42,7 @@ test.describe( 'Add variations', { tag: '@gutenberg' }, () => {
 	} ) => {
 		await test.step( `Open "Edit product" page of product id ${ productId_generateVariations }`, async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_generateVariations }&action=edit`
+				`wp-admin/post.php?post=${ productId_generateVariations }&action=edit`
 			);
 		} );
 
@@ -90,7 +90,7 @@ test.describe( 'Add variations', { tag: '@gutenberg' }, () => {
 		async ( { page } ) => {
 			await test.step( `Open "Edit product" page of product id ${ productId_addManually }`, async () => {
 				await page.goto(
-					`/wp-admin/post.php?post=${ productId_addManually }&action=edit`
+					`wp-admin/post.php?post=${ productId_addManually }&action=edit`
 				);
 			} );
 
