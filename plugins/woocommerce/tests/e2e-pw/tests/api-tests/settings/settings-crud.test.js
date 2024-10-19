@@ -12,7 +12,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 	test.describe( 'List all settings groups', () => {
 		test( 'can retrieve all settings groups', async ( { request } ) => {
 			// call API to retrieve all settings groups
-			const response = await request.get( '/wp-json/wc/v3/settings' );
+			const response = await request.get( 'wp-json/wc/v3/settings' );
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -264,7 +264,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve all general settings', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/general'
+				'wp-json/wc/v3/settings/general'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -590,7 +590,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve a settings option', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/general/woocommerce_allowed_countries'
+				'wp-json/wc/v3/settings/general/woocommerce_allowed_countries'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -619,7 +619,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can update a settings option', async ( { request } ) => {
 			// call API to update settings options
 			const response = await request.put(
-				'/wp-json/wc/v3/settings/general/woocommerce_allowed_countries',
+				'wp-json/wc/v3/settings/general/woocommerce_allowed_countries',
 				{
 					data: {
 						value: 'all_except',
@@ -653,7 +653,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can batch update settings options', async ( { request } ) => {
 			// call API to update settings options
 			const response = await request.post(
-				'/wp-json/wc/v3/settings/general/batch',
+				'wp-json/wc/v3/settings/general/batch',
 				{
 					data: {
 						update: [
@@ -673,7 +673,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 
 			// retrieve the updated settings values
 			const countriesUpdatedResponse = await request.get(
-				'/wp-json/wc/v3/settings/general/woocommerce_allowed_countries'
+				'wp-json/wc/v3/settings/general/woocommerce_allowed_countries'
 			);
 			const countriesUpdatedResponseJSON =
 				await countriesUpdatedResponse.json();
@@ -682,14 +682,14 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			);
 
 			const currencyUpdatedResponse = await request.get(
-				'/wp-json/wc/v3/settings/general/woocommerce_currency'
+				'wp-json/wc/v3/settings/general/woocommerce_currency'
 			);
 			const currencyUpdatedResponseJSON =
 				await currencyUpdatedResponse.json();
 			expect( currencyUpdatedResponseJSON.value ).toEqual( 'GBP' );
 
 			// call API to restore the settings options
-			await request.put( '/wp-json/wc/v3/settings/general/batch', {
+			await request.put( 'wp-json/wc/v3/settings/general/batch', {
 				data: {
 					update: [
 						{
@@ -710,7 +710,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve all products settings', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/products'
+				'wp-json/wc/v3/settings/products'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -1025,7 +1025,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			async ( { request } ) => {
 				// call API to retrieve all settings options
 				const response = await request.get(
-					'/wp-json/wc/v3/settings/tax'
+					'wp-json/wc/v3/settings/tax'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -1183,7 +1183,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve all shipping settings', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/shipping'
+				'wp-json/wc/v3/settings/shipping'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -1315,7 +1315,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve all checkout settings', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/checkout'
+				'wp-json/wc/v3/settings/checkout'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -1328,7 +1328,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve all account settings', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/account'
+				'wp-json/wc/v3/settings/account'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -1486,7 +1486,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		test( 'can retrieve all email settings', async ( { request } ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email'
+				'wp-json/wc/v3/settings/email'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -1629,7 +1629,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			} ) => {
 				// call API to retrieve all settings options
 				const response = await request.get(
-					'/wp-json/wc/v3/settings/advanced'
+					'wp-json/wc/v3/settings/advanced'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -1915,7 +1915,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_new_order'
+				'wp-json/wc/v3/settings/email_new_order'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2019,7 +2019,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			async ( { request } ) => {
 				// call API to retrieve all settings options
 				const response = await request.get(
-					'/wp-json/wc/v3/settings/email_failed_order'
+					'wp-json/wc/v3/settings/email_failed_order'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -2125,7 +2125,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_on_hold_order'
+				'wp-json/wc/v3/settings/email_customer_on_hold_order'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2212,7 +2212,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_processing_order'
+				'wp-json/wc/v3/settings/email_customer_processing_order'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2298,7 +2298,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_completed_order'
+				'wp-json/wc/v3/settings/email_customer_completed_order'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2384,7 +2384,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_refunded_order'
+				'wp-json/wc/v3/settings/email_customer_refunded_order'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2500,7 +2500,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_invoice'
+				'wp-json/wc/v3/settings/email_customer_invoice'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2589,7 +2589,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_note'
+				'wp-json/wc/v3/settings/email_customer_note'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2675,7 +2675,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_reset_password'
+				'wp-json/wc/v3/settings/email_customer_reset_password'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -2761,7 +2761,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_customer_new_account'
+				'wp-json/wc/v3/settings/email_customer_new_account'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );

@@ -43,7 +43,7 @@ test.describe.serial(
 		test.beforeAll( async ( { request } ) => {
 			const createSampleCategories = async () => {
 				const clothing = await request.post(
-					'/wp-json/wc/v3/products/categories',
+					'wp-json/wc/v3/products/categories',
 					{
 						data: {
 							name: 'Clothing',
@@ -53,7 +53,7 @@ test.describe.serial(
 				const clothingJSON = await clothing.json();
 
 				const accessories = await request.post(
-					'/wp-json/wc/v3/products/categories',
+					'wp-json/wc/v3/products/categories',
 					{
 						data: {
 							name: 'Accessories',
@@ -64,7 +64,7 @@ test.describe.serial(
 				const accessoriesJSON = await accessories.json();
 
 				const hoodies = await request.post(
-					'/wp-json/wc/v3/products/categories',
+					'wp-json/wc/v3/products/categories',
 					{
 						data: {
 							name: 'Hoodies',
@@ -75,7 +75,7 @@ test.describe.serial(
 				const hoodiesJSON = await hoodies.json();
 
 				const tshirts = await request.post(
-					'/wp-json/wc/v3/products/categories',
+					'wp-json/wc/v3/products/categories',
 					{
 						data: {
 							name: 'Tshirts',
@@ -86,7 +86,7 @@ test.describe.serial(
 				const tshirtsJSON = await tshirts.json();
 
 				const decor = await request.post(
-					'/wp-json/wc/v3/products/categories',
+					'wp-json/wc/v3/products/categories',
 					{
 						data: {
 							name: 'Decor',
@@ -96,7 +96,7 @@ test.describe.serial(
 				const decorJSON = await decor.json();
 
 				const music = await request.post(
-					'/wp-json/wc/v3/products/categories',
+					'wp-json/wc/v3/products/categories',
 					{
 						data: {
 							name: 'Music',
@@ -117,7 +117,7 @@ test.describe.serial(
 
 			const createSampleAttributes = async () => {
 				const color = await request.post(
-					'/wp-json/wc/v3/products/attributes',
+					'wp-json/wc/v3/products/attributes',
 					{
 						data: {
 							name: 'Color',
@@ -127,7 +127,7 @@ test.describe.serial(
 				const colorJSON = await color.json();
 
 				const size = await request.post(
-					'/wp-json/wc/v3/products/attributes',
+					'wp-json/wc/v3/products/attributes',
 					{
 						data: {
 							name: 'Size',
@@ -143,7 +143,7 @@ test.describe.serial(
 				} ) );
 
 				const colors = await request.post(
-					`/wp-json/wc/v3/products/attributes/${ colorJSON.id }/terms/batch`,
+					`wp-json/wc/v3/products/attributes/${ colorJSON.id }/terms/batch`,
 					{
 						data: {
 							create: colorNamesObjectArray,
@@ -160,7 +160,7 @@ test.describe.serial(
 				} ) );
 
 				const sizes = await request.post(
-					`/wp-json/wc/v3/products/attributes/${ sizeJSON.id }/terms/batch`,
+					`wp-json/wc/v3/products/attributes/${ sizeJSON.id }/terms/batch`,
 					{
 						data: {
 							create: sizeNamesObjectArray,
@@ -179,7 +179,7 @@ test.describe.serial(
 
 			const createSampleTags = async () => {
 				const cool = await request.post(
-					'/wp-json/wc/v3/products/tags',
+					'wp-json/wc/v3/products/tags',
 					{
 						data: {
 							name: 'Cool',
@@ -195,7 +195,7 @@ test.describe.serial(
 
 			const createSampleShippingClasses = async () => {
 				const freight = await request.post(
-					'/wp-json/wc/v3/products/shipping_classes',
+					'wp-json/wc/v3/products/shipping_classes',
 					{
 						data: {
 							name: 'Freight',
@@ -212,7 +212,7 @@ test.describe.serial(
 			const createSampleTaxClasses = async () => {
 				//check to see if Reduced Rate tax class exists - if not, create it
 				let reducedRate = await request.get(
-					'/wp-json/wc/v3/taxes/classes/reduced-rate'
+					'wp-json/wc/v3/taxes/classes/reduced-rate'
 				);
 				let reducedRateJSON = await reducedRate.json();
 				expect( Array.isArray( reducedRateJSON ) ).toBe( true );
@@ -220,7 +220,7 @@ test.describe.serial(
 				//if tax class does not exist then create it
 				if ( reducedRateJSON.length < 1 ) {
 					reducedRate = await request.post(
-						'/wp-json/wc/v3/taxes/classes',
+						'wp-json/wc/v3/taxes/classes',
 						{
 							data: {
 								name: 'Reduced Rate',
@@ -247,7 +247,7 @@ test.describe.serial(
 					'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
 				const simpleProducts = await request.post(
-					'/wp-json/wc/v3/products/batch',
+					'wp-json/wc/v3/products/batch',
 					{
 						data: {
 							create: [
@@ -1273,7 +1273,7 @@ test.describe.serial(
 
 			const createSampleExternalProducts = async ( categories ) => {
 				const externalProducts = await request.post(
-					'/wp-json/wc/v3/products/batch',
+					'wp-json/wc/v3/products/batch',
 					{
 						data: {
 							create: [
@@ -1358,7 +1358,7 @@ test.describe.serial(
 
 			const createSampleGroupedProduct = async ( categories ) => {
 				const logoProducts = await request.get(
-					'/wp-json/wc/v3/products',
+					'wp-json/wc/v3/products',
 					{
 						params: {
 							search: 'logo',
@@ -1369,7 +1369,7 @@ test.describe.serial(
 				const logoProductsJSON = await logoProducts.json();
 
 				const groupedProducts = await request.post(
-					'/wp-json/wc/v3/products/batch',
+					'wp-json/wc/v3/products/batch',
 					{
 						data: {
 							create: [
@@ -1461,7 +1461,7 @@ test.describe.serial(
 					'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. ' +
 					'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-				const hoodie = await request.post( '/wp-json/wc/v3/products', {
+				const hoodie = await request.post( 'wp-json/wc/v3/products', {
 					data: {
 						name: 'Hoodie oxo',
 						date_created_gmt: '2021-09-18T15:50:19',
@@ -1553,7 +1553,7 @@ test.describe.serial(
 					'Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>\n';
 
 				const hoodieVariations = await request.post(
-					`/wp-json/wc/v3/products/${ hoodieJSON.id }/variations/batch`,
+					`wp-json/wc/v3/products/${ hoodieJSON.id }/variations/batch`,
 					{
 						data: {
 							create: [
@@ -1747,7 +1747,7 @@ test.describe.serial(
 				);
 				const hoodieVariationsJSON = await hoodieVariations.json();
 
-				const vneck = await request.post( '/wp-json/wc/v3/products', {
+				const vneck = await request.post( 'wp-json/wc/v3/products', {
 					data: {
 						name: 'V-Neck T-Shirt oxo',
 						date_created_gmt: '2021-09-23T15:50:19',
@@ -1830,7 +1830,7 @@ test.describe.serial(
 				const vneckJSON = await vneck.json();
 
 				const vneckVariations = await request.post(
-					`/wp-json/wc/v3/products/${ vneckJSON.id }/variations/batch`,
+					`wp-json/wc/v3/products/${ vneckJSON.id }/variations/batch`,
 					{
 						data: {
 							create: [
@@ -1972,7 +1972,7 @@ test.describe.serial(
 			};
 
 			const createSampleHierarchicalProducts = async () => {
-				const parent = await request.post( '/wp-json/wc/v3/products', {
+				const parent = await request.post( 'wp-json/wc/v3/products', {
 					data: {
 						name: 'Parent Product oxo',
 						date_created_gmt: '2021-09-27T15:50:19',
@@ -1980,7 +1980,7 @@ test.describe.serial(
 				} );
 				const parentJSON = await parent.json();
 
-				const child = await request.post( '/wp-json/wc/v3/products', {
+				const child = await request.post( 'wp-json/wc/v3/products', {
 					data: {
 						name: 'Child Product oxo',
 						parent_id: parentJSON.id,
@@ -2009,7 +2009,7 @@ test.describe.serial(
 				);
 
 				const review1 = await request.post(
-					'/wp-json/wc/v3/products/reviews',
+					'wp-json/wc/v3/products/reviews',
 					{
 						data: {
 							product_id: cap.id,
@@ -2027,14 +2027,14 @@ test.describe.serial(
 				// See: https://github.com/woocommerce/woocommerce/issues/29906.
 				//await updateProductReview(review1.id);
 				await request.post(
-					`/wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
+					`wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
 					{
 						data: {},
 					}
 				);
 
 				const review2 = await request.post(
-					'/wp-json/wc/v3/products/reviews',
+					'wp-json/wc/v3/products/reviews',
 					{
 						data: {
 							product_id: shirt.id,
@@ -2049,14 +2049,14 @@ test.describe.serial(
 
 				//await updateProductReview(review2.id);
 				await request.post(
-					`/wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
+					`wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
 					{
 						data: {},
 					}
 				);
 
 				const review3 = await request.post(
-					'/wp-json/wc/v3/products/reviews',
+					'wp-json/wc/v3/products/reviews',
 					{
 						data: {
 							product_id: sunglasses.id,
@@ -2070,7 +2070,7 @@ test.describe.serial(
 				const review3JSON = await review3.json();
 
 				await request.post(
-					`/wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
+					`wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
 					{
 						data: {},
 					}
@@ -2090,7 +2090,7 @@ test.describe.serial(
 					( p ) => p.name === 'T-Shirt oxo'
 				);
 
-				const order1 = await request.post( '/wp-json/wc/v3/orders', {
+				const order1 = await request.post( 'wp-json/wc/v3/orders', {
 					data: {
 						set_paid: true,
 						status: 'completed',
@@ -2243,7 +2243,7 @@ test.describe.serial(
 					email: 'ben.efactor@email.net',
 				};
 
-				const john = await request.post( '/wp-json/wc/v3/customers', {
+				const john = await request.post( 'wp-json/wc/v3/customers', {
 					data: {
 						first_name: 'John',
 						last_name: 'Doe',
@@ -2258,7 +2258,7 @@ test.describe.serial(
 				} );
 				const johnJSON = await john.json();
 
-				const tina = await request.post( '/wp-json/wc/v3/customers', {
+				const tina = await request.post( 'wp-json/wc/v3/customers', {
 					data: {
 						first_name: 'Tina',
 						last_name: 'Clark',
@@ -2286,7 +2286,7 @@ test.describe.serial(
 				// Have "John" order all products.
 				Object.values( orderedProducts ).forEach( async ( product ) => {
 					const order2 = await request.post(
-						'/wp-json/wc/v3/orders',
+						'wp-json/wc/v3/orders',
 						{
 							data: {
 								...orderBaseData,
@@ -2312,7 +2312,7 @@ test.describe.serial(
 
 				// Have "Tina" order some sunglasses and make a child order.
 				// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
-				const order2 = await request.post( '/wp-json/wc/v3/orders', {
+				const order2 = await request.post( 'wp-json/wc/v3/orders', {
 					data: {
 						...orderBaseData,
 						status: 'completed',
@@ -2336,7 +2336,7 @@ test.describe.serial(
 				orders.push( order2JSON );
 
 				// create child order by referencing a parent_id
-				const order3 = await request.post( '/wp-json/wc/v3/orders', {
+				const order3 = await request.post( 'wp-json/wc/v3/orders', {
 					data: {
 						...orderBaseData,
 						parent_id: order2JSON.id,
@@ -2360,7 +2360,7 @@ test.describe.serial(
 
 				// Guest order.
 				const guestOrder = await request.post(
-					'/wp-json/wc/v3/orders',
+					'wp-json/wc/v3/orders',
 					{
 						data: {
 							...orderBaseData,
@@ -2383,7 +2383,7 @@ test.describe.serial(
 
 				// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
 				await request.put(
-					'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
+					'wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
 					{
 						data: {
 							value: 'yes',
@@ -2391,7 +2391,7 @@ test.describe.serial(
 					}
 				);
 
-				await request.post( '/wp-json/wc/v3/taxes', {
+				await request.post( 'wp-json/wc/v3/taxes', {
 					data: {
 						country: '*',
 						state: '*',
@@ -2403,7 +2403,7 @@ test.describe.serial(
 					},
 				} );
 
-				const coupon = await request.post( '/wp-json/wc/v3/coupons', {
+				const coupon = await request.post( 'wp-json/wc/v3/coupons', {
 					data: {
 						code: 'save5',
 						amount: '5',
@@ -2411,7 +2411,7 @@ test.describe.serial(
 				} );
 				const couponJSON = await coupon.json();
 
-				const order4 = await request.post( '/wp-json/wc/v3/orders', {
+				const order4 = await request.post( 'wp-json/wc/v3/orders', {
 					data: {
 						...orderBaseData,
 						line_items: [
@@ -2442,7 +2442,7 @@ test.describe.serial(
 				const order4JSON = await order4.json();
 
 				await request.post(
-					`/wp-json/wc/v3/orders/${ order4JSON.id }/refunds`,
+					`wp-json/wc/v3/orders/${ order4JSON.id }/refunds`,
 					{
 						data: {
 							api_refund: false, // Prevent an actual refund request (fails with CoD),
@@ -2519,7 +2519,7 @@ test.describe.serial(
 
 				for ( const _order of orders ) {
 					await request.delete(
-						`/wp-json/wc/v3/orders/${ _order.id }`,
+						`wp-json/wc/v3/orders/${ _order.id }`,
 						{
 							data: {
 								force: true,
@@ -2530,7 +2530,7 @@ test.describe.serial(
 
 				for ( const productId of productIds ) {
 					await request.delete(
-						`/wp-json/wc/v3/products/${ productId }`,
+						`wp-json/wc/v3/products/${ productId }`,
 						{
 							data: {
 								force: true,
@@ -2540,7 +2540,7 @@ test.describe.serial(
 				}
 
 				await request.delete(
-					`/wp-json/wc/v3/products/attributes/${ attributes.colorJSON.id }`,
+					`wp-json/wc/v3/products/attributes/${ attributes.colorJSON.id }`,
 					{
 						data: {
 							force: true,
@@ -2549,7 +2549,7 @@ test.describe.serial(
 				);
 
 				await request.delete(
-					`/wp-json/wc/v3/products/attributes/${ attributes.sizeJSON.id }`,
+					`wp-json/wc/v3/products/attributes/${ attributes.sizeJSON.id }`,
 					{
 						data: {
 							force: true,
@@ -2559,7 +2559,7 @@ test.describe.serial(
 
 				for ( const category of Object.values( categories ) ) {
 					await request.delete(
-						`/wp-json/wc/v3/products/categories/${ category.id }`,
+						`wp-json/wc/v3/products/categories/${ category.id }`,
 						{
 							data: {
 								force: true,
@@ -2570,7 +2570,7 @@ test.describe.serial(
 
 				for ( const tag of Object.values( tags ) ) {
 					await request.delete(
-						`/wp-json/wc/v3/products/tags/${ tag.id }`,
+						`wp-json/wc/v3/products/tags/${ tag.id }`,
 						{
 							data: {
 								force: true,
@@ -2583,7 +2583,7 @@ test.describe.serial(
 					shippingClasses
 				) ) {
 					await request.delete(
-						`/wp-json/wc/v3/products/shipping_classes/${ shippingClass.id }`,
+						`wp-json/wc/v3/products/shipping_classes/${ shippingClass.id }`,
 						{
 							data: {
 								force: true,
@@ -2594,7 +2594,7 @@ test.describe.serial(
 
 				for ( const taxClass of Object.values( taxClasses ) ) {
 					await request.delete(
-						`/wp-json/wc/v3/taxes/classes/${ taxClass.slug }`,
+						`wp-json/wc/v3/taxes/classes/${ taxClass.slug }`,
 						{
 							data: {
 								force: true,
@@ -2613,7 +2613,7 @@ test.describe.serial(
 					_sampleData.guestOrderJSON,
 				] ) ) {
 					await request.delete(
-						`/wp-json/wc/v3/orders/${ _order.id }`,
+						`wp-json/wc/v3/orders/${ _order.id }`,
 						{
 							data: {
 								force: true,
@@ -2626,7 +2626,7 @@ test.describe.serial(
 					_sampleData.customers
 				) ) {
 					await request.delete(
-						`/wp-json/wc/v3/customers/${ customer.id }`,
+						`wp-json/wc/v3/customers/${ customer.id }`,
 						{
 							data: {
 								force: true,
@@ -2640,7 +2640,7 @@ test.describe.serial(
 		}, 10000 );
 
 		test( 'can create an order', async ( { request } ) => {
-			const response = await request.post( '/wp-json/wc/v3/orders', {
+			const response = await request.post( 'wp-json/wc/v3/orders', {
 				data: order,
 			} );
 			const responseJSON = await response.json();
@@ -2656,7 +2656,7 @@ test.describe.serial(
 
 		test( 'can retrieve an order', async ( { request } ) => {
 			const response = await request.get(
-				`/wp-json/wc/v3/orders/${ orderId }`
+				`wp-json/wc/v3/orders/${ orderId }`
 			);
 			const responseJSON = await response.json();
 
@@ -2672,7 +2672,7 @@ test.describe.serial(
 			order.shipping = updatedCustomerShipping;
 
 			const response = await request.put(
-				`/wp-json/wc/v3/orders/${ orderId }`,
+				`wp-json/wc/v3/orders/${ orderId }`,
 				{
 					data: order,
 				}
@@ -2686,7 +2686,7 @@ test.describe.serial(
 
 		test( 'can permanently delete an order', async ( { request } ) => {
 			const response = await request.delete(
-				`/wp-json/wc/v3/orders/${ orderId }`,
+				`wp-json/wc/v3/orders/${ orderId }`,
 				{
 					data: {
 						force: true,
@@ -2696,7 +2696,7 @@ test.describe.serial(
 			expect( response.status() ).toEqual( 200 );
 
 			const getOrderResponse = await request.get(
-				`/wp-json/wc/v3/orders/${ orderId }`
+				`wp-json/wc/v3/orders/${ orderId }`
 			);
 			expect( getOrderResponse.status() ).toEqual( 404 );
 		} );
@@ -2706,7 +2706,7 @@ test.describe.serial(
 
 			test( 'pagination', async ( { request } ) => {
 				const pageSize = 4;
-				const page1 = await request.get( '/wp-json/wc/v3/orders', {
+				const page1 = await request.get( 'wp-json/wc/v3/orders', {
 					params: {
 						per_page: pageSize,
 						search: 'oxo',
@@ -2714,7 +2714,7 @@ test.describe.serial(
 				} );
 				const page1JSON = await page1.json();
 
-				const page2 = await request.get( '/wp-json/wc/v3/orders', {
+				const page2 = await request.get( 'wp-json/wc/v3/orders', {
 					params: {
 						per_page: pageSize,
 						page: 2,

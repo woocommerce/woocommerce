@@ -32,59 +32,51 @@ const methodCostIndex = 2;
  */
 test.describe('Shipping methods API tests', () => {
 
-	test('cannot create a shipping method', async ({
-		request,
-	}) => {
+	test( 'cannot create a shipping method', async ( { request } ) => {
 		/**
 		 * call API to attempt to create a shipping method
 		 * This call will not work as we have no ability to create new shipping methods,
 		 * only retrieve the existing shipping methods
 		 * i.e. Flat rate, Free shipping and Local pickup
 		 */
-		const response = await request.post(
-			'/wp-json/wc/v3/shipping_methods', {
-				data: {
-					title: "flat_rate",
-					description: "Lets you charge a fixed rate for shipping.",
-				},
-			}
+		const response = await request.post( 'wp-json/wc/v3/shipping_methods', {
+			data: {
+				title: 'flat_rate',
+				description: 'Lets you charge a fixed rate for shipping.',
+			},
+		} );
+		const responseJSON = await response.json();
+		expect( response.status() ).toEqual( 404 );
+		expect( responseJSON.code ).toEqual( 'rest_no_route' );
+		expect( responseJSON.message ).toEqual(
+			'No route was found matching the URL and request method.'
 		);
-		const responseJSON = await response.json();
-		expect(response.status()).toEqual(404);
-		expect(responseJSON.code).toEqual('rest_no_route');
-		expect(responseJSON.message).toEqual('No route was found matching the URL and request method.');
-	});
+	} );
 
-	test('can retrieve all shipping methods', async ({
-		request
-	}) => {
+	test( 'can retrieve all shipping methods', async ( { request } ) => {
 		// call API to retrieve all shipping methods
-		const response = await request.get('/wp-json/wc/v3/shipping_methods');
+		const response = await request.get( 'wp-json/wc/v3/shipping_methods' );
 		const responseJSON = await response.json();
-		expect(response.status()).toEqual(200);
-		expect(Array.isArray(responseJSON)).toBe(true);
-		expect(responseJSON.length).toBeGreaterThanOrEqual(3);
-		expect(responseJSON[0].id).toEqual("flat_rate");
-		expect(responseJSON[1].id).toEqual("free_shipping");
-		expect(responseJSON[2].id).toEqual("local_pickup");
-	});
+		expect( response.status() ).toEqual( 200 );
+		expect( Array.isArray( responseJSON ) ).toBe( true );
+		expect( responseJSON.length ).toBeGreaterThanOrEqual( 3 );
+		expect( responseJSON[ 0 ].id ).toEqual( 'flat_rate' );
+		expect( responseJSON[ 1 ].id ).toEqual( 'free_shipping' );
+		expect( responseJSON[ 2 ].id ).toEqual( 'local_pickup' );
+	} );
 
-	test('can retrieve a shipping method', async ({
-		request
-	}) => {
+	test( 'can retrieve a shipping method', async ( { request } ) => {
 		// call API to retrieve a shipping method
 		const response = await request.get(
-			`/wp-json/wc/v3/shipping_methods/local_pickup`
+			`wp-json/wc/v3/shipping_methods/local_pickup`
 		);
 		const responseJSON = await response.json();
-		expect(response.status()).toEqual(200);
-		expect(Array.isArray(responseJSON)).toBe(false);
-		expect(typeof responseJSON.id).toEqual('string');
-	});
+		expect( response.status() ).toEqual( 200 );
+		expect( Array.isArray( responseJSON ) ).toBe( false );
+		expect( typeof responseJSON.id ).toEqual( 'string' );
+	} );
 
-	test(`cannot update a shipping method`, async ({
-		request,
-	}) => {
+	test( `cannot update a shipping method`, async ( { request } ) => {
 		/**
 		 * call API to attempt to update a shipping method
 		 * This call will not work as we have no ability to update new shipping methods,
@@ -92,38 +84,43 @@ test.describe('Shipping methods API tests', () => {
 		 * i.e. Flat rate, Free shipping and Local pickup
 		 */
 		const response = await request.put(
-			'/wp-json/wc/v3/shipping_methods/local_pickup', {
+			'wp-json/wc/v3/shipping_methods/local_pickup',
+			{
 				data: {
-					description: "update local pickup description"
-				}
+					description: 'update local pickup description',
+				},
 			}
 		);
 		const responseJSON = await response.json();
-		expect(response.status()).toEqual(404);
-		expect(responseJSON.code).toEqual('rest_no_route');
-		expect(responseJSON.message).toEqual('No route was found matching the URL and request method.');
-	});
+		expect( response.status() ).toEqual( 404 );
+		expect( responseJSON.code ).toEqual( 'rest_no_route' );
+		expect( responseJSON.message ).toEqual(
+			'No route was found matching the URL and request method.'
+		);
+	} );
 
-
-	test('cannot delete a shipping method', async ({
-		request
-	}) => {
+	test( 'cannot delete a shipping method', async ( { request } ) => {
 		/**
 		 * call API to attempt to delete a shipping method
 		 * This call will not work as we have no ability to delete shipping methods,
 		 * only retrieve the existing shipping methods
 		 * i.e. Flat rate, Free shipping and Local pickup
 		 */
-		const response = await request.delete('/wp-json/wc/v3/shipping_methods', {
-			data: {
-				force: true
+		const response = await request.delete(
+			'wp-json/wc/v3/shipping_methods',
+			{
+				data: {
+					force: true,
+				},
 			}
-		});
+		);
 		const responseJSON = await response.json();
-		expect(response.status()).toEqual(404);
-		expect(responseJSON.code).toEqual('rest_no_route');
-		expect(responseJSON.message).toEqual('No route was found matching the URL and request method.');
-	});
+		expect( response.status() ).toEqual( 404 );
+		expect( responseJSON.code ).toEqual( 'rest_no_route' );
+		expect( responseJSON.message ).toEqual(
+			'No route was found matching the URL and request method.'
+		);
+	} );
 
 
 	//loop through each row from the shippingMethods test data table above
@@ -138,9 +135,12 @@ test.describe('Shipping methods API tests', () => {
 				const shippingMethod = getShippingMethodExample(shippingMethodRow[methodIdIndex], shippingMethodRow[methodCostIndex]);
 
 				//call the API to create the shipping method on the shipping zone
-				const response = await request.post(`/wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods`, {
-					data: shippingMethod
-				});
+				const response = await request.post(
+					`wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods`,
+					{
+						data: shippingMethod,
+					}
+				);
 				const responseJSON = await response.json();
 
 				//validate the response
@@ -158,11 +158,14 @@ test.describe('Shipping methods API tests', () => {
 				}
 
 				// Cleanup: Remove the shipping method from the shipping zone
-				const deleteResponse = await request.delete(`/wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods/${ shippingMethodInstanceId }`, {
-					data: {
-						force: true
+				const deleteResponse = await request.delete(
+					`wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods/${ shippingMethodInstanceId }`,
+					{
+						data: {
+							force: true,
+						},
 					}
-				});
+				);
 			}
 		);
 	}

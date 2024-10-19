@@ -287,7 +287,7 @@ test.describe( 'Products API tests: CRUD', () => {
 		test( 'can retrieve all product attribute', async ( { request } ) => {
 			// call API to retrieve all product attributes
 			const response = await request.get(
-				'/wp-json/wc/v3/products/attributes'
+				'wp-json/wc/v3/products/attributes'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -461,7 +461,7 @@ test.describe( 'Products API tests: CRUD', () => {
 		test( 'can retrieve all product categories', async ( { request } ) => {
 			// call API to retrieve all product categories
 			const response = await request.get(
-				'/wp-json/wc/v3/products/categories'
+				'wp-json/wc/v3/products/categories'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -710,7 +710,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			test( 'can retrieve all product reviews', async ( { request } ) => {
 				// call API to retrieve all product reviews
 				const response = await request.get(
-					'/wp-json/wc/v3/products/reviews'
+					'wp-json/wc/v3/products/reviews'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -928,7 +928,7 @@ test.describe( 'Products API tests: CRUD', () => {
 		} ) => {
 			// call API to retrieve all product shipping classes
 			const response = await request.get(
-				'/wp-json/wc/v3/products/shipping_classes'
+				'wp-json/wc/v3/products/shipping_classes'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -1102,9 +1102,7 @@ test.describe( 'Products API tests: CRUD', () => {
 
 		test( 'can retrieve all product tags', async ( { request } ) => {
 			// call API to retrieve all product tags
-			const response = await request.get(
-				'/wp-json/wc/v3/products/tags'
-			);
+			const response = await request.get( 'wp-json/wc/v3/products/tags' );
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );

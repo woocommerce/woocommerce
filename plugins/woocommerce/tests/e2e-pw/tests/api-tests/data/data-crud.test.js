@@ -256,7 +256,7 @@ const countryCodes = [
 test.describe( 'Data API tests', () => {
 	test( 'can list all data', async ( { request } ) => {
 		// call API to retrieve data values
-		const response = await request.get( '/wp-json/wc/v3/data' );
+		const response = await request.get( 'wp-json/wc/v3/data' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -284,7 +284,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view all continents', async ( { request } ) => {
 		// call API to retrieve all continents
-		const response = await request.get( '/wp-json/wc/v3/data/continents' );
+		const response = await request.get( 'wp-json/wc/v3/data/continents' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -3317,7 +3317,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view continent data', async ( { request } ) => {
 		// call API to retrieve a specific continent data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/continents/eu'
+			'wp-json/wc/v3/data/continents/eu'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -3959,7 +3959,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view country data', async ( { request } ) => {
 		// call API to retrieve all countries
-		const response = await request.get( '/wp-json/wc/v3/data/countries' );
+		const response = await request.get( 'wp-json/wc/v3/data/countries' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -3977,14 +3977,14 @@ test.describe( 'Data API tests', () => {
 							self: [
 								{
 									href: expect.stringContaining(
-										`/wp-json/wc/v3/data/countries/${ country }`
+										`wp-json/wc/v3/data/countries/${ country }`
 									),
 								},
 							],
 							collection: [
 								{
 									href: expect.stringContaining(
-										'/wp-json/wc/v3/data/countries'
+										'wp-json/wc/v3/data/countries'
 									),
 								},
 							],
@@ -3997,7 +3997,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view all currencies', async ( { request } ) => {
 		// call API to retrieve all currencies
-		const response = await request.get( '/wp-json/wc/v3/data/currencies' );
+		const response = await request.get( 'wp-json/wc/v3/data/currencies' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -8083,7 +8083,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view currency data', async ( { request } ) => {
 		// call API to retrieve a specific currency data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/currencies/fkp'
+			'wp-json/wc/v3/data/currencies/fkp'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -8101,7 +8101,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view current currency', async ( { request } ) => {
 		// call API to retrieve current currency data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/currencies/current'
+			'wp-json/wc/v3/data/currencies/current'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );

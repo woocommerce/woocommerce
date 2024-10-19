@@ -14,7 +14,7 @@ test.describe(
 			// Call the API to return all users and determine if a
 			// subscriber user has been created
 			const customersResponse = await request.get(
-				'/wp-json/wc/v3/customers',
+				'wp-json/wc/v3/customers',
 				{
 					params: {
 						role: 'all',
@@ -34,7 +34,7 @@ test.describe(
 			if ( ! subscriberUserId ) {
 				const now = Date.now();
 				const userResponse = await request.post(
-					'/wp-json/wp/v2/users',
+					'wp-json/wp/v2/users',
 					{
 						data: {
 							username: `customer_${ now }`,
@@ -55,7 +55,7 @@ test.describe(
 
 			// Verify the subscriber user has been created
 			const response = await request.get(
-				`/wp-json/wc/v3/customers/${ subscriberUserId }`
+				`wp-json/wc/v3/customers/${ subscriberUserId }`
 			);
 			const responseJSON = await response.json();
 			// eslint-disable-next-line jest/no-standalone-expect
@@ -68,7 +68,7 @@ test.describe(
 			// delete subscriber user if one was created during the execution of these tests
 			if ( subscriberUserCreatedDuringTests ) {
 				await request.delete(
-					`/wp-json/wc/v3/customers/${ subscriberUserId }`,
+					`wp-json/wc/v3/customers/${ subscriberUserId }`,
 					{
 						data: {
 							force: true,
@@ -92,7 +92,7 @@ test.describe(
 			test( 'can retrieve admin user', async ( { request } ) => {
 				// call API to retrieve the previously saved customer
 				const response = await request.get(
-					'/wp-json/wc/v3/customers/1'
+					'wp-json/wc/v3/customers/1'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -106,7 +106,7 @@ test.describe(
 				// if environment was created with subscriber user
 				// call API to retrieve the customer with id 2
 				const response = await request.get(
-					`/wp-json/wc/v3/customers/${ subscriberUserId }`
+					`wp-json/wc/v3/customers/${ subscriberUserId }`
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -119,7 +119,7 @@ test.describe(
 			} ) => {
 				// call API to retrieve the previously saved customer
 				const response = await request.get(
-					'/wp-json/wc/v3/customers/0'
+					'wp-json/wc/v3/customers/0'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 404 );
@@ -133,9 +133,7 @@ test.describe(
 
 			test( 'can retrieve customers', async ( { request } ) => {
 				// call API to retrieve all customers should initially return empty array
-				const response = await request.get(
-					'/wp-json/wc/v3/customers'
-				);
+				const response = await request.get( 'wp-json/wc/v3/customers' );
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
 				expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -147,14 +145,11 @@ test.describe(
 				// call API to retrieve all customers should initially return empty array
 				// unless the role 'all' is passed as a search string, in which case the admin
 				// and subscriber users will be returned
-				const response = await request.get(
-					'/wp-json/wc/v3/customers',
-					{
-						params: {
-							role: 'all',
-						},
-					}
-				);
+				const response = await request.get( 'wp-json/wc/v3/customers', {
+					params: {
+						role: 'all',
+					},
+				} );
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
 				expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -166,7 +161,7 @@ test.describe(
 			test( 'can create a customer', async ( { request } ) => {
 				// call API to create a customer
 				const response = await request.post(
-					'/wp-json/wc/v3/customers',
+					'wp-json/wc/v3/customers',
 					{
 						data: customer,
 					}
@@ -187,7 +182,7 @@ test.describe(
 			test( 'can retrieve a customer', async ( { request } ) => {
 				// call API to retrieve the previously saved customer
 				const response = await request.get(
-					`/wp-json/wc/v3/customers/${ customerId }`
+					`wp-json/wc/v3/customers/${ customerId }`
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -200,9 +195,7 @@ test.describe(
 				request,
 			} ) => {
 				// call API to retrieve all customers
-				const response = await request.get(
-					'/wp-json/wc/v3/customers'
-				);
+				const response = await request.get( 'wp-json/wc/v3/customers' );
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
 				expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -220,7 +213,7 @@ test.describe(
 				 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests
 				 */
 				const response = await request.put(
-					`/wp-json/wc/v3/customers/1`,
+					`wp-json/wc/v3/customers/1`,
 					{
 						data: {
 							first_name: 'admin',
@@ -243,7 +236,7 @@ test.describe(
 			test( 'retrieve after update admin', async ( { request } ) => {
 				// call API to retrieve the admin customer we updated above
 				const response = await request.get(
-					'/wp-json/wc/v3/customers/1'
+					'wp-json/wc/v3/customers/1'
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -258,7 +251,7 @@ test.describe(
 				// update customer names (billing and shipping) to Jane
 				// (these were initialised blank, only regular first_name was populated)
 				const response = await request.put(
-					`/wp-json/wc/v3/customers/${ subscriberUserId }`,
+					`wp-json/wc/v3/customers/${ subscriberUserId }`,
 					{
 						data: {
 							billing: {
@@ -280,7 +273,7 @@ test.describe(
 			test( 'retrieve after update subscriber', async ( { request } ) => {
 				// call API to retrieve the subscriber customer we updated above
 				const response = await request.get(
-					`/wp-json/wc/v3/customers/${ subscriberUserId }`
+					`wp-json/wc/v3/customers/${ subscriberUserId }`
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -292,7 +285,7 @@ test.describe(
 			test( `can update a customer`, async ( { request } ) => {
 				// update customer names (regular, billing and shipping) from John to Jack
 				const response = await request.put(
-					`/wp-json/wc/v3/customers/${ customerId }`,
+					`wp-json/wc/v3/customers/${ customerId }`,
 					{
 						data: {
 							first_name: 'Jack',
@@ -315,7 +308,7 @@ test.describe(
 			test( 'retrieve after update customer', async ( { request } ) => {
 				// call API to retrieve the updated customer we created above
 				const response = await request.get(
-					`/wp-json/wc/v3/customers/${ customerId }`
+					`wp-json/wc/v3/customers/${ customerId }`
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -331,7 +324,7 @@ test.describe(
 			} ) => {
 				// Delete the customer.
 				const response = await request.delete(
-					`/wp-json/wc/v3/customers/${ customerId }`,
+					`wp-json/wc/v3/customers/${ customerId }`,
 					{
 						data: {
 							force: true,
@@ -342,7 +335,7 @@ test.describe(
 
 				// Verify that the customer can no longer be retrieved.
 				const getDeletedCustomerResponse = await request.get(
-					`/wp-json/wc/v3/customers/${ customer }`
+					`wp-json/wc/v3/customers/${ customer }`
 				);
 				expect( getDeletedCustomerResponse.status() ).toEqual( 404 );
 			} );
