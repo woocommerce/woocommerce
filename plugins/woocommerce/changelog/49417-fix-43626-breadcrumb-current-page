@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Turns the last item in the breadcrumb into a link with an `aria` attribute that announces to screen readers that the link is the current page.
