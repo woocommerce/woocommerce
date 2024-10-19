@@ -7,7 +7,7 @@ import { expect, test, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-import { getTestTranslation } from '../../utils/get-test-translations';
+import { getTestTranslation } from '../../utils/get-test-translation';
 import { translations } from '../../test-data/data/data';
 
 test.describe( 'Shopper → Translations', () => {
