@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Pass product instance into `woocommerce_product_read` action as second argument
