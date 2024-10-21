@@ -17,7 +17,7 @@ describe( 'getActionsList', () => {
 				keepCompletedTaskList: 'yes',
 				tasks: [
 					{
-						id: 'marketing',
+						id: 'payments',
 						isComplete: false,
 						content: '',
 						parentId: 'setup',
@@ -39,11 +39,23 @@ describe( 'getActionsList', () => {
 						eventPrefix: '',
 						level: 3,
 					},
+				],
+			},
+			{
+				id: 'extended',
+				title: 'Extended',
+				isHidden: false,
+				isVisible: true,
+				isComplete: false,
+				eventPrefix: 'tasklist_extended',
+				displayProgressHeader: true,
+				keepCompletedTaskList: 'yes',
+				tasks: [
 					{
-						id: 'payments',
+						id: 'marketing',
 						isComplete: false,
 						content: '',
-						parentId: 'setup',
+						parentId: 'extended',
 						isDismissable: false,
 						isDismissed: false,
 						time: '',
@@ -92,10 +104,11 @@ describe( 'getActionsList', () => {
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [
-						{ id: 'marketing', isComplete: true },
-						{ id: 'payments', isComplete: false },
-					],
+					tasks: [ { id: 'payments', isComplete: false } ],
+				},
+				{
+					id: 'extended',
+					tasks: [ { id: 'marketing', isComplete: true } ],
 				},
 			],
 		};
@@ -112,10 +125,11 @@ describe( 'getActionsList', () => {
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [
-						{ id: 'marketing', isComplete: true },
-						{ id: 'payments', isComplete: true },
-					],
+					tasks: [ { id: 'payments', isComplete: true } ],
+				},
+				{
+					id: 'extended',
+					tasks: [ { id: 'marketing', isComplete: false } ],
 				},
 			],
 		};
@@ -132,10 +146,11 @@ describe( 'getActionsList', () => {
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [
-						{ id: 'marketing', isComplete: true },
-						{ id: 'payments', isComplete: true },
-					],
+					tasks: [ { id: 'payments', isComplete: true } ],
+				},
+				{
+					id: 'extended',
+					tasks: [ { id: 'marketing', isComplete: true } ],
 				},
 			],
 		};
@@ -175,14 +190,14 @@ describe( 'getActionsList', () => {
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [
-						{ id: 'marketing', isComplete: true },
-						{ id: 'payments', isComplete: true },
-					],
+					tasks: [ { id: 'payments', isComplete: true } ],
 				},
 				{
 					id: 'extended',
-					tasks: [ { id: 'get-mobile-app', isComplete: true } ],
+					tasks: [
+						{ id: 'marketing', isComplete: true },
+						{ id: 'get-mobile-app', isComplete: true },
+					],
 				},
 			],
 			activePlugins: [ 'mailchimp-for-woocommerce' ],
