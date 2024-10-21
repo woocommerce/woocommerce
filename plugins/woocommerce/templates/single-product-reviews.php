@@ -86,17 +86,18 @@ if ( ! comments_open() ) {
 				$name_email_required = (bool) get_option( 'require_name_email', 1 );
 				$fields              = array(
 					'author' => array(
-						'label'    => __( 'Name', 'woocommerce' ),
-						'type'     => 'text',
-						'value'    => $commenter['comment_author'],
-						'required' => $name_email_required,
+						'label'        => __( 'Name', 'woocommerce' ),
+						'type'         => 'text',
+						'value'        => $commenter['comment_author'],
+						'required'     => $name_email_required,
+						'autocomplete' => 'name',
 					),
 					'email'  => array(
-						'label'    => __( 'Email', 'woocommerce' ),
-						'type'     => 'email',
-						'value'    => $commenter['comment_author_email'],
-						'required' => $name_email_required,
-					),
+						'label'        => __( 'Email', 'woocommerce' ),
+						'type'         => 'email',
+						'value'        => $commenter['comment_author_email'],
+						'required'     => $name_email_required,
+						'autocomplete' => 'email',
 				);
 
 				$comment_form['fields'] = array();
@@ -109,7 +110,7 @@ if ( ! comments_open() ) {
 						$field_html .= '&nbsp;<span class="required">*</span>';
 					}
 
-					$field_html .= '</label><input id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="' . esc_attr( $field['type'] ) . '" value="' . esc_attr( $field['value'] ) . '" size="30" ' . ( $field['required'] ? 'required' : '' ) . ' /></p>';
+					$field_html .= '</label><input id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="' . esc_attr( $field['type'] ) . '" autocomplete="' . esc_attr( $field['autocomplete'] ) . '" value="' . esc_attr( $field['value'] ) . '" size="30" ' . ( $field['required'] ? 'required' : '' ) . ' /></p>';
 
 					$comment_form['fields'][ $key ] = $field_html;
 				}
