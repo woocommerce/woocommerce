@@ -19,8 +19,8 @@
 		<?php echo $data['formatted_date']; ?>
 	</p>
 
-	<h3 id="payment_status_section_title"><?php echo strtoupper( $data['texts']['order_status_section_title'] ); ?></h3>
-	<p><?php echo $data['texts']['order_status']; ?></p>
+	<h3 id="payment_status_section_title"><?php echo strtoupper( $data['texts']['payment_status_section_title'] ); ?></h3>
+	<p><?php echo $data['texts']['payment_status']; ?></p>
 
 	<?php if ( isset( $data['payment_method'] ) ) { ?>
 		<h3 id="payment_method_section_title"><?php echo strtoupper( $data['texts']['payment_method_section_title'] ); ?></h3>
