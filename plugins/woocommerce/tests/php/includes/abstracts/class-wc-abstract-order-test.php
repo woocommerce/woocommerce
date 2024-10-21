@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Abstracts
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
@@ -12,6 +13,8 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
  * Class WC_Abstract_Order.
  */
 class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
+
+	use CogsAwareUnitTestSuiteTrait;
 
 	/**
 	 * Test when rounding is different when doing per line and in subtotal.
@@ -412,5 +415,140 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertContains( $item1_1->get_id(), $order1_items );
 
 		$this->assertEquals( $item2->get_id(), array_keys( $order2->get_items( 'line_item' ) )[0] );
+	}
+
+	/**
+	 * @testdox Abstract order classes don't manage Cost of Goods Sold by default.
+	 */
+	public function test_abstract_orders_dont_have_cogs_by_default() {
+		$order = new class() extends WC_Abstract_Order {
+		};
+
+		$this->assertFalse( $order->has_cogs() );
+	}
+
+	/**
+	 * @testdox The regular order class manages a Cost of Goods Sold value.
+	 */
+	public function test_orders_have_cogs() {
+		$order = new WC_Order();
+
+		$this->assertTrue( $order->has_cogs() );
+	}
+
+	/**
+	 * @testdox 'calculate_cogs_total_value' returns zero, and 'doing it wrong' is thrown, if the Cost of Goods Sold feature is disabled.
+	 */
+	public function test_calculate_total_cogs_simply_returns_false_if_cogs_disabled() {
+		$order = new WC_Order();
+
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::calculate_cogs_total_value' );
+		$this->assertEquals( 0, $order->calculate_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox 'calculate_cogs_total_value' returns false if the Cost of Goods Sold feature is enabled but the class doesn't manage it.
+	 */
+	public function test_calculate_cogs_simply_returns_false_if_cogs_enabled_but_class_has_no_cogs() {
+		$this->enable_cogs_feature();
+
+		// phpcs:disable Squiz.Commenting
+		$order = new class() extends WC_Order {
+			public function has_cogs(): bool {
+				return false;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->add_product_with_cogs_to_order( $order, 12.34, 1 );
+
+		$this->assertEquals( 0, $order->calculate_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox 'calculate_cogs_total_value' calculates the value from the prices and the quantities of all the items with a Cost of Goods Sold value.
+	 */
+	public function test_calculate_cogs_uses_product_info_and_sets_the_value() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
+		$this->add_product_with_cogs_to_order( $order, 56.78, 3 );
+
+		$fee = new WC_Order_Item_Fee(); // Example of line item without COGS.
+		$order->add_item( $fee );
+
+		$calculated_value = $order->calculate_cogs_total_value();
+		$this->assertEquals( 12.34 * 2 + 56.78 * 3, $calculated_value );
+		$this->assertEquals( $calculated_value, $order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox The 'calculate_cogs_total_value_core' method can be overridden in derived classes.
+	 */
+	public function test_calculate_cogs_core_can_be_overridden() {
+		$this->enable_cogs_feature();
+
+		// phpcs:disable Squiz.Commenting
+		$order = new class() extends WC_Order {
+			protected function calculate_cogs_total_value_core(): float {
+				return 999.34;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
+
+		$calculated_value = $order->calculate_cogs_total_value();
+		$this->assertEquals( 999.34, $calculated_value );
+		$this->assertEquals( $calculated_value, $order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox The calculated value for Cost of Goods Sold can be modified using the 'woocommerce_calculated_order_cogs_value' filter.
+	 */
+	public function test_filter_can_be_used_to_alter_calculated_cogs_value() {
+		$filter_received_value = null;
+		$filter_received_order = null;
+
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
+		$this->add_product_with_cogs_to_order( $order, 56.78, 3 );
+
+		add_filter(
+			'woocommerce_calculated_order_cogs_value',
+			function ( $value, $order ) use ( &$filter_received_value, &$filter_received_order ) {
+				$filter_received_value = $value;
+				$filter_received_order = $order;
+				return 999.34;
+			},
+			10,
+			2
+		);
+
+		$calculate_method_result = $order->calculate_cogs_total_value();
+
+		$this->assertEquals( 12.34 * 2 + 56.78 * 3, $filter_received_value );
+		$this->assertEquals( 999.34, $calculate_method_result );
+		$this->assertEquals( $calculate_method_result, $order->get_cogs_total_value() );
+		$this->assertSame( $order, $filter_received_order );
+	}
+
+	/**
+	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 *
+	 * @param WC_Order $order The target order.
+	 * @param float    $cogs_value The COGS value of the product.
+	 * @param int      $quantity The quantity of the order item.
+	 */
+	private function add_product_with_cogs_to_order( WC_Order $order, float $cogs_value, int $quantity ) {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( $cogs_value );
+		$product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->set_quantity( $quantity );
+		$item->save();
+		$order->add_item( $item );
 	}
 }

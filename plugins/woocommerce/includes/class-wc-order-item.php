@@ -10,12 +10,16 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Order item class.
  */
 class WC_Order_Item extends WC_Data implements ArrayAccess {
+	use CogsAwareTrait;
+
 	/**
 	 * Legacy cart item values.
 	 *
@@ -81,6 +85,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
 	 */
 	public function __construct( $item = 0 ) {
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->data['cogs_value'] = null;
+		}
+
 		parent::__construct( $item );
 
 		if ( $item instanceof WC_Order_Item ) {
@@ -107,13 +115,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @since 3.2.0
 	 */
 	public function apply_changes() {
-		if ( function_exists( 'array_replace' ) ) {
-			$this->data = array_replace( $this->data, $this->changes ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_replaceFound
-		} else { // PHP 5.2 compatibility.
-			foreach ( $this->changes as $key => $change ) {
-				$this->data[ $key ] = $change;
-			}
-		}
+		$this->data    = array_replace( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
@@ -443,5 +445,103 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Indicates if the current order item has an associated Cost of Goods Sold value.
+	 *
+	 * Derived classes representing line items that have a COGS value
+	 * should override this method to return "true" and also the 'calculate_cogs_value_core' method.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return bool True if this line item has an associated Cost of Goods Sold value.
+	 */
+	public function has_cogs(): bool {
+		return false;
+	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value and set it as the actual value for this line item.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return bool True if the value has been calculated successfully (and set as the actual value), false otherwise (and the value hasn't changed).
+	 * @throws Exception The class doesn't implement its own version of calculate_cogs_value_core. Derived classes are expected to override that method when has_cogs returns true.
+	 */
+	public function calculate_cogs_value(): bool {
+		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
+			return false;
+		}
+
+		$value = $this->calculate_cogs_value_core();
+
+		/**
+		 * Filter to modify the Cost of Goods Sold value that gets calculated for a given order item.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $value The value originally calculated, null if it was not possible to calculate it.
+		 * @param WC_Order_Item $line_item The order item for which the value is calculated.
+		 */
+		$value = apply_filters( 'woocommerce_calculated_order_item_cogs_value', $value, $this );
+
+		if ( is_null( $value ) ) {
+			return false;
+		}
+
+		$this->set_cogs_value( (float) $value );
+		return true;
+	}
+
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
+
+	/**
+	 * Core method to calculate the Cost of Goods Sold value for this line item:
+	 * it doesn't check if COGS is enabled at class or system level, doesn't fire hooks, and doesn't set the value as the current one for the line item.
+	 *
+	 * @return float|null The calculated value, or null if the value can't be calculated for some reason.
+	 * @throws Exception The class doesn't implement its own version of this method. Derived classes are expected to override this method when has_cogs returns true.
+	 */
+	protected function calculate_cogs_value_core(): ?float {
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		throw new Exception(
+			sprintf(
+				// translators: %1$s = class and method name.
+				__( 'Method %1$s is not implemented. Classes overriding has_cogs must override this method too.', 'woocommerce' ),
+				__METHOD__
+			)
+		);
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+	}
+
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
+
+	/**
+	 * Get the value of the Cost of Goods Sold for this order item.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will always return zero.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return float The current value for this order item.
+	 */
+	public function get_cogs_value( $context = 'view' ): float {
+		return (float) ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ? $this->get_prop( 'cogs_value', $context ) : 0 );
+	}
+
+	/**
+	 * Set the value of the Cost of Goods Sold for this order item.
+	 * Usually you'll want to use calculate_cogs_value instead.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will have no effect.
+	 *
+	 * @param float $value The value to set for this order item.
+	 *
+	 * @internal This method is intended for data store usage only, the value set here will be overridden by calculate_cogs_value.
+	 */
+	public function set_cogs_value( float $value ): void {
+		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
+			$this->set_prop( 'cogs_value', $value );
+		}
 	}
 }

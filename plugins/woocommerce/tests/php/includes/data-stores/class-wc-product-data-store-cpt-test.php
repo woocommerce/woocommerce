@@ -254,7 +254,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->set_cogs_value( 12.34 );
 		$product->save();
 
-		add_filter( 'woocommerce_load_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
+		add_filter( 'woocommerce_load_product_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_value() );
@@ -266,7 +266,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_cogs_saved_value_can_be_altered_via_filter() {
 		$this->enable_cogs_feature();
 
-		add_filter( 'woocommerce_save_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
+		add_filter( 'woocommerce_save_product_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
 		$product = new WC_Product();
 		$product->set_cogs_value( 12.34 );
@@ -286,7 +286,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		add_filter( 'woocommerce_save_cogs_value', fn( $value, $product ) => null, 10, 2 );
+		add_filter( 'woocommerce_save_product_cogs_value', fn( $value, $product ) => null, 10, 2 );
 
 		$product->set_cogs_value( 56.78 );
 		$product->save();

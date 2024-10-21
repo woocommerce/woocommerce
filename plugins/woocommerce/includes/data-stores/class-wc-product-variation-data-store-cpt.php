@@ -460,7 +460,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * @param bool $cogs_value_overrides_parent The flag as read from the database.
 		 * @param WC_Product $product The product for which the flag is being loaded.
 		 */
-		$cogs_value_overrides_parent = apply_filters( 'woocommerce_load_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
+		$cogs_value_overrides_parent = apply_filters( 'woocommerce_load_product_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
 
 		$product->set_props(
 			array(
@@ -578,7 +578,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			 * @param bool|null $cogs_value_overrides_parent The flag to be written to the database. If null is returned nothing will be written or deleted.
 			 * @param WC_Product $product The product for which the flag is being saved.
 			 */
-			$cogs_value_overrides_parent = apply_filters( 'woocommerce_save_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
+			$cogs_value_overrides_parent = apply_filters( 'woocommerce_save_product_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
 
 			if ( ! is_null( $cogs_value_overrides_parent ) ) {
 				$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_overrides_parent', $cogs_value_overrides_parent ? 'yes' : '' );

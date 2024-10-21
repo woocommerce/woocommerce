@@ -155,7 +155,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$data = $this->filter_response_by_context( $data, $context );
 
 		if ( $this->cogs_is_enabled() ) {
-			$this->add_cogs_info_to_returned_data( $data, $object );
+			$this->add_cogs_info_to_returned_product_data( $data, $object );
 		}
 
 		$response = rest_ensure_response( $data );
@@ -873,7 +873,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		);
 
 		if ( $this->cogs_is_enabled() ) {
-			$schema = $this->add_cogs_related_schema( $schema, true );
+			$schema = $this->add_cogs_related_product_schema( $schema, true );
 		}
 
 		return $this->add_additional_fields_schema( $schema );

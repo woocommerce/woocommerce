@@ -15,8 +15,8 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
-		remove_all_filters( 'woocommerce_load_cogs_overrides_parent_value_flag' );
-		remove_all_filters( 'woocommerce_save_cogs_overrides_parent_value_flag' );
+		remove_all_filters( 'woocommerce_load_product_cogs_overrides_parent_value_flag' );
+		remove_all_filters( 'woocommerce_save_product_cogs_overrides_parent_value_flag' );
 	}
 
 	/**
@@ -64,7 +64,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Loaded Cost of Goods Sold "value overrides parent" flag can be modified using the woocommerce_load_cogs_overrides_parent_value_flag filter.
+	 * @testdox Loaded Cost of Goods Sold "value overrides parent" flag can be modified using the woocommerce_load_product_cogs_overrides_parent_value_flag filter.
 	 *
 	 * @testWith [true]
 	 *           [false]
@@ -79,14 +79,14 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		add_filter( 'woocommerce_load_cogs_overrides_parent_value_flag', fn( $value, $product ) => ! $value, 10, 2 );
+		add_filter( 'woocommerce_load_product_cogs_overrides_parent_value_flag', fn( $value, $product ) => ! $value, 10, 2 );
 
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( ! $flag_value, $product->get_cogs_value_overrides_parent() );
 	}
 
 	/**
-	 * @testdox Saved Cost of Goods Sold "value overrides parent" flag can be modified using the woocommerce_save_cogs_overrides_parent_value_flag filter.
+	 * @testdox Saved Cost of Goods Sold "value overrides parent" flag can be modified using the woocommerce_save_product_cogs_overrides_parent_value_flag filter.
 	 *
 	 * @testWith [true]
 	 *           [false]
@@ -97,7 +97,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->enable_cogs_feature();
 
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		add_filter( 'woocommerce_save_cogs_overrides_parent_value_flag', fn( $value, $product ) => ! $value, 10, 2 );
+		add_filter( 'woocommerce_save_product_cogs_overrides_parent_value_flag', fn( $value, $product ) => ! $value, 10, 2 );
 
 		$product = $this->get_variation();
 		$product->set_cogs_value_overrides_parent( $flag_value );
@@ -108,7 +108,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Saving of the Cost of Goods Sold "value overrides parent" flag can be suppressed using the woocommerce_save_cogs_overrides_parent_value_flag filter with a return value of null.
+	 * @testdox Saving of the Cost of Goods Sold "value overrides parent" flag can be suppressed using the woocommerce_save_product_cogs_overrides_parent_value_flag filter with a return value of null.
 	 *
 	 * @testWith [true]
 	 *           [false]
@@ -123,7 +123,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		add_filter( 'woocommerce_save_cogs_overrides_parent_value_flag', fn( $value, $product ) => null, 10, 2 );
+		add_filter( 'woocommerce_save_product_cogs_overrides_parent_value_flag', fn( $value, $product ) => null, 10, 2 );
 
 		$product->set_cogs_value_overrides_parent( ! $flag_value );
 		$product->save();
