@@ -9,17 +9,18 @@ import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 /**
  * Internal dependencies
  */
-import NoPaymentMethods from './no-payment-methods';
 import PaymentMethodOptions from './payment-method-options';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
 import './style.scss';
 
 /**
  * PaymentMethods component.
- *
- * @return {*} The rendered component.
  */
-const PaymentMethods = () => {
+const PaymentMethods = ( {
+	noPaymentMethods,
+}: {
+	noPaymentMethods: JSX.Element | null;
+} ) => {
 	const {
 		paymentMethodsInitialized,
 		availablePaymentMethods,
@@ -37,7 +38,7 @@ const PaymentMethods = () => {
 		paymentMethodsInitialized &&
 		Object.keys( availablePaymentMethods ).length === 0
 	) {
-		return <NoPaymentMethods />;
+		return noPaymentMethods;
 	}
 
 	return (

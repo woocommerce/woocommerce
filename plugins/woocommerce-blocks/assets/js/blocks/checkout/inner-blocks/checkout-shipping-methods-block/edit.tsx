@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, ExternalLink } from '@wordpress/components';
+import { shipping } from '@wordpress/icons';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -19,7 +20,7 @@ import {
 	AdditionalFields,
 	AdditionalFieldsContent,
 } from '../../form-step';
-import NoShippingPlaceholder from './no-shipping-placeholder';
+import ConfigurePlaceholder from '../../configure-placeholder';
 import Block from './block';
 import './editor.scss';
 
@@ -126,7 +127,23 @@ export const Edit = ( {
 				) }
 			</InspectorControls>
 			<Noninteractive>
-				<Block noShippingPlaceholder={ <NoShippingPlaceholder /> } />
+				<Block
+					noShippingPlaceholder={
+						<ConfigurePlaceholder
+							icon={ shipping }
+							label={ __( 'Shipping options', 'woocommerce' ) }
+							description={ __(
+								'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
+								'woocommerce'
+							) }
+							buttonLabel={ __(
+								'Configure Shipping Options',
+								'woocommerce'
+							) }
+							buttonHref={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+						/>
+					}
+				/>
 			</Noninteractive>
 			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>

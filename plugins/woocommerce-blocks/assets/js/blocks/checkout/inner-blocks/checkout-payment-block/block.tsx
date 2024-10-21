@@ -3,8 +3,12 @@
  */
 import { PaymentMethods } from '../../../cart-checkout-shared/payment-methods';
 
-const Block = (): JSX.Element | null => {
-	return <PaymentMethods />;
+const Block = ( {
+	noPaymentMethods,
+}: {
+	noPaymentMethods: JSX.Element | null;
+} ): JSX.Element | null => {
+	return <PaymentMethods noPaymentMethods={ noPaymentMethods } />;
 };
 
 export default Block;
