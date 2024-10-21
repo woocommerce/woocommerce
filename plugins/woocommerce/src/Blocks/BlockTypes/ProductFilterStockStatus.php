@@ -33,7 +33,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	}
 
 	/**
-	 * Register the query param keys.
+	{{{;;{{hhi{,,,kkkiiiiijkjkffasdfj}}}}}} * Register the query param keys.
 	 *
 	 * @param array $filter_param_keys The active filters data.
 	 * @param array $url_param_keys    The query param parsed from the URL.
@@ -106,45 +106,10 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 *                               Note, this will be empty in the editor context when the block is
 	 *                               not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $stock_statuses = [] ) {
+	protected function enqueue_data( array $stock_statuses = array() ) {
 		parent::enqueue_data( $stock_statuses );
 		$this->asset_data_registry->add( 'stockStatusOptions', wc_get_product_stock_status_options() );
 		$this->asset_data_registry->add( 'hideOutOfStockItems', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-	}
-
-	/**
-	 * Get the block context.
-	 *
-	 * @param array $stock_status_data The stock count data.
-	 * @param array $attributes  The block attributes.
-	 * @return array
-	 */
-	private function create_context_by_stock_status_data( $stock_status_data, $attributes ) {
-		$stock_statuses          = wc_get_product_stock_status_options();
-		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$selected_stock_statuses = explode( ',', $query );
-
-		$stock = array_map(
-			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
-				$label = $stock_statuses[ $item['status'] ] . ( $attributes['showCounts'] ? ' (' . $item['count'] . ')' : '' );
-				return array(
-					'label'    => $label,
-					'value'    => $item['status'],
-					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
-				);
-			},
-			$stock_status_data
-		);
-
-		return array(
-			'filterData'         => array(
-				'items'   => $stock,
-				'actions' => array(
-					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
-				),
-			),
-			'hasSelectedFilters' => ! empty( $selected_stock_statuses ),
-		);
 	}
 
 	/**
@@ -157,13 +122,49 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 
-		$stock_status_data = $this->get_stock_status_data( $block );
-		$filter_context    = $this->create_context_by_stock_status_data( $stock_status_data, $attributes );
+		$stock_status_data       = $this->get_stock_status_counts( $block );
+		$stock_statuses          = wc_get_product_stock_status_options();
+		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$selected_stock_statuses = array_filter( explode( ',', $query ) );
+
+		$filter_options = array_map(
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
+				$label = $stock_statuses[ $item['status'] ] . ( $attributes['showCounts'] ? ' (' . $item['count'] . ')' : '' );
+				return array(
+					'label'    => $label,
+					'value'    => $item['status'],
+					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
+					'rawData'  => $item,
+				);
+			},
+			$stock_status_data
+		);
+
+		$filter_context = array(
+			'filterData'         => array(
+				'items'   => $filter_options,
+				'actions' => array(
+					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+				),
+			),
+			'hasSelectedFilters' => ! empty( $selected_stock_statuses ),
+		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilters' => $filter_context['hasSelectedFilters'] ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-context'      => wp_json_encode(
+				array(
+					'hasSelectedFilters' => $filter_context['hasSelectedFilters'],
+					'hasFilterOptions'   => ! empty( $filter_options ),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
+
+		if ( empty( $filter_options ) ) {
+			$wrapper_attributes['hidden'] = true;
+		}
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
@@ -186,7 +187,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 *
 	 * @param WP_Block $block Block instance.
 	 */
-	private function get_stock_status_data( $block ) {
+	private function get_stock_status_counts( $block ) {
 		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
