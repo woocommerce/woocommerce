@@ -98,7 +98,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "View store" should go to the store home page in a new page', async ( {
+		test( 'Clicking on "View store" should go to the store home page', async ( {
 			pageObject,
 			baseURL,
 			page,
@@ -113,15 +113,9 @@ test.describe(
 			await page.goto( TRANSITIONAL_URL );
 			const assembler = await pageObject.getAssembler();
 
-			const newTabPromise = page.waitForEvent( 'popup' );
-			await assembler
-				.getByRole( 'button', { name: 'View store' } )
-				.click();
+			await assembler.getByRole( 'link', { name: 'View store' } ).click();
 
-			const newTab = await newTabPromise;
-			await newTab.waitForLoadState();
-
-			await expect( newTab ).toHaveURL( '/' );
+			await expect( page ).toHaveURL( '/' );
 		} );
 
 		test( 'Clicking on "Share feedback" should open the survey modal', async ( {

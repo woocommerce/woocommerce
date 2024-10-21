@@ -66,7 +66,9 @@ function getChangedFilesForProject(
 		}
 
 		// Track the file relative to the project.
-		projectChanges.push( filePath.slice( projectPath.length + 1 ) );
+		projectChanges.push(
+			filePath.slice( projectPath.length + Number( projectPath !== '' ) )
+		);
 	}
 
 	return projectChanges;
@@ -96,6 +98,9 @@ export function getFileChanges(
 		return true;
 	}
 
+	const ownedFilePaths = [];
+
+	// At the very first iteration, we will identify files ownership by monorepo packages.
 	const projectPaths = getProjectPaths( projectGraph );
 	const changes: ProjectFileChanges = {};
 	for ( const projectName in projectPaths ) {
@@ -113,6 +118,32 @@ export function getFileChanges(
 		}
 
 		changes[ projectName ] = projectChanges;
+		ownedFilePaths.push(
+			...projectChanges.map(
+				( filePath ) => projectPaths[ projectName ] + '/' + filePath
+			)
+		);
+	}
+
+	// Additional iteration will mark remaining files ownership by the monorepo itself.
+	const orphanFilePaths = changedFilePaths.filter(
+		( filePath ) => ! ownedFilePaths.includes( filePath )
+	);
+	for ( const projectName in projectPaths ) {
+		if ( projectPaths[ projectName ] ) {
+			continue;
+		}
+
+		const projectChanges = getChangedFilesForProject(
+			projectPaths[ projectName ],
+			orphanFilePaths
+		);
+		if ( projectChanges.length === 0 ) {
+			continue;
+		}
+
+		changes[ projectName ] = projectChanges;
+		break;
 	}
 
 	return changes;

@@ -1,15 +1,6 @@
-/**
- * Internal dependencies
- */
-import { BlockOverlayAttribute } from './constants';
-
-export type BlockOverlayAttributeOptions =
-	( typeof BlockOverlayAttribute )[ keyof typeof BlockOverlayAttribute ];
-
 export interface BlockAttributes {
 	setAttributes: ( attributes: ProductFiltersBlockAttributes ) => void;
 	productId?: string;
-	overlay: BlockOverlayAttributeOptions;
 	overlayIcon:
 		| 'filter-icon-1'
 		| 'filter-icon-2'
@@ -30,11 +21,11 @@ export type FilterBlockContext = {
 	filterData: {
 		isLoading: boolean;
 		items?: FilterOptionItem[];
-		range?: {
-			min: number;
-			max: number;
-			step: number;
+		price?: {
+			minPrice: number;
+			minRange: number;
+			maxPrice: number;
+			maxRange: number;
 		};
 	};
-	isParentSelected: boolean;
 };

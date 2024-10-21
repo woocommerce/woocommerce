@@ -1,4 +1,22 @@
 *** WooCommerce Beta Tester Changelog ***
+
+2024-10-21 - version 2.5.0
+* Patch - Flush cache after deleting option and resetting PHP rate limit
+* Minor - Add a tool to simulate server problems with woocommerce.com
+* Minor - Add fake WooPayments completion tool
+* Minor - Add set woocom base url tool
+* Minor - Add tool to reset "Launch your store" and coming soon mode changes
+* Patch - Add WCPay test order meta data
+* Patch - Deprecate unsupported Inbox note banner layout
+* Patch - Remove "banner" layout option from inbox note
+* Patch - Update Fake_WCPayments is_account_partially_onboarded to return false
+* Patch - Update remote logger tool to toggle remote logging feature properly
+* Minor - CYS - Move the "ai/patterns" endpoint to woocommerce admin API.
+* Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues.
+* Patch - Monorepo: consolidate syncpack config around React 17/18 usage.
+* Patch - Set remote-logging context to true in log remote event method
+* Patch - Improve remote logging tool to simulate core error early in the request lifecycle before wp fully loaded
+
 2024-08-08 - version 2.4.0
 * Patch - Changed from using React.render to React.createRoot for wc beta tester as it has been deprecated since React 18
 * Minor - Fix "Creation of dynamic property WC_Beta_Tester::$wporg_data is deprecated" on PHP 8.2

@@ -2,8 +2,10 @@
 /**
  * Plugin Name: WooCommerce Cleanup
  * Description: Resets WooCommerce site to testing start state.
- * Version: 1.0
+ * Version: 1.3
  * Author: Solaris Team
+ * Requires at least: 6.6
+ * Requires PHP: 8.0
  * @package WooCommerceCleanup
  *
  * This file contains the main functionality for the WooCommerce Cleanup plugin.
@@ -39,9 +41,12 @@ function wc_cleanup_media() {
 		}
 	}
 
-	// Clean up the uploads directory.
+	// Clean up the uploads directory, including CSV files.
 	$upload_dir = wp_upload_dir();
 	wc_cleanup_directory( $upload_dir['basedir'], $excluded_file_names );
+
+	// Specifically target and remove CSV files.
+	wc_cleanup_csv_files( $upload_dir['basedir'] );
 }
 
 /**
@@ -154,15 +159,43 @@ function wc_cleanup_reset_site() {
 		wp_delete_post( $coupon->ID, true );
 	}
 
-	// Remove all orders.
-	$orders = get_posts(
+	// Remove all coupons that are in the trash.
+	$trash_coupons = get_posts(
 		array(
-			'post_type'   => 'shop_order',
+			'post_type'   => 'shop_coupon',
+			'post_status' => 'trash',
 			'numberposts' => -1,
 		)
 	);
-	foreach ( $orders as $order ) {
-		wp_delete_post( $order->ID, true );
+
+	foreach ( $trash_coupons as $coupon ) {
+		wp_delete_post( $coupon->ID, true );
+	}
+
+	// Remove all orders.
+	if ( wc_get_container()->get( Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+		// HPOS is enabled.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_orders';
+		$order_ids  = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i', $table_name ) );
+
+		foreach ( $order_ids as $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				$order->delete( true );
+			}
+		}
+	} else {
+		// Traditional post-based orders.
+		$orders = get_posts(
+			array(
+				'post_type'   => 'shop_order',
+				'numberposts' => -1,
+			)
+		);
+		foreach ( $orders as $order ) {
+			wp_delete_post( $order->ID, true );
+		}
 	}
 
 	// Remove all products.
@@ -341,17 +374,22 @@ add_action(
 			'wc-cleanup/v1',
 			'/reset',
 			array(
-				'methods'             => 'POST',
+				'methods'             => 'GET',
 				'callback'            => 'wc_cleanup_reset_site_via_api',
 				'permission_callback' => function () {
-					// Verify the nonce before processing the request.
-					if ( ! isset( $_POST['wc_cleanup_reset_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wc_cleanup_reset_nonce'] ) ), 'wc_cleanup_reset_action' ) ) {
-						return new WP_Error( 'rest_forbidden', esc_html__( 'Nonce verification failed', 'woocommerce' ), array( 'status' => 403 ) );
+					$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
+					if ( strpos( $auth_header, 'Basic ' ) === 0 ) {
+						$auth_header = substr( $auth_header, 6 );
+						$credentials = explode( ':', base64_decode( $auth_header ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+						$user = wp_authenticate( $credentials[0], $credentials[1] );
+						if ( is_wp_error( $user ) || ! user_can( $user, 'manage_woocommerce' ) ) {
+							return new WP_Error( 'forbidden', 'Unauthorized', array( 'status' => 403 ) );
+						}
+
+						return true;
 					}
 
-					$provided_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
-					$valid_key    = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
-					return $provided_key === $valid_key;
+					return new WP_Error( 'forbidden', 'Unauthorized', array( 'status' => 403 ) );
 				},
 			)
 		);
@@ -366,4 +404,51 @@ add_action(
 function wc_cleanup_reset_site_via_api() {
 	wc_cleanup_reset_site();
 	return new WP_REST_Response( 'WooCommerce site has been reset.', 200 );
+}
+
+/**
+ * Clean up CSV files in the given directory and remove them from the media library.
+ *
+ * @param string $dir The directory to clean up.
+ */
+function wc_cleanup_csv_files( $dir ) {
+	global $wpdb;
+	$files = glob( $dir . '/*.csv' );
+	foreach ( $files as $file ) {
+		if ( is_file( $file ) ) {
+			// Get the attachment ID by file path.
+			$relative_path = str_replace( wp_upload_dir()['basedir'] . '/', '', $file );
+			$attachment_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s",
+					$relative_path
+				)
+			);
+
+			if ( $attachment_id ) {
+				// If found in media library, delete the attachment.
+				wp_delete_attachment( $attachment_id, true );
+			} else {
+				// If not found in media library, just delete the file.
+				wp_delete_file( $file );
+			}
+		}
+	}
+
+	// Recursively search subdirectories for CSV files.
+	$subdirs = glob( $dir . '/*', GLOB_ONLYDIR );
+	foreach ( $subdirs as $subdir ) {
+		wc_cleanup_csv_files( $subdir );
+	}
+
+	// Clean up any orphaned database entries for CSV files.
+	$wpdb->query(
+		"
+        DELETE p, pm
+        FROM $wpdb->posts p
+        LEFT JOIN $wpdb->postmeta pm ON p.ID = pm.post_id
+        WHERE p.post_type = 'attachment'
+        AND p.post_mime_type = 'text/csv'
+    "
+	);
 }

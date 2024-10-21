@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Limit loading product block editor to admin pages and rest requests

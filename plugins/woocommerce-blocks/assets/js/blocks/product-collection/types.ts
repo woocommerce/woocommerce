@@ -179,6 +179,7 @@ export enum CoreCollectionNames {
 	HAND_PICKED = 'woocommerce/product-collection/hand-picked',
 	RELATED = 'woocommerce/product-collection/related',
 	UPSELLS = 'woocommerce/product-collection/upsells',
+	CROSS_SELLS = 'woocommerce/product-collection/cross-sells',
 }
 
 export enum CoreFilterNames {

@@ -6,7 +6,7 @@ import {
 	select,
 	dispatch as depreciatedDispatch,
 } from '@wordpress/data-controls';
-import { _n, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { DispatchFromMap } from '@automattic/data-stores';
 import { controls } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -286,13 +286,29 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 			'activatePlugins',
 			plugins
 		);
-		return {
+
+		const response = {
 			...activations,
 			data: {
 				...activations.data,
 				...installations.data,
 			},
 		};
+
+		// If everything was a success and we both installed and activated, make the success message more informative.
+		if (
+			installations.success &&
+			Object.keys( installations.data.results ).length &&
+			activations.success &&
+			activations.data.activated.length
+		) {
+			response.message = __(
+				'Plugins were successfully installed and activated.',
+				'woocommerce'
+			);
+		}
+
+		return response;
 	} catch ( error ) {
 		throw error;
 	}

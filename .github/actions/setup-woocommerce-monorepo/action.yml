@@ -13,11 +13,14 @@ inputs:
     build-type:
         description: 'Given "full" or "backend" will perform optimized build steps.'
         default: 'full'
+    pull-package-deps:
+        description: 'Given a string value, will pull the package specific dependencies cache.'
+        default: false
     pull-playwright-cache:
         description: 'Given a boolean value, invokes Playwright dependencies caching.'
         default: false
-    pull-package-deps:
-        description: 'Given a string value, will pull the package specific dependencies cache.'
+    pull-package-composer-deps:
+        description: 'Given a string value, will pull the package specific dependencies cache. Not necessary if pull-package-deps is specified.'
         default: false
 runs:
     using: 'composite'
@@ -62,12 +65,12 @@ runs:
               key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-'
         - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.pull-package-deps != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' || inputs.pull-package-composer-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ inputs.pull-package-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
-              restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-package-deps }}-'
+              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
+              restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-"
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'

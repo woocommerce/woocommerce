@@ -1,0 +1,132 @@
+@import "../../shared.scss";
+
+.woocommerce-experimental-select-control {
+	&:hover,
+	ul:hover,
+	.woocommerce-experimental-select-control__input:hover,
+	.components-popover:hover,
+	.woocommerce-experimental-select-control__combo-box-wrapper:hover {
+		cursor: pointer;
+	}
+
+	&.has-selected-items {
+		.woocommerce-experimental-select-control__combox-box {
+			position: absolute;
+			width: 0;
+			z-index: -1;
+		}
+	}
+
+	.woocommerce-experimental-select-control__combox-box .woocommerce-experimental-select-control__input {
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 16px;
+	}
+
+	.components-popover.woocommerce-experimental-select-control__popover-menu {
+		padding-bottom: 20px;
+	}
+
+	.woocommerce-experimental-select-control__selected-item {
+		background: $gray-100;
+		padding: 2px 5px 2px 8px;
+	}
+
+	.woocommerce-tag .woocommerce-tag__text {
+		background: none !important;
+		font-size: 12px;
+		line-height: 16px;
+		padding: 0 2px;
+	}
+
+	.woocommerce-experimental-select-control__combo-box-wrapper {
+		transition: box-shadow 0.25s linear;
+		border: 1px solid #bbb;
+		border-radius: 2px;
+	}
+
+	.woocommerce-experimental-select-control__popover-menu {
+		border: none;
+		left: 0 !important;
+		width: 100%;
+	}
+
+	.woocommerce-experimental-select-control__popover-menu-container {
+		overflow-y: initial;
+		list-style: none;
+		padding: 0;
+		width: 100% !important;
+	}
+
+	.components-popover {
+		transform: none !important;
+
+		.components-popover__content {
+			transform: none;
+			width: 100%;
+			border: 1px solid #ccc;
+			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+			border-radius: 2px;
+			overflow-x: hidden !important;
+
+			ul li {
+				&:hover {
+					cursor: pointer;
+				}
+
+				.components-base-control__field {
+					margin-bottom: 0 !important;
+				}
+
+				.components-checkbox-control.is-selected {
+					input[type="checkbox"] {
+						border: none !important;
+					}
+				}
+
+				.components-checkbox-control__label {
+					cursor: pointer;
+					font-size: 13px;
+					font-weight: normal !important;
+					pointer-events: none;
+				}
+
+				.components-checkbox-control__input-container {
+					border-radius: 2px;
+					height: 20px !important;
+					padding: 1px;
+					width: 20px !important;
+
+					.components-checkbox-control__input[type="checkbox"] {
+						border: 1px solid #757575;
+						height: 20px !important;
+						width: 20px !important;
+						&:checked {
+							border-radius: 2px;
+						}
+					}
+
+					svg {
+						height: 20px;
+						top: 1px;
+						left: 0;
+						width: 22px;
+					}
+
+					@include breakpoint( "<782px" ) {
+						svg {
+							width: 18px;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+.woocommerce-profiler-platform-selector {
+	.woocommerce-experimental-select-control__input {
+		// hide the caret since typing is disabled and search is not supported.
+		caret-color: transparent;
+	}
+}

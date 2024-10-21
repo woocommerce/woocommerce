@@ -183,63 +183,6 @@ test.describe( `${ blockData.name }`, () => {
 		).toBeVisible();
 	} );
 
-	test( 'should display the correct inspector setting controls', async ( {
-		editor,
-		pageObject,
-	} ) => {
-		await pageObject.addProductFiltersBlock( { cleanContent: true } );
-
-		const filtersBlock = editor.canvas.getByLabel(
-			blockData.selectors.editor.blocks.filters.label
-		);
-		await expect( filtersBlock ).toBeVisible();
-
-		const overlayBlock = editor.canvas.getByLabel(
-			blockData.selectors.editor.blocks.overlay.label
-		);
-
-		// Overlay mode is set to 'Never' by default so the block should be hidden
-		await expect( overlayBlock ).toBeHidden();
-
-		await editor.openDocumentSettingsSidebar();
-
-		// Layout settings
-		await expect(
-			editor.page.getByText( 'LayoutJustificationOrientation' )
-		).toBeVisible();
-
-		// Overlay settings
-		const overlayModeSettings = [ 'Never', 'Mobile', 'Always' ];
-
-		await expect( editor.page.getByText( 'Overlay' ) ).toBeVisible();
-
-		for ( const mode of overlayModeSettings ) {
-			await expect( editor.page.getByText( mode ) ).toBeVisible();
-		}
-
-		await editor.page.getByLabel( 'Never' ).click();
-
-		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeHidden();
-
-		await expect( overlayBlock ).toBeHidden();
-
-		await editor.page.getByLabel( 'Mobile' ).click();
-
-		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
-
-		await expect( overlayBlock ).toBeVisible();
-
-		await editor.page.getByLabel( 'Always' ).click();
-
-		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
-
-		await expect( overlayBlock ).toBeVisible();
-
-		await editor.page.getByLabel( 'Never' ).click();
-
-		await expect( overlayBlock ).toBeHidden();
-	} );
-
 	test( 'Layout > default to vertical stretch', async ( {
 		editor,
 		pageObject,

@@ -12,7 +12,7 @@
 		transform: translateY(-50%);
 		line-height: 1.5;
 		left: em($gap-smaller + 1px);
-		top: 25px;
+		top: 1.562em;
 		transform-origin: top left;
 		color: $universal-body-low-emphasis;
 		transition: all 200ms ease;
@@ -56,7 +56,7 @@
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
-		height: 50px;
+		height: 3.125em;
 		background-color: #fff;
 		color: $input-text-active;
 

@@ -502,7 +502,7 @@ test.describe(
 				Number( productPrice * 1.25 )
 			);
 
-			await page.locator( 'a.reset_variations' ).click();
+			await page.locator( 'button.reset_variations' ).click();
 
 			// Verify the reset by attempting to add the product to the cart
 			page.on( 'dialog', async ( dialog ) => {

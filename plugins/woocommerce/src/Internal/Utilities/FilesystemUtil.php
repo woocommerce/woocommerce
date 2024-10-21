@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WP_Filesystem_Base;
 
@@ -29,6 +30,35 @@ class FilesystemUtil {
 		}
 
 		return $wp_filesystem;
+	}
+
+	/**
+	 * Get the WP filesystem method, with a fallback to 'direct' if no FS_METHOD constant exists and there are not FTP related options/credentials set.
+	 *
+	 * @return string|false The name of the WP filesystem method to use.
+	 */
+	public static function get_wp_filesystem_method_or_direct() {
+		$proxy = wc_get_container()->get( LegacyProxy::class );
+		if ( ! self::constant_exists( 'FS_METHOD' ) && false === $proxy->call_function( 'get_option', 'ftp_credentials' ) && ! self::constant_exists( 'FTP_HOST' ) ) {
+			return 'direct';
+		}
+
+		$method = $proxy->call_function( 'get_filesystem_method' );
+		if ( $method ) {
+			return $method;
+		}
+
+		return 'direct';
+	}
+
+	/**
+	 * Check if a constant exists and is not null.
+	 *
+	 * @param string $name Constant name.
+	 * @return bool True if the constant exists and its value is not null.
+	 */
+	private static function constant_exists( string $name ): bool {
+		return Constants::is_defined( $name ) && ! is_null( Constants::get_constant( $name ) );
 	}
 
 	/**
@@ -75,7 +105,7 @@ class FilesystemUtil {
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
-		$method      = get_filesystem_method();
+		$method      = self::get_wp_filesystem_method_or_direct();
 		$initialized = false;
 
 		if ( 'direct' === $method ) {

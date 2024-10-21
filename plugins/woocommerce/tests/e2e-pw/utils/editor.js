@@ -68,9 +68,10 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName, wpVersion = null ) => {
+	// With Gutenberg active we have Block Inserter name
 	await page
 		.getByRole( 'button', {
-			name: 'Toggle block inserter',
+			name: /Toggle block inserter|Block Inserter/,
 			expanded: false,
 		} )
 		.click();

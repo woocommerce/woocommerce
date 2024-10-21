@@ -40,10 +40,9 @@ export function setIsUpdating( isUpdating: boolean ) {
 }
 
 export function* updateOptions( data: Options ) {
-	yield setIsUpdating( true );
-	yield receiveOptions( data );
-
 	try {
+		yield setIsUpdating( true );
+
 		const results: unknown = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/options',
 			method: 'POST',
@@ -57,6 +56,9 @@ export function* updateOptions( data: Options ) {
 				`Invalid update options response from server: ${ results }`
 			);
 		}
+
+		yield receiveOptions( data );
+
 		return { success: true, ...results };
 	} catch ( error ) {
 		yield setUpdatingError( error );

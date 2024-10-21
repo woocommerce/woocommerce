@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Changes in-app marketplace media queries to use older `min-width` syntax.
+

@@ -54,7 +54,7 @@ jobs:
                   BROWSERSLIST_IGNORE_OLD_DATA: true
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
-                  pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce-blocks,plugins/woocommerce-admin,plugins/woocommerce/client/legacy}/{build,build-style}/**/*.{js,css}'
+                  pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce-blocks,plugins/woocommerce/client/admin,plugins/woocommerce/client/legacy}/{build,build-style}/**/*.{js,css}'
                   install-script: 'pnpm install --filter="@woocommerce/plugin-woocommerce..." --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts'
                   build-script: '--filter="@woocommerce/plugin-woocommerce" build'
                   clean-script: '--if-present clean:build'

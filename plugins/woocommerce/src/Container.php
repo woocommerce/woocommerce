@@ -3,9 +3,12 @@
  * Container class file.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\CostOfGoodsSoldServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
@@ -85,6 +88,7 @@ final class Container {
 		ComingSoonServiceProvider::class,
 		StatsServiceProvider::class,
 		ImportExportServiceProvider::class,
+		CostOfGoodsSoldServiceProvider::class,
 	);
 
 	/**

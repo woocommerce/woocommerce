@@ -29,13 +29,51 @@ const scoreDescriptions = [
 	__( 'Very strong', 'woocommerce' ),
 ];
 
+export const getPasswordStrength = ( password: string ) => {
+	if ( typeof window.zxcvbn === 'undefined' ) {
+		return passwordStrength( password, [
+			{
+				id: 0,
+				value: scoreDescriptions[ 0 ],
+				minDiversity: 0,
+				minLength: 0,
+			},
+			{
+				id: 1,
+				value: scoreDescriptions[ 1 ],
+				minDiversity: 1,
+				minLength: 4,
+			},
+			{
+				id: 2,
+				value: scoreDescriptions[ 2 ],
+				minDiversity: 2,
+				minLength: 8,
+			},
+			{
+				id: 3,
+				value: scoreDescriptions[ 3 ],
+				minDiversity: 4,
+				minLength: 12,
+			},
+			{
+				id: 4,
+				value: scoreDescriptions[ 4 ],
+				minDiversity: 4,
+				minLength: 20,
+			},
+		] ).id;
+	}
+	return window.zxcvbn( password ).score;
+};
+
 /**
  * Renders a password strength meter.
  *
  * Uses zxcvbn to calculate the password strength if available, otherwise falls back to check-password-strength which
  * does not include dictionaries of common passwords.
  */
-const PasswordStrengthMeter = ( {
+export const PasswordStrengthMeter = ( {
 	password = '',
 	onChange,
 }: {
@@ -50,13 +88,7 @@ const PasswordStrengthMeter = ( {
 	let strength = -1;
 
 	if ( password.length > 0 ) {
-		if ( typeof window.zxcvbn === 'undefined' ) {
-			const result = passwordStrength( password );
-			strength = result.id;
-		} else {
-			const result = window.zxcvbn( password );
-			strength = result.score;
-		}
+		strength = getPasswordStrength( password );
 	}
 
 	const previousStrength = usePrevious( strength );
@@ -89,29 +121,27 @@ const PasswordStrengthMeter = ( {
 			>
 				{ scoreDescriptions[ strength ] ?? '' }
 			</meter>
-			<div
-				id={ instanceId + '-result' }
-				className="wc-block-components-password-strength__result"
-			>
-				{ !! scoreDescriptions[ strength ] && (
-					<>
-						<span className="screen-reader-text" aria-live="polite">
-							{ sprintf(
-								/* translators: %s: Password strength */
-								__(
-									'Password strength: %1$s (%2$d characters long)',
-									'woocommerce'
-								),
-								scoreDescriptions[ strength ],
-								password.length
-							) }
-						</span>{ ' ' }
-						<span aria-hidden={ true }>
-							{ scoreDescriptions[ strength ] }
-						</span>
-					</>
-				) }
-			</div>
+			{ !! scoreDescriptions[ strength ] && (
+				<div
+					id={ instanceId + '-result' }
+					className="wc-block-components-password-strength__result"
+				>
+					<span className="screen-reader-text" aria-live="polite">
+						{ sprintf(
+							/* translators: %s: Password strength */
+							__(
+								'Password strength: %1$s (%2$d characters long)',
+								'woocommerce'
+							),
+							scoreDescriptions[ strength ],
+							password.length
+						) }
+					</span>{ ' ' }
+					<span aria-hidden={ true }>
+						{ scoreDescriptions[ strength ] }
+					</span>
+				</div>
+			) }
 		</div>
 	);
 };

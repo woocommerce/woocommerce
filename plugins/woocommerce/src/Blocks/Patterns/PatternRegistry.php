@@ -12,20 +12,15 @@ class PatternRegistry {
 	const SLUG_REGEX            = '/^[A-z0-9\/_-]+$/';
 	const COMMA_SEPARATED_REGEX = '/[\s,]+/';
 
-
 	/**
-	 * Associates pattern slugs with their localized labels for categorization.
+	 * Returns pattern slugs with their localized labels for categorization.
+	 *
 	 * Each key represents a unique pattern slug, while the value is the localized label.
 	 *
-	 * @var array $category_labels
+	 * @return array<string, string>
 	 */
-	private $category_labels;
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->category_labels = [
+	private function get_category_labels() {
+		return [
 			'woo-commerce'     => __( 'WooCommerce', 'woocommerce' ),
 			'intro'            => __( 'Intro', 'woocommerce' ),
 			'featured-selling' => __( 'Featured Selling', 'woocommerce' ),
@@ -148,10 +143,10 @@ class PatternRegistry {
 			}
 		}
 
-        // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
 		$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
 		if ( ! empty( $pattern_data['description'] ) ) {
-            // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
 			$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
 		}
 
@@ -186,13 +181,15 @@ class PatternRegistry {
 			}
 		}
 
+		$category_labels = $this->get_category_labels();
+
 		if ( ! empty( $pattern_data['categories'] ) ) {
 			foreach ( $pattern_data['categories'] as $key => $category ) {
 				$category_slug = _wp_to_kebab_case( $category );
 
 				$pattern_data['categories'][ $key ] = $category_slug;
 
-				$label = isset( $this->category_labels[ $category_slug ] ) ? $this->category_labels[ $category_slug ] : self::kebab_to_capital_case( $category_slug );
+				$label = $category_labels[ $category_slug ] ?? self::kebab_to_capital_case( $category_slug );
 
 				register_block_pattern_category(
 					$category_slug,

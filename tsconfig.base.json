@@ -37,7 +37,7 @@
 	
 	"references": [
 		{ "path": "./plugins/woocommerce/" },
-		{ "path": "./plugins/woocommerce-admin/" },
+		{ "path": "./plugins/woocommerce/client/admin" },
 		{ "path": "./packages/js/admin-e2e-tests" },
 		{ "path": "./packages/js/api" },
 		{ "path": "./packages/js/components" },

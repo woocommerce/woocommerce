@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -70,6 +71,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_wp_old_slug',
 		'_edit_last',
 		'_edit_lock',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -145,8 +147,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return boolval( $locked );
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$result = $wpdb->query( $query );
+		// The insert query can potentially result in a deadlock if there is high concurrency
+		// when trying to insert products, which will result in a false negative for SKU lock
+		// and incorrectly products not being created.
+		// To mitigate this, we will retry the query 3 times before giving up.
+		for ( $attempts = 0; $attempts < 3; $attempts++ ) {
+			if ( $attempts > 1 ) {
+				usleep( 10000 );
+			}
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$result = $wpdb->query( $query );
+			if ( false !== $result ) {
+				break;
+			}
+		}
+
+		if ( false === $result ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'Failed to obtain SKU lock for product: ID "%d" with SKU "%s" after %d attempts.',
+					$product_id,
+					$sku,
+					$attempts,
+				),
+				array(
+					'error' => $wpdb->last_error,
+				)
+			);
+		}
 
 		return (bool) $result;
 	}
@@ -438,7 +467,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : null;
+			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -448,6 +477,31 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
 		$product->set_props( $set_props );
+
+		if ( $this->cogs_feature_is_enabled() ) {
+			$this->load_cogs_data( $product );
+		}
+	}
+
+	/**
+	 * Load the Cost of Goods Sold related data for a given product.
+	 *
+	 * @param WC_Product $product The product to apply the loaded data to.
+	 */
+	protected function load_cogs_data( $product ) {
+		$cogs_value = (float) ( get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given product.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float $cogs_value The value as read from the database.
+		 * @param WC_Product $product The product for which the value is being loaded.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_load_cogs_value', $cogs_value, $product );
+
+		$product->set_props( array( 'cogs_value' => $cogs_value ) );
 	}
 
 	/**
@@ -680,6 +734,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
+			}
+		}
+
+		if ( $this->cogs_feature_is_enabled() ) {
+			$cogs_value = $product->get_cogs_value();
+
+			/**
+			 * Filter to customize the Cost of Goods Sold value that gets saved for a given product,
+			 * or to suppress the saving of the value (so that custom storage can be used).
+			 *
+			 * @since 9.5.0
+			 *
+			 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+			 * @param WC_Product $product The product for which the value is being saved.
+			 */
+			$cogs_value = apply_filters( 'woocommerce_save_cogs_value', $cogs_value, $product );
+
+			if ( ! is_null( $cogs_value ) ) {
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', 0.0 === $cogs_value ? '' : $cogs_value );
+				if ( $updated ) {
+					$this->updated_props[] = 'cogs_value';
+				}
 			}
 		}
 
@@ -2338,5 +2414,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			",
 			$product_id
 		);
+	}
+
+	/**
+	 * Check if the Cost of Goods Sold feature is enabled.
+	 *
+	 * @return bool True if the feature is enabled.
+	 */
+	protected function cogs_feature_is_enabled(): bool {
+		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 	}
 }

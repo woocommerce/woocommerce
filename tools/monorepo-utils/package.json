@@ -51,16 +51,16 @@
 		"uuid": "^9.0.1"
 	},
 	"devDependencies": {
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"copy-webpack-plugin": "^9.1.0",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
+		"jest": "27.5.x",
 		"replace": "^1.2.2",
-		"ts-jest": "~29.1.1",
-		"ts-loader": "^9.5.1",
-		"typescript": "^5.3.3",
+		"ts-jest": "29.1.x",
+		"ts-loader": "9.5.x",
+		"typescript": "5.3.x",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
 		"wireit": "0.14.3"

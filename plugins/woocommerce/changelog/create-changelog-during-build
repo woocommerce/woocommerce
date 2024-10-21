@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Moved changelog generation to build step

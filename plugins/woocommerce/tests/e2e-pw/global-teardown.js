@@ -1,5 +1,6 @@
 const { chromium, expect } = require( '@playwright/test' );
 const { admin } = require( './test-data/data' );
+const { logIn } = require( './utils/login' );
 
 module.exports = async ( config ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;
@@ -20,15 +21,7 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to clear consumer token... Try:' + i );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage
-				.locator( 'input[name="log"]' )
-				.fill( admin.username );
-			await adminPage
-				.locator( 'input[name="pwd"]' )
-				.fill( admin.password );
-			await adminPage.locator( 'text=Log In' ).click();
-			// eslint-disable-next-line playwright/no-networkidle
-			await adminPage.waitForLoadState( 'networkidle' );
+			await logIn( adminPage, admin.username, admin.password );
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);
@@ -92,6 +85,7 @@ module.exports = async ( config ) => {
 			break;
 		} catch ( e ) {
 			console.log( 'Failed to clear consumer token. Retrying...' );
+			console.log( e );
 		}
 	}
 

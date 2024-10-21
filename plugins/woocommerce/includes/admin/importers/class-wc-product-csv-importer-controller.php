@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Importers
  */
 
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Internal\Utilities\URL;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -113,37 +115,18 @@ class WC_Product_CSV_Importer_Controller {
 	 * @throws \Exception When file validation fails.
 	 */
 	protected static function check_file_path( string $path ): void {
-		$is_valid_file = false;
+		$wp_filesystem = FilesystemUtil::get_wp_filesystem();
 
-		if ( ! empty( $path ) ) {
-			$path          = realpath( $path );
-			$is_valid_file = false !== $path;
-		}
-
-		// File must be readable.
-		$is_valid_file = $is_valid_file && is_readable( $path );
+		// File must exist and be readable.
+		$is_valid_file = $wp_filesystem->is_readable( $path );
 
 		// Check that file is within an allowed location.
 		if ( $is_valid_file ) {
-			$normalized_path   = wp_normalize_path( $path );
-			$in_valid_location = false;
-			$valid_locations   = array();
-			$valid_locations[] = ABSPATH;
-
-			$upload_dir = wp_get_upload_dir();
-			if ( false === $upload_dir['error'] ) {
-				$valid_locations[] = $upload_dir['basedir'];
+			$is_valid_file = self::file_is_in_directory( $path, $wp_filesystem->abspath() );
+			if ( ! $is_valid_file ) {
+				$upload_dir    = wp_get_upload_dir();
+				$is_valid_file = false === $upload_dir['error'] && self::file_is_in_directory( $path, $upload_dir['basedir'] );
 			}
-
-			foreach ( $valid_locations as $valid_location ) {
-				$normalized_location = wp_normalize_path( realpath( $valid_location ) );
-				if ( 0 === stripos( $normalized_path, trailingslashit( $normalized_location ) ) ) {
-					$in_valid_location = true;
-					break;
-				}
-			}
-
-			$is_valid_file = $in_valid_location;
 		}
 
 		if ( ! $is_valid_file ) {
@@ -153,6 +136,19 @@ class WC_Product_CSV_Importer_Controller {
 		if ( ! self::is_file_valid_csv( $path ) ) {
 			throw new \Exception( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
+	}
+
+	/**
+	 * Check if a given file is inside a given directory.
+	 *
+	 * @param string $file_path The full path of the file to check.
+	 * @param string $directory The path of the directory to check.
+	 * @return bool True if the file is inside the directory.
+	 */
+	private static function file_is_in_directory( string $file_path, string $directory ): bool {
+		$file_path = (string) new URL( $file_path ); // This resolves '/../' sequences.
+		$file_path = preg_replace( '/^file:\\/\\//', '', $file_path );
+		return 0 === stripos( wp_normalize_path( $file_path ), trailingslashit( wp_normalize_path( $directory ) ) );
 	}
 
 	/**

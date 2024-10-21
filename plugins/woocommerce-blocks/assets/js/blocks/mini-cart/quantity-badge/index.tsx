@@ -11,15 +11,15 @@ import './style.scss';
 import { IconType, ColorItem, productCountVisibilityType } from '.././types';
 
 interface Props {
-	count: number;
+	count?: number;
 	icon?: IconType;
-	iconColor: ColorItem | { color: undefined };
-	productCountColor: ColorItem | { color: undefined };
+	iconColor?: ColorItem | { color: undefined };
+	productCountColor?: ColorItem | { color: undefined };
 	productCountVisibility?: productCountVisibilityType;
 }
 
 const QuantityBadge = ( {
-	count,
+	count = 0,
 	icon,
 	iconColor,
 	productCountColor,
@@ -48,14 +48,14 @@ const QuantityBadge = ( {
 		<span className="wc-block-mini-cart__quantity-badge">
 			<Icon
 				className="wc-block-mini-cart__icon"
-				color={ iconColor.color }
+				color={ iconColor?.color }
 				size={ 20 }
 				icon={ getIcon( icon ) }
 			/>
 			{ shouldDisplayCount && (
 				<span
 					className="wc-block-mini-cart__badge"
-					style={ { background: productCountColor.color } }
+					style={ { background: productCountColor?.color } }
 				>
 					{ displayCount }
 				</span>
