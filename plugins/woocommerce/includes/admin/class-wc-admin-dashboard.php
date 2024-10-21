@@ -100,10 +100,17 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			 * Allows modifying the order statuses used in the top seller query inside the dashboard status widget.
 			 *
 			 * @since 2.2.0
+			 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 			 *
 			 * @param string[] $order_statuses Order statuses.
 			 */
-			$order_statuses  = apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
+			$order_statuses  = apply_filters_deprecated(
+				'woocommerce_reports_order_statuses',
+				array( array( 'completed', 'processing', 'on-hold' ) ),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+			);
 			$query['where'] .= "AND orders.{$orders_column_status} IN ( 'wc-" . implode( "','wc-", $order_statuses ) . "' ) ";
 
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";

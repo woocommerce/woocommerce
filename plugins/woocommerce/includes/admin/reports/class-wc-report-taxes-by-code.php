@@ -2,6 +2,7 @@
 /**
  * Taxes by tax code report.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  */
 
@@ -12,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Taxes_By_Code
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -20,6 +22,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -28,6 +31,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
 	 * Output an export link.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {
 
@@ -46,6 +51,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -71,6 +78,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {
 		global $wpdb;
@@ -208,8 +217,31 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 						$rate = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $rate_id ) );
 						?>
 						<tr>
-							<th scope="row"><?php echo wp_kses_post( apply_filters( 'woocommerce_reports_taxes_tax_rate', $tax_row->tax_rate, $rate_id, $tax_row ) ); ?></th>
-							<td><?php echo wp_kses_post( apply_filters( 'woocommerce_reports_taxes_rate', $rate, $rate_id, $tax_row ) ); ?>%</td>
+							<th scope="row">
+								<?php
+									echo wp_kses_post(
+										apply_filters_deprecated(
+											'woocommerce_reports_taxes_tax_rate',
+											array( $tax_row->tax_rate, $rate_id, $tax_row ),
+											'9.5.0',
+											null,
+											'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+										)
+									);
+								?>
+							</th>
+							<td>
+								<?php
+									echo wp_kses_post(
+										apply_filters_deprecated(
+											'woocommerce_reports_taxes_rate',
+											array( $rate, $rate_id, $tax_row ),
+											'9.5.0',
+											null,
+											'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+										) ?? ''
+									);
+								// phpcs:ignore?>%</td>
 							<td class="total_row"><?php echo esc_html( $tax_row->total_orders ); ?></td>
 							<td class="total_row"><?php echo wc_price( $tax_row->tax_amount ); // phpcs:ignore ?></td>
 							<td class="total_row"><?php echo wc_price( $tax_row->shipping_tax_amount ); // phpcs:ignore ?></td>
