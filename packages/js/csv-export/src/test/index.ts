@@ -12,9 +12,9 @@ import {
 	generateCSVDataFromTable,
 	generateCSVFileName,
 } from '../index';
-import mockCSVData from '../__mocks__/mock-csv-data';
-import mockHeaders from '../__mocks__/mock-headers';
-import mockRows from '../__mocks__/mock-rows';
+import mockCSVData from './__mocks__/mock-csv-data';
+import mockHeaders from './__mocks__/mock-headers';
+import mockRows from './__mocks__/mock-rows';
 
 jest.mock( 'browser-filesaver', () => ( {
 	saveAs: jest.fn(),
