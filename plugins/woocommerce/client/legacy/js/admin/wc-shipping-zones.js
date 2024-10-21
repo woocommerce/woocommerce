@@ -169,7 +169,7 @@
 							}
 
 							$method_list.append(
-								'<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method.title + '</li>'
+								'<li class="wc-shipping-zone-method ' + class_name + '" data-id="' + shipping_method.instance_id + '">' + shipping_method.title + '</li>'
 							);
 						} );
 					} else {
