@@ -67,7 +67,7 @@ describe( 'PickupLocation', () => {
 		].selected = false;
 		const pickupRateIndex =
 			previewCart.shipping_rates[ 0 ].shipping_rates.findIndex(
-				( rate ) => rate.rate_id === 'pickup_location:2'
+				( rate ) => rate.rate_id === 'pickup_location:1'
 			);
 		previewCart.shipping_rates[ 0 ].shipping_rates[
 			pickupRateIndex
