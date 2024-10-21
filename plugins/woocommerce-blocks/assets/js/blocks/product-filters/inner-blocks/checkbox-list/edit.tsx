@@ -96,21 +96,17 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									htmlFor={ `interactive-checkbox-${ index }` }
 									className=" wc-block-product-filter-checkbox-list__label"
 								>
-									<span className="wc-block-interactive-components-checkbox-list__input-wrapper">
-										<span className="wc-block-product-filter-checkbox-list__input-wrapper">
-											<input
-												name={ `interactive-checkbox-${ index }` }
-												type="checkbox"
-												className="wc-block-product-filter-checkbox-list__input"
-												defaultChecked={
-													!! item.selected
-												}
-											/>
-											<Icon
-												className="wc-block-product-filter-checkbox-list__mark"
-												icon={ checkMark }
-											/>
-										</span>
+									<span className="wc-block-product-filter-checkbox-list__input-wrapper">
+										<input
+											name={ `interactive-checkbox-${ index }` }
+											type="checkbox"
+											className="wc-block-product-filter-checkbox-list__input"
+											defaultChecked={ !! item.selected }
+										/>
+										<Icon
+											className="wc-block-product-filter-checkbox-list__mark"
+											icon={ checkMark }
+										/>
 									</span>
 									<span className="wc-block-product-filter-checkbox-list__text">
 										{ item.label }
