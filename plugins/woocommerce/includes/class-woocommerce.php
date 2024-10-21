@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\HooksRegistry;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -707,10 +708,7 @@ final class WooCommerce {
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
-		/**
-		 * Product Usage
-		 */
-		include_once WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php';
+		HooksRegistry::load_hooks();
 
 		/**
 		 * Libraries and packages.

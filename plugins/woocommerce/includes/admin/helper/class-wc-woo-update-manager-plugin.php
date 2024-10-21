@@ -28,7 +28,6 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return void
 	 */
 	public static function load(): void {
-		add_action( 'admin_notices', array( __CLASS__, 'show_woo_update_manager_install_notice' ) );
 	}
 
 	/**

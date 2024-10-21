@@ -27,10 +27,6 @@ class WC_WCCOM_Site {
 	 */
 	public static function load() {
 		self::includes();
-
-		add_action( 'woocommerce_wccom_install_products', array( 'WC_WCCOM_Site_Installer', 'install' ) );
-		add_filter( 'determine_current_user', array( __CLASS__, 'authenticate_wccom' ), 14 );
-		add_action( 'woocommerce_rest_api_get_rest_namespaces', array( __CLASS__, 'register_rest_namespace' ) );
 	}
 
 	/**
@@ -40,7 +36,6 @@ class WC_WCCOM_Site {
 	 */
 	protected static function includes() {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php';
 	}
 
 	/**
