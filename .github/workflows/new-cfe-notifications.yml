@@ -191,11 +191,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Close CFE Issue
-<<<<<<< HEAD
-        run: gh issue close --comment "Closing issue as CFE is rejected - ${{ github.event.issue.html_url }}" "${{ github.event.issue.html_url }}. Please switch the base to trunk and merge."
-=======
-        run: gh issue close --comment "Closing issue as the request is rejected - ${{ github.event.issue.html_url }}" "${{ github.event.issue.html_url }}"
->>>>>>> cef512e37a (Added changes to cfe notifications)
+        run: gh issue close --comment "Closing issue the request is rejected - ${{ github.event.issue.html_url }}" "${{ github.event.issue.html_url }}. Please switch the base to trunk and merge."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
