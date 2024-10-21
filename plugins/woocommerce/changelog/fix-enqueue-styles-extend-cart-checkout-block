@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent doing_it_wrong warnings while registering the example block.
