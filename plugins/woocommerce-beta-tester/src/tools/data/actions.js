@@ -307,3 +307,22 @@ export function* fakeWooPayments( params ) {
 		);
 	} );
 }
+
+export function* updateWccomBaseUrl( { url } ) {
+	yield runCommand( 'Set WooCommerce.com Base URL', function* () {
+		yield apiFetch( {
+			path: '/wc-admin-test-helper/tools/set-wccom-base-url/v1',
+			method: 'POST',
+			data: { url },
+		} );
+	} );
+}
+
+export function* resetLaunchYourStore() {
+	yield runCommand( 'Reset Launch Your Store', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-launch-your-store',
+			method: 'POST',
+		} );
+	} );
+}

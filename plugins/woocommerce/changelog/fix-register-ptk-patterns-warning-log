@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only log PTK error if no action has been scheduled

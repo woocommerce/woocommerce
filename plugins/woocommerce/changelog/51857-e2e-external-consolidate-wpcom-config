@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Consolidate `playwright.config.js` for WPCOM

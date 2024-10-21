@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
- * Version: 2.4.0
+ * Version: 2.5.0
  * Author: WooCommerce
  * Author URI: https://woocommerce.com/
  * Requires at least: 5.8
@@ -30,7 +30,7 @@ if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
-	define( 'WC_BETA_TESTER_VERSION', '2.4.0' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_BETA_TESTER_VERSION', '2.5.0' ); // WRCS: DEFINED_VERSION.
 }
 
 /**
@@ -143,10 +143,30 @@ add_action(
 /**
  * Simulate a WooCommerce error for remote logging testing.
  *
- * @throws Exception A simulated WooCommerce error if the option is set.
+ * This function adds a filter to the 'woocommerce_template_path' hook
+ * that throws an exception, then triggers the filter by calling WC()->template_path().
+ *
+ * @throws Exception A simulated WooCommerce error for testing purposes.
  */
 function simulate_woocommerce_error() {
-	throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+	// Return if WooCommerce is not loaded.
+	if ( ! function_exists( 'WC' ) || ! class_exists( 'WooCommerce' ) ) {
+		return;
+	}
+
+	// Define a constant to prevent the error from being caught by the WP Error Handler.
+	if ( ! defined( 'WP_SANDBOX_SCRAPING' ) ) {
+		define( 'WP_SANDBOX_SCRAPING', true );
+	}
+
+	add_filter(
+		'woocommerce_template_path',
+		function() {
+			throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+		}
+	);
+
+	WC()->template_path();
 }
 
 $simulate_error = get_option( 'wc_beta_tester_simulate_woocommerce_php_error', false );
@@ -155,7 +175,8 @@ if ( $simulate_error ) {
 	delete_option( 'wc_beta_tester_simulate_woocommerce_php_error' );
 
 	if ( 'core' === $simulate_error ) {
-		add_action( 'woocommerce_loaded', 'simulate_woocommerce_error' );
+		// Hook into the plugin_loaded action to simulate the error early before WP fully initializes.
+		add_action( 'plugin_loaded', 'simulate_woocommerce_error' );
 	} elseif ( 'beta-tester' === $simulate_error ) {
 		throw new Exception( 'Test PHP exception from WooCommerce Beta Tester' );
 	}

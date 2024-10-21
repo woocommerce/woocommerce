@@ -19,6 +19,9 @@ export default class ExpressPaymentMethodConfig
 	implements ExpressPaymentMethodConfigInstance
 {
 	public name: string;
+	public title: string;
+	public description: string;
+	public gatewayId: string;
 	public content: ReactNode;
 	public edit: ReactNode;
 	public paymentMethodId?: string;
@@ -27,13 +30,28 @@ export default class ExpressPaymentMethodConfig
 
 	constructor( config: ExpressPaymentMethodConfiguration ) {
 		// validate config
+
+		const readableName =
+			typeof config.name === 'string'
+				? config.name.replace( /[_-]/g, ' ' )
+				: config.name;
+		const trimedDescription =
+			typeof config?.description === 'string' &&
+			config.description.length > 130
+				? config.description.slice( 0, 130 ) + '...'
+				: config.description;
+
 		ExpressPaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
+		this.title = config.title || readableName;
+		this.description = trimedDescription || '';
+		this.gatewayId = config.gatewayId || '';
 		this.content = config.content;
 		this.edit = config.edit;
 		this.paymentMethodId = config.paymentMethodId || this.name;
 		this.supports = {
 			features: config?.supports?.features || [ 'products' ],
+			style: config?.supports?.style || [],
 		};
 		this.canMakePaymentFromConfig = config.canMakePayment;
 	}

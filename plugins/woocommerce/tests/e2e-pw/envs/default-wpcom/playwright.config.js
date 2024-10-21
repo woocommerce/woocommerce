@@ -13,6 +13,7 @@ config = {
 				'**/admin-analytics/**/*.spec.js',
 				'**/admin-marketing/**/*.spec.js',
 				'**/admin-tasks/**/*.spec.js',
+				'**/merchant/**/*.spec.js',
 				'**/shopper/**/*.spec.js',
 				'**/api-tests/**/*.test.js',
 			],
