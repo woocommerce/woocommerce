@@ -9,7 +9,7 @@ const {
 	getTestTranslation,
 } = require( '../tests/e2e/utils/get-test-translation' );
 
-ensureDirSync( path.join( __dirname, '../languages' ) );
+ensureDirSync( path.join( __dirname, '../../woocommerce/languages' ) );
 
 const builtJsFiles = glob.sync(
 	`${ path.dirname( __filename ) }/../build/**/*.js`,
@@ -82,16 +82,10 @@ builtJsFiles.forEach( ( filePath ) => {
 		.update( relativeFilePath )
 		.digest( 'hex' );
 
-	console.log(
-		`wiriting file to ${ path.dirname(
-			__filename
-		) }/../languages/woocommerce-${ locale }-${ md5Path }.json`
-	);
-
 	writeJsonSync(
 		`${ path.dirname(
 			__filename
-		) }/../languages/woocommerce-${ locale }-${ md5Path }.json`,
+		) }/../../woocommerce/languages/woocommerce-${ locale }-${ md5Path }.json`,
 		data
 	);
 } );
