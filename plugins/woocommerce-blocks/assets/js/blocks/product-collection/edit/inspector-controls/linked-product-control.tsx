@@ -137,15 +137,16 @@ const LinkedProductControl = ( {
 	usesReference: string[] | undefined;
 } ) => {
 	const REFERENCE_TYPE_PRODUCT = 'product';
-	const isProductReferenceAvailable =
-		location.type === REFERENCE_TYPE_PRODUCT;
+	const isProductLocation = location.type === REFERENCE_TYPE_PRODUCT;
+	const isCartLocation = location.type === 'cart';
 	const { productReference } = query;
 
 	const { product, isLoading } = useGetProduct( productReference );
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
 	const [ radioControlState, setRadioControlState ] =
 		useState< PRODUCT_REFERENCE_TYPE >(
-			isProductReferenceAvailable && isEmpty( productReference )
+			( isProductLocation || isCartLocation ) &&
+				isEmpty( productReference )
 				? PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
 				: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		);
@@ -160,7 +161,7 @@ const LinkedProductControl = ( {
 
 	if ( ! showLinkedProductControl ) return null;
 
-	const showRadioControl = isProductReferenceAvailable;
+	const showRadioControl = isProductLocation || isCartLocation;
 	const showSpecificProductSelector = showRadioControl
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
@@ -194,6 +195,11 @@ const LinkedProductControl = ( {
 		setRadioControlState( newValue );
 	};
 
+	const fromCurrentProductLabel =
+		location.type === 'cart'
+			? __( 'From products in the cart', 'woocommerce' )
+			: __( 'From the current product', 'woocommerce' );
+
 	return (
 		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
 			{ showRadioControl && (
@@ -205,10 +211,7 @@ const LinkedProductControl = ( {
 						selected={ radioControlState }
 						options={ [
 							{
-								label: __(
-									'From the current product',
-									'woocommerce'
-								),
+								label: fromCurrentProductLabel,
 								value: PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT,
 							},
 							{
