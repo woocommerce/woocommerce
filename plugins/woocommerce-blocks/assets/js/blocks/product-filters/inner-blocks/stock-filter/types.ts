@@ -25,3 +25,12 @@ export type Current = {
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;
+
+export type CollectionData = {
+	stock_status_counts: StockStatusCount[];
+};
+
+export type StockStatusCount = {
+	status: string;
+	count: number;
+};

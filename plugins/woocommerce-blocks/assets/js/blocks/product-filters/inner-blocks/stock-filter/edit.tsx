@@ -2,23 +2,24 @@
  * External dependencies
  */
 import {
-	BlockContextProvider,
 	useBlockProps,
+	BlockContextProvider,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { InitialDisabled } from '../../components/initial-disabled';
-import { getStockFilterData } from './utils';
 import { Inspector } from './inspector';
-import { EditProps } from './types';
+import { CollectionData, EditProps, StockStatusCount } from './types';
 
 const Edit = ( props: EditProps ) => {
+	const { showCounts, hideEmpty } = props.attributes;
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
@@ -70,34 +71,37 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const { results, isLoading } = useCollectionData( {
+	const stockStatusOptions: Record< string, string > = getSetting(
+		'stockStatusOptions',
+		{}
+	);
+
+	const { results: filteredCounts, isLoading } = useCollectionData( {
 		queryStock: true,
 		queryState: {},
 		isEditor: true,
 	} );
 
-	const stock = getStockFilterData( results );
+	const items = useMemo( () => {
+		return Object.entries( stockStatusOptions )
+			.map( ( [ key, value ] ) => {
+				const count =
+					(
+						filteredCounts as unknown as CollectionData
+					 )?.stock_status_counts?.find(
+						( item: StockStatusCount ) => item.status === key
+					)?.count ?? 0;
 
-	const labels = useMemo(
-		() => ( {
-			instock: __( 'In stock', 'woocommerce' ),
-			outofstock: __( 'Out of stock', 'woocommerce' ),
-			onbackorder: __( 'On backorder', 'woocommerce' ),
-		} ),
-		[]
-	);
-
-	const data = stock.map( ( { status, count } ) => {
-		const label = labels[ status ];
-		return {
-			label:
-				label +
-				( props.attributes.showCounts
-					? ` (${ count.toString() })`
-					: '' ),
-			value: status,
-		};
-	} );
+				return {
+					value: key,
+					label: showCounts
+						? `${ value } (${ count.toString() })`
+						: value,
+					count,
+				};
+			} )
+			.filter( ( item ) => ! hideEmpty || item.count > 0 );
+	}, [ stockStatusOptions, filteredCounts, showCounts, hideEmpty ] );
 
 	return (
 		<div { ...innerBlocksProps }>
@@ -106,7 +110,7 @@ const Edit = ( props: EditProps ) => {
 				<BlockContextProvider
 					value={ {
 						filterData: {
-							items: data,
+							items,
 							isLoading,
 						},
 					} }
