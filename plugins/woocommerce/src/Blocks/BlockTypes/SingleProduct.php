@@ -13,20 +13,11 @@ class SingleProduct extends AbstractBlock {
 	protected $block_name = 'single-product';
 
 	/**
-	 * Product ID of the current product to be displayed in the Single Product block.
-	 * This is used to replace the global post for the Single Product inner blocks.
+	 * A stack of posts that have been overridden by the Single Product block.
 	 *
-	 * @var int
+	 * @var WP_Post[]
 	 */
-	protected $product_id = 0;
-
-	/**
-	 * Single Product inner blocks names.
-	 * This is used to map all the inner blocks for a Single Product block.
-	 *
-	 * @var array
-	 */
-	protected $single_product_inner_blocks_names = [];
+	protected $overridden_post_stack = array();
 
 	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
@@ -36,119 +27,108 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		add_filter( 'render_block_context', [ $this, 'update_context' ], 10, 3 );
-		add_filter( 'render_block_core/post-excerpt', [ $this, 'restore_global_post' ], 10, 3 );
-		add_filter( 'render_block_core/post-title', [ $this, 'restore_global_post' ], 10, 3 );
-	}
+		// Use an early priority to ensure other context hooks have access to the context provided here.
+		add_filter( 'render_block_context', [ $this, 'update_context' ], 1, 2 );
 
-	/**
-	 * Restore the global post variable right before generating the render output for the post title and/or post excerpt blocks.
-	 *
-	 * This is required due to the changes made via the replace_post_for_single_product_inner_block method.
-	 * It is a temporary fix to ensure these blocks work as expected until Gutenberg versions 15.2 and 15.6 are part of the core of WordPress.
-	 *
-	 * @see https://github.com/WordPress/gutenberg/pull/48001
-	 * @see https://github.com/WordPress/gutenberg/pull/49495
-	 *
-	 * @param  string    $block_content  The block content.
-	 * @param  array     $parsed_block  The full block, including name and attributes.
-	 * @param  \WP_Block $block_instance  The block instance.
-	 *
-	 * @return mixed
-	 */
-	public function restore_global_post( $block_content, $parsed_block, $block_instance ) {
-		if ( isset( $block_instance->context['singleProduct'] ) && $block_instance->context['singleProduct'] ) {
-			wp_reset_postdata();
-		}
-
-		return $block_content;
+		// In order to ensure that inner blocks have access to the correct post data,
+		// we're going to hook into block rendering to set the global post state.
+		// The `pre_render_block` hook should be as early as possible and is run
+		// before any rendering takes place. A late hook on `render_block` will
+		// make sure that all of the rendering for the block has taken place.
+		add_filter( 'pre_render_block', [ $this, 'update_post' ], 0, 2 );
+		add_filter( 'render_block_woocommerce/single-product', [ $this, 'reset_post' ], 100, 3 );
 	}
 
 	/**
 	 * Update the context by injecting the correct post data
 	 * for each one of the Single Product inner blocks.
 	 *
-	 * @param array    $context Block context.
-	 * @param array    $block Block attributes.
-	 * @param WP_Block $parent_block Block instance.
-	 *
-	 * @return array Updated block context.
+	 * @param array $context Block context.
+	 * @param array $block Block attributes.
 	 */
-	public function update_context( $context, $block, $parent_block ) {
-		if ( 'woocommerce/single-product' === $block['blockName']
-			&& isset( $block['attrs']['productId'] ) ) {
-				$this->product_id = $block['attrs']['productId'];
-
-				$this->single_product_inner_blocks_names = array_reverse(
-					$this->extract_single_product_inner_block_names( $block )
-				);
+	public function update_context( $context, $block ) {
+		if ( 'woocommerce/single-product' !== $block['blockName'] ) {
+			return $context;
 		}
 
-		$this->replace_post_for_single_product_inner_block( $block, $context );
+		$id = $block['attrs']['productId'] ?? null;
+		if ( ! isset( $id ) ) {
+			return $context;
+		}
 
+		// Override the context with the selected product.
+		$context['postId']        = $id;
+		$context['postType']      = get_post_type( $id );
+		$context['singleProduct'] = true;
 		return $context;
 	}
 
 	/**
-	 * Extract the inner block names for the Single Product block. This way it's possible
-	 * to map all the inner blocks for a Single Product block and manipulate the data as needed.
+	 * Updates the global post state to the selected product.
 	 *
-	 * @param array $block The Single Product block or its inner blocks.
-	 * @param array $result Array of inner block names.
-	 *
-	 * @return array Array containing all the inner block names of a Single Product block.
+	 * @param string|null $pre_render   Any pre-rendered content.
+	 * @param array       $parsed_block A representation of the block being rendered.
 	 */
-	protected function extract_single_product_inner_block_names( $block, &$result = [] ) {
-		if ( isset( $block['blockName'] ) ) {
-			$result[] = $block['blockName'];
+	public function update_post( $pre_render, $parsed_block ) {
+		if ( 'woocommerce/single-product' !== $parsed_block['blockName'] ) {
+			return $pre_render;
 		}
 
-		if ( isset( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $inner_block ) {
-				$this->extract_single_product_inner_block_names( $inner_block, $result );
-			}
+		// When `pre_render_block` returns a non-null value, WordPress short-circuits
+		// block rendering since it assumes the block has already been rendered. If
+		// this is the case, we shouldn't set the global post state since we
+		// can't hook into the `render_block` hook to reset the post state.
+		if ( isset( $pre_render ) ) {
+			return $pre_render;
 		}
-		return $result;
+
+		$id = $parsed_block['attrs']['productId'] ?? null;
+		if ( ! isset( $id ) ) {
+			return $pre_render;
+		}
+
+		// Make sure to push the current global post onto the stack
+		// so it can be restored after the block renders.
+		global $post;
+		$this->overridden_post_stack[] = $post;
+
+		// Before rendering our inner blocks we need to set the global post state
+		// to the selected product. This ensures that inner blocks have access
+		// to the correct post data.
+		$selected_product_post = get_post( $parsed_block['attrs']['productId'] );
+		if ( ! ( $selected_product_post instanceof \WP_Post ) ) {
+			return $pre_render;
+		}
+		$post = $selected_product_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		setup_postdata( $post );
+
+		return $pre_render;
 	}
 
 	/**
-	 * Replace the global post for the Single Product inner blocks and reset it after.
+	 * Resets the global post state after rendering the inner blocks.
 	 *
-	 * This is needed because some of the inner blocks may use the global post
-	 * instead of fetching the product through the `productId` attribute, so even if the
-	 * `productId` is passed to the inner block, it will still use the global post.
-	 *
-	 * @param array $block Block attributes.
-	 * @param array $context Block context.
+	 * @param string $block_content The block content.
+	 * @param array  $parsed_block  The parsed block data.
 	 */
-	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
-		if ( $this->single_product_inner_blocks_names ) {
-			$block_name = array_pop( $this->single_product_inner_blocks_names );
-
-			if ( $block_name === $block['blockName'] ) {
-				/**
-				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
-				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
-				 *
-				 * Important: the original post data is restored in the restore_global_post method.
-				 *
-				 * @see https://github.com/WordPress/gutenberg/pull/48001
-				 * @see https://github.com/WordPress/gutenberg/pull/49495
-				 */
-				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
-					global $post;
-					// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					$post = get_post( $this->product_id );
-
-					if ( $post instanceof \WP_Post ) {
-						setup_postdata( $post );
-					}
-				}
-
-				$context['postId']        = $this->product_id;
-				$context['singleProduct'] = true;
-			}
+	public function reset_post( $block_content, $parsed_block ) {
+		if ( 'woocommerce/single-product' !== $parsed_block['blockName'] ) {
+			return $block_content;
 		}
+
+		// We don't want to reset anything if we didn't set it in the first place.
+		$id = $parsed_block['attrs']['productId'] ?? null;
+		if ( ! isset( $id ) ) {
+			return $block_content;
+		}
+
+		// Replace the global post with the one that was set prior to us
+		// overriding it with the selected product.
+		global $post;
+		$post = array_pop( $this->overridden_post_stack ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		setup_postdata( $post );
+
+		return $block_content;
 	}
 
 	/**
