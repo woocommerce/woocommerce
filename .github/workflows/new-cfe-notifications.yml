@@ -39,7 +39,7 @@ jobs:
             }
 
   cfe-created:
-    if: github.event.label.name == 'code freeze exception'
+    if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request'
     runs-on: ubuntu-20.04
     steps:
       - name: Set Slack Message
