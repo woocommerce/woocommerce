@@ -137,7 +137,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						<input
 							class="max"
 							type="text"
-							value="<?php echo esc_attr( wp_strip_all_tags( $formatted_min_price ) ); ?>"
+							value="<?php echo esc_attr( wp_strip_all_tags( $formatted_max_price ) ); ?>"
 							data-wc-bind--value="state.formattedMaxPrice"
 							data-wc-on--focus="actions.selectInputContent"
 							data-wc-on--input="actions.debounceUpdateRange"
