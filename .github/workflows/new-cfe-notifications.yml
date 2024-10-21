@@ -107,6 +107,12 @@ jobs:
           RELEASE_NUMBER: ${{ needs.prep.outputs.release_number }}
           GH_TOKEN: ${{ github.token }}
 
+      - name: Comment issue has been approved
+        run: |
+          gh issue comment ${{ github.event.issue.html_url }} --body "This request has been approved. Please merge the PR to release branch."
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Notify Slack
         uses: archive/github-actions-slack@v2.0.0
         id: notify
@@ -138,7 +144,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Close CFE Issue
-        run: gh issue close --comment "Closing issue as CFE is rejected - ${{ github.event.issue.html_url }}" "${{ github.event.issue.html_url }}"
+        run: gh issue close --comment "Closing issue as CFE is rejected - ${{ github.event.issue.html_url }}" "${{ github.event.issue.html_url }}. Please switch the base to trunk and merge."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
