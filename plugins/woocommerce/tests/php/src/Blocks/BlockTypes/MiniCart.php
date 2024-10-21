@@ -81,8 +81,8 @@ class MiniCart extends \WP_UnitTestCase {
 		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
 
 		// Tests badge is not shown with items in cart when "never" is selected.
-		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"always"} /-->' );
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"never"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertStringNotContainsString( '<span class="wc-block-mini-cart__badge"', $output );
 	}
 }
