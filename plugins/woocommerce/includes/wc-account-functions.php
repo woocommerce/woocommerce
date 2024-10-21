@@ -315,7 +315,7 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['pay'] );
 	}
 
-	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ), true ) ) {
+	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( WC_Order::STATUS_PENDING, WC_Order::STATUS_FAILED ), $order ), true ) ) {
 		unset( $actions['cancel'] );
 	}
 
