@@ -47,6 +47,7 @@ const Edit = ( {
 		width,
 		height,
 		scale,
+		aspectRatio,
 	} = attributes;
 	const blockProps = useBlockProps( { style: { width, height } } );
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
@@ -68,6 +69,7 @@ const Edit = ( {
 					scale={ scale }
 					width={ width }
 					height={ height }
+					aspectRatio={ aspectRatio }
 					setAttributes={ setAttributes }
 				/>
 				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
