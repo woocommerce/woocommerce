@@ -75,7 +75,8 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 													? {
 															backgroundColor:
 																'#ffffff',
-															lineHeight: 'unset',
+															lineHeight:
+																'normal',
 															minHeight: 'unset',
 															boxSizing: 'unset',
 															borderRadius:
@@ -104,6 +105,21 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 											-
 										</button>
 										<input
+											style={
+												// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
+												! isSiteEditor
+													? {
+															backgroundColor:
+																'#ffffff',
+															lineHeight:
+																'normal',
+															minHeight: 'unset',
+															boxSizing: 'unset',
+															borderRadius:
+																'unset',
+													  }
+													: {}
+											}
 											type={ 'number' }
 											value={ '1' }
 											className={ 'input-text qty text' }
@@ -114,7 +130,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 										</button>
 									</div>
 									<button
-										className={ `single_add_to_cart_button button alt wp-element-button` }
+										className={ `single_add_to_cart_button alt wp-element-button` }
 									>
 										{ __( 'Add to cart', 'woocommerce' ) }
 									</button>
