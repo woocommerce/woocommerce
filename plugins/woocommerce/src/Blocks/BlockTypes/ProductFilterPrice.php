@@ -151,7 +151,7 @@ final class ProductFilterPrice extends AbstractBlock {
 					'maxPrice'           => $max_price,
 					'minRange'           => $min_range,
 					'maxRange'           => $max_range,
-					'hasFilterOptions'   => $min_range !== $max_range,
+					'hasFilterOptions'   => $min_range < $max_range && $min_price < $max_price,
 					'hasSelectedFilters' => $min_price !== $min_range || $max_price !== $max_range,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
