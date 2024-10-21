@@ -11,8 +11,8 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	BackgroundRemovalParams,
 	useBackgroundRemoval,
-} from './useBackgroundRemoval';
-import { requestJetpackToken } from '../utils/requestJetpackToken';
+} from '../useBackgroundRemoval';
+import { requestJetpackToken } from '../../utils/requestJetpackToken';
 
 // Mocking the apiFetch function
 jest.mock( '@wordpress/api-fetch', () =>
@@ -25,7 +25,7 @@ jest.mock( '@wordpress/api-fetch', () =>
 			),
 	} )
 );
-jest.mock( '../utils/requestJetpackToken' );
+jest.mock( '../../utils/requestJetpackToken' );
 const mockedRequestJetpackToken = requestJetpackToken as jest.MockedFunction<
 	typeof requestJetpackToken
 >;
