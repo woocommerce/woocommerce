@@ -125,6 +125,17 @@ const enum PRODUCT_REFERENCE_TYPE {
 	SPECIFIC_PRODUCT = 'SPECIFIC_PRODUCT',
 }
 
+const getFromCurrentProductRadioLabel = (
+	currentLocation: string,
+	isUsesReferenceIncludesCart: boolean
+): string => {
+	if ( currentLocation === 'cart' && isUsesReferenceIncludesCart ) {
+		return __( 'From products in the cart', 'woocommerce' );
+	}
+
+	return __( 'From the current product', 'woocommerce' );
+};
+
 const LinkedProductControl = ( {
 	query,
 	setAttributes,
@@ -136,9 +147,11 @@ const LinkedProductControl = ( {
 	location: WooCommerceBlockLocation;
 	usesReference: string[] | undefined;
 } ) => {
-	const REFERENCE_TYPE_PRODUCT = 'product';
-	const isProductLocation = location.type === REFERENCE_TYPE_PRODUCT;
+	const isProductLocation = location.type === 'product';
+	const isUsesReferenceIncludesProduct =
+		!! usesReference?.includes( 'product' );
 	const isCartLocation = location.type === 'cart';
+	const isUsesReferenceIncludesCart = !! usesReference?.includes( 'cart' );
 	const { productReference } = query;
 
 	const { product, isLoading } = useGetProduct( productReference );
@@ -151,20 +164,22 @@ const LinkedProductControl = ( {
 				: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		);
 	const prevReference = useRef< number | undefined >( undefined );
-	const showLinkedProductControl = useMemo( () => {
-		const isProductContextRequired = usesReference?.includes(
-			REFERENCE_TYPE_PRODUCT
-		);
 
-		return isProductContextRequired;
-	}, [ usesReference ] );
-
-	if ( ! showLinkedProductControl ) return null;
-
-	const showRadioControl = isProductLocation || isCartLocation;
+	const showRadioControl =
+		( isProductLocation && isUsesReferenceIncludesProduct ) ||
+		( isCartLocation && isUsesReferenceIncludesCart );
 	const showSpecificProductSelector = showRadioControl
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
+
+	const showLinkedProductControl =
+		( showRadioControl || showSpecificProductSelector ) &&
+		/**
+		 * Linked control is only useful for collection which uses product, cart or order reference.
+		 * TODO Add handling for Order reference
+		 */
+		( isUsesReferenceIncludesProduct || isUsesReferenceIncludesCart );
+	if ( ! showLinkedProductControl ) return null;
 
 	const radioControlHelp =
 		radioControlState === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
@@ -195,10 +210,10 @@ const LinkedProductControl = ( {
 		setRadioControlState( newValue );
 	};
 
-	const fromCurrentProductLabel =
-		location.type === 'cart'
-			? __( 'From products in the cart', 'woocommerce' )
-			: __( 'From the current product', 'woocommerce' );
+	const fromCurrentProductRadioLabel = getFromCurrentProductRadioLabel(
+		location.type,
+		isUsesReferenceIncludesCart
+	);
 
 	return (
 		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
@@ -211,7 +226,7 @@ const LinkedProductControl = ( {
 						selected={ radioControlState }
 						options={ [
 							{
-								label: fromCurrentProductLabel,
+								label: fromCurrentProductRadioLabel,
 								value: PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT,
 							},
 							{
