@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add description and delivery_time properties to WC_Shipping_Rate. These will be displayed in the Cart and Checkout blocks.
