@@ -2,7 +2,6 @@
  * Internal dependencies
  */
 import { getActionsList, WhatsNextProps } from '../WhatsNext';
-import { ADMIN_URL } from '~/utils/admin-settings';
 
 describe( 'getActionsList', () => {
 	const defaultProps: WhatsNextProps = {

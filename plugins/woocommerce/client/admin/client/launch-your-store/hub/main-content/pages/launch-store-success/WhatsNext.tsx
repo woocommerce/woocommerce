@@ -56,7 +56,8 @@ export const getActionsList = ( {
 			{}
 		);
 
-	const isMarketingTaskCompleted = setupTasksCompletion?.marketing || false;
+	const isMarketingTaskCompleted =
+		extendedTasksCompletion?.marketing || false;
 	const isPaymentsTaskCompleted = setupTasksCompletion?.payments || false;
 	const isMobileTaskCompleted =
 		extendedTasksCompletion?.[ 'get-mobile-app' ] || false;
