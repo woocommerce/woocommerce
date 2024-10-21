@@ -955,25 +955,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			array( array( 'Blue', 'Red' ), 'or', true ),
 			array( array( 'Green' ), 'and', false ),
 			array( array( 'Green' ), 'or', false ),
-
+			array( array( 'Blue', 'Green' ), 'and', false ),
 		);
-	}
-
-	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core();
-
-		/**
-		 * When filtering by an attribute having a variation AND another one not having it:
-		 * The product shows, since when dealing with variation attributes we're effectively doing OR.
-		 */
-
-		$data[] = array( array( 'Blue', 'Green' ), 'and', true );
-		return $data;
 	}
 
 	/**
@@ -981,7 +964,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 *
 	 * Note that the difference with the simple product or the non-variation attributes case is that "and" is equivalent to "or".
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
@@ -993,28 +976,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core();
-
-		/**
-		 * When filtering by an attribute having a variation AND another one not having it:
-		 * The product doesn't show because variation attributes are treated as non-variation ones.
-		 */
-
-		$data[] = array( array( 'Blue', 'Green' ), 'and', false );
-		return $data;
-	}
-
-	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes), not using the lookup table.
 	 *
 	 * Note that the difference with the simple product or the non-variation attributes case is that "and" is equivalent to "or".
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
@@ -1090,30 +1056,14 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			array( array( 'Green' ), 'or', true ),
 			array( array( 'White' ), 'and', false ),
 			array( array( 'White' ), 'or', false ),
+			array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', false ),
 		);
-	}
-
-	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core();
-
-		/**
-		 * When filtering by attributes having a variation AND others not having it:
-		 * The product shows, since when dealing with variation attributes we're effectively doing OR.
-		 */
-		$data[] = array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', true );
-
-		return $data;
 	}
 
 	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes, with "Any" values), using the lookup table.
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
@@ -1125,26 +1075,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table() {
-		$data = $this->data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core();
-
-		/**
-		 * When filtering by attributes having a variation AND others not having it:
-		 * The product doesn't show because variation attributes are treated as non-variation ones.
-		 */
-		$data[] = array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', false );
-
-		return $data;
-	}
-
-	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes, with "Any" values), not using the lookup table.
 	 *
-	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table
+	 * @dataProvider data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core
 	 *
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
