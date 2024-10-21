@@ -18,6 +18,7 @@ import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
  */
 import Block from './block';
 import attributes from './attributes';
+import NoPaymentMethods from '../../../cart-checkout-shared/payment-methods/no-payment-methods';
 
 const FrontendBlock = ( {
 	title,
@@ -49,7 +50,7 @@ const FrontendBlock = ( {
 			showStepNumber={ showFormStepNumbers }
 		>
 			<StoreNoticesContainer context={ noticeContexts.PAYMENTS } />
-			<Block />
+			<Block noPaymentMethods={ <NoPaymentMethods /> } />
 			{ children }
 		</FormStep>
 	);
