@@ -236,6 +236,9 @@ abstract class WC_Data {
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		if ( $this->get_id() ) {
+			if ( ! $this->has_unsaved_changes() ) {
+				return $this->get_id();
+			}
 			$this->data_store->update( $this );
 		} else {
 			$this->data_store->create( $this );
@@ -851,6 +854,30 @@ abstract class WC_Data {
 	public function apply_changes() {
 		$this->data    = array_replace_recursive( $this->data, $this->changes ); // @codingStandardsIgnoreLine
 		$this->changes = array();
+	}
+
+	/**
+	 * Whether the data or meta data has changes applied.
+	 *
+	 * @return bool
+	 */
+	protected function has_unsaved_changes(): bool {
+		if ( count( $this->get_changes() ) > 0 ) {
+			return true;
+		}
+
+		if ( ! is_null( $this->meta_data ) ) {
+			foreach ( $this->meta_data as $meta ) {
+				if ( count( $meta->get_changes() ) > 0 ||
+				     ( is_null( $meta->value ) && ! empty( $meta->id ) ) ||
+				     empty( $meta->id )
+				) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
