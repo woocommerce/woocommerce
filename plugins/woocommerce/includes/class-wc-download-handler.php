@@ -544,7 +544,7 @@ class WC_Download_Handler {
 
 		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
 			if ( false === $download_range['is_range_valid'] ) {
-				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				http_response_code( 416 );
 				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
 				exit;
 			}
@@ -553,7 +553,7 @@ class WC_Download_Handler {
 			$end    = $download_range['start'] + $download_range['length'] - 1;
 			$length = $download_range['length'];
 
-			header( 'HTTP/1.1 206 Partial Content' );
+			http_response_code( 206 );
 			header( "Accept-Ranges: 0-$file_size" );
 			header( "Content-Range: bytes $start-$end/$file_size" );
 			header( "Content-Length: $length" );
@@ -571,7 +571,10 @@ class WC_Download_Handler {
 			@apache_setenv( 'no-gzip', 1 ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_apache_setenv
 		}
 		@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_set
-		@session_write_close(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.SessionFunctionsUsage.session_session_write_close
+
+		if ( session_status() === PHP_SESSION_ACTIVE ) {
+			@session_write_close(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.SessionFunctionsUsage.session_session_write_close
+		}
 	}
 
 	/**
@@ -580,13 +583,54 @@ class WC_Download_Handler {
 	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
 	 */
 	private static function clean_buffers() {
-		if ( ob_get_level() ) {
-			$levels = ob_get_level();
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		$levels = ob_get_level();
+		for ( $i = 0; $i < $levels; $i++ ) {
+			$ob_status = ob_get_status();
+
+			// can be not set in some installations
+			if ( ! isset( $ob_status['flags'] ) ) {
+				return;
 			}
-		} else {
-			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+			if ( ( $ob_status['flags'] & PHP_OUTPUT_HANDLER_REMOVABLE ) === PHP_OUTPUT_HANDLER_REMOVABLE ) {
+				ob_end_clean();
+				continue;
+			}
+
+			if ( ( $ob_status['flags'] & PHP_OUTPUT_HANDLER_CLEANABLE ) === PHP_OUTPUT_HANDLER_CLEANABLE ) {
+				// we can't end it, but at least clean it
+				ob_clean();
+			}
+
+			// can't end any parents either
+			return;
+		}
+	}
+
+	/**
+	 * Flush the active output buffer (if any) and the PHP system buffer
+	 * If a reverse-proxy is used, that will most likely also use a buffer, that is not flushed here
+	 * but could be disabled with X-Accel-Buffering: yes header in case of nginx
+	 *
+	 * @return void
+	 */
+	private static function flush() {
+		$ob_flushed = false;
+		$ob_status = ob_get_status();
+		if (
+			isset( $ob_status['flags'] ) &&
+			( $ob_status['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) === PHP_OUTPUT_HANDLER_FLUSHABLE &&
+			$ob_status['buffer_used'] > 0
+		) {
+			$ob_flushed = true;
+			ob_flush();
+		}
+
+		if (
+			!isset( $ob_status['level'] ) ||
+			( $ob_status['level'] === 0 && $ob_flushed )
+		) {
+			flush();
 		}
 	}
 
@@ -647,18 +691,12 @@ class WC_Download_Handler {
 				echo @fread( $handle, $read_length ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
 				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
-				}
+				self::flush();
 			}
 		} else {
 			while ( ! @feof( $handle ) ) { // @codingStandardsIgnoreLine.
 				echo @fread( $handle, $read_length ); // @codingStandardsIgnoreLine.
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
-				}
+				self::flush();
 			}
 		}
 
@@ -688,7 +726,7 @@ class WC_Download_Handler {
 	 * @param string  $title   Error title.
 	 * @param integer $status  Error status.
 	 */
-	private static function download_error( $message, $title = '', $status = 404 ) {
+	private static function download_error( $message, $title = '', $status = 403 ) {
 		/*
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.
