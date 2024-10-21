@@ -12,6 +12,7 @@ import DisplaySettingsToolbar from './display-settings-toolbar';
 import DisplayLayoutToolbar from './display-layout-toolbar';
 import CollectionChooserToolbar from './collection-chooser-toolbar';
 import type { ProductCollectionContentProps } from '../../types';
+import { getCollectionByName } from '../../collections';
 
 export default function ToolbarControls(
 	props: ProductCollectionContentProps
@@ -24,11 +25,20 @@ export default function ToolbarControls(
 		[ props ]
 	);
 
+	const collection = getCollectionByName( props.attributes.collection );
+	const showCollectionChooserToolbar =
+		collection?.scope?.includes( 'block' ) ||
+		collection?.scope === undefined;
+
 	return (
 		<BlockControls>
-			<CollectionChooserToolbar
-				openCollectionSelectionModal={ openCollectionSelectionModal }
-			/>
+			{ showCollectionChooserToolbar && (
+				<CollectionChooserToolbar
+					openCollectionSelectionModal={
+						openCollectionSelectionModal
+					}
+				/>
+			) }
 			{ ! query.inherit && (
 				<>
 					<DisplaySettingsToolbar

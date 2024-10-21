@@ -588,4 +588,69 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			} );
 		} );
 	} );
+
+	test.describe( 'with "scope" argument', () => {
+		test( 'Collection with only `inserter` scope should not be displayed in Collection Chooser', async ( {
+			pageObject,
+			editor,
+			admin,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+
+			const placeholderSelector = editor.canvas.locator(
+				SELECTORS.collectionPlaceholder
+			);
+
+			const collectionButton = placeholderSelector.getByRole( 'button', {
+				name: 'My Custom Collection - With Inserter Scope',
+				exact: true,
+			} );
+
+			await expect( collectionButton ).toBeHidden();
+		} );
+
+		test( 'Collection with only `block` scope should be displayed in Collection Chooser', async ( {
+			pageObject,
+			editor,
+			admin,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+
+			const placeholderSelector = editor.canvas.locator(
+				SELECTORS.collectionPlaceholder
+			);
+
+			const collectionButton = placeholderSelector.getByRole( 'button', {
+				name: 'My Custom Collection - With Block Scope',
+				exact: true,
+			} );
+
+			await expect( collectionButton ).toBeVisible();
+		} );
+
+		test( 'Choose collection button visibility for different scopes', async ( {
+			pageObject,
+			editor,
+			admin,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost(
+				'myCustomCollectionWithBlockScope'
+			);
+			const chooseCollectionButton = admin.page
+				.getByRole( 'toolbar', { name: 'Block Tools' } )
+				.getByRole( 'button', { name: 'Choose collection' } );
+			await expect( chooseCollectionButton ).toBeVisible();
+
+			// Test inserter scope collection
+			await editor.setContent( '' );
+			await editor.insertBlockUsingGlobalInserter(
+				'My Custom Collection - With Inserter Scope'
+			);
+			await expect( chooseCollectionButton ).toBeHidden();
+		} );
+	} );
 } );
