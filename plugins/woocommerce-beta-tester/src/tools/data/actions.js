@@ -317,3 +317,12 @@ export function* updateWccomBaseUrl( { url } ) {
 		} );
 	} );
 }
+
+export function* resetLaunchYourStore() {
+	yield runCommand( 'Reset Launch Your Store', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-launch-your-store',
+			method: 'POST',
+		} );
+	} );
+}
