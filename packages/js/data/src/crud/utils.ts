@@ -302,3 +302,13 @@ export const getGenericActionName = (
 
 	return action;
 };
+
+/**
+ * Generates a temporary unique identifier.
+ *
+ * @return {string} A temporary unique identifier in the format `temp-xxxxxxxxxx`.
+ */
+export const generateTemporaryId = (): string => {
+	const randomPart = Math.random().toString( 36 ).substring( 2, 12 );
+	return `temp-${ randomPart }`;
+};
