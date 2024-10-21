@@ -42,6 +42,7 @@ const mockDispatch = {
 	undoDismissTask: jest.fn(),
 	undoSnoozeTask: jest.fn(),
 	visitedTask: jest.fn(),
+	invalidateResolutionForStoreSelector: jest.fn(),
 };
 ( useDispatch as jest.Mock ).mockReturnValue( mockDispatch );
 
