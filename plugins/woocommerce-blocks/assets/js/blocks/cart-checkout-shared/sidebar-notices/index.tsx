@@ -8,7 +8,6 @@ import {
 } from '@wordpress/block-editor';
 import { addFilter, hasFilter } from '@wordpress/hooks';
 import type { StoreDescriptor } from '@wordpress/data';
-import { NoPaymentMethodsNotice } from '@woocommerce/editor-components/no-payment-methods-notice';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { DefaultNotice } from '@woocommerce/editor-components/default-notice';
 import { IncompatibleExtensionsNotice } from '@woocommerce/editor-components/incompatible-extension-notice';
@@ -112,11 +111,6 @@ const withSidebarNotices = createHigherOrderComponent(
 					/>
 
 					<DefaultNotice block={ isCheckout ? 'checkout' : 'cart' } />
-
-					{ isPaymentMethodsBlock && ! hasPaymentMethods && (
-						<NoPaymentMethodsNotice />
-					) }
-
 					<CartCheckoutFeedbackPrompt />
 				</InspectorControls>
 				<BlockEdit key="edit" { ...props } />
