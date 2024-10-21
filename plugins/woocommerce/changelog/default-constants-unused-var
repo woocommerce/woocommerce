@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove an unused variable from `WooCommerce::define_constants()` missing during an earlier piece of work.
