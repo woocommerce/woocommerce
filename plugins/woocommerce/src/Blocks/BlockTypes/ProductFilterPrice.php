@@ -97,7 +97,7 @@ final class ProductFilterPrice extends AbstractBlock {
 				array(
 					'title'      => $title,
 					'attributes' => array(
-						'data-wc-on--click' => "{$this->get_full_block_name()}::actions.reset",
+						'data-wc-on--click' => "{$this->get_full_block_name()}::actions.clearFilters",
 					),
 				),
 			),

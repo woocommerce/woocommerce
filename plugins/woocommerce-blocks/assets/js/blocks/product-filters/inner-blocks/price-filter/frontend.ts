@@ -51,11 +51,15 @@ store( 'woocommerce/product-filter-price', {
 			Object.assign( context, prices );
 		},
 		clearFilters: () => {
-			const context = getContext< PriceFilterContext >();
-			Object.assign( context, {
-				minPrice: context.minRange,
-				maxPrice: context.maxRange,
-			} );
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			const updatedParams = productFiltersContext.params;
+
+			delete updatedParams.min_price;
+			delete updatedParams.max_price;
+
+			productFiltersContext.params = updatedParams;
 		},
 	},
 	callbacks: {
