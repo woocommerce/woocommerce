@@ -71,7 +71,7 @@ const AddressCard = ( {
 							<span key={ `address-` + index }>{ field }</span>
 						) ) }
 				</div>
-				{ address.phone && ! fieldConfig.phone.hidden ? (
+				{ address.phone ? (
 					<div
 						key={ `address-phone` }
 						className="wc-block-components-address-card__address-section"
