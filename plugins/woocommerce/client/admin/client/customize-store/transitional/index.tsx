@@ -6,6 +6,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import {
 	Button,
 	Modal,
@@ -49,6 +50,7 @@ export const Transitional = ( {
 	aiOnline: boolean;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
+	const adminUrl = getNewPath( getPersistedQuery(), '/', {} );
 	const closeSurvey = () => {
 		setSurveyOpen( false );
 	};
@@ -138,7 +140,7 @@ export const Transitional = ( {
 					{ isEntrepreneurFlow() && (
 						<Button
 							variant="primary"
-							href={ homeUrl }
+							href={ adminUrl }
 							onClick={ () => {
 								trackEvent(
 									'customize_your_store_entrepreneur_home_click'
@@ -251,7 +253,7 @@ export const Transitional = ( {
 									</p>
 									<Button
 										variant="link"
-										href={ homeUrl }
+										href={ adminUrl }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_home_click'
