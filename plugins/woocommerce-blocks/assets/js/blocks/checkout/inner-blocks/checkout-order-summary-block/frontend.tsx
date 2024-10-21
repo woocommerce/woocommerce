@@ -6,12 +6,15 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import type { Currency, CartResponseTotals } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
-
+import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
+import { useEffect, useState } from '@wordpress/element';
+import clsx from 'clsx';
 /**
  * Internal dependencies
  */
 import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
-
+import { useContainerWidthContext } from '../../../../base/context';
+import { FormattedMonetaryAmount } from '../../../../../../packages/components';
 const CheckoutOrderSummary = ( {
 	className,
 	children,
@@ -23,18 +26,7 @@ const CheckoutOrderSummary = ( {
 	totalsCurrency: Currency;
 	cartTotals: CartResponseTotals;
 } ) => {
-	return (
-		<>
-			{ children }
-			<div className="wc-block-components-totals-wrapper">
-				<TotalsFooterItem
-					currency={ totalsCurrency }
-					values={ cartTotals }
-				/>
-			</div>
-			<OrderMetaSlotFill />
-		</>
-	);
+	return <>{ children }</>;
 };
 
 const FrontendBlock = ( {
@@ -45,7 +37,11 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
+	const { isSmall, isMobile } = useContainerWidthContext();
+	const [ isOpen, setIsOpen ] = useState( false );
+
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const totalPrice = parseInt( cartTotals.total_price, 10 );
 
 	// Render once here and once in the fill. The fill can be slotted once elsewhere.
 	return (
@@ -55,13 +51,50 @@ const FrontendBlock = ( {
 					totalsCurrency={ totalsCurrency }
 					cartTotals={ cartTotals }
 				>
-					<p
-						className="wc-block-components-checkout-order-summary__title-text"
-						role="heading"
+					<div className="wc-block-components-checkout-order-summary__title">
+						<p
+							className="wc-block-components-checkout-order-summary__title-text"
+							role="heading"
+						>
+							{ __( 'Order summary', 'woocommerce' ) }
+						</p>
+						{ ( isSmall || isMobile ) && (
+							<>
+								<FormattedMonetaryAmount
+									currency={ totalsCurrency }
+									value={ totalPrice }
+								/>
+								<div
+									role="button"
+									className="wc-block-components-checkout-order-summary__title-open-close"
+									onClick={ () => setIsOpen( ! isOpen ) }
+								>
+									<Icon
+										icon={
+											isOpen ? chevronUp : chevronDown
+										}
+									/>
+								</div>
+							</>
+						) }
+					</div>
+					<div
+						className={ clsx(
+							'wc-block-components-checkout-order-summary__content',
+							{
+								'is-open': isOpen,
+							}
+						) }
 					>
-						{ __( 'Order summary', 'woocommerce' ) }
-					</p>
-					<>{ children }</>
+						{ children }
+						<div className="wc-block-components-totals-wrapper">
+							<TotalsFooterItem
+								currency={ totalsCurrency }
+								values={ cartTotals }
+							/>
+						</div>
+						<OrderMetaSlotFill />
+					</div>
 				</CheckoutOrderSummary>
 			</div>
 			<CheckoutOrderSummaryFill>
@@ -70,7 +103,16 @@ const FrontendBlock = ( {
 					totalsCurrency={ totalsCurrency }
 					cartTotals={ cartTotals }
 				>
-					{ children }
+					<>
+						{ children }
+						<div className="wc-block-components-totals-wrapper">
+							<TotalsFooterItem
+								currency={ totalsCurrency }
+								values={ cartTotals }
+							/>
+						</div>
+						<OrderMetaSlotFill />
+					</>
 				</CheckoutOrderSummary>
 			</CheckoutOrderSummaryFill>
 		</>

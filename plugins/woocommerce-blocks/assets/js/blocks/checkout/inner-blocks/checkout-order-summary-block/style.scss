@@ -1,7 +1,26 @@
 .wp-block-woocommerce-checkout-order-summary-block {
 	padding-top: 16px;
 
-	.wc-block-components-checkout-order-summary__title-text {
-		margin: 0 0 16px 16px;
+	.wc-block-components-checkout-order-summary__title {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		.wc-block-components-checkout-order-summary__title-text {
+			// margin: 0 0 16px 16px;
+			flex-grow: 1;
+		}
+
+		.wc-block-components-checkout-order-summary__title-open-close {
+			cursor: pointer;
+		}
+	}
+
+	.wc-block-components-checkout-order-summary__content {
+		display: none;
+
+		&.is-open {
+			display: block;
+		}
 	}
 }
