@@ -39,6 +39,95 @@ class WC_Admin {
 		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
 			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
 		}
+
+		add_action('admin_init', function() {
+			if ( isset( $_GET['email_preview'] ) && isset( $_GET['order_id'] ) && isset( $_GET['email_type'] ) ) {
+				$order = wc_get_order( $_GET[ 'order_id' ] );
+				add_filter( 'woocommerce_order_needs_shipping_address', '__return_true' );
+				$orderOrSubscription = $order;
+				if ( ! $order ) {
+					if ( (
+						strpos( $_GET[ 'email_type' ], 'WCS_' ) !== false )
+						|| ( strpos( $_GET[ 'email_type' ], 'ASP_' ) !== false )
+					) {
+						$subscriptionProduct = new WC_Product_Subscription();
+						$subscriptionProduct->set_name('Dummy Subscription Product');
+						$subscriptionProduct->set_regular_price(29.99);
+						$subscriptionProduct->set_description('This is a dummy subscription product for testing.');
+						$subscriptionProduct->set_sku('dummy-subscription-001');
+						$subscriptionProduct->set_virtual(true);
+						$subscriptionProduct->set_stock_status('instock');
+
+						$subscription = new WC_Subscription();
+						$subscription->set_customer_id(1);
+						$subscription->set_parent_id(0);
+						$subscription->set_billing_first_name('John');
+						$subscription->set_billing_last_name('Doe');
+						$subscription->set_billing_email('john.doe@example.com');
+						$subscription->add_product($subscriptionProduct, 1);
+						$subscription->set_status('active');
+						$subscription->set_billing_period('month');
+						$subscription->set_billing_interval(1);
+						$subscription->set_total(29.99);
+						$subscription->update_dates([
+							'trial_end' => strtotime('Y-m-d H:i:s', time()),
+							'next_payment' => strtotime('Y-m-d H:i:s', time()),
+							'cancelled' => strtotime('Y-m-d H:i:s', time()),
+							'payment_retry' => strtotime('Y-m-d H:i:s', time()),
+							'end' => strtotime('Y-m-d H:i:s', time()),
+						]);
+						$orderOrSubscription = $subscription;
+					} else {
+						// Create a dummy product object
+						$product = new WC_Product();
+						$product->set_name( 'Dummy Product' );
+						$product->set_price( 25.99 );
+						$product->set_regular_price( 30.00 );
+						$product->set_sale_price( 25.99 );
+						$product->set_sku( 'DUMMY_SKU_2' );
+						$product->set_description( 'This is a dummy product description.' );
+						$product->set_short_description( 'Short description for the dummy product.' );
+						$product->set_image_id( 30 );
+
+						$order = new WC_Order();
+						$order->add_product( wc_get_product(43), 2 );
+						$order->set_id( rand(1000000, 9000000) );
+						$order->set_date_created( time() );
+
+						$address = array(
+							'first_name' => 'John',
+							'last_name'  => 'Doe',
+							'company'    => 'Dummy Company',
+							'email'      => 'john@example.com',
+							'phone'      => '555-555-5555',
+							'address_1'  => '123 Fake Street',
+							'address_2'  => '',
+							'city'       => 'Faketown',
+							'postcode'   => '12345',
+							'country'    => 'US',
+							'state'      => 'CA',
+						);
+						$order->set_address( $address, 'billing' );
+						$order->set_address( $address, 'shipping' );
+						$order->set_payment_method( 'bacs' );  // Bank Transfer for example
+						$order->set_currency( 'USD' );
+						$order->set_total( 104.00 );
+						$orderOrSubscription = $order;
+					}
+				}
+
+				$emails = WC()->mailer()->get_emails();
+				if ( isset( $emails[ $_GET[ 'email_type' ] ] ) ) {
+					$email = $emails[ $_GET[ 'email_type' ] ];
+					$email->set_order( $orderOrSubscription );
+					$content = $email->get_content_html();
+					$styles = $_GET[ 'styles' ] ?? '{}';
+					$styles = json_decode( urldecode( stripslashes( $styles ) ), true );
+					echo apply_filters( 'woocommerce_mail_content', $email->style_inline( $content, $styles ) );
+				}
+				exit;
+			}
+		});
 	}
 
 	/**
