@@ -2131,6 +2131,12 @@ p.demo_store,
 		.shipping_address {
 			clear: both;
 		}
+
+		.checkout-inline-error-message {
+			color: var(--wc-red);
+			font-size: 0.75em;
+			margin-bottom: 0;
+		}
 	}
 
 	#payment {
