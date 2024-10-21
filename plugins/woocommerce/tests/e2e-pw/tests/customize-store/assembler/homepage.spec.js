@@ -64,7 +64,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 				'no'
 			);
 
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -259,7 +259,7 @@ test.describe( 'Homepage tracking banner', () => {
 				'no'
 			);
 
-			await page.route( '**/wp-json/wc-admin/patterns*', ( route ) => {
+			await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
 				route.fulfill( {
 					status: 500,
 				} );

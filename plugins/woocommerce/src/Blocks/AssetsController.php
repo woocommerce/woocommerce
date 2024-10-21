@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
@@ -31,7 +33,7 @@ final class AssetsController {
 	/**
 	 * Initialize class features.
 	 */
-	protected function init() {
+	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_and_enqueue_site_editor_assets' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
@@ -197,6 +199,50 @@ final class AssetsController {
 	}
 
 	/**
+	 * Get the block asset resource hints in the cache or null if not found.
+	 *
+	 * @return array|null Array of resource hints.
+	 */
+	private function get_block_asset_resource_hints_cache() {
+		if ( wp_is_development_mode( 'plugin' ) ) {
+			return null;
+		}
+
+		$cache = get_site_transient( 'woocommerce_block_asset_resource_hints' );
+
+		$current_version = array(
+			'woocommerce' => WOOCOMMERCE_VERSION,
+			'wordpress'   => get_bloginfo( 'version' ),
+		);
+
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
+			return $cache['files'];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set the block asset resource hints in the cache.
+	 *
+	 * @param string $filename File name.
+	 * @param array  $data Array of resource hints.
+	 */
+	private function set_block_asset_resource_hints_cache( $filename, $data ) {
+		$cache   = $this->get_block_asset_resource_hints_cache();
+		$updated = array(
+			'files'   => $cache ?? array(),
+			'version' => array(
+				'woocommerce' => WOOCOMMERCE_VERSION,
+				'wordpress'   => get_bloginfo( 'version' ),
+			),
+		);
+
+		$updated['files'][ $filename ] = $data;
+		set_site_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
+	}
+
+	/**
 	 * Get resource hint for a block by name.
 	 *
 	 * @param string $filename Block filename.
@@ -206,6 +252,13 @@ final class AssetsController {
 		if ( ! $filename ) {
 			return array();
 		}
+
+		$cached = $this->get_block_asset_resource_hints_cache();
+
+		if ( isset( $cached[ $filename ] ) ) {
+			return $cached[ $filename ];
+		}
+
 		$script_data = $this->api->get_script_data(
 			$this->api->get_block_asset_build_path( $filename )
 		);
@@ -213,7 +266,8 @@ final class AssetsController {
 			array( esc_url( add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ) ),
 			$this->get_script_dependency_src_array( $script_data['dependencies'] )
 		);
-		return array_map(
+
+		$data = array_map(
 			function ( $src ) {
 				return array(
 					'href' => $src,
@@ -222,6 +276,10 @@ final class AssetsController {
 			},
 			array_unique( array_filter( $resources ) )
 		);
+
+		$this->set_block_asset_resource_hints_cache( $filename, $data );
+
+		return $data;
 	}
 
 	/**

@@ -18,7 +18,7 @@ const getProps = ( el: HTMLElement ) => {
 
 // This does not replace the entire block markup, just the form part.
 renderFrontend( {
-	selector: '.woocommerce-order-confirmation-create-account-form',
+	selector: '.wc-block-order-confirmation-create-account-form',
 	Block,
 	getProps,
 } );

@@ -3,10 +3,10 @@
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
-use \WP_UnitTestCase;
+use WP_UnitTestCase;
 
 /**
- * Tests the SingleProductTemplateCompatibility class
+ * Tests the SingleProductTemplate class
  *
  */
 class SingleProductTemplateTests extends WP_UnitTestCase {
