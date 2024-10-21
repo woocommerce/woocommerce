@@ -1,0 +1,26 @@
+{
+	"_arguments": {
+		"id": 1234,
+		"_fieldArguments": {
+			"total_amount": {
+				"decimals": 4
+			},
+			"lines": {
+				"first": 200,
+				"_fieldArguments": {
+					"line_amount": {
+						"decimals": 4
+					}
+				}
+			}
+		}
+	},
+	"_fields": {
+		"id": null,
+		"total_amount": null,
+		"applied_coupons": {
+			"amount": null,
+			"type": null
+		}
+	}
+}
