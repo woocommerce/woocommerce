@@ -64,11 +64,11 @@ class CheckoutFieldsFrontend {
 	 * @return string
 	 */
 	protected function render_additional_field( $field ) {
-		return sprintf(
+		return apply_filters( 'woocommerce_checkout_render_additional_field', sprintf(
 			'<dt>%1$s</dt><dd>%2$s</dd>',
-			esc_html( $field['label'] ),
-			esc_html( $field['value'] )
-		);
+			wp_kses_post( $field['label'] ),
+			wp_kses_post( $field['value'] )
+		), $field );
 	}
 
 	/**
@@ -130,7 +130,11 @@ class CheckoutFieldsFrontend {
 				continue;
 			}
 
-			printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $value ) );
+			echo apply_filters( 'woocommerce_checkout_render_address_field', sprintf(
+				'<br><strong>%s</strong>: %s',
+				wp_kses_post( $field['label'] ),
+				wp_kses_post( $value )
+			), $field, $value, $key, $address_type, $this );
 		}
 	}
 
