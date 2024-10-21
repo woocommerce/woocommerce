@@ -117,8 +117,7 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
-					/[\/\\](changelog|bin|build|docs|test)[\/\\]/,
+					/[\/\\](bin|build|config|docs|node_modules|test)[\/\\]/,
 				],
 				use: {
 					loader: 'babel-loader',
@@ -150,7 +149,6 @@ const webpackConfig = {
 					},
 				},
 			},
-			{ test: /\.md$/, use: 'raw-loader' },
 			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				type: 'asset',
