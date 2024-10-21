@@ -11,7 +11,6 @@
 * Patch - Remove "banner" layout option from inbox note
 * Patch - Update Fake_WCPayments is_account_partially_onboarded to return false
 * Patch - Update remote logger tool to toggle remote logging feature properly
-* Patch - Bump the version of beta tester to 2.4.0
 * Minor - CYS - Move the "ai/patterns" endpoint to woocommerce admin API.
 * Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues.
 * Patch - Monorepo: consolidate syncpack config around React 17/18 usage.
