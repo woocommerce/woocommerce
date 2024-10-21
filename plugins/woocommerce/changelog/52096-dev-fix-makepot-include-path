@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update makepot-audit include path: Replace 'client' with 'assets

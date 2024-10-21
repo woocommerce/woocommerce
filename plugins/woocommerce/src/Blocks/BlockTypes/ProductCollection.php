@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales' );
 
 
 	/**
@@ -134,6 +134,46 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
 		$this->register_core_collections();
+	}
+
+	/**
+	 * Get the styles for the list element (fixed width).
+	 *
+	 * @param string $fixed_width Fixed width value.
+	 * @return string
+	 */
+	protected function get_list_styles( $fixed_width ) {
+		$style = '';
+
+		if ( isset( $fixed_width ) ) {
+			$style .= sprintf( 'width:%s;', esc_attr( $fixed_width ) );
+			$style .= 'margin: 0 auto;';
+		}
+		return $style;
+	}
+
+	/**
+	 * Set the style attribute for fixed width.
+	 *
+	 * @param WP_HTML_Tag_Processor $p          The HTML tag processor.
+	 * @param string                $fixed_width The fixed width value.
+	 */
+	private function set_fixed_width_style( $p, $fixed_width ) {
+		$p->set_attribute( 'style', $this->get_list_styles( $fixed_width ) );
+	}
+
+	/**
+	 * Handle block dimensions if width type is set to 'fixed'.
+	 *
+	 * @param WP_HTML_Tag_Processor $p     The HTML tag processor.
+	 * @param array                 $block The block details.
+	 */
+	private function handle_block_dimensions( $p, $block ) {
+		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
+			}
+		}
 	}
 
 	/**
@@ -279,17 +319,13 @@ class ProductCollection extends AbstractBlock {
 				'data-wc-init',
 				'callbacks.onRender'
 			);
-			if ( $collection ) {
-				$p->set_attribute(
-					'data-wc-context',
-					wp_json_encode(
-						array(
-							'collection' => $collection,
-						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-					)
-				);
-			}
+			$p->set_attribute(
+				'data-wc-context',
+				$collection ? wp_json_encode(
+					array( 'collection' => $collection ),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				) : '{}'
+			);
 		}
 
 		return $p->get_updated_html();
@@ -382,6 +418,8 @@ class ProductCollection extends AbstractBlock {
 			if ( $this->is_next_tag_product_collection( $p ) ) {
 				$this->set_product_collection_namespace( $p );
 			}
+			// Check if dimensions need to be set and handle accordingly.
+			$this->handle_block_dimensions( $p, $block );
 			$block_content = $p->get_updated_html();
 
 			$collection    = $block['attrs']['collection'] ?? '';
@@ -392,7 +430,6 @@ class ProductCollection extends AbstractBlock {
 				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
-
 		return $block_content;
 	}
 
@@ -665,7 +702,7 @@ class ProductCollection extends AbstractBlock {
 			return $this->get_preview_query_args( $collection_args, $query, $request );
 		}
 
-		$orderby             = $request->get_param( 'orderBy' );
+		$orderby             = $request->get_param( 'orderby' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
@@ -1015,9 +1052,25 @@ class ProductCollection extends AbstractBlock {
 			return array( 'orderby' => $orderby );
 		}
 
+		if ( 'price' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_price_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
+		}
+
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' === $orderby || 'popularity' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
+			);
+		}
+
 		$meta_keys = array(
-			'popularity' => 'total_sales',
-			'rating'     => '_wc_average_rating',
+			'rating' => '_wc_average_rating',
 		);
 
 		return array(
@@ -1670,20 +1723,82 @@ class ProductCollection extends AbstractBlock {
 		$min_price = $price_range['min'] ?? null;
 		if ( $min_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'min_price', '>=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'max_price', '>=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price >= %f ', $min_price );
 			}
 		}
 
 		$max_price = $price_range['max'] ?? null;
 		if ( $max_price ) {
 			if ( $adjust_for_taxes ) {
-				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'max_price', '<=' );
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'min_price', '<=' );
 			} else {
-				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price );
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price <= %f ', $max_price );
 			}
 		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add price-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_price_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+		if ( 'price' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC';
+
+		return $clauses;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add sales-based sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_sales_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+
+		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
+		if ( 'sales' !== $orderby && 'popularity' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.total_sales ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.total_sales DESC, wc_product_meta_lookup.product_id DESC';
 
 		return $clauses;
 	}
@@ -1923,7 +2038,7 @@ class ProductCollection extends AbstractBlock {
 							$product->get_upsell_ids()
 						);
 					},
-					[]
+					array()
 				);
 
 				// Remove duplicates and product references. We don't want to display
@@ -1962,6 +2077,83 @@ class ProductCollection extends AbstractBlock {
 				}
 
 				$collection_args['upsellsProductReferences'] = array( $product_reference );
+				return $collection_args;
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/cross-sells',
+			function ( $collection_args ) {
+				$product_reference = $collection_args['crossSellsProductReferences'] ?? null;
+				// No products should be shown if no cross-sells product reference is set.
+				if ( empty( $product_reference ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
+
+				if ( empty( $products ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$product_ids = array_map(
+					function ( $product ) {
+						return $product->get_id();
+					},
+					$products
+				);
+
+				$all_cross_sells = array_reduce(
+					$products,
+					function ( $acc, $product ) {
+						return array_merge(
+							$acc,
+							$product->get_cross_sell_ids()
+						);
+					},
+					array()
+				);
+
+				// Remove duplicates and product references. We don't want to display
+				// what's already in cart.
+				$unique_cross_sells = array_unique( $all_cross_sells );
+				$cross_sells        = array_diff( $unique_cross_sells, $product_ids );
+
+				return array(
+					'post__in' => empty( $cross_sells ) ? array( -1 ) : $cross_sells,
+				);
+			},
+			function ( $collection_args, $query ) {
+				$product_reference = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				// Infer the product reference from the location if an explicit product is not set.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = array( $location['sourceData']['productId'] );
+					}
+					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productIds'];
+					}
+				}
+
+				$collection_args['crossSellsProductReferences'] = $product_reference;
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$product_reference = $request->get_param( 'productReference' );
+				// In some cases the editor will send along block location context that we can infer the product reference from.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['crossSellsProductReferences'] = array( $product_reference );
 				return $collection_args;
 			}
 		);

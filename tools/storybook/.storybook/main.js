@@ -1,5 +1,18 @@
 const webpackOverride = require( '../webpack.config' );
 
+const staticDirs = [
+	{
+		from: '../../../plugins/woocommerce/client/admin/client',
+		to: 'main/plugins/woocommerce/client/admin/client',
+	},
+];
+if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
+	// Add WooCommerce Blocks Storybook for build process.
+	staticDirs.push( {
+		from: '../../../plugins/woocommerce-blocks/storybook/dist',
+		to: '/assets/woocommerce-blocks',
+	} );
+}
 module.exports = {
 	stories: [
 		// WooCommerce Admin / @woocommerce/components components
@@ -9,9 +22,34 @@ module.exports = {
 		// WooCommerce Admin / @woocommerce/onboarding components
 		'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
 		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
-		'../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)',
+		'../../../plugins/woocommerce/client/admin/client/**/stories/*.story.@(js|tsx)',
 	],
+	refs: ( config, { configType } ) => {
+		if ( configType === 'DEVELOPMENT' ) {
+			// WooCommerce Blocks gets automatically on port 6006 run when you run pnpm --filter=@woocommerce/storybook watch:build
+			return {
+				'woocommerce-blocks': {
+					expanded: false,
+					title: 'WooCommerce Blocks',
+					url: 'http://localhost:6006',
+				},
+			};
+		}
 
+		let pathPrefix = (
+			process.env.STORYBOOK_COMPOSITION_PATH_PREFIX ?? ''
+		).trim();
+		if ( pathPrefix && ! pathPrefix.startsWith( '/' ) ) {
+			pathPrefix = '/' + pathPrefix;
+		}
+		return {
+			'woocommerce-blocks': {
+				expanded: false,
+				title: 'WooCommerce Blocks',
+				url: pathPrefix + '/assets/woocommerce-blocks',
+			},
+		};
+	},
 	addons: [
 		'@storybook/addon-docs',
 		'@storybook/addon-controls',
@@ -27,12 +65,7 @@ module.exports = {
 		reactDocgen: 'react-docgen-typescript',
 	},
 
-	staticDirs: [
-		{
-			from: '../../../plugins/woocommerce-admin/client',
-			to: 'main/plugins/woocommerce-admin/client',
-		},
-	],
+	staticDirs,
 
 	webpackFinal: webpackOverride,
 

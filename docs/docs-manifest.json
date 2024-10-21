@@ -219,15 +219,16 @@
           "category_title": "Payment Methods",
           "posts": [
             {
-              "post_title": "Cart and Checkout - Payment method integration for the Checkout block",
+              "post_title": "Checkout Block - Payment method integration",
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "015aae25bb331364c224fe8eb2b7675e4cbed0a9e6bee0dde5f5311388161b0a",
+              "hash": "50086a6f4c20ad6b3cd293f2a304263beafdc67be724de5c203fac0b237b9efc",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
-                "./checkout-flow-and-events.md": "499384cbb48ed96a2e12653cd68bd82d123a20a1"
+                "./checkout-flow-and-events.md": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
+                "../../payments/payment-gateway-api.md": "b337203996650b567f91c70306e1010d6f1ae552"
               }
             },
             {
@@ -642,7 +643,7 @@
           "menu_title": "Integrating admin pages",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "hash": "c172fff2814f552e2ab5712edb9e716f75c27946d993a1ade8f2269cc9a8689d",
+          "hash": "9a8dc2055f8ea1abd30a57711a3d93168e7104ba40be65a7f7a704eaff2f04fb",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
           "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467"
         },
@@ -1050,7 +1051,7 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "021a567cece90d4c56991d0778d7f291d1489c7a559b6fade5f001cd9920dc77",
+          "hash": "379612b00de83bebadd338aa55f8af2432927d9b53df4e2fdfe24cfcaf050069",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
         },
@@ -1804,5 +1805,5 @@
       "categories": []
     }
   ],
-  "hash": "0344db5f1a802e436d9f949849b969bdabc88f4ef2a1886c9fc4e8e6ff7c7518"
+  "hash": "7df127d2b26b4b233eff0380f1a8ddd1d686ed85b0dcad661f568dcd2477e022"
 }

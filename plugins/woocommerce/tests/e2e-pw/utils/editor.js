@@ -1,10 +1,13 @@
 const { expect } = require( '@playwright/test' );
 
 const closeChoosePatternModal = async ( { page } ) => {
-	const closeModal = page.getByRole( 'button', {
-		name: 'Close',
-		exact: true,
-	} );
+	const closeModal = page
+		.getByLabel( 'Scrollable section' )
+		.filter()
+		.getByRole( 'button', {
+			name: 'Close',
+			exact: true,
+		} );
 	await page.addLocatorHandler( closeModal, async () => {
 		await closeModal.click();
 	} );
@@ -65,9 +68,10 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName, wpVersion = null ) => {
+	// With Gutenberg active we have Block Inserter name
 	await page
 		.getByRole( 'button', {
-			name: 'Toggle block inserter',
+			name: /Toggle block inserter|Block Inserter/,
 			expanded: false,
 		} )
 		.click();
