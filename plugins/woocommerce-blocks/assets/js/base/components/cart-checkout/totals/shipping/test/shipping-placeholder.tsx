@@ -8,6 +8,8 @@ import { screen, render } from '@testing-library/react';
  */
 import ShippingPlaceholder from '../shipping-placeholder';
 
+const shippingCalculatorID = 'shipping-calculator-form-wrapper';
+
 describe( 'ShippingPlaceholder', () => {
 	it( 'should show correct text if showCalculator is false and addressProvided is false', () => {
 		const { rerender } = render(
@@ -17,6 +19,7 @@ describe( 'ShippingPlaceholder', () => {
 				isCheckout={ true }
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
+				shippingCalculatorID={ shippingCalculatorID }
 			/>
 		);
 		expect(
@@ -29,6 +32,7 @@ describe( 'ShippingPlaceholder', () => {
 				addressProvided={ false }
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
+				shippingCalculatorID={ shippingCalculatorID }
 			/>
 		);
 		expect(
@@ -44,6 +48,7 @@ describe( 'ShippingPlaceholder', () => {
 				isCheckout={ true }
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
+				shippingCalculatorID={ shippingCalculatorID }
 			/>
 		);
 		expect(

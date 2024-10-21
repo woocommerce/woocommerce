@@ -14,10 +14,13 @@ import { useSelect } from '@wordpress/data';
 import ShippingLocation from '../../shipping-location';
 import { CalculatorButton, CalculatorButtonProps } from './calculator-button';
 
-export interface ShippingAddressProps {
+export interface ShippingAddressProps
+	extends Pick<
+		CalculatorButtonProps,
+		'shippingCalculatorID' | 'setIsShippingCalculatorOpen'
+	> {
 	showCalculator: boolean;
 	isShippingCalculatorOpen: boolean;
-	setIsShippingCalculatorOpen: CalculatorButtonProps[ 'setIsShippingCalculatorOpen' ];
 	shippingAddress: ShippingAddressType;
 }
 
@@ -26,6 +29,7 @@ export const ShippingAddress = ( {
 	isShippingCalculatorOpen,
 	setIsShippingCalculatorOpen,
 	shippingAddress,
+	shippingCalculatorID,
 }: ShippingAddressProps ): JSX.Element | null => {
 	const prefersCollection = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).prefersCollection()
@@ -49,6 +53,7 @@ export const ShippingAddress = ( {
 					label={ label }
 					isShippingCalculatorOpen={ isShippingCalculatorOpen }
 					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+					shippingCalculatorID={ shippingCalculatorID }
 				/>
 			) }
 		</>

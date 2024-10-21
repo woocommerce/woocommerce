@@ -13,8 +13,10 @@ import { removeNoticesWithContext } from '@woocommerce/base-utils';
  */
 import ShippingCalculatorAddress from './address';
 import './style.scss';
+import { CalculatorButtonProps } from '../totals/shipping/calculator-button';
 
-interface ShippingCalculatorProps {
+interface ShippingCalculatorProps
+	extends Pick< CalculatorButtonProps, 'shippingCalculatorID' > {
 	onUpdate?: ( newAddress: ShippingAddress ) => void;
 	onCancel?: () => void;
 	addressFields?: Partial< keyof ShippingAddress >[];
@@ -28,11 +30,15 @@ const ShippingCalculator = ( {
 		/* Do nothing */
 	},
 	addressFields = [ 'country', 'state', 'city', 'postcode' ],
+	shippingCalculatorID,
 }: ShippingCalculatorProps ): JSX.Element => {
 	const { shippingAddress } = useCustomerData();
 	const noticeContext = 'wc/cart/shipping-calculator';
 	return (
-		<div className="wc-block-components-shipping-calculator">
+		<div
+			className="wc-block-components-shipping-calculator"
+			id={ shippingCalculatorID }
+		>
 			<StoreNoticesContainer context={ noticeContext } />
 			<ShippingCalculatorAddress
 				address={ shippingAddress }
