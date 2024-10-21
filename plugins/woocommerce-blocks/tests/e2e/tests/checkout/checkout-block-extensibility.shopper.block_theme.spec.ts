@@ -83,9 +83,9 @@ test.describe( 'Shopper → Extensibility', () => {
 			await checkoutPageObject.fillInCheckoutWithTestData();
 			await checkoutPageObject.page.waitForFunction( () => {
 				return (
-					window.wp.data
-						.select( 'wc/store/cart' )
-						.isCustomerDataDirty() === false
+					window.localStorage.getItem(
+						'woocommerce_checkout_is_customer_data_dirty'
+					) === 'false'
 				);
 			} );
 			await checkoutPageObject.page.evaluate(
