@@ -1,100 +1,58 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@woocommerce/interactivity';
-import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
-import { HTMLElementEvent } from '@woocommerce/types';
-import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
+import { getContext, getElement, store } from '@woocommerce/interactivity';
 
 /**
  * Internal dependencies
  */
-import { navigate } from '../../frontend';
+import { ProductFiltersContext } from '../../frontend';
 
-const getUrl = ( activeFilters: string ) => {
-	const url = new URL( window.location.href );
-	const { searchParams } = url;
-
-	if ( activeFilters !== '' ) {
-		searchParams.set( 'filter_stock_status', activeFilters );
-	} else {
-		searchParams.delete( 'filter_stock_status' );
-	}
-
-	return url.href;
-};
+const filterStockStatusKey = 'filter_stock_status';
 
 store( 'woocommerce/product-filter-stock-status', {
 	actions: {
-		onCheckboxChange: () => {
-			const checkboxContext = getContext< CheckboxListContext >(
-				'woocommerce/interactivity-checkbox-list'
+		toggleFilter: () => {
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
 			);
-
-			const filters = checkboxContext.items
-				.filter( ( item ) => {
-					return item.checked;
-				} )
-				.map( ( item ) => {
-					return item.value;
-				} );
-
-			navigate( getUrl( filters.join( ',' ) ) );
-		},
-		onDropdownChange: () => {
-			const dropdownContext = getContext< DropdownContext >(
-				'woocommerce/interactivity-dropdown'
-			);
-
-			const selectedItems = dropdownContext.selectedItems;
-			const items = selectedItems || [];
-			const filters = items.map( ( i ) => i.value );
-
-			navigate( getUrl( filters.join( ',' ) ) );
-		},
-		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-			// get the active filters from the url:
-			const url = new URL( window.location.href );
 			const currentFilters =
-				url.searchParams.get( 'filter_stock_status' ) || '';
+				productFiltersContext.params[ filterStockStatusKey ];
 
 			// split out the active filters into an array.
 			const filtersArr =
-				currentFilters === '' ? [] : currentFilters.split( ',' );
+				currentFilters === undefined ? [] : currentFilters.split( ',' );
 
-			// if checked and not already in activeFilters, add to activeFilters
-			// if not checked and in activeFilters, remove from activeFilters.
-			if ( event.target.checked ) {
-				if ( ! currentFilters.includes( event.target.value ) ) {
-					filtersArr.push( event.target.value );
-				}
-			} else {
-				const index = filtersArr.indexOf( event.target.value );
-				if ( index > -1 ) {
-					filtersArr.splice( index, 1 );
-				}
+			const { ref } = getElement();
+			const value =
+				ref.getAttribute( 'data-target-value' ) ??
+				ref.getAttribute( 'value' );
+
+			const newFilterArr = filtersArr.includes( value )
+				? [ ...filtersArr.filter( ( filter ) => filter !== value ) ]
+				: [ ...filtersArr, value ];
+
+			if ( newFilterArr.length === 0 ) {
+				delete productFiltersContext.params[ filterStockStatusKey ];
+				return;
 			}
 
-			navigate( getUrl( filtersArr.join( ',' ) ) );
+			productFiltersContext.params = {
+				...productFiltersContext.params,
+				[ filterStockStatusKey ]: newFilterArr.join( ',' ),
+			};
 		},
-		removeFilter: () => {
-			const { value } = getContext< { value: string } >();
-			// get the active filters from the url:
-			const url = new URL( window.location.href );
-			const currentFilters =
-				url.searchParams.get( 'filter_stock_status' ) || '';
+		clearFilters: () => {
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			const updatedParams = productFiltersContext.params;
 
-			// split out the active filters into an array.
-			const filtersArr =
-				currentFilters === '' ? [] : currentFilters.split( ',' );
+			delete updatedParams[ filterStockStatusKey ];
 
-			const index = filtersArr.indexOf( value );
-
-			if ( index > -1 ) {
-				filtersArr.splice( index, 1 );
-			}
-
-			navigate( getUrl( filtersArr.join( ',' ) ) );
+			productFiltersContext.params = {
+				...updatedParams,
+			};
 		},
 	},
 } );
