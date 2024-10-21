@@ -3,9 +3,7 @@ on:
   issues:
     types: [labeled]
 
-permissions:
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   cfe-created:
@@ -29,6 +27,9 @@ jobs:
   cfe-approved:
     if: github.event.label.name == 'CFE Approved'
     runs-on: ubuntu-20.04
+    permissions:
+      pull-requests: write
+      issues: write
     steps:
       - name: Extract PR number from issue body
         id: extract-pr
@@ -115,6 +116,8 @@ jobs:
   cfe-rejected:
     if: github.event.label.name == 'CFE Rejected'
     runs-on: ubuntu-20.04
+    permissions:
+      issues: write
     steps:
       - name: Extract Release Number from Issue Body
         id: extract-release
