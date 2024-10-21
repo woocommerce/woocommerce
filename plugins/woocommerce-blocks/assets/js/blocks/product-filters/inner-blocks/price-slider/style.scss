@@ -50,8 +50,8 @@
 	appearance: none;
 }
 
-.wp-block-woocommerce-product-filter-price {
-	.wp-block-woocommerce-product-filter-price-content {
+.wc-block-product-filter-price-slider {
+	&__content {
 		display: grid;
 		grid-template-areas:
 			"price-slider price-slider price-slider"
@@ -59,26 +59,22 @@
 		grid-template-columns: auto 1fr auto;
 		column-gap: $gap-small;
 
-		&.wp-block-woocommerce-product-filter-price-content--inline {
+		&--inline {
 			grid-template-areas: "left-input price-slider right-input";
 			grid-template-columns: auto 1fr auto;
 		}
 	}
 
-	.wp-block-woocommerce-product-filter-price-content-price-range-slider {
-		grid-area: price-slider;
-	}
-
-	.wp-block-woocommerce-product-filter-price-content-left-input {
+	&__left {
 		grid-area: left-input;
 	}
 
-	.wp-block-woocommerce-product-filter-price-content-right-input {
+	&__right {
 		grid-area: right-input;
 	}
 
-	.range {
-		grid-area: "price-slider";
+	&__range {
+		grid-area: price-slider;
 		--low: 0%;
 		--high: 100%;
 		--range-color: currentColor;
