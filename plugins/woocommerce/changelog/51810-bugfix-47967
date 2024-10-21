@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix #47967 where user's could place empty orders with the Checkout block.

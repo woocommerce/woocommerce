@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update editor util to use new string Block Inserter which is compatible with both Gutenberg and without it
