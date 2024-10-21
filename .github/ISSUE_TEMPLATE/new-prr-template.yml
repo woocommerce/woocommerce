@@ -84,8 +84,12 @@ body:
         * Write down ideas on how you could prevent this bug – for example, by writing automated tests, creating a new process, or updating documentation.
         * Make a plan with your team to implement the changes proposed above in order to catch the bug earlier next time and add the related tasks to your backlog.
         * Please, add a separate comment that includes the details for the Escape Analysis. Together with this Escape Analysis, please make sure to include an actionable item that covers the gap exposed by this analysis. It could be a GitHub issue, the reference of a new item to discuss in a team meeting, etc. Anything that prevents this analysis from getting lost in P2 will be useful.
-
----
-
-[] I understand that I need to write an incident report (aka Escape Analysis) as a comment on this post. This is required for the Point Release Request to be accepted.
-[] I understand that I need to create an issue as a result of the Escape Analysis and reference it in a comment on this post. This can be done at a later time, but it is required for this Point Release Request to be closed.
+  - type: checkboxes
+    id: understand-escape-analysis
+    attributes:
+      label: "Confirmation"
+    description: |
+      Please confirm the following:
+    options:
+    - label: "I understand that I need to write an incident report (aka Escape Analysis) as a comment on this post. This is required for the Point Release Request to be accepted."
+    - label: "I understand that I need to create an issue as a result of the Escape Analysis and reference it in a comment on this post. This can be done at a later time, but it is required for this Point Release Request to be closed."
