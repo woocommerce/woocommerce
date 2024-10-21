@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix: Multiple issues related to MySQL having `ANSI_QUOTES` enabled in Product Filters
