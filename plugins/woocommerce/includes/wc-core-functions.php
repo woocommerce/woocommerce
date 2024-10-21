@@ -417,7 +417,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	}
 
 	// Return what we found.
-	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path );
+	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path, $default_path );
 }
 
 /**
