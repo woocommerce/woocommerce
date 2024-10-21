@@ -1,12 +1,8 @@
 /**
  * External dependencies
  */
-import { debounce, pick } from '@woocommerce/base-utils';
-import {
-	CartBillingAddress,
-	CartShippingAddress,
-	BillingAddressShippingAddress,
-} from '@woocommerce/types';
+import { debounce } from '@woocommerce/base-utils';
+import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
@@ -134,25 +130,11 @@ const updateCustomerData = (): void => {
 		return;
 	}
 
-	// Find valid data from the list of dirtyProps and prepare to push to the server.
-	const customerDataToUpdate = {} as Partial< BillingAddressShippingAddress >;
-
-	if ( localState.dirtyProps.billingAddress.length ) {
-		customerDataToUpdate.billing_address = pick(
-			localState.customerData.billingAddress,
-			localState.dirtyProps.billingAddress
-		);
-	}
-
-	if ( localState.dirtyProps.shippingAddress.length ) {
-		customerDataToUpdate.shipping_address = pick(
-			localState.customerData.shippingAddress,
-			localState.dirtyProps.shippingAddress
-		);
-	}
-
 	dispatch( STORE_KEY )
-		.updateCustomerData( customerDataToUpdate )
+		.updateCustomerData( {
+			billing_address: localState.customerData.billingAddress,
+			shipping_address: localState.customerData.shippingAddress,
+		} )
 		.then( () => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
