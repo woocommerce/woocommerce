@@ -6,5 +6,9 @@
 			"./typings",
 			"./node_modules/@types"
 		]
-	}
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*",
+	]
 }
