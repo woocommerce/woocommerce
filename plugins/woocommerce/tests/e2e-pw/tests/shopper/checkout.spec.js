@@ -222,25 +222,39 @@ test.describe(
 				page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing First name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing First name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Last name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Last name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Street address is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Street address is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Town / City is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Town / City is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing ZIP Code is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing ZIP Code is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Phone is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Phone is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Email address is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Email address is a required field.',
+				} )
 			).toBeVisible();
 
 			// toggle ship to different address, fill out billing info and confirm error shown
@@ -259,19 +273,29 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 			await expect(
-				page.getByText( 'Shipping First name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping First name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping Last name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping Last name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping Street address is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping Street address is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping Town / City is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping Town / City is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping ZIP Code is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping ZIP Code is a required field.',
+				} )
 			).toBeVisible();
 		} );
 
