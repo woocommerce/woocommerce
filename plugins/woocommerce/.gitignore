@@ -21,6 +21,9 @@ tests/cli/vendor
 /tests/e2e/plugins
 .phpunit.result.cache
 
+# Test translations
+/languages
+
 # Packages
 /packages/*
 !/packages/README.md

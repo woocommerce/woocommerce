@@ -7,6 +7,7 @@ import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { CheckoutPage } from '../checkout/checkout.page';
+import { translations } from '../../test-data/data/data';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
@@ -19,7 +20,7 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Translations', () => {
 	test.beforeEach( async () => {
-		await wpCLI( 'site switch-language nl_NL' );
+		await wpCLI( `site switch-language ${ translations.locale }` );
 	} );
 
 	test( 'User can view translated Cart block', async ( {
