@@ -362,9 +362,11 @@ class ReceiptRenderingEngine {
 			);
 		}
 
+		$is_order_failed = $order->has_status( 'failed' );
+
 		$line_items_info[] = array(
 			'type'   => 'amount_paid',
-			'title'  => __( 'Amount Paid', 'woocommerce' ),
+			'title'  => $is_order_failed ? __( 'Amount', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
 			'amount' => wc_price( $order->get_total(), $get_price_args ),
 		);
 
@@ -381,9 +383,11 @@ class ReceiptRenderingEngine {
 			),
 			'texts'            => array(
 				'receipt_title'                => $receipt_title,
-				'amount_paid_section_title'    => __( 'Amount Paid', 'woocommerce' ),
-				'date_paid_section_title'      => __( 'Date Paid', 'woocommerce' ),
+				'amount_paid_section_title'    => $is_order_failed ? __( 'Order Total', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
+				'date_paid_section_title'      => $is_order_failed ? __( 'Order Date', 'woocommerce' ) : __( 'Date Paid', 'woocommerce' ),
 				'payment_method_section_title' => __( 'Payment method', 'woocommerce' ),
+				'payment_status_section_title' => __( 'Payment status', 'woocommerce' ),
+				'payment_status'               => $is_order_failed ? __( 'Failed', 'woocommerce' ) : __( 'Success', 'woocommerce' ),
 				'summary_section_title'        => $summary_title,
 				'order_notes_section_title'    => __( 'Notes', 'woocommerce' ),
 				'app_name'                     => __( 'Application Name', 'woocommerce' ),
@@ -391,7 +395,7 @@ class ReceiptRenderingEngine {
 				'account_type'                 => __( 'Account Type', 'woocommerce' ),
 			),
 			'formatted_amount' => wc_price( $order->get_total(), $get_price_args ),
-			'formatted_date'   => wc_format_datetime( $order->get_date_paid() ),
+			'formatted_date'   => wc_format_datetime( $order->get_date_paid() ?? $order->get_date_created() ),
 			'line_items'       => $line_items_info,
 			'payment_method'   => $order->get_payment_method_title(),
 			'notes'            => array_map( 'get_comment_text', $order->get_customer_order_notes() ),
@@ -404,7 +408,7 @@ class ReceiptRenderingEngine {
 	 *
 	 * It will return null if any of these is true:
 	 *
-	 * - Payment method is not 'woocommerce_payments".
+	 * - Payment method is not "woocommerce_payments".
 	 * - WooCommerce Payments is not installed.
 	 * - No intent id is stored for the order.
 	 * - Retrieving the payment information from Stripe API (providing the intent id) fails.
