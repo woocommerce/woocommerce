@@ -17,18 +17,7 @@ import save from '../save';
 const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 	category: 'woocommerce-product-elements',
 	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	icon: {
-		src: (
-			<Icon
-				icon={ grid }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
 	apiVersion: 3,
-	supports: {
-		html: false,
-	},
 	ancestor: [
 		'woocommerce/all-products',
 		'woocommerce/single-product',
