@@ -12,7 +12,7 @@ import type { TaskListType } from '@woocommerce/data';
  */
 import { ADMIN_URL } from '~/utils/admin-settings';
 
-type WhatsNextProps = {
+export type WhatsNextProps = {
 	activePlugins: string[];
 	allTasklists: TaskListType[];
 };
@@ -25,7 +25,10 @@ type Action = {
 	trackEvent: string;
 };
 
-const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
+export const getActionsList = ( {
+	activePlugins,
+	allTasklists,
+}: WhatsNextProps ) => {
 	const actions: Action[] = [];
 	const pick = ( action: Action, condition: boolean ) => {
 		if ( actions.length < 3 && condition ) {
@@ -53,7 +56,8 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 			{}
 		);
 
-	const isMarketingTaskCompleted = setupTasksCompletion?.marketing || false;
+	const isMarketingTaskCompleted =
+		extendedTasksCompletion?.marketing || false;
 	const isPaymentsTaskCompleted = setupTasksCompletion?.payments || false;
 	const isMobileTaskCompleted =
 		extendedTasksCompletion?.[ 'get-mobile-app' ] || false;
@@ -137,8 +141,8 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 	pick( extensions, true ); // No condition yet
 
 	// Pick second three
-	pick( mobileApp, isMobileTaskCompleted );
-	pick( mailchimp, true ); // No condition yet
+	pick( mobileApp, ! isMobileTaskCompleted );
+	pick( mailchimp, ! isMailChimpActivated );
 	pick( externalDocumentation, true ); // No condition yet
 
 	// Pick last three
