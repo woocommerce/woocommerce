@@ -6,6 +6,37 @@ on:
 permissions: {}
 
 jobs:
+  prep:
+    runs-on: ubuntu-20.04
+    outputs:
+      release_number: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
+    steps:
+      - name: Extract Release Number from Issue Body
+        id: extract-release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const event = ${{ toJSON( github.event ) }}
+            const body = event.issue.body;
+
+            // Regular expression to match the release number after the specific question
+            const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
+
+            // Match the body against the regex
+            const match = body.match(releaseRegex);
+
+            // Check if a valid release number was found
+            if (match && match[1]) {
+              const releaseNumber = match[1];
+
+              // Log the release number and set it as a GitHub output
+              console.log(`Valid release number: ${releaseNumber}`);
+              core.setOutput('RELEASE_NUMBER', releaseNumber);
+            } else {
+              // If no valid release number is found, fail the step
+              core.setFailed("No valid release number found after the 'Which release does this request apply to?' section. Aborting.");
+            }
+
   cfe-created:
     if: github.event.label.name == 'code freeze exception'
     runs-on: ubuntu-20.04
@@ -23,10 +54,11 @@ jobs:
           slack-optional-unfurl_media: false
         continue-on-error: true
 
-
   cfe-approved:
     if: github.event.label.name == 'CFE Approved'
     runs-on: ubuntu-20.04
+    needs:
+      - prep
     permissions:
       pull-requests: write
       issues: write
@@ -65,39 +97,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Release Number from Issue Body
-        id: extract-release
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const event = ${{ toJSON( github.event ) }}
-            const body = event.issue.body;
-
-            // Regular expression to match the release number after the specific question
-            const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
-
-            // Match the body against the regex
-            const match = body.match(releaseRegex);
-
-            // Check if a valid release number was found
-            if (match && match[1]) {
-              const releaseNumber = match[1];
-
-              // Log the release number and set it as a GitHub output
-              console.log(`Valid release number: ${releaseNumber}`);
-              core.setOutput('RELEASE_NUMBER', releaseNumber);
-            } else {
-              // If no valid release number is found, fail the step
-              core.setFailed("No valid release number found after the 'Which release does this request apply to?' section. Aborting.");
-            }
-
       - name: Apply Milestone to the Issue
         run: |
           MILESTONE="$RELEASE_NUMBER.0"
           echo "Applying milestone: $MILESTONE"
           gh issue edit ${{ github.event.issue.html_url }} --milestone "$MILESTONE"
         env:
-          RELEASE_NUMBER: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
+          RELEASE_NUMBER: ${{ needs.prep.outputs.release_number }}
           GH_TOKEN: ${{ github.token }}
 
       - name: Notify Slack
@@ -116,42 +122,18 @@ jobs:
   cfe-rejected:
     if: github.event.label.name == 'CFE Rejected'
     runs-on: ubuntu-20.04
+    needs:
+      - prep
     permissions:
       issues: write
     steps:
-      - name: Extract Release Number from Issue Body
-        id: extract-release
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const event = ${{ toJSON( github.event ) }}
-            const body = event.issue.body;
-
-            // Regular expression to match the release number after the specific question
-            const releaseRegex = /Which release does this request apply to\?.*?\n([0-9]+\.[0-9]+)/s;
-
-            // Match the body against the regex
-            const match = body.match(releaseRegex);
-
-            // Check if a valid release number was found
-            if (match && match[1]) {
-              const releaseNumber = match[1];
-
-              // Log the release number and set it as a GitHub output
-              console.log(`Valid release number: ${releaseNumber}`);
-              core.setOutput('RELEASE_NUMBER', releaseNumber);
-            } else {
-              // If no valid release number is found, fail the step
-              core.setFailed("No valid release number found after the 'Which release does this request apply to?' section. Aborting.");
-            }
-
       - name: Apply Milestone to the Issue
         run: |
           MILESTONE="$RELEASE_NUMBER.0"
           echo "Applying milestone: $MILESTONE"
           gh issue edit ${{ github.event.issue.html_url }} --milestone "$MILESTONE"
         env:
-          RELEASE_NUMBER: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
+          RELEASE_NUMBER: ${{ needs.prep.outputs.release_number }}
           GH_TOKEN: ${{ github.token }}
 
       - name: Close CFE Issue
