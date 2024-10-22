@@ -1072,7 +1072,7 @@ class ProductCollection extends AbstractBlock {
 		if ( 'menu_order' === $orderby ) {
 			return array(
 				'orderby' => 'menu_order',
-				'order'   => 'DESC',
+				'order'   => 'ASC',
 			);
 		}
 
