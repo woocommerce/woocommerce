@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Fix an error where the Product Filter Clear Button block does not respect the filter settings.
+
