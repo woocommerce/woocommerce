@@ -33,17 +33,6 @@ const store = createReduxStore( STORE_KEY, {
 
 register( store );
 
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_KEY
-	): DispatchFromMap< typeof actions >;
-	function select( key: typeof STORE_KEY ): SelectFromMap<
-		typeof selectors
-	> & {
-		hasFinishedResolution: ( selector: string ) => boolean;
-	};
-}
-
 // Pushes changes whenever the store is updated.
 subscribe( pushChanges, store );
 
@@ -73,6 +62,17 @@ const unsubscribeUpdatePaymentMethods = subscribe( async () => {
 }, store );
 
 export const CART_STORE_KEY = STORE_KEY;
+
+declare module '@wordpress/data' {
+	function dispatch(
+		key: typeof STORE_KEY
+	): DispatchFromMap< typeof actions >;
+	function select( key: typeof STORE_KEY ): SelectFromMap<
+		typeof selectors
+	> & {
+		hasFinishedResolution: ( selector: string ) => boolean;
+	};
+}
 
 /**
  * CartDispatchFromMap is a type that maps the cart store's action creators to the dispatch function passed to thunks.
