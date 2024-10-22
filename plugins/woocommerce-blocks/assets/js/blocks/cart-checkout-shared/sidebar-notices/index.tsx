@@ -8,7 +8,6 @@ import {
 } from '@wordpress/block-editor';
 import { addFilter, hasFilter } from '@wordpress/hooks';
 import type { StoreDescriptor } from '@wordpress/data';
-import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { DefaultNotice } from '@woocommerce/editor-components/default-notice';
 import { IncompatibleExtensionsNotice } from '@woocommerce/editor-components/incompatible-extension-notice';
 import { useSelect } from '@wordpress/data';
