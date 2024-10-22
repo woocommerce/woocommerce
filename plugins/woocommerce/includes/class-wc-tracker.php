@@ -889,6 +889,9 @@ class WC_Tracker {
 	 * @return int
 	 */
 	private static function get_brands_counts() {
+		if ( ! taxonomy_exists( 'product_brand' ) ) {
+			return 0;
+		}
 		return wp_count_terms( 'product_brand' );
 	}
 
