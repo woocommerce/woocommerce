@@ -249,6 +249,19 @@ class WC_Structured_Data {
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
 						'offerCount' => count( $product->get_children() ),
 					);
+
+					if ( $product->is_on_sale() ) {
+						$markup_offer['priceSpecification'] = array(
+							array(
+								'@type'                 => 'UnitPriceSpecification',
+								'priceType'             => 'https://schema.org/SalePrice',
+								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+								'priceCurrency'         => $currency,
+								'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+								'validThrough'          => $price_valid_until,
+							),
+						);
+					}
 				}
 			} elseif ( $product->is_type( 'grouped' ) ) {
 				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
