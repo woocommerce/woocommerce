@@ -4,10 +4,9 @@
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import type { Currency, CartResponseTotals } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { useEffect, useId, useState } from '@wordpress/element';
+import { useId, useState } from '@wordpress/element';
 import clsx from 'clsx';
 /**
  * Internal dependencies
@@ -15,19 +14,7 @@ import clsx from 'clsx';
 import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
 import { useContainerWidthContext } from '../../../../base/context';
 import { FormattedMonetaryAmount } from '../../../../../../packages/components';
-const CheckoutOrderSummary = ( {
-	className,
-	children,
-	totalsCurrency,
-	cartTotals,
-}: {
-	className?: string;
-	children: JSX.Element | JSX.Element[];
-	totalsCurrency: Currency;
-	cartTotals: CartResponseTotals;
-} ) => {
-	return <>{ children }</>;
-};
+import { FormStepHeading } from '../../form-step';
 
 const FrontendBlock = ( {
 	children,
@@ -64,65 +51,59 @@ const FrontendBlock = ( {
 	return (
 		<>
 			<div className={ className }>
-				<CheckoutOrderSummary
-					totalsCurrency={ totalsCurrency }
-					cartTotals={ cartTotals }
+				<div
+					className={ clsx(
+						'wc-block-components-checkout-order-summary__title',
+						{
+							'is-open': isOpen,
+						}
+					) }
+					{ ...orderSummaryProps }
 				>
-					<div
-						className={ clsx(
-							'wc-block-components-checkout-order-summary__title',
-							{
-								'is-open': isOpen,
-							}
-						) }
-						{ ...orderSummaryProps }
+					<p
+						className="wc-block-components-checkout-order-summary__title-text"
+						role="heading"
 					>
-						<p
-							className="wc-block-components-checkout-order-summary__title-text"
-							role="heading"
-						>
-							{ __( 'Order summary', 'woocommerce' ) }
-						</p>
-						{ ( isSmall || isMobile ) && (
-							<>
-								<FormattedMonetaryAmount
-									currency={ totalsCurrency }
-									value={ totalPrice }
-								/>
-
-								<Icon
-									icon={ isOpen ? chevronUp : chevronDown }
-								/>
-							</>
-						) }
-					</div>
-					<div
-						className={ clsx(
-							'wc-block-components-checkout-order-summary__content',
-							{
-								'is-open': isOpen,
-							}
-						) }
-						id={ ariaControlsId }
-					>
-						{ children }
-						<div className="wc-block-components-totals-wrapper">
-							<TotalsFooterItem
+						{ __( 'Order summary', 'woocommerce' ) }
+					</p>
+					{ ( isSmall || isMobile ) && (
+						<>
+							<FormattedMonetaryAmount
 								currency={ totalsCurrency }
-								values={ cartTotals }
+								value={ totalPrice }
 							/>
-						</div>
-						<OrderMetaSlotFill />
+
+							<Icon icon={ isOpen ? chevronUp : chevronDown } />
+						</>
+					) }
+				</div>
+				<div
+					className={ clsx(
+						'wc-block-components-checkout-order-summary__content',
+						{
+							'is-open': isOpen,
+						}
+					) }
+					id={ ariaControlsId }
+				>
+					{ children }
+					<div className="wc-block-components-totals-wrapper">
+						<TotalsFooterItem
+							currency={ totalsCurrency }
+							values={ cartTotals }
+						/>
 					</div>
-				</CheckoutOrderSummary>
+					<OrderMetaSlotFill />
+				</div>
 			</div>
 			<CheckoutOrderSummaryFill>
-				<CheckoutOrderSummary
-					className={ className }
-					totalsCurrency={ totalsCurrency }
-					cartTotals={ cartTotals }
+				<div
+					className={ `${ className } checkout-order-summary-block-fill-wrapper` }
 				>
-					<>
+					<FormStepHeading>
+						<>{ __( 'Order summary', 'woocommerce' ) }</>
+					</FormStepHeading>
+					<div className="checkout-order-summary-block-fill">
 						{ children }
 						<div className="wc-block-components-totals-wrapper">
 							<TotalsFooterItem
@@ -131,8 +112,8 @@ const FrontendBlock = ( {
 							/>
 						</div>
 						<OrderMetaSlotFill />
-					</>
-				</CheckoutOrderSummary>
+					</div>
+				</div>
 			</CheckoutOrderSummaryFill>
 		</>
 	);

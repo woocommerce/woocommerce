@@ -1,17 +1,36 @@
 .wp-block-woocommerce-checkout-order-summary-block {
 	.wc-block-components-checkout-order-summary__title {
-		margin-top: 16px;
+		margin-top: $gap;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 
 		.wc-block-components-checkout-order-summary__title-text {
-			margin: 0 0 16px 16px;
+			margin: 0 0 $gap $gap;
 			flex-grow: 1;
 		}
 
 		.wc-block-components-checkout-order-summary__title-open-close {
 			cursor: pointer;
+		}
+	}
+
+	.checkout-order-summary-block-fill {
+		border: 1px solid $universal-border-light;
+		border-radius: 5px;
+
+		.wc-block-components-totals-wrapper:first-of-type {
+			border-top: 0;
+		}
+
+		.wc-block-components-totals-item {
+			padding-left: $gap;
+			padding-right: $gap;
+		}
+
+		.wc-block-components-totals-coupon {
+			padding-left: $gap;
+			padding-right: $gap;
 		}
 	}
 }
