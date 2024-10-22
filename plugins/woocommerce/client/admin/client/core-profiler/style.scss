@@ -33,12 +33,6 @@
 	.woocommerce-profiler-button-container {
 		width: 100%;
 		max-width: 404px;
-		@include breakpoint("<782px") {
-			position: absolute;
-			bottom: 20px;
-			padding: 0 20px;
-			max-width: 100%;
-		}
 	}
 
 	.woocommerce-profiler-button {
@@ -471,6 +465,7 @@
 	flex-direction: column;
 	.woocommerce-profiler-business-information__content {
 		max-width: 615px;
+		min-height: 750px;
 		width: 100%;
 		display: flex;
 		align-self: center;
