@@ -4,7 +4,13 @@
 import { BlockInstance } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	useCallback,
+	useEffect,
+	useReducer,
+	useState,
+} from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
 import { PluginArea } from '@wordpress/plugins';
 import classNames from 'classnames';
@@ -53,6 +59,40 @@ import {
 	RegisterKeyboardShortcuts,
 } from './keyboard-shortcuts';
 import { areBlocksEmpty } from './utils/are-blocks-empty';
+
+type SidebarState = {
+	isInserterOpened: boolean;
+	isListViewOpened: boolean;
+};
+
+const setIsInserterOpenedAction = 'SET_IS_INSERTER_OPENED';
+const setIsListViewOpenedAction = 'SET_IS_LISTVIEW_OPENED';
+const initialSidebarState: SidebarState = {
+	isInserterOpened: false,
+	isListViewOpened: false,
+};
+function sidebarReducer(
+	state: SidebarState,
+	action: { type: string; value: boolean }
+): SidebarState {
+	switch ( action.type ) {
+		case setIsInserterOpenedAction: {
+			return {
+				...state,
+				isInserterOpened: action.value,
+				isListViewOpened: action.value ? false : state.isListViewOpened,
+			};
+		}
+		case setIsListViewOpenedAction: {
+			return {
+				...state,
+				isListViewOpened: action.value,
+				isInserterOpened: action.value ? false : state.isInserterOpened,
+			};
+		}
+	}
+	return state;
+}
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -104,8 +144,25 @@ export function IframeEditor( {
 		setTemporalBlocks( blocks );
 	}, [] ); // eslint-disable-line
 
-	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
-	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
+	const [ { isInserterOpened, isListViewOpened }, dispatch ] = useReducer(
+		sidebarReducer,
+		initialSidebarState
+	);
+
+	const setIsInserterOpened = useCallback( ( value: boolean ) => {
+		dispatch( {
+			type: setIsInserterOpenedAction,
+			value,
+		} );
+	}, [] );
+
+	const setIsListViewOpened = useCallback( ( value: boolean ) => {
+		dispatch( {
+			type: setIsListViewOpenedAction,
+			value,
+		} );
+	}, [] );
+
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
