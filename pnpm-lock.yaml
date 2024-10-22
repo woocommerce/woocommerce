@@ -5045,7 +5045,7 @@ importers:
         version: 7.6.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@woocommerce/admin-library':
         specifier: workspace:*
-        version: link:../../plugins/woocommerce-admin
+        version: link:../../plugins/woocommerce/client/admin
       '@woocommerce/block-library':
         specifier: workspace:*
         version: link:../../plugins/woocommerce-blocks
