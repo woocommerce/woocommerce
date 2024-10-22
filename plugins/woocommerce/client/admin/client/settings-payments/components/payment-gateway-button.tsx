@@ -25,7 +25,6 @@ export const PaymentGatewayButton = ( {
 
 	const toggleEnabled = async () => {
 		setIsLoading( true );
-		console.log( 'YOSH!', isLoading );
 
 		if ( ! window.woocommerce_admin.nonces?.gateway_toggle ) {
 			// eslint-disable-next-line no-console
