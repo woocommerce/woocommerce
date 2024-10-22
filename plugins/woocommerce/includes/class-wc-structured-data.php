@@ -251,6 +251,16 @@ class WC_Structured_Data {
 					);
 
 					if ( $product->is_on_sale() ) {
+						$children = array_map( 'wc_get_product', $product->get_children() );
+
+						foreach ( $children as $child ) {
+							$child_sale_price = $child->get_sale_price();
+
+							if ( (int) $child_sale_price === (int) $lowest && $child->get_date_on_sale_to() ) {
+								$sale_price_valid_until = gmdate( 'Y-m-d', $child->get_date_on_sale_to()->getTimestamp() );
+							}
+						}
+
 						$markup_offer['priceSpecification'] = array(
 							array(
 								'@type'                 => 'UnitPriceSpecification',
@@ -258,7 +268,7 @@ class WC_Structured_Data {
 								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
 								'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-								'validThrough'          => $price_valid_until,
+								'validThrough'          => ! empty( $sale_price_valid_until ) ? $sale_price_valid_until : $price_valid_until,
 							),
 						);
 					}
