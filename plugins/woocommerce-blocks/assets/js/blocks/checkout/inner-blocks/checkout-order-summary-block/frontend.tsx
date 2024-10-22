@@ -69,7 +69,12 @@ const FrontendBlock = ( {
 					cartTotals={ cartTotals }
 				>
 					<div
-						className="wc-block-components-checkout-order-summary__title"
+						className={ clsx(
+							'wc-block-components-checkout-order-summary__title',
+							{
+								'is-open': isOpen,
+							}
+						) }
 						{ ...orderSummaryProps }
 					>
 						<p
@@ -95,8 +100,7 @@ const FrontendBlock = ( {
 						className={ clsx(
 							'wc-block-components-checkout-order-summary__content',
 							{
-								'is-open':
-									isOpen || ( ! isSmall && ! isMobile ),
+								'is-open': isOpen,
 							}
 						) }
 						id={ ariaControlsId }

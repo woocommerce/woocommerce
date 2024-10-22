@@ -14,14 +14,6 @@
 			cursor: pointer;
 		}
 	}
-
-	.wc-block-components-checkout-order-summary__content {
-		display: none;
-
-		&.is-open {
-			display: block;
-		}
-	}
 }
 
 .is-small,
@@ -30,10 +22,31 @@
 		margin-top: 0;
 
 		.wc-block-components-checkout-order-summary__title {
+			padding: 20px 0;
 			cursor: pointer;
+			border-top: 1px solid $universal-border-light;
+			border-bottom: 1px solid $universal-border-light;
+
+			&.is-open {
+				padding-bottom: 0;
+				border-bottom: none;
+			}
 
 			.wc-block-components-checkout-order-summary__title-text {
 				margin: 0;
+			}
+		}
+
+		.wc-block-components-checkout-order-summary__content {
+			display: none;
+
+			&.is-open {
+				.wc-block-components-totals-wrapper:first-child {
+					border-top: none;
+				}
+
+				display: block;
+				margin-top: 20px;
 			}
 		}
 	}
