@@ -237,7 +237,7 @@ class WC_Structured_Data {
 								'priceType'             => 'https://schema.org/ListPrice',
 								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
-								'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+								'valueAddedTaxIncluded' => wc_prices_include_tax(),
 								'validThrough'          => $price_valid_until,
 							),
 						),
@@ -267,8 +267,8 @@ class WC_Structured_Data {
 								'priceType'             => 'https://schema.org/SalePrice',
 								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
-								'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-								'validThrough'          => ! empty( $sale_price_valid_until ) ? $sale_price_valid_until : $price_valid_until,
+								'valueAddedTaxIncluded' => wc_prices_include_tax(),
+								'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 							),
 						);
 					}
@@ -305,7 +305,7 @@ class WC_Structured_Data {
 							'priceType'             => 'https://schema.org/ListPrice',
 							'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+							'valueAddedTaxIncluded' => wc_prices_include_tax(),
 							'validThrough'          => $price_valid_until,
 						),
 					),
@@ -321,8 +321,8 @@ class WC_Structured_Data {
 						'priceType'             => 'https://schema.org/SalePrice',
 						'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-						'validThrough'          => ! empty( $sale_price_valid_until ) ? $sale_price_valid_until : $price_valid_until,
+						'valueAddedTaxIncluded' => wc_prices_include_tax(),
+						'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 					);
 				}
 			} else {
@@ -334,7 +334,7 @@ class WC_Structured_Data {
 							'priceType'             => 'https://schema.org/ListPrice',
 							'price'                 => wc_format_decimal( $product->get_regular_price(), wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+							'valueAddedTaxIncluded' => wc_prices_include_tax(),
 							'validThrough'          => $price_valid_until,
 						),
 					),
@@ -350,8 +350,8 @@ class WC_Structured_Data {
 						'priceType'             => 'https://schema.org/SalePrice',
 						'price'                 => wc_format_decimal( $product->get_sale_price(), wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-						'validThrough'          => ! empty( $sale_price_valid_until ) ? $sale_price_valid_until : $price_valid_until,
+						'valueAddedTaxIncluded' => wc_prices_include_tax(),
+						'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 					);
 				}
 			}
