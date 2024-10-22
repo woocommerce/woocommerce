@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import { useState, useMemo, useRef } from '@wordpress/element';
+import { useState, useRef } from '@wordpress/element';
 import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
 import { type ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
