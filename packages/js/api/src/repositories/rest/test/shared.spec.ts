@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient, HTTPResponse } from '../../../http';
 import { ModelTransformer, ModelRepositoryParams } from '../../../framework';
 import { DummyModel } from '../../../__test_data__/dummy-model';
@@ -22,7 +25,7 @@ type DummyModelParams = ModelRepositoryParams<
 >;
 
 class DummyChildModel extends Model {
-	public childName: string = '';
+	public childName = '';
 
 	public constructor( partial?: Partial< DummyModel > ) {
 		super();

@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
 import axios, { AxiosInstance } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+
+/**
+ * Internal dependencies
+ */
 import { AxiosURLToQueryInterceptor } from '../axios-url-to-query-interceptor';
 
 describe( 'AxiosURLToQueryInterceptor', () => {

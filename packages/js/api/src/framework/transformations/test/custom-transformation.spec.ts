@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { CustomTransformation } from '../custom-transformation';
 
 describe( 'CustomTransformation', () => {

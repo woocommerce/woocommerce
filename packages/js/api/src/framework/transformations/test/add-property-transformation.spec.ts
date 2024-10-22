@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { AddPropertyTransformation } from '../add-property-transformation';
 
 describe( 'AddPropertyTransformation', () => {

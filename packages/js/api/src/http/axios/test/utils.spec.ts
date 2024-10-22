@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { buildURL, buildURLWithParams } from '../utils';
 
 describe( 'buildURL', () => {

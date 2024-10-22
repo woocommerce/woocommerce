@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
 import axios, { AxiosInstance } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+
+/**
+ * Internal dependencies
+ */
 import { AxiosInterceptor } from '../axios-interceptor';
 
 class TestInterceptor extends AxiosInterceptor {}

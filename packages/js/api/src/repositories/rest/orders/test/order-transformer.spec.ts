@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	Order,
 	BillingOrderAddress,
@@ -10,7 +13,6 @@ import {
 	MetaData,
 	OrderRefundLine,
 } from '../../../../models';
-
 import {
 	createBillingAddressTransformer,
 	createOrderTransformer,

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { IgnorePropertyTransformation } from '../ignore-property-transformation';
 
 describe( 'IgnorePropertyTransformation', () => {

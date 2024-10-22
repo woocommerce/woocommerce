@@ -1,8 +1,15 @@
+/**
+ * External dependencies
+ */
+import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+
+/**
+ * Internal dependencies
+ */
 import { AxiosClient } from '../axios-client';
 import { HTTPResponse } from '../../http-client';
 import { AxiosInterceptor } from '../axios-interceptor';
-import axios from 'axios';
 
 class DummyInterceptor extends AxiosInterceptor {
 	public start = jest.fn();

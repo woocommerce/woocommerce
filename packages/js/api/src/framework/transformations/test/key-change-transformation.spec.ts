@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { KeyChangeTransformation } from '../key-change-transformation';
 import { DummyModel } from '../../../__test_data__/dummy-model';
 
