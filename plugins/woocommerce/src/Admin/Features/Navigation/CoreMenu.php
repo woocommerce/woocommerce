@@ -50,7 +50,9 @@ class CoreMenu {
 	 * @param array  $arguments The arguments passed to the deprecated method.
 	 */
     public function __call( $name, $arguments ) {
-		self::handle_deprecated_method_call( $name );
+		if ( in_array( $name, self::$names ) ) {    
+			self::handle_deprecated_method_call( $name );
+		}
     }
 
 	/**
@@ -60,6 +62,8 @@ class CoreMenu {
 	 * @param array  $arguments The arguments passed to the deprecated method.
 	 */
     public static function __callStatic( $name, $arguments ) {
-		self::handle_deprecated_method_call( $name );
+		if ( in_array( $name, self::$names ) ) {    
+			self::handle_deprecated_method_call( $name );
+		}
     }
 }
