@@ -135,12 +135,7 @@ class WC_Countries {
 	 * @return string|array Some countries have multiple. The code will be stripped of - and spaces and always be prefixed with +.
 	 */
 	public function get_country_calling_code( $cc ) {
-		$codes = wp_cache_get( 'calling-codes', 'countries' );
-
-		if ( ! $codes ) {
-			$codes = include WC()->plugin_path() . '/i18n/phone.php';
-			wp_cache_set( 'calling-codes', $codes, 'countries' );
-		}
+		$codes = include WC()->plugin_path() . '/i18n/phone.php';
 
 		$calling_code = isset( $codes[ $cc ] ) ? $codes[ $cc ] : '';
 
