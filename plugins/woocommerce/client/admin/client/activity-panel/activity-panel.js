@@ -314,7 +314,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			},
 			visible: isAddProductPage(),
 		};
-		console.log( 'setupTaskListHidden', setupTaskListHidden );
+
 		const setup = {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
