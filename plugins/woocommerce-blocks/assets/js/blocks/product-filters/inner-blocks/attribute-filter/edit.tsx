@@ -14,15 +14,11 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 	BlockContextProvider,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { BlockAttributes, createBlock } from '@wordpress/blocks';
-import { useLocalStorageState } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -37,31 +33,9 @@ import { EXCLUDED_BLOCKS } from '../../constants';
 import { FilterOptionItem } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
+import { useProductFilterClearButtonManager } from './use-product-filter-clear-button-manager';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-
-function findClientIdByName(
-	block: BlockAttributes,
-	targetName: string
-): string | undefined {
-	if ( block.name === targetName ) {
-		return block.clientId;
-	}
-
-	if ( block.innerBlocks && block.innerBlocks.length > 0 ) {
-		for ( const innerBlock of block.innerBlocks ) {
-			const blockId: string | undefined = findClientIdByName(
-				innerBlock,
-				targetName
-			);
-			if ( blockId ) {
-				return blockId;
-			}
-		}
-	}
-
-	return undefined;
-}
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes, clientId } = props;
@@ -84,39 +58,10 @@ const Edit = ( props: EditProps ) => {
 	>( [] );
 	const [ isOptionsLoading, setIsOptionsLoading ] =
 		useState< boolean >( true );
-	const [ previousClearButtonState, setPreviousClearButtonState ] =
-		useState< boolean >( clearButton );
-	const [
-		clearButtonParentBlockBeforeRemove,
-		setClearButtonParentBlockBeforeRemove,
-	] = useState( undefined );
-
-	const { clearButtonBlock, clearButtonParentBlock } = useSelect(
-		( select ) => {
-			const { getBlock, getBlockParents } = select( blockEditorStore );
-			const attributeFilterBlock = getBlock( clientId );
-			const clearButtonId = findClientIdByName(
-				attributeFilterBlock,
-				'woocommerce/product-filter-clear-button'
-			);
-			const clearButtonBlockInstance = clearButtonId
-				? getBlock( clearButtonId )
-				: undefined;
-			const clearButtonParentBlocks = getBlockParents(
-				clearButtonId,
-				true
-			);
-			const clearButtonParentBlockInstance =
-				clearButtonParentBlocks.length
-					? getBlock( clearButtonParentBlocks[ 0 ] )
-					: null;
-
-			return {
-				clearButtonBlock: clearButtonBlockInstance,
-				clearButtonParentBlock: clearButtonParentBlockInstance,
-			};
-		}
-	);
+	useProductFilterClearButtonManager( {
+		clientId,
+		showClearButton: clearButton,
+	} );
 
 	const { results: attributeTerms, isLoading: isTermsLoading } =
 		useCollection< AttributeTerm >( {
@@ -136,14 +81,6 @@ const Edit = ( props: EditProps ) => {
 			queryState: {},
 			isEditor: true,
 		} );
-	// @ts-expect-error @wordpress/data types are outdated.
-	const { insertBlock, removeBlock, updateBlockAttributes } =
-		useDispatch( blockEditorStore );
-	const [ clearButtonAttributes, setClearButtonAttributes ] =
-		useLocalStorageState< BlockAttributes >(
-			`woocommerce-block-clear-button-block-attributes-${ clientId }`,
-			{}
-		);
 
 	useEffect( () => {
 		if ( isTermsLoading || isFilterCountsLoading ) return;
@@ -198,34 +135,6 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 	] );
-
-	useEffect( () => {
-		if ( clearButton !== previousClearButtonState ) {
-			if ( clearButton === true && ! clearButtonBlock ) {
-				setClearButtonParentBlockBeforeRemove( undefined );
-				insertBlock(
-					createBlock(
-						'woocommerce/product-filter-clear-button',
-						clearButtonAttributes
-					),
-					1,
-					clearButtonParentBlockBeforeRemove?.clientId,
-					false
-				);
-			} else if (
-				clearButton === false &&
-				Boolean( clearButtonBlock?.clientId )
-			) {
-				setClearButtonParentBlockBeforeRemove( clearButtonParentBlock );
-				setClearButtonAttributes( clearButtonBlock?.attributes );
-				updateBlockAttributes( clearButtonBlock?.clientId, {
-					lock: { remove: false, move: false },
-				} );
-				removeBlock( clearButtonBlock?.clientId, false );
-			}
-		}
-		setPreviousClearButtonState( clearButton );
-	}, [ clearButton, previousClearButtonState, clearButtonBlock ] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
