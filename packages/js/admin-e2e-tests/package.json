@@ -29,7 +29,7 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:typescript": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -46,7 +46,7 @@
 	},
 	"dependencies": {
 		"@jest/globals": "^27.5.1",
-		"@types/jest": "^27.5.2",
+		"@types/jest": "27.5.x",
 		"@woocommerce/e2e-utils": "workspace:*",
 		"config": "3.3.7"
 	},
@@ -64,12 +64,12 @@
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
 		"jest-mock-extended": "^1.0.18",
 		"rimraf": "5.0.5",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
+		"ts-jest": "29.1.x",
+		"typescript": "5.3.x",
 		"wireit": "0.14.3"
 	},
 	"publishConfig": {
