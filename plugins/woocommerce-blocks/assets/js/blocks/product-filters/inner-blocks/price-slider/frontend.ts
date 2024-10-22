@@ -117,31 +117,48 @@ const _debounceUpdateRange = debounce(
 		context: PriceSliderContext
 	) => {
 		const isMin = event.target.classList.contains( 'min' );
+		const isMax = event.target.classList.contains( 'max' );
 		const targetValue = Number( event.target.value );
-		if (
-			isMin &&
-			targetValue &&
-			inRange( targetValue, context.minRange, context.maxRange ) &&
-			targetValue < context.maxPrice
-		) {
-			context.minPrice = targetValue;
+		if ( isMin ) {
+			if (
+				targetValue &&
+				inRange( targetValue, context.minRange, context.maxRange ) &&
+				targetValue < context.maxPrice
+			) {
+				context.minPrice = targetValue;
+			} else {
+				context.minPrice = context.minRange;
+			}
 			event.target.setAttribute(
 				'data-min-price',
 				context.minPrice.toString()
 			);
+			event.target.value = formatPrice(
+				context.minPrice,
+				getCurrency( { minorUnit: 0 } )
+			);
 		}
-		if (
-			! isMin &&
-			targetValue &&
-			inRange( targetValue, context.minRange, context.maxRange ) &&
-			targetValue > context.minPrice
-		) {
-			context.maxPrice = targetValue;
+
+		if ( isMax ) {
+			if (
+				targetValue &&
+				inRange( targetValue, context.minRange, context.maxRange ) &&
+				targetValue > context.minPrice
+			) {
+				context.maxPrice = targetValue;
+			} else {
+				context.maxPrice = context.maxRange;
+			}
 			event.target.setAttribute(
 				'data-max-price',
 				context.maxPrice.toString()
 			);
+			event.target.value = formatPrice(
+				context.maxPrice,
+				getCurrency( { minorUnit: 0 } )
+			);
 		}
+
 		event.target.dispatchEvent( new Event( 'change' ) );
 	},
 	1000
