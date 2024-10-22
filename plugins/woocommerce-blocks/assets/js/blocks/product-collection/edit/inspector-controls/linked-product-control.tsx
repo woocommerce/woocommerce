@@ -147,11 +147,15 @@ const LinkedProductControl = ( {
 	location: WooCommerceBlockLocation;
 	usesReference: string[] | undefined;
 } ) => {
-	const isProductLocation = location.type === 'product';
-	const isUsesReferenceIncludesProduct =
-		!! usesReference?.includes( 'product' );
-	const isCartLocation = location.type === 'cart';
-	const isUsesReferenceIncludesCart = !! usesReference?.includes( 'cart' );
+	const REFERENCE_TYPE_PRODUCT = 'product';
+	const isProductLocation = location.type === REFERENCE_TYPE_PRODUCT;
+	const isUsesReferenceIncludesProduct = !! usesReference?.includes(
+		REFERENCE_TYPE_PRODUCT
+	);
+	const REFERENCE_TYPE_CART = 'cart';
+	const isCartLocation = location.type === REFERENCE_TYPE_CART;
+	const isUsesReferenceIncludesCart =
+		!! usesReference?.includes( REFERENCE_TYPE_CART );
 	const { productReference } = query;
 
 	const { product, isLoading } = useGetProduct( productReference );
