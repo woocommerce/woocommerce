@@ -13,14 +13,10 @@
 		"typeRoots": []
 	},
 	"exclude": [
-		"bin",
-		"changelog",
 		"node_modules",
-		"vendor",
 		"**/stories",
 		"**/build",
 		"**/build-module",
-		"**/build-style",
 		"**/build-types",
 		"**/test/*",
 		"**/jest.config.js",
