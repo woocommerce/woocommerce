@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Updates last item in the breadcrumb list to a link with `aria-current` set to `page`
