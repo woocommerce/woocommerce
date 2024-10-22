@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Include product name as alt text for cart thumbnails in the `woocommerce_cart` shortcode and Classic Cart block.
+
