@@ -3,7 +3,10 @@
  */
 import { SVG, Path } from '@wordpress/primitives';
 import { Icon } from '@wordpress/icons';
-import type { InnerBlockTemplate } from '@wordpress/blocks';
+import type {
+	InnerBlockTemplate,
+	BlockVariationScope,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -51,7 +54,7 @@ const collection = {
 		'woocommerce'
 	),
 	keywords: [ 'specific', 'choose', 'recommend' ],
-	scope: [],
+	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
 const attributes = {
