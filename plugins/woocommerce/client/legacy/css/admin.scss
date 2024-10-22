@@ -8741,10 +8741,20 @@ table.bar_chart {
 		display: flex;
 		justify-content: space-between;
 		align-items: start;
+		white-space: nowrap;
+		gap: 24px;
 	}
 
 	.order-attribution-origin {
 		flex-grow: 1;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		&.expanded {
+			white-space: normal;
+			overflow-wrap: break-word;
+		}
 	}
 
 	.woocommerce-order-attribution-details-toggle {

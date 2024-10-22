@@ -12,11 +12,14 @@ jQuery( document ).ready( ( $ ) => {
 			const $this = $( e.target ).closest( '.woocommerce-order-attribution-details-toggle');
 			const $container = $this.closest( '.order-attribution-metabox' )
 											.find( '.woocommerce-order-attribution-details-container' );
+			const $origin_detail = $this.closest( '.order-attribution-metabox' )
+											.find( '.order-attribution-origin' );
 			let toggle = '';
 
 			e.preventDefault();
 
 			$container.fadeToggle( 250 );
+			$origin_detail.toggleClass('expanded');
 			$this.find( '.toggle-text' ).toggle();
 			if ( $container.hasClass( 'closed' ) ) {
 				$this.attr( 'aria-expanded', 'true' );
