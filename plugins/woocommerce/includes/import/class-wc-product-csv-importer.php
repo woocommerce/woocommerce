@@ -1150,7 +1150,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( $id_exists && ! $update_existing ) {
 				$data['skipped'][] = new WP_Error(
 					'woocommerce_product_importer_error',
-					$id . esc_html__( 'A product with this ID already exists.', 'woocommerce' ),
+					esc_html__( 'A product with this ID already exists.', 'woocommerce' ),
 					array(
 						'id'  => $id,
 						'row' => $this->get_row_id( $parsed_data ),
