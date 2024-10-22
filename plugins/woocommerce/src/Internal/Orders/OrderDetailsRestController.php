@@ -116,7 +116,7 @@ class OrderDetailsRestController extends RestApiControllerBase {
 
 		WC()->mailer()->customer_invoice( $order );
 
-		$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true );
+		$order->add_order_note( __( 'Order details sent to customer via REST API.', 'woocommerce' ), false, true );
 
 		/**
 		 * Fires after an order email has been resent.

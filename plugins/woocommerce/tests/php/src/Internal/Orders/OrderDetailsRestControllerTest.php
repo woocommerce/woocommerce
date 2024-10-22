@@ -54,7 +54,7 @@ class OrderDetailsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$this->assertCount( 1, $notes );
-		$this->assertEquals( 'Order details manually sent to customer.', $notes[0]->content );
+		$this->assertEquals( 'Order details sent to customer via REST API.', $notes[0]->content );
 	}
 
 	/**
