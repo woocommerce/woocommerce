@@ -12,6 +12,7 @@ import { WooPaymentMethodsLogos } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
+import { ADMIN_URL } from '~/utils/admin-settings';
 
 export const PaymentGateways = () => {
 	// Mock payment gateways for now.
@@ -127,7 +128,16 @@ export const PaymentGateways = () => {
 				) }
 			</>
 		),
-		after: <Gridicon icon="chevron-right" />,
+		after: (
+			<a
+				href={
+					ADMIN_URL +
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				}
+			>
+				<Gridicon icon="chevron-right" />
+			</a>
+		),
 		// todo change logo to appropriate one.
 		before: (
 			<img
