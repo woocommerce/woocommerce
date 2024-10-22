@@ -252,13 +252,13 @@ jobs:
             - name: Comment on PR about the failed cherry pick
               if: ${{ failure() }}
               run: |
-                  gh issue comment ${{ github.event.issue.html_url }} --body "Cherry picking failed for the frozen release: ${{ needs.prep.outputs.frozenRelease }}. Please do it manually. Workflow link for debugging: https://github.com/woocommerce/woocommerce/actions/workflows/new-prr-cherry-pick.yml"
+                  gh pr comment ${{ github.event.pull_request.html_url }} --body "Cherry picking failed for the frozen release: ${{ needs.prep.outputs.frozenRelease }}. Please do it manually. Workflow link for debugging: https://github.com/woocommerce/woocommerce/actions/workflows/new-prr-cherry-pick.yml"
               env:
                 GH_TOKEN: ${{ github.token }}
 
             - name: Comment on PR about the cherry picked PRs to be merged
               if: ${{ success() }}
               run: |
-                gh issue comment ${{ github.event.issue.html_url }} --body "Cherry picking was successful. Please merge the following PR: ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}"
+                gh pr comment ${{ github.event.pull_request.html_url }} --body "Cherry picking was successful. Please merge the following PR: ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}"
               env:
                 GH_TOKEN: ${{ github.token }}
