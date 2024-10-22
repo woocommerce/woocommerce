@@ -6,10 +6,19 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { BlockAttributes, createBlock } from '@wordpress/blocks';
 import { useEffect, useState } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import { getInnerBlockByName } from '../../utils';
+
 function findClientIdByName(
 	block: BlockAttributes,
 	targetName: string
 ): string | undefined {
+	if ( ! block ) {
+		return undefined;
+	}
+
 	if ( block.name === targetName ) {
 		return block.clientId;
 	}
@@ -38,15 +47,11 @@ export const useProductFilterClearButtonManager = ( {
 } ) => {
 	const [ previousShowClearButtonState, setPreviousShowClearButtonState ] =
 		useState< boolean >( showClearButton );
-	const [
-		clearButtonParentBlockBeforeRemove,
-		setClearButtonParentBlockBeforeRemove,
-	] = useState( undefined );
 	// @ts-expect-error @wordpress/data types are outdated.
 	const { insertBlock, removeBlock, updateBlockAttributes } =
 		useDispatch( blockEditorStore );
 
-	const { clearButtonBlock, clearButtonParentBlock } = useSelect(
+	const { filterBlock, clearButtonBlock, clearButtonParentBlock } = useSelect(
 		( select ) => {
 			const { getBlock, getBlockParents } = select( blockEditorStore );
 			const filterBlockInstance = getBlock( clientId );
@@ -81,25 +86,41 @@ export const useProductFilterClearButtonManager = ( {
 				clearButtonParentBlockId: clearButtonParentBlock?.clientId,
 			};
 		}
-		const filterblock = getBlock( clientId );
-		const clearButtonParentBlocks = getBlockParents( clientId, true );
+		const filterBlockHeader = getInnerBlockByName(
+			filterBlock,
+			'core/group'
+		);
+		const filterBlockHeading = findClientIdByName(
+			filterBlockHeader,
+			'core/heading'
+		);
+		if ( Boolean( filterBlockHeading ) ) {
+			return {
+				clearButtonBlockPosition: 1,
+				clearButtonParentBlockId: filterBlockHeader?.clientId,
+			};
+		}
+		return {
+			clearButtonBlockPosition: 0,
+			clearButtonParentBlockId: clientId,
+		};
 	}
 
 	useEffect( () => {
 		if ( showClearButton !== previousShowClearButtonState ) {
 			if ( showClearButton === true && ! clearButtonBlock ) {
-				setClearButtonParentBlockBeforeRemove( undefined );
+				const { clearButtonBlockPosition, clearButtonParentBlockId } =
+					findPositionToAddTheClearButtonBlock();
 				insertBlock(
 					createBlock( 'woocommerce/product-filter-clear-button' ),
-					1,
-					clearButtonParentBlockBeforeRemove?.clientId,
+					clearButtonBlockPosition,
+					clearButtonParentBlockId,
 					false
 				);
 			} else if (
 				showClearButton === false &&
 				Boolean( clearButtonBlock?.clientId )
 			) {
-				setClearButtonParentBlockBeforeRemove( clearButtonParentBlock );
 				updateBlockAttributes( clearButtonBlock?.clientId, {
 					lock: { remove: false, move: false },
 				} );
