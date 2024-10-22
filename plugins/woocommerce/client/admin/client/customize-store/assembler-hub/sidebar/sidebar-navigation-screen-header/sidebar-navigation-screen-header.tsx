@@ -40,6 +40,7 @@ const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
+	'woocommerce-blocks/header-distraction-free',
 ];
 export const SidebarNavigationScreenHeader = ( {
 	onNavigateBackClick,
