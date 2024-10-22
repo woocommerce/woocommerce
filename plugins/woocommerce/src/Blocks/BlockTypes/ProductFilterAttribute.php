@@ -174,13 +174,23 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
 		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
+		$hide_empty        = $block_attributes['hideEmpty'] ?? true;
 
-		$attribute_terms = get_terms(
-			array(
-				'taxonomy' => $product_attribute->slug,
-				'include'  => array_keys( $attribute_counts ),
-			)
-		);
+		if ( $hide_empty ) {
+			$attribute_terms = get_terms(
+				array(
+					'taxonomy' => $product_attribute->slug,
+					'include'  => array_keys( $attribute_counts ),
+				)
+			);
+		} else {
+			$attribute_terms = get_terms(
+				array(
+					'taxonomy'   => $product_attribute->slug,
+					'hide_empty' => false,
+				)
+			);
+		}
 
 		$selected_terms = array_filter(
 			explode(
@@ -207,19 +217,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 				$attribute_terms
 			);
 
-			$filtered_options = array_filter(
-				$attribute_options,
-				function ( $option ) use ( $block_attributes ) {
-					$hide_empty = $block_attributes['hideEmpty'] ?? true;
-					if ( $hide_empty ) {
-						return $option['rawData']['count'] > 0;
-					}
-					return true;
-				}
-			);
-
 			$filter_context = array(
-				'items'   => $filtered_options,
+				'items'   => $attribute_options,
 				'actions' => array(
 					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
 				),
