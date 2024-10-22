@@ -63,7 +63,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 			}
 			// ===============
 			// is it a variable assignment?
-			if ( preg_match( '/^\s*([a-z]\w*)\s*=\s*(.+)$/', $expr, $matches ) ) {
+			if ( preg_match( '/^\s*([a-z]\w*)\s*=\s*(.+)$/', strval( $expr ), $matches ) ) {
 				if ( in_array( $matches[1], self::$vb ) ) { // make sure we're not assigning to a constant
 					return self::trigger( "cannot assign to constant '$matches[1]'" );
 				}
@@ -74,7 +74,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				return self::$v[ $matches[1] ]; // and return the resulting value
 				// ===============
 				// is it a function assignment?
-			} elseif ( preg_match( '/^\s*([a-z]\w*)\s*\(\s*([a-z]\w*(?:\s*,\s*[a-z]\w*)*)\s*\)\s*=\s*(.+)$/', $expr, $matches ) ) {
+			} elseif ( preg_match( '/^\s*([a-z]\w*)\s*\(\s*([a-z]\w*(?:\s*,\s*[a-z]\w*)*)\s*\)\s*=\s*(.+)$/', strval( $expr ), $matches ) ) {
 				$fnn = $matches[1]; // get the function name
 				if ( in_array( $matches[1], self::$fb ) ) { // make sure it isn't built in
 					return self::trigger( "cannot redefine built-in function '$matches[1]()'" );
@@ -86,7 +86,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				$stack_size = count( $stack );
 				for ( $i = 0; $i < $stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[ $i ];
-					if ( preg_match( '/^[a-z]\w*$/', $token ) and ! in_array( $token, $args ) ) {
+					if ( preg_match( '/^[a-z]\w*$/', strval( $token ) ) and ! in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
 							$stack[ $i ] = self::$v[ $token ];
 						} else {
@@ -122,7 +122,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 
 			$expecting_op = false; // we use this in syntax-checking the expression
 			// and determining when a - is a negation
-			if ( preg_match( "/[^\w\s+*^\/()\.,-]/", $expr, $matches ) ) { // make sure the characters are all good
+			if ( preg_match( "/[^\w\s+*^\/()\.,-]/", strval( $expr ), $matches ) ) { // make sure the characters are all good
 				return self::trigger( "illegal character '{$matches[0]}'" );
 			}
 
@@ -159,7 +159,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 							$output[] = $o2;
 						}
 					}
-					if ( preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) { // did we just close a function?
+					if ( preg_match( "/^([A-Za-z]\w*)\($/", strval( $stack->last( 2 ) ), $matches ) ) { // did we just close a function?
 						$fnn = $matches[1]; // get the function name
 						$arg_count = $stack->pop(); // see how many arguments there were (cleverly stored on the stack, thank you)
 						$output[] = $stack->pop(); // pop the function and push onto the output
@@ -186,7 +186,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 						}
 					}
 					// make sure there was a function
-					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) {
+					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", strval( $stack->last( 2 ) ), $matches ) ) {
 						return self::trigger( "unexpected ','" );
 					}
 					$stack->push( $stack->pop() + 1 ); // increment the argument count
@@ -201,7 +201,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				} elseif ( $ex and ! $expecting_op ) { // do we now have a function/variable/number?
 					$expecting_op = true;
 					$val = $match[1];
-					if ( preg_match( "/^([A-Za-z]\w*)\($/", $val, $matches ) ) { // may be func, or variable w/ implicit multiplication against parentheses...
+					if ( preg_match( "/^([A-Za-z]\w*)\($/", strval( $val ), $matches ) ) { // may be func, or variable w/ implicit multiplication against parentheses...
 						if ( in_array( $matches[1], self::$fb ) or array_key_exists( $matches[1], self::$f ) ) { // it's a func
 							$stack->push( $val );
 							$stack->push( 1 );
@@ -290,7 +290,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				} elseif ( '_' === $token ) {
 					$stack->push( -1 * $stack->pop() );
 					// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
-				} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
+				} elseif ( ! preg_match( "/^([a-z]\w*)\($/", strval( $token ), $matches ) ) {
 					if ( is_numeric( $token ) ) {
 						$stack->push( $token );
 					} elseif ( array_key_exists( $token, self::$v ) ) {
