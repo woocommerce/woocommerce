@@ -20,8 +20,6 @@ import {
 } from './update-payment-methods';
 import { ResolveSelectFromMap } from '../mapped-types';
 
-// Please update from deprecated "registerStore" to "createReduxStore" when this PR is merged:
-// https://github.com/WordPress/gutenberg/pull/45513
 const store = createReduxStore( STORE_KEY, {
 	reducer,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
