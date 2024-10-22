@@ -22,6 +22,7 @@ import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { BlockAttributes, createBlock } from '@wordpress/blocks';
+import { useLocalStorageState } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -85,19 +86,37 @@ const Edit = ( props: EditProps ) => {
 		useState< boolean >( true );
 	const [ previousClearButtonState, setPreviousClearButtonState ] =
 		useState< boolean >( clearButton );
+	const [
+		clearButtonParentBlockBeforeRemove,
+		setClearButtonParentBlockBeforeRemove,
+	] = useState( undefined );
 
-	const { clearButtonBlockId } = useSelect( ( select ) => {
-		const { getBlock } = select( blockEditorStore );
-		const attributeFilterBlock = getBlock( clientId );
-		const clearButtonId = findClientIdByName(
-			attributeFilterBlock,
-			'woocommerce/product-filter-clear-button'
-		);
+	const { clearButtonBlock, clearButtonParentBlock } = useSelect(
+		( select ) => {
+			const { getBlock, getBlockParents } = select( blockEditorStore );
+			const attributeFilterBlock = getBlock( clientId );
+			const clearButtonId = findClientIdByName(
+				attributeFilterBlock,
+				'woocommerce/product-filter-clear-button'
+			);
+			const clearButtonBlockInstance = clearButtonId
+				? getBlock( clearButtonId )
+				: undefined;
+			const clearButtonParentBlocks = getBlockParents(
+				clearButtonId,
+				true
+			);
+			const clearButtonParentBlockInstance =
+				clearButtonParentBlocks.length
+					? getBlock( clearButtonParentBlocks[ 0 ] )
+					: null;
 
-		return {
-			clearButtonBlockId: clearButtonId,
-		};
-	} );
+			return {
+				clearButtonBlock: clearButtonBlockInstance,
+				clearButtonParentBlock: clearButtonParentBlockInstance,
+			};
+		}
+	);
 
 	const { results: attributeTerms, isLoading: isTermsLoading } =
 		useCollection< AttributeTerm >( {
@@ -120,6 +139,11 @@ const Edit = ( props: EditProps ) => {
 	// @ts-expect-error @wordpress/data types are outdated.
 	const { insertBlock, removeBlock, updateBlockAttributes } =
 		useDispatch( blockEditorStore );
+	const [ clearButtonAttributes, setClearButtonAttributes ] =
+		useLocalStorageState< BlockAttributes >(
+			`woocommerce-block-clear-button-block-attributes-${ clientId }`,
+			{}
+		);
 
 	useEffect( () => {
 		if ( isTermsLoading || isFilterCountsLoading ) return;
@@ -177,28 +201,31 @@ const Edit = ( props: EditProps ) => {
 
 	useEffect( () => {
 		if ( clearButton !== previousClearButtonState ) {
-			if ( clearButton ) {
+			if ( clearButton === true && ! clearButtonBlock ) {
+				setClearButtonParentBlockBeforeRemove( undefined );
 				insertBlock(
-					createBlock( 'woocommerce/product-filter-clear-button' ),
-					1
+					createBlock(
+						'woocommerce/product-filter-clear-button',
+						clearButtonAttributes
+					),
+					1,
+					clearButtonParentBlockBeforeRemove?.clientId,
+					false
 				);
 			} else if (
 				clearButton === false &&
-				Boolean( clearButtonBlockId )
+				Boolean( clearButtonBlock?.clientId )
 			) {
-				updateBlockAttributes( clearButtonBlockId, {
+				setClearButtonParentBlockBeforeRemove( clearButtonParentBlock );
+				setClearButtonAttributes( clearButtonBlock?.attributes );
+				updateBlockAttributes( clearButtonBlock?.clientId, {
 					lock: { remove: false, move: false },
 				} );
-				removeBlock( clearButtonBlockId );
+				removeBlock( clearButtonBlock?.clientId, false );
 			}
 		}
-	}, [
-		clearButton,
-		previousClearButtonState,
-		clearButtonBlockId,
-		insertBlock,
-		removeBlock,
-	] );
+		setPreviousClearButtonState( clearButton );
+	}, [ clearButton, previousClearButtonState, clearButtonBlock ] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
