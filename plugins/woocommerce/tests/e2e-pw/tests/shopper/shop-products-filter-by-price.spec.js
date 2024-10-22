@@ -22,6 +22,38 @@ const test = baseTest.extend( {
 	testPageTitlePrefix: 'Products filter',
 } );
 
+const chooseCollectionInPage = async ( admin, editor ) => {
+	const placeholderSelector = editor.canvas.locator(
+		'[data-type="woocommerce/product-collection"] .components-placeholder'
+	);
+
+	const chooseCollectionFromPlaceholder = async () => {
+		await placeholderSelector
+			.getByRole( 'button', { name: 'create your own', exact: true } )
+			.click();
+	};
+
+	const chooseCollectionFromDropdown = async () => {
+		await placeholderSelector
+			.getByRole( 'button', {
+				name: 'Choose collection',
+			} )
+			.click();
+
+		await admin.page
+			.locator(
+				'.wc-blocks-product-collection__collections-dropdown-content'
+			)
+			.getByRole( 'button', { name: 'create your own', exact: true } )
+			.click();
+	};
+
+	return await Promise.any( [
+		chooseCollectionFromPlaceholder(),
+		chooseCollectionFromDropdown(),
+	] );
+};
+
 test.describe(
 	'Filter items in the shop by product price',
 	{
@@ -71,6 +103,8 @@ test.describe(
 		} );
 
 		test( 'filter products by prices on the created page', async ( {
+			admin,
+			editor,
 			page,
 			testPage,
 		} ) => {
@@ -81,14 +115,8 @@ test.describe(
 			await insertBlockByShortcut( page, 'Filter by Price' );
 			const wordPressVersion = await getInstalledWordPressVersion();
 			await insertBlock( page, 'Product Collection', wordPressVersion );
-			// Choose default collection
-			await this.editor.canvas
-				.locator(
-					'[data-type="woocommerce/product-collection"] .components-placeholder'
-				)
-				.getByRole( 'button', { name: 'create your own', exact: true } )
-				.click();
-			await await publishPage( page, testPage.title );
+			await chooseCollectionInPage( admin, editor );
+			await publishPage( page, testPage.title );
 
 			// go to the page to test filtering products by price
 			await page.goto( testPage.slug );
