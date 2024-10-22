@@ -7,7 +7,7 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
 import type { Currency, CartResponseTotals } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useId, useState } from '@wordpress/element';
 import clsx from 'clsx';
 /**
  * Internal dependencies
@@ -42,6 +42,23 @@ const FrontendBlock = ( {
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	const ariaControlsId = useId();
+
+	const orderSummaryProps =
+		isSmall || isMobile
+			? {
+					role: 'button',
+					onClick: () => setIsOpen( ! isOpen ),
+					'aria-expanded': isOpen,
+					'aria-controls': ariaControlsId,
+					tabIndex: 0,
+					onKeyDown: ( event: React.KeyboardEvent ) => {
+						if ( event.key === 'Enter' || event.key === ' ' ) {
+							setIsOpen( ! isOpen );
+						}
+					},
+			  }
+			: {};
 
 	// Render once here and once in the fill. The fill can be slotted once elsewhere.
 	return (
@@ -51,7 +68,10 @@ const FrontendBlock = ( {
 					totalsCurrency={ totalsCurrency }
 					cartTotals={ cartTotals }
 				>
-					<div className="wc-block-components-checkout-order-summary__title">
+					<div
+						className="wc-block-components-checkout-order-summary__title"
+						{ ...orderSummaryProps }
+					>
 						<p
 							className="wc-block-components-checkout-order-summary__title-text"
 							role="heading"
@@ -64,17 +84,10 @@ const FrontendBlock = ( {
 									currency={ totalsCurrency }
 									value={ totalPrice }
 								/>
-								<div
-									role="button"
-									className="wc-block-components-checkout-order-summary__title-open-close"
-									onClick={ () => setIsOpen( ! isOpen ) }
-								>
-									<Icon
-										icon={
-											isOpen ? chevronUp : chevronDown
-										}
-									/>
-								</div>
+
+								<Icon
+									icon={ isOpen ? chevronUp : chevronDown }
+								/>
 							</>
 						) }
 					</div>
@@ -82,9 +95,11 @@ const FrontendBlock = ( {
 						className={ clsx(
 							'wc-block-components-checkout-order-summary__content',
 							{
-								'is-open': isOpen,
+								'is-open':
+									isOpen || ( ! isSmall && ! isMobile ),
 							}
 						) }
+						id={ ariaControlsId }
 					>
 						{ children }
 						<div className="wc-block-components-totals-wrapper">
