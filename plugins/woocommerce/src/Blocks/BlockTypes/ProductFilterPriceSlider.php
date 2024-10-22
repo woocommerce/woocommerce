@@ -46,8 +46,8 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
 		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
 
-		$show_input_fields = $attributes['showInputFields'] ?? false;
-		$inline_input      = $attributes['inlineInput'] ?? false;
+		$show_input_fields = isset( $attributes['showInputFields'] ) ? $attributes['showInputFields'] : false;
+		$inline_input      = isset( $attributes['inlineInput'] ) ? $attributes['inlineInput'] : false;
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
