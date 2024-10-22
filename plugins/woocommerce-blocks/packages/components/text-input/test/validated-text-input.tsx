@@ -117,6 +117,9 @@ describe( 'ValidatedTextInput', () => {
 			screen.queryByText( 'Error message in data store' )
 		).not.toBeInTheDocument();
 		await expect( customErrorMessageElement ).toBeInTheDocument();
+		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
+			'Custom error message'
+		);
 	} );
 	it( 'Displays an error message from the data store', async () => {
 		render(
@@ -138,6 +141,38 @@ describe( 'ValidatedTextInput', () => {
 		);
 		const errorMessageElement = await screen.getByText( 'Error message 3' );
 		await expect( errorMessageElement ).toBeInTheDocument();
+		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
+			'Error message 3'
+		);
+	} );
+	it( 'References the error message provided by its props', async () => {
+		render(
+			<>
+				<ValidatedTextInput
+					instanceId={ '2' }
+					onChange={ () => void 0 }
+					value={ 'Test' }
+					label={ 'Test Input' }
+					errorMessage={ 'Custom error message' }
+					aria-errormessage={ 'custom-error-message-container' }
+				/>
+				<p id={ 'custom-error-message-container' }>
+					Completely separate error message
+				</p>
+			</>
+		);
+		await act( () =>
+			dispatch( VALIDATION_STORE_KEY ).setValidationErrors( {
+				'textinput-2': {
+					message: 'Error message in data store',
+					hidden: false,
+				},
+			} )
+		);
+
+		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
+			'Completely separate error message'
+		);
 	} );
 	it( 'Runs custom validation on the input', async () => {
 		const user = userEvent.setup();

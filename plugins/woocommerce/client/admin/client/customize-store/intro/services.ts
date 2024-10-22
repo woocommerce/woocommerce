@@ -106,7 +106,7 @@ const fetchIsFontLibraryAvailable = async () => {
 const fetchIsPTKPatternsAPIAvailable = async () => {
 	try {
 		await apiFetch( {
-			path: '/wc-admin/patterns',
+			path: '/wc/private/patterns',
 			method: 'GET',
 		} );
 

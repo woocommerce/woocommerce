@@ -26,7 +26,14 @@ module.exports = {
 	],
 	refs: ( config, { configType } ) => {
 		if ( configType === 'DEVELOPMENT' ) {
-			return {};
+			// WooCommerce Blocks gets automatically on port 6006 run when you run pnpm --filter=@woocommerce/storybook watch:build
+			return {
+				'woocommerce-blocks': {
+					expanded: false,
+					title: 'WooCommerce Blocks',
+					url: 'http://localhost:6006',
+				},
+			};
 		}
 
 		let pathPrefix = (

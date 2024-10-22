@@ -11,13 +11,15 @@
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"scripts": {
-		"build-storybook": "pnpm build-woocommerce && pnpm build-woocommerce-blocks-storybook && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true storybook build -c ./.storybook",
-		"postbuild-storybook": "cp ../../plugins/woocommerce-blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
-		"build-woocommerce": "pnpm --filter=@woocommerce/plugin-woocommerce build",
-		"build-woocommerce-blocks-storybook": "pnpm --filter=@woocommerce/block-library storybook:build",
-		"preinstall": "npx only-allow pnpm",
-		"storybook": "pnpm build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true storybook dev -c ./.storybook -p 6007 --ci",
-		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook"
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:storybook$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:storybook": "wireit",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:storybook$/'",
+		"watch:build:project": "pnpm --if-present '/^watch:build:project:.*$/'",
+		"watch:build:project:storybook": "wireit",
+		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce-blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook",
+		"preinstall": "npx only-allow pnpm"
 	},
 	"engines": {
 		"node": "^20.11.1",
@@ -48,12 +50,67 @@
 		"@storybook/react": "7.6.19",
 		"@storybook/react-webpack5": "7.6.19",
 		"@storybook/theming": "7.6.19",
+		"@woocommerce/admin-library": "workspace:*",
+		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"react": "18.3.1",
-		"react-dom": "18.3.1",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"storybook": "7.6.19",
-		"typescript": "^5.3.3",
+		"typescript": "5.3.x",
 		"webpack": "^5.89.0",
 		"wireit": "0.14.3"
+	},
+	"wireit": {
+		"build:project:storybook": {
+			"command": "storybook build -c ./.storybook --quiet && pnpm run copy-blocks-storybook-iframe",
+			"env": {
+				"STORYBOOK": "true",
+				"BABEL_ENV": "storybook"
+			},
+			"clean": "if-file-deleted",
+			"files": [
+				".storybook/*.{js,jsx,ts,tsx,html}",
+				"import-wp-css-storybook.sh",
+				"../../packages/js/components/src/**/stories/*.story.@(js|tsx)",
+				"../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)",
+				"../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)",
+				"../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)",
+				"../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)"
+			],
+			"output": [
+				"storybook-static"
+			],
+			"dependencies": [
+				"import-wp-css-for-storybook",
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:storybook": {
+			"command": "storybook dev -c ./.storybook -p 6007 --ci",
+			"service": true,
+			"env": {
+				"STORYBOOK": "true",
+				"BABEL_ENV": "storybook"
+			},
+			"dependencies": [
+				"import-wp-css-for-storybook",
+				"dependencyOutputs"
+			]
+		},
+		"import-wp-css-for-storybook": {
+			"command": "./import-wp-css-storybook.sh",
+			"output": [
+				"wordpress"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"package.json"
+			]
+		}
 	}
 }
