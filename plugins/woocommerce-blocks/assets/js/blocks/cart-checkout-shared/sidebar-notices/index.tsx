@@ -34,13 +34,7 @@ const withSidebarNotices = createHigherOrderComponent(
 			isSelected: isBlockSelected,
 		} = props;
 
-		const {
-			isCart,
-			isCheckout,
-			isPaymentMethodsBlock,
-			hasPaymentMethods,
-			parentId,
-		} = useSelect( ( select ) => {
+		const { isCart, isCheckout, parentId } = useSelect( ( select ) => {
 			const { getBlockParentsByBlockName, getBlockName } =
 				select( blockEditorStore );
 
@@ -81,13 +75,6 @@ const withSidebarNotices = createHigherOrderComponent(
 					currentBlockName === targetParentBlock
 						? clientId
 						: parents[ targetParentBlock ],
-				isPaymentMethodsBlock:
-					currentBlockName === 'woocommerce/checkout-payment-block',
-				hasPaymentMethods:
-					select( PAYMENT_STORE_KEY ).paymentMethodsInitialized() &&
-					Object.keys(
-						select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods()
-					).length > 0,
 			};
 		} );
 
