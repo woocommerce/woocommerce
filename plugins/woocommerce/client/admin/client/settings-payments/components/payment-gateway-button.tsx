@@ -16,7 +16,7 @@ export const PaymentGatewayButton = ( {
 	settings_url,
 	text_settings = __( 'Manage', 'woocommerce' ),
 	text_enable = __( 'Enable', 'woocommerce' ),
-}: PaymentGateway & {
+}: Pick< PaymentGateway, 'id' | 'enabled' | 'settings_url' > & {
 	text_settings?: string;
 	text_enable?: string;
 } ) => {
