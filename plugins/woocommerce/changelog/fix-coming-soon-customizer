@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Do not load the Coming Soon block in the customize.php, widgets.php, theme.php and not gutenberg edit site page
