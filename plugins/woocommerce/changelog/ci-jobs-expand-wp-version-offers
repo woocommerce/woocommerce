@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add new ci jobs for e2e tests with pre-release WP version

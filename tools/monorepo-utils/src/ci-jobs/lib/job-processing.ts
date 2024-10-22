@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { Logger } from '../../core/logger';
 import {
 	CommandVarOptions,
 	JobType,
@@ -254,6 +255,23 @@ async function createTestJob(
 			envVars: await parseTestEnvConfig( config.testEnv.config ),
 			start: replaceCommandVars( config.testEnv.start, options ),
 		};
+	}
+
+	// Pre-release versions (beta, RC) are not always available, and we should not create the job if that's the case.
+	if (
+		[ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
+			config?.testEnv?.config?.wpVersion
+		) &&
+		! createdJob.testEnv.envVars.WP_VERSION
+	) {
+		Logger.warn(
+			`No WP offer was found for config.wpVersion:${ config.testEnv.config.wpVersion }. Job was not created.`
+		);
+		return null;
+	}
+
+	if ( createdJob.testEnv.envVars.WP_VERSION ) {
+		createdJob.name += ` [WP ${ createdJob.testEnv.envVars.WP_VERSION }]`;
 	}
 
 	return createdJob;

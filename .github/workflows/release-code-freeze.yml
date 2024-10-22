@@ -116,14 +116,6 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
 
-            - name: Generate changelog changes
-              id: changelog
-              if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
-              
-
     notify-slack:
         name: 'Sends code freeze notification to Slack'
         runs-on: ubuntu-20.04

@@ -189,9 +189,9 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 
 		$processor = new \WP_HTML_Tag_Processor(
 			$content .
-			'<div class="woocommerce-order-confirmation-create-account-form-wrapper">' .
+			'<div class="wc-block-order-confirmation-create-account-form-wrapper">' .
 				$notice .
-				'<div class="woocommerce-order-confirmation-create-account-form"></div>' .
+				'<div class="wc-block-order-confirmation-create-account-form"></div>' .
 			'</div>'
 		);
 
@@ -201,9 +201,9 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 
 		$processor->set_attribute( 'class', '' );
 		$processor->set_attribute( 'style', '' );
-		$processor->add_class( 'woocommerce-order-confirmation-create-account-content' );
+		$processor->add_class( 'wc-block-order-confirmation-create-account-content' );
 
-		if ( ! $processor->next_tag( array( 'class_name' => 'woocommerce-order-confirmation-create-account-form' ) ) ) {
+		if ( ! $processor->next_tag( array( 'class_name' => 'wc-block-order-confirmation-create-account-form' ) ) ) {
 			return $content;
 		}
 
@@ -223,7 +223,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return string
 	 */
 	protected function render_confirmation() {
-		$content  = '<div class="woocommerce-order-confirmation-create-account-success" id="create-account">';
+		$content  = '<div class="wc-block-order-confirmation-create-account-success" id="create-account">';
 		$content .= '<h3>' . esc_html__( 'Your account has been successfully created', 'woocommerce' ) . '</h3>';
 		$content .= '<p>' . sprintf(
 			/* translators: 1: link to my account page, 2: link to shipping and billing addresses, 3: link to account details, 4: closing tag */

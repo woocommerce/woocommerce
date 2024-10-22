@@ -126,18 +126,9 @@ export const getTouchedChangeloggerProjectsPathsMappedToProjects = (
 	touchedFiles: Array< string >,
 	changeloggerProjects: Array< string >
 ) => {
-	const mappedTouchedFiles = touchedFiles.map( ( touchedProject ) => {
-		if ( touchedProject.includes( 'plugins/woocommerce-admin' ) ) {
-			return touchedProject.replace(
-				'plugins/woocommerce-admin',
-				'plugins/woocommerce'
-			);
-		}
-		return touchedProject;
-	} );
 	const touchedProjectPathsRequiringChangelog = changeloggerProjects.filter(
 		( project ) => {
-			return mappedTouchedFiles.some( ( touchedProject ) =>
+			return touchedFiles.some( ( touchedProject ) =>
 				touchedProject.includes( project + '/' )
 			);
 		}

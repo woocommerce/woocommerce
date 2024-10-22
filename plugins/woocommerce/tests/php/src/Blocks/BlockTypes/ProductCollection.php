@@ -253,19 +253,6 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging order by popularity queries.
-	 */
-	public function test_merging_order_by_popularity_queries() {
-		$parsed_block                              = $this->get_base_parsed_block();
-		$parsed_block['attrs']['query']['orderBy'] = 'popularity';
-
-		$merged_query = $this->initialize_merged_query( $parsed_block );
-
-		$this->assertEquals( 'meta_value_num', $merged_query['orderby'] );
-		$this->assertEquals( 'total_sales', $merged_query['meta_key'] );
-	}
-
-	/**
 	 * Test product visibility query exist in merged query.
 	 */
 	public function test_product_visibility_query_exist_in_merged_query() {
@@ -1213,6 +1200,37 @@ class ProductCollection extends \WP_UnitTestCase {
 			'productCollectionQueryContext',
 			array(
 				'collection' => 'woocommerce/product-collection/upsells',
+			)
+		);
+		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
+	}
+
+	/**
+	 * Tests that the cross-sells collection handler works as expected.
+	 */
+	public function test_collection_cross_sells() {
+		$expected_product_ids = array( 2, 3, 4 );
+		$test_product         = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_cross_sell_ids( $expected_product_ids );
+		$test_product->save();
+
+		// Frontend.
+		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/cross-sells';
+		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
+		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
+
+		// Editor.
+		$request = $this->build_request(
+			array( 'productReference' => $test_product->get_id() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
 			)
 		);
 		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );

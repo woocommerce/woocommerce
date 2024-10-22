@@ -1,12 +1,16 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useState, createInterpolateElement } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
-import PasswordStrengthMeter from '@woocommerce/base-components/cart-checkout/password-strength-meter';
+import {
+	PasswordStrengthMeter,
+	getPasswordStrength,
+} from '@woocommerce/base-components/cart-checkout/password-strength-meter';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
-import { ValidatedTextInput } from '@woocommerce/blocks-components';
+import { ValidatedTextInput, Spinner } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { getSetting } from '@woocommerce/settings';
@@ -36,8 +40,6 @@ const PasswordField = ( {
 	password: string;
 	setPassword: ( password: string ) => void;
 } ) => {
-	const [ passwordStrength, setPasswordStrength ] = useState( 0 );
-
 	return (
 		<div>
 			<ValidatedTextInput
@@ -63,7 +65,7 @@ const PasswordField = ( {
 					}
 				} }
 				customValidation={ ( inputObject ) => {
-					if ( passwordStrength < 2 ) {
+					if ( getPasswordStrength( inputObject.value ) < 2 ) {
 						inputObject.setCustomValidity(
 							__(
 								'Please create a stronger password',
@@ -75,14 +77,7 @@ const PasswordField = ( {
 					return true;
 				} }
 				onChange={ ( value: string ) => setPassword( value ) }
-				feedback={
-					<PasswordStrengthMeter
-						password={ password }
-						onChange={ ( strength: number ) =>
-							setPasswordStrength( strength )
-						}
-					/>
-				}
+				feedback={ <PasswordStrengthMeter password={ password } /> }
 			/>
 		</div>
 	);
@@ -111,6 +106,10 @@ const Form = ( {
 		false
 	);
 	const needsPassword = ! registrationGeneratePassword && ! password;
+
+	if ( ! customerEmail ) {
+		return null;
+	}
 
 	return (
 		<form
@@ -144,14 +143,19 @@ const Form = ( {
 				</>
 			) }
 			<Button
-				className={
-					'wc-block-order-confirmation-create-account-button'
-				}
+				className={ clsx(
+					'wc-block-order-confirmation-create-account-button',
+					{
+						'is-loading': isLoading,
+					}
+				) }
 				type="submit"
 				disabled={ !! hasValidationError || needsPassword || isLoading }
-				showSpinner={ isLoading }
 			>
-				{ __( 'Create account', 'woocommerce' ) }
+				{ !! isLoading && <Spinner /> }
+				<span className="wc-block-order-confirmation-create-account-button-text">
+					{ __( 'Create account', 'woocommerce' ) }
+				</span>
 			</Button>
 			<input type="hidden" name="email" value={ customerEmail } />
 			<input type="hidden" name="password" value={ password } />

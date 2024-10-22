@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
+use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
 
 /**
  * WooCommercePayments Task
@@ -193,25 +194,39 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the store is in a WooPayments supported country.
+	 * Get the WooPayments payment gateway suggestion.
 	 *
-	 * @return bool
+	 * @return object|null The WooPayments suggestion, or null if none found.
+	 */
+	public static function get_suggestion() {
+		$suggestions       = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
+		$wcpay_suggestions = array_filter(
+			$suggestions,
+			function ( $suggestion ) {
+				if ( empty( $suggestion->plugins ) || ! is_array( $suggestion->plugins ) ) {
+					return false;
+				}
+
+				return in_array( 'woocommerce-payments', $suggestion->plugins, true );
+			}
+		);
+
+		if ( empty( $wcpay_suggestions ) ) {
+			return null;
+		}
+
+		return reset( $wcpay_suggestions );
+	}
+
+	/**
+	 * Check if the store location is in a WooPayments supported country.
+	 *
+	 * We infer this from the availability of a WooPayments payment gateways suggestion.
+	 *
+	 * @return bool True if the store location is in a WooPayments supported country, false otherwise.
 	 */
 	public static function is_supported() {
-		$suggestions              = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
-		$suggestion_plugins       = array_merge(
-			...array_filter(
-				array_column( $suggestions, 'plugins' ),
-				function ( $plugins ) {
-					return is_array( $plugins );
-				}
-			)
-		);
-		$woocommerce_payments_ids = array_search( 'woocommerce-payments', $suggestion_plugins, true );
-		if ( false !== $woocommerce_payments_ids ) {
-			return true;
-		}
-		return false;
+		return ! empty( self::get_suggestion() );
 	}
 
 	/**
@@ -247,5 +262,47 @@ class WooCommercePayments extends Task {
 		);
 
 		return ! empty( $enabled_gateways );
+	}
+
+	/**
+	 * The task action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		if ( self::is_supported() ) {
+			// If WooPayments is active, point to the WooPayments client surfaces/flows.
+			if ( self::is_wcpay_active() ) {
+				// Point to a WooPayments connect link to let the WooPayments client figure out the proper
+				// place to redirect the user to.
+				return add_query_arg(
+					array(
+						'wcpay-connect' => '1',
+						'from'          => 'WCADMIN_PAYMENT_TASK',
+						'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+					),
+					admin_url( 'admin.php' )
+				);
+			}
+
+			// Check if there is an active WooPayments incentive via the welcome page.
+			if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
+				// Point to the WooPayments welcome page.
+				return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
+			}
+
+			// WooPayments is not active.
+			// Trigger the WooPayments plugin installation and/or activation by pointing to the task suggestion URL.
+			return add_query_arg(
+				array(
+					'task' => $this->get_id(),
+					'id'   => self::get_suggestion()->id,
+				),
+				admin_url( 'admin.php?page=wc-admin' )
+			);
+		}
+
+		// Fall back to the WooPayments task page URL.
+		return add_query_arg( 'task', $this->get_id(), admin_url( 'admin.php?page=wc-admin' ) );
 	}
 }
