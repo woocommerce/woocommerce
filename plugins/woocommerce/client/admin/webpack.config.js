@@ -117,7 +117,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					/[\/\\](bin|build|config|docs|node_modules|test)[\/\\]/,
+					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
+					/[\/\\](changelog|bin|build|docs|test)[\/\\]/,
 				],
 				use: {
 					loader: 'babel-loader',
