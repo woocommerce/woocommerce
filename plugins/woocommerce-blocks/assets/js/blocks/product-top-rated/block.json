@@ -11,7 +11,8 @@
 			"wide",
 			"full"
 		],
-		"html": false
+		"html": false,
+		"inserter": false
 	},
 	"attributes": {
 		"columns": {
