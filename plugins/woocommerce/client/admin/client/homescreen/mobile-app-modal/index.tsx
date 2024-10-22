@@ -115,7 +115,20 @@ export const MobileAppModal = () => {
 		state,
 		isRetryingMagicLinkSend,
 		magicLinkRequestStatus,
+		completeAppInstallationStep,
 	] );
+
+	const clearQueryString = useCallback( () => {
+		// clear the search params that we use so that the URL is clean
+		updateQueryString(
+			{
+				jetpackState: undefined,
+				mobileAppModal: undefined,
+			},
+			undefined,
+			Object.fromEntries( searchParams.entries() )
+		);
+	}, [ searchParams ] );
 
 	return (
 		<>
@@ -125,21 +138,19 @@ export const MobileAppModal = () => {
 						updateOptions( {
 							woocommerce_admin_dismissed_mobile_app_modal: 'yes',
 						} );
-						// clear the search params that we use so that the URL is clean
-						updateQueryString(
-							{
-								jetpackState: undefined,
-								mobileAppModal: undefined,
-							},
-							undefined,
-							Object.fromEntries( searchParams.entries() )
-						);
+						clearQueryString();
 					} }
 					className={ 'woocommerce__mobile-app-welcome-modal' }
 					pages={ [
 						{
 							content: (
-								<ModalIllustrationLayout body={ pageContent } />
+								<ModalIllustrationLayout
+									body={ pageContent }
+									onDismiss={ () => {
+										clearQueryString();
+										setGuideIsOpen( false );
+									} }
+								/>
 							),
 						},
 					] }
