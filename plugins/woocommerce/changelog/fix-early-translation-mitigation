@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Support situations in which (WooCommerce) translations are inadvertently loaded too early.
