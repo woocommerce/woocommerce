@@ -9,6 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { CoreProfilerStateMachineContext } from '..';
 import {
+	IntroSkippedEvent,
 	UserProfileEvent,
 	BusinessInfoEvent,
 	PluginsLearnMoreLinkClickedEvent,
@@ -37,6 +38,16 @@ const recordTracksStepSkipped = ( _: unknown, params: { step: string } ) => {
 const recordTracksIntroCompleted = () => {
 	recordEvent( 'coreprofiler_step_complete', {
 		step: 'intro_opt_in',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordSkipGuidedSetup = ( { event }: { event: IntroSkippedEvent } ) => {
+	if ( ! event?.payload?.optInDataSharing ) {
+		return;
+	}
+
+	recordEvent( 'coreprofiler_skip_guided_setup', {
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
@@ -213,6 +224,7 @@ export default {
 	recordTracksStepViewed,
 	recordTracksStepSkipped,
 	recordTracksIntroCompleted,
+	recordSkipGuidedSetup,
 	recordTracksUserProfileCompleted,
 	recordTracksSkipBusinessLocationCompleted,
 	recordTracksBusinessInfoCompleted,
