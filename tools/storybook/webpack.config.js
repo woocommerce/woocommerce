@@ -20,6 +20,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'experimental',
+	'onboarding',
 ];
 
 module.exports = ( storybookConfig ) => {
@@ -104,7 +105,7 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve(
 						__dirname,
-						`../../plugins/woocommerce/assets/client/admin/app/*.css`
+						`../../plugins/woocommerce/client/admin/build/app/*.css`
 					),
 					to: `./app-css/[name][ext]`,
 				},
