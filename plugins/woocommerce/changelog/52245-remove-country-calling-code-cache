@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Stop caching country calling codes from i18n/phone.php
