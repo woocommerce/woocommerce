@@ -1,6 +1,6 @@
-@import 'settings-payments-main.scss';
+@import "settings-payments-main.scss";
 
 .settings-payments-offline__container {
 	// Temporarily copy styles while things are under construction.
-  @extend .settings-payments-main__container;
+	@extend .settings-payments-main__container;
 }
