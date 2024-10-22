@@ -991,7 +991,7 @@
           "menu_title": "Payment Token API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-token-api.md",
-          "hash": "441908f0678b9ff90f33adc3831ac75a5c49038a0b068dfc41456c232a851c7d",
+          "hash": "ee6753e946e6533dff62a26ece1911442080de12d449c4d5d28fe1e68adc72b7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-token-api.md",
           "id": "5f345b53875981703d4b80e8d04eae2daafe4c81"
         },
@@ -1805,5 +1805,5 @@
       "categories": []
     }
   ],
-  "hash": "c018c42bc44d2921bec1ad8bae379066e257f0c5bf3293657b927c8060e756c7"
+  "hash": "583abe2771051e73388042e0249906221f7fe0e5fd479c3a55dba9dede6944e3"
 }
