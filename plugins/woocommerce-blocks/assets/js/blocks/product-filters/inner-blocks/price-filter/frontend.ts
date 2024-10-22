@@ -49,25 +49,11 @@ store( 'woocommerce/product-filter-price', {
 			}
 
 			Object.assign( context, prices );
-		},
-		clearFilters: () => {
+
 			const productFiltersContext = getContext< ProductFiltersContext >(
 				'woocommerce/product-filters'
 			);
-			const updatedParams = productFiltersContext.params;
 
-			delete updatedParams.min_price;
-			delete updatedParams.max_price;
-
-			productFiltersContext.params = updatedParams;
-		},
-	},
-	callbacks: {
-		updatePriceContext: () => {
-			const context = getContext< PriceFilterContext >();
-			const productFiltersContext = getContext< ProductFiltersContext >(
-				'woocommerce/product-filters'
-			);
 			const validatedPrices: Record< string, string > = {};
 			const params = { ...productFiltersContext.params };
 
@@ -93,6 +79,17 @@ store( 'woocommerce/product-filter-price', {
 				...params,
 				...validatedPrices,
 			};
+		},
+		clearFilters: () => {
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			const updatedParams = productFiltersContext.params;
+
+			delete updatedParams.min_price;
+			delete updatedParams.max_price;
+
+			productFiltersContext.params = updatedParams;
 		},
 	},
 } );
