@@ -149,6 +149,7 @@ const webpackConfig = {
 					},
 				},
 			},
+			{ test: /\.md$/, use: 'raw-loader' },
 			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				type: 'asset',
