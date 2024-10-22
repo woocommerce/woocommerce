@@ -398,10 +398,10 @@ class WC_Meta_Box_Order_Data {
 						 * details. Example: Hide sensitive customer data for specific
 						 * types of WordPress users.
 						 *
-						 * @param boolean $is_billing_visible Is billing visible to users.
 						 * @since TBD
+						 *
+						 * @param boolean $is_billing_visible Is billing visible to users.
 						 */
-
 						$is_billing_visible = (bool) apply_filters( 'woocommerce_admin_order_data_display_billing_details', true );
 
 						if ( $is_billing_visible ):
@@ -541,10 +541,10 @@ class WC_Meta_Box_Order_Data {
 						 * details. Example: Hide sensitive customer data for specific
 						 * types of WordPress users.
 						 *
-						 * @param boolean $is_shipping_visible Is shipping visible to users.
 						 * @since TBD
+						 *
+						 * @param boolean $is_shipping_visible Is shipping visible to users.
 						 */
-
 						$is_shipping_visible = (bool) apply_filters( 'woocommerce_admin_order_data_display_shipping_details', true );
 
 						if ( $is_shipping_visible ):
