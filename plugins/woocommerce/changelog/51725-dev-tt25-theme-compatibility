@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Adjust styles for inputs and selects in cart and checkout to use ems to better support Twenty Twenty-Five theme.

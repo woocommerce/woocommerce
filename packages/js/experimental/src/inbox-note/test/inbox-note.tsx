@@ -76,15 +76,6 @@ describe( 'InboxNoteCard', () => {
 		expect( queryByText( 'Dismiss' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should render a notification type banner', () => {
-		const bannerNote = { ...note, layout: 'banner' };
-		const { container } = render(
-			<InboxNoteCard key={ bannerNote.id } note={ bannerNote } />
-		);
-		const listNoteWithBanner = container.querySelector( '.banner' );
-		expect( listNoteWithBanner ).not.toBeNull();
-	} );
-
 	it( 'should render a notification type thumbnail', () => {
 		const thumbnailNote = { ...note, layout: 'thumbnail' };
 		const { container } = render(

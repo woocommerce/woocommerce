@@ -11,6 +11,7 @@
 		self.$singleVariation     = $form.find( '.single_variation' );
 		self.$singleVariationWrap = $form.find( '.single_variation_wrap' );
 		self.$resetVariations     = $form.find( '.reset_variations' );
+		self.$resetAlert          = $form.find( '.reset_variations_alert' );
 		self.$product             = $form.closest( '.product' );
 		self.variationData        = $form.data( 'product_variations' );
 		self.useAjax              = false === self.variationData;
@@ -35,6 +36,9 @@
 		$form.on( 'show_variation', { variationForm: self }, self.onShow );
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: self }, self.onAddToCart );
 		$form.on( 'reset_data', { variationForm: self }, self.onResetDisplayedVariation );
+		$form.on( 'reset_focus', { variationForm: self }, self.onResetVariationFocus );
+		$form.on( 'announce_reset', { variationForm: self }, self.onAnnounceReset );
+		$form.on( 'clear_reset_announcement', { variationForm: self }, self.onClearResetAnnouncement );
 		$form.on( 'reset_image', { variationForm: self }, self.onResetImage );
 		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: self }, self.onChange );
 		$form.on( 'found_variation.wc-variation-form', { variationForm: self }, self.onFoundVariation );
@@ -55,7 +59,9 @@
 	VariationForm.prototype.onReset = function( event ) {
 		event.preventDefault();
 		event.data.variationForm.$attributeFields.val( '' ).trigger( 'change' );
+		event.data.variationForm.$form.trigger( 'announce_reset' );
 		event.data.variationForm.$form.trigger( 'reset_data' );
+		event.data.variationForm.$form.trigger( 'reset_focus' );
 	};
 
 	/**
@@ -150,6 +156,25 @@
 		form.$form.trigger( 'reset_image' );
 		form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 	};
+
+	/**
+	 * Announce reset to screen readers.
+	 */
+	VariationForm.prototype.onAnnounceReset = function( event ) {
+		event.data.variationForm.$resetAlert.text( wc_add_to_cart_variation_params.i18n_reset_alert_text );
+	}
+
+	/**
+	 * Focus variation reset
+	 */
+	VariationForm.prototype.onResetVariationFocus = function( event ) {
+		event.data.variationForm.$attributeFields[0].focus();
+	}
+
+	/** Clear reset announcement */
+	VariationForm.prototype.onClearResetAnnouncement = function( event ) {
+		event.data.variationForm.$resetAlert.text( '' );
+	}
 
 	/**
 	 * When the product image is reset.
@@ -315,6 +340,7 @@
 		var form = event.data.variationForm;
 
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).trigger( 'change' );
+		form.$form.trigger( 'clear_reset_announcement' );
 		form.$form.find( '.wc-no-matching-variations' ).parent().remove();
 
 		if ( form.useAjax ) {
@@ -544,15 +570,18 @@
 	};
 
 	/**
-	 * Show or hide the reset link.
+	 * Show or hide the reset button.
 	 */
 	VariationForm.prototype.toggleResetLink = function( on ) {
+		this.$resetAlert.text( '' );
 		if ( on ) {
 			if ( this.$resetVariations.css( 'visibility' ) === 'hidden' ) {
 				this.$resetVariations.css( 'visibility', 'visible' ).hide().fadeIn();
+				this.$resetVariations.css( 'display', 'inline-block' );
 			}
 		} else {
 			this.$resetVariations.css( 'visibility', 'hidden' );
+			this.$resetVariations.css( 'display', 'none' );
 		}
 	};
 

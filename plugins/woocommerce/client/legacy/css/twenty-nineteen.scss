@@ -425,10 +425,7 @@ table.variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger
 }
 
 .woocommerce-tabs {
@@ -1370,5 +1367,18 @@ form.checkout_coupon {
 
 	.input-text.has-error:focus {
 		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+ .woocommerce-checkout {
+	form .form-row.woocommerce-invalid input.input-text {
+		border-color: var(--wc-red);
+	}
+
+	.checkout-inline-error-message {
+		@include checkout-inline-error-message();
 	}
 }

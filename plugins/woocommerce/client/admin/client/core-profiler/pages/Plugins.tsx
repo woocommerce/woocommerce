@@ -62,6 +62,10 @@ export const Plugins = ( {
 	);
 
 	const setSelectedPlugin = ( plugin: Extension ) => {
+		// Don't allow selecting a plugin that is already activated.
+		if ( plugin.is_activated ) {
+			return;
+		}
 		setSelectedPlugins(
 			selectedPlugins.some( ( item ) => item.key === plugin.key )
 				? selectedPlugins.filter( ( item ) => item.key !== plugin.key )

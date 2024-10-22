@@ -7,6 +7,8 @@ import { __ } from '@wordpress/i18n';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
+import { isSiteEditorPage } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -43,6 +45,11 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		} );
 	}, [ setAttributes, isDescendentOfSingleProductBlock ] );
 
+	const isSiteEditor = useSelect(
+		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
+		[]
+	);
+
 	return (
 		<>
 			<Settings
@@ -62,6 +69,21 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 								<>
 									<div className="quantity">
 										<input
+											style={
+												// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
+												! isSiteEditor
+													? {
+															backgroundColor:
+																'#ffffff',
+															lineHeight:
+																'normal',
+															minHeight: 'unset',
+															boxSizing: 'unset',
+															borderRadius:
+																'unset',
+													  }
+													: {}
+											}
 											type={ 'number' }
 											value={ '1' }
 											className={ 'input-text qty text' }
@@ -69,7 +91,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 										/>
 									</div>
 									<button
-										className={ `single_add_to_cart_button button alt wp-element-button` }
+										className={ `single_add_to_cart_button alt wp-element-button` }
 									>
 										{ __( 'Add to cart', 'woocommerce' ) }
 									</button>
@@ -83,6 +105,21 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 											-
 										</button>
 										<input
+											style={
+												// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
+												! isSiteEditor
+													? {
+															backgroundColor:
+																'#ffffff',
+															lineHeight:
+																'normal',
+															minHeight: 'unset',
+															boxSizing: 'unset',
+															borderRadius:
+																'unset',
+													  }
+													: {}
+											}
 											type={ 'number' }
 											value={ '1' }
 											className={ 'input-text qty text' }
@@ -93,7 +130,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 										</button>
 									</div>
 									<button
-										className={ `single_add_to_cart_button button alt wp-element-button` }
+										className={ `single_add_to_cart_button alt wp-element-button` }
 									>
 										{ __( 'Add to cart', 'woocommerce' ) }
 									</button>
