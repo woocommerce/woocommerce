@@ -149,13 +149,12 @@ const LinkedProductControl = ( {
 } ) => {
 	const REFERENCE_TYPE_PRODUCT = 'product';
 	const isProductLocation = location.type === REFERENCE_TYPE_PRODUCT;
-	const isUsesReferenceIncludesProduct = !! usesReference?.includes(
+	const hasProductReference = !! usesReference?.includes(
 		REFERENCE_TYPE_PRODUCT
 	);
 	const REFERENCE_TYPE_CART = 'cart';
 	const isCartLocation = location.type === REFERENCE_TYPE_CART;
-	const isUsesReferenceIncludesCart =
-		!! usesReference?.includes( REFERENCE_TYPE_CART );
+	const hasCartReference = !! usesReference?.includes( REFERENCE_TYPE_CART );
 	const { productReference } = query;
 
 	const { product, isLoading } = useGetProduct( productReference );
@@ -170,8 +169,8 @@ const LinkedProductControl = ( {
 	const prevReference = useRef< number | undefined >( undefined );
 
 	const showRadioControl =
-		( isProductLocation && isUsesReferenceIncludesProduct ) ||
-		( isCartLocation && isUsesReferenceIncludesCart );
+		( isProductLocation && hasProductReference ) ||
+		( isCartLocation && hasCartReference );
 	const showSpecificProductSelector = showRadioControl
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
@@ -182,7 +181,7 @@ const LinkedProductControl = ( {
 		 * Linked control is only useful for collection which uses product, cart or order reference.
 		 * TODO Add handling for Order reference
 		 */
-		( isUsesReferenceIncludesProduct || isUsesReferenceIncludesCart );
+		( hasProductReference || hasCartReference );
 	if ( ! showLinkedProductControl ) return null;
 
 	const radioControlHelp =
@@ -216,7 +215,7 @@ const LinkedProductControl = ( {
 
 	const fromCurrentProductRadioLabel = getFromCurrentProductRadioLabel(
 		location.type,
-		isUsesReferenceIncludesCart
+		hasCartReference
 	);
 
 	return (
