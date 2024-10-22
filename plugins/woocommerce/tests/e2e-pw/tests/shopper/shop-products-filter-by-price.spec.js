@@ -80,8 +80,15 @@ test.describe(
 			await fillPageTitle( page, testPage.title );
 			await insertBlockByShortcut( page, 'Filter by Price' );
 			const wordPressVersion = await getInstalledWordPressVersion();
-			await insertBlock( page, 'All Products', wordPressVersion );
-			await publishPage( page, testPage.title );
+			await insertBlock( page, 'Product Collection', wordPressVersion );
+			// Choose default collection
+			await this.editor.canvas
+				.locator(
+					'[data-type="woocommerce/product-collection"] .components-placeholder'
+				)
+				.getByRole( 'button', { name: 'create your own', exact: true } )
+				.click();
+			await await publishPage( page, testPage.title );
 
 			// go to the page to test filtering products by price
 			await page.goto( testPage.slug );
