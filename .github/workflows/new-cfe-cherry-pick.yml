@@ -213,3 +213,17 @@ jobs:
                       Please merge the following PR :pr: into trunk:
 
                       ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
+
+            - name: Comment on PR about the failed cherry pick
+              if: ${{ failure() }}
+              run: |
+                  gh pr comment ${{ github.event.pull_request.html_url }} --body "Cherry picking failed for the trunk. Please do it manually. Or debug, what happened and run the workflow again. Workflow link for debugging: https://github.com/woocommerce/woocommerce/actions/workflows/new-prr-cherry-pick.yml"
+              env:
+                GH_TOKEN: ${{ github.token }}
+
+            - name: Comment on PR about the cherry picked PRs to be merged
+              if: ${{ success() }}
+              run: |
+                gh pr comment ${{ github.event.pull_request.html_url }} --body "Cherry picking was successful for trunk. Please merge the following PR: ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}"
+              env:
+                GH_TOKEN: ${{ github.token }}
