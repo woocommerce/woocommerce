@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Update cache control header to 60s for coming soon pages
