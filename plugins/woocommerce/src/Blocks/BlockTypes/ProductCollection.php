@@ -2188,7 +2188,7 @@ class ProductCollection extends AbstractBlock {
 			return $product_references;
 		}
 
-		$order              = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 		if ( $order ) {
 			$product_references = array_filter(
 				array_map(
