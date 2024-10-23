@@ -85,13 +85,13 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
-	 * Add classes to the Add to Cart form input.
+	 * Add classes to the Add to Cart form input needed for the stepper style.
 	 *
 	 * @param string $product The Add to Cart form HTML.
 	 *
 	 * @return string The Add to Cart form HTML with classes added.
 	 */
-	private function add_classes_to_add_to_cart_form_input( $product ) {
+	private function add_stepper_classes_to_add_to_cart_form_input( $product ) {
 		$html = new \WP_HTML_Tag_Processor( $product );
 
 		// Add classes to the form.
@@ -163,7 +163,7 @@ class AddToCartForm extends AbstractBlock {
 			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 		}
 
-		$product            = $is_stepper_style ? $this->add_classes_to_add_to_cart_form_input( $product, $attributes ) : $product;
+		$product            = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product ) : $product;
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';
