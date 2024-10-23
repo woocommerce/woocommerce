@@ -3,7 +3,7 @@
  */
 import { Button, Card, CardBody } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
-import { plugins } from '@wordpress/icons';
+import { plugins, external } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
@@ -23,10 +23,12 @@ export const OrderAttributionInstallBanner = ( {
 	bannerImage = <OrderAttributionInstallBannerImage />,
 	eventContext = 'analytics-overview',
 	isHeaderBanner = false,
+	isSmallBanner = false,
 	showBadge = true,
 	dismissable = true,
 	title = 'Discover what drives your sales',
 	description = 'Understand what truly drives revenue with our powerful order attribution extension. Use it to track your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
+	buttonText = 'Try it now',
 } ) => {
 	const { isDismissed, dismiss, shouldShowBanner } =
 		useOrderAttributionInstallBanner();
@@ -81,16 +83,29 @@ export const OrderAttributionInstallBanner = ( {
 		description = sprintf( __( '%s ', 'woocommerce' ), description );
 	}
 
+	// translators: %s: The dynamic button text.
+	buttonText = sprintf( __( '%s ', 'woocommerce' ), buttonText );
+
 	return (
 		<Card
 			size="medium"
-			className="woocommerce-order-attribution-install-banner"
+			className={ `woocommerce-order-attribution-install-banner ${
+				isSmallBanner ? 'small' : ''
+			}` }
 		>
-			<CardBody className="woocommerce-order-attribution-install-banner__body">
+			<CardBody
+				className={ `woocommerce-order-attribution-install-banner__body ${
+					isSmallBanner ? 'small' : ''
+				}` }
+			>
 				<div className="woocommerce-order-attribution-install-banner__image_container">
 					{ bannerImage }
 				</div>
-				<div className="woocommerce-order-attribution-install-banner__text_container">
+				<div
+					className={ `woocommerce-order-attribution-install-banner__text_container ${
+						isSmallBanner ? 'small' : ''
+					}` }
+				>
 					{ showBadge && (
 						<div className="woocommerce-order-attribution-install-banner__text-badge">
 							<Text
@@ -123,11 +138,15 @@ export const OrderAttributionInstallBanner = ( {
 					) }
 					<div>
 						<Button
+							className={ isSmallBanner ? 'small' : '' }
 							href={ WC_ANALYTICS_PRODUCT_URL }
-							variant="primary"
+							variant={ isSmallBanner ? 'secondary' : 'primary' }
 							onClick={ onButtonClick }
+							icon={ isSmallBanner ? external : null }
+							iconPosition={ isSmallBanner ? 'right' : null }
+							target="_blank"
 						>
-							{ __( 'Try it now', 'woocommerce' ) }
+							{ buttonText }
 						</Button>
 						{ dismissable && (
 							<Button

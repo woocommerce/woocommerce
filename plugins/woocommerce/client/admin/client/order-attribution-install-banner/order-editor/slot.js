@@ -40,11 +40,14 @@ const OrderAttributionInstallBannerSlotFill = () => {
 	return (
 		<Fill>
 			<OrderAttributionInstallBanner
+				eventContext="order-editor-order-attribution-metabox"
 				bannerImage={ null }
 				showBadge={ false }
 				dismissable={ false }
+				isSmallBanner
 				title={ null }
 				description="View all of your orders in our new Order Attribution extension."
+				buttonText="Install the extension"
 			/>
 		</Fill>
 	);
