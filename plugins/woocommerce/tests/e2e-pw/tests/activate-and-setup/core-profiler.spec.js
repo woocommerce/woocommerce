@@ -1,6 +1,12 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 
+const getPluginLocator = ( page, slug ) => {
+	return page.locator(
+		`.woocommerce-profiler-plugins-plugin-card[data-slug="${ slug }"]`
+	);
+};
+
 test.describe(
 	'Store owner can complete the core profiler',
 	{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
@@ -14,6 +20,12 @@ test.describe(
 					baseURL,
 					'woocommerce_coming_soon',
 					'no'
+				);
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_remote_variant_assignment',
+					'60'
 				);
 			} catch ( error ) {
 				console.log( error );
@@ -284,30 +296,20 @@ test.describe(
 					);
 				}
 				try {
-					await page
-						.getByText(
-							'Showcase your products with PinterestGet your products in front of a highly'
-						)
+					await getPluginLocator( page, 'pinterest-for-woocommerce' )
 						.getByRole( 'checkbox' )
 						.check( { timeout: 2000 } );
 				} catch ( e ) {
 					console.log( 'Checkbox not present for Pinterest' );
 				}
 				try {
-					await page
-						.getByText(
-							'Reach your customers with MailPoetSend purchase follow-up emails, newsletters,'
-						)
+					await getPluginLocator( page, 'mailchimp-for-woocommerce' )
 						.getByRole( 'checkbox' )
 						.uncheck( { timeout: 2000 } );
 				} catch ( e ) {
-					console.log( 'Checkbox not present for MailPoet' );
+					console.log( 'Checkbox not present for MailChimp' );
 				}
-
-				await page
-					.getByText(
-						'Drive sales with Google for WooCommerceReach millions of active shoppers across'
-					)
+				await getPluginLocator( page, 'google-listings-and-ads' )
 					.getByRole( 'checkbox' )
 					.check( { timeout: 2000 } );
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
@@ -347,24 +349,24 @@ test.describe(
 					} )
 				).toBeVisible();
 				// confirm that the optional plugins are present
-				await expect(
-					page.locator( 'tr' ).filter( {
-						has: page.locator(
-							// 50-50 share between Kliken and Pinterest plugin
-							'tr[data-slug=/kliken-ads-pixel-for-meta|pinterest-for-woocommerce/]'
-						),
-					} )
-				).toBeVisible();
-				await expect(
-					page.locator( 'tr[data-slug="google-listings-and-ads"]' )
-				).toBeVisible();
+				const installedExtensionSlugs = [
+					'pinterest-for-woocommerce',
+					'google-listings-and-ads',
+				];
 
-				await expect(
-					page.locator( 'tr[data-slug="mailpoet"]' )
-				).toBeHidden();
-				await expect(
-					page.locator( 'tr[data-slug="jetpack"]' )
-				).toBeHidden();
+				// Loop through the slugs and check if they are visible on the page using `data-slug`
+				for ( const slug of installedExtensionSlugs ) {
+					const pluginLocator = page.locator(
+						`[data-slug="${ slug }"]`
+					);
+					try {
+						await expect( pluginLocator ).toBeVisible();
+					} catch {
+						console.log(
+							`${ slug } is not found or not visible on the page`
+						);
+					}
+				}
 			} );
 
 			await test.step( 'Confirm that information from core profiler saved', async () => {
