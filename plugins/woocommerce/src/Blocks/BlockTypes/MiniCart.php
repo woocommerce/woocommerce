@@ -338,32 +338,7 @@ class MiniCart extends AbstractBlock {
 			'wordpress'   => get_bloginfo( 'version' ),
 		);
 
-		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
-			$this->scripts_to_lazy_load = json_decode( $cache['data'], true ) ?? array();
-			foreach ( $this->scripts_to_lazy_load as $script_handle => $script ) {
-				// Load the before and after script data which includes
-				// data such as nonces that should not be cached.
-				$this->append_script_before_and_after( $script_handle );
-			}
-		}
-	}
-
-	/**
-	 * Load the frontend dependencies cache when the cart is empty.
-	 */
-	protected function load_empty_frontend_dependencies_cache() {
-		if ( wp_is_development_mode( 'plugin' ) ) {
-			return null;
-		}
-
-		$cache = get_site_transient( 'woocommerce_mini_cart_empty_frontend_dependencies' );
-
-		$current_version = array(
-			'woocommerce' => WOOCOMMERCE_VERSION,
-			'wordpress'   => get_bloginfo( 'version' ),
-		);
-
-		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version && is_string( $cache['data'] ) ) {
 			$this->scripts_to_lazy_load = json_decode( $cache['data'], true ) ?? array();
 			foreach ( $this->scripts_to_lazy_load as $script_handle => $script ) {
 				// Load the before and after script data which includes
@@ -471,15 +446,9 @@ class MiniCart extends AbstractBlock {
 	 * @param string $script_handle Script handle.
 	 */
 	protected function append_script_before_and_after( $script_handle ) {
-		$wp_scripts = wp_scripts();
-
-		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
-			$script_before = $wp_scripts->get_inline_script_data( $script_handle, 'before' );
-			$script_after  = $wp_scripts->get_inline_script_data( $script_handle, 'after' );
-		} else {
-			$script_before = $wp_scripts->print_inline_script( $script_handle, 'before', false );
-			$script_after  = $wp_scripts->print_inline_script( $script_handle, 'after', false );
-		}
+		$wp_scripts    = wp_scripts();
+		$script_before = $wp_scripts->get_inline_script_data( $script_handle, 'before' );
+		$script_after  = $wp_scripts->get_inline_script_data( $script_handle, 'after' );
 
 		$this->scripts_to_lazy_load[ $script_handle ]['before'] = $script_before;
 		$this->scripts_to_lazy_load[ $script_handle ]['after']  = $script_after;
