@@ -38,6 +38,16 @@ jobs:
               process.exit(1);
             }
 
+      - name: Validate version input override
+        if: ${{ github.event.inputs.version != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!/^\d+\.\d+$/.test(${{ github.event.inputs.version }})) {
+              core.setFailed('Invalid version format. The version must be in the format X.Y');
+              process.exit(1);
+            }
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
