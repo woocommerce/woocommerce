@@ -28,12 +28,13 @@ function getUrl( filters: Array< string | null > ) {
 }
 
 /**
- * Get the rating filters from the context
+ * Get the rating list (an array of strings)
+ * from the product filters context.
  *
  * @param {ProductFiltersContext} context The context
  * @return {Array} The rating filters
  */
-function getRatingFilters( context: ProductFiltersContext ) {
+function getRatingFilters( context: ProductFiltersContext ): Array< string > {
 	if ( ! context.params[ filterRatingKey ] ) {
 		return [];
 	}
@@ -81,6 +82,19 @@ store( 'woocommerce/product-filter-rating', {
 			const filters = items.map( ( i ) => i.value );
 
 			navigate( getUrl( filters ) );
+		},
+
+		clearFilters: () => {
+			const context = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			const updatedParams = context.params;
+
+			delete updatedParams[ filterRatingKey ];
+
+			context.params = {
+				...updatedParams,
+			};
 		},
 	},
 } );
