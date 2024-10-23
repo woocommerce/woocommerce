@@ -146,6 +146,8 @@ jQuery( function ( $ ) {
 			},
 		} );
 	} );
+
+	$( document ).on( 'updated_wc_div country_to_state_changed', init_wc_float_labels );
 });
 
 /**
@@ -194,9 +196,54 @@ function refresh_sorted_by_live_region () {
 	}
 }
 
+function init_wc_float_labels () {
+	var inputs_with_wc_float_label = document.querySelectorAll( '.input-with-wc-float-label' );
+
+	function get_label_from_input_id( input_id ) {
+		return document.querySelector( 'label[for="' + input_id + '"]' );
+	}
+
+	inputs_with_wc_float_label.forEach( function( input ) {
+		var label = get_label_from_input_id( input.id );
+
+		if ( label ) {
+			var fake_placeholder = label.parentElement.querySelector( '[class*="placeholder"]' );
+			
+			if ( input.value !== '' || fake_placeholder ) {
+				label.classList.add( 'is-active' );
+			} else {
+				label.classList.remove( 'is-active' );
+			}
+		}
+		
+		input.addEventListener( 'focus', function() {
+			var label = get_label_from_input_id( input.id );
+
+			if ( ! label || label.classList.contains( 'is-active' ) ) {
+				return;
+			}
+
+			label.classList.add( 'is-active' );
+		} );
+
+		input.addEventListener( 'blur', function() {
+			var label = get_label_from_input_id( input.id );
+
+			if ( ! label ) {
+				return;
+			}
+
+			if ( input.value === '' ) {
+				label.classList.remove( 'is-active' );
+			}
+		} );
+	} );
+}
+
 function on_document_ready() {
 	focus_populate_live_region();
 	refresh_sorted_by_live_region();
+	init_wc_float_labels();
 }
 
 document.addEventListener( 'DOMContentLoaded' , on_document_ready );
