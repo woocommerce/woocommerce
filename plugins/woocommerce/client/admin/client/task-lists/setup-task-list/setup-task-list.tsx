@@ -67,6 +67,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 		hideTaskList,
 		visitedTask,
 		keepCompletedTaskList: keepCompletedTasks,
+		invalidateResolutionForStoreSelector,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
@@ -182,13 +183,13 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 	};
 
 	// @todo This would be better as a task endpoint that handles updating the count.
-	const updateTrackStartedCount = ( taskId: string ) => {
+	const updateTrackStartedCount = async ( taskId: string ) => {
 		const newCount = getTaskStartedCount( taskId ) + 1;
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
 		visitedTask( taskId );
-		userPreferences.updateUserPreferences( {
+		await userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
 				[ taskId ]: newCount,
@@ -196,7 +197,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 		} );
 	};
 
-	const trackClick = ( task: TaskType ) => {
+	const trackClick = async ( task: TaskType ) => {
 		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
 			context: layoutString,
@@ -205,13 +206,20 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 					task.additionalData.wooPaymentsIncentiveId,
 			} ),
 		} );
+
+		if ( ! task.isComplete ) {
+			await updateTrackStartedCount( task.id );
+		}
 	};
 
 	const goToTask = ( task: TaskType ) => {
-		trackClick( task );
-		if ( ! task.isComplete ) {
-			updateTrackStartedCount( task.id );
-		}
+		trackClick( task ).then( () => {
+			if ( ! isComplete ) {
+				// Invalidate the task list selector cache to force a re-fetch.
+				// This ensures the task completion status is up-to-date after visiting a task.
+				invalidateResolutionForStoreSelector( 'getTaskLists' );
+			}
+		} );
 
 		if ( task.actionUrl ) {
 			navigateTo( {
@@ -265,14 +273,10 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 				{ cesHeader ? (
 					<TaskListCompletedHeader
 						hideTasks={ hideTasks }
-						keepTasks={ keepTasks }
 						customerEffortScore={ true }
 					/>
 				) : (
-					<TaskListCompleted
-						hideTasks={ hideTasks }
-						keepTasks={ keepTasks }
-					/>
+					<TaskListCompleted hideTasks={ hideTasks } />
 				) }
 			</>
 		);
