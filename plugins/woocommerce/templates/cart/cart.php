@@ -74,8 +74,6 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 						<td class="product-thumbnail">
 						<?php
-						$thumbnail = $_product->get_image( 'woocommerce_thumbnail', array( 'alt' => esc_attr( $product_name ) ) );
-
 						/**
 						 * Filter the product thumbnail displayed in the WooCommerce cart.
 						 *
@@ -89,7 +87,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 						 *
 						 * @since 2.1.0
 						 */
-						$thumbnail = apply_filters( 'woocommerce_cart_item_thumbnail', $thumbnail, $cart_item, $cart_item_key );
+						$thumbnail = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
 
 						if ( ! $product_permalink ) {
 							echo $thumbnail; // PHPCS: XSS ok.
