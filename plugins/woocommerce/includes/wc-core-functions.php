@@ -1320,7 +1320,7 @@ function wc_get_customer_geolocation( $fallback = array(
 	$ua = wc_get_user_agent();
 
 	// Exclude common bots from geolocation by user agent.
-	if ( stristr( $ua, 'bot' ) || stristr( $ua, 'spider' ) || stristr( $ua, 'crawl' ) ) {
+	if ( stripos( $ua, 'bot' ) !== false || stripos( $ua, 'spider' ) !== false || stripos( $ua, 'crawl' ) !== false ) {
 		return $fallback;
 	}
 
