@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the URL for the transitional page is correct whenever accessing it for the very first time after completing the CYS flow
