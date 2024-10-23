@@ -169,10 +169,10 @@ class AddToCartForm extends AbstractBlock {
 			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 		}
 
-		$product = $this->add_classes_to_add_to_cart_form_input( $product, $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$product            = $this->add_classes_to_add_to_cart_form_input( $product, $attributes );
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
+		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$classes = implode(
 			' ',
