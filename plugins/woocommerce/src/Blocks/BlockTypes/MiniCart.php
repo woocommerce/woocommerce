@@ -367,7 +367,7 @@ class MiniCart extends AbstractBlock {
 		if ( isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice'] ) {
 			return;
 		}
-		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
+		$price_color = $attributes['priceColor']['color'] ?? '';
 
 		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . ' "></span>' . $this->get_include_tax_label_markup( $attributes );
 	}
@@ -383,7 +383,7 @@ class MiniCart extends AbstractBlock {
 		if ( empty( $this->tax_label ) ) {
 			return '';
 		}
-		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
+		$price_color = $attributes['priceColor']['color'] ?? '';
 
 		return '<small class="wc-block-mini-cart__tax-label" style="color:' . esc_attr( $price_color ) . ' " hidden>' . esc_html( $this->tax_label ) . '</small>';
 	}
@@ -418,14 +418,14 @@ class MiniCart extends AbstractBlock {
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 		$wrapper_styles  = $classes_styles['styles'];
 
-		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$icon_color          = $attributes['iconColor']['color'] ?? 'currentcolor';
+		$product_count_color = $attributes['productCountColor']['color'] ?? '';
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$button_html = $this->get_cart_price_markup( $attributes ) . '
 		<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
-			<span class="wc-block-mini-cart__badge" style="background:' . $product_count_color . '"></span>
+			<span class="wc-block-mini-cart__badge" style="background:' . esc_attr( $product_count_color ) . '"></span>
 		</span>';
 
 		if ( is_cart() || is_checkout() ) {
