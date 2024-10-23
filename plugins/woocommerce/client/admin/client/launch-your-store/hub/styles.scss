@@ -66,7 +66,7 @@
 						z-index: 2;
 					}
 
-					.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
+					.woocommerce-cys--layout__view-mode-toggle-icon {
 						align-items: center;
 						display: flex;
 					}
@@ -89,9 +89,9 @@
 					}
 
 					.woocommerce-cys-site-hub__view-mode-toggle-container {
-						.edit-site-layout__view-mode-toggle,
-						.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon,
-						.edit-site-site-icon__icon {
+						.woocommerce-cys--layout__view-mode-toggle,
+						.woocommerce-cys--layout__view-mode-toggle-icon,
+						.woocommerce-cys-site-icon__icon {
 							width: 32px;
 							height: 32px;
 							fill: #ccc;

@@ -99,7 +99,7 @@ export const SiteHub = forwardRef(
 										className="woocommerce-cys-wordpress-header-logo"
 									/>
 								) : (
-									<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+									<SiteIcon className="woocommerce-cys--layout__view-mode-toggle-icon" />
 								) }
 							</Link>
 						</div>
