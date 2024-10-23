@@ -130,6 +130,7 @@ export type ProductCollectionEditComponentProps =
 		context: {
 			templateSlug: string;
 		};
+		tracksLocation: string;
 	};
 
 export type ProductCollectionContentProps =
