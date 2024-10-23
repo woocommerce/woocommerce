@@ -21,6 +21,35 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Get version from the branch name workflow is running on
+        if: ${{ github.event.inputs.version == '' }}
+        uses: actions/github-script@v7
+        id: extract-version
+        with:
+          script: |
+            const refName = process.env.GITHUB_REF_NAME;
+            const versionMatch = refName.match(/^release\/(\d+\.\d+)$/);
+            if (versionMatch) {
+              const version = versionMatch[1];
+              console.log(`Extracted version: ${version}`);
+              core.setOutput('version', version);
+            } else {
+              core.setFailed(`Branch name ${refName} does not match the expected pattern 'release/x.y'`);
+              process.exit(1);
+            }
+
+      - name: Validate version input override
+        if: ${{ github.event.inputs.version != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ github.event.inputs.version }}';
+            if (!/^\d+\.\d+$/.test(version)) {
+              core.setFailed('Invalid version format. The version must be in the format X.Y');
+              core.info(`Version you entered: ${version}`);
+              process.exit(1);
+            }
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -43,13 +72,8 @@ jobs:
             pnpm build
         working-directory: tools/monorepo-utils
 
-      - name: 'Get the  versions for the accelerated and monthly releases'
-        id: get-versions
-        if: ${{ github.event.inputs.version == '' }}
-        run: pnpm utils code-freeze get-version
-
       - name: Generate changelog changes and create PR
         id: changelog
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ github.event.inputs.version || steps.get-versions.outputs.monthlyVersionXY }}
+        run: pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ github.event.inputs.version || steps.extract-version.outputs.version }}
