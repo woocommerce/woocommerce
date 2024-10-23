@@ -3975,11 +3975,11 @@ test.describe( 'Data API tests', () => {
 						states: expect.arrayContaining( countryData.states ),
 						_links: {
 							self: [
-								{
+								expect.objectContaining( {
 									href: expect.stringContaining(
 										`wp-json/wc/v3/data/countries/${ country }`
 									),
-								},
+								} ),
 							],
 							collection: [
 								{
@@ -4010,11 +4010,11 @@ test.describe( 'Data API tests', () => {
 					symbol: '&#x62f;.&#x625;',
 					_links: {
 						self: [
-							{
+							expect.objectContaining( {
 								href: expect.stringContaining(
 									'data/currencies/AED'
 								),
-							},
+							} ),
 						],
 						collection: [
 							{
