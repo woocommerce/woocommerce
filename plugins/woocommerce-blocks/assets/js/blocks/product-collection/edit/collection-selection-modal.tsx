@@ -21,20 +21,20 @@ const PatternSelectionModal = ( props: {
 	closePatternSelectionModal: () => void;
 } ) => {
 	const { clientId, attributes, tracksLocation } = props;
+	const { collection } = attributes;
 	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceBlock } = useDispatch( blockEditorStore );
 
-	const [ chosenCollection, selectCollectionName ] = useState(
-		attributes.collection
-	);
+	const [ chosenCollection, selectCollectionName ] = useState( collection );
 
 	const onContinueClick = () => {
 		if ( chosenCollection ) {
 			recordEvent(
 				'blocks_product_collection_collection_replaced_from_placeholder',
 				{
-					collection: chosenCollection,
+					from: collection,
+					to: chosenCollection,
 					location: tracksLocation,
 				}
 			);
