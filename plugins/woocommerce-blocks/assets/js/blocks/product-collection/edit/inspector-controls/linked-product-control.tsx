@@ -133,6 +133,10 @@ const getFromCurrentProductRadioLabel = (
 		return __( 'From products in the cart', 'woocommerce' );
 	}
 
+	if ( currentLocation === 'order' ) {
+		return __( 'From products in the order', 'woocommerce' );
+	}
+
 	return __( 'From the current product', 'woocommerce' );
 };
 
@@ -155,13 +159,19 @@ const LinkedProductControl = ( {
 	const REFERENCE_TYPE_CART = 'cart';
 	const isCartLocation = location.type === REFERENCE_TYPE_CART;
 	const hasCartReference = !! usesReference?.includes( REFERENCE_TYPE_CART );
+
+	const REFERENCE_TYPE_ORDER = 'order';
+	const isOrderLocation = location.type === REFERENCE_TYPE_ORDER;
+	const hasOrderReference =
+		!! usesReference?.includes( REFERENCE_TYPE_ORDER );
+
 	const { productReference } = query;
 
 	const { product, isLoading } = useGetProduct( productReference );
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
 	const [ radioControlState, setRadioControlState ] =
 		useState< PRODUCT_REFERENCE_TYPE >(
-			( isProductLocation || isCartLocation ) &&
+			( isProductLocation || isCartLocation || isOrderLocation ) &&
 				isEmpty( productReference )
 				? PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
 				: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
@@ -170,7 +180,8 @@ const LinkedProductControl = ( {
 
 	const showRadioControl =
 		( isProductLocation && hasProductReference ) ||
-		( isCartLocation && hasCartReference );
+		( isCartLocation && hasCartReference ) ||
+		( isOrderLocation && hasOrderReference );
 	const showSpecificProductSelector = showRadioControl
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
@@ -179,9 +190,8 @@ const LinkedProductControl = ( {
 		( showRadioControl || showSpecificProductSelector ) &&
 		/**
 		 * Linked control is only useful for collection which uses product, cart or order reference.
-		 * TODO Add handling for Order reference
 		 */
-		( hasProductReference || hasCartReference );
+		( hasProductReference || hasCartReference || hasOrderReference );
 	if ( ! showLinkedProductControl ) return null;
 
 	const radioControlHelp =
