@@ -29,12 +29,12 @@ function SiteIcon( { className }: SiteIconProps ) {
 	}, [] );
 
 	if ( isRequestingSite && ! siteIconUrl ) {
-		return <div className="edit-site-site-icon__image" />;
+		return <div className="woocommerce-cys-site-icon__image" />;
 	}
 
 	const icon = siteIconUrl ? (
 		<img
-			className="edit-site-site-icon__image"
+			className="woocommerce-cys-site-icon__image"
 			alt={ __( 'Site Icon', 'woocommerce' ) }
 			src={ siteIconUrl }
 		/>

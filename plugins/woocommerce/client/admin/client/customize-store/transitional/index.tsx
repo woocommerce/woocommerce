@@ -78,7 +78,7 @@ export const Transitional = ( {
 					view: { x: 0 },
 				} }
 				isTransparent={ false }
-				className="edit-site-layout__hub"
+				className="woocommerce-cys-layout__hub"
 			/>
 			<div className="woocommerce-customize-store__transitional-content">
 				<h1 className="woocommerce-customize-store__transitional-heading">

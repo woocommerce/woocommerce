@@ -154,7 +154,7 @@ test.describe(
 			} );
 
 			await expect(
-				page.locator( '.edit-site-site-hub__site-title' )
+				page.locator( '.woocommerce-cys-site-hub__site-title' )
 			).toBeVisible();
 
 			await shareFeedbackButton.click();

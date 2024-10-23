@@ -167,7 +167,7 @@ export const Layout = () => {
 										view: { x: 0 },
 									} }
 									isTransparent={ false }
-									className="edit-site-layout__hub"
+									className="woocommerce-cys-layout__hub"
 								/>
 							</motion.div>
 

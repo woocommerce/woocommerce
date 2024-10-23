@@ -4,22 +4,22 @@
 	width: 100vw;
 	height: 100vh;
 
-	.edit-site-site-hub.edit-site-layout__hub {
+	.woocommerce-cys-site-hub.woocommerce-cys-layout__hub {
 		height: 64px;
 		padding: 16px;
 		gap: 12px;
 		width: 100%;
 		position: initial;
 
-		.edit-site-site-hub__view-mode-toggle-container,
-		.edit-site-site-icon__image,
+		.woocommerce-cys-site-hub__view-mode-toggle-container,
+		.woocommerce-cys-site-icon__image,
 		svg {
 			height: 32px;
 			width: 32px;
 			background: transparent;
 		}
 
-		.edit-site-site-hub__site-title {
+		.woocommerce-cys-site-hub__site-title {
 			margin-left: 12px;
 			color: $gray-900;
 			font-size: 13px;

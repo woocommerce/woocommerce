@@ -10,7 +10,7 @@
 
 .woocommerce-customize-store-header,
 .edit-site-layout__header-container {
-	.edit-site-site-hub__view-mode-toggle-container a {
+	.woocommerce-cys-site-hub__view-mode-toggle-container a {
 		color: unset;
 	}
 }
@@ -42,12 +42,12 @@ body.woocommerce-assembler {
 	}
 
 	/* Sidebar Header */
-	.edit-site-layout__hub {
+	.woocommerce-cys-layout__hub {
 		width: 380px;
 		height: 64px;
 	}
 
-	.edit-site-site-hub__view-mode-toggle-container {
+	.woocommerce-cys-site-hub__view-mode-toggle-container {
 		height: 64px;
 	}
 
@@ -65,7 +65,7 @@ body.woocommerce-assembler {
 	}
 
 	.edit-site-sidebar-navigation-screen__title-icon,
-	.edit-site-site-hub__view-mode-toggle-container,
+	.woocommerce-cys-site-hub__view-mode-toggle-container,
 	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
 		background-color: #f5f5f5;
 	}
@@ -76,7 +76,7 @@ body.woocommerce-assembler {
 		color: $gray-900;
 	}
 
-	.edit-site-site-hub__site-title {
+	.woocommerce-cys-site-hub__site-title {
 		color: $gray-900;
 		font-size: 0.8125rem;
 		font-style: normal;
@@ -85,11 +85,11 @@ body.woocommerce-assembler {
 		margin: 0;
 	}
 
-	.edit-site-site-icon__image {
+	.woocommerce-cys-site-icon__image {
 		border-radius: 2px;
 	}
 
-	.edit-site-site-hub__view-mode-toggle-container {
+	.woocommerce-cys-site-hub__view-mode-toggle-container {
 		.edit-site-layout__view-mode-toggle,
 		.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon,
 		.edit-site-site-icon__icon {
@@ -567,7 +567,7 @@ body.woocommerce-assembler {
 .woocommerce-customize-store__step-assemblerHub,
 .woocommerce-customize-store__step-transitionalScreen {
 	.edit-site-layout {
-		.edit-site-site-hub__view-mode-toggle-container {
+		.woocommerce-cys-site-hub__view-mode-toggle-container {
 			padding: 16px 12px 0 16px;
 		}
 	}
@@ -578,12 +578,12 @@ body.woocommerce-assembler {
 		background-color: #fff;
 	}
 
-	.edit-site-site-hub__view-mode-toggle-container {
+	.woocommerce-cys-site-hub__view-mode-toggle-container {
 		height: 32px;
 	}
 
 	.edit-site-layout {
-		.edit-site-site-hub__view-mode-toggle-container {
+		.woocommerce-cys-site-hub__view-mode-toggle-container {
 			padding-left: 16px;
 		}
 	}
