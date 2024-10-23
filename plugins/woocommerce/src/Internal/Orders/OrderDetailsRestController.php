@@ -107,22 +107,16 @@ class OrderDetailsRestController extends RestApiControllerBase {
 			return new WP_Error( 'invalid_order', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		/**
-		 * Fires before an order email is resent.
-		 *
-		 * @since 1.0.0
-		 */
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/** This action is documented in includes/admin/meta-boxes/class-wc-meta-box-order-actions.php */
 		do_action( 'woocommerce_before_resend_order_emails', $order, 'customer_invoice' );
 
 		WC()->mailer()->customer_invoice( $order );
 
 		$order->add_order_note( __( 'Order details sent to customer via REST API.', 'woocommerce' ), false, true );
 
-		/**
-		 * Fires after an order email has been resent.
-		 *
-		 * @since 1.0.0
-		 */
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/** This action is documented in includes/admin/meta-boxes/class-wc-meta-box-order-actions.php */
 		do_action( 'woocommerce_after_resend_order_email', $order, 'customer_invoice' );
 
 		return array(
