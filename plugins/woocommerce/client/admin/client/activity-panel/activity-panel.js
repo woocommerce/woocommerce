@@ -180,7 +180,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const setupList = activeSetupList && getTaskList( activeSetupList );
 
-		const isSetupTaskListHidden = setupList?.isHidden ?? false;
+		const isSetupTaskListHidden = setupList ? setupList.isHidden : true; // If setupList is null, it means the setup task list is disabled.
 		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
