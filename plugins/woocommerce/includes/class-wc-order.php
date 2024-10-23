@@ -1796,7 +1796,7 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
-		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
+		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this, $on_checkout );
 	}
 
 	/**

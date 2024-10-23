@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Pass on_checkout param to `woocommerce_get_checkout_payment_url` filter for better extensibility.
