@@ -27,19 +27,4 @@
 			position: sticky;
 		}
 	}
-
-	.wp-block-woocommerce-checkout-order-summary-block {
-		border: 1px solid $universal-border-light;
-		border-radius: 5px;
-
-		.wc-block-components-totals-wrapper:first-of-type {
-			border-top: 0;
-		}
-	}
-
-	&.has-dark-controls {
-		.wp-block-woocommerce-checkout-order-summary-block {
-			border-color: $input-border-dark;
-		}
-	}
 }
