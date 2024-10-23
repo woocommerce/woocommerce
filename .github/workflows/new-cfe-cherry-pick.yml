@@ -1,0 +1,214 @@
+name: New CFE workflow - Cherry pick
+on:
+    pull_request:
+        types: [closed]
+    workflow_dispatch:
+        inputs:
+            skipSlackPing:
+                description: 'Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)'
+                type: boolean
+                required: false
+                default: false
+
+env:
+    GIT_COMMITTER_NAME: 'WooCommerce Bot'
+    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
+    GIT_AUTHOR_NAME: 'WooCommerce Bot'
+    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+
+permissions: {}
+
+jobs:
+    verify:
+        name: Verify
+        runs-on: ubuntu-20.04
+        outputs:
+            run: ${{ steps.check.outputs.run }}
+            base_ref: ${{ steps.fetch_pr_details.outputs.base_ref }}
+        steps:
+            - name: Fetch Pull Request Details
+              if: github.event.pull_request
+              id: fetch_pr_details
+              uses: actions/github-script@v7
+              with:
+                script: |
+                  const pullRequestUrl = context.payload.pull_request.url;
+                  const prDetails = await github.request(pullRequestUrl);
+
+                  const labels = prDetails.data.labels.map(label => label.name);
+                  console.log('Labels:', labels);
+
+                  if (!labels.includes('cherry pick to trunk')) {
+                    console.log('Label "cherry pick to trunk" not found. Exiting job.');
+                    process.exit(0);
+                  }
+
+                  core.setOutput('base_ref', prDetails.data.base.ref);
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+            - name: check
+              id: check
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const baseRef = process.env.BASE_REF;
+                      console.log("baseRef:", baseRef);
+
+                      let run = false;
+
+                      const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
+                      console.log("isBot:", isBot);
+                      console.log("baseRef.startsWith('release/'):", baseRef.startsWith('release/'));
+
+                      if ( !isBot && baseRef.startsWith( 'release/' ) ) {
+                        core.setOutput( 'run', 'true' );
+                      } else {
+                        core.setOutput( 'run', 'false' );
+                      }
+              env:
+                BASE_REF: ${{ steps.fetch_pr_details.outputs.base_ref }}
+
+    prep:
+        name: Prep inputs
+        runs-on: ubuntu-20.04
+        if: needs.verify.outputs.run == 'true'
+        needs: verify
+        outputs:
+            release: ${{ steps.prep-inputs.outputs.release }}
+            pr: ${{ steps.prep-inputs.outputs.pr }}
+            version: ${{ steps.prep-inputs.outputs.version }}
+        steps:
+            - name: Prep inputs
+              id: prep-inputs
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const event = ${{ toJSON( github.event ) }}
+
+                      const releaseBranch = '${{ needs.verify.outputs.base_ref }}'
+                      const version = releaseBranch.replace( 'release/', '' )
+                      const pr = event.pull_request.number
+
+                      // Output the values
+                      console.log( 'releaseBranch:', releaseBranch )
+                      console.log( 'version:', version )
+                      console.log( 'pr:', pr )
+    
+                      core.setOutput( 'pr', pr )
+                      core.setOutput( 'version', version )
+                      core.setOutput( 'release', releaseBranch )
+
+    check-release-branch-exists:
+        name: Check for existence of release branch
+        runs-on: ubuntu-20.04
+        needs: prep
+        steps:
+            - name: Check for release branch
+              id: release-breanch-check
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
+                      await github.request( 'GET /repos/{owner}/{repo}/branches/{branch}', {
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        branch: '${{ needs.prep.outputs.release }}',
+                      } );
+    cherry-pick-run:
+        name: Run cherry pick tool
+        runs-on: ubuntu-20.04
+        permissions:
+          actions: write
+          contents: write
+          pull-requests: write
+        needs: [prep, check-release-branch-exists]
+        if: success()
+        steps:
+            - name: Checkout release branch
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Git fetch the release branch
+              run: git fetch origin trunk
+
+            - name: Checkout release branch
+              run: git checkout trunk
+
+            - name: Create a cherry pick branch based on trunk branch
+              run: git checkout -b cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
+
+            - name: Get commit sha from PR
+              id: commit-sha
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const pr = await github.rest.pulls.get({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: '${{ needs.prep.outputs.pr }}'
+                      })
+
+                      core.setOutput( 'sha', pr.data.merge_commit_sha )
+
+            - name: Cherry pick
+              run: |
+                  git cherry-pick ${{ steps.commit-sha.outputs.sha }} -m1
+
+            - name: Push cherry pick branch up
+              run: git push origin cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
+
+            - name: Create the PR for cherry pick branch
+              id: cherry-pick-pr
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      let cherryPickPRBody = "This PR cherry-picks the following PRs into the trunk branch:\n";
+
+                      cherryPickPRBody = `${cherryPickPRBody}` + `* #${{ needs.prep.outputs.pr }}` + "\n";
+
+                      const pr = await github.rest.pulls.create({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        title: "Cherry pick ${{ needs.prep.outputs.pr }} into trunk",
+                        head: "cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}",
+                        base: "trunk",
+                        body: cherryPickPRBody
+                      })
+
+                      core.setOutput( 'cherry-pick-pr', pr.data.html_url )
+                      console.log( 'cherry-pick-pr URL:', pr.data.html_url )
+
+                      // label PR
+
+                      const label = await github.rest.issues.addLabels({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: pr.data.number,
+                        labels: ["metric: code freeze exception"],
+                      });
+
+            - name: Notify Slack on failure
+              if: ${{ failure() && inputs.skipSlackPing != true }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_CORE_RELESES_DAILY_SLACK_CHANNEL }}
+                  slack-text: |
+                      :warning-8c: CFE cherry pick failed for '${{ needs.prep.outputs.release }}'
+
+                      An attempt to cherry pick PR(s) into outgoing trunk for '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
+
+            - name: Notify Slack on success
+              if: ${{ success() && inputs.skipSlackPing != true }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_CORE_RELESES_DAILY_SLACK_CHANNEL }}
+                  slack-text: |
+                      :info: CFE cherry pick succeeded for '${{ needs.prep.outputs.release }}'
+
+                      Please merge the following PR :pr: into trunk:
+
+                      ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}

@@ -1659,6 +1659,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
+	$thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 
@@ -1696,7 +1697,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		$image_params
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '"  data-thumb-sizes="' . esc_attr( $thumbnail_sizes ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
@@ -4141,3 +4142,48 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 		add_option( $option_name, WC()->version );
 	}
 }
+
+/**
+ * Add aria-label to pagination numbers.
+ *
+ * @param string $html HTML output.
+ * @param array  $args An array of arguments. See paginate_links()
+ *                     for information on accepted arguments.
+ *
+ * @return string
+ */
+function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
+	$p         = new WP_HTML_Tag_Processor( $html );
+	$n         = 1;
+	$page_text = __( 'Page', 'woocommerce' );
+
+	while ( $p->next_tag( array( 'class_name' => 'page-numbers' ) ) ) {
+		if (
+			$p->has_class( 'prev' ) ||
+			$p->has_class( 'next' ) ||
+			( 'SPAN' !== $p->get_tag() && 'A' !== $p->get_tag() ) ) {
+			continue;
+		}
+
+		if ( $p->has_class( 'current' ) ) {
+			$n = $args['current'];
+		}
+
+		if ( $p->has_class( 'dots' ) ) {
+			if ( $args['current'] - $args['mid_size'] > $n ) {
+				$n = $args['current'] - $args['mid_size'] - 1;
+			} else {
+				$n = $args['total'] - $args['end_size'];
+			}
+			++$n;
+			continue;
+		}
+
+		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( $n ) );
+		++$n;
+	}
+
+	$html = $p->get_updated_html();
+	return $html;
+}
+add_filter( 'paginate_links_output', 'wc_add_aria_label_to_pagination_numbers', 10, 2 );

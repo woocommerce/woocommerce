@@ -10,17 +10,6 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  */
 abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	/**
-	 * Initialize this block type.
-	 *
-	 * - Hook into WP lifecycle.
-	 * - Register the block with WordPress.
-	 */
-	protected function initialize() {
-		parent::initialize();
-		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
-	}
-
-	/**
 	 * Get the content from a hook and return it.
 	 *
 	 * @param string $hook Hook name.
@@ -47,16 +36,11 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		$order              = $this->get_order();
 		$permission         = $this->get_view_order_permissions( $order );
 		$block_content      = $order ? $this->render_content( $order, $permission, $attributes, $content ) : $this->render_content_fallback();
-		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-
-		if ( ! empty( $classes_and_styles['classes'] ) ) {
-			$classname .= ' ' . $classes_and_styles['classes'];
-		}
 
 		return $block_content ? sprintf(
 			'<div class="wp-block-%5$s-%4$s wc-block-%4$s %1$s" style="%2$s">%3$s</div>',
-			esc_attr( trim( $classname ) ),
+			esc_attr( $classes_and_styles['classes'] ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$block_content,
 			esc_attr( $this->block_name ),
@@ -277,57 +261,6 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		return null;
-	}
-
-	/**
-	 * Register block pattern for Order Confirmation to make it translatable.
-	 */
-	public function register_patterns() {
-
-		register_block_pattern(
-			'woocommerce/order-confirmation-totals-heading',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
-			)
-		);
-
-		register_block_pattern(
-			'woocommerce/order-confirmation-downloads-heading',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
-			)
-		);
-
-		register_block_pattern(
-			'woocommerce/order-confirmation-shipping-heading',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
-			)
-		);
-
-		register_block_pattern(
-			'woocommerce/order-confirmation-billing-heading',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
-			)
-		);
-
-		register_block_pattern(
-			'woocommerce/order-confirmation-additional-fields-heading',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
-			)
-		);
 	}
 
 	/**

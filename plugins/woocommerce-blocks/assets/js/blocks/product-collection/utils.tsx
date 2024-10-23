@@ -103,15 +103,10 @@ const isInProductArchive = () => {
 const isFirstBlockThatUsesPageContext = (
 	property: 'inherit' | 'filterable'
 ) => {
-	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
-	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
-	// available in WordPress 6.5.
-	// Created issue for that: https://github.com/woocommerce/woocommerce/issues/44768.
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
-	const { __experimentalGetGlobalBlocksByName, getBlock } =
-		select( blockEditorStore );
-	const productCollectionBlockIDs = __experimentalGetGlobalBlocksByName(
+	const { getBlocksByName, getBlock } = select( blockEditorStore );
+	const productCollectionBlockIDs = getBlocksByName(
 		'woocommerce/product-collection'
 	) as string[];
 
@@ -212,16 +207,16 @@ export const useProductCollectionUIState = ( {
 } ) => {
 	// Fetch product to check if it's deleted.
 	// `product` will be undefined if it doesn't exist.
-	const productId = attributes.query?.productReference;
+	const productReference = attributes.query?.productReference;
 	const { product, hasResolved } = useSelect(
 		( selectFunc ) => {
-			if ( ! productId ) {
+			if ( ! productReference ) {
 				return { product: null, hasResolved: true };
 			}
 
 			const { getEntityRecord, hasFinishedResolution } =
 				selectFunc( coreDataStore );
-			const selectorArgs = [ 'postType', 'product', productId ];
+			const selectorArgs = [ 'postType', 'product', productReference ];
 			return {
 				product: getEntityRecord( ...selectorArgs ),
 				hasResolved: hasFinishedResolution(
@@ -230,7 +225,7 @@ export const useProductCollectionUIState = ( {
 				),
 			};
 		},
-		[ productId ]
+		[ productReference ]
 	);
 
 	const productCollectionUIStateInEditor = useMemo( () => {
@@ -260,7 +255,7 @@ export const useProductCollectionUIState = ( {
 			isProductContextSelected
 		) {
 			const isProductDeleted =
-				productId &&
+				productReference &&
 				( product === undefined || product?.status === 'trash' );
 			if ( isProductDeleted ) {
 				return ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE;
@@ -287,7 +282,9 @@ export const useProductCollectionUIState = ( {
 
 			if (
 				! isArchiveLocationWithTermId &&
-				! isProductLocationWithProductId
+				! isProductLocationWithProductId &&
+				// If there's a user-selected product reference, don't show the preview label
+				! productReference
 			) {
 				return ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW;
 			}
@@ -307,7 +304,7 @@ export const useProductCollectionUIState = ( {
 		location.sourceData?.productId,
 		usesReference,
 		attributes.collection,
-		productId,
+		productReference,
 		product,
 		hasInnerBlocks,
 		attributes.query?.productReference,

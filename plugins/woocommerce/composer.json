@@ -120,7 +120,7 @@
 			"phpcbf -p"
 		],
 		"makepot-audit": [
-			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,client,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
+			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,assets,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
 		],
 		"makepot": [
 			"@makepot-audit --skip-audit"

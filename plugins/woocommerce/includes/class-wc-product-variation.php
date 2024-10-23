@@ -49,8 +49,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
-		$this->data['tax_class']         = 'parent';
-		$this->data['attribute_summary'] = '';
+		$this->data['tax_class']                   = 'parent';
+		$this->data['attribute_summary']           = '';
+		$this->data['cogs_value_overrides_parent'] = false;
 		parent::__construct( $product );
 	}
 
@@ -582,5 +583,45 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$valid_classes[] = 'parent';
 
 		return $valid_classes;
+	}
+
+	/**
+	 * Get the value of the "Cost of Goods Sold value overrides parent value" flag for this product.
+	 *
+	 * If the flag is set to true, the effective value is equal to the defined value for this variation.
+	 * Otherwise, the effective value is equal to the sum of the defined values for the variation and the parent product.
+	 *
+	 * @return bool The current value of the flag.
+	 */
+	public function get_cogs_value_overrides_parent(): bool {
+		return (bool) $this->get_prop( 'cogs_value_overrides_parent' );
+	}
+
+	/**
+	 * Set the value of the "Cost of Goods Sold value overrides parent value" flag for this product.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this value will NOT be persisted when the product is saved.
+	 *
+	 * @param bool $value The value to set for the flag.
+	 */
+	public function set_cogs_value_overrides_parent( bool $value ): void {
+		$this->set_prop( 'cogs_value_overrides_parent', $value );
+	}
+
+	/**
+	 * Get the effective value of the Cost of Goods Sold for this product.
+	 * (the final, actual monetary value).
+	 *
+	 * See get_cogs_value_overrides_parent.
+	 *
+	 * @return float
+	 */
+	protected function get_cogs_effective_value_core(): float {
+		if ( $this->get_cogs_value_overrides_parent() ) {
+			return parent::get_cogs_value();
+		}
+
+		$parent_value = (float) get_post_meta( $this->get_parent_id(), '_cogs_total_value', true );
+		return parent::get_cogs_value() + $parent_value;
 	}
 }

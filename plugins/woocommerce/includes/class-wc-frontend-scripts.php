@@ -3,7 +3,8 @@
  * Handle frontend scripts
  *
  * @package WooCommerce\Classes
- * @version 2.3.0
+ * @version 3.9.0
+ * @since 2.3.0
  */
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -506,9 +507,10 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-single-product':
 				$params = array(
-					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
-					'review_rating_required'    => wc_review_ratings_required() ? 'yes' : 'no',
-					'flexslider'                => apply_filters(
+					'i18n_required_rating_text'         => esc_attr__( 'Please select a rating', 'woocommerce' ),
+					'i18n_product_gallery_trigger_text' => esc_attr__( 'View full-screen image gallery', 'woocommerce' ),
+					'review_rating_required'            => wc_review_ratings_required() ? 'yes' : 'no',
+					'flexslider'                        => apply_filters(
 						'woocommerce_single_product_carousel_options',
 						array(
 							'rtl'            => is_rtl(),
@@ -522,10 +524,10 @@ class WC_Frontend_Scripts {
 							'allowOneSlide'  => false,
 						)
 					),
-					'zoom_enabled'              => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
-					'zoom_options'              => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
-					'photoswipe_enabled'        => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
-					'photoswipe_options'        => apply_filters(
+					'zoom_enabled'                      => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'zoom_options'                      => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
+					'photoswipe_enabled'                => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+					'photoswipe_options'                => apply_filters(
 						'woocommerce_single_product_photoswipe_options',
 						array(
 							'shareEl'               => false,
@@ -535,7 +537,7 @@ class WC_Frontend_Scripts {
 							'showAnimationDuration' => 0,
 						)
 					),
-					'flexslider_enabled'        => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
+					'flexslider_enabled'                => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 				break;
 			case 'wc-checkout':
@@ -599,6 +601,7 @@ class WC_Frontend_Scripts {
 					'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
 					'i18n_make_a_selection_text'       => esc_attr__( 'Please select some product options before adding this product to your cart.', 'woocommerce' ),
 					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
+					'i18n_reset_alert_text'            => esc_attr__( 'Your selection has been reset. Please select some product options before adding this product to your cart.', 'woocommerce' ),
 				);
 				break;
 			case 'wc-country-select':

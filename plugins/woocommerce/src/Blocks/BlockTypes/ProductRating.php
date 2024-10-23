@@ -202,13 +202,29 @@ class ProductRating extends AbstractBlock {
 				10
 			);
 
+			$classes = implode(
+				' ',
+				array_filter(
+					array(
+						'wc-block-components-product-rating wc-block-grid__product-rating',
+						esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
+						esc_attr( $styles_and_classes['classes'] ),
+					)
+				)
+			);
+
+			$wrapper_attributes = get_block_wrapper_attributes(
+				array(
+					'class' => $classes,
+					'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
+				)
+			);
+
 			return sprintf(
-				'<div class="wc-block-components-product-rating wc-block-grid__product-rating %1$s %2$s" style="%3$s">
-					%4$s
+				'<div %1$s>
+					%2$s
 				</div>',
-				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-				esc_attr( $styles_and_classes['classes'] ),
-				esc_attr( $styles_and_classes['styles'] ?? '' ),
+				$wrapper_attributes,
 				$rating_html
 			);
 		}

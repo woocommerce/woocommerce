@@ -20,7 +20,7 @@ export const usePriceConstraint = (
 	minorUnit: number,
 	direction: string
 ) => {
-	const step = 10 * 10 ** minorUnit;
+	const step = 1 * 10 ** minorUnit;
 	let currentConstraint = null;
 	const parsedPrice = parseFloat( price );
 

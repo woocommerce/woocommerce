@@ -1,0 +1,41 @@
+@import "@wordpress/base-styles/_colors.native.scss";
+
+// Spacings
+// Taken from base style system
+// @wordpress/base-styles/_variables.scss
+$small-gap: $grid-unit-10;   // 8px
+$medium-gap: $grid-unit-20;  // 16px
+$large-gap: $grid-unit-30;   // 24px
+$xlarge-gap: $grid-unit-40;  // 32px
+
+// Layout
+$content-spacing-small: $grid-unit-20;
+$content-spacing-large: $grid-unit-40;
+$content-spacing-small: $medium-gap;
+$content-spacing-large: $xlarge-gap;
+$content-spacing-xlarge: $grid-unit-60;
+$content-max-width: 1600px;
+
+// Breakpoints
+$breakpoint-small: 481px;
+$breakpoint-medium: 769px;
+$breakpoint-large: 1024px;
+$breakpoint-xlarge: 1500px;
+$breakpoint-huge: 1920px;
+
+// Colours
+$gutenberg-gray-100: $gray-0;	// replaced with closest colour from _colors.native.scss
+$gutenberg-gray-300: $gray-300; // anything above gray-100 is from the default _colors.scss
+$gutenberg-gray-700: $gray-700;
+$gutenberg-gray-900: $gray-900;
+$mauve-light-12: $gray-900;
+$woo-purple-50: #7f54b3;
+$wp-gray-0: $gray-0;
+$wp-gray-50: $gray-50;
+$wp-gray-60: $gray-60;
+$skeleton-loader-color: #f0f0f0;
+
+// Modal
+$modal-min-width: 350px;
+$modal-width-small: 384px;
+$modal-width-medium: 512px;

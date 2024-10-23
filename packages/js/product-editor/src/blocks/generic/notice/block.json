@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-notice-field",
+	"title": "Product notice field",
+	"category": "woocommerce",
+	"description": "A notice field for use in the product editor.",
+	"keywords": [
+		"products",
+		"notice"
+	],
+	"textdomain": "default",
+	"attributes": {
+		"message": {
+			"type": "string",
+			"__experimentalRole": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css",
+	"usesContext": [
+		"postType"
+	]
+}

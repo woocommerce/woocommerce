@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Return an empty string from `template_include` filter instead of null to avoid PHP fatal error with conflicting plugins using strict types.

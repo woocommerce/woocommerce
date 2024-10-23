@@ -69,7 +69,7 @@ describe( 'usePriceConstraints', () => {
 		);
 		const container = renderer.root.findByType( 'div' );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 2000 );
+		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 1100 );
 
 		renderer.update( <TestComponent price={ 1999 } /> );
 
@@ -80,10 +80,10 @@ describe( 'usePriceConstraints', () => {
 		const renderer = TestRenderer.create( <TestComponent price={ 999 } /> );
 		const container = renderer.root.findByType( 'div' );
 
-		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 0 );
+		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 900 );
 
 		renderer.update( <TestComponent price={ 1999 } /> );
 
-		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 1000 );
+		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 1900 );
 	} );
 } );

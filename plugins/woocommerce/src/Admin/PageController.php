@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 
 defined( 'ABSPATH' ) || exit;

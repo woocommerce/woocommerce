@@ -253,19 +253,6 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging order by popularity queries.
-	 */
-	public function test_merging_order_by_popularity_queries() {
-		$parsed_block                              = $this->get_base_parsed_block();
-		$parsed_block['attrs']['query']['orderBy'] = 'popularity';
-
-		$merged_query = $this->initialize_merged_query( $parsed_block );
-
-		$this->assertEquals( 'meta_value_num', $merged_query['orderby'] );
-		$this->assertEquals( 'total_sales', $merged_query['meta_key'] );
-	}
-
-	/**
 	 * Test product visibility query exist in merged query.
 	 */
 	public function test_product_visibility_query_exist_in_merged_query() {
@@ -831,7 +818,7 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = new WP_Query( $merged_query );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price >= 1.', $query->request );
 	}
 
 	/**
@@ -854,7 +841,7 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = new WP_Query( $merged_query );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price <= 1.', $query->request );
 	}
 
 	/**
@@ -879,8 +866,8 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = new WP_Query( $merged_query );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
-		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 2.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price <= 2.', $query->request );
 	}
 
 	/**
@@ -911,8 +898,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		delete_option( 'woocommerce_tax_display_shop' );
 		delete_option( 'woocommerce_prices_include_tax' );
 
-		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
-		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 2.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price <= 2.', $query->request );
 	}
 
 	/**
@@ -950,8 +937,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product->delete();
 		WC_Tax::delete_tax_class_by( 'slug', 'collection-test' );
 
-		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`min_price` >= 1.", $query->request );
-		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`max_price` <= 2.", $query->request );
+		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`max_price` >= 1.", $query->request );
+		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`min_price` <= 2.", $query->request );
 	}
 
 	/**
@@ -1219,5 +1206,76 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
+	}
+
+	/**
+	 * Tests that the cross-sells collection handler works as expected.
+	 */
+	public function test_collection_cross_sells() {
+		$expected_product_ids = array( 2, 3, 4 );
+		$test_product         = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_cross_sell_ids( $expected_product_ids );
+		$test_product->save();
+
+		// Frontend.
+		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/cross-sells';
+		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
+		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
+
+		// Editor.
+		$request = $this->build_request(
+			array( 'productReference' => $test_product->get_id() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
+			)
+		);
+		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
+	}
+
+	/**
+	 * Test the add_price_sorting_posts_clauses method.
+	 */
+	public function test_add_price_sorting_posts_clauses() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'price';
+
+		$parsed_block['attrs']['query']['order'] = 'asc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price ASC', $query->request );
+
+		$parsed_block['attrs']['query']['order'] = 'desc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price DESC', $query->request );
+	}
+
+	/**
+	 * Test the add_sales_sorting_posts_clauses method.
+	 */
+	public function test_add_sales_sorting_posts_clauses() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'sales';
+
+		$parsed_block['attrs']['query']['order'] = 'asc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales ASC', $query->request );
+
+		$parsed_block['attrs']['query']['order'] = 'desc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales DESC', $query->request );
 	}
 }

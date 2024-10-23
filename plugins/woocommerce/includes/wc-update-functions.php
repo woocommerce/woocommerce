@@ -2920,3 +2920,10 @@ function wc_update_940_remove_help_panel_highlight_shown() {
 		);
 	}
 }
+
+/**
+ * Add wc_feature_woocommerce_brands_enabled.
+ */
+function wc_update_950_add_brands_enabled_option() {
+	add_option( 'wc_feature_woocommerce_brands_enabled', 'yes' );
+}

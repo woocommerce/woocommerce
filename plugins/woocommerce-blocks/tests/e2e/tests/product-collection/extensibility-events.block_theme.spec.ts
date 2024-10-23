@@ -19,7 +19,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	},
 } );
 
-test.describe( 'Product Collection - extensibility JS events', () => {
+test.describe( 'Product Collection: Extensibility Events', () => {
 	test( 'emits wc-blocks_product_list_rendered event on init and on page change', async ( {
 		pageObject,
 		page,

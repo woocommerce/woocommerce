@@ -1,10 +1,10 @@
-const { chromium, expect } = require( '@playwright/test' );
+const { chromium, expect, request } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
 const { logIn } = require( './utils/login' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { DISABLE_HPOS } = process.env;
+const { DISABLE_HPOS, DISABLE_SITE_RESET } = process.env;
 
 /**
  * @param {import('@playwright/test').FullConfig} config
@@ -14,6 +14,39 @@ module.exports = async ( config ) => {
 
 	console.log( `State Dir: ${ stateDir }` );
 	console.log( `Base URL: ${ baseURL }` );
+
+	// Try calling the site reset plugin (if testing on an external environment)
+	if ( ! baseURL.includes( 'localhost' ) ) {
+		if ( DISABLE_SITE_RESET ) {
+			console.log(
+				'Site reset disabled by DISABLE_SITE_RESET env variable'
+			);
+		} else {
+			console.log( 'Resetting site...' );
+			try {
+				const reset = await request.newContext();
+				const credentials = Buffer.from(
+					`${ admin.username }:${ admin.password }`
+				).toString( 'base64' );
+				const response = await reset.get(
+					`${ baseURL }/wp-json/wc-cleanup/v1/reset`,
+					{
+						headers: {
+							Authorization: `Basic ${ credentials }`,
+						},
+					}
+				);
+				console.log( 'Reset successful:', response.status() );
+			} catch ( error ) {
+				console.error(
+					'Reset failed:',
+					error.response ? error.response.status() : error.message
+				);
+			}
+		}
+	} else {
+		console.log( 'Resetting site skipped as baseURL is localhost' );
+	}
 
 	// used throughout tests for authentication
 	process.env.ADMINSTATE = `${ stateDir }adminState.json`;

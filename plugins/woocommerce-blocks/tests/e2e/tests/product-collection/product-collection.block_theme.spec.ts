@@ -9,7 +9,6 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage, {
 	BLOCK_LABELS,
-	Collections,
 	SELECTORS,
 } from './product-collection.page';
 
@@ -87,11 +86,7 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 		} );
 
-		test.skip( 'does not render', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
+		test( 'does not render', async ( { page, editor, pageObject } ) => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'featured' );
 			await pageObject.addFilter( 'Price Range' );
@@ -106,7 +101,7 @@ test.describe( 'Product Collection', () => {
 			).toBeVisible();
 			// The "No results found" info is rendered in editor for all collections.
 			await expect(
-				featuredBlock.getByText( 'No results found' )
+				featuredBlock.getByText( 'No products to display' )
 			).toBeVisible();
 
 			await pageObject.publishAndGoToFrontend();
@@ -114,7 +109,9 @@ test.describe( 'Product Collection', () => {
 			const content = page.locator( 'main' );
 
 			await expect( content ).not.toContainText( 'Featured products' );
-			await expect( content ).not.toContainText( 'No results found' );
+			await expect( content ).not.toContainText(
+				'No products to display'
+			);
 		} );
 
 		// This test ensures the runtime render state is correctly reset for
@@ -739,7 +736,7 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
-	const templates = {
+	const templates = [
 		// This test is disabled because archives are disabled for attributes by default. This can be uncommented when this is toggled on.
 		//'taxonomy-product_attribute': {
 		//	templateTitle: 'Product Attribute',
@@ -747,102 +744,104 @@ test.describe( 'Product Collection', () => {
 		//	frontendPage: '/product-attribute/color/',
 		//	legacyBlockName: 'woocommerce/legacy-template',
 		//},
-		'taxonomy-product_cat': {
+		{
 			templateTitle: 'Product Category',
 			slug: 'taxonomy-product_cat',
 			frontendPage: '/product-category/music/',
 			legacyBlockName: 'woocommerce/legacy-template',
 			expectedProductsCount: 2,
 		},
-		'taxonomy-product_tag': {
+		{
 			templateTitle: 'Product Tag',
 			slug: 'taxonomy-product_tag',
 			frontendPage: '/product-tag/recommended/',
 			legacyBlockName: 'woocommerce/legacy-template',
 			expectedProductsCount: 2,
 		},
-		'archive-product': {
+		{
 			templateTitle: 'Product Catalog',
 			slug: 'archive-product',
 			frontendPage: '/shop/',
 			legacyBlockName: 'woocommerce/legacy-template',
 			expectedProductsCount: 16,
 		},
-		'product-search-results': {
+		{
 			templateTitle: 'Product Search Results',
 			slug: 'product-search-results',
 			frontendPage: '/?s=shirt&post_type=product',
 			legacyBlockName: 'woocommerce/legacy-template',
 			expectedProductsCount: 3,
 		},
-	};
+	];
 
-	for ( const {
-		templateTitle,
-		slug,
-		frontendPage,
-		legacyBlockName,
-		expectedProductsCount,
-	} of Object.values( templates ) ) {
-		test.describe( `${ templateTitle } template`, () => {
-			test( 'Product Collection block matches with classic template block', async ( {
-				pageObject,
-				requestUtils,
-				admin,
-				editor,
-				page,
-			} ) => {
-				await pageObject.refreshLocators( 'frontend' );
+	templates.forEach(
+		( {
+			templateTitle,
+			slug,
+			frontendPage,
+			legacyBlockName,
+			expectedProductsCount,
+		} ) => {
+			test.describe( `${ templateTitle } template`, () => {
+				test( 'Product Collection block matches with classic template block', async ( {
+					pageObject,
+					requestUtils,
+					admin,
+					editor,
+					page,
+				} ) => {
+					await pageObject.refreshLocators( 'frontend' );
 
-				await page.goto( frontendPage );
+					await page.goto( frontendPage );
 
-				const productCollectionProductNames =
-					await pageObject.getProductNames();
+					const productCollectionProductNames =
+						await pageObject.getProductNames();
 
-				const template = await requestUtils.createTemplate(
-					'wp_template',
-					{
-						slug,
-						title: 'classic template test',
-						content: 'howdy',
-					}
-				);
+					const template = await requestUtils.createTemplate(
+						'wp_template',
+						{
+							slug,
+							title: 'classic template test',
+							content: 'howdy',
+						}
+					);
 
-				await admin.visitSiteEditor( {
-					postId: template.id,
-					postType: 'wp_template',
-					canvas: 'edit',
+					await admin.visitSiteEditor( {
+						postId: template.id,
+						postType: 'wp_template',
+						canvas: 'edit',
+					} );
+
+					await expect(
+						editor.canvas.getByText( 'howdy' )
+					).toBeVisible();
+
+					await editor.insertBlock( { name: legacyBlockName } );
+
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
+
+					await page.goto( frontendPage );
+
+					const classicProducts = page.locator(
+						'.woocommerce-loop-product__title'
+					);
+
+					await expect( classicProducts ).toHaveCount(
+						expectedProductsCount
+					);
+
+					const classicProductsNames =
+						await classicProducts.allTextContents();
+
+					expect( classicProductsNames ).toEqual(
+						productCollectionProductNames
+					);
 				} );
-
-				await expect(
-					editor.canvas.getByText( 'howdy' )
-				).toBeVisible();
-
-				await editor.insertBlock( { name: legacyBlockName } );
-
-				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
-				} );
-
-				await page.goto( frontendPage );
-
-				const classicProducts = page.locator(
-					'.woocommerce-loop-product__title'
-				);
-
-				await expect( classicProducts ).toHaveCount(
-					expectedProductsCount
-				);
-
-				const classicProductsNames =
-					await classicProducts.allTextContents();
-
-				expect( classicProductsNames ).toEqual(
-					productCollectionProductNames
-				);
 			} );
-		} );
-	}
+		}
+	);
 	test.describe( 'Editor: In taxonomies templates', () => {
 		test( 'Products by specific category template displays products from this category', async ( {
 			admin,
@@ -904,311 +903,5 @@ test.describe( 'Product Collection', () => {
 
 			await expect( products ).toHaveText( expectedProducts );
 		} );
-	} );
-} );
-
-test.describe( 'Testing "usesReference" argument in "registerProductCollection"', () => {
-	const MY_REGISTERED_COLLECTIONS = {
-		myCustomCollectionWithProductContext: {
-			name: 'My Custom Collection - Product Context',
-			label: 'Block: My Custom Collection - Product Context',
-			previewLabelTemplate: [ 'woocommerce/woocommerce//single-product' ],
-			shouldShowProductPicker: true,
-		},
-		myCustomCollectionWithCartContext: {
-			name: 'My Custom Collection - Cart Context',
-			label: 'Block: My Custom Collection - Cart Context',
-			previewLabelTemplate: [ 'woocommerce/woocommerce//page-cart' ],
-			shouldShowProductPicker: false,
-		},
-		myCustomCollectionWithOrderContext: {
-			name: 'My Custom Collection - Order Context',
-			label: 'Block: My Custom Collection - Order Context',
-			previewLabelTemplate: [
-				'woocommerce/woocommerce//order-confirmation',
-			],
-			shouldShowProductPicker: false,
-		},
-		myCustomCollectionWithArchiveContext: {
-			name: 'My Custom Collection - Archive Context',
-			label: 'Block: My Custom Collection - Archive Context',
-			previewLabelTemplate: [
-				'woocommerce/woocommerce//taxonomy-product_cat',
-			],
-			shouldShowProductPicker: false,
-		},
-		myCustomCollectionMultipleContexts: {
-			name: 'My Custom Collection - Multiple Contexts',
-			label: 'Block: My Custom Collection - Multiple Contexts',
-			previewLabelTemplate: [
-				'woocommerce/woocommerce//single-product',
-				'woocommerce/woocommerce//order-confirmation',
-			],
-			shouldShowProductPicker: true,
-		},
-	};
-
-	// Activate plugin which registers custom product collections
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'register-product-collection-tester'
-		);
-	} );
-
-	Object.entries( MY_REGISTERED_COLLECTIONS ).forEach(
-		( [ key, collection ] ) => {
-			for ( const template of collection.previewLabelTemplate ) {
-				test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
-					pageObject,
-					editor,
-				} ) => {
-					await pageObject.goToEditorTemplate( template );
-					await pageObject.insertProductCollection();
-					await pageObject.chooseCollectionInTemplate(
-						key as Collections
-					);
-
-					const block = editor.canvas.getByLabel( collection.label );
-					const previewButtonLocator = block.getByTestId(
-						SELECTORS.previewButtonTestID
-					);
-
-					await expect( previewButtonLocator ).toBeVisible();
-				} );
-			}
-
-			test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
-				pageObject,
-				editor,
-				admin,
-			} ) => {
-				await admin.createNewPost();
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInPost( key as Collections );
-
-				// Check visibility of product picker
-				const editorProductPicker = editor.canvas.locator(
-					SELECTORS.productPicker
-				);
-				const expectedVisibility = collection.shouldShowProductPicker
-					? 'toBeVisible'
-					: 'toBeHidden';
-				await expect( editorProductPicker )[ expectedVisibility ]();
-
-				if ( collection.shouldShowProductPicker ) {
-					await pageObject.chooseProductInEditorProductPickerIfAvailable(
-						editor.canvas
-					);
-				}
-
-				// At this point, the product picker should be hidden
-				await expect( editorProductPicker ).toBeHidden();
-
-				// Check visibility of preview label
-				const block = editor.canvas.getByLabel( collection.label );
-				const previewButtonLocator = block.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeHidden();
-			} );
-
-			test( `Collection "${ collection.name }" should not show preview label in Product Catalog template`, async ( {
-				pageObject,
-				editor,
-			} ) => {
-				await pageObject.goToProductCatalogAndInsertCollection(
-					key as Collections
-				);
-
-				const block = editor.canvas.getByLabel( collection.label );
-				const previewButtonLocator = block.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeHidden();
-			} );
-		}
-	);
-} );
-
-test.describe( 'Product picker', () => {
-	const MY_REGISTERED_COLLECTIONS_THAT_NEEDS_PRODUCT = {
-		myCustomCollectionWithProductContext: {
-			name: 'My Custom Collection - Product Context',
-			label: 'Block: My Custom Collection - Product Context',
-			collection:
-				'woocommerce/product-collection/my-custom-collection-product-context',
-		},
-		myCustomCollectionMultipleContexts: {
-			name: 'My Custom Collection - Multiple Contexts',
-			label: 'Block: My Custom Collection - Multiple Contexts',
-			collection:
-				'woocommerce/product-collection/my-custom-collection-multiple-contexts',
-		},
-	};
-
-	// Activate plugin which registers custom product collections
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'register-product-collection-tester'
-		);
-	} );
-
-	Object.entries( MY_REGISTERED_COLLECTIONS_THAT_NEEDS_PRODUCT ).forEach(
-		( [ key, collection ] ) => {
-			test( `For collection "${ collection.name }" - manually selected product reference should be available on Frontend in a post`, async ( {
-				pageObject,
-				admin,
-				page,
-				editor,
-			} ) => {
-				await admin.createNewPost();
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInPost( key as Collections );
-
-				// Verify that product picker is shown in Editor
-				const editorProductPicker = editor.canvas.locator(
-					SELECTORS.productPicker
-				);
-				await expect( editorProductPicker ).toBeVisible();
-
-				// Once a product is selected, the product picker should be hidden
-				await pageObject.chooseProductInEditorProductPickerIfAvailable(
-					editor.canvas
-				);
-				await expect( editorProductPicker ).toBeHidden();
-
-				// On Frontend, verify that product reference is a number
-				await pageObject.publishAndGoToFrontend();
-				const collectionWithProductContext = page.locator(
-					`[data-collection="${ collection.collection }"]`
-				);
-				const queryAttribute = JSON.parse(
-					( await collectionWithProductContext.getAttribute(
-						'data-query'
-					) ) || '{}'
-				);
-				expect( typeof queryAttribute?.productReference ).toBe(
-					'number'
-				);
-			} );
-
-			test( `For collection "${ collection.name }" - changing product using inspector control`, async ( {
-				pageObject,
-				admin,
-				page,
-				editor,
-			} ) => {
-				await admin.createNewPost();
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInPost( key as Collections );
-
-				// Verify that product picker is shown in Editor
-				const editorProductPicker = editor.canvas.locator(
-					SELECTORS.productPicker
-				);
-				await expect( editorProductPicker ).toBeVisible();
-
-				// Once a product is selected, the product picker should be hidden
-				await pageObject.chooseProductInEditorProductPickerIfAvailable(
-					editor.canvas
-				);
-				await expect( editorProductPicker ).toBeHidden();
-
-				// Verify that Album is selected
-				await expect(
-					admin.page.locator( SELECTORS.linkedProductControl.button )
-				).toContainText( 'Album' );
-
-				// Change product using inspector control to Beanie
-				await admin.page
-					.locator( SELECTORS.linkedProductControl.button )
-					.click();
-				await admin.page
-					.locator( SELECTORS.linkedProductControl.popoverContent )
-					.getByLabel( 'Beanie', { exact: true } )
-					.click();
-				await expect(
-					admin.page.locator( SELECTORS.linkedProductControl.button )
-				).toContainText( 'Beanie' );
-
-				// On Frontend, verify that product reference is a number
-				await pageObject.publishAndGoToFrontend();
-				const collectionWithProductContext = page.locator(
-					`[data-collection="${ collection.collection }"]`
-				);
-				const queryAttribute = JSON.parse(
-					( await collectionWithProductContext.getAttribute(
-						'data-query'
-					) ) || '{}'
-				);
-				expect( typeof queryAttribute?.productReference ).toBe(
-					'number'
-				);
-			} );
-
-			test( `For collection "${ collection.name }" - "From current product" is chosen by default`, async ( {
-				pageObject,
-				admin,
-				editor,
-			} ) => {
-				await admin.visitSiteEditor( {
-					postId: `woocommerce/woocommerce//single-product`,
-					postType: 'wp_template',
-					canvas: 'edit',
-				} );
-				await editor.canvas.locator( 'body' ).click();
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate(
-					key as Collections
-				);
-
-				const productToShowControl = admin.page.getByText(
-					'From the current product'
-				);
-				await expect( productToShowControl ).toBeChecked();
-			} );
-		}
-	);
-
-	test( 'Product picker should work as expected while changing collection using "Choose collection" button from Toolbar', async ( {
-		pageObject,
-		admin,
-		editor,
-	} ) => {
-		await admin.createNewPost();
-		await pageObject.insertProductCollection();
-		await pageObject.chooseCollectionInPost(
-			'myCustomCollectionWithProductContext'
-		);
-
-		// Verify that product picker is shown in Editor
-		const editorProductPicker = editor.canvas.locator(
-			SELECTORS.productPicker
-		);
-		await expect( editorProductPicker ).toBeVisible();
-
-		// Once a product is selected, the product picker should be hidden
-		await pageObject.chooseProductInEditorProductPickerIfAvailable(
-			editor.canvas
-		);
-		await expect( editorProductPicker ).toBeHidden();
-
-		// Change collection using Toolbar
-		await pageObject.changeCollectionUsingToolbar(
-			'myCustomCollectionMultipleContexts'
-		);
-		await expect( editorProductPicker ).toBeVisible();
-
-		// Once a product is selected, the product picker should be hidden
-		await pageObject.chooseProductInEditorProductPickerIfAvailable(
-			editor.canvas
-		);
-		await expect( editorProductPicker ).toBeHidden();
-
-		// Product picker should be hidden for collections that don't need product
-		await pageObject.changeCollectionUsingToolbar( 'featured' );
-		await expect( editorProductPicker ).toBeHidden();
 	} );
 } );

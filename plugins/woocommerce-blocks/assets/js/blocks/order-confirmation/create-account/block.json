@@ -7,6 +7,9 @@
 	"keywords": [
 		"WooCommerce"
 	],
+	"blockHooks": {
+		"woocommerce/order-confirmation-summary": "after"
+	},
 	"attributes": {
 		"customerEmail": {
 			"type": "string",
@@ -27,20 +30,28 @@
 		"hasDarkControls": {
 			"type": "boolean",
 			"default": false
+		},
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true
+			}
 		}
 	},
 	"supports": {
+		"multiple": false,
+		"inserter": false,
+		"html": false,
+		"lock": false,
+		"align": [
+			"wide",
+			"full"
+		],
 		"color": {
 			"background": true,
 			"text": true,
 			"button": true
 		},
-		"multiple": false,
-		"align": [
-			"wide",
-			"full"
-		],
-		"html": false,
 		"spacing": {
 			"padding": true,
 			"margin": true,

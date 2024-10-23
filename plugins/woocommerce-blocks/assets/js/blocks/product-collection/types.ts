@@ -29,6 +29,7 @@ export interface ProductCollectionAttributes {
 	];
 	templateSlug: string;
 	displayLayout: ProductCollectionDisplayLayout;
+	dimensions: ProductCollectionDimensions;
 	tagName: string;
 	convertedFromProducts: boolean;
 	collection?: string;
@@ -48,10 +49,20 @@ export enum LayoutOptions {
 	STACK = 'list',
 }
 
+export enum WidthOptions {
+	FILL = 'fill',
+	FIXED = 'fixed',
+}
+
 export interface ProductCollectionDisplayLayout {
 	type: LayoutOptions;
 	columns: number;
 	shrinkColumns: boolean;
+}
+
+export interface ProductCollectionDimensions {
+	widthType: WidthOptions;
+	fixedWidth?: string;
 }
 
 export enum ETimeFrameOperator {
@@ -133,6 +144,7 @@ export type TProductCollectionOrderBy =
 	| 'date'
 	| 'title'
 	| 'popularity'
+	| 'price'
 	| 'rating';
 
 export type ProductCollectionSetAttributes = (
@@ -145,6 +157,12 @@ export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
 	setAttributes: ProductCollectionSetAttributes;
 };
+
+export type DimensionsControlProps = {
+	dimensions: ProductCollectionDimensions;
+	setAttributes: ProductCollectionSetAttributes;
+};
+
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
 	trackInteraction: TrackInteraction;
@@ -161,6 +179,7 @@ export enum CoreCollectionNames {
 	HAND_PICKED = 'woocommerce/product-collection/hand-picked',
 	RELATED = 'woocommerce/product-collection/related',
 	UPSELLS = 'woocommerce/product-collection/upsells',
+	CROSS_SELLS = 'woocommerce/product-collection/cross-sells',
 }
 
 export enum CoreFilterNames {

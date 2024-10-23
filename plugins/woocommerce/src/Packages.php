@@ -66,7 +66,8 @@ class Packages {
 	 * @since 3.7.0
 	 */
 	public static function init() {
-		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ), 0 );
+		add_action( 'plugins_loaded', array( __CLASS__, 'prepare_packages' ), -100 );
+		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ), 10 );
 
 		// Prevent plugins already merged into WooCommerce core from getting activated as standalone plugins.
 		add_action( 'activate_plugin', array( __CLASS__, 'deactivate_merged_plugins' ) );
@@ -147,6 +148,18 @@ class Packages {
 	 */
 	public static function is_package_enabled( $package ) {
 		return array_key_exists( $package, self::get_enabled_packages() );
+	}
+
+	/**
+	 * Prepare merged packages for initialization.
+	 * Especially useful when running actions early in the 'plugins_loaded' timeline.
+	 */
+	public static function prepare_packages() {
+		foreach ( self::get_enabled_packages() as $package_name => $package_class ) {
+			if ( method_exists( $package_class, 'prepare' ) ) {
+				call_user_func( array( $package_class, 'prepare' ) );
+			}
+		}
 	}
 
 	/**

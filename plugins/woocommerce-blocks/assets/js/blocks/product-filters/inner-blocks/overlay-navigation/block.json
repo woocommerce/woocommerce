@@ -46,7 +46,7 @@
 	"supports": {
 		"interactivity": true,
 		"align": [ "left", "right", "center"],
-		"inserter": false,
+		"inserter": true,
 		"color": {
 			"__experimentalDefaultControls": {
 				"text": false,

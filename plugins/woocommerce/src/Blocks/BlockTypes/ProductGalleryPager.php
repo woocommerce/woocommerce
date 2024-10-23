@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * ProductGalleryPager class.
@@ -55,7 +56,7 @@ class ProductGalleryPager extends AbstractBlock {
 		}
 
 		$number_of_thumbnails = $block->context['thumbnailsNumberOfThumbnails'] ?? 0;
-		$classname            = $attributes['className'] ?? '';
+		$classname            = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		$wrapper_attributes   = get_block_wrapper_attributes( array( 'class' => trim( $classname ) ) );
 		$post_id              = $block->context['postId'] ?? '';
 		$product              = wc_get_product( $post_id );

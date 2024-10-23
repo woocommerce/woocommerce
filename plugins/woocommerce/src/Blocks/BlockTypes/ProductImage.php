@@ -208,13 +208,29 @@ class ProductImage extends AbstractBlock {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wc-block-components-product-image wc-block-grid__product-image',
+					esc_attr( $classes_and_styles['classes'] ),
+				)
+			)
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
 		if ( $product ) {
 			return sprintf(
-				'<div class="wc-block-components-product-image wc-block-grid__product-image %1$s" style="%2$s">
-					%3$s
+				'<div %1$s>
+					%2$s
 				</div>',
-				esc_attr( $classes_and_styles['classes'] ),
-				esc_attr( $classes_and_styles['styles'] ),
+				$wrapper_attributes,
 				$this->render_anchor(
 					$product,
 					$this->render_on_sale_badge( $product, $parsed_attributes ),

@@ -1,5 +1,6 @@
 // Parent element should hide column when there is no address.
-.woocommerce-order-confirmation-address-wrapper {
+.woocommerce-order-confirmation-address-wrapper,
+.wc-block-order-confirmation-address-wrapper {
 	margin-block-start: $gap-large * 2;
 
 	.wp-block-column:empty {
