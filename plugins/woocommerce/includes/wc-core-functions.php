@@ -1333,14 +1333,14 @@ function wc_get_customer_geolocation( $fallback = array(
 	// Ensure geolocation is valid.
 	$allowed_countries = WC()->countries->get_allowed_countries();
 
-	if ( ! in_array( $geolocation['country'], array_keys( $allowed_countries ), true ) ) {
+	if ( ! isset( $allowed_countries[ $geolocation['country'] ] ) ) {
 		return $fallback;
 	}
 
 	$allowed_states = WC()->countries->get_allowed_country_states();
 	$country_states = $allowed_states[ $geolocation['country'] ] ?? array();
 
-	if ( $country_states && ! in_array( $geolocation['state'], array_keys( $country_states ), true ) ) {
+	if ( $country_states && ! isset( $country_states[ $geolocation['state'] ] ) ) {
 		$geolocation['state'] = '';
 	}
 
