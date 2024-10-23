@@ -46,9 +46,9 @@ jobs:
             const version = '${{ github.event.inputs.version }}';
             if (!/^\d+\.\d+$/.test(version)) {
               core.setFailed('Invalid version format. The version must be in the format X.Y');
+              core.info(`Version you entered: ${version}`);
               process.exit(1);
             }
-            core.info(`Version you entered: ${version}`);
 
       - name: Checkout code
         uses: actions/checkout@v3
