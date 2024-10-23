@@ -92,7 +92,9 @@ export const applyExtensionCartUpdate =
 	( args: ExtensionCartUpdateArgs ) =>
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		try {
-			const { response } = await apiFetchWithHeaders( {
+			const { response } = await apiFetchWithHeaders< {
+				response: CartResponse;
+			} >( {
 				path: '/wc/store/v1/cart/extensions',
 				method: 'POST',
 				data: { namespace: args.namespace, data: args.data },
@@ -115,7 +117,7 @@ export const applyExtensionCartUpdate =
 			}
 			dispatch.receiveCart( response );
 		} catch ( error ) {
-			dispatch.receiveError( error );
+			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		}
 	};
@@ -390,7 +392,9 @@ export const updateCustomerData =
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		try {
 			dispatch.updatingCustomerData( true );
-			const { response } = await apiFetchWithHeaders( {
+			const { response } = await apiFetchWithHeaders< {
+				response: CartResponse;
+			} >( {
 				path: '/wc/store/v1/cart/update-customer',
 				method: 'POST',
 				data: customerData,
@@ -404,7 +408,7 @@ export const updateCustomerData =
 			setIsCustomerDataDirty( false );
 			return response;
 		} catch ( error ) {
-			dispatch.receiveError( error );
+			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			setIsCustomerDataDirty( true );
 			return Promise.reject( error );
 		} finally {
