@@ -40,6 +40,10 @@
 	.wp-block-woocommerce-checkout-order-summary-block {
 		margin-top: 0;
 
+		&.checkout-order-summary-block-fill-wrapper {
+			padding-top: $gap-larger;
+		}
+
 		.wc-block-components-checkout-order-summary__title {
 			padding: 20px 0;
 			cursor: pointer;

@@ -47,7 +47,8 @@ const FrontendBlock = ( {
 			  }
 			: {};
 
-	// Render once here and once in the fill. The fill can be slotted once elsewhere.
+	// Render the summary once here in the block and once in the fill. The fill can be slotted once elsewhere. The fill is only
+	// rendered on small and mobile screens.
 	return (
 		<>
 			<div className={ className }>
@@ -96,25 +97,28 @@ const FrontendBlock = ( {
 					<OrderMetaSlotFill />
 				</div>
 			</div>
-			<CheckoutOrderSummaryFill>
-				<div
-					className={ `${ className } checkout-order-summary-block-fill-wrapper` }
-				>
-					<FormStepHeading>
-						<>{ __( 'Order summary', 'woocommerce' ) }</>
-					</FormStepHeading>
-					<div className="checkout-order-summary-block-fill">
-						{ children }
-						<div className="wc-block-components-totals-wrapper">
-							<TotalsFooterItem
-								currency={ totalsCurrency }
-								values={ cartTotals }
-							/>
+
+			{ ( isSmall || isMobile ) && (
+				<CheckoutOrderSummaryFill>
+					<div
+						className={ `${ className } checkout-order-summary-block-fill-wrapper` }
+					>
+						<FormStepHeading>
+							<>{ __( 'Order summary', 'woocommerce' ) }</>
+						</FormStepHeading>
+						<div className="checkout-order-summary-block-fill">
+							{ children }
+							<div className="wc-block-components-totals-wrapper">
+								<TotalsFooterItem
+									currency={ totalsCurrency }
+									values={ cartTotals }
+								/>
+							</div>
+							<OrderMetaSlotFill />
 						</div>
-						<OrderMetaSlotFill />
 					</div>
-				</div>
-			</CheckoutOrderSummaryFill>
+				</CheckoutOrderSummaryFill>
+			) }
 		</>
 	);
 };
