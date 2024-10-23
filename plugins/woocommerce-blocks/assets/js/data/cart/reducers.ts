@@ -9,6 +9,7 @@ import type { Reducer } from 'redux';
 import { ACTION_TYPES as types } from './action-types';
 import { defaultCartState, CartState } from './default-state';
 import { EMPTY_CART_ERRORS } from '../constants';
+import { getIsCustomerDataDirty, setIsCustomerDataDirty } from './utils';
 
 /**
  * Reducer for receiving items related to the cart.
@@ -71,6 +72,9 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 					},
 				},
 			};
+			setIsCustomerDataDirty(
+				getIsCustomerDataDirty() || billingAddressChanged
+			);
 			break;
 		case types.SET_SHIPPING_ADDRESS:
 			const shippingAddressChanged = Object.keys(
@@ -85,7 +89,6 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 				...state,
 				metaData: {
 					...state.metaData,
-					isCustomerDataDirty: shippingAddressChanged,
 				},
 				cartData: {
 					...state.cartData,
@@ -95,6 +98,9 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 					},
 				},
 			};
+			setIsCustomerDataDirty(
+				getIsCustomerDataDirty() || shippingAddressChanged
+			);
 			break;
 
 		case types.REMOVING_COUPON:
