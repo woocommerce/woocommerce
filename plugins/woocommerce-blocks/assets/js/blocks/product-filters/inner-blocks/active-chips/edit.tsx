@@ -47,11 +47,13 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		style: getColorVars( attributes ),
 	} );
 
-	const removeText = sprintf(
-		/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
-		__( 'Remove %s filter', 'woocommerce' ),
-		name
-	);
+	const removeText = ( label: string ): string => {
+		return sprintf(
+			/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
+			__( 'Remove %s filter', 'woocommerce' ),
+			label
+		);
+	};
 
 	return (
 		<>
@@ -67,7 +69,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								icon={ closeSmall }
 								size={ 25 }
 							/>
-							<Label screenReaderLabel={ removeText } />
+							<Label
+								screenReaderLabel={ removeText(
+									'Size: Small'
+								) }
+							/>
 						</button>
 					</li>
 					<li className="wc-block-product-filter-active-chips__item">
@@ -80,7 +86,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								icon={ closeSmall }
 								size={ 25 }
 							/>
-							<Label screenReaderLabel={ removeText } />
+							<Label
+								screenReaderLabel={ removeText( 'Color: Red' ) }
+							/>
 						</button>
 					</li>
 					<li className="wc-block-product-filter-active-chips__item">
@@ -93,7 +101,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								icon={ closeSmall }
 								size={ 25 }
 							/>
-							<Label screenReaderLabel={ removeText } />
+							<Label
+								screenReaderLabel={ removeText(
+									'Color: Blue'
+								) }
+							/>
 						</button>
 					</li>
 				</ul>
