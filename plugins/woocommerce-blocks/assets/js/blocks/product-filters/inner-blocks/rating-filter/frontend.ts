@@ -72,17 +72,6 @@ store( 'woocommerce/product-filter-rating', {
 				[ filterRatingKey ]: updatedFiltersList.join( ',' ),
 			};
 		},
-		onDropdownChange: () => {
-			const dropdownContext = getContext< DropdownContext >(
-				'woocommerce/interactivity-dropdown'
-			);
-
-			const selectedItems = dropdownContext.selectedItems;
-			const items = selectedItems || [];
-			const filters = items.map( ( i ) => i.value );
-
-			navigate( getUrl( filters ) );
-		},
 
 		clearFilters: () => {
 			const context = getContext< ProductFiltersContext >(
