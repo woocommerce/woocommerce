@@ -1193,12 +1193,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					type: 'updateQueryStep',
 					params: { step: 'skip-guided-setup' },
 				},
-				{
-					type: 'recordSkipGuidedSetup',
-					params: ( { context } ) => ( {
-						optInDataSharing: context.optInDataSharing,
-					} ),
-				},
 			],
 			states: {
 				preSkipFlowBusinessLocation: {
@@ -1229,6 +1223,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						{
 							type: 'recordTracksStepViewed',
 							params: { step: 'skip_business_location' },
+						},
+						{
+							type: 'recordSkipGuidedSetup',
+							params: ( { context } ) => ( {
+								optInDataSharing: context.optInDataSharing,
+							} ),
 						},
 					],
 					meta: {
