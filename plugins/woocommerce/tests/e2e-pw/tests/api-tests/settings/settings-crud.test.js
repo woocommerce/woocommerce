@@ -1496,11 +1496,10 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_email_from_name',
 						label: '"From" name',
-						description:
-							'How the sender name appears in outgoing WooCommerce emails.',
+						description: '',
 						type: 'text',
 						default: expect.any( String ),
-						tip: 'How the sender name appears in outgoing WooCommerce emails.',
+						tip: '',
 						value: expect.any( String ),
 					} ),
 				] )
@@ -1510,11 +1509,10 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_email_from_address',
 						label: '"From" address',
-						description:
-							'How the sender email appears in outgoing WooCommerce emails.',
+						description: '',
 						type: 'email',
 						default: expect.any( String ),
-						tip: 'How the sender email appears in outgoing WooCommerce emails.',
+						tip: '',
 						value: expect.any( String ),
 					} ),
 				] )
