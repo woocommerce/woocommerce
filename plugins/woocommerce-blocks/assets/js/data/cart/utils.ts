@@ -123,7 +123,7 @@ export const validateDirtyProps = ( dirtyProps: {
 export const getIsCustomerDataDirty = () => {
 	return (
 		window.localStorage.getItem(
-			'woocommerce_checkout_is_customer_data_dirty'
+			'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
 		) === 'true'
 	);
 };
@@ -133,7 +133,7 @@ export const getIsCustomerDataDirty = () => {
  */
 export const setIsCustomerDataDirty = ( isCustomerDataDirty: boolean ) => {
 	window.localStorage.setItem(
-		'woocommerce_checkout_is_customer_data_dirty',
+		'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY',
 		isCustomerDataDirty ? 'true' : 'false'
 	);
 };

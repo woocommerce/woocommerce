@@ -84,7 +84,7 @@ test.describe( 'Shopper → Extensibility', () => {
 			await checkoutPageObject.page.waitForFunction( () => {
 				return (
 					window.localStorage.getItem(
-						'woocommerce_checkout_is_customer_data_dirty'
+						'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
 					) === 'false'
 				);
 			} );
