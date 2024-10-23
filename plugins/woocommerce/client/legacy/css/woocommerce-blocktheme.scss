@@ -246,6 +246,10 @@ a.added_to_cart {
 			width: 3rem;
 			height: 3.5rem;
 		}
+		
+		.select2-selection--single .select2-selection__rendered {
+			padding-left: 0;
+		}
 	}
 }
 

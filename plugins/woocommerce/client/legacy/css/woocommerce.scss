@@ -1161,6 +1161,15 @@ p.demo_store,
 			display: inline;
 		}
 
+		&:has(.input-with-wc-float-label) {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+				left: 1.5em;
+			}
+		}
+
 		.woocommerce-input-wrapper {
 			.description {
 				background: #1e85be;
@@ -1954,16 +1963,24 @@ p.demo_store,
 			vertical-align: middle;
 		}
 
-		td.actions .coupon .input-text {
-			float: left;
-			box-sizing: border-box;
-			border: 1px solid darken($secondary, 10%);
-			padding: 6px 6px 5px;
-			margin: 0 4px 0 0;
-			outline: 0;
+		td.actions .coupon {
+			position: relative;
+			
+			label {
+				@include woocommerce-float-label();
+			}
 
-			&.has-error:focus {
-				border-color: var(--wc-red);
+			.input-text {
+				float: left;
+				box-sizing: border-box;
+				border: 1px solid darken($secondary, 10%);
+				padding: 6px 6px 5px;
+				margin: 0 4px 0 0;
+				outline: 0;
+	
+				&.has-error:focus {
+					border-color: var(--wc-red);
+				}
 			}
 		}
 
