@@ -22,7 +22,7 @@ const collection = {
 		'Highlight products that are currently on sale.',
 		'woocommerce'
 	),
-	keywords: [ 'discount', 'promotion' ],
+	keywords: [ 'discount', 'promotion', 'onsale' ],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
