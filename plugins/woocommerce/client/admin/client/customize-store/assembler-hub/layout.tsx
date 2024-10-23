@@ -163,7 +163,6 @@ export const Layout = () => {
 								animate={ 'view' }
 							>
 								<SiteHub
-									as={ motion.div }
 									variants={ {
 										view: { x: 0 },
 									} }
