@@ -2,30 +2,13 @@
  * External dependencies
  */
 import { getContext, store, getElement } from '@woocommerce/interactivity';
-import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 
 /**
  * Internal dependencies
  */
-import { navigate } from '../../frontend';
 import type { ProductFiltersContext } from '../../frontend';
 
 const filterRatingKey = 'rating_filter';
-
-function getUrl( filters: Array< string | null > ) {
-	filters = filters.filter( Boolean );
-	const url = new URL( window.location.href );
-
-	if ( filters.length ) {
-		// add filters to url
-		url.searchParams.set( 'rating_filter', filters.join( ',' ) );
-	} else {
-		// remove filters from url
-		url.searchParams.delete( 'rating_filter' );
-	}
-
-	return url.href;
-}
 
 /**
  * Get the rating list (an array of strings)

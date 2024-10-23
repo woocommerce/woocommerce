@@ -19,7 +19,6 @@ import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { Notice, withSpokenMessages } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
-import { productFilterRating as icon } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
