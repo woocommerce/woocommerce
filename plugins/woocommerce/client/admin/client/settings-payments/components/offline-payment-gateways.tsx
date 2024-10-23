@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Card, CardHeader } from '@wordpress/components';
-import React, { useState } from '@wordpress/element';
+import React from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { List } from '@woocommerce/components';
@@ -18,28 +18,15 @@ import { PaymentGatewayButton } from './payment-gateway-button';
 const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 export const OfflinePaymentGateways = () => {
-	const { installedPaymentGateways, isResolving } = useSelect( ( select ) => {
+	const { installedPaymentGateways } = useSelect( ( select ) => {
 		return {
 			getPaymentGateway: select( PAYMENT_GATEWAYS_STORE_NAME )
 				.getPaymentGateway,
 			installedPaymentGateways: select(
 				PAYMENT_GATEWAYS_STORE_NAME
 			).getPaymentGateways(),
-			isResolving: select( PAYMENT_GATEWAYS_STORE_NAME ).isResolving(
-				'getPaymentGateways'
-			),
 		};
 	}, [] );
-
-	const [ isInitialized, setIsInitialized ] = useState< boolean >( false );
-
-	if (
-		! isInitialized &&
-		! isResolving &&
-		installedPaymentGateways.length > 0
-	) {
-		setIsInitialized( true );
-	}
 
 	// Mock payment gateways for now.
 	// TODO Get the list of gateways via the API in future PR.

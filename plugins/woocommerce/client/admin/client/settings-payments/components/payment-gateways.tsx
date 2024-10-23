@@ -8,11 +8,11 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { EllipsisMenu, List, Pill } from '@woocommerce/components';
 import { WooPaymentMethodsLogos } from '@woocommerce/onboarding';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { ADMIN_URL } from '~/utils/admin-settings';
 
 export const PaymentGateways = () => {
 	// Mock payment gateways for now.
@@ -130,10 +130,9 @@ export const PaymentGateways = () => {
 		),
 		after: (
 			<a
-				href={
-					ADMIN_URL +
+				href={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
-				}
+				) }
 			>
 				<Gridicon icon="chevron-right" />
 			</a>
