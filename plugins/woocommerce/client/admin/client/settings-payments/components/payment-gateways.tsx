@@ -140,8 +140,8 @@ export const PaymentGateways = () => {
 	} );
 
 	return (
-		<Card size="medium" className="settings-payment-gateways">
-			<CardHeader>
+		<div className="settings-payment-gateways">
+			<div className="settings-payment-gateways__header">
 				<div className="settings-payment-gateways__header-title">
 					{ __( 'Payment providers', 'woocommerce' ) }
 				</div>
@@ -158,8 +158,8 @@ export const PaymentGateways = () => {
 						onChange={ () => {} }
 					/>
 				</div>
-			</CardHeader>
+			</div>
 			<List items={ paymentGatewaysList } />
-		</Card>
+		</div>
 	);
 };
