@@ -1,7 +1,10 @@
 /**
  * Internal dependencies
  */
-import { defaultPlaceOrderButtonLabel } from './constants';
+import {
+	defaultPlaceOrderButtonLabel,
+	defaultReturnToCartButtonLabel,
+} from './constants';
 
 export default {
 	cartPageId: {
@@ -26,5 +29,9 @@ export default {
 	placeOrderButtonLabel: {
 		type: 'string',
 		default: defaultPlaceOrderButtonLabel,
+	},
+	returnToCartButtonLabel: {
+		type: 'string',
+		default: defaultReturnToCartButtonLabel,
 	},
 };

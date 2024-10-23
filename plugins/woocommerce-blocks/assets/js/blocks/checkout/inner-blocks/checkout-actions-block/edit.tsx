@@ -5,19 +5,24 @@ import clsx from 'clsx';
 import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	RichText,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import PageSelector from '@woocommerce/editor-components/page-selector';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
-import { getSetting } from '@woocommerce/settings';
 import { ReturnToCartButton } from '@woocommerce/base-components/cart-checkout';
 import EditableButton from '@woocommerce/editor-components/editable-button';
-import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
  * Internal dependencies
  */
-import { defaultPlaceOrderButtonLabel } from './constants';
+import {
+	defaultPlaceOrderButtonLabel,
+	defaultReturnToCartButtonLabel,
+} from './constants';
 
 export const Edit = ( {
 	attributes,
@@ -27,6 +32,7 @@ export const Edit = ( {
 		showReturnToCart: boolean;
 		cartPageId: number;
 		placeOrderButtonLabel: string;
+		returnToCartButtonLabel: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
@@ -35,6 +41,7 @@ export const Edit = ( {
 		cartPageId = 0,
 		showReturnToCart = false,
 		placeOrderButtonLabel,
+		returnToCartButtonLabel,
 	} = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
@@ -94,16 +101,21 @@ export const Edit = ( {
 			</InspectorControls>
 			<div className="wc-block-checkout__actions">
 				<div className="wc-block-checkout__actions_row">
-					<Noninteractive>
-						{ showReturnToCart && (
-							<ReturnToCartButton
-								link={ getSetting(
-									'page-' + cartPageId,
-									false
-								) }
+					{ showReturnToCart && (
+						<ReturnToCartButton href="#cart-page-placeholder">
+							<RichText
+								multiline={ false }
+								allowedFormats={ [] }
+								value={ returnToCartButtonLabel }
+								placeholder={ defaultReturnToCartButtonLabel }
+								onChange={ ( content ) => {
+									setAttributes( {
+										returnToCartButtonLabel: content,
+									} );
+								} }
 							/>
-						) }
-					</Noninteractive>
+						</ReturnToCartButton>
+					) }
 					<EditableButton
 						className={ clsx(
 							'wc-block-cart__submit-button',
