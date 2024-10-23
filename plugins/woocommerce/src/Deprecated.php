@@ -3,7 +3,7 @@
 /**
  * Class Aliases for graceful Backwards compatibility.
  *
- * This file is autoloaded via composer.json and maps the old namespaces to new namespaces.
+ * This file is autoloaded via composer.json and maps the old namespaces to deprecation handlers.
  */
 
 use Automattic\WooCommerce\Admin\Features\Navigation\RemovedDeprecated;
