@@ -11,9 +11,6 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
-use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
-use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
-use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 
 defined( 'ABSPATH' ) || exit;
 
