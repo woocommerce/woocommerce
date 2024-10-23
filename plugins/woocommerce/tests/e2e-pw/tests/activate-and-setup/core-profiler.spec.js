@@ -349,23 +349,44 @@ test.describe(
 					} )
 				).toBeVisible();
 				// confirm that the optional plugins are present
-				const installedExtensionSlugs = [
-					'pinterest-for-woocommerce',
-					'google-listings-and-ads',
-				];
-
-				// Loop through the slugs and check if they are visible on the page using `data-slug`
-				for ( const slug of installedExtensionSlugs ) {
-					const pluginLocator = page.locator(
-						`[data-slug="${ slug }"]`
+				try {
+					await expect(
+						page.locator(
+							`[data-slug="pinterest-for-woocommerce"]`
+						)
+					).toBeVisible();
+				} catch {
+					console.log(
+						`Pinterest is not found or not visible on the page`
 					);
-					try {
-						await expect( pluginLocator ).toBeVisible();
-					} catch {
-						console.log(
-							`${ slug } is not found or not visible on the page`
-						);
-					}
+				}
+
+				try {
+					await expect(
+						page.locator( `[data-slug="google-listings-and-ads"]` )
+					).toBeVisible();
+				} catch {
+					console.log(
+						`Google for WooCommerce is not found or not visible on the page`
+					);
+				}
+
+				try {
+					await expect(
+						page.locator(
+							`[data-slug="mailchimp-for-woocommerce"]`
+						)
+					).toBeHidden();
+				} catch {
+					console.log( `MailChimp is found on the page` );
+				}
+
+				try {
+					await expect(
+						page.locator( `[data-slug="jetpack"]` )
+					).toBeHidden();
+				} catch {
+					console.log( `Jetpack is found on the page` );
 				}
 			} );
 
