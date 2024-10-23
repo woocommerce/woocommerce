@@ -348,25 +348,22 @@ test.describe(
 				).toBeVisible();
 				// confirm that the optional plugins are present
 				await expect(
-					page.locator( '.plugin-title', {
-						hasText: 'Pinterest for WooCommerce',
+					page.locator( 'tr' ).filter( {
+						has: page.locator(
+							// 50-50 share between Kliken and Pinterest plugin
+							'tr[data-slug=/kliken-ads-pixel-for-meta|pinterest-for-woocommerce/]'
+						),
 					} )
 				).toBeVisible();
 				await expect(
-					page.locator( '.plugin-title', {
-						hasText: /Google for WooCommerce|Google Listings & Ads/,
-					} )
+					page.locator( 'tr[data-slug="google-listings-and-ads"]' )
 				).toBeVisible();
 
 				await expect(
-					page.locator( '.plugin-title', {
-						hasText: 'MailPoet',
-					} )
+					page.locator( 'tr[data-slug="mailpoet"]' )
 				).toBeHidden();
 				await expect(
-					page.locator( '.plugin-title', {
-						hasText: 'Jetpack',
-					} )
+					page.locator( 'tr[data-slug="jetpack"]' )
 				).toBeHidden();
 			} );
 
