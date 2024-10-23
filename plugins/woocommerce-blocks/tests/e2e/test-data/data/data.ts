@@ -9,13 +9,13 @@ const {
 	CUSTOMER_LAST_NAME,
 } = process.env;
 
-export const admin = {
+const admin = {
 	username: ADMIN_USER ?? 'admin',
 	password: ADMIN_PASSWORD ?? 'password',
 	email: ADMIN_USER_EMAIL ?? 'admin@example.com',
 };
 
-export const customer = {
+const customer = {
 	username: CUSTOMER_USER ?? 'customer',
 	password: CUSTOMER_PASSWORD ?? 'password',
 	email: CUSTOMER_USER_EMAIL ?? 'customer@example.com',
@@ -60,7 +60,7 @@ export const customer = {
 
 // Reviews are ordered by when they were created.
 // source: plugins/woocommerce-blocks/tests/e2e/bin/scripts/parallel/reviews.sh
-export const hoodieReviews = [
+const hoodieReviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,
@@ -75,7 +75,7 @@ export const hoodieReviews = [
 	},
 ];
 
-export const capReviews = [
+const capReviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,
@@ -90,9 +90,9 @@ export const capReviews = [
 	},
 ];
 
-export const allReviews = hoodieReviews.concat( capReviews );
+const allReviews = hoodieReviews.concat( capReviews );
 
-export const storeDetails = {
+const storeDetails = {
 	us: {
 		store: {
 			address: 'addr1',
@@ -123,4 +123,19 @@ export const storeDetails = {
 			countryCode: 'LR',
 		},
 	},
+};
+
+const translations = {
+	lang: 'nl',
+	locale: 'nl_NL',
+};
+
+module.exports = {
+	admin,
+	customer,
+	hoodieReviews,
+	capReviews,
+	allReviews,
+	storeDetails,
+	translations,
 };
