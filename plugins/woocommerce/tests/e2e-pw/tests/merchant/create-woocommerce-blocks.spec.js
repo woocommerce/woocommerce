@@ -28,7 +28,7 @@ const blocks = [
 	'Filter by Price',
 	'Filter by Rating',
 	'Filter by Stock',
-	'Hand-picked',
+	'Hand-Picked',
 	'New Arrivals',
 	'On Sale',
 	'Product Categories List',
