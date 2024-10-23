@@ -9,9 +9,11 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Controller for the REST endpoint to the send the order details emails to customers
+ * Controller for the REST endpoint to run actions on orders.
+ *
+ * This first version only supports sending the order details to the customer (`send_order_details`).
  */
-class OrderDetailsRestController extends RestApiControllerBase {
+class OrderActionsRestController extends RestApiControllerBase {
 	use AccessiblePrivateMethods;
 
 	/**
@@ -20,7 +22,7 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return 'order-details';
+		return 'order-actions';
 	}
 
 	/**
@@ -29,14 +31,14 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	public function register_routes() {
 		register_rest_route(
 			$this->route_namespace,
-			'/orders/(?P<id>[\d]+)/details',
+			'/orders/(?P<id>[\d]+)/actions',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'send_order_details' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'order_actions' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-					'args'                => $this->get_args_for_send_order_details(),
-					'schema'              => $this->get_schema_for_send_order_details(),
+					'args'                => $this->get_args_for_order_actions(),
+					'schema'              => $this->get_schema_for_order_actions(),
 				),
 			)
 		);
@@ -64,13 +66,21 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	 *
 	 * @return array[]
 	 */
-	private function get_args_for_send_order_details(): array {
+	private function get_args_for_order_actions(): array {
 		return array(
-			'id' => array(
+			'id'     => array(
 				'description' => __( 'Unique identifier of the order.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+			),
+			'action' => array(
+				'description' => __( 'The action to run on the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'enum'        => array( 'send_order_details' ),
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'required'    => true,
 			),
 		);
 	}
@@ -80,7 +90,7 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	 *
 	 * @return array[]
 	 */
-	private function get_schema_for_send_order_details(): array {
+	private function get_schema_for_order_actions(): array {
 		$schema['properties'] = array(
 			'message' => array(
 				'description' => __( 'A message indication whether the email was sent.', 'woocommerce' ),
@@ -93,14 +103,17 @@ class OrderDetailsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Handle the POST /orders/{id}/details.
-	 *
-	 * Sends the order details email to the customer.
+	 * Handle the POST /orders/{id}/actions.
 	 *
 	 * @param WP_REST_Request $request The received request.
 	 * @return array|WP_Error Request response or an error.
 	 */
-	public function send_order_details( WP_REST_Request $request ) {
+	public function order_actions( WP_REST_Request $request ) {
+		$action = $request->get_param( 'action' );
+		if ( 'send_order_details' !== $action ) {
+			return new WP_Error( 'invalid_action', __( 'Invalid action.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 		$order_id = $request->get_param( 'id' );
 		$order    = wc_get_order( $order_id );
 		if ( ! $order ) {

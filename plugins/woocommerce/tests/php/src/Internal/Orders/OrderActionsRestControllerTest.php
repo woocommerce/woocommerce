@@ -3,18 +3,18 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
-use Automattic\WooCommerce\Internal\Orders\OrderDetailsRestController;
+use Automattic\WooCommerce\Internal\Orders\OrderActionsRestController;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
- * OrderDetailsRestController API controller test.
+ * OrderActionsRestController API controller test.
  *
- * @class OrderDetailsRestController
+ * @class OrderActionsRestController
  */
-class OrderDetailsRestControllerTest extends WC_REST_Unit_Test_Case {
+class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	/**
-	 * @var OrderDetailsRestController
+	 * @var OrderActionsRestController
 	 */
 	protected $controller;
 
@@ -29,10 +29,45 @@ class OrderDetailsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->controller = new OrderDetailsRestController();
+		$this->controller = new OrderActionsRestController();
 		$this->controller->register_routes();
 
 		$this->user = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+	}
+
+	/**
+	 * Test calling the endpoint without an action.
+	 */
+	public function test_missing_action() {
+		wp_set_current_user( $this->user );
+
+		$order   = wc_create_order();
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+		$this->assertEquals( 'Missing parameter(s): action', $data['message'] );
+	}
+
+	/**
+	 * Test calling the endpoint with an unknown action.
+	 */
+	public function test_invalid_action() {
+		wp_set_current_user( $this->user );
+
+		$order   = wc_create_order();
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions' );
+		$request->set_param( 'action', 'unknown_action' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertEquals( 'Invalid parameter(s): action', $data['message'] );
 	}
 
 	/**
@@ -43,7 +78,9 @@ class OrderDetailsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( $this->user );
 
-		$request  = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/details' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions' );
+		$request->set_param( 'action', 'send_order_details' );
+
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -63,7 +100,8 @@ class OrderDetailsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_send_order_details_with_non_existent_order() {
 		wp_set_current_user( $this->user );
 
-		$request  = new WP_REST_Request( 'POST', '/wc/v3/orders/999/details' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/999/actions' );
+		$request->set_param( 'action', 'send_order_details' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 404, $response->get_status() );
@@ -81,9 +119,11 @@ class OrderDetailsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Use a customer user who shouldn't have permission.
 		$customer = $this->factory->user->create( array( 'role' => 'customer' ) );
+
 		wp_set_current_user( $customer );
 
-		$request  = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/details' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions' );
+		$request->set_param( 'action', 'send_order_details' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 403, $response->get_status() );

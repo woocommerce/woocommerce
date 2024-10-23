@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
-use Automattic\WooCommerce\Internal\Orders\OrderDetailsRestController;
+use Automattic\WooCommerce\Internal\Orders\OrderActionsRestController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 
 /**
@@ -23,7 +23,7 @@ class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider 
 	protected $provides = array(
 		CouponsController::class,
 		TaxesController::class,
-		OrderDetailsRestController::class,
+		OrderActionsRestController::class,
 	);
 
 	/**
@@ -32,6 +32,6 @@ class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider 
 	public function register() {
 		$this->share( CouponsController::class );
 		$this->share( TaxesController::class );
-		$this->share_with_implements_tags( OrderDetailsRestController::class );
+		$this->share_with_implements_tags( OrderActionsRestController::class );
 	}
 }
