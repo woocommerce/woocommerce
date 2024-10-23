@@ -5,6 +5,12 @@ namespace Automattic\WooCommerce\Admin\Features\Navigation;
 use WC_Tracks;
 
 class RemovedDeprecated {
+    /**
+     * Handle deprecated method calls.
+     *
+     * @param string $class The class name.
+     * @param string $name The name of the deprecated method.
+     */
 	private static function handle_deprecated_method_call( $class, $name ) {
 		$logger = wc_get_logger();
 		
