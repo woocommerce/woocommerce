@@ -1,0 +1,16 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace__search {
+	grid-area: mktpl-search;
+	margin-top: 15px;
+	width: 320px;
+
+	@media screen and (max-width: $breakpoint-medium) {
+		margin: $grid-unit-20 $grid-unit-20 $grid-unit-10 $grid-unit-20;
+		width: calc(100% - $grid-unit-20 * 2);
+
+		.components-input-control__input {
+			font-size: 13px !important;
+		}
+	}
+}

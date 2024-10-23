@@ -20,7 +20,7 @@ const collection = {
 		'woocommerce'
 	),
 	keywords: [ 'product collection' ],
-	scope: [],
+	scope: [ 'block' ],
 };
 
 const attributes = {

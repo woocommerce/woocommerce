@@ -115,7 +115,6 @@ export const AddNote = () => {
 						labelPosition="side"
 						options={ [
 							{ label: 'Plain', value: 'plain' },
-							{ label: 'Banner', value: 'banner' },
 							{ label: 'Thumbnail', value: 'thumbnail' },
 						] }
 						disabled={ noteType !== 'info' }

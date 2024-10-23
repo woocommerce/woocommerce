@@ -97,30 +97,4 @@ class Payments extends Task {
 
 		return ! empty( $enabled_gateways );
 	}
-
-	/**
-	 * Action URL.
-	 *
-	 * @return string
-	 */
-	public function get_action_url() {
-		// Check if the WooPayments plugin is active and the store is supported.
-		if ( WooCommercePayments::is_supported() && WooCommercePayments::is_wcpay_active() ) {
-			// If WooPayments is connected, point to the WooPayments overview page.
-			if ( WooCommercePayments::is_connected() ) {
-				return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/overview' ) );
-			}
-
-			// Point to the WooPayments Connect page.
-			return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/connect' ) );
-		}
-
-		// Check if there is an active WooPayments incentive via the welcome page.
-		if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
-			// Point to the WooPayments welcome page.
-			return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
-		}
-
-		return admin_url( 'admin.php?page=wc-admin&task=payments' );
-	}
 }

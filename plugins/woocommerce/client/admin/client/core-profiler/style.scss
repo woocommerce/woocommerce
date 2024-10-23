@@ -1,0 +1,707 @@
+@import "./shared.scss";
+
+.woocommerce-layout .woocommerce-layout__main {
+	@include breakpoint("<782px") {
+		padding-top: 0 !important;
+	}
+}
+
+.woocommerce-profile-wizard__body {
+	background-color: #fff;
+
+	#woocommerce-layout__primary {
+		margin: 0;
+		width: 100%;
+	}
+
+	.woocommerce-layout__main {
+		padding-right: 0;
+	}
+}
+
+.woocommerce-profiler-page__content {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+
+	--color-error: #cc1818; // used by some @automattic/components
+
+	@include breakpoint("<782px") {
+		padding: 0 20px;
+	}
+
+	.woocommerce-profiler-button-container {
+		width: 100%;
+		max-width: 404px;
+	}
+
+	.woocommerce-profiler-button {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+		padding: 10px 16px;
+		height: 48px;
+		font-size: 14px;
+		font-weight: normal;
+
+		svg.components-spinner {
+			margin: 0;
+		}
+	}
+
+	.woocommerce-select-control__option {
+		font-size: 13px;
+		height: 40px;
+		min-height: initial;
+
+		&:hover {
+			background: #f6f7f7; // Gray-0
+			color: $gray-900;
+		}
+	}
+	.woocommerce-select-control__listbox {
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+		border: 1px solid #ccc;
+		margin-top: 8px;
+		top: 40px;
+	}
+
+	.woocommerce-select-control__control {
+		height: 40px;
+		padding: 12px;
+		border: 1px solid #bbb;
+
+		label,
+		.woocommerce-select-control__control-input {
+			font-size: 13px;
+			cursor: pointer;
+		}
+
+		.components-base-control__label {
+			font-size: 13px;
+			line-height: 16px;
+			color: $gray-700;
+		}
+
+		&.with-value {
+			.woocommerce-select-control__control-input {
+				margin: 0;
+				color: $gray-900;
+			}
+
+			.components-base-control__label {
+				display: none;
+			}
+		}
+
+		&.is-active {
+			border: 1px solid var(--wp-admin-theme-color);
+		}
+	}
+
+	#woocommerce-select-control__listbox-0 {
+		top: 40px !important;
+	}
+}
+
+.woocommerce-profiler-select-control__country {
+	max-width: 404px;
+	margin: auto auto 32px auto;
+}
+
+// Intro opt-in page
+.woocommerce-profiler-intro-opt-in {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+
+	.woocommerce-profiler-heading {
+		.woocommerce-profiler-heading__title {
+			font-size: 40px;
+			line-height: 46px;
+		}
+	}
+}
+
+.woocommerce-profiler-intro-opt-in__content {
+	padding-top: 110px;
+	flex: 1;
+
+	@include breakpoint("<782px") {
+		padding-top: 70px;
+	}
+
+	.woocommerce-profiler-heading {
+		max-width: 520px;
+	}
+
+	.woocommerce-profiler-welcome-image {
+		margin-bottom: 64px;
+		width: 266px;
+		height: 172px;
+		background: url(./assets/images/welcome-desktop.svg) no-repeat center
+			center;
+
+		@include breakpoint("<782px") {
+			margin-bottom: 40px;
+			background: url(./assets/images/welcome-mobile.svg) no-repeat center
+				center;
+			width: 222px;
+			height: 144px;
+		}
+	}
+
+	.woocommerce-profiler-setup-store__button {
+		padding: 10px 16px;
+		width: 200px;
+		height: 48px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 14px;
+		font-weight: normal;
+		margin-bottom: 16px;
+
+		@include breakpoint("<782px") {
+			width: 100%;
+			margin-top: auto;
+		}
+	}
+
+	.woocommerce-profiler-intro-opt-in__footer {
+		margin: auto auto 40px;
+		display: flex;
+		justify-content: center;
+
+		@include breakpoint("<782px") {
+			margin: 0 auto 20px;
+		}
+
+		.components-checkbox-control__input-container {
+			margin-left: 5px;
+		}
+
+		.components-checkbox-control__label {
+			display: inline-block;
+			color: $gray-700;
+			font-size: 13px;
+			line-height: 16px;
+			max-width: 514px;
+			margin-left: 10px;
+		}
+
+	}
+}
+// Business location page
+.woocommerce-profiler-select-control__country {
+	max-width: 400px;
+	margin: auto auto 32px auto;
+	.woocommerce-select-control__option {
+		font-size: 13px;
+	}
+	.woocommerce-select-control__listbox {
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+		border: 1px solid #ccc;
+		margin-top: 8px;
+	}
+
+	.woocommerce-select-control__control {
+		height: 40px;
+		padding: 12px;
+		border: 1px solid #bbb;
+		label,
+		input {
+			font-size: 13px;
+			color: var(--wp-components-color-foreground, #757575);
+		}
+		&.is-active {
+			border: 1px solid #3858e9;
+		}
+	}
+	#woocommerce-select-control__listbox-0 {
+		top: 40px !important;
+	}
+}
+
+.woocommerce-profiler-business-location {
+	display: flex;
+	flex-direction: column;
+	.woocommerce-profiler-business-location__content {
+		width: 100%;
+		display: flex;
+		align-self: center;
+		& > div {
+			width: 100%;
+		}
+
+		.woocommerce-profiler-heading {
+			max-width: 570px;
+		}
+
+		.components-base-control__field {
+			height: 40px;
+		}
+
+		.woocommerce-select-control__control-icon {
+			display: none;
+		}
+
+		.woocommerce-select-control__control.is-active {
+			.components-base-control__label {
+				display: none;
+			}
+		}
+
+		.woocommerce-select-control.is-searchable
+		.woocommerce-select-control__control-input {
+			margin: 0;
+			padding: 0;
+		}
+
+		.woocommerce-select-control.is-searchable
+		.components-base-control__label {
+			left: 13px;
+		}
+	}
+}
+
+// User profile page
+.woocommerce-profiler-user-profile {
+	.woocommerce-profiler-user-profile__content {
+		min-height: 630px;
+
+		&.is-platform-selector-open {
+			padding-bottom: 145px;
+		}
+	}
+
+	.woocommerce-experimental-select-control
+	.components-popover
+	.components-popover__content
+	ul
+	li:hover {
+		background-color: #f6f7f7 !important; // Gray-0
+		color: $gray-900;
+	}
+
+	.woocommerce-user-profile-choices {
+		margin-bottom: 32px;
+		max-width: 404px;
+		width: 100%;
+	}
+
+	.woocommerce-user-profile-choices fieldset {
+		display: flex;
+		gap: 18px;
+		flex-direction: column;
+	}
+
+	.woocommerce-profiler-choice-sub-options {
+		.woocommerce-profiler-question-label {
+			text-transform: uppercase;
+			color: $gray-900;
+			font-weight: 500;
+			font-size: 11px;
+			line-height: 16px;
+			margin: 0 0 8px;
+		}
+	}
+
+	.woocommerce-profiler-selling-platform {
+		margin-top: 20px;
+	}
+}
+
+.woocommerce-profiler-plugins {
+	display: flex;
+	flex-direction: column;
+	.woocommerce-profiler-plugins__content {
+		display: flex;
+		align-items: center;
+		align-self: center;
+		max-width: 1000px;
+		width: 100%;
+	}
+	.woocommerce-profiler-heading {
+		max-width: 615px;
+		margin: 58px 0 0 0;
+	}
+	.woocommerce-profiler-heading__title {
+		color: $gray-900;
+		padding: 0;
+	}
+	.woocommerce-profiler-heading__subtitle {
+		margin: 12px 0 48px 0 !important;
+		@include breakpoint("<782px") {
+			margin-top: 12px !important;
+		}
+	}
+
+	$sticky-footer-height: 120px;
+
+	.woocommerce-profiler-plugins__list {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 16px;
+		flex: 50%;
+
+		@mixin sticky-footer-scroll-padding {
+			padding-bottom: $sticky-footer-height + 32px;
+		}
+
+		@include breakpoint(">782px") {// sticky footer shouldn't apply to mobile layout
+			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
+			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
+			&.rows-1 {
+				@media screen and ( max-height: 520px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-2 {
+				@media screen and ( max-height: 650px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-3 {
+				@media screen and ( max-height: 780px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-4 {
+				@media screen and ( max-height: 910px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+		}
+	}
+
+	.woocommerce-profiler-plugins-continue-button {
+		width: 200px;
+		height: 48px;
+		margin-top: 28px;
+		text-align: center;
+		display: block;
+		font-size: 14px;
+		font-weight: normal;
+	}
+
+	.plugin-error {
+		width: 100%;
+		border-left: 4px solid #cc1818;
+		background-color: #fce2e4;
+		padding: 12px;
+		margin: 0 0 28px 0;
+		color: #1e1e1e;
+		button {
+			text-decoration: none;
+		}
+		span {
+			font-weight: bold;
+		}
+	}
+
+	.woocommerce-profiler-plugins-jetpack-agreement {
+		color: $gray-700;
+		font-size: 12px;
+	}
+
+	.woocommerce-profiler-plugins__footer {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		@mixin plugins-sticky-footer {
+			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 44.69%);
+			height: $sticky-footer-height;
+			position: fixed;
+			bottom: 0;
+		}
+
+		@include breakpoint(">782px") { // sticky footer shouldn't apply to mobile layout
+			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
+			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
+			&.rows-1 {
+				@media screen and ( max-height: 520px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-2 {
+				@media screen and ( max-height: 650px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-3 {
+				@media screen and ( max-height: 780px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-4 {
+				@media screen and ( max-height: 910px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+		}
+
+	}
+
+	.woocommerce-profiler-plugins-continue-button-container {
+		@include breakpoint("<782px") {
+			width: 100%;
+		}
+
+		.woocommerce-profiler-plugins-continue-button {
+			@include breakpoint("<782px") {
+				width: 100%;
+			}
+		}
+	}
+}
+
+// Business Info Page
+.woocommerce-profiler-business-information {
+	display: flex;
+	flex-direction: column;
+	.woocommerce-profiler-business-information__content {
+		max-width: 615px;
+		width: 100%;
+		display: flex;
+		align-self: center;
+
+		& > div {
+			width: 100%;
+		}
+
+		.woocommerce-profiler-business-information-form {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			height: 100%;
+			max-width: 404px;
+			width: 100%;
+
+			&:has(.woocommerce-profiler-geolocation-notice) {
+				@include breakpoint("<782px") {
+					margin-bottom: 82px;
+				}
+			}
+		}
+
+		.woocommerce-profiler-question-label,
+		.woocommerce-profiler-business-info-email-adddress
+		.components-base-control__label,
+		.woocommerce-profiler-business-info-store-name
+		.components-base-control__label {
+			text-transform: uppercase;
+			color: $gray-900;
+			font-weight: 500;
+			font-size: 11px;
+			line-height: 16px;
+			margin: 0 0 8px;
+		}
+
+		.woocommerce-profiler-question-label
+		.woocommerce-profiler-question-required,
+		.woocommerce-profiler-business-info-email-adddress
+		.woocommerce-profiler-question-required {
+			color: #cc1818;
+			padding-left: 3px;
+		}
+
+		.woocommerce-profiler-business-info-email-adddress
+		.components-text-control__input,
+		.woocommerce-profiler-business-info-store-name
+		.components-text-control__input {
+			height: 40px;
+			border-color: #bbb;
+			border-radius: 2px;
+			border-width: 1px;
+			font-size: 13px;
+			&:focus {
+				border-color: transparent;
+				box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #006088);
+			}
+		}
+
+		.woocommerce-profiler-business-info-email-adddress.is-error {
+			& .components-text-control__input {
+				box-shadow: 0 0 0 1px var(--color-error);
+			}
+		}
+
+		.form-input-validation.is-error span svg {
+			height: 20px;
+			width: 20px;
+		}
+
+		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-adddress {
+			margin-top: 8px;
+		}
+
+		.woocommerce-profiler-business-info-email-adddress {
+			margin-top: 20px;
+		}
+
+		.core-profiler__checkbox {
+			margin-top: 4px;
+
+			.components-checkbox-control__input-container {
+				margin-right: 16px;
+			}
+
+			.components-checkbox-control__label {
+				color: $gray-700;
+				font-size: 12px;
+				line-height: 16px;
+				font-weight: 400;
+			}
+		}
+
+		.woocommerce-profiler-select-control__industry {
+			margin-bottom: 20px;
+		}
+
+		.woocommerce-profiler-question-subtext {
+			color: $gray-700;
+			font-size: 12px;
+			line-height: 16px;
+			font-weight: 400;
+			margin-top: 0;
+			margin-bottom: 20px;
+		}
+
+		.woocommerce-profiler-select-control__country {
+			max-width: 404px;
+			margin: 0;
+		}
+
+		.woocommerce-profiler-select-control__country-error {
+			background: #fce2e4;
+			padding: $gap-small;
+			font-size: 13px;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 24px;
+			color: $gray-900;
+			margin: 12px 0;
+
+			.components-notice__content {
+				margin: 0;
+			}
+
+			.components-button {
+				padding: 0;
+				height: initial;
+				min-width: 24px;
+				min-height: 24px;
+
+				svg {
+					width: 16px;
+					fill: $gray-900;
+				}
+			}
+		}
+
+		.woocommerce-profiler-select-control__country-spacer {
+			margin: auto auto 12px auto;
+		}
+
+		.woocommerce-profiler-button-container {
+			margin-top: 32px;
+		}
+
+		.woocommerce-select-control__control-icon {
+			display: none;
+		}
+
+		.woocommerce-select-control__control.is-active {
+			.components-base-control__label {
+				display: none;
+			}
+		}
+
+		.woocommerce-select-control.is-searchable
+		.woocommerce-select-control__control-input {
+			margin: 0;
+			padding: 0;
+		}
+
+		.woocommerce-select-control.is-searchable
+		.components-base-control__label {
+			left: 13px;
+		}
+
+		.woocommerce-profiler-geolocation-notice {
+			margin: 0;
+			margin-bottom: 0;
+			padding-right: 0;
+			color: $gray-900;
+
+			.components-notice__dismiss > svg {
+				height: 16px;
+				fill: #000;
+			}
+
+			.components-notice__dismiss {
+				height: 16px;
+				margin-right: 8px;
+			}
+
+			p {
+				font-weight: 400;
+				font-size: 13px;
+				line-height: 20px;
+				margin: 0;
+
+				.geolocation-notice-geolocated-country {
+					text-decoration: none;
+				}
+			}
+
+			.woocommerce-profiler-geolocation-notice__list {
+				list-style-type: unset;
+				padding-left: 20px;
+				font-weight: 500;
+				line-height: 20px;
+			}
+		}
+	}
+}
+
+@media screen and (max-height: 667px) {
+	.woocommerce-profiler-user-profile__content {
+		.woocommerce-profiler-button-container {
+			position: inherit;
+			padding: 0;
+		}
+	}
+}
+
+@media screen and (max-height: 850px) {
+	.woocommerce-profiler-select-control__industry {
+		.woocommerce-select-control__listbox {
+			max-height: 162px;
+		}
+	}
+}
+
+// Override WP Core style where it applies padding-top: 46px
+// This style fixes devices with width between 601px and 782px (iPad and iPad Mini)
+@media screen and (min-width: 601px) and (max-width: 782px) {
+	html.wp-toolbar {
+		padding-top: 32px !important;
+	}
+}
+
+.woocommerce-profiler-builder-intro {
+	display: flex;
+	flex-direction: column;
+	padding: 30px;
+	gap: 20px;
+	align-items: center;
+}
+
+.woocommerce-profiler-builder-intro-file-input {
+	margin-left: 100px;
+}

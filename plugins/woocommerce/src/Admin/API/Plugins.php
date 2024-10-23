@@ -592,7 +592,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Returns a URL that can be used by WooPayments to verify business details.
+	 * Returns a URL that can be used to point the merchant to the WooPayments onboarding flow.
 	 *
 	 * @return \WP_Error|array Connect URL.
 	 */
@@ -601,14 +601,17 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		// Redirect to the WooPayments overview page if the merchant started onboarding (aka WooPayments is already connected).
-		// Redirect to the WooPayments connect page if they haven't started onboarding.
-		$path = WooCommercePayments::is_connected() ? '/payments/overview' : '/payments/connect';
-
-		// Point to the WooPayments Connect page rather than straight to the onboarding flow.
-		return( array(
-			'connectUrl' => add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=' . $path ) ),
-		) );
+		// Use a WooPayments connect link to let the WooPayments plugin handle the connection flow.
+		return array(
+			'connectUrl' => add_query_arg(
+				array(
+					'wcpay-connect' => '1',
+					'from'          => 'WCADMIN_PAYMENT_TASK',
+					'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+				),
+				admin_url( 'admin.php' )
+			),
+		);
 	}
 
 	/**

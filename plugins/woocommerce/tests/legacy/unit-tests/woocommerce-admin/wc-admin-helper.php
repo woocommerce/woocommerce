@@ -238,12 +238,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 
 		$wp_rewrite = $this->getMockBuilder( 'WP_Rewrite' )->getMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$permalink_structure = array(
-			'category_base' => 'product-category',
-			'tag_base'      => 'product-tag',
-			'product_base'  => 'product',
-		);
-
 		$wp_rewrite->expects( $this->any() )
 			->method( 'generate_rewrite_rule' )
 			->willReturn( array( 'shop/(.+?)/?$' => 'index.php?product_cat=$matches[1]&year=$matches[2]' ) );
@@ -255,6 +249,18 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			$result                        = WCAdminHelper::is_store_page( $url );
 			$this->assertEquals( $expected_result, $result );
 		}
+
+		$callback = function ( $value ) {
+			$value['product_base'] = 'product/';
+			return $value;
+		};
+
+		add_filter( 'pre_option_woocommerce_permalinks', $callback, 10, 1 );
+
+		// Pages with name "products-demo" shouldn't be considered as a store page when product_base is set to "product/".
+		$this->assertEquals( false, WCAdminHelper::is_store_page( 'https://example.com/products-demo/' ) );
+
+		remove_filter( 'pre_option_woocommerce_permalinks', $callback );
 	}
 
 	/**

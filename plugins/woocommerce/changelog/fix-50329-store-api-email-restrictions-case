@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed case sensitivity of coupon email restrictions from Store API
