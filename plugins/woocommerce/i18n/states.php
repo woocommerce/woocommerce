@@ -1576,7 +1576,6 @@ return array(
 		'SD' => __( 'Sindh', 'woocommerce' ),
 	),
 	'PL' => array(),
-	'PR' => array(),
 	'PT' => array(),
 	'PY' => array( // Paraguayan states.
 		'PY-ASU' => __( 'Asunción', 'woocommerce' ),
