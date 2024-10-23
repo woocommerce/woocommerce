@@ -1278,4 +1278,17 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales DESC', $query->request );
 	}
+
+	/**
+	 * Test the menu_order sorting functionality.
+	 */
+	public function test_menu_order_sorting() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
+		$parsed_block['attrs']['query']['order']   = 'asc';
+		$merged_query                              = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals( 'menu_order', $merged_query['orderby'] );
+		$this->assertEquals( 'ASC', $merged_query['order'] );
+	}
 }
