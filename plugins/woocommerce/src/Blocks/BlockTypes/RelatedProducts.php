@@ -93,7 +93,7 @@ class RelatedProducts extends AbstractBlock {
 	 * @return array
 	 */
 	public function build_query( $query, $block ) {
-		$parsed_block                = $this->parsed_block;
+		$parsed_block = $this->parsed_block;
 		if ( ! $this->is_related_products_block( $parsed_block, $block ) ) {
 			return $query;
 		}
