@@ -251,21 +251,28 @@ class WC_Structured_Data {
 					);
 
 					if ( $product->is_on_sale() ) {
-						$children = array_map( 'wc_get_product', $product->get_children() );
+						$children                = array_map( 'wc_get_product', $product->get_children() );
+						$lowest_child_sale_price = $highest;
 
 						foreach ( $children as $child ) {
 							$child_sale_price = $child->get_sale_price();
 
-							if ( (int) $child_sale_price === (int) $lowest && $child->get_date_on_sale_to() ) {
-								$sale_price_valid_until = gmdate( 'Y-m-d', $child->get_date_on_sale_to()->getTimestamp() );
+							if ( empty( $child_sale_price ) || (int) $child_sale_price > (int) $lowest_child_sale_price ) {
+								continue;
 							}
+
+							$lowest_child_sale_price = $child_sale_price;
+							$date_on_sale_to         = $child->get_date_on_sale_to();
+							$sale_price_valid_until  = $date_on_sale_to
+								? gmdate( 'Y-m-d', $date_on_sale_to->getTimestamp() )
+								: null;
 						}
 
 						$markup_offer['priceSpecification'] = array(
 							array(
 								'@type'                 => 'UnitPriceSpecification',
 								'priceType'             => 'https://schema.org/SalePrice',
-								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+								'price'                 => wc_format_decimal( $lowest_child_sale_price, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
 								'valueAddedTaxIncluded' => wc_prices_include_tax(),
 								'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
