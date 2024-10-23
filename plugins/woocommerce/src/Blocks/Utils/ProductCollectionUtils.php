@@ -11,11 +11,11 @@ class ProductCollectionUtils {
 	/**
 	 * Check if that's Product Collection block based on $query.
 	 *
-	 * @param WP_Query $query The WP_Query instance.
+	 * @param string[] $query_vars The WP_Query vars.
 	 *
 	 * @return boolean
 	 */
-	public static function is_product_collection_from_query( $query ) {
+	public static function is_product_collection_from_query( $query_vars ) {
 		return $query_vars['isProductCollection'] ?? false;
 	}
 
