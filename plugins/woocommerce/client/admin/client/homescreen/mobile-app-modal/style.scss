@@ -16,6 +16,11 @@
 	// Overrides the default modal max-height.
 	max-height: unset;
 
+	@media only screen and (max-width: $break-mobile) {
+		min-width: 100%;
+		max-height: 100%;
+	}
+
 	.components-modal__header {
 		height: 0;
 
@@ -35,6 +40,10 @@
 			grid-template-columns: 3fr 2fr;
 			min-height: 575px;
 
+			@media only screen and (max-width: $break-mobile) {
+				grid-template-columns: 1fr;
+			}
+
 			.mobile-app-modal-content {
 				display: flex;
 
@@ -47,10 +56,13 @@
 					.modal-layout-header {
 						.modal-header > h1 {
 							line-height: normal;
+							margin: 24px 0 0;
 						}
 					}
 					.modal-layout-body {
 						flex-grow: 1;
+						margin-bottom: 16px;
+
 						.modal-subheader {
 							margin-top: 16px;
 							margin-bottom: 24px;
@@ -58,6 +70,7 @@
 								font-weight: 400;
 								color: #757575;
 								line-height: 1.6rem;
+								margin: 0;
 							}
 						}
 					}
@@ -95,12 +108,16 @@
 				background-repeat: no-repeat;
 				background-image: url("data:image/svg+xml,%3Csvg width='341' height='421' viewBox='0 0 341 421' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M-258.536 396.856L-329.719 373.412C-338.484 370.525 -343.249 361.08 -340.362 352.315L-271.987 144.717C-269.1 135.952 -259.655 131.187 -250.89 134.074L-179.707 157.519C-69.5553 193.799 49.1512 133.914 85.431 23.7615L99.9575 -20.3434C102.844 -29.1081 112.29 -33.8731 121.054 -30.9864L328.652 37.3885C337.417 40.2752 342.182 49.7205 339.295 58.4852L324.769 102.59C244.953 344.925 -16.2016 476.672 -258.536 396.856Z' fill='%237F54B3'/%3E%3C/svg%3E");
 
-				padding-top: 36px;
+				padding-top: 74px;
 				overflow: clip;
 
 				img {
 					margin-right: -24px;
 					width: 100%;
+				}
+
+				@media only screen and (max-width: $break-mobile) {
+					display: none;
 				}
 			}
 		}
@@ -112,6 +129,25 @@
 
 	.fill-theme-color {
 		fill: var(--wp-admin-theme-color);
+	}
+
+	.components-button.woocommerce__mobile-app-welcome-modal__close-button {
+		width: 24px;
+		height: 24px;
+		min-width: 24px;
+		position: absolute;
+		right: 16px;
+		top: 16px;
+		margin: 0;
+		padding: 0;
+
+		svg {
+			fill: #fff;
+
+			@media only screen and (max-width: $break-mobile) {
+				fill: $gray-900;
+			}
+		}
 	}
 }
 .woo-icon {
@@ -280,3 +316,4 @@ button.components-button.send-magic-link-button {
 		}
 	}
 }
+
