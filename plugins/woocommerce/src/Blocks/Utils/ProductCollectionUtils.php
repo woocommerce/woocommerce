@@ -8,6 +8,28 @@ use WP_Query;
  * {@internal This class and its methods are not intended for public use.}
  */
 class ProductCollectionUtils {
+	/**
+	 * Check if that's Product Collection block based on $query.
+	 *
+	 * @param WP_Query $query The WP_Query instance.
+	 *
+	 * @return boolean
+	 */
+	public static function is_product_collection_from_query( $query ) {
+		$query_vars = $query->query_vars;
+		return $query_vars['isProductCollection'] ?? false;
+	}
+
+	/**
+	 * Check if that's Product Collection block based on $block instance.
+	 *
+	 * @param array $block The block being rendered.
+	 *
+	 * @return boolean
+	 */
+	public static function is_product_collection_from_block( $block ) {
+		return $block['attrs']['query']['isProductCollectionBlock'] ?? false;
+	}
 
 	/**
 	 * Prepare and execute a query for the Product Collection block.

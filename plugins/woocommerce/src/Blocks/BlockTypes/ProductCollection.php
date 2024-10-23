@@ -409,9 +409,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return string Updated block content with added interactivity attributes.
 	 */
 	public function enhance_product_collection_with_interactivity( $block_content, $block ) {
-		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
-
-		if ( $is_product_collection_block ) {
+		if ( ProductCollectionUtils::is_product_collection_from_block( $block ) ) {
 			// Enqueue the Interactivity API runtime and set the namespace.
 			wp_enqueue_script( 'wc-interactivity' );
 			$p = new \WP_HTML_Tag_Processor( $block_content );
@@ -587,8 +585,8 @@ class ProductCollection extends AbstractBlock {
 		static $dirty_enhanced_queries             = array();
 		static $render_product_collection_callback = null;
 
+		$is_product_collection_block = ProductCollectionUtils::is_product_collection_from_block( $parsed_block );
 		$block_name                  = $parsed_block['blockName'];
-		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		$force_page_reload_global    =
 			$parsed_block['attrs']['forcePageReload'] ?? false &&
 			isset( $block['attrs']['queryId'] );
@@ -743,9 +741,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param array $parsed_block The parsed block.
 	 */
 	public function add_support_for_filter_blocks( $pre_render, $parsed_block ) {
-		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
-
-		if ( ! $is_product_collection_block ) {
+		if ( ! ProductCollectionUtils::is_product_collection_from_block( $parsed_block ) ) {
 			return $pre_render;
 		}
 
@@ -1712,9 +1708,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param WP_Query $query   The WP_Query instance.
 	 */
 	public function add_price_range_filter_posts_clauses( $clauses, $query ) {
-		$query_vars                  = $query->query_vars;
-		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
-		if ( ! $is_product_collection_block ) {
+		if ( ! ProductCollectionUtils::is_product_collection_from_query( $query ) ) {
 			return $clauses;
 		}
 
@@ -1756,10 +1750,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array   Modified list of clauses.
 	 */
 	public function add_price_sorting_posts_clauses( $clauses, $query ) {
-		$query_vars                  = $query->query_vars;
-		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
-
-		if ( ! $is_product_collection_block ) {
+		if ( ! ProductCollectionUtils::is_product_collection_from_query( $query ) ) {
 			return $clauses;
 		}
 
@@ -1786,10 +1777,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array   Modified list of clauses.
 	 */
 	public function add_sales_sorting_posts_clauses( $clauses, $query ) {
-		$query_vars                  = $query->query_vars;
-		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
-
-		if ( ! $is_product_collection_block ) {
+		if ( ! ProductCollectionUtils::is_product_collection_from_query( $query ) ) {
 			return $clauses;
 		}
 
