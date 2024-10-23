@@ -7,11 +7,12 @@ import '@wordpress/element';
  * Internal dependencies
  */
 import './settings-payments-offline.scss';
+import { OfflinePaymentGateways } from './components/offline-payment-gateways';
 
 export const SettingsPaymentsOffline: React.FC = () => {
 	return (
 		<div className="settings-payments-offline__container">
-			<h1>Offline payments screen</h1>
+			<OfflinePaymentGateways />
 		</div>
 	);
 };
