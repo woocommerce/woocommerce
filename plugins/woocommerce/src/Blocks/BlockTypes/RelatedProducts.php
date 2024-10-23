@@ -92,7 +92,7 @@ class RelatedProducts extends AbstractBlock {
 	 * @param WP_Block $block The block being rendered.
 	 * @return array
 	 */
-	public function build_query( $query, $block ) {
+	public function build_query( $query, $block = null ) {
 		$parsed_block = $this->parsed_block;
 		if ( ! $this->is_related_products_block( $parsed_block, $block ) ) {
 			return $query;
