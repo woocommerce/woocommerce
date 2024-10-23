@@ -43,6 +43,11 @@ class BlockUtils {
 		this.page = page;
 	}
 
+	/**
+	 * Configures the Single Product Block in the editor.
+	 * If a product name is provided, it searches for the product by name and selects it.
+	 * If no product name is provided, it selects the first product in the list by default.
+	 */
 	async configureSingleProductBlock( name?: string ) {
 		const singleProductBlock = await this.editor.getBlockByName(
 			'woocommerce/single-product'
