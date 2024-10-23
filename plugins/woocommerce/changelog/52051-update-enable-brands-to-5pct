@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Added a new update function for WC 9.5 to add the wc_feature_woocommerce_brands_enabled option.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Limit block asset registration to rendered blocks on the frontend

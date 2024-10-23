@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Revert of a recent change causing some layout problem. Not worth mentioning as it reverts within the same version, not public facing
-
-

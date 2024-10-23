@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: React error in filter blocks due to duplicated renders

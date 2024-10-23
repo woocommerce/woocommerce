@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adds screen reader text to announce as "Page X" instead of just the number

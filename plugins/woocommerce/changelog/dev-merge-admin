@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Comment: move plugins/woocommerce-admin to plugins/woocommerce/client/admin

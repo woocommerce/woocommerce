@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Update data poller classes to use dynamic base URL

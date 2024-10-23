@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Associate shipping calculator button to its form via aria-expanded/controls attribute

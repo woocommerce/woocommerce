@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Core profiler remove selecting activated plugins in extensions page

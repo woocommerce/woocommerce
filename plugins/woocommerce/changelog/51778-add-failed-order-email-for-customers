@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Send a customer notification email when an order is marked as "failed".

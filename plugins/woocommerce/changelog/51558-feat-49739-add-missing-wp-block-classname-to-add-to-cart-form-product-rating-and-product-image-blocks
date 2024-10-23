@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add missing `wp-block-woocommerce-{name}` class to Add to Cart with Options, Product Image, Product Rating, Product Rating Stars, Product Rating Counter and Product Image blocks.
