@@ -59,6 +59,8 @@ class ProductFilterPriceSlider extends AbstractBlock {
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				),
 				'data-wc-context'     => wp_json_encode( $price_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+				'data-wc-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+
 			)
 		);
 
