@@ -9,7 +9,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { CoreProfilerStateMachineContext } from '..';
 import {
-	IntroSkippedEvent,
 	UserProfileEvent,
 	BusinessInfoEvent,
 	PluginsLearnMoreLinkClickedEvent,
