@@ -818,10 +818,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_has_status() {
 		$object = new WC_Order();
-		$this->assertFalse( $object->has_status( 'completed' ) );
-		$this->assertFalse( $object->has_status( array( 'processing', 'completed' ) ) );
-		$this->assertTrue( $object->has_status( 'pending' ) );
-		$this->assertTrue( $object->has_status( array( 'processing', 'pending' ) ) );
+		$this->assertFalse( $object->has_status( WC_Order::STATUS_COMPLETED ) );
+		$this->assertFalse( $object->has_status( array( WC_Order::STATUS_PROCESSING, WC_Order::STATUS_COMPLETED ) ) );
+		$this->assertTrue( $object->has_status( WC_Order::STATUS_PENDING ) );
+		$this->assertTrue( $object->has_status( array( WC_Order::STATUS_PROCESSING, WC_Order::STATUS_PENDING ) ) );
 	}
 
 	/**
@@ -907,7 +907,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertFalse( $object->payment_complete() );
 		$object->save();
 		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( 'completed', $object->get_status() );
+		$this->assertEquals( WC_Order::STATUS_COMPLETED, $object->get_status() );
 		$this->assertEquals( '12345', $object->get_transaction_id() );
 	}
 
@@ -951,8 +951,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_set_status() {
 		$object = new WC_Order();
-		$object->set_status( 'on-hold' );
-		$this->assertEquals( 'on-hold', $object->get_status() );
+		$object->set_status( WC_Order::STATUS_ON_HOLD );
+		$this->assertEquals( WC_Order::STATUS_ON_HOLD, $object->get_status() );
 	}
 
 	/**
@@ -960,10 +960,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_update_status() {
 		$object = new WC_Order();
-		$this->assertFalse( $object->update_status( 'on-hold' ) );
+		$this->assertFalse( $object->update_status( WC_Order::STATUS_ON_HOLD ) );
 		$object->save();
-		$this->assertTrue( $object->update_status( 'on-hold' ) );
-		$this->assertEquals( 'on-hold', $object->get_status() );
+		$this->assertTrue( $object->update_status( WC_Order::STATUS_ON_HOLD ) );
+		$this->assertEquals( WC_Order::STATUS_ON_HOLD, $object->get_status() );
 	}
 
 	/**
@@ -978,7 +978,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
 
-		$this->assertFalse( $object->update_status( 'on-hold' ) );
+		$this->assertFalse( $object->update_status( WC_Order::STATUS_ON_HOLD ) );
 		$note = current(
 			wc_get_order_notes(
 				array(
@@ -999,7 +999,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		add_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
-		$object->update_status( 'on-hold' );
+		$object->update_status( WC_Order::STATUS_ON_HOLD );
 		remove_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
 
 		$note = current(
@@ -1547,9 +1547,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_is_editable() {
 		$object = new WC_Order();
-		$object->set_status( 'pending' );
+		$object->set_status( WC_Order::STATUS_PENDING );
 		$this->assertTrue( $object->is_editable() );
-		$object->set_status( 'processing' );
+		$object->set_status( WC_Order::STATUS_PROCESSING );
 		$this->assertFalse( $object->is_editable() );
 	}
 
@@ -1558,9 +1558,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_is_paid() {
 		$object = new WC_Order();
-		$object->set_status( 'pending' );
+		$object->set_status( WC_Order::STATUS_PENDING );
 		$this->assertFalse( $object->is_paid() );
-		$object->set_status( 'processing' );
+		$object->set_status( WC_Order::STATUS_PROCESSING );
 		$this->assertTrue( $object->is_paid() );
 	}
 
@@ -1569,9 +1569,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_is_download_permitted() {
 		$object = new WC_Order();
-		$object->set_status( 'pending' );
+		$object->set_status( WC_Order::STATUS_PENDING );
 		$this->assertFalse( $object->is_download_permitted() );
-		$object->set_status( 'completed' );
+		$object->set_status( WC_Order::STATUS_COMPLETED );
 		$this->assertTrue( $object->is_download_permitted() );
 	}
 
@@ -1603,13 +1603,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	public function test_needs_payment() {
 		$object = new WC_Order();
 
-		$object->set_status( 'pending' );
+		$object->set_status( WC_Order::STATUS_PENDING );
 		$this->assertFalse( $object->needs_payment() );
 
 		$object->set_total( 100 );
 		$this->assertTrue( $object->needs_payment() );
 
-		$object->set_status( 'processing' );
+		$object->set_status( WC_Order::STATUS_PROCESSING );
 		$this->assertFalse( $object->needs_payment() );
 	}
 

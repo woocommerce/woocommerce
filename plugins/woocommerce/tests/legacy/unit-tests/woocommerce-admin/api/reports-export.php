@@ -106,7 +106,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$order->set_billing_city( 'Savannah' );
 		$order->set_billing_state( 'GA' );
 		$order->set_billing_postcode( '31401' );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->calculate_totals();
 		$order->save();
 
@@ -115,7 +115,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$order->set_billing_city( 'Orlando' );
 		$order->set_billing_state( 'FL' );
 		$order->set_billing_postcode( '32801' );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->calculate_totals();
 		$order->save();
 

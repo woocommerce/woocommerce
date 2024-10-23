@@ -61,7 +61,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->add_item( $item );
 		// Fix totals.
 		$order->set_total( 75 ); // ( 4 * 10 ) + 25 + 10 shipping (in helper).
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -84,7 +84,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 				0 => array(
 					'order_id'         => $order->get_id(),
 					'parent_id'        => 0,
-					'status'           => 'completed',
+					'status'           => WC_Order::STATUS_COMPLETED,
 					'net_total'        => 65.0,
 					'total_sales'      => 75.0,
 					'num_items_sold'   => 5,
@@ -133,7 +133,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order( 1, $simple_product );
 
 		$order->set_total( 25 );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->save();
 
 		wc_create_refund(
@@ -169,7 +169,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			'before'        => $end_time,
 			'extended_info' => 1,
 			'status_is'     => array(
-				'refunded',
+				WC_Order::STATUS_REFUNDED,
 			),
 		);
 		// Retrieving an order with products (when receiving a single refunded order).
@@ -248,11 +248,11 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->add_item( $item2 );
 		// Fix totals.
 		$order->set_total( 95 ); // ( 6 * 10 ) + 25 + 10 shipping (in helper).
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->save();
 
 		$order2->set_total( 45 ); // ( 1 * 10 ) + 25 + 10 shipping (in helper).
-		$order2->set_status( 'completed' );
+		$order2->set_status( WC_Order::STATUS_COMPLETED );
 		$order2->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -300,14 +300,14 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 
 		$order = WC_Helper_Order::create_order( 1, $simple_product );
 		$order->set_total( 25 );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->apply_coupon( $coupon );
 		$order->calculate_totals();
 		$order->save();
 
 		$order_2 = WC_Helper_Order::create_order( 1, $simple_product );
 		$order_2->set_total( 25 );
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( WC_Order::STATUS_COMPLETED );
 		$order_2->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );

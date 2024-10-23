@@ -211,7 +211,7 @@ class OrderHelper {
 
 		$order->save();
 
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_currency( 'INR' );
 		$order->set_customer_id( $customer->get_id() );
 		$order->set_billing_email( $customer->get_billing_email() );
@@ -301,7 +301,7 @@ class OrderHelper {
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
-		$order->set_status( 'pending' );
+		$order->set_status( WC_Order::STATUS_PENDING );
 		$order->set_created_via( 'unit-tests' );
 		$order->set_currency( 'COP' );
 		$order->set_customer_ip_address( '127.0.0.1' );

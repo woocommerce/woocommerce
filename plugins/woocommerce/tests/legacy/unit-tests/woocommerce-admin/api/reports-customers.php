@@ -145,7 +145,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( $admin_id, $product );
-		$order->set_status( 'processing' );
+		$order->set_status( WC_Order::STATUS_PROCESSING );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -217,7 +217,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		// Place an order for the first test customer.
 		$order = WC_Helper_Order::create_order( $test_customers[0]->get_id(), $product );
-		$order->set_status( 'processing' );
+		$order->set_status( WC_Order::STATUS_PROCESSING );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -494,7 +494,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order( $customer );
 		$order->set_billing_first_name( 'Jon' );
 		$order->set_billing_last_name( 'Snow' );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -523,7 +523,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$order->set_billing_last_name( 'Snow' );
 		$order->set_shipping_first_name( 'IgnoredFirstName' );
 		$order->set_shipping_last_name( 'IgnoredLastName' );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -551,7 +551,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$order->set_billing_last_name( '' );
 		$order->set_shipping_first_name( 'Daenerys' );
 		$order->set_shipping_last_name( 'Targaryen' );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -626,7 +626,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$order = WC_Helper_Order::create_order( 0 );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -663,11 +663,11 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$order = WC_Helper_Order::create_order( 0 );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 		$order2 = WC_Helper_Order::create_order( 0 );
-		$order2->set_status( 'completed' );
+		$order2->set_status( WC_Order::STATUS_COMPLETED );
 		$order2->set_total( 100 );
 		$order2->save();
 
@@ -708,15 +708,15 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$order = WC_Helper_Order::create_order( 0 );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 		$order2 = WC_Helper_Order::create_order( 0 );
-		$order2->set_status( 'completed' );
+		$order2->set_status( WC_Order::STATUS_COMPLETED );
 		$order2->set_total( 100 );
 		$order2->save();
 		$order3 = WC_Helper_Order::create_order( 0 );
-		$order3->set_status( 'completed' );
+		$order3->set_status( WC_Order::STATUS_COMPLETED );
 		$order3->set_total( 100 );
 		$order3->set_billing_email( 'different@example.org' );
 		$order3->save();
@@ -768,15 +768,15 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$order = WC_Helper_Order::create_order( 0 );
-		$order->set_status( 'completed' );
+		$order->set_status( WC_Order::STATUS_COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 		$order2 = WC_Helper_Order::create_order( 0 );
-		$order2->set_status( 'completed' );
+		$order2->set_status( WC_Order::STATUS_COMPLETED );
 		$order2->set_total( 100 );
 		$order2->save();
 		$order3 = WC_Helper_Order::create_order( 0 );
-		$order3->set_status( 'completed' );
+		$order3->set_status( WC_Order::STATUS_COMPLETED );
 		$order3->set_total( 100 );
 		$order3->save();
 
