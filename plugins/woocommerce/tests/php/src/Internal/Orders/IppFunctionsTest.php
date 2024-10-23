@@ -25,7 +25,7 @@ class IppFunctionsTest extends \WC_Unit_Test_Case {
 	 * Tests that order is not eligible for IPP when it has one of not supported core statuses
 	 */
 	public function test_returns_false_if_order_has_NOT_required_status() {
-		$invalid_statuses = array( 'completed', 'cancelled', 'refunded', 'failed', 'trash' );
+		$invalid_statuses = array( \WC_Order::STATUS_COMPLETED, \WC_Order::STATUS_CANCELLED, \WC_Order::STATUS_REFUNDED, \WC_Order::STATUS_FAILED, \WC_Order::STATUS_TRASH );
 
 		foreach ( $invalid_statuses as $invalid_status ) {
 			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
@@ -41,7 +41,7 @@ class IppFunctionsTest extends \WC_Unit_Test_Case {
 	 * Tests that order is eligible for IPP when it has one of supported core statuses
 	 */
 	public function test_returns_true_if_order_has_required_status() {
-		$valid_statuses = array( 'pending', 'on-hold', 'processing' );
+		$valid_statuses = array( \WC_Order::STATUS_PENDING, \WC_Order::STATUS_ON_HOLD, \WC_Order::STATUS_PROCESSING );
 
 		foreach ( $valid_statuses as $valid_status ) {
 			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();

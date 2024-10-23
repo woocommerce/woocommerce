@@ -54,7 +54,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'processing' );
+		$order->set_status( WC_Order::STATUS_PROCESSING );
 		$order_item_id = $order->add_product( $product, 10 );
 
 		// Stocks have not reduced yet.
@@ -83,7 +83,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 
@@ -138,7 +138,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 
@@ -191,7 +191,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 
@@ -246,7 +246,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 
@@ -302,7 +302,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order = WC_Helper_Order::create_order();
 
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 
@@ -361,7 +361,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order = WC_Helper_Order::create_order();
 
-		$order->set_status( 'on-hold' );
+		$order->set_status( WC_Order::STATUS_ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 

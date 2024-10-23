@@ -195,23 +195,23 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $coupon->get_usage_count() );
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
+		$order->set_status( WC_Order::STATUS_PENDING );
 		$order->save();
 		$order->apply_coupon( $coupon_code );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 
 		// Change order status to anything other than cancelled should not change coupon count.
-		$order->set_status( 'processing' );
+		$order->set_status( WC_Order::STATUS_PROCESSING );
 		$order->save();
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 
 		// Cancelling order should reduce coupon count.
-		$order->set_status( 'cancelled' );
+		$order->set_status( WC_Order::STATUS_CANCELLED );
 		$order->save();
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 
 		// Failed order should reduce coupon count.
-		$order->set_status( 'failed' );
+		$order->set_status( WC_Order::STATUS_FAILED );
 		$order->save();
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 
@@ -232,7 +232,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::create_coupon( $coupon_code_3 );
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
+		$order->set_status( WC_Order::STATUS_PENDING );
 		$order->save();
 		$order->apply_coupon( $coupon_code_1 );
 		$order->apply_coupon( $coupon_code_2 );
@@ -243,21 +243,21 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code_3 ) )->get_usage_count() );
 
 		// Change order status to anything other than cancelled should not change coupon count.
-		$order->set_status( 'processing' );
+		$order->set_status( WC_Order::STATUS_PROCESSING );
 		$order->save();
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code_1 ) )->get_usage_count() );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code_3 ) )->get_usage_count() );
 
 		// Cancelling order should reduce coupon count.
-		$order->set_status( 'cancelled' );
+		$order->set_status( WC_Order::STATUS_CANCELLED );
 		$order->save();
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_1 ) )->get_usage_count() );
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_3 ) )->get_usage_count() );
 
 		// Failed order should reduce coupon count.
-		$order->set_status( 'failed' );
+		$order->set_status( WC_Order::STATUS_FAILED );
 		$order->save();
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_1 ) )->get_usage_count() );
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
@@ -279,7 +279,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$coupon_code = 'coupon_test_meta_data';
 		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
 		$order       = WC_Helper_Order::create_order();
-		$order->set_status( 'processing' );
+		$order->set_status( WC_Order::STATUS_PROCESSING );
 		$order->save();
 		$order->apply_coupon( $coupon_code );
 
