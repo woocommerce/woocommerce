@@ -179,6 +179,7 @@ class WC_Tracker {
 		$data['orders']     = self::get_orders();
 		$data['reviews']    = self::get_review_counts();
 		$data['categories'] = self::get_category_counts();
+		$data['brands']     = self::get_brands_counts();
 
 		// Payment gateway info.
 		$data['gateways'] = self::get_active_payment_gateways();
@@ -880,6 +881,18 @@ class WC_Tracker {
 	 */
 	private static function get_category_counts() {
 		return wp_count_terms( 'product_cat' );
+	}
+
+	/**
+	 * Get the number of product brands.
+	 *
+	 * @return int
+	 */
+	private static function get_brands_counts() {
+		if ( ! taxonomy_exists( 'product_brand' ) ) {
+			return 0;
+		}
+		return wp_count_terms( 'product_brand' );
 	}
 
 	/**

@@ -8,7 +8,7 @@ $headings: var(--heading--font-family);
 $body: var(--global--font-secondary);
 
 $body-color: currentColor;
-$highlights-color: #88a171;
+$highlights-color: var(--wc-highlight, #777335);
 
 /**
  * Fonts
@@ -167,8 +167,8 @@ a.button {
 }
 
 .onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
-	top: 2.2em;
-	right: 2.2em;
+	top: 1em;
+	right: 1em;
 }
 
 .single-product .type-product.sale > .onsale {
@@ -204,19 +204,10 @@ a.button {
 	list-style: none;
 	overflow: hidden;
 
-	a {
+	a.button {
+		background: #111;
 		color: #fff;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&.button {
-			background: #111;
-			color: #fff;
-		}
 	}
-
 }
 
 .woocommerce-store-notice__dismiss-link {
@@ -582,7 +573,7 @@ table.variations {
 	}
 }
 
-a.reset_variations {
+button.reset_variations {
 	margin-left: 0.5em;
 }
 
@@ -683,10 +674,12 @@ a.reset_variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger;
+
+	&:focus {
+		outline-offset: 2px;
+    	outline: 2px dotted var(--form--border-color) !important;
+	}
 }
 
 .woocommerce-tabs {
@@ -1669,7 +1662,7 @@ a.reset_variations {
 		.form-row.woocommerce-invalid {
 
 			input.input-text {
-				border: 2px solid $highlights-color;
+				border: 2px solid var(--wc-red);
 			}
 		}
 
@@ -2243,12 +2236,6 @@ a.reset_variations {
 		.onsale {
 			font-size: 1rem;
 		}
-
-		.onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
-			top: 1.8em;
-			right: 1.8em;
-		}
-
 	}
 }
 
@@ -3102,5 +3089,14 @@ form.checkout_coupon {
 
 	.input-text.has-error:focus {
 		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+ .checkout {
+	.checkout-inline-error-message {
+		@include checkout-inline-error-message();
 	}
 }

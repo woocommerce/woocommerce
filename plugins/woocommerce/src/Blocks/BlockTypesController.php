@@ -372,6 +372,7 @@ final class BlockTypesController {
 			'AllReviews',
 			'AttributeFilter',
 			'Breadcrumbs',
+			'CartLink',
 			'CatalogSorting',
 			'ClassicTemplate',
 			'ClassicShortcode',
