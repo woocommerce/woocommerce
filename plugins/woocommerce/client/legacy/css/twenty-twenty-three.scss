@@ -495,6 +495,18 @@
 			}
 		}
 	}
+	
+	// Float label.
+	form .form-row {
+		
+		&:has(.input-with-wc-float-label) {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+			}
+		}
+	}
 }
 
 // Description/Additional info/Reviews tabs.
@@ -576,6 +588,20 @@ ul.wc-tabs {
 		// Make coupon code input less ginormous.
 		#coupon_code {
 			padding: 0 1rem;
+		}
+
+		.coupon {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+				
+				top: initial;
+
+				&.is-active {
+					top: 2em;
+				}
+			}
 		}
 
 		.actions {
