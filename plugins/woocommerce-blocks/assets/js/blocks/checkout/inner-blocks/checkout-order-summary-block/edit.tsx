@@ -8,6 +8,10 @@ import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
+import { useId, useState } from '@wordpress/element';
+import { Icon } from '@wordpress/components';
+import { chevronDown, chevronUp } from '@wordpress/icons';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -19,8 +23,6 @@ import {
 import { OrderMetaSlotFill } from './slotfills';
 import { useContainerWidthContext } from '../../../../base/context';
 import { FormattedMonetaryAmount } from '../../../../../../packages/components';
-import { Icon } from '@wordpress/components';
-import { chevronDown } from '@wordpress/icons';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -31,6 +33,24 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		innerBlockAreas.CHECKOUT_ORDER_SUMMARY
 	);
 	const { isSmall, isMobile } = useContainerWidthContext();
+	const [ isOpen, setIsOpen ] = useState( false );
+	const ariaControlsId = useId();
+
+	const orderSummaryProps =
+		isSmall || isMobile
+			? {
+					role: 'button',
+					onClick: () => setIsOpen( ! isOpen ),
+					'aria-expanded': isOpen,
+					'aria-controls': ariaControlsId,
+					tabIndex: 0,
+					onKeyDown: ( event: React.KeyboardEvent ) => {
+						if ( event.key === 'Enter' || event.key === ' ' ) {
+							setIsOpen( ! isOpen );
+						}
+					},
+			  }
+			: {};
 
 	const defaultTemplate = [
 		[ 'woocommerce/checkout-order-summary-cart-items-block', {}, [] ],
@@ -46,7 +66,10 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wc-block-components-checkout-order-summary__title">
+			<div
+				className="wc-block-components-checkout-order-summary__title"
+				{ ...orderSummaryProps }
+			>
 				<p
 					className="wc-block-components-checkout-order-summary__title-text"
 					role="heading"
@@ -60,11 +83,19 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 							value={ totalPrice }
 						/>
 
-						<Icon icon={ chevronDown } />
+						<Icon icon={ isOpen ? chevronUp : chevronDown } />
 					</>
 				) }
 			</div>
-			<div className="wc-block-components-checkout-order-summary__content">
+			<div
+				className={ clsx(
+					'wc-block-components-checkout-order-summary__content',
+					{
+						'is-open': isOpen,
+					}
+				) }
+				id={ ariaControlsId }
+			>
 				<InnerBlocks
 					allowedBlocks={ allowedBlocks }
 					template={ defaultTemplate }
