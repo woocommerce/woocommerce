@@ -68,34 +68,39 @@ export function navigate( href: string, options = {} ) {
 }
 
 export interface ProductFiltersContext {
-	isDialogOpen: boolean;
-	hasPageWithWordPressAdminBar: boolean;
+	isOverlayEnabled: boolean;
+	isOverlayOpened: boolean;
 	params: Record< string, string >;
 	originalParams: Record< string, string >;
 }
 
 store( 'woocommerce/product-filters', {
 	state: {
-		isDialogOpen: () => {
-			const context = getContext< ProductFiltersContext >();
-			return context.isDialogOpen;
+		get __return_false() {
+			return false;
 		},
 	},
 	actions: {
-		openDialog: () => {
+		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
-			document.body.classList.add( 'wc-modal--open' );
-			context.hasPageWithWordPressAdminBar = Boolean(
-				document.getElementById( 'wpadminbar' )
-			);
-
-			context.isDialogOpen = true;
+			context.isOverlayOpened = true;
+			document.body.style.overflow = 'hidden';
+			if ( document.getElementById( 'wpadminbar' ) ) {
+				const scrollTop = (
+					document.documentElement ||
+					document.body.parentNode ||
+					document.body
+				).scrollTop;
+				document.body.style.setProperty(
+					'--adminbar-mobile-padding',
+					`max(calc(var(--wp-admin--admin-bar--height) - ${ scrollTop }px), 0px)`
+				);
+			}
 		},
-		closeDialog: () => {
+		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
-			document.body.classList.remove( 'wc-modal--open' );
-
-			context.isDialogOpen = false;
+			context.isOverlayOpened = false;
+			document.body.style.overflow = 'auto';
 		},
 	},
 	callbacks: {
