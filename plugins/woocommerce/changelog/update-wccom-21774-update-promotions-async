@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Changed how we fetch WooCommerce promotions. We're doing it async so as not to affect the loading of wp-admin.

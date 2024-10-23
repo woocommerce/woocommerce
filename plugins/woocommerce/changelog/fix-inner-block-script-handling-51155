@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix script tag handling for inner blocks in the cart

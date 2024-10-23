@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Modify product import file check to use the WP filesystem API

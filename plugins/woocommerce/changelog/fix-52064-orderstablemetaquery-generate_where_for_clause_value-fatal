@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal when OrdersTableMetaQuery::generate_where_for_clause_value() didn't return a string

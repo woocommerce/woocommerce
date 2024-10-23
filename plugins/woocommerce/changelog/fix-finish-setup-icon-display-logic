@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix "Finish setup" icon remains if tasks are disabled without being completed

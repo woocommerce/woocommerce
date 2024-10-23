@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Prevent Business Services products from showing pricing information when they're displayed as regular product cards on the Extensions page.

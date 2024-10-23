@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Update product collection E2E test to be more reliable when testing the collection block with product context.

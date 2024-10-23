@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix double rendering of the header and footer when the coming soon mode is enabled with the store pages only option with a non-FSE theme.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Decouple the dependency between the WooCommerce legacy reports and the WooCommerce Status widget on the dashboard page.

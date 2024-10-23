@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: remove setup-onboarding.spec.js. It only contains a basic check that is implicit with any other test.
