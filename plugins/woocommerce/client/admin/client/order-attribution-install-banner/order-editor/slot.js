@@ -39,7 +39,10 @@ export const possiblyRenderOrderAttributionSlot = () => {
 const OrderAttributionInstallBannerSlotFill = () => {
 	return (
 		<Fill>
-			<OrderAttributionInstallBanner bannerImage={ null } />
+			<OrderAttributionInstallBanner
+				bannerImage={ null }
+				showBadge={ false }
+			/>
 		</Fill>
 	);
 };

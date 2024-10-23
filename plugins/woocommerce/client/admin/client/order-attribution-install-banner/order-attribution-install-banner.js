@@ -23,6 +23,7 @@ export const OrderAttributionInstallBanner = ( {
 	bannerImage = <OrderAttributionInstallBannerImage />,
 	eventContext = 'analytics-overview',
 	isHeaderBanner = false,
+	showBadge = true,
 } ) => {
 	const { isDismissed, dismiss, shouldShowBanner } =
 		useOrderAttributionInstallBanner();
@@ -77,16 +78,18 @@ export const OrderAttributionInstallBanner = ( {
 					{ bannerImage }
 				</div>
 				<div className="woocommerce-order-attribution-install-banner__text_container">
-					<div className="woocommerce-order-attribution-install-banner__text-badge">
-						<Text
-							className="woocommerce-order-attribution-install-banner__text-description"
-							as="p"
-							size="12"
-							align="center"
-						>
-							{ __( 'New', 'woocommerce' ) }
-						</Text>
-					</div>
+					{ showBadge && (
+						<div className="woocommerce-order-attribution-install-banner__text-badge">
+							<Text
+								className="woocommerce-order-attribution-install-banner__text-description"
+								as="p"
+								size="12"
+								align="center"
+							>
+								{ __( 'New', 'woocommerce' ) }
+							</Text>
+						</div>
+					) }
 					<Text
 						className="woocommerce-order-attribution-install-banner__text-title"
 						as="p"
