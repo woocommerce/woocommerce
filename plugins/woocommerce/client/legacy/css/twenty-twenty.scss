@@ -477,7 +477,7 @@ table.variations {
 	}
 }
 
-a.reset_variations {
+button.reset_variations {
 	margin-left: 0.5em;
 }
 
@@ -574,10 +574,7 @@ a.reset_variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger;
 }
 
 .woocommerce-tabs {
@@ -2336,16 +2333,8 @@ a.reset_variations {
 	overflow: hidden;
 	width: 100%;
 
-	a {
-		color: #fff;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&.button {
-			background: #000000;
-		}
+	a.button {
+		background: #000000;
 	}
 }
 
@@ -2429,5 +2418,14 @@ form.checkout_coupon {
 
 	.input-text.has-error:focus {
 		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+ .checkout {
+	.checkout-inline-error-message {
+		@include checkout-inline-error-message();
 	}
 }

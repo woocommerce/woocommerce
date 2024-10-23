@@ -145,12 +145,7 @@ for ( const productType of Object.keys( productData ) ) {
 			} );
 
 			await test.step( 'add product categories', async () => {
-				// Using getByRole here is unreliable
-				const categoryCheckbox = page.locator(
-					`#in-product_cat-${ category.id }`
-				);
-				await categoryCheckbox.check();
-				await expect( categoryCheckbox ).toBeChecked();
+				await page.getByText( category.name ).first().check();
 
 				await expect(
 					page

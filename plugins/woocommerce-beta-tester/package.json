@@ -8,22 +8,22 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.4.0",
+	"version": "2.5.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
-		"@types/react": "^17.0.71",
-		"@types/react-dom": "^17.0.25",
+		"@types/react": "17.0.x",
+		"@types/react-dom": "17.0.x",
 		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__plugins": "3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^10.1.0",
+		"@wordpress/env": "10.10.x",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.55.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
-		"ts-loader": "^9.5.1",
-		"typescript": "^5.3.3",
+		"ts-loader": "9.5.x",
+		"typescript": "5.3.x",
 		"uglify-js": "^3.17.4",
 		"wireit": "0.14.3"
 	},
@@ -49,10 +49,10 @@
 		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
-		"@types/react-dom": "^17.0.25",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"@types/react": "17.0.x",
+		"@types/react-dom": "17.0.x",
+		"react": "17.0.x",
+		"react-dom": "17.0.x"
 	},
 	"assets": {
 		"js": {
