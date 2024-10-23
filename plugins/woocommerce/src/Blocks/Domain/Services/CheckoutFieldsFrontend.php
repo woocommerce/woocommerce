@@ -81,11 +81,15 @@ class CheckoutFieldsFrontend {
 		 *     @type string $value The value of the additional field.
 		 * }
 		 */
-		return apply_filters( 'woocommerce_checkout_render_additional_field', sprintf(
-			'<dt>%1$s</dt><dd>%2$s</dd>',
-			wp_kses_post( $field['label'] ),
-			wp_kses_post( $field['value'] )
-		), $field );
+		return apply_filters(
+			'woocommerce_checkout_render_additional_field',
+			sprintf(
+				'<dt>%1$s</dt><dd>%2$s</dd>',
+				wp_kses_post( $field['label'] ),
+				wp_kses_post( $field['value'] )
+			),
+			$field
+		);
 	}
 
 	/**
@@ -163,11 +167,21 @@ class CheckoutFieldsFrontend {
 			 * @param string $address_type The type of address (billing or shipping).
 			 * @param object $this         The class instance.
 			 */
-			echo apply_filters( 'woocommerce_checkout_render_address_field', sprintf(
-				'<br><strong>%s</strong>: %s',
-				wp_kses_post( $field['label'] ),
-				wp_kses_post( $value )
-			), $field, $value, $key, $address_type, $this );
+			echo wp_kses_post(
+				apply_filters(
+					'woocommerce_checkout_render_address_field',
+					sprintf(
+						'<br><strong>%s</strong>: %s',
+						$field['label'],
+						$value
+					),
+					$field,
+					$value,
+					$key,
+					$address_type,
+					$this
+				)
+			);
 		}
 	}
 
