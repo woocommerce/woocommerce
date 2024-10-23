@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Improve remote logging tool to simulate core error early in the request lifecycle before wp fully loaded
