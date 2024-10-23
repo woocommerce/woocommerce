@@ -93,9 +93,8 @@ class RelatedProducts extends AbstractBlock {
 	 * @return array
 	 */
 	public function build_query( $query, $block ) {
-		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
 		$parsed_block                = $this->parsed_block;
-		if ( ! $this->is_related_products_block( $parsed_block ) || $is_product_collection_block ) {
+		if ( ! $this->is_related_products_block( $parsed_block, $block ) ) {
 			return $query;
 		}
 
@@ -137,12 +136,14 @@ class RelatedProducts extends AbstractBlock {
 	/**
 	 * Determines whether the block is a related products block.
 	 *
-	 * @param array $block The block.
+	 * @param array $parsed_block The parsed block.
+	 * @param array $rendered_block The rendered block.
 	 *
 	 * @return bool Whether the block is a related products block.
 	 */
-	private function is_related_products_block( $block ) {
-		if ( ProductQuery::is_woocommerce_variation( $block ) && isset( $block['attrs']['namespace'] ) && 'woocommerce/related-products' === $block['attrs']['namespace'] ) {
+	private function is_related_products_block( $parsed_block, $rendered_block = null ) {
+		$is_product_collection_block = $rendered_block->context['query']['isProductCollectionBlock'] ?? false;
+		if ( ProductQuery::is_woocommerce_variation( $parsed_block ) && isset( $parsed_block['attrs']['namespace'] ) && 'woocommerce/related-products' === $parsed_block['attrs']['namespace'] && ! $is_product_collection_block ) {
 			return true;
 		}
 
