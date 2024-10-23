@@ -338,7 +338,7 @@ class MiniCart extends AbstractBlock {
 			'wordpress'   => get_bloginfo( 'version' ),
 		);
 
-		if ( isset( $cache['version'] ) && $cache['version'] === $current_version && is_string( $cache['data'] ) ) {
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version && isset( $cache['data'] ) && is_string( $cache['data'] ) ) {
 			$this->scripts_to_lazy_load = json_decode( $cache['data'], true ) ?? array();
 			foreach ( $this->scripts_to_lazy_load as $script_handle => $script ) {
 				// Load the before and after script data which includes
