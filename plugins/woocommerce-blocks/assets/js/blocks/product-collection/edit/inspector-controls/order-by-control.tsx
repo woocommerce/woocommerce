@@ -57,6 +57,12 @@ const orderOptions = [
 		value: 'rating/desc',
 		label: __( 'Top Rated', 'woocommerce' ),
 	},
+	{
+		// In WooCommerce, "Manual (menu order)" refers to a custom ordering set by the store owner.
+		// Products can be manually arranged in the desired order in the WooCommerce admin panel.
+		value: 'menu_order/asc',
+		label: __( 'Manual (menu order)', 'woocommerce' ),
+	},
 ];
 
 const OrderByControl = ( props: QueryControlProps ) => {
