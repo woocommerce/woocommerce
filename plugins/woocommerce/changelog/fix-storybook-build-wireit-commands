@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix storybook build command to still work on fresh build.
