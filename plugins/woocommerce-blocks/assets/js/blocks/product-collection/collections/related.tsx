@@ -19,7 +19,7 @@ const collection = {
 	title: __( 'Related Products', 'woocommerce' ),
 	icon: <Icon icon={ loop } />,
 	description: __( 'Recommend products like this one.', 'woocommerce' ),
-	keywords: [ 'product collection' ],
+	keywords: [],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 	usesReference: [ 'product' ],
 };

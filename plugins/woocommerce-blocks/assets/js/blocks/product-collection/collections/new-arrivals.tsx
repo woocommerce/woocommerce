@@ -23,7 +23,7 @@ const collection = {
 	title: __( 'New Arrivals', 'woocommerce' ),
 	icon: <Icon icon={ calendar } />,
 	description: __( 'Recommend your newest products.', 'woocommerce' ),
-	keywords: [ 'newest products', 'product collection' ],
+	keywords: [ 'newest' ],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 

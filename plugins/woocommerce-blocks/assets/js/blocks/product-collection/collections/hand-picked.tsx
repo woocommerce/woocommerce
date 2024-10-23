@@ -53,7 +53,13 @@ const collection = {
 		'Select specific products to recommend to customers.',
 		'woocommerce'
 	),
-	keywords: [ 'specific', 'choose', 'recommend' ],
+	keywords: [
+		'specific',
+		'choose',
+		'recommend',
+		'handpicked',
+		'hand picked',
+	],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 

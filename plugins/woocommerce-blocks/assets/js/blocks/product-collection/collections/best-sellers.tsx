@@ -19,7 +19,7 @@ const collection = {
 	title: __( 'Best Sellers', 'woocommerce' ),
 	icon: <Icon icon={ chartBar } />,
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
-	keywords: [ 'best selling', 'product collection' ],
+	keywords: [ 'best selling' ],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 

@@ -19,7 +19,7 @@ const collection = {
 	title: __( 'Featured', 'woocommerce' ),
 	icon: <Icon icon={ starFilled } />,
 	description: __( 'Showcase your featured products.', 'woocommerce' ),
-	keywords: [ 'product collection' ],
+	keywords: [],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 

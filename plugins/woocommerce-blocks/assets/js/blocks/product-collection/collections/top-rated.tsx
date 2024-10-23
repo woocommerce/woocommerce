@@ -22,7 +22,7 @@ const collection = {
 		'Recommend products with the highest review ratings.',
 		'woocommerce'
 	),
-	keywords: [ 'product collection' ],
+	keywords: [],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
