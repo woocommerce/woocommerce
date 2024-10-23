@@ -242,7 +242,7 @@ class ProductQuery extends AbstractBlock {
 	 * @param WP_Block $block The block being rendered.
 	 * @return array
 	 */
-	public function build_query( $query, $block ) {
+	public function build_query( $query, $block = null ) {
 		$parsed_block                = $this->parsed_block;
 		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
 		if ( ! $this->is_woocommerce_variation( $parsed_block ) || $is_product_collection_block ) {
