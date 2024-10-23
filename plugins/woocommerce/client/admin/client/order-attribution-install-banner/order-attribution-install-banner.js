@@ -4,7 +4,7 @@
 import { Button, Card, CardBody } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { plugins } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
 import { getPath } from '@woocommerce/navigation';
@@ -24,6 +24,8 @@ export const OrderAttributionInstallBanner = ( {
 	eventContext = 'analytics-overview',
 	isHeaderBanner = false,
 	showBadge = true,
+	title = 'Discover what drives your sales',
+	description = 'Understand what truly drives revenue with our powerful order attribution extension. Use it to track your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
 } ) => {
 	const { isDismissed, dismiss, shouldShowBanner } =
 		useOrderAttributionInstallBanner();
@@ -68,6 +70,16 @@ export const OrderAttributionInstallBanner = ( {
 		);
 	}
 
+	if ( title ) {
+		// translators: %s: The dynamic title.
+		title = sprintf( __( '%s ', 'woocommerce' ), title );
+	}
+
+	if ( description ) {
+		// translators: %s: The dynamic description.
+		description = sprintf( __( '%s ', 'woocommerce' ), description );
+	}
+
 	return (
 		<Card
 			size="medium"
@@ -90,26 +102,24 @@ export const OrderAttributionInstallBanner = ( {
 							</Text>
 						</div>
 					) }
-					<Text
-						className="woocommerce-order-attribution-install-banner__text-title"
-						as="p"
-						size="16"
-					>
-						{ __(
-							'Discover what drives your sales',
-							'woocommerce'
-						) }
-					</Text>
-					<Text
-						className="woocommerce-order-attribution-install-banner__text-description"
-						as="p"
-						size="12"
-					>
-						{ __(
-							'Understand what truly drives revenue with our powerful order attribution extension. Use it to track your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
-							'woocommerce'
-						) }
-					</Text>
+					{ title && (
+						<Text
+							className="woocommerce-order-attribution-install-banner__text-title"
+							as="p"
+							size="16"
+						>
+							{ title }
+						</Text>
+					) }
+					{ description && (
+						<Text
+							className="woocommerce-order-attribution-install-banner__text-description"
+							as="p"
+							size="12"
+						>
+							{ description }
+						</Text>
+					) }
 					<div>
 						<Button
 							href={ WC_ANALYTICS_PRODUCT_URL }
