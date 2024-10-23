@@ -24,6 +24,7 @@ export const OrderAttributionInstallBanner = ( {
 	eventContext = 'analytics-overview',
 	isHeaderBanner = false,
 	showBadge = true,
+	dismissable = true,
 	title = 'Discover what drives your sales',
 	description = 'Understand what truly drives revenue with our powerful order attribution extension. Use it to track your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
 } ) => {
@@ -128,12 +129,14 @@ export const OrderAttributionInstallBanner = ( {
 						>
 							{ __( 'Try it now', 'woocommerce' ) }
 						</Button>
-						<Button
-							variant="tertiary"
-							onClick={ () => dismiss( eventContext ) }
-						>
-							{ __( 'Dismiss', 'woocommerce' ) }
-						</Button>
+						{ dismissable && (
+							<Button
+								variant="tertiary"
+								onClick={ () => dismiss( eventContext ) }
+							>
+								{ __( 'Dismiss', 'woocommerce' ) }
+							</Button>
+						) }
 					</div>
 				</div>
 			</CardBody>

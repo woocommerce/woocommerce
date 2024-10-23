@@ -42,6 +42,7 @@ const OrderAttributionInstallBannerSlotFill = () => {
 			<OrderAttributionInstallBanner
 				bannerImage={ null }
 				showBadge={ false }
+				dismissable={ false }
 				title={ null }
 				description="View all of your orders in our new Order Attribution extension."
 			/>
