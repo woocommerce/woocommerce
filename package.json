@@ -77,7 +77,8 @@
 			"@automattic/tour-kit>@wordpress/element": "4.4.1"
 		},
 		"patchedDependencies": {
-			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"
+			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch",
+			"@wordpress/env@10.10.0": "bin/patches/@wordpress__env@10.10.0.patch"
 		}
 	}
 }
