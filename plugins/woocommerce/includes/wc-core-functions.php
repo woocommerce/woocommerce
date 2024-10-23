@@ -1004,13 +1004,22 @@ function wc_get_image_size( $image_size ) {
  * Queue some JavaScript code to be output in the footer.
  *
  * @param string $code Code.
+ * @param string $handle Handle (optional). Will be generated automatically if not given.
  */
-function wc_enqueue_js( $code ) {
+function wc_enqueue_js( $code, $handle = '' ) {
 	global $wc_queued_js;
 
 	if ( empty( $wc_queued_js ) ) {
 		$wc_queued_js = '';
 	}
+
+	$handle = esc_js( $handle ?: wp_generate_uuid4() );
+
+	$code = implode( "\n", [
+		"/** wc_enqueued_js_start:$handle */",
+		$code,
+		"/** wc_enqueued_js_end:$handle */",
+	] );
 
 	$wc_queued_js .= "\n" . $code . "\n";
 }
