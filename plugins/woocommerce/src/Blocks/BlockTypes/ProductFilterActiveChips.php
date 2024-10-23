@@ -91,7 +91,7 @@ final class ProductFilterActiveChips extends AbstractBlock {
 	 * Render the chip item of an active filter.
 	 *
 	 * @param string $type Filter type.
-	 * @param array $item Item data.
+	 * @param array  $item Item data.
 	 * @return string Item HTML.
 	 */
 	private function render_chip_item( $type, $item ) {
