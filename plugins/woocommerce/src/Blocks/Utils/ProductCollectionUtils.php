@@ -16,7 +16,6 @@ class ProductCollectionUtils {
 	 * @return boolean
 	 */
 	public static function is_product_collection_from_query( $query ) {
-		$query_vars = $query->query_vars;
 		return $query_vars['isProductCollection'] ?? false;
 	}
 

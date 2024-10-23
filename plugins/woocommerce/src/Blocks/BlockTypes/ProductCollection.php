@@ -1708,6 +1708,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param WP_Query $query   The WP_Query instance.
 	 */
 	public function add_price_range_filter_posts_clauses( $clauses, $query ) {
+		$query_vars = $query->query_vars;
 		if ( ! ProductCollectionUtils::is_product_collection_from_query( $query ) ) {
 			return $clauses;
 		}
@@ -1750,6 +1751,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array   Modified list of clauses.
 	 */
 	public function add_price_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars = $query->query_vars;
 		if ( ! ProductCollectionUtils::is_product_collection_from_query( $query ) ) {
 			return $clauses;
 		}
@@ -1777,6 +1779,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array   Modified list of clauses.
 	 */
 	public function add_sales_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars = $query->query_vars;
 		if ( ! ProductCollectionUtils::is_product_collection_from_query( $query ) ) {
 			return $clauses;
 		}
