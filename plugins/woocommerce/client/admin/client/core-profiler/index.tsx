@@ -840,7 +840,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										return event.payload;
 									},
 								} ),
-								'recordSkipGuidedSetup',
 							],
 						},
 						INTRO_BUILDER: {
@@ -1193,6 +1192,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				{
 					type: 'updateQueryStep',
 					params: { step: 'skip-guided-setup' },
+				},
+				{
+					type: 'recordSkipGuidedSetup',
+					params: ( { context } ) => ( {
+						optInDataSharing: context.optInDataSharing,
+					} ),
 				},
 			],
 			states: {

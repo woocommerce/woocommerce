@@ -42,8 +42,15 @@ const recordTracksIntroCompleted = () => {
 	} );
 };
 
-const recordSkipGuidedSetup = ( { event }: { event: IntroSkippedEvent } ) => {
-	if ( ! event?.payload?.optInDataSharing ) {
+const recordSkipGuidedSetup = (
+	_: unknown,
+	{
+		optInDataSharing,
+	}: {
+		optInDataSharing: boolean;
+	}
+) => {
+	if ( ! optInDataSharing ) {
 		return;
 	}
 
