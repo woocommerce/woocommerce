@@ -41,7 +41,6 @@ class RelatedProducts extends AbstractBlock {
 			10,
 			2
 		);
-
 	}
 
 	/**
@@ -79,7 +78,7 @@ class RelatedProducts extends AbstractBlock {
 				'query_loop_block_query_vars',
 				array( $this, 'build_query' ),
 				10,
-				1
+				2
 			);
 		}
 
@@ -90,11 +89,13 @@ class RelatedProducts extends AbstractBlock {
 	 * Return a custom query based on attributes, filters and global WP_Query.
 	 *
 	 * @param WP_Query $query The WordPress Query.
+	 * @param WP_Block $block The block being rendered.
 	 * @return array
 	 */
-	public function build_query( $query ) {
-		$parsed_block = $this->parsed_block;
-		if ( ! $this->is_related_products_block( $parsed_block ) ) {
+	public function build_query( $query, $block ) {
+		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
+		$parsed_block                = $this->parsed_block;
+		if ( ! $this->is_related_products_block( $parsed_block ) || $is_product_collection_block ) {
 			return $query;
 		}
 
