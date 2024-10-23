@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales', 'menu_order' );
 
 
 	/**
@@ -1066,6 +1066,13 @@ class ProductCollection extends AbstractBlock {
 			return array(
 				'isProductCollection' => true,
 				'orderby'             => $orderby,
+			);
+		}
+
+		if ( 'menu_order' === $orderby ) {
+			return array(
+				'orderby' => 'menu_order',
+				'order'   => 'ASC',
 			);
 		}
 
