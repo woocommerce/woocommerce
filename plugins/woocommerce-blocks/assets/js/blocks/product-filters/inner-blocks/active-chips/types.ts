@@ -23,12 +23,6 @@ export type BlockAttributes = {
 	customChipBackground?: string;
 	chipBorder?: string;
 	customChipBorder?: string;
-	selectedChipText?: string;
-	customSelectedChipText?: string;
-	selectedChipBackground?: string;
-	customSelectedChipBackground?: string;
-	selectedChipBorder?: string;
-	customSelectedChipBorder?: string;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
@@ -40,10 +34,4 @@ export type EditProps = BlockEditProps< BlockAttributes > & {
 	setChipBackground: ( value: string ) => void;
 	chipBorder: Color;
 	setChipBorder: ( value: string ) => void;
-	selectedChipText: Color;
-	setSelectedChipText: ( value: string ) => void;
-	selectedChipBackground: Color;
-	setSelectedChipBackground: ( value: string ) => void;
-	selectedChipBorder: Color;
-	setSelectedChipBorder: ( value: string ) => void;
 };
