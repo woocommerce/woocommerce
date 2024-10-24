@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 -->
 # Cart Store (`wc/store/cart`) <!-- omit in toc -->
 
 > 💡 What's the difference between the Cart Store and the Checkout Store?
@@ -372,6 +373,7 @@ This action is used to send POSTs request to the /cart/extensions endpoint with 
     -   _data_ `object`: The data to send to the endpoint with the following keys:
         -   _key_ `string`: The key of the extension.
         -   _value_ `string`: The value of the extension.
+    -   _overwriteDirtyCustomerData_ `boolean`: Whether to overwrite the customer data in the client with the data returned from the server, even if it is dirty (i.e. it hasn't been pushed to the server yet).
 
 
 #### _Example_ <!-- omit in toc -->

@@ -24,6 +24,7 @@ import { notifyQuantityChanges } from './notify-quantity-changes';
 import { notifyCartErrors } from './notify-errors';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
 import { apiFetchWithHeaders } from '../shared-controls';
+import { getIsCustomerDataDirty, setIsCustomerDataDirty } from './utils';
 
 /**
  * A thunk used in updating the store with the cart items retrieved from a request. This also notifies the shopper
@@ -99,8 +100,22 @@ export const applyExtensionCartUpdate =
 				data: { namespace: args.namespace, data: args.data },
 				cache: 'no-store',
 			} );
+			if ( args.overwriteDirtyCustomerData === true ) {
+				dispatch.receiveCart( response );
+				return response;
+			}
+			if ( getIsCustomerDataDirty() ) {
+				// If the customer data is dirty, we don't want to overwrite it with the response.
+				// Remove shipping and billing address from the response and then receive the cart.
+				const {
+					shipping_address: _,
+					billing_address: __,
+					...responseWithoutShippingOrBilling
+				} = response;
+				dispatch.receiveCart( responseWithoutShippingOrBilling );
+				return response;
+			}
 			dispatch.receiveCart( response );
-			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
@@ -390,9 +405,11 @@ export const updateCustomerData =
 			} else {
 				dispatch.receiveCart( response );
 			}
+			setIsCustomerDataDirty( false );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
+			setIsCustomerDataDirty( true );
 			return Promise.reject( error );
 		} finally {
 			dispatch.updatingCustomerData( false );

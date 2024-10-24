@@ -116,3 +116,24 @@ export const validateDirtyProps = ( dirtyProps: {
 
 	return invalidProps.length === 0;
 };
+
+/**
+ * Gets the localStorage flag to indicate whether the customer data is dirty.
+ */
+export const getIsCustomerDataDirty = () => {
+	return (
+		window.localStorage.getItem(
+			'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
+		) === 'true'
+	);
+};
+
+/**
+ * Sets a flag in localStorage to indicate whether the customer data has been modified.
+ */
+export const setIsCustomerDataDirty = ( isCustomerDataDirty: boolean ) => {
+	window.localStorage.setItem(
+		'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY',
+		isCustomerDataDirty ? 'true' : 'false'
+	);
+};

@@ -211,6 +211,7 @@ export interface CartMeta {
 export interface ExtensionCartUpdateArgs {
 	data: Record< string, unknown >;
 	namespace: string;
+	overwriteDirtyCustomerData?: undefined | boolean;
 }
 
 export interface BillingAddressShippingAddress {

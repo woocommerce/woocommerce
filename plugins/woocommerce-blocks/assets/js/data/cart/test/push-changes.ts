@@ -130,12 +130,30 @@ describe( 'pushChanges', () => {
 		// Push these changes to the server, the `updateCustomerData` mock is set to reject (in the original mock at the top of the file), to simulate a server error.
 		pushChanges( false );
 
-		// Check that the mock was called with only the updated data.
+		// Check that the mock was called with full address data.
 		await expect( updateCustomerDataMock ).toHaveBeenCalledWith( {
+			billing_address: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
 			shipping_address: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
 				city: 'Houston',
 				state: 'TX',
 				postcode: 'ABCDEF',
+				country: 'US',
+				phone: '555-555-5555',
 			},
 		} );
 
@@ -177,10 +195,28 @@ describe( 'pushChanges', () => {
 		// to the server because the previous push failed when they were originally changed.
 		pushChanges( false );
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith( {
+			billing_address: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
 			shipping_address: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
 				city: 'Houston',
 				state: 'TX',
 				postcode: '77058',
+				country: 'US',
+				phone: '555-555-5555',
 			},
 		} );
 	} );
