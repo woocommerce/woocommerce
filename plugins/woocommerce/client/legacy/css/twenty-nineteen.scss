@@ -880,6 +880,10 @@ table.variations {
 	}
 }
 
+.is-large.wc-block-cart .wc-block-cart__totals-title::before {
+	content: none;
+}
+
 /**
  * Checkout
  */

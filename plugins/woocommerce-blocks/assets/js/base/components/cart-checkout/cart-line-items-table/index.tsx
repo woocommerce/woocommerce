@@ -76,6 +76,9 @@ const CartLineItemsTable = ( {
 			ref={ tableRef }
 			tabIndex={ -1 }
 		>
+			<caption className="screen-reader-text">
+				<h2>{ __( 'Products in cart', 'woocommerce' ) }</h2>
+			</caption>
 			<thead>
 				<tr className="wc-block-cart-items__header">
 					<th className="wc-block-cart-items__header-image">
