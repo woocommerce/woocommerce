@@ -70,6 +70,7 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'woocommerce-services:shipping' ),
 						self::get_plugin( 'jetpack' ),
 						self::get_plugin( 'pinterest-for-woocommerce' ),
+						self::get_plugin( 'kliken-ads-pixel-for-meta' ),
 						self::get_plugin( 'mailpoet' ),
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
@@ -151,6 +152,15 @@ class DefaultFreeExtensions {
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_visible'     => array(
+					array(
+						'type'        => 'option',
+						'option_name' => 'woocommerce_remote_variant_assignment',
+						'value'       => array( 1, 60 ), // 50% segment
+						'default'     => false,
+						'operation'   => 'range',
+					),
+				),
 				'is_built_by_wc' => true,
 			),
 			'mailpoet'                      => array(
@@ -159,6 +169,22 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
+			),
+			// Shared 50% segment with pinterest-for-woocommerce.
+			'kliken-ads-pixel-for-meta'     => array(
+				'name'        => __( 'Meta Ads & Pixel for WooCommerce', 'woocommerce' ),
+				'description' => __( 'Sync your store catalog, set up pixel tracking, and run targeted ad campaigns.', 'woocommerce' ),
+				'image_url'   => plugins_url( '/assets/images/onboarding/kliken-ads-pixel-for-meta.svg', WC_PLUGIN_FILE ),
+				'manage_url'  => 'admin.php?page=kliken-ads-pixel-for-meta',
+				'is_visible'  => array(
+					array(
+						'type'        => 'option',
+						'option_name' => 'woocommerce_remote_variant_assignment',
+						'value'       => array( 61, 120 ), // 50% segment
+						'default'     => false,
+						'operation'   => 'range',
+					),
+				),
 			),
 			'mailchimp-for-woocommerce'     => array(
 				'name'           => __( 'Mailchimp', 'woocommerce' ),
@@ -531,6 +557,13 @@ class DefaultFreeExtensions {
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-pinterest.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Get your products in front of a highly engaged audience.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/pinterest-for-woocommerce?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
+				'install_priority' => 2,
+			),
+			'kliken-ads-pixel-for-meta'     => array(
+				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/kliken-ads-pixel-for-meta.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'Sync your store catalog, set up pixel tracking, and run targeted ad campaigns.', 'woocommerce' ),
+				'learn_more_link'  => 'https://woocommerce.com/products/meta-ads-and-pixel?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 2,
 			),
 			'mailpoet'                      => array(
