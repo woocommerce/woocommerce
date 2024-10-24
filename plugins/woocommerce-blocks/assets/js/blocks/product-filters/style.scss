@@ -22,22 +22,25 @@
 		}
 		.wc-block-product-filters__overlay-dialog {
 			position: absolute;
+            display: block !important;
 			inset: 0;
 			padding: var(--wp--preset--spacing--20);
 			transform: translateY(100vh);
 			transition: transform 500ms;
+            background-color: var(--wc-product-filters-overlay-background-color, #fff);
 		}
 	}
 
-	&.is-overlay-opened {
+	&.is-overlay-enabled.is-overlay-opened {
 		.wc-block-product-filters__overlay {
 			z-index: 9999;
 			pointer-events: auto;
 			opacity: 1;
-			background: pink;
+            background-color: rgba(95, 95, 95, 0.35);
 		}
 		.wc-block-product-filters__overlay-dialog {
-			transform: translateY(var(--top-padding));
+			transform: translateY(0);
+            color: var(--wc-product-filters-overlay-color, inherit);
 		}
 	}
 }

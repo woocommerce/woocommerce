@@ -45,7 +45,7 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"usesContext": [ "postId" ],
+	"usesContext": [ "postId", "query", "queryId" ],
 	"viewScript": "wc-product-filters-frontend",
 	"example": {}
 }

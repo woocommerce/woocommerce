@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use WP_HTML_Tag_Processor;
+
 /**
  * ProductFilters class.
  */
@@ -18,7 +20,19 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return array( 'postId' );
+		return array( 'postId', 'query', 'queryId' );
+	}
+
+	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 * - Hook into pre_render_block to update the query.
+	 */
+	protected function initialize() {
+		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
+		parent::initialize();
 	}
 
 	/**
@@ -47,24 +61,34 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$icontext = array(
+		$inner_blocks = array_reduce(
+			$block->parsed_block['innerBlocks'],
+			function ( $carry, $parsed_block ) use ( $block ) {
+				$carry .= ( new \WP_Block( $parsed_block, $block->context ) )->render();
+				return $carry;
+			},
+			''
+		);
+		$icontext     = array(
 			'isOverlayOpened'  => ! wp_is_mobile(),
 			'isOverlayEnabled' => wp_is_mobile(),
 			'params'           => $this->get_filter_query_params( 0 ),
 			'originalParams'   => $this->get_filter_query_params( 0 ),
 		);
 
+		$wrapper_attributes = array(
+			'class'                             => 'wc-block-product-filters',
+			'data-wc-interactive'               => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-watch'                     => 'callbacks.maybeNavigate',
+			'data-wc-navigation-id'             => $this->generate_navigation_id( $block ),
+			'data-wc-context'                   => wp_json_encode( $icontext, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-class--is-overlay-enabled' => 'context.isOverlayEnabled',
+			'data-wc-class--is-overlay-opened'  => 'context.isOverlayOpened',
+		);
+
 		ob_start();
 		?>
-		<div
-			class="wc-block-product-filters"
-			data-wc-interactive="<?php echo esc_attr( wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
-			data-wc-watch="callbacks.maybeNavigate"
-			data-wc-navigation-id="<?php echo esc_attr( $this->generate_navigation_id( $block ) ); ?>"
-			data-wc-context="<?php echo esc_attr( wp_json_encode( $icontext, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
-			data-wc-class--is-overlay-enabled="context.isOverlayEnabled"
-			data-wc-class--is-overlay-opened="context.isOverlayOpened"
-		>
+		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); ?>>
 			<button
 				class="wc-block-product-filters__open"
 				data-wc-bind--hidden="!context.isOverlayEnabled"
@@ -91,16 +115,14 @@ class ProductFilters extends AbstractBlock {
 							<span><?php echo esc_html__( 'Close', 'woocommerce' ); ?></span>
 							<?php echo $this->get_svg_icon( 'close' ); ?>
 						</button>
-						<div class="wc-block-product-filters__content">
-							<?php echo $content; ?>
-						</div>
+						<?php echo $inner_blocks; ?>
 						<button
 							class="wc-block-product-filters__apply"
 							data-wc-interactive="<?php echo esc_attr( wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
 							data-wc-bind--hidden="!context.isOverlayEnabled"
 							<?php echo $icontext['isOverlayEnabled'] ? '' : 'hidden'; ?>
 						>
-							<?php echo esc_html__( 'Apply', 'woocommerce' ); ?>
+							<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
 						</button>
 					</div>
 				</div>
@@ -174,5 +196,20 @@ class ProductFilters extends AbstractBlock {
 			},
 			ARRAY_FILTER_USE_KEY
 		);
+	}
+
+	/**
+	 * This block renders inner blocks manually so we need to skip default
+	 * rendering routine for its inner blocks
+	 *
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata Metadata provided for registering a block type.
+	 * @return array
+	 */
+	public function add_block_type_metadata_settings( $settings, $metadata ) {
+		if ( ! empty( $metadata['name'] ) && $this->get_full_block_name() === $metadata['name'] ) {
+			$settings['skip_inner_blocks'] = true;
+		}
+			return $settings;
 	}
 }
