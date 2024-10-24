@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { Icon } from '@wordpress/components';
+import { page } from '@wordpress/icons';
 import {
 	BLOCK_DESCRIPTION,
 	BLOCK_TITLE,
 } from '@woocommerce/atomic-blocks/product-elements/summary/constants';
-import { page } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -21,5 +21,5 @@ registerElementVariation( CORE_NAME, {
 	blockIcon: <Icon icon={ page } />,
 	blockTitle: BLOCK_TITLE,
 	variationName: VARIATION_NAME,
-	scope: [ 'block' ],
+	scope: [],
 } );

@@ -10,7 +10,6 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  */
 import metadata from './block.json';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-query/variations/elements/product-title';
-import { VARIATION_NAME as PRODUCT_SUMMARY_VARIATION_NAME } from '../product-query/variations/elements/product-summary';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const BLOCK_ICON = (
@@ -61,12 +60,8 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						{ isDescendentOfSingleProductBlock: true },
 					],
 					[
-						'core/post-excerpt',
-						{
-							__woocommerceNamespace:
-								PRODUCT_SUMMARY_VARIATION_NAME,
-							excerptLength: 100,
-						},
+						'woocommerce/product-summary',
+						{ isDescendentOfSingleProductBlock: true },
 					],
 					[ 'woocommerce/add-to-cart-form' ],
 					[ 'woocommerce/product-meta' ],
