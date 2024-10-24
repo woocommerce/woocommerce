@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { ExperimentalOrderMeta } from '@woocommerce/blocks-checkout';
+import {
+	ExperimentalOrderMeta,
+	createSlotFill,
+} from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 
 // @todo Consider deprecating OrderMetaSlotFill and DiscountSlotFill in favour of inner block areas.
@@ -17,3 +20,10 @@ export const OrderMetaSlotFill = (): JSX.Element => {
 
 	return <ExperimentalOrderMeta.Slot { ...slotFillProps } />;
 };
+
+const checkoutOrderSummarySlotName = 'checkoutOrderSummaryActionArea';
+
+export const {
+	Fill: CheckoutOrderSummaryFill,
+	Slot: CheckoutOrderSummarySlot,
+} = createSlotFill( checkoutOrderSummarySlotName );

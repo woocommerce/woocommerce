@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useContainerWidthContext } from '@woocommerce/base-context';
 import { Panel } from '@woocommerce/blocks-components';
 import type { CartItem } from '@woocommerce/types';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -26,15 +27,10 @@ const OrderSummary = ( {
 	}
 
 	return (
-		<Panel
-			className="wc-block-components-order-summary"
-			initialOpen={ isLarge }
-			hasBorder={ false }
-			title={
-				<span className="wc-block-components-order-summary__button-text">
-					{ __( 'Order summary', 'woocommerce' ) }
-				</span>
-			}
+		<div
+			className={ clsx( 'wc-block-components-order-summary', {
+				'is-large': isLarge,
+			} ) }
 		>
 			<div className="wc-block-components-order-summary__content">
 				{ cartItems.map( ( cartItem ) => {
@@ -46,7 +42,7 @@ const OrderSummary = ( {
 					);
 				} ) }
 			</div>
-		</Panel>
+		</div>
 	);
 };
 

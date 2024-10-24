@@ -16,6 +16,10 @@
 	gap: $gap-smaller;
 	flex-wrap: wrap;
 
+	.wc-block-components-text-input.wc-block-components-totals-coupon__input {
+		margin: 0;
+	}
+
 	.wc-block-components-totals-coupon__input,
 	.wc-block-components-totals-coupon__button {
 		margin: 0;
