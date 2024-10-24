@@ -1117,16 +1117,28 @@ class WC_Tax {
 	 *
 	 * @since 2.3.0
 	 * @param  int $tax_rate_id Tax rate to delete.
+	 * @return bool
 	 */
 	public static function _delete_tax_rate( $tax_rate_id ) {
 		global $wpdb;
 
+		$deleted = false;
+
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
 
-		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+		if ( $wpdb->rows_affected > 0 ) {
 
-		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
+			$deleted = true;
+
+			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+			do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
+
+		}
+
+		return $deleted;
+
 	}
 
 	/**
