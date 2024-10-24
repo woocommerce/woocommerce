@@ -1,0 +1,4 @@
+Significance: major
+Type: fix
+
+Fix: Product Collection block inside Single Product block was not rendering correctly on frontend.
