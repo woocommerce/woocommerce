@@ -109,6 +109,9 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/block-library/build",
+				"node_modules/@woocommerce/block-library/blocks.ini",
+				"node_modules/@woocommerce/admin-library/build",
 				"package.json"
 			]
 		}

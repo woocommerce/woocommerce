@@ -19,11 +19,25 @@
 				"remove": true,
 				"move": true
 			}
+		},
+		"cartPageId": {
+			"type": "number",
+			"default": 0
+		},
+		"showReturnToCart": {
+			"type": "boolean",
+			"default": true
+		},
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"priceSeparator": {
+			"type": "string",
+			"default": "·"
 		}
 	},
-	"parent": [
-		"woocommerce/checkout-fields-block"
-	],
+	"parent": [ "woocommerce/checkout-fields-block" ],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3

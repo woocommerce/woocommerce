@@ -18,17 +18,21 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { defaultPlaceOrderButtonLabel } from './constants';
 import './style.scss';
 
+export type BlockAttributes = {
+	cartPageId: number;
+	showReturnToCart: boolean;
+	className?: string;
+	placeOrderButtonLabel: string;
+	priceSeparator: string;
+};
+
 const Block = ( {
 	cartPageId,
 	showReturnToCart,
 	className,
 	placeOrderButtonLabel,
-}: {
-	cartPageId: number;
-	showReturnToCart: boolean;
-	className?: string;
-	placeOrderButtonLabel: string;
-} ): JSX.Element => {
+	priceSeparator,
+}: BlockAttributes ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
 
 	const label = applyCheckoutFilter( {
@@ -38,6 +42,8 @@ const Block = ( {
 			placeOrderButtonLabel ||
 			defaultPlaceOrderButtonLabel,
 	} );
+
+	const showPrice = className?.includes( 'is-style-with-price' ) || false;
 
 	return (
 		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
@@ -50,9 +56,22 @@ const Block = ( {
 						link={ getSetting( 'page-' + cartPageId, false ) }
 					/>
 				) }
+				{ showPrice && (
+					<style>
+						{ `.wp-block-woocommerce-checkout-actions-block {
+						.wc-block-components-checkout-place-order-button__separator {
+							&::after {
+								content: "${ priceSeparator }";
+							}
+						}
+					}` }
+					</style>
+				) }
 				<PlaceOrderButton
 					label={ label }
 					fullWidth={ ! showReturnToCart }
+					showPrice={ showPrice }
+					priceSeparator={ priceSeparator }
 				/>
 			</div>
 		</div>
