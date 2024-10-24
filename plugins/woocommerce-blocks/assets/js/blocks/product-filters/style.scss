@@ -1,22 +1,46 @@
 .wc-block-product-filters {
-	dialog {
-		flex-direction: column;
-		position: fixed;
-		border: none;
-		top: 0;
-		z-index: 9999;
-		height: 100vh;
-		width: 100vw;
 
-		&.wc-block-product-filters--dialog-open {
-			display: flex;
-			padding-left: 0;
-			overflow-y: auto;
+	--top-padding: var(--wp-admin--admin-bar--height);
+	@media screen and (max-width: 782px) {
+		--top-padding: var(--adminbar-mobile-padding, 0);
+	}
+
+	&.is-overlay-enabled {
+		.wc-block-product-filters__overlay {
+			position: fixed;
+			inset: 0;
+			pointer-events: none;
+			opacity: 0;
+			top: var(--top-padding);
+			transition: all 500ms;
+			background: transparent;
 		}
+		.wc-block-product-filters__overlay-wrapper {
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+		.wc-block-product-filters__overlay-dialog {
+			position: absolute;
+            display: block !important;
+			inset: 0;
+			padding: var(--wp--preset--spacing--20);
+			transform: translateY(100vh);
+			transition: transform 500ms;
+            background-color: var(--wc-product-filters-overlay-background-color, #fff);
+		}
+	}
 
-		&.wc-block-product-filters--with-admin-bar {
-			margin-top: $gap;
-			height: calc(100vh - 2 * $gap);
+	&.is-overlay-enabled.is-overlay-opened {
+		.wc-block-product-filters__overlay {
+			z-index: 9999;
+			pointer-events: auto;
+			opacity: 1;
+            background-color: rgba(95, 95, 95, 0.35);
+		}
+		.wc-block-product-filters__overlay-dialog {
+			transform: translateY(0);
+            color: var(--wc-product-filters-overlay-color, inherit);
 		}
 	}
 }
