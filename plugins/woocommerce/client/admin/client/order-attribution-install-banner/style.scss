@@ -83,6 +83,8 @@
 }
 
 .components-button.woocommerce-order-attribution-install-header-banner {
+	margin-right: 12px;
+
 	@media (max-width: $break-small) {
 		text-wrap: wrap;
 		font-size: 11px;
