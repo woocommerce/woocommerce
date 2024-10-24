@@ -96,11 +96,10 @@ class PaymentInfo {
 			return array();
 		}
 
-		// For testing purposes: if WooCommerce Payments development mode is enabled,
-		// an order meta item with key '_wcpay_payment_details' will be used if it exists as a replacement
-		// for the call to the Stripe API's 'get intent' endpoint.
-		// The value must be the JSON encoding of an array simulating the "payment_details" part of the response from the endpoint
-		// (at the very least it must contain the "card_present" key).
+		// For testing purposes: if WooCommerce Payments development mode is enabled, an order meta item with
+		// key '_wcpay_payment_details' will be used if it exists as a replacement for the call to the Stripe
+		// API's 'get intent' endpoint. The value must be the JSON encoding of an array simulating the
+		// "payment_details" part of the response from the endpoint.
 		$stored_payment_details = Constants::get_constant( 'WCPAY_DEV_MODE' ) ? $order->get_meta( '_wcpay_payment_details' ) : '';
 		$payment_details        = json_decode( $stored_payment_details, true );
 
