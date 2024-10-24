@@ -19,7 +19,17 @@ class Init extends RemoteSpecsEngine {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$is_payments_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification
+		/* phpcs:disable WordPress.Security.NonceVerification */
+		$is_payments_page   = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab'];
+		$is_wc_admin_page   = isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
+		$is_payments_task   = $is_wc_admin_page && isset( $_GET['path'] ) && '/payments' === $_GET['path'];
+		$is_payment_welcome = $is_wc_admin_page && isset( $_GET['path'] ) && '/wc-pay-welcome-page' === $_GET['path'];
+		/* phpcs:enable */
+
+		if ( $is_payments_page || $is_payments_task || $is_payment_welcome ) {
+			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_component_settings' ) );
+		}
+
 		if ( ! wp_is_json_request() && ! $is_payments_page ) {
 			return;
 		}
@@ -161,7 +171,7 @@ class Init extends RemoteSpecsEngine {
 	 * @return boolean If merchant is eligible for WooPay.
 	 */
 	public static function is_woopay_eligible() {
-		$wcpay_promotion = self::get_wc_pay_promotion_spec( false );
+		$wcpay_promotion = self::get_wc_pay_promotion_spec();
 
 		return $wcpay_promotion && 'woocommerce_payments:woopay' === $wcpay_promotion->id;
 	}
@@ -190,6 +200,18 @@ class Init extends RemoteSpecsEngine {
 		}
 
 		return $specs;
+	}
+
+	/**
+	 * Add component settings.
+	 *
+	 * @param array $settings Component settings.
+	 *
+	 * @return array
+	 */
+	public function add_component_settings( $settings ) {
+		$settings['isWooPayEligible'] = self::is_woopay_eligible();
+		return $settings;
 	}
 
 	/**
