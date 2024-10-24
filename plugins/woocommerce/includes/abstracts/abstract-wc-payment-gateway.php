@@ -57,6 +57,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $description;
 
 	/**
+	 * Payment Method type
+	 *
+	 * @var Payment_Method
+	 */
+	public Payment_Method $payment_method;
+
+	/**
 	 * Chosen payment method id.
 	 *
 	 * @var bool
