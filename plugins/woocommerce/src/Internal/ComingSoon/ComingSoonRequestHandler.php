@@ -31,7 +31,7 @@ class ComingSoonRequestHandler {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
 		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
-		add_filter( 'woocommerce_enqueue_styles', array( $this, 'enqueue_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 	}
 
 
@@ -232,33 +232,26 @@ class ComingSoonRequestHandler {
 
 	/**
 	 * Enqueues the coming soon banner styles.
-	 *
-	 * @param array $styles The styles array.
-	 *
-	 * @return array
 	 */
-	public function enqueue_styles( $styles ) {
+	public function enqueue_styles() {
 		// Early exit if LYS feature is disabled.
 		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return $styles;
+			return;
 		}
 
 		if ( $this->coming_soon_helper->is_site_live() ) {
-			return $styles;
+			return;
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return $styles;
+			return;
 		}
 
-		$styles['woocommerce-coming-soon'] = array(
-			'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/coming-soon.css',
-			'deps'    => '',
-			'version' => Constants::get_constant( 'WC_VERSION' ),
-			'media'   => 'all',
-			'has_rtl' => true,
+		wp_enqueue_style(
+			'woocommerce-coming-soon',
+			WC()->plugin_url() . '/assets/css/coming-soon' . ( is_rtl() ? '-rtl' : '' ) . '.css',
+			array(),
+			Constants::get_constant( 'WC_VERSION' )
 		);
-
-		return $styles;
 	}
 }
