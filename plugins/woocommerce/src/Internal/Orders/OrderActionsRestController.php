@@ -124,6 +124,8 @@ class OrderActionsRestController extends RestApiControllerBase {
 		/** This action is documented in includes/admin/meta-boxes/class-wc-meta-box-order-actions.php */
 		do_action( 'woocommerce_before_resend_order_emails', $order, 'customer_invoice' );
 
+		WC()->payment_gateways();
+		WC()->shipping();
 		WC()->mailer()->customer_invoice( $order );
 
 		$order->add_order_note( __( 'Order details sent to customer via REST API.', 'woocommerce' ), false, true );
