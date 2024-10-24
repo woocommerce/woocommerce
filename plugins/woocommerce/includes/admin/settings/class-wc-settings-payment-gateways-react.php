@@ -8,6 +8,8 @@ declare( strict_types = 1);
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Settings_Payment_Gateways_React', false ) ) {
@@ -96,8 +98,9 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 * Render the React section.
 	 *
 	 * @param string $section The section to render.
+	 * @param array  $payment_gateways Payment gateways.
 	 */
-	private function render_react_section( $section ) {
+	private function render_react_section( string $section ) {
 		global $hide_save_button;
 		$hide_save_button = true;
 		echo '<div id="experimental_wc_settings_payments_' . esc_attr( $section ) . '"></div>';
@@ -105,7 +108,46 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		// Output the gateways data to the page so the React app can use it.
 		$controller = new WC_REST_Payment_Gateways_Controller();
 		$response   = $controller->get_items( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) );
-		echo '<script type="application/json" id="experimental_wc_settings_payments_gateways">' . wp_json_encode( $response->data ) . '</script>';
+		$payment_gateways = $this->format_payment_gateways_for_output( $response->data );
+
+		$is_woopayments_onboarded = WooCommercePayments::is_connected() && ! WooCommercePayments::is_account_partially_onboarded();
+		$is_woopayments_in_test_mode = $is_woopayments_onboarded &&
+			method_exists( WC_Payments::class, 'mode' ) &&
+			method_exists( WC_Payments::mode(), 'is_test_mode_onboarding' ) &&
+			WC_Payments::mode()->is_test_mode_onboarding();
+
+		// TODO: we should think about a better way to pass this data to the frontend.
+		echo '<script type="application/json" id="experimental_wc_settings_payments_woopayments">' . wp_json_encode(
+			array(
+				'isSupported'  => WooCommercePayments::is_supported(),
+				'isOnboarded'  => $is_woopayments_onboarded,
+				'isInTestMode' => $is_woopayments_in_test_mode,
+			)
+		) . '</script>';
+		echo '<script type="application/json" id="experimental_wc_settings_payments_gateways">' . wp_json_encode( $payment_gateways ) . '</script>';
+	}
+
+	/**
+	 * Handle some additional formatting and processing that is necessary to display gateways on the React settings page.
+	 *
+	 * @param array $payment_gateways The payment gateways.
+	 *
+	 * @return array
+	 */
+	private function format_payment_gateways_for_output( array $payment_gateways ): array {
+		$offline_methods = [ 'bacs', 'cheque', 'cod' ];
+		$display_payment_gateways = [];
+
+		// Remove offline methods from the list of gateways (these are handled differently).
+		foreach ( $payment_gateways as $gateway ) {
+			if ( ! in_array( $gateway['id'], $offline_methods, true ) ) {
+				$display_payment_gateways[] = $gateway;
+			}
+		}
+
+		// TODO: Add Recommended Gateways (region dependent) to the list of gateways to display.
+		// TODO: we need to add a way to detect if a plugin is onboarded or not. This will determine some aspects of how it displays.
+		return $display_payment_gateways;
 	}
 
 	/**

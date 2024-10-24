@@ -27,7 +27,6 @@ registerStore( STORE_KEY, {
 } );
 
 declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
 	function dispatch(
 		key: typeof STORE_KEY
 	): DispatchFromMap< typeof actions >;

@@ -42,9 +42,7 @@ export const SettingsPaymentsOfflineWrapper: React.FC = () => {
 
 export const SettingsPaymentsWooCommercePaymentsWrapper: React.FC = () => {
 	return (
-		<Suspense
-			fallback={ <div>Loading WooCommerce Payments settings...</div> }
-		>
+		<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
 			<SettingsPaymentsWooCommercePaymentsChunk />
 		</Suspense>
 	);

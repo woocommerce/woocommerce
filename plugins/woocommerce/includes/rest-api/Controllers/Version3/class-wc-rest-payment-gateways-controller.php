@@ -11,7 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Paymenga gateways controller class.
+ * Payment gateways controller class.
  *
  * @package WooCommerce\RestApi
  * @extends WC_REST_Payment_Gateways_V2_Controller
