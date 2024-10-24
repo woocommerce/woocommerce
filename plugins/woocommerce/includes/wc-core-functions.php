@@ -1307,6 +1307,50 @@ function wc_get_base_location() {
 }
 
 /**
+ * Uses geolocation to get the customer country and state only if they are valid values.
+ *
+ * @since 9.5.0
+ * @param array $fallback Fallback location.
+ * @return array
+ */
+function wc_get_customer_geolocation( $fallback = array(
+	'country' => '',
+	'state'   => '',
+) ) {
+	$ua = wc_get_user_agent();
+
+	// Exclude common bots from geolocation by user agent.
+	if ( stripos( $ua, 'bot' ) !== false || stripos( $ua, 'spider' ) !== false || stripos( $ua, 'crawl' ) !== false ) {
+		return $fallback;
+	}
+
+	$geolocation = WC_Geolocation::geolocate_ip( '', true, false );
+
+	if ( empty( $geolocation['country'] ) ) {
+		return $fallback;
+	}
+
+	// Ensure geolocation is valid.
+	$allowed_countries = WC()->countries->get_allowed_countries();
+
+	if ( ! isset( $allowed_countries[ $geolocation['country'] ] ) ) {
+		return $fallback;
+	}
+
+	$allowed_states = WC()->countries->get_allowed_country_states();
+	$country_states = $allowed_states[ $geolocation['country'] ] ?? array();
+
+	if ( $country_states && ! isset( $country_states[ $geolocation['state'] ] ) ) {
+		$geolocation['state'] = '';
+	}
+
+	return array(
+		'country' => $geolocation['country'],
+		'state'   => $geolocation['state'],
+	);
+}
+
+/**
  * Get the customer's default location.
  *
  * Filtered, and set to base location or left blank. If cache-busting,
@@ -1317,32 +1361,46 @@ function wc_get_base_location() {
  */
 function wc_get_customer_default_location() {
 	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
-	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', 'US:CA' );
-	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
-	// Geolocation takes priority if used and if geolocation is possible.
-	if ( 'geolocation' === $set_default_location_to || 'geolocation_ajax' === $set_default_location_to ) {
-		$ua = wc_get_user_agent();
-
-		// Exclude common bots from geolocation by user agent.
-		if ( ! stristr( $ua, 'bot' ) && ! stristr( $ua, 'spider' ) && ! stristr( $ua, 'crawl' ) ) {
-			$geolocation = WC_Geolocation::geolocate_ip( '', true, false );
-
-			if ( ! empty( $geolocation['country'] ) ) {
-				$location = $geolocation;
-			}
-		}
+	// Unless the location should be blank, use the base location as the default.
+	if ( '' !== $set_default_location_to ) {
+		$default_location_string = get_option( 'woocommerce_default_country', 'US:CA' );
 	}
 
-	// Once we have a location, ensure it's valid, otherwise fallback to a valid location.
-	$allowed_country_codes = WC()->countries->get_allowed_countries();
+	$default_location = wc_format_country_state_string(
+		/**
+		 * Filter the customer default location before geolocation.
+		 *
+		 * @since 2.3.0
+		 * @param string $default_location_string The default location.
+		 * @return string
+		 */
+		apply_filters( 'woocommerce_customer_default_location', $default_location_string ?? '' )
+	);
 
-	if ( ! empty( $location['country'] ) && ! array_key_exists( $location['country'], $allowed_country_codes ) ) {
-		$location['country'] = current( array_keys( $allowed_country_codes ) );
-		$location['state']   = '';
+	// Ensure defaults are valid.
+	$allowed_countries = WC()->countries->get_allowed_countries();
+
+	if ( ! in_array( $default_location['country'], array_keys( $allowed_countries ), true ) ) {
+		$default_location = array(
+			'country' => '',
+			'state'   => '',
+		);
 	}
 
-	return apply_filters( 'woocommerce_customer_default_location_array', $location );
+	// Geolocation takes priority if geolocation is possible.
+	if ( in_array( $set_default_location_to, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+		$default_location = wc_get_customer_geolocation( $default_location );
+	}
+
+	/**
+	 * Filter the customer default location after geolocation.
+	 *
+	 * @since 2.3.0
+	 * @param array $customer_location The customer location with keys 'country' and 'state'.
+	 * @return array
+	 */
+	return apply_filters( 'woocommerce_customer_default_location_array', $default_location );
 }
 
 /**

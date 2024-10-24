@@ -1,6 +1,5 @@
 {
 	"extends": "../tsconfig",
-	"include": [ "src/", "typings/" ],
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
@@ -8,5 +7,9 @@
 		"declarationMap": true,
 		"declarationDir": "./build-types",
 		"typeRoots": [ "./typings", "./node_modules/@types" ]
-	}
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*",
+	]
 }

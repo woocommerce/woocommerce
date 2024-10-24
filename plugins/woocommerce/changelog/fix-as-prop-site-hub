@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Remove unnecessary 'as' prop from SiteHub component
+
+
