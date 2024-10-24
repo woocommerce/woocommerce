@@ -171,7 +171,7 @@ class Init extends RemoteSpecsEngine {
 	 * @return boolean If merchant is eligible for WooPay.
 	 */
 	public static function is_woopay_eligible() {
-		$wcpay_promotion = self::get_wc_pay_promotion_spec();
+		$wcpay_promotion = self::get_wc_pay_promotion_spec( false );
 
 		return $wcpay_promotion && 'woocommerce_payments:woopay' === $wcpay_promotion->id;
 	}
