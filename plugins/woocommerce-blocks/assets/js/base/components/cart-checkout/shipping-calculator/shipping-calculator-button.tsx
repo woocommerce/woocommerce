@@ -19,11 +19,11 @@ export const ShippingCalculatorButton = ( {
 	const {
 		isShippingCalculatorOpen,
 		setIsShippingCalculatorOpen,
-		isShippingCalculatorEnabled,
+		showCalculator,
 		shippingCalculatorId,
 	} = useContext( ShippingCalculatorContext );
 
-	if ( ! isShippingCalculatorEnabled ) {
+	if ( ! showCalculator ) {
 		return null;
 	}
 

@@ -33,13 +33,13 @@ export const ShippingCalculator = ( {
 }: ShippingCalculatorProps ): JSX.Element | null => {
 	const {
 		shippingCalculatorId,
-		isShippingCalculatorEnabled,
+		showCalculator,
 		setIsShippingCalculatorOpen,
 	} = useContext( ShippingCalculatorContext );
 	const { shippingAddress } = useCustomerData();
 	const noticeContext = 'wc/cart/shipping-calculator';
 
-	if ( ! isShippingCalculatorEnabled ) {
+	if ( ! showCalculator ) {
 		return null;
 	}
 

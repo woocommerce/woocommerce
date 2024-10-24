@@ -5,7 +5,7 @@ import { createContext } from '@wordpress/element';
 
 type ShippingCalculatorContextType = {
 	shippingCalculatorId: string;
-	isShippingCalculatorEnabled: boolean;
+	showCalculator: boolean;
 	isShippingCalculatorOpen: boolean;
 	setIsShippingCalculatorOpen: ( value: boolean ) => void;
 };
@@ -13,7 +13,7 @@ type ShippingCalculatorContextType = {
 export const ShippingCalculatorContext =
 	createContext< ShippingCalculatorContextType >( {
 		shippingCalculatorId: '',
-		isShippingCalculatorEnabled: false,
+		showCalculator: false,
 		isShippingCalculatorOpen: false,
 		setIsShippingCalculatorOpen: () => {
 			/* Do nothing */
