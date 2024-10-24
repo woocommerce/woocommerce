@@ -2065,8 +2065,13 @@ class ProductCollection extends AbstractBlock {
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
 						$product_references = array( $location['sourceData']['productId'] );
 					}
+
 					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
 						$product_references = $location['sourceData']['productIds'];
+					}
+
+					if ( isset( $location['type'] ) && 'order' === $location['type'] ) {
+						$product_references = $this->get_product_ids_from_order( $location['sourceData']['orderId'] ?? null );
 					}
 				}
 
@@ -2135,19 +2140,24 @@ class ProductCollection extends AbstractBlock {
 				);
 			},
 			function ( $collection_args, $query ) {
-				$product_reference = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_reference ) ) {
+				if ( empty( $product_references ) ) {
 					$location = $collection_args['productCollectionLocation'];
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
-						$product_reference = array( $location['sourceData']['productId'] );
+						$product_references = array( $location['sourceData']['productId'] );
 					}
+
 					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-						$product_reference = $location['sourceData']['productIds'];
+						$product_references = $location['sourceData']['productIds'];
+					}
+
+					if ( isset( $location['type'] ) && 'order' === $location['type'] ) {
+						$product_references = $this->get_product_ids_from_order( $location['sourceData']['orderId'] ?? null );
 					}
 				}
 
-				$collection_args['crossSellsProductReferences'] = $product_reference;
+				$collection_args['crossSellsProductReferences'] = $product_references;
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
@@ -2164,5 +2174,31 @@ class ProductCollection extends AbstractBlock {
 				return $collection_args;
 			}
 		);
+	}
+
+	/**
+	 * Get product IDs from an order.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<int> The product IDs.
+	 */
+	private function get_product_ids_from_order( $order_id ) {
+		$product_references = array();
+		if ( empty( $order_id ) ) {
+			return $product_references;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( $order ) {
+			$product_references = array_filter(
+				array_map(
+					function ( $item ) {
+						return $item->get_product_id();
+					},
+					$order->get_items( 'line_item' )
+				)
+			);
+		}
+		return $product_references;
 	}
 }

@@ -21,7 +21,7 @@ const collection = {
 	),
 	keywords: [ 'boost', 'promotion' ],
 	scope: [ 'block' ],
-	usesReference: [ 'product', 'cart' ],
+	usesReference: [ 'product', 'cart', 'order' ],
 };
 
 const attributes = {

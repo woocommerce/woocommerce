@@ -20,8 +20,8 @@ const collection = {
 		'woocommerce'
 	),
 	keywords: [ 'boost', 'promotion' ],
-	scope: [],
-	usesReference: [ 'product', 'cart' ],
+	scope: [ 'block' ],
+	usesReference: [ 'product', 'cart', 'order' ],
 };
 
 const attributes = {

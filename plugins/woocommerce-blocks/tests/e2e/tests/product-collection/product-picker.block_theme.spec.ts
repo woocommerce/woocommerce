@@ -162,6 +162,50 @@ test.describe( 'Product Collection: Product Picker', () => {
 		} );
 	} );
 
+	test( `For collection "Block: My Custom Collection - Cart Context" - "From products in the cart" is chosen by default in Cart Template`, async ( {
+		pageObject,
+		admin,
+		editor,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postId: `woocommerce/woocommerce//page-cart`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		await editor.canvas.locator( 'body' ).click();
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInTemplate(
+			'myCustomCollectionWithCartContext'
+		);
+
+		const fromProductsInCartRadioButton = admin.page.getByText(
+			'From products in the cart'
+		);
+		await expect( fromProductsInCartRadioButton ).toBeChecked();
+	} );
+
+	test( `For collection "Block: My Custom Collection - Order Context" - "From products in the order" is chosen by default in Order Confirmation Template`, async ( {
+		pageObject,
+		admin,
+		editor,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postId: `woocommerce/woocommerce//order-confirmation`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		await editor.canvas.locator( 'body' ).click();
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInTemplate(
+			'myCustomCollectionWithOrderContext'
+		);
+
+		const fromProductsInOrderRadioButton = admin.page.getByText(
+			'From products in the order'
+		);
+		await expect( fromProductsInOrderRadioButton ).toBeChecked();
+	} );
+
 	test( 'Product picker should work as expected while changing collection using "Choose collection" button from Toolbar', async ( {
 		pageObject,
 		admin,
