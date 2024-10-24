@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Set the product name as alt text for the main product thumbnail when no alt text is provided.
+
