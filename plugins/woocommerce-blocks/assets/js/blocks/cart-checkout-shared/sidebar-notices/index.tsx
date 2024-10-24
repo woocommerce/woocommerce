@@ -8,8 +8,6 @@ import {
 } from '@wordpress/block-editor';
 import { addFilter, hasFilter } from '@wordpress/hooks';
 import type { StoreDescriptor } from '@wordpress/data';
-import { NoPaymentMethodsNotice } from '@woocommerce/editor-components/no-payment-methods-notice';
-import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { DefaultNotice } from '@woocommerce/editor-components/default-notice';
 import { IncompatibleExtensionsNotice } from '@woocommerce/editor-components/incompatible-extension-notice';
 import { useSelect } from '@wordpress/data';
@@ -35,13 +33,7 @@ const withSidebarNotices = createHigherOrderComponent(
 			isSelected: isBlockSelected,
 		} = props;
 
-		const {
-			isCart,
-			isCheckout,
-			isPaymentMethodsBlock,
-			hasPaymentMethods,
-			parentId,
-		} = useSelect( ( select ) => {
+		const { isCart, isCheckout, parentId } = useSelect( ( select ) => {
 			const { getBlockParentsByBlockName, getBlockName } =
 				select( blockEditorStore );
 
@@ -82,13 +74,6 @@ const withSidebarNotices = createHigherOrderComponent(
 					currentBlockName === targetParentBlock
 						? clientId
 						: parents[ targetParentBlock ],
-				isPaymentMethodsBlock:
-					currentBlockName === 'woocommerce/checkout-payment-block',
-				hasPaymentMethods:
-					select( PAYMENT_STORE_KEY ).paymentMethodsInitialized() &&
-					Object.keys(
-						select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods()
-					).length > 0,
 			};
 		} );
 
@@ -112,11 +97,6 @@ const withSidebarNotices = createHigherOrderComponent(
 					/>
 
 					<DefaultNotice block={ isCheckout ? 'checkout' : 'cart' } />
-
-					{ isPaymentMethodsBlock && ! hasPaymentMethods && (
-						<NoPaymentMethodsNotice />
-					) }
-
 					<CartCheckoutFeedbackPrompt />
 				</InspectorControls>
 				<BlockEdit key="edit" { ...props } />

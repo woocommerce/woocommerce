@@ -16,10 +16,12 @@ import './style.scss';
 
 /**
  * PaymentMethods component.
- *
- * @return {*} The rendered component.
  */
-const PaymentMethods = () => {
+const PaymentMethods = ( {
+	noPaymentMethods = <NoPaymentMethods />,
+}: {
+	noPaymentMethods?: JSX.Element | undefined;
+} ) => {
 	const {
 		paymentMethodsInitialized,
 		availablePaymentMethods,
@@ -37,7 +39,7 @@ const PaymentMethods = () => {
 		paymentMethodsInitialized &&
 		Object.keys( availablePaymentMethods ).length === 0
 	) {
-		return <NoPaymentMethods />;
+		return noPaymentMethods;
 	}
 
 	return (

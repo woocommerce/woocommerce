@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, ExternalLink } from '@wordpress/components';
+import { payment } from '@wordpress/icons';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -24,6 +25,7 @@ import {
 	AdditionalFieldsContent,
 } from '../../form-step';
 import Block from './block';
+import ConfigurePlaceholder from '../../configure-placeholder';
 
 export const Edit = ( {
 	attributes,
@@ -119,7 +121,23 @@ export const Edit = ( {
 				) }
 			</InspectorControls>
 			<Noninteractive>
-				<Block />
+				<Block
+					noPaymentMethods={
+						<ConfigurePlaceholder
+							icon={ payment }
+							label={ __( 'Payment options', 'woocommerce' ) }
+							description={ __(
+								'Your store does not have any payment methods that support the Checkout block. Once you have configured a compatible payment method it will be displayed here.',
+								'woocommerce'
+							) }
+							buttonLabel={ __(
+								'Configure Payment Options',
+								'woocommerce'
+							) }
+							buttonHref={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
+						/>
+					}
+				/>
 			</Noninteractive>
 			<AdditionalFields block={ innerBlockAreas.PAYMENT_METHODS } />
 		</FormStepBlock>
