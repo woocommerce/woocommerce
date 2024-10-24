@@ -1,17 +1,20 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use WC_Tracks;
 
+/**
+ * Handle calls to deprecated methods.
+ */
 class RemovedDeprecated {
 	/**
 	 * Handle deprecated method calls.
 	 *
-	 * @param string $class The class name.
 	 * @param string $name The name of the deprecated method.
 	 */
-	private static function handle_deprecated_method_call( $class, $name ) {
+	private static function handle_deprecated_method_call( $name ) {
 		$logger = wc_get_logger();
 
 		if ( $logger ) {
@@ -32,7 +35,7 @@ class RemovedDeprecated {
 	 * @param array  $arguments The arguments passed to the deprecated method.
 	 */
 	public function __call( $name, $arguments ) {
-		self::handle_deprecated_method_call( get_called_class(), $name );
+		self::handle_deprecated_method_call( $name );
 	}
 
 	/**
@@ -42,6 +45,6 @@ class RemovedDeprecated {
 	 * @param array  $arguments The arguments passed to the deprecated method.
 	 */
 	public static function __callStatic( $name, $arguments ) {
-		self::handle_deprecated_method_call( get_called_class(), $name );
+		self::handle_deprecated_method_call( $name );
 	}
 }
