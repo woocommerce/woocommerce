@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { addAProductToCart } = require( '../../utils/cart' );
+
+import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
