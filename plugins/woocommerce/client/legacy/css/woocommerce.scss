@@ -1167,6 +1167,10 @@ p.demo_store,
 			label {
 				@include woocommerce-float-label();
 				left: 1.5em;
+
+				&.is-active {
+					transform: translateY(-2px) scale(.75);
+				}
 			}
 		}
 
