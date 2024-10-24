@@ -76,13 +76,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					'title' => __( 'Email sender options', 'woocommerce' ),
 					'type'  => 'title',
-					'desc'  => '',
+					'desc'  => __( 'This is how your sender name and email address appears in outgoing WooCommerce emails.', 'woocommerce' ),
 					'id'    => 'email_options',
 				),
 
 				array(
 					'title'    => __( '"From" name', 'woocommerce' ),
-					'desc'     => __( 'How the sender name appears in outgoing WooCommerce emails.', 'woocommerce' ),
+					'desc'     => '',
 					'id'       => 'woocommerce_email_from_name',
 					'type'     => 'text',
 					'css'      => 'min-width:400px;',
@@ -93,7 +93,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 				array(
 					'title'             => __( '"From" address', 'woocommerce' ),
-					'desc'              => __( 'How the sender email appears in outgoing WooCommerce emails.', 'woocommerce' ),
+					'desc'              => '',
 					'id'                => 'woocommerce_email_from_address',
 					'type'              => 'email',
 					'custom_attributes' => array(
