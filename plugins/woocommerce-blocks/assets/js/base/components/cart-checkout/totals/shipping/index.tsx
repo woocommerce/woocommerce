@@ -2,37 +2,32 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-components';
-import type { CartResponseTotals, CartShippingRate } from '@woocommerce/types';
-import {
-	ShippingCalculator,
-	ShippingCalculatorContext,
-} from '@woocommerce/base-components/cart-checkout/shipping-calculator';
-import {
-	isPackageRateCollectable,
-	hasShippingRate,
-	getTotalShippingValue,
-	isAddressComplete,
-} from '@woocommerce/base-utils';
+import { getTotalShippingValue } from '@woocommerce/base-utils';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import type {
+	CartResponseShippingAddress,
+	CartResponseTotals,
+	CartShippingRate,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { ShippingVia } from './shipping-via';
 import { ShippingAddress } from './shipping-address';
-import { ShippingRateSelector } from './shipping-rate-selector';
 import './style.scss';
 
 export interface TotalShippingProps {
+	label: string;
+	hasRates: boolean;
 	shippingRates: CartShippingRate[];
+	shippingAddress: CartResponseShippingAddress;
 	values: CartResponseTotals;
 	className?: string;
 	placeholder?: React.ReactNode | null;
-	showRateSelector?: boolean;
+	collaterals?: React.ReactNode | null;
 }
 
 const renderShippingTotalValue = ( value: number ) => {
@@ -43,28 +38,17 @@ const renderShippingTotalValue = ( value: number ) => {
 };
 
 export const TotalsShipping = ( {
+	label = __( 'Delivery', 'woocommerce' ),
+	hasRates = false,
+	shippingAddress,
 	shippingRates,
 	values,
 	placeholder = null,
 	className,
-	showRateSelector = false,
+	collaterals = null,
 }: TotalShippingProps ): JSX.Element | null => {
-	const { shippingAddress, cartHasCalculatedShipping, isLoadingRates } =
-		useStoreCart();
-	const { isShippingCalculatorOpen } = useContext(
-		ShippingCalculatorContext
-	);
 	const totalShippingValue = getTotalShippingValue( values );
 	const totalCurrency = getCurrencyFromPriceResponse( values );
-	const hasRates =
-		cartHasCalculatedShipping && hasShippingRate( shippingRates );
-	const hasCompleteAddress = isAddressComplete( shippingAddress, [
-		'state',
-		'country',
-		'postcode',
-		'city',
-	] );
-
 	const selectedShippingRates = shippingRates.flatMap(
 		( shippingPackage ) => {
 			return shippingPackage.shipping_rates
@@ -72,14 +56,6 @@ export const TotalsShipping = ( {
 				.flatMap( ( rate ) => rate.name );
 		}
 	);
-	const isCollectionOnly = hasRates
-		? shippingRates.every( ( shippingPackage ) => {
-				return shippingPackage.shipping_rates.every(
-					( rate ) =>
-						! rate.selected || isPackageRateCollectable( rate )
-				);
-		  } )
-		: false;
 
 	return (
 		<div
@@ -89,11 +65,7 @@ export const TotalsShipping = ( {
 			) }
 		>
 			<TotalsItem
-				label={
-					isCollectionOnly
-						? __( 'Collection', 'woocommerce' )
-						: __( 'Delivery', 'woocommerce' )
-				}
+				label={ label }
 				value={
 					hasRates
 						? renderShippingTotalValue( totalShippingValue )
@@ -113,16 +85,11 @@ export const TotalsShipping = ( {
 								/>
 							</>
 						) }
-						{ isShippingCalculatorOpen && <ShippingCalculator /> }
-						{ ! isShippingCalculatorOpen &&
-							showRateSelector &&
-							hasRates && (
-								<ShippingRateSelector
-									shippingRates={ shippingRates }
-									isLoadingRates={ isLoadingRates }
-									hasCompleteAddress={ hasCompleteAddress }
-								/>
-							) }
+						{ !! collaterals && (
+							<div className="wc-block-components-totals-shipping__collaterals">
+								{ collaterals }
+							</div>
+						) }
 					</>
 				}
 				currency={ totalCurrency }

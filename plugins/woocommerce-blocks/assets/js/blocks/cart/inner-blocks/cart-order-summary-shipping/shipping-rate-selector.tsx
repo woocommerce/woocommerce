@@ -20,7 +20,6 @@ export const ShippingRateSelector = ( {
 			<legend className="screen-reader-text">
 				{ __( 'Shipping options', 'woocommerce' ) }
 			</legend>
-
 			<ShippingRatesControl
 				className="wc-block-components-totals-shipping__options"
 				noResultsMessage={

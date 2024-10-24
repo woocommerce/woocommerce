@@ -10,6 +10,8 @@ import { useSelect } from '@wordpress/data';
 import {
 	filterShippingRatesByPrefersCollection,
 	isAddressComplete,
+	isPackageRateCollectable,
+	hasShippingRate,
 } from '@woocommerce/base-utils';
 
 const Block = ( {
@@ -17,8 +19,13 @@ const Block = ( {
 }: {
 	className?: string;
 } ): JSX.Element | null => {
-	const { cartTotals, cartNeedsShipping, shippingRates, shippingAddress } =
-		useStoreCart();
+	const {
+		cartTotals,
+		cartNeedsShipping,
+		shippingRates: cartShippingRates,
+		shippingAddress,
+		cartHasCalculatedShipping,
+	} = useStoreCart();
 	const prefersCollection = useSelect( ( select ) => {
 		return select( CHECKOUT_STORE_KEY ).prefersCollection();
 	} );
@@ -34,13 +41,32 @@ const Block = ( {
 		'city',
 	] );
 
+	const shippingRates = filterShippingRatesByPrefersCollection(
+		cartShippingRates,
+		prefersCollection ?? false
+	);
+	const hasRates =
+		cartHasCalculatedShipping && hasShippingRate( shippingRates );
+	const isCollectionOnly = hasRates
+		? shippingRates.every( ( shippingPackage ) => {
+				return shippingPackage.shipping_rates.every(
+					( rate ) =>
+						! rate.selected || isPackageRateCollectable( rate )
+				);
+		  } )
+		: false;
+
 	return (
 		<TotalsWrapper className={ className }>
 			<TotalsShipping
-				shippingRates={ filterShippingRatesByPrefersCollection(
-					shippingRates,
-					prefersCollection ?? false
-				) }
+				label={
+					isCollectionOnly
+						? __( 'Collection', 'woocommerce' )
+						: __( 'Delivery', 'woocommerce' )
+				}
+				hasRates={ hasRates }
+				shippingAddress={ shippingAddress }
+				shippingRates={ shippingRates }
 				values={ cartTotals }
 				placeholder={
 					<span className="wc-block-components-shipping-placeholder__value">

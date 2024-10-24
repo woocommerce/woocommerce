@@ -145,6 +145,12 @@
 	.wc-block-components-sidebar {
 		margin-top: 0;
 
+		.wc-block-components-shipping-calculator,
+		.wc-block-components-shipping-rates-control__package {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
 		.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via,
 		.wc-block-components-totals-shipping__change-address__link {
 			padding-top: $gap-smallest;

@@ -6,17 +6,35 @@ import { useState } from '@wordpress/element';
 import {
 	TotalsShipping,
 	ShippingCalculatorButton,
+	ShippingCalculator,
 } from '@woocommerce/base-components/cart-checkout';
 import { ShippingCalculatorContext } from '@woocommerce/base-components/cart-checkout/shipping-calculator/context';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEditorContext } from '@woocommerce/base-context';
 import { TotalsWrapper } from '@woocommerce/blocks-components';
-import { getShippingRatesPackageCount } from '@woocommerce/base-utils';
+import {
+	getShippingRatesPackageCount,
+	isPackageRateCollectable,
+	isAddressComplete,
+	hasShippingRate,
+} from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import { ShippingRateSelector } from './shipping-rate-selector';
 
 const Block = ( { className }: { className: string } ): JSX.Element | null => {
 	const { isEditor } = useEditorContext();
-	const { cartTotals, cartNeedsShipping, shippingRates } = useStoreCart();
+	const {
+		cartTotals,
+		cartNeedsShipping,
+		shippingRates,
+		isLoadingRates,
+		cartHasCalculatedShipping,
+		shippingAddress,
+	} = useStoreCart();
 	const [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] =
 		useState( false );
 
@@ -31,6 +49,29 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 		'isShippingCalculatorEnabled',
 		true
 	);
+	const hasCompleteAddress = isAddressComplete( shippingAddress, [
+		'state',
+		'country',
+		'postcode',
+		'city',
+	] );
+	const hasRates =
+		cartHasCalculatedShipping && hasShippingRate( shippingRates );
+	const isCollectionOnly = hasRates
+		? shippingRates.every( ( shippingPackage ) => {
+				return shippingPackage.shipping_rates.every(
+					( rate ) =>
+						! rate.selected || isPackageRateCollectable( rate )
+				);
+		  } )
+		: false;
+	const hasCollectionRatesOnly = hasRates
+		? shippingRates.every( ( shippingPackage ) => {
+				return shippingPackage.shipping_rates.every( ( rate ) =>
+					isPackageRateCollectable( rate )
+				);
+		  } )
+		: false;
 
 	return (
 		<TotalsWrapper className={ className }>
@@ -43,9 +84,15 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 				} }
 			>
 				<TotalsShipping
+					label={
+						isCollectionOnly
+							? __( 'Collection', 'woocommerce' )
+							: __( 'Delivery', 'woocommerce' )
+					}
+					hasRates={ hasRates }
 					shippingRates={ shippingRates }
+					shippingAddress={ shippingAddress }
 					values={ cartTotals }
-					showRateSelector={ true }
 					placeholder={
 						showCalculator ? (
 							<ShippingCalculatorButton
@@ -62,6 +109,28 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 								) }
 							</span>
 						)
+					}
+					collaterals={
+						<>
+							{ isShippingCalculatorOpen && (
+								<ShippingCalculator />
+							) }
+							{ ! isShippingCalculatorOpen && (
+								<ShippingRateSelector
+									shippingRates={ shippingRates }
+									isLoadingRates={ isLoadingRates }
+									hasCompleteAddress={ hasCompleteAddress }
+								/>
+							) }
+							{ ! showCalculator && hasCollectionRatesOnly && (
+								<div className="wc-block-components-totals-shipping__delivery-options-notice">
+									{ __(
+										'Delivery options will be calculated during checkout',
+										'woocommerce'
+									) }
+								</div>
+							) }
+						</>
 					}
 				/>
 			</ShippingCalculatorContext.Provider>
