@@ -158,7 +158,7 @@ jQuery( function( $ ) {
 				$newstate = $( '<input type="text" />' )
 					.prop( 'id', input_id )
 					.prop( 'name', input_name )
-					.prop( 'placeholder', placeholder )
+					.prop( 'placeholder', input_classes.includes( 'input-with-wc-float-label' ) ? '' : placeholder )
 					.attr( 'data-input-classes', input_classes )
 					.addClass( 'input-text  ' + input_classes );
 				$parent.show().find( '.select2-container' ).remove();

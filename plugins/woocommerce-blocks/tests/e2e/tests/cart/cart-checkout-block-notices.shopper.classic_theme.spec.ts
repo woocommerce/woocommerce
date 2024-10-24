@@ -51,7 +51,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToCartShortcode();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -66,7 +66,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 
 		await page.reload();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -100,7 +100,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		);
 
 		await frontendUtils.goToCartShortcode();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -115,7 +115,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 
 		await page.reload();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -155,7 +155,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		);
 
 		await frontendUtils.goToCartShortcode();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -170,7 +170,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 
 		await page.reload();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -206,7 +206,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		);
 
 		await frontendUtils.goToCartShortcode();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -219,7 +219,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 
 		await page.reload();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByLabel( 'Coupon code' ).fill( 'testcoupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
@@ -250,7 +250,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToCartShortcode();
-		await page.getByPlaceholder( 'Coupon code' ).fill( INVALID_COUPON );
+		await page.getByLabel( 'Coupon code' ).fill( INVALID_COUPON );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(

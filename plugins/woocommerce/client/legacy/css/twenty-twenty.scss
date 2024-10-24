@@ -50,6 +50,20 @@ a.button {
 		.optional {
 			visibility: visible;
 		}
+
+		&:has(.input-with-wc-float-label) {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+				left: 1em;
+				transform: translateY(0.8em);
+
+				&.is-active {
+					transform: translateY(-2px) scale(.75);
+				}
+			}
+		}
 	}
 
 	form.woocommerce-form-login,
@@ -1177,6 +1191,16 @@ button.reset_variations {
 			padding-top: 1.55rem;
 			padding-bottom: 1.59rem;
 			font-size: 1.6rem;
+		}
+	}
+
+	.coupon {
+		position: relative;
+
+		label {
+			@include woocommerce-float-label();
+			left: 1em;
+			transform: translateY(0.8em);
 		}
 	}
 }

@@ -383,3 +383,22 @@
 		width: 1px;
 	}
 }
+
+@mixin woocommerce-float-label {
+	color: var(--wc-subtext);
+	font-size: var(--wp--preset--font-size--small);
+	left: 1.2em;
+	margin-bottom: 0;
+	position: absolute;
+	text-align: left;
+	top: 0;
+	transform: translateY(0.9em);
+	transform-origin: center left;
+	transition: transform 0.2s ease;
+	z-index: 1;
+	
+	&.is-active {
+		color: inherit;
+		transform: translateY(-4px) scale(.75);
+	}
+}

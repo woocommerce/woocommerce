@@ -15,7 +15,7 @@ const applyCoupon = async ( page, couponCode ) => {
 			response.url().includes( '?wc-ajax=apply_coupon' ) &&
 			response.status() === 200
 	);
-	await page.getByPlaceholder( 'Coupon code' ).fill( couponCode );
+	await page.getByLabel( 'Coupon code' ).fill( couponCode );
 	await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 	await responsePromise;
 };

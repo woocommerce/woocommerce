@@ -495,6 +495,18 @@
 			}
 		}
 	}
+	
+	// Float label.
+	form .form-row {
+		
+		&:has(.input-with-wc-float-label) {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+			}
+		}
+	}
 }
 
 // Description/Additional info/Reviews tabs.
@@ -578,9 +590,28 @@ ul.wc-tabs {
 			padding: 0 1rem;
 		}
 
+		.coupon {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+				transform: translateY(1em);
+				
+				@media only screen and (max-width: 768px) {
+					transform: translateY(1.1em);
+				}
+
+				&.is-active {
+					transform: translateY(0px) scale(.75);
+				}
+			}
+		}
+
 		.actions {
 			button.button {
 				height: initial;
+				margin-bottom: 0;
+				margin-top: 0;
 			}
 		}
 
