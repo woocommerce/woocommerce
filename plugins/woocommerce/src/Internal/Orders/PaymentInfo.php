@@ -22,7 +22,7 @@ class PaymentInfo {
 		'interac',
 		'jcb',
 		'mastercard',
-		'visa'
+		'visa',
 	);
 
 	/**
@@ -41,6 +41,8 @@ class PaymentInfo {
 			/**
 			 * Filter to allow payment gateways to provide payment card info for an order.
 			 *
+			 * @since 9.5.0
+			 *
 			 * @param array|null        $info  The card info.
 			 * @param WC_Abstract_Order $order The order.
 			 */
@@ -57,7 +59,7 @@ class PaymentInfo {
 			'icon'           => '',
 			'last4'          => '',
 		);
-		$info = wp_parse_args( $info, $defaults );
+		$info     = wp_parse_args( $info, $defaults );
 
 		if ( empty( $info['icon'] ) ) {
 			$info['icon'] = self::get_card_icon( $info['brand'] );
