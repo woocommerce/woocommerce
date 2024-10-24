@@ -595,11 +595,14 @@ ul.wc-tabs {
 
 			label {
 				@include woocommerce-float-label();
+				transform: translateY(1em);
 				
-				top: initial;
+				@media only screen and (max-width: 768px) {
+					transform: translateY(1.1em);
+				}
 
 				&.is-active {
-					top: 2em;
+					transform: translateY(0px) scale(.75);
 				}
 			}
 		}
@@ -607,6 +610,8 @@ ul.wc-tabs {
 		.actions {
 			button.button {
 				height: initial;
+				margin-bottom: 0;
+				margin-top: 0;
 			}
 		}
 
