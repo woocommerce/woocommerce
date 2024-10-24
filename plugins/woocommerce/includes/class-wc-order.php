@@ -68,7 +68,19 @@ class WC_Order extends WC_Abstract_Order {
 	 * @var string
 	 */
 	const STATUS_CANCELLED  = 'cancelled';
+
+	/**
+	 * The order is in the trash.
+	 *
+	 * @var string
+	 */
 	const STATUS_TRASH      = 'trash';
+
+	/**
+	 * The order is an automatically generated draft.
+	 *
+	 * @var string
+	 */
 	const STATUS_AUTO_DRAFT = 'auto-draft';
 
 	/**
@@ -77,28 +89,6 @@ class WC_Order extends WC_Abstract_Order {
 	 * @var string
 	 */
 	const STATUS_DRAFT = 'draft';
-
-	/**
-	 * Order statuses that are for internal use only.
-	 *
-	 * @var array
-	 */
-	const INTERNAL_STATUSES = array(
-		self::STATUS_TRASH,
-		self::STATUS_AUTO_DRAFT,
-		self::STATUS_DRAFT,
-	);
-
-	/**
-	 * Order statuses that are considered "draft".
-	 *
-	 * @var array
-	 */
-	const DRAFT_STATUSES = array(
-		self::STATUS_DRAFT,
-		self::STATUS_AUTO_DRAFT,
-		\Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders::STATUS,
-	);
 
 	/**
 	 * Stores data about status changes so relevant hooks can be fired.
