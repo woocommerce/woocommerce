@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Enables replacing cart item images in cart-blocks using a filter. Complementary shortcode hook already exists: woocommerce_cart_item_thumbnail.
