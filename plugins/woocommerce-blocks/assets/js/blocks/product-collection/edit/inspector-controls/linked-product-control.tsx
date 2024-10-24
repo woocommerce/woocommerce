@@ -32,6 +32,10 @@ import type {
 	ProductCollectionSetAttributes,
 } from '../../types';
 
+const REFERENCE_TYPE_PRODUCT = 'product';
+const REFERENCE_TYPE_CART = 'cart';
+const REFERENCE_TYPE_ORDER = 'order';
+
 const ProductButton: React.FC< {
 	isOpen: boolean;
 	onToggle: () => void;
@@ -129,11 +133,14 @@ const getFromCurrentProductRadioLabel = (
 	currentLocation: string,
 	isUsesReferenceIncludesCart: boolean
 ): string => {
-	if ( currentLocation === 'cart' && isUsesReferenceIncludesCart ) {
+	if (
+		currentLocation === REFERENCE_TYPE_CART &&
+		isUsesReferenceIncludesCart
+	) {
 		return __( 'From products in the cart', 'woocommerce' );
 	}
 
-	if ( currentLocation === 'order' ) {
+	if ( currentLocation === REFERENCE_TYPE_ORDER ) {
 		return __( 'From products in the order', 'woocommerce' );
 	}
 
@@ -151,16 +158,13 @@ const LinkedProductControl = ( {
 	location: WooCommerceBlockLocation;
 	usesReference: string[] | undefined;
 } ) => {
-	const REFERENCE_TYPE_PRODUCT = 'product';
 	const isProductLocation = location.type === REFERENCE_TYPE_PRODUCT;
 	const hasProductReference = !! usesReference?.includes(
 		REFERENCE_TYPE_PRODUCT
 	);
-	const REFERENCE_TYPE_CART = 'cart';
 	const isCartLocation = location.type === REFERENCE_TYPE_CART;
 	const hasCartReference = !! usesReference?.includes( REFERENCE_TYPE_CART );
 
-	const REFERENCE_TYPE_ORDER = 'order';
 	const isOrderLocation = location.type === REFERENCE_TYPE_ORDER;
 	const hasOrderReference =
 		!! usesReference?.includes( REFERENCE_TYPE_ORDER );
