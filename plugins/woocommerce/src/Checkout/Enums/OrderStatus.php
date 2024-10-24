@@ -70,6 +70,8 @@ class OrderStatus
 
 	/**
 	 * The order is a draft (legacy status).
+	 *
+	 * @var string
 	 */
 	const NEW = 'new';
 
