@@ -60,7 +60,8 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { BuilderIntro } from './pages/BuilderIntro';
 import { getCountryStateOptions } from './services/country';
 import { CoreProfilerLoader } from './components/loader/Loader';
-import { Plugins } from './pages/Plugins';
+import { Plugins } from './pages/Plugins/Plugins';
+import { NoPermissionsError } from './pages/Plugins/NoPermissions';
 import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
@@ -128,6 +129,7 @@ export type CoreProfilerStateMachineContext = {
 	onboardingProfile: OnboardingProfile;
 	jetpackAuthUrl?: string;
 	currentUserEmail: string | undefined;
+	currentUser?: WCUser< 'capabilities' >;
 };
 
 const getAllowTrackingOption = fromPromise( async () =>
@@ -240,6 +242,26 @@ const getCurrentUserEmail = fromPromise( async () => {
 		USER_STORE_NAME
 	).getCurrentUser();
 	return currentUser?.email;
+} );
+
+const getCurrentUser = fromPromise( async () => {
+	const currentUser: WCUser< 'capabilities' > = await resolveSelect(
+		USER_STORE_NAME
+	).getCurrentUser();
+	return currentUser;
+} );
+
+const assignCurrentUser = assign( {
+	currentUser: ( {
+		event,
+	}: {
+		event: DoneActorEvent< WCUser< 'capabilities' > | undefined >;
+	} ) => {
+		if ( event.output ) {
+			return event.output;
+		}
+		return undefined;
+	},
 } );
 
 const assignCurrentUserEmail = assign( {
@@ -634,6 +656,7 @@ const coreProfilerMachineActions = {
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
 	assignCurrentUserEmail,
+	assignCurrentUser,
 	redirectToWooHome,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
@@ -650,6 +673,7 @@ const coreProfilerMachineActors = {
 	getGeolocation,
 	getOnboardingProfileOption,
 	getCurrentUserEmail,
+	getCurrentUser,
 	getPlugins,
 	getJetpackIsConnected,
 	browserPopstateHandler,
@@ -699,6 +723,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
 		currentUserEmail: undefined,
+		currentUser: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -1296,34 +1321,42 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			initial: 'prePlugins',
 			states: {
 				prePlugins: {
-					invoke: {
-						src: 'getPlugins',
-						onDone: [
-							{
-								target: 'pluginsSkipped',
-								guard: ( {
-									event,
-								}: {
-									event: DoneActorEvent< Extension[] >;
-								} ) => {
-									// Skip the plugins page
-									// When there is 0 plugin returned from the server
-									// Or all the plugins are activated already.
-									return (
-										event.output.length === 0 ||
-										event.output.every(
-											( plugin: Extension ) =>
-												plugin.is_activated
-										)
-									);
+					invoke: [
+						{
+							src: 'getPlugins',
+							onDone: [
+								{
+									target: 'pluginsSkipped',
+									guard: ( {
+										event,
+									}: {
+										event: DoneActorEvent< Extension[] >;
+									} ) => {
+										// Skip the plugins page
+										// When there is 0 plugin returned from the server
+										// Or all the plugins are activated already.
+										return (
+											event.output.length === 0 ||
+											event.output.every(
+												( plugin: Extension ) =>
+													plugin.is_activated
+											)
+										);
+									},
 								},
+								{ target: 'plugins', actions: 'handlePlugins' },
+							],
+							onError: {
+								target: 'pluginsSkipped',
 							},
-							{ target: 'plugins', actions: 'handlePlugins' },
-						],
-						onError: {
-							target: 'pluginsSkipped',
 						},
-					},
+						{
+							src: 'getCurrentUser',
+							onDone: {
+								actions: [ 'assignCurrentUser' ],
+							},
+						},
+					],
 					meta: {
 						progress: 70,
 					},
@@ -1351,6 +1384,30 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 				},
 				plugins: {
+					initial: 'init',
+					states: {
+						init: {
+							always: [
+								{
+									guard: 'userHasNoInstallPluginsPermission',
+									target: 'noPermissionsError',
+								},
+								{ target: 'default' },
+							],
+						},
+						default: {
+							meta: {
+								progress: 80,
+								component: Plugins,
+							},
+						},
+						noPermissionsError: {
+							meta: {
+								progress: 80,
+								component: NoPermissionsError,
+							},
+						},
+					},
 					entry: [
 						{
 							type: 'recordTracksStepViewed',
@@ -1386,10 +1443,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								'recordTracksPluginsInstallationRequest',
 							],
 						},
-					},
-					meta: {
-						progress: 80,
-						component: Plugins,
 					},
 				},
 				postPluginInstallation: {
@@ -1606,6 +1659,16 @@ export const CoreProfilerController = ( {
 							( plugin: Extension ) =>
 								plugin.key === 'jetpack' && plugin.is_activated
 						) !== undefined
+					);
+				},
+				hasPluginInstallationErrors: ( { context } ) => {
+					return context.pluginsInstallationErrors.length > 0;
+				},
+				userHasNoInstallPluginsPermission: ( { context } ) => {
+					return (
+						context?.currentUser?.capabilities[
+							'install_plugins'
+						] !== true
 					);
 				},
 			},

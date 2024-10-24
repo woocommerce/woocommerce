@@ -1,15 +1,12 @@
 /**
  * Internal dependencies
  */
-import { Plugins } from '../pages/Plugins';
+import { Plugins } from '../pages/Plugins/Plugins';
+import { PluginsTermsOfService } from '../pages/Plugins/components/plugin-terms-of-service/PluginsTermsOfService';
+import { PluginErrorBanner } from '../pages/Plugins/components/plugin-error-banner/PluginErrorBanner';
 
 import '../style.scss';
 import { WithSetupWizardLayout } from './WithSetupWizardLayout';
-
-/***
- * This story isn't working because of some issue when importing @automattic/interpolate-components
- * Should probably figure it out.
- */
 
 const plugins = [
 	{
@@ -58,6 +55,58 @@ export const Basic = () => (
 			pluginsInstallationErrors: [],
 		} }
 	/>
+);
+
+export const InstallationError = () => (
+	<Plugins
+		sendEvent={ () => {} }
+		navigationProgress={ 80 }
+		context={ {
+			pluginsAvailable: plugins,
+			pluginsSelected: [],
+			pluginsInstallationErrors: [
+				{
+					plugin: 'Jetpack',
+					errorDetails: {
+						data: {
+							code: 'plugin_install_failed',
+							data: {
+								status: 403,
+							},
+						},
+					},
+					error: 'Installation failed',
+				},
+			],
+		} }
+	/>
+);
+
+export const TermsOfService = () => (
+	<PluginsTermsOfService selectedPlugins={ plugins } />
+);
+
+export const InstallationErrorBanner = () => (
+	<div className="woocommerce-profiler-plugins">
+		<PluginErrorBanner
+			pluginsInstallationPermissionsFailure={ false }
+			pluginsInstallationErrors={ [
+				{
+					plugin: 'Jetpack',
+					errorDetails: {
+						data: {
+							code: 'plugin_install_failed',
+							data: {
+								status: 403,
+							},
+						},
+					},
+					error: 'Installation failed',
+				},
+			] }
+			onClick={ () => {} }
+		/>
+	</div>
 );
 
 export default {

@@ -39,6 +39,7 @@ export type InstallationCompletedResult = {
 export type PluginInstallError = {
 	plugin: string;
 	error: string;
+	errorDetails: Pick< InstallAndActivateErrorResponse, 'data' >;
 };
 
 const createInstallationCompletedWithErrorsEvent = (
@@ -81,6 +82,12 @@ export type PluginInstallerMachineContext = {
 export type InstallAndActivateErrorResponse = {
 	error: string;
 	message: string;
+	data: {
+		code: string | 'woocommerce_rest_cannot_update';
+		data: {
+			status: number;
+		};
+	};
 };
 
 type InstallAndActivateSuccessResponse = {
@@ -252,6 +259,9 @@ export const pluginInstallerMachine = createMachine(
 							error: (
 								event as ErrorActorEvent< InstallAndActivateErrorResponse >
 							 ).error.message,
+							errorDetails: (
+								event as ErrorActorEvent< InstallAndActivateErrorResponse >
+							 ).error,
 						},
 					];
 				},
