@@ -426,7 +426,8 @@
 		"build:project:blocks-json-to-php": {
 			"command": "node ./bin/blocks-json-to-php.js",
 			"dependencies": [
-				"build:project:bundle"
+				"build:project:bundle",
+				"dependencyOutputs"
 			],
 			"files": [
 				"assets/js/blocks/**/block.json",
