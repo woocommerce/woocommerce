@@ -111,7 +111,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 > The following document explains how to to create block themes that work in WooCommerce and how to customize the styles of WooCommerce blocks.
 
--   [Theming](designers/theming/README.md)
+-   [Theming](/docs/block-theme-development/theming-woo-blocks.md)
 
 ## Block References
 

@@ -8,12 +8,7 @@ import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getNewPath } from '@woocommerce/navigation';
 import { Sender } from 'xstate';
-import {
-	Notice,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	__unstableMotion as motion,
-} from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -382,7 +377,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			) }
 			<div className="woocommerce-customize-store-header">
 				<SiteHub
-					as={ motion.div }
 					variants={ {
 						view: { x: 0 },
 					} }

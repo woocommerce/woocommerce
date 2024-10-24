@@ -222,25 +222,39 @@ test.describe(
 				page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing First name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing First name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Last name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Last name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Street address is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Street address is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Town / City is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Town / City is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing ZIP Code is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing ZIP Code is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Phone is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Phone is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Billing Email address is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Billing Email address is a required field.',
+				} )
 			).toBeVisible();
 
 			// toggle ship to different address, fill out billing info and confirm error shown
@@ -259,19 +273,29 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 			await expect(
-				page.getByText( 'Shipping First name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping First name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping Last name is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping Last name is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping Street address is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping Street address is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping Town / City is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping Town / City is a required field.',
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Shipping ZIP Code is a required field.' )
+				page.getByRole( 'link', {
+					name: 'Shipping ZIP Code is a required field.',
+				} )
 			).toBeVisible();
 		} );
 
@@ -437,12 +461,12 @@ test.describe(
 			await test.step( 'Confirm order details on the backend (as a merchant)', async () => {
 				await page.goto( 'wp-login.php' );
 				await page
-					.locator( 'input[name="log"]' )
+					.getByLabel( 'Username or Email Address' )
 					.fill( admin.username );
 				await page
-					.locator( 'input[name="pwd"]' )
+					.getByRole( 'textbox', { name: 'Password' } )
 					.fill( admin.password );
-				await page.locator( 'text=Log In' ).click();
+				await page.getByRole( 'button', { name: 'Log In' } ).click();
 
 				// load the order placed as a guest
 				await page.goto(
@@ -473,12 +497,12 @@ test.describe(
 		test( 'allows existing customer to place order', async ( { page } ) => {
 			await page.goto( 'my-account/' );
 			await page
-				.locator( 'input[name="username"]' )
+				.getByLabel( 'Username or Email Address' )
 				.fill( customer.username );
 			await page
-				.locator( 'input[name="password"]' )
+				.getByRole( 'textbox', { name: 'Password' } )
 				.fill( customer.password );
-			await page.locator( 'text=Log In' ).click();
+			await page.getByRole( 'button', { name: 'Log In' } ).click();
 			await expect(
 				page.getByText(
 					`Hello ${ customer.first_name } ${ customer.last_name }`
@@ -539,9 +563,13 @@ test.describe(
 
 			// Switch to admin user.
 			await page.goto( 'wp-login.php?loggedout=true' );
-			await page.locator( 'input[name="log"]' ).fill( admin.username );
-			await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-			await page.locator( 'text=Log In' ).click();
+			await page
+				.getByLabel( 'Username or Email Address' )
+				.fill( admin.username );
+			await page
+				.getByRole( 'textbox', { name: 'Password' } )
+				.fill( admin.password );
+			await page.getByRole( 'button', { name: 'Log In' } ).click();
 
 			// load the order placed as a customer
 			await page.goto(

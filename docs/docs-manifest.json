@@ -1051,7 +1051,7 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "379612b00de83bebadd338aa55f8af2432927d9b53df4e2fdfe24cfcaf050069",
+          "hash": "1f376130cf31aabd077c48e70cb518a7f635bfd904dc9c82dfc29a3b6913afd4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
         },
@@ -1452,7 +1452,7 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "a82d885c8395385dc51c976b2b51eec88cdcce72bf905fda78f97d77533ce079",
+          "hash": "8bb4925cfc5ca1f9d8839675fafbf1941d6a23ae257827cead075bd4956b80bc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
           "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
@@ -1461,7 +1461,7 @@
           "menu_title": "Set up and use a child theme",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "hash": "b362d5ddd34d8b81f6a2ee2369dd2cd68e51700836a85f96d629e87d564b0844",
+          "hash": "e343a623970fb22db7e109e0623d877ba42d5938885dde99a5701fa42bf7d197",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/set-up-a-child-theme.md",
           "id": "00b6916595cbde7766f080260a9ea26f53f3271c"
         },
@@ -1470,7 +1470,7 @@
           "menu_title": "Image sizing",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/image-sizes.md",
-          "hash": "9883e7931ff8bd56dcd707974fe8ec992f21148818206aec354b0368dc999239",
+          "hash": "94d30b875d0c26b88ebd040a686f802f974f89997a30954fc5bb448de57aefdc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/image-sizes.md",
           "id": "3f5301ac3040d38bc449b440733da6a466209df3",
           "links": {
@@ -1805,5 +1805,5 @@
       "categories": []
     }
   ],
-  "hash": "7df127d2b26b4b233eff0380f1a8ddd1d686ed85b0dcad661f568dcd2477e022"
+  "hash": "c09b2c5235000d3821c3f4390f0c5aaf21308dcf1bd2b3bcbe0dbe8be5edb461"
 }

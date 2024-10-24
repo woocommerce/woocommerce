@@ -115,7 +115,10 @@
 				{
 					"name": "JavaScript",
 					"command": "test:js",
-					"changes": "src/**/*.{js,jsx,ts,tsx}",
+					"changes": [
+						"jest.config.js",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
 					"cascade": "test:js",
 					"events": [
 						"pull_request",

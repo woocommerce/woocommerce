@@ -123,3 +123,10 @@
 		}
 	}
 }
+
+.woocommerce-profiler-platform-selector {
+	.woocommerce-experimental-select-control__input {
+		// hide the caret since typing is disabled and search is not supported.
+		caret-color: transparent;
+	}
+}
