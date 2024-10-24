@@ -1,6 +1,6 @@
 # Style Build Helper
 
-This is a partial [Webpack](https://webpack.js.org/) config for building WooCommece component styles using base styles from Gutenberg. It is used to replace the [`bin/packages/build.js`](https://github.com/woocommerce/woocommerce-admin/blob/6859249/bin/packages/build.js) script.
+This is a partial [Webpack](https://webpack.js.org/) config for building WooCommerce component styles using base styles from Gutenberg. It is used to replace the [`bin/packages/build.js`](https://github.com/woocommerce/woocommerce-admin/blob/6859249/bin/packages/build.js) script.
 
 
 ## Usage
