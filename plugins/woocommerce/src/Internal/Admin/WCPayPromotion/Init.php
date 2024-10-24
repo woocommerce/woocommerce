@@ -22,7 +22,7 @@ class Init extends RemoteSpecsEngine {
 		/* phpcs:disable WordPress.Security.NonceVerification */
 		$is_payments_page   = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab'];
 		$is_wc_admin_page   = isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
-		$is_payments_task   = $is_wc_admin_page && isset( $_GET['path'] ) && '/payments' === $_GET['path'];
+		$is_payments_task   = $is_wc_admin_page && isset( $_GET['task'] ) && 'payments' === $_GET['task'];
 		$is_payment_welcome = $is_wc_admin_page && isset( $_GET['path'] ) && '/wc-pay-welcome-page' === $_GET['path'];
 		/* phpcs:enable */
 
