@@ -207,7 +207,7 @@ for ( const currentPage of wcPages ) {
 					async ( { page } ) => {
 						await page
 							.locator(
-								`li.wp-menu-open > ul.wp-submenu > li a:text-is("${ currentPage.subpages[ i ].name }")`
+								`li.wp-menu-open > ul.wp-submenu > li a:has-text("${ currentPage.subpages[ i ].name }")`
 							)
 							.click();
 

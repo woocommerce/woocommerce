@@ -9,7 +9,6 @@ const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-web
 const BundleAnalyzerPlugin =
 	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
 /**
@@ -18,6 +17,8 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
 const UnminifyWebpackPlugin = require( './unminify' );
 const {
 	webpackConfig: styleConfig,
+	ForkTsCheckerWebpackPlugin,
+	TypeScriptWarnOnlyWebpackPlugin,
 } = require( '@woocommerce/internal-style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
@@ -177,6 +178,10 @@ const webpackConfig = {
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		! process.env.STORYBOOK &&
+			new TypeScriptWarnOnlyWebpackPlugin( [
+				/* specify TS error codes here, e.g. 'TS2322' */
+			] ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -207,7 +212,10 @@ const webpackConfig = {
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
-					from: '../../../../packages/js/product-editor/build/blocks',
+					from: path.join(
+						__dirname,
+						'../../../../packages/js/product-editor/build/blocks'
+					),
 					to: './product-editor/blocks',
 				},
 			],

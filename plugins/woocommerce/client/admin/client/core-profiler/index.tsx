@@ -830,7 +830,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							target: '#skipGuidedSetup',
 							actions: [
 								'assignOptInDataSharing',
-								spawnChild( 'updateTrackingOption ', {
+								spawnChild( 'updateTrackingOption', {
 									input: ( {
 										event,
 									}: {
@@ -1224,6 +1224,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							type: 'recordTracksStepViewed',
 							params: { step: 'skip_business_location' },
 						},
+						{
+							type: 'recordSkipGuidedSetup',
+							params: ( { context } ) => ( {
+								optInDataSharing: context.optInDataSharing,
+							} ),
+						},
 					],
 					meta: {
 						progress: 80,
@@ -1338,16 +1344,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							} );
 							return promiseDelay( 3000 );
 						} ),
-						onDone: [
-							{
-								target: 'isJetpackConnected',
-								guard: or( [
-									'hasJetpackSelectedForInstallation',
-									'hasJetpackActivated',
-								] ),
-							},
-							{ actions: [ 'redirectToWooHome' ] },
-						],
+						onDone: [ { actions: [ 'redirectToWooHome' ] } ],
 					},
 					meta: {
 						component: CoreProfilerLoader,
@@ -1419,10 +1416,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: or( [
-									'hasJetpackSelectedForInstallation',
-									'hasJetpackActivated',
-								] ),
+								guard: 'hasJetpackSelectedForInstallation',
 							},
 							{ actions: 'redirectToWooHome' },
 						],

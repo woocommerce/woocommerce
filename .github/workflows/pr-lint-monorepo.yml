@@ -1,13 +1,22 @@
 name: Run lint checks potentially affecting projects across the monorepo
 on:
     pull_request:
+        paths:
+           - '.github/workflows/pr-lint-monorepo.yml'
+           - 'packages/**'
+           - 'plugins/**'
+           - '!**/changelog/**'
         branches:
             - 'trunk'
+
 concurrency:
     group: changelogger-${{ github.event_name }}-${{ github.ref }}
     cancel-in-progress: true
 
 permissions: {}
+
+env:
+  FORCE_COLOR: 1
 
 jobs:
     changelogger_used:
@@ -24,6 +33,9 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  # The package has majority of composer-deps, therefore referencing it
+                  pull-package-composer-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Check change files are touched for touched projects
               env:
@@ -32,4 +44,4 @@ jobs:
               run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
 
             - name: Run changelog validation
-              run: pnpm -r changelog validate
+              run: pnpm --recursive --parallel --stream changelog validate
