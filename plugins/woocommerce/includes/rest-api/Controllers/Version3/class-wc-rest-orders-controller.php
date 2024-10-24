@@ -347,7 +347,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
-				'enum' => array_merge( array( 'any', 'trash' ), $this->get_order_statuses() ),
+				'enum' => array_merge( array( 'any', WC_Order::STATUS_TRASH ), $this->get_order_statuses() ),
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

@@ -85,7 +85,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				),
 				'query_type'   => 'get_var',
 				'filter_range' => true,
-				'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -111,7 +111,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					),
 					'query_type'   => 'get_var',
 					'filter_range' => true,
-					'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+					'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 				)
 			)
 		);
@@ -256,7 +256,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'limit'        => 12,
 						'query_type'   => 'get_results',
 						'filter_range' => true,
-						'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+						'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 					)
 				);
 
@@ -353,7 +353,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'limit'        => 12,
 						'query_type'   => 'get_results',
 						'filter_range' => true,
-						'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+						'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 					)
 				);
 
@@ -464,7 +464,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_by'     => 'post_date ASC',
 					'query_type'   => 'get_results',
 					'filter_range' => true,
-					'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+					'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 				)
 			);
 
@@ -502,7 +502,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_by'     => 'post_date ASC',
 					'query_type'   => 'get_results',
 					'filter_range' => true,
-					'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+					'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 				)
 			);
 

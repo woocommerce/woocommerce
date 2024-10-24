@@ -364,7 +364,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					if ( $order_or_post_object ) {
 						$currency = $order_or_post_object->get_currency();
 
-						if ( ! $order_or_post_object->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
+						if ( ! $order_or_post_object->has_status( array( WC_Order::STATUS_PENDING, WC_Order::STATUS_FAILED, WC_Order::STATUS_CANCELLED ) ) ) {
 							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );
 						}
 					}

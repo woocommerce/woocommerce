@@ -106,7 +106,7 @@ class WC_Admin_Report {
 			'nocache'             => false,
 			'debug'               => false,
 			'order_types'         => wc_get_order_types( 'reports' ),
-			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
+			'order_status'        => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD ),
 			'parent_order_status' => false,
 		);
 		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );

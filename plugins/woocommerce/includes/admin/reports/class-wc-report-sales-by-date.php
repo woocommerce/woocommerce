@@ -67,7 +67,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'   => 'get_results',
 				'filter_range' => true,
 				'order_types'  => wc_get_order_types( 'order-count' ),
-				'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -103,7 +103,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'   => 'get_results',
 				'filter_range' => true,
 				'order_types'  => wc_get_order_types( 'order-count' ),
-				'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -135,7 +135,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'   => 'get_results',
 				'filter_range' => true,
 				'order_types'  => wc_get_order_types( 'order-count' ),
-				'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -163,7 +163,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'query_type'   => 'get_var',
 					'filter_range' => true,
 					'order_types'  => wc_get_order_types( 'order-count' ),
-					'order_status' => array( 'refunded' ),
+					'order_status' => array( WC_Order::STATUS_REFUNDED ),
 				)
 			)
 		);
@@ -205,7 +205,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'   => 'get_results',
 				'filter_range' => true,
 				'order_types'  => wc_get_order_types( 'sales-reports' ),
-				'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -246,7 +246,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_status'        => false,
-				'parent_order_status' => array( 'refunded' ),
+				'parent_order_status' => array( WC_Order::STATUS_REFUNDED ),
 			)
 		);
 
@@ -321,7 +321,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_status'        => false,
-				'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),
+				'parent_order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD ),
 			)
 		);
 
@@ -391,7 +391,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_status'        => false,
-				'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'parent_order_status' => array( WC_Order::STATUS_COMPLETED, WC_Order::STATUS_PROCESSING, WC_Order::STATUS_ON_HOLD, WC_Order::STATUS_REFUNDED ),
 			)
 		);
 

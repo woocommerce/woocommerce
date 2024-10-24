@@ -984,7 +984,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				'status' => array(
 					'description' => __( 'Order status.', 'woocommerce' ),
 					'type'        => 'string',
-					'default'     => 'pending',
+					'default'     => WC_Order::STATUS_PENDING,
 					'enum'        => $this->get_order_statuses(),
 					'context'     => array( 'view', 'edit' ),
 				),

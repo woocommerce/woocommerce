@@ -72,7 +72,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
-		return 'completed';
+		return WC_Order::STATUS_COMPLETED;
 	}
 
 	/**

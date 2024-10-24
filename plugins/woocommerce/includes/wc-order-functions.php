@@ -126,7 +126,7 @@ function wc_is_order_status( $maybe_status ) {
  * @return array
  */
 function wc_get_is_paid_statuses() {
-	return apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) );
+	return apply_filters( 'woocommerce_order_is_paid_statuses', array( WC_Order::STATUS_PROCESSING, WC_Order::STATUS_COMPLETED ) );
 }
 
 /**
@@ -136,7 +136,7 @@ function wc_get_is_paid_statuses() {
  * @return array
  */
 function wc_get_is_pending_statuses() {
-	return apply_filters( 'woocommerce_order_is_pending_statuses', array( 'pending' ) );
+	return apply_filters( 'woocommerce_order_is_pending_statuses', array( WC_Order::STATUS_PENDING ) );
 }
 
 /**
@@ -342,7 +342,7 @@ function wc_register_order_type( $type, $args = array() ) {
  * @return int
  */
 function wc_processing_order_count() {
-	return wc_orders_count( 'processing' );
+	return wc_orders_count( WC_Order::STATUS_PROCESSING );
 }
 
 /**
@@ -354,7 +354,7 @@ function wc_processing_order_count() {
  */
 function wc_orders_count( $status, string $type = '' ) {
 	$count           = 0;
-	$legacy_statuses = array( 'draft', 'trash' );
+	$legacy_statuses = array( WC_Order::STATUS_DRAFT, WC_Order::STATUS_TRASH );
 	$valid_statuses  = array_merge( array_keys( wc_get_order_statuses() ), $legacy_statuses );
 	$status          = ( ! in_array( $status, $legacy_statuses, true ) && 0 !== strpos( $status, 'wc-' ) ) ? 'wc-' . $status : $status;
 	$valid_types     = wc_get_order_types( 'order-count' );
@@ -435,7 +435,7 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	if ( $order->has_status( 'processing' ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
+	if ( $order->has_status( WC_Order::STATUS_PROCESSING ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
 		return;
 	}
 
@@ -675,7 +675,7 @@ function wc_create_refund( $args = array() ) {
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
 
-				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', WC_Order::STATUS_REFUNDED, $order->get_id(), $refund->get_id() );
 
 				if ( $parent_status ) {
 					$order->update_status( $parent_status );
@@ -900,7 +900,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	}
 
 	$recorded_sales  = $order->get_data_store()->get_recorded_sales( $order );
-	$reflected_order = in_array( $order->get_status(), array( 'cancelled', 'trash' ), true );
+	$reflected_order = in_array( $order->get_status(), array( WC_Order::STATUS_CANCELLED, WC_Order::STATUS_TRASH ), true );
 
 	if ( ! $reflected_order && 'woocommerce_before_delete_order' === current_action() ) {
 		$reflected_order = true;
@@ -960,7 +960,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	}
 
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
-	$invalid_statuses = array( 'cancelled', 'failed', 'trash' );
+	$invalid_statuses = array( WC_Order::STATUS_CANCELLED, WC_Order::STATUS_FAILED, WC_Order::STATUS_TRASH );
 
 	/**
 	 * Allow invalid order status filtering for updating coupon usage.
@@ -1044,7 +1044,7 @@ function wc_cancel_unpaid_orders() {
 			$order = wc_get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
-				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+				$order->update_status( WC_Order::STATUS_CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
 	}
