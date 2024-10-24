@@ -57,14 +57,14 @@ class OrderStatus
 	 *
 	 * @var string
 	 */
-	const CANCELLED  = 'cancelled';
+	const CANCELLED = 'cancelled';
 
 	/**
 	 * The order is in the trash.
 	 *
 	 * @var string
 	 */
-	const TRASH      = 'trash';
+	const TRASH = 'trash';
 
 	/**
 	 * The order is a draft (legacy status).
