@@ -123,6 +123,14 @@ class WC_Frontend_Scripts {
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
 		self::$scripts[] = $handle;
+		// Before WordPress 6.4 defer could cause a regression with non deferrable dependencies,
+		// therefore keep the script in the footer for those cases - see see https://core.trac.wordpress.org/ticket/59599.
+		if ( version_compare( get_bloginfo( 'version' ), '6.4', '<' ) && array( 'strategy' => 'defer' ) === $in_footer ) {
+			$in_footer = array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			);
+		}
 		wp_register_script( $handle, $path, $deps, $version, $in_footer );
 	}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Ensure the script defer strategy added in #40686 doesn't cause a possible performance regression in WP 6.3.
+
