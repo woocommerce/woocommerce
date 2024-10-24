@@ -2,6 +2,10 @@
 	border: 1px solid $universal-border-light;
 	border-radius: 5px;
 
+	.wc-block-components-formatted-money-amount {
+		font-weight: 600;
+	}
+
 	.wc-block-components-totals-wrapper:first-of-type {
 		border-top: 0;
 	}
@@ -15,6 +19,7 @@
 		.wc-block-components-checkout-order-summary__title-text {
 			margin: 0 0 $gap $gap;
 			flex-grow: 1;
+			font-weight: 500;
 		}
 
 		.wc-block-components-checkout-order-summary__title-open-close {
