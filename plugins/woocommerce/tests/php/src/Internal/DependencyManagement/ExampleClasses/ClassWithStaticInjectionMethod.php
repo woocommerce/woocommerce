@@ -5,9 +5,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
 
 /**
- * An example of a class with a private injection method.
+ * An example of a class with a static injection method.
  */
-class ClassWithPrivateInjectionMethod {
+class ClassWithStaticInjectionMethod {
 
 	// phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingPublic, WooCommerce.Functions.InternalInjectionMethod.MissingFinal
 
@@ -16,15 +16,15 @@ class ClassWithPrivateInjectionMethod {
 	 *
 	 * @var bool
 	 */
-	public $init_executed = false;
+	public static $init_executed = false;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 */
-	private function init() {
-		$this->init_executed = true;
+	public static function init() {
+		self::$init_executed = true;
 	}
 
 	// phpcs:enable

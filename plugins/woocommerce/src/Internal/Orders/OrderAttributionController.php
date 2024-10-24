@@ -74,13 +74,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @param LegacyProxy         $proxy      The legacy proxy.
 	 * @param FeaturesController  $controller The feature controller.
 	 * @param WPConsentAPI        $consent    The WPConsentAPI integration.
-	 * @param WC_Logger_Interface $logger     The logger object. If not provided, it will be obtained from the proxy.
 	 */
-	final public function init( LegacyProxy $proxy, FeaturesController $controller, WPConsentAPI $consent, ?WC_Logger_Interface $logger = null ) {
+	final public function init( LegacyProxy $proxy, FeaturesController $controller, WPConsentAPI $consent ) {
 		$this->proxy              = $proxy;
 		$this->feature_controller = $controller;
 		$this->consent            = $consent;
-		$this->logger             = $logger ?? $proxy->call_function( 'wc_get_logger' );
+		$this->logger             = $proxy->call_function( 'wc_get_logger' );
 		$this->set_fields_and_prefix();
 	}
 
