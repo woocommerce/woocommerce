@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Card, CardBody } from '@wordpress/components';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useCallback } from '@wordpress/element';
 import { plugins, external } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
@@ -33,16 +33,26 @@ export const OrderAttributionInstallBanner = ( {
 	const { isDismissed, dismiss, shouldShowBanner } =
 		useOrderAttributionInstallBanner();
 
-	const shouldRender =
-		( isHeaderBanner && shouldShowBanner && isDismissed ) ||
-		( ! isHeaderBanner && shouldShowBanner && ! isDismissed );
-
 	const onButtonClick = () => {
 		recordEvent( 'order_attribution_install_banner_clicked', {
 			path: getPath(),
 			context: eventContext,
 		} );
 	};
+
+	const getShouldRender = useCallback( () => {
+		if ( isHeaderBanner ) {
+			return shouldShowBanner && isDismissed;
+		}
+
+		if ( ! dismissable ) {
+			return shouldShowBanner;
+		}
+
+		return shouldShowBanner && ! isDismissed;
+	}, [ isHeaderBanner, shouldShowBanner, isDismissed, dismissable ] );
+
+	const shouldRender = getShouldRender();
 
 	useEffect( () => {
 		if ( ! shouldRender ) {
