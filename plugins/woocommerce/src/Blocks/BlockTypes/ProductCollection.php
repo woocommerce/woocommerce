@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price', 'sales', 'menu_order' );
 
 
 	/**
@@ -1069,6 +1069,13 @@ class ProductCollection extends AbstractBlock {
 			);
 		}
 
+		if ( 'menu_order' === $orderby ) {
+			return array(
+				'orderby' => 'menu_order',
+				'order'   => 'ASC',
+			);
+		}
+
 		$meta_keys = array(
 			'rating' => '_wc_average_rating',
 		);
@@ -2053,7 +2060,7 @@ class ProductCollection extends AbstractBlock {
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_reference ) ) {
+				if ( empty( $product_references ) ) {
 					$location = $collection_args['productCollectionLocation'];
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
 						$product_references = array( $location['sourceData']['productId'] );
