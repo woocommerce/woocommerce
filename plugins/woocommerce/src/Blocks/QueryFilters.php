@@ -306,7 +306,7 @@ final class QueryFilters {
 		global $wpdb;
 
 		// Select only used tax classes to avoid unwanted calculations.
-		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+		$product_tax_classes = array_filter( $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" ) );
 
 		if ( empty( $product_tax_classes ) ) {
 			return '';
