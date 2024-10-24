@@ -25,6 +25,7 @@ const Block = ( {
 			<TotalsCoupon
 				onSubmit={ applyCoupon }
 				isLoading={ isApplyingCoupon }
+				instanceId="coupon"
 			/>
 		</TotalsWrapper>
 	);
