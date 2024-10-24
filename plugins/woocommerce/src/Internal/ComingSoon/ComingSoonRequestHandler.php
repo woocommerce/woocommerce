@@ -234,16 +234,17 @@ class ComingSoonRequestHandler {
 	 * Enqueues the coming soon banner styles.
 	 */
 	public function enqueue_styles() {
+		// Early exit if the user is not logged in as administrator / shop manager.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
 		// Early exit if LYS feature is disabled.
 		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return;
 		}
 
 		if ( $this->coming_soon_helper->is_site_live() ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
