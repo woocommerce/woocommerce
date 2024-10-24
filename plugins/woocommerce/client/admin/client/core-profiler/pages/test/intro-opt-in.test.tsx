@@ -73,11 +73,30 @@ describe( 'IntroOptIn', () => {
 		} );
 	} );
 
-	it( 'should call sendEvent with INTRO_SKIPPED event when skip button is clicked', () => {
+	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: true when skip button is clicked and the checkbox is checked', () => {
 		render(
 			// @ts-ignore
 			<IntroOptIn { ...props } />
 		);
+		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
+		screen
+			.getByRole( 'button', {
+				name: /Skip guided setup/i,
+			} )
+			.click();
+		expect( props.sendEvent ).toHaveBeenCalledWith( {
+			type: 'INTRO_SKIPPED',
+			payload: { optInDataSharing: true },
+		} );
+	} );
+
+	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: false when skip button is clicked and the checkbox is unchecked', () => {
+		render(
+			// @ts-ignore
+			<IntroOptIn { ...props } />
+		);
+		screen.getByRole( 'checkbox' ).click();
+		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 		screen
 			.getByRole( 'button', {
 				name: /Skip guided setup/i,
