@@ -6,10 +6,26 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
+import {
+	cleanQuery,
+	getUrlParameters,
+	getRestPath,
+	parseId,
+	generateTemporaryId,
+} from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
-import { IdType, IdQuery, Item, ItemQuery, CrudActionOptions } from './types';
+import type {
+	IdType,
+	IdQuery,
+	Item,
+	ItemQuery,
+	CrudActionOptions,
+	CreateAction,
+	DeleteAction,
+	UpdateAction,
+	CrudCreateItemActionOptions,
+} from './types';
 
 type ResolverOptions = {
 	resourceName: string;
@@ -25,11 +41,27 @@ export function createItemError( query: Partial< ItemQuery >, error: unknown ) {
 	};
 }
 
-export function createItemRequest( query: Partial< ItemQuery > ) {
-	return {
+export function createItemRequest(
+	query: Partial< ItemQuery >,
+	options?: CrudCreateItemActionOptions
+) {
+	const action = {
 		type: TYPES.CREATE_ITEM_REQUEST as const,
 		query,
+		options,
 	};
+
+	if ( options?.optimisticPropagation ) {
+		return {
+			...action,
+			options: {
+				...options,
+				tempId: generateTemporaryId(),
+			},
+		};
+	}
+
+	return action;
 }
 
 export function createItemSuccess(
@@ -174,7 +206,7 @@ export function updateItemSuccess(
 	};
 }
 
-export const createDispatchActions = ( {
+export const createDispatchActions = < ResourceName extends string >( {
 	namespace,
 	resourceName,
 }: ResolverOptions ) => {
@@ -182,7 +214,7 @@ export const createDispatchActions = ( {
 		query: Partial< ItemQuery >,
 		options: CrudActionOptions
 	) {
-		yield createItemRequest( query );
+		yield createItemRequest( query, options );
 		const urlParameters = getUrlParameters( namespace, query );
 
 		try {
@@ -254,11 +286,15 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	return {
+	const actions = {
 		[ `create${ resourceName }` ]: createItem,
 		[ `delete${ resourceName }` ]: deleteItem,
 		[ `update${ resourceName }` ]: updateItem,
-	};
+	} as CreateAction< ResourceName, Item > &
+		DeleteAction< ResourceName, Item > &
+		UpdateAction< ResourceName, Item >;
+
+	return actions;
 };
 
 export type Actions = ReturnType<
