@@ -33,33 +33,40 @@ a.button {
 }
 
 .woocommerce {
-	form .form-row {
-		.required {
-			color: firebrick;
-			text-decoration: none;
-			visibility: hidden; // Only show optional by default.
-
-			&[title] {
-				border: 0 !important;
-			}
+	form {
+		&.checkout_coupon .form-row:has(.input-with-wc-float-label) label {
+			transform: translateY(0.6em);
 		}
 
-		.optional {
-			visibility: visible;
-		}
-
-		&:has(.input-with-wc-float-label) {
-			position: relative;
-
-			label {
-				@include woocommerce-float-label();
-				left: 0.8em;
-				transform: translateY(0.4em);
-
-				&.is-active {
-					transform: translateY(-8px) scale(.75);
+		.form-row {
+			.required {
+				color: firebrick;
+				text-decoration: none;
+				visibility: hidden; // Only show optional by default.
+	
+				&[title] {
+					border: 0 !important;
 				}
 			}
+	
+			.optional {
+				visibility: visible;
+			}
+	
+			&:has(.input-with-wc-float-label) {
+				position: relative;
+	
+				label {
+					@include woocommerce-float-label();
+					left: 0.8em;
+					transform: translateY(0.4em);
+	
+					&.is-active {
+						transform: translateY(-8px) scale(.75);
+					}
+				}
+			}
+	
 		}
 	}
 }
