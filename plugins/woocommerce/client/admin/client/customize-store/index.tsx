@@ -77,7 +77,24 @@ const updateQueryStep = (
 		if ( pathFragments[ 2 ] !== step ) {
 			// this state machine is only concerned with [2], so we ignore changes to [3]
 			// [1] is handled by router at root of wc-admin
-			updateQueryString( {}, `/customize-store/${ step }` );
+			const newPath = `/customize-store/${ step }`;
+
+			// Since CYS also runs inside an iframe and because the getHistory
+			// creates an instance per window context, making a push to the
+			// history only alters that instance. Here we need to alter the
+			// browser's (window.top) history and not the history of the iframe.
+			if ( isIframe( window ) && window.top ) {
+				// window.location.href does not fit in this case since it produces
+				// a hard refresh to the page.
+				window.top.history.pushState(
+					{},
+					'',
+					getNewPath( {}, newPath )
+				);
+				return;
+			}
+
+			updateQueryString( {}, newPath );
 		}
 	}
 };
