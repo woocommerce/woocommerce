@@ -77,6 +77,11 @@ class WC_Order extends WC_Abstract_Order {
 	const STATUS_TRASH      = 'trash';
 
 	/**
+	 * The order is a draft (legacy status).
+	 */
+	const STATUS_NEW = 'new';
+
+	/**
 	 * The order is an automatically generated draft.
 	 *
 	 * @var string
