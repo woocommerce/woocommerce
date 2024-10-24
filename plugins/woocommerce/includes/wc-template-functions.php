@@ -1649,9 +1649,12 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
  * @since 3.3.2
  * @param int  $attachment_id Attachment ID.
  * @param bool $main_image Is this the main image or a thumbnail?.
+ * @param int  $image_index The image index in the gallery.
  * @return string
  */
-function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
+function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_index = -1 ) {
+	global $product;
+
 	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
 	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
 	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
@@ -1662,6 +1665,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+	$alt_text          = empty( $alt_text ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
 
 	/**
 	 * Filters the attributes for the image markup.
@@ -1680,6 +1684,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 			'data-large_image_width'  => esc_attr( $full_src[1] ),
 			'data-large_image_height' => esc_attr( $full_src[2] ),
 			'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
+			'alt'                     => esc_attr( $alt_text ),
 		),
 		$attachment_id,
 		$image_size,
@@ -1700,6 +1705,27 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '"  data-thumb-sizes="' . esc_attr( $thumbnail_sizes ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
+if ( ! function_exists( 'woocommerce_get_alt_from_product_title_and_position' ) ) {
+
+	/**
+	 * Get alt text based on product name and image position in gallery.
+	 *
+	 * @since 9.3.3
+	 * @param string $product_name Product name.
+	 * @param bool   $main_image Is this the main image or a thumbnail?.
+	 * @param int    $image_index Image position in gallery.
+	 * @return string Alt text.
+	 */
+	function woocommerce_get_alt_from_product_title_and_position( $product_name, $main_image, $image_index ) {
+		if ( -1 === $image_index ) {
+			return $product_name;
+		}
+
+		$adder = $main_image ? 1 : 2;
+		/* translators: 1: product name 2: image position */
+		return sprintf( __( '%1$s - Image %2$s', 'woocommerce' ), $product_name, ( $image_index + $adder ) );
+	}
+}
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
 
 	/**
