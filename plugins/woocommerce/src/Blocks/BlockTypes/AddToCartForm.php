@@ -85,28 +85,23 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
-	 * Add classes to the Add to Cart form input.
+	 * Add classes to the Add to Cart form input needed for the stepper style.
 	 *
 	 * @param string $product The Add to Cart form HTML.
-	 * @param array  $attributes Block attributes.
 	 *
 	 * @return string The Add to Cart form HTML with classes added.
 	 */
-	private function add_classes_to_add_to_cart_form_input( $product, $attributes ) {
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
-
+	private function add_stepper_classes_to_add_to_cart_form_input( $product ) {
 		$html = new \WP_HTML_Tag_Processor( $product );
 
-		if ( $is_stepper_style ) {
-			// Add classes to the form.
-			while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-				$html->add_class( 'wc-block-components-quantity-selector' );
-			}
+		// Add classes to the form.
+		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector' );
+		}
 
-			$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-			while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-				$html->add_class( 'wc-block-components-quantity-selector__input' );
-			}
+		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
+		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector__input' );
 		}
 
 		return $html->get_updated_html();
@@ -140,6 +135,7 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		$is_external_product_with_url = $product instanceof \WC_Product_External && $product->get_product_url();
+		$is_stepper_style             = 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually();
 
 		ob_start();
 
@@ -158,8 +154,6 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
-
 		$product = $is_stepper_style ? $this->add_steppers( $product ) : $product;
 
 		$parsed_attributes                     = $this->parse_attributes( $attributes );
@@ -169,10 +163,10 @@ class AddToCartForm extends AbstractBlock {
 			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 		}
 
-		$product = $this->add_classes_to_add_to_cart_form_input( $product, $attributes );
+		$product            = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product ) : $product;
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
+		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$classes = implode(
 			' ',

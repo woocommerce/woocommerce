@@ -830,7 +830,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							target: '#skipGuidedSetup',
 							actions: [
 								'assignOptInDataSharing',
-								spawnChild( 'updateTrackingOption ', {
+								spawnChild( 'updateTrackingOption', {
 									input: ( {
 										event,
 									}: {
@@ -1223,6 +1223,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						{
 							type: 'recordTracksStepViewed',
 							params: { step: 'skip_business_location' },
+						},
+						{
+							type: 'recordSkipGuidedSetup',
+							params: ( { context } ) => ( {
+								optInDataSharing: context.optInDataSharing,
+							} ),
 						},
 					],
 					meta: {

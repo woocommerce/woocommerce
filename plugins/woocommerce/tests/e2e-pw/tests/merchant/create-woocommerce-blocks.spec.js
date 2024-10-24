@@ -17,7 +17,6 @@ const singleProductPrice = '555.00';
 // - Product Gallery (Beta) - it's not intended to be used in posts
 const blocks = [
 	'Active Filters',
-	'All Products',
 	'All Reviews',
 	'Best Selling Products',
 	'Customer account',
