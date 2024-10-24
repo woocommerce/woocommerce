@@ -239,6 +239,10 @@ a.added_to_cart {
 			}
 		}
 
+		.select2-results__option:not(.select2-results__option--highlighted) {
+			color: #444;
+		}
+
 		.select2-selection .select2-selection__arrow {
 			position: absolute;
 			top: 0;

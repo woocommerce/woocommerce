@@ -29,16 +29,7 @@ export const IntroOptIn = ( {
 			className="woocommerce-profiler-intro-opt-in"
 			data-testid="core-profiler-intro-opt-in-screen"
 		>
-			<Navigation
-				percentage={ navigationProgress }
-				skipText={ __( 'Skip guided setup', 'woocommerce' ) }
-				onSkip={ () =>
-					sendEvent( {
-						type: 'INTRO_SKIPPED',
-						payload: { optInDataSharing: false },
-					} )
-				}
-			/>
+			<Navigation percentage={ navigationProgress } />
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-intro-opt-in__content">
 				<div className="woocommerce-profiler-welcome-image" />
 				<Heading
@@ -64,6 +55,18 @@ export const IntroOptIn = ( {
 					}
 				>
 					{ __( 'Set up my store', 'woocommerce' ) }
+				</Button>
+				<Button
+					className="woocommerce-profiler-setup-store__button"
+					variant="tertiary"
+					onClick={ () =>
+						sendEvent( {
+							type: 'INTRO_SKIPPED',
+							payload: { optInDataSharing: iOptInDataSharing },
+						} )
+					}
+				>
+					{ __( 'Skip guided setup', 'woocommerce' ) }
 				</Button>
 				{ window.wcAdminFeatures?.blueprint && (
 					<Button
