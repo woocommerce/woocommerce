@@ -64,10 +64,31 @@ class CheckoutFieldsFrontend {
 	 * @return string
 	 */
 	protected function render_additional_field( $field ) {
-		return sprintf(
-			'<dt>%1$s</dt><dd>%2$s</dd>',
-			esc_html( $field['label'] ),
-			esc_html( $field['value'] )
+		/**
+		 * Filter to modify the output of an additional field on the frontend.
+		 *
+		 * This filter allows customization of how an additional field is rendered
+		 * in various frontend locations. The default rendering outputs the field label
+		 * and value in a definition list format.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $output The HTML output of the additional field.
+		 * @param array  $field {
+		 *     An array of additional field data.
+		 *
+		 *     @type string $label The label for the additional field.
+		 *     @type string $value The value of the additional field.
+		 * }
+		 */
+		return apply_filters(
+			'woocommerce_checkout_render_additional_field',
+			sprintf(
+				'<dt>%1$s</dt><dd>%2$s</dd>',
+				wp_kses_post( $field['label'] ),
+				wp_kses_post( $field['value'] )
+			),
+			$field
 		);
 	}
 
@@ -130,7 +151,37 @@ class CheckoutFieldsFrontend {
 				continue;
 			}
 
-			printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $value ) );
+			/**
+			 * Filter to modify the output of address fields on the account page.
+			 *
+			 * This filter allows customization of how address fields are rendered
+			 * on the account page. The default rendering outputs the field label
+			 * and value with HTML formatting.
+			 *
+			 * @since x.x.x
+			 *
+			 * @param string $output       The HTML output of the address field.
+			 * @param array  $field        The field data.
+			 * @param string $value        The formatted field value.
+			 * @param string $key          The key of the field.
+			 * @param string $address_type The type of address (billing or shipping).
+			 * @param object $this         The class instance.
+			 */
+			echo wp_kses_post(
+				apply_filters(
+					'woocommerce_checkout_render_address_field',
+					sprintf(
+						'<br><strong>%s</strong>: %s',
+						$field['label'],
+						$value
+					),
+					$field,
+					$value,
+					$key,
+					$address_type,
+					$this
+				)
+			);
 		}
 	}
 
