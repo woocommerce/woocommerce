@@ -58,6 +58,7 @@ const Edit = ( props: EditProps ) => {
 	>( [] );
 	const [ isOptionsLoading, setIsOptionsLoading ] =
 		useState< boolean >( true );
+
 	useProductFilterClearButtonManager( {
 		clientId,
 		showClearButton: clearButton,
