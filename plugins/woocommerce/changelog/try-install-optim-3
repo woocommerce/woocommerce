@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Optimize installation routine by warming up caches for non-autoload options.
