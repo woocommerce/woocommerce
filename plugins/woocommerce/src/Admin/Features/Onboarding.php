@@ -62,8 +62,8 @@ class Onboarding extends DeprecatedClassFacade {
 	 * @return array
 	 */
 	public static function get_themes() {
-		wc_deprecated_function( 'get_themes', '6.3', '\Automattic\WooCommerce\Internal\Admin\OnboardingThemes::get_themes()' );
-		return \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes::get_themes();
+		wc_deprecated_function( 'get_themes', '6.3' );
+		return array();
 	}
 
 	/**
@@ -74,8 +74,8 @@ class Onboarding extends DeprecatedClassFacade {
 	 * @return array
 	 */
 	public static function get_theme_data( $theme ) {
-		wc_deprecated_function( 'get_theme_data', '6.3', '\Automattic\WooCommerce\Internal\Admin\OnboardingThemes::get_theme_data()' );
-		return \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes::get_theme_data();
+		wc_deprecated_function( 'get_theme_data', '6.3' );
+		return array();
 	}
 
 	/**
@@ -85,8 +85,8 @@ class Onboarding extends DeprecatedClassFacade {
 	 * @return array
 	 */
 	public static function get_allowed_themes() {
-		wc_deprecated_function( 'get_allowed_themes', '6.3', '\Automattic\WooCommerce\Internal\Admin\OnboardingThemes::get_allowed_themes()' );
-		return \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes::get_allowed_themes();
+		wc_deprecated_function( 'get_allowed_themes', '6.3' );
+		return array();
 	}
 
 	/**
@@ -97,7 +97,7 @@ class Onboarding extends DeprecatedClassFacade {
 	 * @return array
 	 */
 	public static function get_product_data( $product_types ) {
-		wc_deprecated_function( 'get_product_data', '6.3', '\Automattic\WooCommerce\Internal\Admin\OnboardingProducts::get_product_data()' );
-		return \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProducts::get_product_data();
+		wc_deprecated_function( 'get_product_data', '6.3' );
+		return array();
 	}
 }
