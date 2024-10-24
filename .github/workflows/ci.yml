@@ -154,13 +154,9 @@ jobs:
 
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
-        uses: 'nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e'
-        with:
-          command: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
-          max_attempts: 2
-          timeout_minutes: 5
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
       - name: 'Determine BuildKite Analytics Message'
         env:
