@@ -21,10 +21,12 @@ import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
 import { useProductCollectionUIState } from '../utils';
 import ProductPicker from './ProductPicker';
+import { useTracksLocation } from '../tracks-utils';
 
 const Edit = ( props: ProductCollectionEditComponentProps ) => {
-	const { clientId, attributes } = props;
-	const location = useGetLocation( props.context, props.clientId );
+	const { clientId, attributes, context } = props;
+	const location = useGetLocation( context, clientId );
+	const tracksLocation = useTracksLocation( context.templateSlug );
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
 	const hasInnerBlocks = useSelect(
@@ -62,7 +64,12 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const renderComponent = () => {
 		switch ( productCollectionUIStateInEditor ) {
 			case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
-				return <ProductCollectionPlaceholder { ...props } />;
+				return (
+					<ProductCollectionPlaceholder
+						{ ...props }
+						tracksLocation={ tracksLocation }
+					/>
+				);
 			case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
 				return (
 					<ProductPicker
@@ -85,7 +92,12 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					/>
 				);
 			default:
-				return <ProductCollectionPlaceholder { ...props } />;
+				return (
+					<ProductCollectionPlaceholder
+						{ ...props }
+						tracksLocation={ tracksLocation }
+					/>
+				);
 		}
 	};
 
@@ -96,6 +108,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				<CollectionSelectionModal
 					clientId={ clientId }
 					attributes={ attributes }
+					tracksLocation={ tracksLocation }
 					closePatternSelectionModal={ () =>
 						setIsSelectionModalOpen( false )
 					}
