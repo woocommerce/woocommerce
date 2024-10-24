@@ -66,12 +66,8 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 			`${ '/shop' }?filter_stock_status=instock,onbackorder`
 		);
 
-		await expect(
-			page.getByText( 'Stock Status: In stock' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Stock Status: On backorder' )
-		).toBeVisible();
+		await expect( page.getByText( 'Status: In stock' ) ).toBeVisible();
+		await expect( page.getByText( 'Status: On backorder' ) ).toBeVisible();
 	} );
 
 	test( 'With attribute filters applied it shows the correct active filters', async ( {
