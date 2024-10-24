@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a method to the order object to get info about the card used for payment
