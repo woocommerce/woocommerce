@@ -195,9 +195,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				}
 			}
 
+			// Prepare min_amount for comparison
+			$min_amount = str_replace( wc_get_price_decimal_separator(), '.', $this->min_amount );
+			$min_amount = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator(), ), '', $min_amount );
+
+			$min_amount = NumberUtil::round( $min_amount, wc_get_price_decimals() );
 			$total = NumberUtil::round( $total, wc_get_price_decimals() );
 
-			if ( $total >= $this->min_amount ) {
+			if ( $total >= $min_amount ) {
 				$has_met_min_amount = true;
 			}
 		}
