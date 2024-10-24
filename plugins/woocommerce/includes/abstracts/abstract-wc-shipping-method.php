@@ -477,7 +477,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Get_option function.
 	 *
-	 * Gets and option from the settings API, using defaults if necessary to prevent undefined notices.
+	 * Gets an option from the settings API, using defaults if necessary to prevent undefined notices.
 	 *
 	 * @param  string $key Key.
 	 * @param  mixed  $empty_value Empty value.
