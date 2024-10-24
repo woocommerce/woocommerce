@@ -40,7 +40,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'status'             => '',
 		'currency'           => '',
 		'version'            => '',
-		'prices_include_tax' => false,
+		'prices_include_tax' => null,
 		'date_created'       => null,
 		'date_modified'      => null,
 		'discount_total'     => 0,
