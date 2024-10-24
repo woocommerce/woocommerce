@@ -6,6 +6,12 @@ import { BlockAttributes } from '@wordpress/blocks';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	privateApis as blockEditorPrivateApis,
+} from '@wordpress/block-editor';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error Using experimental features
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -20,11 +26,16 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
+// eslint-disable-next-line @woocommerce/dependency-group
+import { unlock } from '@woocommerce/utils';
+
+const { DimensionsTool } = unlock( blockEditorPrivateApis );
 
 interface ImageSizeSettingProps {
 	scale: string;
 	width: string | undefined;
 	height: string | undefined;
+	aspectRatio: string | undefined;
 	setAttributes: ( attrs: BlockAttributes ) => void;
 }
 
@@ -74,6 +85,7 @@ export const ImageSizeSettings = ( {
 	scale,
 	width,
 	height,
+	aspectRatio,
 	setAttributes,
 }: ImageSizeSettingProps ) => {
 	return (
@@ -81,6 +93,22 @@ export const ImageSizeSettings = ( {
 			className="wc-block-product-image__tools-panel"
 			label={ __( 'Image size', 'woocommerce' ) }
 		>
+			<DimensionsTool
+				value={ { aspectRatio: aspectRatio ?? '1' } }
+				onChange={ ( {
+					aspectRatio: newAspectRatio,
+				}: {
+					aspectRatio: string;
+				} ) => {
+					setAttributes( {
+						aspectRatio: newAspectRatio,
+						scale: 'cover',
+					} );
+				} }
+				defaultAspectRatio="1"
+				tools={ [ 'aspectRatio' ] }
+			/>
+
 			<UnitControl
 				label={ __( 'Height', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
