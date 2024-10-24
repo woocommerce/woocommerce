@@ -135,4 +135,6 @@ defined( 'ABSPATH' ) || exit;
 			<?php echo esc_html( $meta['session_pages'] ); ?>
 		</span>
 	<?php endif; ?>
+	<!-- A placeholder for the OA install banner React component. -->
+	<div id="order-attribution-install-banner-slotfill"></div>
 </div>

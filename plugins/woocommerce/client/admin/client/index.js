@@ -35,6 +35,10 @@ import {
 } from './settings-payments';
 import { ErrorBoundary } from './error-boundary';
 import { registerBlueprintSlotfill } from './blueprint';
+import {
+	possiblyRenderOrderAttributionSlot,
+	registerOrderAttributionSlotFill,
+} from './order-attribution-install-banner/order-editor/slot';
 
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
@@ -116,6 +120,9 @@ if ( appRoot ) {
 	if ( window.wcAdminFeatures && window.wcAdminFeatures.blueprint === true ) {
 		registerBlueprintSlotfill();
 	}
+
+	possiblyRenderOrderAttributionSlot();
+	registerOrderAttributionSlotFill();
 }
 
 // Render the CustomerEffortScoreTracksContainer only if
