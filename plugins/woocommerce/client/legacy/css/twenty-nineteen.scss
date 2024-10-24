@@ -47,6 +47,20 @@ a.button {
 		.optional {
 			visibility: visible;
 		}
+
+		&:has(.input-with-wc-float-label) {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+				left: 0.8em;
+				transform: translateY(0.4em);
+
+				&.is-active {
+					transform: translateY(-8px) scale(.75);
+				}
+			}
+		}
 	}
 }
 
@@ -819,6 +833,24 @@ table.variations {
 			width: 4rem;
 		}
 	}
+
+	.coupon {
+		position: relative;
+
+		label {
+			@include woocommerce-float-label();
+			left: 0.8em;
+			transform: translateY(0.4em);
+			
+			&.is-active {
+				transform: translateY(-8px) scale(.75);
+			}
+			
+			@media only screen and (max-width: 768px) {
+				transform: translateY(0.5em);
+			}
+		}
+	}
 }
 
 .cart_totals {
@@ -1031,6 +1063,40 @@ table.variations {
 	}
 	.select2-container--focus .select2-selection {
 		border-color: black;
+	}
+}
+
+.woocommerce-shipping-totals {
+	.select2-container {
+		.select2-selection,
+		.select2-search__field {
+			border-radius: 0;
+			color: #ccc;
+			height: 2.45rem;
+			font-size: var(--wp--preset--font-size--small);
+			padding: 0.5rem 0.8rem;
+		}
+	
+		.select2-dropdown {
+			padding: 0.5rem 0.8rem;
+	
+			.select2-search__field {
+				margin-bottom: 1rem;
+			}
+		}
+	
+		.select2-selection .select2-selection__arrow {
+			position: absolute;
+			top: 2px;
+			right: 0;
+			width: 2rem;
+			height: 2.45rem;
+		}
+		
+		.select2-selection--single .select2-selection__rendered {
+			line-height: 1.5;
+			padding-left: 0;
+		}
 	}
 }
 
@@ -1354,7 +1420,7 @@ table.variations {
 /**
  * Coupon error notice
  */
- .woocommerce-cart {
+.woocommerce-cart {
 	td.actions .coupon .coupon-error-notice {
 		@include coupon-error-notice-cart();
  	}
