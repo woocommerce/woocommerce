@@ -103,7 +103,7 @@ runs:
         - name: 'Cache Build Output'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
-          uses: 'google/wireit@4aad131006ea85c1e42af927534ebb13426dd730'
+          uses: 'google/wireit@eea3c9f0385a39e6eb4ff6a6daa273311381d436'
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
