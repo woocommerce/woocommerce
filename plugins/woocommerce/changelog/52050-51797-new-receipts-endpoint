@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the new `POST /orders/{id}/actions` endpoint to allow re-sending the order details to customers.
