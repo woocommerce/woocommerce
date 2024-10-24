@@ -2140,24 +2140,24 @@ class ProductCollection extends AbstractBlock {
 				);
 			},
 			function ( $collection_args, $query ) {
-				$product_reference = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
+				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_reference ) ) {
+				if ( empty( $product_references ) ) {
 					$location = $collection_args['productCollectionLocation'];
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
-						$product_reference = array( $location['sourceData']['productId'] );
+						$product_references = array( $location['sourceData']['productId'] );
 					}
 
 					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-						$product_reference = $location['sourceData']['productIds'];
+						$product_references = $location['sourceData']['productIds'];
 					}
 
 					if ( isset( $location['type'] ) && 'order' === $location['type'] ) {
-						$product_reference = $this->get_product_ids_from_order( $location['sourceData']['orderId'] ?? null );
+						$product_references = $this->get_product_ids_from_order( $location['sourceData']['orderId'] ?? null );
 					}
 				}
 
-				$collection_args['crossSellsProductReferences'] = $product_reference;
+				$collection_args['crossSellsProductReferences'] = $product_references;
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
