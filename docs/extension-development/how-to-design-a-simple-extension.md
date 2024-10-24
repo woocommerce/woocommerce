@@ -382,7 +382,7 @@ if ( ! class_exists( 'My_Extension' ) ) :
 endif;
 
 /**
- * Function for delaying initialization of the extension until after WooComerce is loaded.
+ * Function for delaying initialization of the extension until after WooCommerce is loaded.
  */
 function my_extension_initialize() {
 
