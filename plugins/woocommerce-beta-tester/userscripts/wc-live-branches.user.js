@@ -108,11 +108,11 @@
 			const featureFlags = [
 				'async-product-editor-category-field',
 				'launch-your-store',
-				'experimental-blocks',
 				'minified-js',
 				'product-custom-fields',
 				'reactify-classic-payments-settings',
 				'settings',
+				'experimental-blocks',
 			];
 
 			const contents = `
