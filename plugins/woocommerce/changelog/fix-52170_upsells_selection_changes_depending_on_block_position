@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix Upsells and Cross-Sells selection changes depending on block position #52235

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
@@ -6,16 +7,16 @@ use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
 /**
- * Product Filter: Stock Status Block.
+ * Product Filter: Status Block.
  */
-final class ProductFilterStockStatus extends AbstractBlock {
+final class ProductFilterStatus extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-stock-status';
+	protected $block_name = 'product-filter-status';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 
@@ -92,7 +93,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		);
 
 		$data['stock'] = array(
-			'type'  => __( 'Stock Status', 'woocommerce' ),
+			'type'  => __( 'Status', 'woocommerce' ),
 			'items' => $active_stock_statuses,
 		);
 
@@ -183,7 +184,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	}
 
 	/**
-	 * Retrieve the stock status filter data for current block.
+	 * Retrieve the status filter data for current block.
 	 *
 	 * @param WP_Block $block Block instance.
 	 */

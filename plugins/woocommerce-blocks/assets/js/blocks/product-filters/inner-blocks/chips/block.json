@@ -12,7 +12,7 @@
 	"apiVersion": 3,
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
-		"woocommerce/product-filter-stock-status"
+		"woocommerce/product-filter-status"
 	],
 	"supports": {},
 	"usesContext": [
