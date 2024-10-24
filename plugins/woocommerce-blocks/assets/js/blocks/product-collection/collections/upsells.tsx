@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate } from '@wordpress/blocks';
+import type {
+	InnerBlockTemplate,
+	BlockVariationScope,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, trendingUp } from '@wordpress/icons';
 
@@ -20,7 +23,7 @@ const collection = {
 		'woocommerce'
 	),
 	keywords: [ 'boost', 'promotion' ],
-	scope: [ 'block' ],
+	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 	usesReference: [ 'product', 'cart' ],
 };
 

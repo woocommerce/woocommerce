@@ -33,6 +33,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 	supports: {
 		align: [ 'wide', 'full' ],
 		html: false,
+		inserter: false,
 	},
 	attributes: {
 		...sharedAttributes,

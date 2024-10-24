@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate } from '@wordpress/blocks';
+import type {
+	InnerBlockTemplate,
+	BlockVariationScope,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, percent } from '@wordpress/icons';
 
@@ -19,8 +22,8 @@ const collection = {
 		'Highlight products that are currently on sale.',
 		'woocommerce'
 	),
-	keywords: [ 'product collection' ],
-	scope: [ 'block' ],
+	keywords: [ 'discount', 'promotion', 'onsale' ],
+	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
 const attributes = {

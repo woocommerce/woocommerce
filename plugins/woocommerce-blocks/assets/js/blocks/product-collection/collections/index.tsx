@@ -14,24 +14,25 @@ import {
  */
 import { CollectionName } from '../types';
 import blockJson from '../block.json';
-import productCollection from './product-collection';
-import newArrivals from './new-arrivals';
-import topRated from './top-rated';
 import bestSellers from './best-sellers';
-import onSale from './on-sale';
+import crossSells from './cross-sells';
 import featured from './featured';
 import handPicked from './hand-picked';
+import newArrivals from './new-arrivals';
+import onSale from './on-sale';
+import productCollection from './product-collection';
 import related from './related';
+import topRated from './top-rated';
 import upsells from './upsells';
-import crossSells from './cross-sells';
 
+// Order in here is reflected in the Collection Chooser in Editor.
 const collections: BlockVariation[] = [
 	productCollection,
 	featured,
-	topRated,
+	newArrivals,
 	onSale,
 	bestSellers,
-	newArrivals,
+	topRated,
 	handPicked,
 	related,
 	upsells,

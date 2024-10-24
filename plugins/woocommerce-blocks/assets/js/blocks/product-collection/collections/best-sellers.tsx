@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate } from '@wordpress/blocks';
+import type {
+	InnerBlockTemplate,
+	BlockVariationScope,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chartBar } from '@wordpress/icons';
 
@@ -16,8 +19,8 @@ const collection = {
 	title: __( 'Best Sellers', 'woocommerce' ),
 	icon: <Icon icon={ chartBar } />,
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
-	keywords: [ 'best selling', 'product collection' ],
-	scope: [ 'block' ],
+	keywords: [ 'best selling' ],
+	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
 const attributes = {

@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate } from '@wordpress/blocks';
+import type {
+	InnerBlockTemplate,
+	BlockVariationScope,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, loop } from '@wordpress/icons';
 
@@ -16,8 +19,8 @@ const collection = {
 	title: __( 'Related Products', 'woocommerce' ),
 	icon: <Icon icon={ loop } />,
 	description: __( 'Recommend products like this one.', 'woocommerce' ),
-	keywords: [ 'product collection' ],
-	scope: [ 'block' ],
+	keywords: [],
+	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 	usesReference: [ 'product' ],
 };
 
