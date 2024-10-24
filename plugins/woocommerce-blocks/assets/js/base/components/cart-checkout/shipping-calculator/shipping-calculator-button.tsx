@@ -3,20 +3,30 @@
  */
 import { Button } from '@ariakit/react';
 import { __ } from '@wordpress/i18n';
+import { useContext } from '@wordpress/element';
 
-export interface CalculatorButtonProps {
-	label?: string;
-	isShippingCalculatorOpen: boolean;
-	setIsShippingCalculatorOpen: ( isShippingCalculatorOpen: boolean ) => void;
-	shippingCalculatorID: string;
-}
+/**
+ * Internal dependencies
+ */
+import { ShippingCalculatorContext } from './context';
+import './style.scss';
 
-export const CalculatorButton = ( {
+export const ShippingCalculatorButton = ( {
 	label = __( 'Calculate', 'woocommerce' ),
-	isShippingCalculatorOpen,
-	setIsShippingCalculatorOpen,
-	shippingCalculatorID,
-}: CalculatorButtonProps ): JSX.Element => {
+}: {
+	label?: string;
+} ): JSX.Element | null => {
+	const {
+		isShippingCalculatorOpen,
+		setIsShippingCalculatorOpen,
+		showCalculator,
+		shippingCalculatorId,
+	} = useContext( ShippingCalculatorContext );
+
+	if ( ! showCalculator ) {
+		return null;
+	}
+
 	return (
 		<Button
 			render={ <span /> }
@@ -28,11 +38,11 @@ export const CalculatorButton = ( {
 			} }
 			aria-label={ label }
 			aria-expanded={ isShippingCalculatorOpen }
-			aria-controls={ shippingCalculatorID }
+			aria-controls={ shippingCalculatorId }
 		>
 			{ label }
 		</Button>
 	);
 };
 
-export default CalculatorButton;
+export default ShippingCalculatorButton;

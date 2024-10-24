@@ -146,11 +146,9 @@
 		margin-top: 0;
 
 		.wc-block-components-shipping-calculator,
-		.wc-block-components-shipping-rates-control__package:not(
-			.wc-block-components-panel
-		) {
-			padding-left: $gap;
-			padding-right: $gap;
+		.wc-block-components-shipping-rates-control__package {
+			padding-left: 0;
+			padding-right: 0;
 		}
 
 		.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via,

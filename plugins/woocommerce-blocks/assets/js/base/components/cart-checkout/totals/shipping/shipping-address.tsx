@@ -4,42 +4,24 @@
 import { __ } from '@wordpress/i18n';
 import { formatShippingAddress } from '@woocommerce/base-utils';
 import { ShippingAddress as ShippingAddressType } from '@woocommerce/settings';
-import PickupLocation from '@woocommerce/base-components/cart-checkout/pickup-location';
+import {
+	ShippingLocation,
+	PickupLocation,
+	ShippingCalculatorButton,
+} from '@woocommerce/base-components/cart-checkout';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 
-/**
- * Internal dependencies
- */
-import ShippingLocation from '../../shipping-location';
-import { CalculatorButton, CalculatorButtonProps } from './calculator-button';
-
-export interface ShippingAddressProps
-	extends Pick<
-		CalculatorButtonProps,
-		'shippingCalculatorID' | 'setIsShippingCalculatorOpen'
-	> {
-	showCalculator: boolean;
-	isShippingCalculatorOpen: boolean;
+export interface ShippingAddressProps {
 	shippingAddress: ShippingAddressType;
 }
 
 export const ShippingAddress = ( {
-	showCalculator,
-	isShippingCalculatorOpen,
-	setIsShippingCalculatorOpen,
 	shippingAddress,
-	shippingCalculatorID,
 }: ShippingAddressProps ): JSX.Element | null => {
 	const prefersCollection = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).prefersCollection()
 	);
-
-	const hasFormattedAddress = !! formatShippingAddress( shippingAddress );
-
-	const label = hasFormattedAddress
-		? __( 'Change address', 'woocommerce' )
-		: __( 'Enter address to check delivery options', 'woocommerce' );
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	return (
 		<>
@@ -48,14 +30,16 @@ export const ShippingAddress = ( {
 			) : (
 				<ShippingLocation formattedLocation={ formattedLocation } />
 			) }
-			{ showCalculator && (
-				<CalculatorButton
-					label={ label }
-					isShippingCalculatorOpen={ isShippingCalculatorOpen }
-					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
-					shippingCalculatorID={ shippingCalculatorID }
-				/>
-			) }
+			<ShippingCalculatorButton
+				label={
+					!! formattedLocation
+						? __( 'Change address', 'woocommerce' )
+						: __(
+								'Enter address to check delivery options',
+								'woocommerce'
+						  )
+				}
+			/>
 		</>
 	);
 };
