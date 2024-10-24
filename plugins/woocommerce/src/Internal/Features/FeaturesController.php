@@ -258,6 +258,14 @@ class FeaturesController {
 					'is_legacy'          => false,
 					'is_experimental'    => true,
 				),
+				'email_improvements'    => array(
+					'name'        => __( 'Email improvements', 'woocommerce' ),
+					'description' => __(
+						'Enable modern email design and live preview for transactional emails',
+						'woocommerce'
+					),
+					'disable_ui'  => true,
+				),
 			);
 
 			foreach ( $legacy_features as $slug => $definition ) {
