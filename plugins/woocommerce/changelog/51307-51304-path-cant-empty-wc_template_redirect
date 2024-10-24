@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fixed Fatal Error : Path cannot be empty in wc_template_redirect() include statement | wc-template-functions.php
+
