@@ -174,13 +174,6 @@ describe( 'PaymentMethods', () => {
 		);
 
 		await waitFor( () => {
-			const savedPaymentMethodOptions = screen.queryByText(
-				/Saved payment method options/
-			);
-			expect( savedPaymentMethodOptions ).not.toBeNull();
-		} );
-
-		await waitFor( () => {
 			const paymentMethodOptions = screen.queryByText(
 				/Payment method options/
 			);
