@@ -16,7 +16,7 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Inspector } from './inspector';
-import { CollectionData, EditProps, StockStatusCount } from './types';
+import { CollectionData, EditProps, StatusCount } from './types';
 
 const Edit = ( props: EditProps ) => {
 	const { showCounts, hideEmpty } = props.attributes;
@@ -89,7 +89,7 @@ const Edit = ( props: EditProps ) => {
 					(
 						filteredCounts as unknown as CollectionData
 					 )?.stock_status_counts?.find(
-						( item: StockStatusCount ) => item.status === key
+						( item: StatusCount ) => item.status === key
 					)?.count ?? 0;
 
 				return {

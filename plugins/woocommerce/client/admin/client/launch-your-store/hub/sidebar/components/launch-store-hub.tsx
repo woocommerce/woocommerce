@@ -98,7 +98,6 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 				animate={ 'view' }
 			>
 				<SiteHub
-					as={ motion.div }
 					variants={ {
 						view: { x: 0 },
 					} }
