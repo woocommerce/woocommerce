@@ -2,38 +2,30 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
 import type { CartResponseShippingRate } from '@woocommerce/types';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 
-/**
- * Internal dependencies
- */
-import ShippingRatesControl from '../../shipping-rates-control';
-
-export interface ShippingRateSelectorProps {
-	hasRates: boolean;
-	shippingRates: CartResponseShippingRate[];
-	isLoadingRates: boolean;
-	isAddressComplete: boolean;
-}
-
 export const ShippingRateSelector = ( {
-	hasRates,
 	shippingRates,
 	isLoadingRates,
-	isAddressComplete,
-}: ShippingRateSelectorProps ): JSX.Element => {
-	const legend = hasRates
-		? __( 'Shipping options', 'woocommerce' )
-		: __( 'Choose a shipping option', 'woocommerce' );
+	hasCompleteAddress,
+}: {
+	shippingRates: CartResponseShippingRate[];
+	isLoadingRates: boolean;
+	hasCompleteAddress: boolean;
+} ): JSX.Element | null => {
 	return (
 		<fieldset className="wc-block-components-totals-shipping__fieldset">
-			<legend className="screen-reader-text">{ legend }</legend>
+			<legend className="screen-reader-text">
+				{ __( 'Shipping options', 'woocommerce' ) }
+			</legend>
+
 			<ShippingRatesControl
 				className="wc-block-components-totals-shipping__options"
 				noResultsMessage={
 					<>
-						{ isAddressComplete && (
+						{ hasCompleteAddress && (
 							<NoticeBanner
 								isDismissible={ false }
 								className="wc-block-components-shipping-rates-control__no-results-notice"

@@ -21,3 +21,5 @@ export const ShippingVia = ( {
 		</div>
 	);
 };
+
+export default ShippingVia;
