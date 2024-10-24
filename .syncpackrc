@@ -434,7 +434,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "0.14.3"
+			"pinVersion": "0.14.9"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

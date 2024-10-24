@@ -197,8 +197,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/admin-layout:
     dependencies:
@@ -270,8 +270,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/ai:
     dependencies:
@@ -412,8 +412,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/api:
     dependencies:
@@ -461,8 +461,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/api-core-tests:
     dependencies:
@@ -495,8 +495,8 @@ importers:
         specifier: ^8.55.0
         version: 8.55.0
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/block-templates:
     dependencies:
@@ -604,8 +604,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/components:
     dependencies:
@@ -917,20 +917,20 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/create-product-editor-block:
     devDependencies:
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/create-woo-extension:
     devDependencies:
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/csv-export:
     dependencies:
@@ -975,8 +975,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/currency:
     dependencies:
@@ -1033,8 +1033,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/customer-effort-score:
     dependencies:
@@ -1157,8 +1157,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/data:
     dependencies:
@@ -1299,8 +1299,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/date:
     dependencies:
@@ -1372,8 +1372,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/dependency-extraction-webpack-plugin:
     dependencies:
@@ -1412,8 +1412,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/e2e-core-tests:
     dependencies:
@@ -1479,8 +1479,8 @@ importers:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/e2e-environment:
     dependencies:
@@ -1585,8 +1585,8 @@ importers:
         specifier: ^7.5.4
         version: 7.5.4
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/e2e-utils:
     dependencies:
@@ -1664,8 +1664,8 @@ importers:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/eslint-plugin:
     dependencies:
@@ -1710,8 +1710,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/experimental:
     dependencies:
@@ -1849,8 +1849,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/explat:
     dependencies:
@@ -1919,8 +1919,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/expression-evaluation:
     dependencies:
@@ -1965,14 +1965,14 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/extend-cart-checkout-block:
     devDependencies:
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/integrate-plugin:
     dependencies:
@@ -2065,8 +2065,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/internal-e2e-builds:
     devDependencies:
@@ -2092,8 +2092,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/internal-js-tests:
     dependencies:
@@ -2147,8 +2147,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/internal-style-build:
     dependencies:
@@ -2214,8 +2214,8 @@ importers:
         specifier: ^5.89.0
         version: 5.89.0
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/navigation:
     dependencies:
@@ -2296,8 +2296,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/notices:
     dependencies:
@@ -2363,8 +2363,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/number:
     dependencies:
@@ -2412,8 +2412,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/onboarding:
     dependencies:
@@ -2524,8 +2524,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/product-editor:
     dependencies:
@@ -2804,8 +2804,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/remote-logging:
     dependencies:
@@ -2865,8 +2865,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/js/tracks:
     dependencies:
@@ -2914,8 +2914,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   packages/php/remote-specs-validation:
     dependencies:
@@ -3071,8 +3071,8 @@ importers:
         specifier: ^3.17.4
         version: 3.17.4
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   plugins/woocommerce:
     dependencies:
@@ -3228,8 +3228,8 @@ importers:
         specifier: 3.3.12
         version: 3.3.12(webpack@5.70.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -3343,8 +3343,8 @@ importers:
         specifier: ^3.17.4
         version: 3.17.4
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   plugins/woocommerce-blocks:
     dependencies:
@@ -3924,8 +3924,8 @@ importers:
         specifier: 5.1.4
         version: 5.1.4(webpack-bundle-analyzer@4.7.0)(webpack-dev-server@4.15.1)(webpack@5.91.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
       wp-types:
         specifier: 3.63.0
         version: 3.63.0
@@ -4516,8 +4516,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   plugins/woocommerce/client/legacy:
     dependencies:
@@ -4592,8 +4592,8 @@ importers:
         specifier: ^14.16.1
         version: 14.16.1
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   tools/code-analyzer:
     dependencies:
@@ -4656,8 +4656,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   tools/compare-perf:
     dependencies:
@@ -4738,8 +4738,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   tools/monorepo-utils:
     dependencies:
@@ -4856,8 +4856,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   tools/package-release:
     dependencies:
@@ -4902,8 +4902,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   tools/release-posts:
     dependencies:
@@ -4978,8 +4978,8 @@ importers:
         specifier: 5.3.x
         version: 5.3.3
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
   tools/storybook:
     devDependencies:
@@ -5071,8 +5071,8 @@ importers:
         specifier: ^5.89.0
         version: 5.89.0(@swc/core@1.3.100)(esbuild@0.18.20)
       wireit:
-        specifier: 0.14.3
-        version: 0.14.3
+        specifier: 0.14.9
+        version: 0.14.9
 
 packages:
 
@@ -12929,6 +12929,10 @@ packages:
   balanced-match@2.0.0:
     resolution: {integrity: sha512-1ugUSr8BHXRnK23KfuYS+gVMC3LB8QGH9W1iGtDPsNWoQbgtXSExkBu2aDR4epiGWZOjZsj6lDl/N/AqqTC3UA==}
 
+  balanced-match@3.0.1:
+    resolution: {integrity: sha512-vjtV3hiLqYDNRoiAv0zC4QaGAMPomEoq83PRmYIofPswwZurCeWR5LByXm7SyoL0Zh5+2z0+HC7jG8gSZJUh0w==}
+    engines: {node: '>= 16'}
+
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
@@ -13042,6 +13046,10 @@ packages:
 
   brace-expansion@2.0.1:
     resolution: {integrity: sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==}
+
+  brace-expansion@4.0.0:
+    resolution: {integrity: sha512-l/mOwLWs7BQIgOKrL46dIAbyCKvPV7YJPDspkuc88rHsZRlg3hptUGdU7Trv0VFP4d3xnSGBQrKu5ZvGB7UeIw==}
+    engines: {node: '>= 18'}
 
   braces@2.3.2:
     resolution: {integrity: sha512-aNdbnj9P8PjdXU4ybaWLK2IF3jc/EoDYbC7AazW6to3TRsfXxscC9UXOB5iDiEQrkyIbWp2SLQda4+QAa7nc3w==}
@@ -21722,7 +21730,7 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
-      react: ^17.0.2
+      react: 18.2.0
 
   react-number-format@4.9.3:
     resolution: {integrity: sha512-am1A1xYAbENuKJ+zpM7V+B1oRTSeOHYltqVKExznIVFweBzhLmOBmyb1DfIKjHo90E0bo1p3nzVJ2NgS5xh+sQ==}
@@ -21912,7 +21920,7 @@ packages:
   react-with-direction@1.4.0:
     resolution: {integrity: sha512-ybHNPiAmaJpoWwugwqry9Hd1Irl2hnNXlo/2SXQBwbLn/jGMauMS2y9jw+ydyX5V9ICryCqObNSthNt5R94xpg==}
     peerDependencies:
-      react: ^17.0.2
+      react: ^0.14 || ^15 || ^16
       react-dom: ^0.14 || ^15 || ^16
 
   react-with-styles-interface-css@4.0.3:
@@ -24936,9 +24944,9 @@ packages:
     engines: {node: '>= 0.10.0'}
     hasBin: true
 
-  wireit@0.14.3:
-    resolution: {integrity: sha512-vNSzIBJ1YLMM6dzGUiUMw11KmHOFiXIaOHcQPWVT4j5oCaXQSIYS5AExEzRkAAlm5F0hRPTwDUoazUHu5ZLCNQ==}
-    engines: {node: '>=14.14.0'}
+  wireit@0.14.9:
+    resolution: {integrity: sha512-hFc96BgyslfO1WGSzQqOVYd5N3TB+4u9w70L9GHR/T7SYjvFmeznkYMsRIjMLhPcVabCEYPW1vV66wmIVDs+dQ==}
+    engines: {node: '>=18.0.0'}
     hasBin: true
 
   word-wrap@1.2.5:
@@ -45302,6 +45310,8 @@ snapshots:
 
   balanced-match@2.0.0: {}
 
+  balanced-match@3.0.1: {}
+
   base64-js@1.5.1: {}
 
   base@0.11.2:
@@ -45453,6 +45463,10 @@ snapshots:
   brace-expansion@2.0.1:
     dependencies:
       balanced-match: 1.0.2
+
+  brace-expansion@4.0.0:
+    dependencies:
+      balanced-match: 3.0.1
 
   braces@2.3.2(supports-color@6.1.0):
     dependencies:
@@ -63621,9 +63635,9 @@ snapshots:
 
   window-size@0.2.0: {}
 
-  wireit@0.14.3:
+  wireit@0.14.9:
     dependencies:
-      braces: 3.0.2
+      brace-expansion: 4.0.0
       chokidar: 3.5.3
       fast-glob: 3.3.2
       jsonc-parser: 3.2.0

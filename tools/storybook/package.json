@@ -58,7 +58,7 @@
 		"storybook": "7.6.19",
 		"typescript": "5.3.x",
 		"webpack": "^5.89.0",
-		"wireit": "0.14.3"
+		"wireit": "0.14.9"
 	},
 	"wireit": {
 		"build:project:storybook": {
@@ -109,6 +109,9 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/block-library/build",
+				"node_modules/@woocommerce/block-library/blocks.ini",
+				"node_modules/@woocommerce/admin-library/build",
 				"package.json"
 			]
 		}
