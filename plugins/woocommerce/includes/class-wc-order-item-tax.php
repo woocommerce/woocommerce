@@ -60,7 +60,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @param string $value Label.
 	 */
 	public function set_label( $value ) {
-		$this->set_prop( 'label', wc_clean( $value ) );
+		$this->set_prop( 'label', wc_clean( str_replace( '%', '&#37;', $value ) ) );
 	}
 
 	/**
