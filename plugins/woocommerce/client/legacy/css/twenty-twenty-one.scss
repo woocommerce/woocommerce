@@ -48,6 +48,20 @@ a.button {
 		.optional {
 			visibility: visible;
 		}
+
+		&:has(.input-with-wc-float-label) {
+			position: relative;
+
+			label {
+				@include woocommerce-float-label();
+				left: 0.8em;
+				transform: translateY(0.7em);
+
+				&.is-active {
+					transform: translateY(-3px) scale(.75);
+				}
+			}
+		}		
 	}
 
 	form.woocommerce-form-login,
@@ -2887,6 +2901,20 @@ button.reset_variations {
 			&:active {
 				color: var(--global--color-background);
 				background: var(--global--color-primary);
+			}
+		}
+
+		.coupon {
+			position: relative;
+	
+			label {
+				@include woocommerce-float-label();
+				left: 0.8em;
+				transform: translateY(0.8em);
+				
+				@media only screen and (max-width: 768px) {
+					transform: translateY(0.9em);
+				}
 			}
 		}
 
