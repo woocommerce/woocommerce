@@ -169,6 +169,10 @@ ul.products {
 	li.product {
 		list-style: none;
 
+		.woocommerce-loop-product__link {
+			display: block;
+		}
+
 		.price,
 		.star-rating {
 			display: block;
