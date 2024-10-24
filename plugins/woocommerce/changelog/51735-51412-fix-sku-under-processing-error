@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add a retry mechanism to the query to obtain the SKU lock for product creation through the API.

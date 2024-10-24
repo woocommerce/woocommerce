@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes possible TypeError in orders edit page where wrong parameter type is passed to `add_meta_boxes` action.

@@ -36,3 +36,4 @@ renovate.json
 tsconfig.*
 webpack.config.js
 client/legacy/
+/client/admin/
