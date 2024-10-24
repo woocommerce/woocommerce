@@ -59,3 +59,58 @@ export const getShippingRatesRateCount = (
 		return count + shippingPackage.shipping_rates.length;
 	}, 0 );
 };
+
+/**
+ * Searches an array of packages/rates to see if there are actually any rates
+ * available.
+ *
+ * @param {Array} shippingRates An array of packages and rates.
+ * @return {boolean} True if a rate exists.
+ */
+export const hasShippingRate = (
+	shippingRates: CartShippingRate[]
+): boolean => {
+	return shippingRates.some(
+		( shippingRatesPackage ) => shippingRatesPackage.shipping_rates.length
+	);
+};
+
+/**
+ * Filters an array of packages/rates based on the shopper's preference for collection.
+ */
+export const filterShippingRatesByPrefersCollection = (
+	shippingRates: CartShippingRate[],
+	prefersCollection: boolean
+) => {
+	return shippingRates.map( ( shippingRatesPackage ) => {
+		return {
+			...shippingRatesPackage,
+			shipping_rates: shippingRatesPackage.shipping_rates.filter(
+				( rate ) => {
+					const collectableRate = hasCollectableRate(
+						rate.method_id
+					);
+
+					if ( prefersCollection ) {
+						return collectableRate;
+					}
+
+					return ! collectableRate;
+				}
+			),
+		};
+	} );
+};
+
+/**
+ * Calculates the total shipping value based on store settings.
+ */
+export const getTotalShippingValue = ( values: {
+	total_shipping: string;
+	total_shipping_tax: string;
+} ): number => {
+	return getSetting( 'displayCartPricesIncludingTax', false )
+		? parseInt( values.total_shipping, 10 ) +
+				parseInt( values.total_shipping_tax, 10 )
+		: parseInt( values.total_shipping, 10 );
+};
