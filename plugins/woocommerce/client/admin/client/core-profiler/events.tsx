@@ -30,8 +30,8 @@ export type IntroCompletedEvent = {
 
 export type IntroSkippedEvent = {
 	type: 'INTRO_SKIPPED';
-	payload: { optInDataSharing: false };
-}; // always false for now
+	payload: { optInDataSharing: boolean };
+};
 
 export type UserProfileEvent =
 	| {

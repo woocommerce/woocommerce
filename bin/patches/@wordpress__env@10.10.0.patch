@@ -1,0 +1,22 @@
+diff --git a/lib/build-docker-compose-config.js b/lib/build-docker-compose-config.js
+index a394537e3608723eb93f9184654d34fd845b0fe3..ab00a9b178d7f60d1d711fd645026004dd146ba2 100644
+--- a/lib/build-docker-compose-config.js
++++ b/lib/build-docker-compose-config.js
+@@ -177,7 +177,7 @@ module.exports = function buildDockerComposeConfig( config ) {
+ 	return {
+ 		services: {
+ 			mysql: {
+-				image: 'mariadb:lts',
++				image: 'mariadb:11.2',
+ 				ports: [ developmentMysqlPorts ],
+ 				environment: {
+ 					MYSQL_ROOT_HOST: '%',
+@@ -188,7 +188,7 @@ module.exports = function buildDockerComposeConfig( config ) {
+ 				volumes: [ 'mysql:/var/lib/mysql' ],
+ 			},
+ 			'tests-mysql': {
+-				image: 'mariadb:lts',
++				image: 'mariadb:11.2',
+ 				ports: [ testsMysqlPorts ],
+ 				environment: {
+ 					MYSQL_ROOT_HOST: '%',

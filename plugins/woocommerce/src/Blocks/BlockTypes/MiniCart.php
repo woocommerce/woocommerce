@@ -422,10 +422,17 @@ class MiniCart extends AbstractBlock {
 		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
+		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+		$show_product_count       = 'always' === $product_count_visibility;
+		if ( 'greater_than_zero' === $product_count_visibility ) {
+			$cart               = $this->get_cart_instance();
+			$show_product_count = $cart && $cart->get_cart_contents_count() > 0;
+		}
+
 		$button_html = $this->get_cart_price_markup( $attributes ) . '
 		<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
-			<span class="wc-block-mini-cart__badge" style="background:' . $product_count_color . '"></span>
+			' . ( $show_product_count ? '<span class="wc-block-mini-cart__badge" style="background:' . $product_count_color . '"></span>' : '' ) . '
 		</span>';
 
 		if ( is_cart() || is_checkout() ) {
