@@ -20,7 +20,8 @@ const PatternSelectionModal = ( props: {
 	tracksLocation: string;
 	closePatternSelectionModal: () => void;
 } ) => {
-	const { clientId, attributes, tracksLocation } = props;
+	const { clientId, attributes, tracksLocation, closePatternSelectionModal } =
+		props;
 	const { collection } = attributes;
 	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
@@ -42,11 +43,25 @@ const PatternSelectionModal = ( props: {
 		}
 	};
 
+	const handleModalClose = ( action: 'cancel' | 'close' ) => {
+		recordEvent(
+			'blocks_product_collection_collection_replaced_from_placeholder',
+			{
+				action,
+				location: tracksLocation,
+			}
+		);
+		closePatternSelectionModal();
+	};
+
+	const onCancelClick = () => handleModalClose( 'cancel' );
+	const onCloseModal = () => handleModalClose( 'close' );
+
 	return (
 		<Modal
 			overlayClassName="wc-blocks-product-collection__modal"
 			title={ __( 'What products do you want to show?', 'woocommerce' ) }
-			onRequestClose={ props.closePatternSelectionModal }
+			onRequestClose={ onCloseModal }
 			// @ts-expect-error Type definitions are missing in the version we are using i.e. 19.1.5,
 			size={ 'large' }
 		>
@@ -56,10 +71,7 @@ const PatternSelectionModal = ( props: {
 					onCollectionClick={ selectCollectionName }
 				/>
 				<div className="wc-blocks-product-collection__footer">
-					<Button
-						variant="tertiary"
-						onClick={ props.closePatternSelectionModal }
-					>
+					<Button variant="tertiary" onClick={ onCancelClick }>
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button variant="primary" onClick={ onContinueClick }>
