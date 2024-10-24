@@ -391,6 +391,11 @@ class WC_Order extends WC_Abstract_Order {
 		$this->status_transition = false;
 
 		if ( $status_transition ) {
+			// Verify planned status transition did happen, in case save() wasn't successful.
+			if ( $status_transition['to'] !== $this->data['status'] ) {
+				return;
+			}
+
 			try {
 				/**
 				 * Fires when order status is changed.
