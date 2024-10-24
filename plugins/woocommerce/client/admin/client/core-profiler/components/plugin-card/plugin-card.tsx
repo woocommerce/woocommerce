@@ -20,6 +20,7 @@ export const PluginCard = ( {
 	checked = false,
 	description,
 	learnMoreLink,
+	slug,
 }: {
 	// Checkbox will be hidden if true
 	installed?: boolean;
@@ -30,6 +31,7 @@ export const PluginCard = ( {
 	checked?: boolean;
 	onChange?: () => void;
 	learnMoreLink?: ReactNode;
+	slug?: string;
 } ) => {
 	return (
 		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -38,6 +40,7 @@ export const PluginCard = ( {
 				'is-installed': installed,
 			} ) }
 			onClick={ onChange }
+			data-slug={ slug }
 		>
 			<div className="woocommerce-profiler-plugin-card-top">
 				{ ! installed && (

@@ -13,8 +13,8 @@
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
-		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
-		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
+		"lint": "eslint data endpoints test utils --ext=js,ts,tsx",
+		"lint:fix": "eslint data endpoints test utils --ext=js,ts,tsx --fix"
 	},
 	"repository": {
 		"type": "git",
@@ -28,7 +28,7 @@
 	"dependencies": {
 		"allure-commandline": "^2.25.0",
 		"dotenv": "^10.0.0",
-		"jest": "~27.5.1",
+		"jest": "27.5.x",
 		"jest-allure": "^0.1.3",
 		"jest-runner-groups": "^2.2.0",
 		"postman-collection": "^4.3.0",

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Set server-side render of Mini-Cart icon to correctly show/hide the count based on block setting

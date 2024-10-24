@@ -24,7 +24,7 @@
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune",
-		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/legacy/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
+		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
@@ -46,7 +46,7 @@
 		"css-loader": "^6.8.1",
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",
-		"jest": "~27.5.1",
+		"jest": "27.5.x",
 		"lint-staged": "^12.5.0",
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.4",
@@ -59,7 +59,7 @@
 		"sass": "^1.69.5",
 		"sass-loader": "^10.5.0",
 		"syncpack": "^10.9.3",
-		"typescript": "^5.3.3",
+		"typescript": "5.3.x",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.89.0"
 	},
@@ -72,12 +72,13 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"@types/react": "^17.0.71",
+			"@types/react": "17.0.x",
 			"react-resize-aware": "3.1.1",
 			"@automattic/tour-kit>@wordpress/element": "4.4.1"
 		},
 		"patchedDependencies": {
-			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"
+			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch",
+			"@wordpress/env@10.10.0": "bin/patches/@wordpress__env@10.10.0.patch"
 		}
 	}
 }

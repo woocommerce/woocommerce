@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Change e2e test to use plugin slugs instead for better stability in core profiler tests

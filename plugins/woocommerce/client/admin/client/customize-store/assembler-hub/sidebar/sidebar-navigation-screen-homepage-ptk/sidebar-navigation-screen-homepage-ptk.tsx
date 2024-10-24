@@ -264,7 +264,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											<Button
 												onClick={ async () => {
 													await apiFetch( {
-														path: `/wc-admin/patterns`,
+														path: `/wc/private/patterns`,
 														method: 'POST',
 													} );
 
