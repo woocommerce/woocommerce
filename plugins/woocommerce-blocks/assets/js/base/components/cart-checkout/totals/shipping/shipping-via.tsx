@@ -9,7 +9,7 @@ export const ShippingVia = ( {
 	selectedShippingRates: string[];
 } ): JSX.Element => {
 	return (
-		<div className="wc-block-components-totals-item__description wc-block-components-totals-shipping__via">
+		<div className="wc-block-components-totals-shipping__via">
 			{ decodeEntities(
 				selectedShippingRates
 					.filter(
