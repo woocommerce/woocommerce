@@ -16,7 +16,7 @@ class RemovedDeprecated {
 		
 		if ( $logger ) {
 			$logger->warning(
-				"$class is deprecated since 9.3 with no alternative. Please remove the call to $name."
+				"The WooCommerce Admin Navigation feature and its classes (Screen, Menu, CoreMenu) are deprecated since 9.3 with no alternative. Please remove the call to $name."
 			);
 		}
 
