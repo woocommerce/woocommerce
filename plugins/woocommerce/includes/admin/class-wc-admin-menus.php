@@ -45,9 +45,9 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
-		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
+		add_action( 'admin_menu', array( $this, 'reports_menu' ), 99 );
 
 		/**
 		 * Controls whether we add a submenu item for the WooCommerce Addons page.
@@ -110,9 +110,9 @@ class WC_Admin_Menus {
 	 */
 	public function reports_menu() {
 		if ( self::can_view_woocommerce_menu_item() ) {
-			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ), __( 'Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
+			add_submenu_page( 'woocommerce', __( 'Reports (deprecated)', 'woocommerce' ), __( 'Reports (deprecated)', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
-			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), 'dashicons-chart-bar', '55.6' );
+			add_menu_page( __( 'Sales reports (deprecated)', 'woocommerce' ), __( 'Sales reports (deprecated)', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), 'dashicons-chart-bar', '55.6' );
 		}
 	}
 

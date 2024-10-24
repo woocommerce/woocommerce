@@ -106,7 +106,10 @@ class Controller extends GenericController {
 		 * Array items should be in format of array( 'slug' => 'downloads/stats', 'description' =>  '',
 		 * 'url' => '', and 'path' => '/wc-ext/v1/...'.
 		 *
-		 * @param array $endpoints The list of allowed reports..
+		 * Historically, this filter was also used to add custom reports under the legacy _WooCommerce > Reports_ menu.
+		 * But that usage is deprecated since 9.5.0.
+		 *
+		 * @param array $endpoints The list of allowed reports.
 		 */
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
 

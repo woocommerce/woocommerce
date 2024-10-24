@@ -11,6 +11,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * WC_Report_Stock.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce\Admin\Reports
@@ -21,14 +22,18 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Max items.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int
 	 */
 	protected $max_items;
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
 
 		parent::__construct(
 			array(
@@ -41,6 +46,8 @@ class WC_Report_Stock extends WP_List_Table {
 
 	/**
 	 * No items found text.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function no_items() {
 		_e( 'No products found.', 'woocommerce' );
@@ -49,6 +56,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Don't need this.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $position
 	 */
 	public function display_tablenav( $position ) {
@@ -60,6 +68,8 @@ class WC_Report_Stock extends WP_List_Table {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -72,6 +82,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param mixed  $item
 	 * @param string $column_name
 	 */
@@ -144,7 +155,13 @@ class WC_Report_Stock extends WP_List_Table {
 						);
 					}
 
-					$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
+					$actions = apply_filters_deprecated(
+						'woocommerce_admin_stock_report_product_actions',
+						array( $actions, $product ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 
 					foreach ( $actions as $action ) {
 						printf(
@@ -165,6 +182,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Get columns.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_columns() {
@@ -182,12 +200,20 @@ class WC_Report_Stock extends WP_List_Table {
 
 	/**
 	 * Prepare customer list items.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function prepare_items() {
 
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
-		$per_page              = apply_filters( 'woocommerce_admin_stock_report_products_per_page', 20 );
+		$per_page              = apply_filters_deprecated(
+			'woocommerce_admin_stock_report_products_per_page',
+			array( 20 ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 
 		$this->get_items( $current_page, $per_page );
 

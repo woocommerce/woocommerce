@@ -27,10 +27,6 @@ function wc_admin_get_core_pages_to_connect() {
 			'title' => __( 'Extensions', 'woocommerce' ),
 			'tabs'  => array(),
 		),
-		'wc-reports'  => array(
-			'title' => __( 'Reports', 'woocommerce' ),
-			'tabs'  => $report_tabs,
-		),
 		'wc-settings' => array(
 			'title' => __( 'Settings', 'woocommerce' ),
 			'tabs'  => apply_filters( 'woocommerce_settings_tabs_array', array() ), // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -46,6 +42,10 @@ function wc_admin_get_core_pages_to_connect() {
 					'logs'   => __( 'Logs', 'woocommerce' ),
 				)
 			),
+		),
+		'wc-reports'  => array(
+			'title' => __( 'Reports (deprecated)', 'woocommerce' ),
+			'tabs'  => $report_tabs,
 		),
 	);
 }

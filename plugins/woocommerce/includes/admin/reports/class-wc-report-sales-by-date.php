@@ -2,6 +2,7 @@
 /**
  * WC_Report_Sales_By_Date
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -12,12 +13,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * WC_Report_Sales_By_Date
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
+	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
+	 * @override WC_Admin_Report::__construct not to throw deprecated notice, as this class is still used by non-deprecated REST API endpoints.
+	 */
+	public function __construct() {
+	}
+
+	/**
 	 * Chart colors.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $chart_colours = array();
@@ -25,6 +38,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	/**
 	 * The report data.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var stdClass
 	 */
 	private $report_data;
@@ -32,6 +46,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	/**
 	 * Get report data.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return stdClass
 	 */
 	public function get_report_data() {
@@ -43,6 +58,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Get all data needed for this report and store in the class.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	private function query_report_data() {
 		$this->report_data = new stdClass();
@@ -441,12 +458,19 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
 
 		// 3rd party filtering of report data
-		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
+		$this->report_data = apply_filters_deprecated(
+			'woocommerce_admin_report_data',
+			array( $this->report_data ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 	}
 
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -571,6 +595,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 		$ranges = array(
@@ -606,6 +632,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Output an export link.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -627,6 +655,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	/**
 	 * Round our totals correctly.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param array|string $amount Chart total.
 	 *
 	 * @return array|string
@@ -641,6 +670,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {
 		global $wp_locale;
@@ -674,7 +705,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		// 3rd party filtering of report data.
-		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data );
+		$data = apply_filters_deprecated(
+			'woocommerce_admin_report_chart_data',
+			array( $data ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 
 		// Encode in json format.
 		$chart_data = wp_json_encode(

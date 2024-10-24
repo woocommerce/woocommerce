@@ -2,6 +2,7 @@
 /**
  * Coupon usage report functionality
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Admin\Reports
  */
 
@@ -12,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Coupon_Usage
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -20,6 +22,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	/**
 	 * Chart colors.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $chart_colours = array();
@@ -27,14 +30,19 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	/**
 	 * Coupon codes.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var array
 	 */
 	public $coupon_codes = array();
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
+		wc_deprecated_function( __CLASS__, '9.5.0' );
+
 		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array_map( 'sanitize_text_field', wp_unslash( $_GET['coupon_codes'] ) ) );
 		} elseif ( isset( $_GET['coupon_codes'] ) ) {
@@ -45,6 +53,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	/**
 	 * Get the legend for the main chart sidebar.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -126,6 +135,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -156,6 +167,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	/**
 	 * Get chart widgets.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -171,6 +183,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
 	 * Output coupons widget.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function coupons_widget() {
 		?>
@@ -354,6 +368,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
 	 * Output an export link.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_export_button() {
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
@@ -373,6 +389,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function get_main_chart() {
 		global $wp_locale;
