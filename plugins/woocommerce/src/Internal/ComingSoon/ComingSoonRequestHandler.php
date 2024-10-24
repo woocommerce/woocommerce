@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
+use Automattic\Jetpack\Constants;
 
 /**
  * Handles the template_include hook to determine whether the current page needs
@@ -30,6 +31,7 @@ class ComingSoonRequestHandler {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
 		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
+		add_filter( 'woocommerce_enqueue_styles', array( $this, 'enqueue_styles' ) );
 	}
 
 
@@ -226,5 +228,37 @@ class ComingSoonRequestHandler {
 		);
 		$theme_json->update_with( $new_data );
 		return $theme_json;
+	}
+
+	/**
+	 * Enqueues the coming soon banner styles.
+	 *
+	 * @param array $styles The styles array.
+	 *
+	 * @return array
+	 */
+	public function enqueue_styles( $styles ) {
+		// Early exit if LYS feature is disabled.
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+			return $styles;
+		}
+
+		if ( $this->coming_soon_helper->is_site_live() ) {
+			return $styles;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return $styles;
+		}
+
+		$styles['woocommerce-coming-soon'] = array(
+			'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/coming-soon.css',
+			'deps'    => '',
+			'version' => Constants::get_constant( 'WC_VERSION' ),
+			'media'   => 'all',
+			'has_rtl' => true,
+		);
+
+		return $styles;
 	}
 }
