@@ -209,7 +209,7 @@ function init_wc_float_labels () {
 		if ( label ) {
 			var fake_placeholder = label.parentElement.querySelector( '[class*="placeholder"]' );
 			
-			if ( input.value !== '' || fake_placeholder ) {
+			if ( input.value !== '' || fake_placeholder || input === document.activeElement ) {
 				label.classList.add( 'is-active' );
 			} else {
 				label.classList.remove( 'is-active' );
