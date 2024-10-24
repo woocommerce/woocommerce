@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Aliases for graceful Backwards compatibility.
  *
