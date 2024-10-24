@@ -456,7 +456,7 @@ class ReceiptRenderingEngine {
 		}
 
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$card_svg = base64_encode( file_get_contents( __DIR__ . "/CardIcons/{$card_brand}.svg" ) );
+		$card_svg = base64_encode( file_get_contents( __DIR__ . "/../Orders/CardIcons/{$card_brand}.svg" ) );
 
 		return array(
 			'payment_method' => 'woocommerce_payments',
