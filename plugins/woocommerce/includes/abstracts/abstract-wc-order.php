@@ -509,6 +509,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Gets order subtotal tax.
+	 *
+	 * @return float
+	 */
+	public function get_subtotal_tax() {
+		$subtotal = NumberUtil::round( $this->get_cart_subtotal_tax_for_order(), wc_get_price_decimals() );
+		return apply_filters( 'woocommerce_order_get_subtotal_tax', (float) $subtotal, $this );
+	}
+
+	/**
 	 * Get taxes, merged by code, formatted ready for output.
 	 *
 	 * @return array
@@ -1885,6 +1895,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return wc_remove_number_precision(
 			$this->get_rounded_items_total(
 				$this->get_values_for_total( 'subtotal' )
+			)
+		);
+	}
+	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart subtotal tax (assuming all other settings are same).
+	 *
+	 * @return float Cart subtotal tax.
+	 */
+	protected function get_cart_subtotal_tax_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'subtotal_tax' )
 			)
 		);
 	}
