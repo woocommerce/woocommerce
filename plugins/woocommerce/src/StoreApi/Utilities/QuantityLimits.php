@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
@@ -74,6 +76,38 @@ final class QuantityLimits {
 	}
 
 	/**
+	 * Fix a quantity violation by adjusting it to the nearest valid quantity.
+	 *
+	 * @param int   $quantity The quantity to fix.
+	 * @param array $cart_item The cart item.
+	 * @return int
+	 */
+	public function normalize_cart_item_quantity( int $quantity, array $cart_item ) {
+		$product = $cart_item['data'];
+
+		if ( ! $product instanceof \WC_Product ) {
+			return $quantity;
+		}
+
+		$limits       = $this->get_cart_item_quantity_limits( $cart_item );
+		$new_quantity = $quantity;
+
+		if ( $new_quantity % $limits['multiple_of'] ) {
+			$new_quantity = $this->limit_to_multiple( $new_quantity, $limits['multiple_of'], 'round' );
+		}
+
+		if ( $new_quantity < $limits['minimum'] ) {
+			$new_quantity = $limits['minimum'];
+		}
+
+		if ( $new_quantity > $limits['maximum'] ) {
+			$new_quantity = $limits['maximum'];
+		}
+
+		return $new_quantity;
+	}
+
+	/**
 	 * Return a number using the closest multiple of another number. Used to enforce step/multiple values.
 	 *
 	 * @param int    $number Number to round.
@@ -92,51 +126,32 @@ final class QuantityLimits {
 	/**
 	 * Check that a given quantity is valid according to any limits in place.
 	 *
-	 * @param integer           $quantity Quantity to validate.
-	 * @param \WC_Product|array $cart_item Cart item.
+	 * @param integer $quantity Quantity to validate.
+	 * @param array   $cart_item Cart item.
 	 * @return \WP_Error|true
 	 */
 	public function validate_cart_item_quantity( $quantity, $cart_item ) {
-		$limits = $this->get_cart_item_quantity_limits( $cart_item );
+		$limits  = $this->get_cart_item_quantity_limits( $cart_item );
+		$product = $cart_item['data'];
 
 		if ( ! $limits['editable'] ) {
-			return new \WP_Error(
-				'readonly_quantity',
-				__( 'This item is already in the cart and its quantity cannot be edited', 'woocommerce' )
-			);
+			/* translators: 1: product name */
+			return new \WP_Error( 'readonly_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; cannot be changed', 'woocommerce' ), $product->get_name() ) );
 		}
 
 		if ( $quantity < $limits['minimum'] ) {
-			return new \WP_Error(
-				'invalid_quantity',
-				sprintf(
-					// Translators: %s amount.
-					__( 'The minimum quantity that can be added to the cart is %s', 'woocommerce' ),
-					$limits['minimum']
-				)
-			);
+			/* translators: 1: product name 2: minimum quantity */
+			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The minimum quantity of &quot;%1$s&quot; allowed in the cart is %2$s', 'woocommerce' ), $product->get_name(), $limits['minimum'] ) );
 		}
 
 		if ( $quantity > $limits['maximum'] ) {
-			return new \WP_Error(
-				'invalid_quantity',
-				sprintf(
-					// Translators: %s amount.
-					__( 'The maximum quantity that can be added to the cart is %s', 'woocommerce' ),
-					$limits['maximum']
-				)
-			);
+			/* translators: 1: product name 2: maximum quantity */
+			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The maximum quantity of &quot;%1$s&quot; allowed in the cart is %2$s', 'woocommerce' ), $product->get_name(), $limits['maximum'] ) );
 		}
 
 		if ( $quantity % $limits['multiple_of'] ) {
-			return new \WP_Error(
-				'invalid_quantity',
-				sprintf(
-					// Translators: %s amount.
-					__( 'The quantity added to the cart must be a multiple of %s', 'woocommerce' ),
-					$limits['multiple_of']
-				)
-			);
+			/* translators: 1: product name 2: multiple of */
+			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; must be a multiple of %2$s', 'woocommerce' ), $product->get_name(), $limits['multiple_of'] ) );
 		}
 
 		return true;

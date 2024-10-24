@@ -12,6 +12,63 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  */
 class CartControllerTests extends TestCase {
 	/**
+	 * Test the normalize_cart method.
+	 */
+	public function test_normalize_cart() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product 1',
+				'regular_price' => 10,
+			)
+		);
+
+		// Test maximum quantity after normalizing.
+		$product_key = wc()->cart->add_to_cart( $product->get_id(), 5 );
+		add_filter(
+			'woocommerce_store_api_product_quantity_maximum',
+			function () {
+				return 2;
+			},
+			10
+		);
+		$class->normalize_cart();
+		$this->assertEquals( 2, wc()->cart->get_cart_item( $product_key )['quantity'] );
+		remove_all_filters( 'woocommerce_store_api_product_quantity_maximum' );
+		wc()->cart->empty_cart();
+
+		// Test minimum quantity after normalizing.
+		$product_key = wc()->cart->add_to_cart( $product->get_id(), 1 );
+		add_filter(
+			'woocommerce_store_api_product_quantity_minimum',
+			function () {
+				return 5;
+			},
+			10
+		);
+		$class->normalize_cart();
+		$this->assertEquals( 5, wc()->cart->get_cart_item( $product_key )['quantity'] );
+		remove_all_filters( 'woocommerce_store_api_product_quantity_minimum' );
+		wc()->cart->empty_cart();
+
+		// Test multiple of after normalizing.
+		$product_key = wc()->cart->add_to_cart( $product->get_id(), 7 );
+		add_filter(
+			'woocommerce_store_api_product_quantity_multiple_of',
+			function () {
+				return 3;
+			},
+			10
+		);
+		$class->normalize_cart();
+		$this->assertEquals( 6, wc()->cart->get_cart_item( $product_key )['quantity'] );
+		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
+		wc()->cart->empty_cart();
+	}
+
+	/**
 	 * Test cart error code is getting exposed.
 	 */
 	public function test_get_cart_errors() {

@@ -1,5 +1,5 @@
 <?php
-
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
@@ -177,6 +177,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			);
 		}
 		$this->cart_controller->load_cart();
+		$this->cart_controller->normalize_cart();
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Store API will ensure the cart response has valid quantities for items if setting limits via filters

@@ -39,6 +39,22 @@ class CartController {
 	}
 
 	/**
+	 * Normalizes the cart by fixing any quantity violations.
+	 */
+	public function normalize_cart() {
+		$quantity_limits = new QuantityLimits();
+		$cart_items      = $this->get_cart_items();
+
+		foreach ( $cart_items as $cart_item ) {
+			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_item['quantity'], $cart_item );
+
+			if ( $normalized_qty !== $cart_item['quantity'] ) {
+				$this->set_cart_item_quantity( $cart_item['key'], $normalized_qty );
+			}
+		}
+	}
+
+	/**
 	 * Gets the latest cart instance, and ensures totals have been calculated before returning.
 	 *
 	 * @return \WC_Cart
