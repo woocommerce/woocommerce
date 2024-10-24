@@ -2103,14 +2103,14 @@ p.demo_store,
 	}
 
 	#payment {
-		background: $secondary;
+		background: desaturate(rgba($primary, .14), 21%);
 		border-radius: 5px;
 
 		ul.payment_methods {
 			@include clearfix();
 			text-align: left;
 			padding: 1em;
-			border-bottom: 1px solid darken($secondary, 10%);
+			border-bottom: 1px solid darken(desaturate(rgba($primary, .14), 21%), 10%);
 			margin: 0;
 			list-style: none outside;
 
