@@ -1135,24 +1135,24 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$sku_exists  = $product && 'importing' !== $product->get_status();
 			}
 
-			if ( $id_exists && ! $update_existing ) {
-				$data['skipped'][] = new WP_Error(
-					'woocommerce_product_importer_error',
-					esc_html__( 'A product with this ID already exists.', 'woocommerce' ),
-					array(
-						'id'  => $id,
-						'row' => $this->get_row_id( $parsed_data ),
-					)
-				);
-				continue;
-			}
-
 			if ( $sku_exists && ! $update_existing ) {
 				$data['skipped'][] = new WP_Error(
 					'woocommerce_product_importer_error',
 					esc_html__( 'A product with this SKU already exists.', 'woocommerce' ),
 					array(
 						'sku' => esc_attr( $sku ),
+						'row' => $this->get_row_id( $parsed_data ),
+					)
+				);
+				continue;
+			}
+
+			if ( $id_exists && ! $update_existing ) {
+				$data['skipped'][] = new WP_Error(
+					'woocommerce_product_importer_error',
+					esc_html__( 'A product with this ID already exists.', 'woocommerce' ),
+					array(
+						'id'  => $id,
 						'row' => $this->get_row_id( $parsed_data ),
 					)
 				);
