@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add parameter to woocommerce_locate_template filter
