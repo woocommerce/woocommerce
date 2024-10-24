@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Introduce a simplified dependency injection container
