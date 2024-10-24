@@ -40,7 +40,6 @@ export const SiteHub = forwardRef(
 		}: {
 			isTransparent: boolean;
 			className: string;
-			as: string;
 			variants: motion.Variants;
 		},
 		ref
