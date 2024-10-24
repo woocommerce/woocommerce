@@ -2,10 +2,10 @@ name: Run lint checks potentially affecting projects across the monorepo
 on:
     pull_request:
         paths:
-            - '.github/workflows/pr-lint-monorepo.yml'
-            - 'packages/**'
-            - 'plugins/**'
-            - '!**/changelog/**'
+           - '.github/workflows/pr-lint-monorepo.yml'
+           - 'packages/**'
+           - 'plugins/**'
+           - '!**/changelog/**'
         branches:
             - 'trunk'
 

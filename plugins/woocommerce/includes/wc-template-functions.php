@@ -960,8 +960,8 @@ function wc_privacy_policy_text( $type = 'checkout' ) {
 function wc_replace_policy_page_link_placeholders( $text ) {
 	$privacy_page_id = wc_privacy_policy_page_id();
 	$terms_page_id   = wc_terms_and_conditions_page_id();
-	$privacy_link    = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
-	$terms_link      = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
+	$privacy_link    = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'Privacy policy', 'woocommerce' ) . '</a>' : __( 'Privacy policy', 'woocommerce' );
+	$terms_link      = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'Terms and conditions', 'woocommerce' ) . '</a>' : __( 'Terms and conditions', 'woocommerce' );
 
 	$find_replace = array(
 		'[terms]'          => $terms_link,
