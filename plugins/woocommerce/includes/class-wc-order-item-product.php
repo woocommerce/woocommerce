@@ -505,4 +505,29 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		return parent::offsetExists( $offset );
 	}
+
+	/**
+	 * Indicates that product line items have an associated Cost of Goods Sold value.
+	 * Note that this is true even if the product has np COGS value (in that case the COGS value for the line item will be zero)-
+	 *
+	 * @return bool Always true.
+	 */
+	public function has_cogs(): bool {
+		return true;
+	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value for this line item.
+	 *
+	 * @return float|null The calculated value, null if the product associated to the line item no longer exists.
+	 */
+	public function calculate_cogs_value_core(): ?float {
+		$product = $this->get_product();
+		if ( ! $product ) {
+			return null;
+		}
+
+		$cogs_per_unit = $product->get_cogs_total_value();
+		return $cogs_per_unit * $this->get_quantity();
+	}
 }

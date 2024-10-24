@@ -16,7 +16,7 @@ trait CogsAwareRestControllerTrait {
 	 * @param array      $data Array of response data.
 	 * @param WC_Product $product Product to get the information from.
 	 */
-	private function add_cogs_info_to_returned_data( array &$data, $product ): void {
+	private function add_cogs_info_to_returned_product_data( array &$data, $product ): void {
 		if ( ! $this->cogs_is_enabled() ) {
 			return;
 		}
@@ -68,7 +68,7 @@ trait CogsAwareRestControllerTrait {
 	 * @param bool  $for_variations_controller True if the information is for an endpoint in the variations controller.
 	 * @return array Updated schema information.
 	 */
-	private function add_cogs_related_schema( array $schema, bool $for_variations_controller ): array {
+	private function add_cogs_related_product_schema( array $schema, bool $for_variations_controller ): array {
 		$schema['properties']['cost_of_goods_sold'] = array(
 			'description' => __( 'Cost of Goods Sold data.', 'woocommerce' ),
 			'type'        => 'object',

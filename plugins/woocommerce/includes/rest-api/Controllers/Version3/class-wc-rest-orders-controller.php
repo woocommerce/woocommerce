@@ -8,8 +8,8 @@
  * @since    2.6.0
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_Orders_V2_Controller
  */
 class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
+	use CogsAwareTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -49,7 +50,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
-			function( $coupon ) {
+			function ( $coupon ) {
 				return $coupon->get_code();
 			},
 			$current_order_coupons
@@ -168,6 +169,30 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
+	}
+
+	/**
+	 * Create or update a line item, overridden to add COGS data as needed.
+	 *
+	 * @param array  $posted Line item data.
+	 * @param string $action 'create' to add line item or 'update' to update it.
+	 * @param object $item Passed when updating an item. Null during creation.
+	 * @return WC_Order_Item_Product
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
+		$prepared = parent::prepare_line_items( $posted, $action, $item );
+
+		if ( ! $prepared->has_cogs() || ! $this->cogs_is_enabled() ) {
+			return $prepared;
+		}
+
+		$cogs_value = $posted['cost_of_goods_sold']['value'] ?? null;
+		if ( ! is_null( $cogs_value ) ) {
+			$prepared->set_cogs_value( (float) $cogs_value );
+		}
+
+		return $prepared;
 	}
 
 	/**
@@ -330,6 +355,48 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			'context'     => array( 'edit' ),
 		);
 
+		if ( $this->cogs_is_enabled() ) {
+			$schema = $this->add_cogs_related_schema( $schema );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Add the Cost of Goods Sold related fields to the schema.
+	 *
+	 * @param array $schema The original schema.
+	 * @return array The updated schema.
+	 */
+	private function add_cogs_related_schema( array $schema ): array {
+		$schema['properties']['cost_of_goods_sold'] = array(
+			'description' => __( 'Cost of Goods Sold data.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'properties'  => array(
+				'total_value' => array(
+					'description' => __( 'Total value of the Cost of Goods Sold for the order.', 'woocommerce' ),
+					'type'        => 'number',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+		);
+
+		$schema['properties']['line_items']['items']['properties']['cost_of_goods_sold'] = array(
+			'description' => __( 'Cost of Goods Sold data. Only present for product line items.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'properties'  => array(
+				'total_value' => array(
+					'description' => __( 'Value of the Cost of Goods Sold for the order item.', 'woocommerce' ),
+					'type'        => 'number',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+		);
+
 		return $schema;
 	}
 
@@ -353,5 +420,37 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Core method to prepare a single order object for response
+	 * (doesn't fire hooks, execute rest_ensure_response, or add links).
+	 *
+	 * @param  WC_Data         $order  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return array Prepared response data.
+	 * @since  9.5.0
+	 */
+	protected function prepare_object_for_response_core( $order, $request ): array {
+		$cogs_is_enabled = $this->cogs_is_enabled();
+
+		$data = parent::prepare_object_for_response_core( $order, $request );
+
+		if ( isset( $data['line_items'] ) ) {
+			foreach ( $data['line_items'] as &$line_item_data ) {
+				if ( isset( $line_item_data['cogs_value'] ) ) {
+					if ( $cogs_is_enabled ) {
+						$line_item_data['cost_of_goods_sold']['value'] = $line_item_data['cogs_value'];
+					}
+					unset( $line_item_data['cogs_value'] );
+				}
+			}
+		}
+
+		if ( $cogs_is_enabled ) {
+			$data['cost_of_goods_sold']['total_value'] = $order->get_cogs_total_value();
+		}
+
+		return $data;
 	}
 }

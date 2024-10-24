@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -22,6 +23,8 @@ defined( 'ABSPATH' ) || exit;
  * This class is the standard data store to be used when the custom orders table is in use.
  */
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
+
+	use CogsAwareTrait;
 
 	/**
 	 * Order IDs for which we are checking sync on read in the current request. In WooCommerce, using wc_get_order is a very common pattern, to avoid performance issues, we only sync on read once per request per order. This works because we consider out of sync orders to be an anomaly, so we don't recommend running HPOS with incompatible plugins.
@@ -1244,17 +1247,46 @@ WHERE
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
 		$post_orders    = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
+		$cogs_is_enabled = $this->cogs_is_enabled();
+
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
 			$order    = $orders[ $order_id ];
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
+			if ( $order->has_cogs() && $cogs_is_enabled ) {
+				$this->read_cogs_data( $order );
+			}
+
 			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
 		}
+	}
+
+	/**
+	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
+	 *
+	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
+	 */
+	private function read_cogs_data( WC_Abstract_Order $order ) {
+		$meta_entry = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+		$cogs_value = false === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float $cogs_value The value as read from the database.
+		 * @param WC_Abstract_Order $product The order for which the value is being loaded.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_load_order_cogs_value', $cogs_value, $order );
+
+		$order->set_cogs_total_value( (float) $cogs_value );
+		$order->apply_changes();
 	}
 
 	/**
@@ -1900,6 +1932,50 @@ FROM $order_meta_table
 		$this->update_address_index_meta( $order, $changes );
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
+
+		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->save_cogs_data( $order );
+		}
+	}
+
+	/**
+	 * Save the Cost of Goods Sold value of a given order to the database.
+	 *
+	 * @param WC_Abstract_Order $order The order to save the COGS value for.
+	 */
+	private function save_cogs_data( WC_Abstract_Order $order ) {
+		$cogs_value = $order->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
+		 * or to suppress the saving of the value (so that custom storage can be used).
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
+		if ( is_null( $cogs_value ) ) {
+			return;
+		}
+
+		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+
+		if ( 0.0 === $cogs_value && $existing_meta ) {
+			$existing_meta = current( $existing_meta );
+			$this->data_store_meta->delete_meta( $order, $existing_meta );
+		} elseif ( $existing_meta ) {
+				$existing_meta        = current( $existing_meta );
+				$existing_meta->key   = '_cogs_total_value';
+				$existing_meta->value = $cogs_value;
+				$this->data_store_meta->update_meta( $order, $existing_meta );
+		} else {
+			$meta        = new \WC_Meta_Data();
+			$meta->key   = '_cogs_total_value';
+			$meta->value = $cogs_value;
+			$this->data_store_meta->add_meta( $order, $meta );
+		}
 	}
 
 	/**
