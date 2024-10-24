@@ -19,8 +19,8 @@ class Init extends RemoteSpecsEngine {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$is_payments_page = isset( $_GET['page'] ) && $_GET['page'] === 'wc-settings' && isset( $_GET['tab'] ) && $_GET['tab'] === 'checkout'; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( ! wp_is_json_request() && ! $is_payments_page ) {
+		$is_payments_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && $_GET['tab'] === 'checkout'; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! wp_is_json_request() || ! $is_payments_page ) {
 			return;
 		}
 
@@ -94,7 +94,7 @@ class Init extends RemoteSpecsEngine {
 		$wc_pay_promotion_spec = array_values(
 			array_filter(
 				$promotions,
-				function( $promotion ) {
+				function ( $promotion ) {
 					return isset( $promotion->plugins ) && in_array( 'woocommerce-payments', $promotion->plugins, true );
 				}
 			)
@@ -181,4 +181,3 @@ class Init extends RemoteSpecsEngine {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );
 	}
 }
-
