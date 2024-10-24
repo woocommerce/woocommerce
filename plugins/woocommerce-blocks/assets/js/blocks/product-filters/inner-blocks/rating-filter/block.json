@@ -1,22 +1,19 @@
 {
 	"name": "woocommerce/product-filter-rating",
 	"version": "1.0.0",
-	"title": "Filter Options",
+	"title": "Rating (Experimental)",
 	"description": "Enable customers to filter the product collection by rating.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [],
 	"supports": {
 		"interactivity": true,
-		"inserter": false,
 		"color": {
 			"background": false,
 			"text": true
 		}
 	},
 	"ancestor": [
-		"woocommerce/product-filter"
+		"woocommerce/product-filters"
 	],
 	"usesContext": [
 		"query",

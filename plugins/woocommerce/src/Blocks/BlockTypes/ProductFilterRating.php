@@ -114,49 +114,53 @@ final class ProductFilterRating extends AbstractBlock {
 			return '';
 		}
 
-		$rating_counts = $this->get_rating_counts( $block );
-		$display_style = $attributes['displayStyle'] ?? 'list';
-		$show_counts   = $attributes['showCounts'] ?? false;
+		$rating_counts   = $this->get_rating_counts( $block );
 
-		$filtered_rating_counts = array_filter(
-			$rating_counts,
-			function( $rating ) {
-				return $rating['count'] > 0;
-			}
+		// Pick the selected ratings from the query string.
+		$query           = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$selected_rating = array_filter( explode( ',', $query ) );
+
+		/*
+		 * Get the rating items
+		 * based on the selected ratings and the rating counts.
+		 */
+		$items = $this->get_checkbox_list_items( $rating_counts, $selected_rating, $attributes['showCounts'] ?? false );
+
+		$filter_context = array(
+			'filterData' => array(
+				'items'   => $items,
+				'actions' => array(
+					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+				),
+			),
+			'hasSelectedFilters' => count( $selected_rating ) > 0,
 		);
+		$display_style  = $attributes['displayStyle'] ?? 'list';
+		$show_counts    = $attributes['showCounts'] ?? false;
 
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'data-wc-interactive' => $this->get_full_block_name(),
-				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
-			)
-		);
-
-		if ( empty( $filtered_rating_counts ) ) {
-			return sprintf(
-				'<div %s></div>',
-				$wrapper_attributes
-			);
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
-
-		$input = 'list' === $display_style ? CheckboxList::render(
-			array(
-				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
-				'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
-			)
-		) : Dropdown::render(
-			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
+		$wrapper_attributes = array(
+			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-context'      => wp_json_encode(
+				array(
+					'hasSelectedFilters' => $filter_context['hasSelectedFilters'],
+					'hasFilterOptions'   => ! empty( $items),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		return sprintf(
-			'<div %1$s>
-				%2$s
-			</div>',
-			$wrapper_attributes,
-			$input
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context['filterData'] ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 
@@ -200,10 +204,8 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_checkbox_list_items( $rating_counts, $selected_ratings_query, $show_counts ) {
-		$ratings_array = explode( ',', $selected_ratings_query );
-
 		return array_map(
-			function( $rating ) use ( $ratings_array, $show_counts ) {
+			function( $rating ) use ( $selected_ratings_query, $show_counts ) {
 				$rating_str  = (string) $rating['rating'];
 				$count       = $rating['count'];
 				$count_label = $show_counts ? "($count)" : '';
@@ -216,7 +218,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 				return array(
 					'id'         => 'rating-' . $rating_str,
-					'checked'    => in_array( $rating_str, $ratings_array, true ),
+					'selected'   => in_array( $rating_str, $selected_ratings_query, true ),
 					'label'      => $this->render_rating_label( (int) $rating_str, $count_label ),
 					'aria_label' => $aria_label,
 					'value'      => $rating_str,

@@ -1,76 +1,72 @@
 /**
  * External dependencies
  */
-import { getContext, store } from '@woocommerce/interactivity';
-import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
-import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
+import { getContext, store, getElement } from '@woocommerce/interactivity';
 
 /**
  * Internal dependencies
  */
-import { navigate } from '../../frontend';
+import type { ProductFiltersContext } from '../../frontend';
 
-function getUrl( filters: Array< string | null > ) {
-	filters = filters.filter( Boolean );
-	const url = new URL( window.location.href );
+const filterRatingKey = 'rating_filter';
 
-	if ( filters.length ) {
-		// add filters to url
-		url.searchParams.set( 'rating_filter', filters.join( ',' ) );
-	} else {
-		// remove filters from url
-		url.searchParams.delete( 'rating_filter' );
+/**
+ * Get the rating list (an array of strings)
+ * from the product filters context.
+ *
+ * @param {ProductFiltersContext} context The context
+ * @return {Array} The rating filters
+ */
+function getRatingFilters( context: ProductFiltersContext ): Array< string > {
+	if ( ! context.params[ filterRatingKey ] ) {
+		return [];
 	}
 
-	return url.href;
+	return context.params[ filterRatingKey ].split( ',' );
 }
 
 store( 'woocommerce/product-filter-rating', {
 	actions: {
-		onCheckboxChange: () => {
-			const checkboxContext = getContext< CheckboxListContext >(
-				'woocommerce/interactivity-checkbox-list'
+		toggleFilter: () => {
+			const context = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
 			);
 
-			const filters = checkboxContext.items
-				.filter( ( item ) => {
-					return item.checked;
-				} )
-				.map( ( item ) => {
-					return item.value;
-				} );
+			// Pick out the active filters from the context
+			const filtersList = getRatingFilters( context );
 
-			navigate( getUrl( filters ) );
-		},
-		onDropdownChange: () => {
-			const dropdownContext = getContext< DropdownContext >(
-				'woocommerce/interactivity-dropdown'
-			);
+			const { ref } = getElement();
+			const value =
+				ref.getAttribute( 'data-target-value' ) ??
+				ref.getAttribute( 'value' );
 
-			const selectedItems = dropdownContext.selectedItems;
-			const items = selectedItems || [];
-			const filters = items.map( ( i ) => i.value );
+			const updatedFiltersList = filtersList.includes( value )
+				? [ ...filtersList.filter( ( filter ) => filter !== value ) ]
+				: [ ...filtersList, value ];
 
-			navigate( getUrl( filters ) );
-		},
-		removeFilter: () => {
-			const { value } = getContext< { value: string } >();
-			// get the active filters from the url:
-			const url = new URL( window.location.href );
-			const currentFilters =
-				url.searchParams.get( 'rating_filter' ) || '';
-
-			// split out the active filters into an array.
-			const filtersArr =
-				currentFilters === '' ? [] : currentFilters.split( ',' );
-
-			const index = filtersArr.indexOf( value );
-
-			if ( index > -1 ) {
-				filtersArr.splice( index, 1 );
+			if ( updatedFiltersList.length === 0 ) {
+				delete context.params[ filterRatingKey ];
+				return;
 			}
 
-			navigate( getUrl( filtersArr ) );
+			// Populate the context with the new rating filters
+			context.params = {
+				...context.params,
+				[ filterRatingKey ]: updatedFiltersList.join( ',' ),
+			};
+		},
+
+		clearFilters: () => {
+			const context = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			const updatedParams = context.params;
+
+			delete updatedParams[ filterRatingKey ];
+
+			context.params = {
+				...updatedParams,
+			};
 		},
 	},
 } );

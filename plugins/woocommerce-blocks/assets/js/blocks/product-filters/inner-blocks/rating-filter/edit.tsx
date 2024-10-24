@@ -3,8 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { useBlockProps } from '@wordpress/block-editor';
-import type { BlockEditProps } from '@wordpress/blocks';
+import {
+	useBlockProps,
+	useInnerBlocksProps,
+	BlockContextProvider,
+} from '@wordpress/block-editor';
 import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
@@ -14,19 +17,22 @@ import {
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
-import { CheckboxList } from '@woocommerce/blocks-components';
-import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
+import { Notice, withSpokenMessages } from '@wordpress/components';
+import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { previewOptions } from './preview';
-import { Attributes } from './types';
 import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import { Inspector } from './components/inspector';
+import { InitialDisabled } from '../../components/initial-disabled';
 import { PreviewDropdown } from '../components/preview-dropdown';
+import { getAllowedBlocks } from '../../utils';
+import { EXCLUDED_BLOCKS } from '../../constants';
 import './style.scss';
+import type { Attributes } from './types';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -39,12 +45,62 @@ const NoRatings = () => (
 	</Notice>
 );
 
-const Edit = ( props: BlockEditProps< Attributes > ) => {
-	const blockAttributes = props.attributes;
+const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
+	const { attributes, setAttributes } = props;
 
-	const blockProps = useBlockProps();
+	const { displayStyle, isPreview, showCounts, selectType } = attributes;
 
-	const isEditor = true;
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		useBlockProps(),
+		{
+			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+			template: [
+				[
+					'core/group',
+					{
+						layout: {
+							type: 'flex',
+							flexWrap: 'nowrap',
+						},
+						metadata: {
+							name: __( 'Header', 'woocommerce' ),
+						},
+						style: {
+							spacing: {
+								blockGap: '0',
+							},
+						},
+					},
+					[
+						[
+							'core/heading',
+							{
+								level: 3,
+								content: __( 'Rating', 'woocommerce' ),
+							},
+						],
+						[
+							'woocommerce/product-filter-clear-button',
+							{
+								lock: {
+									remove: true,
+									move: false,
+								},
+							},
+						],
+					],
+				],
+				[
+					'woocommerce/product-filter-checkbox-list',
+					{
+						lock: {
+							remove: true,
+						},
+					},
+				],
+			],
+		}
+	);
 
 	const setWrapperVisibility = useSetWraperVisibility();
 	const [ queryState ] = useQueryStateByContext();
@@ -53,26 +109,20 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		useCollectionData( {
 			queryRating: true,
 			queryState,
-			isEditor,
+			isEditor: true,
 		} );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState(
-		blockAttributes.isPreview ? previewOptions : []
+		isPreview ? previewOptions : []
 	);
 
 	const isLoading =
-		! blockAttributes.isPreview &&
-		filteredCountsLoading &&
-		displayedOptions.length === 0;
-
-	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
+		! isPreview && filteredCountsLoading && displayedOptions.length === 0;
 
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
 		[]
 	);
-
-	const [ checked ] = useState( initialFilters );
 
 	const [ productRatingsQuery ] = useQueryStateByKey(
 		'rating',
@@ -83,7 +133,8 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		useState( false );
 
 	/**
-	 * Compare intersection of all ratings and filtered counts to get a list of options to display.
+	 * Compare intersection of all ratings
+	 * and filtered counts to get a list of options to display.
 	 */
 	useEffect( () => {
 		/**
@@ -92,7 +143,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		 * @param {string} queryStatus The status slug to check.
 		 */
 
-		if ( filteredCountsLoading || blockAttributes.isPreview ) {
+		if ( filteredCountsLoading || isPreview ) {
 			return;
 		}
 
@@ -120,7 +171,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							key={ item?.rating }
 							rating={ item?.rating }
 							ratedProductsCount={
-								blockAttributes.showCounts ? item?.count : null
+								showCounts ? item?.count : null
 							}
 						/>
 					),
@@ -130,8 +181,8 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 
 		setDisplayedOptions( newOptions );
 	}, [
-		blockAttributes.showCounts,
-		blockAttributes.isPreview,
+		showCounts,
+		isPreview,
 		filteredCounts,
 		filteredCountsLoading,
 		productRatingsQuery,
@@ -157,50 +208,44 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 
 	return (
 		<>
-			<Inspector { ...props } />
-			<div { ...blockProps }>
-				<Disabled>
+			<Inspector
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+			/>
+
+			<div { ...innerBlocksProps }>
+				<InitialDisabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
-						className={ clsx(
-							`style-${ blockAttributes.displayStyle }`,
-							{
-								'is-loading': isLoading,
-							}
-						) }
+						className={ clsx( `style-${ displayStyle }`, {
+							'is-loading': isLoading,
+						} ) }
 					>
-						{ blockAttributes.displayStyle === 'dropdown' ? (
-							<>
-								<PreviewDropdown
-									placeholder={
-										blockAttributes.selectType === 'single'
-											? __(
-													'Select a rating',
-													'woocommerce'
-											  )
-											: __(
-													'Select ratings',
-													'woocommerce'
-											  )
-									}
-								/>
-							</>
-						) : (
-							<CheckboxList
-								options={ displayedOptions }
-								checked={ checked }
-								onChange={ () => {
-									// noop
-								} }
-								isLoading={ isLoading }
-								isDisabled={ isDisabled }
+						{ displayStyle === 'dropdown' ? (
+							<PreviewDropdown
+								placeholder={
+									selectType === 'single'
+										? __( 'Select a rating', 'woocommerce' )
+										: __( 'Select ratings', 'woocommerce' )
+								}
 							/>
+						) : (
+							<BlockContextProvider
+								value={ {
+									filterData: {
+										items: displayedOptions,
+										isLoading,
+									},
+								} }
+							>
+								{ children }
+							</BlockContextProvider>
 						) }
 					</div>
-				</Disabled>
+				</InitialDisabled>
 			</div>
 		</>
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default withSpokenMessages( RatingFilterEdit );

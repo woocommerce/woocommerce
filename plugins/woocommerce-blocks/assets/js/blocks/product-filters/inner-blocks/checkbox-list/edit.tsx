@@ -26,7 +26,7 @@ import './editor.scss';
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
 
-const Edit = ( props: EditProps ): JSX.Element => {
+const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 	const {
 		clientId,
 		context,
@@ -205,4 +205,4 @@ export default withColors( {
 	optionElementBorder: 'option-element-border',
 	optionElementSelected: 'option-element-border',
 	optionElement: 'option-element',
-} )( Edit );
+} )( CheckboxListEdit );
