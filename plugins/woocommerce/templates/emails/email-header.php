@@ -42,6 +42,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 										if ( $img ) {
 											echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" /></p>';
+										} else {
+											echo '<p>' . get_bloginfo( 'name', 'display' ) . '</p>';
 										}
 										?>
 									</div>
