@@ -2519,7 +2519,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @return float The current value for this order.
 	 */
-	public function get_cogs_total_value() {
+	public function get_cogs_total_value(): float {
 		return (float) ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ? $this->get_prop( 'cogs_total_value' ) : 0 );
 	}
 
