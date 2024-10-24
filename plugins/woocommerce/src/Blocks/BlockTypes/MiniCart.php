@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
@@ -19,6 +21,20 @@ use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
+
+	/**
+	 * The key used to retrieve the cache for empty cart dependencies.
+	 *
+	 * @var string
+	 */
+	const EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY = 'woocommerce_mini_cart_empty_frontend_dependencies';
+
+	/**
+	 * The key used to retrieve the cache for empty cart dependencies.
+	 *
+	 * @var string
+	 */
+	const NON_EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY = 'woocommerce_mini_cart_non_empty_frontend_dependencies';
 
 	/**
 	 * Block name.
@@ -56,6 +72,13 @@ class MiniCart extends AbstractBlock {
 	protected $display_cart_prices_including_tax = false;
 
 	/**
+	 * Whether or not the cart contains items.
+	 *
+	 * @var bool
+	 */
+	protected $is_cart_empty = true;
+
+	/**
 	 * Block Hook API placements.
 	 *
 	 * @var array
@@ -91,6 +114,7 @@ class MiniCart extends AbstractBlock {
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
+		add_action( 'shutdown', array( $this, 'update_frontend_dependencies_cache' ), 20 );
 	}
 
 	/**
@@ -220,6 +244,15 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
+		$cart                = $this->get_cart_instance();
+		$this->is_cart_empty = $cart && $cart->is_empty();
+
+		$this->load_frontend_dependencies_cache();
+		if ( ! empty( $this->scripts_to_lazy_load ) ) {
+			$this->add_inline_script_data();
+			return;
+		}
+
 		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
 
 		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
@@ -254,10 +287,9 @@ class MiniCart extends AbstractBlock {
 		);
 
 		$inner_blocks_frontend_scripts = array();
-		$cart                          = $this->get_cart_instance();
 		if ( $cart ) {
 			// Preload inner blocks frontend scripts.
-			$inner_blocks_frontend_scripts = $cart->is_empty() ? array(
+			$inner_blocks_frontend_scripts = $this->is_cart_empty ? array(
 				'empty-cart-frontend',
 				'filled-cart-frontend',
 				'shopping-button-frontend',
@@ -282,7 +314,67 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
-		$data                          = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
+		$this->add_inline_script_data();
+	}
+
+	/**
+	 * Load the frontend dependencies cache when the cart has items.
+	 *
+	 * @return string|null String of JSON data.
+	 */
+	protected function load_frontend_dependencies_cache() {
+		if ( wp_is_development_mode( 'plugin' ) ) {
+			return null;
+		}
+
+		$cache = get_site_transient(
+			$this->is_cart_empty
+				? self::EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY
+				: self::NON_EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY
+		);
+
+		$current_version = array(
+			'woocommerce' => WOOCOMMERCE_VERSION,
+			'wordpress'   => get_bloginfo( 'version' ),
+		);
+
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version && isset( $cache['data'] ) && is_string( $cache['data'] ) ) {
+			$this->scripts_to_lazy_load = json_decode( $cache['data'], true ) ?? array();
+			foreach ( $this->scripts_to_lazy_load as $script_handle => $script ) {
+				// Load the before and after script data which includes
+				// data such as nonces that should not be cached.
+				$this->append_script_before_and_after( $script_handle );
+			}
+		}
+	}
+
+	/**
+	 * Update frontend dependencies cache.
+	 */
+	public function update_frontend_dependencies_cache() {
+		$cache = array(
+			'version' => array(
+				'woocommerce' => WOOCOMMERCE_VERSION,
+				'wordpress'   => get_bloginfo( 'version' ),
+			),
+			'data'    => wp_json_encode( $this->scripts_to_lazy_load ),
+		);
+
+		set_site_transient(
+			$this->is_cart_empty
+				? self::EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY
+				: self::NON_EMPTY_CART_FRONTEND_DEPENDENCIES_CACHE_KEY,
+			$cache,
+			MONTH_IN_SECONDS
+		);
+	}
+
+	/**
+	 * Add inline script data.
+	 */
+	protected function add_inline_script_data() {
+		$data = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
+
 		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 
 		wp_add_inline_script(
@@ -339,21 +431,27 @@ class MiniCart extends AbstractBlock {
 
 		$site_url = site_url() ?? wp_guess_url();
 
-		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
-			$script_before = $wp_scripts->get_inline_script_data( $script->handle, 'before' );
-			$script_after  = $wp_scripts->get_inline_script_data( $script->handle, 'after' );
-		} else {
-			$script_before = $wp_scripts->print_inline_script( $script->handle, 'before', false );
-			$script_after  = $wp_scripts->print_inline_script( $script->handle, 'after', false );
-		}
-
 		$this->scripts_to_lazy_load[ $script->handle ] = array(
 			'src'          => preg_match( '|^(https?:)?//|', $script->src ) ? $script->src : $site_url . $script->src,
 			'version'      => $script->ver,
-			'before'       => $script_before,
-			'after'        => $script_after,
 			'translations' => $wp_scripts->print_translations( $script->handle, false ),
 		);
+
+		$this->append_script_before_and_after( $script->handle );
+	}
+
+	/**
+	 * Append the before and after script data.
+	 *
+	 * @param string $script_handle Script handle.
+	 */
+	protected function append_script_before_and_after( $script_handle ) {
+		$wp_scripts    = wp_scripts();
+		$script_before = $wp_scripts->get_inline_script_data( $script_handle, 'before' );
+		$script_after  = $wp_scripts->get_inline_script_data( $script_handle, 'after' );
+
+		$this->scripts_to_lazy_load[ $script_handle ]['before'] = $script_before;
+		$this->scripts_to_lazy_load[ $script_handle ]['after']  = $script_after;
 	}
 
 	/**
