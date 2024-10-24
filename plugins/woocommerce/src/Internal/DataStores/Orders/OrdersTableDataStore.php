@@ -1962,11 +1962,9 @@ FROM $order_meta_table
 
 		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
 
-		if ( 0.0 === $cogs_value ) {
-			if ( $existing_meta ) {
-				$existing_meta = current( $existing_meta );
-				$this->data_store_meta->delete_meta( $order, $existing_meta );
-			}
+		if ( 0.0 === $cogs_value && $existing_meta ) {
+			$existing_meta = current( $existing_meta );
+			$this->data_store_meta->delete_meta( $order, $existing_meta );
 		} elseif ( $existing_meta ) {
 				$existing_meta        = current( $existing_meta );
 				$existing_meta->key   = '_cogs_total_value';
