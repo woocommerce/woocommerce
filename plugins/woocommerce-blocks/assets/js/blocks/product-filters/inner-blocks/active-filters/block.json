@@ -14,19 +14,15 @@
 		"woocommerce/product-filters"
 	],
 	"supports": {
-		"interactivity": true,
-		"color": {
-			"text": true,
-			"background": false
-		}
+		"interactivity": true
 	},
 	"usesContext": [
 		"queryId"
 	],
 	"attributes": {
-		"displayStyle": {
-			"type": "string",
-			"default": "chips"
+		"clearButton": {
+			"type": "boolean",
+			"default":true
 		}
 	}
 }

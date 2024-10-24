@@ -1,8 +1,25 @@
 <!-- wp:woocommerce/product-filters -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters">
 
-{{#> wp-block blockName='woocommerce/product-filter-active' attributes=attributes }}
-{{/ wp-block }}
+<!-- wp:woocommerce/product-filter-active -->
+<div class="wp-block-woocommerce-product-filter-active"><!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"5px"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Active</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
+<!-- wp:buttons {"layout":{"type":"flex"}} -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+<!-- /wp:woocommerce/product-filter-clear-button --></div>
+<!-- /wp:group -->
+
+<!-- wp:woocommerce/product-filter-active-chips {"lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-product-filter-active-chips wc-block-product-filter-active-chips"></div>
+<!-- /wp:woocommerce/product-filter-active-chips --></div>
+<!-- /wp:woocommerce/product-filter-active -->
 
 </div>
 <!-- /wp:woocommerce/product-filters -->

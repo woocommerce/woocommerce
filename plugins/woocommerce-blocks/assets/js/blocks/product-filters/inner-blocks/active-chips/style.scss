@@ -1,0 +1,31 @@
+.wc-block-product-filter-active-chips__items {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	color: var(--wc-product-filter-active-chips-text, currentColor);
+
+	.wc-block-product-filter-active-chips__item {
+		border: 1px solid var(--wc-product-filter-active-chips-border, color-mix(in srgb, currentColor 20%, transparent));
+		padding: 4px 8px;
+		appearance: none;
+		background: var(--wc-product-filter-active-chips-background, transparent);
+		border-radius: 2px;
+		font-size: 0.875em;
+		display: flex;
+		align-items: center;
+
+		.wc-block-product-filter-active-chips__remove {
+			background: none;
+			border: none;
+			cursor: pointer;
+			padding: 0;
+			margin: 0 0 0 5px;
+			display: flex;
+			align-items: center;
+			fill: var(--wc-product-filter-active-chips-text, currentColor);
+		}
+	}
+}
