@@ -41,6 +41,23 @@ const recordTracksIntroCompleted = () => {
 	} );
 };
 
+const recordSkipGuidedSetup = (
+	_: unknown,
+	{
+		optInDataSharing,
+	}: {
+		optInDataSharing: boolean;
+	}
+) => {
+	if ( ! optInDataSharing ) {
+		return;
+	}
+
+	recordEvent( 'coreprofiler_skip_guided_setup', {
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
 const recordTracksUserProfileCompleted = ( {
 	event,
 }: {
@@ -213,6 +230,7 @@ export default {
 	recordTracksStepViewed,
 	recordTracksStepSkipped,
 	recordTracksIntroCompleted,
+	recordSkipGuidedSetup,
 	recordTracksUserProfileCompleted,
 	recordTracksSkipBusinessLocationCompleted,
 	recordTracksBusinessInfoCompleted,

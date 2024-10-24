@@ -15,6 +15,9 @@ patchedDependencies:
   '@wordpress/edit-site@5.15.0':
     hash: 6y3l6gxu33zybfmvbjd23dtqda
     path: bin/patches/@wordpress__edit-site@5.15.0.patch
+  '@wordpress/env@10.10.0':
+    hash: udc4zzshwvoqfywbfiynuocs7e
+    path: bin/patches/@wordpress__env@10.10.0.patch
 
 importers:
 
@@ -3041,8 +3044,8 @@ importers:
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
       '@wordpress/env':
-        specifier: ^10.1.0
-        version: 10.5.0
+        specifier: 10.10.x
+        version: 10.10.0(patch_hash=udc4zzshwvoqfywbfiynuocs7e)
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -3144,8 +3147,8 @@ importers:
         specifier: wp-6.6
         version: 1.0.1(@playwright/test@1.46.1)(encoding@0.1.13)(typescript@5.3.3)
       '@wordpress/env':
-        specifier: ^10.1.0
-        version: 10.5.0
+        specifier: 10.10.x
+        version: 10.10.0(patch_hash=udc4zzshwvoqfywbfiynuocs7e)
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.36.0(postcss@8.4.32)(stylelint@14.16.1)
@@ -3316,8 +3319,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
       '@wordpress/env':
-        specifier: ^10.1.0
-        version: 10.5.0
+        specifier: 10.10.x
+        version: 10.10.0(patch_hash=udc4zzshwvoqfywbfiynuocs7e)
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -3702,8 +3705,8 @@ importers:
         specifier: 5.22.0
         version: 5.22.0
       '@wordpress/env':
-        specifier: ^10.1.0
-        version: 10.5.0
+        specifier: 10.10.x
+        version: 10.10.0(patch_hash=udc4zzshwvoqfywbfiynuocs7e)
       '@wordpress/html-entities':
         specifier: 3.24.0
         version: 3.24.0
@@ -4665,8 +4668,8 @@ importers:
         specifier: ^16.18.68
         version: 16.18.68
       '@wordpress/env':
-        specifier: ^10.1.0
-        version: 10.5.0
+        specifier: 10.10.x
+        version: 10.10.0(patch_hash=udc4zzshwvoqfywbfiynuocs7e)
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -5045,7 +5048,7 @@ importers:
         version: 7.6.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@woocommerce/admin-library':
         specifier: workspace:*
-        version: link:../../plugins/woocommerce-admin
+        version: link:../../plugins/woocommerce/client/admin
       '@woocommerce/block-library':
         specifier: workspace:*
         version: link:../../plugins/woocommerce-blocks
@@ -11217,8 +11220,8 @@ packages:
     resolution: {integrity: sha512-JUd0XUHjNtQexAUJq5TodweU9kooCdrh/3NlKj8jEMKgveDx+ipXN2zVsaJWzAcu50FBhegaL+hFH6XRtqEDdQ==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
 
-  '@wordpress/env@10.5.0':
-    resolution: {integrity: sha512-Hx+fi6qTEAuycznulkuMi4d5RDPZ6lPPAxaylpCwXNX2hgx5jrrpgnY4Zn0chBgZMpShO7BbA+zNDq2E6evvTw==}
+  '@wordpress/env@10.10.0':
+    resolution: {integrity: sha512-7r4E5ECqkdy+Cll3ikCKfaweyRL7T7uAnY86GZZ9HJa5dNfzObfTyWWtPB44gMp5KnW4dZGW/E6mQMzhedc72A==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     hasBin: true
 
@@ -25263,11 +25266,6 @@ packages:
   yaml@2.3.4:
     resolution: {integrity: sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==}
     engines: {node: '>= 14'}
-
-  yaml@2.4.3:
-    resolution: {integrity: sha512-sntgmxj8o7DE7g/Qi60cqpLBA3HG3STcDA0kO+WfB05jEKhZMbY7umNm2rBpQvsmZ16/lPXCJGW2672dgOUkrg==}
-    engines: {node: '>= 14'}
-    hasBin: true
 
   yaml@2.5.0:
     resolution: {integrity: sha512-2wWLbGbYDiSqqIKoPjar3MPgB94ErzCtrNE1FdqGuaO0pi2JGjmE8aW8TDZwzU7vuxcGRdL/4gPQwQ7hD5AMSw==}
@@ -41892,7 +41890,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@wordpress/env@10.5.0':
+  '@wordpress/env@10.10.0(patch_hash=udc4zzshwvoqfywbfiynuocs7e)':
     dependencies:
       chalk: 4.1.2
       copy-dir: 1.3.0
@@ -47610,7 +47608,7 @@ snapshots:
 
   docker-compose@0.24.7:
     dependencies:
-      yaml: 2.4.3
+      yaml: 2.5.0
 
   doctrine@2.1.0:
     dependencies:
@@ -63847,8 +63845,6 @@ snapshots:
   yaml@1.10.2: {}
 
   yaml@2.3.4: {}
-
-  yaml@2.4.3: {}
 
   yaml@2.5.0: {}
 
