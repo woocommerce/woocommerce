@@ -11,7 +11,7 @@
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:storybook$/'",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:storybook": "wireit",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:storybook$/'",
@@ -109,6 +109,9 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/block-library/build",
+				"node_modules/@woocommerce/block-library/blocks.ini",
+				"node_modules/@woocommerce/admin-library/build",
 				"package.json"
 			]
 		}
