@@ -33,8 +33,12 @@ export const Inspector = ( {
 	const { displayStyle, showCounts, hideEmpty, clearButton } = attributes;
 
 	if ( displayStyleOptions.length === 0 ) {
-		displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
-			blockType.ancestor?.includes( 'woocommerce/product-filter-status' )
+		displayStyleOptions = getBlockTypes().filter(
+			( blockType ) =>
+				blockType.name !== 'woocommerce/product-filter-clear-button' &&
+				blockType.ancestor?.includes(
+					'woocommerce/product-filter-status'
+				)
 		);
 	}
 

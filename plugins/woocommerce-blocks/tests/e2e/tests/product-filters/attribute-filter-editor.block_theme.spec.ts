@@ -145,4 +145,30 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( productFilterAttributeBlockHeading ).toBeVisible();
 	} );
+
+	test( 'should be able to enable or disable the "Clear" button for the filter', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
+		await expect( block ).toBeVisible();
+		await block.click();
+
+		const clearButton = block.getByText( 'Clear' );
+		await expect( clearButton ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
+
+		const enableClearButtonSettings =
+			editor.page.getByLabel( 'Clear button' );
+
+		await expect( enableClearButtonSettings ).toBeVisible();
+
+		await enableClearButtonSettings.click();
+		await expect( clearButton ).toBeHidden();
+	} );
 } );
