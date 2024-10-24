@@ -31,8 +31,8 @@ class CheckoutActionsBlock extends AbstractInnerBlock {
 		register_block_style(
 			$this->get_full_block_name(),
 			array(
-				'name'       => 'dot-separator',
-				'label'      => __( '"Dot" Separator', 'woocommerce' ),
+				'name'       => 'without-price',
+				'label'      => __( 'Hide Price', 'woocommerce' ),
 				'is_default' => true,
 			)
 		);
@@ -40,8 +40,8 @@ class CheckoutActionsBlock extends AbstractInnerBlock {
 		register_block_style(
 			$this->get_full_block_name(),
 			array(
-				'name'       => 'dash-separator',
-				'label'      => __( '"Dash" Separator', 'woocommerce' ),
+				'name'       => 'with-price',
+				'label'      => __( 'Show Price', 'woocommerce' ),
 				'is_default' => false,
 			)
 		);

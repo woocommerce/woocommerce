@@ -1,20 +1,4 @@
 .wp-block-woocommerce-checkout-actions-block {
-	&.is-style-dot-separator {
-		.wc-block-components-checkout-place-order-button__separator {
-			&::after {
-				content: "·";
-			}
-		}
-	}
-
-	&.is-style-dash-separator {
-		.wc-block-components-checkout-place-order-button__separator {
-			&::after {
-				content: "-";
-			}
-		}
-	}
-
 	.wc-block-checkout__actions {
 		&_row {
 			display: flex;

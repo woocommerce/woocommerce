@@ -20,10 +20,6 @@
 				"move": true
 			}
 		},
-		"showPrice": {
-			"type": "boolean",
-			"default": false
-		},
 		"cartPageId": {
 			"type": "number",
 			"default": 0
@@ -35,6 +31,10 @@
 		"className": {
 			"type": "string",
 			"default": ""
+		},
+		"priceSeparator": {
+			"type": "string",
+			"default": "·"
 		}
 	},
 	"parent": [ "woocommerce/checkout-fields-block" ],

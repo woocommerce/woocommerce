@@ -18,12 +18,14 @@ interface PlaceOrderButtonProps {
 	label: string;
 	fullWidth?: boolean;
 	showPrice?: boolean;
+	priceSeparator?: string;
 }
 
 const PlaceOrderButton = ( {
 	label,
 	fullWidth = false,
 	showPrice = false,
+	priceSeparator = '·',
 }: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
@@ -52,6 +54,15 @@ const PlaceOrderButton = ( {
 			{ label }
 			{ showPrice && (
 				<>
+					<style>
+						{ `.wp-block-woocommerce-checkout-actions-block {
+							.wc-block-components-checkout-place-order-button__separator {
+								&::after {
+									content: "${ priceSeparator }";
+								}
+							}
+						}` }
+					</style>
 					<div className="wc-block-components-checkout-place-order-button__separator" />
 					<div className="wc-block-components-checkout-place-order-button__price">
 						<FormattedMonetaryAmount
