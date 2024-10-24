@@ -6,13 +6,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import {
-	Button,
-	Modal,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	__unstableMotion as motion,
-} from '@wordpress/components';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { Button, Modal } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -31,7 +26,7 @@ import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneu
 export * as actions from './actions';
 export * as services from './services';
 
-export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
+export type events = { type: 'COMPLETE_SURVEY' };
 
 export const Transitional = ( {
 	sendEvent,
@@ -49,6 +44,7 @@ export const Transitional = ( {
 	aiOnline: boolean;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
+	const adminUrl = getNewPath( getPersistedQuery(), '/', {} );
 	const closeSurvey = () => {
 		setSurveyOpen( false );
 	};
@@ -78,7 +74,6 @@ export const Transitional = ( {
 				</Modal>
 			) }
 			<SiteHub
-				as={ motion.div }
 				variants={ {
 					view: { x: 0 },
 				} }
@@ -138,13 +133,11 @@ export const Transitional = ( {
 					{ isEntrepreneurFlow() && (
 						<Button
 							variant="primary"
+							href={ adminUrl }
 							onClick={ () => {
 								trackEvent(
 									'customize_your_store_entrepreneur_home_click'
 								);
-								sendEvent( {
-									type: 'GO_BACK_TO_HOME',
-								} );
 							} }
 						>
 							{ __( 'Back to Home', 'woocommerce' ) }
@@ -253,13 +246,11 @@ export const Transitional = ( {
 									</p>
 									<Button
 										variant="link"
+										href={ adminUrl }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_home_click'
 											);
-											sendEvent( {
-												type: 'GO_BACK_TO_HOME',
-											} );
 										} }
 									>
 										{ __( 'Back to Home', 'woocommerce' ) }

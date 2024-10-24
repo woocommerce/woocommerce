@@ -8,7 +8,7 @@ $headings: var(--heading--font-family);
 $body: var(--global--font-secondary);
 
 $body-color: currentColor;
-$highlights-color: #88a171;
+$highlights-color: var(--wc-highlight, #777335);
 
 /**
  * Fonts
@@ -167,8 +167,8 @@ a.button {
 }
 
 .onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
-	top: 2.2em;
-	right: 2.2em;
+	top: 1em;
+	right: 1em;
 }
 
 .single-product .type-product.sale > .onsale {
@@ -674,10 +674,12 @@ button.reset_variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger;
+
+	&:focus {
+		outline-offset: 2px;
+    	outline: 2px dotted var(--form--border-color) !important;
+	}
 }
 
 .woocommerce-tabs {
@@ -2234,12 +2236,6 @@ button.reset_variations {
 		.onsale {
 			font-size: 1rem;
 		}
-
-		.onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
-			top: 1.8em;
-			right: 1.8em;
-		}
-
 	}
 }
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: Update relevant e2e tests to be compatible with the upcoming changes in WP 6.7
