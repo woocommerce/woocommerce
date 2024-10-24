@@ -19,7 +19,8 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect, useRef } from '@wordpress/element';
 import { getQueryArg } from '@wordpress/url';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch, select, useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -58,8 +59,6 @@ export const Edit = ( {
 		requireCompanyField,
 		showApartmentField,
 		requireApartmentField,
-		showPhoneField,
-		requirePhoneField,
 		showOrderNotes,
 		showPolicyLinks,
 		showReturnToCart,
@@ -68,6 +67,38 @@ export const Edit = ( {
 		isPreview = false,
 		showFormStepNumbers = false,
 	} = attributes;
+
+	const { requirePhoneField, showPhoneField } = useSelect( ( select ) => {
+		const phoneField = select( coreStore ).getEditedEntityRecord(
+			'root',
+			'site',
+			undefined
+		)?.woocommerce_checkout_phone_field;
+		return {
+			requirePhoneField: phoneField === 'required',
+			showPhoneField: phoneField !== 'hidden',
+		};
+	}, [] );
+
+	const setShowPhoneFieldEntity = ( showField: boolean ) => {
+		dispatch( coreStore ).editEntityRecord( 'root', 'site', undefined, {
+			woocommerce_checkout_phone_field: showField ? '' : 'hidden',
+		} );
+		// Hack to get it update in editor
+		wcSettings.defaultFields.phone.hidden = ! showField;
+		if ( showField ) {
+			wcSettings.defaultFields.phone.required = true;
+		}
+	};
+	console.log( { requirePhoneField, showPhoneField } );
+	const setRequirePhoneFieldEntity = ( value: string ) => {
+		dispatch( coreStore ).editEntityRecord( 'root', 'site', undefined, {
+			woocommerce_checkout_phone_field:
+				value === 'true' ? 'required' : '',
+		} );
+		// Hack to get it update in editor
+		wcSettings.defaultFields.phone.required = value === 'true';
+	};
 
 	// This focuses on the block when a certain query param is found. This is used on the link from the task list.
 	const focus = useRef( getQueryArg( window.location.href, 'focus' ) );
@@ -167,7 +198,7 @@ export const Edit = ( {
 				<ToggleControl
 					label={ __( 'Phone', 'woocommerce' ) }
 					checked={ showPhoneField }
-					onChange={ () => toggleAttribute( 'showPhoneField' ) }
+					onChange={ setShowPhoneFieldEntity }
 				/>
 				{ showPhoneField && (
 					<RadioControl
@@ -182,9 +213,7 @@ export const Edit = ( {
 								value: true,
 							},
 						] }
-						onChange={ () =>
-							toggleAttribute( 'requirePhoneField' )
-						}
+						onChange={ setRequirePhoneFieldEntity }
 						className="components-base-control--nested wc-block-components-require-phone-field"
 					/>
 				) }
@@ -201,7 +230,7 @@ export const Edit = ( {
 				/>
 			</InspectorControls>
 			<EditorProvider
-				isPreview={ isPreview }
+				isPreview={ !! isPreview }
 				previewData={ { previewCart, previewSavedPaymentMethods } }
 			>
 				<SlotFillProvider>
@@ -218,10 +247,8 @@ export const Edit = ( {
 									value={ {
 										showApartmentField,
 										showCompanyField,
-										showPhoneField,
 										requireApartmentField,
 										requireCompanyField,
-										requirePhoneField,
 										showOrderNotes,
 										showPolicyLinks,
 										showReturnToCart,

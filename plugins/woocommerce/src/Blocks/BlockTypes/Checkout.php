@@ -33,6 +33,7 @@ class Checkout extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+		add_action( 'wp_loaded', array( $this, 'register_settings' ) );
 		// This prevents the page redirecting when the cart is empty. This is so the editor still loads the page preview.
 		add_filter(
 			'woocommerce_checkout_redirect_empty_cart',
@@ -67,6 +68,30 @@ class Checkout extends AbstractBlock {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Checkout', 'woocommerce' ) . '</h1><!-- /wp:heading -->',
+			)
+		);
+	}
+
+	/**
+	 * Exposes phone setting for the checkout block.
+	 */
+	public function register_settings() {
+		register_setting(
+			'options',
+			'woocommerce_checkout_phone_field',
+			array(
+				'type'         => 'object',
+				'description'  => 'Controls the display of the phone field in checkout.',
+				'label'        => 'Phone number',
+				'show_in_rest' => array(
+					'name'   => 'woocommerce_checkout_phone_field',
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'required', '', 'hidden' ),
+					),
+				),
+				'default'      => get_option( 'woocommerce_checkout_phone_field' ),
+
 			)
 		);
 	}
