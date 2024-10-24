@@ -6,11 +6,7 @@ import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-components';
-import type {
-	CartResponseTotals,
-	CartShippingRate,
-	Currency,
-} from '@woocommerce/types';
+import type { CartResponseTotals, CartShippingRate } from '@woocommerce/types';
 import {
 	ShippingCalculator,
 	ShippingCalculatorContext,
@@ -61,8 +57,7 @@ export const TotalsShipping = ( {
 	const totalShippingValue = getTotalShippingValue( values );
 	const totalCurrency = getCurrencyFromPriceResponse( values );
 	const hasRates =
-		cartHasCalculatedShipping &&
-		( hasShippingRate( shippingRates ) || totalShippingValue > 0 );
+		cartHasCalculatedShipping && hasShippingRate( shippingRates );
 	const hasCompleteAddress = isAddressComplete( shippingAddress, [
 		'state',
 		'country',
