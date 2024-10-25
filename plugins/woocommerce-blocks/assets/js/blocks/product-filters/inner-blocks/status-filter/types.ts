@@ -27,10 +27,10 @@ export type Current = {
 export type EditProps = BlockEditProps< BlockAttributes >;
 
 export type CollectionData = {
-	stock_status_counts: StockStatusCount[];
+	stock_status_counts: StatusCount[];
 };
 
-export type StockStatusCount = {
+export type StatusCount = {
 	status: string;
 	count: number;
 };

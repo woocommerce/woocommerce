@@ -617,7 +617,7 @@ class WC_Tracker {
 		// Sort keys by length and then by characters within the same length keys.
 		usort(
 			$keys,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				if ( strlen( $a ) === strlen( $b ) ) {
 					return strcmp( $a, $b );
 				}
@@ -719,7 +719,7 @@ class WC_Tracker {
 			// Convert into an associative array with a combination of currency and gateway as key.
 			array_reduce(
 				$orders_and_gateway_details,
-				function( $result, $item ) {
+				function ( $result, $item ) {
 					$item->gateway = preg_replace( '/\s+/', ' ', $item->gateway );
 
 					// Introduce currency as a prefix for the key.
@@ -808,7 +808,7 @@ class WC_Tracker {
 			// Convert into an associative array with the origin as key.
 			array_reduce(
 				$orders_origin,
-				function( $result, $item ) {
+				function ( $result, $item ) {
 					$key = $item->origin;
 
 					$result[ $key ] = $item;
@@ -945,7 +945,7 @@ class WC_Tracker {
 		$all_features     = FeaturesUtil::get_features( true, true );
 		$enabled_features = array_filter(
 			$all_features,
-			function( $feature ) {
+			function ( $feature ) {
 				return $feature['is_enabled'];
 			}
 		);
@@ -974,6 +974,7 @@ class WC_Tracker {
 			'calc_taxes'                            => get_option( 'woocommerce_calc_taxes' ),
 			'coupons_enabled'                       => get_option( 'woocommerce_enable_coupons' ),
 			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout' ),
+			'delayed_account_creation'              => get_option( 'woocommerce_enable_delayed_account_creation' ),
 			'checkout_login_reminder'               => get_option( 'woocommerce_enable_checkout_login_reminder' ),
 			'secure_checkout'                       => get_option( 'woocommerce_force_ssl_checkout' ),
 			'enable_signup_and_login_from_checkout' => get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),

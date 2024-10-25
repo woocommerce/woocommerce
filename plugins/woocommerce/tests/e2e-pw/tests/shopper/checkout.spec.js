@@ -461,12 +461,12 @@ test.describe(
 			await test.step( 'Confirm order details on the backend (as a merchant)', async () => {
 				await page.goto( 'wp-login.php' );
 				await page
-					.locator( 'input[name="log"]' )
+					.getByLabel( 'Username or Email Address' )
 					.fill( admin.username );
 				await page
-					.locator( 'input[name="pwd"]' )
+					.getByRole( 'textbox', { name: 'Password' } )
 					.fill( admin.password );
-				await page.locator( 'text=Log In' ).click();
+				await page.getByRole( 'button', { name: 'Log In' } ).click();
 
 				// load the order placed as a guest
 				await page.goto(
@@ -497,12 +497,12 @@ test.describe(
 		test( 'allows existing customer to place order', async ( { page } ) => {
 			await page.goto( 'my-account/' );
 			await page
-				.locator( 'input[name="username"]' )
+				.getByLabel( 'Username or Email Address' )
 				.fill( customer.username );
 			await page
-				.locator( 'input[name="password"]' )
+				.getByRole( 'textbox', { name: 'Password' } )
 				.fill( customer.password );
-			await page.locator( 'text=Log In' ).click();
+			await page.getByRole( 'button', { name: 'Log In' } ).click();
 			await expect(
 				page.getByText(
 					`Hello ${ customer.first_name } ${ customer.last_name }`
@@ -563,9 +563,13 @@ test.describe(
 
 			// Switch to admin user.
 			await page.goto( 'wp-login.php?loggedout=true' );
-			await page.locator( 'input[name="log"]' ).fill( admin.username );
-			await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-			await page.locator( 'text=Log In' ).click();
+			await page
+				.getByLabel( 'Username or Email Address' )
+				.fill( admin.username );
+			await page
+				.getByRole( 'textbox', { name: 'Password' } )
+				.fill( admin.password );
+			await page.getByRole( 'button', { name: 'Log In' } ).click();
 
 			// load the order placed as a customer
 			await page.goto(
