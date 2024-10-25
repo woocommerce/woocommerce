@@ -2,12 +2,12 @@
 
 namespace Automattic\WooCommerce\Internal\ReceiptRendering;
 
+use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
 use Exception;
-use WC_Order;
+use WC_Abstract_Order;
 
 /**
  * This class generates printable order receipts as transient files (see src/Internal/TransientFiles).
@@ -272,10 +272,10 @@ class ReceiptRenderingEngine {
 	/**
 	 * Get the order data that the receipt template will use.
 	 *
-	 * @param WC_Order $order The order to get the data from.
+	 * @param WC_Abstract_Order $order The order to get the data from.
 	 * @return array The order data as an associative array.
 	 */
-	private function get_order_data( WC_Order $order ): array {
+	private function get_order_data( WC_Abstract_Order $order ): array {
 		$store_name = get_bloginfo( 'name' );
 		if ( $store_name ) {
 			/* translators: %s = store name */
@@ -414,61 +414,20 @@ class ReceiptRenderingEngine {
 	 * - Retrieving the payment information from Stripe API (providing the intent id) fails.
 	 * - The received data set doesn't contain the expected information.
 	 *
-	 * @param WC_Order $order The order to get the data from.
+	 * @param WC_Abstract_Order $order The order to get the data from.
 	 * @return array|null An array of payment information for the order, or null if not available.
 	 */
-	private function get_woo_pay_data( WC_Order $order ): ?array {
-		// For testing purposes: if WooCommerce Payments development mode is enabled,
-		// an order meta item with key '_wcpay_payment_details' will be used if it exists as a replacement
-		// for the call to the Stripe API's 'get intent' endpoint.
-		// The value must be the JSON encoding of an array simulating the "payment_details" part of the response from the endpoint
-		// (at the very least it must contain the "card_present" key).
-		$payment_details = json_decode( defined( 'WCPAY_DEV_MODE' ) && WCPAY_DEV_MODE ? $order->get_meta( '_wcpay_payment_details' ) : false, true );
+	private function get_woo_pay_data( WC_Abstract_Order $order ): ?array {
+		$card_info = PaymentInfo::get_card_info( $order );
 
-		if ( ! $payment_details ) {
-			if ( 'woocommerce_payments' !== $order->get_payment_method() ) {
-				return null;
-			}
-
-			if ( ! class_exists( \WC_Payments::class ) ) {
-				return null;
-			}
-
-			$intent_id = $order->get_meta( '_intent_id' );
-			if ( ! $intent_id ) {
-				return null;
-			}
-
-			try {
-				$payment_details = \WC_Payments::get_payments_api_client()->get_intent( $intent_id )->get_charge()->get_payment_method_details();
-			} catch ( Exception $ex ) {
-				$order_id = $order->get_id();
-				$message  = $ex->getMessage();
-				wc_get_logger()->error( StringUtil::class_name_without_namespace( static::class ) . " - retrieving info for charge {$intent_id} for order {$order_id}: {$message}" );
-				return null;
-			}
-		}
-
-		$card_data = $payment_details['card_present'] ?? null;
-		if ( is_null( $card_data ) ) {
+		if ( empty( $card_info ) ) {
 			return null;
 		}
 
-		$card_brand = $card_data['brand'] ?? '';
-		if ( ! in_array( $card_brand, self::KNOWN_CARD_TYPES, true ) ) {
-			$card_brand = 'unknown';
-		}
+		// Backcompat for custom templates.
+		$card_info['card_icon']  = $card_info['icon'];
+		$card_info['card_last4'] = $card_info['last4'];
 
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$card_svg = base64_encode( file_get_contents( __DIR__ . "/CardIcons/{$card_brand}.svg" ) );
-
-		return array(
-			'payment_method' => 'woocommerce_payments',
-			'card_icon'      => $card_svg,
-			'card_last4'     => wp_kses( $card_data['last4'] ?? '', array() ),
-			'app_name'       => wp_kses( $card_data['receipt']['application_preferred_name'] ?? null, array() ),
-			'aid'            => wp_kses( $card_data['receipt']['dedicated_file_name'] ?? null, array() ),
-			'account_type'   => wp_kses( $card_data['receipt']['account_type'] ?? null, array() ),
-		);
+		return array_filter( $card_info );
 	}
 }

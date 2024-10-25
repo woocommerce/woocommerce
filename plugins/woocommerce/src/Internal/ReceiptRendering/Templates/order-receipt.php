@@ -51,7 +51,11 @@
 	}
 }
 
-if ( isset( $data['payment_info'] ) ) {
+if (
+	! empty( $data['payment_info']['app_name'] )
+	|| ! empty( $data['payment_info']['aid'] )
+	|| ! empty( $data['payment_info']['account_type'] )
+) {
 	?>
 	<footer>
 		<p id="payment_info">
