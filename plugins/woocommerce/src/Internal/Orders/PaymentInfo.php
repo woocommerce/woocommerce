@@ -142,12 +142,15 @@ class PaymentInfo {
 
 		$card_info = array();
 
-		if ( isset( $payment_details['card_present'] ) ) {
-			$card_info['brand'] = $payment_details['card_present']['brand'] ?? '';
-			$card_info['last4'] = $payment_details['card_present']['last4'] ?? '';
-		} elseif ( isset( $payment_details['card'] ) ) {
+		if ( isset( $payment_details['card'] ) ) {
 			$card_info['brand'] = $payment_details['card']['brand'] ?? '';
 			$card_info['last4'] = $payment_details['card']['last4'] ?? '';
+		} elseif ( isset( $payment_details['card_present'] ) ) {
+			$card_info['brand']        = $payment_details['card_present']['brand'] ?? '';
+			$card_info['last4']        = $payment_details['card_present']['last4'] ?? '';
+			$card_info['account_type'] = $payment_details['card_present']['receipt']['account_type'] ?? '';
+			$card_info['aid']          = $payment_details['card_present']['receipt']['dedicated_file_name'] ?? '';
+			$card_info['app_name']     = $payment_details['card_present']['receipt']['application_preferred_name'] ?? '';
 		}
 
 		return array_map( 'sanitize_text_field', $card_info );

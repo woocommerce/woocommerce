@@ -20,7 +20,7 @@ class PaymentInfoTest extends WC_Unit_Test_Case {
 	 * @testdox The `get_card_info` method should return an associative array with specific keys when an order has
 	 *          payment card info available.
 	 */
-	public function test_get_card_info(): void {
+	public function test_get_card_info_wcpay_online(): void {
 		$order = OrderHelper::create_order();
 		Constants::set_constant( 'WCPAY_DEV_MODE', true ); // Enables use of order meta for providing payment details.
 
