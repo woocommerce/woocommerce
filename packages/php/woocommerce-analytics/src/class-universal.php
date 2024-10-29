@@ -52,6 +52,8 @@ class Universal {
 		add_filter( 'woocommerce_checkout_posted_data', array( $this, 'save_checkout_post_data' ), 10, 1 );
 
 		add_action( 'woocommerce_created_customer', array( $this, 'capture_created_customer' ), 10, 2 );
+
+		add_action( 'woocommerce_created_customer', array( $this, 'capture_post_checkout_created_customer' ), 10, 2 );
 	}
 
 	/**
@@ -315,6 +317,8 @@ class Universal {
 			$checkout_page_used = 'No';
 		}
 
+		$delayed_account_creation = ucfirst( get_option( 'woocommerce_enable_delayed_account_creation', 'Yes' ) );
+
 		$guest_checkout = $order->get_user() ? 'No' : 'Yes';
 
 		$express_checkout = 'null';
@@ -359,16 +363,17 @@ class Universal {
 			$this->record_event(
 				'woocommerceanalytics_product_purchase',
 				array(
-					'oi'               => $order->get_order_number(),
-					'pq'               => $order_item->get_quantity(),
-					'payment_option'   => $payment_option,
-					'create_account'   => $create_account,
-					'guest_checkout'   => $guest_checkout,
-					'express_checkout' => $express_checkout,
-					'products_count'   => $order_items_count,
-					'coupon_used'      => $order_coupons_count,
-					'order_value'      => $order->get_total(),
-					'from_checkout'    => $checkout_page_used,
+					'oi'                       => $order->get_order_number(),
+					'pq'                       => $order_item->get_quantity(),
+					'payment_option'           => $payment_option,
+					'create_account'           => $create_account,
+					'guest_checkout'           => $guest_checkout,
+					'delayed_account_creation' => $delayed_account_creation,
+					'express_checkout'         => $express_checkout,
+					'products_count'           => $order_items_count,
+					'coupon_used'              => $order_coupons_count,
+					'order_value'              => $order->get_total(),
+					'from_checkout'            => $checkout_page_used,
 					'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
 					'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
 				),
@@ -519,6 +524,34 @@ class Universal {
 				$session->set( 'wc_checkout_createaccount_used', true );
 				$session->save_data();
 			}
+		}
+	}
+
+	/**
+	 * Capture the post checkout create account event.
+	 *
+	 * @param int   $customer_id Customer ID.
+	 * @param array $new_customer_data New customer data.
+	 */
+	public function capture_post_checkout_created_customer( $customer_id, $new_customer_data ) {
+		if (
+			is_array( $new_customer_data )
+			&& ! empty( $new_customer_data['source'] )
+			&& str_contains( $new_customer_data['source'], 'delayed-account-creation' )
+		) {
+
+			$checkout_page_used                        = true === WC()->session->get( 'checkout_page_used' ) ? 'Yes' : 'No';
+			$checkout_page_contains_checkout_block     = '1';
+			$checkout_page_contains_checkout_shortcode = '0';
+
+			$this->record_event(
+				'woocommerceanalytics_post_account_creation',
+				array(
+					'from_checkout' => $checkout_page_used,
+					'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
+					'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+				)
+			);
 		}
 	}
 }

@@ -90,8 +90,9 @@ trait Woo_Analytics_Trait {
 	protected function get_cart_checkout_shared_data() {
 		$cart = WC()->cart;
 
-		$guest_checkout = ucfirst( get_option( 'woocommerce_enable_guest_checkout', 'No' ) );
-		$create_account = ucfirst( get_option( 'woocommerce_enable_signup_and_login_from_checkout', 'No' ) );
+		$guest_checkout           = ucfirst( get_option( 'woocommerce_enable_guest_checkout', 'No' ) );
+		$create_account           = ucfirst( get_option( 'woocommerce_enable_signup_and_login_from_checkout', 'No' ) );
+		$delayed_account_creation = ucfirst( get_option( 'woocommerce_enable_delayed_account_creation', 'Yes' ) );
 
 		$coupons     = $cart->get_coupons();
 		$coupon_used = 0;
@@ -113,15 +114,16 @@ trait Woo_Analytics_Trait {
 		$enabled_payment_options = array_keys( $enabled_payment_options );
 		$cart_total              = wc_prices_include_tax() ? $cart->get_cart_contents_total() + $cart->get_cart_contents_tax() : $cart->get_cart_contents_total();
 		$shared_data             = array(
-			'products'               => $this->format_items_to_json( $cart->get_cart() ),
-			'create_account'         => $create_account,
-			'guest_checkout'         => $guest_checkout,
-			'express_checkout'       => 'null', // TODO: not solved yet.
-			'products_count'         => $cart->get_cart_contents_count(),
-			'order_value'            => $cart_total,
-			'shipping_options_count' => 'null', // TODO: not solved yet.
-			'coupon_used'            => $coupon_used,
-			'payment_options'        => $enabled_payment_options,
+			'products'                 => $this->format_items_to_json( $cart->get_cart() ),
+			'create_account'           => $create_account,
+			'guest_checkout'           => $guest_checkout,
+			'delayed_account_creation' => $delayed_account_creation,
+			'express_checkout'         => 'null', // TODO: not solved yet.
+			'products_count'           => $cart->get_cart_contents_count(),
+			'order_value'              => $cart_total,
+			'shipping_options_count'   => 'null', // TODO: not solved yet.
+			'coupon_used'              => $coupon_used,
+			'payment_options'          => $enabled_payment_options,
 		);
 
 		return $shared_data;

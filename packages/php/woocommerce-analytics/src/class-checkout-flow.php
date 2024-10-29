@@ -95,6 +95,8 @@ class Checkout_Flow {
 			$checkout_page_used = 'No';
 		}
 
+		$delayed_account_creation = ucfirst( get_option( 'woocommerce_enable_delayed_account_creation', 'Yes' ) );
+
 		$this->record_event(
 			'woocommerceanalytics_order_confirmation_view',
 			array(
@@ -102,6 +104,7 @@ class Checkout_Flow {
 				'create_account'                        => $create_account,
 				'express_checkout'                      => 'null', // TODO: not solved yet.
 				'guest_checkout'                        => $order->get_customer_id() ? 'No' : 'Yes',
+				'delayed_account_creation'              => $delayed_account_creation,
 				'oi'                                    => $order->get_id(),
 				'order_value'                           => $order->get_total(),
 				'payment_option'                        => $order->get_payment_method(),
