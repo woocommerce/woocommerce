@@ -67,14 +67,11 @@
 						if ( $options.length === 1 ) {
 							// There is only one attribute to choose from
 							$el.val( $options.val() );
-							doCheckVariations = true;
+							$el.trigger( "change" ).trigger( "click" );
 						} else {
 							// More than one attribute to choose from, let the user choose
 						}
 				} );
-				if ( doCheckVariations ) {
-					$form.trigger( 'check_variations' );
-				}
 			}
 
 			$form.trigger( 'wc_variation_form', self );
