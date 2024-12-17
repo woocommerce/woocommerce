@@ -39,6 +39,7 @@ class Woocommerce_Analytics {
 		// loading s.js.
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_tracking_script' ) );
 
+		// Initialize general store tracking actions.
 		add_action( 'init', array( new Universal(), 'init_hooks' ) );
 		add_action( 'init', array( new My_Account(), 'init_hooks' ) );
 		if (
@@ -83,7 +84,7 @@ class Woocommerce_Analytics {
 		}
 
 		// Tracking only Site pages.
-		if ( is_admin() ) {
+		if ( is_admin() || wp_doing_ajax() || is_login() ) {
 			return false;
 		}
 

@@ -96,7 +96,6 @@ class Checkout_Flow {
 		}
 
 		$delayed_account_creation = ucfirst( get_option( 'woocommerce_enable_delayed_account_creation', 'Yes' ) );
-
 		$this->record_event(
 			'woocommerceanalytics_order_confirmation_view',
 			array(
@@ -106,9 +105,13 @@ class Checkout_Flow {
 				'guest_checkout'                        => $order->get_customer_id() ? 'No' : 'Yes',
 				'delayed_account_creation'              => $delayed_account_creation,
 				'oi'                                    => $order->get_id(),
-				'order_value'                           => $order->get_total(),
-				'payment_option'                        => $order->get_payment_method(),
+				'order_value'                           => $order->get_subtotal(),
+				'order_total'                           => $order->get_total(),
 				'products_count'                        => $order->get_item_count(),
+				'total_discount'                        => $order->get_discount_total(),
+				'total_shipping'                        => $order->get_shipping_total(),
+				'total_tax'                             => $order->get_total_tax(),
+				'payment_option'                        => $order->get_payment_method(),
 				'products'                              => $this->format_items_to_json( $order->get_items() ),
 				'order_note'                            => $order->get_customer_note(),
 				'shipping_option'                       => $order->get_shipping_method(),
@@ -123,7 +126,17 @@ class Checkout_Flow {
 	 * Track the cart page view
 	 */
 	public function capture_cart_view() {
-		if ( ! is_cart() ) {
+		global $post;
+		$cart_page_id = wc_get_page_id( 'cart' );
+
+		$is_cart = $cart_page_id && is_page( $cart_page_id )
+			|| wc_post_content_has_shortcode( 'woocommerce_cart' )
+			|| has_block( 'woocommerce/cart', $post )
+			|| apply_filters( 'woocommerce_is_cart', false )
+			|| Constants::is_defined( 'WOOCOMMERCE_CART' )
+			|| is_cart();
+
+		if ( ! $is_cart ) {
 			return;
 		}
 
@@ -146,7 +159,6 @@ class Checkout_Flow {
 		$is_checkout = $checkout_page_id && is_page( $checkout_page_id )
 		|| wc_post_content_has_shortcode( 'woocommerce_checkout' )
 		|| has_block( 'woocommerce/checkout', $post )
-		|| has_block( 'woocommerce/classic-shortcode', $post )
 		|| apply_filters( 'woocommerce_is_checkout', false )
 		|| Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' );
 
