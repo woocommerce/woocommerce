@@ -585,6 +585,9 @@ trait Woo_Analytics_Trait {
 	 */
 	public function get_cart_total() {
 		$cart = WC()->cart;
+		if ( $cart === null ) {
+			return 0;
+		}
 		return $cart->get_total( 'tracking' );
 	}
 
@@ -595,6 +598,9 @@ trait Woo_Analytics_Trait {
 	 */
 	public function get_cart_subtotal() {
 		$cart = WC()->cart;
+		if ( $cart === null ) {
+			return 0;
+		}
 		return $cart->get_subtotal();
 	}
 
@@ -605,6 +611,9 @@ trait Woo_Analytics_Trait {
 	 */
 	public function get_cart_shipping_total() {
 		$cart = WC()->cart;
+		if ( $cart === null ) {
+			return 0;
+		}
 		return $cart->get_shipping_total();
 	}
 
@@ -615,6 +624,9 @@ trait Woo_Analytics_Trait {
 	 */
 	public function get_cart_taxes() {
 		$cart = WC()->cart;
+		if ( $cart === null ) {
+			return 0;
+		}
 		return $cart->get_taxes_total();
 	}
 
@@ -625,6 +637,9 @@ trait Woo_Analytics_Trait {
 	 */
 	public function get_total_discounts() {
 		$cart = WC()->cart;
+		if ( $cart === null ) {
+			return 0;
+		}
 		return $cart->get_discount_total();
 	}
 
@@ -635,6 +650,9 @@ trait Woo_Analytics_Trait {
 	 */
 	public function get_cart_items_count() {
 		$cart = WC()->cart;
+		if ( $cart === null ) {
+			return 0;
+		}
 		return $cart->get_cart_contents_count();
 	}
 }

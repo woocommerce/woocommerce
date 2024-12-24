@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix fatal when WC()->cart returns null
