@@ -9,7 +9,6 @@
 namespace Automattic;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
-use Automattic\Woocommerce_Analytics\Checkout_Flow;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
 
@@ -42,12 +41,6 @@ class Woocommerce_Analytics {
 		// Initialize general store tracking actions.
 		add_action( 'init', array( new Universal(), 'init_hooks' ) );
 		add_action( 'init', array( new My_Account(), 'init_hooks' ) );
-		if (
-			class_exists( '\Automattic\WooCommerce\Blocks\Package' )
-			&& version_compare( \Automattic\WooCommerce\Blocks\Package::get_version(), '11.6.2', '>=' )
-		) {
-			add_action( 'init', array( new Checkout_Flow(), 'init_hooks' ) );
-		}
 
 		/**
 		 * Fires after the WooCommerce Analytics package is initialized

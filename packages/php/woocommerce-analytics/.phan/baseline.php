@@ -16,7 +16,6 @@ return [
 
     // Currently, file_suppressions and directory_suppressions are the only supported suppressions
     'file_suppressions' => [
-        'src/class-checkout-flow.php' => ['PhanPluginRedundantAssignment'],
         'src/class-universal.php' => ['PhanPluginRedundantAssignment', 'PhanUndeclaredMethodInCallable'],
         'src/class-woo-analytics-trait.php' => ['PhanTypeSuspiciousNonTraversableForeach', 'PhanUndeclaredMethod'],
     ],
