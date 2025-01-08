@@ -2796,9 +2796,14 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$order =            new WC_Order();
 
 			// Set up a test action to add a custom validation error.
-			add_action('woocommerce_checkout_validate_order_before_payment', function($order, $errors) {
-					$errors->add('custom_error', 'This is a custom validation error');
-			}, 10, 2);
+			add_action(
+			    'woocommerce_checkout_validate_order_before_payment', 
+			    function ( $order, $errors ) {
+					$errors->add( 'custom_error', 'This is a custom validation error' );
+			    },
+			    10,
+			    2
+			);
 
 			// Use reflection to make the protected method accessible.
 			$reflection = new ReflectionClass( $order_controller );
