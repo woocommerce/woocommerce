@@ -2793,7 +2793,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_perform_custom_order_validation() {
 			$order_controller = new \Automattic\WooCommerce\StoreApi\Utilities\OrderController();
-			$order = new WC_Order();
+			$order =            new WC_Order();
 
 			// Set up a test action to add a custom validation error.
 			add_action('woocommerce_checkout_validate_order_before_payment', function($order, $errors) {
