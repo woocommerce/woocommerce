@@ -2792,7 +2792,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testDox Test that perform_custom_order_validation throws a RouteException with a custom error.
 	 */
 	public function test_perform_custom_order_validation() {
-			$order_controller = new OrderController();
+			$order_controller = new \Automattic\WooCommerce\StoreApi\Utilities\OrderController();
 			$order = new WC_Order();
 
 			// Set up a test action to add a custom validation error.
