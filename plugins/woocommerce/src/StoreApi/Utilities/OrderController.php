@@ -203,7 +203,7 @@ class OrderController {
 		if ( $validation_errors->has_errors() ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_custom_validation_error',
-				implode( ' ', $validation_errors->get_error_messages() ),
+				esc_html( implode( ' ', $validation_errors->get_error_messages() ) ),
 				400
 			);
 		}
