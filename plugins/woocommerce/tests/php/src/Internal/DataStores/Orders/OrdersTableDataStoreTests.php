@@ -2807,7 +2807,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 			// Use reflection to make the protected method accessible.
 			$reflection = new ReflectionClass( $order_controller );
-			$method = $reflection->getMethod( 'perform_custom_order_validation' );
+			$method =     $reflection->getMethod( 'perform_custom_order_validation' );
 			$method->setAccessible( true );
 
 			// Assert that the method throws a RouteException with our custom error.
