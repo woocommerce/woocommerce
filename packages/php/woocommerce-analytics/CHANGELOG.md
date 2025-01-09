@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-01-09
+### Fixed
+- Temporarily disable setcookie to avoid caching issues.
+
 ## [0.4.0] - 2025-01-06
 ### Added
 - Add Search Event & landing Page support. [#40698]
@@ -83,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix namespace issue with WooCommerce class reference. [#35857]
 - General: bail early when WooCommerce is not active. [#36278]
 
+[0.4.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.2.0...v0.3.0
