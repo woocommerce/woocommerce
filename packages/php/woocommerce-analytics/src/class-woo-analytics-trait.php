@@ -263,16 +263,19 @@ trait Woo_Analytics_Trait {
 	 * @return array Array of standard event props.
 	 */
 	public function get_common_properties() {
-		$session_data       = json_decode( sanitize_text_field( wp_unslash( $_COOKIE['woocommerceanalytics_session'] ?? '' ) ), true ) ?? array();
-		$session_id         = sanitize_text_field( $session_data['session_id'] ?? $this->session_id );
-		$landing_page       = sanitize_url( $session_data['landing_page'] ?? $this->landing_page );
+		// phpcs:disable Squiz.PHP.CommentedOutCode.Found
+		// Disabled the below temporarily to avoid caching issues.
+		// $session_data       = json_decode( sanitize_text_field( wp_unslash( $_COOKIE['woocommerceanalytics_session'] ?? '' ) ), true ) ?? array();
+		// $session_id         = sanitize_text_field( $session_data['session_id'] ?? $this->session_id );
+		// $landing_page       = sanitize_url( $session_data['landing_page'] ?? $this->landing_page );
+		// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 		$site_info          = array(
-			'session_id'                         => $session_id,
+			'session_id'                         => null,
 			'blog_id'                            => Jetpack_Connection::get_site_id(),
 			'store_id'                           => defined( '\\WC_Install::STORE_ID_OPTION' ) ? get_option( \WC_Install::STORE_ID_OPTION ) : false,
 			'ui'                                 => $this->get_user_id(),
 			'url'                                => home_url(),
-			'landing_page'                       => $landing_page,
+			'landing_page'                       => null,
 			'woo_version'                        => WC()->version,
 			'wp_version'                         => get_bloginfo( 'version' ),
 			'store_admin'                        => in_array( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles, true ) ? 1 : 0,
