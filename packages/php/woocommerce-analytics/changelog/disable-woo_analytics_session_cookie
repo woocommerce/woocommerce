@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Temporarily disable setcookie to avoid caching issues.

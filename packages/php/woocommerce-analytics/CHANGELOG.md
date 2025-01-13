@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2025-01-09
 ### Fixed
-- Temporarily disable setcookie to avoid caching issues.
+- Temporarily disable setcookie to avoid caching issues. [#40937]
 
 ## [0.4.0] - 2025-01-06
 ### Added
@@ -87,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix namespace issue with WooCommerce class reference. [#35857]
 - General: bail early when WooCommerce is not active. [#36278]
 
+[0.4.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.3.0...v0.3.1
