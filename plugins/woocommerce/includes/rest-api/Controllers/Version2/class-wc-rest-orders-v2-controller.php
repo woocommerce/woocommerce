@@ -1617,6 +1617,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
+							'global_unique_id' => array(
+								'description' => __( 'Product global unique id.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
 							'price'        => array(
 								'description' => __( 'Product price.', 'woocommerce' ),
 								'type'        => 'number',
