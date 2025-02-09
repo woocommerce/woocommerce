@@ -1,0 +1,202 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Fraunces & Inter",
+	"category": "professional",
+	"keywords": [
+		"serif",
+		"sans-serif",
+		"friendly",
+		"charming",
+		"inviting",
+		"calm",
+		"professional",
+		"elegant",
+		"versatile",
+		"light",
+		"airy",
+		"sophisticated",
+		"delicate",
+		"refined"
+	],
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Fraunces",
+							"fontStyle": "normal",
+							"fontWeight": "100 800",
+							"src": [
+								"file:./assets/fonts/fraunces/Fraunces-VariableFont.ttf"
+							]
+						},
+						{
+							"fontFamily": "Fraunces",
+							"fontStyle": "italic",
+							"fontWeight": "100 800",
+							"src": [
+								"file:./assets/fonts/fraunces/Fraunces-Italic-VariableFont.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Fraunces\", serif",
+					"name": "Fraunces",
+					"slug": "fraunces"
+				},
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Inter",
+							"fontStretch": "normal",
+							"fontStyle": "normal",
+							"fontWeight": "100 800",
+							"src": [
+								"file:./assets/fonts/inter/InterVariable.ttf"
+							]
+						},
+						{
+							"fontFamily": "Inter",
+							"fontStretch": "normal",
+							"fontStyle": "italic",
+							"fontWeight": "100 800",
+							"src": [
+								"file:./assets/fonts/inter/InterVariable-Italic.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Inter\", sans-serif",
+					"name": "Inter",
+					"slug": "inter"
+				}
+			],
+			"fontSizes": [
+				{
+					"name": "Small",
+					"size": "17px",
+					"slug": "small",
+					"fluid": {
+						"min": "15px",
+						"max": "17px"
+					}
+				},
+				{
+					"name": "Medium",
+					"size": "22px",
+					"slug": "medium",
+					"fluid": {
+						"min": "17px",
+						"max": "22px"
+					}
+				},
+				{
+					"name": "Large",
+					"size": "34px",
+					"slug": "large",
+					"fluid": {
+						"min": "24px",
+						"max": "34px"
+					}
+				},
+				{
+					"name": "Extra Large",
+					"size": "60px",
+					"slug": "x-large",
+					"fluid": {
+						"min": "38px",
+						"max": "60px"
+					}
+				},
+				{
+					"name": "2X Large",
+					"size": "86px",
+					"slug": "xx-large",
+					"fluid": {
+						"min": "46px",
+						"max": "86px"
+					}
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/site-title": {
+				"typography": {
+					"fontSize": "21px",
+					"fontFamily": "var(--wp--preset--font-family--fraunces)",
+					"fontWeight": "200"
+				}
+			},
+			"core/navigation": {
+				"typography": {
+					"fontSize": "21px",
+					"fontFamily": "var(--wp--preset--font-family--fraunces)",
+					"fontWeight": "200"
+				}
+			},
+			"core/site-tagline": {
+				"typography": {
+					"fontSize": "13px",
+					"fontWeight": "300"
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--inter)",
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"fontWeight": "400"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--fraunces)",
+					"fontWeight": "200"
+				}
+			},
+			"h1": {
+				"typography": {
+					"lineHeight": "0.9"
+				}
+			},
+			"h2": {
+				"typography": {
+					"lineHeight": "0.9"
+				}
+			},
+			"h3": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--large)",
+					"fontWeight": "300"
+				}
+			},
+			"h4": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontWeight": "300"
+				}
+			},
+			"h5": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontWeight": "300"
+				}
+			},
+			"h6": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"fontWeight": "300"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--inter)",
+			"fontWeight": "300",
+			"lineHeight": "1.6",
+			"fontSize": "var(--wp--preset--font-size--small)"
+		}
+	}
+}

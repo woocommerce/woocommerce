@@ -1,0 +1,188 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Messapia & DM Sans",
+	"category": "playful",
+	"keywords": [
+		"serif",
+		"sans-serif",
+		"elegant",
+		"modern",
+		"editorial",
+		"fashion",
+		"luxury",
+		"artistic",
+		"expressive",
+		"sophisticated",
+		"refined"
+	],
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Messapia Bold",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/messapia/Messapia-Bold.woff2"
+							]
+						}
+					],
+					"fontFamily": "\"Messapia Bold\", sans-serif",
+					"name": "Messapia Bold",
+					"slug": "messapia-bold"
+				},
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Messapia",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/messapia/Messapia.woff2"
+							]
+						}
+					],
+					"fontFamily": "\"Messapia\", serif",
+					"name": "Messapia",
+					"slug": "messapia"
+				},
+				{
+					"fontFace": [
+						{
+							"fontFamily": "DM Sans",
+							"fontStyle": "normal",
+							"fontWeight": "300 700",
+							"src": [
+								"file:./assets/fonts/dm-sans/DMSans-VariableFont_opsz,wght.ttf"
+							]
+						},
+						{
+							"fontFamily": "DM Sans",
+							"fontStyle": "italic",
+							"fontWeight": "300 700",
+							"src": [
+								"file:./assets/fonts/dm-sans/DMSans-Italic-VariableFont_opsz,wght.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"DM Sans\", sans-serif",
+					"name": "DM Sans",
+					"slug": "dm-sans"
+				}
+			],
+			"fontSizes": [
+				{
+					"name": "Small",
+					"size": "15px",
+					"slug": "small"
+				},
+				{
+					"name": "Medium",
+					"size": "18px",
+					"slug": "medium",
+					"fluid": {
+						"min": "17px",
+						"max": "18px"
+					}
+				},
+				{
+					"name": "Large",
+					"size": "32px",
+					"slug": "large"
+				},
+				{
+					"name": "Extra Large",
+					"size": "46px",
+					"slug": "x-large",
+					"fluid": {
+						"min": "36px",
+						"max": "46px"
+					}
+				},
+				{
+					"name": "2X Large",
+					"size": "62px",
+					"slug": "xx-large",
+					"fluid": {
+						"min": "46px",
+						"max": "62px"
+					}
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/site-title": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--messapia)",
+					"fontSize": "24px",
+					"fontWeight": "500"
+				}
+			},
+			"core/navigation": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--messapia)",
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontWeight": "500"
+				}
+			},
+			"core/site-tagline": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"fontWeight": "300"
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--messapia)",
+					"fontSize": "var(--wp--preset--font-size--medium)"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--messapia)",
+					"fontWeight": "normal",
+					"lineHeight": "1.2"
+				}
+			},
+			"h2": {
+				"typography": {
+					"lineHeight": "1.2"
+				}
+			},
+			"h3": {
+				"typography": {
+					"lineHeight": "1.3",
+					"fontSize": "24px"
+				}
+			},
+			"h4": {
+				"typography": {
+					"lineHeight": "1.4"
+				}
+			},
+			"h5": {
+				"typography": {
+					"lineHeight": "1.4"
+				}
+			},
+			"h6": {
+				"typography": {
+					"lineHeight": "1.4"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--dm-sans)",
+			"fontWeight": "300",
+			"lineHeight": "1.65",
+			"fontSize": "var(--wp--preset--font-size--medium)"
+		}
+	}
+}

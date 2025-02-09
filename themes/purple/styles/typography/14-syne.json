@@ -1,0 +1,133 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Syne",
+	"category": "bold",
+	"keywords": [
+		"sans-serif",
+		"clean",
+		"modern",
+		"contemporary",
+		"uppercase",
+		"bold",
+		"minimalist",
+		"tech",
+		"dynamic",
+		"impactful",
+		"powerful"
+	],
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Syne",
+							"fontStyle": "normal",
+							"fontWeight": "400 700",
+							"src": [
+								"file:./assets/fonts/syne/Syne-VariableFont_wght.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Syne\", sans-serif",
+					"name": "Syne",
+					"slug": "syne"
+				}
+			],
+			"fontSizes": [
+				{
+					"name": "Small",
+					"size": "16px",
+					"slug": "small"
+				},
+				{
+					"name": "Medium",
+					"size": "24px",
+					"slug": "medium"
+				},
+				{
+					"name": "Large",
+					"size": "48px",
+					"slug": "large"
+				},
+				{
+					"name": "Extra Large",
+					"size": "48px",
+					"slug": "x-large",
+					"fluid": {
+						"min": "30px",
+						"max": "48px"
+					}
+				},
+				{
+					"name": "2X Large",
+					"size": "70px",
+					"slug": "xx-large",
+					"fluid": {
+						"min": "40px",
+						"max": "70px"
+					}
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/navigation": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--syne)",
+					"fontSize": "14px",
+					"textTransform": "uppercase",
+					"fontWeight": "700"
+				}
+			},
+			"core/site-tagline": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--syne)",
+					"fontSize": "14px",
+					"textTransform": "uppercase",
+					"fontWeight": "700"
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--syne)",
+					"fontSize": "14px",
+					"textTransform": "uppercase",
+					"fontWeight": "700"
+				}
+			},
+			"h1": {
+				"typography": {
+					"lineHeight": "0.9"
+				}
+			},
+			"h2": {
+				"typography": {
+					"lineHeight": "1"
+				}
+			},
+			"h3": {
+				"typography": {
+					"lineHeight": "1"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--syne)",
+					"fontWeight": "700",
+					"textTransform": "uppercase"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--syne)",
+			"fontWeight": "400",
+			"lineHeight": "1.5",
+			"fontSize": "17px"
+		}
+	}
+}

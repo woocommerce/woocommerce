@@ -1,0 +1,178 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Lucette & DM Mono",
+	"category": "bold",
+	"keywords": [
+		"serif",
+		"elegant",
+		"contemporary",
+		"technical",
+		"monospace",
+		"minimalist",
+		"professional",
+		"versatile",
+		"quirky",
+		"contrasting",
+		"dynamic",
+		"modern"
+	],
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Lucette",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/lucette/Lucette-Regular.woff2"
+							]
+						},
+						{
+							"fontFamily": "Lucette",
+							"fontStyle": "italic",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/lucette/Lucette-Regularitalic.woff2"
+							]
+						}
+					],
+					"fontFamily": "\"Lucette\", sans-serif",
+					"name": "Lucette",
+					"slug": "lucette"
+				},
+				{
+					"fontFace": [
+						{
+							"fontFamily": "DM Mono",
+							"fontStyle": "normal",
+							"fontWeight": "300",
+							"src": [
+								"file:./assets/fonts/dm-mono/DMMono-Light.ttf"
+							]
+						},
+						{
+							"fontFamily": "DM Mono",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/dm-mono/DMMono-Regular.ttf"
+							]
+						},
+						{
+							"fontFamily": "DM Mono",
+							"fontStyle": "italic",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/dm-mono/DMMono-Italic.ttf"
+							]
+						},
+						{
+							"fontFamily": "DM Mono",
+							"fontStyle": "normal",
+							"fontWeight": "500 600",
+							"src": [
+								"file:./assets/fonts/dm-mono/DMMono-Medium.ttf"
+							]
+						},
+						{
+							"fontFamily": "DM Mono",
+							"fontStyle": "italic",
+							"fontWeight": "500 600",
+							"src": [
+								"file:./assets/fonts/dm-mono/DMMono-MediumItalic.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"DM Mono\", monospace",
+					"name": "DM Mono",
+					"slug": "dm-mono"
+				}
+			],
+			"fontSizes": [
+				{
+					"name": "Small",
+					"size": "15px",
+					"slug": "small",
+					"fluid": {
+						"min": "14px",
+						"max": "15px"
+					}
+				},
+				{
+					"name": "Medium",
+					"size": "19px",
+					"slug": "medium"
+				},
+				{
+					"name": "Large",
+					"size": "40px",
+					"slug": "large"
+				},
+				{
+					"name": "Extra Large",
+					"size": "60px",
+					"slug": "x-large"
+				},
+				{
+					"name": "2X Large",
+					"size": "85px",
+					"slug": "xx-large"
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/site-title": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontFamily": "var(--wp--preset--font-family--dm-mono)",
+					"fontWeight": "300"
+				}
+			},
+			"core/navigation": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontFamily": "var(--wp--preset--font-family--dm-mono)",
+					"fontWeight": "300"
+				}
+			},
+			"core/site-tagline": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontFamily": "var(--wp--preset--font-family--dm-mono)",
+					"fontWeight": "300"
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--dm-mono)",
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"fontWeight": "400"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--lucette)",
+					"fontWeight": "normal"
+				}
+			},
+			"h3": {
+				"typography": {
+					"fontSize": "28px"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--dm-mono)",
+			"lineHeight": "1.75",
+			"fontSize": "var(--wp--preset--font-size--small)",
+			"fontWeight": "300"
+		}
+	}
+}

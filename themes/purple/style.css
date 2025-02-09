@@ -1,0 +1,163 @@
+/*
+Theme Name: woostarter
+Theme URI: 
+Author: Automattic
+Author URI: https://automattic.com/
+Description: Woo starter theme.
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 7.0
+Version: 0.0.1
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: woostarter
+Tags: 
+*/
+
+/* Set default line height for font size presets. */
+
+.has-xx-large-font-size {
+	line-height: 1;
+}
+
+/* Add a transition state for buttons. */
+
+.wp-element-button {
+    transition: border, background-color, color, box-shadow, opacity, filter;
+    transition-duration: 0.15s;
+    transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    backdrop-filter: blur(30px);
+}
+
+/* Fields */
+
+label,
+.jetpack-field-label .rich-text.jetpack-field-label__input,
+.contact-form .grunion-checkbox-multiple-options legend, 
+.contact-form .grunion-radio-options legend,
+.wp-block-jetpack-contact-form-container .wp-block-jetpack-contact-form label {
+    display: inline-block;
+    font-size: var(--wp--preset--font-size--small);
+    margin-bottom: 0.25em;
+    font-weight: inherit;
+}
+
+textarea,
+input:not([type=submit]):not([type=checkbox]):not([type=radio]):not([type=range]),
+.wp-block-post-comments-form textarea,
+.wp-block-post-comments-form input:not([type=submit]):not([type=checkbox]):not([type=radio]),
+.jetpack-contact-form .jetpack-field .jetpack-field__input,
+.jetpack-contact-form .jetpack-field .jetpack-field__textarea {
+    backdrop-filter: saturate(1.075);
+    background-color: transparent;
+    border-color: currentColor;
+    border-style: solid;
+    border-radius: 6px;
+    border-width: 1px;
+    box-shadow: none;
+    box-sizing: border-box;
+    color: currentColor;
+    filter: brightness(1.05);
+    font-size: var(--wp--preset--font-size--small);
+    font-weight: inherit;
+    line-height: 1.5;
+    min-height: 42px;
+    padding: 0.8rem 1rem;
+    width: 100%;
+}
+
+textarea:focus,
+input:not([type=submit]):focus,
+.wp-block-post-comments-form textarea:focus,
+.wp-block-post-comments-form input:not([type=submit]):not([type=checkbox]):not([type=radio]):focus {
+    outline: 1px solid currentColor;
+}
+
+/* Jetpack Forms: Clean up errors */
+
+.contact-form__error {
+    font-size: 13px;
+}
+
+.contact-form__input-error {
+	font-size: 13px;
+    gap: 8px;
+}
+
+.contact-form__input-error .contact-form__warning-icon {
+    border-width: 0;
+}
+
+/* Jetpack Forms: Animated block style tweaks */
+
+.contact-form .is-style-animated .grunion-field-wrap.grunion-field-select-wrap .animated-label__label label,
+.contact-form .is-style-animated .grunion-field-wrap .grunion-field.has-placeholder ~ .animated-label__label label,
+.contact-form .is-style-animated .grunion-field-wrap .grunion-field:focus ~ .animated-label__label label,
+.contact-form .is-style-animated .grunion-field-wrap .grunion-field:not(:placeholder-shown) ~ .animated-label__label label {
+	opacity: 0.7;
+    font-size: 11px;
+}
+
+
+/* Make sure footers have no margin. */
+
+footer {
+	margin-top: 0 !important;
+}
+
+/* Social Links: Better default color. */
+
+.wp-block-social-links.is-style-logos-only li.wp-social-link {
+	color: currentcolor;
+}
+
+.wp-block-social-links.is-style-logos-only .wp-social-link svg {
+	height: 1em;
+	width: 1em;
+}
+
+.wp-block-social-links.has-small-icon-size {
+	font-size: 20px;
+}
+
+/* Move header core/navigation to the right on mobile. */
+
+.order-0 {
+	order: 0;
+}
+
+.order-1 {
+	order: 1;
+}
+
+.grow-0 {
+	flex-grow: 0;
+}
+
+.grow {
+	flex-grow: 1;
+}
+
+@media (min-width: 600px) {
+
+	.md\:order-0 {
+		order: 0;
+	}
+
+	.md\:order-1 {
+		order: 1;
+	}
+
+	.md\:grow-0 {
+		flex-grow: 0;
+	}
+
+	.md\:grow {
+		flex-grow: 1;
+	}
+
+}
+
+.overflow-hidden {
+	overflow: hidden;
+}
