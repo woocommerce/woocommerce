@@ -32,7 +32,7 @@
 
 <!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":331,"aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2024/12/about-business-image.webp" alt="Antique bottles in a dimly lit arched alcove with a textured wall." class="wp-image-331" style="aspect-ratio:3/4;object-fit:cover"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/about-business-image.webp" alt="Antique bottles in a dimly lit arched alcove with a textured wall." class="wp-image-331" style="aspect-ratio:3/4;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
