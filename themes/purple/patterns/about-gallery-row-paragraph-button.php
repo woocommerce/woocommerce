@@ -16,25 +16,25 @@
 <!-- wp:columns {"isStackedOnMobile":false,"align":"wide","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|20"}}}} -->
 <div class="wp-block-columns alignwide is-not-stacked-on-mobile"><!-- wp:column {"verticalAlignment":"stretch","width":"25%"} -->
 <div class="wp-block-column is-vertically-aligned-stretch" style="flex-basis:25%"><!-- wp:image {"id":331,"aspectRatio":"1","scale":"cover","style":{"color":[]}} -->
-<figure class="wp-block-image"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2024/12/about-business-image-859x1024.webp" alt="Antique bottles in a dimly lit arched alcove with a textured wall." class="wp-image-331" style="aspect-ratio:1;object-fit:cover"/></figure>
+<figure class="wp-block-image"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/about-business-image-859x1024.webp" alt="Antique bottles in a dimly lit arched alcove with a textured wall." class="wp-image-331" style="aspect-ratio:1;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"stretch","width":"25%"} -->
 <div class="wp-block-column is-vertically-aligned-stretch" style="flex-basis:25%"><!-- wp:image {"id":493,"aspectRatio":"1","scale":"cover","style":{"color":[]}} -->
-<figure class="wp-block-image"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-necklace-closeup.jpg" alt="A double-strand turquoise beaded necklace with silver accents." class="wp-image-493" style="aspect-ratio:1;object-fit:cover"/></figure>
+<figure class="wp-block-image"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-necklace-closeup.jpg" alt="A double-strand turquoise beaded necklace with silver accents." class="wp-image-493" style="aspect-ratio:1;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"stretch","width":"25%"} -->
 <div class="wp-block-column is-vertically-aligned-stretch" style="flex-basis:25%"><!-- wp:image {"id":492,"aspectRatio":"1","scale":"cover","style":{"color":[]}} -->
-<figure class="wp-block-image"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-lamp-closeup.jpg" alt="A close-up of an old metal street lamp with a greenish interior, glowing against a gray background." class="wp-image-492" style="aspect-ratio:1;object-fit:cover"/></figure>
+<figure class="wp-block-image"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-lamp-closeup.jpg" alt="A close-up of an old metal street lamp with a greenish interior, glowing against a gray background." class="wp-image-492" style="aspect-ratio:1;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"stretch","width":"25%"} -->
 <div class="wp-block-column is-vertically-aligned-stretch" style="flex-basis:25%"><!-- wp:image {"id":491,"aspectRatio":"1","scale":"cover","style":{"color":[]}} -->
-<figure class="wp-block-image"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-gold-pendant-closeup.jpg" alt="A small, textured gold pendant with a teardrop shape on a white background." class="wp-image-491" style="aspect-ratio:1;object-fit:cover"/></figure>
+<figure class="wp-block-image"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-gold-pendant-closeup.jpg" alt="A small, textured gold pendant with a teardrop shape on a white background." class="wp-image-491" style="aspect-ratio:1;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
