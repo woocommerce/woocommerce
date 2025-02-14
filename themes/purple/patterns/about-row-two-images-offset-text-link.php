@@ -15,16 +15,16 @@
 
 <!-- wp:columns {"isStackedOnMobile":false,"align":"wide"} -->
 <div class="wp-block-columns alignwide is-not-stacked-on-mobile"><!-- wp:column {"width":"70%"} -->
-<div class="wp-block-column" style="flex-basis:70%"><!-- wp:cover {"url":"https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-vintage-bracelet.jpg","id":483,"alt":"A vintage silver cuff bracelet with square turquoise stone inlays.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-483" alt="A vintage silver cuff bracelet with square turquoise stone inlays." src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-vintage-bracelet.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-column" style="flex-basis:70%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-bracelet.jpg","id":483,"alt":"A vintage silver cuff bracelet with square turquoise stone inlays.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
+<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-483" alt="A vintage silver cuff bracelet with square turquoise stone inlays." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-bracelet.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"30%"} -->
-<div class="wp-block-column" style="flex-basis:30%"><!-- wp:cover {"url":"https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-fabric-close-up.jpg","id":453,"alt":"A close-up of loosely woven burlap fabric with a rough texture.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-453" alt="A close-up of loosely woven burlap fabric with a rough texture." src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-fabric-close-up.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-column" style="flex-basis:30%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-fabric-close-up.jpg","id":453,"alt":"A close-up of loosely woven burlap fabric with a rough texture.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
+<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-453" alt="A close-up of loosely woven burlap fabric with a rough texture." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-fabric-close-up.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
