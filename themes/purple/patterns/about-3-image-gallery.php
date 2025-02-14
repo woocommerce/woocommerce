@@ -16,19 +16,19 @@
 <!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":436,"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-vintage-rug.jpg" alt="A dark fabric with an intricate golden pattern depicting figures, animals, and trees." class="wp-image-436"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-rug.jpg" alt="A dark fabric with an intricate golden pattern depicting figures, animals, and trees." class="wp-image-436"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":423,"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-ceramic-cup.jpg" alt="A glossy, hand-crafted brown ceramic cup with an organic shape." class="wp-image-423"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-cup.jpg" alt="A glossy, hand-crafted brown ceramic cup with an organic shape." class="wp-image-423"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":437,"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-vintage-necklace.jpg" alt="A handmade necklace with large, irregularly shaped stone beads in earthy tones." class="wp-image-437"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-necklace.jpg" alt="A handmade necklace with large, irregularly shaped stone beads in earthy tones." class="wp-image-437"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
