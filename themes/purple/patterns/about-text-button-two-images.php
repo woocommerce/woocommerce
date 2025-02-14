@@ -41,16 +41,16 @@
 
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"%"} -->
-<div class="wp-block-column"><!-- wp:cover {"url":"https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-clay-pots-on-a-row-scaled.jpg","id":420,"alt":"A row of rustic clay pots hanging against a woven reed wall.","dimRatio":0,"align":"wide","style":{"color":[]}} -->
-<div class="wp-block-cover alignwide"><img class="wp-block-cover__image-background wp-image-420" alt="A row of rustic clay pots hanging against a woven reed wall." src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-clay-pots-on-a-row-scaled.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-column"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-clay-pots-on-a-row.webp","id":420,"alt":"A row of rustic clay pots hanging against a woven reed wall.","dimRatio":0,"align":"wide","style":{"color":[]}} -->
+<div class="wp-block-cover alignwide"><img class="wp-block-cover__image-background wp-image-420" alt="A row of rustic clay pots hanging against a woven reed wall." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-clay-pots-on-a-row.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"20%"} -->
-<div class="wp-block-column" style="flex-basis:20%"><!-- wp:cover {"url":"https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-ceramic-decoration-1024x851.jpg","id":417,"alt":"A stone-like ceramic vessel shaped like a bird with intricate carvings.","dimRatio":0,"focalPoint":{"x":0,"y":1},"isDark":false,"style":{"color":[]}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-417" alt="A stone-like ceramic vessel shaped like a bird with intricate carvings." src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-ceramic-decoration-1024x851.jpg" style="object-position:0% 100%" data-object-fit="cover" data-object-position="0% 100%"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-column" style="flex-basis:20%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp","id":417,"alt":"A stone-like ceramic vessel shaped like a bird with intricate carvings.","dimRatio":0,"focalPoint":{"x":0,"y":1},"isDark":false,"style":{"color":[]}} -->
+<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-417" alt="A stone-like ceramic vessel shaped like a bird with intricate carvings." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp" style="object-position:0% 100%" data-object-fit="cover" data-object-position="0% 100%"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
