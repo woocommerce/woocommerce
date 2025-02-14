@@ -16,7 +16,7 @@
 <!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"stretch"}} -->
 <div class="wp-block-group alignwide"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
@@ -30,7 +30,7 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
@@ -44,7 +44,7 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
@@ -58,7 +58,7 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
