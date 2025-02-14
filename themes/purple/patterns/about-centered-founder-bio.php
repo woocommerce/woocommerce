@@ -28,7 +28,7 @@
 <!-- /wp:spacer -->
 
 <!-- wp:image {"id":189,"aspectRatio":"1","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2024/11/tempImagepYO0T3.jpg" alt="A soft-focus black and white portrait of a woman sitting outdoors with a large dog, surrounded by trees." class="wp-image-189" style="aspect-ratio:1;object-fit:cover"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/about-founder-image.webp" alt="A soft-focus black and white portrait of a woman sitting outdoors with a large dog, surrounded by trees." class="wp-image-189" style="aspect-ratio:1;object-fit:cover"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|20"} -->
