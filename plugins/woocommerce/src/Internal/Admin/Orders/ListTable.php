@@ -809,7 +809,6 @@ class ListTable extends WP_List_Table {
 	 * current month.
 	 *
 	 * @return \stdClass[]
-	 * @throws \DateMalformedStringException
 	 */
 	protected function get_months_filter_options(): array {
 		global $wpdb;
