@@ -104,9 +104,9 @@
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 
-<!-- wp:image {"width":"300px"} -->
-<figure class="wp-block-image is-resized"><img src="https://kiri.mystagingwebsite.com/wp-content/themes/kiri/assets/images/woo-payment-icons.png" alt="" style="width:300px"/></figure>
-<!-- /wp:image --></div>
+<!-- wp:paragraph -->
+<p>[Shops Icons]</p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|40"} -->
