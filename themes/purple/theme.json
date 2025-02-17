@@ -196,10 +196,90 @@
 						},
 						{
 							"fontFamily": "Platypi",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-400-normal.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "normal",
+							"fontWeight": "500",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-500-normal.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "normal",
+							"fontWeight": "600",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-600-normal.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "normal",
+							"fontWeight": "700",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-700-normal.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "normal",
+							"fontWeight": "800",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-800-normal.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
 							"fontStyle": "italic",
 							"fontWeight": "300",
 							"src": [
 								"file:./assets/fonts/platypi/platypi-300-italic.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "italic",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-400-italic.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "italic",
+							"fontWeight": "500",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-500-italic.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "italic",
+							"fontWeight": "600",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-600-italic.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "italic",
+							"fontWeight": "700",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-700-italic.woff2"
+							]
+						},
+						{
+							"fontFamily": "Platypi",
+							"fontStyle": "italic",
+							"fontWeight": "800",
+							"src": [
+								"file:./assets/fonts/platypi/platypi-800-italic.woff2"
 							]
 						}
 					],
@@ -210,7 +290,10 @@
 			],
 			"fontSizes": [
 				{
-					"fluid": false,
+					"fluid": {
+						"max": "14px",
+						"min": "12px"
+					},
 					"name": "Small",
 					"size": "14px",
 					"slug": "small"
@@ -280,10 +363,7 @@
 			},
 			"core/buttons": {
 				"spacing": {
-					"blockGap": "8px",
-					"margin": {
-						"top": "calc( var(--wp--style--block-gap) * 1.5)"
-					}
+					"blockGap": "8px"
 				}
 			},
 			"core/columns": {
@@ -295,6 +375,18 @@
 				}
 			},
 			"core/navigation": {
+				"elements": {
+					"link": {
+						":hover": {
+							"typography": {
+								"textDecoration": "underline"
+							}
+						},
+						"typography": {
+							"textDecoration": "none"
+						}
+					}
+				},
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)"
 				}
@@ -365,7 +457,7 @@
 					}
 				},
 				"color": {
-					"text": "var(--wp--preset--color--theme-5)"
+					"text": "var(--wp--preset--color--theme-3)"
 				}
 			},
 			"core/site-title": {
@@ -377,9 +469,10 @@
 					}
 				},
 				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--platypi)",
 					"fontSize": "var(--wp--preset--font-size--large)",
 					"fontStyle": "normal",
-					"fontWeight": "500"
+					"fontWeight": "400"
 				}
 			}
 		},
@@ -387,12 +480,12 @@
 			"background": "var(--wp--preset--color--theme-1)",
 			"text": "var(--wp--preset--color--theme-5)"
 		},
-		"css": ".no-underline a { text-decoration: none; }",
+		"css": "",
 		"elements": {
 			"button": {
 				":hover": {
 					"color": {
-						"background": "color-mix(in srgb, var(--wp--preset--color--theme-5) 85%, #000)"
+						"background": "color-mix(in srgb, var(--wp--preset--color--theme-5) 85%, #FFF)"
 					}
 				},
 				"border": {
