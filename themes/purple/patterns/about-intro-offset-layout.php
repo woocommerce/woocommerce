@@ -28,7 +28,7 @@
 <!-- /wp:spacer -->
 
 <!-- wp:image {"id":411,"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-glasses.jpg" alt="" class="wp-image-411"/></figure>
+<figure class="wp-block-image size-full"><img src="?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-glasses.jpg" alt="" class="wp-image-411"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|50"} -->
@@ -38,7 +38,7 @@
 
 <!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":412,"aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="https://kiri.mystagingwebsite.com/wp-content/uploads/2025/02/pattern-abstract.jpg" alt="A black and white abstract composition of curved paper with light and shadow." class="wp-image-412" style="aspect-ratio:3/4;object-fit:cover"/></figure>
+<figure class="wp-block-image size-full"><img src="?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-abstract.jpg" alt="A black and white abstract composition of curved paper with light and shadow." class="wp-image-412" style="aspect-ratio:3/4;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
