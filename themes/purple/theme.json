@@ -39,27 +39,27 @@
 			"palette": [
 				{
 					"color": "#FFFFFF",
-					"name": "Color 1",
+					"name": "Background",
 					"slug": "theme-1"
 				},
 				{
-					"color": "#F7F7F7",
-					"name": "Color 2",
+					"color": "#FBFAF3",
+					"name": "Tertiary",
 					"slug": "theme-2"
 				},
 				{
-					"color": "#d1d1d1",
-					"name": "Color 3",
+					"color": "#686868",
+					"name": "Secondary",
 					"slug": "theme-3"
 				},
 				{
-					"color": "#626262",
-					"name": "Color 4",
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Opacity 20%",
 					"slug": "theme-4"
 				},
 				{
 					"color": "#111111",
-					"name": "Color 5",
+					"name": "Primary",
 					"slug": "theme-5"
 				}
 			]
@@ -70,7 +70,7 @@
 		},
 		"layout": {
 			"contentSize": "620px",
-			"wideSize": "1440px"
+			"wideSize": "1340px"
 		},
 		"spacing": {
 			"defaultSpacingSizes": false,
@@ -82,17 +82,17 @@
 			"spacingSizes": [
 				{
 					"name": "Tiny",
-					"size": "10px",
+					"size": "clamp(4px, 1vw, 10px)",
 					"slug": "20"
 				},
 				{
 					"name": "X-Small",
-					"size": "20px",
+					"size": "clamp(10px, 2vw, 20px)",
 					"slug": "30"
 				},
 				{
 					"name": "Small",
-					"size": "30px",
+					"size": "clamp(20px, 3vw, 30px)",
 					"slug": "40"
 				},
 				{
@@ -122,170 +122,19 @@
 			"fluid": true,
 			"fontFamilies": [
 				{
-					"fontFace": [
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "200",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-200-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "300",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-300-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "400",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-400-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "500",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-500-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "600",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-600-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "700",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-700-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Manrope",
-							"fontStyle": "normal",
-							"fontWeight": "800",
-							"src": [
-								"file:./assets/fonts/manrope/manrope-800-normal.woff2"
-							]
-						}
-					],
-					"fontFamily": "Manrope, sans-serif",
 					"name": "Manrope",
-					"slug": "manrope"
-				},
-				{
+					"slug": "manrope",
+					"fontFamily": "Manrope, sans-serif",
 					"fontFace": [
 						{
-							"fontFamily": "Platypi",
+							"src": [
+								"file:./assets/fonts/manrope/Manrope-VariableFont_wght.woff2"
+							],
+							"fontWeight": "200 800",
 							"fontStyle": "normal",
-							"fontWeight": "300",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-300-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "normal",
-							"fontWeight": "400",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-400-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "normal",
-							"fontWeight": "500",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-500-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "normal",
-							"fontWeight": "600",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-600-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "normal",
-							"fontWeight": "700",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-700-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "normal",
-							"fontWeight": "800",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-800-normal.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "italic",
-							"fontWeight": "300",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-300-italic.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "italic",
-							"fontWeight": "400",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-400-italic.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "italic",
-							"fontWeight": "500",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-500-italic.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "italic",
-							"fontWeight": "600",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-600-italic.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "italic",
-							"fontWeight": "700",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-700-italic.woff2"
-							]
-						},
-						{
-							"fontFamily": "Platypi",
-							"fontStyle": "italic",
-							"fontWeight": "800",
-							"src": [
-								"file:./assets/fonts/platypi/platypi-800-italic.woff2"
-							]
+							"fontFamily": "Manrope"
 						}
-					],
-					"fontFamily": "Platypi, serif",
-					"name": "Platypi",
-					"slug": "platypi"
+					]
 				}
 			],
 			"fontSizes": [
@@ -299,39 +148,36 @@
 					"slug": "small"
 				},
 				{
-					"fluid": {
-						"max": "20px",
-						"min": "16px"
-					},
+					"fluid": false,
 					"name": "Medium",
-					"size": "26px",
+					"size": "16px",
 					"slug": "medium"
 				},
 				{
 					"fluid": {
-						"max": "26px",
-						"min": "20px"
+						"max": "22px",
+						"min": "16px"
 					},
 					"name": "Large",
-					"size": "24px",
+					"size": "22px",
 					"slug": "large"
 				},
 				{
 					"fluid": {
-						"max": "32px",
+						"max": "28px",
 						"min": "22px"
 					},
 					"name": "Extra Large",
-					"size": "40px",
+					"size": "28px",
 					"slug": "x-large"
 				},
 				{
 					"fluid": {
 						"max": "42px",
-						"min": "38px"
+						"min": "34.4px"
 					},
 					"name": "2X Large",
-					"size": "74px",
+					"size": "42px",
 					"slug": "xx-large"
 				}
 			],
@@ -345,17 +191,24 @@
 				"border": {
 					"radius": "999px"
 				},
+				"typography": {
+					"fontSize": "18px",
+					"lineHeight": "1.1",
+					"letterSpacing": "-0.36px"
+				},
 				"variations": {
 					"outline": {
 						"border": {
+							"color": "currentColor",
 							"width": "1px"
 						},
+						"css": ".wp-block-button__link:not(.has-background):hover {background-color:color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent);}",
 						"spacing": {
 							"padding": {
-								"bottom": "13px",
-								"left": "21px",
-								"right": "21px",
-								"top": "13px"
+								"bottom": "calc(1rem - 1px)",
+								"left": "calc(2.25rem - 1px)",
+								"right": "calc(2.25rem - 1px)",
+								"top": "calc(1rem - 1px)"
 							}
 						}
 					}
@@ -363,7 +216,10 @@
 			},
 			"core/buttons": {
 				"spacing": {
-					"blockGap": "8px"
+					"blockGap": "16px",
+					"margin": {
+						"top": "calc( var(--wp--style--block-gap) * 1.5)"
+					}
 				}
 			},
 			"core/columns": {
@@ -457,7 +313,7 @@
 					}
 				},
 				"color": {
-					"text": "var(--wp--preset--color--theme-3)"
+					"text": "var(--wp--preset--color--theme-5)"
 				}
 			},
 			"core/site-title": {
@@ -597,7 +453,7 @@
 			"fontFamily": "var(--wp--preset--font-family--manrope)",
 			"fontSize": "16px",
 			"fontStyle": "normal",
-			"fontWeight": "300",
+			"fontWeight": "400",
 			"lineHeight": "1.6"
 		}
 	},
