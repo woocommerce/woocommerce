@@ -74,7 +74,7 @@ class CacheAction {
 				'cache_key'           => null,
 				'force_refresh'       => false,
 				'interval_in_seconds' => DAY_IN_SECONDS,
-				'is_cached'           => array( $this, 'is_cached' ),
+				'is_cached'           => null,
 			)
 		);
 
@@ -89,15 +89,15 @@ class CacheAction {
 	/**
 	 * Validate and throw errors on action args if required args are missing.
 	 *
-	 * @throws \Exception
+	 * @throws \InvalidArgumentException
 	 */
 	private function validate_action_args( $args ) {
 		if ( ! isset( $args['id' ] ) ) {
-			throw new \Exception( __( 'Background cache action must include an ID argument', 'woocommerce' ) );
+			throw new \InvalidArgumentException( __( 'Background cache action must include an ID argument', 'woocommerce' ) );
 		}
 
-		if ( ! isset( $args['callback' ] ) ) {
-			throw new \Exception( __( 'Background cache action must include a callback argument', 'woocommerce' ) );
+		if ( ! isset( $args['callback' ] ) || ! is_callable( $args['callback'] ) ) {
+			throw new \InvalidArgumentException( __( 'Background cache action must include a callable callback argument', 'woocommerce' ) );
 		}
 	}
 
@@ -126,11 +126,15 @@ class CacheAction {
 	 * @return bool
 	 */
 	public function is_cached() {
-		if ( $this->is_cached ) {
+		if ( is_callable( $this->is_cached ) ) {
 			return call_user_func( $this->is_cached, $this->cache_key );
 		}
 
-		return false !== wp_cache_get( $this->cache_key );
+		if ( $this->cache_key ) {
+			return false !== wp_cache_get( $this->cache_key );
+		}
+
+		return false;
 	}
 
 	/**
@@ -145,7 +149,7 @@ class CacheAction {
 		}
 
 		if ( ! $this->is_cached() ) {
-			call_user_func( $action['callback'] );
+			call_user_func( $this->callback );
 		}
 	}
 }

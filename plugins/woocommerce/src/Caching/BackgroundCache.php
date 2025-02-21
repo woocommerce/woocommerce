@@ -21,7 +21,7 @@ class BackgroundCache {
 	const UNSCHEDULE_HOOK_NAME = 'woocommerce_background_caching_unschedule';
 	
 	/**
-	 * Registered actions.
+	 * Scheduled actions.
 	 *
 	 * @var array {
 	 *     An array of action arguments.
@@ -33,7 +33,7 @@ class BackgroundCache {
 	 *     @type callable $is_cached           A function that determines if the respective cache still exists.  Should return a boolean.
 	 * }
 	 */
-	private $registered_actions = array();
+	private $scheduled_actions = array();
 
 	/**
 	 * Initialize the background scheduler.
@@ -44,21 +44,21 @@ class BackgroundCache {
 	}
 
 	/**
-	 * Register an action to run in the background.
+	 * Schedule an action to run in the background.
 	 *
 	 * @param CacheAction
 	 * @return void
 	 */
-	public function register_action( $background_cache_action ) {
+	public function schedule_action( $background_cache_action ) {
 		if ( ! is_a( $background_cache_action, CacheAction::class ) ) {
-			throw new \Exception( 'Background cache action must be an instance of CacheAction' );
+			throw new \InvalidArgumentException( 'Background cache action must be an instance of CacheAction' );
 		}
 
 		if ( function_exists( 'as_schedule_recurring_action' ) && false === as_next_scheduled_action( self::BACKGROUND_HOOK_NAME, array( $background_cache_action->get_id() ) ) ) {
 			as_schedule_recurring_action( time(), $background_cache_action->get_interval(), self::BACKGROUND_HOOK_NAME, array( $background_cache_action->get_id() ) );
+			$this->scheduled_actions[ $background_cache_action->get_id() ] = $background_cache_action;
 		}
 
-		$this->registered_actions[ $background_cache_action->get_id() ] = $background_cache_action;
 	}
 
 	/**
@@ -79,7 +79,7 @@ class BackgroundCache {
 	 * @return void
 	 */
 	public function run_callback( $id ) {
-		$action = $this->registered_actions[ $id ] ?? null;
+		$action = $this->scheduled_actions[ $id ] ?? null;
 
 		if ( ! $action ) {
 			as_enqueue_async_action( self::UNSCHEDULE_HOOK_NAME, array( $id ) );
