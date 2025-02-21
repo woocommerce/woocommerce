@@ -65,7 +65,6 @@ class OrderCountCacheService {
 			$background_cache_action = new CacheAction(
 				array(
 					'callback'            => function() use ( $order_type ) {
-						error_log( 'Removing order count cache for ' . $order_type );
 						$this->order_count_cache->remove( $order_type );
 						OrderUtil::get_count_for_type( $order_type );
 					},
