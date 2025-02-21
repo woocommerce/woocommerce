@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Add background cache to refresh expensive queries
