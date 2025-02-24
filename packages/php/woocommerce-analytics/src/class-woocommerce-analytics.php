@@ -19,7 +19,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Package version.
 	 */
-	const PACKAGE_VERSION = '0.4.1';
+	const PACKAGE_VERSION = '0.4.2';
 
 	/**
 	 * Initializer.
