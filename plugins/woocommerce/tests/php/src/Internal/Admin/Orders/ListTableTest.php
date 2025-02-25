@@ -103,4 +103,52 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( end( $year_months )->year, 1991 );
 		$this->assertEquals( end( $year_months )->month, 1 );
 	}
+
+	/**
+	 * @testdox Using the simplified option for the months filter works as expected.
+	 */
+	public function test_get_and_maybe_update_months_filter_cache_simplified() {
+		update_option( 'wc_shop_order_list_table_months_filter_simplified', true );
+
+		$start_date     = new \WC_DateTime( '2020-03-01 00:00:00' );
+		$current_date   = new \WC_DateTime();
+		$expected_count = $this->get_months_count( $start_date, $current_date );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_date_created( $start_date );
+		$order->save();
+
+		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut );
+
+		$this->assertCount( $expected_count, $year_months );
+		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
+		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
+		$this->assertEquals( end( $year_months )->year, 2020 );
+		$this->assertEquals( end( $year_months )->month, 3 );
+
+		delete_option( 'wc_shop_order_list_table_months_filter_simplified' );
+	}
+
+	/**
+	 * Get the total number of year-month items there should be between two dates.
+	 *
+	 * Note that this is different than calculating the elapsed time between the two dates. For this we instead care
+	 * about which year-months from the calendar are present.
+	 *
+	 * @param \DateTime $start
+	 * @param \DateTime $end
+	 *
+	 * @return int
+	 */
+	private function get_months_count( \DateTime $start, \DateTime $end ): int {
+		$start_year  = (int) $start->format( 'Y' );
+		$start_month = (int) $start->format( 'n' );
+		$end_year    = (int) $end->format( 'Y' );
+		$end_month   = (int) $end->format( 'n' );
+
+		$months_from_years = ( $end_year - $start_year ) * 12;
+		$start_month_diff  = $start_month - 1;
+
+		return $months_from_years - $start_month_diff + $end_month;
+	}
 }
