@@ -104,7 +104,7 @@ abstract class CustomMetaDataStore {
 
 		$db_info = $this->get_db_info();
 
-		$object_id  = $object->get_id();
+		$object_id = $object->get_id();
 		if ( ! $object_id ) {
 			return false;
 		}
