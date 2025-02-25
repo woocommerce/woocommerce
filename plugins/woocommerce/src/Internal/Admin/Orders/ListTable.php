@@ -837,7 +837,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		// Option to use a simplified, more performant method for building the months options list.
-		$use_simplified_months_options = get_option( 'wc_' . $this->order_type . '_list_table_months_filter_simplified', false );
+		$use_simplified_months_options = boolval( get_option( 'wc_' . $this->order_type . '_list_table_months_filter_simplified', false ) );
 
 		if ( true === $use_simplified_months_options ) {
 			$order_dates = $this->get_simplified_months_filter_options();
