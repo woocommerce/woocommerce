@@ -165,18 +165,22 @@ test.beforeAll( async ( { browser, restApi } ) => {
 		} );
 
 	// Reset Analytics Settings to their default values.
-	// Setting options can be found at plugins/woocommerce/src/Internal/Admin/Settings.php.
-	await wcAdminApi.post( 'options', {
-		woocommerce_excluded_report_order_statuses: [
-			'pending',
-			'cancelled',
-			'failed',
-		],
-	} );
-	await wcAdminApi.post( 'options', {
+	await wcAdminApi
+		.put( 'options', {
+			woocommerce_excluded_report_order_statuses: [
+				'pending',
+				'cancelled',
+				'failed',
+			],
+		} )
+		.then( ( response ) => {
+			console.log( response );
+		} )
+		.catch( ( error ) => console.log( error ) );
+	await wcAdminApi.put( 'options', {
 		woocommerce_actionable_order_statuses: [ 'processing', 'on-hold' ],
 	} );
-	await wcAdminApi.post( 'options', {
+	await wcAdminApi.put( 'options', {
 		woocommerce_default_date_range: 'period=month&compare=previous_year',
 	} );
 
