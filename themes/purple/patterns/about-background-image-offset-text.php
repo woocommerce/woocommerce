@@ -6,10 +6,12 @@
  * Keywords: about, text, icons, cover, story
  * Description: A section with a background image and some offset text.
  *
-
+ */
 ?>
-<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/home-pattern-cover-image-1024x572.webp","id":217,"alt":"A black and white abstract composition of curved paper with light and shadow.","dimRatio":30,"overlayColor":"contrast","isUserOverlayColor":true,"minHeight":100,"minHeightUnit":"vh","sizeSlug":"full","metadata":{"name":"Background image, offset text and link"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-cover alignfull" style="margin-top:0;margin-bottom:0;min-height:100vh"><img class="wp-block-cover__image-background wp-image-217 size-full" alt="A black and white abstract composition of curved paper with light and shadow." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/home-pattern-cover-image-1024x572.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-30 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:columns {"align":"wide"} -->
+
+
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/home-pattern-cover-image-1024x572.webp","id":217,"alt":"A black and white abstract composition of curved paper with light and shadow.","dimRatio":30,"overlayColor":"contrast","isUserOverlayColor":true,"minHeight":100,"minHeightUnit":"vh","metadata":{"name":"Background image, offset text and link","categories":["about"],"patternName":"woostarter/background-image-offset-text-link"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-cover alignfull" style="margin-top:0;margin-bottom:0;min-height:100vh"><span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-30 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-217" alt="A black and white abstract composition of curved paper with light and shadow." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/home-pattern-cover-image-1024x572.webp" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"33.33%"} -->
 <div class="wp-block-column" style="flex-basis:33.33%"></div>
 <!-- /wp:column -->

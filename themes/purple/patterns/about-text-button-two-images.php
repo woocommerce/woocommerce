@@ -6,9 +6,10 @@
  * Keywords: about, text, story
  * Description: A section with text, button and two images.
  *
-
+ */
 ?>
-<!-- wp:group {"metadata":{"categories":["intro"],"name":"Text, button and two images","patternName":"a8c/intro-two-column-with-image-and-content"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+
+<!-- wp:group {"metadata":{"categories":["about"],"name":"Text, button and two images","patternName":"woostarter/text-button-two-images"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
@@ -42,7 +43,7 @@
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"%"} -->
 <div class="wp-block-column"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-clay-pots-on-a-row.webp","id":420,"alt":"A row of rustic clay pots hanging against a woven reed wall.","dimRatio":0,"align":"wide","style":{"color":[]}} -->
-<div class="wp-block-cover alignwide"><img class="wp-block-cover__image-background wp-image-420" alt="A row of rustic clay pots hanging against a woven reed wall." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-clay-pots-on-a-row.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-cover alignwide"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-420" alt="A row of rustic clay pots hanging against a woven reed wall." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-clay-pots-on-a-row.webp" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
@@ -50,7 +51,7 @@
 
 <!-- wp:column {"width":"20%"} -->
 <div class="wp-block-column" style="flex-basis:20%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp","id":417,"alt":"A stone-like ceramic vessel shaped like a bird with intricate carvings.","dimRatio":0,"focalPoint":{"x":0,"y":1},"isDark":false,"style":{"color":[]}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-417" alt="A stone-like ceramic vessel shaped like a bird with intricate carvings." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp" style="object-position:0% 100%" data-object-fit="cover" data-object-position="0% 100%"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-cover is-light"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-417" alt="A stone-like ceramic vessel shaped like a bird with intricate carvings." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp" style="object-position:0% 100%" data-object-fit="cover" data-object-position="0% 100%"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>

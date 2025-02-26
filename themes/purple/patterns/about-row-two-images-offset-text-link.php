@@ -6,25 +6,26 @@
  * Keywords: about, text
  * Description: A section with two images, offset text and link.
  *
-
+ */
 ?>
-<!-- wp:group {"metadata":{"categories":["intro"],"name":"Two image row, offset text and link","patternName":"a8c/intro-two-column-with-image-and-content"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+
+<!-- wp:group {"metadata":{"categories":["about"],"name":"Two image row, offset text and link","patternName":"woostarter/two-image-row-offset-text-link"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|40"} -->
 <div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:columns {"isStackedOnMobile":false,"align":"wide"} -->
 <div class="wp-block-columns alignwide is-not-stacked-on-mobile"><!-- wp:column {"width":"70%"} -->
-<div class="wp-block-column" style="flex-basis:70%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-bracelet.jpg","id":483,"alt":"A vintage silver cuff bracelet with square turquoise stone inlays.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-483" alt="A vintage silver cuff bracelet with square turquoise stone inlays." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-bracelet.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-column" style="flex-basis:70%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-bracelet.webp","id":483,"alt":"A vintage silver cuff bracelet with square turquoise stone inlays.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
+<div class="wp-block-cover is-light"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-483" alt="A vintage silver cuff bracelet with square turquoise stone inlays." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-vintage-bracelet.webp" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"30%"} -->
-<div class="wp-block-column" style="flex-basis:30%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-fabric-close-up.jpg","id":453,"alt":"A close-up of loosely woven burlap fabric with a rough texture.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-453" alt="A close-up of loosely woven burlap fabric with a rough texture." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-fabric-close-up.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<div class="wp-block-column" style="flex-basis:30%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-fabric-close-up.webp","id":453,"alt":"A close-up of loosely woven burlap fabric with a rough texture.","dimRatio":0,"isDark":false,"style":{"color":[]}} -->
+<div class="wp-block-cover is-light"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-453" alt="A close-up of loosely woven burlap fabric with a rough texture." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-fabric-close-up.webp" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>

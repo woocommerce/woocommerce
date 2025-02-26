@@ -8,8 +8,9 @@
  * Block Types: core/query
  * Inserter: yes
  *
-
+ */
 ?>
+
 <!-- wp:group {"metadata":{"name":"3-column blog section"},"align":"full","className":"is-style-section-3","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull is-style-section-3" style="margin-top:0;margin-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>

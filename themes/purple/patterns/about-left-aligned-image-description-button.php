@@ -6,13 +6,14 @@
  * Keywords: about, text
  * Description: A section with an image on the left, description and button on the right.
  *
-
+ */
 ?>
-<!-- wp:group {"metadata":{"name":"Image on the left, description on the right"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->
+
+<!-- wp:group {"metadata":{"name":"Image on the left, description on the right","categories":["about"],"patternName":"woostarter/left-aligned-image-description-button"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0"><!-- wp:columns {"align":"wide","className":"is-style-default","style":{"spacing":{"blockGap":{"left":"0"}}}} -->
 <div class="wp-block-columns alignwide is-style-default"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
-<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp","id":417,"dimRatio":0,"customOverlayColor":"#dedede","isUserOverlayColor":false,"isDark":false,"sizeSlug":"full","style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background wp-image-417 size-full" alt="" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim" style="background-color:#dedede"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
+<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp","id":417,"dimRatio":0,"customOverlayColor":"#dedede","isUserOverlayColor":false,"isDark":false,"style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
+<div class="wp-block-cover is-light"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim" style="background-color:#dedede"></span><img class="wp-block-cover__image-background wp-image-417" alt="" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-ceramic-decoration.webp" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
@@ -35,3 +36,7 @@
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph -->

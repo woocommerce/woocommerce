@@ -6,8 +6,9 @@
  * Keywords: about, text, icons, bio, story
  * Description: A section with a heading, image, paragraph and button.
  *
-
+ */
 ?>
+
 <!-- wp:group {"metadata":{"categories":["intro"],"name":"Centered founder bio/story","patternName":"a8c/intro-two-column-with-image-and-content"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|70"} -->
 <div style="height:var(--wp--preset--spacing--70)" aria-hidden="true" class="wp-block-spacer"></div>
