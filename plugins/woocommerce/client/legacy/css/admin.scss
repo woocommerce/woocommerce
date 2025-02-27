@@ -8875,8 +8875,11 @@ body.woocommerce_page_wc-settings {
 
 		.subsubsub {
 			margin: 0 0 24px 0;
-			li:first-child a {
-				padding-left: 0;
+			li {
+				color: #2271b1;
+				&:first-child a{
+					padding: 0;
+				}
 			}
 		}
 	}
