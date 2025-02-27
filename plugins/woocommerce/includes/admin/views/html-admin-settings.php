@@ -58,21 +58,23 @@ $hide_nav = Features::is_enabled( 'reactify-classic-payments-settings' ) &&
 				?>
 			</nav>
 		<?php endif; ?>
-		<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
-		<?php
-			do_action( 'woocommerce_sections_' . $current_tab );
+		<div class="settings-content">
+			<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
+			<?php
+				do_action( 'woocommerce_sections_' . $current_tab );
 
-			WC_Admin_Settings::show_messages();
+				WC_Admin_Settings::show_messages();
 
-			do_action( 'woocommerce_settings_' . $current_tab );
-			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
-		?>
-		<p class="submit">
-			<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>
-				<button name="save" disabled class="woocommerce-save-button components-button is-primary" type="submit" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
-			<?php endif; ?>
-			<?php wp_nonce_field( 'woocommerce-settings' ); ?>
-		</p>
+				do_action( 'woocommerce_settings_' . $current_tab );
+				do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
+			?>
+			<p class="submit">
+				<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>
+					<button name="save" disabled class="woocommerce-save-button components-button is-primary" type="submit" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+				<?php endif; ?>
+				<?php wp_nonce_field( 'woocommerce-settings' ); ?>
+			</p>
+		</div>
 	</form>
 	<?php do_action( 'woocommerce_after_settings_' . $current_tab ); ?>
 </div>
