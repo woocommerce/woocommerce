@@ -68,6 +68,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
+				add_action(
+					'admin_head',
+					function () {
+						if ( function_exists( 'get_current_screen' ) ) {
+							$screen = get_current_screen();
+							if ( $screen->id === 'woocommerce_page_wc-settings' ) {
+								$screen->remove_help_tabs();
+							}
+						}
+					}
+				);
 			}
 
 			return self::$settings;
