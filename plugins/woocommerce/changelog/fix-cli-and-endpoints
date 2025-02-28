@@ -1,0 +1,6 @@
+Significance: minor
+Type: fix
+
+- Adding header validation to prevent this error:
+`PHP Warning:  Undefined array key "X-WP-Total" in /app/wordpress/wp-content/plugins/woocommerce/includes/cli/class-wc-cli-rest-command.php on line 239`
+- Adding `X-WP-Total` and `X-WP-TotalPages` header on `tax_class` and `payment_gateway` endpoints.
