@@ -8889,27 +8889,32 @@ body.woocommerce_page_wc-settings {
 	}
 
 	.nav-tab-wrapper {
+		ol {
+			display: flex;
+			flex-wrap: wrap;
+			list-style: none;
+			margin: 0 0 4px 30px;
+			gap: 24px;
+			li {
+				a {
+					border: 0;
+					background: none;
+					font-weight: 510;
+					font-size: 14px;
+					line-height: 20px;
+					color: #505050;
+					padding: 0 0 10px 0;
+					text-decoration: none;
+					&:focus, &:hover, &:active {
+						outline: none;
+						box-shadow: none;
+					}
+				}
+			}
+		}
 		margin: 0;
 		background: #FFF;
 		border-bottom: 1px solid #EBEBEB;
-		a:first-child {
-			margin-left: 30px;
-		}
-
-		.nav-tab {
-			border: 0;
-			background: none;
-			font-weight: 510;
-			font-size: 14px;
-			line-height: 20px;
-			color: #505050;
-			margin: 0 30px 0 0;
-			padding: 0 0 10px 0;
-			&:focus, &:hover, &:active {
-				outline: none;
-				box-shadow: none;
-			}
-		}
 
 		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
 			border-bottom: 2px solid #3858E9;
@@ -8917,3 +8922,4 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 }
+
