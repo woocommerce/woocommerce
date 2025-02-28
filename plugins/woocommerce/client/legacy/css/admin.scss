@@ -8852,6 +8852,12 @@ body.woocommerce_page_wc-settings {
 		background: #FCFCFC;
 	}
 
+	.woocommerce-layout__primary {
+		@media screen and (max-width: 782px) {
+			padding-top: 0 !important;
+		}
+	}
+
 	.woocommerce-layout__header-heading {
 		padding: 0 0 0 30px;
 		font-weight: 590;
