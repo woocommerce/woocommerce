@@ -239,7 +239,7 @@ class WC_CLI_REST_Command {
 			if ( isset( $headers['X-WP-Total'] ) ) {
 				echo (int) $headers['X-WP-Total'];
 			} else {
-				echo "Notice: Count format not implemented yet\n\r";
+				WP_CLI::error( 'Count format not implemented yet.' );
 			}
 		} elseif ( 'headers' === $assoc_args['format'] ) {
 			echo wp_json_encode( $headers );
