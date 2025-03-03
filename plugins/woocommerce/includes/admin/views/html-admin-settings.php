@@ -46,7 +46,7 @@ $hide_nav = Features::is_enabled( 'reactify-classic-payments-settings' ) &&
 				<?php
 
 				foreach ( $tabs as $slug => $label ) {
-					echo '<li><a href="' . esc_html( admin_url( 'admin.php?page=wc-settings&tab=' . esc_attr( $slug ) ) ) . '" class="' . ( $current_tab === $slug ? 'nav-tab-active' : '' ) . '">' . esc_html( $label ) . '</a></li>';
+					echo '<li><a href="' . esc_html( admin_url( 'admin.php?page=wc-settings&tab=' . esc_attr( $slug ) ) ) . '" class="nav-tab ' . ( $current_tab === $slug ? 'nav-tab-active' : '' ) . '">' . esc_html( $label ) . '</a></li>';
 				}
 
 				/**
