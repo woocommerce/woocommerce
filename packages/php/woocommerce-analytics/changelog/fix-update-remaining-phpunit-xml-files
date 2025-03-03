@@ -1,0 +1,5 @@
+Significance: patch
+Type: fixed
+Comment: Cleanup `phpunit.xml.dist` to be right for PHPUnit 10+ if someday someone adds tests here.
+
+
