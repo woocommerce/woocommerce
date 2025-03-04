@@ -254,6 +254,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
+			'wc-ajax-add-to-cart'        => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/ajax-add-to-cart' . $suffix . '.js' ),
+				'deps'    => array(),
+				'version' => $version,
+			),
 			'wc-cart'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
@@ -382,6 +387,9 @@ class WC_Frontend_Scripts {
 
 		if ( 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart' ) ) {
 			self::enqueue_script( 'wc-add-to-cart' );
+		}
+		if ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) {
+			self::enqueue_script( 'wc-ajax-add-to-cart' );
 		}
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart' );
