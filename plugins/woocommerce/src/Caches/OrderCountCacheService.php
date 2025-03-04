@@ -67,7 +67,7 @@ class OrderCountCacheService {
 						$this->order_count_cache->remove( $order_type );
 						OrderUtil::get_count_for_type( $order_type );
 					},
-					'hook'                => $order_type . '-order-count',
+					'hook'                => 'woocommerce_order_count_' . $order_type,
 					'interval_in_seconds' => HOUR_IN_SECONDS * 12,
 				)
 			);
