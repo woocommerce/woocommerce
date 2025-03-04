@@ -2,7 +2,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Caching;
+namespace Automattic\WooCommerce\Admin\Schedulers;
 
 /**
  * An action that can be scheduled to run in the background.

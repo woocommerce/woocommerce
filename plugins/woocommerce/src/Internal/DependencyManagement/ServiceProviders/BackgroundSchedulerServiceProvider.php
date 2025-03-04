@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Caching\BackgroundScheduler;
+use Automattic\WooCommerce\Admin\Schedulers\BackgroundScheduler;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 /**

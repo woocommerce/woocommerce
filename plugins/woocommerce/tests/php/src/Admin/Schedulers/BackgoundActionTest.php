@@ -2,9 +2,9 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Caching;
+namespace Automattic\WooCommerce\Tests\Admin\Schedulers;
 
-use Automattic\WooCommerce\Caching\BackgroundAction;
+use Automattic\WooCommerce\Admin\Schedulers\BackgroundAction;
 use PHPUnit\Framework\TestCase;
 
 /**

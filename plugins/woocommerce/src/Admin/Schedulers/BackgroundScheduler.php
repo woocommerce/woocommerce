@@ -2,7 +2,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Caching;
+namespace Automattic\WooCommerce\Admin\Schedulers;
 
 /**
  * A thin wrapper around ActionScheduler to handle background
