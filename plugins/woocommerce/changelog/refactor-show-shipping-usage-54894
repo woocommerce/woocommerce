@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Merge legacy cart and block based cart shipping calculation methods to ensure shipping calculations happen only when a full address has been provided.

@@ -41,23 +41,23 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	public function test_has_full_shipping_address_returns_correctly() {
 		// With GB, state is not required. Test it returns false with only a country, nothing else.
 		WC()->customer->set_shipping_country( 'GB' );
-		$this->assertFalse( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertFalse( WC()->customer->has_full_shipping_address() );
 
 		WC()->customer->set_shipping_postcode( 'PR1 4SS' );
-		$this->assertFalse( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertFalse( WC()->customer->has_full_shipping_address() );
 
 		WC()->customer->set_shipping_city( 'Preston' );
-		$this->assertTrue( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertTrue( WC()->customer->has_full_shipping_address() );
 
 		// Now switch to US, ensure that it returns false because state is not input.
 		WC()->customer->set_shipping_country( 'US' );
 		WC()->customer->set_shipping_postcode( '90210' );
 		WC()->customer->set_shipping_city( 'Beverly Hills' );
-		$this->assertFalse( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertFalse( WC()->customer->has_full_shipping_address() );
 
 		// Now add state, ensure that it returns true.
 		WC()->customer->set_shipping_state( 'CA' );
-		$this->assertTrue( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertTrue( WC()->customer->has_full_shipping_address() );
 
 		// Now add a filter to set US state to optional, and UK state to required.
 		add_filter(
@@ -76,15 +76,18 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 
 		// Test that US state is now optional.
 		WC()->customer->set_shipping_state( '' );
-		$this->assertTrue( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertTrue( WC()->customer->has_full_shipping_address() );
 
 		// Test that UK state is now required.
 		WC()->customer->set_shipping_country( 'GB' );
 		WC()->customer->set_shipping_postcode( 'PR1 4SS' );
-		$this->assertFalse( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertFalse( WC()->customer->has_full_shipping_address() );
 
 		// Finally test that it passes when an ordinarily optional prop filtered to be required is provided.
 		WC()->customer->set_shipping_state( 'Lancashire' );
-		$this->assertTrue( $this->shipping_controller->has_full_shipping_address() );
+		$this->assertTrue( WC()->customer->has_full_shipping_address() );
+
+		// Remove filter.
+		remove_all_filters( 'woocommerce_get_country_locale' );
 	}
 }
