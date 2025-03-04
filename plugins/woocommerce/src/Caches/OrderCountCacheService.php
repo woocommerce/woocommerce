@@ -5,10 +5,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Caches;
 
 use WC_Order;
+use Automattic\WooCommerce\Caching\BackgroundScheduler;
+use Automattic\WooCommerce\Caching\BackgroundAction;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Caching\BackgroundCache;
-use Automattic\WooCommerce\Caching\CacheAction;
-use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -60,23 +59,19 @@ class OrderCountCacheService {
 	 */
 	public function register_background_caching() {
 		$order_types        = wc_get_order_types( 'order-count' );
-		$background_caching = wc_get_container()->get( BackgroundCache::class );
+		$background_caching = wc_get_container()->get( BackgroundScheduler::class );
 		foreach ( $order_types as $order_type ) {
-			$background_cache_action = new CacheAction(
+			$background_cache_action = new BackgroundAction(
 				array(
 					'callback'            => function() use ( $order_type ) {
 						$this->order_count_cache->remove( $order_type );
 						OrderUtil::get_count_for_type( $order_type );
 					},
-					'force_refresh'       => true,
+					'hook'                => $order_type . '-order-count',
 					'interval_in_seconds' => HOUR_IN_SECONDS * 12,
-					'id'                  => $order_type . '-order-count',
-					'is_cached'           => function() {
-						return $this->order_count_cache->is_cached( $order_type );
-					},
 				)
 			);
-			$background_caching->schedule_action( $background_cache_action );
+			$background_caching->register_action( $background_cache_action );
 		}
 	}
 

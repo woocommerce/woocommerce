@@ -2,13 +2,13 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Caching\BackgroundCache;
+use Automattic\WooCommerce\Caching\BackgroundScheduler;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 /**
  * Service provider for the background cache mechanism.
  */
-class BackgroundCacheServiceProvider extends AbstractServiceProvider {
+class BackgroundSchedulerServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.
@@ -16,13 +16,13 @@ class BackgroundCacheServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
-		BackgroundCache::class,
+		BackgroundScheduler::class,
 	);
 
 	/**
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( BackgroundCache::class );
+		$this->share( BackgroundScheduler::class );
 	}
 }
