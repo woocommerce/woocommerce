@@ -64,9 +64,10 @@
 		formData.forEach( ( item ) => {
 			if ( item.name === 'add-to-cart' ) {
 				item.name = 'product_id';
-				item.value =
-					form.querySelector( 'input[name=variation_id]' )?.value ||
-					button.value;
+				const variation = form.querySelector(
+					'input[name=variation_id]'
+				);
+				item.value = variation ? variation.value : button.value;
 			}
 		} );
 
@@ -104,8 +105,7 @@
 				} );
 			} )
 			.catch( ( error ) => {
-				console.error( 'Error:', error );
-				button.classList.remove( 'loading' );
+				throw new Error( error );
 			} );
 
 		button.classList.add( 'loading' );
