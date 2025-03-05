@@ -308,7 +308,18 @@ class AddToCartWithOptionsVariationSelector extends AbstractBlock {
 		global $product;
 
 		if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
-			return $this->render_variation_form( $product, $attributes );
+			$variation_attributes = $product->get_variation_attributes();
+
+			if ( empty( $variation_attributes ) ) {
+				return '';
+			}
+
+			$variations = $this->get_variations_data( $product );
+			if ( empty( $variations ) ) {
+				return '';
+			}
+
+			return $content;
 		}
 
 		return '';
