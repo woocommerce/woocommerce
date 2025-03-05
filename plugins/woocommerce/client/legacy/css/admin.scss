@@ -8899,24 +8899,23 @@ body.woocommerce_page_wc-settings {
 			display: flex;
 			flex-wrap: wrap;
 			list-style: none;
-			margin: 0 0 4px 30px;
+			margin: 0 0 0 30px;
 			gap: 24px;
-			li {
-				a {
-					float: none;
-					margin-left: 0;
-					border: 0;
-					background: none;
-					font-weight: 510;
-					font-size: 14px;
-					line-height: 20px;
-					color: #505050;
-					padding: 0 0 10px 0;
-					text-decoration: none;
-					&:focus, &:hover, &:active {
-						outline: none;
-						box-shadow: none;
-					}
+			a {
+				float: none;
+				font-family: $font-sf-pro-text;
+				margin-left: 0;
+				border: 0;
+				background: none;
+				font-weight: 510;
+				font-size: 14px;
+				line-height: 20px;
+				color: #505050;
+				padding: 0 0 10px 0;
+				text-decoration: none;
+				&:focus, &:hover, &:active {
+					outline: none;
+					box-shadow: none;
 				}
 			}
 		}
