@@ -27,6 +27,21 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	}
 
 	/**
+	 * Get the block's attributes.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return array  Block attributes merged with defaults.
+	 */
+	private function parse_attributes( $attributes ) {
+		// These should match what's set in JS `registerBlockType`.
+		$defaults = array(
+			'style' => 'pills',
+		);
+
+		return wp_parse_args( $attributes, $defaults );
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -35,10 +50,15 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
+		global $product;
 		global $attribute_name;
 		global $attribute_terms;
 
 		if ( isset( $attribute_name ) ) {
+			wp_enqueue_script_module( $this->get_full_block_name() );
+
+			$attributes = $this->parse_attributes( $attributes );
+
 			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 	
 			$field_style = $attributes['style'];
@@ -55,9 +75,17 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 				)
 			);
 
+			$default_selected_attribute = $this->get_default_selected_attribute();
+
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'data-block-name' => $this->get_full_block_name(),
+					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+					'data-wp-context' => wp_json_encode(
+						array(
+							'selected' => $default_selected_attribute,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
 					'class' => $classes,
 					'style' => esc_attr( $classes_and_styles['styles'] ),
 					'id' => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) ),
@@ -72,6 +100,26 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		}
 
 		return '';
+	}
+
+	/**
+	 * Get the default selected attribute.
+	 *
+	 * @return string The default selected attribute. 
+	 */
+	protected function get_default_selected_attribute() {
+		global $product;
+		global $attribute_name;
+
+		$is_taxonomy = taxonomy_exists( $attribute_name );
+		
+		$selected_attribute = $product->get_variation_default_attribute( $attribute_name );
+		
+		if ( $is_taxonomy ) {
+			$selected_attribute = sanitize_title( $selected_attribute );
+		}
+
+		return $selected_attribute;
 	}
 
 	/**
@@ -210,9 +258,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			$option_label = $is_taxonomy ? $item->name : $item;
 
 			if ( ! $is_taxonomy || in_array( $option_value, $options, true ) ) {
-				$is_selected = $is_taxonomy
-					? sanitize_title( $selected ) === $option_value
-					: $selected === $option_value;
+				$is_selected = $this->get_default_selected_attribute( $option_value ) === $option_value;
 
 				/**
 				 * Filter the variation option name.
@@ -245,9 +291,15 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 				);
 
 				$html .= sprintf(
-					'<div role="radio" class="%s" value="%s">%s</div>',
+					'<div role="radio" tabindex="0" class="%s" data-wp-context=\'%s\' data-wp-on--click="actions.onSelect" data-wp-watch="callbacks.checkSelected" data-wp-class--wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected="context.isSelected">%s</div>',
 					esc_attr( $classes ),
-					esc_attr( $option_value ),
+					wp_json_encode(
+						array(
+							'value'      => $option_value,
+							'isSelected' => $selected,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
 					esc_html( $filtered_label )
 				);
 			}

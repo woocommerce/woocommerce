@@ -13,10 +13,32 @@
 	padding: 0.25em 1em;
 	text-transform: uppercase;
 	font-size: var(--wp--preset--font-size--small);
+	cursor: pointer;
+
+	&:hover {
+		background-color: color-mix(
+			in srgb,
+			var(--wp--preset--color--contrast) 10%,
+			transparent
+		);
+	}
+
+	&:focus {
+		outline-color: var(--wp--preset--color--accent-4);
+		outline-offset: 2px;
+	}
 
 	&--selected {
 		background-color: $black;
 		color: $white;
+
+		&:hover {
+			background-color: color-mix(
+				in srgb,
+				var(--wp--preset--color--contrast) 85%,
+				transparent
+			);
+		}
 	}
 
 	&--disabled {
