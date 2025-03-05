@@ -61,10 +61,50 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 		global $attribute_terms;
 
 		$attribute_name = $product_attribute_name;
-		$attribute_terms = $product_attribute_terms;
+		$attribute_terms = $this->get_terms( $product_attribute_name, $product_attribute_terms );
+
+		if ( empty( $attribute_terms ) ) {
+			return '';
+		}
 
 		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 		// `render_callback` and ensure that no wrapper markup is included.
 		return $block->render( array( 'dynamic' => false ) );
+	}
+
+	/**
+	 * Get product attributes terms.
+	 *
+	 * @param string $attribute_name Product Attribute Name.
+	 * @param array  $product_attribute_terms Product Attribute Terms.
+	 * @return srtring
+	 */
+	protected function get_terms( $attribute_name, $attribute_terms ) {
+		global $product;
+
+		$is_taxonomy = taxonomy_exists( $attribute_name );
+		if ( $is_taxonomy ) {
+			$items = array_map(
+				function ( $term ) {
+					return array(
+						'value' => $term->slug,
+						'label' => $term->name,
+					);
+				},
+				wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) ),
+			);
+		} else {
+			$items = array_map(
+				function ( $term ) {
+					return array(
+						'value' => $term,
+						'label' => $term,
+					);
+				},
+				$attribute_terms,
+			);
+		}
+
+		return $items;
 	}
 }

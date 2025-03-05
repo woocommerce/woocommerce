@@ -156,16 +156,8 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @param array $wrapper_attributes The wrapper attributes.
 	 * @return string The pills.
 	 */
-	protected function render_pills( $wrapper_attributes ) {
-		global $product;
-		global $attribute_name;
-		global $attribute_terms;
-		
-		$selected = $product->get_variation_default_attribute( $attribute_name );
-		
-		$options = '';
-
-		$options .= $this->render_attribute_pills( $product, $attribute_name, $attribute_terms, $selected, taxonomy_exists( $attribute_name ) );
+	protected function render_pills( $wrapper_attributes ) {		
+		$options = $this->render_attribute_pills();
 		
 		return sprintf(
 			'<div %s role="radiogroup">%s</div>',
@@ -236,73 +228,50 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	/**
 	 * Get HTML for attribute options.
 	 *
-	 * @param WC_Product $product The product object.
-	 * @param string     $attribute_name Name of the attribute.
-	 * @param array      $options Available options.
-	 * @param string     $selected Selected value.
-	 * @param bool       $is_taxonomy Whether this is a taxonomy-based attribute.
 	 * @return string Options HTML
 	 */
-	private function render_attribute_pills( $product, $attribute_name, $options, $selected, $is_taxonomy ): string {
-		if ( empty( $options ) ) {
-			return '';
-		}
+	private function render_attribute_pills(): string {
+		global $product;
+		global $attribute_name;
+		global $attribute_terms;
 
-		$html  = '';
-		$items = $is_taxonomy
-			? wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) )
-			: $options;
+		$html = '';
 
-		foreach ( $items as $item ) {
-			$option_value = $is_taxonomy ? $item->slug : $item;
-			$option_label = $is_taxonomy ? $item->name : $item;
+		foreach ( $attribute_terms as $term ) {
+			$option_value = $term['value'];
+			$option_label = $term['label'];
+			$is_selected  = $this->get_default_selected_attribute() === $option_value;
 
-			if ( ! $is_taxonomy || in_array( $option_value, $options, true ) ) {
-				$is_selected = $this->get_default_selected_attribute( $option_value ) === $option_value;
+			/**
+			 * Filter the variation option name.
+			 *
+			 * @since 9.7.0
+			 *
+			 * @param string     $option_label    The option label.
+			 * @param string     $option_value    Term option value.
+			 * @param string     $attribute_name  Name of the attribute.
+			 * @param WC_Product $product         Product object.
+			 */
+			$filtered_label = apply_filters(
+				'woocommerce_variation_option_name',
+				$option_label,
+				$option_value,
+				$attribute_name,
+				$product
+			);
 
-				/**
-				 * Filter the variation option name.
-				 *
-				 * @since 9.7.0
-				 *
-				 * @param string     $option_label    The option label.
-				 * @param WP_Term|string|null $item   Term object for taxonomies, option string for custom attributes.
-				 * @param string     $attribute_name  Name of the attribute.
-				 * @param WC_Product $product         Product object.
-				 */
-				$filtered_label = apply_filters(
-					'woocommerce_variation_option_name',
-					$option_label,
-					$is_taxonomy ? $item : null,
-					$attribute_name,
-					$product
-				);
-
-				$classes = implode(
-					' ',
-					array_filter(
-						array(
-							'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-							'dropdown' === $selected ?
-								'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected' :
-								'',
-						)
-					)
-				);
-
-				$html .= sprintf(
-					'<div role="radio" tabindex="0" class="%s" data-wp-context=\'%s\' data-wp-on--click="actions.onSelect" data-wp-watch="callbacks.checkSelected" data-wp-class--wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected="context.isSelected">%s</div>',
-					esc_attr( $classes ),
-					wp_json_encode(
-						array(
-							'value'      => $option_value,
-							'isSelected' => $selected,
-						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			$html .= sprintf(
+				'<div role="radio" tabindex="0" class="%s" data-wp-context=\'%s\' data-wp-on--click="actions.onSelect" data-wp-watch="callbacks.checkSelected" data-wp-class--wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected="context.isSelected">%s</div>',
+				'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
+				wp_json_encode(
+					array(
+						'value'      => $option_value,
+						'isSelected' => $is_selected,
 					),
-					esc_html( $filtered_label )
-				);
-			}
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				),
+				esc_html( $filtered_label )
+			);
 		}
 
 		return $html;
