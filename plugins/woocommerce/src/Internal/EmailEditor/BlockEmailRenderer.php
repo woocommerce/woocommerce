@@ -33,12 +33,11 @@ class BlockEmailRenderer {
 	private $personalizer;
 
 	/**
-	 * Email theme controller
-	 * We use it to get email CSS.
+	 * Service for extracting WooCommerce content from WC_Email object.
 	 *
-	 * @var Theme_Controller
+	 * @var WooContentProcessor
 	 */
-	private $theme_controller;
+	private $woo_content_processor;
 
 	/**
 	 * Constructor.
@@ -53,9 +52,11 @@ class BlockEmailRenderer {
 	/**
 	 * Initialize the renderer.
 	 *
+	 * @param WooContentProcessor $woo_content_processor Service for extracting WooCommerce content from WC_Email object.
 	 * @internal
 	 */
-	final public function init(): void {
+	final public function init( WooContentProcessor $woo_content_processor ): void {
+		$this->woo_content_processor = $woo_content_processor;
 		add_action( 'woocommerce_blocks_renderer_initialized', array( $this, 'register_block_renderers' ) );
 	}
 
@@ -80,7 +81,7 @@ class BlockEmailRenderer {
 			return null;
 		}
 
-		$woo_content = $this->capture_woo_content( $wc_email );
+		$woo_content = $this->woo_content_processor->get_woo_content( $wc_email );
 		return $this->render_block_email( $email_post, $woo_content, $wc_email );
 	}
 
@@ -115,7 +116,7 @@ class BlockEmailRenderer {
 	 * @param \WC_Email $email WooCommerce email.
 	 * @return \WP_Post|null
 	 */
-	public function get_email_post_by_wc_email( \WC_Email $email ): ?\WP_Post {
+	private function get_email_post_by_wc_email( \WC_Email $email ): ?\WP_Post {
 		$args = array(
 			'post_type'      => Integration::EMAIL_POST_TYPE,
 			'name'           => $email->id,
@@ -145,51 +146,19 @@ class BlockEmailRenderer {
 		return $context;
 	}
 
-	public function prepare_css( string $css, \WC_Email $wc_email ): string {
-		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
-		$editor_css = $this->theme_controller->get_stylesheet_for_rendering();
-
-		// Remove color and font-family declarations from WooCommerce CSS.
-		$css = preg_replace('/color\s*:\s*[^;]+;/', '', $css);
-		$css = preg_replace('/font-family\s*:\s*[^;]+;/', '', $css);
-
-		return $css . "\n" . $editor_css;
-	}
-
 	/**
-	 * Capture the WooCommerce content excluding headers and footers.
+	 * Filter CSS for the email.
+	 * The CSS was from email editor was already inlined.
+	 * The method hookes to woocommerce_email_styles and removes CSS rules that we don't want to apply to the email.
 	 *
-	 * @param \WC_Email $wc_email WooCommerce email.
+	 * @param string $css CSS.
 	 * @return string
 	 */
-	private function capture_woo_content( \WC_Email $wc_email ): string {
-		// Store the existing header and footer callbacks.
-		global $wp_filter;
-		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_footer'] : null;
-
-		// Remove header and footer filters because we want to get only the main content.
-		remove_all_filters( 'woocommerce_email_header' );
-		remove_all_filters( 'woocommerce_email_footer' );
-
-		$woo_content = $wc_email->get_content_html();
-
-		// Restore the original header and footer filters.
-		if ( $original_header_filters ) {
-			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		if ( $original_footer_filters ) {
-			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-
-		return $woo_content;
+	public function prepare_css( string $css ): string {
+		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
+		// Remove color and font-family declarations from WooCommerce CSS.
+		$css = preg_replace( '/color\s*:\s*[^;]+;/', '', $css );
+		$css = preg_replace( '/font-family\s*:\s*[^;]+;/', '', $css );
+		return $css;
 	}
 }
