@@ -106,15 +106,6 @@ const Blueprint = () => {
 		} ) );
 	};
 
-	useEffect( () => {
-		const saveButton = document.getElementsByClassName(
-			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
-			saveButton.style.display = 'none';
-		}
-	} );
-
 	return (
 		<div className="blueprint-settings-slotfill">
 			{ error && (
