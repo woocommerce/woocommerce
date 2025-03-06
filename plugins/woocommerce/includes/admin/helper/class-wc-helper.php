@@ -2199,6 +2199,9 @@ class WC_Helper {
 		$product_id   = $plugin['_product_id'];
 		$subscription = self::get_available_subscription( $product_id );
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		// No valid subscription found.
 		if ( ! $subscription ) {
 			return;
@@ -2231,9 +2234,6 @@ class WC_Helper {
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
 	}
 
 	/**
