@@ -43,18 +43,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	}
 
 	/**
-	 * Check if the thumbnails should be limited.
-	 *
-	 * @param int $thumbnails_count     Current count of processed thumbnails.
-	 * @param int $number_of_thumbnails Number of thumbnails configured to display.
-	 *
-	 * @return bool
-	 */
-	protected function limit_thumbnails( $thumbnails_count, $number_of_thumbnails ) {
-		return $thumbnails_count > $number_of_thumbnails;
-	}
-
-	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -98,17 +86,11 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		$number_of_thumbnails         = isset( $attributes['numberOfThumbnails'] ) && is_numeric( $attributes['numberOfThumbnails'] ) ? $attributes['numberOfThumbnails'] : $default_number_of_thumbnails;
 		$number_of_images             = count( $product_gallery_images );
 		// If the number of thumbnails is greater than the number of images, set the number of thumbnails to the number of images.
-		// But not less than than 3 (default number of thumbnails).
+		// But not less than 3 (default number of thumbnails).
 		$thumbnails_layout          = max( min( $number_of_images, $number_of_thumbnails ), $default_number_of_thumbnails );
 		$number_of_thumbnails_class = 'wc-block-product-gallery-thumbnails--number-of-thumbnails-' . $thumbnails_layout;
-		$thumbnails_count           = 1;
 
 		foreach ( $product_gallery_images as $product_gallery_image_html ) {
-			// Limit the number of thumbnails only in the standard mode (and not in dialog).
-			if ( $this->limit_thumbnails( $thumbnails_count, $number_of_thumbnails ) ) {
-				break;
-			}
-
 			$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
 
 			if ( $processor->next_tag( 'img' ) ) {
@@ -124,8 +106,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			} else {
 				$html .= $product_gallery_image_html;
 			}
-
-			++$thumbnails_count;
 		}
 
 		$allowed_html                    = wp_kses_allowed_html( 'post' );
