@@ -294,6 +294,8 @@ class WC_Install {
 		'10.0.0' => array(
 			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
+			'wc_update_1000_update_primary_key_to_composite_in_order_product_lookup_table',
+			'wc_update_1000_add_old_refunded_order_items_to_product_lookup_table',
 		),
 	);
 
@@ -1889,7 +1891,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id),
+	PRIMARY KEY  (order_item_id, order_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),

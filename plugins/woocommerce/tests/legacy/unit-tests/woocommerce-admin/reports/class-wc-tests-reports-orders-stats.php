@@ -372,12 +372,22 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		}
 
 		// Add a partial refund on the last order.
-		$refund = wc_create_refund(
-			array(
-				'amount'   => 10,
-				'order_id' => $order->get_id(),
-			)
-		);
+		foreach ( $order->get_items() as  $item_key => $item_values ) {
+			$item_data = $item_values->get_data();
+			$refund    = wc_create_refund(
+				array(
+					'amount'     => 10,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_data['id'] => array(
+							'qty'          => 0,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+			break;
+		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -408,7 +418,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -60,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -522,7 +532,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -10,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -579,7 +589,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -50,       // @todo - does this value make sense?
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(

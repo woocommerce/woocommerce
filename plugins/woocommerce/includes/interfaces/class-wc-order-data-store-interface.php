@@ -31,6 +31,16 @@ interface WC_Order_Data_Store_Interface {
 	public function get_total_tax_refunded( $order );
 
 	/**
+	 * Get the total shipping tax refunded.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @since 9.9.0
+	 * @return float
+	 */
+	public function get_total_shipping_tax_refunded( $order );
+
+	/**
 	 * Get the total shipping refunded.
 	 *
 	 * @param WC_Order $order Order object.
