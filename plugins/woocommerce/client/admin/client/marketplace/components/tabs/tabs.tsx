@@ -98,6 +98,28 @@ const renderTabs = (
 									'is-active': tabKey === selectedTab,
 								}
 							) }
+							title={
+								tabKey === 'my-subscriptions'
+									? __(
+											'Number of updates available for your subscriptions',
+											'woocommerce'
+									  )
+									: __(
+											'Number of matching items in this category',
+											'woocommerce'
+									  )
+							}
+							aria-label={
+								tabKey === 'my-subscriptions'
+									? __(
+											'Number of updates available for your subscriptions',
+											'woocommerce'
+									  )
+									: __(
+											'Number of matching items in this category',
+											'woocommerce'
+									  )
+							}
 						>
 							<span> { tabs[ tabKey ]?.updateCount } </span>
 						</span>
