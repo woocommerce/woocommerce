@@ -9,10 +9,7 @@ import {
 	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	useState,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
