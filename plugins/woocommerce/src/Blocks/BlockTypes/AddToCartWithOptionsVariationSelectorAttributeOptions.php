@@ -18,15 +18,6 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute-options';
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 * Get the block's attributes.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
@@ -75,31 +66,47 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 				)
 			);
 
-			$default_selected_attribute = $this->get_default_selected_attribute();
-
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
 					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-					'data-wp-context' => wp_json_encode(
-						array(
-							'selected' => $default_selected_attribute,
-						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-					),
 					'class' => $classes,
 					'style' => esc_attr( $classes_and_styles['styles'] ),
-					'id' => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) ),
 				)
 			);
 
 			if ( 'dropdown' === $field_style ) {
-				return $this->render_dropdown( $wrapper_attributes );
+				$content = $this->render_dropdown( $attributes );
+			} else {
+				$content = $this->render_pills( $attributes );
 			}
 
-			return $this->render_pills( $wrapper_attributes );
+			return sprintf(
+				'<div %s>%s</div>',
+				$wrapper_attributes,
+				$content
+			);
 		}
 
 		return '';
+	}
+
+	/**
+	 * Get the normalized version of the attributes.
+	 *
+	 * @param array $attributes         The element's attributes.
+	 * @param array $default_attributes The element's default attributes.
+	 * @return string The HTML element's attributes.
+	 */
+	protected function get_normalized_attributes( $attributes, $default_attributes = array() ) {
+		$normalized_attributes = array();
+
+		$merged_attributes = array_merge( $default_attributes, $attributes );
+
+		foreach ( $merged_attributes as $key => $value ) {
+			$normalized_attributes[] = $key . '="' . esc_attr( $value ) . '"';
+		}
+
+		return implode( ' ', $normalized_attributes );
 	}
 
 	/**
@@ -120,6 +127,61 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		}
 
 		return $selected_attribute;
+	}
+
+	/**
+	 * Render the attribute options as pills.
+	 *
+	 * @param array $attributes The block's attributes.
+	 * @return string The pills.
+	 */
+	protected function render_pills( $attributes ) {
+		global $attribute_name;
+		global $attribute_terms;
+
+		return sprintf(
+			'<div %s>
+				<template data-wp-each="context.options">
+        	<div %s></div>
+    		</template>
+			</div>',
+			$this->get_normalized_attributes(
+				array(
+					'role'            => "radiogroup",
+					'class'           => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
+					'id'              => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) ),
+					'aria-labeledby'  => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) . '_label' ),
+					'data-wp-context' => wp_json_encode(
+						array(
+							'options'  => $attribute_terms,
+							'selected' => $this->get_default_selected_attribute(),
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
+				),
+			),
+			$this->get_normalized_attributes(
+				array(
+					'role'                       => "radio",
+					'data-wp-bind--tabindex'     => "context.tabIndex",
+					'data-wp-bind--aria-checked' => "context.isSelected",
+					'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
+					'data-wp-text'               => "context.item.label",
+					'data-wp-watch'              => "callbacks.checkSelected",
+					'data-wp-init--init'         => "callbacks.init",
+					'data-wp-on--click'          => "actions.handleClick",
+					'data-wp-on--keydown'        => "actions.handleKeyDown",
+					'data-wp-context' => wp_json_encode(
+						array(
+							'isSelected' => false,
+							'tabIndex'   => -1,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
+					'data-wp-class--wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected' => "context.isSelected",
+				),
+			),
+		);
 	}
 
 	/**
@@ -146,22 +208,6 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			'<select %s data-attribute_name="attribute_%s">%s</select>',
 			$wrapper_attributes,
 			esc_attr( sanitize_title( $attribute_name ) ),
-			$options
-		);
-	}
-
-	/**
-	 * Render the attribute options as pills.
-	 *
-	 * @param array $wrapper_attributes The wrapper attributes.
-	 * @return string The pills.
-	 */
-	protected function render_pills( $wrapper_attributes ) {		
-		$options = $this->render_attribute_pills();
-		
-		return sprintf(
-			'<div %s role="radiogroup">%s</div>',
-			$wrapper_attributes,
 			$options
 		);
 	}
@@ -220,58 +266,6 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					esc_html( $filtered_label )
 				);
 			}
-		}
-
-		return $html;
-	}
-
-	/**
-	 * Get HTML for attribute options.
-	 *
-	 * @return string Options HTML
-	 */
-	private function render_attribute_pills(): string {
-		global $product;
-		global $attribute_name;
-		global $attribute_terms;
-
-		$html = '';
-
-		foreach ( $attribute_terms as $term ) {
-			$option_value = $term['value'];
-			$option_label = $term['label'];
-			$is_selected  = $this->get_default_selected_attribute() === $option_value;
-
-			/**
-			 * Filter the variation option name.
-			 *
-			 * @since 9.7.0
-			 *
-			 * @param string     $option_label    The option label.
-			 * @param string     $option_value    Term option value.
-			 * @param string     $attribute_name  Name of the attribute.
-			 * @param WC_Product $product         Product object.
-			 */
-			$filtered_label = apply_filters(
-				'woocommerce_variation_option_name',
-				$option_label,
-				$option_value,
-				$attribute_name,
-				$product
-			);
-
-			$html .= sprintf(
-				'<div role="radio" tabindex="0" class="%s" data-wp-context=\'%s\' data-wp-on--click="actions.onSelect" data-wp-watch="callbacks.checkSelected" data-wp-class--wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected="context.isSelected">%s</div>',
-				'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-				wp_json_encode(
-					array(
-						'value'      => $option_value,
-						'isSelected' => $is_selected,
-					),
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				),
-				esc_html( $filtered_label )
-			);
 		}
 
 		return $html;

@@ -44,19 +44,18 @@ class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
 	
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'data-block-name' => $this->get_full_block_name(),
 					'class' => esc_attr( $classes_and_styles['classes'] ),
+					'for'   => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) ),
+					'id'    => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) . '_label' ),
 					'style' => esc_attr( $classes_and_styles['styles'] ),
 				)
 			);
 
-			$label_for  = esc_attr( 'attribute_' . sanitize_title( $attribute_name ) );
 			$label_text = esc_html( wc_attribute_label( $attribute_name ) );
 
 			$content .= sprintf(
-				'<label %s for="%s">%s</label>',
+				'<label %s>%s</label>',
 				$wrapper_attributes,
-				$label_for,
 				$label_text
 			);
 		}

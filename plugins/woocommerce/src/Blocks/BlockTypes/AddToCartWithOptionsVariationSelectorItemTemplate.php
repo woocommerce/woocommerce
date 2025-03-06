@@ -85,20 +85,32 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 		$is_taxonomy = taxonomy_exists( $attribute_name );
 		if ( $is_taxonomy ) {
 			$items = array_map(
-				function ( $term ) {
+				function ( $term ) use ( $attribute_name, $product ) {
 					return array(
 						'value' => $term->slug,
-						'label' => $term->name,
+						'label' => apply_filters(
+							'woocommerce_variation_option_name',
+							$term->name,
+							$term,
+							$attribute_name,
+							$product
+						),
 					);
 				},
 				wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) ),
 			);
 		} else {
 			$items = array_map(
-				function ( $term ) {
+				function ( $term ) use ( $attribute_name, $product ) {
 					return array(
 						'value' => $term,
-						'label' => $term,
+						'label' => apply_filters(
+							'woocommerce_variation_option_name',
+							$term,
+							null,
+							$attribute_name,
+							$product
+						),
 					);
 				},
 				$attribute_terms,

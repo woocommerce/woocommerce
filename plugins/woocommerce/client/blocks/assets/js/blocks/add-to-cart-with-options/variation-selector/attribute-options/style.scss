@@ -14,6 +14,7 @@
 	text-transform: uppercase;
 	font-size: var(--wp--preset--font-size--small);
 	cursor: pointer;
+	user-select: none;
 
 	&:hover {
 		background-color: color-mix(

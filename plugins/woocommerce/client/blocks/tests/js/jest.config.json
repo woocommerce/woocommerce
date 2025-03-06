@@ -38,9 +38,7 @@
 		"^(.+)/build-module/(.*)$": "$1/build/$2"
 	},
 	"preset": "@wordpress/jest-preset-default",
-	"setupFiles": [
-		"<rootDir>/tests/js/config/global-mocks.js"
-	],
+	"setupFiles": [ "<rootDir>/tests/js/config/global-mocks.js" ],
 	"setupFilesAfterEnv": [ "<rootDir>/tests/js/config/testing-library.js" ],
 	"testPathIgnorePatterns": [
 		"<rootDir>/bin/",
