@@ -11,7 +11,6 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 import {
 	useState,
-	useEffect,
 	createInterpolateElement,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
