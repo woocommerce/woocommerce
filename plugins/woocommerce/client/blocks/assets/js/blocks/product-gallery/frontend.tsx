@@ -223,18 +223,6 @@ const productGallery = {
 				actions.selectPreviousImage();
 			}
 		},
-		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
-			) {
-				if ( event.code === 'Space' ) {
-					event.preventDefault();
-				}
-				actions.openDialog();
-			}
-		},
 		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
 			if (
 				event.code === 'Enter' ||
