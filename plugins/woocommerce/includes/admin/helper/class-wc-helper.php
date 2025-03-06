@@ -2381,10 +2381,11 @@ class WC_Helper {
 			}
 		}
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		if ( $deactivated ) {
 			self::log( sprintf( 'Auto-deactivated %d subscription(s) for %s', $deactivated, $filename ) );
-			self::_flush_subscriptions_cache();
-			self::_flush_updates_cache();
 		}
 	}
 
