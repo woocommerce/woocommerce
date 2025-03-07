@@ -518,8 +518,8 @@ class WC_Install {
 			flush_rewrite_rules();
 		}
 
-		// Enable AJAX add to cart on product pages by default for WooCommerce 9.9 and above.
-		if ( version_compare( WC()->version, '9.9', '>=' ) ) {
+		// Enable AJAX add to cart on product pages by default for new installations of WooCommerce 9.9 and above.
+		if ( self::is_new_install() && version_compare( WC()->version, '9.9', '>=' ) ) {
 			update_option( 'woocommerce_enable_ajax_add_to_cart_product_pages', 'yes' );
 		}
 
