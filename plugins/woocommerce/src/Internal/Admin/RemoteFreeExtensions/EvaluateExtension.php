@@ -84,6 +84,9 @@ class EvaluateExtension {
 
 			$bundle['plugins'] = $evaluate_order->evaluate( $bundle['plugins'], array(
 				'plugins' => $bundle['plugins'],
+				'vars' => array(
+					'platform' => wp_is_mobile() ? 'mobile' : 'desktop',
+				)
 			) );
 
 			$bundles[] = $bundle;
