@@ -42,13 +42,13 @@ class EvaluateOrder {
 	 * @return mixed The evaluated order.
 	 */
 	protected function evaluate_order( RuleEvaluator $rule_evaluator, $order, array $context ) {
-		if ( ! isset( $order->overrides ) ) {
-			return $order->value;
-		}
-
 		// Return 9999 if the order is not set. This is the highest possible order.
 		if ( ! isset( $order->value ) ) {
 			return self::MISSING_ORDER_VALUE;
+		}
+
+		if ( ! isset( $order->overrides ) ) {
+			return $order->value;
 		}
 
 		foreach ( $order->overrides as $override ) {
