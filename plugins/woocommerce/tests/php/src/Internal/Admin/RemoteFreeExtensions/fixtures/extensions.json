@@ -1,0 +1,329 @@
+[
+  {
+    "name": "WooPayments",
+    "description": "Securely accept payments and manage payment activity straight from your store's dashboard",
+    "is_visible": [
+      {
+        "type": "or",
+        "operands": [
+          {
+            "type": "base_location_country",
+            "value": "US",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "PR",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "AU",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "CA",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "DE",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "ES",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "FR",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "GB",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "IE",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "IT",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "NZ",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "AT",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "BE",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "NL",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "PL",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "PT",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "CH",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "HK",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "SG",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "CY",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "DK",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "EE",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "FI",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "GR",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "LU",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "LT",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "LV",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "NO",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "MT",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "SI",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "SK",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "BG",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "CZ",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "HR",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "HU",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "RO",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "SE",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "JP",
+            "operation": "="
+          },
+          {
+            "type": "base_location_country",
+            "value": "AE",
+            "operation": "="
+          }
+        ]
+      },
+      {
+        "type": "option",
+        "transformers": [
+          {
+            "use": "dot_notation",
+            "arguments": {
+              "path": "industry"
+            }
+          },
+          {
+            "use": "array_column",
+            "arguments": {
+              "key": "slug"
+            }
+          }
+        ],
+        "option_name": "woocommerce_onboarding_profile",
+        "operation": "!contains",
+        "value": "cbd-other-hemp-derived-products",
+        "default": []
+      }
+    ],
+    "order": {
+      "value": 1
+    },
+    "is_built_by_wc": true,
+    "min_wp_version": "5.9",
+    "key": "woocommerce-payments",
+    "label": "Get paid with WooPayments",
+    "image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo-rebrand-2.svg",
+    "learn_more_link": "https://woocommerce.com/products/woocommerce-payments",
+    "install_priority": 5
+  },
+  {
+    "name": "WooCommerce Shipping",
+    "description": "Print USPS and DHL labels directly from your dashboard and save on shipping.",
+    "is_visible": [
+      {
+        "type": "base_location_country",
+        "value": "US",
+        "operation": "="
+      }
+    ],
+    "is_built_by_wc": true,
+    "key": "woocommerce-services:shipping",
+    "label": "Print shipping labels with WooCommerce Shipping",
+    "image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo-rebrand-2.svg",
+    "learn_more_link": "https://woocommerce.com/woocommerce-shipping",
+    "install_priority": 3
+  },
+  {
+    "name": "PayPal",
+    "description": "PayPal test",
+    "is_visible": true,
+    "order": {
+      "value": 1,
+      "overrides": [
+        {
+          "value": 3,
+          "rules": [
+            {
+              "type": "context_plugins",
+              "name": "name",
+              "value": "WooPayments",
+              "operation": "="
+            },
+            {
+              "type": "context_vars",
+              "name": "platform",
+              "value": "desktop",
+              "operation": "="
+            }
+          ]
+        },
+        {
+          "value": 2,
+          "rules": [
+            {
+              "type": "context_plugins",
+              "name": "name",
+              "value": "WooPayments",
+              "operation": "="
+            },
+            {
+              "type": "context_vars",
+              "name": "platform",
+              "value": "mobile",
+              "operation": "="
+            }
+          ]
+        }
+      ]
+    },
+    "is_built_by_wc": true,
+    "min_wp_version": "5.9",
+    "key": "woocommerce-payments",
+    "label": "Get paid with WooPayments",
+    "image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo-rebrand-2.svg",
+    "learn_more_link": "https://woocommerce.com/products/woocommerce-payments",
+    "install_priority": 5
+  },
+  {
+    "name": "Test",
+    "description": "Test test",
+    "is_visible": true,
+    "order": {
+      "value": 1,
+      "overrides": [
+        {
+          "value": 2,
+          "rules": [
+            {
+              "type": "base_location_country",
+              "value": [
+                "US"
+              ],
+              "operation": "in"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
