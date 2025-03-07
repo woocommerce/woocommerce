@@ -29,7 +29,7 @@
 		outline-offset: 2px;
 	}
 
-	&--selected {
+	&[aria-checked="true"] {
 		background-color: $black;
 		color: $white;
 

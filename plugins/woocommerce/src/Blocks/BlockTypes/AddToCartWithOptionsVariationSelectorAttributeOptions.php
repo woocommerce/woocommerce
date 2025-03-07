@@ -141,7 +141,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 
 		return sprintf(
 			'<div %s>
-				<template data-wp-each="context.options">
+				<template data-wp-each--option="context.options">
         	<div %s></div>
     		</template>
 			</div>',
@@ -166,18 +166,17 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					'data-wp-bind--tabindex'     => "context.tabIndex",
 					'data-wp-bind--aria-checked' => "context.isSelected",
 					'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-					'data-wp-text'               => "context.item.label",
+					'data-wp-text'               => "context.option.label",
 					'data-wp-watch'              => "callbacks.watchSelected",
 					'data-wp-on--click'          => "actions.handleClick",
 					'data-wp-on--keydown'        => "actions.handleKeyDown",
-					'data-wp-context' => wp_json_encode(
+					'data-wp-context'            => wp_json_encode(
 						array(
 							'isSelected' => false,
 							'tabIndex'   => -1,
 						),
 						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 					),
-					'data-wp-class--wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected' => "context.isSelected",
 				),
 			),
 		);

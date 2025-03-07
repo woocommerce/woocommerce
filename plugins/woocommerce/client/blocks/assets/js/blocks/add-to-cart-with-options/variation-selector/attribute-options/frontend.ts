@@ -10,7 +10,7 @@ type Option = {
 
 type Context = {
 	selected: string | null;
-	item: Option;
+	option: Option;
 	options: Option[];
 	isSelected?: boolean;
 	tabIndex?: number;
@@ -21,10 +21,10 @@ store( 'woocommerce/add-to-cart-with-options', {
 	actions: {
 		handleClick() {
 			const context = getContext< Context >();
-			if ( context.selected === context.item.value ) {
+			if ( context.selected === context.option.value ) {
 				context.selected = null;
 			} else {
-				context.selected = context.item.value;
+				context.selected = context.option.value;
 			}
 		},
 		handleKeyDown( event: KeyboardEvent ) {
@@ -38,7 +38,7 @@ store( 'woocommerce/add-to-cart-with-options', {
 					if ( context.selected ) {
 						context.selected = null;
 					} else {
-						context.selected = context.item.value;
+						context.selected = context.option.value;
 					}
 					flag = true;
 					break;
@@ -48,7 +48,7 @@ store( 'woocommerce/add-to-cart-with-options', {
 				case 'Left':
 				case 'ArrowLeft': {
 					const index = context.options.findIndex(
-						( item ) => item.value === context.item.value
+						( option ) => option.value === context.option.value
 					);
 					if ( index === -1 ) return;
 					if ( index > 0 ) {
@@ -74,7 +74,7 @@ store( 'woocommerce/add-to-cart-with-options', {
 				case 'Right':
 				case 'ArrowRight': {
 					const index = context.options.findIndex(
-						( item ) => item.value === context.item.value
+						( option ) => option.value === context.option.value
 					);
 					if ( index === -1 ) return;
 					if ( index < context.options.length - 1 ) {
@@ -106,12 +106,12 @@ store( 'woocommerce/add-to-cart-with-options', {
 	callbacks: {
 		watchSelected() {
 			const context = getContext< Context >();
-			context.isSelected = context.selected === context.item.value;
+			context.isSelected = context.selected === context.option.value;
 			if ( context.selected ) {
 				context.tabIndex = context.isSelected ? 0 : -1;
 			} else {
 				const index = context.options.findIndex(
-					( item ) => item.value === context.item.value
+					( option ) => option.value === context.option.value
 				);
 				context.tabIndex = index === 0 ? 0 : -1;
 			}
