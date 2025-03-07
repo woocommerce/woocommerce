@@ -104,24 +104,17 @@ store( 'woocommerce/add-to-cart-with-options', {
 		},
 	},
 	callbacks: {
-		init() {
+		watchSelected() {
 			const context = getContext< Context >();
 			context.isSelected = context.selected === context.item.value;
-			if ( ! context.selected ) {
+			if ( context.selected ) {
+				context.tabIndex = context.isSelected ? 0 : -1;
+			} else {
 				const index = context.options.findIndex(
 					( item ) => item.value === context.item.value
 				);
-				if ( index === 0 ) {
-					context.tabIndex = 0;
-				}
-			} else if ( context.isSelected ) {
-				context.tabIndex = 0;
+				context.tabIndex = index === 0 ? 0 : -1;
 			}
-		},
-		checkSelected() {
-			const context = getContext< Context >();
-			context.isSelected = context.selected === context.item.value;
-			context.tabIndex = context.isSelected ? 0 : -1;
 		},
 	},
 } );

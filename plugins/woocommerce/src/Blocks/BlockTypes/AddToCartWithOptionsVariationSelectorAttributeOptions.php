@@ -167,8 +167,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					'data-wp-bind--aria-checked' => "context.isSelected",
 					'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
 					'data-wp-text'               => "context.item.label",
-					'data-wp-watch'              => "callbacks.checkSelected",
-					'data-wp-init--init'         => "callbacks.init",
+					'data-wp-watch'              => "callbacks.watchSelected",
 					'data-wp-on--click'          => "actions.handleClick",
 					'data-wp-on--keydown'        => "actions.handleKeyDown",
 					'data-wp-context' => wp_json_encode(
