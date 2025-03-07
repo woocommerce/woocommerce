@@ -290,6 +290,9 @@ class WC_Install {
 			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
 		),
+		'9.9.1' => array(
+			'wc_update_991_multisite_visibility_setting',
+		),
 	);
 
 	/**
