@@ -1116,6 +1116,16 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Return the email's block email post id
+	 *
+	 * @return string
+	 */
+	public function get_email_template_post_id(): ?int {
+		$id = get_option( 'woocommerce_email_templates_' . $this->id . '_post_id' );
+		return $id ? (int) $id : null;
+	}
+
+	/**
 	 * Move template action.
 	 *
 	 * @param string $template_type Template type.

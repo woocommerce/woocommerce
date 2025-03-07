@@ -208,7 +208,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			);
 		}
 
-		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) { 
+		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
 			$email_notifications_field = 'email_notification_block_emails';
 		} else {
 			$email_notifications_field = 'email_notification';
@@ -627,9 +627,24 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * Creates the React mount point for listing of block based emails.
 	 */
 	public function email_notification_setting_block_emails() {
+		$emails      = WC()->mailer()->get_emails();
+		$email_types = array();
+		foreach ( $emails as $type => $email ) {
+			if ( $email->recipient === null ) {
+				$email->recipient = '';
+			}
+			$email_types[] = array(
+				'title' => $email->get_title(),
+				'description' => $email->get_description(),
+				'id' => $email->id,
+				'post_id' => $email->get_email_template_post_id(),
+				'recipients' => $email->get_recipient(),
+			);
+		}
 		?>
 		<div
 			id="wc_settings_email_listing_slotfill"
+			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 		></div>
 		<?php
 	}

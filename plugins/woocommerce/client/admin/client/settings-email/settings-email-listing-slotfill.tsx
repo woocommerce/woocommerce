@@ -8,13 +8,23 @@ import { registerPlugin } from '@wordpress/plugins';
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
+import { ListView } from './settings-email-listing-listview';
+
+export type EmailType = {
+	title: string;
+	description: string;
+	id: string;
+	post_id: string;
+	recipients: string;
+	status?: string;
+};
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const EmailListingFill: React.FC< {} > = () => {
+const EmailListingFill: React.FC< { emailTypes: any } > = ( { emailTypes } ) => {
 	return (
 		<Fill>
-			<h1>Block emails</h1>
+			<ListView emailTypes={ emailTypes } />
 		</Fill>
 	);
 };
@@ -25,11 +35,16 @@ export const registerSettingsEmailListingFill = () => {
 	if ( ! slotElement ) {
 		return null;
 	}
+	const emailTypesData = slotElement.getAttribute( 'data-email-types' );
+	let emailTypes: EmailType[] = [];
+	try {
+		emailTypes = JSON.parse( emailTypesData || '' );
+	} catch ( e ) {}
 
 	registerPlugin( 'woocommerce-admin-settings-email-listing', {
         scope: 'woocommerce-email-listing',
 		render: () => (
-			<EmailListingFill />
+			<EmailListingFill emailTypes={ emailTypes } />
 		),
 	} );
 };
