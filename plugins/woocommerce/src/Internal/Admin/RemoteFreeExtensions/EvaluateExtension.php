@@ -60,6 +60,11 @@ class EvaluateExtension {
 	public static function evaluate_bundles( $specs, $allowed_bundles = array() ) {
 		$bundles = array();
 		$evaluate_order = new EvaluateOrder();
+		$context = array(
+			'vars' => array(
+				'platform' => wp_is_mobile() ? 'mobile' : 'desktop',
+			)
+		);
 
 		foreach ( $specs as $spec ) {
 			$spec              = (object) $spec;
@@ -82,12 +87,8 @@ class EvaluateExtension {
 				}
 			}
 
-			$bundle['plugins'] = $evaluate_order->evaluate( $bundle['plugins'], array(
-				'plugins' => $bundle['plugins'],
-				'vars' => array(
-					'platform' => wp_is_mobile() ? 'mobile' : 'desktop',
-				)
-			) );
+			$context['plugins'] = $bundle['plugins'];
+			$bundle['plugins'] = $evaluate_order->evaluate( $bundle['plugins'], $context);
 
 			$bundles[] = $bundle;
 		}
