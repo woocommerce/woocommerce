@@ -59,6 +59,7 @@ class EvaluateExtension {
 	 */
 	public static function evaluate_bundles( $specs, $allowed_bundles = array() ) {
 		$bundles = array();
+		$evaluate_order = new EvaluateOrder();
 
 		foreach ( $specs as $spec ) {
 			$spec              = (object) $spec;
@@ -80,6 +81,10 @@ class EvaluateExtension {
 					$errors[] = $e;
 				}
 			}
+
+			$bundle['plugins'] = $evaluate_order->evaluate( $bundle['plugins'], array(
+				'plugins' => $bundle['plugins'],
+			) );
 
 			$bundles[] = $bundle;
 		}
