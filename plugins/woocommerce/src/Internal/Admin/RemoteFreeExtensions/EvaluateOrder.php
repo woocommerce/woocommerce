@@ -11,10 +11,6 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
  */
 class EvaluateOrder {
 	/**
-	 * The value to use when the `order` is missing.
-	 */
-	const MISSING_ORDER_VALUE = 9999;
-	/**
 	 * Evaluates the spec and returns a status.
 	 *
 	 * @param array $spec The spec to evaluate. This should be fully evaluated already. We're only processing "order".
@@ -22,11 +18,11 @@ class EvaluateOrder {
 	 *
 	 * @return mixed The evaluated spec.
 	 */
-	public function evaluate( array $spec, array $context = array() ) {
+	public function evaluate( array $spec, array $context = array(), $order_field = 'order' ) {
 		$rule_evaluator = new RuleEvaluator( new GetRuleProcessor( $context ) );
 
 		foreach ( $spec as $index => $spec_item ) {
-			$spec_item->order = $this->evaluate_order( $rule_evaluator, $spec_item->order, $index );
+			$spec_item->{$order_field} = $this->evaluate_order( $rule_evaluator, $spec_item->{$order_field}, $index );
 		}
 
 		return $spec;

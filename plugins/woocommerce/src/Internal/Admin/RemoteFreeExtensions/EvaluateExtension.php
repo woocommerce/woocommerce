@@ -89,6 +89,7 @@ class EvaluateExtension {
 
 			$context['plugins'] = $bundle['plugins'];
 			$bundle['plugins'] = $evaluate_order->evaluate( $bundle['plugins'], $context);
+			$bundle['plugins'] = $evaluate_order->evaluate( $bundle['plugins'], $context, 'order_mobile' );
 
 			$bundles[] = $bundle;
 		}
