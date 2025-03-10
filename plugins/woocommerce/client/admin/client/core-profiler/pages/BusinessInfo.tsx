@@ -487,6 +487,7 @@ export const BusinessInfo = ( {
 								/>
 							) }
 							<CheckboxControl
+								__nextHasNoMarginBottom
 								className="core-profiler__checkbox"
 								label={ __(
 									'Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox.',
