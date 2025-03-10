@@ -7,7 +7,10 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
-		"postinstall": "XDEBUG_MODE=off composer install --quiet"
+		"postinstall": "XDEBUG_MODE=off composer install --quiet",
+		"test:unit": "composer run-script test:unit",
+		"test:php:env": "composer run-script test:unit",
+		"test:integration": "composer run-script test:integration"
 	},
 	"license": "GPL-3.0-or-later",
 	"dependencies": {},
@@ -19,7 +22,31 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.{php}"
-			}
+			},
+			"tests": [
+				{
+					"name": "PHP: 8.1 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:env",
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						"phpunit.xml"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.1",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	}
 }
