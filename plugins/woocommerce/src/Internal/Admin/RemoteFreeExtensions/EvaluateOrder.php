@@ -25,8 +25,8 @@ class EvaluateOrder {
 	public function evaluate( array $spec, array $context = array() ) {
 		$rule_evaluator = new RuleEvaluator( new GetRuleProcessor( $context ) );
 
-		foreach ( $spec as $spec_item ) {
-			$spec_item->order = isset( $spec_item->order ) ? $this->evaluate_order( $rule_evaluator, $spec_item->order, $context ) : self::MISSING_ORDER_VALUE;
+		foreach ( $spec as $index => $spec_item ) {
+			$spec_item->order = $this->evaluate_order( $rule_evaluator, $spec_item->order, $index );
 		}
 
 		return $spec;
@@ -37,14 +37,13 @@ class EvaluateOrder {
 	 *
 	 * @param RuleEvaluator $rule_evaluator The rule evaluator.
 	 * @param object        $order The order to evaluate.
-	 * @param array         $context The context variables.
 	 *
 	 * @return mixed The evaluated order.
 	 */
-	protected function evaluate_order( RuleEvaluator $rule_evaluator, $order, array $context ) {
+	protected function evaluate_order( RuleEvaluator $rule_evaluator, $order, $default_sort_order ) {
 		// Return 9999 if the order is not set. This is the highest possible order.
 		if ( ! isset( $order->value ) ) {
-			return self::MISSING_ORDER_VALUE;
+			return $default_sort_order;
 		}
 
 		if ( ! isset( $order->overrides ) ) {
