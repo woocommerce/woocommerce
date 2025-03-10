@@ -8,13 +8,15 @@
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
+		"env:test": "pnpm env:dev",
+		"env:dev": "pnpm wp-env start --update",
 		"test:unit": "composer run-script test:unit",
 		"test:php:env": "composer run-script test:unit",
 		"test:integration": "composer run-script test:integration"
 	},
 	"license": "GPL-3.0-or-later",
-	"dependencies": {},
 	"devDependencies": {
+		"@wordpress/env": "10.17.0",
 		"rimraf": "5.0.5"
 	},
 	"config": {
