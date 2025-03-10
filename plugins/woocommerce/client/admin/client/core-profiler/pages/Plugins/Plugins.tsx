@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Extension, ExtensionList } from '@woocommerce/data';
-import { useState, useMemo } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import clsx from 'clsx';
 
 /**
@@ -103,6 +103,9 @@ export const Plugins = ( {
 	) => void;
 	navigationProgress: number;
 } ) => {
+	const [ availablePlugins, setAvailablePlugins ] = useState< Extension[] >(
+		context.pluginsAvailable
+	);
 	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		Set< ExtensionList[ 'plugins' ][ number ] >
 	>(
@@ -168,6 +171,32 @@ export const Plugins = ( {
 		[ context.pluginsAvailable ]
 	);
 
+	// Sort plugins based on order_mobile if the screen is mobile
+	useEffect( () => {
+		const mediaQuery = window.matchMedia( '(max-width: 782px)' );
+
+		const handleResize = ( e: MediaQueryListEvent ) => {
+			if ( e.matches ) {
+				setAvailablePlugins(
+					[ ...availablePlugins ].sort(
+						( a, b ) =>
+							( a.order_mobile ?? Infinity ) -
+							( b.order_mobile ?? Infinity )
+					) || []
+				);
+			} else {
+				setAvailablePlugins( context.pluginsAvailable );
+			}
+		};
+
+		mediaQuery.addEventListener( 'change', handleResize );
+
+		// Call once on mount if already in mobile view
+		handleResize( mediaQuery as unknown as MediaQueryListEvent );
+
+		return () => mediaQuery.removeEventListener( 'change', handleResize );
+	}, [] );
+
 	return (
 		<div
 			className="woocommerce-profiler-plugins"
@@ -204,7 +233,7 @@ export const Plugins = ( {
 						`rows-${ pluginsCardRowCount }`
 					) }
 				>
-					{ context.pluginsAvailable.map( ( plugin ) => {
+					{ availablePlugins.map( ( plugin ) => {
 						const {
 							key: pluginSlug,
 							learn_more_link: learnMoreLink,
