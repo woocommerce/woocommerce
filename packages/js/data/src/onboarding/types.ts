@@ -237,6 +237,7 @@ export type Extension = {
 	tags?: TagsSlug[];
 	install_external?: boolean;
 	order?: number;
+	order_mobile?: number;
 };
 
 export type InstallAndActivatePluginsAsyncResponse = {
