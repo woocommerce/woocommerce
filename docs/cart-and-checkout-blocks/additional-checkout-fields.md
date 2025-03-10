@@ -215,6 +215,8 @@ These options apply to all field types (except in a few circumstances which are 
 | `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `order`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                                                                                                                                                         |
 | `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                                                                                                                                                           |
+| `required`          | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. | No | `true` | `false` |
+| `hidden`            | Fields cannot be set to hidden, so this field only accept `false`. Setting it to `true` is not supported. | No | `false` | `false` |
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
 | `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
@@ -238,11 +240,7 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-As well as the options above, text fields also support a `required` option. If this is `true` then the shopper _must_ provide a value for this field during the checkout process.
-
-| Option name     | Description                                                                                                                         | Required? | Example                                      | Default value |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------|----------------------------------------------|---|
-| `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
+Text fields don't have any additional options beyond the general options listed above.
 
 #### Options for `select` fields
 
@@ -255,7 +253,6 @@ You can set a placeholder to be shown on the select by passing a `placeholder` v
 | Option name | Description | Required? | Example        | Default value |
 |-----|-----|-----|----------------|--------------|
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | see below | No default - this must be provided. |
-| `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
 | `placeholder` | If this value is set, the shopper will see this option in the select. If the select is required, the shopper cannot select this option. | No | `Select a role` | Select a $label |
 
 ##### Example of `options` value
@@ -280,11 +277,10 @@ You can set a placeholder to be shown on the select by passing a `placeholder` v
 
 #### Options for `checkbox` fields
 
-As well as the options above, checkbox fields also support a `required` option. If this is `true` then the shopper _must_ check this box to place the order.
+As well as the options above, checkbox field support showing an error message if it's required and not checked.
 
 | Option name     | Description                                                                  | Required? | Example                                                      | Default value |
 |-----------------|------------------------------------------------------------------------------|-----------|--------------------------------------------------------------|---|
-| `required`      | If this is `true` then the shopper _must_ check this box to place the order. | No | `true`                                                       | `false` |
 | `error_message` | A custom message to show if the box is unchecked.                            | No | `You must confirm you are over 18 before placing the order.` | `Please check this box if you want to proceed.` |
 
 ### Attributes
