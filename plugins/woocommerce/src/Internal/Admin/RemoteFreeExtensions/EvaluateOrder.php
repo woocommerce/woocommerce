@@ -22,7 +22,7 @@ class EvaluateOrder {
 		$rule_evaluator = new RuleEvaluator( new GetRuleProcessor( $context ) );
 
 		foreach ( $spec as $index => $spec_item ) {
-			$spec_item->{$order_field} = $this->evaluate_order( $rule_evaluator, $spec_item->{$order_field}, $index );
+			$spec_item->{$order_field} = $this->evaluate_order( $rule_evaluator, $spec_item->{$order_field}, $index+1 );
 		}
 
 		return $spec;
