@@ -924,7 +924,7 @@ Here we make our field required and visible only if local pickup is being
 Notice that for hidden, we inverse the field, meaning, this field should only be hidden if `prefers_collection` is false, which is almost all cases except when it's selected. In the examples above, we used [the keyword `const`](https://ajv.js.org/json-schema.html#const).
 
 
-#### Custom Validation Rules
+#### Validation schema example
 
 Validation is slightly different from conditional visibility and requirement. In validation, you will pass in a subset of schema (only applicable to your field), and its role is to validate the field and show any errors if there.
 
@@ -952,6 +952,17 @@ Validation can also be against other fields, for example, an alternative email f
 ```
 
 In the example above, we used [format keyword](https://github.com/ajv-validator/ajv-formats) and `$data` to refer to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference). We also used the `errorMessage` property to provide a custom error message.
+
+#### `$data` keyword and JSON pointers
+
+`$data` keyword is a way in JSON schema to reference another field's value. In the above example, we use it to refer to the billing email via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference).
+
+When dealing with JSON pointers, there are some things to keep in mind:
+
+- The forward slash `/` is used to navigate through the JSON object, so for additional fields, a field named `my-plugin-namespace/my-field` will need to be referenced as `my-plugin-namespace~1my-field`.
+- Navigation in JSON pointers can be from the current field backward, or from the root. If you have an address field and want to validate say the phone field, this means you will validate 2 values, one for shipping, and one for billing, so you can reference the phone field in 2 ways:
+    - `0/customer/address/phone` which uses root navigation (via the `0/`) prefix, and uses the dynamic `address` group, which will change depending if the billing or shipping value is being validated.
+    - `1/phone` which uses relative pointers to step back, in this case, it will access its sibling field, the `phone` field. Increase the number to step back even further, for example, `2/id` will access the customer ID.
 
 ### Keywords and values that are not in spec
 
