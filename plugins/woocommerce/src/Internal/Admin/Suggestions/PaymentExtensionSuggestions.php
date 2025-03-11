@@ -43,7 +43,6 @@ class PaymentExtensionSuggestions {
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
-	const BANK_OF_AMERICA   = 'bank_of_america';
 	const BOLT              = 'bolt_checkout';
 	const AUTHORIZE_NET     = 'authorize_net';
 	const DEPAY             = 'depay';
@@ -2936,14 +2935,6 @@ class PaymentExtensionSuggestions {
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'bolt-checkout-woocommerce',
-				),
-			),
-			self::BANK_OF_AMERICA   => array(
-				'_type'       => self::TYPE_PSP,
-				'icon'        => plugins_url( 'assets/images/onboarding/icons/bofa.svg', WC_PLUGIN_FILE ),
-				'plugin'      => array(
-					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'woocommerce-gateway-bank-of-america',
 				),
 			),
 			self::DEPAY             => array(
