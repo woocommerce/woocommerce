@@ -171,8 +171,9 @@ class Loader {
 		}
 
 		// Add page ID as a class.
-		if ( $pageId = PageController::get_instance()->get_current_screen_id() ) {
-			$classes[] = $pageId;
+		$page_id = PageController::get_instance()->get_current_screen_id();
+		if ( $page_id ) {
+			$classes[] = $page_id;
 		}
 
 		/**
