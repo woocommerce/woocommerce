@@ -138,8 +138,12 @@ class Bootstrap {
 		$is_rest              = wc()->is_rest_api_request();
 		$is_store_api_request = wc()->is_store_api_request();
 
+		// Initialize Store API in non-admin context.
+		if ( ! is_admin() ) {
+			$this->container->get( StoreApi::class )->init();
+		}
+
 		// Load and init assets.
-		$this->container->get( StoreApi::class )->init();
 		$this->container->get( PaymentsApi::class )->init();
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
