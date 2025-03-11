@@ -535,11 +535,9 @@ const getPlugins = fromPromise( async () => {
 		onboardingStore
 	).getFreeExtensions();
 	return (
-		extensionsBundles
-			.find( ( bundle ) => bundle.key === 'obw/core-profiler' )
-			?.plugins.sort(
-				( a, b ) => ( a.order ?? Infinity ) - ( b.order ?? Infinity )
-			) || []
+		extensionsBundles.find(
+			( bundle ) => bundle.key === 'obw/core-profiler'
+		)?.plugins || []
 	);
 } );
 
