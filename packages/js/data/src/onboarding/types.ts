@@ -236,8 +236,6 @@ export type Extension = {
 	requires_jpc?: boolean;
 	tags?: TagsSlug[];
 	install_external?: boolean;
-	order?: number;
-	order_mobile?: number;
 };
 
 export type InstallAndActivatePluginsAsyncResponse = {
