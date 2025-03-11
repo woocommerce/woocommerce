@@ -30,7 +30,7 @@ type StoreNoticesState = {
 	get isInfo(): boolean;
 };
 
-export type StoreNoticesStore = {
+export type Store = {
 	state: StoreNoticesState;
 	actions: {
 		addNotice: ( notice: Notice ) => string;
@@ -58,8 +58,9 @@ const generateNoticeId = () => {
 		.substring( 2, 15 ) }`;
 };
 
-const { state } = store< StoreNoticesStore >(
-	'woocommerce/product-collection-notices',
+// Todo: export this store once the store is public.
+const { state } = store< Store >(
+	'woocommerce/store-notices',
 	{
 		state: {
 			get role() {

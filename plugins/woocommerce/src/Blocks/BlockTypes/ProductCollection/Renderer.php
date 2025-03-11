@@ -177,8 +177,6 @@ class Renderer {
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region() {
-		wp_enqueue_script_module( 'woocommerce/product-collection-notices' );
-
 		wp_interactivity_state(
 			'woocommerce/product-collection-notices',
 			array(

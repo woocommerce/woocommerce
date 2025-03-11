@@ -53,8 +53,8 @@ const entries = {
 		'./assets/js/blocks/add-to-cart-with-options/variation-selector/frontend.ts',
 
 	// Other
-	'woocommerce/product-collection-notices':
-		'./assets/js/blocks/product-collection/notices-frontend.ts',
+	'stores/woocommerce/cart': './assets/js/base/stores/woocommerce/cart.ts',
+	'stores/store-notices': './assets/js/base/stores/store-notices.ts',
 };
 
 module.exports = {
@@ -82,6 +82,11 @@ module.exports = {
 		new DependencyExtractionWebpackPlugin( {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
+			requestToExternalModule( request ) {
+				if ( request.startsWith( '@woocommerce/stores/' ) ) {
+					return request;
+				}
+			},
 		} ),
 	],
 	module: {

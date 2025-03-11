@@ -67,7 +67,8 @@ function emitSyncEvent( {
 	);
 }
 
-export const { state, actions } = store< Store >(
+// Todo: export this store once the store is public.
+const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
