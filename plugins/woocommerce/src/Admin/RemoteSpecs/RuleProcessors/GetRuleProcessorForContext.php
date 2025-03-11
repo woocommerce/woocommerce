@@ -32,8 +32,6 @@ class GetRuleProcessorForContext {
 	 */
 	public function get_processor( $rule_type ) {
 		switch ( $rule_type ) {
-			case 'context_vars':
-				return new ContextVarsRuleProcessor( $this->context['vars'] ?? array() );
 			case 'context_plugins':
 				return new ContextPluginsRuleProcessor( $this->context['plugins'] ?? array() );
 		}
