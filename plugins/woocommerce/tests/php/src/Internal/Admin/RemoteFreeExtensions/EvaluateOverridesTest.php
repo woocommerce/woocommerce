@@ -1,5 +1,6 @@
 <?php
 
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
@@ -16,6 +17,7 @@ class EvaluateOverridesTest extends WC_Unit_Test_Case {
 	 * @return mixed
 	 */
 	protected function get_extensions() {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$extensions = file_get_contents( __DIR__ . '/fixtures/extensions.json' );
 		return json_decode( $extensions );
 	}
