@@ -57,9 +57,6 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 	 * @return string Row HTML
 	 */
 	private function get_product_row( $product_attribute_name, $product_attribute_terms, $attributes, $block ): string {
-		global $attribute_name;
-		global $attribute_terms;
-
 		$attribute_name = $product_attribute_name;
 		$attribute_terms = $this->get_terms( $product_attribute_name, $product_attribute_terms );
 
@@ -67,9 +64,21 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			return '';
 		}
 
+		// Get an instance of the current Post Template block.
+		$block_instance = $block->parsed_block;
+
+		$new_block = new WP_Block(
+			$block_instance,
+			array(
+				'attributeId'    => uniqid(),
+				'attributeName'  => $attribute_name,
+				'attributeTerms' => $attribute_terms,
+			),
+		);
+
 		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 		// `render_callback` and ensure that no wrapper markup is included.
-		return $block->render( array( 'dynamic' => false ) );
+		return $new_block->render( array( 'dynamic' => false ) );
 	}
 
 	/**
@@ -83,9 +92,12 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 		global $product;
 
 		$is_taxonomy = taxonomy_exists( $attribute_name );
+
+		$selected_attribute = $product->get_variation_default_attribute( $attribute_name );
+
 		if ( $is_taxonomy ) {
 			$items = array_map(
-				function ( $term ) use ( $attribute_name, $product ) {
+				function ( $term ) use ( $attribute_name, $product, $selected_attribute ) {
 					return array(
 						'value' => $term->slug,
 						'label' => apply_filters(
@@ -95,13 +107,14 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 							$attribute_name,
 							$product
 						),
+						'isSelected' => $selected_attribute === $term->slug,
 					);
 				},
 				wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) ),
 			);
 		} else {
 			$items = array_map(
-				function ( $term ) use ( $attribute_name, $product ) {
+				function ( $term ) use ( $attribute_name, $product, $selected_attribute ) {
 					return array(
 						'value' => $term,
 						'label' => apply_filters(
@@ -111,6 +124,7 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 							$attribute_name,
 							$product
 						),
+						'isSelected' => $selected_attribute === $term,
 					);
 				},
 				$attribute_terms,

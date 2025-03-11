@@ -35,31 +35,34 @@ class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		global $attribute_name;
-
-		$content = '';
-
-		if ( isset( $attribute_name ) ) {
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-	
-			$wrapper_attributes = get_block_wrapper_attributes(
-				array(
-					'class' => esc_attr( $classes_and_styles['classes'] ),
-					'for'   => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) ),
-					'id'    => esc_attr( 'attribute_' . sanitize_title( $attribute_name ) . '_label' ),
-					'style' => esc_attr( $classes_and_styles['styles'] ),
-				)
-			);
-
-			$label_text = esc_html( wc_attribute_label( $attribute_name ) );
-
-			$content .= sprintf(
-				'<label %s>%s</label>',
-				$wrapper_attributes,
-				$label_text
-			);
+		if ( empty( $block->context ) ) {
+			return '';
 		}
 
-		return $content;
+		$attribute_id = $block->context['attributeId'];
+		$attribute_name = $block->context['attributeName'];
+
+		if ( ! isset( $attribute_id ) || ! isset( $attribute_name ) ) {
+			return '';
+		}
+
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => esc_attr( $classes_and_styles['classes'] ),
+				'for'   => esc_attr( $attribute_id ),
+				'id'    => esc_attr( $attribute_id . '_label' ),
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
+		$label_text = esc_html( wc_attribute_label( $attribute_name ) );
+
+		return sprintf(
+			'<label %s>%s</label>',
+			$wrapper_attributes,
+			$label_text
+		);
 	}
 }

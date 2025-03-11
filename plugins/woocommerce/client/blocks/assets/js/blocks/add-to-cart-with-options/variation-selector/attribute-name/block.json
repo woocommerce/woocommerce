@@ -54,5 +54,6 @@
 				"padding": true
 			}
 		}
-	}
+	},
+	"usesContext": [ "attributeId", "attributeName", "attributeTerms" ]
 }

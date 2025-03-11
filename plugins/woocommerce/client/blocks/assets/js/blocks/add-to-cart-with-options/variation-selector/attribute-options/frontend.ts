@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 
 type Option = {
 	value: string;
 	label: string;
+	isSelected: boolean;
 };
 
 type Context = {
@@ -15,8 +16,9 @@ type Context = {
 };
 
 type PillsContext = Context & {
-	isSelected?: boolean;
 	tabIndex?: number;
+	selected?: string;
+	focused?: string;
 };
 
 store(
@@ -27,24 +29,25 @@ store(
 			handleClick() {
 				const context = getContext< PillsContext >();
 				if ( context.selected === context.option.value ) {
-					context.selected = null;
+					context.selected = '';
 				} else {
 					context.selected = context.option.value;
 				}
+				context.focused = context.option.value;
 			},
 			handleKeyDown( event: KeyboardEvent ) {
 				const context = getContext< PillsContext >();
 
-				const target = event.currentTarget as HTMLDivElement;
 				let flag = false;
 
 				switch ( event.key ) {
 					case ' ':
-						if ( context.selected ) {
-							context.selected = null;
+						if ( context.selected === context.option.value ) {
+							context.selected = '';
 						} else {
 							context.selected = context.option.value;
 						}
+						context.focused = context.option.value;
 						flag = true;
 						break;
 
@@ -56,23 +59,11 @@ store(
 							( option ) => option.value === context.option.value
 						);
 						if ( index === -1 ) return;
-						if ( index > 0 ) {
-							const prevSibling =
-								target.previousElementSibling as HTMLDivElement;
-							prevSibling?.focus();
+						const at =
+							index > 0 ? index - 1 : context.options.length - 1;
 
-							context.selected =
-								context.options[ index - 1 ].value;
-						} else {
-							const lastSibling = target.parentElement
-								?.lastElementChild as HTMLDivElement;
-							lastSibling?.focus();
-
-							context.selected =
-								context.options[
-									context.options.length - 1
-								].value;
-						}
+						context.selected = context.options[ at ].value;
+						context.focused = context.selected;
 						flag = true;
 						break;
 					}
@@ -85,20 +76,11 @@ store(
 							( option ) => option.value === context.option.value
 						);
 						if ( index === -1 ) return;
-						if ( index < context.options.length - 1 ) {
-							const nextSibling =
-								target.nextElementSibling as HTMLDivElement;
-							nextSibling?.focus();
+						const at =
+							index < context.options.length - 1 ? index + 1 : 0;
 
-							context.selected =
-								context.options[ index + 1 ].value;
-						} else {
-							const firstSibling = target.parentElement
-								?.firstElementChild as HTMLDivElement;
-							firstSibling?.focus();
-
-							context.selected = context.options[ 0 ].value;
-						}
+						context.selected = context.options[ at ].value;
+						context.focused = context.selected;
 						flag = true;
 						break;
 					}
@@ -115,15 +97,30 @@ store(
 		callbacks: {
 			watchSelected() {
 				const context = getContext< PillsContext >();
-				context.isSelected = context.selected === context.option.value;
-				if ( context.selected ) {
-					context.tabIndex = context.isSelected ? 0 : -1;
-				} else {
-					const index = context.options.findIndex(
-						( option ) => option.value === context.option.value
-					);
-					context.tabIndex = index === 0 ? 0 : -1;
+
+				if ( ! context.selected && ! context.focused ) {
+					if ( context.options[ 0 ] === context.option ) {
+						context.tabIndex = 0;
+					}
+					return;
 				}
+
+				context.option.isSelected =
+					context.selected === context.option.value;
+
+				if (
+					context.option.isSelected ||
+					context.focused === context.option.value
+				) {
+					context.tabIndex = 0;
+					if ( context.focused ) {
+						const { ref } = getElement();
+						ref?.focus();
+					}
+					return;
+				}
+
+				context.tabIndex = -1;
 			},
 		},
 	}
