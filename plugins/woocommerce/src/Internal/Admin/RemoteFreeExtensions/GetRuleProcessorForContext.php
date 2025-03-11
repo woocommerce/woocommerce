@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules\ContextVars
  *
  * GetRuleProcessor class.
  */
-class GetRuleProcessorForOverrides {
+class GetRuleProcessorForContext {
 	/**
 	 * Contains the context variables.
 	 *

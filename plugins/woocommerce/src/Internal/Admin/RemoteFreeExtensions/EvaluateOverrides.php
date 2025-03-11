@@ -17,7 +17,7 @@ class EvaluateOverrides {
 	 * @return array The evaluated spec.
 	 */
 	public function evaluate( array $spec, array $context = array() ) {
-		$rule_evaluator = new RuleEvaluator( new GetRuleProcessorForOverrides( $context ) );
+		$rule_evaluator = new RuleEvaluator( new GetRuleProcessorForContext( $context ) );
 
 		foreach ( $spec as $spec_item ) {
 			if ( isset( $spec_item->overrides ) && is_array( $spec_item->overrides ) ) {
