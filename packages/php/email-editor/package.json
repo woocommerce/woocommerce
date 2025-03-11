@@ -11,7 +11,7 @@
 		"env:test": "pnpm env:dev",
 		"env:dev": "pnpm wp-env start --update",
 		"test:unit": "composer run-script test:unit",
-		"test:php:env": "composer run-script test:unit",
+		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration"
 	},
 	"license": "GPL-3.0-or-later",
