@@ -215,9 +215,9 @@ These options apply to all field types (except in a few circumstances which are 
 | `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `order`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                                                                                                                                                         |
 | `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                                                                                                                                                           |
-| `required`          | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visiblity-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
-| `hidden`            | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visiblity-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
-| `validation`        | An array of JSON Schema objects that define validation rules for the field. See [Conditional visibility and validation via JSON Schema](#conditional-visiblity-and-validation-via-json-schema). | No | `[{"type": "object", "properties": {...}}]` | `[]` |
+| `required`          | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
+| `hidden`            | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
+| `validation`        | An array of JSON Schema objects that define validation rules for the field. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `[{"type": "object", "properties": {...}}]` | `[]` |
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
 | `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
@@ -596,6 +596,7 @@ If you're not familiar with JSON Schema, you can get a quick introduction to it 
 
 When you're writing your rules, you're writing a partial schema for the document object, essentially describing the ideal state you want for your field to be required or hidden. An example of the document object looks like this:
 
+<!-- markdownlint-disable MD033 -->
 <details>
 	<summary>Document object</summary>
 
@@ -682,9 +683,11 @@ When you're writing your rules, you're writing a partial schema for the document
 ```
 
 </details>
+<!-- markdownlint-enable MD033 -->
 
 
 It's full schema is this one:
+<!-- markdownlint-disable MD033 -->
 <details>
 	<summary>Document schema</summary>
 	
@@ -887,10 +890,11 @@ It's full schema is this one:
 ```
 
 </details>
+<!-- markdownlint-enable MD033 -->
 
 ### Examples
 
-#### Required and visible field.
+#### Required and visible field
 
 Here we make our field required and visible only if local pickup is being
 
@@ -966,7 +970,7 @@ When dealing with JSON pointers, there are some things to keep in mind:
 
 ### Keywords and values that are not in spec
 
-We support https://json-schema.org/draft-07, which is simple and doesn't support all the keywords and values that are in the latest spec, but we feel like it covers most of the use cases. On top of that, we introduced some non-standard keywords and values that are not in the spec, their implementation might be different between Opis and AJV (or any future implementation), this is the list of such keywords and values:
+We support [JSON Schema Draft-07](https://json-schema.org/draft-07), which is simple and doesn't support all the keywords and values that are in the latest spec, but we feel like it covers most of the use cases. On top of that, we introduced some non-standard keywords and values that are not in the spec, their implementation might be different between Opis and AJV (or any future implementation), this is the list of such keywords and values:
 
 - `errorMessage`: Custom error message for validation, in AJV, this is `errorMessage` and in Opis, this is `$error`, we only support `errorMessage` and maps that internally for Opis. We also don't support templates in `errorMessage` for now.
 - `$data`: Refers to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference), both Opis and AJV use the same implementation.
