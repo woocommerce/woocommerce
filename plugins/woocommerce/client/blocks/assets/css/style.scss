@@ -99,10 +99,11 @@ body.wc-block-product-gallery-modal-open {
 	}
 }
 
-.wc-block-grid__product-rating {
+.wc-block-grid__product-rating, .wp-block-woocommerce-product-review-rating {
 	display: block;
 
 	.wc-block-grid__product-rating__stars,
+	.wc-block-components-product-review-rating__stars,
 	.star-rating {
 		overflow: hidden;
 		position: relative;

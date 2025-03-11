@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-review-rating",
+	"title": "Product Review Rating",
+	"category": "woocommerce",
+	"description": "Displays the rating of a product review.",
+	"textdomain": "default",
+	"usesContext": [ "commentId" ],
+	"attributes": {
+		"textAlign": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"color": {
+			"gradients": true,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			}
+		}
+	}
+}
