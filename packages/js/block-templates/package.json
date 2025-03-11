@@ -51,7 +51,7 @@
 	},
 	"dependencies": {
 		"@woocommerce/expression-evaluation": "workspace:*",
-		"@woocommerce/settings": "^1.0.0",
+		"@woocommerce/settings": "1.0.0",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/blocks": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",

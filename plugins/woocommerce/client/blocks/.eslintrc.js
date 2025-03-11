@@ -126,6 +126,7 @@ const coreModules = [
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-components',
+	'@woocommerce/blocks-registry',
 	'@woocommerce/price-format',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',

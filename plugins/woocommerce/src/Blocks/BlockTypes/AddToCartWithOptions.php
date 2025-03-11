@@ -201,8 +201,6 @@ class AddToCartWithOptions extends AbstractBlock {
 				$template_part_contents,
 				$hooks_after,
 			);
-
-			$product = $previous_product;
 		} else {
 			ob_start();
 
@@ -215,6 +213,8 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$form_html = ob_get_clean();
 		}
+
+		$product = $previous_product;
 
 		return $form_html;
 	}

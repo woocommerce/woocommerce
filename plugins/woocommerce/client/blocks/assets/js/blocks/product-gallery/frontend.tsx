@@ -332,22 +332,8 @@ const productGallery = {
 				return;
 			}
 
-			// TODO: Replace with an interactive block that calls `actions.selectImage`.
-			// This have a diffent context in current setup.
-			const selectImage = ( newImageNumber: number ) => {
-				const { imageData } = getContext();
-				const allImageIds = imageData?.image_ids || [];
-				const { disableLeft, disableRight } = getArrowsState(
-					newImageNumber,
-					allImageIds.length
-				);
-				context.selectedImageId = allImageIds[ newImageNumber - 1 ];
-				context.disableLeft = disableLeft;
-				context.disableRight = disableRight;
-				scrollImageIntoView( allImageIds[ newImageNumber - 1 ] );
-			};
-
-			const selectFirstImage = () => selectImage( 1 );
+			const selectFirstImage = () =>
+				withScope( () => actions.selectImage( 1 ) );
 
 			// Initial mutation is triggered when the page is loaded.
 			// We don't want to set `userHasInteracted` to true on initial mutation

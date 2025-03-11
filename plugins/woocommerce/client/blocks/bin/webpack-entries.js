@@ -53,6 +53,11 @@ const blocks = {
 			'add-to-cart-with-options/grouped-product-selector/product-item-template',
 		isExperimental: true,
 	},
+	'add-to-cart-with-options-grouped-product-selector-item-cta': {
+		customDir:
+			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
+		isExperimental: true,
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},

@@ -47,6 +47,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		wp_enqueue_script( 'wc-settings' );
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$query_id      = $block->context['queryId'] ?? 0;
