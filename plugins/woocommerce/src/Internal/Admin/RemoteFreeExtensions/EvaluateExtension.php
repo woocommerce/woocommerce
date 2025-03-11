@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\EvaluateOverrides;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 /**

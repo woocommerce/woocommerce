@@ -1,9 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules;
-
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\ComparisonOperation;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleProcessorInterface;
+namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
 /**
  * Rule processor for context_vars rules.

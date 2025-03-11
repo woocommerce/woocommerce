@@ -1,11 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
-
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleProcessorInterface;
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules\ContextPluginsRuleProcessor;
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules\ContextVarsRuleProcessor;
+namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
 /**
  * A custom GetRuleProcessor class to support context_vars and context_plugins rule types.

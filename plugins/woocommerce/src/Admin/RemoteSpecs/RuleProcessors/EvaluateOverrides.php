@@ -1,8 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
-
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
+namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
 /**
  * Evaluates `overrides` property in the spec and returns the evaluated spec.

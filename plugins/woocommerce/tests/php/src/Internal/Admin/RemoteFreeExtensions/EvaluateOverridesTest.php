@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\EvaluateOverrides;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\EvaluateOverrides;
 use WC_Unit_Test_Case;
 
 class EvaluateOverridesTest extends WC_Unit_Test_Case {
