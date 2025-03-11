@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
 /**
@@ -30,12 +32,12 @@ class ContextPluginsRuleProcessor implements RuleProcessorInterface {
 	 * }
 	 *
 	 * @var array a list of plugins.
-	 *
 	 */
 	private array $plugins;
 
 	/**
 	 * Constructor.
+	 *
 	 * @param array $plugins a list of plugins.
 	 */
 	public function __construct( array $plugins ) {
