@@ -19,9 +19,21 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleProcessorInterfa
 class ContextPluginsRuleProcessor implements RuleProcessorInterface {
 
 	/**
-	 * The list of plugins.
+	 * The list of plugin objects.
+	 *
+	 * Plugin object is unmodified object from https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json
+	 *
+	 * Example:
+	 * {
+	 *   "id": "WooCommerce Shipping",
+	 *   "description": "description",
+	 *   "is_visible": true,
+	 *   "is_built_by_wc": true,
+	 *   "key": "woocommerce-shipping",
+	 * }
 	 *
 	 * @var array a list of plugins.
+	 *
 	 */
 	private array $plugins;
 
