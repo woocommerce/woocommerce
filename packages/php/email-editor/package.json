@@ -29,7 +29,7 @@
 				{
 					"name": "PHP: 8.1 WP: latest",
 					"testType": "unit:php",
-					"command": "test:php:env",
+					"command": "test:php:ci",
 					"changes": [
 						"composer.json",
 						"composer.lock",
