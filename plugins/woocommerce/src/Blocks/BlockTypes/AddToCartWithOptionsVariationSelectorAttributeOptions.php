@@ -41,9 +41,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		global $product;
 		global $attribute_name;
-		global $attribute_terms;
 
 		if ( isset( $attribute_name ) ) {
 			wp_enqueue_script_module( $this->get_full_block_name() );
