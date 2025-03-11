@@ -53,14 +53,14 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			$attributes = $this->parse_attributes( $attributes );
 
 			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-	
+
 			$field_style = $attributes['style'];
 
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
 					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-					'class' => esc_attr( $classes_and_styles['classes'] ),
-					'style' => esc_attr( $classes_and_styles['styles'] ),
+					'class'               => esc_attr( $classes_and_styles['classes'] ),
+					'style'               => esc_attr( $classes_and_styles['styles'] ),
 				)
 			);
 
@@ -109,14 +109,14 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * Get the default selected attribute.
 	 *
 	 * @param array $attribute_terms The attribute's.
-	 * @return string|null The default selected attribute. 
+	 * @return string|null The default selected attribute.
 	 */
 	protected function get_default_selected_attribute( $attribute_terms ) {
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( $attribute_term['isSelected'] ) {
 				return $attribute_term['value'];
 			}
-		};
+		}
 
 		return null;
 	}
@@ -130,8 +130,8 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @return string The pills.
 	 */
 	protected function render_pills( $attributes, $content, $block ) {
-		$attribute_id = $block->context['attributeId'];
-		$attribute_name = $block->context['attributeName'];
+		$attribute_id    = $block->context['attributeId'];
+		$attribute_name  = $block->context['attributeName'];
 		$attribute_terms = $block->context['attributeTerms'];
 
 		return sprintf(
@@ -142,7 +142,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			</div>',
 			$this->get_normalized_attributes(
 				array(
-					'role'                => "radiogroup",
+					'role'                => 'radiogroup',
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'id'                  => $attribute_id,
 					'aria-labeledby'      => $attribute_id . '_label',
@@ -156,14 +156,14 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			),
 			$this->get_normalized_attributes(
 				array(
-					'role'                       => "radio",
-					'data-wp-bind--tabindex'     => "context.tabIndex",
-					'data-wp-bind--aria-checked' => "context.option.isSelected",
+					'role'                       => 'radio',
+					'data-wp-bind--tabindex'     => 'context.tabIndex',
+					'data-wp-bind--aria-checked' => 'context.option.isSelected',
 					'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-					'data-wp-text'               => "context.option.label",
-					'data-wp-watch'              => "callbacks.watchSelected",
-					'data-wp-on--click'          => "actions.handleClick",
-					'data-wp-on--keydown'        => "actions.handleKeyDown",
+					'data-wp-text'               => 'context.option.label',
+					'data-wp-watch'              => 'callbacks.watchSelected',
+					'data-wp-on--click'          => 'actions.handleClick',
+					'data-wp-on--keydown'        => 'actions.handleKeyDown',
 					'data-wp-context'            => array(
 						'tabIndex' => -1,
 					),
@@ -181,12 +181,16 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @return string The dropdown.
 	 */
 	protected function render_dropdown( $attributes, $content, $block ) {
-		$attribute_id = $block->context['attributeId'];
-		$attribute_name = $block->context['attributeName'];
+		$attribute_id    = $block->context['attributeId'];
+		$attribute_name  = $block->context['attributeName'];
 		$attribute_terms = $block->context['attributeTerms'];
+		$default_option  = array(
+			'label' => esc_html__( 'Choose an option', 'woocommerce' ),
+			'value' => '',
+		);
 
 		$options = array_merge(
-			array( array( 'label' => esc_html__( 'Choose an option', 'woocommerce' ), 'value' => '' ) ),
+			array( $default_option ),
 			$attribute_terms
 		);
 
@@ -209,11 +213,11 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			),
 			$this->get_normalized_attributes(
 				array(
-					'data-wp-text'           => "context.option.label",
-					'data-wp-bind--value'    => "context.option.value",
-					'data-wp-bind--selected' => "context.isSelected",
-					'data-wp-init'           => "callbacks.init",
-					'data-wp-on--change'     => "actions.handleChange",
+					'data-wp-text'           => 'context.option.label',
+					'data-wp-bind--value'    => 'context.option.value',
+					'data-wp-bind--selected' => 'context.isSelected',
+					'data-wp-init'           => 'callbacks.init',
+					'data-wp-on--change'     => 'actions.handleChange',
 					'data-wp-context'        => array(
 						'isSelected' => null,
 					),

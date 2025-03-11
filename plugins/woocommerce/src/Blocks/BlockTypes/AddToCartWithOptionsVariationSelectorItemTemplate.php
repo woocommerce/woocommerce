@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
+
 use WP_Block;
 
 /**
@@ -57,7 +58,7 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 	 * @return string Row HTML
 	 */
 	private function get_product_row( $product_attribute_name, $product_attribute_terms, $attributes, $block ): string {
-		$attribute_name = $product_attribute_name;
+		$attribute_name  = $product_attribute_name;
 		$attribute_terms = $this->get_terms( $product_attribute_name, $product_attribute_terms );
 
 		if ( empty( $attribute_terms ) ) {
@@ -85,7 +86,7 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 	 * Get product attributes terms.
 	 *
 	 * @param string $attribute_name Product Attribute Name.
-	 * @param array  $product_attribute_terms Product Attribute Terms.
+	 * @param array  $attribute_terms Product Attribute Terms.
 	 * @return srtring
 	 */
 	protected function get_terms( $attribute_name, $attribute_terms ) {
@@ -99,8 +100,18 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			$items = array_map(
 				function ( $term ) use ( $attribute_name, $product, $selected_attribute ) {
 					return array(
-						'value' => $term->slug,
-						'label' => apply_filters(
+						'value'      => $term->slug,
+						/**
+						 * Filter the variation option name.
+						 *
+						 * @since 9.7.0
+						 *
+						 * @param string     $option_label    The option label.
+						 * @param WP_Term|string|null $item   Term object for taxonomies, option string for custom attributes.
+						 * @param string     $attribute_name  Name of the attribute.
+						 * @param WC_Product $product         Product object.
+						 */
+						'label'      => apply_filters(
 							'woocommerce_variation_option_name',
 							$term->name,
 							$term,
@@ -116,8 +127,18 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			$items = array_map(
 				function ( $term ) use ( $attribute_name, $product, $selected_attribute ) {
 					return array(
-						'value' => $term,
-						'label' => apply_filters(
+						'value'      => $term,
+						/**
+						 * Filter the variation option name.
+						 *
+						 * @since 9.7.0
+						 *
+						 * @param string     $option_label    The option label.
+						 * @param WP_Term|string|null $item   Term object for taxonomies, option string for custom attributes.
+						 * @param string     $attribute_name  Name of the attribute.
+						 * @param WC_Product $product         Product object.
+						 */
+						'label'      => apply_filters(
 							'woocommerce_variation_option_name',
 							$term,
 							null,
