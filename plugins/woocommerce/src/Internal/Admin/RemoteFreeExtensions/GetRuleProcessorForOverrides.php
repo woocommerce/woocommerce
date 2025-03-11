@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor as OriginalGetRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleProcessorInterface;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules\ContextPluginsRuleProcessor;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules\ContextVarsRuleProcessor;
@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Rules\ContextVars
  *
  * GetRuleProcessor class.
  */
-class GetRuleProcessor {
+class GetRuleProcessorForOverrides {
 	/**
 	 * Contains the context variables.
 	 *
@@ -43,6 +43,6 @@ class GetRuleProcessor {
 				return new ContextPluginsRuleProcessor( $this->context['plugins'] ?? array() );
 		}
 
-		return OriginalGetRuleProcessor::get_processor( $rule_type );
+		return GetRuleProcessor::get_processor( $rule_type );
 	}
 }

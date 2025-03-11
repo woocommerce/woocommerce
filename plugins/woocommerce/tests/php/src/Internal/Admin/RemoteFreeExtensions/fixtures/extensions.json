@@ -225,9 +225,7 @@
         "default": []
       }
     ],
-    "order": {
-      "value": 1
-    },
+    "order": 1,
     "is_built_by_wc": true,
     "min_wp_version": "5.9",
     "key": "woocommerce-payments",
@@ -257,45 +255,21 @@
     "name": "PayPal",
     "description": "PayPal test",
     "is_visible": true,
-    "order": {
-      "value": 1,
-      "overrides": [
-        {
-          "value": 3,
-          "rules": [
-            {
-              "type": "context_plugins",
-              "name": "name",
-              "value": "WooPayments",
-              "operation": "="
-            },
-            {
-              "type": "context_vars",
-              "name": "platform",
-              "value": "desktop",
-              "operation": "="
-            }
-          ]
-        },
-        {
-          "value": 2,
-          "rules": [
-            {
-              "type": "context_plugins",
-              "name": "name",
-              "value": "WooPayments",
-              "operation": "="
-            },
-            {
-              "type": "context_vars",
-              "name": "platform",
-              "value": "mobile",
-              "operation": "="
-            }
-          ]
-        }
-      ]
-    },
+    "order": 1,
+    "overrides": [
+      {
+        "field": "order",
+        "value": 3,
+        "rules": [
+          {
+            "type": "context_plugins",
+            "name": "name",
+            "value": "WooPayments",
+            "operation": "="
+          }
+        ]
+      }
+    ],
     "is_built_by_wc": true,
     "min_wp_version": "5.9",
     "key": "woocommerce-payments",
@@ -308,22 +282,21 @@
     "name": "Test",
     "description": "Test test",
     "is_visible": true,
-    "order": {
-      "value": 1,
-      "overrides": [
-        {
-          "value": 2,
-          "rules": [
-            {
-              "type": "base_location_country",
-              "value": [
-                "US"
-              ],
-              "operation": "in"
-            }
-          ]
-        }
-      ]
-    }
+    "order": 1,
+    "overrides": [
+      {
+        "field": "order",
+        "value": 2,
+        "rules": [
+          {
+            "type": "base_location_country",
+            "value": [
+              "US"
+            ],
+            "operation": "in"
+          }
+        ]
+      }
+    ]
   }
 ]
