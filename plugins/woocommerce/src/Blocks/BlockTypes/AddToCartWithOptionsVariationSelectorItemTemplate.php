@@ -71,9 +71,9 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 		$new_block = new WP_Block(
 			$block_instance,
 			array(
-				'attributeId'    => uniqid(),
-				'attributeName'  => $attribute_name,
-				'attributeTerms' => $attribute_terms,
+				'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),
+				'woocommerce/attributeName'  => $attribute_name,
+				'woocommerce/attributeTerms' => $attribute_terms,
 			),
 		);
 

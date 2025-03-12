@@ -38,7 +38,7 @@ store(
 			handleKeyDown( event: KeyboardEvent ) {
 				const context = getContext< PillsContext >();
 
-				let flag = false;
+				let keyWasProcessed = false;
 
 				switch ( event.key ) {
 					case ' ':
@@ -48,7 +48,7 @@ store(
 							context.selected = context.option.value;
 						}
 						context.focused = context.option.value;
-						flag = true;
+						keyWasProcessed = true;
 						break;
 
 					case 'Up':
@@ -64,7 +64,7 @@ store(
 
 						context.selected = context.options[ at ].value;
 						context.focused = context.selected;
-						flag = true;
+						keyWasProcessed = true;
 						break;
 					}
 
@@ -81,14 +81,14 @@ store(
 
 						context.selected = context.options[ at ].value;
 						context.focused = context.selected;
-						flag = true;
+						keyWasProcessed = true;
 						break;
 					}
 					default:
 						break;
 				}
 
-				if ( flag ) {
+				if ( keyWasProcessed ) {
 					event.stopPropagation();
 					event.preventDefault();
 				}

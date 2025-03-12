@@ -55,5 +55,9 @@
 			}
 		}
 	},
-	"usesContext": [ "attributeId", "attributeName", "attributeTerms" ]
+	"usesContext": [
+		"woocommerce/attributeId",
+		"woocommerce/attributeName",
+		"woocommerce/attributeTerms"
+	]
 }

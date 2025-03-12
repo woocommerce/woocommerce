@@ -45,7 +45,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			return '';
 		}
 
-		$attribute_name = $block->context['attributeName'];
+		$attribute_name = $block->context['woocommerce/attributeName'];
 
 		if ( isset( $attribute_name ) ) {
 			wp_enqueue_script_module( $this->get_full_block_name() );
@@ -130,9 +130,9 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @return string The pills.
 	 */
 	protected function render_pills( $attributes, $content, $block ) {
-		$attribute_id    = $block->context['attributeId'];
-		$attribute_name  = $block->context['attributeName'];
-		$attribute_terms = $block->context['attributeTerms'];
+		$attribute_id    = $block->context['woocommerce/attributeId'];
+		$attribute_name  = $block->context['woocommerce/attributeName'];
+		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 
 		return sprintf(
 			'<div %s>
@@ -181,9 +181,9 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @return string The dropdown.
 	 */
 	protected function render_dropdown( $attributes, $content, $block ) {
-		$attribute_id    = $block->context['attributeId'];
-		$attribute_name  = $block->context['attributeName'];
-		$attribute_terms = $block->context['attributeTerms'];
+		$attribute_id    = $block->context['woocommerce/attributeId'];
+		$attribute_name  = $block->context['woocommerce/attributeName'];
+		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 		$default_option  = array(
 			'label' => esc_html__( 'Choose an option', 'woocommerce' ),
 			'value' => '',

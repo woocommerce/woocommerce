@@ -39,8 +39,8 @@ class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
 			return '';
 		}
 
-		$attribute_id   = $block->context['attributeId'];
-		$attribute_name = $block->context['attributeName'];
+		$attribute_id   = $block->context['woocommerce/attributeId'];
+		$attribute_name = $block->context['woocommerce/attributeName'];
 
 		if ( ! isset( $attribute_id ) || ! isset( $attribute_name ) ) {
 			return '';
