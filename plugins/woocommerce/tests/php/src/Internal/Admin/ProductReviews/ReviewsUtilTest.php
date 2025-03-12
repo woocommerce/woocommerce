@@ -49,18 +49,18 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	public function test_comments_clauses_without_product_reviews_filter( array $args, bool $should_exclude_reviews ) {
 		global $wpdb;
 
-		$join = " LEFT JOIN {$wpdb->posts} AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ";
+		$join  = " LEFT JOIN {$wpdb->posts} AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ";
 		$where = ' wp_posts_to_exclude_reviews.post_type NOT IN (\'product\') ';
 		$query = new \WP_Comment_Query();
 		$query->query( $args );
 		$sql = $query->request;
 
-		if($should_exclude_reviews) {
-			$this->assertStringContainsString($join, $sql);
-			$this->assertStringContainsString($where, $sql);
+		if ( $should_exclude_reviews ) {
+			$this->assertStringContainsString( $join, $sql );
+			$this->assertStringContainsString( $where, $sql );
 		} else {
-			$this->assertStringNotContainsString($join, $sql);
-			$this->assertStringNotContainsString($where, $sql);
+			$this->assertStringNotContainsString( $join, $sql );
+			$this->assertStringNotContainsString( $where, $sql );
 		}
 	}
 
