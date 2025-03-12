@@ -326,3 +326,21 @@ body.wc-block-product-gallery-dialog-open {
 		}
 	}
 }
+
+// On mobile devices (<600px):
+// - Product gallery groups are stacked vertically
+// - Thumbnails appear below the main gallery image and are arranged horizontally in a row
+@include breakpoint("<600px") {
+	.wc-block-product-gallery {
+		.wc-block-product-gallery__gallery-area {
+			flex-direction: column;
+		}
+		.wc-block-product-gallery__large-image-and-navigation {
+			order: -1;
+		}
+
+		.wc-block-product-gallery-thumbnails {
+			flex-direction: row;
+		}
+	}
+}

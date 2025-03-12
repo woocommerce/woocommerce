@@ -334,7 +334,12 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 		if ( $product && method_exists( $product, 'get_variation_attributes' ) ) {
 			$variation_attributes = $product->get_variation_attributes();
 			$attributes           = $product->get_attributes();
-			return ( in_array( $name, array_keys( $attributes ), true ) && in_array( $value, $variation_attributes[ $attributes[ $name ]['name'] ], true ) );
+
+			return (
+				in_array( $name, array_keys( $attributes ), true ) &&
+				isset( $variation_attributes[ $attributes[ $name ]['name'] ] ) &&
+				in_array( $value, $variation_attributes[ $attributes[ $name ]['name'] ], true )
+			);
 		} else {
 			return false;
 		}
