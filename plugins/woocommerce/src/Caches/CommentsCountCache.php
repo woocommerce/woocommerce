@@ -74,7 +74,7 @@ class CommentsCountCache {
 	public function set( string $name, $value ) {
 		return $this->use_cache_api
 			? wp_cache_set( $name, $value, self::COMMENT_COUNT_CACHE_GROUP )
-			: set_transient( 'woocommerce_product_reviews_pending_count', $value, $this->transient_expiration );
+			: set_transient( $name, $value, $this->transient_expiration );
 	}
 
 	/**
