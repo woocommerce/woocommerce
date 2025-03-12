@@ -29,7 +29,7 @@ class CommentsCountCache {
 	 *
 	 * @var int
 	 */
-	private $transient_expiration;
+	private $transient_expiration_today_midnight_gmt;
 
 	/**
 	 * Constructor, detects which cache API to use.
@@ -38,7 +38,7 @@ class CommentsCountCache {
 		$this->use_cache_api = ( true === wp_using_ext_object_cache() );
 		if ( ! $this->use_cache_api ) {
 			// Set the expiration to the same day midnight (GMT).
-			$this->transient_expiration = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
+			$this->transient_expiration_today_midnight_gmt = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
 		}
 	}
 
@@ -74,7 +74,7 @@ class CommentsCountCache {
 	public function set( string $name, $value ) {
 		return $this->use_cache_api
 			? wp_cache_set( $name, $value, self::COMMENT_COUNT_CACHE_GROUP )
-			: set_transient( 'woocommerce_product_reviews_pending_count', $value, $this->transient_expiration );
+			: set_transient( 'woocommerce_product_reviews_pending_count', $value, $this->transient_expiration_today_midnight_gmt );
 	}
 
 	/**
@@ -90,7 +90,7 @@ class CommentsCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->transient_expiration ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->transient_expiration_today_midnight_gmt ) ) {
 			return $transient_value;
 		}
 		return false;
@@ -109,7 +109,7 @@ class CommentsCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->transient_expiration ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->transient_expiration_today_midnight_gmt ) ) {
 			return $transient_value;
 		}
 		return false;
