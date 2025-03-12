@@ -49,7 +49,7 @@ class PaymentExtensionSuggestions {
 	const ELAVON            = 'elavon';
 	const EWAY              = 'eway';
 	const FORTISPAY         = 'fortis';
-	const GO_CARDLESS       = 'go_cardless';
+	const GOCARDLESS        = 'gocardless';
 	const NEXI              = 'nexi';
 	const PAYPAL_ZETTLE     = 'paypal_zettle';
 	const RAPYD             = 'rapyd';
@@ -158,6 +158,16 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ca/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
@@ -255,6 +265,16 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -279,6 +299,16 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -317,6 +347,16 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 		),
 		'CY' => array(
@@ -325,6 +365,16 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 		),
@@ -356,6 +406,16 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/da-dk/priser/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -378,6 +438,16 @@ class PaymentExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
 			self::MOLLIE,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 		),
 		'FI' => array(
@@ -386,6 +456,16 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -413,6 +493,16 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/fr-fr/tarifs/',
+						),
+					),
+				),
+			),
 			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -467,6 +557,16 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/de-de/preise/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -1261,8 +1361,6 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::AIRWALLEX,
-			self::ANTOM,
 			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -1273,6 +1371,18 @@ class PaymentExtensionSuggestions {
 						array(
 							'_type' => self::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/au/en/legal/general/ua',
+						),
+					),
+				),
+			),
+			self::AIRWALLEX,
+			self::ANTOM,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-au/pricing/',
 						),
 					),
 				),
@@ -2969,12 +3079,36 @@ class PaymentExtensionSuggestions {
 					'slug'  => 'fortis-for-woocommerce',
 				),
 			),
-			self::GO_CARDLESS       => array(
+			self::GOCARDLESS        => array(
 				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'GoCardless', 'woocommerce' ),
+				'description' => esc_html__( 'Accept Direct Debit, ACH Pull, and open baking payments.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/gocardless.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'woocommerce-gateway-gocardless',
+				),
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://gocardless.com/pricing/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/gocardless/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://gocardless.com/legal/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/gocardless/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=gocardless',
+					),
 				),
 			),
 			self::NEXI              => array(
