@@ -1,0 +1,5 @@
+Significance: patch
+Type: added
+Comment: Use `phpunit-select-config` to run phpunit, in preparation for use of PHPUnit 11+.
+
+

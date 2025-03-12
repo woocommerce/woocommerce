@@ -10,7 +10,6 @@
 # Remember to end all directories with `/**` to properly tag every file.
 .gitignore        production-exclude
 changelog/**      production-exclude
-phpunit.xml.dist  production-exclude
 .phpcs.dir.xml    production-exclude
 tests/**          production-exclude
 .phpcsignore      production-exclude
