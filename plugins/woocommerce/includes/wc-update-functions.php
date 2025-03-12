@@ -3005,8 +3005,8 @@ function wc_update_980_remove_order_attribution_install_banner_dismissed_option(
 }
 
 /**
-  * Remove the transient wc_count_comments as this has migrated to use cache.
-  */
+ * Remove the transient wc_count_comments as this has migrated to use cache.
+ */
 function wc_update_990_remove_wc_count_comments_transient() {
 	delete_transient( 'wc_count_comments' );
 }

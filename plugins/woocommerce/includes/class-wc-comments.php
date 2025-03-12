@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
 class WC_Comments {
 
 	/**
+	 * Cache Group
+	 *
 	 * @var string COMMENT_COUNT_CACHE_GROUP The cache group to use for comment counts.
 	 */
 	private const COMMENT_COUNT_CACHE_GROUP = 'wc_comment_counts';
