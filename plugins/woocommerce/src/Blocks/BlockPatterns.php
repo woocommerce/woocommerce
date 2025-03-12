@@ -114,9 +114,7 @@ class BlockPatterns {
 
 		$patterns = $this->get_block_patterns();
 		foreach ( $patterns as $pattern ) {
-			if ( file_exists( $pattern['source'] ) ) {
-				$this->pattern_registry->register_block_pattern( $pattern['source'], $pattern, $this->get_patterns_dictionary() );
-			}
+			$this->pattern_registry->register_block_pattern( $pattern['source'], $pattern, $this->get_patterns_dictionary() );
 		}
 	}
 
@@ -174,7 +172,7 @@ class BlockPatterns {
 	private function get_pattern_cache() {
 		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
 
-		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
+		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] && 'development' !== wp_get_environment_type() ) {
 			return $pattern_data['patterns'];
 		}
 
