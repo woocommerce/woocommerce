@@ -255,7 +255,7 @@ export const validateAdditionalFields = (
 		} else if (
 			ORDER_FORM_KEYS.includes( fieldKey as keyof AdditionalValues )
 		) {
-			prefix = 'additional-information_';
+			prefix = 'order_';
 		} else {
 			return false;
 		}
