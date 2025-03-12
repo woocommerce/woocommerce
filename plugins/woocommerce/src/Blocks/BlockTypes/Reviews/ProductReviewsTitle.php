@@ -15,15 +15,6 @@ class ProductReviewsTitle extends AbstractBlock {
 	protected $block_name = 'product-reviews-title';
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]|null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array $attributes Block attributes.

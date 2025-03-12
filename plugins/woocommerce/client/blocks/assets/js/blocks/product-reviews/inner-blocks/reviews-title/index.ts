@@ -10,7 +10,7 @@ import { title as icon } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import edit from './edit';
-import './editor.scss';
+import './style.scss';
 
 if ( isExperimentalBlocksEnabled() ) {
 	// @ts-expect-error metadata is not typed.
