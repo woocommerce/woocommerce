@@ -75,4 +75,19 @@ class EvaluateOverridesTest extends WC_Unit_Test_Case {
 		// Reset the default country.
 		update_option( 'woocommerce_default_country', $current_wc_country );
 	}
+
+	/**
+	 * Test that the override can use dot notation to override values.
+	 * @return void
+	 */
+	public function test_it_can_override_value_with_dot_notation() {
+		$evaluator = new EvaluateOverrides();
+
+		$extensions = $this->get_extensions();
+		$result = $evaluator->evaluate( array( $extensions[4] ), array(
+			'plugins' => $extensions,
+		) );
+
+		$this->assertEquals( 'after', $result[0]->install_options[0]->options->install_priority );
+	}
 }

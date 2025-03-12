@@ -298,5 +298,33 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Dot Notation Test",
+    "is_visible": true,
+    "install_options": [
+      {
+        "name": "name",
+        "value": "value",
+        "options": {
+          "autoload": true,
+          "install_priority": "before"
+        }
+      }
+    ],
+    "overrides": [
+      {
+        "field": "install_options.0.options.install_priority",
+        "value": "after",
+        "rules": [
+          {
+            "type": "context_plugins",
+            "name": "name",
+            "value": "Test",
+            "operation": "="
+          }
+        ]
+      }
+    ]
   }
 ]
