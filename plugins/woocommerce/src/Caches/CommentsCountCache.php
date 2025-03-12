@@ -6,8 +6,8 @@ namespace Automattic\WooCommerce\Caches;
 /**
  * Comments stats caching class, which handles switching between caching APIs (persisting cache vs transients).
  *
- * Transient API is potentially exposed to the race conditions and order to compensate it this a bit, we set
- * the transients expiration withing 24 hours and then external components will re-populate it.
+ * Transient API is potentially exposed to the race conditions and in order to compensate this a bit, we set
+ * the transients expiration withing 24 hours and then external components will need to re-populate the transients.
  */
 class CommentsCountCache {
 	/**
