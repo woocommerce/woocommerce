@@ -3,11 +3,16 @@
  */
 import { store } from '@wordpress/interactivity';
 import type { Cart, CartItem, ApiErrorResponse } from '@woocommerce/types';
+import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 type OptimisticCartItem = {
 	key?: string;
@@ -43,10 +48,32 @@ function isApiErrorResponse(
 	return ! res.status.toString().startsWith( '2' );
 }
 
-function generateError( error: ApiErrorResponse ) {
+function generateError( error: ApiErrorResponse ): Error {
 	return Object.assign( new Error( error.message || 'Unknown error.' ), {
 		code: error.code || 'unknown_error',
 	} );
+}
+
+async function showNoticeError( error: Error ) {
+	// Todo: Use the module exports instead of `store()` once the store-notices
+	// store is public.
+	await import( '@woocommerce/stores/store-notices' );
+	const { actions: noticeActions } = store< StoreNotices >(
+		'woocommerce/store-notices',
+		{},
+		{ lock: universalLock }
+	);
+
+	// Todo: Check what should happen if the notice is already displayed.
+	noticeActions.addNotice( {
+		notice: error.message,
+		type: 'error',
+		dismissible: true,
+	} );
+
+	// Emmits console.error for troubleshooting.
+	// eslint-disable-next-line no-console
+	console.error( error );
 }
 
 let pendingRefresh = false;
@@ -125,7 +152,8 @@ const { state, actions } = store< Store >(
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
 					state.cart = JSON.parse( previousCart );
 
-					throw error;
+					// Shows the error notice.
+					showNoticeError( error as Error );
 				}
 			},
 			*refreshCartItems() {

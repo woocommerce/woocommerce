@@ -7,7 +7,6 @@ import {
 	useLayoutEffect,
 } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -108,7 +107,8 @@ const { state } = store< Store >(
 				const context = getContext();
 				const { productId, quantityToAdd } = context;
 
-				// Todo: Use the imported module once the woocommerce store is public.
+				// Todo: Use the module exports instead of `store()` once the
+				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 				const { actions } = store< WooCommerce >(
 					'woocommerce',
@@ -116,49 +116,16 @@ const { state } = store< Store >(
 					{ lock: universalLock }
 				);
 
-				// Todo: This import needs to be placed outside of the `catch`
-				// until https://github.com/woocommerce/gutenberg/pull/5 is merged.
-				yield import( '@woocommerce/stores/store-notices' );
-
-				try {
-					yield actions.addCartItem( {
-						id: productId,
-						quantity: state.quantity + quantityToAdd,
-					} );
-				} catch ( error ) {
-					const message = ( error as Error ).message;
-
-					// Todo: Use the imported module once the store-notices store is public.
-					const { actions: noticeActions } = store< StoreNotices >(
-						'woocommerce/store-notices',
-						{},
-						{ lock: universalLock }
-					);
-					// The old implementation always overwrites the last
-					// notice, so we remove the last notice before adding a
-					// new one.
-					if ( state.noticeId !== '' ) {
-						noticeActions.removeNotice( state.noticeId );
-					}
-
-					const noticeId = noticeActions.addNotice( {
-						notice: message,
-						type: 'error',
-						dismissible: true,
-					} );
-
-					state.noticeId = noticeId;
-
-					// We don't care about errors blocking execution, but will
-					// console.error for troubleshooting.
-					// eslint-disable-next-line no-console
-					console.error( error );
-				}
+				yield actions.addCartItem( {
+					id: productId,
+					quantity: state.quantity + quantityToAdd,
+				} );
 
 				context.displayViewCart = true;
 			},
 			*refreshCartItems() {
-				// Todo: Use the imported module once the woocommerce store is public.
+				// Todo: Use the module exports instead of `store()` once the
+				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 				const { actions } = store< WooCommerce >(
 					'woocommerce',
