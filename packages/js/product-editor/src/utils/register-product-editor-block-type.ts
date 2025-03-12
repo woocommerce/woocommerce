@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Block, BlockConfiguration } from '@wordpress/blocks';
-import { select as WPSelect } from '@wordpress/data';
 import { registerWooBlockType } from '@woocommerce/block-templates';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -20,7 +19,8 @@ export function useEvaluationContext( context: Record< string, unknown > ) {
 
 	const productId = useEntityId( 'postType', postType );
 
-	const getEvaluationContext = ( select: typeof WPSelect ) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const getEvaluationContext = ( select: any ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const editedProduct = select( 'core' ).getEditedEntityRecord(
