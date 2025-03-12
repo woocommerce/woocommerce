@@ -31,9 +31,20 @@ class WC_Woo_Helper_Connection {
 
 		return sprintf(
 		/* translators: 1: WooCommerce.com connection URL, 2: home URL */
-			__( 'Your site is connected to WooCommerce.com under %1$s, but the home URL of the site is %2$s. Please reconnect your site to WooCommerce.com', 'woocommerce' ),
+			__( 'Your site is currently connected to WooCommerce.com using <b>%1$s</b>, but your actual site URL is <b>%2$s</b>. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' ),
 			$url,
 			$home_url
 		);
+	}
+
+	public static function has_host_plan_orders() {
+		$subscriptions = WC_Helper::get_subscriptions();
+		foreach ( $subscriptions as $subscription ) {
+			if ( isset( $subscription['included_in_host_plan'] ) && true === (bool) $subscription['included_in_host_plan'] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
