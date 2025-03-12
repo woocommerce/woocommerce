@@ -81,14 +81,9 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$html                         = '';
-		$default_number_of_thumbnails = 3;
-		$number_of_thumbnails         = isset( $attributes['numberOfThumbnails'] ) && is_numeric( $attributes['numberOfThumbnails'] ) ? $attributes['numberOfThumbnails'] : $default_number_of_thumbnails;
-		$number_of_images             = count( $product_gallery_images );
-		// If the number of thumbnails is greater than the number of images, set the number of thumbnails to the number of images.
-		// But not less than 3 (default number of thumbnails).
-		$thumbnails_layout          = max( min( $number_of_images, $number_of_thumbnails ), $default_number_of_thumbnails );
-		$number_of_thumbnails_class = 'wc-block-product-gallery-thumbnails--number-of-thumbnails-' . $thumbnails_layout;
+		$html             = '';
+		$thumbnail_size   = str_replace('%', '', $attributes['thumbnailSize'] ?? '20%');
+		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
 
 		foreach ( $product_gallery_images as $product_gallery_image_html ) {
 			$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
@@ -115,7 +110,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			'<div class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s" data-wp-interactive="woocommerce/product-gallery">
 				%3$s
 			</div>',
-			esc_attr( $classes_and_styles['classes'] . ' ' . $number_of_thumbnails_class ),
+			esc_attr( $classes_and_styles['classes'] . ' ' . $thumbnails_class ),
 			esc_attr( $classes_and_styles['styles'] ),
 			wp_kses(
 				$html,
