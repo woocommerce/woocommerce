@@ -55,7 +55,7 @@ class BlockEmailRenderer {
 	 */
 	final public function init( WooContentProcessor $woo_content_processor ): void {
 		$this->woo_content_processor = $woo_content_processor;
-		add_action( 'woocommerce_blocks_renderer_initialized', array( $this, 'register_block_renderers' ) );
+		add_action( 'woocommerce_email_blocks_renderer_initialized', array( $this, 'register_block_renderers' ) );
 	}
 
 	/**
