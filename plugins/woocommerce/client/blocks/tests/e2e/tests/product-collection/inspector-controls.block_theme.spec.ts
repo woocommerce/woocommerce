@@ -553,12 +553,17 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			await expect( pageObject.products ).toHaveCount( 18 );
 
-			const addBlockButton = editor.canvas
-				.locator( '[data-type="woocommerce/product-collection"]' )
-				.getByRole( 'button', { name: 'Add block' } );
-			await addBlockButton.click();
-			await page.getByPlaceholder( 'Search' ).fill( 'product filters' );
-			await page.getByText( 'Product Filters' ).click();
+			const productCollectionBlock = await editor.getBlockByName(
+				'woocommerce/product-collection'
+			);
+			const productCollectionClientId =
+				( await productCollectionBlock
+					.last()
+					.getAttribute( 'data-block' ) ) ?? '';
+			await editor.insertBlock(
+				{ name: 'woocommerce/product-filters' },
+				{ clientId: productCollectionClientId }
+			);
 
 			const postId = await editor.publishPost();
 			await page.goto( `/?p=${ postId }` );
@@ -604,12 +609,17 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 				'Music',
 			] );
 
-			const addBlockButton = editor.canvas
-				.locator( '[data-type="woocommerce/product-collection"]' )
-				.getByRole( 'button', { name: 'Add block' } );
-			await addBlockButton.click();
-			await page.getByPlaceholder( 'Search' ).fill( 'product filters' );
-			await page.getByText( 'Product Filters' ).click();
+			const productCollectionBlock = await editor.getBlockByName(
+				'woocommerce/product-collection'
+			);
+			const productCollectionClientId =
+				( await productCollectionBlock
+					.last()
+					.getAttribute( 'data-block' ) ) ?? '';
+			await editor.insertBlock(
+				{ name: 'woocommerce/product-filters' },
+				{ clientId: productCollectionClientId }
+			);
 
 			await expect( pageObject.products ).toHaveCount( 2 );
 
