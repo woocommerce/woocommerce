@@ -24,13 +24,18 @@ import { SelectTemplateModal } from '../template-select';
 import { recordEvent } from '../../events';
 
 export function EmailTypeInfo() {
-	const { template, currentEmailContent } = useSelect(
-		( select ) => ( {
-			template: select( storeName ).getCurrentTemplate(),
-			currentEmailContent: select( storeName ).getEditedEmailContent(),
-		} ),
+	const { template, currentEmailContent, canUpdateTemplates } = useSelect(
+		( select ) => {
+			return {
+				template: select( storeName ).getCurrentTemplate(),
+				currentEmailContent:
+					select( storeName ).getEditedEmailContent(),
+				canUpdateTemplates: select( storeName ).canUserEditTemplates(),
+			};
+		},
 		[]
 	);
+
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
 		useState( false );
 	const [ isSelectTemplateModalOpen, setSelectTemplateModalOpen ] =
@@ -82,22 +87,25 @@ export function EmailTypeInfo() {
 									>
 										{ ( { onClose } ) => (
 											<>
-												<MenuItem
-													onClick={ () => {
-														recordEvent(
-															'sidebar_template_actions_edit_template_clicked'
-														);
-														setEditTemplateModalOpen(
-															true
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Edit template',
-														'woocommerce'
-													) }
-												</MenuItem>
+												{ canUpdateTemplates && (
+													<MenuItem
+														onClick={ () => {
+															recordEvent(
+																'sidebar_template_actions_edit_template_clicked'
+															);
+															setEditTemplateModalOpen(
+																true
+															);
+															onClose();
+														} }
+													>
+														{ __(
+															'Edit template',
+															'woocommerce'
+														) }
+													</MenuItem>
+												) }
+
 												<MenuItem
 													onClick={ () => {
 														recordEvent(
