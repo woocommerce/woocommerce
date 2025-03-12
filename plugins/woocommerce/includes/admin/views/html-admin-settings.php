@@ -7,6 +7,8 @@
  * @package WooCommerce
  */
 
+// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+
 use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
