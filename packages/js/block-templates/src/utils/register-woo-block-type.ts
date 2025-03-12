@@ -16,7 +16,11 @@ import { ComponentType } from 'react';
 // Including `@types/wordpress__data` as a devDependency causes build issues,
 // so just going type-free for now.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useSelect, select as WPSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
+
+// Define a more generic type for the select function to avoid TypeScript errors
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SelectType = ( store: string ) => Record< string, unknown >;
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -25,14 +29,13 @@ interface BlockRepresentation< T extends Record< string, object > > {
 }
 
 type UseEvaluationContext = ( context: Record< string, unknown > ) => {
-	getEvaluationContext: (
-		select: typeof WPSelect
-	) => Record< string, unknown >;
+	getEvaluationContext: ( select: SelectType ) => Record< string, unknown >;
 };
 
 function defaultUseEvaluationContext( context: Record< string, unknown > ) {
 	return {
-		getEvaluationContext: () => context,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+		getEvaluationContext: ( select: any ) => context,
 	};
 }
 
@@ -55,8 +58,8 @@ function getEdit<
 		const { getEvaluationContext } = useEvaluationContext( context );
 
 		const { shouldHide, shouldDisable } = useSelect(
-			// @ts-expect-error TODO: react-18-upgrade
-			( select: typeof WPSelect ) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			( select: any ) => {
 				const evaluationContext = getEvaluationContext( select );
 
 				return {
