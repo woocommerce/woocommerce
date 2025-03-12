@@ -7,7 +7,6 @@ use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer as EmailRenderer;
-use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\Internal\EmailEditor\Renderer\Blocks\WooContent;
 
 /**
@@ -43,10 +42,9 @@ class BlockEmailRenderer {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$editor_container       = Email_Editor_Container::container();
-		$this->renderer         = $editor_container->get( EmailRenderer::class );
-		$this->personalizer     = $editor_container->get( Personalizer::class );
-		$this->theme_controller = $editor_container->get( Theme_Controller::class );
+		$editor_container   = Email_Editor_Container::container();
+		$this->renderer     = $editor_container->get( EmailRenderer::class );
+		$this->personalizer = $editor_container->get( Personalizer::class );
 	}
 
 	/**
