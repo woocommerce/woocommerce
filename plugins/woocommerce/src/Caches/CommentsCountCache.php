@@ -4,7 +4,10 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Caches;
 
 /**
- * Comments stats caching class, which handles switching between caching APIs (cache vs transients).
+ * Comments stats caching class, which handles switching between caching APIs (persisting cache vs transients).
+ *
+ * Transient API is potentially exposed to the race conditions and order to compensate it this a bit, we set
+ * the transients expiration withing 24 hours and then external components will re-populate it.
  */
 class CommentsCountCache {
 	/**
@@ -22,10 +25,21 @@ class CommentsCountCache {
 	protected $use_cache_api;
 
 	/**
+	 * Flag indicating usage cache APIs over transients.
+	 *
+	 * @var int
+	 */
+	private $transient_expiration;
+
+	/**
 	 * Constructor, detects which cache API to use.
 	 */
 	public function __construct() {
 		$this->use_cache_api = ( true === wp_using_ext_object_cache() );
+		if ( ! $this->use_cache_api ) {
+			// Set the expiration to the same day midnight (GMT).
+			$this->transient_expiration = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
+		}
 	}
 
 	/**
@@ -60,7 +74,7 @@ class CommentsCountCache {
 	public function set( string $name, $value ) {
 		return $this->use_cache_api
 			? wp_cache_set( $name, $value, self::COMMENT_COUNT_CACHE_GROUP )
-			: set_transient( 'woocommerce_product_reviews_pending_count', $value, DAY_IN_SECONDS );
+			: set_transient( 'woocommerce_product_reviews_pending_count', $value, $this->transient_expiration );
 	}
 
 	/**
@@ -76,7 +90,7 @@ class CommentsCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, DAY_IN_SECONDS ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->transient_expiration ) ) {
 			return $transient_value;
 		}
 		return false;
@@ -95,7 +109,7 @@ class CommentsCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, DAY_IN_SECONDS ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->transient_expiration ) ) {
 			return $transient_value;
 		}
 		return false;
