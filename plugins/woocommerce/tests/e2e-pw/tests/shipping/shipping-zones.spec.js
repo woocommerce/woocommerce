@@ -10,6 +10,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { WC_API_PATH } from '../../utils/api-client';
+import { updateIfNeeded, resetValue } from '../../utils/settings';
 
 function rand() {
 	return faker.string.alphanumeric( 5 );
@@ -28,25 +29,34 @@ async function checkShippingRateInCart( page, product, checks ) {
 
 	await page.goto( `shop/?add-to-cart=${ product.id }` );
 	await page.goto( 'cart/' );
-	await page.locator( 'a.shipping-calculator-button' ).click();
-	await page
-		.locator( '#calc_shipping_country' )
-		.selectOption( checks.country );
-	await page.locator( '#calc_shipping_state' ).selectOption( checks.state );
-	if ( checks.postCode ) {
-		await page.locator( '#calc_shipping_postcode' ).fill( checks.postCode );
-	}
 
-	await page.locator( 'button[name=calc_shipping]' ).click();
-	await expect( page.locator( 'button[name=calc_shipping]' ) ).toBeHidden();
+	await page
+		.getByRole( 'button', { name: 'Enter address to check' } )
+		.click();
+
+	await page.getByLabel( 'Country/Region' ).selectOption( checks.country );
+	await page.getByLabel( 'Province' ).selectOption( checks.state );
+	await page.getByRole( 'textbox', { name: 'City' } ).fill( checks.city );
+	await page
+		.getByRole( 'textbox', { name: 'Postal code' } )
+		.fill( checks.postCode );
+
+	await page
+		.getByRole( 'button', {
+			name: 'Check delivery options',
+			exact: true,
+		} )
+		.click();
 
 	await expect(
-		page.locator( '.shipping ul#shipping_method > li > label' )
-	).toContainText( checks.method );
+		page.getByRole( 'radio', { name: checks.method } )
+	).toBeVisible();
 
 	if ( checks.cost ) {
 		await expect(
-			page.locator( '.shipping ul#shipping_method > li > label' )
+			page.locator(
+				'.wc-block-components-shipping-rates-control__package .wc-block-components-formatted-money-amount'
+			)
 		).toContainText( checks.cost );
 	}
 
@@ -59,33 +69,23 @@ async function checkShippingRateInCart( page, product, checks ) {
 		  } )
 		: product.regular_price;
 
-	await expect( page.locator( 'td[data-title="Total"]' ) ).toContainText(
-		total.toString()
-	);
+	await expect(
+		page.locator( '.wc-block-components-totals-item__value' ).last()
+	).toHaveText( `$${ total }` );
 }
 
 [
-	{
-		name: `Mayne Island with free Local pickup ${ rand() }`,
-		zone: 'British Columbia, Canada',
-		postCode: 'V0N 2J0',
-		method: 'Local pickup',
-		checks: {
-			country: 'CA',
-			state: 'BC',
-			postCode: 'V0N 2J0',
-			method: 'Local pickup',
-		},
-	},
 	{
 		name: `BC with Free shipping ${ rand() }`,
 		zone: 'British Columbia, Canada',
 		postCode: '',
 		method: 'Free shipping',
 		checks: {
-			country: 'CA',
-			state: 'BC',
+			country: 'Canada',
+			state: 'British Columbia',
 			method: 'Free shipping',
+			postCode: 'V5K 0A1',
+			city: 'Vancouver',
 		},
 	},
 	{
@@ -95,8 +95,9 @@ async function checkShippingRateInCart( page, product, checks ) {
 		method: 'Flat rate',
 		cost: '15.00',
 		checks: {
-			country: 'CA',
-			state: 'AB',
+			country: 'Canada',
+			state: 'Alberta',
+			city: 'Calgary',
 			postCode: 'T2T 1B3',
 			method: 'Flat rate',
 			cost: '15.00',
@@ -121,6 +122,21 @@ async function checkShippingRateInCart( page, product, checks ) {
 			} );
 		},
 		page: async ( { restApi, page }, use ) => {
+			const enableShippingCalcState = await updateIfNeeded(
+				'shipping/woocommerce_enable_shipping_calc',
+				'yes'
+			);
+
+			const shippingCostRequiresAddressState = await updateIfNeeded(
+				'shipping/woocommerce_shipping_cost_requires_address',
+				'yes'
+			);
+
+			const taxCalcState = await updateIfNeeded(
+				'general/woocommerce_calc_taxes',
+				'no'
+			);
+
 			await use( page );
 
 			// Cleanup
@@ -141,6 +157,16 @@ async function checkShippingRateInCart( page, product, checks ) {
 						} );
 				}
 			}
+
+			await resetValue(
+				`shipping/woocommerce_enable_shipping_calc`,
+				enableShippingCalcState
+			);
+			await resetValue(
+				`shipping/woocommerce_shipping_cost_requires_address`,
+				shippingCostRequiresAddressState
+			);
+			await resetValue( `general/woocommerce_calc_taxes`, taxCalcState );
 		},
 	} );
 

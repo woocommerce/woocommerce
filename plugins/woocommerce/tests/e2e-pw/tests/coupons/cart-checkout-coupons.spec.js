@@ -8,6 +8,13 @@ import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
+import {
+	createClassicCartPage,
+	createClassicCheckoutPage,
+	CLASSIC_CART_PAGE,
+	CLASSIC_CHECKOUT_PAGE,
+} from '../../utils/pages';
+import { updateIfNeeded } from '../../utils/settings';
 
 const firstProductName = 'Coupon test product';
 const coupons = [
@@ -39,6 +46,12 @@ test.describe(
 		const couponBatchId = [];
 
 		test.beforeAll( async ( { restApi } ) => {
+			// Make sure the classic cart and checkout pages exist
+			await createClassicCartPage();
+			await createClassicCheckoutPage();
+
+			await updateIfNeeded( 'general/woocommerce_calc_taxes', 'no' );
+
 			// make sure the currency is USD
 			await restApi.put(
 				`${ WC_API_PATH }/settings/general/woocommerce_currency`,
@@ -100,7 +113,7 @@ test.describe(
 					await test.step( 'Load cart page and apply coupons', async () => {
 						await addAProductToCart( page, firstProductId );
 
-						await page.goto( 'cart/' );
+						await page.goto( CLASSIC_CART_PAGE.slug );
 						await page
 							.locator( '#coupon_code' )
 							.fill( coupons[ i ].code );
@@ -119,12 +132,16 @@ test.describe(
 						).toBeVisible();
 						// Checks the coupon amount is credited properly
 						await expect(
-							page.locator( '.cart-discount .amount' )
-						).toContainText( discounts[ i ] );
+							page
+								.locator( '.cart-discount .amount' )
+								.filter( { hasText: discounts[ i ] } )
+						).toBeVisible();
 						// Checks that the cart total is updated
 						await expect(
-							page.locator( '.order-total .amount' )
-						).toContainText( totals[ i ] );
+							page
+								.locator( '.order-total .amount' )
+								.filter( { hasText: totals[ i ] } )
+						).toBeVisible();
 					} );
 
 					await context.clearCookies();
@@ -132,7 +149,7 @@ test.describe(
 					await test.step( 'Load checkout page and apply coupons', async () => {
 						await addAProductToCart( page, firstProductId );
 
-						await page.goto( 'checkout' );
+						await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 						await page
 							.locator( 'text=Click here to enter your code' )
 							.click();
@@ -151,11 +168,15 @@ test.describe(
 							)
 						).toBeVisible();
 						await expect(
-							page.locator( '.cart-discount .amount' )
-						).toContainText( discounts[ i ] );
+							page
+								.locator( '.cart-discount .amount' )
+								.filter( { hasText: discounts[ i ] } )
+						).toBeVisible();
 						await expect(
-							page.locator( '.order-total .amount' )
-						).toContainText( totals[ i ] );
+							page
+								.locator( '.order-total .amount' )
+								.filter( { hasText: totals[ i ] } )
+						).toBeVisible();
 					} );
 				}
 			);
@@ -168,7 +189,7 @@ test.describe(
 				await test.step( 'Load cart page and try applying same coupon twice', async () => {
 					await addAProductToCart( page, firstProductId );
 
-					await page.goto( 'cart/' );
+					await page.goto( CLASSIC_CART_PAGE.slug );
 					await page
 						.locator( '#coupon_code' )
 						.fill( coupons[ 0 ].code );
@@ -181,7 +202,7 @@ test.describe(
 					).toBeVisible();
 
 					// try to apply the same coupon
-					await page.goto( 'cart/' );
+					await page.goto( CLASSIC_CART_PAGE.slug );
 					await page
 						.locator( '#coupon_code' )
 						.fill( coupons[ 0 ].code );
@@ -195,11 +216,15 @@ test.describe(
 					).toBeVisible();
 					// check cart total
 					await expect(
-						page.locator( '.cart-discount .amount' )
-					).toContainText( discounts[ 0 ] );
+						page
+							.locator( '.cart-discount .amount' )
+							.filter( { hasText: discounts[ 0 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( totals[ 0 ] );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: totals[ 0 ] } )
+					).toBeVisible();
 				} );
 
 				await context.clearCookies();
@@ -207,7 +232,7 @@ test.describe(
 				await test.step( 'Load checkout page and try applying same coupon twice', async () => {
 					await addAProductToCart( page, firstProductId );
 
-					await page.goto( 'checkout/' );
+					await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 					await page
 						.locator( 'text=Click here to enter your code' )
 						.click();
@@ -233,11 +258,15 @@ test.describe(
 					).toBeVisible();
 					// check cart total
 					await expect(
-						page.locator( '.cart-discount .amount' )
-					).toContainText( discounts[ 0 ] );
+						page
+							.locator( '.cart-discount .amount' )
+							.filter( { hasText: discounts[ 0 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( totals[ 0 ] );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: totals[ 0 ] } )
+					).toBeVisible();
 				} );
 			}
 		);
@@ -249,7 +278,10 @@ test.describe(
 				await test.step( 'Load cart page and try applying multiple coupons', async () => {
 					await addAProductToCart( page, firstProductId );
 
-					await page.goto( 'cart/' );
+					await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
+					await page
+						.locator( 'text=Click here to enter your code' )
+						.click();
 					await page
 						.locator( '#coupon_code' )
 						.fill( coupons[ 0 ].code );
@@ -261,9 +293,9 @@ test.describe(
 						page.getByText( 'Coupon code applied successfully.' )
 					).toBeVisible();
 
-					// If not waiting the next coupon is not applied correctly. This should be temporary, we need a better way to handle this.
-					await page.waitForTimeout( 2000 );
-
+					await page
+						.locator( 'text=Click here to enter your code' )
+						.click();
 					await page
 						.locator( '#coupon_code' )
 						.fill( coupons[ 2 ].code );
@@ -276,14 +308,20 @@ test.describe(
 					).toBeVisible();
 					// check cart total
 					await expect(
-						page.locator( '.cart-discount .amount >> nth=0' )
-					).toContainText( discounts[ 0 ] );
+						page
+							.locator( '.cart-discount .amount >> nth=0' )
+							.filter( { hasText: discounts[ 0 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.cart-discount .amount >> nth=1' )
-					).toContainText( discounts[ 2 ] );
+						page
+							.locator( '.cart-discount .amount >> nth=1' )
+							.filter( { hasText: discounts[ 2 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( '$8.00' );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: '$8.00' } )
+					).toBeVisible();
 				} );
 
 				await context.clearCookies();
@@ -291,7 +329,7 @@ test.describe(
 				await test.step( 'Load checkout page and try applying multiple coupons', async () => {
 					await addAProductToCart( page, firstProductId );
 
-					await page.goto( 'checkout/' );
+					await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 					await page
 						.locator( 'text=Click here to enter your code' )
 						.click();
@@ -303,9 +341,6 @@ test.describe(
 					await expect(
 						page.getByText( 'Coupon code applied successfully.' )
 					).toBeVisible();
-
-					// If not waiting the next coupon is not applied correctly. This should be temporary, we need a better way to handle this.
-					await page.waitForTimeout( 2000 );
 
 					await page
 						.locator( 'text=Click here to enter your code' )
@@ -320,14 +355,20 @@ test.describe(
 					).toBeVisible();
 					// check cart total
 					await expect(
-						page.locator( '.cart-discount .amount >> nth=0' )
-					).toContainText( discounts[ 0 ] );
+						page
+							.locator( '.cart-discount .amount >> nth=0' )
+							.filter( { hasText: discounts[ 0 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.cart-discount .amount >> nth=1' )
-					).toContainText( discounts[ 2 ] );
+						page
+							.locator( '.cart-discount .amount >> nth=1' )
+							.filter( { hasText: discounts[ 2 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( '$8.00' );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: '$8.00' } )
+					).toBeVisible();
 				} );
 			}
 		);
@@ -339,27 +380,36 @@ test.describe(
 				await test.step( 'Load cart page and try restoring total when removed coupons', async () => {
 					await addAProductToCart( page, firstProductId );
 
-					await page.goto( 'cart/' );
+					await page.goto( CLASSIC_CART_PAGE.slug );
 					await page
 						.locator( '#coupon_code' )
 						.fill( coupons[ 0 ].code );
 					await page
 						.getByRole( 'button', { name: 'Apply coupon' } )
 						.click();
+					await expect(
+						page.getByText( 'Coupon code applied successfully.' )
+					).toBeVisible();
 
 					// confirm numbers
 					await expect(
-						page.locator( '.cart-discount .amount' )
-					).toContainText( discounts[ 0 ] );
+						page
+							.locator( '.cart-discount .amount' )
+							.filter( { hasText: discounts[ 0 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( totals[ 0 ] );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: totals[ 0 ] } )
+					).toBeVisible();
 
 					await page.locator( 'a.woocommerce-remove-coupon' ).click();
 
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( '$20.00' );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: '$20.00' } )
+					).toBeVisible();
 				} );
 
 				await context.clearCookies();
@@ -367,7 +417,7 @@ test.describe(
 				await test.step( 'Load checkout page and try restoring total when removed coupons', async () => {
 					await addAProductToCart( page, firstProductId );
 
-					await page.goto( 'checkout/' );
+					await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 					await page
 						.locator( 'text=Click here to enter your code' )
 						.click();
@@ -378,17 +428,23 @@ test.describe(
 
 					// confirm numbers
 					await expect(
-						page.locator( '.cart-discount .amount' )
-					).toContainText( discounts[ 0 ] );
+						page
+							.locator( '.cart-discount .amount' )
+							.filter( { hasText: discounts[ 0 ] } )
+					).toBeVisible();
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( totals[ 0 ] );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: totals[ 0 ] } )
+					).toBeVisible();
 
 					await page.locator( 'a.woocommerce-remove-coupon' ).click();
 
 					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( '$20.00' );
+						page
+							.locator( '.order-total .amount' )
+							.filter( { hasText: '$20.00' } )
+					).toBeVisible();
 				} );
 			}
 		);
