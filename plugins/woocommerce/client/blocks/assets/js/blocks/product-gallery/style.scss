@@ -146,6 +146,9 @@ $dialog-padding: 20px;
 	display: flex;
 	gap: $thumbnails-gap;
 
+	overflow: auto;
+	scrollbar-width: none;
+
 	&__image {
 		cursor: pointer;
 		max-width: 100%;
@@ -165,17 +168,18 @@ $dialog-padding: 20px;
 	}
 }
 
-// Automattically react to the Group container settings.
+// Percentage width
 .is-nowrap .wc-block-product-gallery-thumbnails,
 .is-horizontal.is-nowrap .wc-block-product-gallery-thumbnails {
 	flex-direction: column;
 
-	@for $i from 3 through 8 {
-		&.wc-block-product-gallery-thumbnails--number-of-thumbnails-#{$i} {
+	@for $i from 10 through 50 {
+		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
 			$gap-width: $thumbnails-gap * ($i - 1);
 			$border-width: $i * $thumbnails-border-width * 2;
 
-			flex-basis: calc((100% - #{$gap-width} - #{$border-width}) / $i);
+			flex-basis: calc($i * 1%);
+			aspect-ratio: 1 / calc(100 / $i);
 		}
 	}
 }
@@ -184,12 +188,13 @@ $dialog-padding: 20px;
 .is-horizontal .wc-block-product-gallery-thumbnails {
 	flex-direction: row;
 
-	@for $i from 3 through 8 {
-		&.wc-block-product-gallery-thumbnails--number-of-thumbnails-#{$i} {
+	@for $i from 10 through 50 {
+		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
 			$gap-width: $thumbnails-gap * ($i - 1);
 			$border-width: $i * $thumbnails-border-width * 2;
 
-			flex: 0 0 calc((100% - #{$gap-width} - #{$border-width}) / $i);
+			// flex: 0 0 calc((100% - #{$gap-width} - #{$border-width}) / $i);
+			aspect-ratio: calc(100 / $i) / 1;
 		}
 	}
 }
