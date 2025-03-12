@@ -20,6 +20,7 @@
 
 $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 "Helvetica Neue", sans-serif;
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 .wc-addons-wrap {
 	.marketplace-header {
@@ -8849,7 +8850,7 @@ html:has(#status-table-templates){
 
 body.woocommerce_page_wc-settings {
 	#wpbody-content, #wpcontent {
-		background: #FCFCFC;
+		background: #f0f0f1;
 	}
 
 	.woocommerce-layout__primary {
@@ -8872,7 +8873,7 @@ body.woocommerce_page_wc-settings {
 
 	.settings-content {
 		padding: 0 30px;
-		background: #FCFCFC;
+		background: #f0f0f1;
 		margin-top: 24px;
 
 		h2 {
@@ -8902,7 +8903,7 @@ body.woocommerce_page_wc-settings {
 		gap: 24px;
 		a {
 			float: none;
-			font-family: $font-sf-pro-text;
+			font-family: $font-sf-pro-display;
 			margin-left: 0;
 			border: 0;
 			background: none;
