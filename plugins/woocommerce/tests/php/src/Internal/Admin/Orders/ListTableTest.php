@@ -121,8 +121,8 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 * Note that this is different from calculating the elapsed time between the two dates. For this we instead care
 	 * about which year-months from the calendar are present.
 	 *
-	 * @param \DateTime $start
-	 * @param \DateTime $end
+	 * @param \DateTime $start The start of the date range.
+	 * @param \DateTime $end   The end of the date range.
 	 *
 	 * @return int
 	 */
