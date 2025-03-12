@@ -28,6 +28,7 @@ class PaymentExtensionSuggestions {
 	const PAYPAL_WALLET     = 'paypal_wallet';
 	const PAYONEER          = 'payoneer';
 	const PAYSTACK          = 'paystack';
+	const PAYTRAIL		    = 'paytrail';
 	const PAYU_INDIA        = 'payu_india';
 	const RAZORPAY          = 'razorpay';
 	const SQUARE            = 'square';
@@ -554,6 +555,7 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::PAYTRAIL,
 			self::PAYPAL_WALLET,
 			self::KLARNA_CHECKOUT => array(
 				'_merge_on_type' => array(
@@ -2897,6 +2899,38 @@ class PaymentExtensionSuggestions {
 					array(
 						'_type' => self::LINK_TYPE_SUPPORT,
 						'url'   => 'https://support.paystack.com/en/articles/2130754',
+					),
+				),
+			),
+			self::PAYTRAIL          => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Paytrail', 'woocommerce' ),
+				'description' => esc_html__( 'Accept all popular payment methods for Finnish B2C and B2B customers', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/paytrail.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'paytrail-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://www.paytrail.com/en/pricing',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/paytrail/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://www.paytrail.com/en/terms-conditions',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/paytrail-for-woocommerce/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://www.paytrail.com/en/customer-service#merchants',
 					),
 				),
 			),
