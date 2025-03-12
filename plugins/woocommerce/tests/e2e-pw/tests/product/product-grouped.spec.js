@@ -3,6 +3,7 @@
  */
 import { test, expect, tags } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContent } from '../../utils/cart';
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
@@ -102,19 +103,27 @@ test.describe(
 				)
 			).toBeVisible();
 			await page.goto( 'cart/' );
-			await expect(
-				page.locator( 'td.product-name >> nth=0' )
-			).toContainText( simpleProduct1 );
-			await expect(
-				page.locator( 'td.product-name >> nth=1' )
-			).toContainText( simpleProduct2 );
-			let totalPrice = await page
-				.locator( 'tr.order-total > td' )
-				.last()
-				.textContent();
-			totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-			await expect( totalPrice ).toBeGreaterThanOrEqual(
-				productPrice * 10
+
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: simpleProduct1,
+							price: productPrice,
+						},
+						qty: 5,
+					},
+					{
+						data: {
+							name: simpleProduct2,
+							price: productPrice,
+						},
+						qty: 5,
+					},
+				],
+				0
 			);
 		} );
 
@@ -137,12 +146,16 @@ test.describe(
 			).toBeVisible();
 
 			await page.goto( 'cart/' );
-			await page.locator( 'a.remove >> nth=1' ).click();
-			await page.locator( 'a.remove >> nth=0' ).click();
+			await page
+				.getByRole( 'button', { name: 'Remove' } )
+				.first()
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Remove' } )
+				.first()
+				.click();
 
-			await expect(
-				page.getByText( 'Your cart is currently empty.' )
-			).toBeVisible();
+			await checkCartContent( false, page, [], 0 );
 		} );
 	}
 );
