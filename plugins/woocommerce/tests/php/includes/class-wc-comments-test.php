@@ -112,6 +112,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 					 * Constructor override.
 					 */
 					public function __construct() {
+						parent::__construct();
 						$this->use_cache_api = true;
 					}
 				},
@@ -122,6 +123,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 					 * Constructor override.
 					 */
 					public function __construct() {
+						parent::__construct();
 						$this->use_cache_api = false;
 					}
 				},
