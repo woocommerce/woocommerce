@@ -4,8 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -35,15 +33,15 @@ class Package {
 	 * @internal
 	 */
 	final public static function init() {
-		self::$package_active = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
+		self::$package_active = get_option( 'woocommerce_feature_block_email_editor_enabled', 'no' ) === 'yes'; // init is called pretty early. Cant use FeaturesUtil.
 
 		// we only want to initialize the package if the block editor feature flag is enabled.
 		if ( ! self::$package_active ) {
 			return;
 		}
 
-		\Automattic\WooCommerce\EmailEditor\Package::init();
 		self::initialize();
+		\Automattic\WooCommerce\EmailEditor\Package::init();
 	}
 
 	/**

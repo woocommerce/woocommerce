@@ -2,13 +2,11 @@
  * Internal dependencies
  */
 import { test as setup } from './fixtures';
-import { ADMIN_STATE_PATH } from '../playwright.config';
 import { setComingSoon } from '../utils/coming-soon';
 import { skipOnboardingWizard } from '../utils/onboarding';
+import { WC_API_PATH, WP_API_PATH } from '../utils/api-client';
 
-setup.use( { storageState: ADMIN_STATE_PATH } );
-
-setup( 'configure HPOS', async ( { api } ) => {
+setup( 'configure HPOS', async ( { restApi } ) => {
 	const { DISABLE_HPOS } = process.env;
 	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
@@ -24,8 +22,8 @@ setup( 'configure HPOS', async ( { api } ) => {
 						value === 'yes' ? 'on' : 'off'
 					} HPOS...`
 				);
-				const response = await api.post(
-					'settings/advanced/woocommerce_custom_orders_table_enabled',
+				const response = await restApi.post(
+					`${ WC_API_PATH }/settings/advanced/woocommerce_custom_orders_table_enabled`,
 					{ value }
 				);
 				if ( response.data.value === value ) {
@@ -53,8 +51,8 @@ setup( 'configure HPOS', async ( { api } ) => {
 		}
 	}
 
-	const response = await api.get(
-		'settings/advanced/woocommerce_custom_orders_table_enabled'
+	const response = await restApi.get(
+		`${ WC_API_PATH }/settings/advanced/woocommerce_custom_orders_table_enabled`
 	);
 	const dataValue = response.data.value;
 	const enabledOption = response.data.options[ dataValue ];
@@ -64,43 +62,50 @@ setup( 'configure HPOS', async ( { api } ) => {
 } );
 
 //todo to remove, see https://github.com/woocommerce/woocommerce/issues/50758
-setup( 'convert Cart and Checkout pages to shortcode', async ( { wpApi } ) => {
-	// List all pages
-	const response_list = await wpApi.get(
-		'./wp-json/wp/v2/pages?slug=cart,checkout',
-		{
-			data: {
-				_fields: [ 'id', 'slug' ],
-			},
-			failOnStatusCode: true,
+setup(
+	'convert Cart and Checkout pages to shortcode',
+	async ( { restApi } ) => {
+		// List all pages
+		const response_list = await restApi.get(
+			`${ WP_API_PATH }/pages?slug=cart,checkout`,
+			{
+				data: {
+					_fields: [ 'id', 'slug' ],
+				},
+				failOnStatusCode: true,
+			}
+		);
+
+		const list = await response_list.data;
+
+		// Find the cart and checkout pages
+		const cart = list.find( ( page ) => page.slug === 'cart' );
+		const checkout = list.find( ( page ) => page.slug === 'checkout' );
+
+		if ( ! cart ) {
+			console.error( 'Cart page not found' );
 		}
-	);
 
-	const list = await response_list.json();
+		if ( ! checkout ) {
+			console.error( 'Checkout page not found' );
+		}
 
-	// Find the cart and checkout pages
-	const cart = list.find( ( page ) => page.slug === 'cart' );
-	const checkout = list.find( ( page ) => page.slug === 'checkout' );
-
-	// Convert their contents to shortcodes
-	await wpApi.put( `./wp-json/wp/v2/pages/${ cart.id }`, {
-		data: {
+		// Convert their contents to shortcodes
+		const r = await restApi.put( `${ WP_API_PATH }/pages/${ cart.id }`, {
 			content: {
 				raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
 			},
-		},
-		failOnStatusCode: true,
-	} );
+			failOnStatusCode: true,
+		} );
 
-	await wpApi.put( `./wp-json/wp/v2/pages/${ checkout.id }`, {
-		data: {
+		await restApi.put( `${ WP_API_PATH }/pages/${ checkout.id }`, {
 			content: {
 				raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
 			},
-		},
-		failOnStatusCode: true,
-	} );
-} );
+			failOnStatusCode: true,
+		} );
+	}
+);
 
 setup( 'disable coming soon', async ( { baseURL } ) => {
 	await setComingSoon( { baseURL, enabled: 'no' } );
@@ -110,8 +115,8 @@ setup( 'disable onboarding wizard', async () => {
 	await skipOnboardingWizard();
 } );
 
-setup( 'determine if multisite', async ( { api } ) => {
-	const response = await api.get( 'system_status' );
+setup( 'determine if multisite', async ( { restApi } ) => {
+	const response = await restApi.get( `${ WC_API_PATH }/system_status` );
 	const { environment } = response.data;
 
 	if ( environment.wp_multisite === false ) {
@@ -122,8 +127,8 @@ setup( 'determine if multisite', async ( { api } ) => {
 	}
 } );
 
-setup( 'general settings', async ( { api } ) => {
-	await api.post( 'settings/general/batch', {
+setup( 'general settings', async ( { restApi } ) => {
+	await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
 		update: [
 			{ id: 'woocommerce_allowed_countries', value: 'all' },
 			{ id: 'woocommerce_currency', value: 'USD' },

@@ -33,7 +33,6 @@
 		"@woocommerce/blocks-test-utils": "tests/utils",
 		"@woocommerce/types": "assets/js/types",
 		"@woocommerce/utils": "assets/js/utils",
-		"@woocommerce/interactivity": "assets/js/interactivity",
 		"^react$": "<rootDir>/node_modules/react",
 		"^react-dom$": "<rootDir>/node_modules/react-dom",
 		"^(.+)/build-module/(.*)$": "$1/build/$2"

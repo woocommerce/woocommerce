@@ -14,8 +14,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 
 test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Overlay', () => {
-		test.beforeEach( async ( { requestUtils, templateCompiler, page } ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+		test.beforeEach( async ( { templateCompiler, page } ) => {
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: 1,

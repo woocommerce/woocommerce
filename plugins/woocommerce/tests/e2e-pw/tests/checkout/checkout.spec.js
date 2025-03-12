@@ -19,6 +19,7 @@ import {
 } from '../../utils/pages';
 import { logInFromMyAccount } from '../../utils/login';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
+import { WC_API_PATH } from '../../utils/api-client';
 
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 
@@ -146,7 +147,7 @@ async function fillBillingDetails( page, data, createAccount ) {
 
 /* region fixtures */
 const test = baseTest.extend( {
-	page: async ( { page, api }, use ) => {
+	page: async ( { page, restApi }, use ) => {
 		await createBlocksCheckoutPage( page.context().browser() );
 
 		const calcTaxesState = await updateIfNeeded(
@@ -165,21 +166,25 @@ const test = baseTest.extend( {
 		);
 
 		// Check id COD payment is enabled and enable it if it is not
-		const codResponse = await api.get( 'payment_gateways/cod' );
+		const codResponse = await restApi.get(
+			`${ WC_API_PATH }/payment_gateways/cod`
+		);
 		const codEnabled = codResponse.enabled;
 
 		if ( ! codEnabled ) {
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: true,
 			} );
 		}
 
 		// Check id BACS payment is enabled and enable it if it is not
-		const bacsResponse = await api.get( 'payment_gateways/bacs' );
+		const bacsResponse = await restApi.get(
+			`${ WC_API_PATH }/payment_gateways/bacs`
+		);
 		const bacsEnabled = bacsResponse.enabled;
 
 		if ( ! bacsEnabled ) {
-			await api.put( 'payment_gateways/bacs', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
 				enabled: true,
 			} );
 		}
@@ -202,35 +207,37 @@ const test = baseTest.extend( {
 		);
 
 		if ( ! codEnabled ) {
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: codEnabled,
 			} );
 		}
 
 		if ( ! bacsEnabled ) {
-			await api.put( 'payment_gateways/bacs', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
 				enabled: bacsEnabled,
 			} );
 		}
 	},
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product;
 
 		// Using dec: 0 to avoid small rounding issues
-		await api
-			.post( 'products', getFakeProduct( { dec: 0 } ) )
+		await restApi
+			.post( `${ WC_API_PATH }/products`, getFakeProduct( { dec: 0 } ) )
 			.then( ( response ) => {
 				product = response.data;
 			} );
 
 		await use( product );
 
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
-	tax: async ( { api }, use ) => {
+	tax: async ( { restApi }, use ) => {
 		let tax;
-		await api
-			.post( 'taxes', {
+		await restApi
+			.post( `${ WC_API_PATH }/taxes`, {
 				country: 'US',
 				state: '*',
 				cities: '*',
@@ -245,44 +252,57 @@ const test = baseTest.extend( {
 
 		await use( tax );
 
-		await api.delete( `taxes/${ tax.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
 			force: true,
 		} );
 	},
-	customer: async ( { api }, use ) => {
+	customer: async ( { restApi }, use ) => {
 		const customerData = getFakeCustomer();
 		let customer;
 
-		await api.post( 'customers', customerData ).then( ( response ) => {
-			customer = response.data;
-			customer.password = customerData.password;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, customerData )
+			.then( ( response ) => {
+				customer = response.data;
+				customer.password = customerData.password;
+			} );
 
 		// add a shipping zone and method for the customer
 		let shippingZoneId;
-		await api
-			.post( 'shipping/zones', {
+		await restApi
+			.post( `${ WC_API_PATH }/shipping/zones`, {
 				name: `Free Shipping ${ customerData.shipping.city }`,
 			} )
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
 			} );
-		await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+		await restApi.put(
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/locations`,
+			[
+				{
+					code: `${ customerData.shipping.country }:${ customerData.shipping.state }`,
+					type: 'state',
+				},
+			]
+		);
+		await restApi.post(
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/methods`,
 			{
-				code: `${ customerData.shipping.country }:${ customerData.shipping.state }`,
-				type: 'state',
-			},
-		] );
-		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
-			method_id: 'free_shipping',
-		} );
+				method_id: 'free_shipping',
+			}
+		);
 
 		await use( customer );
 
-		await api.delete( `customers/${ customer.id }`, { force: true } );
-		await api.delete( `shipping/zones/${ shippingZoneId }`, {
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
 			force: true,
 		} );
+		await restApi.delete(
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
+			{
+				force: true,
+			}
+		);
 	},
 } );
 /* endregion */

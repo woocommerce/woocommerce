@@ -10,3 +10,15 @@ export interface ProductGallerySettingsProps {
 		attributes: Partial< ProductGalleryBlockAttributes >
 	) => void;
 }
+
+interface ImageDataItem {
+	id: number;
+	src: string;
+	srcSet: string;
+	sizes: string;
+}
+
+export interface ImageDataObject {
+	images: Record< number, ImageDataItem >;
+	image_ids: number[];
+}

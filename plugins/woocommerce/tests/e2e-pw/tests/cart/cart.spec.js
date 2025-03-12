@@ -10,6 +10,7 @@ import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { createBlocksCartPage, BLOCKS_CART_PAGE } from '../../utils/pages';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const cartPages = [ { name: 'classic cart', slug: 'cart' }, BLOCKS_CART_PAGE ];
 
@@ -120,30 +121,34 @@ async function checkCartContent( slug, page, products, tax ) {
 
 /* region fixtures */
 const test = baseTest.extend( {
-	page: async ( { page, api }, use ) => {
+	page: async ( { page, restApi }, use ) => {
 		await createBlocksCartPage( page.context().browser() );
 
 		const calcTaxesState = await updateIfNeeded(
-			'general/woocommerce_calc_taxes',
+			`general/woocommerce_calc_taxes`,
 			'yes'
 		);
 
 		// Check id COD payment is enabled and enable it if it is not
-		const codResponse = await api.get( 'payment_gateways/cod' );
+		const codResponse = await restApi.get(
+			`${ WC_API_PATH }/payment_gateways/cod`
+		);
 		const codEnabled = codResponse.enabled;
 
 		if ( ! codEnabled ) {
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: true,
 			} );
 		}
 
 		// Check id BACS payment is enabled and enable it if it is not
-		const bacsResponse = await api.get( 'payment_gateways/bacs' );
+		const bacsResponse = await restApi.get(
+			`${ WC_API_PATH }/payment_gateways/bacs`
+		);
 		const bacsEnabled = bacsResponse.enabled;
 
 		if ( ! bacsEnabled ) {
-			await api.put( 'payment_gateways/bacs', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
 				enabled: true,
 			} );
 		}
@@ -153,27 +158,27 @@ const test = baseTest.extend( {
 
 		// revert the settings to initial state
 
-		await resetValue( 'general/woocommerce_calc_taxes', calcTaxesState );
+		await resetValue( `general/woocommerce_calc_taxes`, calcTaxesState );
 
 		if ( ! codEnabled ) {
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: codEnabled,
 			} );
 		}
 
 		if ( ! bacsEnabled ) {
-			await api.put( 'payment_gateways/bacs', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
 				enabled: bacsEnabled,
 			} );
 		}
 	},
-	products: async ( { api }, use ) => {
+	products: async ( { restApi }, use ) => {
 		const products = [];
 
 		// Using dec: 0 to avoid small rounding issues
 		for ( let i = 0; i < 2; i++ ) {
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					...getFakeProduct( { dec: 0 } ),
 					manage_stock: true,
 					stock_quantity: 3,
@@ -186,13 +191,15 @@ const test = baseTest.extend( {
 		await use( products );
 
 		for ( const product of products ) {
-			await api.delete( `products/${ product.id }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} );
 		}
 	},
-	tax: async ( { api }, use ) => {
+	tax: async ( { restApi }, use ) => {
 		let tax;
-		await api
-			.post( 'taxes', {
+		await restApi
+			.post( `${ WC_API_PATH }/taxes`, {
 				country: 'US',
 				state: '*',
 				cities: '*',
@@ -207,7 +214,7 @@ const test = baseTest.extend( {
 
 		await use( tax );
 
-		await api.delete( `taxes/${ tax.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
 			force: true,
 		} );
 	},

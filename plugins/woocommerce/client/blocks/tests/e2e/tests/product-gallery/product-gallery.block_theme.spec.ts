@@ -242,43 +242,6 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test.describe( 'with pager', () => {
-		test( 'pager should change when clicking on a next button or thumbnail', async ( {
-			pageObject,
-			editor,
-			page,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			const pagerBlock = await pageObject.getPagerBlock( {
-				page: 'frontend',
-			} );
-
-			await expect( pagerBlock ).toHaveText( '1/3' );
-
-			const nextButton = page.getByRole( 'button', {
-				name: 'Next image',
-			} );
-			await nextButton.click();
-
-			await expect( pagerBlock ).toHaveText( '2/3' );
-
-			const thumbnailsLocator = await pageObject.getThumbnailsBlock( {
-				page: 'frontend',
-			} );
-			const firstThumbnail = thumbnailsLocator.locator( 'img' ).nth( 0 );
-			await firstThumbnail.click();
-
-			await expect( pagerBlock ).toHaveText( '1/3' );
-		} );
-	} );
-
 	test.describe( 'within pop-up', () => {
 		test( 'should display the same selected image when the pop-up is opened', async ( {
 			page,

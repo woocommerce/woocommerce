@@ -1,7 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe(
 	'Bulk edit orders',
@@ -11,43 +13,37 @@ test.describe(
 
 		let orderId1, orderId2, orderId3, orderId4, orderId5;
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api
-				.post( 'orders', {
+		test.beforeAll( async ( { restApi } ) => {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
 				.then( ( response ) => {
 					orderId1 = response.data.id;
 				} );
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
 				.then( ( response ) => {
 					orderId2 = response.data.id;
 				} );
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
 				.then( ( response ) => {
 					orderId3 = response.data.id;
 				} );
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
 				.then( ( response ) => {
 					orderId4 = response.data.id;
 				} );
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
 				.then( ( response ) => {
@@ -55,18 +51,22 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId1 }`, {
+				force: true,
 			} );
-			await api.delete( `orders/${ orderId1 }`, { force: true } );
-			await api.delete( `orders/${ orderId2 }`, { force: true } );
-			await api.delete( `orders/${ orderId3 }`, { force: true } );
-			await api.delete( `orders/${ orderId4 }`, { force: true } );
-			await api.delete( `orders/${ orderId5 }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId2 }`, {
+				force: true,
+			} );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId3 }`, {
+				force: true,
+			} );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId4 }`, {
+				force: true,
+			} );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId5 }`, {
+				force: true,
+			} );
 		} );
 
 		test( 'can bulk update order status', async ( { page } ) => {

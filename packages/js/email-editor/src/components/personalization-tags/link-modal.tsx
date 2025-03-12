@@ -8,7 +8,7 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './index.scss';
+import './style.scss';
 
 const LinkModal = ( { onInsert, isOpened, closeCallback, tag } ) => {
 	const [ linkText, setLinkText ] = useState( __( 'Link', 'woocommerce' ) );

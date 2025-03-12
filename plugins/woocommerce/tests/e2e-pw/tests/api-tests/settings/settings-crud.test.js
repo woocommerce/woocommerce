@@ -1552,7 +1552,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#720eec',
 						tip: 'The base color for WooCommerce email templates. Default <code>#720eec</code>.',
-						value: '#000000',
+						value: '#9DFF20',
 					} ),
 				] )
 			);
@@ -1595,19 +1595,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 						default: '#3c3c3c',
 						tip: 'The main body text color. Default <code>#3c3c3c</code>.',
 						value: '#000000',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_merchant_email_notifications',
-						label: 'Enable email insights',
-						description:
-							'Receive email notifications with additional guidance to complete the basic store setup and helpful insights',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
 					} ),
 				] )
 			);
@@ -1698,11 +1685,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_base_color',
 						label: 'Accent',
 						description:
-							'Customize the color of your buttons and links. Default <code>#000000</code>.',
+							'Customize the color of your buttons and links. Default <code>#9DFF20</code>.',
 						type: 'color',
-						default: '#000000',
-						tip: 'Customize the color of your buttons and links. Default <code>#000000</code>.',
-						value: '#000000',
+						default: '#9DFF20',
+						tip: 'Customize the color of your buttons and links. Default <code>#9DFF20</code>.',
+						value: '#9DFF20',
 					} ),
 				] )
 			);
@@ -1759,19 +1746,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 						default: '#787c82',
 						tip: 'Choose a color for your secondary text, such as your footer content. Default <code>#787c82</code>.',
 						value: '#787c82',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_merchant_email_notifications',
-						label: 'Enable email insights',
-						description:
-							'Receive email notifications with additional guidance to complete the basic store setup and helpful insights',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
 					} ),
 				] )
 			);

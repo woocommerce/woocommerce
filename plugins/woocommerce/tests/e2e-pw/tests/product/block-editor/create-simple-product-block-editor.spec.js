@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { expect } from '@playwright/test';
 import { insertBlock } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -9,7 +8,7 @@ import { insertBlock } from '@woocommerce/e2e-utils-playwright';
  */
 import { test } from '../../../fixtures/block-editor-fixtures';
 import { clickOnTab } from '../../../utils/simple-products';
-import { tags } from '../../../fixtures/fixtures';
+import { tags, expect } from '../../../fixtures/fixtures';
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';

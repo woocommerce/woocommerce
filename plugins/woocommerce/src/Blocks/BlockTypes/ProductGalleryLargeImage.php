@@ -131,7 +131,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 						<img
 							class="<?php echo esc_attr( $base_classes ); ?>"
 							data-wp-bind--src="context.image.src"
-							data-wp-bind--srcset="context.image.srcSet"
+							data-wp-bind--srcset="context.image.src_set"
 							data-wp-bind--sizes="context.image.sizes"
 							data-wp-bind--data-image-id="context.image.id"
 							data-wp-bind--tabindex="context.image.tabIndex"

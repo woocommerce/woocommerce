@@ -2188,6 +2188,10 @@ ul.wc_coupon_list_block {
 			}
 		}
 
+		.cost-total {
+			opacity: 50%;
+		}
+
 		.refunded-total {
 			color: $red;
 		}
@@ -2389,12 +2393,19 @@ ul.wc_coupon_list_block {
 				text-align: center;
 			}
 
+			.item_cost_of_goods {
+				.view {
+					opacity: 50%;
+				}
+			}
+
 			.cost,
 			.tax,
 			.quantity,
 			.line_cost,
 			.line_tax,
 			.tax_class,
+			.item_cost_of_goods,
 			.item_cost {
 				text-align: right;
 
@@ -3910,6 +3921,7 @@ table.wc_input_table {
 		background-color: #fefbcc;
 	}
 
+	.item_cost_of_goods,
 	.item_cost,
 	.cost {
 		text-align: right;
@@ -4572,7 +4584,7 @@ table {
 }
 
 #wc-shipping-zone-region-picker-root .woocommerce-tree-select-control {
-	
+
 	.components-base-control {
 		padding: 2px 8px;
 		border-radius: 4px;

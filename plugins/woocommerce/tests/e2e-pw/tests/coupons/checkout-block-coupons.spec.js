@@ -12,10 +12,11 @@ import {
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
+import { fillPageTitle } from '../../utils/editor';
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { random } from '../../utils/helpers';
 
-const { fillPageTitle } = require( '../../utils/editor' );
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { random } = require( '../../utils/helpers' );
 const simpleProductName = `Checkout Coupons Product ${ random() }`;
 const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
@@ -70,14 +71,17 @@ test.describe(
 	() => {
 		const couponBatchId = [];
 
-		test.beforeAll( async ( { api } ) => {
+		test.beforeAll( async ( { restApi } ) => {
 			// make sure the currency is USD
-			await api.put( 'settings/general/woocommerce_currency', {
-				value: 'USD',
-			} );
+			await restApi.put(
+				`${ WC_API_PATH }/settings/general/woocommerce_currency`,
+				{
+					value: 'USD',
+				}
+			);
 			// add a product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProductName,
 					type: 'simple',
 					regular_price: singleProductFullPrice,
@@ -87,8 +91,8 @@ test.describe(
 					productId = response.data.id;
 				} );
 			// add coupons
-			await api
-				.post( 'coupons/batch', {
+			await restApi
+				.post( `${ WC_API_PATH }/coupons/batch`, {
 					create: coupons,
 				} )
 				.then( ( response ) => {
@@ -97,8 +101,8 @@ test.describe(
 					}
 				} );
 			// add limited coupon
-			await api
-				.post( 'coupons', {
+			await restApi
+				.post( `${ WC_API_PATH }/coupons`, {
 					code: couponLimitedCode,
 					discount_type: 'fixed_cart',
 					amount: '10.00',
@@ -109,8 +113,8 @@ test.describe(
 					limitedCouponId = response.data.id;
 				} );
 			// add order with applied limited coupon
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 					billing: customerBilling,
 					coupon_lines: [
@@ -124,14 +128,14 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { api } ) => {
-			await api.post( 'products/batch', {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.post( `${ WC_API_PATH }/products/batch`, {
 				delete: [ productId ],
 			} );
-			await api.post( 'coupons/batch', {
+			await restApi.post( `${ WC_API_PATH }/coupons/batch`, {
 				delete: [ ...couponBatchId, limitedCouponId ],
 			} );
-			await api.post( 'orders/batch', {
+			await restApi.post( `${ WC_API_PATH }/orders/batch`, {
 				delete: [ orderId ],
 			} );
 		} );

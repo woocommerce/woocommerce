@@ -1,26 +1,32 @@
-const { test, expect } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { expect, test } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
-const hide_task_list = async ( wcAdminApi, task_list_name ) => {
+const hide_task_list = async ( restApi, task_list_name ) => {
 	const {
-		statusText,
+		statusCode,
 		data: { isHidden },
-	} = await wcAdminApi.post( 'onboarding/tasks/' + task_list_name + '/hide' );
+	} = await restApi.post(
+		`${ WC_ADMIN_API_PATH }/onboarding/tasks/${ task_list_name }/hide`
+	);
 
-	expect( statusText ).toEqual( 'OK' );
+	expect( statusCode ).toEqual( 200 );
 
 	return isHidden === true;
 };
 
-const show_task_list = async ( wcAdminApi, task_list_name ) => {
+const show_task_list = async ( restApi, task_list_name ) => {
 	const {
-		statusText,
+		statusCode,
 		data: { isHidden },
-	} = await wcAdminApi.post(
-		'onboarding/tasks/' + task_list_name + '/unhide'
+	} = await restApi.post(
+		`${ WC_ADMIN_API_PATH }/onboarding/tasks/${ task_list_name }/unhide`
 	);
 
-	expect( statusText ).toEqual( 'OK' );
+	expect( statusCode ).toEqual( 200 );
 
 	return isHidden === false;
 };
@@ -28,18 +34,20 @@ const show_task_list = async ( wcAdminApi, task_list_name ) => {
 test.describe( 'Add Product Task', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.beforeAll( async ( { wcAdminApi, api } ) => {
-		await wcAdminApi.post( 'onboarding/profile', {
+	test.beforeAll( async ( { restApi } ) => {
+		await restApi.post( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
 			skipped: true,
 		} );
-		const products = await api.get( 'products?per_page=50' );
-		await api.post( 'products/batch', {
+		const products = await restApi.get(
+			`${ WC_API_PATH }/products?per_page=50`
+		);
+		await restApi.post( `${ WC_API_PATH }/products/batch`, {
 			delete: products.data.map( ( product ) => product.id ),
 		} );
 	} );
 
-	test.afterAll( async ( { wcAdminApi } ) => {
-		await wcAdminApi.post( 'onboarding/profile', {
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.post( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
 			skipped: false,
 		} );
 	} );
@@ -83,10 +91,10 @@ test.describe( 'Add Product Task', () => {
 
 	test( 'Products page shows products table when products exist', async ( {
 		page,
-		api,
+		restApi,
 	} ) => {
 		// Create a test product
-		await api.post( 'products', {
+		await restApi.post( `${ WC_API_PATH }/products`, {
 			name: 'Test Product',
 			type: 'simple',
 			regular_price: '10.00',
@@ -111,18 +119,20 @@ test.describe( 'Add Product Task', () => {
 		).toHaveCount( 1 );
 
 		// Clean up - delete test product
-		const products = await api.get( 'products' );
+		const products = await restApi.get( `${ WC_API_PATH }/products` );
 		for ( const product of products.data ) {
-			await api.delete( `products/${ product.id }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} );
 		}
 	} );
 
 	test( 'Products page redirects to add product task when no products exist and task list is hidden', async ( {
 		page,
-		wcAdminApi,
+		restApi,
 	} ) => {
 		// Hide the task list
-		expect( await hide_task_list( wcAdminApi, 'setup' ) ).toBe( true );
+		expect( await hide_task_list( restApi, 'setup' ) ).toBe( true );
 
 		// Navigate to All Products page
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
@@ -140,6 +150,6 @@ test.describe( 'Add Product Task', () => {
 		).toBeVisible();
 
 		// Reset task list to visible
-		expect( await show_task_list( wcAdminApi, 'setup' ) ).toBe( true );
+		expect( await show_task_list( restApi, 'setup' ) ).toBe( true );
 	} );
 } );

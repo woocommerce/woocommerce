@@ -1,20 +1,25 @@
-const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { faker } = require( '@faker-js/faker' );
-const {
-	ADMIN_STATE_PATH,
-	CUSTOMER_STATE_PATH,
-} = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { faker } from '@faker-js/faker';
+
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	products: async ( { api }, use ) => {
+	products: async ( { restApi }, use ) => {
 		const timestamp = Date.now().toString();
 		const products = [];
 
 		// Create the products
 		for ( let i = 0; i < 2; i++ ) {
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: `Product ${ i } ${ timestamp }`,
 					type: 'simple',
 					regular_price: '9.99',
@@ -27,18 +32,17 @@ const test = baseTest.extend( {
 		await use( products );
 
 		// Cleanup
-		await api.post( `products/batch`, {
+		await restApi.post( `${ WC_API_PATH }/products/batch`, {
 			delete: products.map( ( product ) => product.id ),
 		} );
 	},
-	reviews: async ( { api, products }, use ) => {
+	reviews: async ( { restApi, products }, use ) => {
 		const timestamp = Date.now().toString();
 		const reviews = [];
 
-		// Create the product reviews
 		for ( const product of products ) {
-			await api
-				.post( 'products/reviews', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/reviews`, {
 					product_id: product.id,
 					review: `Nice product ${ product.name }, at ${ timestamp }`,
 					reviewer: 'John Doe',
@@ -52,10 +56,18 @@ const test = baseTest.extend( {
 
 		await use( reviews );
 
-		// Cleanup
-		await api.delete( `products/reviews/batch`, {
-			delete: reviews.map( ( review ) => review.id ),
-		} );
+		for ( const review of reviews ) {
+			try {
+				await restApi.delete(
+					`${ WC_API_PATH }/products/reviews/${ review.id }`
+				);
+			} catch ( error ) {
+				// Ignore 410 error - which is expected if the review was already trashed
+				if ( error.data?.data?.status !== 410 ) {
+					throw error;
+				}
+			}
+		}
 	},
 } );
 

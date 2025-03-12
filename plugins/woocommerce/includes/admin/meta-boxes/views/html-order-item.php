@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+
 $product      = $item->get_product();
 $product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
@@ -47,6 +49,15 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $product, $item, absint( $item_id ) ); ?>
 
+	<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+		<td class="item_cost_of_goods" width="1%" data-sort-value="<?php echo esc_attr( $item->get_cogs_value() ); ?>">
+			<div class="view">
+				<?php
+				echo wp_kses_post( $item->get_cogs_value_html() );
+				?>
+			</div>
+		</td>
+	<?php endif; ?>
 	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal( $item, false, true ) ); ?>">
 		<div class="view">
 			<?php

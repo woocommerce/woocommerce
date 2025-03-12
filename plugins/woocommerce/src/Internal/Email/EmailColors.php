@@ -40,8 +40,8 @@ class EmailColors {
 				&& function_exists( 'wp_get_global_styles' ) 
 			) {
 				$global_styles             = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
-				$base_color_global         = ! empty( $global_styles['elements']['button']['color']['text'] )
-					? sanitize_hex_color( $global_styles['elements']['button']['color']['text'] ) : '';
+				$base_color_global         = ! empty( $global_styles['elements']['button']['color']['background'] )
+					? sanitize_hex_color( $global_styles['elements']['button']['color']['background'] ) : '';
 				$bg_color_global           = ! empty( $global_styles['color']['background'] )
 					? sanitize_hex_color( $global_styles['color']['background'] ) : '';
 				$body_bg_color_global      = ! empty( $global_styles['color']['background'] )

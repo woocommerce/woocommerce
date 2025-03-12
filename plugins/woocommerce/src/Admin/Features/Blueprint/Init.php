@@ -109,6 +109,66 @@ class Init {
 	}
 
 	/**
+	 * Get plugins for export group.
+	 *
+	 * @return array|array[] $plugins
+	 */
+	public function get_plugins_for_export_group() {
+		$plugins        = $this->wp_get_plugins();
+		$active_plugins = $this->wp_get_option( 'active_plugins', array() );
+		$plugins        = array_map(
+			function ( $key, $plugin ) use ( $active_plugins ) {
+				return array(
+					'id'      => $key,
+					'label'   => $plugin['Name'],
+					'checked' => in_array( $key, $active_plugins, true ),
+				);
+			},
+			array_keys( $plugins ),
+			$plugins
+		);
+
+		usort(
+			$plugins,
+			function ( $a, $b ) {
+				return $b['checked'] <=> $a['checked'];
+			}
+		);
+
+		return $plugins;
+	}
+
+	/**
+	 * Get themes for export group.
+	 *
+	 * @return array $themes
+	 */
+	public function get_themes_for_export_group() {
+		$themes       = $this->wp_get_themes();
+		$active_theme = $this->wp_get_theme();
+
+		$themes = array_map(
+			function ( $theme ) use ( $active_theme ) {
+				return array(
+					'id'      => $theme->get_stylesheet(),
+					'label'   => $theme->get( 'Name' ),
+					'checked' => $theme->get_stylesheet() === $active_theme->get_stylesheet(),
+				);
+			},
+			$themes
+		);
+
+		usort(
+			$themes,
+			function ( $a, $b ) {
+				return $b['checked'] <=> $a['checked'];
+			}
+		);
+
+		return array_values( $themes );
+	}
+
+	/**
 	 * Return step groups for JS.
 	 *
 	 * This is used to populate exportable items on the blueprint settings page.
@@ -116,10 +176,6 @@ class Init {
 	 * @return array
 	 */
 	public function get_step_groups_for_js() {
-		$all_plugins    = $this->wp_get_plugins();
-		$active_plugins = array_intersect_key( $all_plugins, array_flip( get_option( 'active_plugins', array() ) ) );
-		$active_theme   = $this->wp_get_theme();
-
 		return array(
 			array(
 				'id'          => 'settings',
@@ -132,6 +188,7 @@ class Init {
 							'id'          => $exporter instanceof HasAlias ? $exporter->get_alias() : $exporter->get_step_name(),
 							'label'       => $exporter->get_label(),
 							'description' => $exporter->get_description(),
+							'checked'     => true,
 						);
 					},
 					$this->get_woo_exporters()
@@ -142,28 +199,14 @@ class Init {
 				'description' => __( 'It includes all the installed plugins and extensions.', 'woocommerce' ),
 				'label'       => __( 'Plugins and extensions', 'woocommerce' ),
 				'icon'        => 'plugins',
-				'items'       => array_map(
-					function ( $key, $plugin ) {
-						return array(
-							'id'    => $key,
-							'label' => $plugin['Name'],
-						);
-					},
-					array_keys( $active_plugins ),
-					$active_plugins
-				),
+				'items'       => $this->get_plugins_for_export_group(),
 			),
 			array(
 				'id'          => 'themes',
 				'description' => __( 'It includes all the installed themes.', 'woocommerce' ),
 				'label'       => __( 'Themes', 'woocommerce' ),
 				'icon'        => 'brush',
-				'items'       => array(
-					array(
-						'id'    => $active_theme->get_stylesheet(),
-						'label' => $active_theme->get( 'Name' ),
-					),
-				),
+				'items'       => $this->get_themes_for_export_group(),
 			),
 		);
 	}
@@ -180,17 +223,10 @@ class Init {
 			return $settings;
 		}
 
-		$screen_id     = PageController::get_instance()->get_current_screen_id();
-		$advanced_page = strpos( $screen_id, 'woocommerce_page_wc-settings-advanced' ) !== false;
-		if ( 'woocommerce_page_wc-admin' === $screen_id || $advanced_page ) {
-			// Add upload nonce to global JS settings. The value can be accessed at wcSettings.admin.blueprint_upload_nonce.
-			$settings['blueprint_upload_nonce'] = wp_create_nonce( 'blueprint_upload_nonce' );
-		}
-
-		if ( $advanced_page ) {
+		if ( 'woocommerce_page_wc-settings-advanced-blueprint' === PageController::get_instance()->get_current_screen_id() ) {
 			// Used on the settings page.
 			// wcSettings.admin.blueprint_step_groups.
-			$settings['blueprint_step_groups'] = $this->get_step_groups_for_js();
+			$settings['blueprint_step_groups']         = $this->get_step_groups_for_js();
 			$settings['blueprint_max_step_size_bytes'] = RestApi::MAX_FILE_SIZE;
 		}
 

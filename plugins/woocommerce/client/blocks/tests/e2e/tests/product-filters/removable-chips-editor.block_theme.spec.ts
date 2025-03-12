@@ -14,7 +14,7 @@ const blockData = {
 		frontend: {},
 		editor: {
 			settings: {},
-			label: 'Block: Active (Experimental)',
+			label: 'Block: Active',
 			innerBlocks: {
 				chips: {
 					label: 'Block: Chips',
@@ -37,8 +37,7 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, requestUtils } ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+	test.beforeEach( async ( { admin } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',

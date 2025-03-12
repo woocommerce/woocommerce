@@ -9,6 +9,7 @@ import { faker } from '@faker-js/faker';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
+import { WC_API_PATH } from '../../utils/api-client';
 
 function rand() {
 	return faker.string.alphanumeric( 5 );
@@ -104,28 +105,37 @@ async function checkShippingRateInCart( page, product, checks ) {
 ].forEach( ( { name, zone, postCode, method, cost, checks } ) => {
 	const test = baseTest.extend( {
 		storageState: ADMIN_STATE_PATH,
-		product: async ( { api }, use ) => {
+		product: async ( { restApi }, use ) => {
 			let product = getFakeProduct();
 
-			await api.post( 'products', product ).then( ( response ) => {
-				product = response.data;
-			} );
+			await restApi
+				.post( `${ WC_API_PATH }/products`, product )
+				.then( ( response ) => {
+					product = response.data;
+				} );
 
 			await use( product );
 
-			await api.delete( `products/${ product.id }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} );
 		},
-		page: async ( { api, page }, use ) => {
+		page: async ( { restApi, page }, use ) => {
 			await use( page );
 
 			// Cleanup
-			const allShippingZones = await api.get( 'shipping/zones' );
+			const allShippingZones = await restApi.get(
+				`${ WC_API_PATH }/shipping/zones`
+			);
 			for ( const shippingZone of allShippingZones.data ) {
 				if ( shippingZone.name === name ) {
-					await api
-						.delete( `shipping/zones/${ shippingZone.id }`, {
-							force: true,
-						} )
+					await restApi
+						.delete(
+							`${ WC_API_PATH }/shipping/zones/${ shippingZone.id }`,
+							{
+								force: true,
+							}
+						)
 						.catch( ( error ) => {
 							console.error( error );
 						} );
@@ -204,32 +214,40 @@ async function checkShippingRateInCart( page, product, checks ) {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	zone: async ( { api }, use ) => {
+	zone: async ( { restApi }, use ) => {
 		let zone;
 
-		await api
-			.post( 'shipping/zones', { name: `Test zone name ${ rand() }` } )
+		await restApi
+			.post( `${ WC_API_PATH }/shipping/zones`, {
+				name: `Test zone name ${ rand() }`,
+			} )
 			.then( ( response ) => {
 				zone = response.data;
 			} );
 
-		await api.put( `shipping/zones/${ zone.id }/locations`, [
-			{
-				code: 'US:AL',
-				type: 'state',
-			},
-		] );
+		await restApi.put(
+			`${ WC_API_PATH }/shipping/zones/${ zone.id }/locations`,
+			[
+				{
+					code: 'US:AL',
+					type: 'state',
+				},
+			]
+		);
 
-		await api.post( `shipping/zones/${ zone.id }/methods`, {
-			method_id: 'flat_rate',
-			settings: {
-				cost: '15.00',
-			},
-		} );
+		await restApi.post(
+			`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`,
+			{
+				method_id: 'flat_rate',
+				settings: {
+					cost: '15.00',
+				},
+			}
+		);
 
 		await use( zone );
 
-		await api.delete( `shipping/zones/${ zone.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/shipping/zones/${ zone.id }`, {
 			force: true,
 		} );
 	},

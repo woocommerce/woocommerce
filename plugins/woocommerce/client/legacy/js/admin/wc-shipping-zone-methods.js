@@ -104,7 +104,6 @@
 					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_back_response', this.onConfigureShippingMethodBack );
-					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
 					$( document.body ).on( 'wc_backbone_modal_loaded', { view: this }, this.onModalLoaded );
@@ -750,11 +749,6 @@
 							});
 						}
 					}
-				},
-				onChangeShippingMethodSelector: function() {
-					var description = $( this ).find( 'option:selected' ).data( 'description' );
-					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
-					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();

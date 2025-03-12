@@ -2723,13 +2723,13 @@ function _wc_delete_transients( $transients ) {
 		}
 
 		// Limit the number of items in a single query to avoid exceeding database query parameter limits.
-		if ( count( $transients) > 199 ) {
+		if ( count( $transients ) > 199 ) {
 			// Process in smaller chunks to reduce memory usage.
 			$chunks  = array_chunk( $transients, 100 );
 			$success = true;
 
 			foreach ( $chunks as $chunk ) {
-				$result = wc_delete_transients( $chunk );
+				$result = _wc_delete_transients( $chunk );
 				if ( ! $result ) {
 					$success = false;
 				}
@@ -2754,6 +2754,11 @@ function _wc_delete_transients( $transients ) {
 				);
 			}
 
+			if ( empty( $options_to_clear ) ) {
+				// If there are no options to clear, return true immediately.
+				return true;
+			}
+
 			// Use a single query for better performance.
 			$wpdb->query(
 				$wpdb->prepare(
@@ -2764,7 +2769,7 @@ function _wc_delete_transients( $transients ) {
 
 			// Lets clear our options data from the cache.
 			// We can batch delete if available, introduced in WP 6.0.0.
-			if ( ! wp_installing() && ! empty( $options_to_clear ) ) {
+			if ( ! wp_installing() ) {
 				if ( function_exists( 'wp_cache_delete_multiple' ) ) {
 					wp_cache_delete_multiple( $options_to_clear, 'options' );
 				} else {

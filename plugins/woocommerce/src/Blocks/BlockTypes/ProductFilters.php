@@ -47,6 +47,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		wp_enqueue_script( 'wc-settings' );
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$query_id      = $block->context['queryId'] ?? 0;
@@ -100,11 +101,15 @@ class ProductFilters extends AbstractBlock {
 			'data-wp-interactive'              => $this->get_full_block_name(),
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
 			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
-			'data-wp-router-region'            => $this->generate_navigation_id( $block ),
 			'data-wp-context'                  => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wp-class--is-overlay-opened' => 'context.isOverlayOpened',
 			'style'                            => $styles,
 		);
+
+		// TODO: Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
+		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
+			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
+		}
 
 		ob_start();
 		?>

@@ -57,8 +57,6 @@ export class ProductFiltersPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editor.canvas.getByLabel(
-			'Block: Overlay Navigation (Experimental)'
-		);
+		return this.editor.canvas.getByLabel( 'Block: Overlay Navigation' );
 	}
 }

@@ -45,7 +45,6 @@
 	],
 	"scripts": {
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
-		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
@@ -161,7 +160,6 @@
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/e2e-utils": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/woocommerce-rest-api": "1.0.1",
 		"@wordpress/api-fetch": "6.21.0",
 		"@wordpress/babel-preset-default": "7.28.0",
 		"@wordpress/base-styles": "4.35.0",
@@ -333,10 +331,6 @@
 		"*.{js,ts,tsx}": [
 			"prettier --write",
 			"pnpm run lint:js"
-		],
-		"*.php": [
-			"php -d display_errors=1 -l",
-			"composer run-script phpcs"
 		],
 		"*.md": [
 			"pnpm run lint:md:docs"

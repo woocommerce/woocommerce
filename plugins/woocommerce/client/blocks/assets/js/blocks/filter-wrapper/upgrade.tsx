@@ -2,97 +2,96 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { createInterpolateElement } from '@wordpress/element';
+import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
+import { useDispatch, select } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import type { BlockInstance } from '@wordpress/blocks';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { Button } from '@wordpress/components';
-import { Warning } from '@wordpress/block-editor';
 
-interface UpgradeNoticeProps {
-	clientId: string;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-	attributes: Record< string, unknown >;
-	filterType: undefined | string;
-}
+export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
+	const { replaceBlock, removeBlock, updateBlockAttributes, selectBlock } =
+		useDispatch( 'core/block-editor' );
 
-export const UpgradeNotice = ( {
-	clientId,
-	setAttributes,
-	filterType,
-	attributes,
-}: UpgradeNoticeProps ) => {
-	const { replaceBlock } = useDispatch( 'core/block-editor' );
-	const { heading, headingLevel } = attributes;
-	const isInsideFilterWrapper = useSelect(
-		( select ) => {
-			const { getBlockParentsByBlockName } =
-				select( 'core/block-editor' );
-			return (
-				getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/filter-wrapper'
-				).length > 0
-			);
-		},
-		[ clientId ]
+	const notice = createInterpolateElement(
+		__(
+			'Upgrade all Filter blocks on this page for better performance and more customizability',
+			'woocommerce'
+		),
+		{
+			strongText: (
+				<strong>{ __( `Product Filters`, 'woocommerce' ) }</strong>
+			),
+		}
 	);
 
-	const upgradeFilterBlockHandler = () => {
-		const filterWrapperInnerBlocks: BlockInstance[] = [
-			createBlock( `woocommerce/${ filterType }`, {
-				...attributes,
-				heading: '',
-			} ),
-		];
+	const buttonLabel = __( 'Upgrade all Filter blocks', 'woocommerce' );
 
-		if ( heading && heading !== '' ) {
-			filterWrapperInnerBlocks.unshift(
-				createBlock( 'core/heading', {
-					content: heading,
-					level: headingLevel ?? 2,
-				} )
-			);
+	const handleClick = () => {
+		const { getBlocksByName, getBlockParentsByBlockName } =
+			select( 'core/block-editor' );
+
+		const blockParent = getBlockParentsByBlockName(
+			clientId,
+			'woocommerce/filter-wrapper'
+		);
+
+		const newBlock = createBlock( 'woocommerce/product-filters' );
+
+		if ( blockParent.length ) {
+			replaceBlock( blockParent[ 0 ], newBlock );
+		} else {
+			replaceBlock( clientId, newBlock );
 		}
 
-		replaceBlock(
-			clientId,
-			createBlock(
-				'woocommerce/filter-wrapper',
-				{
-					heading,
-					filterType,
-				},
-				[ ...filterWrapperInnerBlocks ]
-			)
+		const legacyFilterBlockWrapper = getBlocksByName(
+			'woocommerce/filter-wrapper'
 		);
-		setAttributes( {
-			heading: '',
-			lock: {
-				remove: true,
-			},
+
+		// We want to remove all the legacy filter blocks on the page.
+		legacyFilterBlockWrapper.forEach( ( blockId: string ) => {
+			// We need to disable locked blocks first.
+			updateBlockAttributes( blockId, {
+				lock: {
+					remove: false,
+				},
+			} );
+
+			removeBlock( blockId );
 		} );
+
+		// These are the v1 legacy filters without the wrapper block.
+		const v1LegacyFilterBlocks = [
+			'woocommerce/active-filters',
+			'woocommerce/price-filter',
+			'woocommerce/attribute-filter',
+			'woocommerce/stock-filter',
+		];
+
+		v1LegacyFilterBlocks.forEach( ( blockName ) => {
+			const block = getBlocksByName( blockName );
+
+			if ( block.length ) {
+				// We need to disable locked blocks first.
+				updateBlockAttributes( block[ 0 ], {
+					lock: {
+						remove: false,
+					},
+				} );
+
+				removeBlock( block[ 0 ] );
+			}
+		} );
+
+		// Make sure to put the focus on the newly added Product Filters block.
+		selectBlock( newBlock.clientId );
 	};
 
-	if ( isInsideFilterWrapper || ! filterType ) {
-		return null;
-	}
-
-	const actions = [
-		<Button
-			key="convert"
-			onClick={ upgradeFilterBlockHandler }
-			variant="primary"
-		>
-			{ __( 'Upgrade block', 'woocommerce' ) }
-		</Button>,
-	];
-
 	return (
-		<Warning actions={ actions }>
-			{ __(
-				'Filter block: We have improved this block to make styling easier. Upgrade it using the button below.',
-				'woocommerce'
-			) }
-		</Warning>
+		<UpgradeDowngradeNotice
+			isDismissible={ false }
+			actionLabel={ buttonLabel }
+			onActionClick={ handleClick }
+		>
+			{ notice }
+		</UpgradeDowngradeNotice>
 	);
 };

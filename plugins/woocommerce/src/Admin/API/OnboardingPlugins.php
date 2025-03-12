@@ -248,13 +248,14 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$color_scheme = get_user_option( 'admin_color', get_current_user_id() );
 		if ( ! $color_scheme ) {
-			$color_scheme = 'default';
+			// The default Core color schema is 'fresh'.
+			$color_scheme = 'fresh';
 		}
 
 		return array(
 			'success'      => ! $errors->has_errors(),
 			'errors'       => $errors->get_error_messages(),
-			'color_scheme' => 'fresh' === $color_scheme ? 'default' : $color_scheme,
+			'color_scheme' => $color_scheme,
 			'url'          => add_query_arg(
 				array(
 					'from'        => $request->get_param( 'from' ),

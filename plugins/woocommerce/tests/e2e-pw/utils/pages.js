@@ -11,7 +11,7 @@ import {
  * Internal dependencies
  */
 import { fillPageTitle } from './editor';
-import apiClient from './api-client';
+import ApiClient, { WP_API_PATH } from './api-client';
 import { ADMIN_STATE_PATH } from '../playwright.config';
 
 export const BLOCKS_CHECKOUT_PAGE = {
@@ -25,11 +25,14 @@ export const BLOCKS_CART_PAGE = {
 };
 
 export async function pageExists( slug ) {
-	const pages = await apiClient().get( `wp/v2/pages?slug=${ slug }`, {
-		data: {
-			_fields: [ 'id' ],
-		},
-	} );
+	const pages = await ApiClient.create().get(
+		`${ WP_API_PATH }/pages?slug=${ slug }`,
+		{
+			data: {
+				_fields: [ 'id' ],
+			},
+		}
+	);
 
 	return pages.data.length > 0;
 }

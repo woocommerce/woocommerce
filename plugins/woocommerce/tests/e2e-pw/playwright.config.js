@@ -71,22 +71,10 @@ export const setupProjects = [
 		dependencies: [ 'install wc' ],
 	},
 	{
-		name: 'consumer token setup',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'token.setup.js',
-		teardown: 'consumer token teardown',
-		dependencies: [ 'global authentication' ],
-	},
-	{
-		name: 'consumer token teardown',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: `token.teardown.js`,
-	},
-	{
 		name: 'site setup',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
 		testMatch: `site.setup.js`,
-		dependencies: [ 'consumer token setup' ],
+		dependencies: [ 'global authentication' ],
 	},
 ];
 

@@ -6,9 +6,8 @@ import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const firstProductName = 'Coupon test product';
 const coupons = [
@@ -39,24 +38,21 @@ test.describe(
 		let firstProductId;
 		const couponBatchId = [];
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// make sure the currency is USD
-			await api.put( 'settings/general/woocommerce_currency', {
-				value: 'USD',
-			} );
+			await restApi.put(
+				`${ WC_API_PATH }/settings/general/woocommerce_currency`,
+				{
+					value: 'USD',
+				}
+			);
 			// enable COD
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: true,
 			} );
 			// add product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: firstProductName,
 					type: 'simple',
 					regular_price: '20.00',
@@ -65,8 +61,8 @@ test.describe(
 					firstProductId = response.data.id;
 				} );
 			// add coupons
-			await api
-				.post( 'coupons/batch', {
+			await restApi
+				.post( `${ WC_API_PATH }/coupons/batch`, {
 					create: coupons,
 				} )
 				.then( ( response ) => {
@@ -81,18 +77,17 @@ test.describe(
 			await context.clearCookies();
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ firstProductId }`,
+				{
+					force: true,
+				}
+			);
+			await restApi.post( `${ WC_API_PATH }/coupons/batch`, {
+				delete: [ ...couponBatchId ],
 			} );
-			await api.delete( `products/${ firstProductId }`, {
-				force: true,
-			} );
-			await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: false,
 			} );
 		} );

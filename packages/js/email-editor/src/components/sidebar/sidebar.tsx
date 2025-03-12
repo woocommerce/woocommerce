@@ -26,7 +26,7 @@ import { TemplateSettings } from './template-settings';
 import { useEditorMode } from '../../hooks';
 import { Tabs } from '../../private-apis';
 
-import './index.scss';
+import './style.scss';
 import { recordEvent } from '../../events';
 
 type Props = React.ComponentProps< typeof ComplementaryArea >;

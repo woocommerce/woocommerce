@@ -105,6 +105,11 @@ class PaymentUtils {
 
 		// If no saved payment method exists, use the first enabled payment method.
 		$enabled_payment_gateways = self::get_enabled_payment_gateways();
+
+		if ( empty( $enabled_payment_gateways ) ) {
+			return '';
+		}
+
 		$first_key                = array_key_first( $enabled_payment_gateways );
 		$first_payment_method     = $enabled_payment_gateways[ $first_key ];
 		return $first_payment_method->id ?? '';

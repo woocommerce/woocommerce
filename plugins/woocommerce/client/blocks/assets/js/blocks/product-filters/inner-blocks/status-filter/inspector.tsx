@@ -90,6 +90,8 @@ export const Inspector = ( {
 							setAttributes( { displayStyle: value } );
 						} }
 						style={ { width: '100%' } }
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 					>
 						{ displayStyleOptions.map( ( blockType ) => (
 							<ToggleGroupControlOption
@@ -105,6 +107,7 @@ export const Inspector = ( {
 						onChange={ ( value ) =>
 							setAttributes( { showCounts: value } )
 						}
+						__nextHasNoMarginBottom
 					/>
 					<ToggleControl
 						label={ __( 'Empty filter options', 'woocommerce' ) }
@@ -112,6 +115,7 @@ export const Inspector = ( {
 						onChange={ ( value ) =>
 							setAttributes( { hideEmpty: ! value } )
 						}
+						__nextHasNoMarginBottom
 					/>
 				</PanelBody>
 			</InspectorControls>

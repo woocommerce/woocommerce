@@ -44,7 +44,7 @@ const Blueprint = () => {
 	const [ checkedState, setCheckedState ] = useState(
 		blueprintStepGroups.reduce( ( acc, group ) => {
 			acc[ group.id ] = group.items.reduce( ( groupAcc, item ) => {
-				groupAcc[ item.id ] = true; // Default all to true
+				groupAcc[ item.id ] = item.checked ?? false;
 				return groupAcc;
 			}, {} );
 			return acc;
@@ -68,9 +68,6 @@ const Blueprint = () => {
 				},
 			} );
 			const link = document.createElement( 'a' );
-			link.innerHTML =
-				'Click here in case download does not start automatically';
-
 			let url = null;
 
 			if ( response.type === 'zip' ) {
@@ -85,7 +82,6 @@ const Blueprint = () => {
 				link.setAttribute( 'download', 'woo-blueprint.json' );
 			}
 
-			linkContainer.appendChild( document.createElement( 'br' ) );
 			linkContainer.appendChild( link );
 
 			link.click();
