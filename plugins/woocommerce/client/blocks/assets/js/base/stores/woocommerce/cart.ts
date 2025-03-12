@@ -54,7 +54,7 @@ function generateError( error: ApiErrorResponse ): Error {
 	} );
 }
 
-async function showNoticeError( error: Error ) {
+async function showNoticeError( error: Error | ApiErrorResponse ) {
 	// Todo: Use the module exports instead of `store()` once the store-notices
 	// store is public.
 	await import( '@woocommerce/stores/store-notices' );
@@ -136,6 +136,11 @@ const { state, actions } = store< Store >(
 					// Checks if the response contains an error.
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
+
+					// Checks if the response was successful, but still contains some errors.
+					json.errors?.forEach( ( error ) => {
+						showNoticeError( error );
+					} );
 
 					// Updates the local cart.
 					state.cart = json;
