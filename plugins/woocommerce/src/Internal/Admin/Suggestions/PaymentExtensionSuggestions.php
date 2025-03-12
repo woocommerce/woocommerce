@@ -43,6 +43,7 @@ class PaymentExtensionSuggestions {
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
+	const BILLIE            = 'billie';
 	const BOLT              = 'bolt_checkout';
 	const AUTHORIZE_NET     = 'authorize_net';
 	const DEPAY             = 'depay';
@@ -3037,6 +3038,14 @@ class PaymentExtensionSuggestions {
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'woocommerce-gateway-authorize-net-cim',
+				),
+			),
+			self::BILLIE            => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/billie.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'billie-for-woocommerce',
 				),
 			),
 			self::BOLT              => array(
