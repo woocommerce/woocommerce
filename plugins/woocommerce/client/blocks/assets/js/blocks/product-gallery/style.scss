@@ -159,11 +159,8 @@ $dialog-padding: 20px;
 	&__thumbnail {
 		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
 		display: flex;
-		flex-basis: 0;
-		flex-grow: 1;
 		justify-content: center;
 		align-items: center;
-		position: relative;
 		aspect-ratio: 1 / 1;
 	}
 }

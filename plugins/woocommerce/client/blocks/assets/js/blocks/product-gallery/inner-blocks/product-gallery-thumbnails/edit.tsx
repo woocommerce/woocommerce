@@ -40,7 +40,7 @@ export const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>
-				{ [ ...Array( 4 ).keys() ].map( ( index ) => {
+				{ [ ...Array( 6 ).keys() ].map( ( index ) => {
 					return (
 						<div
 							className="wc-block-product-gallery-thumbnails__thumbnail"
