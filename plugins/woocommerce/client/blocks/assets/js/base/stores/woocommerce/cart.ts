@@ -45,7 +45,7 @@ function isApiErrorResponse(
 	res: Response,
 	json: unknown
 ): json is ApiErrorResponse {
-	return ! res.status.toString().startsWith( '2' );
+	return ! res.ok;
 }
 
 function generateError( error: ApiErrorResponse ): Error {
