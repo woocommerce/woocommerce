@@ -93,27 +93,25 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			expect(
-				await checkoutPageObject.verifyAdditionalFieldsDetails( [
-					[ 'Government ID', '12345' ],
-					[ 'Government ID', '54321' ],
-					[ 'What is your favourite colour?', 'Blue' ],
-					[
-						'Enter a gift message to include in the package',
-						'This is for you!',
-					],
-					[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
-					[ 'Would you like a free gift with your order?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'No' ],
-					[ 'How wide is your road?', 'Wide' ],
-					[ 'How wide is your road?', 'Narrow' ],
-					[
-						'Is this a personal purchase or a business purchase?',
-						'business',
-					],
-				] )
-			).toBe( true );
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '12345' ],
+				[ 'Government ID', '54321' ],
+				[ 'What is your favourite colour?', 'Blue' ],
+				[
+					'Enter a gift message to include in the package',
+					'This is for you!',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
+				[ 'Would you like a free gift with your order?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'No' ],
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Narrow' ],
+				[
+					'Is this a personal purchase or a business purchase?',
+					'business',
+				],
+			] );
 
 			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
@@ -329,25 +327,23 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			expect(
-				await checkoutPageObject.verifyAdditionalFieldsDetails( [
-					[ 'Government ID', '98765' ],
-					[ 'Government ID', '43210' ],
-					[ 'What is your favourite colour?', 'Red' ],
-					[ 'Would you like a free gift with your order?', 'No' ],
-					// One checkbox is checked, the other is unchecked.
-					[ 'Can a truck fit down your road?', 'No' ],
-					[ 'Can a truck fit down your road?', 'Yes' ],
-					// Different values in different address types.
-					[ 'How wide is your road?', 'Wide' ],
-					[ 'How wide is your road?', 'Super wide' ],
-					[
-						'Enter a gift message to include in the package',
-						'This is for you, from me!',
-					],
-					[ 'Do you want to subscribe to our newsletter?', 'No' ],
-				] )
-			).toBe( true );
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '98765' ],
+				[ 'Government ID', '43210' ],
+				[ 'What is your favourite colour?', 'Red' ],
+				[ 'Would you like a free gift with your order?', 'No' ],
+				// One checkbox is checked, the other is unchecked.
+				[ 'Can a truck fit down your road?', 'No' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				// Different values in different address types.
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Super wide' ],
+				[
+					'Enter a gift message to include in the package',
+					'This is for you, from me!',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'No' ],
+			] );
 
 			// This optional select field was unset, so it should not be visible on the confirmation. Can't check this
 			// with the above function so we will check it "manually".
@@ -431,27 +427,25 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			expect(
-				await checkoutPageObject.verifyAdditionalFieldsDetails( [
-					[ 'Government ID', '12345' ],
-					[ 'Government ID', '54321' ],
-					[ 'What is your favourite colour?', 'Blue' ],
-					[
-						'Enter a gift message to include in the package',
-						'This is for you!',
-					],
-					[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
-					[ 'Would you like a free gift with your order?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'No' ],
-					[ 'How wide is your road?', 'Wide' ],
-					[ 'How wide is your road?', 'Narrow' ],
-					[
-						'Is this a personal purchase or a business purchase?',
-						'business',
-					],
-				] )
-			).toBe( true );
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '12345' ],
+				[ 'Government ID', '54321' ],
+				[ 'What is your favourite colour?', 'Blue' ],
+				[
+					'Enter a gift message to include in the package',
+					'This is for you!',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
+				[ 'Would you like a free gift with your order?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'No' ],
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Narrow' ],
+				[
+					'Is this a personal purchase or a business purchase?',
+					'business',
+				],
+			] );
 
 			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
@@ -634,14 +628,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			expect(
-				await checkoutPageObject.verifyAdditionalFieldsDetails( [
-					[ 'Government ID', '12345' ],
-					[ 'Government ID', '54321' ],
-					[ 'How wide is your road?', 'Wide' ],
-					[ 'How wide is your road?', 'Narrow' ],
-				] )
-			).toBe( true );
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '12345' ],
+				[ 'Government ID', '54321' ],
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Narrow' ],
+			] );
 		} );
 
 		test( 'Shopper can see and edit submitted fields in my account area. Values are also sanitized and validated in my account area.', async ( {
@@ -705,21 +697,19 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			expect(
-				await checkoutPageObject.verifyAdditionalFieldsDetails( [
-					[ 'Government ID', '12345' ],
-					[ 'Government ID', '54321' ],
-					[ 'How wide is your road?', 'Wide' ],
-					[ 'How wide is your road?', 'Narrow' ],
-					[
-						'Enter a gift message to include in the package',
-						'This is a nice gift',
-					],
-					[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'No' ],
-				] )
-			).toBe( true );
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '12345' ],
+				[ 'Government ID', '54321' ],
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Narrow' ],
+				[
+					'Enter a gift message to include in the package',
+					'This is a nice gift',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'No' ],
+			] );
 
 			await checkoutPageObject.page.goto( '/my-account' );
 			await checkoutPageObject.page

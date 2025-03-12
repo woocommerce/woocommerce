@@ -120,6 +120,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			let customerDataUpdatePromise =
+				checkoutPageObject.waitForCustomerDataUpdate();
+
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.fillInCheckoutWithTestData(
 				{},
@@ -169,7 +172,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
 
-			await checkoutPageObject.waitForCustomerDataUpdate();
+			await customerDataUpdatePromise;
+
+			customerDataUpdatePromise =
+				checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
 				.getByRole( 'group', {
@@ -178,7 +184,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
 
-			await checkoutPageObject.waitForCustomerDataUpdate();
+			await customerDataUpdatePromise;
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
@@ -188,27 +194,25 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			expect(
-				await checkoutPageObject.verifyAdditionalFieldsDetails( [
-					[ 'Government ID', '12345' ],
-					[ 'Government ID', '54321' ],
-					[ 'What is your favourite colour?', 'Blue' ],
-					[
-						'Enter a gift message to include in the package',
-						'For my non-ascii named friend: niño',
-					],
-					[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
-					[ 'Would you like a free gift with your order?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'Yes' ],
-					[ 'Can a truck fit down your road?', 'No' ],
-					[ 'How wide is your road?', 'Wide' ],
-					[ 'How wide is your road?', 'Narrow' ],
-					[
-						'Is this a personal purchase or a business purchase?',
-						'business',
-					],
-				] )
-			).toBe( true );
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '12345' ],
+				[ 'Government ID', '54321' ],
+				[ 'What is your favourite colour?', 'Blue' ],
+				[
+					'Enter a gift message to include in the package',
+					'For my non-ascii named friend: niño',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
+				[ 'Would you like a free gift with your order?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'No' ],
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Narrow' ],
+				[
+					'Is this a personal purchase or a business purchase?',
+					'business',
+				],
+			] );
 
 			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();

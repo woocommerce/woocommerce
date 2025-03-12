@@ -211,18 +211,6 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
-		await this.page
-			.waitForRequest(
-				( request ) => {
-					return request.url().includes( 'batch' );
-				},
-				{ timeout: 3000 }
-			)
-			.catch( () => {
-				// Do nothing. This is just in case there's a debounced request
-				// still to be made, e.g. from checking "Can a truck fit down
-				// your road?" field.
-			} );
 		await this.waitForCheckoutToFinishUpdating();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
@@ -235,18 +223,12 @@ export class CheckoutPage {
 	 */
 	async verifyAdditionalFieldsDetails( values: [ string, string ][] ) {
 		for ( const [ label, value ] of values ) {
-			const visible = await this.page
-				.getByText(
+			await expect(
+				this.page.getByText(
 					`${ label }${ value }` // No space between these due to the way the markup is output on the confirmation page.
 				)
-				.isVisible();
-
-			if ( ! visible ) {
-				return false;
-			}
+			).toBeVisible();
 		}
-		// If one of the fields above is false the function would have returned early.
-		return true;
 	}
 
 	async verifyAddressDetails(
