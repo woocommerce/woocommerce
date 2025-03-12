@@ -178,7 +178,7 @@ class Renderer {
 	 */
 	protected function render_interactivity_notices_region() {
 		wp_interactivity_state(
-			'woocommerce/product-collection-notices',
+			'woocommerce/store-notices',
 			array(
 				'notices' => array(),
 			)
@@ -187,7 +187,7 @@ class Renderer {
 		ob_start();
 		?>
 		<div class="wc-block-store-notices woocommerce alignwide wp-block-woocommerce-store-notices">
-			<div data-wp-interactive="woocommerce/product-collection-notices" class="woocommerce-notices-wrapper">
+			<div data-wp-interactive="woocommerce/store-notices" class="woocommerce-notices-wrapper">
 				<template
 					data-wp-each--notice="state.notices"
 					data-wp-each-key="context.notice.id"

@@ -73,6 +73,7 @@ module.exports = {
 		path: path.resolve( __dirname, '../build/' ),
 		asyncChunks: false,
 		chunkFormat: 'module',
+		environment: { module: true },
 		module: true,
 	},
 	resolve: {
@@ -84,7 +85,7 @@ module.exports = {
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
 			requestToExternalModule( request ) {
 				if ( request.startsWith( '@woocommerce/stores/' ) ) {
-					return request;
+					return `import ${ request }`;
 				}
 			},
 		} ),

@@ -116,6 +116,9 @@ const { state } = store< Store >(
 					{ lock: universalLock }
 				);
 
+				// Todo: This import needs to be placed outside of the `catch` until (ADD GH PR LINK) is merged.
+				yield import( '@woocommerce/stores/store-notices' );
+
 				try {
 					yield actions.addCartItem( {
 						id: productId,
@@ -125,31 +128,25 @@ const { state } = store< Store >(
 					const message = ( error as Error ).message;
 
 					// Todo: Use the imported module once the store-notices store is public.
-					yield import( '@woocommerce/stores/store-notices' );
 					const { actions: noticeActions } = store< StoreNotices >(
 						'woocommerce/store-notices',
 						{},
 						{ lock: universalLock }
 					);
-
-					// Technically as long as the product collection is present, noticeActions
-					// will be too, but we check for 'addNotice' to guard against possible fatal errors.
-					if ( 'addNotice' in noticeActions ) {
-						// The old implementation always overwrites the last
-						// notice, so we remove the last notice before adding a
-						// new one.
-						if ( state.noticeId !== '' ) {
-							noticeActions.removeNotice( state.noticeId );
-						}
-
-						const noticeId = noticeActions.addNotice( {
-							notice: message,
-							type: 'error',
-							dismissible: true,
-						} );
-
-						state.noticeId = noticeId;
+					// The old implementation always overwrites the last
+					// notice, so we remove the last notice before adding a
+					// new one.
+					if ( state.noticeId !== '' ) {
+						noticeActions.removeNotice( state.noticeId );
 					}
+
+					const noticeId = noticeActions.addNotice( {
+						notice: message,
+						type: 'error',
+						dismissible: true,
+					} );
+
+					state.noticeId = noticeId;
 
 					// We don't care about errors blocking execution, but will
 					// console.error for troubleshooting.
