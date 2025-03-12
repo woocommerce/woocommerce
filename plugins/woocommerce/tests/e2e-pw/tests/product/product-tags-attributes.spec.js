@@ -1,12 +1,18 @@
 /**
  * External dependencies
  */
-import { getCanvas, goToPageEditor } from '@woocommerce/e2e-utils-playwright';
+import {
+	getCanvas,
+	goToPageEditor,
+	insertBlockByShortcut,
+	publishPage,
+} from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
 import { tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { fillPageTitle } from '../../utils/editor';
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const pageTitle = 'Product Showcase';
@@ -288,23 +294,9 @@ test.describe(
 		test( 'can see products showcase', async ( { page } ) => {
 			// create as a merchant a new page with Product Collection block
 			await goToPageEditor( { page } );
-
+			await fillPageTitle( page, pageTitle );
+			await insertBlockByShortcut( page, 'Product Collection' );
 			const canvas = await getCanvas( page );
-
-			await canvas
-				.getByRole( 'textbox', { name: 'Add Title' } )
-				.fill( pageTitle );
-
-			await canvas
-				.getByRole( 'button', { name: 'Add default block' } )
-				.click();
-
-			await canvas
-				.getByRole( 'document', {
-					name: 'Empty block; start writing or type forward slash to choose a block',
-				} )
-				.pressSequentially( '/product collection' );
-			await page.keyboard.press( 'Enter' );
 
 			// Product Collection requires choosing some collection.
 			await canvas
@@ -316,24 +308,7 @@ test.describe(
 				} )
 				.click();
 
-			await page
-				.getByRole( 'button', { name: 'Publish', exact: true } )
-				.click();
-
-			await page
-				.getByRole( 'region', { name: 'Editor publish' } )
-				.getByRole( 'button', { name: 'Publish', exact: true } )
-				.click();
-
-			await expect(
-				// WP 6.6 updates the button text from "Update" to "Save", so we'll need to check for either.
-				page.getByRole( 'button', { name: 'Update', exact: true } ).or(
-					page.getByRole( 'button', {
-						name: 'Save',
-						exact: true,
-					} )
-				)
-			).toBeVisible();
+			await publishPage( page, pageTitle );
 
 			// go to created page with products showcase
 			await page.goto( 'product-showcase' );

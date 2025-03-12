@@ -43,7 +43,10 @@ for ( const userData of users ) {
 			await page.getByLabel( 'Last Name' ).fill( userData.last_name );
 			await page.getByText( 'Send the new user an email' ).check();
 			await page.getByLabel( 'Role' ).selectOption( userData.role );
-			await page.getByRole( 'button', { name: 'Add New User' } ).click();
+			// WP 6.8 changed the button text from "Add New User" to "Add User"
+			await page
+				.getByRole( 'button', { name: /Add User|Add New User/ } )
+				.click();
 
 			await expect( page ).toHaveTitle( /Users/ );
 
