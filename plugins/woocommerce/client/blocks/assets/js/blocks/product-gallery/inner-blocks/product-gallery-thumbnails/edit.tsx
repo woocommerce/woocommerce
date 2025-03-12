@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody } from '@wordpress/components';
+import { PanelBody, Disabled } from '@wordpress/components';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import type { BlockEditProps } from '@wordpress/blocks';
 
@@ -16,12 +16,21 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
+	const { thumbnailSize } = attributes;
+	const minSize = 10;
+	const maxSize = 50;
+	const defSize = 20;
+	const thumbnailSizeValue =
+		Math.min(
+			Math.max( Number( thumbnailSize.replace( '%', '' ) ), minSize ),
+			maxSize
+		) || defSize;
 	const blockProps = useBlockProps( {
-		className: `wc-block-product-gallery-thumbnails wc-block-product-gallery-thumbnails--number-of-thumbnails-${ attributes.numberOfThumbnails }`,
+		className: `wc-block-product-gallery-thumbnails wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
 	} );
 
 	return (
-		<div { ...blockProps }>
+		<>
 			<InspectorControls>
 				<PanelBody>
 					<ProductGalleryThumbnailsBlockSettings
@@ -30,8 +39,8 @@ export const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			{ [ ...Array( attributes.numberOfThumbnails ).keys() ].map(
-				( index ) => {
+			<div { ...blockProps }>
+				{ [ ...Array( 4 ).keys() ].map( ( index ) => {
 					return (
 						<div
 							className="wc-block-product-gallery-thumbnails__thumbnail"
@@ -44,8 +53,8 @@ export const Edit = ( {
 							/>
 						</div>
 					);
-				}
-			) }
-		</div>
+				} ) }
+			</div>
+		</>
 	);
 };
