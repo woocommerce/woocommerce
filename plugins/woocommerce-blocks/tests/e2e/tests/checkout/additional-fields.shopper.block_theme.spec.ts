@@ -909,6 +909,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
 
+			// Check that contact and order fields are persisted
+			let putResponse = checkoutPageObject.page.waitForResponse(
+				'**/wc/store/v1/checkout**'
+			);
+
 			await checkoutPageObject.fillInCheckoutWithTestData(
 				{},
 				{
@@ -920,7 +925,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					},
 					order: {
 						'What is your favourite colour?': 'Red',
-						// 'How did you hear about us?': 'Friend',
 					},
 				}
 			);
@@ -931,10 +935,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				)
 				.check();
 
-			// Check that contact and order fields are persisted
-			await checkoutPageObject.page.waitForResponse(
-				'**/wc/store/v1/checkout**'
-			);
+			await putResponse;
 
 			await checkoutPageObject.page.reload();
 
@@ -975,15 +976,17 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				checkoutPageObject.page.getByLabel( 'Test required checkbox' )
 			).not.toBeChecked();
 
+			// This should generate a PUT request to checkout.
+			putResponse = checkoutPageObject.page.waitForResponse(
+				'**/wc/store/v1/checkout**'
+			);
+
 			// Check the required checkbox and refresh.
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
 				.check();
 
-			// This should generate a PUT request to checkout.
-			await checkoutPageObject.page.waitForResponse(
-				'**/wc/store/v1/checkout**'
-			);
+			await putResponse;
 
 			await checkoutPageObject.page.reload();
 
