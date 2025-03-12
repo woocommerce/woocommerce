@@ -226,6 +226,10 @@ const blocks = {
 		customDir: 'product-reviews/inner-blocks/review-rating',
 		isExperimental: true,
 	},
+	'product-reviews-title': {
+		customDir: 'product-reviews/inner-blocks/reviews-title',
+		isExperimental: true,
+	},
 };
 
 /**

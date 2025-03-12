@@ -5,7 +5,7 @@
 	"title": "Product Review Rating",
 	"category": "woocommerce",
 	"description": "Displays the rating of a product review.",
-	"textdomain": "default",
+	"textdomain": "woocommerce",
 	"usesContext": [ "commentId" ],
 	"attributes": {
 		"textAlign": {
