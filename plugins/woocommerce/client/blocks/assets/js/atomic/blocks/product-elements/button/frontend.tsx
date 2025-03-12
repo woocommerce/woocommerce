@@ -116,7 +116,8 @@ const { state } = store< Store >(
 					{ lock: universalLock }
 				);
 
-				// Todo: This import needs to be placed outside of the `catch` until (ADD GH PR LINK) is merged.
+				// Todo: This import needs to be placed outside of the `catch`
+				// until https://github.com/woocommerce/gutenberg/pull/5 is merged.
 				yield import( '@woocommerce/stores/store-notices' );
 
 				try {
