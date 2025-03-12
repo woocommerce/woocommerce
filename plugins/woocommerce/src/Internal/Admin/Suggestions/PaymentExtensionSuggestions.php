@@ -40,6 +40,7 @@ class PaymentExtensionSuggestions {
 	const AFTERPAY          = 'afterpay';
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
+	const KLARNA_CHECKOUT   = 'klarna_checkout';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
@@ -171,6 +172,20 @@ class PaymentExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/ca/business/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/ca/legal/',
+						),
+					),
+				),
+			),
 			self::AFFIRM,
 			self::AFTERPAY,
 			self::KLARNA => array(
@@ -200,6 +215,7 @@ class PaymentExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT, // Use the default details.
 			self::AFFIRM,
 			self::AFTERPAY,
 			self::KLARNA, // Use the default details.
@@ -229,6 +245,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/uk/business/payment-methods/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/uk/terms-and-conditions/',
+						),
+					),
+				),
+			),
 			self::CLEARPAY,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -279,6 +309,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/at/verkaeufer/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/at/agb/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -313,6 +357,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/be/fr/entreprise/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/be/fr/conditions-generales/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -387,6 +445,20 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/cz/firmy/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/cz/obchodni-podminky/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -420,6 +492,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/dk/erhverv/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/dk/vilkar/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -469,6 +555,20 @@ class PaymentExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/fi/yritys/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/fi/ehdot/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -521,6 +621,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/fr/entreprise/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/fr/legal/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -571,6 +685,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/de/verkaeufer/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/de/agb/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -593,6 +721,20 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/gr/business/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/gr/oroi-kai-proypotheseis/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -620,6 +762,20 @@ class PaymentExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/hu/uzlet/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/hu/jogi-informaciok/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -670,6 +826,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/ie/business/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/ie/terms-and-conditions/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -694,6 +864,20 @@ class PaymentExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/it/aziende/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/it/legal/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -770,6 +954,20 @@ class PaymentExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/nl/zakelijk/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/nl/voorwaarden/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -791,6 +989,20 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/no/bedrift/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/no/vilkar/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -814,6 +1026,20 @@ class PaymentExtensionSuggestions {
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/pl/biznes/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/pl/zasady-i-warunki/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -838,6 +1064,20 @@ class PaymentExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/pt/empresa/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/pt/termos-e-condicoes/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -860,6 +1100,20 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/ro/companii/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/ro/aspecte-juridice/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -892,6 +1146,20 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/sk/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/sk/zmluvne-podmienky/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -938,6 +1206,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/es/empresa/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/es/legal/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -969,6 +1251,20 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/ch/fr/entreprise/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/ch/fr/conditions-generales-de-vente/',
+						),
+					),
+				),
+			),
 			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -1239,6 +1535,20 @@ class PaymentExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT       => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/mx/negocios/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/mx/terminos-y-condiciones/',
+						),
+					),
+				),
+			),
 			self::KLARNA       => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -1390,6 +1700,20 @@ class PaymentExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/au/business/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/au/legal/',
+						),
+					),
+				),
+			),
 			self::AFTERPAY,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -1503,6 +1827,20 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/nz/business/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/nz/legal/',
+						),
+					),
+				),
+			),
 			self::AFTERPAY,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -2958,6 +3296,38 @@ class PaymentExtensionSuggestions {
 					array(
 						'_type' => self::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-payments',
+					),
+				),
+			),
+			self::KLARNA_CHECKOUT => array(
+				'_type'       => self::TYPE_EXPRESS_CHECKOUT,
+				'title'       => esc_html__( 'Klarna Checkout', 'woocommerce' ),
+				'description' => esc_html__( 'A full checkout experience embedded on your site that includes all popular payment methods (Pay Now, Pay Later, Financing, Installments).', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/klarna-checkout.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'klarna-checkout-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://www.klarna.com/us/business/payment-methods/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/klarna-checkout/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://www.klarna.com/us/legal/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/klarna-checkout/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
 					),
 				),
 			),
