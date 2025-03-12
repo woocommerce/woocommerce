@@ -42,8 +42,8 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::comments_clauses_without_product_reviews()
 	 * @dataProvider provider_comments_clauses_without_product_reviews_filter
 	 *
-	 * @param array $args
-	 * @param bool  $should_exclude_reviews
+	 * @param array $args The query args passed to WP_Comment_Query.
+	 * @param bool  $should_exclude_reviews Whether the query should be modified to exclude reviews.
 	 *
 	 */
 	public function test_comments_clauses_without_product_reviews_filter( array $args, bool $should_exclude_reviews ) {
@@ -66,40 +66,40 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 
 	/** @see test_comments_clauses_without_product_reviews_filter */
 	public function provider_comments_clauses_without_product_reviews_filter() {
-		yield 'Query for product comments' => [
-			'args' => [
+		yield 'Query for product comments' => array(
+			'args'                   => array(
 				'post_type' => 'product',
-			],
+			),
 			'should_exclude_reviews' => false,
-		];
+		);
 
-		yield 'Query for product and post comments' => [
-			'args' => [
+		yield 'Query for product and post comments' => array(
+			'args'                   => array(
 				'post_type' => 'post,product',
-			],
+			),
 			'should_exclude_reviews' => false,
-		];
+		);
 
-		yield 'Query for post comments' => [
-			'args' => [
+		yield 'Query for post comments' => array(
+			'args'                   => array(
 				'post_type' => 'post',
-			],
+			),
 			'should_exclude_reviews' => true,
-		];
+		);
 
-		yield 'Query by comment ID' => [
-			'args' => [
+		yield 'Query by comment ID' => array(
+			'args'                   => array(
 				'type' => 'comment',
-			],
+			),
 			'should_exclude_reviews' => false,
-		];
+		);
 
-		yield 'Query by non-Product Post ID' => [
-			'args' => [
+		yield 'Query by non-Product Post ID' => array(
+			'args'                   => array(
 				'post_id' => PHP_INT_MAX,
-			],
+			),
 			'should_exclude_reviews' => true,
-		];
+		);
 	}
 
 }
