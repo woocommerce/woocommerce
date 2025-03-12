@@ -84,9 +84,12 @@ class EvaluateOverridesTest extends WC_Unit_Test_Case {
 		$evaluator = new EvaluateOverrides();
 
 		$extensions = $this->get_extensions();
-		$result = $evaluator->evaluate( array( $extensions[4] ), array(
-			'plugins' => $extensions,
-		) );
+		$result     = $evaluator->evaluate(
+			array( $extensions[4] ),
+			array(
+				'plugins' => $extensions,
+			)
+		);
 
 		$this->assertEquals( 'after', $result[0]->install_options[0]->options->install_priority );
 	}
