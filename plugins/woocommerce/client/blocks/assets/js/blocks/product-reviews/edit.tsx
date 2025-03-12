@@ -50,7 +50,7 @@ const Edit = ( { attributes, setAttributes }: ProductReviewsEditProps ) => {
 					/>
 				</InspectorControls>
 			</InspectorControls>
-			<TagName { ...innerBlocksProps } />;
+			<TagName { ...innerBlocksProps } />
 		</>
 	);
 };
