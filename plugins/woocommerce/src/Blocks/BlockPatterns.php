@@ -172,7 +172,7 @@ class BlockPatterns {
 	private function get_pattern_cache() {
 		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
 
-		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] && 'development' !== wp_get_environment_type() ) {
+		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
 			return $pattern_data['patterns'];
 		}
 
