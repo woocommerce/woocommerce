@@ -29,7 +29,7 @@ class CommentsCountCache {
 	 *
 	 * @var int
 	 */
-	private $transient_expiration_today_midnight_gmt;
+	private $transient_expiration;
 
 	/**
 	 * Constructor, detects which cache API to use.
@@ -37,8 +37,8 @@ class CommentsCountCache {
 	public function __construct() {
 		$this->use_cache_api = ( true === wp_using_ext_object_cache() );
 		if ( ! $this->use_cache_api ) {
-			// Set the expiration to the same day midnight (GMT).
-			$this->transient_expiration_today_midnight_gmt = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
+			// Set the transients expiration to the same day midnight (GMT).
+			$this->transient_expiration = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
 		}
 	}
 
@@ -55,7 +55,7 @@ class CommentsCountCache {
 	/**
 	 * Retrieves the cache value associated with the provided name.
 	 *
-	 * @param string $name     The name of cache entry.
+	 * @param string $name The name of cache entry.
 	 * @return false|int|array
 	 */
 	public function get( string $name ) {
@@ -74,7 +74,7 @@ class CommentsCountCache {
 	public function set( string $name, $value ) {
 		return $this->use_cache_api
 			? wp_cache_set( $name, $value, self::COMMENT_COUNT_CACHE_GROUP )
-			: set_transient( 'woocommerce_product_reviews_pending_count', $value, $this->transient_expiration_today_midnight_gmt );
+			: set_transient( 'woocommerce_product_reviews_pending_count', $value, $this->transient_expiration );
 	}
 
 	/**
@@ -90,9 +90,10 @@ class CommentsCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->transient_expiration_today_midnight_gmt ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->transient_expiration ) ) {
 			return $transient_value;
 		}
+
 		return false;
 	}
 
@@ -109,9 +110,10 @@ class CommentsCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->transient_expiration_today_midnight_gmt ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->transient_expiration ) ) {
 			return $transient_value;
 		}
+
 		return false;
 	}
 }
