@@ -3121,7 +3121,7 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_ZETTLE     => array(
 				'_type'       => self::TYPE_PSP,
-				'icon'        => plugins_url( 'assets/images/onboarding/icons/paypalzettle.svg', WC_PLUGIN_FILE ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/paypal-zettle.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'zettle-pos-integration',
