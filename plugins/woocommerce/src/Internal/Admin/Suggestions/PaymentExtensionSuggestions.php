@@ -54,6 +54,7 @@ class PaymentExtensionSuggestions {
 	const NEXI              = 'nexi';
 	const PAYPAL_ZETTLE     = 'paypal_zettle';
 	const RAPYD             = 'rapyd';
+	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 
 	/*
 	 * The extension types.
@@ -3142,6 +3143,14 @@ class PaymentExtensionSuggestions {
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'rapyd-payments-plugin-for-woocommerce',
+				),
+			),
+			self::PAYPAL_BRAINTREE   => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/paypal-braintree.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-paypal-powered-by-braintree',
 				),
 			),
 		);
