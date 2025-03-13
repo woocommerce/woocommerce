@@ -453,17 +453,17 @@ class Checkout extends AbstractCartRoute {
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
-		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
 		$this->update_order_from_request( $request );
-		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );
-		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
-		wc_log_order_step( '[Store API #7] Validated order data', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #7] Validated order data', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Hold coupons for the order as soon as the draft order is created.
@@ -507,7 +507,7 @@ class Checkout extends AbstractCartRoute {
 				esc_html( $e->getCode() )
 			);
 		}
-		wc_log_order_step( '[Store API #8] Reserved stock for order', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #8] Reserved stock for order', array( 'order_object' => $this->order ) );
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -643,11 +643,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
-			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Created order from cart', array( 'order_id' => $this->order->get_id() ) );
+			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
 
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
-			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Updated order from cart', array( 'order_id' => $this->order->get_id() ) );
+			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
 		}
 
 		wc_do_deprecated_action(
@@ -700,7 +700,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
-		wc_log_order_step( '[Store API #5::create_or_update_draft_order] Set order draft id', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #5::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
 	}
 
 	/**

@@ -1124,8 +1124,8 @@ class WC_Checkout {
 		wc_log_order_step(
 			'[Shortcode #6B] Order processed without payment',
 			array(
-				'order_id'   => $order_id,
-				'redirected' => ! wp_doing_ajax() ? 'yes' : 'no',
+				'order_object' => $order,
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
 			),
 			true
 		);
@@ -1338,14 +1338,14 @@ class WC_Checkout {
 
 				wc_log_order_step(
 					'[Shortcode #4] Validated/Created customer and created order object',
-					array( 'order_id' => $order_id )
+					array( 'order_object' => $order )
 				);
 
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				wc_log_order_step(
 					'[Shortcode #5] woocommerce_checkout_order_processed hook ran successfully',
-					array( 'order_id' => $order_id )
+					array( 'order_object' => $order )
 				);
 
 				/**
@@ -1366,7 +1366,7 @@ class WC_Checkout {
 			}
 		} catch ( Exception $e ) {
 			// Step logs the exception. If nothing abnormal occurred during the process_checkout flow, the log is removed.
-			wc_log_order_step( '[Shortcode #FAIL] ' . $e->getMessage(), array( 'error_code' => $e->getCode() ), true );
+			wc_log_order_step( '[Shortcode #EXPECTEDFAIL] ' . $e->getMessage(), array( 'error_code' => $e->getCode() ), true );
 			wc_add_notice( $e->getMessage(), 'error' );
 		}
 		$this->send_ajax_failure_response();
