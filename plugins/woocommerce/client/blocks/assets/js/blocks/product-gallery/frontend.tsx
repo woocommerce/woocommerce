@@ -25,6 +25,10 @@ export interface ProductGalleryContext {
 	isDragging: boolean;
 	userHasInteracted: boolean;
 	imageData: ImageDataObject;
+	overflowTop: boolean;
+	overflowBottom: boolean;
+	overflowLeft: boolean;
+	overflowRight: boolean;
 }
 
 const getContext = ( ns?: string ) =>
@@ -307,6 +311,29 @@ const productGallery = {
 			context.isDragging = false;
 			context.touchStartX = 0;
 			context.touchCurrentX = 0;
+		},
+		onScroll: () => {
+			const marginError = 3;
+			const scrollableElement = getElement()?.ref as HTMLElement;
+			if ( ! scrollableElement ) {
+				return;
+			}
+			const {
+				scrollTop,
+				scrollHeight,
+				clientHeight,
+				scrollLeft,
+				scrollWidth,
+				clientWidth,
+			} = scrollableElement;
+
+			const context = getContext();
+			context.overflowTop = scrollTop > marginError;
+			context.overflowBottom =
+				scrollTop + clientHeight < scrollHeight - marginError;
+			context.overflowLeft = scrollLeft > marginError;
+			context.overflowRight =
+				scrollLeft + clientWidth < scrollWidth - marginError;
 		},
 	},
 	callbacks: {
