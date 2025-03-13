@@ -98,6 +98,21 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * * Tests that no Add to Cart button is displayed for out of stock products.
+	 */
+	public function test_out_of_stock_product() {
+		// Single Products in stock contain the Add to Cart button.
+		$this->assertStringContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button is visible for in stock products.' );
+
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		// Single Products out of stock contain the Read more button.
+		$this->assertStringNotContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button is not visible for out of stock products.' );
+	}
+
+	/**
 	 * Tests that the  woocommerce_<product_type>_add_to_cart hooks are rendered when rendering the block.
 	 */
 	public function test_product_type_add_to_cart_hooks_are_rendered() {

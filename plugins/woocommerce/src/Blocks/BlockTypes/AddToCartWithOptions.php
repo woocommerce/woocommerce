@@ -74,6 +74,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			return '';
 		}
 
+		if ( ! $product->is_in_stock() ) {
+			return wc_get_stock_html( $product );
+		}
+
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$product_type = $product->get_type();
