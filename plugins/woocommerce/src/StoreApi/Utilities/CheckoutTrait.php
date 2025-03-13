@@ -150,7 +150,7 @@ trait CheckoutTrait {
 		$this->order->set_payment_method( $this->get_request_payment_method_id( $request ) );
 		$this->order->set_payment_method_title( $this->get_request_payment_method_title( $request ) );
 		wc_log_order_step(
-			'[Store API #6 update_order_from_request] Set customer note and payment method',
+			'[Store API #5::update_order_from_request] Set customer note and payment method',
 			array(
 				'order_id' => $this->order->get_id(),
 				'payment'  => $this->order->get_payment_method_title(),
@@ -158,7 +158,7 @@ trait CheckoutTrait {
 		);
 		$this->persist_additional_fields_for_order( $request );
 		wc_log_order_step(
-			'[Store API #6 update_order_from_request] Persisted additional fields',
+			'[Store API #5::update_order_from_request] Persisted additional fields',
 			array(
 				'order_id' => $this->order->get_id(),
 				'payment'  => $this->order->get_payment_method_title(),

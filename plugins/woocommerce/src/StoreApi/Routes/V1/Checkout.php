@@ -643,11 +643,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
-			wc_log_order_step( '[Store API #5 create_or_update_draft_order] Created order from cart', array( 'order_id' => $this->order->get_id() ) );
+			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Created order from cart', array( 'order_id' => $this->order->get_id() ) );
 
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
-			wc_log_order_step( '[Store API #5 create_or_update_draft_order] Updated order from cart', array( 'order_id' => $this->order->get_id() ) );
+			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Updated order from cart', array( 'order_id' => $this->order->get_id() ) );
 		}
 
 		wc_do_deprecated_action(
@@ -700,7 +700,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
-		wc_log_order_step( '[Store API #5 create_or_update_draft_order] Set order draft id', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #5::create_or_update_draft_order] Set order draft id', array( 'order_id' => $this->order->get_id() ) );
 	}
 
 	/**
@@ -781,7 +781,7 @@ class Checkout extends AbstractCartRoute {
 					$this->update_customer_address_field( $customer, $key, $value, $context_data['group'] );
 				}
 			}
-			wc_log_order_step( '[Store API #4 update_customer_from_request] Persisted shipping and contact fields' );
+			wc_log_order_step( '[Store API #3 update_customer_from_request] Persisted shipping and contact fields' );
 		}
 
 		/**
@@ -873,13 +873,13 @@ class Checkout extends AbstractCartRoute {
 
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
-			wc_log_order_step( '[Store API #7 process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
 
 		}
 
 		// Persist customer address data to account.
 		$this->order_controller->sync_customer_data_with_order( $this->order );
-		wc_log_order_step( '[Store API #7 process_customer] Synced customer data from order', array( 'customer_id' => $this->order->get_customer_id() ) );
+		wc_log_order_step( '[Store API #6::process_customer] Synced customer data from order', array( 'customer_id' => $this->order->get_customer_id() ) );
 	}
 
 	/**
