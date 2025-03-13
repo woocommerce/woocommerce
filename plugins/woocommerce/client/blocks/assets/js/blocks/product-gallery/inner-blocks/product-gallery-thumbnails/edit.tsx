@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, Disabled } from '@wordpress/components';
+import { PanelBody } from '@wordpress/components';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import type { BlockEditProps } from '@wordpress/blocks';
 
@@ -40,20 +40,22 @@ export const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>
-				{ [ ...Array( 6 ).keys() ].map( ( index ) => {
-					return (
-						<div
-							className="wc-block-product-gallery-thumbnails__thumbnail"
-							key={ index }
-						>
-							<img
-								className="wc-block-product-gallery-thumbnails__image"
-								src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
-								alt=""
-							/>
-						</div>
-					);
-				} ) }
+				<div className="wc-block-product-gallery-thumbnails__scrollable">
+					{ [ ...Array( 6 ).keys() ].map( ( index ) => {
+						return (
+							<div
+								className="wc-block-product-gallery-thumbnails__thumbnail"
+								key={ index }
+							>
+								<img
+									className="wc-block-product-gallery-thumbnails__image"
+									src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
+									alt=""
+								/>
+							</div>
+						);
+					} ) }
+				</div>
 			</div>
 		</>
 	);
