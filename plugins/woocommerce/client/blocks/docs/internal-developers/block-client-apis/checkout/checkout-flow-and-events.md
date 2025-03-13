@@ -53,7 +53,7 @@ The following statuses exist in the Checkout.
 
 #### Checkout Data Store Status
 
-There are various statuses that are exposed on the Checkout data store via selectors. All the selectors are detailed below and in the [Checkout API docs](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/block-client-apis/checkout/checkout-api.md).
+There are various statuses that are exposed on the Checkout data store via selectors. All the selectors are detailed below and in the [Checkout API docs](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/block-client-apis/checkout/checkout-api.md).
 
 You can use them in your component like so
 

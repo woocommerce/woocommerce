@@ -107,13 +107,13 @@ Screenshots of Redux Dev tool showing the data store before and after the setExt
 
 ### 4. Processing the Checkout POST Request
 
-To process the added field data, we'll need extend the Store API to tell it to expect additional data. See more details in the [Exposing your data in the Store API](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
+To process the added field data, we'll need extend the Store API to tell it to expect additional data. See more details in the [Exposing your data in the Store API](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
 
 #### Code Example
 
 We will use the following PHP files in our example:
 
-- The `custom-inner-block-blocks-integration.php` file: Enqueue scripts, styles, and data on the frontend when the Checkout blocks is being used. See more details in the [IntegrationInterface](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-block/integration-interface.md) documentation.
+- The `custom-inner-block-blocks-integration.php` file: Enqueue scripts, styles, and data on the frontend when the Checkout blocks is being used. See more details in the [IntegrationInterface](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/integration-interface.md) documentation.
 
 ```php
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;

@@ -1,4 +1,4 @@
-# Cart Items API <!-- omit in toc -->
+\# Cart Items API <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -317,7 +317,7 @@ curl --request POST https://example-store.com/wp-json/wc/store/v1/cart/items?id=
 
 For an example response, see [Single Cart Item](#single-cart-item).
 
-If you're looking to add multiple items to the cart at once, please take a look at [batching](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/src/StoreApi/docs/cart.md#add-item).
+If you're looking to add multiple items to the cart at once, please take a look at [batching](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/docs/cart.md#add-item).
 
 ## Edit Single Cart Item
 
