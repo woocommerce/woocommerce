@@ -169,7 +169,7 @@ class Templates {
 			if ( isset( $templates[ $block_template->slug ] ) ) {
 				continue;
 			}
-			$templates[ $block_template->slug ] = $block_template;
+			$templates[ $block_template->slug ] = $block_template->title;  // requires only the template title, not the full template object
 		}
 		return $templates;
 	}

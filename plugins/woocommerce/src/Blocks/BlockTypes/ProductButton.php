@@ -155,10 +155,16 @@ class ProductButton extends AbstractBlock {
 		*/
 		$quantity_to_add = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
 
+		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
+		$add_to_cart_text                  = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
+		if ( $is_descendent_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
+			$add_to_cart_text = $product->single_add_to_cart_text();
+		}
+
 		$context = array(
 			'quantityToAdd'   => $quantity_to_add,
 			'productId'       => $product->get_id(),
-			'addToCartText'   => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' ),
+			'addToCartText'   => $add_to_cart_text,
 			'tempQuantity'    => $number_of_items_in_cart,
 			'animationStatus' => 'IDLE',
 		);
@@ -253,7 +259,7 @@ class ProductButton extends AbstractBlock {
 					'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',
 					'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 					'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-					'{add_to_cart_text}'       => $is_ajax_button ? '' : $product->add_to_cart_text(),
+					'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
 					'{div_directives}'         => $is_ajax_button ? $div_directives : '',
 					'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 					'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
