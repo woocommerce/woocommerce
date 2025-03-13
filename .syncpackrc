@@ -279,7 +279,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.15.0"
+			"pinVersion": "wp-6.8"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
