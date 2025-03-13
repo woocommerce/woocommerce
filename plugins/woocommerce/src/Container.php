@@ -107,7 +107,7 @@ final class Container {
 	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
 	 * @template T
-	 * @param class-string<T> $id Identifier of the entry to look for.
+	 * @param string|class-string<T> $id Identifier of the entry to look for.
 	 *
 	 * @return T Resolved entry.
 	 *
