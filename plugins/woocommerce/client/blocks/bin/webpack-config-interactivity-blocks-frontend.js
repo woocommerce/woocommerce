@@ -12,13 +12,13 @@ const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const entries = {
 	// Blocks
 	'woocommerce/product-button':
-		'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
+		'./assets/js/atomic/blocks/product-elements/button/frontend.ts',
 	'woocommerce/product-gallery':
-		'./assets/js/blocks/product-gallery/frontend.tsx',
+		'./assets/js/blocks/product-gallery/frontend.ts',
 	'woocommerce/product-gallery-large-image':
-		'./assets/js/blocks/product-gallery/inner-blocks/product-gallery-large-image/frontend.tsx',
+		'./assets/js/blocks/product-gallery/inner-blocks/product-gallery-large-image/frontend.ts',
 	'woocommerce/product-collection':
-		'./assets/js/blocks/product-collection/frontend.tsx',
+		'./assets/js/blocks/product-collection/frontend.ts',
 	'woocommerce/product-filters':
 		'./assets/js/blocks/product-filters/frontend.ts',
 	'woocommerce/product-filter-active':
