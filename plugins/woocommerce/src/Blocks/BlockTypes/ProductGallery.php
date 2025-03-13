@@ -140,6 +140,10 @@ class ProductGallery extends AbstractBlock {
 						'productId'         => $product_id,
 						'selectedImageId'   => $initial_image_id,
 						'userHasInteracted' => false,
+						'overflowTop'       => false,
+						'overflowBottom'    => false,
+						'overflowLeft'      => false,
+						'overflowRight'     => false,
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
