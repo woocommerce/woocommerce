@@ -369,7 +369,7 @@ class WC_Shipping {
 						continue;
 					}
 
-					if ( in_array( $rate->method_id, array( 'local_pickup', 'pickup_location' ), true ) ) {
+					if ( $this->shipping_methods[ $rate->method_id ]->supports( 'local-pickup' ) || 'local_pickup' === $rate->method_id ) {
 						$local_pickup[] = $rate;
 					}
 				}
