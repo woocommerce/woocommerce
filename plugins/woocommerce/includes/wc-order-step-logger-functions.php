@@ -68,7 +68,8 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 		if ( ! is_null( error_get_last() ) ) {
 			$context['last_error'] = error_get_last();
 		}
-		$context['backtrace'] = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+		$context['backtrace']      = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+		$context['remote-logging'] = false; // forcing disable on remote logging.
 
 		$steps[] = $message;
 		// Logging the place order flow step. Log files are grouped per order to make is easier to navigate.
