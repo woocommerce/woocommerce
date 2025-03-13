@@ -84,7 +84,7 @@ class CouponsController {
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
 
-		$code   = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$code   = wc_format_coupon_code_without_lower( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$result = $order->apply_coupon( $code );
 
 		if ( is_wp_error( $result ) ) {

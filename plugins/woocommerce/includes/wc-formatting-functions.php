@@ -358,6 +358,16 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
+ * Format a coupon code without transforming to lowercase.
+ *
+ * @param string $value Coupon code to format.
+ * @return string
+ */
+function wc_format_coupon_code_without_lower( $value ) {
+	return apply_filters( 'woocommerce_coupon_code_without_lower', $value );
+}
+
+/**
  * Format a coupon code.
  *
  * @since  3.0.0

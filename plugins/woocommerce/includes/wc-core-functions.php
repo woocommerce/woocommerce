@@ -37,6 +37,8 @@ require WC_ABSPATH . 'includes/wc-webhook-functions.php';
 /**
  * Filters on data used in admin and frontend.
  */
+add_filter( 'woocommerce_coupon_code_without_lower', 'html_entity_decode' );
+add_filter( 'woocommerce_coupon_code_without_lower', 'wc_sanitize_coupon_code' );
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'wc_sanitize_coupon_code' );
 add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );

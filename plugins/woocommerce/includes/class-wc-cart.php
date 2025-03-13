@@ -1752,7 +1752,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array( wc_format_coupon_code( $coupon_code ), $this->applied_coupons, true ) : count( $this->applied_coupons ) > 0;
+		return $coupon_code ? in_array( wc_format_coupon_code( $coupon_code ), array_map( 'wc_format_coupon_code', $this->applied_coupons ), true ) : count( $this->applied_coupons ) > 0;		
 	}
 
 	/**
@@ -1768,13 +1768,13 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		// Sanitize coupon code.
-		$coupon_code = wc_format_coupon_code( $coupon_code );
+		$coupon_code = wc_format_coupon_code_without_lower( $coupon_code );
 
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
 
 		// Prevent adding coupons by post ID.
-		if ( $the_coupon->get_code() !== $coupon_code ) {
+		if ( strtolower( $the_coupon->get_code() ) !== strtolower( $coupon_code ) ) {
 			$the_coupon->set_code( $coupon_code );
 			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
 			return false;
