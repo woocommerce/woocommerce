@@ -9,21 +9,17 @@ import { faker } from '@faker-js/faker';
 import { test as baseTest, expect } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
+import { getFakeProduct } from '../../utils/data';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 	products: async ( { restApi }, use ) => {
-		const timestamp = Date.now().toString();
 		const products = [];
 
 		// Create the products
 		for ( let i = 0; i < 2; i++ ) {
 			await restApi
-				.post( `${ WC_API_PATH }/products`, {
-					name: `Product ${ i } ${ timestamp }`,
-					type: 'simple',
-					regular_price: '9.99',
-				} )
+				.post( `${ WC_API_PATH }/products`, getFakeProduct() )
 				.then( ( response ) => {
 					products.push( response.data );
 				} );
@@ -45,8 +41,10 @@ const test = baseTest.extend( {
 				.post( `${ WC_API_PATH }/products/reviews`, {
 					product_id: product.id,
 					review: `Nice product ${ product.name }, at ${ timestamp }`,
-					reviewer: 'John Doe',
-					reviewer_email: `john.doe.${ timestamp }@example.com`,
+					reviewer: faker.person.fullName(),
+					reviewer_email: faker.internet.email( {
+						provider: 'example.fakerjs.dev',
+					} ),
 					rating: ( Math.random() * ( 5 - 1 ) + 1 ).toFixed( 0 ),
 				} )
 				.then( ( response ) => {
@@ -120,21 +118,20 @@ test.describe( 'Product Reviews', () => {
 				.fill( review.product_name );
 			await page
 				.getByRole( 'option', { name: review.product_name } )
+				.first()
 				.click();
 			await page.getByRole( 'button', { name: 'Filter' } ).click();
 
-			// Flakiness warning: if the filtering is too slow, some other reviews might still be displayed
-			// We need to find something to assess filtering is ready
-			const rows = await page.locator( '#the-comment-list tr' ).all();
+			await expect( page.locator( '#the-comment-list tr' ) ).toHaveCount(
+				1
+			);
 
-			for ( const reviewRow of rows ) {
-				await expect(
-					reviewRow
-						.locator( '[data-colname="Product"]' )
-						.getByRole( 'link' )
-						.first()
-				).toContainText( review.product_name );
-			}
+			await expect(
+				page
+					.locator( '[data-colname="Product"]' )
+					.getByRole( 'link' )
+					.filter( { hasText: review.product_name } )
+			).toBeVisible();
 		} );
 
 		test( 'can quick edit a product review', async ( {
