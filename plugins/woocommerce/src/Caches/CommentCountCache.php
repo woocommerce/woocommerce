@@ -29,17 +29,15 @@ class CommentCountCache {
 	 *
 	 * @var int
 	 */
-	private $transient_expiration;
+	private $expiration;
 
 	/**
 	 * Constructor, detects which cache API to use.
 	 */
 	public function __construct() {
 		$this->use_cache_api = ( true === wp_using_ext_object_cache() );
-		if ( ! $this->use_cache_api ) {
-			// Set the transients expiration to the same day midnight (GMT).
-			$this->transient_expiration = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
-		}
+		// Set expiration to the same day midnight (GMT).
+		$this->expiration    = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
 	}
 
 	/**
@@ -73,8 +71,8 @@ class CommentCountCache {
 	 */
 	public function set( string $name, $value ) {
 		return $this->use_cache_api
-			? wp_cache_set( $name, $value, self::COMMENT_COUNT_CACHE_GROUP )
-			: set_transient( $name, $value, $this->transient_expiration );
+			? wp_cache_set( $name, $value, self::COMMENT_COUNT_CACHE_GROUP, $this->expiration )
+			: set_transient( $name, $value, $this->expiration );
 	}
 
 	/**
@@ -90,7 +88,7 @@ class CommentCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->transient_expiration ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, ++$transient_value, $this->expiration ) ) {
 			return $transient_value;
 		}
 
@@ -110,7 +108,7 @@ class CommentCountCache {
 		}
 
 		$transient_value = get_transient( $name );
-		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->transient_expiration ) ) {
+		if ( false !== $transient_value && false !== set_transient( $name, --$transient_value, $this->expiration ) ) {
 			return $transient_value;
 		}
 
