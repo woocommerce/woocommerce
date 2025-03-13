@@ -14,6 +14,7 @@ export interface BlockAttributes {
 	width?: number | undefined;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	'woocommerce/isDescendantOfAddToCartWithOptions'?: boolean | undefined;
+	blockClientId?: string;
 }
 
 export interface AddToCartProductDetails {
@@ -27,6 +28,7 @@ export interface AddToCartButtonPlaceholderAttributes {
 	className: string;
 	style: React.CSSProperties;
 	isLoading: boolean;
+	blockClientId?: string;
 }
 
 export interface AddToCartButtonAttributes {
