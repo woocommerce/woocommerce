@@ -146,8 +146,12 @@ const productGallery = {
 		 * @return Array The subset of processed image data.
 		 */
 		get thumbnails() {
+			const { imageData } = getContext();
 			const { numberOfThumbnails } = getConfig();
-			return this.processedImageData.slice( 0, numberOfThumbnails );
+			return Object.values( imageData.images ).slice(
+				0,
+				numberOfThumbnails
+			);
 		},
 	},
 	actions: {
