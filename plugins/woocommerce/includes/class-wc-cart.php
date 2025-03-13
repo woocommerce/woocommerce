@@ -1774,7 +1774,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$the_coupon = new WC_Coupon( $coupon_code );
 
 		// Prevent adding coupons by post ID.
-		if ( strtolower( $the_coupon->get_code() ) !== strtolower( $coupon_code ) ) {
+		if ( wc_strtolower( $the_coupon->get_code() ) !== wc_strtolower( $coupon_code ) ) {
 			$the_coupon->set_code( $coupon_code );
 			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
 			return false;

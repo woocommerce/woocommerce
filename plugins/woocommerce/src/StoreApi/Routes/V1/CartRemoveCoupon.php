@@ -72,7 +72,7 @@ class CartRemoveCoupon extends AbstractCartRoute {
 		$coupon      = new \WC_Coupon( $coupon_code );
 		$discounts   = new \WC_Discounts( $cart );
 
-		if ( strtolower( $coupon->get_code() ) !== strtolower( $coupon_code ) || is_wp_error( $discounts->is_coupon_valid( $coupon ) ) ) {
+		if ( wc_strtolower( $coupon->get_code() ) !== wc_strtolower( $coupon_code ) || is_wp_error( $discounts->is_coupon_valid( $coupon ) ) ) {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_error', esc_html__( 'Invalid coupon code.', 'woocommerce' ), 400 );
 		}
 

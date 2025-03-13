@@ -965,7 +965,7 @@ class CartController {
 		$applied_coupons = $this->get_cart_coupons();
 		$coupon          = new \WC_Coupon( $coupon_code );
 
-		if ( strtolower( $coupon->get_code() ) !== strtolower( $coupon_code ) ) {
+		if ( wc_strtolower( $coupon->get_code() ) !== wc_strtolower( $coupon_code ) ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(

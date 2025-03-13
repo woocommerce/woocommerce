@@ -1277,7 +1277,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$code   = wc_format_coupon_code_without_lower( $raw_coupon );
 			$coupon = new WC_Coupon( $code );
 
-			if ( strtolower( $coupon->get_code() ) !== strtolower( $code ) ) {
+			if ( wc_strtolower( $coupon->get_code() ) !== wc_strtolower( $code ) ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
 			}
 		} else {
