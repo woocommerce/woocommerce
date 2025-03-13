@@ -2878,8 +2878,8 @@ class PaymentExtensionSuggestions {
 			),
 			self::VIVA_WALLET       => array(
 				'_type'       => self::TYPE_PSP,
-				'title'       => esc_html__( 'Viva.com Standard Checkout', 'woocommerce' ),
-				'description' => esc_html__( 'Viva.com is a European payments solution that allows you to accept payments in 24 countries and multiple currencies.', 'woocommerce' ),
+				'title'       => esc_html__( 'Viva.com Smart Checkout', 'woocommerce' ),
+				'description' => esc_html__( 'A European payments solution that allows you to accept payments in over 25 countries and multiple currencies.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/vivacom.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
@@ -3143,7 +3143,7 @@ class PaymentExtensionSuggestions {
 			self::HELIOPAY          => array(
 				'_type'       => self::TYPE_CRYPTO,
 				'title'       => esc_html__( 'Helio Pay', 'woocommerce' ),
-				'description' => esc_html__( 'Effortlessly accept cryptocurrency payments in your WooCommerce store with Helio Pay.', 'woocommerce' ),
+				'description' => esc_html__( 'Effortlessly accept cryptocurrency payments in your store.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/heliopay.png', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
