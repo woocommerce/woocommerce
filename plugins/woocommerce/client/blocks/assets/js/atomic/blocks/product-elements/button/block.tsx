@@ -17,7 +17,6 @@ import {
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
-import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -165,10 +164,8 @@ const LoadingAddToCartButton = ( {
 const AddToCartButtonPlaceholder = ( {
 	className,
 	style,
+	blockClientId,
 }: AddToCartButtonPlaceholderAttributes ): JSX.Element => {
-	const blockProps = useBlockProps();
-	const blockClientId = blockProps?.id;
-
 	const {
 		current: currentProductType,
 		registerListener,
@@ -176,10 +173,12 @@ const AddToCartButtonPlaceholder = ( {
 	} = useProductTypeSelector();
 
 	useEffect( () => {
-		registerListener( blockClientId );
-		return () => {
-			unregisterListener( blockClientId );
-		};
+		if ( blockClientId ) {
+			registerListener( blockClientId );
+			return () => {
+				unregisterListener( blockClientId );
+			};
+		}
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
 	const buttonText =
@@ -205,7 +204,7 @@ const AddToCartButtonPlaceholder = ( {
 };
 
 export const Block = ( props: BlockAttributes ): JSX.Element => {
-	const { className, textAlign } = props;
+	const { className, textAlign, blockClientId } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { isLoading, product } = useProductDataContext();
@@ -246,6 +245,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 							style={ styleProps.style }
 							className={ styleProps.className }
 							isLoading={ isLoading }
+							blockClientId={ blockClientId }
 						/>
 					) }
 				</>
