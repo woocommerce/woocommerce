@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { wooContentPlaceholderBlock } from './blocks/woo-email-content';
 import { NAME_SPACE } from './constants';
+import { modifyTemplateSidebar } from './templates';
 
 addFilter( 'woocommerce_email_editor_send_button_label', NAME_SPACE, () =>
 	__( 'Save email', 'woocommerce' )
@@ -24,3 +25,4 @@ addFilter(
 );
 
 registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
+modifyTemplateSidebar();
