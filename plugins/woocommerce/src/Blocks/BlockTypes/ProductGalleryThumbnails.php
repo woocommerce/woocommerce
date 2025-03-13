@@ -107,8 +107,22 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		$allowed_html['img']['tabindex'] = true;
 
 		return sprintf(
-			'<div class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s" data-wp-interactive="woocommerce/product-gallery">
-				%3$s
+			'<div
+				data-wp-interactive="woocommerce/product-gallery"
+				class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s"
+				data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.overflowTop"
+				data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.overflowBottom"
+				data-wp-class--wc-block-product-gallery-thumbnails--overflow-left="context.overflowLeft"
+				data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.overflowRight"
+				style="%2$s"
+			>
+				<div
+					class="wc-block-product-gallery-thumbnails__scrollable"
+					data-wp-init="actions.onScroll"
+					data-wp-on--scroll="actions.onScroll"
+				>
+					%3$s
+				</div>
 			</div>',
 			esc_attr( $classes_and_styles['classes'] . ' ' . $thumbnails_class ),
 			esc_attr( $classes_and_styles['styles'] ),
