@@ -143,11 +143,16 @@ $dialog-padding: 20px;
 }
 
 .wc-block-product-gallery-thumbnails {
-	display: flex;
-	gap: $thumbnails-gap;
+	$gradient-size: 15%;
+	position: relative;
 
-	overflow: auto;
-	scrollbar-width: none;
+	&__scrollable {
+		display: flex;
+		gap: $thumbnails-gap;
+		overflow: auto;
+		scrollbar-width: none;
+		height: 100%
+	}
 
 	&__image {
 		cursor: pointer;
@@ -163,12 +168,60 @@ $dialog-padding: 20px;
 		align-items: center;
 		aspect-ratio: 1 / 1;
 	}
+
+	&:before, &:after {
+		content: '';
+		position: absolute;
+		display: none;
+		transition: display 0.1s linear;
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow {
+		&-top:before {
+			top: 0;
+			left: 0;
+			height: $gradient-size;
+			width: 100%;
+			display: block;
+			background: linear-gradient(to bottom, var(--wp--preset--color--base) 25%, transparent);
+		}
+
+		&-bottom:after {
+			bottom: 0;
+			left: 0;
+			height: $gradient-size;
+			width: 100%;
+			display: block;
+			background: linear-gradient(to top, var(--wp--preset--color--base) 25%, transparent);
+		}
+
+		&-left:before {
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: $gradient-size;
+			display: block;
+			background: linear-gradient(to right, var(--wp--preset--color--base) 25%, transparent);
+
+		}
+
+		&-right:after {
+			top: 0;
+			right: 0;
+			height: 100%;
+			width: $gradient-size;
+			display: block;
+			background: linear-gradient(to left, var(--wp--preset--color--base) 25%, transparent);
+		}
+	}
 }
 
 // Percentage width
 .is-nowrap .wc-block-product-gallery-thumbnails,
 .is-horizontal.is-nowrap .wc-block-product-gallery-thumbnails {
-	flex-direction: column;
+	&__scrollable {
+		flex-direction: column;
+	}
 
 	@for $i from 10 through 50 {
 		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
@@ -183,14 +236,14 @@ $dialog-padding: 20px;
 
 .is-vertical .wc-block-product-gallery-thumbnails,
 .is-horizontal .wc-block-product-gallery-thumbnails {
-	flex-direction: row;
+	&__scrollable {
+		flex-direction: row;
+	}
 
 	@for $i from 10 through 50 {
 		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
-			$gap-width: $thumbnails-gap * ($i - 1);
-			$border-width: $i * $thumbnails-border-width * 2;
-
-			// flex: 0 0 calc((100% - #{$gap-width} - #{$border-width}) / $i);
+			width: 100%;
+			height: calc($i * 1%);
 			aspect-ratio: calc(100 / $i) / 1;
 		}
 	}
