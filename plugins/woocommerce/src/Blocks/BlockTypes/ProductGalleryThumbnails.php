@@ -109,6 +109,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 						data-wp-on--click="actions.selectCurrentImage"
 						data-wp-on--keydown="actions.onThumbnailKeyDown"
 						decoding="async"
+						tabindex="0"
 						loading="lazy" />
 					<div class="wc-block-product-gallery-thumbnails__thumbnail__overlay" 
 						data-wp-bind--visible="actions.displayViewAll"
