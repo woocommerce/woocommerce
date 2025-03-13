@@ -561,7 +561,7 @@ class Checkout extends AbstractCartRoute {
 		wc_log_order_step(
 			'[Store API #9] Order processed',
 			array(
-				'order_id'               => $this->order->get_id(),
+				'order_object'           => $this->order,
 				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
 				'payment_status'         => $payment_result->status,
 			),
@@ -643,11 +643,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
-			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
 
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
-			wc_log_order_step( '[Store API #5::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
 		}
 
 		wc_do_deprecated_action(
@@ -700,7 +700,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
-		wc_log_order_step( '[Store API #5::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
+		wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
 	}
 
 	/**
@@ -781,7 +781,7 @@ class Checkout extends AbstractCartRoute {
 					$this->update_customer_address_field( $customer, $key, $value, $context_data['group'] );
 				}
 			}
-			wc_log_order_step( '[Store API #3 update_customer_from_request] Persisted shipping and contact fields' );
+			wc_log_order_step( '[Store API #3::update_customer_from_request] Persisted ' . $context . ' fields' );
 		}
 
 		/**
