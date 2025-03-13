@@ -11,11 +11,6 @@ import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
 import { isWpVersion, getSetting } from '@woocommerce/settings';
 import { ComponentType } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet, natively (not until 7.0.0).
-// Including `@types/wordpress__data` as a devDependency causes build issues,
-// so just going type-free for now.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useSelect } from '@wordpress/data';
 
 // Define a more generic type for the select function to avoid TypeScript errors

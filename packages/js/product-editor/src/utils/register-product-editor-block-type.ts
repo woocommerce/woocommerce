@@ -3,9 +3,6 @@
  */
 import { Block, BlockConfiguration } from '@wordpress/blocks';
 import { registerWooBlockType } from '@woocommerce/block-templates';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId } from '@wordpress/core-data';
 
 interface BlockRepresentation< T extends Record< string, object > > {
