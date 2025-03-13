@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@wordpress/interactivity';
+import { store, withScope } from '@wordpress/interactivity';
 import type { Cart, CartItem, ApiErrorResponse } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
@@ -54,10 +54,10 @@ function generateError( error: ApiErrorResponse ): Error {
 	} );
 }
 
-async function showNoticeError( error: Error | ApiErrorResponse ) {
+function* showNoticeError( error: Error | ApiErrorResponse ) {
 	// Todo: Use the module exports instead of `store()` once the store-notices
 	// store is public.
-	await import( '@woocommerce/stores/store-notices' );
+	yield import( '@woocommerce/stores/store-notices' );
 	const { actions: noticeActions } = store< StoreNotices >(
 		'woocommerce/store-notices',
 		{},
@@ -100,6 +100,7 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*addCartItem( { id, quantity }: { id: number; quantity: number } ) {
+				yield import( '@woocommerce/stores/store-notices' );
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId
 				);
@@ -139,7 +140,7 @@ const { state, actions } = store< Store >(
 
 					// Checks if the response was successful, but still contains some errors.
 					json.errors?.forEach( ( error ) => {
-						showNoticeError( error );
+						withScope( () => showNoticeError( error ) );
 					} );
 
 					// Updates the local cart.
@@ -158,7 +159,18 @@ const { state, actions } = store< Store >(
 					state.cart = JSON.parse( previousCart );
 
 					// Shows the error notice.
-					showNoticeError( error as Error );
+					const { actions: noticeActions } = store< StoreNotices >(
+						'woocommerce/product-collection',
+						{},
+						{ lock: universalLock }
+					);
+
+					// Todo: Check what should happen if the notice is already displayed.
+					yield noticeActions.addNotice( {
+						notice: error.message,
+						type: 'error',
+						dismissible: true,
+					} );
 				}
 			},
 			*refreshCartItems() {

@@ -130,16 +130,18 @@ class Renderer {
 			$collection                     = $block['attrs']['collection'] ?? '';
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 
+			$context = array( 'notices' => array() );
+			if ( $collection ) {
+				$context['collection'] = $collection;
+			}
+
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
 				$p->set_attribute( 'data-wp-interactive', 'woocommerce/product-collection' );
 				$p->set_attribute( 'data-wp-init', 'callbacks.onRender' );
 				$p->set_attribute(
 					'data-wp-context',
-					$collection ? wp_json_encode(
-						array( 'collection' => $collection ),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-					) : '{}'
+					wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 				);
 
 				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
@@ -167,7 +169,7 @@ class Renderer {
 	 * @return string The updated block content.
 	 */
 	private function add_store_notices_fallback( $block_content ) {
-		return $this->render_interactivity_notices_region() . $block_content;
+		return preg_replace( '/(<div[^>]+>)/', '$1' . $this->render_interactivity_notices_region(), $block_content, 1 );
 	}
 
 	/**
@@ -177,18 +179,11 @@ class Renderer {
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region() {
-		wp_interactivity_state(
-			'woocommerce/store-notices',
-			array(
-				'notices' => array(),
-			)
-		);
-
 		ob_start();
 		?>
-		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide">
+		<div class="wc-block-components-notices alignwide">
 			<template
-				data-wp-each--notice="state.notices"
+				data-wp-each--notice="context.notices"
 				data-wp-each-key="context.notice.id"
 			>
 				<div

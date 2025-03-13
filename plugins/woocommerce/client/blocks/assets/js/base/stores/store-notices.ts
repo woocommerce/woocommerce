@@ -18,11 +18,11 @@ type NoticeWithId = Notice & {
 };
 
 const getContext = getContextFn< {
+	notices: NoticeWithId[];
 	notice: NoticeWithId;
 } >;
 
 type StoreNoticesState = {
-	notices: NoticeWithId[];
 	get role(): string;
 	get iconPath(): string;
 	get isError(): boolean;
@@ -59,8 +59,8 @@ const generateNoticeId = () => {
 };
 
 // Todo: export this store once the store is public.
-const { state } = store< Store >(
-	'woocommerce/store-notices',
+store< Store >(
+	'woocommerce/product-collection',
 	{
 		state: {
 			get role() {
@@ -94,26 +94,28 @@ const { state } = store< Store >(
 		},
 		actions: {
 			addNotice: ( notice: Notice ) => {
+				const { notices } = getContext();
 				const noticeId = generateNoticeId();
 				const noticeWithId = {
 					...notice,
 					id: noticeId,
 				};
-				state.notices.push( noticeWithId );
+				notices.push( noticeWithId );
 
 				return noticeId;
 			},
 
 			removeNotice: ( noticeId: string | PointerEvent ) => {
+				const { notices } = getContext();
 				noticeId =
 					typeof noticeId === 'string'
 						? noticeId
 						: getContext().notice.id;
-				const index = state.notices.findIndex(
+				const index = notices.findIndex(
 					( { id } ) => id === noticeId
 				);
 				if ( index !== -1 ) {
-					state.notices.splice( index, 1 );
+					notices.splice( index, 1 );
 				}
 			},
 		},
@@ -136,5 +138,7 @@ const { state } = store< Store >(
 			},
 		},
 	},
-	{ lock: true }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
