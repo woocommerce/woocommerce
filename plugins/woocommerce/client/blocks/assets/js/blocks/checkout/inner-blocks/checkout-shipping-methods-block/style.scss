@@ -13,8 +13,8 @@
 	}
 
 	.wc-block-components-shipping-rates-control__no-shipping-address-message {
-		background-color: $gray-200;
-		color: $gray-700;
+		background-color: color-mix(in srgb, currentColor 6%, transparent);
+		color: color-mix(in srgb, currentColor 66%, transparent);
 		padding: em($gap-large);
 		text-align: center;
 	}
