@@ -8,7 +8,7 @@
  * @version 2.3.0
  */
 
-use Automattic\WooCommerce\Caches\CommentsCountCache;
+use Automattic\WooCommerce\Caches\CommentCountCache;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -243,7 +243,7 @@ class WC_Comments {
 	 * @return int
 	 */
 	public static function get_products_reviews_pending_moderation_counter() {
-		$cache = wc_get_container()->get( CommentsCountCache::class );
+		$cache = wc_get_container()->get( CommentCountCache::class );
 		$count = $cache->get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
 		if ( false === $count ) {
 			$count = (int) get_comments(
@@ -270,7 +270,7 @@ class WC_Comments {
 		$needs_bump = '0' === $comment->comment_approved;
 		if ( $needs_bump && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
 			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
-			$cache      = wc_get_container()->get( CommentsCountCache::class );
+			$cache      = wc_get_container()->get( CommentCountCache::class );
 			if ( $is_product && $cache->has( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY ) ) {
 				$cache->increment( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
 			}
@@ -288,7 +288,7 @@ class WC_Comments {
 		$needs_adjustments = 'unapproved' === $new_status || 'unapproved' === $old_status;
 		if ( $needs_adjustments && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
 			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
-			$cache      = wc_get_container()->get( CommentsCountCache::class );
+			$cache      = wc_get_container()->get( CommentCountCache::class );
 			if ( $is_product && $cache->has( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY ) ) {
 				if ( '0' === $comment->comment_approved ) {
 					$cache->increment( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
