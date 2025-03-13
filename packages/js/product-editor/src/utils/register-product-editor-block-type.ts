@@ -20,14 +20,20 @@ type SelectType = ( store: string ) => Record< string, unknown >;
 export function useEvaluationContext( context: Record< string, unknown > ) {
 	const { postType } = context;
 
-	const productId = useEntityId( 'postType', postType );
+	const productId = useEntityId( 'postType', postType as string );
 
 	const getEvaluationContext = ( select: SelectType ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const editedProduct = select( 'core' ).getEditedEntityRecord(
+		const coreStore = select( 'core' ) as {
+			getEditedEntityRecord: (
+				kind: string,
+				name: string,
+				id: number
+			) => Record< string, unknown >;
+		};
+
+		const editedProduct = coreStore.getEditedEntityRecord(
 			'postType',
-			postType,
+			postType as string,
 			productId
 		);
 
