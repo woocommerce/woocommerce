@@ -127,6 +127,7 @@ class PageRenderer {
 			return array(
 				'value' => $email->id,
 				'label' => $email->title,
+				'id' => get_class($email),
 			);
 		}, $email_types ) );
 
@@ -145,6 +146,7 @@ class PageRenderer {
 					'send'     => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
 				),
 				'email_types' => $email_types,
+				'block_preview_url' 	=>  esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
 			)
 		);
 	}
