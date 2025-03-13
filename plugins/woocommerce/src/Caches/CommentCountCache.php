@@ -37,7 +37,7 @@ class CommentCountCache {
 	public function __construct() {
 		$this->use_cache_api = ( true === wp_using_ext_object_cache() );
 		// Set expiration to the same day midnight (GMT).
-		$this->expiration    = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
+		$this->expiration = DAY_IN_SECONDS - ( time() % DAY_IN_SECONDS );
 	}
 
 	/**
