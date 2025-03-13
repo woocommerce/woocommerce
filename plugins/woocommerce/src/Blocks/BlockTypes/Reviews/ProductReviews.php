@@ -1,4 +1,5 @@
-<?php
+<?php declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
