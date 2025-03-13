@@ -54,13 +54,13 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	/**
 	 * Test get_products_reviews_pending_moderation_counter.
 	 *
-	 * @param CommentCountCache $comments_cache_facade Cache facade instance to inject from data provider.
-	 * @dataProvider cache_facade_instance
+	 * @param CommentCountCache $substitute_cache_facade Cache facade instance to inject into DI-container.
+	 * @dataProvider cache_facade_instance_provider
 	 */
-	public function test_get_pending_review_count_is_getting_updated(CommentCountCache $comments_cache_facade ) {
-		$di                             = wc_get_container();
-		$original_comments_cache_facade = $di->get( CommentCountCache::class );
-		$di->replace( CommentCountCache::class, $comments_cache_facade );
+	public function test_get_pending_review_count_is_getting_updated( CommentCountCache $substitute_cache_facade ) {
+		$di                    = wc_get_container();
+		$original_cache_facade = $di->get( CommentCountCache::class );
+		$di->replace( CommentCountCache::class, $substitute_cache_facade );
 
 		// Populate the cache entry, otherwise lazy updates will not be performed.
 		$this->assertSame( 0, WC_Comments::get_products_reviews_pending_moderation_counter() );
@@ -96,7 +96,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 		}
 		$this->assertSame( count( $unapproved_reviews ), WC_Comments::get_products_reviews_pending_moderation_counter() );
 
-		$di->replace( CommentCountCache::class, $original_comments_cache_facade );
+		$di->replace( CommentCountCache::class, $original_cache_facade );
 	}
 
 	/**
@@ -104,7 +104,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 *
 	 * @return Generator<CommentCountCache>
 	 */
-	public function cache_facade_instance() {
+	public function cache_facade_instance_provider() {
 		yield from array(
 			'use cache API'     => array(
 				new class() extends CommentCountCache {
