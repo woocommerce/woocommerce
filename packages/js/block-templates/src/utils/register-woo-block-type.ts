@@ -19,7 +19,6 @@ import { ComponentType } from 'react';
 import { useSelect } from '@wordpress/data';
 
 // Define a more generic type for the select function to avoid TypeScript errors
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SelectType = ( store: string ) => Record< string, unknown >;
 
 interface BlockRepresentation< T extends Record< string, object > > {

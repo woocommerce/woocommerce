@@ -15,7 +15,6 @@ interface BlockRepresentation< T extends Record< string, object > > {
 }
 
 // Define a more generic type for the select function to avoid TypeScript errors
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SelectType = ( store: string ) => Record< string, unknown >;
 
 export function useEvaluationContext( context: Record< string, unknown > ) {
@@ -23,7 +22,6 @@ export function useEvaluationContext( context: Record< string, unknown > ) {
 
 	const productId = useEntityId( 'postType', postType );
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const getEvaluationContext = ( select: SelectType ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
