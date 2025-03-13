@@ -34,8 +34,7 @@ type UseEvaluationContext = ( context: Record< string, unknown > ) => {
 
 function defaultUseEvaluationContext( context: Record< string, unknown > ) {
 	return {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-		getEvaluationContext: ( select: any ) => context,
+		getEvaluationContext: () => context,
 	};
 }
 
