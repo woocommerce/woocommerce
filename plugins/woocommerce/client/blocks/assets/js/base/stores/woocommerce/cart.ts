@@ -160,7 +160,7 @@ const { state, actions } = store< Store >(
 
 					// Shows the error notice.
 					const { actions: noticeActions } = store< StoreNotices >(
-						'woocommerce/product-collection',
+						'woocommerce/store-notices',
 						{},
 						{ lock: universalLock }
 					);
