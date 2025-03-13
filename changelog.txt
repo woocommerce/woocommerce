@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 9.7.1 2025-03-04 =
+
+**WooCommerce**
+
+* Fix - Remove decodeEntities from the product name used on cart & checkout [#56048](https://github.com/woocommerce/woocommerce/pull/56048)
+* Fix - Improved shortcode cart and checkout coupon notices by appending elements instead of text. [#56047](https://github.com/woocommerce/woocommerce/pull/56047)
+* Update - Replaced concatenated string-based HTML elements in JS with createElement(). [#56047](https://github.com/woocommerce/woocommerce/pull/56047)
+
+
 = 9.7.0 2025-02-24 =
 
 **WooCommerce**
