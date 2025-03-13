@@ -198,8 +198,8 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::AIRWALLEX,
 			self::SQUARE, // Use the default details.
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -1019,10 +1019,6 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::MOLLIE,
-			self::MONEI,
-			self::AIRWALLEX,
-			self::VIVA_WALLET,
 			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -1037,6 +1033,10 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::MOLLIE,
+			self::MONEI,
+			self::AIRWALLEX,
+			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
