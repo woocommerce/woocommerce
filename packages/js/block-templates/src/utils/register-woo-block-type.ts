@@ -57,8 +57,7 @@ function getEdit<
 		const { getEvaluationContext } = useEvaluationContext( context );
 
 		const { shouldHide, shouldDisable } = useSelect(
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			( select: any ) => {
+			( select: SelectType ) => {
 				const evaluationContext = getEvaluationContext( select );
 
 				return {
