@@ -175,12 +175,10 @@ const AddToCartButtonPlaceholder = ( {
 	useEffect( () => {
 		if ( blockClientId ) {
 			registerListener( blockClientId );
-		}
-		return () => {
-			if ( blockClientId ) {
+			return () => {
 				unregisterListener( blockClientId );
-			}
-		};
+			};
+		}
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
 	const buttonText =
