@@ -3222,6 +3222,8 @@ class PaymentExtensionSuggestions {
 			),
 			self::BILLIE            => array(
 				'_type'  => self::TYPE_PSP,
+				'title'       => esc_html__( 'Billie', 'woocommerce' ),
+				'description' => esc_html__( 'Billie is the leading provider of Buy Now, Pay Later payment methods for B2B stores.', 'woocommerce' ),
 				'icon'   => plugins_url( 'assets/images/onboarding/icons/billie.svg', WC_PLUGIN_FILE ),
 				'plugin' => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
