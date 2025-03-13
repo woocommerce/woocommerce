@@ -148,10 +148,10 @@ const productGallery = {
 		get thumbnails() {
 			const { imageData } = getContext();
 			const { numberOfThumbnails } = getConfig();
-			return Object.values( imageData.images ).slice(
-				0,
-				numberOfThumbnails
-			);
+			const allImageIds = imageData?.image_ids || [];
+			return allImageIds
+				.slice( 0, numberOfThumbnails ) // Get only the visible thumbnails
+				.map( ( imageId ) => imageData?.images[ imageId ] ); // Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
 		},
 	},
 	actions: {
