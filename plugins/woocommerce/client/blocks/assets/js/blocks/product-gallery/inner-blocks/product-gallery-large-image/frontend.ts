@@ -70,4 +70,6 @@ const productGalleryLargeImage = {
 	},
 };
 
-store< Store >( 'woocommerce/product-gallery', productGalleryLargeImage );
+store< Store >( 'woocommerce/product-gallery', productGalleryLargeImage, {
+	lock: true,
+} );

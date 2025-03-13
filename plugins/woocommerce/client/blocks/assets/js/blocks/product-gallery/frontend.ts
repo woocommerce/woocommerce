@@ -424,6 +424,6 @@ const productGallery = {
 	},
 };
 
-store( 'woocommerce/product-gallery', productGallery );
+store( 'woocommerce/product-gallery', productGallery, { lock: true } );
 
 export type ProductGallery = typeof productGallery;
