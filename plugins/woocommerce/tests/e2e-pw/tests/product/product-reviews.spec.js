@@ -295,7 +295,7 @@ test.describe( 'Product Reviews', () => {
 				.locator( 'a.comments-view-item-link' )
 				.getAttribute( 'href' );
 			await page.goto( productLink );
-			await page.click( '#tab-reviews' );
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
 
 			const replyReviews = page.locator(
 				`div.comment_container:has-text("${ replyText }")`
