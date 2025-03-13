@@ -30,7 +30,7 @@
 		"@babel/preset-env": "^7.23.5",
 		"@babel/preset-react": "7.23.3",
 		"@babel/preset-typescript": "7.23.3",
-		"@babel/runtime": "^7.23.5",
+		"@babel/runtime": "^7.26.10",
 		"@storybook/addon-a11y": "7.6.19",
 		"@storybook/addon-actions": "7.6.19",
 		"@storybook/addon-console": "^1.2.3",

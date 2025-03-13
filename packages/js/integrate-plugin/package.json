@@ -58,7 +58,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/runtime": "^7.26.10",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react-hooks": "8.0.1",
 		"@types/jest": "27.5.x",

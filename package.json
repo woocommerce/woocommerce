@@ -31,7 +31,7 @@
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/runtime": "^7.26.10",
 		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
