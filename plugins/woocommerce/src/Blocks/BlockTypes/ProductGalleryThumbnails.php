@@ -75,8 +75,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		// TODO: This is a temporary solution to display the view all thumbnail.
-		// Will eventually be replaced by a slider.
+		// Will eventually be replaced by a slider. Temporary solution.
 		$default_number_of_thumbnails = 3;
 		$number_of_thumbnails         = isset( $attributes['numberOfThumbnails'] ) && is_numeric( $attributes['numberOfThumbnails'] ) ? $attributes['numberOfThumbnails'] : $default_number_of_thumbnails;
 		$number_of_images             = count( $product_gallery_images );
@@ -86,7 +85,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		$number_of_thumbnails_class = 'wc-block-product-gallery-thumbnails--number-of-thumbnails-' . $thumbnails_layout;
 		$remaining_thumbnails_count = $number_of_images - $number_of_thumbnails;
 		wp_interactivity_config( 'woocommerce/product-gallery', array( 'numberOfThumbnails' => $number_of_thumbnails ) );
-
 		// End of temporary solution.
 
 		ob_start();
