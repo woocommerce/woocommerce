@@ -49,7 +49,19 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_on_order_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_before_trash_order', array( $this, 'update_on_order_trashed' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
-		add_action( 'init', array( $this, 'register_background_caching' ) );
+		add_action( 'woocommerce_order_count', array( $this, 'refresh_cache' ) );
+		add_action( BackgroundScheduler::HOOK_NAME, array( $this, 'register_background_actions' ) );
+	}
+
+	/**
+	 * Refresh the cache for a given order type.
+	 *
+	 * @param string $order_type The order type.
+	 * @return void
+	 */
+	public function refresh_cache( $order_type ) {
+		$this->order_count_cache->remove( $order_type );
+		OrderUtil::get_count_for_type( $order_type );
 	}
 
 	/**
@@ -57,21 +69,17 @@ class OrderCountCacheService {
 	 *
 	 * @return void
 	 */
-	public function register_background_caching() {
-		$order_types        = wc_get_order_types( 'order-count' );
-		$background_caching = wc_get_container()->get( BackgroundScheduler::class );
+	public function register_background_actions() {
+		if ( ! function_exists( 'as_schedule_recurring_action' ) ) {
+			return;
+		}
+
+		$order_types = wc_get_order_types( 'order-count' );
 		foreach ( $order_types as $order_type ) {
-			$background_cache_action = new BackgroundAction(
-				array(
-					'callback'            => function() use ( $order_type ) {
-						$this->order_count_cache->remove( $order_type );
-						OrderUtil::get_count_for_type( $order_type );
-					},
-					'hook'                => 'woocommerce_order_count_' . $order_type,
-					'interval_in_seconds' => HOUR_IN_SECONDS * 12,
-				)
-			);
-			$background_caching->register_action( $background_cache_action );
+			if ( false === as_has_scheduled_action( 'woocommerce_order_count' ) ) {
+				$frequency = HOUR_IN_SECONDS * 12;
+				as_schedule_recurring_action( time() + $frequency, $frequency, 'woocommerce_order_count', array( $order_type ) );
+			}
 		}
 	}
 
