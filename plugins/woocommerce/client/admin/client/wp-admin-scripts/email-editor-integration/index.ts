@@ -9,7 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { wooContentBlock } from './woo_content_placeholder_block';
+import { wooContentPlaceholderBlock } from './blocks/woo-email-content';
 import { NAME_SPACE } from './constants';
 import { modifySidebar } from './sidebar_extension';
 
@@ -25,5 +25,5 @@ addFilter(
 	() => 'https://woocommerce.com/document/email-faq/'
 );
 
-registerBlockType( 'woo/email-content', wooContentBlock );
+registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
 modifySidebar();
