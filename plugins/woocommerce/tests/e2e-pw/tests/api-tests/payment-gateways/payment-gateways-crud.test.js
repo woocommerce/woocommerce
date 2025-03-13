@@ -155,7 +155,8 @@ test.describe( 'Payment Gateways API tests', () => {
 								'Any &quot;Free shipping&quot; method',
 						},
 						'Local pickup': {
-							local_pickup: 'Any &quot;Local pickup&quot; method',
+							pickup_location:
+								'Any &quot;Local pickup&quot; method',
 						},
 					} ),
 				},

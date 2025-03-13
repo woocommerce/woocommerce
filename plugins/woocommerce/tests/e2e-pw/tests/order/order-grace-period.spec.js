@@ -86,6 +86,8 @@ test( 'guest shopper can verify their email address after the grace period', asy
 			'woocommerce_order_email_verification_grace_period',
 			0
 		);
+
+		// eslint-disable-next-line playwright/no-wait-for-timeout
 		await page.waitForTimeout( 2000 ); // needs some time before reload for change to take effect.
 		await page.reload();
 		await expect(
@@ -117,7 +119,7 @@ test( 'guest shopper can verify their email address after the grace period', asy
 		await page.getByLabel( 'Email address' ).fill( order.billing.email );
 		await page.getByRole( 'button', { name: /Verify|Confirm/ } ).click();
 		await expect(
-			page.getByText( 'Your order has been received' )
+			page.getByText( 'Thank you. Your order has been received.' )
 		).toBeVisible();
 	} );
 } );
