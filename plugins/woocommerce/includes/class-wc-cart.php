@@ -1768,7 +1768,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		// Sanitize coupon code.
-		$coupon_code = wc_format_coupon_code_without_lower( $coupon_code );
+		$coupon_code = wc_format_coupon_code( $coupon_code, true );
 
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );

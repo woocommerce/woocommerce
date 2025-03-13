@@ -68,7 +68,7 @@ class CartRemoveCoupon extends AbstractCartRoute {
 		}
 
 		$cart        = $this->cart_controller->get_cart_instance();
-		$coupon_code = wc_format_coupon_code_without_lower( $request['code'] );
+		$coupon_code = wc_format_coupon_code( $request['code'], true );
 		$coupon      = new \WC_Coupon( $coupon_code );
 		$discounts   = new \WC_Discounts( $cart );
 

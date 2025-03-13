@@ -1274,7 +1274,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
 		} elseif ( is_string( $raw_coupon ) ) {
-			$code   = wc_format_coupon_code_without_lower( $raw_coupon );
+			$code   = wc_format_coupon_code( $raw_coupon, true );
 			$coupon = new WC_Coupon( $code );
 
 			if ( wc_strtolower( $coupon->get_code() ) !== wc_strtolower( $code ) ) {
