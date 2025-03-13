@@ -24,22 +24,25 @@ class CartCheckoutUtils {
 	 * - The cart page is being viewed.
 	 * - The page contains a cart block, cart shortcode or classic shortcode block with the cart attribute.
 	 *
+	 * This function cannot be used accurately before the `pre_get_posts` action has been run.
+	 *
 	 * @return bool
 	 */
 	public static function is_cart_page() {
-		if ( null !== self::$is_cart_page ) {
-			return self::$is_cart_page;
+		if ( ! did_action( 'pre_get_posts' ) ) {
+			return false;
 		}
 
-		$page_id      = wc_get_page_id( 'cart' );
-		$is_cart_page = $page_id && is_page( $page_id );
+		global $post;
 
-		if ( $is_cart_page ) {
-			self::$is_cart_page = true;
-		} else {
-			global $post;
-			// Check page contents for block/shortcode.
-			self::$is_cart_page = is_a( $post, 'WP_Post' ) && ( wc_post_content_has_shortcode( 'woocommerce_cart' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart', $post->post_content ) );
+		if ( null === self::$is_cart_page ) {
+			$page_id            = wc_get_page_id( 'cart' );
+			self::$is_cart_page = $page_id && is_page( $page_id );
+
+			// If the is_page check returned false, check the page contents for a cart block or shortcode.
+			if ( ! self::$is_cart_page && is_a( $post, 'WP_Post' ) ) {
+				self::$is_cart_page = wc_post_content_has_shortcode( 'woocommerce_cart' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart', $post->post_content );
+			}
 		}
 
 		return self::$is_cart_page;
@@ -70,22 +73,25 @@ class CartCheckoutUtils {
 	 * - The checkout page is being viewed.
 	 * - The page contains a checkout block, checkout shortcode or classic shortcode block with the checkout attribute.
 	 *
+	 * This function cannot be used accurately before the `pre_get_posts` action has been run.
+	 *
 	 * @return bool
 	 */
 	public static function is_checkout_page() {
-		if ( null !== self::$is_checkout_page ) {
-			return self::$is_checkout_page;
+		if ( ! did_action( 'pre_get_posts' ) ) {
+			return false;
 		}
 
-		$page_id          = wc_get_page_id( 'checkout' );
-		$is_checkout_page = $page_id && is_page( $page_id );
+		global $post;
 
-		if ( $is_checkout_page ) {
-			self::$is_checkout_page = true;
-		} else {
-			global $post;
-			// Check page contents for block/shortcode.
-			self::$is_checkout_page = is_a( $post, 'WP_Post' ) && ( wc_post_content_has_shortcode( 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout', $post->post_content ) );
+		if ( null === self::$is_checkout_page ) {
+			$page_id                = wc_get_page_id( 'checkout' );
+			self::$is_checkout_page = $page_id && is_page( $page_id );
+
+			// If the is_page check returned false, check the page contents for a cart block or shortcode.
+			if ( ! self::$is_checkout_page && is_a( $post, 'WP_Post' ) ) {
+				self::$is_checkout_page = wc_post_content_has_shortcode( 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout', $post->post_content );
+			}
 		}
 
 		return self::$is_checkout_page;
