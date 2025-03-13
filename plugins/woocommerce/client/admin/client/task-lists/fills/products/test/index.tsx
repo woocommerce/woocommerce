@@ -70,6 +70,7 @@ describe( 'Products', () => {
 		// Reset location.href
 		mockLocation.href = '';
 
+		// @ts-expect-error -- partial mock
 		window.wcAdminFeatures = {
 			printful: true,
 		};
@@ -288,10 +289,6 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
-		const mockLocation = {
-			href: 'test',
-		} as Location;
-
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,
