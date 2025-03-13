@@ -187,6 +187,7 @@ test.describe( 'Product Reviews', () => {
 				value: updatedRating.toString(),
 			} );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page.waitForURL( '**/edit-comments.php?**' );
 
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
@@ -202,7 +203,7 @@ test.describe( 'Product Reviews', () => {
 			).toBeVisible();
 
 			await reviewRow.locator( 'a.comments-view-item-link' ).click();
-			await page.click( '#tab-reviews' );
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
 			await expect(
 				page.locator( '.comment_container' ).first()
 			).toContainText( updatedReview );
