@@ -57,10 +57,10 @@ class ProductGalleryUtils {
 			if ( 0 === $image_id ) {
 				// Handle placeholder image.
 				$image_src_data[] = array(
-					'id'      => 0,
-					'src'     => wc_placeholder_img_src(),
+					'id'     => 0,
+					'src'    => wc_placeholder_img_src(),
 					'srcset' => '',
-					'sizes'   => '',
+					'sizes'  => '',
 				);
 				continue;
 			}
@@ -73,10 +73,10 @@ class ProductGalleryUtils {
 			$sizes  = wp_get_attachment_image_sizes( $image_id, 'full' );
 
 			$image_src_data[] = array(
-				'id'      => $image_id,
-				'src'     => $full_src ? $full_src[0] : '',
+				'id'     => $image_id,
+				'src'    => $full_src ? $full_src[0] : '',
 				'srcset' => $srcset ? $srcset : '',
-				'sizes'   => $sizes ? $sizes : '',
+				'sizes'  => $sizes ? $sizes : '',
 			);
 		}
 
