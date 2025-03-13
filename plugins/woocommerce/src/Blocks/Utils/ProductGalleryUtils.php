@@ -59,7 +59,7 @@ class ProductGalleryUtils {
 				$image_src_data[] = array(
 					'id'      => 0,
 					'src'     => wc_placeholder_img_src(),
-					'src_set' => '',
+					'srcset' => '',
 					'sizes'   => '',
 				);
 				continue;
@@ -75,7 +75,7 @@ class ProductGalleryUtils {
 			$image_src_data[] = array(
 				'id'      => $image_id,
 				'src'     => $full_src ? $full_src[0] : '',
-				'src_set' => $srcset ? $srcset : '',
+				'srcset' => $srcset ? $srcset : '',
 				'sizes'   => $sizes ? $sizes : '',
 			);
 		}

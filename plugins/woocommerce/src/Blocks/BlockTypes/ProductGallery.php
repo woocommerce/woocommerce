@@ -37,7 +37,7 @@ class ProductGallery extends AbstractBlock {
 		foreach ( $images as $image ) {
 			$id           = $image['id'];
 			$src          = $image['src'];
-			$srcset       = $image['src_set'];
+			$srcset       = $image['srcset'];
 			$sizes        = $image['sizes'];
 			$images_html .= "<img tabindex='0' data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}'/>";
 		}

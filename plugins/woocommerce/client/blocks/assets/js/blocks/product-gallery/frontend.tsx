@@ -126,7 +126,7 @@ const productGallery = {
 						isActive,
 						tabIndex,
 						src: '',
-						src_set: '',
+						srcset: '',
 					};
 				}
 				return {

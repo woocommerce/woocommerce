@@ -104,7 +104,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 						class="wc-block-product-gallery-thumbnails__thumbnail__image"
 						data-wp-bind--data-image-id="context.image.id"
 						data-wp-bind--src="context.image.src"
-						data-wp-bind--srcset="context.image.src_set" 
+						data-wp-bind--srcset="context.image.srcset" 
 						data-wp-bind--sizes="context.image.sizes"
 						data-wp-on--click="actions.selectCurrentImage"
 						data-wp-on--keydown="actions.onThumbnailKeyDown"
