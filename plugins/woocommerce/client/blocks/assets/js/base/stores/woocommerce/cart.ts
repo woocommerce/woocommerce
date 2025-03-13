@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, withScope } from '@wordpress/interactivity';
+import { store } from '@wordpress/interactivity';
 import type { Cart, CartItem, ApiErrorResponse } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
@@ -9,10 +9,6 @@ import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
-
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 type OptimisticCartItem = {
 	key?: string;
@@ -32,6 +28,7 @@ export type Store = {
 		addCartItem: ( args: { id: number; quantity: number } ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
+		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
 	};
 };
 
@@ -52,28 +49,6 @@ function generateError( error: ApiErrorResponse ): Error {
 	return Object.assign( new Error( error.message || 'Unknown error.' ), {
 		code: error.code || 'unknown_error',
 	} );
-}
-
-function* showNoticeError( error: Error | ApiErrorResponse ) {
-	// Todo: Use the module exports instead of `store()` once the store-notices
-	// store is public.
-	yield import( '@woocommerce/stores/store-notices' );
-	const { actions: noticeActions } = store< StoreNotices >(
-		'woocommerce/store-notices',
-		{},
-		{ lock: universalLock }
-	);
-
-	// Todo: Check what should happen if the notice is already displayed.
-	noticeActions.addNotice( {
-		notice: error.message,
-		type: 'error',
-		dismissible: true,
-	} );
-
-	// Emmits console.error for troubleshooting.
-	// eslint-disable-next-line no-console
-	console.error( error );
 }
 
 let pendingRefresh = false;
@@ -140,7 +115,7 @@ const { state, actions } = store< Store >(
 
 					// Checks if the response was successful, but still contains some errors.
 					json.errors?.forEach( ( error ) => {
-						withScope( () => showNoticeError( error ) );
+						actions.showNoticeError( error );
 					} );
 
 					// Updates the local cart.
@@ -159,18 +134,7 @@ const { state, actions } = store< Store >(
 					state.cart = JSON.parse( previousCart );
 
 					// Shows the error notice.
-					const { actions: noticeActions } = store< StoreNotices >(
-						'woocommerce/store-notices',
-						{},
-						{ lock: universalLock }
-					);
-
-					// Todo: Check what should happen if the notice is already displayed.
-					yield noticeActions.addNotice( {
-						notice: error.message,
-						type: 'error',
-						dismissible: true,
-					} );
+					actions.showNoticeError( error as Error );
 				}
 			},
 			*refreshCartItems() {
@@ -204,6 +168,29 @@ const { state, actions } = store< Store >(
 				} finally {
 					pendingRefresh = false;
 				}
+			},
+			*showNoticeError( error: Error | ApiErrorResponse ) {
+				// Todo: Use the module exports instead of `store()` once the store-notices
+				// store is public.
+				yield import( '@woocommerce/stores/store-notices' );
+				const { actions: noticeActions } = store< StoreNotices >(
+					'woocommerce/store-notices',
+					{},
+					{
+						lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+					}
+				);
+
+				// Todo: Check what should happen if the notice is already displayed.
+				noticeActions.addNotice( {
+					notice: error.message,
+					type: 'error',
+					dismissible: true,
+				} );
+
+				// Emmits console.error for troubleshooting.
+				// eslint-disable-next-line no-console
+				console.error( error );
 			},
 		},
 	},
