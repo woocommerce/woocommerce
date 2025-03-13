@@ -70,6 +70,7 @@ export const OfflinePaymentGatewayListItem = ( {
 					<div className="woocommerce-list__item-after__actions">
 						{ ! gateway.state.enabled ? (
 							<EnableGatewayButton
+								installingPlugin={ null }
 								gatewayId={ gateway.id }
 								gatewayState={ gateway.state }
 								settingsHref={
@@ -83,9 +84,11 @@ export const OfflinePaymentGatewayListItem = ( {
 							/>
 						) : (
 							<SettingsButton
+								gatewayId={ gateway.id }
 								settingsHref={
 									gateway.management._links.settings.href
 								}
+								isInstallingPlugin={ false }
 							/>
 						) }
 					</div>

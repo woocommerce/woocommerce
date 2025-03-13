@@ -8,6 +8,7 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -387,35 +388,32 @@ function wc_processing_order_count() {
  */
 function wc_orders_count( $status, string $type = '' ) {
 	$count           = 0;
-	$legacy_statuses = array( OrderStatus::DRAFT, OrderStatus::TRASH );
-	$valid_statuses  = array_merge( array_keys( wc_get_order_statuses() ), $legacy_statuses );
+	$legacy_statuses = array(
+		OrderStatus::DRAFT,
+		OrderStatus::TRASH,
+	);
 	$status          = ( ! in_array( $status, $legacy_statuses, true ) && 0 !== strpos( $status, 'wc-' ) ) ? 'wc-' . $status : $status;
 	$valid_types     = wc_get_order_types( 'order-count' );
 	$type            = trim( $type );
 
-	if ( ! in_array( $status, $valid_statuses, true ) || ( $type && ! in_array( $type, $valid_types, true ) ) ) {
+	try {
+		$types_for_count   = $type ? array( $type ) : $valid_types;
+		$order_count_cache = new OrderCountCache();
+
+		foreach ( $types_for_count as $type ) {
+			$cache = $order_count_cache->get( $type, array( $status ) );
+			if ( false !== $cache && isset( $cache[ $status ] ) ) {
+				$count += $cache[ $status ];
+			} else {
+				$count_for_type = OrderUtil::get_count_for_type( $type );
+				$count         += $count_for_type[ $status ];
+			}
+		}
+
+		return $count;
+	} catch ( Exception $e ) {
 		return 0;
 	}
-
-	$cache_key    = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status . $type;
-	$cached_count = wp_cache_get( $cache_key, 'counts' );
-
-	if ( false !== $cached_count ) {
-		return $cached_count;
-	}
-
-	$types_for_count = $type ? array( $type ) : $valid_types;
-
-	foreach ( $types_for_count as $type ) {
-		$data_store = WC_Data_Store::load( 'shop_order' === $type ? 'order' : $type );
-		if ( $data_store ) {
-			$count += $data_store->get_order_count( $status );
-		}
-	}
-
-	wp_cache_set( $cache_key, $count, 'counts' );
-
-	return $count;
 }
 
 /**

@@ -11,7 +11,7 @@ inputs:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
     build-type:
-        description: 'Given "full" or "backend" will perform optimized build steps.'
+        description: 'Given "full", "backend", "dependencies" will perform optimized build steps.'
         default: 'full'
     pull-package-deps:
         description: 'Given a string value, will pull the package specific dependencies cache.'
@@ -40,7 +40,7 @@ runs:
               # The built-in caching is not fit to per-package caching we are aiming.
               cache: ''
         - name: 'Setup PHP'
-          if: ${{ inputs.php-version != 'false' }}
+          if: ${{ inputs.php-version != 'false' && inputs.build-type != 'dependencies' }}
           uses: 'shivammathur/setup-php@v2'
           with:
               php-version: '${{ inputs.php-version }}'
@@ -55,22 +55,22 @@ runs:
           uses: 'actions/cache@v4'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
-              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ ( inputs.build-type == 'backend' && 'backend' ) || 'full' }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ ( inputs.build-type == 'backend' && 'backend' ) || 'full' }}-"
         - name: 'Cache: node cache'
-          if: ${{ inputs.pull-package-deps != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type != 'backend' }}
           uses: 'actions/cache@v4'
           with:
               path: './node_modules/.cache'
-              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-'
+              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.pull-package-deps != 'false' || inputs.pull-package-composer-deps != 'false' }}
           uses: 'actions/cache@v4'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
-              restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-"
+              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
+              restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-build:${{ inputs.build-type }}-"
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
           uses: 'actions/cache@v4'
@@ -116,4 +116,7 @@ runs:
             fi
             if [[ '${{ inputs.build-type }}' == 'full' ]]; then
               pnpm ${{ steps.project-filters.outputs.build }} build
+            fi
+            if [[ '${{ inputs.build-type }}' == 'dependencies' ]]; then
+              pnpm --if-present --workspace-concurrency=Infinity --stream --filter="${{ inputs.build }}^..." '/^build:project:.*$/'
             fi

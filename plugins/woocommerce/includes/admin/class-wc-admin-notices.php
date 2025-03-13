@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\BrandingController;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -337,9 +336,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		$activation_variant = BrandingController::use_new_branding() ? 'new' : 'old';
 		wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), Constants::get_constant( 'WC_VERSION' ) );
-		wp_enqueue_style( 'woocommerce-activation-branding', plugins_url( "/assets/css/activation-{$activation_variant}-branding.css", WC_PLUGIN_FILE ), array(), Constants::get_constant( 'WC_VERSION' ) );
 
 		// Add RTL support.
 		wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );

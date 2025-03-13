@@ -9,6 +9,7 @@ import {
 	PaymentProviderOnboardingState,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -71,6 +72,14 @@ export const CompleteSetupButton = ( {
 	const onboardingCompleted = onboardingState.completed;
 
 	const completeSetup = () => {
+		// Record the click of this button.
+		recordEvent( 'settings_payments_provider_complete_setup_click', {
+			provider_id: gatewayId,
+			onboarding_started: onboardingState.started,
+			onboarding_completed: onboardingState.completed,
+			onboarding_test_mode: onboardingState.test_mode,
+		} );
+
 		setIsUpdating( true );
 
 		if ( ! accountConnected || ! onboardingStarted ) {

@@ -3,11 +3,10 @@
  */
 import { useSelect } from '@wordpress/data';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	PAYMENT_GATEWAYS_STORE_NAME,
 	PaymentGateway,
 	type PaymentSelectors,
-	type OnboardingSelectors,
 	type WPDataSelectors,
 } from '@woocommerce/data';
 
@@ -26,13 +25,13 @@ export const usePaymentsBanner = () => {
 			installedPaymentGateways: (
 				select( PAYMENT_GATEWAYS_STORE_NAME ) as PaymentSelectors
 			 ).getPaymentGateways(),
-			paymentGatewaySuggestions: (
-				select( ONBOARDING_STORE_NAME ) as OnboardingSelectors
-			 ).getPaymentGatewaySuggestions(),
+			paymentGatewaySuggestions:
+				select( onboardingStore ).getPaymentGatewaySuggestions(),
 			hasFinishedResolution:
-				(
-					select( ONBOARDING_STORE_NAME ) as WPDataSelectors
-				 ).hasFinishedResolution( 'getPaymentGatewaySuggestions' ) &&
+				select( onboardingStore ).hasFinishedResolution(
+					'getPaymentGatewaySuggestions',
+					[]
+				) &&
 				(
 					select( PAYMENT_GATEWAYS_STORE_NAME ) as WPDataSelectors
 				 ).hasFinishedResolution( 'getPaymentGateways' ),

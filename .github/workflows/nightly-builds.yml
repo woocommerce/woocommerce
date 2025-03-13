@@ -16,7 +16,7 @@ jobs:
     if: github.repository_owner == 'woocommerce'
     name: Nightly builds
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:

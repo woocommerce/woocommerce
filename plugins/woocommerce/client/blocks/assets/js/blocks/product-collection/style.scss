@@ -1,0 +1,12 @@
+.wp-block-woocommerce-product-collection {
+	.wc-block-components-product-stock-indicator {
+		text-align: center;
+	}
+}
+
+// Styles for the interactivity API store notices rendered top of block for client side errors.
+.wc-block-components-notice-banner {
+	.wc-block-components-button.wc-block-components-notice-banner__dismiss[hidden] {
+		display: none;
+	}
+}

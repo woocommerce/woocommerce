@@ -52,6 +52,9 @@ class WC_Privacy_Background_Process extends WC_Background_Process {
 			case 'trash_cancelled_orders':
 				$process_count = WC_Privacy::trash_cancelled_orders( $process_limit );
 				break;
+			case 'anonymize_refunded_orders':
+				$process_count = WC_Privacy::anonymize_refunded_orders( $process_limit );
+				break;
 			case 'anonymize_completed_orders':
 				$process_count = WC_Privacy::anonymize_completed_orders( $process_limit );
 				break;

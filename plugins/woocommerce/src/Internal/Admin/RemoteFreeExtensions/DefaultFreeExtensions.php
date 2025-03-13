@@ -4,10 +4,11 @@
  */
 
 declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
-use Automattic\WooCommerce\Internal\BrandingController;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,9 +24,7 @@ class DefaultFreeExtensions {
 	 * @return string
 	 */
 	private static function get_woo_logo() {
-		return BrandingController::use_new_branding() ?
-			plugins_url( '/assets/images/core-profiler/woo-rebrand-2.svg', WC_PLUGIN_FILE ) :
-			plugins_url( '/assets/images/onboarding/woo.svg', WC_PLUGIN_FILE );
+		return plugins_url( '/assets/images/core-profiler/logo-woo.svg', WC_PLUGIN_FILE );
 	}
 
 	/**
@@ -40,7 +39,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Get the basics', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'woocommerce-payments' ),
-					self::get_plugin( 'woocommerce-services:shipping' ),
+					self::get_plugin( 'woocommerce-shipping' ),
 					self::get_plugin( 'woocommerce-services:tax' ),
 					self::get_plugin( 'jetpack' ),
 				),
@@ -60,8 +59,10 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Reach out to customers', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'mailpoet:alt' ),
+					// IMPORTANT: Klaviyo needs to be above Mailchimp as per partnership agreement.
+					// P2 for context: pdibGW-3XM-p2.
+					self::get_plugin( 'klaviyo:alt' ),
 					self::get_plugin( 'mailchimp-for-woocommerce' ),
-					self::get_plugin( 'klaviyo' ),
 				),
 			),
 			array(
@@ -69,6 +70,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'google-listings-and-ads:alt' ),
+					self::get_plugin( 'multichannel-by-cedcommerce' ),
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
@@ -80,7 +82,7 @@ class DefaultFreeExtensions {
 				'plugins' => self::with_core_profiler_fields(
 					array(
 						self::get_plugin( 'woocommerce-payments' ),
-						self::get_plugin( 'woocommerce-services:shipping' ),
+						self::get_plugin( 'woocommerce-shipping' ),
 						self::get_plugin( 'jetpack' ),
 						self::get_plugin( 'pinterest-for-woocommerce' ),
 						self::get_plugin( 'kliken-ads-pixel-for-meta' ),
@@ -93,6 +95,21 @@ class DefaultFreeExtensions {
 				),
 			),
 		);
+
+		if ( Features::is_enabled( 'disable-core-profiler-fallback' ) ) {
+			$remote_variant_assignment = (int) get_option( 'woocommerce_remote_variant_assignment', 61 ); // 1-120
+			$should_rollout_to_users   = $remote_variant_assignment <= 60; // Rollout to 50% of users.
+
+			if ( $should_rollout_to_users ) {
+				// Remove the core-profiler bundle.
+				$bundles = array_filter(
+					$bundles,
+					function ( $bundle ) {
+						return 'obw/core-profiler' !== $bundle['key'];
+					}
+				);
+			}
+		}
 
 		$bundles = wp_json_encode( $bundles );
 		return json_decode( $bundles );
@@ -136,6 +153,18 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
+			),
+			'multichannel-by-cedcommerce'   => array(
+				'name'             => __( 'Multichannel for WooCommerce', 'woocommerce' ),
+				'description'      => __( 'Sync your sales data across platforms and manage everything from a unified dashboard.', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/onboarding/multichannel.webp', WC_PLUGIN_FILE ),
+				'manage_url'       => 'admin.php?page=sales_channel',
+				'is_built_by_wc'   => false,
+				'install_external' => true,
+				'learn_more_link'  => 'https://woocommerce.com/products/multichannel-by-cedcommerce-ebay-amazon-walmart-etsy-integration/?utm_source=marketing_task&utm_medium=product',
+				'tags'             => array(
+					'marketplace',
+				),
 			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
@@ -232,6 +261,13 @@ class DefaultFreeExtensions {
 				),
 				'is_built_by_wc' => false,
 			),
+			'klaviyo:alt'                   => array(
+				'name'           => __( 'Klaviyo', 'woocommerce' ),
+				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=klaviyo_settings',
+				'is_built_by_wc' => false,
+			),
 			'woocommerce-payments'          => array(
 				'name'           => __( 'WooPayments', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
@@ -292,7 +328,7 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 				'min_wp_version' => '5.9',
 			),
-			'woocommerce-services:shipping' => array(
+			'woocommerce-shipping'          => array(
 				'name'           => __( 'WooCommerce Shipping', 'woocommerce' ),
 				'image_url'      => self::get_woo_logo(),
 				'description'    => sprintf(
@@ -306,33 +342,6 @@ class DefaultFreeExtensions {
 						'type'      => 'base_location_country',
 						'value'     => 'US',
 						'operation' => '=',
-					),
-					array(
-						'type'    => 'not',
-						'operand' => array(
-							array(
-								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-services' ),
-							),
-						),
-					),
-					array(
-						'type'    => 'not',
-						'operand' => array(
-							array(
-								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-shipping' ),
-							),
-						),
-					),
-					array(
-						'type'    => 'not',
-						'operand' => array(
-							array(
-								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-tax' ),
-							),
-						),
 					),
 					array(
 						'type'     => 'or',
@@ -390,33 +399,6 @@ class DefaultFreeExtensions {
 				),
 				'is_visible'     => array(
 					self::get_rules_for_wcservices_tax_countries(),
-					array(
-						'type'    => 'not',
-						'operand' => array(
-							array(
-								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-services' ),
-							),
-						),
-					),
-					array(
-						'type'    => 'not',
-						'operand' => array(
-							array(
-								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-shipping' ),
-							),
-						),
-					),
-					array(
-						'type'    => 'not',
-						'operand' => array(
-							array(
-								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-tax' ),
-							),
-						),
-					),
 				),
 				'is_built_by_wc' => true,
 			),
@@ -540,7 +522,7 @@ class DefaultFreeExtensions {
 	 */
 	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
-			'woocommerce-payments'          => array(
+			'woocommerce-payments'      => array(
 				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
@@ -548,14 +530,14 @@ class DefaultFreeExtensions {
 				'install_priority' => 5,
 				'requires_jpc'     => true,
 			),
-			'woocommerce-services:shipping' => array(
+			'woocommerce-shipping'      => array(
 				'label'            => __( 'Print shipping labels with WooCommerce Shipping', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
-				'description'      => __( 'Print USPS and DHL labels directly from your dashboard and save on shipping.', 'woocommerce' ),
+				'description'      => __( 'Print USPS, UPS, and DHL labels directly from your dashboard and save on shipping.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/woocommerce-shipping?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 3,
 			),
-			'jetpack'                       => array(
+			'jetpack'                   => array(
 				'label'            => __( 'Boost content creation with Jetpack AI Assistant', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-jetpack.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Save time on content creation — unlock high-quality blog posts and pages using AI.', 'woocommerce' ),
@@ -563,49 +545,49 @@ class DefaultFreeExtensions {
 				'install_priority' => 8,
 				'requires_jpc'     => true,
 			),
-			'pinterest-for-woocommerce'     => array(
+			'pinterest-for-woocommerce' => array(
 				'label'            => __( 'Showcase your products with Pinterest', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-pinterest.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Get your products in front of a highly engaged audience.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/pinterest-for-woocommerce?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 2,
 			),
-			'kliken-ads-pixel-for-meta'     => array(
+			'kliken-ads-pixel-for-meta' => array(
 				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/kliken-ads-pixel-for-meta.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Sync your store catalog, set up pixel tracking, and run targeted ad campaigns.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/meta-ads-and-pixel?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 2,
 			),
-			'mailpoet'                      => array(
+			'mailpoet'                  => array(
 				'label'            => __( 'Reach your customers with MailPoet', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-mailpoet.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Send purchase follow-up emails, newsletters, and promotional campaigns.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/mailpoet?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 7,
 			),
-			'klaviyo'                       => array(
+			'klaviyo'                   => array(
 				'label'            => __( 'Klaviyo', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
 				'description'      => __( 'Grow and retain customers with email, SMS, automations, and a consolidated view of customer interactions.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/klaviyo-for-woocommerce?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 7,
 			),
-			'tiktok-for-business'           => array(
+			'tiktok-for-business'       => array(
 				'label'            => __( 'Create ad campaigns with TikTok', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-tiktok.png', WC_PLUGIN_FILE ),
 				'description'      => __( 'Create advertising campaigns and reach one billion global users.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/tiktok-for-woocommerce?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 1,
 			),
-			'google-listings-and-ads'       => array(
+			'google-listings-and-ads'   => array(
 				'label'            => __( 'Drive sales with Google for WooCommerce', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-google.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Reach millions of active shoppers across Google with free product listings and ads.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/google-listings-and-ads?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 6,
 			),
-			'woocommerce-services:tax'      => array(
+			'woocommerce-services:tax'  => array(
 				'label'            => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
 				'description'      => __( 'Automatically calculate how much sales tax should be collected – by city, country, or state.', 'woocommerce' ),
@@ -614,57 +596,16 @@ class DefaultFreeExtensions {
 			),
 		);
 
-		/*
-		 * Overwrite the is_visible conditions to just the country restriction
-		 * and the requirement for WooCommerce Shipping and WooCommerce Tax
-		 * to not be active.
-		 */
-		$_plugins['woocommerce-services:shipping']['is_visible'] = array(
+		$_plugins['woocommerce-shipping']['is_visible'] = array(
 			array(
 				'type'      => 'base_location_country',
 				'value'     => 'US',
 				'operation' => '=',
 			),
-			array(
-				'type'    => 'not',
-				'operand' => array(
-					array(
-						'type'    => 'plugins_activated',
-						'plugins' => array( 'woocommerce-shipping' ),
-					),
-				),
-			),
-			array(
-				'type'    => 'not',
-				'operand' => array(
-					array(
-						'type'    => 'plugins_activated',
-						'plugins' => array( 'woocommerce-tax' ),
-					),
-				),
-			),
 		);
 
 		$_plugins['woocommerce-services:tax']['is_visible'] = array(
 			self::get_rules_for_wcservices_tax_countries(),
-			array(
-				'type'    => 'not',
-				'operand' => array(
-					array(
-						'type'    => 'plugins_activated',
-						'plugins' => array( 'woocommerce-shipping' ),
-					),
-				),
-			),
-			array(
-				'type'    => 'not',
-				'operand' => array(
-					array(
-						'type'    => 'plugins_activated',
-						'plugins' => array( 'woocommerce-tax' ),
-					),
-				),
-			),
 		);
 
 		$remove_plugins_activated_rule = function ( $is_visible ) {
@@ -693,31 +634,7 @@ class DefaultFreeExtensions {
 			if ( isset( $_plugins[ $plugin['key'] ] ) ) {
 				$plugin = array_merge( $plugin, $_plugins[ $plugin['key'] ] );
 
-				/*
-				 * Removes the "not plugins_activated" rules from the "is_visible"
-				 * ruleset except for the WooCommerce Services plugin.
-				 *
-				 * WC Services is a plugin that provides shipping and tax features.
-				 * WC Services is sometimes labelled as "WooCommerce Shipping" or
-				 * "WooCommerce Tax", depending on which functionality of the plugin
-				 * is advertised.
-				 *
-				 * We have two new upcoming, standalone plugins: "WooCommerce Shipping" and
-				 * "WooCommerce Tax" (same names as sometimes used for WC Services).
-				 * The new plugins are incompatible with the old WC Services plugin.
-				 * In order to prevent merchants from running into this plugin conflict,
-				 * we want to keep the "not plugins_activated" rules for recommending
-				 * WC Services.
-				 *
-				 * If WC Services and the new plugins are installed together,
-				 * a notice is displayed and the plugin functionality is not registered
-				 * by either WC Services or WC Shipping and WC Tax.
-				 */
-				if (
-					isset( $plugin['is_visible'] ) &&
-					is_array( $plugin['is_visible'] ) &&
-					! in_array( $plugin['key'], array( 'woocommerce-services:shipping', 'woocommerce-services:tax' ), true )
-				) {
+				if ( isset( $plugin['is_visible'] ) && is_array( $plugin['is_visible'] ) ) {
 					$plugin['is_visible'] = $remove_plugins_activated_rule( $plugin['is_visible'] );
 				}
 			}

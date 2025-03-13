@@ -6,12 +6,26 @@
 	}
 
 	h3 {
-		margin-bottom: 0;
+		margin-bottom: 8px;
+		color: #23282d;
 		font-size: 18px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 24px; /* 133.333% */
+	}
+
+	h4 {
+		margin-bottom: 4px;
+		color: #23282d;
+		font-size: 16px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 24px; /* 150% */
 	}
 
 	p {
 		line-height: 20px;
+		margin: 0;
 	}
 
 	button.is-primary {
@@ -26,8 +40,8 @@
 		}
 	}
 
-	p.export-intro {
-		margin: 6px 0 16px 0;
+	p.blueprint-settings-intro-text {
+		margin-bottom: 40px;
 	}
 
 	a.woocommerce-admin-inline-documentation-link {
@@ -49,13 +63,14 @@
 
 	.woocommerce-collapsible-content {
 		color: #1e1e1e;
-		margin-bottom: 16px;
+		flex-grow: 1;
 		button.woocommerce-collapsible-content__toggle {
 			width: 100%;
 			span {
 				font-size: 14px;
-				font-weight: 600;
+				font-weight: 500;
 				color: #1e1e1e;
+				line-height: 24px;
 			}
 			svg {
 				margin-left: auto;
@@ -82,7 +97,8 @@
 		}
 
 		.woocommerce-collapsible-content__content {
-			margin-top: 6px;
+			margin-top: 16px;
+			left: -27px;
 			p {
 				margin: 0 0 12px 0;
 				color: #757575;
@@ -94,6 +110,12 @@
 
 			.components-base-control {
 				margin-bottom: 16px;
+				&:last-child {
+					margin-bottom: 0;
+					p {
+						margin-bottom: 0;
+					}
+				}
 			}
 		}
 
@@ -106,6 +128,35 @@
 
 	.woocommerce-blueprint-import-button {
 		margin-top: 24px;
+	}
+
+	.blueprint-settings-export-group {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		gap: 8px;
+		border-bottom: 1px solid #e7e7e9;
+		padding: 16px 0 16px 0;
+		position: relative;
+	}
+
+	.blueprint-settings-export-group-item-count {
+		position: absolute;
+		right: 40px;
+		top: 20px;
+		color: $gray-700;
+		text-align: right;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 400;
+	}
+
+	.blueprint-upload-form {
+		margin: 16px 0 40px 0;
+	}
+
+	.blueprint-settings-export-button {
+		margin-top: 14px;
 	}
 }
 

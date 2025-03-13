@@ -29,6 +29,7 @@ import {
 	ImportCSVItem,
 	PrintfulAdvertProductPlacement,
 } from './constants';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -171,6 +172,20 @@ export const Products = () => {
 					items={ footerStack }
 					showOtherOptions={ false }
 					isTaskListItemClicked={ isRequesting }
+				/>
+				<TrackedLink
+					textProps={ {
+						className: 'woocommerce-products-marketplace-link',
+					} }
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
+						'woocommerce'
+					) }
+					eventName="tasklist_add_product_visit_marketplace_click"
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+					) }
 				/>
 			</div>
 			{ isLoadingSampleProducts ? (

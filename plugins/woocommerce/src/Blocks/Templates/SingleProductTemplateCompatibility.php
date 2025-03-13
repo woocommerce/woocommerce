@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -19,6 +21,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 *
 	 * @param mixed $block_content The rendered block content.
 	 * @param mixed $block         The parsed block data.
+	 *
 	 * @return string
 	 */
 	public function inject_hooks( $block_content, $block ) {
@@ -64,6 +67,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * @param mixed $block_content The rendered block content.
 	 * @param mixed $block         The parsed block data.
 	 * @param array $block_hooks   The hooks that should be injected to the block.
+	 *
 	 * @return string
 	 */
 	private function inject_hook_to_first_and_last_blocks( $block_content, $block, $block_hooks ) {
@@ -248,6 +252,16 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 					'woocommerce_output_related_products'  => 20,
 				),
 			),
+			'woocommerce_before_add_to_cart_form'       => array(
+				'block_names' => array( 'woocommerce/add-to-cart-with-options' ),
+				'position'    => 'before',
+				'hooked'      => array(),
+			),
+			'woocommerce_after_add_to_cart_form'        => array(
+				'block_names' => array( 'woocommerce/add-to-cart-with-options' ),
+				'position'    => 'after',
+				'hooked'      => array(),
+			),
 		);
 	}
 
@@ -388,7 +402,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * @return bool True if the template has a single product template block, false otherwise.
 	 */
 	private static function has_single_product_template_blocks( $parsed_blocks ) {
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-price', 'woocommerce/breadcrumbs' );
+		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/add-to-cart-with-options', 'woocommerce/product-meta', 'woocommerce/product-price', 'woocommerce/breadcrumbs' );
 
 		return BlockTemplateUtils::has_block_including_patterns( $single_product_template_blocks, $parsed_blocks );
 	}

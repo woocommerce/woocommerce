@@ -1,0 +1,346 @@
+$admin-bar-height: 32px;
+$thumbnails-gap: 15px;
+$thumbnails-border-width: 1px;
+$dialog-padding: 20px;
+
+.wc-block-product-gallery-large-image {
+	width: 100%;
+	height: fit-content;
+	position: relative;
+	flex-grow: 1;
+
+	.wc-block-product-gallery-large-image__container {
+		display: flex;
+		overflow: hidden;
+		scroll-snap-type: x mandatory;
+		scroll-behavior: auto;
+		width: fit-content;
+		height: fit-content;
+		align-items: center;
+		margin: 0;
+		padding: 0;
+	}
+
+	.wc-block-product-gallery-large-image__wrapper {
+		aspect-ratio: 1 / 1;
+		flex-shrink: 0;
+		max-width: 100%;
+		overflow: hidden;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		scroll-snap-align: none center;
+	}
+
+	.wc-block-product-gallery-large-image__image-element {
+		width: 100%;
+		overflow: hidden;
+		margin-right: auto;
+		margin-left: auto;
+	}
+
+
+	img {
+		display: block;
+		position: relative;
+		margin: 0 auto;
+		z-index: 1;
+		transition: all 0.1s linear;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
+		width: 100%;
+
+		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
+		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
+			cursor: pointer;
+		}
+
+		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
+			cursor: zoom-in;
+		}
+	}
+
+	.wc-block-product-gallery-large-image__inner-blocks {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		width: calc(100% - 10px);
+		height: calc(100% - 10px);
+		top: 5px;
+		left: 5px;
+
+		> * {
+			margin-left: unset;
+			margin-right: unset;
+		}
+	}
+}
+
+.wc-block-product-gallery-large-image-next-previous {
+	display: flex;
+	align-items: flex-end;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	height: 100%;
+
+	button {
+		cursor: pointer;
+		z-index: 3;
+		pointer-events: all;
+		padding: 0;
+		border: none;
+		background: none;
+
+		&:disabled {
+			opacity: 50%;
+			cursor: not-allowed;
+		}
+	}
+
+	.is-vertically-aligned-top {
+		align-items: flex-start;
+	}
+
+	.is-vertically-aligned-center {
+		align-items: center;
+	}
+
+	.is-vertically-aligned-bottom {
+		align-items: flex-end;
+	}
+}
+
+// Next/Previous Buttons Settings
+.wc-block-product-gallery-large-image-next-previous-settings {
+	width: 100%;
+}
+
+//  Next/Previous Buttons Inside the Image Settings
+.wc-block-product-gallery-large-image-next-previous-left--inside-image {
+	margin-left: 15px;
+}
+
+.wc-block-product-gallery-large-image-next-previous-right--inside-image {
+	margin-right: 15px;
+}
+
+.wc-block-product-gallery-large-image-next-previous-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	position: absolute;
+	width: 100%;
+
+	&.wc-block-product-gallery-large-image-next-previous--inside-image {
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+
+	svg {
+		z-index: 1;
+	}
+}
+
+.wc-block-product-gallery-thumbnails {
+	display: flex;
+	gap: $thumbnails-gap;
+
+	&__image {
+		cursor: pointer;
+		max-width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
+	}
+
+	&__thumbnail {
+		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
+		display: flex;
+		flex-basis: 0;
+		flex-grow: 1;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		aspect-ratio: 1 / 1;
+	}
+
+	&__thumbnail__overlay {
+		container-type: inline-size;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		color: #fff;
+		background-color: rgba(0, 0, 0, 0.4);
+		line-height: 1.5;
+
+
+		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+			font-size: 1.2rem;
+			font-weight: 700;
+		}
+
+		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+			text-decoration: underline;
+		}
+
+		@container (width < 70px) {
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				display: none;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+				font-size: 1rem;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 0.6rem;
+			}
+		}
+
+		@container (width > 70px) {
+			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+				font-size: 1.2rem;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 0.8rem;
+			}
+		}
+
+		@container (width > 100px) {
+			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+				font-size: 1.4rem;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 1rem;
+			}
+		}
+	}
+}
+
+// Automattically react to the Group container settings.
+.is-nowrap .wc-block-product-gallery-thumbnails,
+.is-horizontal.is-nowrap .wc-block-product-gallery-thumbnails {
+	flex-direction: column;
+
+	@for $i from 3 through 8 {
+		&.wc-block-product-gallery-thumbnails--number-of-thumbnails-#{$i} {
+			$gap-width: $thumbnails-gap * ($i - 1);
+			$border-width: $i * $thumbnails-border-width * 2;
+
+			flex-basis: calc((100% - #{$gap-width} - #{$border-width}) / $i);
+		}
+	}
+}
+
+.is-vertical .wc-block-product-gallery-thumbnails,
+.is-horizontal .wc-block-product-gallery-thumbnails {
+	flex-direction: row;
+
+	@for $i from 3 through 8 {
+		&.wc-block-product-gallery-thumbnails--number-of-thumbnails-#{$i} {
+			$gap-width: $thumbnails-gap * ($i - 1);
+			$border-width: $i * $thumbnails-border-width * 2;
+
+			flex: 0 0 calc((100% - #{$gap-width} - #{$border-width}) / $i);
+		}
+	}
+}
+
+body.wc-block-product-gallery-dialog-open {
+	overflow: hidden;
+}
+
+.wc-block-product-gallery-dialog {
+	height: 100vh;
+	width: 100vw;
+	padding: 0;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+	overflow: hidden;
+
+	.admin-bar & {
+		// Subtract the admin bar height.
+		height: calc(100vh - $admin-bar-height);
+		top: $admin-bar-height;
+	}
+
+	&__close-button {
+		padding: 5px;
+		position: absolute;
+		right: 25px;
+		top: 25px;
+		background: none;
+		border: none;
+		cursor: pointer;
+	}
+
+	&__content {
+		// Subtract the top and bottom padding.
+		height: calc(100vh - ($dialog-padding * 2));
+		overflow: hidden;
+		padding: 20px 0;
+
+		@media (min-width: 765px) {
+			padding: 20px 0;
+		}
+
+		.admin-bar & {
+			// Subtract the admin bar height.
+			height: calc(100vh - ($dialog-padding * 2) - $admin-bar-height);
+		}
+	}
+
+	&__images-container {
+		height: 100%;
+		overflow-y: auto;
+		box-sizing: border-box;
+		padding: 3px 0;
+	}
+
+	&__images {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		img {
+			max-width: 100%;
+			height: auto;
+			margin-bottom: 20px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+}
+
+// On mobile devices (<600px):
+// - Product gallery groups are stacked vertically
+// - Thumbnails appear below the main gallery image and are arranged horizontally in a row
+@include breakpoint("<600px") {
+	.wc-block-product-gallery {
+		.wc-block-product-gallery__gallery-area {
+			flex-direction: column;
+		}
+		.wc-block-product-gallery__large-image-and-navigation {
+			order: -1;
+		}
+
+		.wc-block-product-gallery-thumbnails {
+			flex-direction: row;
+		}
+	}
+}

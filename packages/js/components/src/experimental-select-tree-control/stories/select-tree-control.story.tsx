@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import React, { createElement, useState } from 'react';
+import { createElement, useState } from 'react';
+
 import { Button, Modal, SlotFillProvider } from '@wordpress/components';
 
 /**

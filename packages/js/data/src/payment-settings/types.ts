@@ -166,6 +166,7 @@ export type PaymentSettingsState = {
 	suggestionCategories: SuggestedPaymentExtensionCategory[];
 	isFetching: boolean;
 	errors: Record< string, unknown >;
+	isWooPayEligible: boolean;
 };
 
 export type OrderMap = Record< string, number >;
@@ -181,3 +182,7 @@ export type EnableGatewayResponse = {
 	success: boolean;
 	data: unknown;
 };
+
+export interface WooPayEligibilityResponse {
+	is_eligible: boolean;
+}

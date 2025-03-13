@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	__experimentalHeading as Heading,
 	__experimentalHStack as HStack,
@@ -18,7 +18,7 @@ export const Header = ( {
 } ) => {
 	return (
 		<VStack
-			className={ classnames(
+			className={ clsx(
 				'woocommerce-settings-header edit-site-page-header',
 				{
 					'woocommerce-settings-header--has-tabs': hasTabs,

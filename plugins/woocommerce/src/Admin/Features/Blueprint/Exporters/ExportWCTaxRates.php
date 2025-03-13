@@ -1,11 +1,13 @@
 <?php
 
-declare( strict_types = 1);
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCTaxRates;
+use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\RunSql;
+use Automattic\WooCommerce\Blueprint\Util;
 
 /**
  * Class ExportWCTaxRates
@@ -14,69 +16,69 @@ use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */
-class ExportWCTaxRates implements StepExporter {
+class ExportWCTaxRates implements StepExporter, HasAlias {
 
 	/**
 	 * Export WooCommerce tax rates.
 	 *
-	 * @return SetWCTaxRates
+	 * @return array RunSql
 	 */
-	public function export() {
+	public function export(): array {
+		return array_merge(
+			$this->generateSteps( 'woocommerce_tax_rates' ),
+			$this->generateSteps( 'woocommerce_tax_rate_locations' )
+		);
+	}
+
+	/**
+	 * Generate SQL steps for exporting data.
+	 *
+	 * @param string $table Table identifier.
+	 * @return array Array of RunSql steps.
+	 */
+	private function generateSteps( string $table ): array {
 		global $wpdb;
-
-		// Fetch tax rates from the database.
-		$rates = $wpdb->get_results(
-			"
-            SELECT *
-            FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
-            ",
-			ARRAY_A
+		$table = $wpdb->prefix . $table;
+		return array_map(
+			fn( $record ) => new RunSql( Util::array_to_insert_sql( $record, $table, 'replace into' ) ),
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A )
 		);
-
-		// Fetch tax rate locations from the database.
-		$locations = $wpdb->get_results(
-			"
-            SELECT *
-            FROM {$wpdb->prefix}woocommerce_tax_rate_locations as locations
-            ",
-			ARRAY_A
-		);
-
-		// Create a new SetWCTaxRates step with the fetched data.
-		$step = new SetWCTaxRates( $rates, $locations );
-		$step->set_meta_values(
-			array(
-				'plugin' => 'woocommerce',
-			)
-		);
-
-		return $step;
 	}
 
 	/**
 	 * Get the name of the step.
 	 *
-	 * @return string
+	 * @return string Step name.
 	 */
-	public function get_step_name() {
-		return 'setWCTaxRates';
+	public function get_step_name(): string {
+		return 'runSql';
 	}
 
 	/**
 	 * Return label used in the frontend.
 	 *
-	 * @return string
+	 * @return string Label text.
 	 */
-	public function get_label() {
-		return __( 'Tax Rates', 'woocommerce' );
+	public function get_label(): string {
+		return __( 'Tax', 'woocommerce' );
 	}
 
 	/**
 	 * Return description used in the frontend.
 	 *
-	 * @return string
+	 * @return string Description text.
 	 */
-	public function get_description() {
-		return __( 'It includes tax rates and locations.', 'woocommerce' );
+	public function get_description(): string {
+		return __( 'It includes all settings in WooCommerce | Settings | Tax.', 'woocommerce' );
+	}
+
+	/**
+	 * Get the alias.
+	 *
+	 * @return string Alias name.
+	 */
+	public function get_alias(): string {
+		return 'setWCTaxRates';
 	}
 }

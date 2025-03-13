@@ -1,38 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
-import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import { DataForm } from '@wordpress/dataviews';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { useSettingsForm } from '../hooks/use-settings-form';
-import { CustomView } from '../components/custom-view';
-
-const Form = ( { settings }: { settings: SettingsField[] } ) => {
-	const { data, fields, form, updateField } = useSettingsForm( settings );
-
-	return (
-		<form id="mainform">
-			<div className="woocommerce-settings-content">
-				<DataForm
-					fields={ fields }
-					form={ form }
-					data={ data }
-					onChange={ updateField }
-				/>
-			</div>
-			<div className="woocommerce-settings-content-footer">
-				<Button variant="primary">
-					{ __( 'Save', 'woocommerce' ) }
-				</Button>
-			</div>
-		</form>
-	);
-};
+import { Form } from './form';
 
 export const LegacyContent = ( {
 	settingsPage,
@@ -50,11 +24,11 @@ export const LegacyContent = ( {
 	}
 
 	return (
-		<>
-			{ settingsData.start && (
-				<CustomView html={ settingsData.start.content } />
-			) }
-			<Form settings={ section.settings } />
-		</>
+		<Form
+			settings={ section.settings }
+			settingsData={ settingsData }
+			settingsPage={ settingsPage }
+			activeSection={ activeSection }
+		/>
 	);
 };

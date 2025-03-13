@@ -6,7 +6,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
-
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 /**
  * OrderController class.
  * Helper class which creates and syncs orders with the cart.
@@ -113,6 +113,7 @@ class OrderController {
 		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->update_meta_data( 'is_vat_exempt', wc()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no' );
 		$order->calculate_totals();
+		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
 	}
 
 	/**
@@ -394,7 +395,7 @@ class OrderController {
 
 		foreach ( $current_locale as $address_field_key => $address_field ) {
 			// Skip validation if field is not required.
-			if ( ! $address_field['required'] ) {
+			if ( true !== $address_field['required'] ) {
 				continue;
 			}
 

@@ -37,17 +37,18 @@ describe( 'ShippingRecommendations', () => {
 		} );
 	} );
 
-	it( 'should not render when WCS is already installed', () => {
+	it( 'should render when WCS&T is installed', () => {
 		useSelect.mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getActivePlugins: () => [ 'woocommerce-services' ],
+				isJetpackConnected: () => false,
 			} ) )
 		);
 		render( <ShippingRecommendations /> );
 
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 	} );
 
 	it( 'should not render when the WooCommerce Shipping plugin is active', () => {
@@ -63,20 +64,7 @@ describe( 'ShippingRecommendations', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'should not render when the WooCommerce Tax plugin is active', () => {
-		useSelect.mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getActivePlugins: () => [ 'woocommerce-shipping' ],
-			} ) )
-		);
-		render( <ShippingRecommendations /> );
-
-		expect(
-			screen.queryByText( 'WooCommerce Shipping' )
-		).not.toBeInTheDocument();
-	} );
-
-	it( 'should render WCS when not installed', () => {
+	it( 'should render when WooCommerce Shipping is not installed', () => {
 		render( <ShippingRecommendations /> );
 
 		expect(
@@ -84,7 +72,7 @@ describe( 'ShippingRecommendations', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'allows to install WCS', async () => {
+	it( 'allows to install WooCommerce Shipping', async () => {
 		const installAndActivatePluginsMock = jest
 			.fn()
 			.mockResolvedValue( undefined );

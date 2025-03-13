@@ -775,7 +775,7 @@ class WC_Helper_Updater {
 	 */
 	public static function get_updates_count_html() {
 		$count      = self::get_updates_count_based_on_site_status();
-		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+		$count_html = sprintf( ' <span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
 
 		return $count_html;
 	}
@@ -823,7 +823,7 @@ class WC_Helper_Updater {
 			sprintf(
 				// translators: %s: URL of WooCommerce.com subscriptions tab.
 				__( 'Please visit the <a href="%s" target="_blank">subscriptions page</a> and renew to continue receiving updates.', 'woocommerce' ),
-				esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) )
+				esc_url( admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' ) )
 			)
 		);
 	}

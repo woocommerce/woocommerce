@@ -7,7 +7,7 @@ import {
 } from '@woocommerce/admin-layout';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
+import { onboardingStore, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch, resolveSelect } from '@wordpress/data';
 /**
@@ -29,7 +29,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	}
 
 	const { invalidateResolutionForStoreSelector, optimisticallyCompleteTask } =
-		useDispatch( ONBOARDING_STORE_NAME );
+		useDispatch( onboardingStore );
 
 	const updateBadge = useCallback( async () => {
 		const badgeElements = document.querySelectorAll(
@@ -41,7 +41,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		}
 
 		const setupTaskList = await resolveSelect(
-			ONBOARDING_STORE_NAME
+			onboardingStore
 		).getTaskList( 'setup' );
 		if ( ! setupTaskList ) {
 			return;

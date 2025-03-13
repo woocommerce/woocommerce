@@ -173,6 +173,18 @@ function ProductCardFooter( props: { product: Product } ) {
 		return getPriceLabel();
 	};
 
+	const isInstalled = () => {
+		return product.slug && isProductInstalled( product.slug );
+	};
+
+	if ( isInstalled() ) {
+		return (
+			<span className="woocommerce-marketplace__product-card__installed-label">
+				{ __( 'Installed', 'woocommerce' ) }
+			</span>
+		);
+	}
+
 	if ( shouldShowAddToStore( product ) ) {
 		return (
 			<>

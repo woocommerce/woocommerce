@@ -33,9 +33,9 @@ export const getColorEdit = ( {
 						[ id ]: newValue,
 					} );
 				} }
-				id={ id }
 				color={ value }
 			/>
+			<input type="hidden" name={ id } value={ value } />
 		</Fragment>
 	);
 };

@@ -45,8 +45,8 @@
 		"dompurify": "^2.5.7",
 		"gridicons": "^3.4.2",
 		"moment": "^2.29.4",
-		"react-transition-group": "^4.4.5",
-		"react-visibility-sensor": "^5.1.1"
+		"react-intersection-observer": "^9.8.1",
+		"react-transition-group": "^4.4.5"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -130,7 +130,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"

@@ -122,6 +122,8 @@ final class ProductFilterStatus extends AbstractBlock {
 			return '';
 		}
 
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$stock_status_data       = $this->get_stock_status_counts( $block );
 		$stock_statuses          = wc_get_product_stock_status_options();
 		$filter_params           = $block->context['filterParams'] ?? array();
@@ -149,8 +151,8 @@ final class ProductFilterStatus extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-context'      => wp_json_encode(
+			'data-wp-interactive'  => $this->get_full_block_name(),
+			'data-wp-context'      => wp_json_encode(
 				array(
 					'hasFilterOptions'    => ! empty( $filter_options ),
 					/* translators: {{label}} is the status filter item label. */
@@ -158,7 +160,7 @@ final class ProductFilterStatus extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'data-wc-bind--hidden' => '!context.hasFilterOptions',
+			'data-wp-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( empty( $filter_options ) ) {
@@ -222,5 +224,16 @@ final class ProductFilterStatus extends AbstractBlock {
 				return $stock_count['count'] > 0;
 			}
 		);
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

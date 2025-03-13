@@ -139,14 +139,14 @@ add_action(
 We recommend using components from `@wordpress/components` as this will also keep the styling consistent. We will use the [ComboboxControl](https://wordpress.github.io/gutenberg/?path=/docs/components-comboboxcontrol--docs) core component in this field.
 
 We can add it to our `edit` function pretty easily by making use of `wp.components`. We will also add a constant for the filter options.
-**Note:** I also added the `blockProps` to the top element, we still recommend using this as some of these props are being used in the product form. When we add the block props we need to also let the form know it is an interactive element. We do this by adding at-least one attribute with the `__experimentalRole` set to `content`.
+**Note:** I also added the `blockProps` to the top element, we still recommend using this as some of these props are being used in the product form. When we add the block props we need to also let the form know it is an interactive element. We do this by adding at-least one attribute with the `role` set to `content`.
 So lets add this to our `index.js` attributes:
 
 ```javascript
  attributes: {
     "message": {
         "type": "string",
-        "__experimentalRole": "content",
+        "role": "content",
         "source": "text",
         "selector": "div"
     }

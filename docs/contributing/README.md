@@ -11,7 +11,7 @@ Interested in joining the Woo contributor community? The links in this doc summa
 The WooCommerce core plugin code can be found in our [monorepo](https://github.com/woocommerce/woocommerce). Here you can contribute to: 
 
 - [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)
-- [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks) 
+- [WooCommerce Blocks](../../plugins/woocommerce/client/blocks) 
 
 ### Code of Conduct
 
@@ -38,8 +38,3 @@ Our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/tru
 Security and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.
 
 Please report any vulnerabilities or security issues by reading through Woo's security policy [here](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md).
-
-
-
-
-

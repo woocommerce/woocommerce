@@ -30,11 +30,11 @@
 
 	// Override styles for woocommerce list items.
 	.woocommerce-list {
-		border-top: 1px solid $gray-200;
 		border-bottom: 1px solid $gray-200;
 
 		&__item {
 			padding: 0 48px;
+			border-color: $gray-200;
 
 			&:hover {
 				background-color: $white;
@@ -42,10 +42,6 @@
 				.woocommerce-list__item-title {
 					color: $gray-900;
 				}
-			}
-
-			&:not(:first-child) {
-				border-top: 1px solid $gray-200;
 			}
 
 			@media screen and ( max-width: 1024px ) {

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -10,17 +10,14 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { SHOW_PREPUBLISH_CHECKS_ENABLED_OPTION_NAME } from '../constants';
 
 export function useShowPrepublishChecks() {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const { isResolving, showPrepublishChecks } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const showPrepublishChecksOption =
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			getOption( SHOW_PREPUBLISH_CHECKS_ENABLED_OPTION_NAME ) || 'yes';
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			SHOW_PREPUBLISH_CHECKS_ENABLED_OPTION_NAME,
 		] );

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 

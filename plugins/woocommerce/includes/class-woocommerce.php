@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Caches\OrderCountCacheService;
 
 /**
  * Main WooCommerce Class.
@@ -42,7 +43,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.8.0';
+	public $version = '9.9.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -330,6 +331,7 @@ final class WooCommerce {
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
+		$container->get( OrderCountCacheService::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -341,6 +343,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::instance()->register();
 
 		// Classes inheriting from RestApiControllerBase.
@@ -831,6 +834,9 @@ final class WooCommerce {
 	 * Init WooCommerce when WordPress Initialises.
 	 */
 	public function init() {
+		// See the comment inside FeaturesController::__construct.
+		wc_get_container()->get( FeaturesController::class )->register_additional_features();
+
 		/**
 		 * Action triggered before WooCommerce initialization begins.
 		 */
@@ -871,16 +877,21 @@ final class WooCommerce {
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
-		$locale = determine_locale();
-
 		/**
 		 * Filter to adjust the WooCommerce locale to use for translations.
 		 */
-		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$locale                  = apply_filters( 'plugin_locale', determine_locale(), 'woocommerce' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$custom_translation_path = WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo';
+		$plugin_translation_path = WP_LANG_DIR . '/plugins/woocommerce-' . $locale . '.mo';
 
-		unload_textdomain( 'woocommerce', true );
-		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( WC_PLUGIN_FILE ) ) . '/i18n/languages' );
+		// If a custom translation exists (by default it will not, as it is not a standard WordPress convention)
+		// we unload the existing translation, then essentially layer the custom translation on top of the canonical
+		// translation. Otherwise, we simply step back and let WP manage things.
+		if ( is_readable( $custom_translation_path ) ) {
+			unload_textdomain( 'woocommerce' );
+			load_textdomain( 'woocommerce', $custom_translation_path );
+			load_textdomain( 'woocommerce', $plugin_translation_path );
+		}
 	}
 
 	/**

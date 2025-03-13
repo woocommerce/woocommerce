@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -83,7 +83,7 @@ const updateGlobalStylesWithDefaultValues = async (
 	const colorPalette = COLOR_PALETTES[ 0 ];
 
 	const allowTracking =
-		( await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		( await resolveSelect( optionsStore ).getOption(
 			'woocommerce_allow_tracking'
 		) ) === 'yes';
 
@@ -209,7 +209,7 @@ const createProducts = async () => {
 
 export const enableTracking = async () => {
 	try {
-		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		await dispatch( optionsStore ).updateOptions( {
 			woocommerce_allow_tracking: 'yes',
 		} );
 		window.wcTracks.isEnabled = true;

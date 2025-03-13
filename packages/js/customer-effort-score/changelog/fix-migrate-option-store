@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update import of OPTIONS_STORE_NAME to optionsStore

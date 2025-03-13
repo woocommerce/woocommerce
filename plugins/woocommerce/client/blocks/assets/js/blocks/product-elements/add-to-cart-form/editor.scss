@@ -1,0 +1,40 @@
+.wc-block-editor-add-to-cart-form-container {
+	cursor: help;
+	gap: 10px;
+	display: flex;
+	flex-direction: column;
+	width: 400px;
+	max-width: 100%;
+	.components-disabled {
+		display: flex;
+		> .quantity:not(.wc-block-components-quantity-selector) .qty {
+			padding-top: 0;
+			padding-bottom: 0;
+			height: calc(100% - 4px); // 4px border width
+		}
+	}
+}
+
+.quantity .qty {
+	// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
+	width: 3.631em;
+	text-align: center;
+}
+
+div.product form.cart div.quantity {
+	display: inline-block;
+	float: none;
+	vertical-align: middle;
+}
+
+input {
+	height: auto;
+}
+
+.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
+	.wc-block-components-quantity-selector {
+		margin: 0 4px 0 0;
+		background: #fff;
+		width: unset !important;
+	}
+}

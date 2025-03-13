@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Updated shipping methods store import to use the storeDescriptor instead of STORE_NAME_STRING

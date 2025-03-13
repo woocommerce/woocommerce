@@ -1,17 +1,36 @@
 .woocommerce-incentive-modal {
 	max-width: 840px;
+	border-radius: 8px;
 
 	& > .components-modal__content {
 		padding: 0;
 		margin-top: 0;
 	}
 
-	&__media {
-		@media screen and ( max-width: 1024px ) {
+	&__media.components-card-media {
+		overflow: hidden;
+		background-color: $studio-woocommerce-purple-0;
+		border-radius: 0 !important;
+		align-self: stretch;
+
+		display: flex;
+		align-items: center;
+
+		@media screen and ( max-width: $break-large ) {
 			width: 100%;
+			max-height: 200px;
 		}
 
-		background-color: $studio-woocommerce-purple-0;
+		& > img {
+			width: 360px;
+			padding: 0 $grid-unit-50;
+
+			@media screen and ( max-width: $break-large ) {
+				padding: 0;
+				margin: 0 auto;
+				width: 240px;
+			}
+		}
 	}
 
 	&__card {
@@ -22,37 +41,47 @@
 		display: flex;
 		align-items: center;
 
-		@media screen and ( max-width: 1024px ) {
+		@media screen and ( max-width: $break-large ) {
 			flex-direction: column;
 		}
 	}
 
-	&__body {
+	&__body.components-card__body {
 		flex: 1;
+		padding: $grid-unit-80 $grid-unit-40 $grid-unit-40;
+
+		@media screen and ( max-width: $break-large ) {
+			padding-top: $grid-unit-30;
+		}
+
+		@media screen and ( max-width: $break-small ) {
+			padding: $grid-unit-30;
+		}
 
 		& > h2 {
 			font-weight: 400;
 			font-size: 24px;
-			line-height: 32px;
+			line-height: 1.3;
+			margin-top: $grid-unit-20;
+			margin-bottom: $grid-unit-20;
 
-			@media screen and ( max-width: 1024px ) {
+			@media screen and ( max-width: $break-large ) {
 				font-size: 20px;
 			}
 
-			@media screen and ( max-width: 782px ) {
-				font-size: 15px;
-				line-height: 20px;
+			@media screen and ( max-width: $break-medium ) {
+				font-size: 17px;
 			}
 		}
 		& > p {
 			font-size: 16px;
 			line-height: 24px;
 
-			@media screen and ( max-width: 1024px ) {
+			@media screen and ( max-width: $break-large ) {
 				font-size: 15px;
 			}
 
-			@media screen and ( max-width: 782px ) {
+			@media screen and ( max-width: $break-medium ) {
 				font-size: 13px;
 				line-height: 20px;
 			}
@@ -64,35 +93,27 @@
 		}
 
 		& > .woocommerce-incentive-model__actions {
-			margin-top: 32px;
+			margin-top: $grid-unit-40;
 
-			@media screen and ( max-width: 1024px ) {
+			button.components-button {
+				height: 32px;
+				padding: $grid-unit-05 $grid-unit-10;
+			}
+
+			@media screen and ( max-width: $break-large ) {
 				text-align: right;
+				margin-top: $grid-unit-30;
 			}
 		}
 	}
 
-	&__content img {
-		width: 280px;
-		padding: 76px 40px;
-
-		@media screen and ( max-width: 1024px ) {
-			max-height: 220px;
-			padding: 0;
-		}
-
-		@media screen and ( max-width: 782px ) {
-			max-height: 220px;
-			padding: 0;
-		}
-	}
-
-	@media screen and ( max-width: 1024px ) {
+	@media screen and ( max-width: $break-large ) {
 		margin: auto;
 		max-width: 500px;
 	}
 
-	@media screen and ( max-width: 782px ) {
-		margin: auto $gap;
+	@media screen and ( max-width: $break-small ) {
+		margin: auto $grid-unit-20;
+		max-width: 100%;
 	}
 }

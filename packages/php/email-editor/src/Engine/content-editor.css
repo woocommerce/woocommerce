@@ -1,0 +1,116 @@
+/*
+ * Styles for the email editor.
+ */
+/*
+ * Flex layout used for buttons block for email editor.
+ */
+.is-layout-email-flex {
+	flex-wrap: nowrap;
+}
+
+:where(body .is-layout-flex) {
+	gap: var(--wp--style--block-gap, 16px);
+}
+
+.is-mobile-preview .is-layout-email-flex {
+	display: block;
+}
+
+.is-mobile-preview .is-layout-email-flex .block-editor-block-list__block {
+	padding: 5px 0;
+	width: 100%;
+}
+
+.is-mobile-preview .is-layout-email-flex .wp-block-button__link {
+	width: 100%;
+}
+
+/*
+ * Email Editor specific styles for vertical gap between blocks in column and group.
+ * This is needed because we disable layout for core/group, core/column and core/columns blocks, and .is-layout-flex is not applied.
+ */
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+> .wp-block-column
+> .wp-block:first-child,
+.wp-block-group > .wp-block:first-child {
+	margin-top: 0;
+}
+
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+> .wp-block-column
+> .wp-block,
+.wp-block-group > .wp-block {
+	margin-bottom: var(--wp--style--block-gap, 16px);
+	margin-top: var(--wp--style--block-gap, 16px);
+}
+
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+> .wp-block-column
+> .wp-block:not([aria-hidden="true"]):last-of-type,
+.wp-block-group > .wp-block:not([aria-hidden="true"]):last-of-type {
+	margin-bottom: 0;
+}
+
+/*
+ * Use box sizing border box for columns that have defined a width (they have flex-basis set).
+ */
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+	> .wp-block-column[style*='flex-basis'] {
+	box-sizing: border-box;
+}
+
+/*
+ * For the WYSIWYG experience we don't want to display any margins between blocks in the editor
+ */
+.wp-block {
+	clear: both; // for ensuring that floated elements (images) are cleared
+}
+
+/*
+ * Image block enhancements
+ */
+.wp-block-image figcaption {
+	/* Resetting the margin for images in the editor to avoid unexpected spacing */
+	margin: 0;
+}
+
+.wp-block-image.alignleft,
+.wp-block-image.alignright {
+	margin-inline: 0 0;
+	text-align: center;
+}
+
+.wp-block-image.aligncenter {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.wp-block-image.alignright {
+	margin-left: auto;
+}
+
+/*
+ * Set default padding-left to have consistent default look in editor and in email
+ * This also overrides the default values in browsers for padding-inline-start
+ */
+ul,
+ol,
+ul.has-background,
+ol.has-background {
+	padding-left: 40px;
+}
+
+/*
+ * Override default button border radius which is set in core to 9999px
+ */
+.wp-block-button__link {
+	border-radius: 0;
+}
+
+/*
+ * Mobile preview fixes
+ */
+.is-mobile-preview figure > div {
+	max-width: 100% !important;
+	height: auto !important;
+}

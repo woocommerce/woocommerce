@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { find, first, without } from 'lodash';
-import React from 'react';
 import {
 	Card,
 	CardBody,

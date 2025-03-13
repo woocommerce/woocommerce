@@ -223,7 +223,6 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_private_link',
 			'woocommerce_share_key',
 			'woocommerce_show_lys_tour',
-			'woocommerce_order_attribution_install_banner_dismissed',
 			'woocommerce_remote_variant_assignment',
 			'woocommerce_gateway_order',
 			// WC Test helper options.

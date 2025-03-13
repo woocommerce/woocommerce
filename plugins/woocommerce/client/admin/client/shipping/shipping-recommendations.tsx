@@ -5,12 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
-import ExternalIcon from 'gridicons/dist/external';
+import { pluginsStore } from '@woocommerce/data';
+import { getAdminLink } from '@woocommerce/settings';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore VisuallyHidden is present, it's just not typed
 // eslint-disable-next-line @woocommerce/dependency-group
-import { CardFooter, Button, VisuallyHidden } from '@wordpress/components';
+import { CardFooter } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -20,15 +20,16 @@ import {
 	DismissableList,
 	DismissableListHeading,
 } from '../settings-recommendations/dismissable-list';
-import WooCommerceServicesItem from './woocommerce-services-item';
+import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
 const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
 		Array< string >
 	>( [] );
 
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 
 	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
 		if ( pluginsBeingSetup.length > 0 ) {
@@ -84,18 +85,17 @@ export const ShippingRecommendationsList = ( {
 			) ) }
 		</ul>
 		<CardFooter>
-			<Button
-				className="woocommerce-recommended-shipping-extensions__more_options_cta"
-				href="https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
-				target="_blank"
-				isTertiary
-			>
-				{ __( 'See more options', 'woocommerce' ) }
-				<VisuallyHidden>
-					{ __( '(opens in a new tab)', 'woocommerce' ) }
-				</VisuallyHidden>
-				<ExternalIcon size={ 18 } />
-			</Button>
+			<TrackedLink
+				message={ __(
+					// translators: {{Link}} is a placeholder for a html element.
+					'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+					'woocommerce'
+				) }
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+				) }
+				eventName="settings_shipping_recommendation_visit_marketplace_click"
+			/>
 		</CardFooter>
 	</DismissableList>
 );
@@ -104,23 +104,17 @@ const ShippingRecommendations: React.FC = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
 	const activePlugins = useSelect(
-		( select ) =>
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			select( PLUGINS_STORE_NAME ).getActivePlugins(),
+		( select ) => select( pluginsStore ).getActivePlugins(),
 		[]
 	);
 
-	if (
-		activePlugins.includes( 'woocommerce-services' ) ||
-		activePlugins.includes( 'woocommerce-shipping' ) ||
-		activePlugins.includes( 'woocommerce-tax' )
-	) {
+	if ( activePlugins.includes( 'woocommerce-shipping' ) ) {
 		return null;
 	}
 
 	return (
 		<ShippingRecommendationsList>
-			<WooCommerceServicesItem
+			<WoocommerceShippingItem
 				pluginsBeingSetup={ pluginsBeingSetup }
 				onSetupClick={ setupPlugin }
 			/>

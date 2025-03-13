@@ -4,7 +4,7 @@
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
@@ -184,8 +184,7 @@ function _CustomerEffortScoreTracks( {
  */
 export const CustomerEffortScoreTracks = compose(
 	withSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const cesShownForActions = getOption( SHOWN_FOR_ACTIONS_OPTION_NAME );
 

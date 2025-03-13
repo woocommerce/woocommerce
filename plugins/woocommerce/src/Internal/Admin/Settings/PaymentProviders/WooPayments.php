@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
+use WooCommerce\Admin\Experimental_Abtest;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -155,38 +156,50 @@ class WooPayments extends PaymentGateway {
 			return add_query_arg( $params, $connect_url );
 		}
 
-		// We don't have an account yet, so the onboarding link is to kickstart the process.
+		// We don't have an account yet, so the onboarding link is used to kickstart the process.
 
-		// Apply our routing logic to determine if we should do a live onboarding/account.
+		// Default to test-account-first onboarding.
 		$live_onboarding = false;
 
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-
 		/*
-		 * For answers provided in the onboarding profile, we will only consider live onboarding if:
-		 * Merchant selected “I’m already selling” and answered either:
-		 * - Yes, I’m selling online.
-		 * - I’m selling both online and offline.
+		 * Apply our routing logic to determine if we should do a live onboarding/account.
 		 *
-		 * For existing stores, we will only consider live onboarding if all are true:
+		 * For new stores (not yet launched aka in Coming Soon mode),
+		 * based on the answers provided in the onboarding profile, we will do live onboarding if:
+		 * - Merchant selected “I’m already selling” AND answered either:
+		 *   - Yes, I’m selling online.
+		 *   - I’m selling both online and offline.
+		 *
+		 * For launched stores, we will only consider live onboarding if all are true:
 		 * - Store is at least 90 days old.
 		 * - Store has an active payments gateway (other than WooPayments).
 		 * - Store has processed a live electronic payment in the past 90 days (any gateway).
 		 *
 		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
 		 */
-		if (
-			isset( $onboarding_profile['business_choice'] ) && 'im_already_selling' === $onboarding_profile['business_choice'] &&
-			isset( $onboarding_profile['selling_online_answer'] ) && (
-				'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
-				'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-			)
+		if ( filter_var( get_option( 'woocommerce_coming_soon' ), FILTER_VALIDATE_BOOLEAN ) ) {
+			$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+			if (
+				isset( $onboarding_profile['business_choice'] ) && 'im_already_selling' === $onboarding_profile['business_choice'] &&
+				isset( $onboarding_profile['selling_online_answer'] ) && (
+					'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
+					'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+				)
+			) {
+				$live_onboarding = true;
+			}
+		} elseif (
+			WCAdminHelper::is_wc_admin_active_for( 90 * DAY_IN_SECONDS ) &&
+			$this->has_enabled_other_ecommerce_gateways() &&
+			$this->has_orders()
 		) {
 			$live_onboarding = true;
-		} elseif ( WCAdminHelper::is_wc_admin_active_for( 90 * DAY_IN_SECONDS ) &&
-			$this->has_enabled_other_ecommerce_gateways() &&
-			$this->has_orders() ) {
+		}
 
+		// We run an experiment to determine the efficiency of test-account-first onboarding vs straight-to-live onboarding.
+		// If the experiment is active and the store is in the treatment group, we will do live onboarding.
+		// Otherwise, we will do test-account-first onboarding (control group).
+		if ( ! $live_onboarding && Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_onboarding_2025_v1' ) ) {
 			$live_onboarding = true;
 		}
 

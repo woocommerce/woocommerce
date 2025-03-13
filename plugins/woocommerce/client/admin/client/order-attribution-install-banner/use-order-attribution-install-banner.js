@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useCallback, useMemo } from '@wordpress/element';
 import {
-	OPTIONS_STORE_NAME,
-	PLUGINS_STORE_NAME,
+	optionsStore,
+	pluginsStore,
 	useUser,
+	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getPath } from '@woocommerce/navigation';
@@ -18,17 +19,16 @@ import { isWcVersion } from '@woocommerce/settings';
 import { STORE_KEY } from '~/marketing/data/constants';
 import '~/marketing/data';
 
-const OPTION_NAME_BANNER_DISMISSED =
-	'woocommerce_order_attribution_install_banner_dismissed';
+const USER_META_BANNER_DISMISSED = 'order_attribution_install_banner_dismissed';
 const OPTION_VALUE_YES = 'yes';
 const OPTION_NAME_REMOTE_VARIANT_ASSIGNMENT =
 	'woocommerce_remote_variant_assignment';
 
 const getThreshold = ( percentages ) => {
 	const defaultPercentages = [
-		[ '9.7', 100 ], // 100%
-		[ '9.6', 60 ], // 60%
-		[ '9.5', 10 ], // 10%
+		[ '9.7', 10 ], // 10%
+		[ '9.6', 10 ], // 10%
+		[ '9.5', 1 ], // 1%
 	];
 
 	if ( ! Array.isArray( percentages ) || percentages.length === 0 ) {
@@ -36,7 +36,7 @@ const getThreshold = ( percentages ) => {
 	}
 
 	// Sort the percentages in descending order by version, to ensure we get the highest version first so the isWcVersion() check works correctly.
-	// E.g. if we are on 9.7 but the percentages are in version ascending order, we would get 10% instead of 100%.
+	// E.g. if we are on 9.7 but the percentages are in version ascending order, we would get 1% instead of 10%.
 	percentages.sort( ( a, b ) => parseFloat( b[ 0 ] ) - parseFloat( a[ 0 ] ) );
 
 	for ( let [ version, percentage ] of percentages ) {
@@ -72,13 +72,16 @@ const shouldPromoteOrderAttribution = (
  * A utility hook designed specifically for the order attribution install banner,
  * which determines if the banner should be displayed, checks if it has been dismissed, and provides a function to dismiss it.
  */
-export const useOrderAttributionInstallBanner = () => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+export const useOrderAttributionInstallBanner = ( { isInstalling } ) => {
 	const { currentUserCan } = useUser();
+	const {
+		[ USER_META_BANNER_DISMISSED ]: bannerDismissed,
+		updateUserPreferences,
+	} = useUserPreferences();
 
 	const dismiss = ( eventContext = 'analytics-overview' ) => {
-		updateOptions( {
-			[ OPTION_NAME_BANNER_DISMISSED ]: OPTION_VALUE_YES,
+		updateUserPreferences( {
+			[ USER_META_BANNER_DISMISSED ]: OPTION_VALUE_YES,
 		} );
 		recordEvent( 'order_attribution_install_banner_dismissed', {
 			path: getPath(),
@@ -88,7 +91,7 @@ export const useOrderAttributionInstallBanner = () => {
 
 	const { canUserInstallPlugins, orderAttributionInstallState } = useSelect(
 		( select ) => {
-			const { getPluginInstallState } = select( PLUGINS_STORE_NAME );
+			const { getPluginInstallState } = select( pluginsStore );
 			const installState = getPluginInstallState(
 				'woocommerce-analytics'
 			);
@@ -103,20 +106,19 @@ export const useOrderAttributionInstallBanner = () => {
 
 	const { loading, isBannerDismissed, remoteVariantAssignment } = useSelect(
 		( select ) => {
-			const { getOption, hasFinishedResolution } =
-				select( OPTIONS_STORE_NAME );
+			const { getOption, hasFinishedResolution } = select( optionsStore );
 
 			return {
 				loading: ! hasFinishedResolution( 'getOption', [
-					OPTION_NAME_BANNER_DISMISSED,
+					OPTION_NAME_REMOTE_VARIANT_ASSIGNMENT,
 				] ),
-				isBannerDismissed: getOption( OPTION_NAME_BANNER_DISMISSED ),
+				isBannerDismissed: bannerDismissed,
 				remoteVariantAssignment: getOption(
 					OPTION_NAME_REMOTE_VARIANT_ASSIGNMENT
 				),
 			};
 		},
-		[]
+		[ bannerDismissed ]
 	);
 
 	const { loadingRecommendations, recommendations } = useSelect(
@@ -162,6 +164,10 @@ export const useOrderAttributionInstallBanner = () => {
 			return false;
 		}
 
+		if ( isInstalling ) {
+			return true;
+		}
+
 		const isPluginInstalled = [ 'installed', 'activated' ].includes(
 			orderAttributionInstallState
 		);
@@ -180,6 +186,7 @@ export const useOrderAttributionInstallBanner = () => {
 		orderAttributionInstallState,
 		remoteVariantAssignment,
 		percentages,
+		isInstalling,
 	] );
 
 	return {

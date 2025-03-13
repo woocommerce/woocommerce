@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	TaskType,
 	useUserPreferences,
 } from '@woocommerce/data';
@@ -45,7 +45,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		undoSnoozeTask,
 		visitedTask,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( onboardingStore );
 	const userPreferences = useUserPreferences();
 
 	const {

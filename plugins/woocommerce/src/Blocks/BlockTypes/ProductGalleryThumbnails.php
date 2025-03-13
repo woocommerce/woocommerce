@@ -50,7 +50,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	 * @return string
 	 */
 	protected function generate_view_all_html( $remaining_thumbnails_count ) {
-		$view_all_html = '<div class="wc-block-product-gallery-thumbnails__thumbnail__overlay" data-wc-on--click="actions.openDialog" data-wc-on--keydown="actions.onViewAllImagesKeyDown" tabindex="0">
+		$view_all_html = '<div class="wc-block-product-gallery-thumbnails__thumbnail__overlay" data-wp-on--click="actions.openDialog" data-wp-on--keydown="actions.onViewAllImagesKeyDown" tabindex="0">
 			<span class="wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count">+%1$s</span>
 			<span class="wc-block-product-gallery-thumbnails__thumbnail__view-all">%2$s</span>
 			</div>';
@@ -177,11 +177,11 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 			if ( $processor->next_tag( 'img' ) ) {
 				$processor->add_class( 'wc-block-product-gallery-thumbnails__image' );
-				$processor->set_attribute( 'data-wc-on--keydown', 'actions.onThumbnailKeyDown' );
+				$processor->set_attribute( 'data-wp-on--keydown', 'actions.onThumbnailKeyDown' );
 				$processor->set_attribute( 'tabindex', '0' );
 				$processor->set_attribute(
-					'data-wc-on--click',
-					'actions.selectImage'
+					'data-wp-on--click',
+					'actions.selectCurrentImage'
 				);
 
 				$html .= $processor->get_updated_html();
@@ -196,7 +196,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		$allowed_html['img']['tabindex'] = true;
 
 		return sprintf(
-			'<div class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s" data-wc-interactive=\'%4$s\'>
+			'<div class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s" data-wp-interactive="woocommerce/product-gallery">
 				%3$s
 			</div>',
 			esc_attr( $classes_and_styles['classes'] . ' ' . $number_of_thumbnails_class ),
@@ -205,7 +205,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				$html,
 				$allowed_html
 			),
-			wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 		);
 	}
 }

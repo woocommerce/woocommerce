@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
 import userEvent from '@testing-library/user-event';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -55,7 +56,7 @@ jest.mock( '@wordpress/data', () => ( {
 			hasFinishedResolution: () => true,
 			getOption: ( key: string ) => {
 				return {
-					wc_connect_options: {
+					wcshipping_options: {
 						tos_accepted: true,
 					},
 					woocommerce_setup_jetpack_opted_in: 1,
@@ -63,6 +64,10 @@ jest.mock( '@wordpress/data', () => ( {
 			},
 		} ) )
 	),
+} ) );
+
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
 } ) );
 
 const taskProps: TaskProps = {
@@ -78,7 +83,7 @@ const ShippingRecommendation = ( props: ShippingRecommendationProps ) => {
 };
 
 describe( 'ShippingRecommendation', () => {
-	test( 'should show plugins step when woocommerce-services is not installed and activated', () => {
+	test( 'should show plugins step when woocommerce-shipping is not installed and activated', () => {
 		const { getByText } = render(
 			<ShippingRecommendation
 				isJetpackConnected={ false }
@@ -89,12 +94,12 @@ describe( 'ShippingRecommendation', () => {
 		expect( getByText( 'MockedPlugins' ) ).toBeInTheDocument();
 	} );
 
-	test( 'should show connect step when WCS&T is activated but not yet connected', () => {
+	test( 'should show connect step when WooCommerce Shipping is activated but not yet connected', () => {
 		const { getByRole } = render(
 			<ShippingRecommendation
 				isJetpackConnected={ false }
 				isResolving={ false }
-				activePlugins={ [ 'woocommerce-services' ] }
+				activePlugins={ [ 'woocommerce-shipping' ] }
 			/>
 		);
 		expect(
@@ -102,12 +107,12 @@ describe( 'ShippingRecommendation', () => {
 		).toBeInTheDocument();
 	} );
 
-	test( 'should show "complete task" button when WCS&T is activated and Jetpack is connected', () => {
+	test( 'should show "complete task" button when WooCommerce Shipping is activated and Jetpack is connected', () => {
 		const { getByRole } = render(
 			<ShippingRecommendation
 				isJetpackConnected={ true }
 				isResolving={ false }
-				activePlugins={ [ 'woocommerce-services' ] }
+				activePlugins={ [ 'woocommerce-shipping' ] }
 			/>
 		);
 		expect(
@@ -120,7 +125,7 @@ describe( 'ShippingRecommendation', () => {
 			<ShippingRecommendation
 				isJetpackConnected={ true }
 				isResolving={ false }
-				activePlugins={ [ 'woocommerce-services' ] }
+				activePlugins={ [ 'woocommerce-shipping' ] }
 			/>
 		);
 
@@ -138,5 +143,39 @@ describe( 'ShippingRecommendation', () => {
 
 		await userEvent.click( getByText( 'Set store location' ) );
 		expect( getByText( 'Address' ) ).toBeInTheDocument();
+	} );
+
+	test( 'should trigger event tasklist_shipping_recommendation_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+		render( <ShippingRecommendation /> );
+
+		fireEvent.click(
+			screen.getByText( 'Official WooCommerce Marketplace' )
+		);
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'tasklist_shipping_recommendation_visit_marketplace_click',
+			{}
+		);
+	} );
+
+	test( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+		const mockLocation = {
+			href: 'test',
+		} as Location;
+
+		mockLocation.href = 'test';
+		Object.defineProperty( global.window, 'location', {
+			value: mockLocation,
+		} );
+
+		render( <ShippingRecommendation /> );
+
+		fireEvent.click(
+			screen.getByText( 'Official WooCommerce Marketplace' )
+		);
+
+		expect( mockLocation.href ).toContain(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
+		);
 	} );
 } );

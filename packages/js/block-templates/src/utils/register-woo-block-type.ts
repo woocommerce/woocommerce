@@ -9,6 +9,7 @@ import {
 } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
+import { isWpVersion, getSetting } from '@woocommerce/settings';
 import { ComponentType } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet, natively (not until 7.0.0).
@@ -90,37 +91,61 @@ function getEdit<
 	};
 }
 
+let requiresExperimentalRole = isWpVersion( '6.7', '<' );
+const adminSettings: { gutenberg_version?: string } = getSetting( 'admin' );
+if ( requiresExperimentalRole && adminSettings.gutenberg_version ) {
+	requiresExperimentalRole =
+		parseFloat( adminSettings?.gutenberg_version ) < 19.4;
+}
+
 function augmentAttributes<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( attributes: T ) {
 	// Note: If you modify this function, also update the server-side
 	// Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::augment_attributes() function.
-	return {
+	const augmentedAttributes = {
 		...attributes,
 		...{
 			_templateBlockId: {
 				type: 'string',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			_templateBlockOrder: {
 				type: 'integer',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			_templateBlockHideConditions: {
 				type: 'array',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			_templateBlockDisableConditions: {
 				type: 'array',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			disabled: attributes.disabled || {
 				type: 'boolean',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 		},
 	};
+	if ( requiresExperimentalRole ) {
+		return Object.keys( augmentedAttributes ).reduce(
+			( acc, key: keyof T ) => {
+				if ( augmentedAttributes[ key ].role ) {
+					acc[ key ] = {
+						...augmentedAttributes[ key ],
+						__experimentalRole: augmentedAttributes[ key ].role,
+					};
+				} else {
+					acc[ key ] = augmentedAttributes[ key ];
+				}
+				return acc;
+			},
+			{} as T
+		);
+	}
+	return augmentedAttributes;
 }
 
 /**

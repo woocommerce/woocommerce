@@ -2,9 +2,8 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { Link } from '@woocommerce/components';
-import { isRTL, __ } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -14,13 +13,16 @@ import './product-list-header.scss';
 
 interface ProductListHeaderProps {
 	title: string;
+	description: string;
 	groupURL: string | null;
+	groupURLText: string | null;
+	groupURLType: 'wc-admin' | 'wp-admin' | 'external' | undefined; // defined in Link component
 }
 
 export default function ProductListHeader(
 	props: ProductListHeaderProps
 ): JSX.Element {
-	const { title, groupURL } = props;
+	const { title, description, groupURL, groupURLText, groupURLType } = props;
 	const isLoading = title === '';
 
 	const classNames = clsx( 'woocommerce-marketplace__product-list-header', {
@@ -32,11 +34,19 @@ export default function ProductListHeader(
 			<h2 className="woocommerce-marketplace__product-list-title">
 				{ title }
 			</h2>
+			{ description && (
+				<p className="woocommerce-marketplace__product-list-description">
+					{ description }
+				</p>
+			) }
 			{ groupURL !== null && (
 				<span className="woocommerce-marketplace__product-list-link">
 					<Link
 						href={ groupURL }
-						target="_blank"
+						type={ groupURLType }
+						target={
+							groupURLType === 'external' ? '_blank' : undefined
+						}
 						onClick={ () => {
 							recordEvent( 'marketplace_see_more_clicked', {
 								group_title: title,
@@ -44,8 +54,7 @@ export default function ProductListHeader(
 							} );
 						} }
 					>
-						{ __( 'See more', 'woocommerce' ) }
-						<Icon icon={ isRTL() ? chevronLeft : chevronRight } />
+						{ groupURLText ?? __( 'See more', 'woocommerce' ) }
 					</Link>
 				</span>
 			) }

@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsDataSourcePoller;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
-use Automattic\WooCommerce\Internal\Admin\Notes\ChoosingTheme;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
@@ -22,7 +21,6 @@ use Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
 use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Internal\Admin\Notes\ManageOrdersOnTheGo;
 use Automattic\WooCommerce\Internal\Admin\Notes\MarketingJetpack;
-use Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use Automattic\WooCommerce\Internal\Admin\Notes\MigrateFromShopify;
 use Automattic\WooCommerce\Internal\Admin\Notes\MobileApp;
 use Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
@@ -69,8 +67,6 @@ class Events {
 	 * @var array
 	 */
 	private static $note_classes_to_added_or_updated = array(
-		AddFirstProduct::class,
-		ChoosingTheme::class,
 		CustomizeStoreWithBlocks::class,
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,
@@ -146,10 +142,6 @@ class Events {
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			RemoteInboxNotificationsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 			RemoteInboxNotificationsEngine::run();
-		}
-
-		if ( $this->is_merchant_email_notifications_enabled() ) {
-			MerchantEmailNotifications::run();
 		}
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {

@@ -4,11 +4,20 @@
  *
  * @package WooCommerce\Tests\Cart.
  */
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+	/**
+	 * Called before every test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+	}
 
 	/**
 	 * tearDown.
@@ -94,6 +103,37 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$variable_product->delete( true );
+	}
+
+	/**
+	 * @testdox should throw a notice to the cart if using an invalid product_id.
+	 */
+	public function test_add_variation_to_the_cart_invalid_product() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$single_product = WC_Helper_Product::create_simple_product();
+
+		// Add variation using parent id.
+		WC()->cart->add_to_cart(
+			-1,
+			1,
+			$single_product->get_id()
+		);
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Check for cart contents.
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$expected = sprintf( 'The selected product is invalid.' );
+		$this->assertEquals( $expected, $notices['error'][0]['notice'] );
+
+		// Reset cart.
+		WC()->cart->empty_cart();
+		WC()->customer->set_is_vat_exempt( false );
 	}
 
 	/**
@@ -188,6 +228,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Set address for shipping calculation required for "woocommerce_shipping_cost_requires_address".
 		WC()->cart->get_customer()->set_shipping_country( 'US' );
 		WC()->cart->get_customer()->set_shipping_state( 'NY' );
+		WC()->cart->get_customer()->set_shipping_city( 'New York' );
 		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
@@ -196,6 +237,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		WC()->cart->get_customer()->set_shipping_country( 'GB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( '' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
 
@@ -215,12 +257,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Country that does not require state.
 		WC()->cart->get_customer()->set_shipping_country( 'LB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
 		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
 		// Country that does not require postcode.
 		WC()->cart->get_customer()->set_shipping_country( 'NG' );
 		WC()->cart->get_customer()->set_shipping_state( 'AB' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
@@ -229,6 +273,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		WC()->cart->get_customer()->set_shipping_country( 'GB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
 

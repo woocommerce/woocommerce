@@ -32,13 +32,13 @@ function useProductMetadata( options?: Options ) {
 			// @ts-ignore
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const { meta_data: metadata }: Product = getEditedEntityRecord(
 				'postType',
 				postType,
 				id
 			);
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const isResolutionFinished = hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', postType, id ]

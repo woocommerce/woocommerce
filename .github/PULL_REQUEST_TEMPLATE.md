@@ -13,7 +13,23 @@
 
 <!-- Describe the changes made to this Pull Request and the reason for such changes. -->
 
+<!-- For bug fixes: If known, please provide links to help with traceability and escape analysis. -->
+<!-- Please include a link to the issue of the bug being fixed, if one doesn't exist please create it. -->
+<!-- If the PR that introduced the bug is known, please also add its link below. -->
+
 Closes # .
+
+(For Bug Fixes) Bug introduced in PR # .
+
+### Screenshots or screen recordings:
+
+<!-- If this PR includes UI changes, please provide screenshots or a screen recording for clarity. -->
+<!-- This section can be removed if not applicable. -->
+
+| Before | After |
+| ------ | ----- |
+|        |       |
+
 
 <!-- Begin testing instructions -->
 
@@ -28,6 +44,13 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 3.
 
 <!-- End testing instructions -->
+
+### Testing that has already taken place:
+
+<!-- Detail any testing that has already been conducted. -->
+<!-- Include environment details such as hosting type, plugins, theme, store size, store age, and relevant settings. -->
+<!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
+<!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
 
 ### Changelog entry
 

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 import { WCUser } from '@woocommerce/data';
 
 /**
@@ -37,7 +36,7 @@ describe( 'NoPermissions', () => {
 			],
 			currentUser: {
 				capabilities: {},
-			} as WCUser< 'capabilities' >,
+			} as WCUser,
 		},
 		sendEvent: mockSendEvent,
 		navigationProgress: 50,

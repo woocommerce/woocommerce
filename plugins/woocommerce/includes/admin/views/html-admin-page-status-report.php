@@ -1088,12 +1088,15 @@ if ( 0 < $mu_plugins_count ) :
 </table>
 
 <?php
-	// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	/**
 	 * Action fired when the WooCommerce system status report is rendered.
+	 *
+	 * @since 2.4.0 Introduced hook.
+	 * @since 9.8.0 Made SSR report data available to callbacks.
+	 *
+	 * @param array|WP_Error $report Report data.
 	 */
-	do_action( 'woocommerce_system_status_report' );
-	// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+	do_action( 'woocommerce_system_status_report', $report );
 ?>
 
 <table class="wc_status_table widefat" cellspacing="0">

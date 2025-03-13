@@ -51,7 +51,7 @@ const maybeHideInventoryAdvancedCollapsible = createHigherOrderComponent(
 						);
 						const advancedCollapsibleBlock = select(
 							'core/block-editor'
-							// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+							// @ts-expect-error Selector is not typed
 						).getBlock( props?.clientId as string );
 
 						let allBlocksInvisible = false;

@@ -1,4 +1,3 @@
-export { JetpackInstallationStepper } from './JetpackInstallationStepper';
 export {
 	useJetpackPluginState,
 	JetpackPluginStates,

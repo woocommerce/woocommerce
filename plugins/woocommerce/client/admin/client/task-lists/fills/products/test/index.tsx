@@ -251,4 +251,33 @@ describe( 'Products', () => {
 				.length
 		).toBeGreaterThanOrEqual( 1 );
 	} );
+
+	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+		const { getByText } = render( <Products /> );
+
+		userEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'tasklist_add_product_visit_marketplace_click',
+			{}
+		);
+	} );
+
+	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+		const mockLocation = {
+			href: 'test',
+		} as Location;
+
+		mockLocation.href = 'test';
+		Object.defineProperty( global.window, 'location', {
+			value: mockLocation,
+		} );
+
+		const { getByText } = render( <Products /> );
+
+		userEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+		expect( mockLocation.href ).toContain(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+		);
+	} );
 } );

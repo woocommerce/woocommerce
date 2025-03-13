@@ -17,7 +17,6 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import React from 'react';
-
 /**
  * Internal dependencies
  */

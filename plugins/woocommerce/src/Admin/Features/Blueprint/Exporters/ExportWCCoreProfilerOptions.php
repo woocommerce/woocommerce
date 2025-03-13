@@ -21,7 +21,7 @@ class ExportWCCoreProfilerOptions implements StepExporter, HasAlias {
 	 * @return SetSiteOptions
 	 */
 	public function export() {
-		$step = new SetSiteOptions(
+		return new SetSiteOptions(
 			array(
 				'blogname'                       => $this->wp_get_option( 'blogname' ),
 				'woocommerce_allow_tracking'     => $this->wp_get_option( 'woocommerce_allow_tracking' ),
@@ -29,14 +29,6 @@ class ExportWCCoreProfilerOptions implements StepExporter, HasAlias {
 				'woocommerce_default_country'    => $this->wp_get_option( 'woocommerce_default_country' ),
 			)
 		);
-		$step->set_meta_values(
-			array(
-				'plugin' => 'woocommerce',
-				'alias'  => $this->get_alias(),
-			)
-		);
-
-		return $step;
 	}
 
 	/**

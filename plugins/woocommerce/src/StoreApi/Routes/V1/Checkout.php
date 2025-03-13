@@ -1,5 +1,5 @@
 <?php
-declare( strict_types = 1);
+declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
@@ -8,8 +8,9 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
-use Automattic\WooCommerce\Blocks\Domain\Services\Schema\DocumentObject;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Admin\Features\Features;
+
 /**
  * Checkout class.
  */
@@ -85,6 +86,7 @@ class Checkout extends AbstractCartRoute {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
+				'validate_callback'   => [ $this, 'validate_callback' ],
 				'args'                => array_merge(
 					[
 						'payment_data'      => [
@@ -110,6 +112,28 @@ class Checkout extends AbstractCartRoute {
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
 				),
 			],
+			[
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => [ $this, 'get_response' ],
+				'permission_callback' => '__return_true',
+				'args'                => array_merge(
+					[
+						'additional_fields' => [
+							'description' => __( 'Additional fields related to the order.', 'woocommerce' ),
+							'type'        => 'object',
+						],
+						'payment_method'    => [
+							'description' => __( 'Selected payment method for the order.', 'woocommerce' ),
+							'type'        => 'string',
+						],
+						'order_notes'       => [
+							'description' => __( 'Order notes.', 'woocommerce' ),
+							'type'        => 'string',
+						],
+					],
+					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE )
+				),
+			],
 			'schema'      => [ $this->schema, 'get_public_item_schema' ],
 			'allow_batch' => [ 'v1' => true ],
 		];
@@ -123,8 +147,6 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
-
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
@@ -178,7 +200,6 @@ class Checkout extends AbstractCartRoute {
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$this->create_or_update_draft_order( $request );
-
 		return $this->prepare_item_for_response(
 			(object) [
 				'order'          => $this->order,
@@ -189,58 +210,196 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Validate required additional fields on request.
+	 * Validation callback for the checkout route.
+	 *
+	 * This runs after individual field validation_callbacks have been called.
 	 *
 	 * @param \WP_REST_Request $request Request object.
-	 *
-	 * @throws RouteException When a required additional field is missing.
+	 * @return true|\WP_Error
 	 */
-	public function validate_required_additional_fields( \WP_REST_Request $request ) {
-		$document_object = null;
+	public function validate_callback( $request ) {
+		/**
+		 * The request is cloned to avoid modifying the original request object when sanitizing params.
+		 * Un-sanitized params are used to see if required fields had values. Sanitized params are used to
+		 * validate field values.
+		 */
+		$sanitized_request = clone $request;
+		$sanitized_request->sanitize_params();
 
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$document_object = new DocumentObject(
-				[
-					'customer' => [
-						'billing_address'  => $request['billing_address'],
-						'shipping_address' => $request['shipping_address'],
-					],
-					'checkout' => [
-						'payment_method'    => $request['payment_method'],
-						'create_account'    => $request['create_account'],
-						'customer_note'     => $request['customer_note'],
-						'additional_fields' => $request['additional_fields'],
-					],
-				]
+		$validate_contexts = [
+			'shipping_address' => [
+				'group'    => 'shipping',
+				'location' => 'address',
+				'param'    => 'shipping_address',
+			],
+			'billing_address'  => [
+				'group'    => 'billing',
+				'location' => 'address',
+				'param'    => 'billing_address',
+			],
+			'contact'          => [
+				'group'    => 'other',
+				'location' => 'contact',
+				'param'    => 'additional_fields',
+			],
+			'order'            => [
+				'group'    => 'other',
+				'location' => 'order',
+				'param'    => 'additional_fields',
+			],
+		];
+
+		if ( ! WC()->cart->needs_shipping() ) {
+			unset( $validate_contexts['shipping_address'] );
+		}
+
+		$invalid_groups  = [];
+		$invalid_details = [];
+		$is_partial      = in_array( $request->get_method(), [ 'PUT', 'PATCH' ], true );
+
+		foreach ( $validate_contexts as $context => $context_data ) {
+			$errors = new \WP_Error();
+
+			if ( Features::is_enabled( 'experimental-blocks' ) ) {
+				$document_object = $this->get_document_object_from_rest_request( $sanitized_request );
+				$document_object->set_context( $context );
+				$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
+			} else {
+				$additional_fields = $this->additional_fields_controller->get_fields_for_location( $context_data['location'] );
+			}
+
+			// These values are used to see if required fields have values.
+			$field_values = (array) $request->get_param( $context_data['param'] ) ?? [];
+
+			// These values are used to validate custom rules and generate the document object.
+			$sanitized_field_values = (array) $sanitized_request->get_param( $context_data['param'] ) ?? [];
+
+			foreach ( $additional_fields as $field_key => $field ) {
+				// Skip values that were not posted if the request is partial or the field is not required.
+				if ( ! isset( $field_values[ $field_key ] ) && ( $is_partial || true !== $field['required'] ) ) {
+					continue;
+				}
+
+				// Clean the field value to trim whitespace.
+				$field_value           = wc_clean( wp_unslash( $field_values[ $field_key ] ?? '' ) );
+				$sanitized_field_value = $sanitized_field_values[ $field_key ] ?? '';
+
+				if ( empty( $field_value ) ) {
+					if ( true === $field['required'] ) {
+						/* translators: %s: is the field label */
+						$error_message = sprintf( __( '%s is required', 'woocommerce' ), $field['label'] );
+						if ( 'shipping_address' === $context ) {
+							/* translators: %s: is the field error message */
+							$error_message = sprintf( __( 'There was a problem with the provided shipping address: %s', 'woocommerce' ), $error_message );
+						} elseif ( 'billing_address' === $context ) {
+							/* translators: %s: is the field error message */
+							$error_message = sprintf( __( 'There was a problem with the provided billing address: %s', 'woocommerce' ), $error_message );
+						}
+						$errors->add( 'woocommerce_required_checkout_field', $error_message, [ 'key' => $field_key ] );
+					}
+					continue;
+				}
+
+				$valid_check = $this->additional_fields_controller->validate_field( $field, $sanitized_field_value );
+
+				if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
+					foreach ( $valid_check->get_error_codes() as $code ) {
+						$valid_check->add_data(
+							array(
+								'location' => $context_data['location'],
+								'key'      => $field_key,
+							),
+							$code
+						);
+					}
+					$errors->merge_from( $valid_check );
+					continue;
+				}
+			}
+
+			// Validate all fields for this location (this runs custom validation callbacks).
+			$valid_location_check = $this->additional_fields_controller->validate_fields_for_location( $sanitized_field_values, $context_data['location'], $context_data['group'] );
+
+			if ( is_wp_error( $valid_location_check ) && $valid_location_check->has_errors() ) {
+				foreach ( $valid_location_check->get_error_codes() as $code ) {
+					$valid_location_check->add_data(
+						array(
+							'location' => $context_data['location'],
+						),
+						$code
+					);
+				}
+				$errors->merge_from( $valid_location_check );
+			}
+
+			if ( $errors->has_errors() ) {
+				$invalid_groups[ $context_data['param'] ]  = $errors->get_error_message();
+				$invalid_details[ $context_data['param'] ] = rest_convert_error_to_response( $errors )->get_data();
+			}
+		}
+
+		if ( $invalid_groups ) {
+			return new \WP_Error(
+				'rest_invalid_param',
+				/* translators: %s: List of invalid parameters. */
+				esc_html( sprintf( __( 'Invalid parameter(s): %s', 'woocommerce' ), implode( ', ', array_keys( $invalid_groups ) ) ) ),
+				array(
+					'status'  => 400,
+					'params'  => $invalid_groups,
+					'details' => $invalid_details,
+				)
 			);
 		}
 
-		$address_fields = $this->additional_fields_controller->get_fields_for_location( 'address' );
+		return true;
+	}
 
-		if ( WC()->cart->needs_shipping() ) {
-			foreach ( $address_fields as $field_key => $field ) {
-				if ( ! isset( $request['shipping_address'][ $field_key ] ) && $this->additional_fields_controller->is_field_required( $field, $document_object, 'shipping_address' ) ) {
-					/* translators: %s: is the field label */
-					throw new RouteException( 'woocommerce_rest_checkout_missing_required_field', esc_html( sprintf( __( 'There was a problem with the provided shipping address: %s is required', 'woocommerce' ), $field['label'] ) ), 400 );
-				}
-			}
+	/**
+	 * Get route response for PUT requests.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException On error.
+	 * @return \WP_REST_Response
+	 */
+	protected function get_route_update_response( \WP_REST_Request $request ) {
+		/**
+		 * Create (or update) Draft Order and process request data.
+		 */
+		$this->create_or_update_draft_order( $request );
+
+		/**
+		 * Persist additional fields, order notes and payment method for order.
+		 */
+		$this->persist_additional_fields_for_order( $request );
+		$this->persist_order_notes_for_order( $request );
+		$this->persist_payment_method_for_order( $request );
+
+		if ( $request->get_param( '__experimental_calc_totals' ) ) {
+			/**
+			 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+			 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+			 */
+			$this->cart_controller->calculate_totals();
+			/**
+			 * Validate that the cart is not empty.
+			 */
+			$this->cart_controller->validate_cart_not_empty();
+
+			/**
+			 * Validate items and fix violations before the order is processed.
+			 */
+			$this->cart_controller->validate_cart();
 		}
 
-		foreach ( $address_fields as $field_key => $field ) {
-			if ( ! isset( $request['billing_address'][ $field_key ] ) && $this->additional_fields_controller->is_field_required( $field, $document_object, 'billing_address' ) ) {
-				/* translators: %s: is the field label */
-				throw new RouteException( 'woocommerce_rest_checkout_missing_required_field', esc_html( sprintf( __( 'There was a problem with the provided billing address: %s is required', 'woocommerce' ), $field['label'] ) ), 400 );
-			}
-		}
+		$this->order->save();
 
-		$other_fields = $this->additional_fields_controller->get_fields_for_group( 'other' );
-
-		foreach ( $other_fields as $field_key => $field ) {
-			if ( ! isset( $request['additional_fields'][ $field_key ] ) && $this->additional_fields_controller->is_field_required( $field, $document_object ) ) {
-				/* translators: %s: is the field label */
-				throw new RouteException( 'woocommerce_rest_checkout_missing_required_field', esc_html( sprintf( __( 'There was a problem with the provided additional fields: %s is required', 'woocommerce' ), $field['label'] ) ), 400 );
-			}
-		}
+		return $this->prepare_item_for_response(
+			(object) [
+				'order' => wc_get_order( $this->order ),
+				'cart'  => $this->cart_controller->get_cart_instance(),
+			],
+			$request
+		);
 	}
 
 	/**
@@ -284,33 +443,27 @@ class Checkout extends AbstractCartRoute {
 		$this->cart_controller->validate_cart();
 
 		/**
-		 * Validate additional fields on request.
-		 */
-		$this->validate_required_additional_fields( $request );
-		wc_log_order_step( '[Store API #3] Validated additional required fields' );
-
-		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
 		 * uses the up-to-date customer address.
 		 */
 		$this->update_customer_from_request( $request );
-		wc_log_order_step( '[Store API #4] Updated customer data from request' );
+		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
-		wc_log_order_step( '[Store API #5] Created/Updated draft order', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_id' => $this->order->get_id() ) );
 		$this->update_order_from_request( $request );
-		wc_log_order_step( '[Store API #6] Updated order with posted data', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_id' => $this->order->get_id() ) );
 		$this->process_customer( $request );
-		wc_log_order_step( '[Store API #7] Created and/or persisted customer data from order', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_id' => $this->order->get_id() ) );
 
 		/**
 		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
-		wc_log_order_step( '[Store API #8] Validated order data', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #7] Validated order data', array( 'order_id' => $this->order->get_id() ) );
 
 		/**
 		 * Hold coupons for the order as soon as the draft order is created.
@@ -354,7 +507,7 @@ class Checkout extends AbstractCartRoute {
 				esc_html( $e->getCode() )
 			);
 		}
-		wc_log_order_step( '[Store API #9] Reserved stock for order', array( 'order_id' => $this->order->get_id() ) );
+		wc_log_order_step( '[Store API #8] Reserved stock for order', array( 'order_id' => $this->order->get_id() ) );
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -406,7 +559,7 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		wc_log_order_step(
-			'[Store API #10] Order processed',
+			'[Store API #9] Order processed',
 			array(
 				'order_id'               => $this->order->get_id(),
 				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
@@ -540,7 +693,7 @@ class Checkout extends AbstractCartRoute {
 		if ( ! $this->order instanceof \WC_Order ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_missing_order',
-				__( 'Unable to create order', 'woocommerce' ),
+				esc_html__( 'Unable to create order', 'woocommerce' ),
 				500
 			);
 		}
@@ -551,6 +704,27 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Updates a customer address field.
+	 *
+	 * @param \WC_Customer $customer The customer to update.
+	 * @param string       $key The key of the field to update.
+	 * @param mixed        $value The value to update the field to.
+	 * @param string       $address_type The type of address to update (billing|shipping).
+	 */
+	private function update_customer_address_field( $customer, $key, $value, $address_type ) {
+		$callback = "set_{$address_type}_{$key}";
+
+		if ( is_callable( [ $customer, $callback ] ) ) {
+			$customer->$callback( $value );
+			return;
+		}
+
+		if ( $this->additional_fields_controller->is_field( $key ) ) {
+			$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, $address_type );
+		}
+	}
+
+	/**
 	 * Updates the current customer session using data from the request (e.g. address data).
 	 *
 	 * Address session data is synced to the order itself later on by OrderController::update_order_from_cart()
@@ -558,42 +732,56 @@ class Checkout extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function update_customer_from_request( \WP_REST_Request $request ) {
-		$customer = WC()->customer;
+		$customer                  = WC()->customer;
+		$additional_field_contexts = [
+			'shipping_address' => [
+				'group'    => 'shipping',
+				'location' => 'address',
+				'param'    => 'shipping_address',
+			],
+			'billing_address'  => [
+				'group'    => 'billing',
+				'location' => 'address',
+				'param'    => 'billing_address',
+			],
+			'contact'          => [
+				'group'    => 'other',
+				'location' => 'contact',
+				'param'    => 'additional_fields',
+			],
+		];
 
-		// Billing address is a required field.
-		foreach ( $request['billing_address'] as $key => $value ) {
-			$callback = "set_billing_$key";
-			if ( is_callable( [ $customer, $callback ] ) ) {
-				$customer->$callback( $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'billing' );
+		foreach ( $additional_field_contexts as $context => $context_data ) {
+			if ( Features::is_enabled( 'experimental-blocks' ) ) {
+				$document_object = $this->get_document_object_from_rest_request( $request );
+				$document_object->set_context( $context );
+				$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
+			} else {
+				$additional_fields = $this->additional_fields_controller->get_fields_for_location( $context_data['location'] );
 			}
-		}
-		wc_log_order_step( '[Store API #4 update_customer_from_request] Persisted billing fields' );
 
-		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
-		$shipping_address_values = $request['shipping_address'] ?? $request['billing_address'];
+			if ( 'shipping_address' === $context_data['param'] ) {
+				$field_values = (array) $request['shipping_address'] ?? ( $request['billing_address'] ?? [] );
 
-		foreach ( $shipping_address_values as $key => $value ) {
-			$callback = "set_shipping_$key";
-			if ( is_callable( [ $customer, $callback ] ) ) {
-				$customer->$callback( $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'shipping' );
+				if ( ! WC()->cart->needs_shipping() ) {
+					$field_values = $request['billing_address'] ?? [];
+				}
+			} else {
+				$field_values = (array) $request[ $context_data['param'] ] ?? [];
 			}
-		}
-		wc_log_order_step( '[Store API #4 update_customer_from_request] Persisted shipping fields' );
 
-		// Persist contact fields to session.
-		$contact_fields = $this->additional_fields_controller->get_contact_fields_keys();
+			if ( 'address' === $context_data['location'] ) {
+				$persist_keys = array_merge( $this->additional_fields_controller->get_address_fields_keys(), [ 'email' ], array_keys( $additional_fields ) );
+			} else {
+				$persist_keys = array_keys( $additional_fields );
+			}
 
-		if ( ! empty( $contact_fields ) ) {
-			foreach ( $contact_fields as $key ) {
-				if ( isset( $request['additional_fields'], $request['additional_fields'][ $key ] ) ) {
-					$this->additional_fields_controller->persist_field_for_customer( $key, $request['additional_fields'][ $key ], $customer );
+			foreach ( $field_values as $key => $value ) {
+				if ( in_array( $key, $persist_keys, true ) ) {
+					$this->update_customer_address_field( $customer, $key, $value, $context_data['group'] );
 				}
 			}
-			wc_log_order_step( '[Store API #4 update_customer_from_request] Persisted contact fields' );
+			wc_log_order_step( '[Store API #4 update_customer_from_request] Persisted shipping and contact fields' );
 		}
 
 		/**
@@ -625,7 +813,7 @@ class Checkout extends AbstractCartRoute {
 			if ( $requires_payment_method ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
-					__( 'No payment method provided.', 'woocommerce' ),
+					esc_html__( 'No payment method provided.', 'woocommerce' ),
 					400
 				);
 			}
@@ -639,7 +827,7 @@ class Checkout extends AbstractCartRoute {
 				'woocommerce_rest_checkout_payment_method_disabled',
 				sprintf(
 					// Translators: %s Payment method ID.
-					__( '%s is not available for this order—please choose a different payment method', 'woocommerce' ),
+					esc_html__( '%s is not available for this order—please choose a different payment method', 'woocommerce' ),
 					esc_html( $gateway_title )
 				),
 				400
@@ -723,6 +911,30 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Persists order notes from the request to the order.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	private function persist_order_notes_for_order( \WP_REST_Request $request ) {
+		if ( isset( $request['order_notes'] ) ) {
+			$this->order->set_customer_note( sanitize_text_field( wp_unslash( $request['order_notes'] ) ) );
+		}
+	}
+
+	/**
+	 * Persists the chosen payment method to the order.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	private function persist_payment_method_for_order( \WP_REST_Request $request ) {
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		if ( isset( $request['payment_method'] ) && in_array( $request['payment_method'], array_keys( $available_gateways ), true ) ) {
+			WC()->session->set( 'chosen_payment_method', sanitize_text_field( wp_unslash( $request['payment_method'] ) ) );
+			$this->order->set_payment_method( sanitize_text_field( wp_unslash( $request['payment_method'] ) ) );
+		}
 	}
 
 	/**

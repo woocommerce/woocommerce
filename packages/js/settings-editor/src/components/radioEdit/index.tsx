@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import type { DataFormControlProps } from '@wordpress/dataviews';
 import { RadioControl } from '@wordpress/components';
 
@@ -18,17 +18,19 @@ export const getRadioEdit =
 		const label = field.label === id ? undefined : field.label;
 
 		return (
-			<RadioControl
-				help={ help }
-				label={ label }
-				onChange={ ( newValue ) => {
-					onChange( {
-						[ id ]: newValue,
-					} );
-				} }
-				options={ elements }
-				selected={ value }
-				id={ id }
-			/>
+			<>
+				<RadioControl
+					help={ help }
+					label={ label }
+					onChange={ ( newValue ) => {
+						onChange( {
+							[ id ]: newValue,
+						} );
+					} }
+					options={ elements }
+					selected={ value }
+				/>
+				<input type="hidden" name={ id } value={ value } />
+			</>
 		);
 	};

@@ -5,7 +5,6 @@
  * Categories: WooCommerce
  * Template Types: coming-soon
  * Inserter: false
- * Feature Flag: coming-soon-newsletter-template
  */
 
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;

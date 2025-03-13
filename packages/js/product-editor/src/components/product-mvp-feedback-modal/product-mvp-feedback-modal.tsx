@@ -104,7 +104,7 @@ function ProductMVPFeedbackModal( {
 	return (
 		<FeedbackModal
 			title={ __(
-				'Thanks for trying out the new product form!',
+				'Thanks for trying out the new product editor!',
 				'woocommerce'
 			) }
 			onSubmit={ onSendFeedback }
@@ -126,7 +126,7 @@ function ProductMVPFeedbackModal( {
 				<fieldset className="woocommerce-product-mvp-feedback-modal__reason">
 					<legend>
 						{ __(
-							'What made you turn off the new product form?',
+							'What made you turn off the new product editor?',
 							'woocommerce'
 						) }
 					</legend>

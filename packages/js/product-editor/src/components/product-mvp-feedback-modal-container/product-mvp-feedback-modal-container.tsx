@@ -22,7 +22,7 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 	const { isProductMVPModalVisible } = useSelect( ( select ) => {
 		const { isProductMVPFeedbackModalVisible } = select( STORE_KEY );
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			isProductMVPModalVisible: isProductMVPFeedbackModalVisible(),
 		};
 	}, [] );

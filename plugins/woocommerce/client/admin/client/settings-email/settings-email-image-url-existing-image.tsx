@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -20,17 +21,41 @@ export const ExistingImage: React.FC< ExistingImageProps > = ( {
 	imageUrl,
 	setImageUrl,
 } ) => {
+	const [ backgroundColor, setBackgroundColor ] = useState( 'transparent' );
+
+	useEffect( () => {
+		const element = jQuery( '#woocommerce_email_body_background_color' );
+		if ( ! element.length ) {
+			return;
+		}
+		setBackgroundColor( element.val() as string );
+
+		const handleChange = ( jqEvent: JQuery.Event ) => {
+			const event = jqEvent as JQuery.Event & {
+				target: HTMLInputElement;
+			};
+			const value = event.target.value;
+			setBackgroundColor( value );
+		};
+
+		element.on( 'change', handleChange );
+
+		return () => {
+			element.off( 'change', handleChange );
+		};
+	}, [] );
 	return (
-		<div className="wc-settings-email-image-url-existing-image">
+		<div>
 			<div>
 				<button
+					style={ { backgroundColor } }
 					onClick={ () => selectImage( inputId, setImageUrl ) }
-					className="wc-settings-email-image-url-select-image"
+					className="wc-settings-email-select-image"
 					type="button"
 				>
 					<img
 						src={ imageUrl }
-						className="wc-settings-email-image-url-image-preview"
+						className="wc-settings-email-logo-image"
 						alt={ __( 'Image preview', 'woocommerce' ) }
 					/>
 				</button>

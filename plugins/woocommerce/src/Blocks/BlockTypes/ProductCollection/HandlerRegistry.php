@@ -85,7 +85,9 @@ class HandlerRegistry {
 				$related_products = wc_get_related_products(
 					$collection_args['relatedProductReference'],
 					// Use a higher limit so that the result set contains enough products for the collection to subsequently filter.
-					100
+					100,
+					array(),
+					$collection_args['relatedBy']
 				);
 
 				remove_filter( 'woocommerce_product_related_posts_relate_by_category', $category_callback, PHP_INT_MAX );

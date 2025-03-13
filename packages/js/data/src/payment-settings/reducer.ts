@@ -12,6 +12,7 @@ const reducer = (
 		suggestions: [],
 		suggestionCategories: [],
 		isFetching: false,
+		isWooPayEligible: false,
 		errors: {},
 	},
 	payload?: Actions
@@ -44,6 +45,11 @@ const reducer = (
 			case ACTION_TYPES.UPDATE_PROVIDER_ORDERING:
 				return {
 					...state,
+				};
+			case ACTION_TYPES.SET_IS_ELIGIBLE:
+				return {
+					...state,
+					isWooPayEligible: payload.isEligible,
 				};
 		}
 	}

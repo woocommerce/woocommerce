@@ -21,6 +21,7 @@ const defaultState: PaymentSettingsState = {
 	suggestions: [],
 	suggestionCategories: [],
 	isFetching: false,
+	isWooPayEligible: false,
 	errors: {},
 };
 

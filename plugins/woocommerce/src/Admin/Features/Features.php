@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Features Class.
@@ -145,6 +146,10 @@ class Features {
 			if ( $feature_class ) {
 				new $feature_class();
 			}
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
+			new \Automattic\WooCommerce\Admin\Features\Blueprint\Init();
 		}
 	}
 

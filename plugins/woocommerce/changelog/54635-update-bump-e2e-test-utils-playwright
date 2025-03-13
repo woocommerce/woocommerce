@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Version bump of `e2e-test-utils-playwright` package in order to fix a flaky test
-

@@ -1,8 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const uuid = require( 'uuid' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { random } from '../../utils/helpers';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -10,37 +12,31 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	let orderId, secondOrderId, orderToCancel, customerId;
 	const username = `big.archie.${ Date.now() }`;
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api
-			.post( 'orders', {
+	test.beforeAll( async ( { restApi } ) => {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 			} )
 			.then( ( response ) => {
 				orderId = response.data.id;
 			} );
-		await api
-			.post( 'orders', {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 			} )
 			.then( ( response ) => {
 				secondOrderId = response.data.id;
 			} );
-		await api
-			.post( 'orders', {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 			} )
 			.then( ( response ) => {
 				orderToCancel = response.data.id;
 			} );
 
-		await api
-			.post( 'customers', {
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, {
 				email: `${ username }@email.addr`,
 				first_name: 'Archie',
 				last_name: 'Greenback',
@@ -75,17 +71,19 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+			force: true,
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
-		await api.delete( `orders/${ secondOrderId }`, { force: true } );
-		await api.delete( `orders/${ orderToCancel }`, { force: true } );
-		await api.delete( `customers/${ customerId }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/orders/${ secondOrderId }`, {
+			force: true,
+		} );
+		await restApi.delete( `${ WC_API_PATH }/orders/${ orderToCancel }`, {
+			force: true,
+		} );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
+			force: true,
+		} );
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
@@ -388,46 +386,38 @@ test.describe(
 		/**
 		 * Enable the "Grant access to downloadable products after payment" setting in WooCommerce > Settings > Products > Downloadable products.
 		 */
-		const enableGrantAccessAfterPaymentSetting = async ( api ) => {
-			const endpoint =
-				'settings/products/woocommerce_downloads_grant_access_after_payment';
+		const enableGrantAccessAfterPaymentSetting = async ( restApi ) => {
+			const endpoint = `${ WC_API_PATH }/settings/products/woocommerce_downloads_grant_access_after_payment`;
 
 			// Get current value
-			const response = await api.get( endpoint );
+			const response = await restApi.get( endpoint );
 			initialGrantAccessAfterPaymentSetting = response.data.value;
 
 			// Enable
 			if ( initialGrantAccessAfterPaymentSetting !== 'yes' ) {
-				await api.put( endpoint, {
+				await restApi.put( endpoint, {
 					value: 'yes',
 				} );
 			}
 		};
 
-		const revertGrantAccessAfterPaymentSetting = async ( api ) => {
-			const endpoint =
-				'settings/products/woocommerce_downloads_grant_access_after_payment';
+		const revertGrantAccessAfterPaymentSetting = async ( restApi ) => {
+			const endpoint = `${ WC_API_PATH }/settings/products/woocommerce_downloads_grant_access_after_payment`;
 
-			await api.put( endpoint, {
+			await restApi.put( endpoint, {
 				value: initialGrantAccessAfterPaymentSetting,
 			} );
 		};
 
-		test.beforeEach( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api
-				.post( 'products', {
+		test.beforeEach( async ( { restApi } ) => {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: productName,
 					downloadable: true,
 					download_limit: -1,
 					downloads: [
 						{
-							id: uuid.v4(),
+							id: random(),
 							name: 'Single',
 							file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 						},
@@ -437,16 +427,16 @@ test.describe(
 					productId = response.data.id;
 				} );
 
-			await enableGrantAccessAfterPaymentSetting( api );
+			await enableGrantAccessAfterPaymentSetting( restApi );
 
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: product2Name,
 					downloadable: true,
 					download_limit: -1,
 					downloads: [
 						{
-							id: uuid.v4(),
+							id: random(),
 							name: 'Single',
 							file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 						},
@@ -455,8 +445,8 @@ test.describe(
 				.then( ( response ) => {
 					product2Id = response.data.id;
 				} );
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 					line_items: [
 						{
@@ -469,8 +459,8 @@ test.describe(
 				.then( ( response ) => {
 					orderId = response.data.id;
 				} );
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 					billing: customerBilling,
 				} )
@@ -479,18 +469,21 @@ test.describe(
 				} );
 		} );
 
-		test.afterEach( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterEach( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
+				force: true,
 			} );
-			await api.delete( `products/${ productId }`, { force: true } );
-			await api.delete( `products/${ product2Id }`, { force: true } );
-			await api.delete( `orders/${ orderId }`, { force: true } );
-			await api.delete( `orders/${ noProductOrderId }`, { force: true } );
-			await revertGrantAccessAfterPaymentSetting( api );
+			await restApi.delete( `${ WC_API_PATH }/products/${ product2Id }`, {
+				force: true,
+			} );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
+			await restApi.delete(
+				`${ WC_API_PATH }/orders/${ noProductOrderId }`,
+				{ force: true }
+			);
+			await revertGrantAccessAfterPaymentSetting( restApi );
 		} );
 
 		//todo these tests aren't completely independent. Needs some refactoring.

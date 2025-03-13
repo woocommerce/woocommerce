@@ -150,6 +150,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_checkout_order_created',
 			function ( $order ) {
+
+				// Check if this order already has any attribution data to prevent duplicates attribution data.
+				if ( $this->has_attribution( $order ) ) {
+					return;
+				}
+
 				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
 				// phpcs:ignore WordPress.Security.NonceVerification
 				$params = $this->get_unprefixed_field_values( $_POST );
@@ -538,5 +544,22 @@ class OrderAttributionController implements RegisterHooksInterface {
 		// HPOS and non-HPOS use different hooks.
 		add_action( "manage_{$screen_id}_custom_column", $display_column, 10, 2 );
 		add_action( "manage_{$screen_id}_posts_custom_column", $display_column, 10, 2 );
+	}
+
+	/**
+	 * Check if this order already has any attribution data
+	 *
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return bool
+	 * @since 9.8.0
+	 */
+	public function has_attribution( $order ) {
+		foreach ( $this->field_names as $field ) {
+			if ( $order->meta_exists( $this->get_meta_prefixed_field_name( $field ) ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

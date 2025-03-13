@@ -118,6 +118,17 @@ class Note extends \WC_Data {
 	*/
 
 	/**
+	 * Get deprecated types.
+	 *
+	 * @return array
+	 */
+	public static function get_deprecated_types() {
+		return array(
+			self::E_WC_ADMIN_NOTE_EMAIL,
+		);
+	}
+
+	/**
 	 * Get allowed types.
 	 *
 	 * @return array
@@ -130,7 +141,6 @@ class Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
 			self::E_WC_ADMIN_NOTE_MARKETING,
 			self::E_WC_ADMIN_NOTE_SURVEY,
-			self::E_WC_ADMIN_NOTE_EMAIL,
 		);
 
 		return apply_filters( 'woocommerce_note_types', $allowed_types );
@@ -388,6 +398,13 @@ class Note extends \WC_Data {
 	public function set_type( $type ) {
 		if ( empty( $type ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'woocommerce' ) );
+		}
+
+		if ( in_array( $type, self::get_deprecated_types(), true ) ) {
+			$this->error(
+				'admin_note_invalid_data',
+				__( 'The admin note type prop is deprecated.', 'woocommerce' )
+			);
 		}
 
 		if ( ! in_array( $type, self::get_allowed_types(), true ) ) {

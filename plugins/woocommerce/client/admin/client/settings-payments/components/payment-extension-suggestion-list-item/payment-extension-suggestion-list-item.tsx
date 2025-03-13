@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 import { PaymentExtensionSuggestionProvider } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -23,6 +23,7 @@ import {
 import { DefaultDragHandle } from '~/settings-payments/components/sortable';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
 import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
+import { OfficialBadge } from '~/settings-payments/components/official-badge';
 
 type PaymentExtensionSuggestionListItemProps = {
 	/**
@@ -73,6 +74,14 @@ export const PaymentExtensionSuggestionListItem = ( {
 				'wc_settings_payments__banner'
 			) );
 
+	// Determine the CTA button label based on the extension state.
+	let ctaButtonLabel = __( 'Install', 'woocommerce' );
+	if ( pluginInstalled ) {
+		ctaButtonLabel = __( 'Enable', 'woocommerce' );
+	} else if ( installingPlugin === extension.id ) {
+		ctaButtonLabel = __( 'Installing', 'woocommerce' );
+	}
+
 	return (
 		<div
 			id={ extension.id }
@@ -102,6 +111,8 @@ export const PaymentExtensionSuggestionListItem = ( {
 						{ incentive && (
 							<IncentiveStatusBadge incentive={ incentive } />
 						) }
+						{ /* All payment extension suggestions are official. */ }
+						<OfficialBadge variant="expanded" />
 					</span>
 					<span
 						className="woocommerce-list__item-content"
@@ -123,6 +134,16 @@ export const PaymentExtensionSuggestionListItem = ( {
 						<Button
 							variant="primary"
 							onClick={ () => {
+								if ( pluginInstalled ) {
+									// Record the event when user clicks on a gateway's enable button.
+									recordEvent(
+										'settings_payments_provider_enable_click',
+										{
+											provider_id: extension.id,
+										}
+									);
+								}
+
 								if ( incentive ) {
 									acceptIncentive( incentive.promo_id );
 								}
@@ -137,9 +158,7 @@ export const PaymentExtensionSuggestionListItem = ( {
 							isBusy={ installingPlugin === extension.id }
 							disabled={ !! installingPlugin }
 						>
-							{ pluginInstalled
-								? __( 'Enable', 'woocommerce' )
-								: __( 'Install', 'woocommerce' ) }
+							{ ctaButtonLabel }
 						</Button>
 					</div>
 				</div>

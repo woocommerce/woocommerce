@@ -8,7 +8,6 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import { RegionPicker } from './region-picker';
-import { ShippingCurrencyContext } from './currency-context';
 import { recursivelyTransformLabels } from './utils';
 
 const shippingZoneRegionPickerRoot = document.getElementById(
@@ -25,7 +24,6 @@ const initialValues = window.shippingZoneMethodsLocalizeScript?.locations ?? [];
 const ShippingApp = () => {
 	return (
 		<div>
-			<ShippingCurrencyContext />
 			<RegionPicker options={ options } initialValues={ initialValues } />
 		</div>
 	);

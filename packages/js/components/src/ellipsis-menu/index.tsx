@@ -7,7 +7,7 @@ import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 import Ellipsis from 'gridicons/dist/ellipsis';
-import React, { MouseEvent, KeyboardEvent, ReactNode } from 'react';
+import { MouseEvent, KeyboardEvent, ReactNode } from 'react';
 
 type CallbackProps = {
 	isOpen?: boolean;
@@ -39,6 +39,16 @@ type EllipsisMenuProps = {
 		typeof Dropdown
 		// @ts-expect-error missing prop in types. -- Props type definition is outdated and does not include popoverProps.
 	>[ 'popoverProps' ][ 'placement' ];
+	/**
+	 * By default, the first menu item will receive focus. This is the same as setting this prop to "firstElement".
+	 * Specifying a true value will focus the container instead.
+	 * Specifying a false value disables the focus handling entirely
+	 * (this should only be done when an appropriately accessible
+	 * substitute behavior exists).
+	 *
+	 * @default 'firstElement'
+	 */
+	focusOnMount?: ComponentProps< typeof Dropdown >[ 'focusOnMount' ];
 };
 
 /**
@@ -53,6 +63,7 @@ const EllipsisMenu = ( {
 	// if set bottom-start, it will fallback to bottom-end / top-end / top-start
 	// if it's bottom, it will fallback to only top
 	placement = 'bottom-start',
+	focusOnMount = 'firstElement',
 }: EllipsisMenuProps ) => {
 	if ( ! renderContent ) {
 		return null;
@@ -98,7 +109,7 @@ const EllipsisMenu = ( {
 		<div className={ classnames( className, 'woocommerce-ellipsis-menu' ) }>
 			<Dropdown
 				contentClassName="woocommerce-ellipsis-menu__popover"
-				popoverProps={ { placement } }
+				popoverProps={ { placement, focusOnMount } }
 				renderToggle={ renderEllipsis }
 				renderContent={ renderMenu }
 			/>

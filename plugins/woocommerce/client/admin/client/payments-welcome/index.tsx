@@ -5,7 +5,7 @@ import { Notice } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, type PluginSelectors } from '@woocommerce/data';
+import { optionsStore, pluginsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -23,18 +23,17 @@ interface activatePromoResponse {
 
 const ConnectAccountPage = () => {
 	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
+	const { updateOptions } = useDispatch( optionsStore );
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 	const [ isSubmitted, setSubmitted ] = useState( false );
 	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const [ enabledApms, setEnabledApms ] = useState( new Set< Apm >() );
 
 	const { isJetpackConnected, connectUrl } = useSelect(
 		( select ) => {
+			const selectors = select( pluginsStore );
 			return {
-				isJetpackConnected: (
-					select( 'wc/admin/plugins' ) as PluginSelectors
-				 ).isJetpackConnected(),
+				isJetpackConnected: selectors.isJetpackConnected(),
 				connectUrl:
 					'admin.php?wcpay-connect=1&promo=' +
 					encodeURIComponent( incentive.id ) +

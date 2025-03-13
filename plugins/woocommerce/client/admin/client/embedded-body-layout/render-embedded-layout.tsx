@@ -12,22 +12,13 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { EmbedLayout, PrimaryLayout as NoticeArea } from '../layout';
+import { PrimaryLayout as NoticeArea } from '../layout/shared';
+import { EmbedLayout } from '../layout/embed';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
-import { isFeatureEnabled } from '~/utils/features';
-
-import { possiblyRenderSettingsSlots } from '../settings/settings-slots';
-import { registerTaxSettingsConflictErrorFill } from '../settings/conflict-error-slotfill';
-import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
-import { registerSiteVisibilitySlotFill } from '../launch-your-store';
-import { registerBlueprintSlotfill } from '../blueprint';
 import {
 	possiblyRenderOrderAttributionSlot,
 	registerOrderAttributionSlotFill,
 } from '../order-attribution-install-banner/order-editor/slot';
-import { registerSettingsEmailColorPaletteFill } from '../settings-email/settings-email-color-palette-slotfill';
-import { registerSettingsEmailImageUrlFill } from '../settings-email/settings-email-image-url-slotfill';
-import { registerSettingsEmailPreviewFill } from '../settings-email/settings-email-preview-slotfill';
 
 const debug = debugFactory( 'wc-admin:client' );
 
@@ -46,11 +37,14 @@ const renderHydratedLayout = (
 	let HydratedEmbedLayout = withSettingsHydration(
 		settingsGroup,
 		window.wcSettings?.admin
-	)( EmbedLayout );
+	)( EmbedLayout as React.ComponentType< Record< string, unknown > > );
 
 	if ( hydrateUser ) {
-		HydratedEmbedLayout =
-			withCurrentUserHydration( hydrateUser )( HydratedEmbedLayout );
+		HydratedEmbedLayout = withCurrentUserHydration( hydrateUser )(
+			HydratedEmbedLayout as React.ComponentType<
+				Record< string, unknown >
+			>
+		);
 	}
 
 	createRoot( embeddedRoot ).render( <HydratedEmbedLayout /> );
@@ -104,30 +98,11 @@ const renderEmbeddedBody = ( wpBody: HTMLElement, wrap: Element ) => {
 };
 
 /**
- * Registers the slot fills.
+ * Registers slot fills for the embedded layout. This should be used only for pages other than the settings page. For settings pages, slot fills are registered in wp-admin-scripts/settings/
  */
 const registerSlotFills = () => {
-	possiblyRenderSettingsSlots();
-	registerTaxSettingsConflictErrorFill();
-	registerPaymentsSettingsBannerFill();
-
-	const features = window.wcAdminFeatures;
-	if ( features?.[ 'launch-your-store' ] === true ) {
-		registerSiteVisibilitySlotFill();
-	}
-
-	if ( features?.blueprint === true ) {
-		registerBlueprintSlotfill();
-	}
-
 	possiblyRenderOrderAttributionSlot();
 	registerOrderAttributionSlotFill();
-
-	if ( isFeatureEnabled( 'email_improvements' ) ) {
-		registerSettingsEmailColorPaletteFill();
-		registerSettingsEmailImageUrlFill();
-		registerSettingsEmailPreviewFill();
-	}
 };
 
 /**

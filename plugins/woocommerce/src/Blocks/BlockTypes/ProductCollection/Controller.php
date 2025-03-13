@@ -67,6 +67,9 @@ class Controller extends AbstractBlock {
 			2
 		);
 
+		// Register the backend settings so they can be used in the editor.
+		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
+
 		// Update the query for Editor.
 		add_filter( 'rest_product_query', array( $this, 'update_rest_query_in_editor' ), 10, 2 );
 
@@ -101,7 +104,7 @@ class Controller extends AbstractBlock {
 			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
 
 			if ( $is_anchor ) {
-				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.viewProduct' );
+				$p->set_attribute( 'data-wp-on--click', 'woocommerce/product-collection::actions.viewProduct' );
 
 				$block_content = $p->get_updated_html();
 			}
@@ -192,11 +195,7 @@ class Controller extends AbstractBlock {
 					}
 
 					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
-						$p = new \WP_HTML_Tag_Processor( $content );
-						if ( $p->next_tag() ) {
-							$p->set_attribute( 'data-wc-navigation-disabled', 'true' );
-						}
-						$content = $p->get_updated_html();
+						wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}
 
@@ -241,6 +240,30 @@ class Controller extends AbstractBlock {
 	}
 
 	/**
+	 * Exposes settings used by the Product Collection block when manipulating
+	 * the default query.
+	 */
+	public function register_settings() {
+		register_setting(
+			'options',
+			'woocommerce_default_catalog_orderby',
+			array(
+				'type'         => 'object',
+				'description'  => __( 'How should products be sorted in the catalog by default?', 'woocommerce' ),
+				'label'        => __( 'Default product sorting', 'woocommerce' ),
+				'show_in_rest' => array(
+					'name'   => 'woocommerce_default_catalog_orderby',
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'menu_order', 'popularity', 'rating', 'date', 'price', 'price-desc' ),
+					),
+				),
+				'default'      => 'menu_order',
+			)
+		);
+	}
+
+	/**
 	 * Update the query for the product query block in Editor.
 	 *
 	 * @param array           $query   Query args.
@@ -267,13 +290,14 @@ class Controller extends AbstractBlock {
 			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query, $request );
 		}
 
+		$orderby = $request->get_param( 'orderby' );
+
 		// When requested, short-circuit the query and return the preview query args.
 		$preview_state = $request->get_param( 'previewState' );
 		if ( isset( $preview_state['isPreview'] ) && 'true' === $preview_state['isPreview'] ) {
-			return $this->query_builder->get_preview_query_args( $collection_args, $query, $request );
+			return $this->query_builder->get_preview_query_args( $collection_args, array_merge( $query, array( 'orderby' => $orderby ) ), $request );
 		}
 
-		$orderby             = $request->get_param( 'orderby' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
@@ -393,5 +417,17 @@ class Controller extends AbstractBlock {
 		// Use HandlerRegistry to register collections.
 		$collection_handler_store = $this->collection_handler_registry->register_core_collections();
 		$this->query_builder->set_collection_handler_store( $collection_handler_store );
+	}
+
+
+	/**
+	 * Disable the block type script, this block uses script modules.
+	 *
+	 * @param string|null $key The key of the script.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

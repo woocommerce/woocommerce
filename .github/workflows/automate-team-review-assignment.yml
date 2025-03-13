@@ -1,0 +1,142 @@
+name: Add community label, Assign reviewers
+
+on:
+    pull_request_target:
+        types: [opened, ready_for_review, review_requested]
+    issues:
+        types: [opened]
+
+concurrency:
+    group: automate-team-review-assignment-${{ github.event_name }}-${{ github.event.action }}-${{ github.event.pull_request.number || github.event.issue.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    pull-requests: write
+    issues: write
+
+jobs:
+    add-community-label:
+        name: Add community label
+        if: ${{ github.event.action == 'opened' }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check if community contribution
+              id: check
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const username = '${{ github.event.pull_request.user.login || github.event.issue.user.login }}';
+                      const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          username: username,
+                      } );
+                      const contributor = ( permission === 'read' || permission === 'none' ) && username !== 'gglobalstep';
+                      core.setOutput( 'contributor', contributor ? 'yes' : 'no' );
+
+            - name: Add community label
+              if: ${{ steps.check.outputs.contributor == 'yes' }}
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      github.rest.issues.addLabels({
+                          issue_number: ${{ github.event.pull_request.number || github.event.issue.number }},
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          labels: [ 'type: community contribution' ]
+                      });
+
+    assign-reviewers:
+      name: Assign reviewers
+      if: ${{ github.event.pull_request && ( github.event.action == 'opened' || github.event.action == 'ready_for_review' ) }}
+      runs-on: ubuntu-latest
+      steps:
+        - name: Check if community contribution
+          id: check
+          uses: actions/github-script@v7
+          with:
+            retries: 2
+            script: |
+              const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  username: '${{ github.event.pull_request.user.login }}',
+              } );
+              core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
+
+        - name: Assign reviewers for a community PR
+          if: ${{ steps.check.outputs.contributor == 'yes' }}
+          uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
+          with:
+              config: '.github/project-community-pr-assigner.yml'
+              token: ${{ secrets.PR_ASSIGN_TOKEN }}
+
+        - name: Assign reviewers for a teams PR
+          if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false }}
+          continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
+          uses: acq688/Request-Reviewer-For-Team-Action@v1.1
+          with:
+              config: '.github/automate-team-review-assignment-config.yml'
+              GITHUB_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
+    
+    add-testing-instructions-review-comment:
+      name: Remind reviewers to also review the testing instructions and test coverage
+      if: ${{ github.event.pull_request && github.event.action == 'review_requested' }}
+      runs-on: ubuntu-latest
+      steps:
+        - name: Check if community contribution
+          id: check
+          uses: actions/github-script@v7
+          with:
+            retries: 2
+            script: |
+              const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  username: '${{ github.event.pull_request.user.login }}',
+              } );
+              core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
+
+        - name: Get the username of requested reviewers
+          if: ${{ steps.check.outputs.contributor == 'no' }}
+          id: get_reviewer_username
+          run: |
+              # Retrieves the username of all reviewers and stores them in a comma-separated list
+              reviewers=$(echo '${{ toJson(github.event.pull_request.requested_reviewers[*].login) }}' | jq -r 'map("@\(.)") | join(" ")')
+              echo "REVIEWERS=$reviewers" >> $GITHUB_ENV
+
+        - name: Get the name of requested teams
+          id: get_team_name
+          run: |
+              # Retrieves the name of all teams asked for review and stores them in a comma-separated list
+              teams=$(echo '${{ toJson(github.event.pull_request.requested_teams[*].slug) }}' | jq -r 'map("@woocommerce/\(.)") | join(" ")')
+              echo "TEAMS=$teams" >> $GITHUB_ENV
+
+        - name: Find the comment by github-actions[bot] asking for reviewing the testing instructions
+          uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
+          id: find-comment
+          with:
+              issue-number: ${{ github.event.pull_request.number }}
+              comment-author: 'github-actions[bot]'
+              body-includes: Apart from reviewing the code changes
+
+        - name: Create or update PR comment asking for reviewers to review the testing instructions and test coverage
+          uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+          with:
+              comment-id: ${{ steps.find-comment.outputs.comment-id }}
+              issue-number: ${{ github.event.pull_request.number }}
+              body: |
+                  ## Testing Guidelines
+                  Hi ${{ env.REVIEWERS }} ${{ env.TEAMS }},
+                  
+                  Apart from reviewing the code changes, please make sure to **review the testing instructions** ([Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)) and verify that relevant tests (E2E, Unit, Integration, etc.) have been added or updated as needed.
+                  
+                  **Reminder:** PR reviewers are required to document testing performed. This includes:
+                  - 🖼️ **Screenshots or screen recordings**.
+                  - 📝 **List of functionality tested / steps followed**.
+                  - 🌐 **Site details** (environment attributes such as hosting type, plugins, theme, store size, store age, and relevant settings).
+                  - 🔍 **Any analysis performed**, such as assessing potential impacts on environment attributes and other plugins, conducting performance profiling, or using LLM/AI-based analysis.
+                  
+                  ⚠️ Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public issue.
+              edit-mode: replace

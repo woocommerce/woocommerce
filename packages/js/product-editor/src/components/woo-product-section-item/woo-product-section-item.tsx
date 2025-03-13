@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 

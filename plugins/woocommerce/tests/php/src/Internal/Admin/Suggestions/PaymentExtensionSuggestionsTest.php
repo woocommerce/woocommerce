@@ -124,11 +124,10 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_get_country_extensions_count_with_merchant_selling_online(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
-		// Square (in-person) is NOT included.
 		$country_suggestions_count = array(
-			'CA' => 7, // Minus Square (in-person).
-			'US' => 9, // Minus Square (in-person).
-			'GB' => 10, // Minus Square (in-person).
+			'CA' => 8,
+			'US' => 10,
+			'GB' => 11,
 			'AT' => 9,
 			'BE' => 9,
 			'BG' => 6,
@@ -139,13 +138,13 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'EE' => 5,
 			'FI' => 7,
 			'FO' => 2,
-			'FR' => 9, // Minus Square (in-person).
+			'FR' => 10,
 			'GI' => 3,
 			'DE' => 9,
 			'GR' => 7,
 			'GL' => 2,
 			'HU' => 8,
-			'IE' => 9, // Minus Square (in-person).
+			'IE' => 10,
 			'IT' => 9,
 			'LV' => 5,
 			'LI' => 4,
@@ -160,7 +159,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'RO' => 7,
 			'SM' => 2,
 			'SK' => 6,
-			'ES' => 9, // Minus Square (in-person).
+			'ES' => 11,
 			'SE' => 7,
 			'CH' => 7,
 			'AG' => 4,
@@ -208,7 +207,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'UY' => 4,
 			'VI' => 2,
 			'VE' => 3,
-			'AU' => 8, // Minus Square (in-person).
+			'AU' => 9,
 			'BD' => 1,
 			'CN' => 4,
 			'FJ' => 2,
@@ -216,7 +215,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HK' => 7,
 			'IN' => 6,
 			'ID' => 4,
-			'JP' => 6, // Minus Square (in-person).
+			'JP' => 7,
 			'MY' => 5,
 			'NC' => 2,
 			'NZ' => 7,
@@ -358,11 +357,10 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_get_country_extensions_count_with_merchant_selling_offline(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
-		// Square (in-person) is included.
 		$country_suggestions_count = array(
-			'CA' => 8, // Including Square (in-person).
-			'US' => 10, // Including Square (in-person).
-			'GB' => 11, // Including Square (in-person).
+			'CA' => 8,
+			'US' => 10,
+			'GB' => 11,
 			'AT' => 9,
 			'BE' => 9,
 			'BG' => 6,
@@ -373,13 +371,13 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'EE' => 5,
 			'FI' => 7,
 			'FO' => 2,
-			'FR' => 10, // Including Square (in-person).
+			'FR' => 10,
 			'GI' => 3,
 			'DE' => 9,
 			'GR' => 7,
 			'GL' => 2,
 			'HU' => 8,
-			'IE' => 10, // Including Square (in-person).
+			'IE' => 10,
 			'IT' => 9,
 			'LV' => 5,
 			'LI' => 4,
@@ -394,7 +392,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'RO' => 7,
 			'SM' => 2,
 			'SK' => 6,
-			'ES' => 10, // Including Square (in-person).
+			'ES' => 11,
 			'SE' => 7,
 			'CH' => 7,
 			'AG' => 4,
@@ -442,7 +440,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'UY' => 4,
 			'VI' => 2,
 			'VE' => 3,
-			'AU' => 9, // Including Square (in-person).
+			'AU' => 9,
 			'BD' => 1,
 			'CN' => 4,
 			'FJ' => 2,
@@ -450,7 +448,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HK' => 7,
 			'IN' => 6,
 			'ID' => 4,
-			'JP' => 7, // Including Square (in-person).
+			'JP' => 7,
 			'MY' => 5,
 			'NC' => 2,
 			'NZ' => 7,

@@ -124,6 +124,8 @@ final class ProductFilterPrice extends AbstractBlock {
 			return '';
 		}
 
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$price_range   = $this->get_filtered_price( $block );
 		$min_range     = $price_range['min_price'] ?? 0;
 		$max_range     = $price_range['max_price'] ?? 0;
@@ -142,13 +144,8 @@ final class ProductFilterPrice extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode(
-				array(
-					'namespace' => $this->get_full_block_name(),
-				),
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
-			),
-			'data-wc-context'      => wp_json_encode(
+			'data-wp-interactive'  => $this->get_full_block_name(),
+			'data-wp-context'      => wp_json_encode(
 				array(
 					'minRange'             => $min_range,
 					'maxRange'             => $max_range,
@@ -164,8 +161,8 @@ final class ProductFilterPrice extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
-			'data-wc-key'          => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
-			'data-wc-bind--hidden' => '!context.hasFilterOptions',
+			'data-wp-key'          => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
+			'data-wp-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
@@ -226,5 +223,16 @@ final class ProductFilterPrice extends AbstractBlock {
 			'min_price' => intval( floor( $price_results->min_price ?? 0 ) ),
 			'max_price' => intval( ceil( $price_results->max_price ?? 0 ) ),
 		);
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

@@ -9,11 +9,11 @@ import { EllipsisMenu } from '@woocommerce/components';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { WooOnboardingTaskListHeader } from '@woocommerce/onboarding';
 import {
-	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
 	getVisibleTasks,
 	TaskListType,
+	onboardingStore,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, useSlot } from '@woocommerce/experimental';
@@ -57,9 +57,8 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { profileItems } = useSelect( ( select ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems } = select( onboardingStore );
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			profileItems: getProfileItems(),
 		};
 	}, [] );
@@ -68,7 +67,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 		visitedTask,
 		keepCompletedTaskList: keepCompletedTasks,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( onboardingStore );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;

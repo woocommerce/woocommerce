@@ -3,10 +3,7 @@
  */
 import { Gridicon } from '@automattic/components';
 import { Button, SelectControl } from '@wordpress/components';
-import {
-	PAYMENT_SETTINGS_STORE_NAME,
-	type PaymentSettingsSelectors,
-} from '@woocommerce/data';
+import { paymentSettingsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import React, {
 	useState,
@@ -180,17 +177,9 @@ export const SettingsPaymentsMethods = () => {
 	const [ isCompleted, setIsCompleted ] = useState( false );
 	const { providers } = useSelect( ( select ) => {
 		return {
-			isFetching: (
-				select(
-					PAYMENT_SETTINGS_STORE_NAME
-				) as PaymentSettingsSelectors
-			 ).isFetching(),
+			isFetching: select( paymentSettingsStore ).isFetching(),
 			providers:
-				(
-					select(
-						PAYMENT_SETTINGS_STORE_NAME
-					) as PaymentSettingsSelectors
-				 ).getPaymentProviders() || [],
+				select( paymentSettingsStore ).getPaymentProviders() || [],
 		};
 	}, [] );
 
@@ -202,32 +191,28 @@ export const SettingsPaymentsMethods = () => {
 		recordEvent( 'wcpay_settings_payment_methods_continue', {
 			selected_payment_methods: Object.keys( paymentMethodsState )
 				.filter(
-					( paymentMethod ) =>
-						paymentMethodsState[ paymentMethod ] === true
+					( paymentMethod ) => paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
 			deselected_payment_methods: Object.keys( paymentMethodsState )
 				.filter(
-					( paymentMethod ) =>
-						paymentMethodsState[ paymentMethod ] === false
+					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
 		} );
 
 		setIsCompleted( true );
+
 		// Get the onboarding URL or fallback to the test drive account link
 		const onboardUrl =
 			wooPayments?.onboarding?._links.onboard.href ||
 			getWooPaymentsTestDriveAccountLink();
 
-		// Combine the onboard URL with the query string
-		const fullOnboardUrl =
+		// Combine the onboard URL with the query string and redirect to the onboard URL.
+		window.location.href =
 			onboardUrl +
 			'&capabilities=' +
 			encodeURIComponent( JSON.stringify( paymentMethodsState ) );
-
-		// Redirect to the onboard URL
-		window.location.href = fullOnboardUrl;
 	}, [ paymentMethodsState, wooPayments ] );
 
 	useEffect( () => {

@@ -10,11 +10,7 @@ import {
 	PanelRow,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import {
-	ONBOARDING_STORE_NAME,
-	ORDERS_STORE_NAME,
-	PRODUCTS_STORE_NAME,
-} from '@woocommerce/data';
+import { ordersStore, productsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { snakeCase } from 'lodash';
@@ -32,6 +28,7 @@ import { getAllPanels } from './panels';
 import { getUnapprovedReviews } from './reviews/utils';
 import { getUrlParams } from '../../utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isTaskListVisible } from '~/hooks/use-tasklists-state';
 
 const ORDERS_QUERY_PARAMS = { _fields: [ 'id' ] };
 const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
@@ -44,11 +41,11 @@ export const ActivityPanel = () => {
 		const {
 			getOrdersTotalCount,
 			hasFinishedResolution: hasFinishedOrdersResolution,
-		} = select( ORDERS_STORE_NAME );
+		} = select( ordersStore );
 		const {
 			getProductsTotalCount,
 			hasFinishedResolution: hasFinishedProductsResolution,
-		} = select( PRODUCTS_STORE_NAME );
+		} = select( productsStore );
 		const totalOrderCount = getOrdersTotalCount( ORDERS_QUERY_PARAMS, 0 );
 		const orderStatuses = getOrderStatuses( select );
 		const reviewsEnabled = getAdminSetting( 'reviewsEnabled', 'no' );
@@ -69,7 +66,6 @@ export const ActivityPanel = () => {
 				PUBLISHED_PRODUCTS_QUERY_PARAMS,
 				0,
 			] );
-		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList( 'setup' );
 
 		return {
 			loadingOrderAndProductCount,
@@ -77,7 +73,7 @@ export const ActivityPanel = () => {
 			unapprovedReviewsCount,
 			unreadOrdersCount,
 			manageStock,
-			isTaskListHidden: taskList?.isHidden,
+			isTaskListHidden: ! isTaskListVisible( 'setup' ),
 			publishedProductCount,
 			reviewsEnabled,
 			totalOrderCount,
@@ -101,7 +97,7 @@ export const ActivityPanel = () => {
 			);
 			recordEvent( 'activity_panel_visible_panels', visiblePanels );
 		}
-	}, [ panelsData.isTaskListHidden ] );
+	}, [ panelsData.isTaskListHidden, panels ] );
 
 	if ( panels.length === 0 ) {
 		return null;

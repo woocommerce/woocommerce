@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 type Props = {
 	/** Set to false to disable this query, defaults to true to query the data */
@@ -34,36 +34,27 @@ export const useLaunchYourStore = (
 				};
 			}
 
-			const { hasFinishedResolution, getOption } =
-				select( OPTIONS_STORE_NAME );
+			const { hasFinishedResolution, getOption } = select( optionsStore );
 
 			const allOptionResolutionsFinished =
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_coming_soon',
 				] ) &&
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_store_pages_only',
 				] ) &&
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_private_link',
 				] ) &&
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_share_key',
 				] );
 
 			return {
 				isLoading: allOptionResolutionsFinished,
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				comingSoon: getOption( 'woocommerce_coming_soon' ),
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				privateLink: getOption( 'woocommerce_private_link' ),
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				shareKey: getOption( 'woocommerce_share_key' ),
 				launchYourStoreEnabled:
 					window.wcAdminFeatures[ 'launch-your-store' ],

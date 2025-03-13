@@ -3,8 +3,7 @@
  */
 import {
 	type RecommendedPaymentMethod,
-	PAYMENT_SETTINGS_STORE_NAME,
-	type PaymentSettingsSelectors,
+	paymentSettingsStore,
 } from '@woocommerce/data';
 import { useEffect, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
@@ -85,15 +84,14 @@ const combineRequestMethods = (
  * Combines Apple Pay and Google Pay into a single method if both exist and allows users
  * to toggle the enabled/disabled state of each payment method.
  */
-export const SettingsPaymentsMethods: React.FC<
-	SettingsPaymentsMethodsProps
-> = ( { paymentMethodsState, setPaymentMethodsState } ) => {
+export const SettingsPaymentsMethods = ( {
+	paymentMethodsState,
+	setPaymentMethodsState,
+}: SettingsPaymentsMethodsProps ) => {
 	const [ isExpanded, setIsExpanded ] = useState( false );
 
 	const { paymentMethods, isFetching } = useSelect( ( select ) => {
-		const paymentSettings = select(
-			PAYMENT_SETTINGS_STORE_NAME
-		) as PaymentSettingsSelectors;
+		const paymentSettings = select( paymentSettingsStore );
 		const paymentProviders = paymentSettings.getPaymentProviders() || [];
 		const recommendedPaymentMethods =
 			getRecommendedPaymentMethods( paymentProviders );
@@ -144,16 +142,16 @@ export const SettingsPaymentsMethods: React.FC<
 							)
 						) }
 					</div>
-					<Button
-						className="settings-payments-methods__show-more"
-						onClick={ () => {
-							setIsExpanded( ! isExpanded );
-						} }
-						tabIndex={ 0 }
-						aria-expanded={ isExpanded }
-					>
-						{ ! isExpanded &&
-							sprintf(
+					{ ! isExpanded && (
+						<Button
+							className="settings-payments-methods__show-more"
+							onClick={ () => {
+								setIsExpanded( ! isExpanded );
+							} }
+							tabIndex={ 0 }
+							aria-expanded={ isExpanded }
+						>
+							{ sprintf(
 								/* translators: %s: number of disabled payment methods */
 								__( 'Show more (%s)', 'woocommerce' ),
 								paymentMethods.filter(
@@ -161,8 +159,8 @@ export const SettingsPaymentsMethods: React.FC<
 										pm.enabled === false
 								).length ?? 0
 							) }
-						{ isExpanded && __( 'Show less', 'woocommerce' ) }
-					</Button>
+						</Button>
+					) }
 				</>
 			) }
 		</div>

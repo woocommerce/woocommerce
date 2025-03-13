@@ -3,7 +3,7 @@
  */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { createContext, useContext } from '@wordpress/element';
@@ -17,10 +17,14 @@ import './dismissable-list.scss';
 // using a context provider for the option name so that the option name prop doesn't need to be passed to the `DismissableListHeading` too
 const OptionNameContext = createContext( '' );
 
-export const DismissableListHeading: React.FC< {
+export const DismissableListHeading = ( {
+	onDismiss = () => null,
+	children,
+}: {
+	children: React.ReactNode;
 	onDismiss?: () => void;
-} > = ( { children, onDismiss = () => null } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+} ) => {
+	const { updateOptions } = useDispatch( optionsStore );
 	const dismissOptionName = useContext( OptionNameContext );
 
 	const handleDismissClick = () => {
@@ -51,22 +55,29 @@ export const DismissableListHeading: React.FC< {
 	);
 };
 
-export const DismissableList: React.FC< {
-	dismissOptionName: string;
+export const DismissableList = ( {
+	children,
+	className,
+	dismissOptionName,
+}: {
+	children: React.ReactNode;
 	className?: string;
-} > = ( { children, className, dismissOptionName } ) => {
-	const isVisible = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+	dismissOptionName: string;
+} ) => {
+	const isVisible = useSelect(
+		( select ) => {
+			const { getOption, hasFinishedResolution } = select( optionsStore );
 
-		const hasFinishedResolving = hasFinishedResolution( 'getOption', [
-			dismissOptionName,
-		] );
+			const hasFinishedResolving = hasFinishedResolution( 'getOption', [
+				dismissOptionName,
+			] );
 
-		const isDismissed = getOption( dismissOptionName ) === 'yes';
+			const isDismissed = getOption( dismissOptionName ) === 'yes';
 
-		return hasFinishedResolving && ! isDismissed;
-	} );
+			return hasFinishedResolving && ! isDismissed;
+		},
+		[ dismissOptionName ]
+	);
 
 	if ( ! isVisible ) {
 		return null;

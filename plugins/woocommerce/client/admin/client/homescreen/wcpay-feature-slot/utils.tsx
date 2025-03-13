@@ -36,7 +36,7 @@ export const WooHomescreenWCPayFeatureItem = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -46,7 +46,7 @@ export const WooHomescreenWCPayFeatureItem = ( {
 WooHomescreenWCPayFeatureItem.Slot = ( {
 	fillProps,
 }: {
-	fillProps?: Slot.Props;
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
 } ) => (
 	<Slot
 		name={ EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME }

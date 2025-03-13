@@ -1,0 +1,25 @@
+{
+	"name": "@woocommerce/email-editor-php-config",
+	"description": "Email editor based on WordPress Gutenberg package.",
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:lang:php": "composer run-script phpcs",
+		"postinstall": "XDEBUG_MODE=off composer install --quiet"
+	},
+	"license": "GPL-3.0-or-later",
+	"dependencies": {},
+	"devDependencies": {
+		"rimraf": "5.0.5"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{php}"
+			}
+		}
+	}
+}

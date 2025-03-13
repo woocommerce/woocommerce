@@ -7,6 +7,7 @@ import classnames from 'classnames';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { isEqual, isNumber } from 'lodash';
 import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT, TAB } from '@wordpress/keycodes';
+import { FixedSizeList } from 'react-window';
 
 /**
  * Internal dependencies
@@ -58,6 +59,58 @@ type Props = {
 	 * Function to execute when the list should be expanded or collapsed.
 	 */
 	setExpanded: ( expanded: boolean ) => void;
+	/**
+	 * Enable virtual scrolling for large lists of options.
+	 */
+	virtualScroll?: boolean;
+	/**
+	 * Height in pixels for each virtual item.
+	 */
+	virtualItemHeight?: number;
+	/**
+	 * Maximum height in pixels for the virtualized list.
+	 */
+	virtualListHeight?: number;
+};
+
+const VirtualOption = ( {
+	index,
+	style,
+	data,
+}: {
+	index: number;
+	style: React.CSSProperties;
+	data: {
+		options: Option[];
+		selectedIndex: number | null | undefined;
+		instanceId: number;
+		onSelect: ( option: Option ) => void;
+		getOptionRef: ( index: number ) => RefObject< HTMLButtonElement >;
+	};
+} ) => {
+	const { options, selectedIndex, instanceId, onSelect, getOptionRef } = data;
+	const option = options[ index ];
+
+	return (
+		<Button
+			ref={ getOptionRef( index ) }
+			key={ option.key }
+			id={ `woocommerce-select-control__option-${ instanceId }-${ option.key }` }
+			role="option"
+			aria-selected={ index === selectedIndex }
+			aria-setsize={ options.length }
+			aria-posinset={ index + 1 }
+			disabled={ option.isDisabled }
+			className={ classnames( 'woocommerce-select-control__option', {
+				'is-selected': index === selectedIndex,
+			} ) }
+			onClick={ () => onSelect( option ) }
+			tabIndex={ -1 }
+			style={ style }
+		>
+			{ option.label }
+		</Button>
+	);
 };
 
 /**
@@ -66,6 +119,7 @@ type Props = {
 class List extends Component< Props > {
 	optionRefs: { [ key: number ]: RefObject< HTMLButtonElement > };
 	listbox: RefObject< HTMLDivElement >;
+	listRef: RefObject< FixedSizeList >;
 
 	constructor( props: Props ) {
 		super( props );
@@ -74,10 +128,11 @@ class List extends Component< Props > {
 		this.select = this.select.bind( this );
 		this.optionRefs = {};
 		this.listbox = createRef();
+		this.listRef = createRef();
 	}
 
 	componentDidUpdate( prevProps: Props ) {
-		const { options, selectedIndex } = this.props;
+		const { options, selectedIndex, virtualScroll } = this.props;
 
 		// Remove old option refs to avoid memory leaks.
 		if ( ! isEqual( options, prevProps.options ) ) {
@@ -88,7 +143,11 @@ class List extends Component< Props > {
 			selectedIndex !== prevProps.selectedIndex &&
 			isNumber( selectedIndex )
 		) {
-			this.scrollToOption( selectedIndex );
+			if ( virtualScroll && this.listRef.current ) {
+				this.listRef.current.scrollToItem( selectedIndex, 'smart' );
+			} else {
+				this.scrollToOption( selectedIndex );
+			}
 		}
 	}
 
@@ -222,7 +281,11 @@ class List extends Component< Props > {
 	componentDidMount() {
 		const { selectedIndex } = this.props;
 		if ( isNumber( selectedIndex ) && selectedIndex > -1 ) {
-			this.scrollToOption( selectedIndex );
+			if ( this.props.virtualScroll && this.listRef.current ) {
+				this.listRef.current.scrollToItem( selectedIndex, 'smart' );
+			} else {
+				this.scrollToOption( selectedIndex );
+			}
 		}
 		this.toggleKeyEvents( true );
 	}
@@ -232,14 +295,55 @@ class List extends Component< Props > {
 	}
 
 	render() {
-		const { instanceId, listboxId, options, selectedIndex, staticList } =
-			this.props;
+		const {
+			instanceId,
+			listboxId,
+			options,
+			selectedIndex,
+			staticList,
+			virtualScroll,
+			virtualItemHeight = 35,
+			virtualListHeight = 300,
+		} = this.props;
+
 		const listboxClasses = classnames(
 			'woocommerce-select-control__listbox',
 			{
 				'is-static': staticList,
+				'is-virtual': virtualScroll,
 			}
 		);
+
+		if ( virtualScroll ) {
+			return (
+				<div
+					id={ listboxId }
+					role="listbox"
+					className={ listboxClasses }
+					tabIndex={ -1 }
+				>
+					<FixedSizeList
+						ref={ this.listRef }
+						height={ Math.min(
+							virtualListHeight,
+							options.length * virtualItemHeight
+						) }
+						width="100%"
+						itemCount={ options.length }
+						itemSize={ virtualItemHeight }
+						itemData={ {
+							options,
+							selectedIndex,
+							instanceId,
+							onSelect: this.select,
+							getOptionRef: this.getOptionRef.bind( this ),
+						} }
+					>
+						{ VirtualOption }
+					</FixedSizeList>
+				</div>
+			);
+		}
 
 		return (
 			<div

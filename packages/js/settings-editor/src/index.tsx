@@ -4,7 +4,9 @@
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
-import { dispatch } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
+import { SnackbarList } from '@wordpress/components';
+import { store as noticesStore } from '@wordpress/notices';
 /* eslint-disable @woocommerce/dependency-group */
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -20,6 +22,7 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 import { isGutenbergVersionAtLeast } from './utils';
 import { Layout } from './layout';
 import { useActiveRoute } from './route';
+import { SettingsDataProvider } from './data';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -28,9 +31,33 @@ dispatch( editSiteStore ).updateSettings( {
 	__experimentalDashboardLink: getAdminLink( 'admin.php?page=wc-admin' ),
 } );
 
+const Notices = () => {
+	const notices: { id: string; content: string }[] = useSelect(
+		( select ) => {
+			const { getNotices } = select( noticesStore );
+			return getNotices();
+		},
+		[]
+	);
+
+	return <SnackbarList notices={ notices } onRemove={ () => {} } />;
+};
+
+const SettingsApp = () => {
+	const { route, settingsPage, tabs, activeSection } = useActiveRoute();
+
+	return (
+		<Layout
+			route={ route }
+			settingsPage={ settingsPage }
+			tabs={ tabs }
+			activeSection={ activeSection }
+		/>
+	);
+};
+
 export const SettingsEditor = () => {
 	const isRequiredGutenbergVersion = isGutenbergVersionAtLeast( 19.0 );
-	const { route, settingsPage, tabs, activeSection } = useActiveRoute();
 
 	if ( ! isRequiredGutenbergVersion ) {
 		return (
@@ -45,12 +72,10 @@ export const SettingsEditor = () => {
 	}
 
 	return (
-		<Layout
-			route={ route }
-			settingsPage={ settingsPage }
-			tabs={ tabs }
-			activeSection={ activeSection }
-		/>
+		<SettingsDataProvider>
+			<SettingsApp />
+			<Notices />
+		</SettingsDataProvider>
 	);
 };
 

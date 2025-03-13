@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { NOTES_STORE_NAME } from '@woocommerce/data';
+import { notesStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch } from '@wordpress/data';
 import { Button, Modal } from '@wordpress/components';
@@ -10,8 +10,7 @@ import { __ } from '@wordpress/i18n';
 const DismissAllModal = ( { onClose } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
-	const { batchUpdateNotes, removeAllNotes } =
-		useDispatch( NOTES_STORE_NAME );
+	const { batchUpdateNotes, removeAllNotes } = useDispatch( notesStore );
 
 	const dismissAllNotes = async () => {
 		recordEvent( 'wcadmin_inbox_action_dismissall', {} );

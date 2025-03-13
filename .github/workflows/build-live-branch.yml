@@ -8,9 +8,13 @@ on:
             - 'packages/php/**'
             - 'tools/**'
             - '**/changelog/**'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
             - '**/tests/**'
             - '**/*.md'
             - '.husky/**'
+            - '.cursor/**'
             - '.github/**'
             - '!.github/workflows/build-live-branch.yml'
 
@@ -23,7 +27,7 @@ permissions: {}
 jobs:
     build:
         if: github.repository_owner == 'woocommerce' && github.actor != 'github-actions[bot]'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
@@ -31,12 +35,10 @@ jobs:
 
             - name: Get current version
               id: version
-              uses: actions/github-script@v6.3.3
-              with:
-                  script:
-                      const { getVersion } = require( './.github/workflows/scripts/get-plugin-version' );
-                      const version = await getVersion( 'woocommerce' );
-                      core.setOutput( 'version', version );
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo

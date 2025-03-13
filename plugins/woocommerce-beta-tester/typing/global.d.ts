@@ -3,6 +3,11 @@ declare global {
 		wcSettings: {
 			isRemoteLoggingEnabled: boolean;
 		};
+		wc: {
+			wcSettings: {
+				WC_VERSION: string;
+			}
+		}
 	}
 }
 

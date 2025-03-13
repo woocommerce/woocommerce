@@ -1,5 +1,22 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2025-02-20 - version 3.0.0
+* Patch - Fix warnings on the Plugins page when a plugin requires another plugin
+* Patch - Add tab navigation with URL state management in WooCommerce Admin Test Helper
+* Patch - Change remote logging event level from critical to info
+* Patch - Enhance live branches API with permission checks to allow install desired WC version without WC exists
+* Patch - Update links to download WooCommerce Beta Tester
+* Minor - Bump @wordpress/env to 10.14.0 and remove patch for 10.10.0
+* Patch - Bump @wordpress/env to 10.17.0
+* Minor - Fix TS errors and re-enable type checking
+* Minor - Monorepo: bump pnpm version to 9.15.0
+* Major [ **BREAKING CHANGE** ] - Updated declared dependencies to React 18 and Wordpress 6.6
+* Patch - Update import of OPTIONS_STORE_NAME to optionsStore
+* Patch - Update orders store import to use ordersStore from @woocommerce/data
+* Patch - Update wireit to 0.14.10
+* Minor - Upgraded Typescript in the monorepo to 5.7.2
+* Minor - Split JS into multiple chunks to avoid loading on every admin page.
+
 2024-11-26 - version 2.5.1
 * Patch - Fix wc plugin file path
 * Patch - Add coming soon newsletter feature flag

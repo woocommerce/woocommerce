@@ -19,10 +19,10 @@ export const NewImage: React.FC< NewImageProps > = ( {
 	setImageUrl,
 } ) => {
 	return (
-		<div className="wc-settings-email-image-url-new-image">
+		<div>
 			<button
 				onClick={ () => selectImage( inputId, setImageUrl ) }
-				className="wc-settings-email-image-url-select-image"
+				className="wc-settings-email-select-image"
 				type="button"
 			>
 				<img
@@ -30,7 +30,7 @@ export const NewImage: React.FC< NewImageProps > = ( {
 					width="24"
 					height="24"
 					alt={ __( 'Image upload icon', 'woocommerce' ) }
-					className="wc-settings-email-image-url-new-image-icon"
+					className="wc-settings-email-select-image-icon"
 				/>
 			</button>
 		</div>

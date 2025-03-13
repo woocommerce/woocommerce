@@ -8,7 +8,8 @@ import {
 	SlotFillProvider,
 	Spinner,
 } from '@wordpress/components';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
+
 import { createElement, useState } from '@wordpress/element';
 import { tag } from '@wordpress/icons';
 

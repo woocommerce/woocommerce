@@ -1,7 +1,12 @@
 .woocommerce-item__payment-gateway-placeholder {
 	border-top: 1px solid $gray-200;
-	border-bottom: 1px solid $gray-200;
+	border-bottom: none; // This way we avoid a double border between items.
 	padding: 0 48px;
+
+	// Add back the bottom border for the last item.
+	&:nth-last-child(1 of .woocommerce-item__payment-gateway-placeholder) {
+		border-bottom: 1px solid $gray-200;
+	}
 
 	&:hover {
 		background-color: $white;

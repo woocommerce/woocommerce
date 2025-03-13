@@ -1,8 +1,4 @@
-const {
-	test,
-	expect,
-	tags,
-} = require( '../../../fixtures/api-tests-fixtures' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { coupon, order } = require( '../../../data' );
 
 test.describe( 'Coupons API tests', () => {
@@ -73,30 +69,26 @@ test.describe( 'Coupons API tests', () => {
 		);
 	} );
 
-	test(
-		'can permanently delete a coupon',
-		{ tag: tags.SKIP_ON_WPCOM },
-		async ( { request } ) => {
-			//call API to delete previously created coupon
-			const response = await request.delete(
-				`./wp-json/wc/v3/coupons/${ couponId }`,
-				{
-					data: { force: true },
-				}
-			);
+	test( 'can permanently delete a coupon', async ( { request } ) => {
+		//call API to delete previously created coupon
+		const response = await request.delete(
+			`./wp-json/wc/v3/coupons/${ couponId }`,
+			{
+				data: { force: true },
+			}
+		);
 
-			//validate response
-			expect( response.status() ).toEqual( 200 );
+		//validate response
+		expect( response.status() ).toEqual( 200 );
 
-			//call API to retrieve previously deleted coupon
-			const getCouponResponse = await request.get(
-				`./wp-json/wc/v3/coupons/${ couponId }`
-			);
+		//call API to retrieve previously deleted coupon
+		const getCouponResponse = await request.get(
+			`./wp-json/wc/v3/coupons/${ couponId }`
+		);
 
-			//validate response
-			expect( getCouponResponse.status() ).toEqual( 404 );
-		}
-	);
+		//validate response
+		expect( getCouponResponse.status() ).toEqual( 404 );
+	} );
 } );
 
 test.describe( 'Batch update coupons', () => {
@@ -188,42 +180,38 @@ test.describe( 'Batch update coupons', () => {
 		expect( updatedCoupons[ 1 ].amount ).toEqual( '25.00' );
 	} );
 
-	test(
-		'can batch delete coupons',
-		{ tag: tags.SKIP_ON_WPCOM },
-		async ( { request } ) => {
-			// Batch delete the 2 coupons.
-			const couponIdsToDelete = expectedCoupons.map( ( { id } ) => id );
-			const batchDeletePayload = {
-				delete: couponIdsToDelete,
-			};
+	test( 'can batch delete coupons', async ( { request } ) => {
+		// Batch delete the 2 coupons.
+		const couponIdsToDelete = expectedCoupons.map( ( { id } ) => id );
+		const batchDeletePayload = {
+			delete: couponIdsToDelete,
+		};
 
-			//Call API to batch delete the coupons
-			const batchDeleteResponse = await request.post(
-				'wp-json/wc/v3/coupons/batch',
-				{
-					data: batchDeletePayload,
-				}
-			);
-			const batchDeletePayloadJSON = await batchDeleteResponse.json();
-
-			// Verify that the response shows the 2 coupons.
-			const deletedCouponIds = batchDeletePayloadJSON.delete.map(
-				( { id } ) => id
-			);
-			expect( batchDeleteResponse.status() ).toEqual( 200 );
-			expect( deletedCouponIds ).toEqual( couponIdsToDelete );
-
-			// Verify that the 2 deleted coupons cannot be retrieved.
-			for ( const couponId of couponIdsToDelete ) {
-				//Call the API to attempte to retrieve the coupons
-				const response = await request.get(
-					`wp-json/wc/v3/coupons/${ couponId }`
-				);
-				expect( response.status() ).toEqual( 404 );
+		//Call API to batch delete the coupons
+		const batchDeleteResponse = await request.post(
+			'wp-json/wc/v3/coupons/batch',
+			{
+				data: batchDeletePayload,
 			}
+		);
+		const batchDeletePayloadJSON = await batchDeleteResponse.json();
+
+		// Verify that the response shows the 2 coupons.
+		const deletedCouponIds = batchDeletePayloadJSON.delete.map(
+			( { id } ) => id
+		);
+		expect( batchDeleteResponse.status() ).toEqual( 200 );
+		expect( deletedCouponIds ).toEqual( couponIdsToDelete );
+
+		// Verify that the 2 deleted coupons cannot be retrieved.
+		for ( const couponId of couponIdsToDelete ) {
+			//Call the API to attempte to retrieve the coupons
+			const response = await request.get(
+				`wp-json/wc/v3/coupons/${ couponId }`
+			);
+			expect( response.status() ).toEqual( 404 );
 		}
-	);
+	} );
 } );
 
 test.describe( 'List coupons', () => {

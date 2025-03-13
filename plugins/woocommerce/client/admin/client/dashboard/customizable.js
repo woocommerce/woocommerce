@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { Icon, plusCircleFilled } from '@wordpress/icons';
 import { withSelect } from '@wordpress/data';
 import { H } from '@woocommerce/components';
-import { SETTINGS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
+import { settingsStore, useUserPreferences } from '@woocommerce/data';
 import { getQuery } from '@woocommerce/navigation';
 import {
 	getCurrentDates,
@@ -329,7 +329,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 export default compose(
 	withSelect( ( select ) => {
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
 		return {

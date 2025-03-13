@@ -14,6 +14,8 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\MockSessionHandler;
@@ -603,6 +605,7 @@ class Checkout extends MockeryTestCase {
 			}
 		);
 
+		unset( WC()->countries->locale );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
@@ -1256,5 +1259,109 @@ class Checkout extends MockeryTestCase {
 
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+	}
+
+	/**
+	 * Test updating an order via PUT request.
+	 */
+	public function test_put_order_update() {
+		$fields = array(
+			array(
+				'id'                => 'plugin-namespace/student-id',
+				'label'             => 'Student ID',
+				'location'          => 'address',
+				'type'              => 'text',
+				'required'          => true,
+				'attributes'        => array(
+					'title'          => 'This is a student id',
+					'autocomplete'   => 'student-id',
+					'autocapitalize' => 'none',
+					'maxLength'      => '30',
+				),
+				'sanitize_callback' => function ( $value ) {
+					return trim( $value );
+				},
+				'validate_callback' => function ( $value ) {
+					return strlen( $value ) > 3;
+				},
+			),
+			array(
+				'id'       => 'plugin-namespace/job-function',
+				'label'    => 'What is your main role at your company?',
+				'location' => 'contact',
+				'required' => false,
+				'type'     => 'text',
+			),
+			array(
+				'id'       => 'plugin-namespace/leave-on-porch',
+				'label'    => __( 'Please leave my package on the porch if I\'m not home', 'woocommerce' ),
+				'location' => 'order',
+				'type'     => 'checkbox',
+			),
+		);
+		array_map( 'woocommerce_register_additional_checkout_field', $fields );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'additional_fields' => array(
+					'plugin-namespace/student-id'     => '1234567890',
+					'plugin-namespace/job-function'   => 'engineering',
+					'plugin-namespace/leave-on-porch' => true,
+				),
+				'payment_method'    => 'bacs',
+				'order_notes'       => 'Please leave my package on the porch',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+
+		$checkout_fields           = Package::container()->get( CheckoutFields::class );
+		$additional_fields_address = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', 'other', 'view' );
+		$additional_fields_contact = $checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' );
+		$additional_fields_order   = $checkout_fields->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' );
+
+		// Verify that address fields are not updated, but contact and order fields are.
+		$this->assertArrayNotHasKey( 'plugin-namespace/student-id', $additional_fields_address );
+		$this->assertEquals( 'engineering', $additional_fields_contact['plugin-namespace/job-function']['value'] );
+		$this->assertEquals( true, $additional_fields_order['plugin-namespace/leave-on-porch']['value'] );
+	}
+
+	/**
+	 * Test updating an order with invalid payment method.
+	 */
+	public function test_put_order_invalid_payment_method() {
+		// Now test updating with invalid payment method .
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'payment_method' => 'invalid_method',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+
+	/**
+	 * Test updating an order with invalid order notes.
+	 */
+	public function test_put_order_invalid_order_notes() {
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'order_notes' => array( 'invalid' => 'notes format' ), // Order notes should be <string>.
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
 	}
 }

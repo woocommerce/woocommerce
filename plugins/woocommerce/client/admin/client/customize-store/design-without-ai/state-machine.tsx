@@ -303,6 +303,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						},
 					},
 					assembleSite: {
+						meta: {
+							component: ApiCallLoader,
+						},
 						initial: 'pending',
 						states: {
 							pending: {

@@ -8,6 +8,7 @@ use Exception;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
+use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 
 /**
  * Controller for the REST endpoints to service the Payments settings page.
@@ -50,6 +51,18 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @param bool $override Whether to override the existing routes. Useful for testing.
 	 */
 	public function register_routes( bool $override = false ) {
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/woopay-eligibility',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/country',
@@ -1135,6 +1148,19 @@ class PaymentsRestController extends RestApiControllerBase {
 					'readonly'    => true,
 				),
 			),
+		);
+	}
+
+	/**
+	 * Get WooPay eligibility status.
+	 *
+	 * @return array The WooPay eligibility status.
+	 */
+	protected function get_woopay_eligibility() {
+		return rest_ensure_response(
+			array(
+				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
+			)
 		);
 	}
 }

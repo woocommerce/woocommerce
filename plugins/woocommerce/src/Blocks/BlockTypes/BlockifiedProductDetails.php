@@ -13,6 +13,14 @@ class BlockifiedProductDetails extends AbstractBlock {
 	 */
 	protected $block_name = 'blockified-product-details';
 
+	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
 
 	/**
 	 * Render the block.

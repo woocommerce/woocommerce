@@ -12,7 +12,7 @@ import {
 	getHistory,
 	getPersistedQuery,
 } from '@woocommerce/navigation';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
@@ -134,7 +134,7 @@ const markTaskComplete = async () => {
 	const currentTemplateId: string | undefined = await resolveSelect(
 		coreStore
 	).getDefaultTemplateId( { slug: 'home' } );
-	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+	return dispatch( optionsStore ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
 		// We use this on the intro page to determine if this same theme was used in the last customization.
 		woocommerce_admin_customize_store_completed_theme_id: currentTemplateId,

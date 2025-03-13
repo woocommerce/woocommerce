@@ -123,7 +123,7 @@ export const EmailPreviewHeader: React.FC< EmailPreviewHeaderProps > = ( {
 					/>
 				</div>
 				<div className="wc-settings-email-preview-header-sender">
-					{ fromName }
+					{ `${ fromName } ` }
 					<span>&lt;{ fromAddress }&gt;</span>
 				</div>
 			</div>

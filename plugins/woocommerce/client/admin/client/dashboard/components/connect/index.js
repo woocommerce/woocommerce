@@ -7,7 +7,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 
 /**
  * Button redirecting to Jetpack auth flow.
@@ -147,21 +147,24 @@ Connect.propTypes = {
 	 * Text used for the abort connection button.
 	 */
 	abortText: PropTypes.string,
+	/**
+	 * Source identifier for the connection.
+	 */
+	from: PropTypes.string,
 };
 
 Connect.defaultProps = {
 	setIsPending: () => {},
+	from: 'woocommerce-services',
 };
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getJetpackAuthUrl, isResolving } = select(
-			ONBOARDING_STORE_NAME
-		);
+		const { getJetpackAuthUrl, isResolving } = select( onboardingStore );
 
 		const queryArgs = {
 			redirectUrl: props.redirectUrl || window.location.href,
-			from: 'woocommerce-services',
+			from: props.from,
 		};
 
 		const jetpackAuthUrlResponse = getJetpackAuthUrl( queryArgs );

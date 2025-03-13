@@ -75,12 +75,22 @@ class ProductSummary extends AbstractBlock {
 		$short_description = $product->get_short_description();
 
 		if ( $short_description ) {
+			// Logic copied from https://github.com/woocommerce/woocommerce/blob/637dde283057ed6667ff81c73ed08774552f631d/plugins/woocommerce/includes/wc-core-functions.php#L53-L62.
+			$short_description = wp_kses_post( $short_description );
+			$short_description = $GLOBALS['wp_embed']->run_shortcode( $short_description );
+			$short_description = shortcode_unautop( $short_description );
+			$short_description = do_shortcode( $short_description );
 			return $short_description;
 		}
 
 		$description = $product->get_description();
 
 		if ( $show_description_if_empty && $description ) {
+			// Logic copied from https://github.com/woocommerce/woocommerce/blob/637dde283057ed6667ff81c73ed08774552f631d/plugins/woocommerce/includes/wc-core-functions.php#L53-L62.
+			$description = wp_kses_post( $description );
+			$description = $GLOBALS['wp_embed']->run_shortcode( $description );
+			$description = shortcode_unautop( $description );
+			$description = do_shortcode( $description );
 			return $description;
 		}
 
@@ -163,7 +173,7 @@ class ProductSummary extends AbstractBlock {
 	 * but allows keeping the editor and frontend consistent.
 	 *
 	 * NOTE: If editing, keep it in sync with generateSummary function from
-	 * plugins/woocommerce-blocks/assets/js/base/components/summary/utils.ts!
+	 * plugins/woocommerce/client/blocks/assets/js/base/components/summary/utils.ts!
 	 *
 	 * Once HTML API allow for HTML manipulation both functions (PHP and JS)
 	 * should be updated to solution fully respecting the word count.
@@ -239,7 +249,7 @@ class ProductSummary extends AbstractBlock {
 			</div></div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
-			wp_kses_post( $final_summary )
+			$final_summary
 		);
 	}
 }

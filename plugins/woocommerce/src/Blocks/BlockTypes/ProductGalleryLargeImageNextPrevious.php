@@ -60,7 +60,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
-				'data-wc-on--click',
+				'data-wp-on--click',
 				'actions.selectPreviousImage'
 			);
 			$p->set_attribute(
@@ -75,7 +75,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
-				'data-wc-on--click',
+				'data-wp-on--click',
 				'actions.selectNextImage'
 			);
 			$p->set_attribute(
@@ -88,7 +88,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		return strtr(
 			'<div
 				class="wc-block-product-gallery-large-image-next-previous wp-block-woocommerce-product-gallery-large-image-next-previous"
-				data-wc-interactive=\'{data_wc_interactive}\'
+				data-wp-interactive=\'{data_wp_interactive}\'
 			>
 				<div class="wc-block-product-gallery-large-image-next-previous-container">
 					{prev_button}
@@ -98,7 +98,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			array(
 				'{prev_button}'         => $prev_button,
 				'{next_button}'         => $next_button,
-				'{data_wc_interactive}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+				'{data_wp_interactive}' => 'woocommerce/product-gallery',
 			)
 		);
 	}
@@ -114,15 +114,17 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		$next_button_icon_path     = 'M21.7001 12L19.3 14L28.5 24L19.3 34L21.7001 36L32.5 24L21.7001 12Z';
 		$icon_path                 = $previous_button_icon_path;
 		$button_side_class         = 'left';
+		$button_disabled_directive = 'context.disableLeft';
 
 		if ( 'next' === $button_type ) {
-			$icon_path         = $next_button_icon_path;
-			$button_side_class = 'right';
+			$icon_path                 = $next_button_icon_path;
+			$button_side_class         = 'right';
+			$button_disabled_directive = 'context.disableRight';
 		}
 
 		return sprintf(
 			'<button
-				data-wc-bind--disabled="state.disable%1$s"
+				data-wp-bind--disabled="%1$s"
 				class="wc-block-product-gallery-large-image-next-previous--button wc-block-product-gallery-large-image-next-previous-%2$s"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" width="49" height="48" viewBox="0 0 49 48" fill="none">
@@ -140,7 +142,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 					</defs>
 				</svg>
 			</button>',
-			ucfirst( $button_side_class ),
+			$button_disabled_directive,
 			$button_side_class,
 			$icon_path
 		);

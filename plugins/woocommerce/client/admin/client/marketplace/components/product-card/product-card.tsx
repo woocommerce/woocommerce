@@ -154,6 +154,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			className="woocommerce-marketplace__product-card__link"
 			href={ productUrl() }
 			rel="noopener noreferrer"
+			target="_blank"
 			onClick={ () => {
 				recordTracksEvent( 'marketplace_product_card_clicked', {
 					product_id: product.id,

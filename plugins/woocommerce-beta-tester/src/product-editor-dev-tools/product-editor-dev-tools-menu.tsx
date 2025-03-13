@@ -15,7 +15,7 @@ export function ProductEditorDevToolsMenu( {
 } ) {
 	return (
 		<WooProductMoreMenuItem order={ 1000 }>
-			{ ( { onClose }: { onClose: () => void } ) => (
+			{ ( { onClose } ) => (
 				<MenuGroup label={ __( 'Developer tools', 'woocommerce' ) }>
 					<MenuItem
 						icon={ <Icon icon={ cog } /> }

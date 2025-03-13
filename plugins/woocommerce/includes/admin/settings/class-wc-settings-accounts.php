@@ -254,6 +254,18 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'    => false,
 			),
 			array(
+				'title'       => __( 'Retain refunded orders', 'woocommerce' ),
+				'desc_tip'    => __( 'Retain refunded orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
+				'id'          => 'woocommerce_anonymize_refunded_orders',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => array(
+					'number' => '',
+					'unit'   => 'months',
+				),
+				'autoload'    => false,
+			),
+			array(
 				'title'       => __( 'Retain completed orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
 				'id'          => 'woocommerce_anonymize_completed_orders',

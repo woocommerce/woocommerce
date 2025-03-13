@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
-use Automattic\WooCommerce\Internal\BrandingController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -116,11 +115,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
 				wp_enqueue_style( 'woocommerce_admin_marketplace_styles' );
-			}
-
-			// Override primary color if new branding is in use.
-			if ( BrandingController::use_new_branding() ) {
-				wp_enqueue_style( 'woocommerce_admin_variables', WC()->plugin_url() . '/assets/css/variables-new-branding.css', array(), $version );
 			}
 		}
 
@@ -319,6 +313,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 					'i18n_variation_count_single'         => esc_js( __( '1 variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
+					'i18n_variation_cost_remove_warning'  => esc_js( __( 'The custom cost of goods sold values will revert back to their defaults for all the variations. Would you like to continue?', 'woocommerce' ) ),
 					'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
 				);
 

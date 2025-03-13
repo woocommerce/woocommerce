@@ -5,7 +5,6 @@
  * Categories: WooCommerce
  * Template Types: coming-soon
  * Inserter: false
- * Feature Flag: coming-soon-newsletter-template
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
@@ -20,8 +19,8 @@ $left_image  = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern
 $right_image = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/orange-wall-with-bicycle.jpg' );
 
 ?>
-<!-- wp:woocommerce/coming-soon {"comingSoonPatternId":"page-coming-soon-split-right-image","className":"woocommerce-coming-soon-split-right-image","style":{"color":{"background":"#f9f9f9"}}} -->
-<div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-split-right-image has-background" style="background-color:#f9f9f9">
+<!-- wp:woocommerce/coming-soon {"comingSoonPatternId":"page-coming-soon-split-right-image","className":"woocommerce-coming-soon-split-right-image","style":{"color":{"background":"#f9f9f9","text":"#000000"},"elements":{"link":{"color":{"text":"#000000"}}}}} -->
+<div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-split-right-image has-text-color has-background has-link-color" style="color:#000000;background-color:#f9f9f9">
 	<!-- wp:group {"style":{"dimensions":{"minHeight":"100vh"},"spacing":{"padding":{"top":"0px","bottom":"0px"},"blockGap":"0px"}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top","orientation":"vertical","justifyContent":"center"}} -->
 	<div class="wp-block-group" style="min-height:100vh;padding-top:0px;padding-bottom:0px"><!-- wp:group {"style":{"dimensions":{"minHeight":"117px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
 		<div class="wp-block-group" style="min-height:117px"><!-- wp:site-title {"textAlign":"center","style":{"typography":{"fontSize":"18px","letterSpacing":"2.7px","fontStyle":"normal","fontWeight":"400"}},"fontFamily":"<?php echo esc_attr( $body_font_family ); ?>"} /--></div>
@@ -51,8 +50,8 @@ $right_image = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern
 			<!-- /wp:column -->
 
 			<!-- wp:column {"verticalAlignment":"stretch","layout":{"type":"default"}} -->
-			<div class="wp-block-column is-vertically-aligned-stretch"><!-- wp:cover {"url":"<?php echo esc_url( $right_image ); ?>","id":34,"dimRatio":0,"customOverlayColor":"#cd7550","isUserOverlayColor":false,"focalPoint":{"x":0.5,"y":0.8},"minHeight":100,"minHeightUnit":"%","isDark":false,"className":"woocommerce-split-right-image-cover","style":{"spacing":{"padding":{"top":"126px","bottom":"126px","left":"76px","right":"75px"}}},"layout":{"type":"default"}} -->
-				<div class="wp-block-cover is-light woocommerce-split-right-image-cover" style="padding-top:126px;padding-right:75px;padding-bottom:126px;padding-left:76px;min-height:100%"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim" style="background-color:#cd7550"></span><img class="wp-block-cover__image-background wp-image-34" alt="" src="<?php echo esc_url( $right_image ); ?>" style="object-position:50% 80%" data-object-fit="cover" data-object-position="50% 80%"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","style":{"typography":{"fontSize":"75px","fontStyle":"normal","fontWeight":"400","lineHeight":"1.3"},"color":{"text":"#ffffff80"},"elements":{"link":{"color":{"text":"#ffffff80"}}}},"fontFamily":"<?php echo esc_attr( $heading_font_family ); ?>"} -->
+			<div class="wp-block-column is-vertically-aligned-stretch"><!-- wp:cover {"url":"<?php echo esc_url( $right_image ); ?>","id":34,"dimRatio":0,"customOverlayColor":"#cd7550","isUserOverlayColor":false,"focalPoint":{"x":0.5,"y":0.8},"minHeight":100,"minHeightUnit":"%","isDark":false,"className":"woocommerce-split-right-image-cover","style":{"elements":{"link":{"color":{"text":"inherit"}}},"color":{"text":"inherit"},"spacing":{"padding":{"top":"126px","bottom":"126px","left":"76px","right":"75px"}}},"layout":{"type":"default"}} -->
+				<div class="wp-block-cover has-text-color has-link-color is-light woocommerce-split-right-image-cover" style="padding-top:126px;padding-right:75px;padding-bottom:126px;padding-left:76px;min-height:100%;color:inherit"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim" style="background-color:#cd7550"></span><img class="wp-block-cover__image-background wp-image-34" alt="" src="<?php echo esc_url( $right_image ); ?>" style="object-position:50% 80%" data-object-fit="cover" data-object-position="50% 80%"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","style":{"typography":{"fontSize":"75px","fontStyle":"normal","fontWeight":"400","lineHeight":"1.3"},"color":{"text":"#ffffff80"},"elements":{"link":{"color":{"text":"#ffffff80"}}}},"fontFamily":"<?php echo esc_attr( $heading_font_family ); ?>"} -->
 					<p class="has-text-align-center has-text-color has-link-color has-<?php echo esc_attr( $heading_font_family ); ?>-font-family" style="color:#ffffff80;font-size:75px;font-style:normal;font-weight:400;line-height:1.3"><em><?php echo esc_html_x( 'Where cycling dreams take flight.', 'Used in the heading of the coming soon page', 'woocommerce' ); ?></em></p>
 					<!-- /wp:paragraph --></div></div>
 				<!-- /wp:cover --></div>

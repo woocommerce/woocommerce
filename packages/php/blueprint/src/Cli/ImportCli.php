@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Blueprint\Cli;
 
-use Automattic\WooCommerce\Blueprint\CliResultFormatter;
 use Automattic\WooCommerce\Blueprint\ImportSchema;
+use Automattic\WooCommerce\Blueprint\ResultFormatters\CliResultFormatter;
 
 /**
  * Class ImportCli

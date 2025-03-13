@@ -14,3 +14,4 @@
 /.* @woocommerce/flux
 /*.* @woocommerce/flux
 /changelog.txt
+/pnpm-lock.yaml

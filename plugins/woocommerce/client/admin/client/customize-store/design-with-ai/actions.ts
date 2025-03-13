@@ -4,7 +4,7 @@
 import { assign, spawn } from 'xstate';
 import { getQuery, updateQueryString } from '@woocommerce/navigation';
 import { dispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -191,7 +191,7 @@ const assignHomepageTemplate = assign<
 } );
 
 const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
-	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+	return dispatch( optionsStore ).updateOptions( {
 		woo_ai_describe_store_description: descriptionText,
 	} );
 };

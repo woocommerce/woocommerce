@@ -111,8 +111,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
-
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
@@ -160,25 +158,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
 
 		return $response;
-	}
-
-	/**
-	 * Load the cart session before handling responses.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->has_cart_token( $request ) ) {
-			// Overrides the core session class.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
-		}
-		$this->cart_controller->load_cart();
-		$this->cart_controller->normalize_cart();
 	}
 
 	/**

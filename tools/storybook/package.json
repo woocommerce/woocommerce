@@ -15,7 +15,7 @@
 		"build:storybook": "wireit",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:storybook$/'",
 		"watch:build:storybook": "wireit",
-		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce-blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
+		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce/client/blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook",
 		"preinstall": "npx only-allow pnpm"
 	},
@@ -26,10 +26,10 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"devDependencies": {
-		"@babel/plugin-proposal-class-properties": "^7.18.6",
+		"@babel/plugin-transform-class-properties": "^7.23.3",
 		"@babel/preset-env": "^7.23.5",
 		"@babel/preset-react": "7.23.3",
-		"@babel/preset-typescript": "^7.23.3",
+		"@babel/preset-typescript": "7.23.3",
 		"@babel/runtime": "^7.23.5",
 		"@storybook/addon-a11y": "7.6.19",
 		"@storybook/addon-actions": "7.6.19",

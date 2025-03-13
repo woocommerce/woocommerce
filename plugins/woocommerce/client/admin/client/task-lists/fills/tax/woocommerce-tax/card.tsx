@@ -11,24 +11,18 @@ import { updateQueryString } from '@woocommerce/navigation';
  */
 import { PartnerCard } from '../components/partner-card';
 import logo from './logo.png';
-import newLogo from './logo_new.png';
 import { TaxChildProps } from '../utils';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
-import { isNewBranding } from '~/utils/admin-settings';
 
 export const Card: React.FC< TaxChildProps > = () => {
 	return (
 		<PartnerCard
 			name={ __( 'WooCommerce Tax', 'woocommerce' ) }
-			logo={ isNewBranding() ? newLogo : logo }
-			description={
-				isNewBranding()
-					? __(
-							'WooCommerce Tax, recommended for new stores',
-							'woocommerce'
-					  )
-					: __( 'Best for new stores', 'woocommerce' )
-			}
+			logo={ logo }
+			description={ __(
+				'WooCommerce Tax, recommended for new stores',
+				'woocommerce'
+			) }
 			benefits={ [
 				__( 'Real-time sales tax calculation', 'woocommerce' ),
 				interpolateComponents( {

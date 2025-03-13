@@ -11,7 +11,7 @@ jobs:
       github.event.issue &&
       github.event.issue.state == 'open' &&
       contains(github.event.issue.labels.*.name, 'needs: author feedback')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:

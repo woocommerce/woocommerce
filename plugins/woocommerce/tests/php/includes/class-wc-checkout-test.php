@@ -54,7 +54,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_cart_needs_shipping_address',
-			function() {
+			function () {
 				return true;
 			}
 		);
@@ -76,7 +76,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_order_notes() {
 		$data = array(
 			'ship_to_different_address' => false,
-			'order_comments'             => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
+			'order_comments'            => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
 			'payment_method'            => WC_Gateway_BACS::ID,
 		);
 
@@ -181,28 +181,28 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_validate_checkout_adds_we_dont_ship_error_only_if_country_exists( $country, $expect_we_dont_ship_error ) {
 		add_filter(
 			'woocommerce_countries_allowed_countries',
-			function() {
+			function () {
 				return array( 'ES' );
 			}
 		);
 
 		add_filter(
 			'woocommerce_cart_needs_shipping',
-			function() {
+			function () {
 				return true;
 			}
 		);
 
 		add_filter(
 			'wc_shipping_enabled',
-			function() {
+			function () {
 				return true;
 			}
 		);
 
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'wc_get_shipping_method_count' => function( $include_legacy = false, $enabled_only = false ) {
+				'wc_get_shipping_method_count' => function ( $include_legacy = false, $enabled_only = false ) {
 					return 1;
 				},
 			)
@@ -219,7 +219,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->sut->validate_checkout( $data, $errors );
 
 		$this->assertEquals(
-			$expect_we_dont_ship_error ? 'Unfortunately <strong>we do not ship to the JP</strong>. Please enter an alternative shipping address.' : '',
+			$expect_we_dont_ship_error ? 'Unfortunately <strong>we do not ship to JP</strong>. Please enter an alternative shipping address.' : '',
 			$errors->get_error_message( 'shipping' )
 		);
 	}
@@ -239,4 +239,3 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC()->customer = $orig_customer;
 	}
 }
-

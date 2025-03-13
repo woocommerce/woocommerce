@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improved shortcode cart and checkout coupon notices by appending elements instead of text.

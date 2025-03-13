@@ -28,6 +28,7 @@ import {
 } from '~/settings-payments/components/buttons';
 import { ReactivateLivePaymentsButton } from '~/settings-payments/components/buttons/reactivate-live-payments-button';
 import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
+import { OfficialBadge } from '~/settings-payments/components/official-badge';
 
 type PaymentGatewayItemProps = {
 	gateway: PaymentGatewayProvider;
@@ -109,12 +110,14 @@ export const PaymentGatewayListItem = ( {
 						) }
 						{ gateway.supports?.includes( 'subscriptions' ) && (
 							<Tooltip
+								placement="top"
 								text={ __(
 									'Supports recurring payments',
 									'woocommerce'
 								) }
 								children={
 									<img
+										className="woocommerce-list__item-recurring-payments-icon"
 										src={
 											WC_ASSET_URL +
 											'images/icons/recurring-payments.svg'
@@ -126,6 +129,10 @@ export const PaymentGatewayListItem = ( {
 									/>
 								}
 							/>
+						) }
+						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
+						{ gateway._suggestion_id && (
+							<OfficialBadge variant="expanded" />
 						) }
 					</span>
 					<span
@@ -169,10 +176,11 @@ export const PaymentGatewayListItem = ( {
 
 						{ ! gatewayNeedsOnboarding && (
 							<SettingsButton
+								gatewayId={ gateway.id }
 								settingsHref={
 									gateway.management._links.settings.href
 								}
-								installingPlugin={ installingPlugin }
+								isInstallingPlugin={ !! installingPlugin }
 							/>
 						) }
 

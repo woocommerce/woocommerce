@@ -48,4 +48,8 @@ export type PaymentSettingsSelectors = {
 	getSuggestions: WPDataSelector< typeof getSuggestions >;
 	getSuggestionCategories: WPDataSelector< typeof getSuggestionCategories >;
 	isFetching: WPDataSelector< typeof isFetching >;
+	getIsWooPayEligible: WPDataSelector< typeof getIsWooPayEligible >;
 } & WPDataSelectors;
+
+export const getIsWooPayEligible = ( state: PaymentSettingsState ) =>
+	state.isWooPayEligible;

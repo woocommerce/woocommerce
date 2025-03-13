@@ -1,0 +1,37 @@
+{
+	"compilerOptions": {
+		"rootDir": "src",
+		"noEmit": true,
+		"composite": true,
+		"incremental": true,
+		"module": "esnext",
+		"target": "esnext",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"allowJs": true,
+		"skipLibCheck": true,
+		"downlevelIteration": true,
+		"jsx": "react-jsx",
+
+		// strict checks
+		"strict": true,
+		"alwaysStrict": true,
+		"strictBindCallApply": false,
+		"strictFunctionTypes": false,
+		"strictNullChecks": false,
+		"strictPropertyInitialization": false,
+		"noImplicitAny": false,
+		"noImplicitThis": false,
+		"forceConsistentCasingInFileNames": true,
+
+		// additional checks
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"typeRoots": [ "./node_modules/@types" ]
+	},
+	"include": [ "src/**/*" ]
+}

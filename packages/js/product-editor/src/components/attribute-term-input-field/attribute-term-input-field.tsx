@@ -16,8 +16,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useDebounce } from '@wordpress/compose';
 import { plus } from '@wordpress/icons';
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
+	experimentalProductAttributeTermsStore,
 } from '@woocommerce/data';
 import {
 	selectControlStateChangeTypes,
@@ -75,21 +75,19 @@ export const AttributeTermInputField: React.FC<
 		useState< string >();
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
-		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
+		useDispatch( experimentalProductAttributeTermsStore );
 
 	const fetchItems = useCallback(
 		( searchString?: string | undefined ) => {
 			setIsFetching( true );
-			return resolveSelect(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-			)
+			return resolveSelect( experimentalProductAttributeTermsStore )
 				.getProductAttributeTerms( {
 					search: searchString || '',
 					attribute_id: attributeId,
 				} )
 				.then(
-					( attributeTerms: ProductAttributeTerm[] ) => {
-						setFetchedItems( attributeTerms );
+					( attributeTerms ) => {
+						setFetchedItems( attributeTerms || [] );
 						setIsFetching( false );
 						return attributeTerms;
 					},
@@ -140,16 +138,14 @@ export const AttributeTermInputField: React.FC<
 		} );
 		setIsCreatingTerm( true );
 		try {
-			const newAttribute: ProductAttributeTerm =
-				await createProductAttributeTerm( {
-					...attribute,
-					attribute_id: attributeId,
-				} );
+			const newAttribute = await createProductAttributeTerm( {
+				...attribute,
+				attribute_id: attributeId,
+			} );
 			recordEvent( 'product_attribute_term_add_success', {
 				source: TRACKS_SOURCE,
 			} );
 			onChange( [ ...value, newAttribute ] );
-			invalidateResolutionForStoreSelector( 'getProductAttributes' );
 			invalidateResolutionForStoreSelector( 'getProductAttributeTerms' );
 			setIsCreatingTerm( false );
 		} catch ( err: unknown ) {

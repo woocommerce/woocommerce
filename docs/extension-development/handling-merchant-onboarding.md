@@ -170,8 +170,11 @@ import { registerPlugin } from '@wordpress/plugins';
 Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we're using here is called JSX. If you're unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
 
 ```js
+import { onboardingStore } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
+
 const Task = ( { onComplete, task } ) =&gt; {
-	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const { actionTask } = useDispatch( onboardingStore );
 	const { isActioned } = task;
 
 	return (

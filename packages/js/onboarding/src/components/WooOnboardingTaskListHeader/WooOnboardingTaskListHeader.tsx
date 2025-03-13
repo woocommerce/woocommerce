@@ -6,7 +6,8 @@ import { Slot, Fill } from '@wordpress/components';
 
 type WooOnboardingTaskListHeaderProps = {
 	id: string;
-};
+	// The name prop is derived from the id and should not be passed by users.
+} & Omit< React.ComponentProps< typeof Fill >, 'name' >;
 
 /**
  * A Fill for adding Onboarding Task List headers.
@@ -19,9 +20,8 @@ type WooOnboardingTaskListHeaderProps = {
 export const WooOnboardingTaskListHeader = ( {
 	id,
 	...props
-}: WooOnboardingTaskListHeaderProps & React.ComponentProps< typeof Fill > ) => (
+}: WooOnboardingTaskListHeaderProps ) => (
 	<Fill
-		// @ts-expect-error -- TODO: react-18-upgrade - examine why the type is inferred to have a name property and ts thinks that it will always override the name prop
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		{ ...props }
 	/>

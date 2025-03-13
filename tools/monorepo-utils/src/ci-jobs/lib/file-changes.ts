@@ -79,16 +79,22 @@ function getChangedFilesForProject(
  *
  * @param {Object} projectGraph The project graph to assign changes for.
  * @param {string} baseRef      The git ref to compare against for changes.
+ * @param {string} prNumber     The PR number referencing the changes.
  * @return {Object|true} A map of changed files keyed by the project name or true if all projects should be marked as changed.
  */
 export function getFileChanges(
 	projectGraph: ProjectNode,
-	baseRef: string
+	baseRef: string,
+	prNumber: string
 ): ProjectFileChanges | true {
+	const command =
+		( prNumber && `gh pr diff ${ prNumber } --name-only` ) ||
+		`git diff --name-only ${ baseRef }`;
 	// We're going to use git to figure out what files have changed.
-	const output = execSync( `git diff --name-only ${ baseRef }`, {
+	const output = execSync( command, {
 		encoding: 'utf8',
 	} );
+
 	const changedFilePaths = output.split( '\n' );
 
 	// If the root lockfile has been changed we have no easy way

@@ -5,7 +5,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useContext, useMemo } from '@wordpress/element';
 import {
@@ -37,14 +37,11 @@ import {
 
 export const FontPairing = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			aiSuggestions: getOption(
 				'woocommerce_customize_store_ai_suggestions'
 			) as { lookAndFeel: Look },
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			isLoading: ! hasFinishedResolution( 'getOption', [
 				'woocommerce_customize_store_ai_suggestions',
 			] ),
@@ -73,13 +70,8 @@ export const FontPairing = () => {
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 	const trackingAllowed = useSelect(
 		( select ) =>
-			// Todo: awaiting more global fix, demo:
-			// https://github.com/woocommerce/woocommerce/pull/54146
-			(
-				select( OPTIONS_STORE_NAME ) as {
-					getOption: ( option: string ) => unknown;
-				}
-			 ).getOption( 'woocommerce_allow_tracking' ) === 'yes',
+			select( optionsStore ).getOption( 'woocommerce_allow_tracking' ) ===
+			'yes',
 		[]
 	);
 

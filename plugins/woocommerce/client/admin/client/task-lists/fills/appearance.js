@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { registerPlugin } from '@wordpress/plugins';
 import { getAdminLink } from '@woocommerce/settings';

@@ -156,6 +156,7 @@ export const PaymentGatewayList = ( {
 										<div className="woocommerce-list__item-after centered no-buttons">
 											<div className="woocommerce-list__item-after__actions">
 												<a
+													className="woocommerce-list__item-after__actions__arrow"
 													href={
 														offlinePmsGroup
 															.management._links

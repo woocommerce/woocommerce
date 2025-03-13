@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import schema from '@wordpress/core-data';
+import type { User, Context } from '@wordpress/core-data';
 
 export type UserPreferences = {
 	activity_panel_inbox_last_read?: string;
@@ -40,12 +40,7 @@ export type WoocommerceMeta = {
 	[ key in keyof UserPreferences ]: string;
 };
 
-export type WCUser<
-	T extends keyof schema.Schema.BaseUser< 'view' > = schema.Schema.ViewKeys.User
-> = Pick<
-	schema.Schema.BaseUser< 'view' >,
-	schema.Schema.ViewKeys.User | T
-> & {
+export type WCUser< T extends Context = 'edit' > = User< T > & {
 	// https://github.com/woocommerce/woocommerce/blob/3eb1938f4a0d0a93c9bcaf2a904f96bd501177fc/plugins/woocommerce/src/Internal/Admin/WCAdminUser.php#L40-L58
 	woocommerce_meta: WoocommerceMeta;
 	is_super_admin: boolean;

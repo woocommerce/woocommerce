@@ -12,7 +12,6 @@ import { Post } from './types';
 export const useBlogPosts = ( category: string ) => {
 	return useSelect(
 		( select ) => {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const { getBlogPosts, getBlogPostsError, isResolving } =
 				select( marketingStore );
 

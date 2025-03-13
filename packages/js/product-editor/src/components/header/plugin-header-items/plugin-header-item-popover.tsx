@@ -7,7 +7,7 @@ import { plugins } from '@wordpress/icons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { PinnedItems } from '@wordpress/interface';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
 
 /**
  * Internal dependencies

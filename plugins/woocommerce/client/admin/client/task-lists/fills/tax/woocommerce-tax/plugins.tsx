@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Plugins as PluginInstaller } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
+import { optionsStore, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -27,27 +27,22 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	onManual,
 	pluginsToActivate,
 } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 		const wcConnectOptions = getOption( 'wc_connect_options' );
 
 		return {
 			isResolving:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_setup_jetpack_opted_in',
 				] ) ||
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'wc_connect_options',
 				] ),
 			tosAccepted:
 				( isWcConnectOptions( wcConnectOptions ) &&
 					wcConnectOptions?.tos_accepted ) ||
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
 		};
 	}, [] );

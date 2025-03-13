@@ -575,7 +575,7 @@ Due to technical reasons, it's not yet possible to specify the meta key for fiel
 
 Assuming 2 fields, named `my-plugin-namespace/address-field` in the address step and `my-plugin-namespace/my-other-field` in the order step, you can:
 
-### React to to saving fields
+### React to saving fields
 
 You can react to those fields being saved by hooking into `woocommerce_set_additional_field_value` action.
 

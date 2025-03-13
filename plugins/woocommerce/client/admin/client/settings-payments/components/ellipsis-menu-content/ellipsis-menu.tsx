@@ -53,6 +53,11 @@ export const EllipsisMenuWrapper = ( {
 						providerId={ provider.id }
 						pluginFile={ provider.plugin.file }
 						isSuggestion={ provider._type === 'suggestion' }
+						suggestionId={
+							provider._type === 'suggestion'
+								? provider._suggestion_id
+								: undefined
+						}
 						suggestionHideUrl={
 							provider._type === 'suggestion'
 								? provider._links?.hide?.href
@@ -67,11 +72,13 @@ export const EllipsisMenuWrapper = ( {
 						}
 					/>
 				) }
+				focusOnMount={ true }
 			/>
 			{ /* Modal for resetting WooPayments accounts */ }
 			<WooPaymentsResetAccountModal
 				isOpen={ resetAccountModalVisible }
 				onClose={ () => setResetAccountModalVisible( false ) }
+				isTestMode={ provider.onboarding?.state.test_mode }
 			/>
 		</>
 	);

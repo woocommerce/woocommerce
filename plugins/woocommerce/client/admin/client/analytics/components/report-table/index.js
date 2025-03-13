@@ -32,7 +32,7 @@ import {
 	getReportChartData,
 	getReportTableData,
 	EXPORT_STORE_NAME,
-	SETTINGS_STORE_NAME,
+	settingsStore,
 	REPORTS_STORE_NAME,
 	useUserPreferences,
 	QUERY_DEFAULTS,
@@ -590,7 +590,7 @@ export default compose(
 			: null;
 
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
 		const noSearchResultsFound =

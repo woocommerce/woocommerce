@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use WC_Customer;
+use WC_Shipping_Rate;
 use WC_Tracks;
 
 /**
@@ -69,31 +71,14 @@ class ShippingController {
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'filter_taxable_address' ) );
+		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
-		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
+		add_filter( 'woocommerce_shipping_packages', array( $this, 'remove_shipping_if_no_address' ), 11 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
 
-		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
-		// returns based on the option's value in the DB and we can't override it any other way.
-		add_filter( 'option_woocommerce_shipping_cost_requires_address', array( $this, 'override_cost_requires_address_option' ) );
-
 		add_action( 'rest_pre_serve_request', array( $this, 'track_local_pickup' ), 10, 4 );
-	}
-
-	/**
-	 * Overrides the option to force shipping calculations NOT to wait until an address is entered, but only if the
-	 * Checkout page contains the Checkout Block.
-	 *
-	 * @param boolean $value Whether shipping cost calculation requires address to be entered.
-	 * @return boolean Whether shipping cost calculation should require an address to be entered before calculating.
-	 */
-	public function override_cost_requires_address_option( $value ) {
-		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
-			return 'no';
-		}
-		return $value;
 	}
 
 	/**
@@ -143,13 +128,8 @@ class ShippingController {
 		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
 			foreach ( $settings as $index => $setting ) {
 				if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
-					$settings[ $index ]['desc'] = sprintf(
-						/* translators: %s: URL to the documentation. */
-						__( 'Hide shipping costs until an address is entered (Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>)', 'woocommerce' ),
-						'https://woocommerce.com/document/woocommerce-blocks-local-pickup/'
-					);
-					$settings[ $index ]['disabled'] = true;
-					$settings[ $index ]['value']    = 'no';
+					$settings[ $index ]['desc_tip'] =
+						__( 'Local pickup rates will display in the Cart and Checkout blocks, even without an address.', 'woocommerce' );
 					break;
 				}
 			}
@@ -411,7 +391,7 @@ class ShippingController {
 			}
 		);
 
-		// Remove pickup location from rates arrays.
+		// Remove pickup location from rates arrays if not all packages can be picked up or support local pickup.
 		if ( count( $valid_packages ) !== count( $packages ) ) {
 			$packages = array_map(
 				function ( $package ) {
@@ -434,6 +414,42 @@ class ShippingController {
 		return $packages;
 	}
 
+	/**
+	 * Remove shipping (i.e. delivery, not local pickup) if
+	 * "Hide shipping costs until an address is entered" is enabled,
+	 * and no address has been entered yet.
+	 *
+	 * @param array $packages Array of shipping packages.
+	 * @return array
+	 */
+	public function remove_shipping_if_no_address( $packages ) {
+		$shipping_cost_requires_address = wc_string_to_bool( get_option( 'woocommerce_shipping_cost_requires_address', 'no' ) );
+
+		// Return early here for a small performance gain if we don't need to hide shipping costs until an address is entered.
+		if ( ! $shipping_cost_requires_address ) {
+			return $packages;
+		}
+
+		$customer = WC()->customer;
+
+		if ( $customer instanceof WC_Customer && $customer->has_full_shipping_address() ) {
+			return $packages;
+		}
+
+		return array_map(
+			function ( $package ) {
+				// Package rates is always an array due to a check in core.
+				$package['rates'] = array_filter(
+					$package['rates'],
+					function ( $rate ) {
+						return $rate instanceof WC_Shipping_Rate && in_array( $rate->get_method_id(), LocalPickupUtils::get_local_pickup_method_ids(), true );
+					}
+				);
+				return $package;
+			},
+			$packages
+		);
+	}
 	/**
 	 * Track local pickup settings changes via Store API
 	 *

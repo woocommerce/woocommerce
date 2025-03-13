@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Form, H, TextControl } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
@@ -20,10 +20,10 @@ const initialFormValues = {
 
 const BacsPaymentGatewaySetup = () => {
 	const isUpdating = useSelect( ( select ) => {
-		return select( OPTIONS_STORE_NAME ).isOptionsUpdating();
+		return select( optionsStore ).isOptionsUpdating();
 	} );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const validate = ( values ) => {
 		const errors = {};

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix return type of the `pages` property in REST API so shortcode is a string

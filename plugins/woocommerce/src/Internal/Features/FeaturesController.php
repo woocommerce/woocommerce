@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
+use WC_Tracks;
+use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -19,7 +21,10 @@ defined( 'ABSPATH' ) || exit;
  * provides also a mechanism for WooCommerce plugins to declare that they are compatible
  * (or incompatible) with a given feature.
  *
- * Features should not be enabled, or disabled, before init.
+ * Important: some of the features are defined from inside the 'woocommerce_register_feature_definitions' hook.
+ * This hook is fired from inside 'init'; therefore, features that need to be
+ * queried, enabled, or disabled before 'init' (e.g. during WP CLI initialization)
+ * must be hardcoded in the $legacy_features array defined inside get_feature_definitions.
  */
 class FeaturesController {
 
@@ -86,10 +91,38 @@ class FeaturesController {
 	private $plugins_excluded_from_compatibility_ui;
 
 	/**
+	 * Flag indicating if additional features have been registered already.
+	 *
+	 * @var bool
+	 */
+	private bool $registered_additional_features = false;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		add_filter( 'init', array( $this, 'start_listening_for_option_changes' ), 10, 0 );
+		// In principle, register_additional_features is triggered manually from within class-woocommerce
+		// right before before_woocommerce_init is fired (this is needed for the features to be visible
+		// to plugins executing declare_compatibility).
+		// However we add additional checks/hookings here to support unit tests and possible overlooked/future
+		// DI container/class instantiation nuances.
+		if ( ! $this->registered_additional_features ) {
+			if ( did_action( 'before_woocommerce_init' ) ) {
+				// Needed for unit tests, where 'before_woocommerce_init' will have been fired already at this point.
+				$this->register_additional_features();
+			} else {
+				// This needs to have a higher $priority than the 'before_woocommerce_init' hooked by plugins that declare compatibility.
+				add_filter( 'before_woocommerce_init', array( $this, 'register_additional_features' ), -9999, 0 );
+			}
+		}
+
+		if ( did_action( 'init' ) ) {
+			// Needed for unit tests, where 'init' will have been fired already at this point.
+			$this->start_listening_for_option_changes();
+		} else {
+			add_filter( 'init', array( $this, 'start_listening_for_option_changes' ), 10, 0 );
+		}
+
 		add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
 		add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
@@ -101,6 +134,7 @@ class FeaturesController {
 		add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
+		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
 	}
 
 	/**
@@ -163,7 +197,9 @@ class FeaturesController {
 	private function get_feature_definitions() {
 		if ( empty( $this->features ) ) {
 			$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
-			$legacy_features                  = array(
+			$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
+
+			$legacy_features = array(
 				'analytics'              => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
 					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
@@ -287,9 +323,11 @@ class FeaturesController {
 				),
 				'remote_logging'         => array(
 					'name'               => __( 'Remote Logging', 'woocommerce' ),
-					'description'        => __(
-						'Enable this feature to log errors and related data to Automattic servers for debugging purposes and to improve WooCommerce',
-						'woocommerce'
+					'description'        => sprintf(
+						/* translators: %1$s: opening link tag, %2$s: closing link tag */
+						__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. This feature requires %1$susage tracking%2$s to be enabled.', 'woocommerce' ),
+						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) . '">',
+						'</a>'
 					),
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
@@ -304,38 +342,125 @@ class FeaturesController {
 					 */
 					'is_legacy'          => true,
 					'is_experimental'    => false,
-				),
-				'email_improvements'     => array(
-					'name'        => __( 'Email improvements', 'woocommerce' ),
-					'description' => __(
-						'Enable modern email design and live preview for transactional emails',
-						'woocommerce'
+					'setting'            => array(
+						'disabled' => function () use ( $tracking_enabled ) {
+							return ! $tracking_enabled;
+						},
+						'desc_tip' => function () use ( $tracking_enabled ) {
+							if ( ! $tracking_enabled ) {
+								return __( '⚠ Usage tracking must be enabled to use remote logging.', 'woocommerce' );
+							}
+							return '';
+						},
 					),
 				),
+				'email_improvements'     => array(
+					'name'            => __( 'Email improvements', 'woocommerce' ),
+					'description'     => __(
+						'Enable modern email design for transactional emails',
+						'woocommerce'
+					),
+
+					/*
+					 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+					 * but as this feature doesn't affect all extensions, and the rollout is fairly short,
+					 * we'll skip the compatibility check by marking this as legacy. This is a workaround until
+					 * we can implement a more sophisticated compatibility checking system.
+					 *
+					 * @see https://github.com/woocommerce/woocommerce/issues/39147
+					 * @see https://github.com/woocommerce/woocommerce/issues/55540
+					 */
+					'is_legacy'       => true,
+					'is_experimental' => false,
+				),
+				'blueprint'              => array(
+					'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
+					'description'        => __(
+						'Enable blueprint to import and export settings in bulk',
+						'woocommerce'
+					),
+					'enabled_by_default' => false,
+					'disable_ui'         => false,
+
+					/*
+					* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+					* but we wish to handle compatibility checking in a similar fashion to legacy features. The
+					* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+					* feature.
+					*
+					* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+					*/
+					'is_legacy'          => true,
+					'is_experimental'    => false,
+				),
+				'block_email_editor'     => array(
+					'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
+					'description'        => __(
+						'Enable the block-based email editor for transactional emails',
+						'woocommerce'
+					),
+					'enabled_by_default' => false,
+					'disable_ui'         => true,
+				),
 			);
+
+			if ( ! $tracking_enabled ) {
+				// Uncheck the remote logging feature when usage tracking is disabled.
+				$legacy_features['remote_logging']['setting']['value'] = 'no';
+			}
 
 			foreach ( $legacy_features as $slug => $definition ) {
 				$this->add_feature_definition( $slug, $definition['name'], $definition );
 			}
 
-			/**
-			 * The action for registering features.
-			 *
-			 * @since 8.3.0
-			 *
-			 * @param FeaturesController $features_controller The instance of FeaturesController.
-			 */
-			do_action( 'woocommerce_register_feature_definitions', $this );
+			$this->init_compatibility_info_by_feature();
+		}
 
-			foreach ( array_keys( $this->features ) as $feature_id ) {
+		return $this->features;
+	}
+
+	/**
+	 * Initialize the compatibility_info_by_feature property after all the features have been added.
+	 */
+	private function init_compatibility_info_by_feature() {
+		foreach ( array_keys( $this->features ) as $feature_id ) {
+			if ( ! isset( $this->compatibility_info_by_feature[ $feature_id ] ) ) {
 				$this->compatibility_info_by_feature[ $feature_id ] = array(
 					'compatible'   => array(),
 					'incompatible' => array(),
 				);
 			}
 		}
+	}
 
-		return $this->features;
+	/**
+	 * Function to trigger the 'woocommerce_register_feature_definitions' hook.
+	 *
+	 * This function must execute immediately before the 'before_woocommerce_init'
+	 * action is fired, so that feature compatibility declarations happening
+	 * in that action find all the features properly declared already.
+	 *
+	 * @internal
+	 */
+	public function register_additional_features() {
+		if ( $this->registered_additional_features ) {
+			return;
+		}
+
+		$this->get_feature_definitions(); // To populate $this->features if needed.
+
+		/**
+		 * The action for registering features.
+		 *
+		 * @since 8.3.0
+		 *
+		 * @param FeaturesController $features_controller The instance of FeaturesController.
+		 */
+		do_action( 'woocommerce_register_feature_definitions', $this );
+
+		$this->init_compatibility_info_by_feature();
+
+		$this->registered_additional_features = true;
 	}
 
 	/**
@@ -733,6 +858,14 @@ class FeaturesController {
 		if ( ! $feature_id ) {
 			return;
 		}
+
+		WC_Tracks::record_event(
+			self::FEATURE_ENABLED_CHANGED_ACTION,
+			array(
+				'feature_id' => $feature_id,
+				'enabled'    => $value,
+			)
+		);
 
 		/**
 		 * Action triggered when a feature is enabled or disabled (the value of the corresponding setting option is changed).
@@ -1448,6 +1581,25 @@ class FeaturesController {
 		if ( count( $query_params_to_remove ) > 1 && isset( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
+		}
+	}
+
+	/**
+	 * Display the email improvements feedback notice to render CES modal in.
+	 *
+	 * @param string $feature_id The feature id.
+	 * @param bool   $is_enabled Whether the feature is enabled.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function display_email_improvements_feedback_notice( $feature_id, $is_enabled ): void {
+		if ( 'email_improvements' === $feature_id && ! $is_enabled ) {
+			add_action(
+				'admin_notices',
+				function () {
+					echo '<div id="wc_settings_features_email_feedback_slotfill"></div>';
+				}
+			);
 		}
 	}
 }

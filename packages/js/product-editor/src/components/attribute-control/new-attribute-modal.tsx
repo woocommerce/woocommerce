@@ -10,10 +10,9 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	type ProductAttributesActions,
-	type WPDataActions,
 	type ProductAttributeTerm,
 	type ProductAttribute,
+	experimentalProductAttributesStore,
 } from '@woocommerce/data';
 import { Button, Modal, Notice, Tooltip } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -206,8 +205,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createProductAttribute } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	) as unknown as ProductAttributesActions & WPDataActions;
+		experimentalProductAttributesStore
+	);
 
 	return (
 		<>

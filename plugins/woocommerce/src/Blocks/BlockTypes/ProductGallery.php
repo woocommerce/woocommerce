@@ -41,18 +41,18 @@ class ProductGallery extends AbstractBlock {
 
 		return sprintf(
 			'<dialog
-				data-wc-ref
-				data-wc-bind--open="context.isDialogOpen"
-				data-wc-on--close="actions.closeDialog"
-				data-wc-on--keydown="actions.onDialogKeyDown"
-				data-wc-watch="callbacks.dialogStateChange"
+				data-wp-ref
+				data-wp-bind--open="context.isDialogOpen"
+				data-wp-on--close="actions.closeDialog"
+				data-wp-on--keydown="actions.onDialogKeyDown"
+				data-wp-watch="callbacks.dialogStateChange"
 				class="wc-block-product-gallery-dialog"
 				role="dialog"
 				aria-modal="true"
 				tabindex="-1"
 				aria-label="Product Gallery">
 				<div class="wc-block-product-gallery-dialog__content">
-					<button class="wc-block-product-gallery-dialog__close-button" data-wc-on--click="actions.closeDialog" aria-label="%s">
+					<button class="wc-block-product-gallery-dialog__close-button" data-wp-on--click="actions.closeDialog" aria-label="%s">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
 							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
 						</svg>
@@ -106,8 +106,12 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$product_gallery_thumbnail_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'thumbnail', array() );
 		$product_gallery_full_images      = ProductGalleryUtils::get_product_gallery_images( $post_id, 'full', array() );
+		$image_src_data                   = ProductGalleryUtils::get_product_gallery_image_data( $product );
+		$initial_image_id                 = count( $image_src_data['image_ids'] ) > 0 ? $image_src_data['image_ids'][0] : -1;
 		$classname_single_image           = '';
 
 		if ( count( $product_gallery_thumbnail_images ) < 2 ) {
@@ -121,29 +125,28 @@ class ProductGallery extends AbstractBlock {
 		$p                   = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
 
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
 			$p->set_attribute(
-				'data-wc-context',
+				'data-wp-context',
 				wp_json_encode(
 					array(
-						'selectedImageNumber'    => 1,
-						'isDialogOpen'           => false,
-						'visibleImagesIds'       => ProductGalleryUtils::get_product_gallery_image_ids( $product, null, true ),
-						'dialogVisibleImagesIds' => ProductGalleryUtils::get_product_gallery_image_ids( $product, null, false ),
-						'productId'              => $product_id,
-						'elementThatTriggeredDialogOpening' => null,
-						'disableLeft'            => true,
-						'disableRight'           => false,
-						'isDragging'             => false,
-						'touchStartX'            => 0,
-						'touchCurrentX'          => 0,
+						'imageData'         => $image_src_data,
+						'isDialogOpen'      => false,
+						'disableLeft'       => true,
+						'disableRight'      => false,
+						'isDragging'        => false,
+						'touchStartX'       => 0,
+						'touchCurrentX'     => 0,
+						'productId'         => $product_id,
+						'selectedImageId'   => $initial_image_id,
+						'userHasInteracted' => false,
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$p->set_attribute( 'data-wc-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+				$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
 			}
 
 			$p->add_class( $classname );
@@ -152,5 +155,16 @@ class ProductGallery extends AbstractBlock {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

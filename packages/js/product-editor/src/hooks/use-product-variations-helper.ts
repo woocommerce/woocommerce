@@ -5,10 +5,10 @@ import { dispatch, resolveSelect, useSelect } from '@wordpress/data';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { getNewPath, getPath, navigateTo } from '@woocommerce/navigation';
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
 	ProductDefaultAttribute,
 	ProductVariation,
+	experimentalProductVariationsStore,
 } from '@woocommerce/data';
 import { applyFilters } from '@wordpress/hooks';
 import {
@@ -26,6 +26,7 @@ async function getDefaultVariationValues(
 	productId: number
 ): Promise< Partial< Omit< ProductVariation, 'id' > > > {
 	try {
+		// @ts-expect-error TODO react-18-upgrade: core.getEntityRecord type is not typed yet
 		const { attributes } = await resolveSelect( 'core' ).getEntityRecord(
 			'postType',
 			'product',
@@ -37,8 +38,9 @@ async function getDefaultVariationValues(
 		if ( ! alreadyHasVariableAttribute ) {
 			return {};
 		}
+
 		const products = await resolveSelect(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		).getProductVariations( {
 			product_id: productId,
 			per_page: 1,
@@ -79,13 +81,12 @@ export function useProductVariationsHelper() {
 			const {
 				isGeneratingVariations: getIsGeneratingVariations,
 				generateProductVariationsError,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			} = select( experimentalProductVariationsStore );
+
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				isGeneratingVariations: getIsGeneratingVariations( {
 					product_id: productId,
 				} ),
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				generateError: generateProductVariationsError( {
 					product_id: productId,
 				} ),
@@ -105,6 +106,7 @@ export function useProductVariationsHelper() {
 	) {
 		setIsGenerating( true );
 
+		// @ts-expect-error TODO react-18-upgrade: core.getEntityRecord type is not typed yet
 		const { status: lastStatus, variations } = await resolveSelect(
 			'core'
 		).getEditedEntityRecord( 'postType', 'product', productId );
@@ -118,7 +120,7 @@ export function useProductVariationsHelper() {
 
 		await Promise.all(
 			variations.map( ( variationId: number ) =>
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				// @ts-expect-error invalidateResolution is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
 				dispatch( coreStore ).invalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
@@ -126,9 +128,8 @@ export function useProductVariationsHelper() {
 				] )
 			)
 		);
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		await dispatch(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		).invalidateResolutionForStore();
 		/**
 		 * Filters the meta_data array for generated variations.
@@ -143,12 +144,8 @@ export function useProductVariationsHelper() {
 			product
 		);
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-		return dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME )
-			.generateProductVariations< {
-				count: number;
-				deleted_count: number;
-			} >(
+		return dispatch( experimentalProductVariationsStore )
+			.generateProductVariations(
 				{
 					product_id: productId,
 				},
@@ -160,11 +157,11 @@ export function useProductVariationsHelper() {
 				{
 					delete: true,
 					default_values: defaultVariationValues,
-					meta_data,
+					meta_data: meta_data as Product[ 'meta_data' ],
 				}
 			)
-			.then( async ( response: ProductVariation[] ) => {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			.then( async ( response ) => {
+				// @ts-expect-error invalidateResolution is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
 				await dispatch( coreStore ).invalidateResolution(
 					'getEntityRecord',
 					[ 'postType', 'product', productId ]
@@ -176,9 +173,8 @@ export function useProductVariationsHelper() {
 					productId
 				);
 
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				await dispatch(
-					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+					experimentalProductVariationsStore
 				).invalidateResolutionForStore();
 
 				return response;

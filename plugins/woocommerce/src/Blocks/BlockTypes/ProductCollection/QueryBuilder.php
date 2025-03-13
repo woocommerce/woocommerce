@@ -312,8 +312,9 @@ class QueryBuilder {
 		if ( isset( $handlers['preview_query'] ) ) {
 			$collection_query = call_user_func( $handlers['preview_query'], $collection_args, $args, $request );
 		}
+		$orderby_query = $args['orderby'] ? $this->get_custom_orderby_query( $args['orderby'] ) : array();
 
-		$args = $this->merge_queries( $args, $collection_query );
+		$args = $this->merge_queries( $args, $orderby_query, $collection_query );
 		return $args;
 	}
 

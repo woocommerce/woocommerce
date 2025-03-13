@@ -31,6 +31,10 @@ export const possiblyRenderSettingsSlots = () => {
 			scope: 'woocommerce-email-preview-settings',
 		},
 		{
+			id: 'wc_settings_features_email_feedback_slotfill',
+			scope: 'woocommerce-email-feedback-settings',
+		},
+		{
 			id: 'wc_settings_email_image_url_slotfill',
 			scope: 'woocommerce-email-image-url-settings',
 		},

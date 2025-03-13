@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { useState, createElement } from '@wordpress/element';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 

@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Pill } from '@woocommerce/components';
 import { Popover } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { Icon, info } from '@wordpress/icons';
+import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -61,6 +61,14 @@ export const StatusBadge = ( {
 }: StatusBadgeProps ) => {
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
 
+	const hidePopoverDebounced = useDebounce( () => {
+		setPopoverVisible( false );
+	}, 350 );
+	const showPopover = () => {
+		setPopoverVisible( true );
+		hidePopoverDebounced.cancel();
+	};
+
 	/**
 	 * Get the appropriate CSS class for the badge based on the status.
 	 */
@@ -110,8 +118,8 @@ export const StatusBadge = ( {
 				<span
 					className="woocommerce-status-badge__icon-container"
 					onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-					onMouseEnter={ () => setPopoverVisible( true ) }
-					onMouseLeave={ () => setPopoverVisible( false ) }
+					onMouseEnter={ showPopover }
+					onMouseLeave={ hidePopoverDebounced }
 					onKeyDown={ ( event ) => {
 						if ( event.key === 'Enter' || event.key === ' ' ) {
 							setPopoverVisible( ! isPopoverVisible );
@@ -122,21 +130,21 @@ export const StatusBadge = ( {
 				>
 					<Icon
 						className="woocommerce-status-badge-icon"
-						size={ 14 }
+						size={ 16 }
 						icon={ info }
 					/>
 					{ isPopoverVisible && (
 						<Popover
 							className="woocommerce-status-badge-popover"
-							position="top right"
+							placement="top-start"
+							offset={ 6 }
+							variant="unstyled"
+							focusOnMount={ true }
 							noArrow={ true }
-							onClose={ () => setPopoverVisible( false ) }
+							shift={ true }
+							onClose={ hidePopoverDebounced }
 						>
-							<div
-								className={
-									'settings-payment-gateways__popover-container'
-								}
-							>
+							<div className="components-popover__content-container">
 								{ popoverContent }
 							</div>
 						</Popover>

@@ -38,9 +38,13 @@ This stores the name of the store, which is used in the store header and in the 
     ```typescript
     {
         business_choice: "im_just_starting_my_business" | "im_already_selling" | "im_setting_up_a_store_for_a_client" | undefined
+        business_extensions: Plugin[] // slugs of plugins that were installed, e.g 'woocommerce-payments', 'jetpack'
         selling_online_answer: "yes_im_selling_online" | "no_im_selling_offline" | "im_selling_both_online_and_offline" | undefined
         selling_platforms: ("amazon" | "adobe_commerce" | "big_cartel" | "big_commerce" | "ebay" | "ecwid" | "etsy" | "facebook_marketplace" | "google_shopping" | "pinterest" | "shopify" | "square" | "squarespace" | "wix" | "wordpress")[] | undefined
         is_store_country_set: true | false
+        is_plugins_page_skipped: true | false // if the user has clicked skip on the Plugins page
+        skipped: true | false // if the user has clicked skip on the intro-opt-in page
+        completed: true | false // if the user has completed the Core Profiler
         industry: "clothing_and_accessories" | "health_and_beauty" | "food_and_drink" | "home_furniture_and_garden" | "education_and_learning" | "electronics_and_computers" | "arts_and_crafts" | "sports_and_recreation" | "other"
         store_email: string
         is_agree_marketing: true | false
@@ -57,31 +61,36 @@ This stores the location that the WooCommerce store believes it is in. This is u
 
 This determines whether we return telemetry to Automattic.
 
-### Currency options
+- `woocommerce_onboarding_profile_progress`: Record< CoreProfilerStep , { completed_at: string } >
 
-These options are set by looking up the currency data from `@woocommerce/currency` after the user has selected their country.
+This stores the steps that have been completed in the Core Profiler.
+See [`packages/js/data/src/onboarding/types.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/data/src/onboarding/types.ts) for CoreProfilerStep type.
+
+### Currency and Measurement Unit Options
+
+These options are set by calling the `updateStoreCurrencyAndMeasurementUnits` function after the user has selected their country. This function updates both currency and measurement unit settings in PHP.
+
+#### Currency Options
+
+The following currency options are updated:
 
 - `woocommerce_currency`
-
 - `woocommerce_currency_pos`
-
 - `woocommerce_price_thousand_sep`
-
 - `woocommerce_price_decimal_sep`
-
 - `woocommerce_price_num_decimals`
 
-Refer to [Shop currency documentation](https://woocommerce.com/document/shop-currency/) and [class-wc-settings-general.php](https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-settings-class-wc-settings-general.html) for the full details of the currency settings.
+Refer to [Shop currency documentation](https://woocommerce.com/document/shop-currency/) and [`class-wc-settings-general.php`](https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-settings-class-wc-settings-general.html) for full details on currency settings.
 
-### Weight and Dimension options
+#### Weight and Dimension Options
 
-These options are set by looking up the weight and dimension data from admin localeInfo settings after the user has selected their country.
+The following weight and dimension options are updated:
 
 - `woocommerce_weight_unit`
-
 - `woocommerce_dimension_unit`
 
-Refer to [class-wc-settings-products.php](https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-settings-class-wc-settings-products.html) and [locale-info.php](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/i18n/locale-info.php) for the full details of the weight and dimension settings.
+Refer to [`class-wc-settings-products.php`](https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-settings-class-wc-settings-products.html) and [`locale-info.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/i18n/locale-info.php) for full details on weight and dimension settings.
+
 
 ### Coming soon options
 
@@ -100,29 +109,37 @@ As this information is not automatically updated, it would be best to refer dire
 
 The following WP Data API calls are used in the Core Profiler:
 
-- `resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions()`
+- `resolveSelect( onboardingStore ).getFreeExtensions()`
 
 This is used to retrieve the list of extensions that will be shown on the Extensions page. It makes an API call to the WooCommerce REST API, which will make a call to WooCommerce.com if permitted. Otherwise it retrieves the locally stored list of free extensions.
 
-- `resolveSelect( COUNTRIES_STORE_NAME ).getCountries()`
+- `resolveSelect( countriesStore ).getCountries()`
 
 This is used to retrieve the list of countries that will be shown in the Country dropdown on the Business Information page. It makes an API call to the WooCommerce REST API.
 
-- `resolveSelect( COUNTRIES_STORE_NAME ).geolocate()`
+- `resolveSelect( countriesStore ).geolocate()`
 
 This is used to retrieve the country that the store believes it is in. It makes an API call to the WordPress.com geolocation API, if permitted. Otherwise it will not be used.
 
-- `resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected()`
+- `resolveSelect( pluginsStore ).isJetpackConnected()`
 
 This is used to determine whether the store is connected to Jetpack.
 
-- `resolveSelect( ONBOARDING_STORE_NAME ).getJetpackAuthUrl()`
+- `resolveSelect( onboardingStore ).getJetpackAuthUrl()`
 
 This is used to retrieve the URL that the browser should be redirected to in order to connect to Jetpack.
 
-- `resolveSelect( ONBOARDING_STORE_NAME ).coreProfilerCompleted()`
+- `resolveSelect( onboardingStore ).coreProfilerCompleted()`
 
 This is used to indicate to WooCommerce Admin that the Core Profiler has been completed, and this sets the Store's coming-soon mode to true. This hides the store pages from the public until the store is ready.
+
+- `dispatch( onboardingStore ).updateProfileItems( profileItems )`
+
+This is used to update `woocommerce_onboarding_profile`.
+
+- `dispatch( onboardingStore ).updateStoreCurrencyAndMeasurementUnits( countryCode )`
+
+This is used to update the store's currency and measurement units, which can be found under WooCommerce → Settings → General → Currency Options and WooCommerce → Settings → Products → Measurements.
 
 ### Extensions Installation
 

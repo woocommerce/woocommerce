@@ -19,6 +19,11 @@ on:
         type: string
         description: 'Custom event name: In case the `Event name` choice is `custom`, this field is required.'
         required: false
+      wc-version:
+        type: string
+        description: 'Optional, for `on-demand` or `custom` jobs. Most jobs (wp-env) ignore this. It can be `latest`, `nightly`, or a specific WC version (e.g., `9.7.0-rc.1`).'
+        required: false
+        default: latest
 
 jobs:
   validate-input:
@@ -36,4 +41,5 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       trigger: ${{ inputs.trigger == 'custom' && inputs.custom-trigger || inputs.trigger }}
+      wc-version: ${{ inputs.wc-version }}
     secrets: inherit

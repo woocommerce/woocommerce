@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Interactivity\Store;
 
 /**
  * ProductButton class.
@@ -19,18 +20,21 @@ class ProductButton extends AbstractBlock {
 
 
 	/**
-	 * Get the frontend script handle for this block type.
+	 * Cart.
+	 *
+	 * @var array
+	 */
+	private static $cart = null;
+
+
+	/**
+	 * Disable frontend script for this block type, it's a script module.
 	 *
 	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
 	 */
 	protected function get_block_type_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-interactivity-frontend',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-interactivity-frontend' ),
-			'dependencies' => [ 'wc-interactivity' ],
-		];
-
-		return $key ? $script[ $key ] : $script;
+		return null;
 	}
 
 	/**
@@ -74,7 +78,6 @@ class ProductButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-
 		// This workaround ensures that WordPress loads the core/button block styles.
 		// For more details, see https://github.com/woocommerce/woocommerce/pull/53052.
 		( new \WP_Block( array( 'blockName' => 'core/button' ) ) )->render();
@@ -92,24 +95,33 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		wc_initial_state(
+		wp_enqueue_script_module( 'woocommerce/product-button' );
+
+		$this->initialize_cart_state();
+
+		wp_interactivity_state(
 			'woocommerce/product-button',
 			array(
+				'addToCartText' => function () {
+					$context = wp_interactivity_get_context();
+					$quantity = $context['tempQuantity'];
+					$addToCartText = $context['addToCartText'];
+					return $quantity > 0 ? sprintf(
+						/* translators: %s: product number. */
+						__( '%s in cart', 'woocommerce' ),
+						$quantity
+					) : $addToCartText;
+				},
 				'inTheCartText' => sprintf(
 					/* translators: %s: product number. */
 					__( '%s in cart', 'woocommerce' ),
 					'###'
 				),
+				'noticeId'      => '',
 			)
 		);
 
-		$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
-		$more_than_one_item      = $number_of_items_in_cart > 0;
-		$initial_product_text    = $more_than_one_item ? sprintf(
-		/* translators: %s: product number. */
-			__( '%s in cart', 'woocommerce' ),
-			$number_of_items_in_cart
-		) : $product->add_to_cart_text();
+		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 		$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
@@ -143,12 +155,18 @@ class ProductButton extends AbstractBlock {
 		*/
 		$quantity_to_add = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
 
+		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
+		$add_to_cart_text                  = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
+		if ( $is_descendent_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
+			$add_to_cart_text = $product->single_add_to_cart_text();
+		}
+
 		$context = array(
-			'quantityToAdd'          => $quantity_to_add,
-			'productId'              => $product->get_id(),
-			'addToCartText'          => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' ),
-			'temporaryNumberOfItems' => $number_of_items_in_cart,
-			'animationStatus'        => 'IDLE',
+			'quantityToAdd'   => $quantity_to_add,
+			'productId'       => $product->get_id(),
+			'addToCartText'   => $add_to_cart_text,
+			'tempQuantity'    => $number_of_items_in_cart,
+			'animationStatus' => 'IDLE',
 		);
 
 		/**
@@ -178,31 +196,22 @@ class ProductButton extends AbstractBlock {
 			$this->prevent_cache();
 		}
 
-		$interactive = array(
-			'namespace' => 'woocommerce/product-button',
-		);
-
 		$div_directives = '
-			data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
-			data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+			data-wp-interactive="woocommerce/product-button"
+			data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+			data-wp-init="actions.refreshCartItems"
 		';
 
-		$button_directives = '
-			data-wc-on--click="actions.addToCart"
-			data-wc-class--loading="context.isLoading"
-		';
-
-		$anchor_directive = '
-			data-wc-on--click="woocommerce/product-collection::actions.viewProduct"
-		';
+		$button_directives = 'data-wp-on--click="actions.addCartItem"';
+		$anchor_directive  = 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
 		$span_button_directives = '
-			data-wc-text="state.addToCartText"
-			data-wc-class--wc-block-slide-in="state.slideInAnimation"
-			data-wc-class--wc-block-slide-out="state.slideOutAnimation"
-			data-wc-on--animationend="actions.handleAnimationEnd"
-			data-wc-watch="callbacks.startAnimation"
-			data-wc-layout-init="callbacks.syncTemporaryNumberOfItemsOnLoad"
+			data-wp-text="state.addToCartText"
+			data-wp-class--wc-block-slide-in="state.slideInAnimation"
+			data-wp-class--wc-block-slide-out="state.slideOutAnimation"
+			data-wp-on--animationend="actions.handleAnimationEnd"
+			data-wp-watch="callbacks.startAnimation"
+			data-wp-run="callbacks.syncTempQuantityOnLoad"
 		';
 
 		$wrapper_attributes = get_block_wrapper_attributes(
@@ -239,7 +248,7 @@ class ProductButton extends AbstractBlock {
 						{attributes}
 						{button_directives}
 					>
-					<span {span_button_directives}> {add_to_cart_text} </span>
+					<span {span_button_directives}>{add_to_cart_text}</span>
 					</{html_element}>
 					{view_cart_html}
 				</div>',
@@ -250,7 +259,7 @@ class ProductButton extends AbstractBlock {
 					'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',
 					'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 					'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-					'{add_to_cart_text}'       => esc_html( $initial_product_text ),
+					'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
 					'{div_directives}'         => $is_ajax_button ? $div_directives : '',
 					'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 					'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
@@ -264,6 +273,27 @@ class ProductButton extends AbstractBlock {
 		$product = $previous_product;
 
 		return $html;
+	}
+
+	/**
+	 * Initialize the cart state.
+	 */
+	private function initialize_cart_state() {
+		if ( null === self::$cart ) {
+			$cart_items = isset( WC()->cart )
+				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items' ) )->data
+				: array();
+
+			wp_interactivity_state(
+				'woocommerce',
+				array(
+					'cart'     => array( 'items' => $cart_items ),
+					'nonce'    => wp_create_nonce( 'wc_store_api' ),
+					'noticeId' => '',
+					'restUrl'  => get_rest_url(),
+				)
+			);
+		}
 	}
 
 	/**
@@ -298,7 +328,7 @@ class ProductButton extends AbstractBlock {
 		return sprintf(
 			'<span
 				hidden
-				data-wc-bind--hidden="!state.displayViewCart"
+				data-wp-bind--hidden="!state.displayViewCart"
 			>
 				<a
 					href="%1$s"

@@ -7,6 +7,7 @@ import {
 	useMemo,
 	useState,
 	useRef,
+	useContext,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -28,7 +29,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { Sidebar } from './components';
 import { Route, Location } from './types';
 import { LegacyContent } from './legacy';
-
+import { SettingsDataContext } from './data';
 const { useLocation } = unlock( routerPrivateApis );
 
 const NotFound = () => {
@@ -195,7 +196,7 @@ export const useActiveRoute = (): {
 	activeSection?: string;
 	tabs?: Array< { name: string; title: string } >;
 } => {
-	const settingsData: SettingsData = window.wcSettings?.admin?.settingsData;
+	const { settingsData } = useContext( SettingsDataContext );
 	const location = useLocation() as Location;
 	const modernRoutes = useModernRoutes();
 

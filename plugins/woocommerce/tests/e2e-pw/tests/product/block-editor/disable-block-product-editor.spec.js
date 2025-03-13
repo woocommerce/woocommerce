@@ -79,7 +79,7 @@ test.describe.serial(
 			await page.locator( 'button[aria-label="Options"]' ).click();
 			await page
 				.getByRole( 'menuitem', {
-					name: 'Turn off the new product form',
+					name: 'Turn off the new product editor',
 				} )
 				.click();
 			await dismissFeedbackModalIfShown( page );

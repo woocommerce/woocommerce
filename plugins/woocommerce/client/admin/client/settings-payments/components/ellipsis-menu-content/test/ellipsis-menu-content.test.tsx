@@ -37,6 +37,7 @@ describe( 'EllipsisMenuContent component', () => {
 		const { getByText } = render(
 			<EllipsisMenuContent
 				isSuggestion={ true }
+				suggestionId={ 'bogus' }
 				links={ links }
 				providerId={ 'bogus' }
 				pluginFile={ 'bogus/bogus' }

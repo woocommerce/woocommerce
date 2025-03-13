@@ -16,13 +16,16 @@
 			padding: $gap-smaller 48px $gap-large;
 			align-items: center;
 
-			@media screen and ( max-width: 1024px ) {
+			@media screen and (max-width: $break-xlarge) {
 				padding: $gap-smaller $gap-large $gap-large;
 			}
 
-			@media screen and ( max-width: 782px ) {
-				display: block;
+			@media screen and (max-width: $break-medium) {
 				padding: $gap-smaller $gap $gap-large;
+			}
+
+			@media screen and (max-width: $break-mobile) {
+				display: block;
 			}
 		}
 
@@ -33,12 +36,14 @@
 		}
 
 		&__header-select-container {
-			min-width: 240px;
-			max-width: 313px;
+			min-width: 280px;
+			min-height: 36px;
 			background-color: #fff;
 			border: 1px solid $gray-300;
-			display: inline-block;
+			display: flex;
+			align-items: center;
 			border-radius: 2px;
+			position: relative;
 
 			.components-input-control__prefix {
 				min-width: fit-content;
@@ -47,7 +52,7 @@
 			}
 
 			.components-select-control__input {
-				min-height: 32px;
+				min-height: $button-size-compact;
 			}
 
 			.components-base-control__field {
@@ -55,9 +60,9 @@
 			}
 
 			&--indicator {
-				height: 26px;
+				height: 28px;
 				cursor: pointer;
-				padding-top: 6px;
+				padding-top: 8px;
 				margin-left: auto;
 
 				&-icon {
@@ -73,23 +78,14 @@
 				}
 			}
 
-			&.has-alert {
-				display: flex;
-				align-items: center;
-
-				.components-country-select-control__menu {
-					width: 310px;
-
-					@media screen and ( max-width: 782px ) {
-						width: 313px;
-					}
-				}
-			}
-
-			@media screen and ( max-width: 782px ) {
+			@media screen and (max-width: $break-mobile) {
 				margin-top: $gap;
 			}
 		}
+	}
+
+	.woocommerce-list__item-recurring-payments-icon:hover {
+		cursor: pointer;
 	}
 
 	.other-payment-gateways__header__title-image-placeholder {
@@ -103,12 +99,12 @@
 		border: 1px solid $gray-200;
 		border-radius: 4px;
 		margin: 32px 48px 0 48px;
-		padding: 8px 24px;
+		padding: $grid-unit-30 24px;
 
 		&__header {
-			padding: 20px 0;
 			display: flex;
 			justify-content: space-between;
+			align-items: center;
 
 			&:hover {
 				cursor: pointer;
@@ -120,16 +116,21 @@
 				font-size: 16px;
 				font-weight: 600;
 				line-height: 24px;
+				align-items: center;
 
 				&-image {
-					width: 24px;
-					height: 24px;
+					width: $icon-size;
+					height: $icon-size;
 					border-radius: 2px;
 				}
 
-				@media screen and ( max-width: 782px ) {
+				@media screen and (max-width: $break-medium) {
 					font-weight: 500;
 				}
+			}
+
+			&__arrow {
+				padding: $grid-unit-05;
 			}
 
 			/* Override hover and focus states for the button */
@@ -143,11 +144,29 @@
 			}
 		}
 
+		&.is-expanded {
+			.other-payment-gateways__header {
+				margin-bottom: $grid-unit-40;
+			}
+		}
+
 		&__content {
-			margin-top: 16px;
 			display: flex;
 			flex-direction: column;
 			gap: 16px;
+
+			&__category-container {
+				border-bottom: 1px solid $gray-100;
+
+				// The last element with this class.
+				&:nth-last-child(1 of .other-payment-gateways__content__category-container) {
+					border-bottom: none;
+
+					.other-payment-gateways__content__grid {
+						padding-bottom: 0;
+					}
+				}
+			}
 
 			&__title {
 				display: flex;
@@ -160,9 +179,15 @@
 					font-weight: 500;
 					color: $gray-900;
 					line-height: 16px;
+					margin: 0;
 				}
 
-				&__tooltip {
+				&__icon-container {
+					height: 16px;
+					cursor: pointer;
+				}
+
+				&__icon {
 					color: $gray-700;
 					width: 16px;
 					height: 16px;
@@ -175,11 +200,11 @@
 				gap: $gap; /* Space between columns */
 				padding: $gap 0;
 
-				@media screen and (max-width: 1024px) {
+				@media screen and (max-width: $break-wide) {
 					grid-template-columns: repeat(2, 1fr); /* 2 columns */
 				}
 
-				@media screen and (max-width: 768px) {
+				@media screen and (max-width: $break-medium) {
 					grid-template-columns: repeat(1, 1fr); /* w columns */
 				}
 			}
@@ -189,13 +214,17 @@
 				align-items: flex-start; /* Align items to the top */
 				padding: $gap 0;
 
+				@media screen and (min-width: $break-xlarge) {
+					max-width: 480px;
+				}
+
 				&-image {
 					width: 40px;
 					height: 40px;
 					margin-right: 20px; /* Space between image and text */
 					border-radius: 4px;
 
-					@media screen and ( max-width: 782px ) {
+					@media screen and (max-width: 782px) {
 						width: 24px;
 						height: 24px;
 					}
@@ -207,7 +236,10 @@
 					gap: 4px;
 
 					&__title {
-						display: block;
+						display: inline-flex;
+						flex-wrap: wrap;
+						gap: 10px;
+						align-items: center;
 						font-size: 14px;
 						font-weight: 600;
 						line-height: 20px;
@@ -225,40 +257,85 @@
 						display: flex;
 						gap: $gap-smaller; /* Space between buttons */
 						padding-top: 4px; /* Space between description and buttons */
+
 						button {
 							align-self: flex-start; /* Align button to the left */
+						}
+
+						button.components-button.is-link {
+							text-decoration: none;
+							padding-right: 12px; /* This reserves space for the three dots of loading animation */
+						}
+
+						button.components-button.is-link.is-busy {
+							background: none;
+
+							// Loading animation from here https://stackoverflow.com/a/40991531.
+							&::after {
+								display: inline-block;
+								animation: three-dots-loader steps(1, end) 1s infinite;
+								content: "";
+							}
+						}
+
+						@keyframes three-dots-loader {
+							0% {
+								content: "";
+							}
+							25% {
+								content: ".";
+							}
+							50% {
+								content: "..";
+							}
+							75% {
+								content: "...";
+							}
+							100% {
+								content: "";
+							}
 						}
 					}
 				}
 			}
 
 			&__external-icon {
-				padding: 8px 0;
-
-				img {
-					height: 16px;
-					margin-right: 4px;
-				}
-
-				a {
-					padding: 0;
-					text-decoration: none;
-				}
+				padding: $grid-unit-05;
 			}
 		}
 
-		@media screen and (max-width: 1024px) {
+		@media screen and (max-width: $break-xlarge) {
 			margin: 32px $gap-large 0 $gap-large;
 		}
 
-		@media screen and ( max-width: 782px ) {
+		@media screen and (max-width: $break-medium) {
 			margin: 32px $gap 0 $gap;
 			padding: $gap-smaller $gap;
 		}
 	}
+
+	.woocommerce-status-badge-popover {
+		.components-popover__content-container {
+			width: 236px;
+		}
+	}
+
+	.more-payment-options-link {
+		padding: 0;
+		text-decoration: none;
+
+		img {
+			height: $grid-unit-20;
+			margin-right: $grid-unit-05;
+		}
+	}
+
+	.more-payment-options {
+		padding: 25px 54px;
+	}
 }
 
-@media screen and ( max-width: 1024px ) {
+@media screen and (max-width: $break-xlarge) {
 	.settings-payments-main__container {
 		.woocommerce-item__payment-gateway-placeholder {
 			padding: 0 $gap-large;
@@ -266,7 +343,7 @@
 	}
 }
 
-@media screen and ( max-width: 782px ) {
+@media screen and (max-width: $break-medium) {
 	.settings-payments-main__container {
 		.woocommerce-item__payment-gateway-placeholder {
 			padding: 0 $gap;
@@ -296,32 +373,78 @@
 				display: none;
 			}
 		}
+
+		.more-payment-options {
+			padding-left: 25px;
+		}
+	}
+}
+
+.woocommerce-official-extension-badge {
+	display: inline-flex;
+	align-items: center;
+	background: none;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+
+	& > .woocommerce-official-extension-badge__container {
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+		padding: 2px 4px 2px 2px;
+
+		> img {
+			height: 16px;
+		}
+	}
+}
+
+// Popover styling
+.settings-payment-gateways__header-select-container--indicator-popover,
+.woocommerce-official-extension-badge-popover,
+.woocommerce-status-badge-popover,
+.other-payment-gateways__content__title-popover {
+	.components-popover__content {
+		background: $white;
+		color: $gray-900;
+		padding: $gap-small;
+		border: 1px solid $gray-100;
+		box-shadow: none;
+		border-radius: 3px;
+
+		a {
+			outline: none;
+			text-decoration: underline;
+		}
+	}
+
+	.components-popover__content-container {
+		width: 216px;
+		font-size: 13px;
+		line-height: 20px;
+
+		// The first paragraph doesn't have a top margin.
+		p:first-of-type {
+			margin-top: 0;
+		}
+
+		// The last paragraph doesn't have a bottom margin.
+		p:last-of-type {
+			margin-bottom: 0;
+		}
 	}
 }
 
 .settings-payment-gateways__header-select-container--indicator-popover {
-	.components-popover__content {
-		background: $white;
-		border: 1px solid $gray-100;
-		border-radius: 3px;
-		max-width: 255px;
-		padding: $gap-smaller;
-		box-shadow: none;
-		margin-bottom: $gap-smaller;
-
-		a {
-			outline: none;
-			text-decoration: none;
-
-			&:focus {
-				box-shadow: none;
-			}
-		}
-	}
-
-	&-content {
+	.components-popover__content-container {
 		width: 236px;
-		font-size: 13px;
-		line-height: 20px;
+	}
+}
+
+.other-payment-gateways__content__title-popover {
+	.components-popover__content-container {
+		width: 256px;
 	}
 }

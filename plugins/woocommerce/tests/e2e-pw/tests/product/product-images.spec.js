@@ -1,5 +1,9 @@
-const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 async function addImageFromLibrary( page, imageName, actionButtonName ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
@@ -14,7 +18,7 @@ async function addImageFromLibrary( page, imageName, actionButtonName ) {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product = {
 			id: 0,
 			name: `Product ${ Date.now() }`,
@@ -23,19 +27,23 @@ const test = baseTest.extend( {
 			sale_price: '11.59',
 		};
 
-		await api.post( 'products', product ).then( ( response ) => {
-			product = response.data;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/products`, product )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
-	productWithImage: async ( { api, product }, use ) => {
+	productWithImage: async ( { restApi, product }, use ) => {
 		let productWithImage;
-		await api
-			.put( `products/${ product.id }`, {
+		await restApi
+			.put( `${ WC_API_PATH }/products/${ product.id }`, {
 				images: [
 					{
 						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',
@@ -48,10 +56,10 @@ const test = baseTest.extend( {
 
 		await use( productWithImage );
 	},
-	productWithGallery: async ( { api, product }, use ) => {
+	productWithGallery: async ( { restApi, product }, use ) => {
 		let productWithGallery;
-		await api
-			.put( `products/${ product.id }`, {
+		await restApi
+			.put( `${ WC_API_PATH }/products/${ product.id }`, {
 				images: [
 					{
 						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',

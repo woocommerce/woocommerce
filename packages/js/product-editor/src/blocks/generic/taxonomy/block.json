@@ -10,31 +10,31 @@
 	"attributes": {
 		"slug": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"property": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"label": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"createTitle": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"dialogNameHelpText": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"parentTaxonomyText": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"help": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		}
 	},
 	"supports": {

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { debounce } from 'lodash';
 
 /**
@@ -26,6 +26,7 @@ export const EmailPreviewIframe: React.FC< EmailPreviewIframeProps > = ( {
 } ) => {
 	const [ counter, setCounter ] = useState( 0 );
 	const nonce = emailPreviewNonce();
+	const iframeRef = useRef< HTMLIFrameElement | null >( null );
 
 	useEffect( () => {
 		const handleFieldChange = async ( jqEvent: JQuery.Event ) => {
@@ -47,6 +48,13 @@ export const EmailPreviewIframe: React.FC< EmailPreviewIframeProps > = ( {
 			} finally {
 				target.dispatchEvent( new Event( 'transient-saved' ) );
 				setCounter( ( prevCounter ) => prevCounter + 1 );
+
+				// Update iframe src using replace to avoid polluting browser history
+				if ( iframeRef.current ) {
+					iframeRef.current.contentWindow?.location.replace(
+						`${ src }&hash=${ counter + 1 }`
+					);
+				}
 			}
 		};
 
@@ -57,8 +65,15 @@ export const EmailPreviewIframe: React.FC< EmailPreviewIframeProps > = ( {
 			handlers[ id ] = debounce( handleFieldChange, 400 );
 			const field = jQuery( `#${ id }` );
 			if ( field.length ) {
-				// Using jQuery events due to select2 and iris (color picker) usage
-				field.on( 'change', handlers[ id ] );
+				if ( field.hasClass( 'wc-enhanced-select' ) ) {
+					// For select2 fields, only bind change event once initialized
+					field.one( 'select2:open', () => {
+						field.on( 'change', handlers[ id ] );
+					} );
+				} else {
+					// Using jQuery events due to select2 and iris (color picker) usage
+					field.on( 'change', handlers[ id ] );
+				}
 			}
 		} );
 
@@ -71,13 +86,14 @@ export const EmailPreviewIframe: React.FC< EmailPreviewIframeProps > = ( {
 				}
 			} );
 		};
-	}, [ nonce, setIsLoading, settingsIds, setCounter ] );
+	}, [ nonce, setIsLoading, settingsIds, setCounter, src, counter ] );
 
 	return (
 		<div>
 			<iframe
+				ref={ iframeRef }
 				className={ isLoading ? 'iframe-is-loading' : '' }
-				src={ `${ src }&hash=${ counter }` }
+				src={ src }
 				title={ __( 'Email preview frame', 'woocommerce' ) }
 				onLoad={ () => setIsLoading( false ) }
 			/>

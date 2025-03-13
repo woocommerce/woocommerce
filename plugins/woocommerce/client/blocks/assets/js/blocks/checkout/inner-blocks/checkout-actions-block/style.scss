@@ -1,0 +1,70 @@
+.wp-block-woocommerce-checkout-actions-block {
+	.wc-block-checkout__actions {
+		&_row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+
+			.wc-block-components-checkout-place-order-button {
+				width: 50%;
+				padding: 1em;
+				height: auto;
+
+				&--full-width {
+					width: 100%;
+				}
+
+				// Keeps the text in the DOM but not visible, so it doesn't cause the button to resize while showing the spinner.
+				.wc-block-components-checkout-place-order-button__text--visually-hidden {
+					visibility: hidden;
+				}
+
+				.wc-block-components-checkout-place-order-button__text {
+					display: flex;
+					align-items: center;
+
+					// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+					text-wrap: balance;
+					text-wrap: pretty;
+				}
+
+				.wc-block-components-checkout-place-order-button__separator {
+					margin: 0 20px;
+				}
+
+				.wc-block-components-button__text {
+					> svg {
+						fill: $white;
+						vertical-align: top;
+						position: absolute;
+						top: 50%;
+						left: 50%;
+						transform: translate(-50%, -50%);
+					}
+				}
+			}
+		}
+	}
+
+	.is-large {
+		.wc-block-checkout__actions {
+			padding: 0 0 $gap-largest 0;
+		}
+	}
+}
+
+.is-mobile {
+	.wc-block-checkout__actions {
+		.wc-block-checkout__actions_row {
+			flex-direction: column-reverse;
+		}
+
+		.wc-block-components-checkout-place-order-button {
+			width: 100%;
+		}
+
+		.wc-block-components-checkout-return-to-cart-button {
+			margin: $gap auto;
+		}
+	}
+}

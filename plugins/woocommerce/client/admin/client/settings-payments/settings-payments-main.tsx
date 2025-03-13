@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	PLUGINS_STORE_NAME,
-	PAYMENT_SETTINGS_STORE_NAME,
+	pluginsStore,
+	paymentSettingsStore,
 	PaymentProvider,
-	type PaymentSettingsSelectors,
-	type PluginSelectors,
 } from '@woocommerce/data';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -34,6 +34,7 @@ import {
 	getWooPaymentsTestDriveAccountLink,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -48,10 +49,8 @@ export const SettingsPaymentsMain = () => {
 	const [ sortedProviders, setSortedProviders ] = useState<
 		PaymentProvider[] | null
 	>( null );
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { updateProviderOrdering } = useDispatch(
-		PAYMENT_SETTINGS_STORE_NAME
-	);
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+	const { updateProviderOrdering } = useDispatch( paymentSettingsStore );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const [
 		postSandboxAccountSetupModalVisible,
@@ -63,10 +62,14 @@ export const SettingsPaymentsMain = () => {
 			?.business_country_code || null
 	);
 
-	const urlParams = new URLSearchParams( window.location.search );
+	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
-	// Effect for handling URL parameters and displaying messages or modals.
 	useEffect( () => {
+		// Record the page view event
+		recordEvent( 'settings_payments_pageview' );
+
+		// Handle URL parameters and display messages or modals.
+		const urlParams = new URLSearchParams( window.location.search );
 		const isAccountTestDriveError =
 			urlParams.get( 'test_drive_error' ) === 'true';
 		if ( isAccountTestDriveError ) {
@@ -107,34 +110,34 @@ export const SettingsPaymentsMain = () => {
 	}, [] );
 
 	const installedPluginSlugs = useSelect( ( select ) => {
-		return (
-			select( PLUGINS_STORE_NAME ) as PluginSelectors
-		 ).getInstalledPlugins();
+		return select( pluginsStore ).getInstalledPlugins();
 	}, [] );
 
 	// Make UI refresh when plugin is installed.
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		PAYMENT_SETTINGS_STORE_NAME
+	const { invalidateResolutionForStoreSelector } =
+		useDispatch( paymentSettingsStore );
+
+	const {
+		providers,
+		offlinePaymentGateways,
+		suggestions,
+		suggestionCategories,
+		isFetching,
+	} = useSelect(
+		( select ) => {
+			const paymentSettings = select( paymentSettingsStore );
+
+			return {
+				providers: paymentSettings.getPaymentProviders( storeCountry ),
+				offlinePaymentGateways:
+					paymentSettings.getOfflinePaymentGateways(),
+				suggestions: paymentSettings.getSuggestions(),
+				suggestionCategories: paymentSettings.getSuggestionCategories(),
+				isFetching: paymentSettings.isFetching(),
+			};
+		},
+		[ storeCountry ]
 	);
-
-	const { providers, suggestions, suggestionCategories, isFetching } =
-		useSelect(
-			( select ) => {
-				const paymentSettings = select(
-					PAYMENT_SETTINGS_STORE_NAME
-				) as PaymentSettingsSelectors;
-
-				return {
-					providers:
-						paymentSettings.getPaymentProviders( storeCountry ),
-					suggestions: paymentSettings.getSuggestions(),
-					suggestionCategories:
-						paymentSettings.getSuggestionCategories(),
-					isFetching: paymentSettings.isFetching(),
-				};
-			},
-			[ storeCountry ]
-		);
 
 	const dismissIncentive = useCallback(
 		( dismissHref: string, context: string ) => {
@@ -217,6 +220,52 @@ export const SettingsPaymentsMain = () => {
 		}
 	}
 
+	const triggeredPageViewRef = useRef( false );
+
+	// Record a pageview event when the page loads.
+	useEffect( () => {
+		if (
+			isFetching ||
+			! providers.length ||
+			! suggestions.length ||
+			triggeredPageViewRef.current
+		) {
+			return;
+		}
+
+		// Set the ref to true to prevent multiple pageview events.
+		triggeredPageViewRef.current = true;
+
+		const eventProps: { [ key: string ]: boolean } = {
+			woocommerce_payments_displayed: providers.some( ( provider ) =>
+				isWooPayments( provider.id )
+			),
+		};
+
+		suggestions.forEach( ( suggestion ) => {
+			eventProps[ suggestion.id.replace( /-/g, '_' ) + '_displayed' ] =
+				true;
+		} );
+
+		providers
+			.filter( ( provider ) => provider._type === 'suggestion' )
+			.forEach( ( provider ) => {
+				if ( provider._suggestion_id ) {
+					eventProps[
+						provider._suggestion_id.replace( /-/g, '_' ) +
+							'_displayed'
+					] = true;
+				} else if ( provider.plugin && provider.plugin.slug ) {
+					// Fallback to using the slug if the suggestion ID is not available.
+					eventProps[
+						provider.plugin.slug.replace( /-/g, '_' ) + '_displayed'
+					] = true;
+				}
+			} );
+
+		recordEvent( 'settings_payments_recommendations_pageview', eventProps );
+	}, [ suggestions, providers, isFetching ] );
+
 	const setupPlugin = useCallback(
 		( id: string, slug: string, onboardingUrl: string | null ) => {
 			if ( installingPlugin ) {
@@ -230,16 +279,24 @@ export const SettingsPaymentsMain = () => {
 			}
 
 			setInstallingPlugin( id );
+			recordEvent( 'settings_payments_recommendations_setup', {
+				extension_selected: slug,
+			} );
 			installAndActivatePlugins( [ slug ] )
-				.then( async ( response: Response ) => {
+				.then( async ( response ) => {
 					createNoticesFromResponse( response );
 					invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
 					);
 
+					// Record the plugin installation event.
+					recordEvent( 'settings_payments_provider_installed', {
+						provider_id: id,
+					} );
+
 					// Wait for the state update and fetch the latest providers.
 					const updatedProviders = await resolveSelect(
-						PAYMENT_SETTINGS_STORE_NAME
+						paymentSettingsStore
 					).getPaymentProviders( storeCountry );
 
 					// Find the matching provider the updated list.
@@ -249,6 +306,11 @@ export const SettingsPaymentsMain = () => {
 							provider?._suggestion_id === id || // For suggestions that were replaced by a gateway.
 							provider.plugin.slug === slug // Last resort to find the provider.
 					);
+
+					// Record the event when user successfully enables a gateway.
+					recordEvent( 'settings_payments_provider_enable', {
+						provider_id: id,
+					} );
 
 					// If the installed and/or activated extension has recommended payment methods,
 					// redirect to the payment methods page.
@@ -282,6 +344,53 @@ export const SettingsPaymentsMain = () => {
 			invalidateResolutionForStoreSelector,
 			storeCountry,
 		]
+	);
+
+	const trackMorePaymentsOptionsClicked = () => {
+		// We will gather all the available payment methods (suggestions, gateways, offline PMs)
+		// to track which options the user has.
+		const paymentOptionsList: string[] = providers.map( ( provider ) => {
+			if ( provider.plugin && provider.plugin.slug ) {
+				return provider.plugin.slug.replace( /-/g, '_' );
+			} else if ( provider._suggestion_id ) {
+				return provider._suggestion_id.replace( /-/g, '_' );
+			}
+
+			return provider.id;
+		} );
+
+		offlinePaymentGateways.forEach( ( offlinePaymentGateway ) => {
+			paymentOptionsList.push( offlinePaymentGateway.id );
+		} );
+
+		suggestions.forEach( ( suggestion ) => {
+			if ( suggestion.plugin && suggestion.plugin.slug ) {
+				paymentOptionsList.push(
+					suggestion.plugin.slug.replace( /-/g, '_' )
+				);
+				return;
+			}
+			paymentOptionsList.push( suggestion.id.replace( /-/g, '_' ) );
+		} );
+
+		const uniquePaymentsOptions = [ ...new Set( paymentOptionsList ) ];
+
+		recordEvent( 'settings_payments_recommendations_other_options', {
+			available_payment_methods: uniquePaymentsOptions.join( ', ' ),
+		} );
+	};
+
+	const morePaymentOptionsLink = (
+		<Button
+			variant={ 'link' }
+			target="_blank"
+			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/"
+			className="more-payment-options-link"
+			onClick={ trackMorePaymentsOptionsClicked }
+		>
+			<img src={ assetUrl + '/icons/external-link.svg' } alt="" />
+			{ __( 'More payment options', 'woocommerce' ) }
+		</Button>
 	);
 
 	return (
@@ -336,13 +445,24 @@ export const SettingsPaymentsMain = () => {
 					businessRegistrationCountry={ storeCountry }
 					setBusinessRegistrationCountry={ setStoreCountry }
 				/>
-				<OtherPaymentGateways
-					suggestions={ suggestions }
-					suggestionCategories={ suggestionCategories }
-					installingPlugin={ installingPlugin }
-					setupPlugin={ setupPlugin }
-					isFetching={ isFetching }
-				/>
+				{
+					// If no suggestions are available, only show a link to the WooCommerce.com payment marketplace page.
+					! isFetching && suggestions.length === 0 && (
+						<div className="more-payment-options">
+							{ morePaymentOptionsLink }
+						</div>
+					)
+				}
+				{ ( isFetching || suggestions.length > 0 ) && (
+					<OtherPaymentGateways
+						suggestions={ suggestions }
+						suggestionCategories={ suggestionCategories }
+						installingPlugin={ installingPlugin }
+						setupPlugin={ setupPlugin }
+						isFetching={ isFetching }
+						morePaymentOptionsLink={ morePaymentOptionsLink }
+					/>
+				) }
 			</div>
 			<WooPaymentsPostSandboxAccountSetupModal
 				isOpen={

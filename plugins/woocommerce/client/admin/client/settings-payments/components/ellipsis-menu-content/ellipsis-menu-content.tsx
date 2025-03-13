@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Button, CardDivider } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
-	PLUGINS_STORE_NAME,
-	PAYMENT_SETTINGS_STORE_NAME,
+	pluginsStore,
+	paymentSettingsStore,
 	PaymentGatewayLink,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -30,6 +30,10 @@ interface EllipsisMenuContentProps {
 	 * Indicates if the menu is being used for a payment extension suggestion.
 	 */
 	isSuggestion: boolean;
+	/**
+	 * The ID of the payment extension suggestion. Optional.
+	 */
+	suggestionId?: string;
 	/**
 	 * The URL to call when hiding a payment extension suggestion. Optional.
 	 */
@@ -65,6 +69,7 @@ export const EllipsisMenuContent = ( {
 	providerId,
 	pluginFile,
 	isSuggestion,
+	suggestionId,
 	suggestionHideUrl = '',
 	onToggle,
 	links = [],
@@ -72,7 +77,7 @@ export const EllipsisMenuContent = ( {
 	setResetAccountModalVisible = () => {},
 	isEnabled = false,
 }: EllipsisMenuContentProps ) => {
-	const { deactivatePlugin } = useDispatch( PLUGINS_STORE_NAME );
+	const { deactivatePlugin } = useDispatch( pluginsStore );
 	const [ isDeactivating, setIsDeactivating ] = useState( false );
 	const [ isDisabling, setIsDisabling ] = useState( false );
 	const [ isHidingSuggestion, setIsHidingSuggestion ] = useState( false );
@@ -81,7 +86,7 @@ export const EllipsisMenuContent = ( {
 		invalidateResolutionForStoreSelector,
 		togglePaymentGateway,
 		hidePaymentExtensionSuggestion,
-	} = useDispatch( PAYMENT_SETTINGS_STORE_NAME );
+	} = useDispatch( paymentSettingsStore );
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 
@@ -120,6 +125,11 @@ export const EllipsisMenuContent = ( {
 	 * Disables the payment gateway from payment processing.
 	 */
 	const disableGateway = () => {
+		// Record the event when user clicks on a gateway's disable button.
+		recordEvent( 'settings_payments_provider_disable_click', {
+			provider_id: providerId,
+		} );
+
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
 
@@ -136,6 +146,11 @@ export const EllipsisMenuContent = ( {
 			gatewayToggleNonce
 		)
 			.then( () => {
+				// Record the event when user successfully disables a gateway.
+				recordEvent( 'settings_payments_provider_disable', {
+					provider_id: providerId,
+				} );
+
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDisabling( false );
 				onToggle();
@@ -155,6 +170,10 @@ export const EllipsisMenuContent = ( {
 	const hideSuggestion = () => {
 		setIsHidingSuggestion( true );
 
+		// Record the event before hiding the suggestion.
+		recordEvent( 'settings_payments_recommendations_dismiss', {
+			pes_id: suggestionId,
+		} );
 		hidePaymentExtensionSuggestion( suggestionHideUrl )
 			.then( () => {
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
@@ -173,40 +192,41 @@ export const EllipsisMenuContent = ( {
 			} );
 	};
 
+	// Filter links in accordance with the gateway state.
+	const contextLinks = links.filter( ( link: PaymentGatewayLink ) => {
+		switch ( link._type ) {
+			case 'pricing':
+				// Show pricing link for any state.
+				return true;
+			case 'terms':
+			case 'about':
+				// Show terms and about links for gateways that are not enabled yet.
+				return ! isEnabled;
+			case 'documentation':
+			case 'support':
+				// Show documentation and support links for gateways are enabled.
+				return isEnabled;
+			default:
+				return false;
+		}
+	} );
+
 	return (
 		<>
-			{ links
-				.filter( ( link: PaymentGatewayLink ) => {
-					switch ( link._type ) {
-						case 'pricing':
-							// show pricing link for any state
-							return true;
-						case 'terms':
-						case 'about':
-							// show terms and about links for gateways that are not enabled yet
-							return ! isEnabled;
-						case 'documentation':
-						case 'support':
-							// show documentation and support links for gateways are enabled
-							return isEnabled;
-						default:
-							return false;
-					}
-				} )
-				.map( ( link: PaymentGatewayLink ) => {
-					const displayName = typeToDisplayName[ link._type ];
-					return displayName ? (
-						<div
-							className="woocommerce-ellipsis-menu__content__item"
-							key={ link._type }
-						>
-							<Button target="_blank" href={ link.url }>
-								{ displayName }
-							</Button>
-						</div>
-					) : null;
-				} ) }
-			<CardDivider />
+			{ contextLinks.map( ( link: PaymentGatewayLink ) => {
+				const displayName = typeToDisplayName[ link._type ];
+				return displayName ? (
+					<div
+						className="woocommerce-ellipsis-menu__content__item"
+						key={ link._type }
+					>
+						<Button target="_blank" href={ link.url }>
+							{ displayName }
+						</Button>
+					</div>
+				) : null;
+			} ) }
+			{ !! contextLinks.length && <CardDivider /> }
 			{ isSuggestion && (
 				<div
 					className="woocommerce-ellipsis-menu__content__item"

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createElement } from 'react';
+import { createElement } from 'react';
 import { Notice } from '@wordpress/components';
 import { MediaItem } from '@wordpress/media-utils';
 import { useState } from '@wordpress/element';

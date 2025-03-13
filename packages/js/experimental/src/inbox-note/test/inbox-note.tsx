@@ -3,27 +3,32 @@
  */
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { InboxNoteCard } from '../inbox-note';
 
-jest.mock( 'react-visibility-sensor', () =>
-	jest.fn().mockImplementation( ( { children, onChange } ) => {
-		return (
-			<>
-				<button onClick={ () => onChange( true ) }>
-					Trigger change
-				</button>
-				{ children }
-			</>
-		);
-	} )
-);
-
 window.open = jest.fn();
+
+// Mock react-intersection-observer
+jest.mock( 'react-intersection-observer', () => {
+	return {
+		useInView: (
+			options: { onChange?: ( inView: boolean ) => void } = {}
+		) => {
+			if ( options.onChange ) {
+				// Call onChange with true to simulate element coming into view
+				options.onChange( true );
+			}
+			return {
+				ref: jest.fn(),
+				inView: true,
+			};
+		},
+	};
+} );
 
 describe( 'InboxNoteCard', () => {
 	const note = {
@@ -247,33 +252,17 @@ describe( 'InboxNoteCard', () => {
 			);
 		} );
 
-		it( 'should call onVisible when visibility sensor calls it', () => {
+		it( 'should call onVisible when element is in view', () => {
 			const onVisible = jest.fn();
-			const { getByText } = render(
+			render(
 				<InboxNoteCard
 					key={ note.id }
 					note={ note }
 					onNoteVisible={ onVisible }
 				/>
 			);
-			expect( onVisible ).not.toHaveBeenCalled();
-			userEvent.click( getByText( 'Trigger change' ) );
-			expect( onVisible ).toHaveBeenCalledWith( note );
-		} );
 
-		it( 'should call onVisible when visibility sensor calls it, but only once', () => {
-			const onVisible = jest.fn();
-			const { getByText } = render(
-				<InboxNoteCard
-					key={ note.id }
-					note={ note }
-					onNoteVisible={ onVisible }
-				/>
-			);
-			userEvent.click( getByText( 'Trigger change' ) );
-			userEvent.click( getByText( 'Trigger change' ) );
-			userEvent.click( getByText( 'Trigger change' ) );
-			expect( onVisible ).toHaveBeenCalledTimes( 1 );
+			expect( onVisible ).toHaveBeenCalledWith( note );
 		} );
 	} );
 } );

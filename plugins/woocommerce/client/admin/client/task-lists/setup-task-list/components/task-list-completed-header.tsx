@@ -6,7 +6,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { EllipsisMenu } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';
+import { optionsStore, WEEK } from '@woocommerce/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import {
@@ -47,7 +47,7 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 export const TaskListCompletedHeader: React.FC<
 	TaskListCompletedHeaderProps
 > = ( { hideTasks, customerEffortScore } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
@@ -57,26 +57,23 @@ export const TaskListCompletedHeader: React.FC<
 		useSelect(
 			( select ) => {
 				const { getOption, hasFinishedResolution } =
-					select( OPTIONS_STORE_NAME );
+					select( optionsStore );
 
 				if ( customerEffortScore ) {
-					// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 					const allowTracking = getOption(
 						ALLOW_TRACKING_OPTION_NAME
-					);
+					) as string;
 					const adminInstallTimestamp: number =
-						// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-						getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-					// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-					const cesActions = getOption< string[] >(
+						( getOption(
+							ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
+						) as number ) || 0;
+					const cesActions = getOption(
 						SHOWN_FOR_ACTIONS_OPTION_NAME
-					);
+					) as string[];
 					const loadingOptions =
-						// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 						! hasFinishedResolution( 'getOption', [
 							SHOWN_FOR_ACTIONS_OPTION_NAME,
 						] ) ||
-						// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 						! hasFinishedResolution( 'getOption', [
 							ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 						] );

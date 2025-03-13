@@ -237,7 +237,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( ! empty( $sku ) && WC()->is_rest_api_request() && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
 				$product->delete( true );
 				// translators: 1: SKU.
-				throw new Exception( esc_html( sprintf( __( 'The SKU (%1$s) you are trying to insert is already under processing', 'woocommerce' ), $sku ) ) );
+				throw new Exception( esc_html( sprintf( __( 'The product with SKU (%1$s) you are trying to insert is already present in the lookup table', 'woocommerce' ), $sku ) ) );
 			}
 
 			// get the post object so that we can set the status
@@ -882,7 +882,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		if ( $this->cogs_feature_is_enabled() ) {
+			$props_in_lookup_table[] = 'cogs_value';
+		}
+		if ( array_intersect( $this->updated_props, $props_in_lookup_table ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -2389,6 +2393,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
 				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
+			if ( $this->use_cogs_lookup_column() ) {
+				$cogs_value                       = get_post_meta( $id, '_cogs_total_value', true );
+				$product_data['cogs_total_value'] = '' === $cogs_value ? null : (float) $cogs_value;
+			}
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
 			}
@@ -2437,5 +2445,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function cogs_feature_is_enabled(): bool {
 		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
+	}
+
+	/**
+	 * Check if the COGS value column from the product meta lookup table can be used.
+	 *
+	 * @return bool
+	 */
+	protected function use_cogs_lookup_column(): bool {
+		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
+		return $cogs_controller->feature_is_enabled() && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
 	}
 }

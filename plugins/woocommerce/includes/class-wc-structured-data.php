@@ -336,12 +336,17 @@ class WC_Structured_Data {
 						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
 					}
 
-					$markup_offer['priceSpecification'][] = array(
-						'@type'                 => 'UnitPriceSpecification',
-						'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
-						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax(),
-						'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+					// We add the sale price to the top of the array so it's the first offer.
+					// See https://github.com/woocommerce/woocommerce/issues/55043.
+					array_unshift(
+						$markup_offer['priceSpecification'],
+						array(
+							'@type'                 => 'UnitPriceSpecification',
+							'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax(),
+							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+						)
 					);
 				}
 			} else {
@@ -369,12 +374,17 @@ class WC_Structured_Data {
 						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
 					}
 
-					$markup_offer['priceSpecification'][] = array(
-						'@type'                 => 'UnitPriceSpecification',
-						'price'                 => wc_format_decimal( $product->get_sale_price(), wc_get_price_decimals() ),
-						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax(),
-						'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+					// We add the sale price to the top of the array so it's the first offer.
+					// See https://github.com/woocommerce/woocommerce/issues/55043.
+					array_unshift(
+						$markup_offer['priceSpecification'],
+						array(
+							'@type'                 => 'UnitPriceSpecification',
+							'price'                 => wc_format_decimal( $product->get_sale_price(), wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax(),
+							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+						)
 					);
 				}
 			}

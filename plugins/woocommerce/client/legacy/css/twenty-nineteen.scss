@@ -1445,3 +1445,16 @@ form.checkout_coupon {
 		@include checkout-inline-error-message();
 	}
 }
+
+/**
+ * Log in form
+ */
+.woocommerce-page {
+	form {
+		.password-input {
+			input[type="text"] {
+				padding-right: 2.5rem;
+			}
+		}
+	}
+}

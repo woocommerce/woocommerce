@@ -24,7 +24,6 @@ export const usePatterns = () => {
 					'getBlockPatterns'
 				),
 			invalidateCache: () =>
-				// @ts-expect-error -- No types for this exist yet.
 				dispatch( coreStore ).invalidateResolutionForStoreSelector(
 					'getBlockPatterns'
 				),

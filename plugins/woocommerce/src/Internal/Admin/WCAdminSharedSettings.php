@@ -63,9 +63,19 @@ class WCAdminSharedSettings {
 			\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )->add(
 				$this->settings_prefix,
 				function () {
+					/**
+					 * Filters the shared settings that are passed to the client.
+					 *
+					 * @since 6.4.0
+					 */
 					return apply_filters( 'woocommerce_admin_shared_settings', array() );
 				}
 			);
+
+			add_action( 'admin_enqueue_scripts', function() {
+				// Enqueue deprecation scripts (client/wp-admin-scripts/wcsettings-deprecation/index.js).
+				WCAdminAssets::register_script( 'wp-admin-scripts', 'wcsettings-deprecation', true );
+			} );
 		}
 	}
 }

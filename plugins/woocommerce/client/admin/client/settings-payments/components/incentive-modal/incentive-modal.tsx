@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import { useEffect } from 'react';
 import {
 	Button,
 	Card,
@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { PaymentIncentive, PaymentProvider } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -85,6 +86,15 @@ export const IncentiveModal = ( {
 	const context = 'wc_settings_payments__modal';
 	const isDismissed = isIncentiveDismissedInContext( incentive, context );
 
+	useEffect( () => {
+		// Record the event when the incentive is shown.
+		recordEvent( 'settings_payments_incentive_show', {
+			incentive_id: incentive.promo_id,
+			provider_id: provider.id,
+			display_context: context,
+		} );
+	}, [ incentive.promo_id, provider.id ] );
+
 	/**
 	 * Closes the modal.
 	 */
@@ -97,12 +107,37 @@ export const IncentiveModal = ( {
 	 * Triggers the onAccept callback, dismisses the incentive, closes the modal, and trigger plugin setup.
 	 */
 	const handleAccept = () => {
+		// Record the event when the user accepts the incentive.
+		recordEvent( 'settings_payments_incentive_accept', {
+			incentive_id: incentive.promo_id,
+			provider_id: provider.id,
+			display_context: context,
+		} );
+
+		// Accept the incentive and setup the plugin.
 		setIsBusy( true );
 		onAccept( incentive.promo_id );
 		onDismiss( incentive._links.dismiss.href, context ); // We also dismiss the incentive when it is accepted.
 		handleClose(); // Close the modal.
 		setupPlugin( provider.id, provider.plugin.slug, onboardingUrl );
 		setIsBusy( false );
+	};
+
+	/**
+	 * Handles dismissing the incentive.
+	 * Triggers the onDismiss callback and hides the modal.
+	 */
+	const handleDismiss = () => {
+		// Record the event when the user dismisses the incentive.
+		recordEvent( 'settings_payments_incentive_dismiss', {
+			incentive_id: incentive.promo_id,
+			provider_id: provider.id,
+			display_context: context,
+		} );
+
+		// Dimiss the incentive.
+		onDismiss( incentive._links.dismiss.href, context );
+		handleClose();
 	};
 
 	// Do not render the modal if the incentive is dismissed in this context.
@@ -116,10 +151,7 @@ export const IncentiveModal = ( {
 				<Modal
 					title=""
 					className="woocommerce-incentive-modal"
-					onRequestClose={ () => {
-						onDismiss( incentive._links.dismiss.href, context );
-						handleClose();
-					} }
+					onRequestClose={ handleDismiss }
 				>
 					<Card className={ 'woocommerce-incentive-modal__card' }>
 						<div className="woocommerce-incentive-modal__content">

@@ -8,7 +8,8 @@ use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 use Automattic\WooCommerce\Blueprint\ExportSchema;
 use Automattic\WooCommerce\Blueprint\ImportSchema;
-use Automattic\WooCommerce\Blueprint\JsonResultFormatter;
+use Automattic\WooCommerce\Blueprint\ResultFormatters\JsonResultFormatter;
+use Automattic\WooCommerce\Blueprint\ImportStep;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\ZipExportedSchema;
 use RecursiveArrayIterator;
@@ -23,6 +24,11 @@ use RecursiveIteratorIterator;
  */
 class RestApi {
 	/**
+	 * Maximum allowed file size in bytes (50MB)
+	 */
+	const MAX_FILE_SIZE = 52428800; // 50 * 1024 * 1024
+
+	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
@@ -30,61 +36,26 @@ class RestApi {
 	protected $namespace = 'wc-admin';
 
 	/**
+	 * Get maximum allowed file size for blueprint uploads.
+	 *
+	 * @return int Maximum file size in bytes
+	 */
+	protected function get_max_file_size() {
+		/**
+		 * Filters the maximum allowed file size for blueprint uploads.
+		 *
+		 * @since 9.3.0
+		 * @param int $max_size Maximum file size in bytes.
+		 */
+		return apply_filters( 'woocommerce_blueprint_upload_max_file_size', self::MAX_FILE_SIZE );
+	}
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 9.3.0
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/blueprint/queue',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'queue' ),
-					'permission_callback' => array( $this, 'check_permission' ),
-				),
-				'schema' => array( $this, 'get_queue_response_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/blueprint/process',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'process' ),
-					'permission_callback' => array( $this, 'check_permission' ),
-					'args'                => array(
-						'reference'     => array(
-							'description' => __( 'The reference of the uploaded file', 'woocommerce' ),
-							'type'        => 'string',
-							'required'    => true,
-						),
-						'process_nonce' => array(
-							'description' => __( 'The nonce for processing the uploaded file', 'woocommerce' ),
-							'type'        => 'string',
-							'required'    => true,
-						),
-					),
-				),
-				'schema' => array( $this, 'get_process_response_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/blueprint/import',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'import' ),
-					'permission_callback' => array( $this, 'check_permission' ),
-				),
-			)
-		);
-
 		register_rest_route(
 			$this->namespace,
 			'/blueprint/export',
@@ -128,6 +99,26 @@ class RestApi {
 						),
 					),
 				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/blueprint/import-step',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_step' ),
+					'permission_callback' => array( $this, 'check_permission' ),
+					'args'                => array(
+						'step_definition' => array(
+							'description' => __( 'The step definition to import', 'woocommerce' ),
+							'type'        => 'object',
+							'required'    => true,
+						),
+					),
+				),
+				'schema' => array( $this, 'get_import_step_response_schema' ),
 			)
 		);
 	}
@@ -200,252 +191,6 @@ class RestApi {
 	}
 
 	/**
-	 * Handle the import request.
-	 *
-	 * @return \WP_HTTP_Response The response object.
-	 * @throws \InvalidArgumentException If the import fails.
-	 */
-	public function import() {
-
-		// Check for nonce to prevent CSRF.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		if ( ! isset( $_POST['blueprint_upload_nonce'] ) || ! \wp_verify_nonce( $_POST['blueprint_upload_nonce'], 'blueprint_upload_nonce' ) ) {
-			return new \WP_HTTP_Response(
-				array(
-					'status'  => 'error',
-					'message' => __( 'Invalid nonce', 'woocommerce' ),
-				),
-				400
-			);
-		}
-
-		// phpcs:ignore
-		if ( ! empty( $_FILES['file'] ) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
-			// phpcs:ignore
-			$uploaded_file = $_FILES['file']['tmp_name'];
-			// phpcs:ignore
-			$mime_type     = $_FILES['file']['type'];
-
-			if ( 'application/json' !== $mime_type && 'application/zip' !== $mime_type ) {
-				return new \WP_HTTP_Response(
-					array(
-						'status'  => 'error',
-						'message' => __( 'Invalid file type', 'woocommerce' ),
-					),
-					400
-				);
-			}
-
-			try {
-				// phpcs:ignore
-				if ( $mime_type === 'application/zip' ) {
-					// phpcs:ignore
-					if ( ! function_exists( 'wp_handle_upload' ) ) {
-						require_once ABSPATH . 'wp-admin/includes/file.php';
-					}
-
-					$movefile = \wp_handle_upload( $_FILES['file'], array( 'test_form' => false ) );
-
-					if ( $movefile && ! isset( $movefile['error'] ) ) {
-						$blueprint = ImportSchema::create_from_zip( $movefile['file'] );
-					} else {
-						throw new InvalidArgumentException( $movefile['error'] );
-					}
-				} else {
-					$blueprint = ImportSchema::create_from_json( $uploaded_file );
-				}
-			} catch ( \Exception $e ) {
-				return new \WP_HTTP_Response(
-					array(
-						'status'  => 'error',
-						'message' => $e->getMessage(),
-					),
-					400
-				);
-			}
-
-			$results          = $blueprint->import();
-			$result_formatter = new JsonResultFormatter( $results );
-			$redirect         = $blueprint->get_schema()->landingPage ?? null;
-			$redirect_url     = $redirect->url ?? 'admin.php?page=wc-admin';
-
-			$is_success = $result_formatter->is_success() ? 'success' : 'error';
-
-			return new \WP_HTTP_Response(
-				array(
-					'status'  => $is_success,
-					'message' => 'error' === $is_success ? __( 'There was an error while processing your schema', 'woocommerce' ) : 'success',
-					'data'    => array(
-						'redirect' => admin_url( $redirect_url ),
-						'result'   => $result_formatter->format(),
-					),
-				),
-				200
-			);
-		}
-
-		return new \WP_HTTP_Response(
-			array(
-				'status'  => 'error',
-				'message' => __( 'No file uploaded', 'woocommerce' ),
-			),
-			400
-		);
-	}
-
-	/**
-	 * Handle the upload request.
-	 *
-	 * We're not calling to run the import process in this function.
-	 * We'll upload the file to a temporary dir, validate the file, and return a reference to the file.
-	 * The uploaded file will be processed once user hits the import button and calls the process endpoint with a nonce.
-	 *
-	 * @return array
-	 */
-	public function queue() {
-		// Initialize response structure.
-		$response = array(
-			'reference'  => null,
-			'error_type' => null,
-			'errors'     => array(),
-		);
-
-		// Check for nonce to prevent CSRF.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		if ( ! isset( $_POST['blueprint_upload_nonce'] ) || ! \wp_verify_nonce( $_POST['blueprint_upload_nonce'], 'blueprint_upload_nonce' ) ) {
-			$response['error_type'] = 'upload';
-			$response['errors'][]   = __( 'Invalid nonce', 'woocommerce' );
-			return $response;
-		}
-
-		// Validate file upload.
-		if ( empty( $_FILES['file'] ) || ! isset( $_FILES['file']['error'], $_FILES['file']['tmp_name'], $_FILES['file']['type'] ) ) {
-			$response['error_type'] = 'upload';
-			$response['errors'][]   = __( 'No file uploaded', 'woocommerce' );
-			return $response;
-		}
-
-		// It errors with " Detected usage of a non-sanitized input variable:"
-		// We don't want to sanitize the file name for is_uploaded_file as it expects the raw file name.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( UPLOAD_ERR_OK !== $_FILES['file']['error'] || ! is_uploaded_file( $_FILES['file']['tmp_name'] ) ) {
-			$response['error_type'] = 'upload';
-			$response['errors'][]   = __( 'File upload error', 'woocommerce' );
-			return $response;
-		}
-
-		$mime_type = sanitize_text_field( $_FILES['file']['type'] );
-
-		// Check for valid file types.
-		if ( 'application/json' !== $mime_type && 'application/zip' !== $mime_type ) {
-			$response['error_type'] = 'upload';
-			$response['errors'][]   = __( 'Invalid file type', 'woocommerce' );
-			return $response;
-		}
-
-		// Errors with "Detected usage of a non-sanitized input variable:"
-		// We don't want to sanitize the file name for pathinfo as it expects the raw file name.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$extension = pathinfo( $_FILES['file']['name'], PATHINFO_EXTENSION );
-
-		// Same as above, we don't want to sanitize the file name for get_temp_dir as it expects the raw file name.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$tmp_filepath = get_temp_dir() . basename( $_FILES['file']['tmp_name'] ) . '.' . $extension;
-
-		// Same as above, we don't want to sanitize the file name for move_uploaded_file as it expects the raw file name.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! move_uploaded_file( $_FILES['file']['tmp_name'], $tmp_filepath ) ) {
-			$response['error_type'] = 'upload';
-			$response['errors'][]   = __( 'Error moving file to tmp directory', 'woocommerce' );
-			return $response;
-		}
-
-		// Process the uploaded file.
-		// We'll not call import function.
-		// Just validate the file by calling create_from_json or create_from_zip.
-		// Please note that we're not performing a full validation here as we can't know
-		// the full list of available steps without starting the import process due to filters being used for extensibility.
-		// For now, we'll just check the provided schema is a valid JSON and has 'steps' key.
-		// Full validation is performed in the process function.
-		try {
-			if ( 'application/zip' === $mime_type ) {
-				$import_schema = ImportSchema::create_from_zip( $tmp_filepath );
-			} else {
-				$import_schema = ImportSchema::create_from_json( $tmp_filepath );
-			}
-		} catch ( \Exception $e ) {
-			$response['error_type'] = 'schema_validation';
-			$response['errors'][]   = $e->getMessage();
-			return $response;
-		}
-
-		// Same as above, we don't want to sanitize the file name for basename as it expects the raw file name.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$response['reference']             = basename( $_FILES['file']['tmp_name'] . '.' . $extension );
-		$response['process_nonce']         = wp_create_nonce( $response['reference'] );
-		$response['settings_to_overwrite'] = $this->get_settings_to_overwrite( $import_schema->get_schema()->get_steps() );
-
-		return $response;
-	}
-
-	/**
-	 * Process the uploaded file.
-	 *
-	 * @param \WP_REST_Request $request request object.
-	 *
-	 * @return array
-	 */
-	public function process( \WP_REST_Request $request ) {
-		$response = array(
-			'processed' => false,
-			'message'   => '',
-			'data'      => array(
-				'redirect' => '',
-				'result'   => array(),
-			),
-		);
-
-		$ref   = $request->get_param( 'reference' );
-		$nonce = $request->get_param( 'process_nonce' );
-
-		if ( ! \wp_verify_nonce( $nonce, $ref ) ) {
-			$response['message'] = __( 'Invalid nonce', 'woocommerce' );
-			return $response;
-		}
-
-		$fullpath  = get_temp_dir() . $ref;
-		$extension = pathinfo( $fullpath, PATHINFO_EXTENSION );
-
-		// Process the uploaded file.
-		try {
-			if ( 'zip' === $extension ) {
-				$blueprint = ImportSchema::create_from_zip( $fullpath );
-			} else {
-				$blueprint = ImportSchema::create_from_json( $fullpath );
-			}
-		} catch ( \Exception $e ) {
-			$response['message'] = $e->getMessage();
-			return $response;
-		}
-
-		$results          = $blueprint->import();
-		$result_formatter = new JsonResultFormatter( $results );
-		$redirect         = $blueprint->get_schema()->landingPage ?? null;
-		$redirect_url     = $redirect->url ?? 'admin.php?page=wc-admin';
-
-		$is_success = $result_formatter->is_success();
-
-		$response['processed'] = $is_success;
-		$response['message']   = false === $is_success ? __( 'There was an error while processing your schema', 'woocommerce' ) : 'success';
-		$response['data']      = array(
-			'redirect' => admin_url( $redirect_url ),
-			'result'   => $result_formatter->format(),
-		);
-
-		return $response;
-	}
-
-	/**
 	 * Convert step list from the frontend to the backend format.
 	 *
 	 * From:
@@ -510,6 +255,43 @@ class RestApi {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Import a single step.
+	 *
+	 * @param \WP_REST_Request $request The request object.
+	 *
+	 * @return array
+	 */
+	public function import_step( \WP_REST_Request $request ) {
+		// Get the raw body size.
+		$body_size = strlen( $request->get_body() );
+		if ( $body_size > $this->get_max_file_size() ) {
+			return array(
+				'success'  => false,
+				'messages' => array(
+					array(
+						'message' => sprintf(
+							// Translators: %s is the maximum file size in megabytes.
+							__( 'Blueprint step definition size exceeds maximum limit of %s MB', 'woocommerce' ),
+							( $this->get_max_file_size() / ( 1024 * 1024 ) )
+						),
+						'type'    => 'error',
+					),
+				),
+			);
+		}
+
+		// Make sure we're dealing with object.
+		$step_definition = json_decode( wp_json_encode( $request->get_param( 'step_definition' ) ) );
+		$step_importer   = new ImportStep( $step_definition );
+		$result          = $step_importer->import();
+
+		return array(
+			'success'  => $result->is_success(),
+			'messages' => $result->get_messages(),
+		);
 	}
 
 
@@ -583,6 +365,41 @@ class RestApi {
 					),
 				),
 			),
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the schema for the import-step endpoint.
+	 *
+	 * @return array
+	 */
+	public function get_import_step_response_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'import-step',
+			'type'       => 'object',
+			'properties' => array(
+				'success'  => array(
+					'type' => 'boolean',
+				),
+				'messages' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'message' => array(
+								'type' => 'string',
+							),
+							'type'    => array(
+								'type' => 'string',
+							),
+						),
+						'required'   => array( 'message', 'type' ),
+					),
+				),
+			),
+			'required'   => array( 'success', 'messages' ),
 		);
 		return $schema;
 	}

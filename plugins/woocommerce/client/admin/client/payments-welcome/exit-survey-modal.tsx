@@ -9,7 +9,7 @@ import {
 	TextareaControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -35,12 +35,11 @@ function ExitSurveyModal( {}: {
 	const [ isSomethingElseChecked, setSomethingElseChecked ] =
 		useState( false );
 	const [ comments, setComments ] = useState( '' );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const dismissedIncentives = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption } = select( optionsStore );
 		return (
-			// @ts-expect-error Awaiting for a broader global fix.
 			( getOption(
 				'wcpay_welcome_page_incentives_dismissed'
 			) as string[] ) || []

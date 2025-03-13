@@ -4,7 +4,7 @@
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { Button } from '@wordpress/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
@@ -91,7 +91,7 @@ function Experiments( {
 export default compose(
 	withSelect( ( select ) => {
 		const { getExperiments } = select( STORE_KEY );
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+		const { getOption, isResolving } = select( optionsStore );
 
 		return {
 			experiments: getExperiments(),

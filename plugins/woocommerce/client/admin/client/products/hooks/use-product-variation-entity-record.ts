@@ -14,6 +14,7 @@ export function useProductVariationEntityRecord(
 	);
 
 	useEffect( () => {
+		// @ts-expect-error TODO react-18-upgrade: getEntityRecord type is not correctly typed yet
 		const getRecordPromise: Promise< ProductVariation > = resolveSelect(
 			coreStore
 		).getEntityRecord(

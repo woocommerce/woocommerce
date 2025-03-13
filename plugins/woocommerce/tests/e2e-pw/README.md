@@ -143,6 +143,10 @@ If you need to create a new pre-defined environment, you can follow these steps:
   run `E2E_ENV_KEY='your-key' ./tests/e2e-pw/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env`
   file into `tests/e2e-pw/envs/my-new-env/.env.enc`.
 
+> [!TIP]
+> Creating an environment directory starting with `_local` will make it ignored by git, so you can store your local environment configurations without worrying about accidentally committing them.
+> Example: _local_my-own-jn-testing-site
+
 ## Writing e2e tests
 
 There are no hard rules for writing tests, but use your common sense when it comes to code duplication and layers of
@@ -196,15 +200,13 @@ Use the `allure generate` command to generate an HTML report from the `allure-re
 the test run. Then, use the `allure open` command to open it on your browser. For example, assuming that:
 
 - You're at the root of the WooCommerce monorepo
-- You did not specify a custom location for `allure-results` (you did not assign a value to `ALLURE_RESULTS_DIR`)
 - You want to generate the `allure-report` folder in `plugins/woocommerce/tests/e2e-pw/test-results`
 
 Then you would need to use the following commands:
 
 ```bash
-cd plugins/woocommerce
-pnpm exec allure generate --clean tests/e2e-pw/test-results/allure-results --output tests/e2e-pw/test-results/allure-report
-pnpm exec allure open tests/e2e-pw/test-results/allure-report
+pnpm exec allure generate --clean plugins/woocommerce/tests/e2e-pw/test-results/allure-results --output plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+pnpm exec allure open plugins/woocommerce/tests/e2e-pw/test-results/allure-report
 ```
 
 A browser window should open the Allure report.

@@ -11,7 +11,7 @@ import {
 } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { Button, Modal, CheckboxControl, Spinner } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
@@ -50,10 +50,7 @@ export const SidebarNavigationScreenTypography = ( {
 
 	const trackingAllowed = useSelect(
 		( select ) =>
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			select( OPTIONS_STORE_NAME ).getOption(
-				'woocommerce_allow_tracking'
-			),
+			select( optionsStore ).getOption( 'woocommerce_allow_tracking' ),
 		[]
 	);
 

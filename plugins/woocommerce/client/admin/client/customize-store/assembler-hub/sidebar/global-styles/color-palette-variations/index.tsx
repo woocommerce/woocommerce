@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
@@ -18,14 +18,11 @@ import { ColorPaletteResponse } from '~/customize-store/design-with-ai/types';
 
 export const ColorPalette = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			aiSuggestions: getOption(
 				'woocommerce_customize_store_ai_suggestions'
 			) as { defaultColorPalette: ColorPaletteResponse },
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			isLoading: ! hasFinishedResolution( 'getOption', [
 				'woocommerce_customize_store_ai_suggestions',
 			] ),

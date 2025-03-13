@@ -18,7 +18,7 @@ jobs:
     name: 'Verify if any PR is left open by author:app/github-actions'
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
         - name: Verify if any PR is left open by author:app/github-actions
           id: verify-prs
@@ -94,7 +94,7 @@ jobs:
 
   build:
     name: Build release zip file
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ needs.verify.outputs.runBuildZipJob == 'true' }}
     needs: verify
     permissions:

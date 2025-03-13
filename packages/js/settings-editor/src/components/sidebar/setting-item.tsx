@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs, getQueryArgs, removeQueryArgs } from '@wordpress/url';
 /* eslint-disable @woocommerce/dependency-group */
@@ -71,7 +71,7 @@ export function SettingItem( {
 	return (
 		<HStack
 			justify="flex-start"
-			className={ classNames( 'edit-site-sidebar-setting-item', {
+			className={ clsx( 'edit-site-sidebar-setting-item', {
 				'is-selected': isActive,
 			} ) }
 		>

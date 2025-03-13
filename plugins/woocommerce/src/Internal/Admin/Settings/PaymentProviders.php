@@ -457,7 +457,7 @@ class PaymentProviders {
 		$categories[] = array(
 			'id'          => self::CATEGORY_EXPRESS_CHECKOUT,
 			'_priority'   => 10,
-			'title'       => esc_html__( 'Express Checkouts', 'woocommerce' ),
+			'title'       => esc_html__( 'Wallets & Express checkouts', 'woocommerce' ),
 			'description' => esc_html__( 'Allow shoppers to fast-track the checkout process with express options like Apple Pay and Google Pay.', 'woocommerce' ),
 		);
 		$categories[] = array(
@@ -809,11 +809,24 @@ class PaymentProviders {
 					ExtensionSuggestions::PAYPAL_FULL_STACK,
 					ExtensionSuggestions::PAYPAL_WALLET,
 					ExtensionSuggestions::MOLLIE,
+					ExtensionSuggestions::MONEI,
 					ExtensionSuggestions::ANTOM,
 					ExtensionSuggestions::MERCADO_PAGO,
 					ExtensionSuggestions::AMAZON_PAY,
-					ExtensionSuggestions::SQUARE_IN_PERSON,
+					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
+					ExtensionSuggestions::COINBASE,
+					ExtensionSuggestions::AUTHORIZE_NET,
+					ExtensionSuggestions::BOLT,
+					ExtensionSuggestions::BANK_OF_AMERICA,
+					ExtensionSuggestions::DEPAY,
+					ExtensionSuggestions::ELAVON,
+					ExtensionSuggestions::EWAY,
+					ExtensionSuggestions::FORTISPAY,
+					ExtensionSuggestions::GO_CARDLESS,
+					ExtensionSuggestions::NEXI,
+					ExtensionSuggestions::PAYPAL_ZETTLE,
+					ExtensionSuggestions::RAPYD,
 				),
 				true
 			) ) {

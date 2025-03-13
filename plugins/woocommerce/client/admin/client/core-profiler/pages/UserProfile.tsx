@@ -157,13 +157,13 @@ export const UserProfile = ( {
 						options={ sellingOnlineOptions }
 						excludeSelectedOptions={ false }
 						help={ <Icon icon={ chevronDown } /> }
-						onChange={ (
-							selectedOptionKey: typeof sellingOnlineAnswer
-						) => {
-							setSellingOnlineAnswer( selectedOptionKey );
+						onChange={ ( selectedOptionKey ) => {
+							setSellingOnlineAnswer(
+								selectedOptionKey as SellingOnlineAnswer
+							);
 						} }
 						multiple={ false }
-						selected={ sellingOnlineAnswer }
+						selected={ String( sellingOnlineAnswer ) }
 					/>
 				</div>
 				{ sellingOnlineAnswer &&

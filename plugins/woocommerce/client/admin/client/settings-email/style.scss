@@ -3,6 +3,10 @@ $wc-setting-email-width: 634px;
 
 #wc_settings_email_preview_slotfill {
 	position: relative;
+
+	&.wc-settings-email-improvements-disabled {
+		padding-bottom: 120px;
+	}
 }
 
 .wc-settings-email-preview-container {
@@ -14,7 +18,9 @@ $wc-setting-email-width: 634px;
 	grid-gap: $wc-setting-email-preview-gap;
 	grid-template-rows: 36px 1fr;
 	height: 960px;
+	margin-bottom: 60px;
 	padding: $wc-setting-email-preview-gap;
+	position: relative;
 	width: 684px;
 
 	@include breakpoint( "<782px" ) {
@@ -31,6 +37,7 @@ $wc-setting-email-width: 634px;
 
 .wc-settings-email-preview-container-floating {
 	bottom: 0;
+	margin-bottom: 0;
 	position: absolute;
 	left: $wc-setting-email-width + $wc-setting-email-preview-gap * 2;
 }
@@ -233,73 +240,54 @@ $wc-setting-email-width: 634px;
 .wc-settings-email-preview-header-sender {
 	font-size: 13px;
 	font-weight: 600;
+	word-break: break-word;
 
 	span {
 		font-size: 11px;
 		font-weight: 400;
-		margin-left: 4px;
 	}
 }
 
-.wc-settings-email-image-url-new-image {
+.wc-settings-email-preview-ces-feedback {
+	bottom: -40px;
+	position: absolute;
+	right: 0;
+}
+
+.wc-settings-email-select-image {
 	border: 1px #ccc solid;
 	border-radius: 4px;
-	width: 400px;
-	height: 88px;
+	box-sizing: border-box;
+	margin-bottom: 8px;
+	min-height: 88px;
+	padding: 10px;
 	position: relative;
+	width: 400px;
 
 	&:hover {
-		filter: brightness(0.87);
-	}
-
-	button.wc-settings-email-image-url-select-image {
-		background-color: transparent;
-		border: none;
-		display: block;
-		height: 100%;
-		width: 100%;
-
-		&:hover {
-			cursor: pointer;
-		}
-	}
-
-	img.wc-settings-email-image-url-new-image-icon {
-		position: absolute;
-		inset: 0;
-		margin: auto;
+		border-color: #999;
+		cursor: pointer;
 	}
 }
 
-.wc-settings-email-image-url-existing-image {
-	> div {
-		margin-bottom: 8px;
-	}
+.wc-settings-email-select-image-icon {
+	inset: 0;
+	margin: auto;
+	position: absolute;
+}
 
-	.wc-settings-email-image-url-image-preview {
-		max-width: 400px;
-		border: 1px #ccc solid;
-		border-radius: 4px;
-
-		&:hover {
-			cursor: pointer;
-		}
-	}
-
-	button.wc-settings-email-image-url-select-image:not(.button) {
-		background-color: transparent;
-		border: none;
-		padding: 0;
-
-		&:focus {
-			box-shadow: none;
-		}
-	}
+.wc-settings-email-logo-image {
+	max-height: 160px;
+	max-width: 100%;
 }
 
 .wc-settings-email-color-palette-separator {
 	border-bottom: none;
 	margin-left: 0;
+	max-width: $wc-setting-email-width;
+}
+
+.wc-settings-email-color-palette-header {
 	max-width: $wc-setting-email-width;
 }
 
@@ -312,4 +300,8 @@ $wc-setting-email-width: 634px;
 	align-items: center;
 	display: inline-flex;
 	gap: 12px;
+
+	.components-toggle-control {
+		margin-bottom: 0;
+	}
 }

@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { createElement, Fragment } from '@wordpress/element';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -79,7 +79,7 @@ export const CustomerEffortScoreTracksContainer = compose(
 		return { queue, resolving };
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
+		const { updateOptions } = dispatch( optionsStore );
 
 		return {
 			clearQueue: () => {

@@ -12,7 +12,7 @@ import { getPersistedQuery } from '@woocommerce/navigation';
 import {
 	getFilterQuery,
 	getLeaderboard,
-	SETTINGS_STORE_NAME,
+	settingsStore,
 } from '@woocommerce/data';
 import { CurrencyContext } from '@woocommerce/currency';
 import { formatValue } from '@woocommerce/number';
@@ -186,7 +186,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { id, query, totalRows, filters } = props;
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 		const filterQuery = getFilterQuery( { filters, query } );
 

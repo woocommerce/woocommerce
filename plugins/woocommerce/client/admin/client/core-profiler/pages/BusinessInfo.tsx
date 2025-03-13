@@ -286,13 +286,11 @@ export const BusinessInfo = ( {
 						options={ industryChoices }
 						excludeSelectedOptions={ false }
 						help={ <Icon icon={ chevronDown } /> }
-						onChange={ (
-							results: Array<
-								( typeof industryChoices )[ number ]
-							>
-						) => {
-							if ( results.length ) {
-								setIndustry( results[ 0 ] );
+						onChange={ ( results ) => {
+							if ( Array.isArray( results ) && results.length ) {
+								setIndustry(
+									results[ 0 ] as IndustryChoiceOption
+								);
 							}
 						} }
 						selected={ industry ? [ industry ] : [] }
@@ -321,14 +319,19 @@ export const BusinessInfo = ( {
 						options={ countries }
 						excludeSelectedOptions={ false }
 						help={ <Icon icon={ chevronDown } /> }
-						onChange={ ( results: Array< CountryStateOption > ) => {
-							if ( results.length ) {
-								setStoreCountry( results[ 0 ] );
+						onChange={ ( results ) => {
+							if ( Array.isArray( results ) && results.length ) {
+								setStoreCountry(
+									results[ 0 ] as CountryStateOption
+								);
 							}
 						} }
 						selected={ storeCountry ? [ storeCountry ] : [] }
 						showAllOnFocus
 						isSearchable
+						virtualScroll={ true }
+						virtualItemHeight={ 40 }
+						virtualListHeight={ 40 * 9 }
 					/>
 					{ countries.length === 0 && (
 						<Notice

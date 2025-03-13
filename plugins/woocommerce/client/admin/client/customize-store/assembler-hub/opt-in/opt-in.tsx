@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, resolveSelect, select, useSelect } from '@wordpress/data';
 import { useContext, useEffect } from '@wordpress/element';
@@ -34,7 +34,6 @@ async function installPatterns() {
 		method: 'POST',
 	} );
 
-	// @ts-expect-error -- No types for this exist yet.
 	await dispatch( coreStore ).invalidateResolutionForStoreSelector(
 		'getBlockPatterns'
 	);
@@ -125,11 +124,9 @@ export const OptInSubscribe = () => {
 	] = useGlobalSetting( 'typography.fontFamilies' );
 
 	const isOptedIn = useSelect( ( selectStore ) => {
-		const allowTracking =
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			selectStore( OPTIONS_STORE_NAME ).getOption(
-				'woocommerce_allow_tracking'
-			);
+		const allowTracking = selectStore( optionsStore ).getOption(
+			'woocommerce_allow_tracking'
+		);
 		return allowTracking === 'yes';
 	}, [] );
 

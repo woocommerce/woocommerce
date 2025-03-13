@@ -9,7 +9,7 @@ import {
 	Button,
 	Icon,
 } from '@wordpress/components';
-import { closeSmall } from '@wordpress/icons';
+import { closeSmall, upload } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { useMachine } from '@xstate5/react';
 import {
@@ -25,84 +25,122 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import uploadIcon from './upload.svg';
 import './style.scss';
 import { OverwriteConfirmationModal } from '../settings/overwrite-confirmation-modal';
+import { getOptionGroupsFromSteps } from './get-option-groups';
+import {
+	BlueprintQueueResponse,
+	BlueprintImportResponse,
+	BlueprintStep,
+	BlueprintImportStepResponse,
+} from './types';
 
-type BlueprintQueueResponse = {
-	reference?: string;
-	error_type?: string;
-	errors?: string[];
-	process_nonce?: string;
-	settings_to_overwrite?: string[];
-};
+const parseBlueprintSteps = async ( file: File ) => {
+	// Create a FileReader instance
+	const reader = new FileReader();
 
-type BlueprintImportResponse = {
-	// TODO: flesh out this type with more concrete values
-	processed: boolean;
-	message: string;
-	data: {
-		redirect: string;
-		result: {
-			is_success: boolean;
-			messages: {
-				step: string;
-				type: string;
-				message: string;
-			}[];
-		};
-	};
-};
-
-const uploadBlueprint = async ( file: File ) => {
-	const formData = new FormData();
-	formData.append( 'file', file );
-
-	if ( window?.wcSettings?.admin?.blueprint_upload_nonce ) {
-		formData.append(
-			'blueprint_upload_nonce',
-			window.wcSettings.admin.blueprint_upload_nonce
-		);
-	} else {
-		throw new Error( 'Blueprint upload nonce not found' ); // TODO: write a more user friendly error
-	}
-
-	const response = await apiFetch< BlueprintQueueResponse >( {
-		path: 'wc-admin/blueprint/queue',
-		method: 'POST',
-		body: formData,
+	// Create a promise to handle async file reading
+	const fileContent: string = await new Promise( ( resolve, reject ) => {
+		reader.onload = () => resolve( reader.result as string );
+		reader.onerror = () => reject( reader.error );
+		reader.readAsText( file );
 	} );
 
-	if ( response.error_type ) {
-		throw new Error( response.errors?.[ 0 ] ?? 'Unknown error' );
+	// Parse the file content as JSON
+	const steps = JSON.parse( fileContent ).steps;
+
+	// Ensure the parsed data is an array
+	if ( ! Array.isArray( steps ) ) {
+		throw new Error( 'Invalid JSON format: Expected an array.' );
 	}
 
-	return response;
+	return steps;
 };
 
-const importBlueprint = async ( process_nonce: string, reference: string ) => {
-	const { processed, message } = await apiFetch< BlueprintImportResponse >( {
-		path: '/wc-admin/blueprint/process',
-		method: 'POST',
-		data: {
-			reference,
-			process_nonce,
-		},
-	} );
+const importBlueprint = async ( steps: BlueprintStep[] ) => {
+	const errors = [] as {
+		step: string;
+		messages: {
+			step: string;
+			type: string;
+			message: string;
+		}[];
+	}[];
 
-	if ( ! processed ) {
-		throw new Error( message );
+	try {
+		// Ensure the parsed data is an array
+		if ( ! Array.isArray( steps ) ) {
+			throw new Error( 'Invalid JSON format: Expected an array.' );
+		}
+
+		const MAX_STEP_SIZE_BYTES =
+			window?.wcSettings?.admin?.blueprint_max_step_size_bytes ||
+			50 * 1024 * 1024; // defaults to 50MB
+
+		// Loop through each step and send it to the endpoint
+		for ( const step of steps ) {
+			const stepJson = JSON.stringify( {
+				step_definition: step,
+			} );
+			const stepSize = new Blob( [ stepJson ] ).size;
+			if ( stepSize > MAX_STEP_SIZE_BYTES ) {
+				errors.push( {
+					step: step.step,
+					messages: [
+						{
+							step: step.step,
+							type: 'error',
+							message: `Step exceeds maximum size limit of ${ (
+								MAX_STEP_SIZE_BYTES /
+								( 1024 * 1024 )
+							).toFixed( 2 ) }MB (Current: ${ (
+								stepSize /
+								( 1024 * 1024 )
+							).toFixed( 2 ) }MB)`,
+						},
+					],
+				} );
+				continue; // Skip this step
+			}
+			const response = await apiFetch< BlueprintImportStepResponse >( {
+				path: 'wc-admin/blueprint/import-step',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: stepJson,
+			} );
+
+			if ( ! response.success ) {
+				errors.push( {
+					step: step.step,
+					messages: response.messages,
+				} );
+			}
+		}
+
+		let errorMessage;
+		if ( errors.length > 0 ) {
+			errorMessage = `${ __(
+				'Your Blueprint has been imported, but there were some errors. Please check the messages.',
+				'woocommerce'
+			) }`;
+		} else {
+			errorMessage = `${ __(
+				'Your Blueprint has been imported!',
+				'woocommerce'
+			) }`;
+		}
+		dispatch( 'core/notices' ).createSuccessNotice( errorMessage );
+		return errors;
+	} catch ( e ) {
+		throw new Error( 'Error reading or parsing file' );
 	}
-
-	dispatch( 'core/notices' ).createSuccessNotice(
-		`${ __( 'Your Blueprint has been imported!', 'woocommerce' ) }`
-	);
 };
 
 interface FileUploadContext {
 	file?: File;
-	process_nonce?: string;
-	reference?: string;
+	steps?: BlueprintStep[];
 	error?: Error;
 	settings_to_overwrite?: string[];
 }
@@ -142,8 +180,6 @@ export const fileUploadMachine = setup( {
 		reportSuccess: enqueueActions( ( { event, enqueue } ) => {
 			assertEvent( event, 'xstate.done.actor.0.fileUpload.uploading' );
 			enqueue.assign( {
-				process_nonce: event.output.process_nonce,
-				reference: event.output.reference,
 				settings_to_overwrite: event.output.settings_to_overwrite,
 			} );
 		} ),
@@ -163,15 +199,12 @@ export const fileUploadMachine = setup( {
 		},
 	},
 	actors: {
-		uploader: fromPromise( ( { input }: { input: { file: File } } ) =>
-			uploadBlueprint( input.file )
-		),
 		importer: fromPromise(
-			( {
-				input,
-			}: {
-				input: { process_nonce: string; reference: string };
-			} ) => importBlueprint( input.process_nonce, input.reference )
+			( { input }: { input: { steps: BlueprintStep[] } } ) =>
+				importBlueprint( input.steps )
+		),
+		stepsParser: fromPromise( ( { input }: { input: { file: File } } ) =>
+			parseBlueprintSteps( input.file )
 		),
 	},
 	guards: {
@@ -189,7 +222,7 @@ export const fileUploadMachine = setup( {
 		idle: {
 			on: {
 				UPLOAD: {
-					target: 'uploading',
+					target: 'parsingSteps',
 					actions: assign( {
 						file: ( { event } ) => event.file,
 						error: () => undefined,
@@ -203,29 +236,40 @@ export const fileUploadMachine = setup( {
 				},
 			},
 		},
-		uploading: {
-			invoke: {
-				src: 'uploader',
-				input: ( { event } ) => {
-					assertEvent( event, 'UPLOAD' );
-					return { file: event.file };
-				},
-				onDone: {
-					target: 'success',
-					actions: 'reportSuccess',
-				},
-				onError: {
-					target: 'error',
-					actions: assign( {
-						error: ( { event } ) => event?.error as Error,
-					} ),
-				},
-			},
-		},
 		error: {
 			entry: 'reportError',
 			always: {
 				target: 'idle',
+			},
+		},
+		parsingSteps: {
+			invoke: {
+				src: 'stepsParser',
+				input: ( { context } ) => {
+					return {
+						file: context.file!,
+					};
+				},
+				onDone: {
+					target: 'success',
+					actions: assign( {
+						error: () => undefined,
+						steps: ( { event } ) => event.output,
+						settings_to_overwrite: ( { event } ) => {
+							return getOptionGroupsFromSteps(
+								event.output
+							) as string[];
+						},
+					} ),
+				},
+				onError: {
+					target: 'error',
+					actions: assign( {
+						error: new Error(
+							'Error reading or parsing file. Please check the schema.'
+						),
+					} ),
+				},
 			},
 		},
 		success: {
@@ -234,6 +278,7 @@ export const fileUploadMachine = setup( {
 					actions: assign( {
 						error: () => undefined,
 						file: () => undefined,
+						steps: () => undefined,
 					} ),
 					target: 'idle',
 				},
@@ -259,12 +304,39 @@ export const fileUploadMachine = setup( {
 				src: 'importer',
 				input: ( { context } ) => {
 					return {
-						process_nonce: context.process_nonce!,
-						reference: context.reference!,
+						steps: context.steps!,
 					};
 				},
 				onDone: {
 					target: 'importSuccess',
+					actions: assign( {
+						error: ( { event } ) => {
+							if (
+								Array.isArray( event.output ) &&
+								event.output.length
+							) {
+								return {
+									name: 'BlueprintImportError',
+									message: event.output
+										.map( ( item ) => {
+											const step = `step: ${ item.step }`;
+											const errors = item.messages
+												.filter(
+													( msg ) =>
+														msg.type === 'error'
+												) // Filter messages with type 'error'
+												.map(
+													( msg ) =>
+														`  ${ msg.message.trim() }.`
+												) // Trim and append a period
+												.join( '\n' ); // Join messages with newlines
+											return `${ step }\nerrors:\n${ errors }`;
+										} )
+										.join( '\n\n' ),
+								};
+							}
+						},
+					} ),
 				},
 				onError: {
 					target: 'error',
@@ -283,7 +355,7 @@ export const BlueprintUploadDropzone = () => {
 			{ state.context.error && (
 				<div className="blueprint-upload-dropzone-error">
 					<Notice status="error" isDismissible={ false }>
-						{ state.context.error.message }
+						<pre>{ state.context.error.message }</pre>
 					</Notice>
 				</div>
 			) }
@@ -301,16 +373,12 @@ export const BlueprintUploadDropzone = () => {
 						} }
 					>
 						<div className="blueprint-upload-dropzone">
-							<img
-								className="blueprint-upload-dropzone-icon"
-								src={ uploadIcon }
-								alt="Upload"
-							/>
+							<Icon icon={ upload } />
 							<p className="blueprint-upload-dropzone-text">
-								{ __(
-									'Upload a .zip or .json file',
-									'woocommerce'
-								) }
+								{ __( 'Drag and drop or ', 'woocommerce' ) }
+								<span>
+									{ __( 'choose a file', 'woocommerce' ) }
+								</span>
 							</p>
 							<DropZone
 								onFilesDrop={ ( files ) => {
@@ -332,12 +400,12 @@ export const BlueprintUploadDropzone = () => {
 					</FormFileUpload>
 				</div>
 			) }
-			{ state.matches( 'uploading' ) && (
+			{ state.matches( 'importing' ) && (
 				<div className="blueprint-upload-form">
 					<div className="blueprint-upload-dropzone-uploading">
 						<Spinner className="blueprint-upload-dropzone-spinner" />
 						<p className="blueprint-upload-dropzone-text">
-							{ __( 'Uploading your file…', 'woocommerce' ) }
+							{ __( 'Importing your file…', 'woocommerce' ) }
 						</p>
 					</div>
 				</div>

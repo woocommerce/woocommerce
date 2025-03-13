@@ -207,7 +207,27 @@ final class WC_Cart_Session {
 					)
 				);
 
+				/**
+				 * Filter to modify or add session data to the cart contents.
+				 *
+				 * @since 3.2.0
+				 *
+				 * @param array  $session_data Data for an item in the cart.
+				 * @param array  $values       Data for an item in the cart, without the product object.
+				 * @param string $key          The cart item hash.
+				 */
 				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+				if ( ! isset( $cart_contents[ $key ]['data'] ) || ! $cart_contents[ $key ]['data'] instanceof WC_Product ) {
+					// If the cart contents is missing the product object after filtering, something is wrong.
+					wc_doing_it_wrong(
+						__METHOD__,
+						'When filtering cart items with woocommerce_get_cart_item_from_session, each item must have a data key containing a product object.',
+						'9.8.0'
+					);
+
+					// Add the product back in.
+					$cart_contents[ $key ]['data'] = $product;
+				}
 
 				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
 				$this->cart->set_cart_contents( $cart_contents );

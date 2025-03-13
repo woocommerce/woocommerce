@@ -116,7 +116,6 @@ abstract class AbstractTemplateCompatibility {
 	 */
 	abstract protected function set_hook_data();
 
-
 	/**
 	 * Remove the default callback added by WooCommerce. We replaced these
 	 * callbacks by blocks so we have to remove them to prevent duplicated

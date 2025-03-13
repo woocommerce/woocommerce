@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { getVisibleTasks, onboardingStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,13 +20,10 @@ export const DefaultProgressHeader: React.FC< DefaultProgressHeaderProps > = ( {
 } ) => {
 	const { loading, tasksCount, completedCount } = useSelect(
 		( select ) => {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
-				taskListId
-			);
+			const taskList =
+				select( onboardingStore ).getTaskList( taskListId );
 			const finishedResolution = select(
-				ONBOARDING_STORE_NAME
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				onboardingStore
 			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
 			const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 

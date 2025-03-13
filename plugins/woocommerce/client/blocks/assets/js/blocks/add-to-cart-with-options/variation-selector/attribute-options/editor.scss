@@ -1,0 +1,33 @@
+.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills {
+	display: inline-flex;
+	gap: $grid-unit-10;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	flex-wrap: wrap;
+}
+
+.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
+	border: 1px solid $black;
+	border-radius: $grid-unit-40;
+	padding: 0.25em 1em;
+	text-transform: uppercase;
+	font-size: var(--wp--preset--font-size--small);
+
+	&--selected {
+		background-color: $black;
+		color: $white;
+	}
+
+	&--disabled {
+		border-color: var(--wc-subtext);
+		color: var(--wc-subtext);
+		text-decoration: line-through;
+	}
+}
+
+.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown {
+	height: 3em;
+	padding: 0.25em 1em;
+	font-size: var(--wp--preset--font-size--small);
+}

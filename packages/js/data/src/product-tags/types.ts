@@ -36,7 +36,7 @@ type ReadOnlyProperties = 'id' | 'count';
 
 type MutableProperties = Partial< Omit< ProductTag, ReadOnlyProperties > >;
 
-type ProductTagActions = CrudActions<
+export type ProductTagActions = CrudActions<
 	'ProductTag',
 	ProductTag,
 	MutableProperties,
@@ -47,7 +47,7 @@ export type ProductTagSelectors = CrudSelectors<
 	'ProductTag',
 	'ProductTags',
 	ProductTag,
-	Query,
+	Partial< Query >,
 	MutableProperties
 >;
 

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -43,6 +43,15 @@ jest.mock( '@woocommerce/components', () => ( {
 			) ) }
 		</div>
 	),
+	Link: ( {
+		children,
+		...props
+	}: {
+		children: React.ReactNode;
+		href: string;
+		onClick?: () => void;
+		type?: string;
+	} ) => <a { ...props }>{ children }</a>,
 } ) );
 jest.mock(
 	'../../task-lists/fills/PaymentGatewaySuggestions/components/WCPay',
@@ -172,6 +181,26 @@ describe( 'Payment recommendations', () => {
 		const { container } = render( <PaymentRecommendations /> );
 
 		expect( container.firstChild ).toBeNull();
+	} );
+
+	it( 'should trigger event settings_payment_recommendations_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+		( isWCPaySupported as jest.Mock ).mockReturnValue( true );
+		( useSelect as jest.Mock ).mockReturnValue( {
+			installedPaymentGateways: {},
+			paymentGatewaySuggestions: [
+				{ title: 'test', id: 'test', plugins: [ 'test' ] },
+			],
+		} );
+		const { container } = render( <PaymentRecommendations /> );
+
+		expect( container.firstChild ).not.toBeNull();
+		fireEvent.click(
+			screen.getByText( 'Official WooCommerce Marketplace' )
+		);
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_payment_recommendations_visit_marketplace_click',
+			{}
+		);
 	} );
 
 	describe( 'interactions', () => {
@@ -314,6 +343,18 @@ describe( 'Payment recommendations', () => {
 
 			expect( queryByText( 'test' ) ).not.toBeInTheDocument();
 			expect( queryByText( 'another' ) ).toBeInTheDocument();
+		} );
+
+		it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+			const { container, getByText } = render(
+				<PaymentRecommendations />
+			);
+
+			expect( container.firstChild ).not.toBeNull();
+			fireEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+			expect( mockLocation.href ).toContain(
+				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+			);
 		} );
 	} );
 } );

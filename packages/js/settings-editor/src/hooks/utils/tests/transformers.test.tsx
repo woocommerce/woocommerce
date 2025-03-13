@@ -96,8 +96,8 @@ describe( 'dataforms-transformers', () => {
 				desc: 'Select Input',
 				value: 'value1',
 				options: {
-					'Option 1': 'value1',
-					'Option 2': 'value2',
+					value1: 'Option 1',
+					value2: 'Option 2',
 				},
 			};
 
@@ -181,6 +181,23 @@ describe( 'dataforms-transformers', () => {
 					Edit: expect.any( Function ),
 				},
 			] );
+		} );
+
+		it( 'should transform info view fields correctly', () => {
+			const setting: InfoSettingsField = {
+				id: 'info1',
+				type: 'info',
+				title: 'Info View',
+				text: 'Info View',
+			};
+
+			const result = transformToField( setting );
+			expect( result ).toEqual( {
+				id: 'info1',
+				label: 'Info View',
+				type: 'text',
+				Edit: expect.any( Function ),
+			} );
 		} );
 	} );
 

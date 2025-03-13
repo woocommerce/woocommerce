@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { createElement, Fragment } from '@wordpress/element';
 import { Icon, chevronDown } from '@wordpress/icons';
 

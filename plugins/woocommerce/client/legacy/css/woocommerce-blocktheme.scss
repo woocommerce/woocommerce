@@ -510,3 +510,10 @@ p.demo_store,
 		color: var(--wp--preset--color--background, $primarytext);
 	}
 }
+
+/**
+* Product category count
+*/
+.woocommerce .product-category mark.count {
+	background-color: transparent;
+}

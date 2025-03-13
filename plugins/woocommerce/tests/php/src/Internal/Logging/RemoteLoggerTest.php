@@ -57,7 +57,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'option_woocommerce_admin_remote_feature_enabled',
 				'option_woocommerce_allow_tracking',
 				'option_woocommerce_version',
-				'option_woocommerce_remote_variant_assignment',
 				'plugins_api',
 				'pre_http_request',
 				'woocommerce_remote_logger_formatted_log_data',
@@ -97,19 +96,15 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function remote_logging_disallowed_provider() {
 			return array(
-				'feature flag disabled'   => array(
+				'feature flag disabled' => array(
 					'condition' => 'feature flag disabled',
 					'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 				),
-				'tracking opted out'      => array(
+				'tracking opted out'    => array(
 					'condition' => 'tracking opted out',
 					'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
 				),
-				'high variant assignment' => array(
-					'condition' => 'high variant assignment',
-					'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
-				),
-				'outdated version'        => array(
+				'outdated version'      => array(
 					'condition' => 'outdated version',
 					'setup'     => function () {
 						$version = WC()->version;
@@ -374,7 +369,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'less severe than critical' => array(
 					fn() => null,
 					'error',
-					false,
+					true,
 				),
 				'critical level'            => array(
 					fn() => null,
@@ -555,7 +550,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'Missing backtrace'         => array(
 					'Some error message',
 					array( 'source' => 'fatal-errors' ),
-					false,
+					true,
 				),
 			);
 		}
@@ -696,7 +691,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		private function setup_remote_logging_conditions( $enabled = true ) {
 			update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
 			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
-			add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 5 );
 			$this->setup_mock_plugin_updates( $enabled ? WC()->version : '9.0.0' );
 		}
 

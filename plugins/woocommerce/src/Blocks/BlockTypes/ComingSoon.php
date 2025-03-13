@@ -33,10 +33,10 @@ class ComingSoon extends AbstractBlock {
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
 
-		if ( isset( $attributes['color'] ) ) {
+		if ( isset( $attributes['style']['color']['background'] ) ) {
 			wp_add_inline_style(
 				'wc-blocks-style',
-				':root{--woocommerce-coming-soon-color: ' . esc_html( $attributes['color'] ) . '}'
+				':root{--woocommerce-coming-soon-color: ' . esc_html( $attributes['style']['color']['background'] ) . '}'
 			);
 		}
 	}

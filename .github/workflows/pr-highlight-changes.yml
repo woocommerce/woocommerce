@@ -11,11 +11,11 @@ on:
 jobs:
   analyze:
     name: 'Analyze Branch Changes'
-    runs-on: 'ubuntu-20.04'
+    runs-on: ubuntu-latest
     outputs:
       results: ${{ steps.results.outputs.results }}
     steps:
-      - uses: 'actions/checkout@v3'
+      - uses: 'actions/checkout@v4'
         name: 'Checkout'
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup WooCommerce Monorepo'

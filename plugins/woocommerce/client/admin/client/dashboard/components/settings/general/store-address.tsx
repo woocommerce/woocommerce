@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { COUNTRIES_STORE_NAME, Country, Locale } from '@woocommerce/data';
+import { countriesStore, Country, Locale } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
@@ -314,18 +314,18 @@ export function StoreAddress( {
 					getLocale,
 					getCountries,
 					hasFinishedResolution: hasFinishedCountryResolution,
-				} = select( COUNTRIES_STORE_NAME );
+				} = select( countriesStore );
 				return {
-					// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 					locale: getLocale( countryState ) as Locale,
-					// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 					countries: getCountries(),
-					loadingCountries:
-						// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-						! hasFinishedCountryResolution( 'getCountries' ),
-					hasFinishedResolution:
-						// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-						hasFinishedCountryResolution( 'getLocales' ),
+					loadingCountries: ! hasFinishedCountryResolution(
+						'getCountries',
+						undefined
+					),
+					hasFinishedResolution: hasFinishedCountryResolution(
+						'getLocales',
+						undefined
+					),
 				};
 			},
 			[ countryState ]
@@ -390,6 +390,9 @@ export function StoreAddress( {
 					onCountryStateChange( selected as string );
 				} }
 				controlClassName={ getInputProps( 'countryState' ).className }
+				virtualScroll={ true }
+				virtualItemHeight={ 56 }
+				virtualListHeight={ 56 * 6 }
 			>
 				{ countryStateAutofill }
 			</SelectControl>

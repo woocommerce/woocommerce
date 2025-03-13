@@ -1,7 +1,9 @@
 .components-country-select-control {
 	font-size: 13px;
 	color: $gray-900;
-	position: relative;
+	width: 100%;
+	flex-grow: 1;
+	min-width: 0;
 
 	&__label {
 		color: $gray-700;
@@ -35,7 +37,7 @@
 	}
 
 	&__button {
-		width: 277px;
+		width: 100%;
 		margin: 0 1px;
 		display: flex;
 		justify-content: space-between;
@@ -65,6 +67,7 @@
 			fill: initial;
 			width: 18px;
 			flex: 0 0 18px;
+			margin-left: auto;
 		}
 	}
 
@@ -138,10 +141,6 @@
 			background: transparent;
 			border: none;
 		}
-	}
-
-	@media screen and ( max-width: 782px ) {
-		max-width: 280px;
 	}
 }
 

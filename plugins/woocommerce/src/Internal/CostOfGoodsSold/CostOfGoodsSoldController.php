@@ -23,6 +23,7 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 	 */
 	public function register() {
 		add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
+		add_filter( 'woocommerce_debug_tools', array( $this, 'add_debug_tools_entry' ), 999, 1 );
 	}
 
 	/**
@@ -62,6 +63,87 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 			'cost_of_goods_sold',
 			__( 'Cost of Goods Sold', 'woocommerce' ),
 			$definition
+		);
+	}
+
+	/**
+	 * Add the entry for "add/remove COGS value column to/from the product meta lookup table" to the WooCommerce admin tools.
+	 *
+	 * @internal Hook handler, not to be explicitly used from outside the class.
+	 *
+	 * @param array $tools_array Array to add the tool to.
+	 * @return array Updated tools array.
+	 */
+	public function add_debug_tools_entry( array $tools_array ): array {
+		// If the feature is disabled we show the tool for removing the column, but not for adding it.
+		$column_exists = $this->product_meta_lookup_table_cogs_value_columns_exist();
+		if ( ! $this->feature_is_enabled() && ! $column_exists ) {
+			return $tools_array;
+		}
+
+		$tools_array['generate_cogs_value_meta_column'] = array(
+			'name'     => $column_exists ?
+				__( 'Remove COGS columns from the product meta lookup table', 'woocommerce' ) :
+				__( 'Create COGS columns in the product meta lookup table', 'woocommerce' ),
+			'button'   => $column_exists ?
+				__( 'Remove columns', 'woocommerce' ) :
+				__( 'Create columns', 'woocommerce' ),
+			'desc'     =>
+				$column_exists ?
+				__( 'This tool will remove the Cost of Goods Sold (COGS) related columns from the product meta lookup table. COGS will continue working (if the feature is enabled) but some functionality will not be available.', 'woocommerce' ) :
+				__( 'This tool will generate the necessary Cost of Goods Sold (COGS) related columns in the product meta lookup table, and populate them from existing product data.', 'woocommerce' ),
+			'callback' =>
+				$column_exists ? array( $this, 'remove_lookup_cogs_columns' ) : array( $this, 'generate_lookup_cogs_columns' ),
+		);
+
+		return $tools_array;
+	}
+
+	/**
+	 * Handler for the "add COGS value column to the product meta lookup table" admin tool.
+	 *
+	 * @internal Tool callback, not to be explicitly used from outside the class.
+	 */
+	public function generate_lookup_cogs_columns() {
+		global $wpdb;
+
+		if ( $this->feature_is_enabled() && ! $this->product_meta_lookup_table_cogs_value_columns_exist() ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_product_meta_lookup ADD COLUMN cogs_total_value DECIMAL(19,4)" );
+			$wpdb->query(
+				"UPDATE {$wpdb->prefix}wc_product_meta_lookup AS lookup
+    			JOIN {$wpdb->prefix}postmeta AS pm ON lookup.product_id = pm.post_id
+    			SET lookup.cogs_total_value = CAST(pm.meta_value AS DECIMAL(19, 4))
+    			WHERE pm.meta_key = '_cogs_total_value';"
+			);
+		}
+	}
+
+	/**
+	 * Handler for the "remove COGS value column to the product meta lookup table" admin tool.
+	 *
+	 * @internal Tool callback, not to be explicitly used from outside the class.
+	 */
+	public function remove_lookup_cogs_columns() {
+		global $wpdb;
+
+		if ( $this->product_meta_lookup_table_cogs_value_columns_exist() ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_product_meta_lookup DROP COLUMN cogs_total_value" );
+		}
+	}
+
+	/**
+	 * Tells if the COGS value column exists in the product meta lookup table.
+	 *
+	 * @return bool True if the column exists, false otherwise.
+	 */
+	public function product_meta_lookup_table_cogs_value_columns_exist(): bool {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SHOW COLUMNS FROM {$wpdb->prefix}wc_product_meta_lookup LIKE %s",
+				'cogs_total_value'
+			)
 		);
 	}
 }

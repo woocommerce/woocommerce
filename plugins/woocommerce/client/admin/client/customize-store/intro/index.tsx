@@ -8,7 +8,8 @@ import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getNewPath } from '@woocommerce/navigation';
 import { Sender } from 'xstate';
-import { Notice } from '@wordpress/components';
+import { Notice, Card, CardHeader, CardFooter } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
@@ -127,17 +128,37 @@ const ThemeCards = ( {
 				) ) }
 			</div>
 
-			<div className="woocommerce-customize-store-browse-themes">
-				<button
-					onClick={ () =>
-						sendEvent( {
-							type: 'SELECTED_BROWSE_ALL_THEMES',
-						} )
-					}
-				>
-					{ __( 'Browse all themes', 'woocommerce' ) }
-				</button>
-			</div>
+			<Card className="woocommerce-customize-store-browse-themes">
+				<CardHeader>
+					<Text
+						variant="title.small"
+						as="h2"
+						className="woocommerce-browse-themes-card__title"
+					>
+						{ __(
+							'Visit the Official WooCommerce Theme Marketplace',
+							'woocommerce'
+						) }
+					</Text>
+				</CardHeader>
+				<CardFooter>
+					<Text variant="body.small" as="p">
+						{ __(
+							'Browse more than 100 free and paid themes tailored to different industries—30-day money-back guarantee. If you change your mind within 30 days of your purchase, we’ll give you a full refund — hassle-free.',
+							'woocommerce'
+						) }
+					</Text>
+					<button
+						onClick={ () =>
+							sendEvent( {
+								type: 'SELECTED_BROWSE_ALL_THEMES',
+							} )
+						}
+					>
+						{ __( 'Browse all themes', 'woocommerce' ) }
+					</button>
+				</CardFooter>
+			</Card>
 		</>
 	);
 };

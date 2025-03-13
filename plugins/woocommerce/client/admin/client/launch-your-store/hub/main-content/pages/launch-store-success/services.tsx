@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { pluginsStore, onboardingStore } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
 import { fromPromise } from 'xstate5';
 import apiFetch from '@wordpress/api-fetch';
@@ -23,11 +23,11 @@ const fetchSurveyCompletedOption =
 export const fetchCongratsData = fromPromise( async () => {
 	const [ surveyCompleted, tasklists, activePlugins ] = await Promise.all( [
 		fetchSurveyCompletedOption(),
-		resolveSelect( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
+		resolveSelect( onboardingStore ).getTaskListsByIds( [
 			'setup',
 			'extended',
 		] ),
-		resolveSelect( PLUGINS_STORE_NAME ).getActivePlugins(),
+		resolveSelect( pluginsStore ).getActivePlugins(),
 	] );
 	return {
 		surveyCompleted: surveyCompleted as string | null,

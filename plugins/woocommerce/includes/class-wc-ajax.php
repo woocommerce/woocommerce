@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
@@ -834,10 +835,8 @@ class WC_AJAX {
 		$variation_object = wc_get_product_object( ProductType::VARIATION );
 		$variation_object->set_parent_id( $product_id );
 		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
-		$variation_id   = $variation_object->save();
-		$variation      = get_post( $variation_id );
-		$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
-		include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
+		$variation_object->save();
+		self::render_variation_html( $product_object, $variation_object, $loop, self::base_cost_or_null( $product_object ) );
 		wp_die();
 	}
 
@@ -2412,12 +2411,10 @@ class WC_AJAX {
 		if ( $variations ) {
 			wc_render_invalid_variation_notice( $product_object );
 
+			$base_cost = self::base_cost_or_null( $product_object );
 			foreach ( $variations as $variation_object ) {
-				$variation_id   = $variation_object->get_id();
-				$variation      = get_post( $variation_id );
-				$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
-				include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
-				$loop++;
+				self::render_variation_html( $product_object, $variation_object, $loop, $base_cost );
+				++$loop;
 			}
 		}
 		wp_die();
@@ -2790,6 +2787,28 @@ class WC_AJAX {
 	private static function variation_bulk_action_variable_sale_price_decrease( $variations, $data ) {
 		self::variation_bulk_adjust_price( $variations, 'sale_price', '-', wc_clean( $data['value'] ) );
 	}
+
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	/**
+	 * Bulk action - Unset cost values.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 */
+	private static function variation_bulk_action_variable_unset_cogs_value( $variations, $data ) {
+		if ( ! wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+			return;
+		}
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			$variation->set_cogs_value( null );
+			$variation->save();
+		}
+	}
+	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 
 	/**
 	 * Bulk action - Set Price.
@@ -3657,6 +3676,35 @@ class WC_AJAX {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->check_locked_orders_ajax( $response, $data );
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	/**
+	 * Render a variation editor.
+	 *
+	 * NOTE! Do NOT remove the apparently unused function arguments.
+	 * These are actually used inside the included html-variation-admin template.
+	 *
+	 * @param WC_Product $product_object PArent product of the variation being edited.
+	 * @param WC_Product $variation_object Variation being edited.
+	 * @param int        $loop Index of the variation being rendered.
+	 * @param float|null $base_cost Default cost for variations, null if the Cost of Goods Sold feature is disabled.
+	 */
+	private static function render_variation_html( WC_Product $product_object, WC_Product $variation_object, $loop, ?float $base_cost ) {
+		$variation_id   = $variation_object->get_id();
+		$variation      = get_post( $variation_id );
+		$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
+		include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
+	}
+	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
+	/**
+	 * Get the Cost of Goods Sold value for a product (0 if it's null), return null if the Cost of Goods Sold feature is disabled.
+	 *
+	 * @param WC_Product $product_object Product object.
+	 * @return float|null Cost of the product, or null.
+	 */
+	private static function base_cost_or_null( WC_Product $product_object ): ?float {
+		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ? ( $product_object->get_cogs_value() ?? 0 ) : null;
+	}
 }
 
 WC_AJAX::init();

@@ -6,6 +6,7 @@ import {
 	Button,
 	Notice,
 	ToggleControl,
+	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import {
@@ -14,8 +15,10 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
+import { settings, plugins, brush } from '@wordpress/icons';
+
 /**
  * Internal dependencies
  */
@@ -25,9 +28,14 @@ import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
+const icons = {
+	plugins,
+	brush,
+	settings,
+};
+
 const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
-	const [ exportAsZip, setExportAsZip ] = useState( false );
 	const [ error, setError ] = useState( null );
 
 	const blueprintStepGroups =
@@ -36,7 +44,7 @@ const Blueprint = () => {
 	const [ checkedState, setCheckedState ] = useState(
 		blueprintStepGroups.reduce( ( acc, group ) => {
 			acc[ group.id ] = group.items.reduce( ( groupAcc, item ) => {
-				groupAcc[ item.id ] = true; // Default all to true
+				groupAcc[ item.id ] = item.checked ?? false;
 				return groupAcc;
 			}, {} );
 			return acc;
@@ -57,13 +65,9 @@ const Blueprint = () => {
 				method: 'POST',
 				data: {
 					steps: _steps,
-					export_as_zip: exportAsZip,
 				},
 			} );
 			const link = document.createElement( 'a' );
-			link.innerHTML =
-				'Click here in case download does not start automatically';
-
 			let url = null;
 
 			if ( response.type === 'zip' ) {
@@ -124,11 +128,11 @@ const Blueprint = () => {
 					{ error }
 				</Notice>
 			) }
-			<h3>Import Blueprint</h3>
-			<p>
+			<h3>{ __( 'Blueprint', 'woocommerce' ) }</h3>
+			<p className="blueprint-settings-intro-text">
 				{ createInterpolateElement(
 					__(
-						'Import your blueprint schema to ease the setup process for your store or allow teams to apply each others’ changes. You can import only one Blueprint at the time. Want to know more? <docLink/>',
+						'Blueprints are setup files that contain all the installation instructions, including plugins, themes, and setting. Ease the setup process, allow teams to apply each others’ changes and much more. <docLink />',
 						'woocommerce'
 					),
 					{
@@ -137,79 +141,64 @@ const Blueprint = () => {
 								href="#tba"
 								className="woocommerce-admin-inline-documentation-link"
 							>
-								{ __(
-									'Check our documentation',
-									'woocommerce'
-								) }
+								{ __( 'Learn more', 'woocommerce' ) }
 							</a>
 						),
 					}
+				) }
+			</p>
+			<h4>{ __( 'Import', 'woocommerce' ) }</h4>
+			<p>
+				{ __(
+					'Import a .zip or .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
+					'woocommerce'
 				) }
 			</p>
 			<BlueprintUploadDropzone />
-			<p></p>
-			<h3>{ __( 'Export Blueprint', 'woocommerce' ) }</h3>
-			<p className="export-intro">
-				{ createInterpolateElement(
-					__(
-						'Export your blueprint schema. Select the options you want to export, then click on “Export”. Want to know more? <docLink/> ',
-						'woocommerce'
-					),
-					{
-						docLink: (
-							<a
-								href="#tba"
-								className="woocommerce-admin-inline-documentation-link"
-							>
-								{ __(
-									'Check our documentation',
-									'woocommerce'
-								) }
-							</a>
-						),
-					}
+			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
+			<p className="blueprint-settings-export-intro">
+				{ __(
+					'Choose what you want to include, and export it as a .zip file.',
+					'woocommerce'
 				) }
 			</p>
 			{ blueprintStepGroups.map( ( group, index ) => (
-				<CollapsibleContent
-					key={ index }
-					toggleText={ group.label }
-					initialCollapsed={ index > 0 }
-					hintText={ group.description }
-				>
-					{ group.items.map( ( step ) => (
-						<ToggleControl
-							key={ step.id }
-							label={ step.label }
-							checked={ checkedState[ group.id ][ step.id ] }
-							onChange={ () => {
-								handleOnChange( group.id, step.id );
-							} }
-							help={ step.description }
-						/>
-					) ) }
-				</CollapsibleContent>
+				<div key={ index } className="blueprint-settings-export-group">
+					<Icon
+						icon={ icons[ group.icon ] ?? icons.settings }
+						alt={ sprintf(
+							// translators: %s: icon name. Does not need to be translated.
+							__( 'Blueprint setting icon - %s', 'woocommerce' ),
+							group.icon
+						) }
+					/>
+					<span className="blueprint-settings-export-group-item-count">
+						{ group.items.length }
+					</span>
+
+					<CollapsibleContent
+						key={ index }
+						toggleText={ group.label }
+						initialCollapsed={ true }
+					>
+						{ group.items.map( ( step ) => (
+							<ToggleControl
+								key={ step.id }
+								label={ step.label }
+								checked={ checkedState[ group.id ][ step.id ] }
+								onChange={ () => {
+									handleOnChange( group.id, step.id );
+								} }
+								help={ step.description }
+							/>
+						) ) }
+					</CollapsibleContent>
+				</div>
 			) ) }
 
 			<div id="download-link-container"></div>
-			<h4>{ __( 'Options', 'woocommerce' ) }</h4>
-			<div>
-				<input
-					type="checkbox"
-					id="export-as-zip"
-					name={ 'export-as-zip' }
-					value={ 'yes' }
-					checked={ exportAsZip }
-					onChange={ () => {
-						setExportAsZip( ! exportAsZip );
-					} }
-				/>
-				<label htmlFor="export-as-zip">
-					{ __( 'Export as a zip (Experimental)', 'woocommerce' ) }
-				</label>
-			</div>
-			<br></br>
 			<Button
+				className="blueprint-settings-export-button"
 				variant="primary"
 				onClick={ () => {
 					const selectedSteps = Object.entries( checkedState ).reduce(
