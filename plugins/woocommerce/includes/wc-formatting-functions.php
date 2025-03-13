@@ -360,6 +360,7 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Format a coupon code without transforming to lowercase.
  *
+ * @since 9.9.0
  * @param string $value Coupon code to format.
  * @return string
  */
