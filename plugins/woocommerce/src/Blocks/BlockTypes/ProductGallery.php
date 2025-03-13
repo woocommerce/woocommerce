@@ -62,7 +62,8 @@ class ProductGallery extends AbstractBlock {
 					</button>
 					<div class="wc-block-product-gallery-dialog__images-container">
 						<div class="wc-block-product-gallery-dialog__images">
-							<?php echo esc_html( $images_html ); ?>
+							<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
+							<?php echo $images_html; ?>
 						</div>
 				</div>
 			</div>
