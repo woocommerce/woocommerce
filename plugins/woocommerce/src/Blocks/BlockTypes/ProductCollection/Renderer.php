@@ -186,40 +186,38 @@ class Renderer {
 
 		ob_start();
 		?>
-		<div class="wc-block-store-notices woocommerce alignwide wp-block-woocommerce-store-notices">
-			<div data-wp-interactive="woocommerce/store-notices" class="woocommerce-notices-wrapper">
-				<template
-					data-wp-each--notice="state.notices"
-					data-wp-each-key="context.notice.id"
+		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide">
+			<template
+				data-wp-each--notice="state.notices"
+				data-wp-each-key="context.notice.id"
+			>
+				<div
+					class="wc-block-components-notice-banner"
+					data-wp-init="callbacks.scrollIntoView"
+					data-wp-class--is-error="state.isError"
+					data-wp-class--is-success ="state.isSuccess"
+					data-wp-class--is-info="state.isInfo"
+					data-wp-class--is-dismissible="context.notice.dismissible"
+					data-wp-bind--role="state.role"
 				>
-					<div
-						class="wc-block-components-notice-banner"
-						data-wp-init="callbacks.scrollIntoView"
-						data-wp-class--is-error="state.isError"
-						data-wp-class--is-success ="state.isSuccess"
-						data-wp-class--is-info="state.isInfo"
-						data-wp-bind--role="state.role"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-							<path data-wp-bind--d="state.iconPath"></path>
-						</svg>
-						<div class="wc-block-components-notice-banner__content">
-							<span data-wp-init="callbacks.renderNoticeContent"></span>
-						</div>
-						<button
-							data-wp-bind--hidden="!context.notice.dismissible"
-							class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
-							aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
-							data-wp-on--click="actions.removeNotice"
-							hidden
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-								<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
-							</svg>	
-						</button>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+						<path data-wp-bind--d="state.iconPath"></path>
+					</svg>
+					<div class="wc-block-components-notice-banner__content">
+						<span data-wp-init="callbacks.renderNoticeContent"></span>
 					</div>
-				</template>
-			</div>
+					<button
+						data-wp-bind--hidden="!context.notice.dismissible"
+						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
+						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
+						data-wp-on--click="actions.removeNotice"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
+						</svg>	
+					</button>
+				</div>
+			</template>
 		</div>
 		<?php
 		return ob_get_clean();
