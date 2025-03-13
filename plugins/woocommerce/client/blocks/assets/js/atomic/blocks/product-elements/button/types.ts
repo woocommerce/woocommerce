@@ -12,6 +12,15 @@ export interface BlockAttributes {
 	isDescendentOfQueryLoop?: boolean | undefined;
 	isDescendentOfSingleProductBlock?: boolean | undefined;
 	width?: number | undefined;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	'woocommerce/isDescendantOfAddToCartWithOptions'?: boolean | undefined;
+}
+
+export interface AddToCartProductDetails {
+	url: string;
+	description: string;
+	text: string;
+	single_text: string;
 }
 
 export interface AddToCartButtonPlaceholderAttributes {
@@ -23,14 +32,12 @@ export interface AddToCartButtonPlaceholderAttributes {
 export interface AddToCartButtonAttributes {
 	className: string;
 	style: React.CSSProperties;
+	isDescendantOfAddToCartWithOptions: boolean | undefined;
 	product: {
 		id: number;
+		type: string;
 		permalink: string;
-		add_to_cart: {
-			url: string;
-			description: string;
-			text: string;
-		};
+		add_to_cart: AddToCartProductDetails;
 		has_options: boolean;
 		is_purchasable: boolean;
 		is_in_stock: boolean;
