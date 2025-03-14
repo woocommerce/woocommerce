@@ -506,6 +506,12 @@ class ProductSchema extends AbstractSchema {
 						'readonly'    => true,
 						'default'     => 1,
 					],
+					'single_text' => [
+						'description' => __( 'Button text in the single product page.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
 				],
 			],
 			self::EXTENDING_KEY   => $this->get_extended_schema( self::IDENTIFIER ),
@@ -558,6 +564,7 @@ class ProductSchema extends AbstractSchema {
 					'text'        => $this->prepare_html_response( $product->add_to_cart_text() ),
 					'description' => $this->prepare_html_response( $product->add_to_cart_description() ),
 					'url'         => $this->prepare_html_response( $product->add_to_cart_url() ),
+					'single_text' => $this->prepare_html_response( $product->single_add_to_cart_text() ),
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),

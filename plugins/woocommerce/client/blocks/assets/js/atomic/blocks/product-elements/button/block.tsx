@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useEffect } from '@wordpress/element';
 import clsx from 'clsx';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
@@ -25,10 +26,42 @@ import type {
 	BlockAttributes,
 	AddToCartButtonAttributes,
 	AddToCartButtonPlaceholderAttributes,
+	AddToCartProductDetails,
 } from './types';
+import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
+
+const getButtonText = ( {
+	cartQuantity,
+	productCartDetails,
+	isDescendantOfAddToCartWithOptions,
+}: {
+	cartQuantity: number;
+	productCartDetails: AddToCartProductDetails;
+	isDescendantOfAddToCartWithOptions: boolean | undefined;
+} ) => {
+	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
+
+	if ( addedToCart ) {
+		return sprintf(
+			/* translators: %s number of products in cart. */
+			_n( '%d in cart', '%d in cart', cartQuantity, 'woocommerce' ),
+			cartQuantity
+		);
+	}
+
+	if (
+		isDescendantOfAddToCartWithOptions &&
+		productCartDetails?.single_text
+	) {
+		return productCartDetails?.single_text;
+	}
+
+	return productCartDetails?.text || __( 'Add to cart', 'woocommerce' );
+};
 
 const AddToCartButton = ( {
 	product,
+	isDescendantOfAddToCartWithOptions,
 	className,
 	style,
 }: AddToCartButtonAttributes ): JSX.Element => {
@@ -42,21 +75,16 @@ const AddToCartButton = ( {
 	} = product;
 	const { dispatchStoreEvent } = useStoreEvents();
 	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart( id );
-
 	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
 	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
 	const buttonAriaLabel = decodeEntities(
 		productCartDetails?.description || ''
 	);
-	const buttonText = addedToCart
-		? sprintf(
-				/* translators: %s number of products in cart. */
-				_n( '%d in cart', '%d in cart', cartQuantity, 'woocommerce' ),
-				cartQuantity
-		  )
-		: decodeEntities(
-				productCartDetails?.text || __( 'Add to cart', 'woocommerce' )
-		  );
+	const buttonText = getButtonText( {
+		cartQuantity,
+		productCartDetails,
+		isDescendantOfAddToCartWithOptions,
+	} );
 
 	const ButtonTag = allowAddToCart ? 'button' : 'a';
 	const buttonProps = {} as HTMLAnchorElement & { onClick: () => void };
@@ -108,11 +136,13 @@ const AddToCartButton = ( {
 	);
 };
 
-const AddToCartButtonPlaceholder = ( {
+const LoadingAddToCartButton = ( {
 	className,
 	style,
-	isLoading,
-}: AddToCartButtonPlaceholderAttributes ): JSX.Element => {
+}: {
+	className: string;
+	style: React.CSSProperties;
+} ): JSX.Element => {
 	return (
 		<button
 			className={ clsx(
@@ -120,10 +150,7 @@ const AddToCartButtonPlaceholder = ( {
 				'wp-element-button',
 				'add_to_cart_button',
 				'wc-block-components-product-button__button',
-				{
-					'wc-block-components-product-button__button--placeholder':
-						isLoading,
-				},
+				'wc-block-components-product-button__button--placeholder',
 				className
 			) }
 			style={ style }
@@ -134,8 +161,50 @@ const AddToCartButtonPlaceholder = ( {
 	);
 };
 
+const AddToCartButtonPlaceholder = ( {
+	className,
+	style,
+	blockClientId,
+}: AddToCartButtonPlaceholderAttributes ): JSX.Element => {
+	const {
+		current: currentProductType,
+		registerListener,
+		unregisterListener,
+	} = useProductTypeSelector();
+
+	useEffect( () => {
+		if ( blockClientId ) {
+			registerListener( blockClientId );
+			return () => {
+				unregisterListener( blockClientId );
+			};
+		}
+	}, [ blockClientId, registerListener, unregisterListener ] );
+
+	const buttonText =
+		currentProductType?.slug === 'external'
+			? __( 'Buy product', 'woocommerce' )
+			: __( 'Add to cart', 'woocommerce' );
+
+	return (
+		<button
+			className={ clsx(
+				'wp-block-button__link',
+				'wp-element-button',
+				'add_to_cart_button',
+				'wc-block-components-product-button__button',
+				className
+			) }
+			style={ style }
+			disabled={ true }
+		>
+			{ buttonText }
+		</button>
+	);
+};
+
 export const Block = ( props: BlockAttributes ): JSX.Element => {
-	const { className, textAlign } = props;
+	const { className, textAlign, blockClientId } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { isLoading, product } = useProductDataContext();
@@ -153,18 +222,33 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 				}
 			) }
 		>
-			{ product.id ? (
-				<AddToCartButton
-					product={ product }
-					style={ styleProps.style }
+			{ isLoading ? (
+				<LoadingAddToCartButton
 					className={ styleProps.className }
+					style={ styleProps.style }
 				/>
 			) : (
-				<AddToCartButtonPlaceholder
-					style={ styleProps.style }
-					className={ styleProps.className }
-					isLoading={ isLoading }
-				/>
+				<>
+					{ product.id ? (
+						<AddToCartButton
+							product={ product }
+							style={ styleProps.style }
+							className={ styleProps.className }
+							isDescendantOfAddToCartWithOptions={
+								props[
+									'woocommerce/isDescendantOfAddToCartWithOptions'
+								]
+							}
+						/>
+					) : (
+						<AddToCartButtonPlaceholder
+							style={ styleProps.style }
+							className={ styleProps.className }
+							isLoading={ isLoading }
+							blockClientId={ blockClientId }
+						/>
+					) }
+				</>
 			) }
 		</div>
 	);
