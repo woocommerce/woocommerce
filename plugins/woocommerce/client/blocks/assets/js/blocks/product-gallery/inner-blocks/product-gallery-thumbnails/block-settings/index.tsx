@@ -26,7 +26,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 			value={ thumbnailSize }
 			onChange={ ( value: string | undefined ) =>
 				setAttributes( {
-					thumbnailSize: value || '20%',
+					thumbnailSize: value || '33%',
 				} )
 			}
 			units={ [ { value: '%', label: '%' } ] }
