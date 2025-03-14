@@ -224,6 +224,7 @@ class Products extends Task {
 			return 'yes' === $product_exists;
 		}
 
+		// Query to determine if there are any published products that are either not headstart posts (sample products) or have been modified by a user.
 		$args = array(
 			'post_type'      => 'product',
 			'post_status'    => ProductStatus::PUBLISH,
