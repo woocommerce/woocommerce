@@ -9,11 +9,7 @@ import {
 	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	useState,
-	useEffect,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
@@ -44,7 +40,7 @@ const Blueprint = () => {
 	const [ checkedState, setCheckedState ] = useState(
 		blueprintStepGroups.reduce( ( acc, group ) => {
 			acc[ group.id ] = group.items.reduce( ( groupAcc, item ) => {
-				groupAcc[ item.id ] = true; // Default all to true
+				groupAcc[ item.id ] = item.checked ?? false;
 				return groupAcc;
 			}, {} );
 			return acc;
@@ -68,9 +64,6 @@ const Blueprint = () => {
 				},
 			} );
 			const link = document.createElement( 'a' );
-			link.innerHTML =
-				'Click here in case download does not start automatically';
-
 			let url = null;
 
 			if ( response.type === 'zip' ) {
@@ -85,7 +78,6 @@ const Blueprint = () => {
 				link.setAttribute( 'download', 'woo-blueprint.json' );
 			}
 
-			linkContainer.appendChild( document.createElement( 'br' ) );
 			linkContainer.appendChild( link );
 
 			link.click();
@@ -109,15 +101,6 @@ const Blueprint = () => {
 			},
 		} ) );
 	};
-
-	useEffect( () => {
-		const saveButton = document.getElementsByClassName(
-			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
-			saveButton.style.display = 'none';
-		}
-	} );
 
 	return (
 		<div className="blueprint-settings-slotfill">
@@ -154,7 +137,7 @@ const Blueprint = () => {
 			<h4>{ __( 'Import', 'woocommerce' ) }</h4>
 			<p>
 				{ __(
-					'Import a .zip or .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
+					'Import .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
 					'woocommerce'
 				) }
 			</p>

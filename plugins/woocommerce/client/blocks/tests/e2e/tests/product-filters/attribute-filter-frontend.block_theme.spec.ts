@@ -23,8 +23,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 
 test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	test.describe( 'With default display style', () => {
-		test.beforeEach( async ( { requestUtils, templateCompiler, page } ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+		test.beforeEach( async ( { templateCompiler, page } ) => {
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: 1,
@@ -75,7 +74,6 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			}
 		} );
 
-		// Skipping these tests until we can move this block to @wordpress/interactivity.
 		test( 'filters the list of products by selecting an attribute', async ( {
 			page,
 		} ) => {
@@ -158,8 +156,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test.describe( 'With show counts enabled', () => {
-		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+		test.beforeEach( async ( { templateCompiler } ) => {
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: 1,

@@ -1,7 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, test, expect } from '../../fixtures/fixtures.js';
+import { ADMIN_STATE_PATH } from '../../playwright.config.js';
+import { WC_API_PATH } from '../../utils/api-client';
 
 test.describe(
 	'WooCommerce woo.com Settings',
@@ -11,19 +13,15 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			// make sure the analytics connection is disabled
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.put( 'settings/advanced/woocommerce_allow_tracking', {
-				value: 'no',
-			} );
-			await api.put(
-				'settings/advanced/woocommerce_show_marketplace_suggestions',
+		test.beforeAll( async ( { restApi } ) => {
+			await restApi.put(
+				`${ WC_API_PATH }/settings/advanced/woocommerce_allow_tracking`,
+				{
+					value: 'no',
+				}
+			);
+			await restApi.put(
+				`${ WC_API_PATH }/settings/advanced/woocommerce_show_marketplace_suggestions`,
 				{
 					value: 'no',
 				}

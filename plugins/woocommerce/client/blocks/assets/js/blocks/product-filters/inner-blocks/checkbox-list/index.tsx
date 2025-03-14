@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import { productFilterOptions } from '@woocommerce/icons';
 import { registerBlockType } from '@wordpress/blocks';
 
@@ -13,10 +12,8 @@ import Edit from './edit';
 import './style.scss';
 import Save from './save';
 
-if ( isExperimentalBlocksEnabled() ) {
-	registerBlockType( metadata, {
-		edit: Edit,
-		icon: productFilterOptions,
-		save: Save,
-	} );
-}
+registerBlockType( metadata, {
+	edit: Edit,
+	icon: productFilterOptions,
+	save: Save,
+} );

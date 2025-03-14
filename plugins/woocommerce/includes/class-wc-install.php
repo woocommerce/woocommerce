@@ -280,6 +280,7 @@ class WC_Install {
 		'9.9.0' => array(
 			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
 			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
+			'wc_update_990_remove_email_notes',
 		),
 	);
 

@@ -1,6 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../fixtures/fixtures.js';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 let productId;
 const productName = `Unique thing that we sell ${ new Date()
@@ -11,15 +14,9 @@ const productPrice = '9.99';
 test.describe( 'Products > Search and View a product', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api
-			.post( 'products', {
+	test.beforeAll( async ( { restApi } ) => {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: productName,
 				type: 'simple',
 				regular_price: productPrice,
@@ -29,14 +26,8 @@ test.describe( 'Products > Search and View a product', () => {
 			} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.delete( `products/${ productId }`, {
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
 			force: true,
 		} );
 	} );

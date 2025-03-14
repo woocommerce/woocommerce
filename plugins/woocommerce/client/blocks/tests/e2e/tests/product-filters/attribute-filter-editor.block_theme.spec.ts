@@ -31,8 +31,7 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, requestUtils } ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+	test.beforeEach( async ( { admin } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -46,7 +45,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
+		const block = editor.canvas.getByLabel( 'Block: Color' );
 
 		await expect( block ).toBeVisible();
 
@@ -78,7 +77,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
+		const block = editor.canvas.getByLabel( 'Block: Color' );
 
 		await expect( block ).toBeVisible();
 
@@ -106,7 +105,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
+		const block = editor.canvas.getByLabel( 'Block: Color' );
 
 		await editor.openDocumentSettingsSidebar();
 		await block.click();
@@ -126,13 +125,12 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( listView ).toBeVisible();
 
 		const productFilterAttributeSizeBlockListItem = listView.getByText(
-			'Size (Experimental)' // it must select the attribute with the highest product count
+			'Size' // it must select the attribute with the highest product count
 		);
 		await expect( productFilterAttributeSizeBlockListItem ).toBeVisible();
 
-		const productFilterAttributeWrapperBlock = editor.canvas.getByLabel(
-			'Block: Size (Experimental)'
-		);
+		const productFilterAttributeWrapperBlock =
+			editor.canvas.getByLabel( 'Block: Size' );
 		await editor.selectBlocks( productFilterAttributeWrapperBlock );
 		await expect( productFilterAttributeWrapperBlock ).toBeVisible();
 

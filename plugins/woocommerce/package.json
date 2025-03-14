@@ -19,7 +19,7 @@
 		"build:project:copy-assets:legacy": "rsync -avhW --checksum --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --delete --quiet client/legacy/build/js/ assets/js",
 		"build:project:copy-assets:admin": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin && pnpm email-editor:build:project:copy-assets",
 		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && rsync -avhW --checksum --quiet client/blocks/blocks.ini blocks.ini && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
-		"email-editor:build:project:copy-assets": "rsync -avhW --checksum --delete --quiet client/admin/node_modules/@woocommerce/email-editor/build/ assets/client/admin/email-editor && rsync -avhW --checksum --quiet client/admin/node_modules/@woocommerce/email-editor/assets/ assets/client/admin/email-editor",
+		"email-editor:build:project:copy-assets": "rsync -avhW --checksum --delete --quiet client/admin/node_modules/@woocommerce/email-editor/build/ assets/client/admin/email-editor",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"env:destroy": "pnpm wp-env destroy",
@@ -261,7 +261,9 @@
 					"changes": [
 						"tests/e2e-pw/**"
 					],
-					"onlyForDependencies": ["@woocommerce/e2e-utils-playwright"],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"events": [
 						"pull_request",
 						"daily-checks",
@@ -290,7 +292,9 @@
 					"changes": [
 						"tests/e2e-pw/**"
 					],
-					"onlyForDependencies": ["@woocommerce/e2e-utils-playwright"],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"events": [
 						"pull_request",
 						"daily-checks",
@@ -314,7 +318,9 @@
 					"changes": [
 						"tests/e2e-pw/**"
 					],
-					"onlyForDependencies": ["@woocommerce/e2e-utils-playwright"],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"events": [
 						"pull_request",
 						"daily-checks",
@@ -344,7 +350,9 @@
 					"changes": [
 						"tests/e2e-pw/**"
 					],
-					"onlyForDependencies": ["@woocommerce/e2e-utils-playwright"],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -377,7 +385,9 @@
 					"changes": [
 						"tests/e2e-pw/**"
 					],
-					"onlyForDependencies": ["@woocommerce/e2e-utils-playwright"],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -410,7 +420,9 @@
 					"changes": [
 						"tests/e2e-pw/**"
 					],
-					"onlyForDependencies": ["@woocommerce/e2e-utils-playwright"],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -703,7 +715,6 @@
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/woocommerce-rest-api": "^1.0.1",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/e2e-test-utils-playwright": "^1.15.0",
@@ -757,7 +768,8 @@
 			"node_modules/@woocommerce/block-library/build",
 			"node_modules/@woocommerce/block-library/blocks.ini",
 			"node_modules/@woocommerce/classic-assets/build",
-			"node_modules/@woocommerce/admin-library/build"
+			"node_modules/@woocommerce/admin-library/build",
+			"client/admin/node_modules/@woocommerce/email-editor/build/"
 		],
 		"ext": "js,css,php,json",
 		"ignoreRoot": []
@@ -784,15 +796,15 @@
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/api/dist/",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"!node_modules/@woocommerce/api/*.ts.map",
 				"!node_modules/@woocommerce/api/*.tsbuildinfo",
 				"!node_modules/@woocommerce/api/dist/**/__tests__/",
 				"!node_modules/@woocommerce/api/dist/**/__mocks__/",
 				"!node_modules/@woocommerce/api/dist/**/__snapshops__/",
-				"!node_modules/@woocommerce/api/dist/**/__test_data__/"
+				"!node_modules/@woocommerce/api/dist/**/__test_data__/",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js"
 			]
 		}
 	}

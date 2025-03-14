@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-filter-status",
 	"version": "1.0.0",
-	"title": "Status (Experimental)",
+	"title": "Status",
 	"description": "Let shoppers filter products by choosing stock status.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],

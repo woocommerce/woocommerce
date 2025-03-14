@@ -70,7 +70,8 @@ const { state, actions } = store( 'woocommerce/product-filter-attribute', {
 					( item ) =>
 						item.value === value &&
 						item.type === 'attribute' &&
-						item.attribute?.slug === context.attributeSlug
+						item.attribute?.slug === context.attributeSlug &&
+						item.attribute?.queryType === context.queryType
 				);
 			} else {
 				productFiltersStore.actions.setActiveFilter( {
@@ -79,7 +80,7 @@ const { state, actions } = store( 'woocommerce/product-filter-attribute', {
 					label: actions.getActiveLabel( ariaLabel ),
 					attribute: {
 						slug: context.attributeSlug,
-						queryType: 'or',
+						queryType: context.queryType,
 					},
 				} );
 			}

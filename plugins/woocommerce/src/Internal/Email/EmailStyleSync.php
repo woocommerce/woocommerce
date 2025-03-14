@@ -152,8 +152,8 @@ class EmailStyleSync implements RegisterHooksInterface {
 		$body_text_color_default = $default_colors['body_text_color_default'];
 		$footer_text_color_default = $default_colors['footer_text_color_default'];
 
-		$base_color = ! empty( $global_styles['elements']['button']['color']['text'] )
-			? sanitize_hex_color( $global_styles['elements']['button']['color']['text'] )
+		$base_color = ! empty( $global_styles['elements']['button']['color']['background'] )
+			? sanitize_hex_color( $global_styles['elements']['button']['color']['background'] )
 			: $base_color_default;
 
 		$bg_color = ! empty( $global_styles['color']['background'] )

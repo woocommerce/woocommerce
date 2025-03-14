@@ -358,6 +358,27 @@ class WC_Shipping {
 				}
 			}
 
+			// Hide shipping rates when free shipping is available.
+			if ( 'yes' === get_option( 'woocommerce_shipping_hide_rates_when_free', 'no' ) ) {
+				$free_shipping = array();
+				$local_pickup  = array();
+
+				foreach ( $package['rates'] as $rate ) {
+					if ( 'free_shipping' === $rate->method_id ) {
+						$free_shipping[] = $rate;
+						continue;
+					}
+
+					if ( in_array( $rate->method_id, array( 'local_pickup', 'pickup_location' ), true ) ) {
+						$local_pickup[] = $rate;
+					}
+				}
+
+				if ( ! empty( $free_shipping ) ) {
+					$package['rates'] = array_merge( $free_shipping, $local_pickup );
+				}
+			}
+
 			/**
 			 * Filter the calculated shipping rates.
 			 *

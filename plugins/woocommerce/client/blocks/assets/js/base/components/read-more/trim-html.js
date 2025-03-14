@@ -105,12 +105,12 @@ export function trimHtml( html, options ) {
 				row = charArr.slice( 0, cut ).join( '' ) + suffix;
 
 				if ( moreLink ) {
-					row +=
-						'<a href="' +
-						moreLink +
-						'" style="display:inline">' +
-						moreText +
-						'</a>';
+					const link = document.createElement( 'a' );
+					link.href = moreLink;
+					link.style.display = 'inline';
+					link.textContent = moreText;
+
+					row += link.outerHTML;
 				}
 
 				sum = limit;

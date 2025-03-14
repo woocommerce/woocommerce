@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import * as navigation from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import { updateLinkHref } from '../controller';
@@ -19,6 +24,10 @@ describe( 'updateLinkHref', () => {
 		fruit: 'apple',
 		dish: 'cobbler',
 	};
+
+	beforeEach( () => {
+		jest.restoreAllMocks();
+	} );
 
 	it( 'should update report urls', () => {
 		const item = { href: REPORT_URL };
@@ -75,5 +84,53 @@ describe( 'updateLinkHref', () => {
 		expect( item.href ).toBe(
 			`admin.php?page=wc-admin&path=${ encodedPath }&fruit=apple&dish=cobbler`
 		);
+	} );
+
+	it( 'should not prevent default when Command key is pressed', () => {
+		const item = { href: REPORT_URL };
+		const spyGetHistory = jest.spyOn( navigation, 'getHistory' );
+		const event = {
+			ctrlKey: false,
+			metaKey: true,
+			preventDefault: jest.fn(),
+		};
+
+		updateLinkHref( item, nextQuery, timeExcludedScreens );
+
+		item.onclick( event );
+		expect( spyGetHistory ).not.toHaveBeenCalled();
+		expect( event.preventDefault ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should not prevent default when Control key is pressed', () => {
+		const item = { href: REPORT_URL };
+		const spyGetHistory = jest.spyOn( navigation, 'getHistory' );
+		const event = {
+			ctrlKey: true,
+			metaKey: false,
+			preventDefault: jest.fn(),
+		};
+
+		updateLinkHref( item, nextQuery, timeExcludedScreens );
+
+		item.onclick( event );
+		expect( spyGetHistory ).not.toHaveBeenCalled();
+		expect( event.preventDefault ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should prevent default on normal clicks', () => {
+		const item = { href: REPORT_URL };
+		const spyGetHistory = jest.spyOn( navigation, 'getHistory' );
+		const event = {
+			ctrlKey: false,
+			metaKey: false,
+			preventDefault: jest.fn(),
+		};
+
+		updateLinkHref( item, nextQuery, timeExcludedScreens );
+
+		item.onclick( event );
+		expect( spyGetHistory ).toHaveBeenCalledTimes( 1 );
+		expect( event.preventDefault ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

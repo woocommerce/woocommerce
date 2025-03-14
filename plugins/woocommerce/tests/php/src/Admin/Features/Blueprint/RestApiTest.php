@@ -77,7 +77,6 @@ class RestApiTest extends WP_Test_REST_TestCase {
 		parent::tearDown();
 		// Clean up global state
 		unset($_FILES['file']);
-		unset($_POST['blueprint_upload_nonce']);
 
 		// Clean up temporary file
 		if (file_exists($this->temp_file)) {

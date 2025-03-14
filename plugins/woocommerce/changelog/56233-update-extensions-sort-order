@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Support `order` property from the free extensions feed.

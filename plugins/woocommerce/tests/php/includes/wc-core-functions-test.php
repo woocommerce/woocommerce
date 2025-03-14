@@ -257,6 +257,10 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( get_transient( $transient_name3 ) );
 
+		// Test with a transient that does not exist.
+		$wc_test_transient_not_existing = 'wc_test_transient_not_existing';
+		$this->assertTrue( _wc_delete_transients( array( $wc_test_transient_not_existing ) ) );
+
 		// Test with empty input.
 		$this->assertFalse( _wc_delete_transients( array() ) );
 		$this->assertFalse( _wc_delete_transients( '' ) );

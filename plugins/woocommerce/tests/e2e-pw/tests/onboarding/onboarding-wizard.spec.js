@@ -1,8 +1,15 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { setOption } = require( '../../utils/options' );
-const { setComingSoon } = require( '../../utils/coming-soon' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { setOption } from '../../utils/options';
+import { setComingSoon } from '../../utils/coming-soon';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const getPluginLocator = ( page, slug ) => {
 	return page.locator(

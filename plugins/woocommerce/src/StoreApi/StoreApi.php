@@ -40,9 +40,23 @@ final class StoreApi {
 				}
 				self::container()->get( Authentication::class )->init();
 
-				$cart_controller = new CartController();
-				$cart_controller->load_cart();
-				$cart_controller->normalize_cart();
+				try {
+					$cart_controller = new CartController();
+					$cart_controller->load_cart();
+					$cart_controller->normalize_cart();
+				} catch ( \Exception $e ) {
+					return new \WP_Error(
+						'woocommerce_rest_cart_error',
+						$e->getMessage(),
+						array( 'status' => 500 )
+					);
+				} catch ( \Error $e ) {
+					return new \WP_Error(
+						'woocommerce_rest_cart_error',
+						$e->getMessage(),
+						array( 'status' => 500 )
+					);
+				}
 			},
 			11
 		);

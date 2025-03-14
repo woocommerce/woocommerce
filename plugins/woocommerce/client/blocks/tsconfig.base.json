@@ -40,8 +40,6 @@
 			],
 			"@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
 			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
-			"@woocommerce/interactivity": [ "assets/js/interactivity" ],
-			"@woocommerce/interactivity/*": [ "assets/js/interactivity/*" ],
 			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
 			"@woocommerce/base-utils/*": [ "assets/js/base/utils/*" ],
 			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
@@ -54,9 +52,6 @@
 			"@woocommerce/blocks-checkout": [ "packages/checkout" ],
 			"@woocommerce/blocks-checkout-events": [ "assets/js/events" ],
 			"@woocommerce/blocks-components": [ "packages/components" ],
-			"@woocommerce/interactivity-components/*": [
-				"packages/interactivity-components/*"
-			],
 			"@woocommerce/price-format": [ "packages/prices" ],
 			"@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
 			"@woocommerce/icons": [ "assets/js/icons" ],

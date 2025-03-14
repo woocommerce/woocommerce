@@ -31,8 +31,7 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, requestUtils } ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+	test.beforeEach( async ( { admin } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -43,7 +42,7 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'block is added in Editor', async ( { editor, pageObject } ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel( 'Block: Price (Experimental)' );
+		const block = editor.canvas.getByLabel( 'Block: Price' );
 		await expect( block ).toBeVisible();
 	} );
 } );

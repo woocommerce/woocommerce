@@ -91,12 +91,13 @@ export const insertBlock = async ( page, blockName ) => {
 
 export const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
-	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
-	await canvas
-		.getByRole( 'document', {
+	const emptyBlockField = canvas.getByText( 'Type / to choose a block' ).or(
+		canvas.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.pressSequentially( `/${ blockName }` );
+	);
+	await emptyBlockField.click();
+	await emptyBlockField.pressSequentially( `/${ blockName }` );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 

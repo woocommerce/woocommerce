@@ -1,47 +1,40 @@
 /**
  * Internal dependencies
  */
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+
 const customerEmailAddress = `john.doe.${ Date.now() }@example.com`;
 
 test.describe( 'Shopper My Account Create Account', () => {
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.put(
-			'settings/account/woocommerce_enable_myaccount_registration',
+	test.beforeAll( async ( { restApi } ) => {
+		await restApi.put(
+			`${ WC_API_PATH }/settings/account/woocommerce_enable_myaccount_registration`,
 			{
 				value: 'yes',
 			}
 		);
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
+	test.afterAll( async ( { restApi } ) => {
 		// get a list of all customers and delete the one we created
-		await api.get( 'customers' ).then( ( response ) => {
-			for ( let i = 0; i < response.data.length; i++ ) {
-				if ( response.data[ i ].email === customerEmailAddress ) {
-					api.delete( `customers/${ response.data[ i ].id }`, {
-						force: true,
-					} );
+		await restApi
+			.get( `${ WC_API_PATH }/customers` )
+			.then( ( response ) => {
+				for ( let i = 0; i < response.data.length; i++ ) {
+					if ( response.data[ i ].email === customerEmailAddress ) {
+						restApi.delete(
+							`${ WC_API_PATH }/customers/${ response.data[ i ].id }`,
+							{
+								force: true,
+							}
+						);
+					}
 				}
-			}
-		} );
+			} );
 
-		await api.put(
-			'settings/account/woocommerce_enable_myaccount_registration',
+		await restApi.put(
+			`${ WC_API_PATH }/settings/account/woocommerce_enable_myaccount_registration`,
 			{
 				value: 'no',
 			}
