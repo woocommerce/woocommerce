@@ -41,7 +41,6 @@ type ProductFilterPriceSliderStore = ProductFiltersStore &
 		};
 		actions: {
 			selectInputContent: () => void;
-			limitRange: ( e: HTMLElementEvent< HTMLInputElement > ) => void;
 			debounceSetMinPrice: (
 				e: HTMLElementEvent< HTMLInputElement >
 			) => void;
@@ -87,19 +86,6 @@ const { state, actions } = store< ProductFilterPriceSliderStore >(
 				},
 				1000
 			),
-			limitRange: ( e: HTMLElementEvent< HTMLInputElement > ) => {
-				if ( e.target.classList.contains( 'min' ) ) {
-					e.target.value = Math.min(
-						parseInt( e.target.value, 10 ),
-						state.maxPrice - 1
-					).toString();
-				} else {
-					e.target.value = Math.max(
-						parseInt( e.target.value, 10 ),
-						state.minPrice + 1
-					).toString();
-				}
-			},
 		},
 	}
 );
