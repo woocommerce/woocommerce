@@ -174,8 +174,9 @@ $dialog-padding: 20px;
 		object-fit: contain;
 	}
 
-	&::before, &::after {
-		content: '';
+	&::before,
+	&::after {
+		content: "";
 		position: absolute;
 		opacity: 0;
 		transition: opacity 0.2s linear;
