@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Extension, ExtensionList } from '@woocommerce/data';
 import { useState, useMemo } from '@wordpress/element';
+import { useMediaQuery } from '@wordpress/compose';
 import clsx from 'clsx';
 
 /**
@@ -89,10 +90,7 @@ export const Plugins = ( {
 }: {
 	context: Pick<
 		CoreProfilerStateMachineContext,
-		| 'pluginsAvailable'
-		| 'pluginsInstallationErrors'
-		| 'pluginsSelected'
-		| 'pluginsTruncated'
+		'pluginsAvailable' | 'pluginsInstallationErrors' | 'pluginsSelected'
 	>;
 	sendEvent: (
 		payload:
@@ -150,7 +148,6 @@ export const Plugins = ( {
 				pluginsShown,
 				pluginsSelected: selectedPluginSlugs,
 				pluginsUnselected,
-				pluginsTruncated: context.pluginsTruncated,
 			},
 		} );
 	};
@@ -166,6 +163,13 @@ export const Plugins = ( {
 				return acc;
 			}, {} as Record< string, string > ),
 		[ context.pluginsAvailable ]
+	);
+
+	const baseHeight = 350;
+	const rowHeight = 100; // include the gap between the cards
+	const listHeight = baseHeight + rowHeight * pluginsCardRowCount;
+	const shouldShowStickyFooter = useMediaQuery(
+		`(max-height: ${ listHeight }px)`
 	);
 
 	return (
@@ -185,7 +189,7 @@ export const Plugins = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						'Enhance your store by installing these free business features. No commitment required – you can remove them at any time.',
+						'No commitment required – you can remove them at any time.',
 						'woocommerce'
 					) }
 				/>
@@ -199,16 +203,12 @@ export const Plugins = ( {
 					/>
 				) }
 				<div
-					className={ clsx(
-						'woocommerce-profiler-plugins__list',
-						`rows-${ pluginsCardRowCount }`
-					) }
+					className={ clsx( 'woocommerce-profiler-plugins__list', {
+						'sticky-footer': shouldShowStickyFooter,
+					} ) }
 				>
 					{ context.pluginsAvailable.map( ( plugin ) => {
-						const {
-							key: pluginSlug,
-							learn_more_link: learnMoreLink,
-						} = plugin;
+						const { key: pluginSlug } = plugin;
 						return (
 							<PluginCard
 								key={ pluginSlug }
@@ -219,29 +219,14 @@ export const Plugins = ( {
 									}
 								} }
 								checked={ selectedPlugins.has( plugin ) }
-							>
-								{ learnMoreLink && (
-									<PluginCard.LearnMoreLink
-										onClick={ () => {
-											sendEvent( {
-												type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
-												payload: {
-													plugin: pluginSlug,
-													learnMoreLink,
-												},
-											} );
-										} }
-									/>
-								) }
-							</PluginCard>
+							></PluginCard>
 						);
 					} ) }
 				</div>
 				<div
-					className={ clsx(
-						'woocommerce-profiler-plugins__footer',
-						`rows-${ pluginsCardRowCount }`
-					) }
+					className={ clsx( 'woocommerce-profiler-plugins__footer', {
+						'sticky-footer': shouldShowStickyFooter,
+					} ) }
 				>
 					<div className="woocommerce-profiler-plugins-continue-button-container">
 						<Button
