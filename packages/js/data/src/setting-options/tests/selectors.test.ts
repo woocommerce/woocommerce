@@ -61,6 +61,38 @@ describe( 'setting-options selectors', () => {
 			const settings = selectors.getSettings( state, testGroup.id );
 			expect( settings ).toEqual( { [ testSetting.id ]: testSetting } );
 		} );
+
+		it( 'should return settings with edited values when edits exist', () => {
+			const setting1 = createTestSetting( {
+				id: 'setting-1',
+				value: 'original-value-1',
+			} );
+			const setting2 = createTestSetting( {
+				id: 'setting-2',
+				value: 'original-value-2',
+			} );
+
+			state.settings = {
+				[ testGroup.id ]: {
+					'setting-1': setting1,
+					'setting-2': setting2,
+				},
+			};
+
+			state.edits = {
+				[ testGroup.id ]: { 'setting-1': 'edited-value-1' },
+			};
+
+			const settings = selectors.getSettings( state, testGroup.id );
+
+			expect( settings ).toEqual( {
+				'setting-1': {
+					...setting1,
+					value: 'edited-value-1',
+				},
+				'setting-2': setting2,
+			} );
+		} );
 	} );
 
 	describe( 'getSetting', () => {

@@ -368,6 +368,11 @@ describe( 'setting-options actions', () => {
 				mockResults
 			);
 
+			expect( store.getState().edits[ groupId ] ).toEqual( {
+				setting1: 'value1',
+				setting2: 'value2',
+			} );
+
 			await expect(
 				registry.dispatch( STORE_NAME ).saveSettingsGroup( groupId )
 			).rejects.toThrow( 'Failed to update some settings' );
@@ -376,6 +381,11 @@ describe( 'setting-options actions', () => {
 			expect( store.getState().settings[ groupId ]?.setting1 ).toEqual(
 				mockResults.update[ 0 ]
 			);
+
+			// Verify only failed settings are in the edits state
+			expect( store.getState().edits[ groupId ] ).toEqual( {
+				setting2: 'value2',
+			} );
 
 			// Verify error state
 			expect( store.getState().errors[ groupId ]?.setting2 ).toEqual(

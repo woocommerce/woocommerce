@@ -39,19 +39,49 @@ export const getGroup = (
 const EMPTY_OBJECT = {};
 
 /**
- * Get all settings for a specific group.
+ * Get all settings for a specific group. When edits exist, they are applied to the settings.
  *
  * @param {SettingsState} state   - The current state of the settings.
  * @param {string}        groupId - The ID of the group to get settings for.
- * @return {Record<string, Setting>} The settings for the specified group.
+ * @return {Record<string, Setting>} The settings for the specified group with any edited values.
  */
-export const getSettings = ( state: SettingsState, groupId: string ) => {
-	const groupSettings = state.settings[ groupId ];
-	if ( ! groupSettings ) {
-		return EMPTY_OBJECT;
-	}
-	return groupSettings;
-};
+export const getSettings = createSelector(
+	( state: SettingsState, groupId: string ) => {
+		const groupSettings = state.settings[ groupId ];
+		if ( ! groupSettings ) {
+			return EMPTY_OBJECT;
+		}
+
+		const groupEdits = state.edits[ groupId ];
+		if ( ! groupEdits ) {
+			return groupSettings;
+		}
+
+		// Create a new object with all settings, applying edits where they exist
+		return Object.keys( groupSettings ).reduce< Record< string, Setting > >(
+			( result, settingId ) => {
+				const setting = groupSettings[ settingId ];
+
+				// If this setting has an edit, apply it
+				if ( settingId in groupEdits ) {
+					result[ settingId ] = {
+						...setting,
+						value: groupEdits[ settingId ],
+					};
+				} else {
+					result[ settingId ] = setting;
+				}
+
+				return result;
+			},
+			{}
+		);
+	},
+	( state: SettingsState, groupId: string ) => [
+		state.settings[ groupId ],
+		state.edits[ groupId ],
+	]
+);
 
 /**
  * Get a specific setting by ID.
@@ -108,8 +138,11 @@ export const getSettingValue = (
 		return groupEdits[ settingId ];
 	}
 
-	const setting = getSetting( state, groupId, settingId );
-	return setting?.value;
+	const groupSettings = state.settings[ groupId ];
+	if ( ! groupSettings ) {
+		return undefined;
+	}
+	return groupSettings[ settingId ]?.value;
 };
 
 /**
