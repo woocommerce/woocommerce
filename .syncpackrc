@@ -69,7 +69,6 @@
 				"@wordpress/wordcount",
 				"babel*",
 				"eslint*",
-				"glob*",
 				"postcss*",
 				"webpack*"
 			],

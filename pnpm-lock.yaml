@@ -4854,11 +4854,8 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1
       glob:
-        specifier: 7.2.3
-        version: 7.2.3
-      glob-promise:
-        specifier: 4.2.2
-        version: 4.2.2(glob@7.2.3)
+        specifier: ^10.3.10
+        version: 10.3.10
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
@@ -17725,12 +17722,6 @@ packages:
     engines: {node: '>=4'}
     peerDependencies:
       glob: '*'
-
-  glob-promise@4.2.2:
-    resolution: {integrity: sha512-xcUzJ8NWN5bktoTIX7eOclO1Npxd/dyVqUJxlLIDasT4C7KZyqlPIwkdJ0Ypiy3p2ZKahTjK4M9uC3sNSfNMzw==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      glob: ^7.1.6
 
   glob-to-regexp@0.3.0:
     resolution: {integrity: sha512-Iozmtbqv0noj0uDDqoL0zNq0VBEfK2YFoMAZoxJe4cwphvLR+JskfF30QhXHOR4m3KrE6NLRYw+U9MRXvifyig==}
@@ -34099,9 +34090,7 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -53303,11 +53292,6 @@ snapshots:
       '@types/glob': 8.1.0
       glob: 7.2.3
 
-  glob-promise@4.2.2(glob@7.2.3):
-    dependencies:
-      '@types/glob': 7.2.0
-      glob: 7.2.3
-
   glob-to-regexp@0.3.0: {}
 
   glob-to-regexp@0.4.1: {}
@@ -55919,9 +55903,7 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:
