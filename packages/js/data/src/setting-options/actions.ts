@@ -2,8 +2,8 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { DispatchFromMap } from '@automattic/data-stores';
 import type { createRegistry } from '@wordpress/data';
+import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 
 /**
  * Internal dependencies
@@ -15,25 +15,16 @@ import type {
 	SettingsGroup,
 	APIError,
 	BatchSettingsError,
-	SettingsState,
 	SettingUpdate,
 	SettingsUpdateObject,
 } from './types';
 import { NAMESPACE } from '../constants';
+import { store } from './';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
-type AllSelectors = typeof import('./selectors');
-type CurriedState< F > = F extends (
-	state: SettingsState,
-	...args: infer P
-) => infer R
-	? ( ...args: P ) => R
-	: F;
-type Selectors = {
-	[ key in keyof AllSelectors ]: CurriedState< AllSelectors[ key ] >;
-};
+
 export type ThunkArgs = {
-	select: Selectors;
+	select: CurriedSelectorsOf< typeof store >;
 	dispatch: ActionDispatchersForThunk;
 	registry: WPDataRegistry;
 };
@@ -338,13 +329,6 @@ export type Actions = ReturnType<
 	| typeof createUpdateSettingAction
 	| typeof updateSettingsArray
 >;
-
-export type ActionDispatchers = DispatchFromMap< {
-	saveSettingsGroup: typeof saveSettingsGroup;
-	saveSetting: typeof saveSetting;
-	updateSetting: typeof updateSetting;
-	updateSettings: typeof updateSettings;
-} >;
 
 export type ActionDispatchersForThunk = {
 	receiveGroups: typeof receiveGroups;
