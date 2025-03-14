@@ -30,7 +30,7 @@ export const Edit = ( {
 	} );
 
 	return (
-		<>
+		<div { ...blockProps }>
 			<InspectorControls>
 				<PanelBody>
 					<ProductGalleryThumbnailsBlockSettings
@@ -39,24 +39,22 @@ export const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div { ...blockProps }>
-				<div className="wc-block-product-gallery-thumbnails__scrollable">
-					{ [ ...Array( 6 ).keys() ].map( ( index ) => {
-						return (
-							<div
-								className="wc-block-product-gallery-thumbnails__thumbnail"
-								key={ index }
-							>
-								<img
-									className="wc-block-product-gallery-thumbnails__image"
-									src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
-									alt=""
-								/>
-							</div>
-						);
-					} ) }
-				</div>
+			<div className="wc-block-product-gallery-thumbnails__scrollable">
+				{ [ ...Array( 6 ).keys() ].map( ( index ) => {
+					return (
+						<div
+							className="wc-block-product-gallery-thumbnails__thumbnail"
+							key={ index }
+						>
+							<img
+								className="wc-block-product-gallery-thumbnails__thumbnail__image"
+								src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
+								alt=""
+							/>
+						</div>
+					);
+				} ) }
 			</div>
-		</>
+		</div>
 	);
 };
