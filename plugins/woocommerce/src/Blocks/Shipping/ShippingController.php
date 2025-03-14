@@ -17,6 +17,12 @@ use WC_Tracks;
  * @internal
  */
 class ShippingController {
+
+	/**
+	 * Script handle used for enqueueing the scripts needed for managing the Local Pickup Shipping Settings.
+	 */
+	private const LOCAL_PICKUP_ADMIN_JS_HANDLE = 'wc-shipping-method-pickup-location';
+
 	/**
 	 * Instance of the asset API.
 	 *
@@ -232,7 +238,7 @@ class ShippingController {
 	 * Hydrate client settings
 	 */
 	public function hydrate_client_settings() {
-		if ( ! wp_script_is( 'wc-shipping-method-pickup-location', 'enqueued' ) ) {
+		if ( ! wp_script_is( self::LOCAL_PICKUP_ADMIN_JS_HANDLE, 'enqueued' ) ) {
 			// Only hydrate the settings if the script dependent on them is enqueued.
 			return;
 		}
@@ -286,7 +292,7 @@ class ShippingController {
 		);
 
 		wp_add_inline_script(
-			'wc-shipping-method-pickup-location',
+			self::LOCAL_PICKUP_ADMIN_JS_HANDLE,
 			sprintf(
 				'var hydratedScreenSettings = %s;',
 				wp_json_encode( $settings )
@@ -298,7 +304,7 @@ class ShippingController {
 	 * Load admin scripts.
 	 */
 	public function admin_scripts() {
-		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
+		$this->asset_api->register_script( self::LOCAL_PICKUP_ADMIN_JS_HANDLE, 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
 	}
 
 	/**
