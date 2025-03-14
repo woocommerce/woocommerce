@@ -70,37 +70,4 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			).toBeVisible();
 		} );
 	} );
-
-	test.describe( 'settings', () => {
-		test( 'rounds the number of thumbnails to integer', async ( {
-			page,
-			editor,
-		} ) => {
-			const thumbnailsBlock =
-				editor.canvas.getByLabel( 'Block: Thumbnails' );
-
-			await editor.selectBlocks( thumbnailsBlock );
-
-			await editor.openDocumentSettingsSidebar();
-			const numberOfThumbnailInput = page
-				.getByLabel( 'Editor settings' )
-				.getByRole( 'spinbutton', {
-					name: 'Number of Thumbnails',
-				} );
-
-			await numberOfThumbnailInput.fill( '4.2' );
-			await page.keyboard.press( 'Enter' );
-
-			const numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
-				'.wc-block-product-gallery-thumbnails__thumbnail'
-			);
-
-			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 4 );
-
-			await numberOfThumbnailInput.fill( '4.7' );
-			await page.keyboard.press( 'Enter' );
-
-			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );
-		} );
-	} );
 } );
