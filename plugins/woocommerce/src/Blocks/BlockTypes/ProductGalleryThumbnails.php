@@ -75,7 +75,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$thumbnail_size   = str_replace('%', '', $attributes['thumbnailSize'] ?? '20%');
+		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '20%' );
 		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
 
 		ob_start();
