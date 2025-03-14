@@ -84,10 +84,10 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			class="wc-block-product-gallery-thumbnails <?php echo esc_attr( $classes_and_styles['classes'] . ' ' . $thumbnails_class ); ?>"
 			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
-			data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.overflowTop"
-			data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.overflowBottom"
-			data-wp-class--wc-block-product-gallery-thumbnails--overflow-left="context.overflowLeft"
-			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.overflowRight">
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.thumbnailsOverflowTop"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.thumbnailsOverflowBottom"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-left="context.thumbnailsOverflowLeft"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.thumbnailsOverflowRight">
 			<div
 				class="wc-block-product-gallery-thumbnails__scrollable"
 				data-wp-init="actions.onScroll"
