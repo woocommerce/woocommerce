@@ -170,6 +170,12 @@ class Loader {
 			$classes[] = 'woocommerce-embed-page';
 		}
 
+		// Add page ID as a class.
+		$page_id = PageController::get_instance()->get_current_screen_id();
+		if ( $page_id ) {
+			$classes[] = $page_id;
+		}
+
 		/**
 		 * Some routes or features like onboarding hide the wp-admin navigation and masterbar.
 		 * Setting `woocommerce_admin_is_loading` to true allows us to premeptively hide these
