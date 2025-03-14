@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed a bug where sanitize would always cause phone number to be valid. Added format utility function to remove useless non-displayable chars, avoiding copy-paste issues.
