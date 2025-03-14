@@ -51,6 +51,15 @@ test.describe( 'Merchant → Checkout', () => {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
+
+		// Dismiss the "Get started" modal if it appears.
+		const getStartedButton = admin.page.getByRole( 'button', {
+			name: 'Get started',
+		} );
+		if ( await getStartedButton.isVisible() ) {
+			await getStartedButton.click();
+		}
+
 		await editor.openDocumentSettingsSidebar();
 	} );
 
