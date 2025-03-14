@@ -329,7 +329,9 @@
 		{
 			"label": "@wordpress/* build-dependencies (always ahead of runtime-dependencies)",
 			"dependencies": [
-				"@wordpress/dependency-extraction-webpack-plugin"
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/babel-preset-default",
+                "@wordpress/browserslist-config"
 			],
 			"packages": [
 				"**"
