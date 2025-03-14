@@ -147,11 +147,12 @@ $dialog-padding: 20px;
 	position: relative;
 
 	&__scrollable {
+		height: 100%;
 		display: flex;
 		gap: $thumbnails-gap;
 		overflow: auto;
 		scrollbar-width: none;
-		height: 100%
+		pointer-events: auto;
 	}
 
 	&__thumbnail {
@@ -174,6 +175,7 @@ $dialog-padding: 20px;
 		position: absolute;
 		opacity: 0;
 		transition: opacity 0.2s linear;
+		pointer-events: none;
 	}
 
 	&.wc-block-product-gallery-thumbnails--overflow {
