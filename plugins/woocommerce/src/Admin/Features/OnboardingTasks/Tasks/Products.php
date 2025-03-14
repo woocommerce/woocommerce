@@ -20,7 +20,6 @@ class Products extends Task {
 	 */
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
-		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
 
@@ -109,27 +108,6 @@ class Products extends Task {
 	}
 
 	/**
-	 * Adds a return to task list notice when completing the manual product task.
-	 *
-	 * @param string $hook Page hook.
-	 */
-	public function possibly_add_manual_return_notice_script( $hook ) {
-		global $post;
-		if ( $hook !== 'post.php' || $post->post_type !== 'product' ) {
-			return;
-		}
-
-		if ( ! $this->is_active() || ! $this->is_complete() ) {
-			return;
-		}
-
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-product-notice', true );
-
-		// Clear the active task transient to only show notice once per active session.
-		delete_transient( self::ACTIVE_TASK_TRANSIENT );
-	}
-
-	/**
 	 * Adds a return to task list notice when completing the import product task.
 	 *
 	 * @param string $hook Page hook.
@@ -191,7 +169,7 @@ class Products extends Task {
 	/**
 	 * Set the has products transient if the product qualifies as a user created product.
 	 *
-	 * @param int $product_id Product ID.
+	 * @param int        $product_id Product ID.
 	 * @param WC_Product $product Product object.
 	 */
 	public function maybe_set_has_product_transient( $product_id, $product ) {
