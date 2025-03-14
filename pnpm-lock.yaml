@@ -875,8 +875,8 @@ importers:
         specifier: workspace:*
         version: link:../internal-style-build
       '@wordpress/babel-preset-default':
-        specifier: ^6.17.0
-        version: 6.17.0
+        specifier: wp-6.6
+        version: 8.0.1
       '@wordpress/browserslist-config':
         specifier: wp-6.6
         version: 6.0.1
@@ -1467,8 +1467,8 @@ importers:
         specifier: 1.1.3
         version: 1.1.3(@babel/core@7.12.9)
       '@wordpress/babel-preset-default':
-        specifier: 7.28.0
-        version: 7.28.0
+        specifier: wp-6.6
+        version: 8.0.1
       '@wordpress/browserslist-config':
         specifier: wp-6.6
         version: 6.0.1
@@ -1567,8 +1567,8 @@ importers:
         specifier: 1.1.3
         version: 1.1.3(@babel/core@7.12.9)
       '@wordpress/babel-preset-default':
-        specifier: 7.28.0
-        version: 7.28.0
+        specifier: wp-6.6
+        version: 8.0.1
       '@wordpress/browserslist-config':
         specifier: wp-6.6
         version: 6.0.1
@@ -1640,8 +1640,8 @@ importers:
         specifier: 1.1.3
         version: 1.1.3(@babel/core@7.12.9)
       '@wordpress/babel-preset-default':
-        specifier: 7.28.0
-        version: 7.28.0
+        specifier: wp-6.6
+        version: 8.0.1
       '@wordpress/browserslist-config':
         specifier: wp-6.6
         version: 6.0.1
@@ -1664,8 +1664,8 @@ importers:
         specifier: ^7.26.0
         version: 7.26.0
       '@wordpress/babel-preset-default':
-        specifier: 7.28.0
-        version: 7.28.0
+        specifier: wp-6.6
+        version: 8.0.1
       jest:
         specifier: 27.5.x
         version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
@@ -3554,8 +3554,8 @@ importers:
         specifier: 1.1.3
         version: 1.1.3(@babel/core@7.12.9)
       '@wordpress/babel-preset-default':
-        specifier: 3.0.2
-        version: 3.0.2(@babel/core@7.12.9)
+        specifier: wp-6.6
+        version: 8.0.1
       '@wordpress/e2e-test-utils-playwright':
         specifier: ^1.15.0
         version: 1.16.0(@playwright/test@1.50.1)
@@ -4665,8 +4665,8 @@ importers:
         specifier: 6.21.0
         version: 6.21.0
       '@wordpress/babel-preset-default':
-        specifier: 7.28.0
-        version: 7.28.0
+        specifier: wp-6.6
+        version: 8.0.1
       '@wordpress/base-styles':
         specifier: 4.35.0
         version: 4.35.0
@@ -11827,12 +11827,6 @@ packages:
     peerDependencies:
       '@babel/core': ^7.12.9
 
-  '@wordpress/babel-preset-default@3.0.2':
-    resolution: {integrity: sha512-bsa4piS4GU02isj2XJNUgSEC7MpzdYNy9wOFySrp8G6IHAvwrlwcPEXJf5EuwE8ZqTMmFAzPyKOHFEAx/j+J1A==}
-    engines: {node: '>=8'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-
   '@wordpress/babel-preset-default@6.17.0':
     resolution: {integrity: sha512-mBB1KHWT2vN+maKIPYLQSxhhAzW6CNwYiJNRSNaNBALie9TULe7etrnwoZ1eqPVsuYvBlXB4XKcPaSm3/FW+qQ==}
     engines: {node: '>=12'}
@@ -11947,10 +11941,6 @@ packages:
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     peerDependencies:
       react: ^18.0.0
-
-  '@wordpress/browserslist-config@2.7.0':
-    resolution: {integrity: sha512-pB45JlfmHuEigNFZ1X+CTgIsOT3/TTb9iZxw1DHXge/7ytY8FNhtcNwTfF9IgnS6/xaFRZBqzw4DyH4sP1Lyxg==}
-    engines: {node: '>=8'}
 
   '@wordpress/browserslist-config@4.1.3':
     resolution: {integrity: sha512-M4WQ0C4zCfMWyCmK40git3rfPdNkRwg5boGjoTL4LSdhrY+rtchFAtfOHS9KovAZ5ZzTB0gyZsCu/QKZlPClog==}
@@ -28492,7 +28482,7 @@ snapshots:
   '@babel/plugin-proposal-async-generator-functions@7.20.7(@babel/core@7.12.9)':
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-environment-visitor': 7.22.20
+      '@babel/helper-environment-visitor': 7.24.7
       '@babel/helper-plugin-utils': 7.25.9
       '@babel/helper-remap-async-to-generator': 7.25.9(@babel/core@7.12.9)
       '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.12.9)
@@ -28502,7 +28492,7 @@ snapshots:
   '@babel/plugin-proposal-async-generator-functions@7.20.7(@babel/core@7.23.5)':
     dependencies:
       '@babel/core': 7.23.5
-      '@babel/helper-environment-visitor': 7.22.20
+      '@babel/helper-environment-visitor': 7.24.7
       '@babel/helper-plugin-utils': 7.25.9
       '@babel/helper-remap-async-to-generator': 7.25.9(@babel/core@7.23.5)
       '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.23.5)
@@ -34304,7 +34294,10 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
   '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))':
     dependencies:
@@ -40621,7 +40614,7 @@ snapshots:
       '@types/node': 20.17.8
     optional: true
 
-  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
@@ -41662,20 +41655,6 @@ snapshots:
     dependencies:
       '@babel/core': 7.12.9
 
-  '@wordpress/babel-preset-default@3.0.2(@babel/core@7.12.9)':
-    dependencies:
-      '@babel/core': 7.12.9
-      '@babel/plugin-proposal-async-generator-functions': 7.20.7(@babel/core@7.12.9)
-      '@babel/plugin-proposal-object-rest-spread': 7.20.7(@babel/core@7.12.9)
-      '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.12.9)
-      '@babel/plugin-transform-runtime': 7.23.4(@babel/core@7.12.9)
-      '@babel/preset-env': 7.25.7(@babel/core@7.12.9)
-      '@babel/runtime': 7.23.5
-      '@wordpress/browserslist-config': 2.7.0
-      babel-core: 7.0.0-bridge.0(@babel/core@7.12.9)
-    transitivePeerDependencies:
-      - supports-color
-
   '@wordpress/babel-preset-default@6.17.0':
     dependencies:
       '@babel/core': 7.26.0
@@ -42397,8 +42376,6 @@ snapshots:
       showdown: 1.9.1
       simple-html-tokenizer: 0.5.11
       uuid: 9.0.1
-
-  '@wordpress/browserslist-config@2.7.0': {}
 
   '@wordpress/browserslist-config@4.1.3': {}
 
@@ -44593,14 +44570,14 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.26.0)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.26.0)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
       eslint-plugin-import: 2.29.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)
-      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       eslint-plugin-jsdoc: 36.1.1(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@7.32.0)
       eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0(eslint@7.32.0))(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
@@ -47466,10 +47443,6 @@ snapshots:
       dequal: 2.0.3
 
   b4a@1.6.4: {}
-
-  babel-core@7.0.0-bridge.0(@babel/core@7.12.9):
-    dependencies:
-      '@babel/core': 7.12.9
 
   babel-core@7.0.0-bridge.0(@babel/core@7.26.0):
     dependencies:
@@ -51553,12 +51526,12 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
+  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript

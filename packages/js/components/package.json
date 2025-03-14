@@ -154,7 +154,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/babel-preset-default": "^6.17.0",
+		"@wordpress/babel-preset-default": "wp-6.6",
 		"@wordpress/browserslist-config": "wp-6.6",
 		"concurrently": "^7.6.0",
 		"css-loader": "^3.6.0",

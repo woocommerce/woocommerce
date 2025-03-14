@@ -31,7 +31,6 @@
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
-				"@wordpress/babel-preset-default",
 				"@wordpress/base-styles",
 				"@wordpress/block-editor",
 				"@wordpress/blocks",
@@ -225,7 +224,6 @@
 		{
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
-				"@wordpress/babel-preset-default",
 				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
