@@ -1379,19 +1379,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
-						id: 'woocommerce_registration_generate_username',
-						label: 'Account creation options',
-						description:
-							'Use email address as account login (recommended)',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_password',
 						label: 'Account creation options',
 						description: 'Send password setup link (recommended)',

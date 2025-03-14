@@ -35,12 +35,9 @@
 	display: flex;
 	align-items: center;
 	flex-direction: column;
-
+	padding: 0 20px;
 	--color-error: #cc1818; // used by some @automattic/components
 
-	@include breakpoint("<782px") {
-		padding: 0 20px;
-	}
 
 	.woocommerce-profiler-button-container {
 		width: 100%;
@@ -328,12 +325,18 @@
 .woocommerce-profiler-plugins {
 	display: flex;
 	flex-direction: column;
+
 	.woocommerce-profiler-plugins__content {
 		display: flex;
 		align-items: center;
 		align-self: center;
-		max-width: 1000px;
+		max-width: 1020px;
 		width: 100%;
+		padding: 0;
+
+		@media screen and (max-width: $break-xlarge) {
+			padding-inline: 20px;
+		}
 	}
 	.woocommerce-profiler-heading {
 		max-width: 615px;
@@ -350,41 +353,26 @@
 		}
 	}
 
-	$sticky-footer-height: 120px;
+	$sticky-footer-height: 157px;
 
 	.woocommerce-profiler-plugins__list {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		gap: 16px;
-		flex: 50%;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(374px, 500px));
+		gap: 20px;
+		justify-content: center;
+		width: 100%;
+
+		@include breakpoint("<782px") {
+			grid-template-columns: 1fr;
+		}
 
 		@mixin sticky-footer-scroll-padding {
 			padding-bottom: $sticky-footer-height + 32px;
 		}
 
-		@include breakpoint(">782px") {// sticky footer shouldn't apply to mobile layout
-			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
-			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
-			&.rows-1 {
-				@media screen and ( max-height: 520px ) {
-					@include sticky-footer-scroll-padding;
-				}
-			}
-			&.rows-2 {
-				@media screen and ( max-height: 650px ) {
-					@include sticky-footer-scroll-padding;
-				}
-			}
-			&.rows-3 {
-				@media screen and ( max-height: 780px ) {
-					@include sticky-footer-scroll-padding;
-				}
-			}
-			&.rows-4 {
-				@media screen and ( max-height: 910px ) {
-					@include sticky-footer-scroll-padding;
-				}
+		@include breakpoint(">782px") {
+			&.sticky-footer {
+				@include sticky-footer-scroll-padding;
 			}
 		}
 	}
@@ -392,7 +380,7 @@
 	.woocommerce-profiler-plugins-continue-button {
 		width: 200px;
 		height: 48px;
-		margin-top: 28px;
+		margin-top: 57px;
 		text-align: center;
 		display: block;
 		font-size: 14px;
@@ -417,6 +405,7 @@
 	.woocommerce-profiler-plugins-jetpack-agreement {
 		color: $gray-700;
 		font-size: 12px;
+		margin-block: 16px 24px;
 	}
 
 	.woocommerce-profiler-plugins__footer {
@@ -435,25 +424,8 @@
 		@include breakpoint(">782px") { // sticky footer shouldn't apply to mobile layout
 			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
 			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
-			&.rows-1 {
-				@media screen and ( max-height: 520px ) {
-					@include plugins-sticky-footer;
-				}
-			}
-			&.rows-2 {
-				@media screen and ( max-height: 650px ) {
-					@include plugins-sticky-footer;
-				}
-			}
-			&.rows-3 {
-				@media screen and ( max-height: 780px ) {
-					@include plugins-sticky-footer;
-				}
-			}
-			&.rows-4 {
-				@media screen and ( max-height: 910px ) {
-					@include plugins-sticky-footer;
-				}
+			&.sticky-footer {
+				@include plugins-sticky-footer;
 			}
 		}
 
