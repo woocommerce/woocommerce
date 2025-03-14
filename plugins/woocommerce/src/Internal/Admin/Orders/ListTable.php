@@ -814,7 +814,7 @@ class ListTable extends WP_List_Table {
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
 		$trash_status = esc_sql( OrderStatus::TRASH );
 
-		$first_year_month = $wpdb->get_row(
+		$first_year_month_gmt = $wpdb->get_row(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"
@@ -822,51 +822,54 @@ class ListTable extends WP_List_Table {
 					       MONTH( t.date_created_gmt ) AS month
 					FROM $orders_table t
 					WHERE type = %s
-					AND status != '$trash_status'
+					AND status != %s
 					ORDER BY year ASC, month ASC
 					LIMIT 1
 				",
-				$this->order_type
+				$this->order_type,
+				$trash_status
 			)
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
-		$end     = new \DateTime( 'now', wp_timezone() );
-		$options = array();
-
-		if ( is_object( $first_year_month ) ) {
-			$start = new \DateTime(
+		if ( is_object( $first_year_month_gmt ) ) {
+			$start = new \WC_DateTime(
 				sprintf(
 					'%s-%s-01',
-					$first_year_month->year,
-					$first_year_month->month
-				),
-				wp_timezone()
+					$first_year_month_gmt->year,
+					$first_year_month_gmt->month
+				)
 			);
+			$start->setTimezone( wp_timezone() ); // Adjust date and time to reflect site timezone.
+		} else {
+			$start = new \WC_DateTime( 'now', wp_timezone() );
+		}
 
-			// If, somehow, the oldest order date is in the future, swap the start and end of the range.
-			if ( $start > $end ) {
-				$end   = $start;
-				$start = new \DateTime( 'now', wp_timezone() );
-			}
+		$end     = new \WC_DateTime( 'now', wp_timezone() );
+		$options = array();
 
-			while (
-				$start->format( 'Y' ) < $end->format( 'Y' )
-				|| $start->format( 'n' ) < $end->format( 'n' )
-			) {
-				$option        = new \stdClass();
-				$option->year  = $start->format( 'Y' );
-				$option->month = $start->format( 'n' );
-				$options[]     = $option;
+		// If, somehow, the oldest order date is in the future, swap the start and end of the range.
+		if ( $start > $end ) {
+			$end   = $start;
+			$start = new \WC_DateTime( 'now', wp_timezone() );
+		}
 
-				$start->add( new \DateInterval( 'P1M' ) );
-			}
+		while (
+			$start->date( 'Y' ) < $end->date( 'Y' )
+			|| $start->date( 'n' ) < $end->date( 'n' )
+		) {
+			$option        = new \stdClass();
+			$option->year  = $start->date( 'Y' );
+			$option->month = $start->date( 'n' );
+			$options[]     = $option;
+
+			$start->add( new \DateInterval( 'P1M' ) );
 		}
 
 		// Add in the current year-month.
 		$option        = new \stdClass();
-		$option->year  = $end->format( 'Y' );
-		$option->month = $end->format( 'n' );
+		$option->year  = $end->date( 'Y' );
+		$option->month = $end->date( 'n' );
 		$options[]     = $option;
 
 		return array_reverse( $options );

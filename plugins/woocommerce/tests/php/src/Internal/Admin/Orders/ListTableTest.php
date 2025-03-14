@@ -3,6 +3,7 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
@@ -78,6 +79,25 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The available months options don't take into account trashed orders.
+	 */
+	public function test_get_months_filter_options_skip_trash() {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_date_created( new \WC_DateTime( '2025-01-02 00:00:00' ) );
+		$order->set_status( OrderStatus::TRASH );
+		$order->save();
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_date_created( new \WC_DateTime( '2025-02-02 00:00:00' ) );
+		$order->save();
+
+		$year_months = $this->call_get_months_filter_options( $this->sut );
+
+		$this->assertEquals( 2025, end( $year_months )->year );
+		$this->assertEquals( 2, end( $year_months )->month );
+	}
+
+	/**
 	 * @testdox The months filter options works as expected with only one month.
 	 */
 	public function test_get_months_filter_options_single_month() {
@@ -88,6 +108,25 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $year_months );
 		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
 		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
+	}
+
+	/**
+	 * @testdox The available months options are based on the site's timezone, rather than UTC/GMT.
+	 */
+	public function test_get_months_filter_options_timezone_edge() {
+		update_option( 'gmt_offset', '-5' );
+
+		$date  = new \WC_DateTime( '2024-12-31 22:00:00', wp_timezone() ); // 2025-01-01 01:00:00 in UTC.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_date_created( $date );
+		$order->save();
+
+		$year_months = $this->call_get_months_filter_options( $this->sut );
+
+		$this->assertEquals( 2024, end( $year_months )->year );
+		$this->assertEquals( 12, end( $year_months )->month );
+
+		delete_option( 'gmt_offset' );
 	}
 
 	/**
