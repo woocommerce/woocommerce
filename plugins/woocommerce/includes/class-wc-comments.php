@@ -47,8 +47,9 @@ class WC_Comments {
 
 		// Secure potential remaining Action Logs.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_action_log_comments' ), 10, 2 );
+		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_action_log_comments_from_feed_where' ) );
 
-		// Exclude product reviews.
+		// Exclude product reviews from general comments.
 		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 2 );
 
 		// Count comments.
@@ -123,7 +124,7 @@ class WC_Comments {
 	 * @return string
 	 */
 	public static function exclude_order_comments_from_feed_where( $where ) {
-		return $where . ( $where ? ' AND ' : '' ) . " comment_type != 'order_note' ";
+		return $where . ( trim( $where ) ? ' AND ' : '' ) . " comment_type != 'order_note' ";
 	}
 
 	/**
@@ -149,14 +150,14 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS.
+	 * Exclude action_log comments from queries and RSS.
 	 *
 	 * @since  2.1
 	 * @param  string $where The WHERE clause of the query.
 	 * @return string
 	 */
-	public static function exclude_webhook_comments_from_feed_where( $where ) {
-		return $where . ( $where ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
+	public static function exclude_action_log_comments_from_feed_where( $where ) {
+		return $where . ( trim( $where ) ? ' AND ' : '' ) . " comment_type != 'action_log' ";
 	}
 
 	/**
@@ -295,20 +296,14 @@ class WC_Comments {
 	 * is called.
 	 */
 	public static function delete_comments_count_cache() {
-		if ( wp_cache_supports( 'flush_group' ) ) {
-			wp_cache_flush_group( self::COMMENT_COUNT_CACHE_GROUP );
-		} else {
-			$comment_statuses = array(
-				'approved',
-				'unapproved',
-				'spam',
-				'trash',
-				'post-trashed',
-			);
-			foreach ( $comment_statuses as $comment_status ) {
-				wp_cache_delete( 'wc_count_comments_' . $comment_status, self::COMMENT_COUNT_CACHE_GROUP );
-			}
-		}
+		$comment_status_keys = array(
+			'wc_count_comments_approved',
+			'wc_count_comments_unapproved',
+			'wc_count_comments_spam',
+			'wc_count_comments_trash',
+			'wc_count_comments_post-trashed',
+		);
+		wp_cache_delete_multiple( $comment_status_keys, self::COMMENT_COUNT_CACHE_GROUP );
 	}
 
 	/**

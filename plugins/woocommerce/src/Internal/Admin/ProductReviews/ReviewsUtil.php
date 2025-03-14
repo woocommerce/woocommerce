@@ -46,7 +46,7 @@ class ReviewsUtil {
 
 		if ( ! empty( $comment_query->query_vars['post__in'] ) ) {
 			$post_ids = wp_parse_id_list( $comment_query->query_vars['post__in'] );
-			_prime_post_caches( $post_ids );
+			_prime_post_caches( $post_ids, false, false );
 			foreach ( $post_ids as $post_id ) {
 				if ( 'product' === get_post_type( $post_id ) ) {
 					return $clauses;
