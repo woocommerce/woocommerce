@@ -1,0 +1,9 @@
+.wc-block-product-gallery-thumbnails__scrollable {
+	overflow: hidden;
+}
+
+// Using Disabled from `@wordpress/components` breaks the layout
+// as we're relying on flex.
+.wc-block-product-gallery-thumbnails__thumbnail {
+	pointer-events: none;
+}
