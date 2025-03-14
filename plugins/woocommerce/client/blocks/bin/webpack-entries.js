@@ -103,9 +103,6 @@ const blocks = {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
 	},
-	'product-gallery-pager': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
-	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
 	},

@@ -10,12 +10,10 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import largeImageNextPreviousButtonMetadata from '../product-gallery-large-image-next-previous/block.json';
-import pagerMetadata from '../product-gallery-pager/block.json';
 import './editor.scss';
 
 const getInnerBlocksTemplate = () => [
 	[ largeImageNextPreviousButtonMetadata.name ],
-	[ pagerMetadata.name ],
 ];
 
 const Placeholder = memo( () => {

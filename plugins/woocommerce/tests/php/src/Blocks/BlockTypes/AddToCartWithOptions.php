@@ -65,6 +65,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		// Single Products contain the Add to Cart button and the quantity selector blocks.
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-button', $markup, 'The Simple Product Add to Cart with Options contains the product button block.' );
+		$this->assertStringContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button reads "Add to cart".' );
 		$this->assertStringContainsString( 'woocommerce/add-to-cart-with-options-quantity-selector', $markup, 'The Simple Product Add to Cart with Options contains the quantity selector block.' );
 
 		$product    = new \WC_Product_External();
@@ -73,6 +74,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		// External Products contain the Add to Cart button block but do not contain the quantity selector block.
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-button', $markup, 'The External Product Add to Cart with Options contains the product button block.' );
+		$this->assertStringContainsString( 'Buy product', $markup, 'The External Product Add to Cart Button reads "Buy product".' );
 		$this->assertStringNotContainsString( 'woocommerce/add-to-cart-with-options-quantity-selector', $markup, 'The External Product Add to Cart with Options does not contain the quantity selector block.' );
 
 		$product    = new WC_Product_Custom();
