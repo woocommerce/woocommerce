@@ -138,110 +138,122 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_TotalPaymentsVolumeProcessor ext
 	}
 
 	/**
-	 * Test validation with invalid data.
+	 * Test validation with invalid data using a data provider.
+	 *
+	 * @param array  $rule    The rule to validate.
+	 * @param string $message The message to display.
+	 *
+	 * @dataProvider data_provider_invalid_data
 	 */
-	public function test_validate_invalid_data() {
-		$mock = $this->getMockBuilder( TotalPaymentsVolumeProcessor::class )
-			->onlyMethods( array( 'get_reports_query' ) )
-			->getMock();
+	public function test_validate_invalid_data( $rule, $message ) {
+		$processor = new TotalPaymentsVolumeProcessor();
+		$this->assertFalse( $processor->validate( (object) $rule ), $message );
+	}
 
-		$this->assertFalse( $mock->validate( (object) array() ) );
-		$this->assertFalse(
-			$mock->validate(
-				(object) array(
+	/**
+	 * Data provider for invalid data validation tests.
+	 *
+	 * @return array
+	 */
+	public function data_provider_invalid_data() {
+		return array(
+			'empty_rule'                              => array(
+				array(),
+				'Validation should fail for an empty rule.',
+			),
+			'missing_value_and_operation'             => array(
+				array(
 					'timeframe' => 'last_week',
-				)
-			)
-		);
-
-		$this->assertFalse(
-			$mock->validate(
-				(object) array(
+				),
+				'Validation should fail when value and operation are missing.',
+			),
+			'invalid_timeframe'                       => array(
+				array(
 					'timeframe' => 'invalid',
 					'value'     => 100,
 					'operation' => '=',
-				)
-			)
-		);
-
-		// Test invalid range operation cases.
-		$this->assertFalse(
-			$mock->validate(
-				(object) array(
+				),
+				'Validation should fail for an invalid timeframe.',
+			),
+			'range_operation_with_non_array_value'    => array(
+				array(
 					'timeframe' => 'last_week',
-					'value'     => 100, // Should be array for range.
+					'value'     => 100,
 					'operation' => 'range',
-				)
-			)
-		);
-		$this->assertFalse(
-			$mock->validate(
-				(object) array(
+				),
+				'Validation should fail when range operation is used with non-array value.',
+			),
+			'range_operation_with_short_array'        => array(
+				array(
 					'timeframe' => 'last_week',
-					'value'     => array( 100 ), // Array too short.
+					'value'     => array( 100 ),
 					'operation' => 'range',
-				)
-			)
-		);
-		$this->assertFalse(
-			$mock->validate(
-				(object) array(
+				),
+				'Validation should fail when range operation is used with an array that is too short.',
+			),
+			'range_operation_with_long_array'         => array(
+				array(
 					'timeframe' => 'last_week',
-					'value'     => array( 100, 200, 300 ), // Array too long.
+					'value'     => array( 100, 200, 300 ),
 					'operation' => 'range',
-				)
-			)
-		);
-		$this->assertFalse(
-			$mock->validate(
-				(object) array(
+				),
+				'Validation should fail when range operation is used with an array that is too long.',
+			),
+			'range_operation_with_non_numeric_values' => array(
+				array(
 					'timeframe' => 'last_week',
-					'value'     => array( 'invalid', 200 ), // Non-numeric values.
+					'value'     => array( 'invalid', 200 ),
 					'operation' => 'range',
-				)
-			)
+				),
+				'Validation should fail when range operation is used with non-numeric values.',
+			),
 		);
 	}
 
 	/**
 	 * Test validation with valid data.
+	 *
+	 * @param object $rule    The rule to validate.
+	 * @param string $message The message to display.
+	 *
+	 * @dataProvider data_provider_valid_data
 	 */
-	public function test_validate_valid_data() {
-		$mock = $this->getMockBuilder( TotalPaymentsVolumeProcessor::class )
-			->onlyMethods( array( 'get_reports_query' ) )
-			->getMock();
+	public function test_validate_valid_data( $rule, $message ) {
+		$processor = new TotalPaymentsVolumeProcessor();
+		$this->assertTrue( $processor->validate( $rule ), $message );
+	}
 
-		// Test regular comparison operation.
-		$this->assertTrue(
-			$mock->validate(
+	/**
+	 * Data provider for test_validate_valid_data.
+	 *
+	 * @return array
+	 */
+	public function data_provider_valid_data() {
+		return array(
+			'regular_comparison_operation'        => array(
 				(object) array(
 					'timeframe' => 'last_week',
 					'value'     => 100,
 					'operation' => '=',
-				)
-			)
-		);
-
-		// Test range operation.
-		$this->assertTrue(
-			$mock->validate(
+				),
+				'Validation should pass for regular comparison operation.',
+			),
+			'range_operation'                     => array(
 				(object) array(
 					'timeframe' => 'last_week',
 					'value'     => array( 0, 5000000 ),
 					'operation' => 'range',
-				)
-			)
-		);
-
-		// Test range operation with decimal values.
-		$this->assertTrue(
-			$mock->validate(
+				),
+				'Validation should pass for range operation with integer values.',
+			),
+			'range_operation_with_decimal_values' => array(
 				(object) array(
 					'timeframe' => 'last_week',
 					'value'     => array( 0.5, 5000000.50 ),
 					'operation' => 'range',
-				)
-			)
+				),
+				'Validation should pass for range operation with decimal values.',
+			),
 		);
 	}
 
