@@ -75,6 +75,7 @@ export const Inspector = ( {
 			<InspectorControls key="inspector">
 				<PanelBody title={ __( 'Attribute', 'woocommerce' ) }>
 					<ComboboxControl
+						__nextHasNoMarginBottom
 						options={ ATTRIBUTES.map( ( item ) => ( {
 							value: item.attribute_id,
 							label: item.attribute_label,
@@ -123,6 +124,7 @@ export const Inspector = ( {
 							'Determine the order of filter options.',
 							'woocommerce'
 						) }
+						__nextHasNoMarginBottom
 					/>
 					<ToggleGroupControl
 						label={ __( 'Logic', 'woocommerce' ) }
@@ -131,6 +133,8 @@ export const Inspector = ( {
 						onChange={ ( value: BlockAttributes[ 'queryType' ] ) =>
 							setAttributes( { queryType: value } )
 						}
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 						style={ { width: '100%' } }
 						help={
 							queryType === 'and'
@@ -165,6 +169,8 @@ export const Inspector = ( {
 					<ToggleGroupControl
 						value={ displayStyle }
 						isBlock
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 						onChange={ (
 							value: BlockAttributes[ 'displayStyle' ]
 						) => {
@@ -214,6 +220,7 @@ export const Inspector = ( {
 						onChange={ ( value ) =>
 							setAttributes( { showCounts: value } )
 						}
+						__nextHasNoMarginBottom
 					/>
 					<ToggleControl
 						label={ __( 'Empty filter options', 'woocommerce' ) }
@@ -221,6 +228,7 @@ export const Inspector = ( {
 						onChange={ ( value ) =>
 							setAttributes( { hideEmpty: ! value } )
 						}
+						__nextHasNoMarginBottom
 					/>
 				</PanelBody>
 			</InspectorControls>

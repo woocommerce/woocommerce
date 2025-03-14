@@ -13,12 +13,10 @@
 	},
 	"env": {
 		"development": {
-			"port": 8887,
-			"phpmyadminPort": 9070
+			"port": 8887
 		},
 		"tests": {
 			"port": 8087,
-			"phpmyadminPort": 9073,
 			"plugins": [
 				"."
 			],

@@ -147,18 +147,6 @@ export class ProductGalleryPage {
 		return this.editor.getBlockByName( blockName );
 	}
 
-	async getPagerBlock( { page }: { page: 'frontend' | 'editor' } ) {
-		const blockName = 'woocommerce/product-gallery-pager';
-		if ( page === 'frontend' ) {
-			return (
-				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
-				has: this.page.locator( ':visible' ),
-			} );
-		}
-		return this.editor.getBlockByName( blockName );
-	}
-
 	async getBlock( { page }: { page: 'frontend' | 'editor' } ) {
 		const blockName = 'woocommerce/product-gallery';
 		if ( page === 'frontend' ) {

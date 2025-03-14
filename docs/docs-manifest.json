@@ -82,7 +82,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "cc5157b6c46624a72effbb16ab4d25165c0d096e9bf78eb7af0f16fe2e20d266",
+          "hash": "2c9248ef789ef0bcf178500ef9b9792736e823bd73d222a512a80ecbbbf6cfbe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -736,6 +736,22 @@
           "hash": "9a3624adc70b6a30bc89ecd86519909c90335f75fcbc925e5b417fac20712e54",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/data-management/crud-objects.md",
           "id": "eaf29a28f438c0d03b4e7056dc3b6eaead4937b5"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nThis section provides documentation about the email preview system in WooCommerce\n",
+      "category_slug": "emails",
+      "category_title": "Emails",
+      "posts": [
+        {
+          "post_title": "Email Preview Integration",
+          "menu_title": "Email Preview Integration",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-preview.md",
+          "hash": "6d3fe596cb0b40babdbe14dd035bf374fbe696bd5a64b6c2c608a29c18e733e5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-preview.md",
+          "id": "b84b4684c6a48a280d57969773134698bc04401a"
         }
       ],
       "categories": []
@@ -1976,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "599c9356484835c43a80a4a03c99e25b5b3cbc32a97b22f737ef6f3a8235a230"
+  "hash": "3bd39c7331b1617369da3dde77d207b63f30fe4273d0b7f100890256a3a71eae"
 }

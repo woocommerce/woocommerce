@@ -27,7 +27,7 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 				},
 				[
 					[
-						'woocommerce/add-to-cart-with-options-quantity-selector',
+						'woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta',
 					],
 					[
 						'core/post-title',

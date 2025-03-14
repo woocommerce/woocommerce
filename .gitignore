@@ -113,3 +113,4 @@ changes.json
 
 # Cursor related files
 .cursorignore
+.cursorindexingignore
