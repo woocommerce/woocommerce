@@ -36,10 +36,17 @@ export class Editor extends CoreEditor {
 	 * Opens the global inserter.
 	 */
 	async openGlobalBlockInserter() {
-		const toggleButton = this.page.getByRole( 'button', {
-			name: 'Block Inserter',
-			exact: true,
-		} );
+		const toggleButton = this.page
+			.getByRole( 'button', {
+				name: 'Block Inserter',
+				exact: true,
+			} )
+			// Keep WP v6.7 compatibility.
+			.or(
+				this.page.getByRole( 'button', {
+					name: 'Toggle block inserter',
+				} )
+			);
 
 		const isOpen =
 			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
