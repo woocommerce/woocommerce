@@ -229,6 +229,7 @@ $dialog-padding: 20px;
 		flex-direction: column;
 	}
 
+	// These are min - max range values for thumbnails size.
 	@for $i from 10 through 50 {
 		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
 			$gap-width: $thumbnails-gap * ($i - 1);
@@ -246,6 +247,7 @@ $dialog-padding: 20px;
 		flex-direction: row;
 	}
 
+	// These are min - max range values for thumbnails size.
 	@for $i from 10 through 50 {
 		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
 			width: 100%;
