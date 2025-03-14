@@ -1,5 +1,6 @@
 $admin-bar-height: 32px;
-$thumbnails-gap: 15px;
+$thumbnails-gradient-size: 20%;
+$thumbnails-gap: 2%;
 $thumbnails-border-width: 1px;
 $dialog-padding: 20px;
 
@@ -143,7 +144,6 @@ $dialog-padding: 20px;
 }
 
 .wc-block-product-gallery-thumbnails {
-	$gradient-size: 15%;
 	position: relative;
 
 	&__scrollable {
@@ -172,26 +172,26 @@ $dialog-padding: 20px;
 	&:before, &:after {
 		content: '';
 		position: absolute;
-		display: none;
-		transition: display 0.1s linear;
+		opacity: 0;
+		transition: opacity 0.2s linear;
 	}
 
 	&.wc-block-product-gallery-thumbnails--overflow {
 		&-top:before {
 			top: 0;
 			left: 0;
-			height: $gradient-size;
+			height: $thumbnails-gradient-size;
 			width: 100%;
-			display: block;
+			opacity: 1;
 			background: linear-gradient(to bottom, var(--wp--preset--color--base) 25%, transparent);
 		}
 
 		&-bottom:after {
 			bottom: 0;
 			left: 0;
-			height: $gradient-size;
+			height: $thumbnails-gradient-size;
 			width: 100%;
-			display: block;
+			opacity: 1;
 			background: linear-gradient(to top, var(--wp--preset--color--base) 25%, transparent);
 		}
 
@@ -199,8 +199,8 @@ $dialog-padding: 20px;
 			top: 0;
 			left: 0;
 			height: 100%;
-			width: $gradient-size;
-			display: block;
+			width: $thumbnails-gradient-size;
+			opacity: 1;
 			background: linear-gradient(to right, var(--wp--preset--color--base) 25%, transparent);
 
 		}
@@ -209,8 +209,8 @@ $dialog-padding: 20px;
 			top: 0;
 			right: 0;
 			height: 100%;
-			width: $gradient-size;
-			display: block;
+			width: $thumbnails-gradient-size;
+			opacity: 1;
 			background: linear-gradient(to left, var(--wp--preset--color--base) 25%, transparent);
 		}
 	}
