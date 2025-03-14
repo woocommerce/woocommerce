@@ -146,13 +146,6 @@ $dialog-padding: 20px;
 	display: flex;
 	gap: $thumbnails-gap;
 
-	&__image {
-		cursor: pointer;
-		max-width: 100%;
-		aspect-ratio: 1 / 1;
-		object-fit: contain;
-	}
-
 	&__thumbnail {
 		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
 		display: flex;
@@ -164,6 +157,13 @@ $dialog-padding: 20px;
 		aspect-ratio: 1 / 1;
 	}
 
+	&__thumbnail__image {
+		cursor: pointer;
+		max-width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
+	}
+
 	&__thumbnail__overlay {
 		container-type: inline-size;
 		position: absolute;
@@ -171,7 +171,7 @@ $dialog-padding: 20px;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		display: flex;
+		display: none;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
@@ -180,6 +180,9 @@ $dialog-padding: 20px;
 		background-color: rgba(0, 0, 0, 0.4);
 		line-height: 1.5;
 
+		&[visible="true"] {
+			display: flex;
+		}
 
 		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
 			font-size: 1.2rem;
