@@ -13,6 +13,7 @@ import type { StorePart } from '@woocommerce/utils';
 /**
  * Internal dependencies
  */
+import { checkOverflow } from './utils';
 import type { ImageDataObject, ImageDataItem } from './types';
 
 export interface ProductGalleryContext {
@@ -330,27 +331,14 @@ const productGallery = {
 			context.touchCurrentX = 0;
 		},
 		onScroll: () => {
-			const marginError = 3;
-			const scrollableElement = getElement()?.ref as HTMLElement;
-			if ( ! scrollableElement ) {
-				return;
-			}
-			const {
-				scrollTop,
-				scrollHeight,
-				clientHeight,
-				scrollLeft,
-				scrollWidth,
-				clientWidth,
-			} = scrollableElement;
-
 			const context = getContext();
-			context.overflowTop = scrollTop > marginError;
-			context.overflowBottom =
-				scrollTop + clientHeight < scrollHeight - marginError;
-			context.overflowLeft = scrollLeft > marginError;
-			context.overflowRight =
-				scrollLeft + clientWidth < scrollWidth - marginError;
+			const scrollableElement = getElement()?.ref as HTMLElement;
+			const overflowState = checkOverflow( scrollableElement );
+
+			context.overflowTop = overflowState.overflowTop;
+			context.overflowBottom = overflowState.overflowBottom;
+			context.overflowLeft = overflowState.overflowLeft;
+			context.overflowRight = overflowState.overflowRight;
 		},
 	},
 	callbacks: {
