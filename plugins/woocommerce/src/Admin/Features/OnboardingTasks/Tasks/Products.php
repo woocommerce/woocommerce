@@ -191,7 +191,7 @@ class Products extends Task {
 	/**
 	 * Set the has products transient if the product qualifies as a user created product.
 	 *
-	 * @param int $product_id Product ID.
+	 * @param int        $product_id Product ID.
 	 * @param WC_Product $product Product object.
 	 */
 	public function maybe_set_has_product_transient( $product_id, $product ) {
@@ -209,8 +209,8 @@ class Products extends Task {
 	 */
 	private function is_valid_product( $product ) {
 		return ProductStatus::PUBLISH === $product->get_status() &&
-			! $product->get_meta( '_headstart_post' ) &&
-			get_post_meta( $product->get_id(), '_edit_last', true );
+			( ! $product->get_meta( '_headstart_post' ) ||
+			get_post_meta( $product->get_id(), '_edit_last', true ) );
 	}
 
 	/**
@@ -234,7 +234,7 @@ class Products extends Task {
 				'relation' => 'OR',
 				array(
 					'key'     => '_headstart_post',
-					'compare' => 'NOT EXISTS',
+					'compare' => 'NOT NULL',
 				),
 				array(
 					'key'     => '_edit_last',
