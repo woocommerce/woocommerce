@@ -205,7 +205,6 @@ describe( 'AttributeTermInputField', () => {
 				/>
 			);
 		} );
-		// debug();
 		await waitFor( () => {
 			expect( screen.queryByText( 'spinner' ) ).toBeInTheDocument();
 		} );
