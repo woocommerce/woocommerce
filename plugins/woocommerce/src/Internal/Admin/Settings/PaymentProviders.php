@@ -830,12 +830,22 @@ class PaymentProviders {
 				),
 				true
 			) ) {
-				$gateway_details['title']       = $suggestion['title'];
-				$gateway_details['description'] = $suggestion['description'];
+				if ( ! empty( $suggestion['title'] ) ) {
+					$gateway_details['title'] = $suggestion['title'];
+				}
+
+				if ( ! empty( $suggestion['description'] ) ) {
+					$gateway_details['description'] = $suggestion['description'];
+				}
 			}
 
-			$gateway_details['icon']  = $suggestion['icon'];
-			$gateway_details['image'] = $suggestion['image'];
+			if ( ! empty( $suggestion['icon'] ) ) {
+				$gateway_details['icon'] = $suggestion['icon'];
+			}
+
+			if ( ! empty( $suggestion['image'] ) ) {
+				$gateway_details['image'] = $suggestion['image'];
+			}
 
 			if ( empty( $gateway_details['links'] ) ) {
 				$gateway_details['links'] = $suggestion['links'];
