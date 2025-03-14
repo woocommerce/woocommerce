@@ -37,9 +37,9 @@ require WC_ABSPATH . 'includes/wc-webhook-functions.php';
 /**
  * Filters on data used in admin and frontend.
  */
-foreach ( array('woocommerce_coupon_code', 'woocommerce_coupon_code_without_lower') as $filter ) {
-    add_filter( $filter, 'html_entity_decode' );
-    add_filter( $filter, 'wc_sanitize_coupon_code' );
+foreach ( array( 'woocommerce_coupon_code', 'woocommerce_coupon_code_without_lower' ) as $filter ) {
+	add_filter( $filter, 'html_entity_decode' );
+	add_filter( $filter, 'wc_sanitize_coupon_code' );
 }
 add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
