@@ -3373,11 +3373,11 @@ class PaymentExtensionSuggestions {
 		$standardized['id']          = $extension_details['id'];
 		$standardized['_priority']   = $extension_details['_priority'];
 		$standardized['_type']       = $extension_details['_type'];
-		$standardized['title']       = $extension_details['title'];
-		$standardized['description'] = $extension_details['description'];
 		$standardized['plugin']      = $extension_details['plugin'];
 
 		// Optional fields.
+		$standardized['title']       = $extension_details['title'] ?? '';
+		$standardized['description'] = $extension_details['description'] ?? '';
 		$standardized['image']      = $extension_details['image'] ?? '';
 		$standardized['icon']       = $extension_details['icon'] ?? '';
 		$standardized['links']      = $extension_details['links'] ?? array();
