@@ -233,7 +233,7 @@ test.describe(
 		test( 'should see and sort tags page with all the products', async ( {
 			page,
 		} ) => {
-			await page.goto( 'shop/' );
+			await page.goto( 'shop/?orderby=date' );
 			await page.locator( `text=${ simpleProductName } 1` ).click();
 			await page.getByRole( 'link', { name: productTagName1 } ).click();
 			await expect(
