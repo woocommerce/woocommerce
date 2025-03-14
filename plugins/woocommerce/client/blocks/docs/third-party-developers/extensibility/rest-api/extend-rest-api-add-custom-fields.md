@@ -103,7 +103,7 @@ Screenshots of Redux Dev tool showing the data store before and after the setExt
 
 | Before | After |
 | ------ | ----- |
-|    <img width="713" alt="image" src="https://github.com/woocommerce/woocommerce-blocks/assets/14235870/948581f5-fdc2-4df1-963f-9aeb4b18b042">    |    <img width="723" alt="image" src="https://github.com/woocommerce/woocommerce-blocks/assets/14235870/ddc7dbe7-3fad-44cd-bd19-ce78bc49b951">   |
+| ![Redux Dev tool showing the data store before the setExtensionData call](https://github.com/woocommerce/woocommerce-blocks/assets/14235870/948581f5-fdc2-4df1-963f-9aeb4b18b042) | ![Redux Dev tool showing the data store  after the setExtensionData call](https://github.com/woocommerce/woocommerce-blocks/assets/14235870/ddc7dbe7-3fad-44cd-bd19-ce78bc49b951) |
 
 ### 4. Processing the Checkout POST Request
 
