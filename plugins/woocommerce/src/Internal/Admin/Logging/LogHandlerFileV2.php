@@ -49,6 +49,8 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
+		$context = (array) $context;
+
 		if ( isset( $context['source'] ) && is_string( $context['source'] ) && strlen( $context['source'] ) >= 3 ) {
 			$source = sanitize_title( trim( $context['source'] ) );
 		} else {
@@ -85,9 +87,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		}
 
 		$context_for_entry = $context;
-		if ( is_array( $context_for_entry ) ) {
-			unset( $context_for_entry['source'] );
-		}
+		unset( $context_for_entry['source'] );
 
 		if ( ! empty( $context_for_entry ) ) {
 			$formatted_context = wp_json_encode( $context_for_entry, JSON_UNESCAPED_UNICODE );
@@ -247,7 +247,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 
 		$files = array_filter(
 			$files,
-			function( $file ) use ( $timestamp ) {
+			function ( $file ) use ( $timestamp ) {
 				/**
 				 * Allows preventing an expired log file from being deleted.
 				 *
