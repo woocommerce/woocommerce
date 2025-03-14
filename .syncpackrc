@@ -35,7 +35,6 @@
 				"@wordpress/base-styles",
 				"@wordpress/block-editor",
 				"@wordpress/blocks",
-				"@wordpress/browserslist-config",
 				"@wordpress/components",
 				"@wordpress/compose",
 				"@wordpress/core-data",
