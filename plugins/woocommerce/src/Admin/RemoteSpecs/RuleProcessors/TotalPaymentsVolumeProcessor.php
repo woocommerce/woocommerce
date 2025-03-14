@@ -73,6 +73,10 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 			return false;
 		}
 
+		if ( ! isset( $rule->operation ) ) {
+			return false;
+		}
+
 		// If the operation is range, the value must be an array of two numbers.
 		if ( 'range' === $rule->operation ) {
 			if ( ! is_array( $rule->value ) || count( $rule->value ) !== 2 ) {
