@@ -6,7 +6,6 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
-	getConfig,
 } from '@wordpress/interactivity';
 import type { StorePart } from '@woocommerce/utils';
 
@@ -28,10 +27,10 @@ export interface ProductGalleryContext {
 	userHasInteracted: boolean;
 	imageData: ImageDataObject;
 	image: ImageDataItem;
-	overflowTop: boolean;
-	overflowBottom: boolean;
-	overflowLeft: boolean;
-	overflowRight: boolean;
+	thumbnailsOverflowTop: boolean;
+	thumbnailsOverflowBottom: boolean;
+	thumbnailsOverflowLeft: boolean;
+	thumbnailsOverflowRight: boolean;
 }
 
 const getContext = ( ns?: string ) =>
@@ -333,10 +332,10 @@ const productGallery = {
 			const scrollableElement = getElement()?.ref as HTMLElement;
 			const overflowState = checkOverflow( scrollableElement );
 
-			context.overflowTop = overflowState.overflowTop;
-			context.overflowBottom = overflowState.overflowBottom;
-			context.overflowLeft = overflowState.overflowLeft;
-			context.overflowRight = overflowState.overflowRight;
+			context.thumbnailsOverflowTop = overflowState.overflowTop;
+			context.thumbnailsOverflowBottom = overflowState.overflowBottom;
+			context.thumbnailsOverflowLeft = overflowState.overflowLeft;
+			context.thumbnailsOverflowRight = overflowState.overflowRight;
 		},
 	},
 	callbacks: {
