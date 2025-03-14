@@ -1274,10 +1274,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
 		} elseif ( is_string( $raw_coupon ) ) {
-			$code   = wc_format_coupon_code( $raw_coupon, true );
+			$code   = wc_format_coupon_code( $raw_coupon );
 			$coupon = new WC_Coupon( $code );
 
-			if ( wc_strtolower( $coupon->get_code() ) !== wc_strtolower( $code ) ) {
+			if ( ! wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
 			}
 		} else {
@@ -1370,7 +1370,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Remove the coupon line.
 		foreach ( $coupons as $item_id => $coupon ) {
-			if ( wc_strtolower( $coupon->get_code() ) === wc_strtolower( $code ) ) {
+			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
 				$coupon_object->decrease_usage_count( $this->get_user_id() );

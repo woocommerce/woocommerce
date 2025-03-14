@@ -513,7 +513,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param string $code Coupon code.
 	 */
 	public function set_code( $code ) {
-		$this->set_prop( 'code', wc_format_coupon_code( $code, true ) );
+		$this->set_prop( 'code', wc_format_coupon_code( $code ) );
 	}
 
 	/**

@@ -360,21 +360,11 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Format a coupon code.
  *
- * Either format the coupon code with transforming to lowercase or skip the lowercase conversion.
- * Skipping the lowercase conversion is useful when coupon codes contain non-ASCII characters (like 'Å', 'Ö', 'Ü')
- * which can be negatively affected by the lowercase conversion, especially on sites using latin1 charset.
- *
  * @since  3.0.0
  * @param  string $value Coupon code to format.
- * @param  bool   $skip_lowercase Whether to skip the lowercase conversion.
  * @return string
  */
-function wc_format_coupon_code( $value, $skip_lowercase = false ) {
-	if ( $skip_lowercase ) {
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-		return apply_filters( 'woocommerce_coupon_code_without_lower', $value );
-		/* phpcs:enable */
-	}
+function wc_format_coupon_code( $value ) {
 	return apply_filters( 'woocommerce_coupon_code', $value );
 }
 

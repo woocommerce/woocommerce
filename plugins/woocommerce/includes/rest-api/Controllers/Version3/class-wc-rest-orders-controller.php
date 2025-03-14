@@ -67,7 +67,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$coupon_code = wc_format_coupon_code( wc_clean( $coupon_code ), true );
+			$coupon_code = wc_format_coupon_code( wc_clean( $coupon_code ) );
 			$coupon      = new WC_Coupon( $coupon_code );
 
 			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.

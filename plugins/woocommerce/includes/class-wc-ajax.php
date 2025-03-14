@@ -257,7 +257,7 @@ class WC_AJAX {
 		}
 
 		if ( ! StringUtil::is_null_or_whitespace( $coupon_code ) ) {
-			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $coupon_code ), true ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $coupon_code ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		} else {
 			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 		}
