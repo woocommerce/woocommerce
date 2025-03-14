@@ -14,8 +14,8 @@ const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
 
 ensureDirSync( LANGUAGES_DIR );
 
-const builtJsFiles = glob.sync( path.join( BUILD_DIR, '**/*.js' ) );
-const testFiles = glob.sync( path.join( TESTS_DIR, '**/*.{js,ts}' ) );
+const builtJsFiles = glob.globSync( path.join( BUILD_DIR, '**/*.js' ) );
+const testFiles = glob.globSync( path.join( TESTS_DIR, '**/*.{js,ts}' ) );
 
 // Scan the test files to collect translations used in the tests. We'll use this
 // to generate the test translations json files.
