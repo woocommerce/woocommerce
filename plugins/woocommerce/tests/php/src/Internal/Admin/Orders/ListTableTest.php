@@ -61,10 +61,10 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$year_months = $this->call_get_months_filter_options( $this->sut );
 
 		$this->assertCount( $expected_count, $year_months );
-		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
-		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
-		$this->assertEquals( end( $year_months )->year, 2020 );
-		$this->assertEquals( end( $year_months )->month, 3 );
+		$this->assertEquals( gmdate( 'Y', time() ), $year_months[0]->year );
+		$this->assertEquals( gmdate( 'n', time() ), $year_months[0]->month );
+		$this->assertEquals( 2020, end( $year_months )->year );
+		$this->assertEquals( 3, end( $year_months )->month );
 	}
 
 	/**
@@ -74,8 +74,8 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$year_months = $this->call_get_months_filter_options( $this->sut );
 
 		$this->assertCount( 1, $year_months );
-		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
-		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
+		$this->assertEquals( gmdate( 'Y', time() ), $year_months[0]->year );
+		$this->assertEquals( gmdate( 'n', time() ), $year_months[0]->month );
 	}
 
 	/**
@@ -106,8 +106,8 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$year_months = $this->call_get_months_filter_options( $this->sut );
 
 		$this->assertCount( 1, $year_months );
-		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
-		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
+		$this->assertEquals( gmdate( 'Y', time() ), $year_months[0]->year );
+		$this->assertEquals( gmdate( 'n', time() ), $year_months[0]->month );
 	}
 
 	/**
@@ -148,10 +148,10 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$year_months = $this->call_get_months_filter_options( $this->sut );
 
 		$this->assertCount( $expected_count, $year_months );
-		$this->assertEquals( $year_months[0]->year, $start_date->format( 'Y' ) );
-		$this->assertEquals( $year_months[0]->month, $start_date->format( 'n' ) );
-		$this->assertEquals( end( $year_months )->year, gmdate( 'Y', time() ) );
-		$this->assertEquals( end( $year_months )->month, gmdate( 'n', time() ) );
+		$this->assertEquals( $start_date->format( 'Y' ), $year_months[0]->year );
+		$this->assertEquals( $start_date->format( 'n' ), $year_months[0]->month );
+		$this->assertEquals( gmdate( 'Y', time() ), end( $year_months )->year );
+		$this->assertEquals( gmdate( 'n', time() ), end( $year_months )->month );
 	}
 
 	/**
