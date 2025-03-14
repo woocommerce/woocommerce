@@ -20,9 +20,6 @@ export const Edit = ( {
 	setAttributes,
 }: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
 	const { thumbnailSize } = attributes;
-	const minSize = 10;
-	const maxSize = 50;
-	const defSize = 33;
 
 	const scrollableRef = useRef< HTMLDivElement >( null );
 	const [ overflowState, setOverflowState ] = useState( {
@@ -55,11 +52,7 @@ export const Edit = ( {
 		};
 	}, [ thumbnailSize ] ); // Re-run when thumbnailSize changes as it affects layout
 
-	const thumbnailSizeValue =
-		Math.min(
-			Math.max( Number( thumbnailSize.replace( '%', '' ) ), minSize ),
-			maxSize
-		) || defSize;
+	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
 
 	const className = clsx(
 		'wc-block-product-gallery-thumbnails',

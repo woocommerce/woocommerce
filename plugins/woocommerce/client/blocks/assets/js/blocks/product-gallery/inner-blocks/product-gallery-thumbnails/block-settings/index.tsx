@@ -14,6 +14,10 @@ import {
  */
 import type { ProductGalleryThumbnailsSettingsProps } from '../types';
 
+const minValue = 10;
+const maxValue = 50;
+const defaultValue = 33;
+
 export const ProductGalleryThumbnailsBlockSettings = ( {
 	attributes,
 	setAttributes,
@@ -24,14 +28,21 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 		<UnitControl
 			label={ __( 'Thumbnail Size', 'woocommerce' ) }
 			value={ thumbnailSize }
-			onChange={ ( value: string | undefined ) =>
+			onChange={ ( value: string | undefined ) => {
+				const numberValue = Number(
+					value?.replace( '%', '' ) || defaultValue
+				);
+				const validated = Math.min(
+					Math.max( numberValue, minValue ),
+					maxValue
+				);
 				setAttributes( {
-					thumbnailSize: value || '33%',
-				} )
-			}
+					thumbnailSize: validated + '%',
+				} );
+			} }
 			units={ [ { value: '%', label: '%' } ] }
-			min={ 10 }
-			max={ 50 }
+			min={ minValue }
+			max={ maxValue }
 			step={ 1 }
 			size="default"
 			__next36pxDefaultSize
