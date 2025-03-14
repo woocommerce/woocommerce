@@ -91,7 +91,7 @@ export function editSetting(
 		dispatch( createUpdateSettingAction( groupId, settingId, value ) );
 
 		if ( save ) {
-			return dispatch.saveSetting( groupId, settingId );
+			return dispatch.saveEditedSetting( groupId, settingId );
 		}
 	};
 }
@@ -130,7 +130,7 @@ export function editSettings(
 		dispatch( editSettingsArray( groupId, updatesArray ) );
 
 		if ( save ) {
-			return dispatch.saveSettingsGroup( groupId );
+			return dispatch.saveEditedSettingsGroup( groupId );
 		}
 	};
 }
@@ -203,7 +203,7 @@ export const revertGroup = ( groupId: string ) => ( {
  * @param groupId - The group ID.
  * @return The action object.
  */
-export const saveSettingsGroup =
+export const saveEditedSettingsGroup =
 	( groupId: string ) =>
 	async ( { select, dispatch }: ThunkArgs ) => {
 		dispatch( setSaving( groupId, null, true ) );
@@ -289,7 +289,7 @@ export const saveSettingsGroup =
  * @param settingId - The setting ID.
  * @return The action object.
  */
-export const saveSetting =
+export const saveEditedSetting =
 	( groupId: string, settingId: string ) =>
 	async ( { select, dispatch }: ThunkArgs ) => {
 		// Check if this setting has any edits
@@ -339,7 +339,7 @@ export type ActionDispatchersForThunk = {
 	revertGroup: typeof revertGroup;
 	editSetting: typeof editSetting;
 	editSettings: typeof editSettings;
-	saveSetting: typeof saveSetting;
-	saveSettingsGroup: typeof saveSettingsGroup;
+	saveEditedSetting: typeof saveEditedSetting;
+	saveEditedSettingsGroup: typeof saveEditedSettingsGroup;
 	< T = Record< string, unknown > >( args: T ): void;
 };

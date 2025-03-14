@@ -210,14 +210,14 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'saveSetting', () => {
+	describe( 'saveEditedSetting', () => {
 		it( 'should not make API call if setting has no edits', async () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
 
 			await registry
 				.dispatch( STORE_NAME )
-				.saveSetting( groupId, settingId );
+				.saveEditedSetting( groupId, settingId );
 
 			expect( apiFetch ).not.toHaveBeenCalled();
 		} );
@@ -242,7 +242,7 @@ describe( 'setting-options actions', () => {
 
 			await registry
 				.dispatch( STORE_NAME )
-				.saveSetting( groupId, settingId );
+				.saveEditedSetting( groupId, settingId );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
 				path: expect.stringContaining( `${ groupId }/${ settingId }` ),
@@ -277,7 +277,7 @@ describe( 'setting-options actions', () => {
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.saveSetting( groupId, settingId )
+					.saveEditedSetting( groupId, settingId )
 			).rejects.toThrow( error );
 
 			// Verify error state
@@ -290,7 +290,7 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'saveSettingsGroup', () => {
+	describe( 'saveEditedSettingsGroup', () => {
 		it( 'should handle successful batch update', async () => {
 			const groupId = 'test-group';
 			const mockResults = {
@@ -318,7 +318,9 @@ describe( 'setting-options actions', () => {
 				{ id: 'setting2', value: 'value2' },
 			] );
 
-			await registry.dispatch( STORE_NAME ).saveSettingsGroup( groupId );
+			await registry
+				.dispatch( STORE_NAME )
+				.saveEditedSettingsGroup( groupId );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
 				path: expect.stringContaining( groupId ),
@@ -374,7 +376,9 @@ describe( 'setting-options actions', () => {
 			} );
 
 			await expect(
-				registry.dispatch( STORE_NAME ).saveSettingsGroup( groupId )
+				registry
+					.dispatch( STORE_NAME )
+					.saveEditedSettingsGroup( groupId )
 			).rejects.toThrow( 'Failed to update some settings' );
 
 			// Verify successful update
@@ -407,7 +411,9 @@ describe( 'setting-options actions', () => {
 			( apiFetch as unknown as jest.Mock ).mockRejectedValue( error );
 
 			await expect(
-				registry.dispatch( STORE_NAME ).saveSettingsGroup( groupId )
+				registry
+					.dispatch( STORE_NAME )
+					.saveEditedSettingsGroup( groupId )
 			).rejects.toThrow( error );
 
 			// Verify error state
@@ -418,7 +424,9 @@ describe( 'setting-options actions', () => {
 		it( 'should not make API call if group has no edits', async () => {
 			const groupId = 'test-group';
 
-			await registry.dispatch( STORE_NAME ).saveSettingsGroup( groupId );
+			await registry
+				.dispatch( STORE_NAME )
+				.saveEditedSettingsGroup( groupId );
 
 			expect( apiFetch ).not.toHaveBeenCalled();
 		} );

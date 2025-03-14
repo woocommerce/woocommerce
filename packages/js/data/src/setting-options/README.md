@@ -59,13 +59,13 @@ Reverts changes for a specific setting.
 
 Reverts all changes in a settings group.
 
-### `saveSettingsGroup( groupId: string )`
+### `saveEditedSettingsGroup( groupId: string )`
 
-Saves all changes in a settings group to the server.
+Saves all edited settings in a settings group to the server.
 
-### `saveSetting( groupId: string, settingId: string )`
+### `saveEditedSetting( groupId: string, settingId: string )`
 
-Saves changes for a specific setting to the server.
+Saves edited setting to the server.
 
 ## Selectors
 
