@@ -143,8 +143,6 @@ const productGallery = {
 
 			return processedImageData;
 		},
-		// TODO: This is a temporary solution to display the view all thumbnail.
-		// Will eventually be replaced by a slider where processedImageData can be used directly.
 		/**
 		 * The subset of processedImageData that is displayed in the thumbnails block.
 		 *
@@ -152,11 +150,11 @@ const productGallery = {
 		 */
 		get thumbnails() {
 			const { imageData } = getContext();
-			const { numberOfThumbnails } = getConfig();
 			const allImageIds = imageData?.image_ids || [];
-			return allImageIds
-				.slice( 0, numberOfThumbnails ) // Get only the visible thumbnails
-				.map( ( imageId ) => imageData?.images[ imageId ] ); // Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
+			// Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
+			return allImageIds.map(
+				( imageId ) => imageData?.images[ imageId ]
+			);
 		},
 	},
 	actions: {
