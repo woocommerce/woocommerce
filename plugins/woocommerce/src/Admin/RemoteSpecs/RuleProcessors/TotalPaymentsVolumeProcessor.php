@@ -1,9 +1,9 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Rule processor that passes when a store's payments volume exceeds a provided amount.
  */
+
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
