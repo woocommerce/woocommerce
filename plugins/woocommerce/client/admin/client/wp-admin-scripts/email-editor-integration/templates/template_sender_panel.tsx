@@ -3,8 +3,32 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Panel, PanelBody, PanelRow, TextControl } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 
 function TemplateSenderPanel() {
+	const [ woocommerce_template_data, setWoocommerceTemplateData ] =
+		useEntityProp( 'postType', 'wp_template', 'woocommerce_data' );
+
+	const handleFromNameChange = ( value: string ) => {
+		setWoocommerceTemplateData( {
+			...woocommerce_template_data,
+			sender_settings: {
+				...woocommerce_template_data?.sender_settings,
+				from_name: value,
+			},
+		} );
+	};
+
+	const handleFromAddressChange = ( value: string ) => {
+		setWoocommerceTemplateData( {
+			...woocommerce_template_data,
+			sender_settings: {
+				...woocommerce_template_data?.sender_settings,
+				from_address: value,
+			},
+		} );
+	};
+
 	return (
 		<Panel className="woocommerce-email-sidebar-template-settings-sender-options">
 			<PanelBody>
@@ -22,23 +46,27 @@ function TemplateSenderPanel() {
 				<PanelRow>
 					<TextControl
 						className="woocommerce-email-sidebar-template-settings-sender-options-input"
-						label={ __( '“from” name', 'woocommerce' ) }
+						label={ __( '"from" name', 'woocommerce' ) }
 						name="from_name"
-						value={ 'Store name' }
-						onChange={ ( value: string ) =>
-							console.log( 'value', value )
+						type="text"
+						value={
+							woocommerce_template_data?.sender_settings
+								?.from_name || ''
 						}
+						onChange={ handleFromNameChange }
 					/>
 				</PanelRow>
 				<PanelRow>
 					<TextControl
 						className="woocommerce-email-sidebar-template-settings-sender-options-input"
-						label={ __( '“from” email', 'woocommerce' ) }
+						label={ __( '"from" email', 'woocommerce' ) }
 						name="from_email"
-						value={ 'sender@example.com' }
-						onChange={ ( value: string ) =>
-							console.log( 'value', value )
+						type="email"
+						value={
+							woocommerce_template_data?.sender_settings
+								?.from_address || ''
 						}
+						onChange={ handleFromAddressChange }
 					/>
 				</PanelRow>
 			</PanelBody>
