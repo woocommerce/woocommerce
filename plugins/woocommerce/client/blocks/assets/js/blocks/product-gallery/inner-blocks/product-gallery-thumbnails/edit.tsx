@@ -38,7 +38,7 @@ export const Edit = ( {
 							key={ index }
 						>
 							<img
-								className="wc-block-product-gallery-thumbnails__image"
+								className="wc-block-product-gallery-thumbnails__thumbnail__image"
 								src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
 								alt=""
 							/>

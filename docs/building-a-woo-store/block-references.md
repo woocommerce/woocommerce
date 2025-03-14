@@ -1439,17 +1439,6 @@ Display next and previous buttons.
 -	**Supports:** layout (allowVerticalAlignment, default, ~~allowInheriting~~, ~~allowJustification~~, ~~allowOrientation~~)
 -	**Attributes:** 
 
-## Pager - woocommerce/product-gallery-pager
-
-Display the gallery pager in format "current image/total images".
-
--	**Name:** woocommerce/product-gallery-pager
--	**Category:** woocommerce
--   **Ancestor:** woocommerce/product-gallery
--   **Parent:** 
--	**Supports:** color (background, text), spacing (margin, padding), typography (fontSize, lineHeight, textAlign)
--	**Attributes:** 
-
 ## Thumbnails - woocommerce/product-gallery-thumbnails
 
 Display the Thumbnails of a product.

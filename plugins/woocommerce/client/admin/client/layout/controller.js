@@ -480,6 +480,10 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		item.href = href;
 
 		item.onclick = ( e ) => {
+			if ( e.ctrlKey || e.metaKey ) {
+				return;
+			}
+
 			e.preventDefault();
 			getHistory().push( href );
 		};
