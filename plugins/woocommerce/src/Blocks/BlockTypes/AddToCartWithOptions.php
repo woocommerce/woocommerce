@@ -68,7 +68,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$previous_product = $product;
 		$product          = wc_get_product( $post_id );
-		if ( ! $product instanceof \WC_Product ) {
+		if ( ! $product instanceof \WC_Product || ( ProductType::SIMPLE === $product->get_type() && ! $product->is_purchasable() ) ) {
 			$product = $previous_product;
 
 			return '';
