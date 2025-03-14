@@ -225,7 +225,6 @@ function wc_rest_urlencode_rfc3986( $value ) {
  * @return bool
  */
 function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_id = 0 ) {
-	return true;
 	$contexts = array(
 		'read'   => 'read_private_posts',
 		'create' => 'publish_posts',

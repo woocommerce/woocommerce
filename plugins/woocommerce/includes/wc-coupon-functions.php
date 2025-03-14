@@ -73,6 +73,7 @@ function wc_coupons_enabled() {
 
 /**
  * Check if two coupon codes are the same.
+ * Lowercasing to ensure case-insensitive comparison.
  *
  * @since 9.9.0
  *
