@@ -230,11 +230,20 @@ class Products extends Task {
 			'posts_per_page' => 1,
 			'no_found_rows'  => true,
 			'fields'         => 'ids',
-			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'meta_query'     => array(
 				'relation' => 'OR',
 				array(
-					'key'     => '_headstart_post',
-					'compare' => 'NOT NULL',
+					'relation' => 'OR',
+					array(
+						'key'     => '_headstart_post',
+						'value'   => null,
+						'compare' => 'IS',
+					),
+					array(
+						'key'     => '_headstart_post',
+						'compare' => 'NOT EXISTS',
+					),
 				),
 				array(
 					'key'     => '_edit_last',
