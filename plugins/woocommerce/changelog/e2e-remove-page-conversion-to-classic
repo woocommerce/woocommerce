@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: remove conversion of cart and checkout pages to shortcode

@@ -11,6 +11,8 @@ import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { applyFilters } from '@wordpress/hooks';
+import { pluginsStore } from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -28,6 +30,7 @@ import {
 	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
 	ImportCSVItem,
 	PrintfulAdvertProductPlacement,
+	SponsoredProductPlacementType,
 } from './constants';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
@@ -56,11 +59,19 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
-
 	const [
 		isConfirmingLoadSampleProducts,
 		setIsConfirmingLoadSampleProducts,
 	] = useState( false );
+
+	const { installedPlugins, isRequestingPlugins } = useSelect( ( select ) => {
+		const { getInstalledPlugins, isPluginsRequesting } =
+			select( pluginsStore );
+		return {
+			isRequestingPlugins: isPluginsRequesting( 'installPlugins' ),
+			installedPlugins: getInstalledPlugins(),
+		};
+	}, [] );
 
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
@@ -118,7 +129,6 @@ export const Products = () => {
 	}, [ surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord ] );
 
 	const footerStack = useMemo( () => {
-		const options = [];
 		const importCSVItemWithTimeRecord = {
 			...ImportCSVItem,
 			onClick: () => {
@@ -127,16 +137,19 @@ export const Products = () => {
 			},
 		};
 
-		options.push( importCSVItemWithTimeRecord );
+		const options: SponsoredProductPlacementType[] = [
+			importCSVItemWithTimeRecord,
+		];
 
 		if (
-			window.wcAdminFeatures &&
-			window.wcAdminFeatures.printful === true
+			!! window.wcAdminFeatures?.printful &&
+			! isRequestingPlugins &&
+			! installedPlugins.includes( 'printful-shipping-for-woocommerce' )
 		) {
 			options.push( PrintfulAdvertProductPlacement );
 		}
 		return options;
-	}, [ recordCompletionTime ] );
+	}, [ recordCompletionTime, isRequestingPlugins, installedPlugins ] );
 
 	return (
 		<div className="woocommerce-task-products">

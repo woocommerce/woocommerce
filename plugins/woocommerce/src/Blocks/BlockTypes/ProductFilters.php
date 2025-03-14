@@ -36,6 +36,12 @@ class ProductFilters extends AbstractBlock {
 		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
 		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
 		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
+
+		$canonical_url_no_pagination = get_pagenum_link( 1 );
+		if ( is_singular() ) {
+			$canonical_url_no_pagination = get_permalink();
+		}
+		$this->asset_data_registry->add( 'canonicalUrl', html_entity_decode( $canonical_url_no_pagination ) );
 	}
 
 	/**

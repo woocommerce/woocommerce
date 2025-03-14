@@ -9,11 +9,7 @@ import {
 	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	useState,
-	useEffect,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
@@ -106,15 +102,6 @@ const Blueprint = () => {
 		} ) );
 	};
 
-	useEffect( () => {
-		const saveButton = document.getElementsByClassName(
-			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
-			saveButton.style.display = 'none';
-		}
-	} );
-
 	return (
 		<div className="blueprint-settings-slotfill">
 			{ error && (
@@ -150,7 +137,7 @@ const Blueprint = () => {
 			<h4>{ __( 'Import', 'woocommerce' ) }</h4>
 			<p>
 				{ __(
-					'Import a .zip or .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
+					'Import .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
 					'woocommerce'
 				) }
 			</p>
