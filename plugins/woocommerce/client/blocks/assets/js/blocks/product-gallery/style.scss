@@ -143,6 +143,10 @@ $dialog-padding: 20px;
 	}
 }
 
+@mixin gradient($direction) {
+	background: linear-gradient(to $direction, var(--wp--preset--color--base) 25%, transparent);
+}
+
 .wc-block-product-gallery-thumbnails {
 	position: relative;
 
@@ -179,41 +183,38 @@ $dialog-padding: 20px;
 	}
 
 	&.wc-block-product-gallery-thumbnails--overflow {
-		&-top:before {
-			top: 0;
+		&-top:before, &-bottom:after {
 			left: 0;
 			height: $thumbnails-gradient-size;
 			width: 100%;
 			opacity: 1;
-			background: linear-gradient(to bottom, var(--wp--preset--color--base) 25%, transparent);
+		}
+
+		&-top:before {
+			top: 0;
+			@include gradient(bottom);
 		}
 
 		&-bottom:after {
 			bottom: 0;
-			left: 0;
-			height: $thumbnails-gradient-size;
-			width: 100%;
+			@include gradient(top);
+		}
+
+		&-right:after, &-left:before {
+			top: 0;
+			height: 100%;
+			width: $thumbnails-gradient-size;
 			opacity: 1;
-			background: linear-gradient(to top, var(--wp--preset--color--base) 25%, transparent);
 		}
 
 		&-left:before {
-			top: 0;
 			left: 0;
-			height: 100%;
-			width: $thumbnails-gradient-size;
-			opacity: 1;
-			background: linear-gradient(to right, var(--wp--preset--color--base) 25%, transparent);
-
+			@include gradient(right);
 		}
 
 		&-right:after {
-			top: 0;
 			right: 0;
-			height: 100%;
-			width: $thumbnails-gradient-size;
-			opacity: 1;
-			background: linear-gradient(to left, var(--wp--preset--color--base) 25%, transparent);
+			@include gradient(left);
 		}
 	}
 }
