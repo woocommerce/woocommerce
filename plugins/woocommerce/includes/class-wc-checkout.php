@@ -886,7 +886,8 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_sanitize_phone_number( $data[ $key ] );
+					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
+					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
 
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
