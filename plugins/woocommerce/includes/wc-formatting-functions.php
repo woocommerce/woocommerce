@@ -1611,7 +1611,7 @@ function wc_remove_non_displayable_chars( string $raw_value ): string {
 		'\x{FFFB}', // Interlinear Annotation Terminator.
 	);
 
-	return preg_replace( '/[' . implode( '', $remove_chars ) . ']/u', '', $raw_value );
+	return trim( preg_replace( '/[' . implode( '', $remove_chars ) . ']/u', '', $raw_value ) );
 }
 
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
