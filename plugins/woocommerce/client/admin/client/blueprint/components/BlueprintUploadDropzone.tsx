@@ -274,14 +274,6 @@ export const fileUploadMachine = setup( {
 		},
 		success: {
 			on: {
-				DISMISS: {
-					actions: assign( {
-						error: () => undefined,
-						file: () => undefined,
-						steps: () => undefined,
-					} ),
-					target: 'idle',
-				},
 				IMPORT: [
 					{
 						target: 'overrideModal',
@@ -344,6 +336,16 @@ export const fileUploadMachine = setup( {
 			},
 		},
 		importSuccess: {},
+	},
+	on: {
+		DISMISS: {
+			actions: assign( {
+				error: () => undefined,
+				file: () => undefined,
+				steps: () => undefined,
+			} ),
+			target: '#fileUpload.idle',
+		},
 	},
 } );
 
@@ -420,7 +422,9 @@ export const BlueprintUploadDropzone = () => {
 						</span>
 						<Button
 							icon={ <Icon icon={ closeSmall } /> }
-							onClick={ () => send( { type: 'DISMISS' } ) }
+							onClick={ () => {
+								send( { type: 'DISMISS' } );
+							} }
 						/>
 					</p>
 				</div>
