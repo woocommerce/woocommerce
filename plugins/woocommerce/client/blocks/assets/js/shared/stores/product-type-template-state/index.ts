@@ -13,10 +13,8 @@ import {
 	ACTION_UNREGISTER_LISTENER,
 	STORE_NAME,
 } from './constants';
-import {
-	getProductTypeOptions,
-	type ProductTypeProps,
-} from '../../../utils/get-product-type-options';
+import { getProductTypeOptions } from '../../../utils/get-product-type-options';
+import type { ProductTypeProps } from './types';
 
 type StoreState = {
 	productTypes: {
@@ -139,3 +137,6 @@ export const store = createReduxStore( STORE_NAME, {
 if ( ! select( STORE_NAME ) ) {
 	register( store );
 }
+
+export { default as useProductTypeSelector } from './use-product-type-selector';
+export type { ProductTypeProps } from './types';

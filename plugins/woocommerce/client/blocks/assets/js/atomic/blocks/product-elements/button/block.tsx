@@ -28,7 +28,7 @@ import type {
 	AddToCartButtonPlaceholderAttributes,
 	AddToCartProductDetails,
 } from './types';
-import useProductTypeSelector from '../../../../blocks/add-to-cart-with-options/hooks/use-product-type-selector';
+import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
 
 const getButtonText = ( {
 	cartQuantity,
