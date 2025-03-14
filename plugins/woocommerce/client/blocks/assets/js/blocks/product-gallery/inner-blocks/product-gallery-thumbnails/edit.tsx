@@ -87,7 +87,7 @@ export const Edit = ( {
 				ref={ scrollableRef }
 				className="wc-block-product-gallery-thumbnails__scrollable"
 			>
-				{ [ ...Array( 6 ).keys() ].map( ( index ) => {
+				{ [ ...Array( 10 ).keys() ].map( ( index ) => {
 					return (
 						<div
 							className="wc-block-product-gallery-thumbnails__thumbnail"
