@@ -9,10 +9,15 @@ import { WooHeaderItem } from '@woocommerce/admin-layout';
  */
 import ActivityPanel from './activity-panel';
 
+const excludedPages = [ 'wc-settings' ];
+
 const ActivityPanelHeaderItem = () => (
 	<WooHeaderItem order={ 20 }>
 		{ ( { isEmbedded, query } ) => {
-			if ( ! window.wcAdminFeatures[ 'activity-panels' ] ) {
+			if (
+				! window.wcAdminFeatures[ 'activity-panels' ] ||
+				excludedPages.includes( query.page )
+			) {
 				return null;
 			}
 

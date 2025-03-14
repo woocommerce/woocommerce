@@ -84,7 +84,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		foreach ( $image_data['images'] as $image ) {
 			$this->assertArrayHasKey( 'id', $image );
 			$this->assertArrayHasKey( 'sizes', $image );
-			$this->assertArrayHasKey( 'src_set', $image );
+			$this->assertArrayHasKey( 'srcset', $image );
 			$this->assertArrayHasKey( 'src', $image );
 		}
 
