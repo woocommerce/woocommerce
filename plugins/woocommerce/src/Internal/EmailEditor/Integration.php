@@ -85,7 +85,7 @@ class Integration {
 		$container->get( PersonalizationTagManager::class );
 		$container->get( BlockEmailRenderer::class );
 		$container->get( WCTransactionalEmails::class );
-		$this->editor_page_renderer = $container->get( PageRenderer::class );
+		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 	}
 
@@ -185,10 +185,14 @@ class Integration {
 	 * Extend the post API for the wp_template post type to add and save the woocommerce_data field.
 	 */
 	public function extend_template_post_api(): void {
-		register_rest_field( 'wp_template', 'woocommerce_data', [
-			'get_callback' => [ $this->template_api_controller, 'get_template_data'],
-			'update_callback' => [$this->template_api_controller, 'save_template_data'],
-			'schema' => $this->template_api_controller->get_template_data_schema(),
-		]);
+		register_rest_field(
+			'wp_template',
+			'woocommerce_data',
+			array(
+				'get_callback'    => array( $this->template_api_controller, 'get_template_data' ),
+				'update_callback' => array( $this->template_api_controller, 'save_template_data' ),
+				'schema'          => $this->template_api_controller->get_template_data_schema(),
+			)
+		);
 	}
 }
