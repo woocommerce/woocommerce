@@ -553,10 +553,17 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			await expect( pageObject.products ).toHaveCount( 18 );
 
-			await page.getByLabel( 'Toggle block inserter' ).click();
-			await page.getByRole( 'tab', { name: 'Patterns' } ).click();
-			await page.getByPlaceholder( 'Search' ).fill( 'product filters' );
-			await page.getByLabel( 'Product Filters' ).click();
+			const productCollectionBlock = await editor.getBlockByName(
+				'woocommerce/product-collection'
+			);
+			const productCollectionClientId =
+				( await productCollectionBlock
+					.last()
+					.getAttribute( 'data-block' ) ) ?? '';
+			await editor.insertBlock(
+				{ name: 'woocommerce/product-filters' },
+				{ clientId: productCollectionClientId }
+			);
 
 			const postId = await editor.publishPost();
 			await page.goto( `/?p=${ postId }` );
@@ -574,7 +581,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			await page
 				.getByRole( 'textbox', {
-					name: 'Filter products by maximum',
+					name: 'Filter products by maximum price',
 				} )
 				.dblclick();
 			await page.keyboard.type( '10' );
@@ -602,10 +609,17 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 				'Music',
 			] );
 
-			await page.getByLabel( 'Toggle block inserter' ).click();
-			await page.getByRole( 'tab', { name: 'Patterns' } ).click();
-			await page.getByPlaceholder( 'Search' ).fill( 'product filters' );
-			await page.getByLabel( 'Product Filters' ).click();
+			const productCollectionBlock = await editor.getBlockByName(
+				'woocommerce/product-collection'
+			);
+			const productCollectionClientId =
+				( await productCollectionBlock
+					.last()
+					.getAttribute( 'data-block' ) ) ?? '';
+			await editor.insertBlock(
+				{ name: 'woocommerce/product-filters' },
+				{ clientId: productCollectionClientId }
+			);
 
 			await expect( pageObject.products ).toHaveCount( 2 );
 
@@ -617,7 +631,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			await page
 				.getByRole( 'textbox', {
-					name: 'Filter products by maximum',
+					name: 'Filter products by maximum price',
 				} )
 				.dblclick();
 			await page.keyboard.type( '5' );

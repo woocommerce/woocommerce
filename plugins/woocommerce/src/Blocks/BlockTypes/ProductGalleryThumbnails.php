@@ -55,12 +55,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$post_id            = $block->context['postId'];
 
@@ -70,66 +64,74 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 		$product = wc_get_product( $post_id );
 
-		if ( ! $product ) {
+		if ( ! $product instanceof \WC_Product ) {
 			return '';
 		}
 
-		$crop_images            = $block->context['cropImages'] ?? false;
-		$product_gallery_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'full', array(), 'wc-block-product-gallery-thumbnails__thumbnail', $crop_images );
-
-		if ( ! $product_gallery_images || count( $product_gallery_images ) <= 1 ) {
+		$product_gallery_thumbnails_data = ProductGalleryUtils::get_product_gallery_image_data( $product );
+		$product_gallery_images          = $product_gallery_thumbnails_data['images'];
+		// Don't show the thumbnails block if there is only one image.
+		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
 		}
 
-		$html             = '';
-		$thumbnail_size   = str_replace('%', '', $attributes['thumbnailSize'] ?? '20%');
-		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
+		// Will eventually be replaced by a slider. Temporary solution.
+		$default_number_of_thumbnails = 3;
+		$number_of_thumbnails         = isset( $attributes['numberOfThumbnails'] ) && is_numeric( $attributes['numberOfThumbnails'] ) ? $attributes['numberOfThumbnails'] : $default_number_of_thumbnails;
+		$number_of_images             = count( $product_gallery_images );
+		// If the number of thumbnails is greater than the number of images, set the number of thumbnails to the number of images.
+		// But not less than than 3 (default number of thumbnails).
+		$thumbnails_layout          = max( min( $number_of_images, $number_of_thumbnails ), $default_number_of_thumbnails );
+		$number_of_thumbnails_class = 'wc-block-product-gallery-thumbnails--number-of-thumbnails-' . $thumbnails_layout;
+		$remaining_thumbnails_count = $number_of_images - $number_of_thumbnails;
+		wp_interactivity_config( 'woocommerce/product-gallery', array( 'numberOfThumbnails' => $number_of_thumbnails ) );
+		// End of temporary solution.
 
-		foreach ( $product_gallery_images as $product_gallery_image_html ) {
-			$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
+		ob_start();
+		?>
+		<div
+			class="wc-block-product-gallery-thumbnails
+						<?php echo esc_attr( $classes_and_styles['classes'] . ' ' . $number_of_thumbnails_class ); ?>"
+			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
+			data-wp-interactive="woocommerce/product-gallery"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.overflowTop"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.overflowBottom"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-left="context.overflowLeft"
+			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.overflowRight">
+			<div
+				class="wc-block-product-gallery-thumbnails__scrollable"
+				data-wp-init="actions.onScroll"
+				data-wp-on--scroll="actions.onScroll">
+				<template
+					data-wp-each--image="state.thumbnails"
+					data-wp-each-key="context.image.id">
+					<div class="wc-block-product-gallery-thumbnails__thumbnail">
+						<img
+							class="wc-block-product-gallery-thumbnails__thumbnail__image"
+							data-wp-bind--data-image-id="context.image.id"
+							data-wp-bind--src="context.image.src"
+							data-wp-bind--srcset="context.image.srcset"
+							data-wp-bind--sizes="context.image.sizes"
+							data-wp-on--click="actions.selectCurrentImage"
+							data-wp-on--keydown="actions.onThumbnailKeyDown"
+							decoding="async"
+							tabindex="0"
+							loading="lazy" />
+						<div class="wc-block-product-gallery-thumbnails__thumbnail__overlay"
+							data-wp-bind--visible="actions.displayViewAll"
+							data-wp-on--click="actions.openDialog"
+							data-wp-on--keydown="actions.onViewAllImagesKeyDown"
+							tabindex="0">
+							<span class="wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count">+<?php echo esc_html( $remaining_thumbnails_count ); ?></span>
+							<span class="wc-block-product-gallery-thumbnails__thumbnail__view-all"><?php echo esc_html__( 'View all', 'woocommerce' ); ?></span>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
+		<?php
+		$template = ob_get_clean();
 
-			if ( $processor->next_tag( 'img' ) ) {
-				$processor->add_class( 'wc-block-product-gallery-thumbnails__image' );
-				$processor->set_attribute( 'data-wp-on--keydown', 'actions.onThumbnailKeyDown' );
-				$processor->set_attribute( 'tabindex', '0' );
-				$processor->set_attribute(
-					'data-wp-on--click',
-					'actions.selectCurrentImage'
-				);
-
-				$html .= $processor->get_updated_html();
-			} else {
-				$html .= $product_gallery_image_html;
-			}
-		}
-
-		$allowed_html                    = wp_kses_allowed_html( 'post' );
-		$allowed_html['img']['tabindex'] = true;
-
-		return sprintf(
-			'<div
-				data-wp-interactive="woocommerce/product-gallery"
-				class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s"
-				data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.overflowTop"
-				data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.overflowBottom"
-				data-wp-class--wc-block-product-gallery-thumbnails--overflow-left="context.overflowLeft"
-				data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.overflowRight"
-				style="%2$s"
-			>
-				<div
-					class="wc-block-product-gallery-thumbnails__scrollable"
-					data-wp-init="actions.onScroll"
-					data-wp-on--scroll="actions.onScroll"
-				>
-					%3$s
-				</div>
-			</div>',
-			esc_attr( $classes_and_styles['classes'] . ' ' . $thumbnails_class ),
-			esc_attr( $classes_and_styles['styles'] ),
-			wp_kses(
-				$html,
-				$allowed_html
-			),
-		);
+		return $template;
 	}
 }

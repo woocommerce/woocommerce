@@ -4,7 +4,7 @@
 import { test as setup } from './fixtures';
 import { setComingSoon } from '../utils/coming-soon';
 import { skipOnboardingWizard } from '../utils/onboarding';
-import { WC_API_PATH, WP_API_PATH } from '../utils/api-client';
+import { WC_API_PATH } from '../utils/api-client';
 
 setup( 'configure HPOS', async ( { restApi } ) => {
 	const { DISABLE_HPOS } = process.env;
@@ -60,52 +60,6 @@ setup( 'configure HPOS', async ( { restApi } ) => {
 		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
 	);
 } );
-
-//todo to remove, see https://github.com/woocommerce/woocommerce/issues/50758
-setup(
-	'convert Cart and Checkout pages to shortcode',
-	async ( { restApi } ) => {
-		// List all pages
-		const response_list = await restApi.get(
-			`${ WP_API_PATH }/pages?slug=cart,checkout`,
-			{
-				data: {
-					_fields: [ 'id', 'slug' ],
-				},
-				failOnStatusCode: true,
-			}
-		);
-
-		const list = await response_list.data;
-
-		// Find the cart and checkout pages
-		const cart = list.find( ( page ) => page.slug === 'cart' );
-		const checkout = list.find( ( page ) => page.slug === 'checkout' );
-
-		if ( ! cart ) {
-			console.error( 'Cart page not found' );
-		}
-
-		if ( ! checkout ) {
-			console.error( 'Checkout page not found' );
-		}
-
-		// Convert their contents to shortcodes
-		const r = await restApi.put( `${ WP_API_PATH }/pages/${ cart.id }`, {
-			content: {
-				raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
-			},
-			failOnStatusCode: true,
-		} );
-
-		await restApi.put( `${ WP_API_PATH }/pages/${ checkout.id }`, {
-			content: {
-				raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
-			},
-			failOnStatusCode: true,
-		} );
-	}
-);
 
 setup( 'disable coming soon', async ( { baseURL } ) => {
 	await setComingSoon( { baseURL, enabled: 'no' } );

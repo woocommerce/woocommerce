@@ -4,6 +4,7 @@
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContent } from '../../utils/cart';
 
 const productData = {
 	virtual: {
@@ -325,21 +326,20 @@ for ( const productType of Object.keys( productData ) ) {
 					.click();
 				await page.getByRole( 'link', { name: 'View cart' } ).click();
 
-				await expect(
-					page
-						.getByRole( 'link' )
-						.filter( { hasText: productData[ productType ].name } )
-				).toBeVisible();
-
-				await page
-					.getByRole( 'link', { name: 'Proceed to checkout' } )
-					.click();
-
-				await expect(
-					page
-						.getByRole( 'cell' )
-						.filter( { hasText: productData[ productType ].name } )
-				).toBeVisible();
+				await checkCartContent(
+					false,
+					page,
+					[
+						{
+							data: {
+								name: productData[ productType ].name,
+								price: productData[ productType ].regularPrice,
+							},
+							qty: 1,
+						},
+					],
+					0
+				);
 			} );
 		}
 	);

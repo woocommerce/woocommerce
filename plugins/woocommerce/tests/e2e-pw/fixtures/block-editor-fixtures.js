@@ -1,11 +1,11 @@
 /**
  * Internal dependencies
  */
-import { test } from './fixtures';
+import { test as baseTest } from './fixtures';
 import { WC_API_PATH } from '../utils/api-client';
 import { ADMIN_STATE_PATH } from '../playwright.config';
 
-exports.test = test.extend( {
+export const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		// Enable product block editor
 		await restApi.put(

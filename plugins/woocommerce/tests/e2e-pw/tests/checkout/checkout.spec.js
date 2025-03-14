@@ -14,8 +14,8 @@ import { faker } from '@faker-js/faker';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeCustomer, getFakeProduct } from '../../utils/data';
 import {
-	createBlocksCheckoutPage,
-	BLOCKS_CHECKOUT_PAGE,
+	createClassicCheckoutPage,
+	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
 import { logInFromMyAccount } from '../../utils/login';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
@@ -24,13 +24,13 @@ import { WC_API_PATH } from '../../utils/api-client';
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 
 const checkoutPages = [
-	{ name: 'classic checkout', slug: 'checkout' },
-	BLOCKS_CHECKOUT_PAGE,
+	{ name: 'blocks checkout', slug: 'checkout' },
+	CLASSIC_CHECKOUT_PAGE,
 ];
 
 /* region helpers */
-function isBlocksCheckout( page ) {
-	return page.url().includes( BLOCKS_CHECKOUT_PAGE.slug );
+function isClassicCheckout( page ) {
+	return page.url().includes( CLASSIC_CHECKOUT_PAGE.slug );
 }
 
 async function checkOrderDetails( page, product, qty, tax ) {
@@ -43,7 +43,14 @@ async function checkOrderDetails( page, product, qty, tax ) {
 		maximumFractionDigits: 2,
 	} );
 
-	if ( page.url().includes( BLOCKS_CHECKOUT_PAGE.slug ) ) {
+	if ( isClassicCheckout( page ) ) {
+		await expect( page.locator( 'td.product-name' ) ).toHaveText(
+			`${ product.name } × ${ qty }`
+		);
+		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
+			expectedTotalPrice
+		);
+	} else {
 		await expect(
 			page.getByRole( 'heading', { name: product.name } )
 		).toBeVisible();
@@ -57,13 +64,6 @@ async function checkOrderDetails( page, product, qty, tax ) {
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 			)
 		).toContainText( expectedTotalPrice );
-	} else {
-		await expect( page.locator( 'td.product-name' ) ).toHaveText(
-			`${ product.name } × ${ qty }`
-		);
-		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
-			expectedTotalPrice
-		);
 	}
 }
 
@@ -80,7 +80,7 @@ async function addProductToCartAndProceedToCheckout(
 }
 
 async function placeOrder( page ) {
-	if ( isBlocksCheckout( page ) ) {
+	if ( ! isClassicCheckout( page ) ) {
 		await page.getByLabel( 'Add a note to your order' ).check();
 		// this helps with flakiness on clicking the Place order button
 		await page
@@ -96,28 +96,7 @@ async function placeOrder( page ) {
 }
 
 async function fillBillingDetails( page, data, createAccount ) {
-	if ( isBlocksCheckout( page ) ) {
-		await page
-			.getByRole( 'textbox', { name: 'Email address' } )
-			.fill( data.email );
-
-		await fillBillingCheckoutBlocks( page, {
-			firstName: data.first_name,
-			lastName: data.last_name,
-			address: data.address_1,
-			city: data.city,
-			zip: data.postcode,
-			phone: data.phone,
-		} );
-
-		if ( createAccount ) {
-			await page
-				.getByRole( 'checkbox', {
-					name: 'Create an account with',
-				} )
-				.check();
-		}
-	} else {
+	if ( isClassicCheckout( page ) ) {
 		await page
 			.getByRole( 'textbox', { name: 'First name' } )
 			.fill( data.first_name );
@@ -141,6 +120,27 @@ async function fillBillingDetails( page, data, createAccount ) {
 		if ( createAccount ) {
 			await page.getByText( 'Create an account?' ).check();
 		}
+	} else {
+		await page
+			.getByRole( 'textbox', { name: 'Email address' } )
+			.fill( data.email );
+
+		await fillBillingCheckoutBlocks( page, {
+			firstName: data.first_name,
+			lastName: data.last_name,
+			address: data.address_1,
+			city: data.city,
+			zip: data.postcode,
+			phone: data.phone,
+		} );
+
+		if ( createAccount ) {
+			await page
+				.getByRole( 'checkbox', {
+					name: 'Create an account with',
+				} )
+				.check();
+		}
 	}
 }
 /* endregion */
@@ -148,7 +148,7 @@ async function fillBillingDetails( page, data, createAccount ) {
 /* region fixtures */
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
-		await createBlocksCheckoutPage( page.context().browser() );
+		await createClassicCheckoutPage();
 
 		const calcTaxesState = await updateIfNeeded(
 			'general/woocommerce_calc_taxes',
@@ -230,9 +230,9 @@ const test = baseTest.extend( {
 
 		await use( product );
 
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
+		// await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+		// 	force: true,
+		// } );
 	},
 	tax: async ( { restApi }, use ) => {
 		let tax;
@@ -408,6 +408,13 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				customer.password,
 				false
 			);
+
+			// Make sure after login the user is redirected to the right checkout page
+			// Login from classic checkout redirects to default checkout page: https://github.com/woocommerce/woocommerce/issues/56205
+			// Workaround until bug is fixed: extra navigation the test checkout page
+			await page.goto( slug );
+			await expect( page.url() ).toContain( slug );
+
 			await checkOrderDetails( page, product, qty, tax );
 
 			const shippingAddress = {
@@ -418,12 +425,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				zip: faker.location.zipCode( '#####' ),
 			};
 
-			if ( isBlocksCheckout( page ) ) {
-				await page
-					.getByRole( 'button', { name: 'Edit shipping address' } )
-					.click();
-				await fillShippingCheckoutBlocks( page, shippingAddress );
-			} else {
+			if ( isClassicCheckout( page ) ) {
 				await page.getByText( 'Ship to a different address?' ).click();
 
 				await page
@@ -441,6 +443,11 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				await page
 					.locator( '#shipping_postcode' )
 					.fill( shippingAddress.zip );
+			} else {
+				await page
+					.getByRole( 'button', { name: 'Edit shipping address' } )
+					.click();
+				await fillShippingCheckoutBlocks( page, shippingAddress );
 			}
 
 			await page.getByText( 'Cash on delivery' ).click();
@@ -474,7 +481,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				email: faker.internet.email(),
 			};
 
-			if ( isBlocksCheckout( page ) ) {
+			if ( isClassicCheckout( page ) ) {
+				await fillBillingDetails( page, billingAddress, false );
+			} else {
 				await page
 					.getByRole( 'checkbox', {
 						name: 'Use same address for billing',
@@ -489,8 +498,6 @@ checkoutPages.forEach( ( { name, slug } ) => {
 					phone: billingAddress.phone,
 					email: billingAddress.email,
 				} );
-			} else {
-				await fillBillingDetails( page, billingAddress, false );
 			}
 
 			await page.getByText( 'Direct bank transfer' ).click();

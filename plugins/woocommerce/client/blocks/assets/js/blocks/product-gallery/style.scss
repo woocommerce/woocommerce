@@ -154,19 +154,19 @@ $dialog-padding: 20px;
 		height: 100%
 	}
 
-	&__image {
-		cursor: pointer;
-		max-width: 100%;
-		aspect-ratio: 1 / 1;
-		object-fit: contain;
-	}
-
 	&__thumbnail {
 		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		aspect-ratio: 1 / 1;
+	}
+
+	&__thumbnail__image {
+		cursor: pointer;
+		max-width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
 	}
 
 	&:before, &:after {
@@ -317,6 +317,24 @@ body.wc-block-product-gallery-dialog-open {
 			&:last-child {
 				margin-bottom: 0;
 			}
+		}
+	}
+}
+
+// On mobile devices (<600px):
+// - Product gallery groups are stacked vertically
+// - Thumbnails appear below the main gallery image and are arranged horizontally in a row
+@include breakpoint("<600px") {
+	.wc-block-product-gallery {
+		.wc-block-product-gallery__gallery-area {
+			flex-direction: column;
+		}
+		.wc-block-product-gallery__large-image-and-navigation {
+			order: -1;
+		}
+
+		.wc-block-product-gallery-thumbnails {
+			flex-direction: row;
 		}
 	}
 }

@@ -6,13 +6,14 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
+	getConfig,
 } from '@wordpress/interactivity';
 import type { StorePart } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
-import type { ImageDataObject } from './types';
+import type { ImageDataObject, ImageDataItem } from './types';
 
 export interface ProductGalleryContext {
 	selectedImageId: number;
@@ -25,6 +26,7 @@ export interface ProductGalleryContext {
 	isDragging: boolean;
 	userHasInteracted: boolean;
 	imageData: ImageDataObject;
+	image: ImageDataItem;
 	overflowTop: boolean;
 	overflowBottom: boolean;
 	overflowLeft: boolean;
@@ -128,7 +130,7 @@ const productGallery = {
 						isActive,
 						tabIndex,
 						src: '',
-						src_set: '',
+						srcset: '',
 					};
 				}
 				return {
@@ -139,6 +141,21 @@ const productGallery = {
 			} );
 
 			return processedImageData;
+		},
+		// TODO: This is a temporary solution to display the view all thumbnail.
+		// Will eventually be replaced by a slider where processedImageData can be used directly.
+		/**
+		 * The subset of processedImageData that is displayed in the thumbnails block.
+		 *
+		 * @return Array The subset of processed image data.
+		 */
+		get thumbnails() {
+			const { imageData } = getContext();
+			const { numberOfThumbnails } = getConfig();
+			const allImageIds = imageData?.image_ids || [];
+			return allImageIds
+				.slice( 0, numberOfThumbnails ) // Get only the visible thumbnails
+				.map( ( imageId ) => imageData?.images[ imageId ] ); // Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
 		},
 	},
 	actions: {
@@ -411,20 +428,13 @@ const productGallery = {
 			};
 		},
 		dialogStateChange: () => {
-			const { imageData, selectedImageId, isDialogOpen } = getContext();
-
-			const allImageIds = imageData?.image_ids || [];
+			const { selectedImageId, isDialogOpen } = getContext();
 			const { ref: dialogRef } = getElement() || {};
-
-			const selectedImageNumber = getSelectedImageNumber(
-				allImageIds,
-				selectedImageId
-			);
 
 			if ( isDialogOpen && dialogRef instanceof HTMLElement ) {
 				dialogRef.focus();
 				const selectedImage = dialogRef.querySelector(
-					`[data-image-index="${ selectedImageNumber }"]`
+					`[data-image-id="${ selectedImageId }"]`
 				);
 
 				if ( selectedImage instanceof HTMLElement ) {

@@ -6,8 +6,9 @@ import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { expect, tags, test } from '../../fixtures/fixtures';
+import { tags, test } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContentInBlocksCart } from '../../utils/cart';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
@@ -61,12 +62,17 @@ test.describe(
 				);
 				await addAProductToCart( page, productId );
 				await page.goto( 'cart/' );
-				await expect( page.locator( 'td.product-name' ) ).toContainText(
-					productName
+
+				await checkCartContentInBlocksCart(
+					page,
+					[
+						{
+							data: { name: productName, price: productPrice },
+							qty: 1,
+						},
+					],
+					parseFloat( productPrice )
 				);
-				await expect(
-					page.getByLabel( 'Product quantity' )
-				).toHaveValue( '1' );
 
 				// Reset settings.
 				await restApi.put(
