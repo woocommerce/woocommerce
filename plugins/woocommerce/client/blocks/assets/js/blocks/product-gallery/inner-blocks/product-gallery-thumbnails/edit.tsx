@@ -1,15 +1,18 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { useRef, useState, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
+import { checkOverflow } from '../../utils';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
 export const Edit = ( {
@@ -19,15 +22,56 @@ export const Edit = ( {
 	const { thumbnailSize } = attributes;
 	const minSize = 10;
 	const maxSize = 50;
-	const defSize = 20;
+	const defSize = 33;
+
+	const scrollableRef = useRef< HTMLDivElement >( null );
+	const [ overflowState, setOverflowState ] = useState( {
+		overflowBottom: false,
+		overflowRight: false,
+	} );
+
+	useEffect( () => {
+		const scrollableElement = scrollableRef.current;
+		if ( ! scrollableElement ) return;
+
+		// Create a ResizeObserver to watch for layout changes
+		const resizeObserver = new ResizeObserver( () => {
+			const overflow = checkOverflow( scrollableElement );
+			setOverflowState( overflow );
+		} );
+
+		// Observe both the scrollable element and its parent for size changes
+		resizeObserver.observe( scrollableElement );
+		if ( scrollableElement.parentElement ) {
+			resizeObserver.observe( scrollableElement.parentElement );
+		}
+
+		// Initial check
+		const overflow = checkOverflow( scrollableElement );
+		setOverflowState( overflow );
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [ thumbnailSize ] ); // Re-run when thumbnailSize changes as it affects layout
+
 	const thumbnailSizeValue =
 		Math.min(
 			Math.max( Number( thumbnailSize.replace( '%', '' ) ), minSize ),
 			maxSize
 		) || defSize;
-	const blockProps = useBlockProps( {
-		className: `wc-block-product-gallery-thumbnails wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
-	} );
+
+	const className = clsx(
+		'wc-block-product-gallery-thumbnails',
+		`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
+		{
+			'wc-block-product-gallery-thumbnails--overflow-right':
+				overflowState.overflowRight,
+			'wc-block-product-gallery-thumbnails--overflow-bottom':
+				overflowState.overflowBottom,
+		}
+	);
+	const blockProps = useBlockProps( { className } );
 
 	return (
 		<div { ...blockProps }>
@@ -39,7 +83,10 @@ export const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div className="wc-block-product-gallery-thumbnails__scrollable">
+			<div
+				ref={ scrollableRef }
+				className="wc-block-product-gallery-thumbnails__scrollable"
+			>
 				{ [ ...Array( 6 ).keys() ].map( ( index ) => {
 					return (
 						<div
