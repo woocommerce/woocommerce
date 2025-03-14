@@ -13,7 +13,7 @@
 	"attributes": {
 		"thumbnailSize": {
 			"type": "string",
-			"default": "20%"
+			"default": "33%"
 		}
 	},
 	"supports": {
