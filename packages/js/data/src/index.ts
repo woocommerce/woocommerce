@@ -75,7 +75,7 @@ export { store as experimentalProductFormStore } from './product-form';
 export { store as paymentSettingsStore } from './payment-settings';
 export { store as reportsStore } from './reports';
 export { store as itemsStore } from './items';
-export { store as settingsOptionsStore } from './setting-options';
+export { store as experimentalSettingOptionsStore } from './setting-options';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
