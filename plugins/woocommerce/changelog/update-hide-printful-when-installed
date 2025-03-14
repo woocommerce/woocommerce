@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Printful banner visibility in Products task list to respect plugin installation status
