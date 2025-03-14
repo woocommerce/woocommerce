@@ -3,7 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
-const permalink = '/checkout';
 const templatePath = 'woocommerce/woocommerce//page-checkout';
 const templateType = 'wp_template';
 
@@ -51,23 +50,6 @@ test.describe( 'Test the checkout template', () => {
 			} )
 		).toBeVisible();
 	} );
-
-	// See https://github.com/woocommerce/woocommerce/pull/55989
-	test.fixme(
-		'Admin bar edit site link opens site editor',
-		async ( { admin, frontendUtils, editor } ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart();
-			await admin.page.goto( permalink );
-			await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
-
-			await expect(
-				editor.canvas.getByRole( 'button', {
-					name: 'Place Order',
-				} )
-			).toBeVisible();
-		}
-	);
 } );
 
 test.describe( 'Test editing the checkout template', () => {
