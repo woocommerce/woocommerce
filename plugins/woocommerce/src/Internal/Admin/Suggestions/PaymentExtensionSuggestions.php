@@ -3378,11 +3378,11 @@ class PaymentExtensionSuggestions {
 		// Optional fields.
 		$standardized['title']       = $extension_details['title'] ?? '';
 		$standardized['description'] = $extension_details['description'] ?? '';
-		$standardized['image']      = $extension_details['image'] ?? '';
-		$standardized['icon']       = $extension_details['icon'] ?? '';
-		$standardized['links']      = $extension_details['links'] ?? array();
-		$standardized['tags']       = $extension_details['tags'] ?? array();
-		$standardized['_incentive'] = $extension_details['_incentive'] ?? null;
+		$standardized['image']       = $extension_details['image'] ?? '';
+		$standardized['icon']        = $extension_details['icon'] ?? '';
+		$standardized['links']       = $extension_details['links'] ?? array();
+		$standardized['tags']        = $extension_details['tags'] ?? array();
+		$standardized['_incentive']  = $extension_details['_incentive'] ?? null;
 
 		return $standardized;
 	}
