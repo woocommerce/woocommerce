@@ -247,7 +247,11 @@ class WC_Admin {
 				die( 'Security check' );
 			}
 
-			/** @var EmailPreview $email_preview */
+			/**
+			 * Email preview instance for rendering dummy content.
+			 *
+			 * @var EmailPreview $email_preview - email preview instance
+			 */
 			$email_preview = wc_get_container()->get( EmailPreview::class );
 
 			if ( isset( $_GET['type'] ) ) {
@@ -258,7 +262,6 @@ class WC_Admin {
 					wp_die( esc_html__( 'Invalid email type.', 'woocommerce' ), 400 );
 				}
 			}
-
 
 			$message = $this->capture_woo_content( $email_preview );
 
@@ -271,7 +274,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Capture the WooCommerce content.
+	 * Captures and returns the main content of a WooCommerce email preview without header and footer.
 	 *
 	 * This is an extracted function from an active PR.
 	 *
@@ -279,9 +282,10 @@ class WC_Admin {
 	 *
 	 * Updater after https://github.com/woocommerce/woocommerce/pull/56199 is merged
 	 *
+	 * @param EmailPreview $email_preview - email preview instance.
 	 * @return string
 	 */
-	private function capture_woo_content($email_preview): string {
+	private function capture_woo_content( $email_preview ): string {
 		// Store the existing header and footer callbacks.
 		global $wp_filter;
 		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
