@@ -174,7 +174,7 @@ $dialog-padding: 20px;
 		object-fit: contain;
 	}
 
-	&:before, &:after {
+	&::before, &::after {
 		content: '';
 		position: absolute;
 		opacity: 0;
@@ -183,36 +183,38 @@ $dialog-padding: 20px;
 	}
 
 	&.wc-block-product-gallery-thumbnails--overflow {
-		&-top:before, &-bottom:after {
+		&-top::before,
+		&-bottom::after {
 			left: 0;
 			height: $thumbnails-gradient-size;
 			width: 100%;
 			opacity: 1;
 		}
 
-		&-top:before {
+		&-top::before {
 			top: 0;
 			@include gradient(bottom);
 		}
 
-		&-bottom:after {
+		&-bottom::after {
 			bottom: 0;
 			@include gradient(top);
 		}
 
-		&-right:after, &-left:before {
+		&-right::after,
+		&-left::before {
 			top: 0;
 			height: 100%;
 			width: $thumbnails-gradient-size;
 			opacity: 1;
 		}
 
-		&-left:before {
+		&-left::before {
 			left: 0;
 			@include gradient(right);
 		}
 
-		&-right:after {
+		&-right::after {
 			right: 0;
 			@include gradient(left);
 		}
