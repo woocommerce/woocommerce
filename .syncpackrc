@@ -331,7 +331,7 @@
 			"dependencies": [
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/babel-preset-default",
-                "@wordpress/browserslist-config"
+				"@wordpress/browserslist-config"
 			],
 			"packages": [
 				"**"
