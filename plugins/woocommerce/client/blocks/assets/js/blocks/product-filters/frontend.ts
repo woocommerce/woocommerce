@@ -226,11 +226,11 @@ const { state, actions } = store( 'woocommerce/product-filters', {
 				return ( window.location.href = url.href );
 			}
 
-			const { actions } = yield import(
+			const { actions: routerActions } = yield import(
 				'@wordpress/interactivity-router'
 			);
 
-			yield actions.navigate( url.href );
+			yield routerActions.navigate( url.href );
 		},
 	},
 	callbacks: {
