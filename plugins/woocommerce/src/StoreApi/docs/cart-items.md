@@ -1,4 +1,4 @@
-\# Cart Items API <!-- omit in toc -->
+# Cart Items API <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
 
