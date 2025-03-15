@@ -13,7 +13,7 @@ import {
 	getReportChartData,
 	getTooltipValueFormat,
 	settingsStore,
-	REPORTS_STORE_NAME,
+	reportsStore,
 } from '@woocommerce/data';
 import {
 	getAllowedIntervalsForQuery,
@@ -349,7 +349,7 @@ export default compose(
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
 		/* eslint @wordpress/no-unused-vars-before-return: "off" */
-		const reportStoreSelector = select( REPORTS_STORE_NAME );
+		const reportStoreSelector = select( reportsStore );
 
 		const newProps = {
 			mode: chartMode,

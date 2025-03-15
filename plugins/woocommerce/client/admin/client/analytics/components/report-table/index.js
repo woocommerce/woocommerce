@@ -33,7 +33,7 @@ import {
 	getReportTableData,
 	EXPORT_STORE_NAME,
 	settingsStore,
-	REPORTS_STORE_NAME,
+	reportsStore,
 	useUserPreferences,
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
@@ -583,7 +583,7 @@ export default compose(
 		} = props;
 
 		/* eslint @wordpress/no-unused-vars-before-return: "off" */
-		const reportStoreSelector = select( REPORTS_STORE_NAME );
+		const reportStoreSelector = select( reportsStore );
 
 		const extendedStoreSelector = extendedItemsStoreName
 			? select( extendedItemsStoreName )
