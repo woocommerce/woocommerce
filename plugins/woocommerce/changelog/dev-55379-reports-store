@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update reports store import to use `reportsStore` from `@woocommerce/data`
