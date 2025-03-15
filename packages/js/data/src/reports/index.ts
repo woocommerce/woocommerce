@@ -56,6 +56,6 @@ declare module '@wordpress/data' {
 type TailParameters< F > = F extends (
 	state: infer S,
 	...args: infer T
-) => infer R
+) => infer R // eslint-disable-line @typescript-eslint/no-unused-vars -- Name is used to infer the type to avoid `any`.
 	? T
 	: never;
