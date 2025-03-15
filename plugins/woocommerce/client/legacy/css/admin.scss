@@ -20,6 +20,7 @@
 
 $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 "Helvetica Neue", sans-serif;
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 .wc-addons-wrap {
 	.marketplace-header {
@@ -8846,3 +8847,85 @@ html:has(#status-table-templates){
 .woocommerce-admin-page #postbox-container-2 {
 	clear: left;
 }
+
+body.woocommerce_page_wc-settings {
+	#wpbody-content, #wpcontent {
+		background: #f0f0f1;
+	}
+
+	.woocommerce-layout__primary {
+		@media screen and (max-width: 782px) {
+			padding-top: 0 !important;
+		}
+	}
+
+	.woocommerce-layout__header-heading {
+		padding: 0 0 0 30px;
+		font-weight: 590;
+		font-size: 16px;
+		color: #070707;
+	}
+
+	#wpbody .woocommerce-layout,
+	.woocommerce-layout__notice-list-hide + .wrap {
+		padding: 0;
+	}
+
+	.settings-content {
+		padding: 0 30px;
+		background: #f0f0f1;
+		margin-top: 24px;
+
+		h2 {
+			margin: 0;
+		}
+
+		.subsubsub {
+			margin: 0 0 24px 0;
+			li {
+				color: #2271b1;
+				&:first-child a{
+					padding: 0;
+				}
+			}
+		}
+	}
+
+	.wrap {
+		padding: 0;
+	}
+
+	.nav-tab-wrapper {
+		display: flex;
+		flex-wrap: wrap;
+		list-style: none;
+		padding-left: 30px;
+		gap: 24px;
+		a {
+			float: none;
+			font-family: $font-sf-pro-display;
+			margin-left: 0;
+			border: 0;
+			background: none;
+			font-weight: 510;
+			font-size: 14px;
+			line-height: 20px;
+			color: #505050;
+			padding: 0 0 10px 0;
+			text-decoration: none;
+			&:focus, &:hover, &:active {
+				outline: none;
+				box-shadow: none;
+			}
+		}
+		margin: 0;
+		background: #FFF;
+		border-bottom: 1px solid #EBEBEB;
+
+		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
+			border-bottom: 2px solid #3858E9;
+			color: #070707;
+		}
+	}
+}
+

@@ -12,12 +12,11 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import type { HTMLAttributes } from 'react';
 import { ProductResponseItem } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { store as productTypeTemplateStateStore } from '../../../../shared/stores/product-type-template-state';
+import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
 import type { BlockAttributes } from './types';
 import './style.scss';
 
@@ -59,20 +58,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { text: availabilityText, class: availabilityClass } =
 		product.stock_availability;
 
-	const { selectedProductType } = useSelect( ( select ) => {
-		const { getCurrentProductType } = select(
-			productTypeTemplateStateStore
-		);
-		return {
-			selectedProductType: getCurrentProductType(),
-		};
-	}, [] );
+	const { current: currentProductType } = useProductTypeSelector();
 
 	if (
 		! isStockIndicatorVisible(
 			product,
 			availabilityText,
-			selectedProductType?.slug
+			currentProductType?.slug
 		)
 	) {
 		return null;
