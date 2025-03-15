@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove plugin display limit and improve layout handling in Core Profiler

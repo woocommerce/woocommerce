@@ -11,7 +11,7 @@ export interface ProductGallerySettingsProps {
 	) => void;
 }
 
-interface ImageDataItem {
+export interface ImageDataItem {
 	id: number;
 	src: string;
 	srcSet: string;
