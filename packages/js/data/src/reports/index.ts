@@ -15,14 +15,6 @@ import * as resolvers from './resolvers';
 import controls from '../controls';
 import reducer, { State } from './reducer';
 import { WPDataSelectors } from '../types';
-import {
-	ReportItemObjectInfer,
-	ReportItemsEndpoint,
-	ReportQueryParams,
-	ReportStatEndpoint,
-	ReportStatObjectInfer,
-	ReportStatQueryParams,
-} from './types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
@@ -47,13 +39,11 @@ export type ReportsSelect = WPDataSelectors &
 		'getReportItems' | 'getReportStats'
 	> & {
 		getReportItems: < T >(
-			endpoint: ReportItemsEndpoint,
-			query: ReportQueryParams
-		) => ReportItemObjectInfer< T >;
+			...args: TailParameters< typeof selectors.getReportItems< T > >
+		) => ReturnType< typeof selectors.getReportItems< T > >;
 		getReportStats: < T >(
-			endpoint: ReportStatEndpoint,
-			query: ReportStatQueryParams
-		) => ReportStatObjectInfer< T >;
+			...args: TailParameters< typeof selectors.getReportStats< T > >
+		) => ReturnType< typeof selectors.getReportStats< T > >;
 	};
 
 declare module '@wordpress/data' {
@@ -62,3 +52,10 @@ declare module '@wordpress/data' {
 		key: typeof STORE_NAME | typeof store
 	): PromiseifySelectors< ReportsSelect >;
 }
+
+type TailParameters< F > = F extends (
+	state: infer S,
+	...args: infer T
+) => infer R
+	? T
+	: never;
