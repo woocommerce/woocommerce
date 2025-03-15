@@ -1107,7 +1107,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Annotation', wc_remove_non_displayable_chars( "Anno\xEF\xBF\xB9tation" ) );
 
 		// String with a mix of removable and non-removable characters.
-		$this->assertEquals( 'Valid 123 Address', wc_remove_non_displayable_chars( "\xE2\x80\x8BValid 123 Address\xC2\xA0" ) );
+		$this->assertEquals( 'Valid 123 Address ', wc_remove_non_displayable_chars( "\xE2\x80\x8BValid 123 Address\xC2\xA0" ) );
 
 		// String with non-breaking space (U+00A0), should be preserved.
 		$this->assertEquals( "Hello\xC2\xA0World", wc_remove_non_displayable_chars( "Hello\xC2\xA0World" ) );
