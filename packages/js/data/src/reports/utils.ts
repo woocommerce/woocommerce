@@ -19,9 +19,9 @@ import { select as WPSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { store } from './';
 import * as reportsUtils from './utils';
 import { MAX_PER_PAGE, QUERY_DEFAULTS } from '../constants';
-import { STORE_NAME } from './constants';
 import { getResourceName } from '../utils';
 import {
 	ReportItemsEndpoint,
@@ -300,7 +300,7 @@ export function getSummaryNumbers< T extends ReportStatEndpoint >(
 ) {
 	const { endpoint, select } = options;
 	const { getReportStats, getReportStatsError, isResolving } =
-		select( STORE_NAME );
+		select( store );
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -425,7 +425,7 @@ export function getReportChartData< T extends ReportStatEndpoint >(
 			version: '1.7.0',
 			hint: 'You can pass the report selectors through option.selector now.',
 		} );
-		reportSelectors = options.select( STORE_NAME );
+		reportSelectors = options.select( store );
 	}
 	const { getReportStats, getReportStatsError, isResolving } =
 		reportSelectors;
@@ -592,7 +592,7 @@ export function getReportTableData< T extends ReportItemsEndpoint >(
 			version: '1.7.0',
 			hint: 'You can pass the report selectors through option.selector now.',
 		} );
-		reportSelectors = options.select( STORE_NAME );
+		reportSelectors = options.select( store );
 	}
 	const { getReportItems, getReportItemsError, hasFinishedResolution } =
 		reportSelectors;

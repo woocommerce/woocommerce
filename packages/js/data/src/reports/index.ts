@@ -3,7 +3,7 @@
  */
 
 import { createReduxStore, register } from '@wordpress/data';
-import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
+import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -14,7 +14,7 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import controls from '../controls';
 import reducer, { State } from './reducer';
-import { WPDataActions, WPDataSelectors } from '../types';
+import { WPDataSelectors } from '../types';
 import {
 	ReportItemObjectInfer,
 	ReportItemsEndpoint,
@@ -39,8 +39,10 @@ register( store );
 
 export const REPORTS_STORE_NAME = STORE_NAME;
 
+// We need to provide those types to support type parameters in the selectors.
 export type ReportsSelect = WPDataSelectors &
 	Omit<
+		// SelectFromMap removes type parameters, so we need to redo it ourselves.
 		SelectFromMap< typeof selectors >,
 		'getReportItems' | 'getReportStats'
 	> & {
@@ -55,11 +57,8 @@ export type ReportsSelect = WPDataSelectors &
 	};
 
 declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions & WPDataActions >;
-	function select( key: typeof STORE_NAME ): ReportsSelect;
+	function select( key: typeof STORE_NAME | typeof store ): ReportsSelect;
 	function resolveSelect(
-		key: typeof STORE_NAME
+		key: typeof STORE_NAME | typeof store
 	): PromiseifySelectors< ReportsSelect >;
 }
