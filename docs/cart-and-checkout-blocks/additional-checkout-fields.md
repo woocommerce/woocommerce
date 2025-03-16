@@ -568,7 +568,7 @@ If these fields were rendered in the "contact" location instead, the code would 
 
 ## Conditional visibility and validation via JSON Schema
 
-The `required`, `hidden`, and `validation` properties can accept [JSON Schema arrays](https://json-schema.org/understanding-json-schema/about) to create conditional logic for fields. This allows you to dynamically control field visibility, requirement status, and validation rules based on the values of other fields.
+The `required`, `hidden`, and `validation` properties accept an `array` of [JSON Schema](https://json-schema.org/understanding-json-schema/about) to create conditional logic for fields. This allows you to dynamically control field visibility, requirement status, and validation rules based on the values of other fields.
 
 Schema is evaluated in the frontend in real-time, and on the backend at any update. This ensures fast and responsive UI, and consistent results between the client and server.
 
