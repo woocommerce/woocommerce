@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { itemsStore } from '@woocommerce/data';
 import { AnalyticsError } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 
@@ -136,8 +136,7 @@ export default compose(
 			query.products &&
 			query.products.split( ',' ).length === 1;
 
-		const { getItems, isResolving, getItemsError } =
-			select( ITEMS_STORE_NAME );
+		const { getItems, isResolving, getItemsError } = select( itemsStore );
 
 		if ( isRequesting ) {
 			return {

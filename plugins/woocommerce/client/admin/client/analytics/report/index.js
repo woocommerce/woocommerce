@@ -7,7 +7,7 @@ import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
-import { searchItemsByString, ITEMS_STORE_NAME } from '@woocommerce/data';
+import { searchItemsByString, itemsStore } from '@woocommerce/data';
 import { AnalyticsError } from '@woocommerce/components';
 import {
 	CurrencyContext,
@@ -113,7 +113,7 @@ export default compose(
 		const { search } = query;
 
 		/* eslint @wordpress/no-unused-vars-before-return: "off" */
-		const itemsSelector = select( ITEMS_STORE_NAME );
+		const itemsSelector = select( itemsStore );
 
 		if ( ! search ) {
 			return {};

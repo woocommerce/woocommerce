@@ -13,7 +13,7 @@ import {
 	MenuTitle,
 	SectionHeader,
 } from '@woocommerce/components';
-import { useUserPreferences, ITEMS_STORE_NAME } from '@woocommerce/data';
+import { useUserPreferences, itemsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -180,7 +180,7 @@ Leaderboards.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getItems, getItemsError } = select( ITEMS_STORE_NAME );
+		const { getItems, getItemsError } = select( itemsStore );
 		const { leaderboards: allLeaderboards } = getAdminSetting(
 			'dataEndpoints',
 			{

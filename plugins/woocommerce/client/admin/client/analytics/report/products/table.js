@@ -11,7 +11,7 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { itemsStore } from '@woocommerce/data';
 import { CurrencyContext } from '@woocommerce/currency';
 
 /**
@@ -372,8 +372,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query, isRequesting } = props;
 
-		const { getItems, getItemsError, isResolving } =
-			select( ITEMS_STORE_NAME );
+		const { getItems, getItemsError, isResolving } = select( itemsStore );
 
 		if (
 			isRequesting ||
