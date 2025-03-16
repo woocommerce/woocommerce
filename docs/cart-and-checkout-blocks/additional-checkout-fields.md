@@ -896,7 +896,7 @@ It's full schema is this one:
 
 #### Required and visible field
 
-Here we make our field required and visible only if local pickup is being
+In this example we make the field required and visible only if local pickup is being used.
 
 ```php
 'required' => [
