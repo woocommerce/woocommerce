@@ -73,6 +73,7 @@ export { store as paymentGatewaysStore } from './payment-gateways';
 export { store as importStore } from './import';
 export { store as experimentalProductFormStore } from './product-form';
 export { store as paymentSettingsStore } from './payment-settings';
+export { store as itemsStore } from './items';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';

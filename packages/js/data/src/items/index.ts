@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
-import { Reducer, AnyAction } from 'redux';
 /**
  * Internal dependencies
  */
@@ -19,14 +18,15 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
-// @ts-expect-error migrate store to createReduxStore function https://github.com/woocommerce/woocommerce/issues/55380
-registerStore< State >( STORE_NAME, {
-	reducer: reducer as Reducer< State, AnyAction >,
+export const store = createReduxStore( STORE_NAME, {
+	reducer,
 	actions,
 	controls,
 	selectors,
 	resolvers,
 } );
+
+register( store );
 
 export const ITEMS_STORE_NAME = STORE_NAME;
 
