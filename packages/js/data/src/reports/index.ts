@@ -39,10 +39,10 @@ export type ReportsSelect = WPDataSelectors &
 		'getReportItems' | 'getReportStats'
 	> & {
 		getReportItems: < T >(
-			...args: TailParameters< typeof selectors.getReportItems< T > >
+			...args: RemoveStateParam< typeof selectors.getReportItems< T > >
 		) => ReturnType< typeof selectors.getReportItems< T > >;
 		getReportStats: < T >(
-			...args: TailParameters< typeof selectors.getReportStats< T > >
+			...args: RemoveStateParam< typeof selectors.getReportStats< T > >
 		) => ReturnType< typeof selectors.getReportStats< T > >;
 	};
 
@@ -53,7 +53,10 @@ declare module '@wordpress/data' {
 	): PromiseifySelectors< ReportsSelect >;
 }
 
-type TailParameters< F > = F extends (
+/**
+ * Remove the state parameter from a given function type.
+ */
+type RemoveStateParam< F > = F extends (
 	state: infer S,
 	...args: infer T
 ) => infer R // eslint-disable-line @typescript-eslint/no-unused-vars -- Name is used to infer the type to avoid `any`.
