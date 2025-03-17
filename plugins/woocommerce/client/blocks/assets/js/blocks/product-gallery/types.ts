@@ -18,7 +18,21 @@ export interface ImageDataItem {
 	sizes: string;
 }
 
-export interface ImageDataObject {
+interface ImageDataObject {
 	images: Record< number, ImageDataItem >;
 	image_ids: number[];
+}
+
+export interface ProductGalleryContext {
+	selectedImageId: number;
+	isDialogOpen: boolean;
+	productId: string;
+	disableLeft: boolean;
+	disableRight: boolean;
+	touchStartX: number;
+	touchCurrentX: number;
+	isDragging: boolean;
+	userHasInteracted: boolean;
+	imageData: ImageDataObject;
+	image: ImageDataItem;
 }
