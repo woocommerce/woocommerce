@@ -815,18 +815,17 @@ class PaymentProviders {
 					ExtensionSuggestions::AMAZON_PAY,
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
-					ExtensionSuggestions::COINBASE,
-					ExtensionSuggestions::AUTHORIZE_NET,
-					ExtensionSuggestions::BOLT,
-					ExtensionSuggestions::BANK_OF_AMERICA,
-					ExtensionSuggestions::DEPAY,
-					ExtensionSuggestions::ELAVON,
-					ExtensionSuggestions::EWAY,
-					ExtensionSuggestions::FORTISPAY,
-					ExtensionSuggestions::GO_CARDLESS,
-					ExtensionSuggestions::NEXI,
-					ExtensionSuggestions::PAYPAL_ZETTLE,
-					ExtensionSuggestions::RAPYD,
+					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
+					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
+					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
+					ExtensionSuggestions::DEPAY, // We don't have suggestion details yet.
+					ExtensionSuggestions::ELAVON, // We don't have suggestion details yet.
+					ExtensionSuggestions::EWAY, // We don't have suggestion details yet.
+					ExtensionSuggestions::FORTISPAY, // We don't have suggestion details yet.
+					ExtensionSuggestions::NEXI, // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_ZETTLE, // We don't have suggestion details yet.
+					ExtensionSuggestions::RAPYD, // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
 				),
 				true
 			) ) {
