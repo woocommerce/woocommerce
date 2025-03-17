@@ -137,6 +137,9 @@ test.describe( 'Shopper → Local pickup', () => {
 		await admin.page
 			.getByRole( 'button', { name: 'Save changes' } )
 			.click();
+		await admin.page.waitForResponse( ( response ) => {
+			return response.url().includes( 'wp-json/wp/v2/settings' );
+		} );
 	} );
 
 	test( 'The shopper can choose a local pickup option', async ( {
