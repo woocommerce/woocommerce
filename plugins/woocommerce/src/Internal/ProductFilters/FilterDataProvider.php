@@ -26,10 +26,12 @@ class FilterDataProvider {
 	 * @param string $class_path Namespace name of the query clauses generator.
 	 */
 	public function with( QueryClausesGenerator $query_clauses_generator ) {
-		if ( ! isset( $this->providers[ $query_clauses_generator::class ] ) ) {
-			$this->providers[ $query_clauses_generator::class ] = new FilterData( $query_clauses_generator );
+		$class_name = get_class( $query_clauses_generator );
+
+		if ( ! isset( $this->providers[ $class_name ] ) ) {
+			$this->providers[ $class_name ] = new FilterData( $query_clauses_generator );
 		}
 
-		return $this->providers[ $query_clauses_generator::class ];
+		return $this->providers[ $class_name ];
 	}
 }
