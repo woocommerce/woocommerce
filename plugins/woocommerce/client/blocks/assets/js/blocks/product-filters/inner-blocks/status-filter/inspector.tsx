@@ -51,7 +51,7 @@ export const Inspector = ( {
 
 	return (
 		<>
-			<InspectorControls group="styles">
+			<InspectorControls group="settings">
 				<PanelBody title={ __( 'Display', 'woocommerce' ) }>
 					<ToggleGroupControl
 						value={ displayStyle }
