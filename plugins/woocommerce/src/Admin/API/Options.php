@@ -4,7 +4,7 @@
  *
  * Handles requests to get and update options in the wp_options table.
  *
- * IMPORTANT: This API is for legacy support only. DO NOT add new options here.
+ * IMPORTANT: This API is for legacy support only. DO NOT add new options here. See p90Yrv-2vK-p2#comment-6482 for more details.
  * For new settings/options, create dedicated endpoints instead.
  * Example:
  * - Use register_rest_route() to create a new endpoint
