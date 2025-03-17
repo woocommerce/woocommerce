@@ -70,29 +70,27 @@ const Edit = ( {
 
 	return (
 		<>
-			<InspectorControls>
-				{ /* @ts-expect-error missing types */ }
-				<InspectorControls group="advanced">
-					<SelectControl
-						// @ts-expect-error missing types.
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-						label={ __( 'HTML element', 'woocommerce' ) }
-						options={ [
-							{
-								label: __( 'Default (<div>)', 'woocommerce' ),
-								value: 'div',
-							},
-							{ label: '<section>', value: 'section' },
-							{ label: '<aside>', value: 'aside' },
-						] }
-						value={ TagName }
-						onChange={ ( value: 'div' | 'section' | 'aside' ) =>
-							setAttributes( { tagName: value } )
-						}
-						help={ htmlElementMessages[ TagName ] }
-					/>
-				</InspectorControls>
+			{ /* @ts-expect-error missing types */ }
+			<InspectorControls group="advanced">
+				<SelectControl
+					// @ts-expect-error missing types.
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					label={ __( 'HTML element', 'woocommerce' ) }
+					options={ [
+						{
+							label: __( 'Default (<div>)', 'woocommerce' ),
+							value: 'div',
+						},
+						{ label: '<section>', value: 'section' },
+						{ label: '<aside>', value: 'aside' },
+					] }
+					value={ TagName }
+					onChange={ ( value: 'div' | 'section' | 'aside' ) =>
+						setAttributes( { tagName: value } )
+					}
+					help={ htmlElementMessages[ TagName ] }
+				/>
 			</InspectorControls>
 			<TagName { ...innerBlocksProps } />
 		</>
