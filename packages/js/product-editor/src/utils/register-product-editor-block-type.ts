@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { Block, BlockConfiguration } from '@wordpress/blocks';
-import { select as WPSelect } from '@wordpress/data';
 import { registerWooBlockType } from '@woocommerce/block-templates';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId } from '@wordpress/core-data';
 
 interface BlockRepresentation< T extends Record< string, object > > {
@@ -15,17 +11,26 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
+// Define a more generic type for the select function to avoid TypeScript errors
+type SelectType = ( store: string ) => Record< string, unknown >;
+
 export function useEvaluationContext( context: Record< string, unknown > ) {
 	const { postType } = context;
 
-	const productId = useEntityId( 'postType', postType );
+	const productId = useEntityId( 'postType', postType as string );
 
-	const getEvaluationContext = ( select: typeof WPSelect ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const editedProduct = select( 'core' ).getEditedEntityRecord(
+	const getEvaluationContext = ( select: SelectType ) => {
+		const coreStore = select( 'core' ) as {
+			getEditedEntityRecord: (
+				kind: string,
+				name: string,
+				id: number
+			) => Record< string, unknown >;
+		};
+
+		const editedProduct = coreStore.getEditedEntityRecord(
 			'postType',
-			postType,
+			postType as string,
 			productId
 		);
 

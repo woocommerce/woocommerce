@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid loading settings for wc-shipping-method-pickup-location when script isn't enqueued
