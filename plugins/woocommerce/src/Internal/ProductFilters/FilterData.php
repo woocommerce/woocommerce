@@ -23,6 +23,11 @@ class FilterData {
 	 */
 	private $query_clauses;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
+	 */
 	public function __construct( QueryClausesGenerator $query_clauses ) {
 		$this->query_clauses = $query_clauses;
 	}
@@ -80,6 +85,7 @@ class FilterData {
 	 * Get stock status counts for the current products.
 	 *
 	 * @param array $query_vars The WP_Query arguments.
+	 * @param array $statuses   Array of stock status values to count.
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( array $query_vars, array $statuses ) {

@@ -17,13 +17,15 @@ defined( 'ABSPATH' ) || exit;
 class FilterDataProvider {
 	/**
 	 * Hold initialized providers.
+	 *
+	 * @var array Product filter data providers.
 	 */
 	private $providers = array();
 
 	/**
 	 * Get the data provider with desired query clauses generator.
 	 *
-	 * @param string $class_path Namespace name of the query clauses generator.
+	 * @param QueryClausesGenerator $query_clauses_generator The query clauses generator instance.
 	 */
 	public function with( QueryClausesGenerator $query_clauses_generator ) {
 		$class_name = get_class( $query_clauses_generator );
