@@ -57,5 +57,10 @@
 				}
 			}
 	},
-	"usesContext": [ "postId", "postType" ]
+	"usesContext": [ "postId", "postType" ],
+	"ancestor": [
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	]
 }
