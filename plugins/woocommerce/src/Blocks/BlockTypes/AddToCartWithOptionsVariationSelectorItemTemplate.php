@@ -65,7 +65,7 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			return '';
 		}
 
-		// Get an instance of the current Post Template block.
+		// Get an instance of the current Variation Selector Item Template block.
 		$block_instance = $block->parsed_block;
 
 		$new_block = new WP_Block(
@@ -77,8 +77,8 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			),
 		);
 
-		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-		// `render_callback` and ensure that no wrapper markup is included.
+		// Render the inner blocks of the Variation Selector Item Template block with `dynamic` set to `false`
+		// to prevent calling `render_callback` and ensure that no wrapper markup is included.
 		return $new_block->render( array( 'dynamic' => false ) );
 	}
 
