@@ -52,17 +52,34 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 						},
 					],
 					[
-						'woocommerce/product-price',
+						'core/group',
 						{
-							isDescendentOfSingleProductBlock: true,
-							fontSize: 'medium',
-							textAlign: 'right',
+							layout: {
+								type: 'flex',
+								orientation: 'vertical',
+							},
 							style: {
-								typography: {
-									fontWeight: 400,
+								spacing: {
+									blockGap: '0',
 								},
 							},
 						},
+						[
+							[
+								'woocommerce/product-price',
+								{
+									isDescendentOfSingleProductBlock: true,
+									fontSize: 'medium',
+									textAlign: 'right',
+									style: {
+										typography: {
+											fontWeight: 400,
+										},
+									},
+								},
+							],
+							[ 'woocommerce/product-stock-indicator' ],
+						],
 					],
 				],
 			],
