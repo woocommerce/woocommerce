@@ -125,7 +125,8 @@ const { state, actions } = store(
 				}
 			},
 		},
-	}
+	},
+	{ lock: true }
 );
 
 type DropdownContext = Context & {
@@ -149,5 +150,6 @@ store(
 				context.selected = context.option.value;
 			},
 		},
-	}
+	},
+	{ lock: true }
 );
