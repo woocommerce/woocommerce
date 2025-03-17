@@ -243,7 +243,14 @@ abstract class Incentive {
 			fn( $dismissed_incentive ) => $id === $dismissed_incentive['id']
 		);
 
-		return array_column( $dismissals, 'context' );
+		// Map to return an array of associative arrays containing both 'context' and 'timestamp'.
+		return array_map(
+			fn( $dismissed_incentive ) => [
+				'timestamp' => $dismissed_incentive['timestamp'],
+				'context'   => $dismissed_incentive['context'],
+			],
+			$dismissals
+		);
 	}
 
 	/**

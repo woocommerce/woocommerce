@@ -57,9 +57,9 @@ export const isIncentiveDismissedInContext = (
 		return false;
 	}
 
-	return (
-		incentive._dismissals.includes( 'all' ) ||
-		incentive._dismissals.includes( context )
+	return incentive._dismissals.some(
+		( dismissal ) =>
+			dismissal.context === 'all' || dismissal.context === context
 	);
 };
 
