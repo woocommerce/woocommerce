@@ -29,7 +29,9 @@ export const Edit = ( {
 
 	useEffect( () => {
 		const scrollableElement = scrollableRef.current;
-		if ( ! scrollableElement ) return;
+		if ( ! ( scrollableElement instanceof HTMLElement ) ) {
+			return;
+		}
 
 		// Create a ResizeObserver to watch for layout changes
 		const resizeObserver = new ResizeObserver( () => {

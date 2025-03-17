@@ -306,8 +306,11 @@ const productGallery = {
 			context.touchCurrentX = 0;
 		},
 		onScroll: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! ( scrollableElement instanceof HTMLElement ) ) {
+				return;
+			}
 			const context = getContext();
-			const scrollableElement = getElement()?.ref as HTMLElement;
 			const overflowState = checkOverflow( scrollableElement );
 
 			context.thumbnailsOverflowTop = overflowState.overflowTop;
