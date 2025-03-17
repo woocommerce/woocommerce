@@ -33,7 +33,6 @@ import {
 	isWooPayments,
 	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
-	providersContainWooPaymentsEnabled,
 	isActionIncentive,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
@@ -214,15 +213,14 @@ export const SettingsPaymentsMain = () => {
 			) {
 				const referenceTimestamp = new Date();
 				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
-				// After 30 days - if a merchant has not enabled WooPayments and have dismissed the switcher incentive modal,
-				// We push showing banner instead of just highlighting the incentive.
+				// If the merchant have dismissed the switcher incentive modal and 30 days have passed,
+				// show the banner instead of just highlighting the incentive.
 				if (
 					isIncentiveDismissedEarlierThanTimestamp(
 						incentive,
 						'wc_settings_payments__modal',
 						referenceTimestamp.getTime()
-					) &&
-					! providersContainWooPaymentsEnabled( providers )
+					)
 				) {
 					showBannerIncentive = true;
 				} else {

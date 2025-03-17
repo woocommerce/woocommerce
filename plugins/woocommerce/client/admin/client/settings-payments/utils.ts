@@ -69,13 +69,13 @@ export const isIncentiveDismissedInContext = (
 export const isIncentiveDismissedEarlierThanTimestamp = (
 	incentive: PaymentIncentive | undefined,
 	context: string,
-	referenceTimestampMs: number // UNIX timestamp in milliseconds
+	referenceTimestampMs: number // UNIX timestamp in milliseconds.
 ): boolean => {
 	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
 		return false;
 	}
 
-	// Check if any dismissal happened before the provided reference timestamp
+	// Check if the dismissal happened before the provided reference timestamp.
 	return incentive._dismissals.some( ( dismissal ) => {
 		const dismissalTimestampMs = dismissal.timestamp * 1000; // Convert to milliseconds if stored in seconds
 		return (
@@ -190,16 +190,4 @@ export const providersContainWooPaymentsInDevMode = (
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return !! wooPayments?.state?.dev_mode;
-};
-
-/**
- * Checks whether providers contain WooPayments gateway that is enabled.
- *
- * @param providers payment providers
- */
-export const providersContainWooPaymentsEnabled = (
-	providers: PaymentProvider[]
-): boolean => {
-	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
-	return !! wooPayments?.state?.enabled;
 };

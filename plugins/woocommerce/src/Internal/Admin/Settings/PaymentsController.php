@@ -241,15 +241,38 @@ class PaymentsController {
 
 		// Go through the providers and check if any of them have a "prominently" visible incentive (i.e., modal or banner).
 		foreach ( $providers as $provider ) {
-			// We check to see if the incentive was dismissed in the banner context.
-			// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
-			// we rely on the fact that the modal falls back to the banner, once dismissed.
-			if ( ! empty( $provider['_incentive'] ) &&
-				( empty( $provider['_incentive']['_dismissals'] ) ||
-					! in_array( 'wc_settings_payments__banner', $provider['_incentive']['_dismissals'], true )
-				)
-			) {
-				return true;
+			if ( ! empty( $provider['_incentive'] ) ) {
+				$promo_id = $provider['_incentive']['promo_id'] ?? '';
+				$is_switcher_incentive = str_contains( $promo_id, '-switch-' );
+				$dismissals = $provider['_incentive']['_dismissals'] ?? [];
+
+				// If there are no dismissals at all, the incentive is visible
+				if ( empty( $dismissals ) ) {
+					return true;
+				}
+
+				// We check to see if the incentive was dismissed in the banner context.
+				$is_dismissed_banner = array_filter( $dismissals, function ( $dismissal ) {
+					return isset( $dismissal['context'] ) && $dismissal['context'] === 'wc_settings_payments__banner';
+				});
+
+				// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
+				// we rely on the fact that the modal falls back to the banner, once dismissed.
+				// But there's one special case. If the merchant have dismissed the switcher incentive modal
+				// and 30 days have passed, highlight the incentive.
+				$is_dismissed_modal_more_than_30_days_ago = array_filter( $dismissals, function ( $dismissal ) {
+					return isset( $dismissal['context'], $dismissal['timestamp'] ) &&
+						$dismissal['context'] === 'wc_settings_payments__modal' &&
+						$dismissal['timestamp'] < strtotime( '-30 days' );
+				});
+				if ( $is_switcher_incentive && empty( $is_dismissed_modal_more_than_30_days_ago ) && empty( $is_dismissed_banner ) ) {
+					return false;
+				}
+
+				// If the banner context was NOT found in the dismissals, the incentive is still visible.
+				if ( empty( $is_dismissed_banner ) ) {
+					return true;
+				}
 			}
 		}
 

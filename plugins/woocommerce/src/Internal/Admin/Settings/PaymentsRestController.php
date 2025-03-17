@@ -952,14 +952,24 @@ class PaymentsRestController extends RestApiControllerBase {
 						),
 						'_dismissals'       => array(
 							'type'        => 'array',
-							'description' => esc_html__( 'The dismissals list for the incentive. The `all` entry means the incentive was dismissed for all contexts.', 'woocommerce' ),
+							'description' => esc_html__( 'The dismissals list for the incentive. Each dismissal entry includes a context and a timestamp. The `all` entry means the incentive was dismissed for all contexts.', 'woocommerce' ),
 							'uniqueItems' => true,
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'items'       => array(
-								'type'        => 'string',
-								'description' => esc_html__( 'Context ID in which the incentive was dismissed.', 'woocommerce' ),
-								'readonly'    => true,
+								'type'       => 'object',
+								'properties' => array(
+									'context'   => array(
+										'type'        => 'string',
+										'description' => esc_html__( 'Context ID in which the incentive was dismissed.', 'woocommerce' ),
+										'readonly'    => true,
+									),
+									'timestamp' => array(
+										'type'        => 'integer',
+										'description' => esc_html__( 'Unix timestamp representing when the incentive was dismissed.', 'woocommerce' ),
+										'readonly'    => true,
+									),
+								),
 							),
 						),
 						'_links'            => array(

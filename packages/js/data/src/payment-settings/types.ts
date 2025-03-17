@@ -34,10 +34,6 @@ export enum PaymentProviderType {
 	Suggestion = 'suggestion',
 	Gateway = 'gateway',
 }
-interface Dismissal {
-	timestamp: number; // timestamp in seconds
-	context: string;
-}
 
 export type PaymentIncentive = {
 	id: string;
@@ -48,11 +44,16 @@ export type PaymentIncentive = {
 	cta_label: string;
 	tc_url: string;
 	badge: string;
-	_dismissals: Dismissal[];
+	_dismissals: PaymentIncentiveDismissal[];
 	_links: {
 		dismiss: LinkData;
 	};
 };
+
+interface PaymentIncentiveDismissal {
+	timestamp: number; // timestamp in seconds
+	context: string;
+}
 
 export type RecommendedPaymentMethod = {
 	id: string;
