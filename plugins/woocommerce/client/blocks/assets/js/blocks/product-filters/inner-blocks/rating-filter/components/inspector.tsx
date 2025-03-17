@@ -68,6 +68,7 @@ export const Inspector = ( {
 					label={ __( 'Display product count', 'woocommerce' ) }
 					checked={ showCounts }
 					onChange={ setCountVisibility }
+					__nextHasNoMarginBottom
 				/>
 			</PanelBody>
 

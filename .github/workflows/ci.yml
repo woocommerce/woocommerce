@@ -225,6 +225,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 25 ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
@@ -527,6 +528,12 @@ jobs:
       contents: read
 
     steps:
+      - name: 'Temporary blocked: evaluating tj-actions/changed-files related SIRT report'
+        shell: bash
+        run: |
+          echo 'Temporary blocked: evaluating tj-actions/changed-files related SIRT report'
+          exit 1
+
       - name: 'Calculate checkout depth'
         id: checkout_depth
         shell: bash

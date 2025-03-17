@@ -402,27 +402,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				$color_palette_section_end,
 
 				array( 'type' => 'email_preview' ),
-
-				array(
-					'title' => __( 'Store management insights', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'email_merchant_notes',
-				),
-
-				array(
-					'title'         => __( 'Enable email insights', 'woocommerce' ),
-					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
-					'id'            => 'woocommerce_merchant_email_notifications',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'default'       => 'no',
-					'autoload'      => false,
-				),
-
-				array(
-					'type' => 'sectionend',
-					'id'   => 'email_merchant_notes',
-				),
 			);
 
 		// Remove empty elements that depend on the email_improvements feature flag.

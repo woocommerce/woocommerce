@@ -60,7 +60,6 @@ const maybeHideInventoryAdvancedCollapsible = createHigherOrderComponent(
 								advancedCollapsibleBlock?.innerBlocks[ 0 ];
 							allBlocksInvisible = areAllBlocksInvisible(
 								advancedSectionBlock?.innerBlocks,
-								// @ts-expect-error type is not correct
 								evalContext.getEvaluationContext( select )
 							);
 						}

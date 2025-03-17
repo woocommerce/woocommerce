@@ -12,10 +12,6 @@
 /storybook export-ignore
 
 # Ignore following configuration files
-/phpcs.xml export-ignore
-/phpunit.* export-ignore
-/composer.lock export-ignore
-/composer.json export-ignore
 /CODEOWNERS export-ignore
 /renovate.json export-ignore
 /webpack.config.js export-ignore

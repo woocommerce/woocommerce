@@ -168,7 +168,6 @@ export function addAttribute( settings: Block ) {
  * @return {Function} Wrapped component.
  */
 export const withLayoutControls = createHigherOrderComponent(
-	// @ts-expect-error No types for this exist yet.
 	( BlockEdit ) => ( props ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		const supportLayout = hasLayoutBlockSupport( props.name );

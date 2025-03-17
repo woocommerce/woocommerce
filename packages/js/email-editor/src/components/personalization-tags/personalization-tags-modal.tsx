@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import './index.scss';
+import './style.scss';
 import { CategoryMenu } from './category-menu';
 import { CategorySection } from './category-section';
 import { LinkModal } from './link-modal';

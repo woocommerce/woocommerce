@@ -49,6 +49,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 
 		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 		wc_get_container()->get( Package::class )->init();
+		wc_get_container()->get( Integration::class )->initialize();
 		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
 
 		$this->email_post = $this->factory()->post->create_and_get(

@@ -5,10 +5,7 @@ import { test as setup } from './fixtures';
 
 async function deactivateWooCommerce( restApi ) {
 	try {
-		await restApi.fetch(
-			'wc-admin-test-helper/live-branches/deactivate/v1',
-			{ method: 'GET' }
-		);
+		await restApi.get( 'wc-admin-test-helper/live-branches/deactivate/v1' );
 		console.log( 'WC deactivated.' );
 	} catch ( err ) {
 		console.error( 'Error deactivating WooCommerce:', err );
@@ -16,10 +13,8 @@ async function deactivateWooCommerce( restApi ) {
 }
 
 async function getActivatedWooCommerceVersion( restApi ) {
-	const response = await restApi.get( 'wp/v2/plugins', {
-		data: { status: 'active' },
-	} );
-	const plugins = await response.json();
+	const response = await restApi.get( 'wp/v2/plugins', { status: 'active' } );
+	const plugins = await response.data;
 	return plugins.find( ( plugin ) => plugin.name === 'WooCommerce' )?.version;
 }
 
@@ -46,21 +41,18 @@ setup( 'Install WC using WC Beta Tester', async ( { restApi } ) => {
 
 	// Install WC
 	if ( wcVersion === 'latest' ) {
-		const latestResponse = await restApi.fetch(
+		const latestResponse = await restApi.post(
 			'wc-admin-test-helper/live-branches/install/latest/v1',
-			{
-				method: 'POST',
-				data: { include_pre_releases: true },
-			}
+			{ include_pre_releases: true }
 		);
 
-		if ( ! latestResponse.ok() ) {
+		if ( latestResponse.statusCode !== 200 ) {
 			throw new Error(
 				`Failed to install latest WC: ${ latestResponse.status() } ${ await latestResponse.text() }`
 			);
 		}
 
-		resolvedVersion = ( await latestResponse.json() )?.version || '';
+		resolvedVersion = ( await latestResponse.data )?.version || '';
 
 		if ( resolvedVersion === activatedWcVersion ) {
 			console.log(
@@ -90,21 +82,18 @@ setup( 'Install WC using WC Beta Tester', async ( { restApi } ) => {
 					? 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip'
 					: `https://github.com/woocommerce/woocommerce/releases/download/${ wcVersion }/woocommerce.zip`;
 
-			const installResponse = await restApi.fetch(
+			const installResponse = await restApi.post(
 				'wc-admin-test-helper/live-branches/install/v1',
 				{
-					method: 'POST',
-					data: {
-						pr_name: wcVersion,
-						download_url: downloadUrl,
-						version: wcVersion,
-					},
+					pr_name: wcVersion,
+					download_url: downloadUrl,
+					version: wcVersion,
 				}
 			);
 
-			if ( ! installResponse.ok() ) {
+			if ( installResponse.statusCode !== 200 ) {
 				throw new Error(
-					`Failed to install WC ${ wcVersion }: ${ installResponse.status() } ${ await installResponse.text() }`
+					`Failed to install WC ${ wcVersion }: ${ installResponse.statusCode }`
 				);
 			}
 
@@ -118,19 +107,16 @@ setup( 'Install WC using WC Beta Tester', async ( { restApi } ) => {
 	// Activate WC
 	if ( resolvedVersion ) {
 		try {
-			const activationResponse = await restApi.fetch(
+			const activationResponse = await restApi.post(
 				'wc-admin-test-helper/live-branches/activate/v1',
 				{
-					method: 'POST',
-					data: {
-						version: resolvedVersion,
-					},
+					version: resolvedVersion,
 				}
 			);
 
-			if ( ! activationResponse.ok() ) {
+			if ( activationResponse.statusCode !== 200 ) {
 				throw new Error(
-					`Failed to activate WC ${ resolvedVersion }: ${ activationResponse.status() } ${ await activationResponse.text() }`
+					`Failed to activate WC ${ resolvedVersion }: ${ activationResponse.statusCode } }`
 				);
 			}
 

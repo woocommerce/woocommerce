@@ -168,7 +168,7 @@ class EmailStyleSyncTest extends WC_Unit_Test_Case {
             'elements' => [
                 'button' => [
                     'color' => [
-                        'text' => '#ff0000'
+                        'background' => '#ff0000'
                     ]
                 ],
                 'caption' => [
