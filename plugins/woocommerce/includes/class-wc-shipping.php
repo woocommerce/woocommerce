@@ -365,12 +365,12 @@ class WC_Shipping {
 
 				foreach ( $package['rates'] as $rate ) {
 					if ( 'free_shipping' === $rate->method_id ) {
-						$free_shipping[] = $rate;
+						$free_shipping[ $rate->id ] = $rate;
 						continue;
 					}
 
 					if ( in_array( $rate->method_id, array( 'local_pickup', 'pickup_location' ), true ) ) {
-						$local_pickup[] = $rate;
+						$local_pickup[ $rate->id ] = $rate;
 					}
 				}
 
