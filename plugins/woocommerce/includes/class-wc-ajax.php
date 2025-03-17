@@ -3643,6 +3643,11 @@ class WC_AJAX {
 	public static function load_status_widget() {
 		check_ajax_referer( 'wc-status-widget', 'security' );
 
+		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'view_woocommerce_reports' ) || ! current_user_can( 'publish_shop_orders' ) ) {
+			wp_send_json_error( 'missing_permissions' );
+			wp_die();
+		}
+
 		include_once __DIR__ . '/admin/class-wc-admin-dashboard.php';
 		ob_start();
 		$wc_admin_dashboard = new WC_Admin_Dashboard();
