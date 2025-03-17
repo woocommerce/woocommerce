@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Pelago\Emogrifier\CssInliner;
 use Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
@@ -258,10 +259,18 @@ class WC_Email extends WC_Settings_API {
 	public $email_improvements_enabled;
 
 	/**
+	 * Whether email block editor feature is enabled.
+	 *
+	 * @var bool
+	 */
+	public $block_email_editor_enabled;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$this->block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 
 		// Find/replace.
 		$this->placeholders = array_merge(
@@ -706,6 +715,12 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_content() {
 		$this->sending = true;
+
+		$block_email_content = $this->get_block_email_html_content();
+		if ( $block_email_content ) {
+			$this->email_type = 'plain' === $this->email_type ? 'html' : $this->email_type;
+			return $block_email_content;
+		}
 
 		if ( 'plain' === $this->get_email_type() ) {
 			$email_content = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) ), 70 );
@@ -1388,5 +1403,54 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		return $option;
+	}
+
+	/**
+	 * This method checks if there is email created in the block editor associated with this WC_Email
+	 * and if so, it renders the block email content.
+	 *
+	 * @return string|null
+	 */
+	private function get_block_email_html_content(): ?string {
+		if ( ! $this->block_email_editor_enabled ) {
+			return null;
+		}
+
+		/** Service for rendering emails from block content @var BlockEmailRenderer $renderer */
+		$renderer   = wc_get_container()->get( BlockEmailRenderer::class );
+		$email_post = $renderer->get_email_post_by_wc_email( $this );
+
+		if ( ! $email_post ) {
+			return null;
+		}
+
+		// Get the Woo content excluding headers and footers.
+		// Store the existing header and footer callbacks.
+		global $wp_filter;
+		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
+		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
+
+		// Remove header and footer filters because we want to get only the main content.
+		remove_all_filters( 'woocommerce_email_header' );
+		remove_all_filters( 'woocommerce_email_footer' );
+
+		$woo_content = $this->get_content_html();
+
+		// Restore the original header and footer filters.
+		if ( $original_header_filters ) {
+			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $filter ) {
+					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
+				}
+			}
+		}
+		if ( $original_footer_filters ) {
+			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $filter ) {
+					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
+				}
+			}
+		}
+		return $renderer->render_block_email( $email_post, $woo_content, $this );
 	}
 }

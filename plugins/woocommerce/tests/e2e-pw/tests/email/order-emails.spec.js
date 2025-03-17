@@ -13,14 +13,15 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
 import { setOption } from '../../utils/options';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	order: async ( { api }, use ) => {
+	order: async ( { restApi }, use ) => {
 		let order;
 
-		await api
-			.post( 'orders', {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 				billing: { email: faker.internet.exampleEmail() },
 			} )
@@ -33,7 +34,9 @@ const test = baseTest.extend( {
 
 		await use( order );
 
-		await api.delete( `orders/${ order.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+			force: true,
+		} );
 	},
 } );
 
@@ -74,14 +77,14 @@ test.beforeEach( async ( { baseURL } ) => {
 ].forEach( ( { role, status, subject, content } ) => {
 	test( `${ role } receives email for ${ status } order`, async ( {
 		page,
-		api,
+		restApi,
 		order,
 	} ) => {
 		// Inject the order id into the expected subject and make it a regex
 		subject = new RegExp( subject.replace( 'ORDER_ID', `${ order.id }` ) );
 
-		await api
-			.put( `orders/${ order.id }`, {
+		await restApi
+			.put( `${ WC_API_PATH }/orders/${ order.id }`, {
 				status,
 			} )
 			.catch( ( error ) => {
@@ -89,9 +92,11 @@ test.beforeEach( async ( { baseURL } ) => {
 			} );
 
 		let orderStatus;
-		await api.get( `orders/${ order.id }` ).then( ( response ) => {
-			orderStatus = response.data.status;
-		} );
+		await restApi
+			.get( `${ WC_API_PATH }/orders/${ order.id }` )
+			.then( ( response ) => {
+				orderStatus = response.data.status;
+			} );
 
 		await expect( orderStatus ).toEqual( status );
 

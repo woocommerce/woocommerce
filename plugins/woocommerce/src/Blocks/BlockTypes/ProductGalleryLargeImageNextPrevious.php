@@ -60,7 +60,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
-				'data-wc-on--click',
+				'data-wp-on--click',
 				'actions.selectPreviousImage'
 			);
 			$p->set_attribute(
@@ -75,7 +75,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
-				'data-wc-on--click',
+				'data-wp-on--click',
 				'actions.selectNextImage'
 			);
 			$p->set_attribute(
@@ -88,7 +88,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		return strtr(
 			'<div
 				class="wc-block-product-gallery-large-image-next-previous wp-block-woocommerce-product-gallery-large-image-next-previous"
-				data-wc-interactive=\'{data_wc_interactive}\'
+				data-wp-interactive=\'{data_wp_interactive}\'
 			>
 				<div class="wc-block-product-gallery-large-image-next-previous-container">
 					{prev_button}
@@ -98,7 +98,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			array(
 				'{prev_button}'         => $prev_button,
 				'{next_button}'         => $next_button,
-				'{data_wc_interactive}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+				'{data_wp_interactive}' => 'woocommerce/product-gallery',
 			)
 		);
 	}
@@ -124,7 +124,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		return sprintf(
 			'<button
-				data-wc-bind--disabled="%1$s"
+				data-wp-bind--disabled="%1$s"
 				class="wc-block-product-gallery-large-image-next-previous--button wc-block-product-gallery-large-image-next-previous-%2$s"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" width="49" height="48" viewBox="0 0 49 48" fill="none">

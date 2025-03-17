@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+dev: update CI jobs config to include more e2e checks

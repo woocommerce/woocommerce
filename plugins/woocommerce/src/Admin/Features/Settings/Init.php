@@ -163,20 +163,46 @@ class Init {
 
 		// Add the settings data to the settings array.
 		$setting_pages = \WC_Admin_Settings::get_settings_pages();
-		$pages         = array();
+		$settings      = self::get_page_data( $settings, $setting_pages );
+
+		return $settings;
+	}
+
+	/**
+	 * Get the page data for the settings editor.
+	 *
+	 * @param array $settings The settings array.
+	 * @param array $setting_pages The setting pages.
+	 * @return array The settings array.
+	 */
+	public static function get_page_data( $settings, $setting_pages ) {
+		global $wp_scripts;
+		/**
+		 * Filters the settings tabs array.
+		 *
+		 * @since 2.5.0
+		 *
+		 * @param array $available_pages The available pages.
+		 */
+		$available_pages = apply_filters( 'woocommerce_settings_tabs_array', array() );
+		$pages           = array();
+
 		foreach ( $setting_pages as $setting_page ) {
+			// If any page has removed itself from the tabs array, avoid adding this page to the settings editor.
+			if ( ! in_array( $setting_page->get_id(), array_keys( $available_pages ), true ) ) {
+				continue;
+			}
+
 			$scripts_before_adding_settings = $wp_scripts->queue;
 			$pages                          = $setting_page->add_settings_page_data( $pages );
-
-			$settings_scripts_handles                               = array_diff( $wp_scripts->queue, $scripts_before_adding_settings );
+			$settings_scripts_handles       = array_diff( $wp_scripts->queue, $scripts_before_adding_settings );
 			$settings['settingsScripts'][ $setting_page->get_id() ] = self::get_script_urls( $settings_scripts_handles );
 		}
 
-		$transformer                       = new Transformer();
-		$settings['settingsData']['pages'] = $transformer->transform( $pages );
-		$settings['settingsData']['start'] = $setting_pages[0]->get_custom_view( 'woocommerce_settings_start' );
-
-		$settings['settingsData']['_wpnonce'] = wp_create_nonce( 'woocommerce-settings' );
+		$transformer                          = new Transformer();
+		$settings['settingsData']['pages']    = $transformer->transform( $pages );
+		$settings['settingsData']['start']    = $setting_pages[0]->get_custom_view( 'woocommerce_settings_start' );
+		$settings['settingsData']['_wpnonce'] = wp_create_nonce( 'wp_rest' );
 
 		return $settings;
 	}

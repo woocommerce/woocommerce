@@ -94,6 +94,7 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 			'shipping_options'                           => array( 'title', 'sectionend' ),
 			'woocommerce_enable_shipping_calc'           => 'checkbox',
 			'woocommerce_shipping_cost_requires_address' => 'checkbox',
+			'woocommerce_shipping_hide_rates_when_free'  => 'checkbox',
 			'woocommerce_ship_to_destination'            => 'radio',
 			'woocommerce_shipping_debug_mode'            => 'checkbox',
 		);

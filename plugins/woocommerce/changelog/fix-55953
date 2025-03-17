@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix https://github.com/woocommerce/woocommerce/issues/55953

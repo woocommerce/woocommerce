@@ -104,7 +104,7 @@ class Controller extends AbstractBlock {
 			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
 
 			if ( $is_anchor ) {
-				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.viewProduct' );
+				$p->set_attribute( 'data-wp-on--click', 'woocommerce/product-collection::actions.viewProduct' );
 
 				$block_content = $p->get_updated_html();
 			}
@@ -195,11 +195,7 @@ class Controller extends AbstractBlock {
 					}
 
 					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
-						$p = new \WP_HTML_Tag_Processor( $content );
-						if ( $p->next_tag() ) {
-							$p->set_attribute( 'data-wc-navigation-disabled', 'true' );
-						}
-						$content = $p->get_updated_html();
+						wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}
 
@@ -421,5 +417,17 @@ class Controller extends AbstractBlock {
 		// Use HandlerRegistry to register collections.
 		$collection_handler_store = $this->collection_handler_registry->register_core_collections();
 		$this->query_builder->set_collection_handler_store( $collection_handler_store );
+	}
+
+
+	/**
+	 * Disable the block type script, this block uses script modules.
+	 *
+	 * @param string|null $key The key of the script.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

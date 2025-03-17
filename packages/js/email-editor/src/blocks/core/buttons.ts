@@ -11,7 +11,7 @@ import { Block } from '@wordpress/blocks/index';
 function enhanceButtonsBlock() {
 	addFilter(
 		'blocks.registerBlockType',
-		'mailpoet-email-editor/change-buttons',
+		'woocommerce-email-editor/change-buttons',
 		( settings: Block, name ) => {
 			if ( name === 'core/buttons' ) {
 				return {

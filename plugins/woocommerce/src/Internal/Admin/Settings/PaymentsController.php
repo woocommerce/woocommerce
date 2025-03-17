@@ -53,8 +53,32 @@ class PaymentsController {
 			return $features;
 		}
 
+		// Transient key to handle the experiment failure.
+		$transient_key = 'wc_experiment_failure_woocommerce_payment_settings_2025_v2';
+
+		// Try to get cached result first.
+		$cached_result = get_transient( $transient_key );
+
+		// If we have a cache entry that indicates an error, disable the feature.
+		if ( 'error' === $cached_result ) {
+			return array_merge(
+				$features,
+				array(
+					'reactify-classic-payments-settings' => false,
+				)
+			);
+		}
+
+		try {
+			$in_treatment = Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_2025_v2' );
+		} catch ( \Exception $e ) {
+			// If the experiment fails, set a transient to avoid repeated failures and set the flag to false.
+			$in_treatment = false;
+			set_transient( $transient_key, 'error', HOUR_IN_SECONDS );
+		}
+
 		// If the feature flag is enabled, but the user is NOT in the experiment treatment group, disable the feature.
-		if ( ! Experimental_Abtest::in_treatment_handled_exception( 'woocommerce_payment_settings_2025_v2' ) ) {
+		if ( ! $in_treatment ) {
 			return array_merge(
 				$features,
 				array(

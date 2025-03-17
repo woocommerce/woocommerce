@@ -164,7 +164,11 @@ class EmailPreview {
 	 * @throws \InvalidArgumentException When the email type is invalid.
 	 */
 	public function set_email_type( string $email_type ) {
-		$emails = WC()->mailer()->get_emails();
+		$wc_emails = WC()->mailer()->get_emails();
+		$emails    = array_combine(
+			array_map( 'get_class', $wc_emails ),
+			$wc_emails
+		);
 		if ( ! in_array( $email_type, array_keys( $emails ), true ) ) {
 			throw new \InvalidArgumentException( 'Invalid email type' );
 		}

@@ -45,10 +45,10 @@
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/expression-evaluation": "workspace:*",
-		"@woocommerce/navigation": "workspace:^",
+		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/number": "workspace:*",
-		"@woocommerce/settings": "^1.0.0",
-		"@woocommerce/tracks": "workspace:^",
+		"@woocommerce/settings": "1.0.0",
+		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.6",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/blocks": "wp-6.6",
@@ -175,7 +175,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-update: Store API `POST /cart/add-item` to support attribute names from product page

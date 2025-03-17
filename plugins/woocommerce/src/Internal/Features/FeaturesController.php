@@ -357,7 +357,7 @@ class FeaturesController {
 				'email_improvements'     => array(
 					'name'            => __( 'Email improvements', 'woocommerce' ),
 					'description'     => __(
-						'Enable modern email design and live preview for transactional emails',
+						'Enable modern email design for transactional emails',
 						'woocommerce'
 					),
 

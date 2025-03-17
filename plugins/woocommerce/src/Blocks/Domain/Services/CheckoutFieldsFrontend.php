@@ -349,7 +349,7 @@ class CheckoutFieldsFrontend {
 			$field_value = $field_values[ $field_key ];
 
 			if ( empty( $field_value ) ) {
-				if ( ! empty( $field['required'] ) ) {
+				if ( true === $field['required'] ) {
 					$errors->add(
 						'required_field',
 						/* translators: %s: is the field label */

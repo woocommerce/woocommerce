@@ -24,13 +24,18 @@ import { SelectTemplateModal } from '../template-select';
 import { recordEvent } from '../../events';
 
 export function EmailTypeInfo() {
-	const { template, currentEmailContent } = useSelect(
-		( select ) => ( {
-			template: select( storeName ).getCurrentTemplate(),
-			currentEmailContent: select( storeName ).getEditedEmailContent(),
-		} ),
+	const { template, currentEmailContent, canUpdateTemplates } = useSelect(
+		( select ) => {
+			return {
+				template: select( storeName ).getCurrentTemplate(),
+				currentEmailContent:
+					select( storeName ).getEditedEmailContent(),
+				canUpdateTemplates: select( storeName ).canUserEditTemplates(),
+			};
+		},
 		[]
 	);
+
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
 		useState( false );
 	const [ isSelectTemplateModalOpen, setSelectTemplateModalOpen ] =
@@ -38,18 +43,18 @@ export function EmailTypeInfo() {
 
 	return (
 		<>
-			<Panel className="mailpoet-email-sidebar__email-type-info">
+			<Panel className="woocommerce-email-sidebar-email-type-info">
 				<PanelBody>
 					<PanelRow>
-						<span className="mailpoet-email-type-info__icon">
+						<span className="woocommerce-email-type-info-icon">
 							<Icon icon={ megaphone } />
 						</span>
-						<div className="mailpoet-email-type-info__content">
-							<h2>{ __( 'Newsletter', 'mailpoet' ) }</h2>
+						<div className="woocommerce-email-type-info-content">
+							<h2>{ __( 'Newsletter', 'woocommerce' ) }</h2>
 							<span>
 								{ __(
 									'Send or schedule a newsletter to connect with your subscribers.',
-									'mailpoet'
+									'woocommerce'
 								) }
 							</span>
 						</div>
@@ -58,7 +63,7 @@ export function EmailTypeInfo() {
 						<PanelRow>
 							<Flex justify={ 'start' }>
 								<FlexItem className="editor-post-panel__row-label">
-									{ __( 'Template', 'mailpoet' ) }
+									{ __( 'Template', 'woocommerce' ) }
 								</FlexItem>
 								<FlexItem>
 									<DropdownMenu
@@ -67,7 +72,7 @@ export function EmailTypeInfo() {
 										toggleProps={ { variant: 'tertiary' } }
 										label={ __(
 											'Template actions',
-											'mailpoet'
+											'woocommerce'
 										) }
 										onToggle={ ( isOpen ) =>
 											recordEvent(
@@ -82,22 +87,25 @@ export function EmailTypeInfo() {
 									>
 										{ ( { onClose } ) => (
 											<>
-												<MenuItem
-													onClick={ () => {
-														recordEvent(
-															'sidebar_template_actions_edit_template_clicked'
-														);
-														setEditTemplateModalOpen(
-															true
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Edit template',
-														'mailpoet'
-													) }
-												</MenuItem>
+												{ canUpdateTemplates && (
+													<MenuItem
+														onClick={ () => {
+															recordEvent(
+																'sidebar_template_actions_edit_template_clicked'
+															);
+															setEditTemplateModalOpen(
+																true
+															);
+															onClose();
+														} }
+													>
+														{ __(
+															'Edit template',
+															'woocommerce'
+														) }
+													</MenuItem>
+												) }
+
 												<MenuItem
 													onClick={ () => {
 														recordEvent(
@@ -111,7 +119,7 @@ export function EmailTypeInfo() {
 												>
 													{ __(
 														'Swap template',
-														'mailpoet'
+														'woocommerce'
 													) }
 												</MenuItem>
 											</>

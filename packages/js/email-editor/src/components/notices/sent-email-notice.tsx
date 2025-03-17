@@ -26,7 +26,7 @@ export function SentEmailNotice() {
 				'warning',
 				__(
 					'This email has already been sent. It can be edited, but not sent again. Duplicate this email if you want to send it again.',
-					'mailpoet'
+					'woocommerce'
 				),
 				{
 					id: 'email-sent',

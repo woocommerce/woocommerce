@@ -36,7 +36,9 @@ class LaunchYourStore {
 	 */
 	public function save_site_visibility_options() {
 		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'woocommerce-settings' ) ) {
+		// New Settings API uses wp_rest nonce.
+		$nonce_string = Features::is_enabled( 'settings' ) ? 'wp_rest' : 'woocommerce-settings';
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, $nonce_string ) ) {
 			return;
 		}
 

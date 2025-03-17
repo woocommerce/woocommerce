@@ -29,6 +29,10 @@ class FixtureData {
 		);
 		$product->save();
 
+		if ( isset( $props['brand_ids'] ) ) {
+			wp_set_object_terms( $product->get_id(), $props['brand_ids'], 'product_brand' );
+		}
+
 		return wc_get_product( $product->get_id() );
 	}
 
@@ -254,6 +258,20 @@ class FixtureData {
 		return wp_insert_term(
 			$category_name,
 			'product_cat',
+			$props
+		);
+	}
+
+	/**
+	 * Create a product brand and return the result.
+	 *
+	 * @param array $props Product props.
+	 * @return array
+	 */
+	public function get_product_brand( $props ) {
+		return wp_insert_term(
+			$props['name'],
+			'product_brand',
 			$props
 		);
 	}

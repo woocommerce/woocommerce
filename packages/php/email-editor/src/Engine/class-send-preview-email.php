@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
 
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use MailPoet\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
 
 /**
  * Class Send_Preview_Email
@@ -17,7 +17,7 @@ use MailPoet\EmailEditor\Engine\Renderer\Renderer;
  * This class is responsible for handling the functionality to send preview emails.
  * It is part of the email editor integrations utilities.
  *
- * @package MailPoet\EmailEditor\Integrations\Utils
+ * @package Automattic\WooCommerce\EmailEditor\Integrations\Utils
  */
 class Send_Preview_Email {
 
@@ -89,7 +89,7 @@ class Send_Preview_Email {
 		$rendered_data = $this->renderer->render(
 			$post,
 			$subject,
-			__( 'Preview', 'mailpoet' ),
+			__( 'Preview', 'woocommerce' ),
 			$language
 		);
 
@@ -155,11 +155,11 @@ class Send_Preview_Email {
 	 */
 	private function validate_data( array $data ) {
 		if ( empty( $data['email'] ) || empty( $data['postId'] ) ) {
-			throw new \InvalidArgumentException( esc_html__( 'Missing required data', 'mailpoet' ) );
+			throw new \InvalidArgumentException( esc_html__( 'Missing required data', 'woocommerce' ) );
 		}
 
 		if ( ! is_email( $data['email'] ) ) {
-			throw new \InvalidArgumentException( esc_html__( 'Invalid email', 'mailpoet' ) );
+			throw new \InvalidArgumentException( esc_html__( 'Invalid email', 'woocommerce' ) );
 		}
 	}
 
@@ -174,7 +174,7 @@ class Send_Preview_Email {
 	private function fetch_post( $post_id ): \WP_Post {
 		$post = get_post( intval( $post_id ) );
 		if ( ! $post instanceof \WP_Post ) {
-			throw new \Exception( esc_html__( 'Invalid post', 'mailpoet' ) );
+			throw new \Exception( esc_html__( 'Invalid post', 'woocommerce' ) );
 		}
 		return $post;
 	}

@@ -35,8 +35,8 @@ export function PreviewDropdown() {
 	return (
 		<>
 			<DropdownMenu
-				className="mailpoet-preview-dropdown"
-				label={ __( 'Preview', 'mailpoet' ) }
+				className="woocommerce-preview-dropdown"
+				label={ __( 'Preview', 'woocommerce' ) }
 				icon={ deviceIcons[ previewDeviceType.toLowerCase() ] }
 				onToggle={ ( isOpened ) =>
 					recordEvent( 'header_preview_dropdown_clicked', {
@@ -59,7 +59,7 @@ export function PreviewDropdown() {
 									previewDeviceType === 'Desktop' && check
 								}
 							>
-								{ __( 'Desktop', 'mailpoet' ) }
+								{ __( 'Desktop', 'woocommerce' ) }
 							</MenuItem>
 							<MenuItem
 								className="block-editor-post-preview__button-resize"
@@ -71,7 +71,7 @@ export function PreviewDropdown() {
 								} }
 								icon={ previewDeviceType === 'Mobile' && check }
 							>
-								{ __( 'Mobile', 'mailpoet' ) }
+								{ __( 'Mobile', 'woocommerce' ) }
 							</MenuItem>
 						</MenuGroup>
 						<MenuGroup>
@@ -85,7 +85,7 @@ export function PreviewDropdown() {
 									onClose();
 								} }
 							>
-								{ __( 'Send a test email', 'mailpoet' ) }
+								{ __( 'Send a test email', 'woocommerce' ) }
 							</MenuItem>
 						</MenuGroup>
 						<MenuGroup>
@@ -95,13 +95,13 @@ export function PreviewDropdown() {
 									forceIsAutosaveable={ true }
 									aria-label={ __(
 										'Preview in new tab',
-										'mailpoet'
+										'woocommerce'
 									) }
 									textContent={
 										<>
 											{ __(
 												'Preview in new tab',
-												'mailpoet'
+												'woocommerce'
 											) }
 											<Icon icon={ external } />
 										</>

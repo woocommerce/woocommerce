@@ -1,13 +1,13 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
 
-namespace MailPoet\EmailEditor\Engine\Templates;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Templates;
 
 /**
  * Registry for email templates.
@@ -27,7 +27,7 @@ class Templates_Registry {
 	 * @return void
 	 */
 	public function initialize(): void {
-		apply_filters( 'mailpoet_email_editor_register_templates', $this );
+		apply_filters( 'woocommerce_email_editor_register_templates', $this );
 	}
 
 	/**
@@ -59,7 +59,7 @@ class Templates_Registry {
 
 	/**
 	 * Retrieve a template by its name.
-	 * Example: get_by_name( 'mailpoet//email-general' ) will return the instance of Template with identical name.
+	 * Example: get_by_name( 'woocommerce//email-general' ) will return the instance of Template with identical name.
 	 *
 	 * @param string $name The name of the template.
 	 * @return Template|null The template object or null if not found.

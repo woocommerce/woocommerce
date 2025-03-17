@@ -4,11 +4,11 @@ category_slug: cart-and-checkout-available-filters
 post_title: Cart and Checkout - Available Filters
 ---
 
-This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md) page.
+This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](../../../plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md) page.
 
 ## Cart Line Items filters
 
-The following [Cart Line Items filters](./cart-line-items.md) are available:
+The following [Cart Line Items filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-cart-line-items/) are available:
 
 -   `cartItemClass`
 -   `cartItemPrice`
@@ -23,7 +23,7 @@ The following screenshot shows which parts the individual filters affect:
 
 ## Order Summary Items filters
 
-The following [Order Summary Items filters](./order-summary-items.md) are available:
+The following [Order Summary Items filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-order-summary-items/) are available:
 
 -   `cartItemClass`
 -   `cartItemPrice`
@@ -36,14 +36,14 @@ The following screenshot shows which parts the individual filters affect:
 
 ## Totals Footer Item filter
 
-The following [Totals Footer Item filter](./totals-footer-item.md) is available:
+The following [Totals Footer Item filter](https://developer.woocommerce.com/docs/cart-and-checkout-filters-totals-footer-item/) is available:
 
 -   `totalLabel`
 -   `totalValue`
 
 ## Checkout and place order button filters
 
-The following [Checkout and place order button filters](./checkout-and-place-order-button.md) are available:
+The following [Checkout and place order button filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-checkout-and-place-order-button/) are available:
 
 -   `proceedToCheckoutButtonLabel`
 -   `proceedToCheckoutButtonLink`
@@ -51,7 +51,7 @@ The following [Checkout and place order button filters](./checkout-and-place-ord
 
 ## Coupon filters
 
-The following [Coupon filters](./coupons.md) are available:
+The following [Coupon filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-coupons/) are available:
 
 -   `coupons`
 -   `showApplyCouponNotice`
@@ -59,7 +59,7 @@ The following [Coupon filters](./coupons.md) are available:
 
 ## Additional Cart and Checkout inner block types filter
 
-The following [Additional Cart and Checkout inner block types filter](./additional-cart-checkout-inner-block-types.md) is available:
+The following [Additional Cart and Checkout inner block types filter](https://developer.woocommerce.com/docs/cart-and-checkout-filters-inner-block-types/) is available:
 
 -   `additionalCartCheckoutInnerBlockTypes`
 
@@ -114,5 +114,3 @@ If you are logged in to the store as an administrator, you should be shown an er
 working correctly. The error will also be shown in your console.
 
 ![Troubleshooting](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-30-at-10.52.53.png)
-
-

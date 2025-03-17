@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useContext } from '@wordpress/element';
 import { screen, render, renderHook } from '@testing-library/react';
 import { addAction, applyFilters, didFilter } from '@wordpress/hooks';
 /* eslint-disable @woocommerce/dependency-group */
@@ -37,6 +37,11 @@ jest.mock( '../components/sidebar', () => ( {
 	Sidebar: ( { children }: { children: React.ReactNode } ) => (
 		<div data-testid="sidebar-navigation-screen">{ children }</div>
 	),
+} ) );
+
+jest.mock( '@wordpress/element', () => ( {
+	...jest.requireActual( '@wordpress/element' ),
+	useContext: jest.fn(),
 } ) );
 
 const mockSettingsPages = {
@@ -79,6 +84,10 @@ describe( 'route.tsx', () => {
 				settingsData: mockSettingsPages,
 			},
 		};
+
+		( useContext as jest.Mock ).mockReturnValue( {
+			settingsData: mockSettingsPages,
+		} );
 
 		// Mock default location
 		(
@@ -134,25 +143,25 @@ describe( 'route.tsx', () => {
 			} );
 
 			// Mock a modern page
-			window.wcSettings = {
-				admin: {
-					settingsData: {
-						pages: {
-							modern: {
-								label: 'Modern',
-								icon: 'published',
-								slug: 'modern',
-								sections: {},
-								is_modern: true,
-								start: null,
-								end: null,
-							},
-						},
+			const mockModernPages = {
+				pages: {
+					modern: {
+						label: 'Modern',
+						icon: 'published',
+						slug: 'modern',
+						sections: {},
+						is_modern: true,
 						start: null,
-						_wpnonce: 'test-nonce',
+						end: null,
 					},
 				},
+				start: null,
+				_wpnonce: 'test-nonce',
 			};
+
+			( useContext as jest.Mock ).mockReturnValue( {
+				settingsData: mockModernPages,
+			} );
 
 			( applyFilters as jest.Mock ).mockReturnValue( {
 				modern: {

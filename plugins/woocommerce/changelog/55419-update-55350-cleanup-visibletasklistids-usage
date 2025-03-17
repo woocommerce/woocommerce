@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Do not call `get_visible` function is all lists are already hidden.

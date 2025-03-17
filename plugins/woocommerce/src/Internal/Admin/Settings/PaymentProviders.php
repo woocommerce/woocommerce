@@ -815,6 +815,18 @@ class PaymentProviders {
 					ExtensionSuggestions::AMAZON_PAY,
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
+					ExtensionSuggestions::COINBASE,
+					ExtensionSuggestions::AUTHORIZE_NET,
+					ExtensionSuggestions::BOLT,
+					ExtensionSuggestions::BANK_OF_AMERICA,
+					ExtensionSuggestions::DEPAY,
+					ExtensionSuggestions::ELAVON,
+					ExtensionSuggestions::EWAY,
+					ExtensionSuggestions::FORTISPAY,
+					ExtensionSuggestions::GO_CARDLESS,
+					ExtensionSuggestions::NEXI,
+					ExtensionSuggestions::PAYPAL_ZETTLE,
+					ExtensionSuggestions::RAPYD,
 				),
 				true
 			) ) {

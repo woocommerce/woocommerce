@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Add experimental, opt-in support for batch GET requests in Store API.

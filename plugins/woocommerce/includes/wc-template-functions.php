@@ -1089,8 +1089,13 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 
 		$notice_id = md5( $notice );
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo apply_filters( 'woocommerce_demo_store', '<p class="woocommerce-store-notice demo_store" data-notice-id="' . esc_attr( $notice_id ) . '" style="display:none;">' . wp_kses_post( $notice ) . ' <a href="#" class="woocommerce-store-notice__dismiss-link">' . esc_html__( 'Dismiss', 'woocommerce' ) . '</a></p>', $notice );
+		/**
+		 * Filter demo store notice.
+		 *
+		 * @since 1.6.4
+		 * @param string $store_notice Notice element.
+		 */
+		echo apply_filters( 'woocommerce_demo_store', '<p role="complementary" aria-label="' . esc_attr__( 'Store notice', 'woocommerce' ) . '" class="woocommerce-store-notice demo_store" data-notice-id="' . esc_attr( $notice_id ) . '" style="display:none;">' . wp_kses_post( $notice ) . ' <a role="button" href="#" class="woocommerce-store-notice__dismiss-link">' . esc_html__( 'Dismiss', 'woocommerce' ) . '</a></p>', $notice ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
@@ -3151,7 +3156,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						$field .= '<option value="' . esc_attr( $ckey ) . '" ' . selected( $value, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
 					}
 
-					$field .= $required_indicator . '</select>';
+					$field .= '</select>';
 
 					$field .= '<noscript><button type="submit" name="woocommerce_checkout_update_totals" value="' . esc_attr__( 'Update country / region', 'woocommerce' ) . '">' . esc_html__( 'Update country / region', 'woocommerce' ) . '</button></noscript>';
 
@@ -3619,6 +3624,17 @@ if ( ! function_exists( 'wc_no_products_found' ) ) {
 	 * Handles the loop when no products were found/no product exist.
 	 */
 	function wc_no_products_found() {
+		if ( ! function_exists( 'wc_print_notice' ) ) {
+			// wc_print_notice() is used in our default template, so this likely means this function was called out of
+			// context. We include the notice functions here to avoid a fatal error.
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				'Function should only be used during frontend requests.',
+				'9.8.0'
+			);
+			return;
+		}
+
 		wc_get_template( 'loop/no-products-found.php' );
 	}
 }
@@ -4395,7 +4411,7 @@ function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
 			continue;
 		}
 
-		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( $n ) );
+		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( (int) $n ) );
 		++$n;
 	}
 

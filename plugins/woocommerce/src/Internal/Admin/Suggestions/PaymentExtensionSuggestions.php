@@ -42,6 +42,18 @@ class PaymentExtensionSuggestions {
 	const KLARNA            = 'klarna';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
+	const COINBASE          = 'coinbase';
+	const BANK_OF_AMERICA   = 'bank_of_america';
+	const BOLT              = 'bolt_checkout';
+	const AUTHORIZE_NET     = 'authorize_net';
+	const DEPAY             = 'depay';
+	const ELAVON            = 'elavon';
+	const EWAY              = 'eway';
+	const FORTISPAY         = 'fortis';
+	const GO_CARDLESS       = 'go_cardless';
+	const NEXI              = 'nexi';
+	const PAYPAL_ZETTLE     = 'paypal_zettle';
+	const RAPYD             = 'rapyd';
 
 	/*
 	 * The extension types.
@@ -2613,7 +2625,7 @@ class PaymentExtensionSuggestions {
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/vivacom.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'vivawallet-woocommerce-gateway',
+					'slug'  => 'viva-com-smart-for-woocommerce',
 				),
 				'links'       => array(
 					array(
@@ -2900,6 +2912,102 @@ class PaymentExtensionSuggestions {
 						'_type' => self::LINK_TYPE_SUPPORT,
 						'url'   => 'https://support.monei.com/hc/en-us/requests/new',
 					),
+				),
+			),
+			self::COINBASE          => array(
+				'_type'       => self::TYPE_CRYPTO,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/coinbase.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'coinbase-commerce',
+				),
+			),
+			self::AUTHORIZE_NET     => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/authorize.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-authorize-net-cim',
+				),
+			),
+			self::BOLT              => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/bolt.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'bolt-checkout-woocommerce',
+				),
+			),
+			self::BANK_OF_AMERICA   => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/bofa.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-bank-of-america',
+				),
+			),
+			self::DEPAY             => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/depay.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'depay-payments-for-woocommerce',
+				),
+			),
+			self::ELAVON            => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-converge',
+				),
+			),
+			self::EWAY              => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/eway.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-eway',
+				),
+			),
+			self::FORTISPAY         => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/fortispay.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'fortis-for-woocommerce',
+				),
+			),
+			self::GO_CARDLESS       => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/gocardless.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-gocardless',
+				),
+			),
+			self::NEXI              => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/nexi.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'dibs-easy-for-woocommerce',
+				),
+			),
+			self::PAYPAL_ZETTLE     => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/paypalzettle.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'zettle-pos-integration',
+				),
+			),
+			self::RAPYD             => array(
+				'_type'       => self::TYPE_PSP,
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/rapyd.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'rapyd-payments-plugin-for-woocommerce',
 				),
 			),
 		);

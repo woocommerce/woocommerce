@@ -56,7 +56,6 @@ class ProductSaleBadge extends AbstractBlock {
 			'spacing'                =>
 			array(
 				'margin'                          => true,
-				'padding'                         => true,
 				'__experimentalSkipSerialization' => true,
 
 			),

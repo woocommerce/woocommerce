@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Removes the gallery template part and renders a uncustomizable simple vertical scroll dialog gallery

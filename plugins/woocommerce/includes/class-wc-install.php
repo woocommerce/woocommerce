@@ -274,6 +274,14 @@ class WC_Install {
 		'9.6.1' => array(
 			'wc_update_961_migrate_default_email_base_color',
 		),
+		'9.8.0' => array(
+			'wc_update_980_remove_order_attribution_install_banner_dismissed_option',
+		),
+		'9.9.0' => array(
+			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
+			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
+			'wc_update_990_remove_email_notes',
+		),
 	);
 
 	/**
@@ -1022,6 +1030,7 @@ class WC_Install {
 	public static function enable_email_improvements() {
 		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
 		update_option( 'woocommerce_email_improvements_default_enabled', 'yes' );
+		update_option( 'woocommerce_email_auto_sync_with_theme', 'yes' );
 		update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
 		update_option( 'woocommerce_email_improvements_last_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
 		update_option( 'woocommerce_email_improvements_enabled_count', 1 );
@@ -1785,7 +1794,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id),
+	PRIMARY KEY  (order_item_id, order_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),

@@ -9,7 +9,7 @@ tags: reference
 > [!IMPORTANT]
 > We strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be "private", and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.
 
-WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/contributors/coding-guidelines.md). All classes start with one of these two prefixes:
+WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../../plugins/woocommerce/client/blocks/docs/contributors/coding-guidelines.md). All classes start with one of these two prefixes:
 
 * `.wc-block-`: class names specific to a single block.
 * `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
@@ -69,4 +69,3 @@ WC Blocks use the [`hidden` HTML attribute](https://developer.mozilla.org/en-US/
 ## Legacy classes from WooCommerce (.price, .star-rating, .button...)
 
 WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. However, you might find some of them that have been added for backwards compatibility. We still encourage themes to use the prefixed classes when possible, this avoids conflicts with other plugins, the editor, etc.
-

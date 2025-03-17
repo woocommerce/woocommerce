@@ -83,19 +83,7 @@ export const Header = ( {
 					bannerType={ ORDER_ATTRIBUTION_INSTALL_BANNER_TYPE_HEADER }
 					eventContext="analytics-overview-header"
 				/>
-			) }{ ' ' }
-			<>
-				{ showLaunchYourStoreStatus && <LaunchYourStoreStatus /> }
-				{ isAnalyticsOverviewScreen && (
-					// @ts-expect-error OrderAttributionInstallBanner is not typed
-					<OrderAttributionInstallBanner
-						bannerType={
-							ORDER_ATTRIBUTION_INSTALL_BANNER_TYPE_HEADER
-						}
-						eventContext="analytics-overview-header"
-					/>
-				) }
-			</>
+			) }
 		</BaseHeader>
 	);
 };

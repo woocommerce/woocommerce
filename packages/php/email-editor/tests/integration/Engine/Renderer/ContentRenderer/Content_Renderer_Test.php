@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\ContentRenderer;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Integrations\MailPoet\Blocks\BlockTypesController;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Integrations\MailPoet\Blocks\BlockTypesController;
 
 require_once __DIR__ . '/Dummy_Block_Renderer.php';
 
@@ -37,7 +37,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->renderer   = $this->di_container->get( Content_Renderer::class );
-		$email_post_id = $this->factory->post->create(
+		$email_post_id    = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:paragraph --><p>Hello!</p><!-- /wp:paragraph -->',
 			)

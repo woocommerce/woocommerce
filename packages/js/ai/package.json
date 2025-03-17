@@ -120,7 +120,6 @@
 						"jest.config.js",
 						"src/**/*.{js,jsx,ts,tsx}"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"

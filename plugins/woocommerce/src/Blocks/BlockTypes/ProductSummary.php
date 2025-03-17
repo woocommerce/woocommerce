@@ -173,7 +173,7 @@ class ProductSummary extends AbstractBlock {
 	 * but allows keeping the editor and frontend consistent.
 	 *
 	 * NOTE: If editing, keep it in sync with generateSummary function from
-	 * plugins/woocommerce-blocks/assets/js/base/components/summary/utils.ts!
+	 * plugins/woocommerce/client/blocks/assets/js/base/components/summary/utils.ts!
 	 *
 	 * Once HTML API allow for HTML manipulation both functions (PHP and JS)
 	 * should be updated to solution fully respecting the word count.

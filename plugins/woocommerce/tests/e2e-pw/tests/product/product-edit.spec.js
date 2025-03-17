@@ -1,16 +1,47 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+const { faker } = require( '@faker-js/faker' );
+
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
+import { getFakeProduct } from '../../utils/data';
+
+async function saveProductChanges( page ) {
+	await page
+		.locator( '#publishing-action' )
+		.getByRole( 'button', { name: 'Update' } )
+		.click();
+	await expect(
+		page
+			.locator( 'div.notice-success > p' )
+			.filter( { hasText: 'Product updated' } )
+	).toBeVisible();
+}
+
+async function saveBulkProductChanges( page ) {
+	await page.getByRole( 'button', { name: 'Update' } ).click();
+	await expect(
+		page
+			.locator( 'div.notice > p' )
+			.filter( { hasText: /(\d+) product(s)? updated/ } )
+	).toBeVisible();
+}
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	products: async ( { api }, use ) => {
+	products: async ( { restApi }, use ) => {
 		const products = [];
 
 		for ( let i = 0; i < 2; i++ ) {
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					id: 0,
-					name: `Product ${ i }_${ Date.now() }`,
+					name: faker.commerce.productName(),
 					type: 'simple',
 					regular_price: `${ 12.99 + i }`,
 					manage_stock: true,
@@ -24,9 +55,10 @@ const test = baseTest.extend( {
 
 		await use( products );
 
-		// Cleanup
 		for ( const product of products ) {
-			await api.delete( `products/${ product.id }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} );
 		}
 	},
 } );
@@ -39,12 +71,8 @@ test( 'can edit a product and save the changes', async ( {
 		`wp-admin/post.php?post=${ products[ 0 ].id }&action=edit`
 	);
 
-	const newProduct = {
-		name: `Product ${ Date.now() }`,
-		description: `This product is pretty awesome ${ Date.now() }`,
-		regularPrice: '100.05',
-		salePrice: '99.05',
-	};
+	const newProduct = getFakeProduct();
+	newProduct.sale_price = newProduct.regular_price - 1;
 
 	await test.step( 'edit the product name', async () => {
 		await page.getByLabel( 'Product name' ).fill( newProduct.name );
@@ -61,15 +89,14 @@ test( 'can edit a product and save the changes', async ( {
 	await test.step( 'edit the product price', async () => {
 		await page
 			.getByLabel( 'Regular price ($)' )
-			.fill( newProduct.regularPrice );
-		await page.getByLabel( 'Sale price ($)' ).fill( newProduct.salePrice );
+			.fill( newProduct.regular_price.toString() );
+		await page
+			.getByLabel( 'Sale price ($)' )
+			.fill( newProduct.sale_price.toString() );
 	} );
 
 	await test.step( 'publish the updated product', async () => {
-		await page
-			.locator( '#publishing-action' )
-			.getByRole( 'button', { name: 'Update' } )
-			.click();
+		await saveProductChanges( page );
 	} );
 
 	await test.step( 'verify the changes', async () => {
@@ -80,10 +107,10 @@ test( 'can edit a product and save the changes', async ( {
 			newProduct.description
 		);
 		await expect( page.getByLabel( 'Regular price ($)' ) ).toHaveValue(
-			newProduct.regularPrice
+			newProduct.regular_price.toString()
 		);
 		await expect( page.getByLabel( 'Sale price ($)' ) ).toHaveValue(
-			newProduct.salePrice
+			newProduct.sale_price.toString()
 		);
 	} );
 } );
@@ -140,7 +167,7 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 	} );
 
 	await test.step( 'save the updates', async () => {
-		await page.getByRole( 'button', { name: 'Update' } ).click();
+		await saveBulkProductChanges( page );
 	} );
 
 	await test.step( 'verify the changes', async () => {
@@ -215,7 +242,7 @@ test(
 		} );
 
 		await test.step( 'save the updates', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await saveBulkProductChanges( page );
 		} );
 
 		await test.step( 'verify the changes', async () => {
@@ -256,7 +283,7 @@ test(
 				.locator( 'select[name="change_sale_price"]' )
 				.selectOption( 'Change to:' );
 
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await saveBulkProductChanges( page );
 		} );
 
 		await test.step( 'Verify products have their regular price again', async () => {
@@ -306,7 +333,7 @@ test(
 				.getByPlaceholder( 'Enter sale price ($)' )
 				.fill( `${ salePriceDecrease }%` );
 
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await saveBulkProductChanges( page );
 		} );
 
 		await test.step( 'Verify products have a sale price', async () => {
@@ -334,12 +361,12 @@ test(
 test(
 	'increasing the sale price from 0 does not change the sale price when bulk editing products',
 	{ tag: [ tags.SERVICES ] },
-	async ( { page, api, products } ) => {
+	async ( { page, restApi, products } ) => {
 		let product;
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				id: 0,
-				name: `Product _${ Date.now() }`,
+				name: faker.commerce.productName(),
 				type: 'simple',
 				regular_price: '100',
 				sale_price: '0',
@@ -375,7 +402,7 @@ test(
 				.getByPlaceholder( 'Enter sale price ($)' )
 				.fill( `${ salePriceIncrease }%` );
 
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await saveBulkProductChanges( page );
 		} );
 
 		await test.step( 'Verify products have a sale price', async () => {

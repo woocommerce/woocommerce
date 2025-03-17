@@ -1379,19 +1379,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
-						id: 'woocommerce_registration_generate_username',
-						label: 'Account creation options',
-						description:
-							'Use email address as account login (recommended)',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_password',
 						label: 'Account creation options',
 						description: 'Send password setup link (recommended)',
@@ -1552,7 +1539,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#720eec',
 						tip: 'The base color for WooCommerce email templates. Default <code>#720eec</code>.',
-						value: '#720eec',
+						value: '#9DFF20',
 					} ),
 				] )
 			);
@@ -1566,7 +1553,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#f7f7f7',
 						tip: 'The background color for WooCommerce email templates. Default <code>#f7f7f7</code>.',
-						value: '#f7f7f7',
+						value: '#ffffff',
 					} ),
 				] )
 			);
@@ -1594,20 +1581,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#3c3c3c',
 						tip: 'The main body text color. Default <code>#3c3c3c</code>.',
-						value: '#3c3c3c',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_merchant_email_notifications',
-						label: 'Enable email insights',
-						description:
-							'Receive email notifications with additional guidance to complete the basic store setup and helpful insights',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
+						value: '#000000',
 					} ),
 				] )
 			);
@@ -1698,11 +1672,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_base_color',
 						label: 'Accent',
 						description:
-							'Customize the color of your buttons and links. Default <code>#000000</code>.',
+							'Customize the color of your buttons and links. Default <code>#9DFF20</code>.',
 						type: 'color',
-						default: '#000000',
-						tip: 'Customize the color of your buttons and links. Default <code>#000000</code>.',
-						value: '#720eec',
+						default: '#9DFF20',
+						tip: 'Customize the color of your buttons and links. Default <code>#9DFF20</code>.',
+						value: '#9DFF20',
 					} ),
 				] )
 			);
@@ -1716,7 +1690,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#ffffff',
 						tip: 'Select a color for the background of your emails. Default <code>#ffffff</code>.',
-						value: '#f7f7f7',
+						value: '#ffffff',
 					} ),
 				] )
 			);
@@ -1744,7 +1718,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#000000',
 						tip: 'Set the color of your headings and text. Default <code>#000000</code>.',
-						value: '#3c3c3c',
+						value: '#000000',
 					} ),
 				] )
 			);
@@ -1758,20 +1732,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'color',
 						default: '#787c82',
 						tip: 'Choose a color for your secondary text, such as your footer content. Default <code>#787c82</code>.',
-						value: '#3c3c3c',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_merchant_email_notifications',
-						label: 'Enable email insights',
-						description:
-							'Receive email notifications with additional guidance to complete the basic store setup and helpful insights',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
+						value: '#787c82',
 					} ),
 				] )
 			);

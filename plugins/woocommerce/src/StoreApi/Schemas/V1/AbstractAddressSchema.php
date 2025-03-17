@@ -294,7 +294,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : $field['required'],
+				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : true === $field['required'],
 			];
 
 			if ( 'select' === $field['type'] ) {

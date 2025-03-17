@@ -17,7 +17,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import './index.scss';
+import './style.scss';
 import { storeName } from '../../store';
 import { useEmailCss } from '../../hooks';
 import { AutosaveMonitor } from '../autosave';

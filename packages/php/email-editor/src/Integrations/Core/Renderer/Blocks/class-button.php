@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Settings_Controller;
-use MailPoet\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 
 /**
  * Renders a button block.

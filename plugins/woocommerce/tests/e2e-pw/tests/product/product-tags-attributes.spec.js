@@ -1,16 +1,22 @@
 /**
  * External dependencies
  */
-import { getCanvas, goToPageEditor } from '@woocommerce/e2e-utils-playwright';
+import {
+	getCanvas,
+	goToPageEditor,
+	insertBlockByShortcut,
+	publishPage,
+} from '@woocommerce/e2e-utils-playwright';
+
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
+import { tags, test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-const { test, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
+import { WC_API_PATH, WP_API_PATH } from '../../utils/api-client';
+import { fillPageTitle } from '../../utils/editor';
+
 const pageTitle = 'Product Showcase';
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const singleProductPrice1 = '5.00';
 const singleProductPrice2 = '10.00';
 const singleProductPrice3 = '15.00';
@@ -38,38 +44,24 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			// make sure the attribute term page is visible in the shop
-			await api.put(
-				'settings/products/woocommerce_attribute_lookup_enabled',
-				{
-					value: 'yes',
-				}
-			);
-
+		test.beforeAll( async ( { restApi } ) => {
 			// add product tags
-			await api
-				.post( 'products/tags', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/tags`, {
 					name: productTagName1,
 				} )
 				.then( ( response ) => {
 					productTag1Id = response.data.id;
 				} );
-			await api
-				.post( 'products/tags', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/tags`, {
 					name: productTagName2,
 				} )
 				.then( ( response ) => {
 					productTag2Id = response.data.id;
 				} );
-			await api
-				.post( 'products/tags', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/tags`, {
 					name: productTagName3,
 				} )
 				.then( ( response ) => {
@@ -77,8 +69,8 @@ test.describe(
 				} );
 
 			// add product attribute
-			await api
-				.post( 'products/attributes', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/attributes`, {
 					name: productAttributeName,
 					has_archives: true,
 				} )
@@ -87,13 +79,16 @@ test.describe(
 				} );
 
 			// add product attribute term
-			await api.post( `products/attributes/${ attributeId }/terms`, {
-				name: productAttributeTerm,
-			} );
+			await restApi.post(
+				`${ WC_API_PATH }/products/attributes/${ attributeId }/terms`,
+				{
+					name: productAttributeTerm,
+				}
+			);
 
 			// add products
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProductName + ' 1',
 					type: 'simple',
 					regular_price: singleProductPrice1,
@@ -117,8 +112,8 @@ test.describe(
 				.then( ( response ) => {
 					product1Id = response.data.id;
 				} );
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProductName + ' 2',
 					type: 'simple',
 					regular_price: singleProductPrice2,
@@ -139,8 +134,8 @@ test.describe(
 				.then( ( response ) => {
 					product2Id = response.data.id;
 				} );
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProductName + ' 3',
 					type: 'simple',
 					regular_price: singleProductPrice3,
@@ -158,48 +153,31 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.post( 'products/batch', {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.post( `${ WC_API_PATH }/products/batch`, {
 				delete: [ product1Id, product2Id, product3Id ],
 			} );
-			await api.post( 'products/tags/batch', {
+			await restApi.post( `${ WC_API_PATH }/products/tags/batch`, {
 				delete: [ productTag1Id, productTag2Id, productTag3Id ],
 			} );
-			await api.post( 'products/attributes/batch', {
+			await restApi.post( `${ WC_API_PATH }/products/attributes/batch`, {
 				delete: [ attributeId ],
 			} );
-			await api.put(
-				'settings/products/woocommerce_attribute_lookup_enabled',
-				{
-					value: 'no',
-				}
-			);
-			const base64auth = Buffer.from(
-				`${ admin.username }:${ admin.password }`
-			).toString( 'base64' );
-			const wpApi = await request.newContext( {
-				baseURL: `${ baseURL }/wp-json/wp/v2/`,
-				extraHTTPHeaders: {
-					Authorization: `Basic ${ base64auth }`,
-				},
-			} );
-			let response = await wpApi.get( `pages` );
-			const allPages = await response.json();
-			await allPages.forEach( async ( page ) => {
+
+			const pages = await restApi.get( `${ WP_API_PATH }/pages` );
+
+			for ( const page of pages.data ) {
 				if ( page.title.rendered === pageTitle ) {
-					response = await wpApi.delete( `pages/${ page.id }`, {
-						data: {
-							force: true,
-						},
-					} );
+					await restApi.delete(
+						`${ WP_API_PATH }/pages/${ page.id }`,
+						{
+							data: {
+								force: true,
+							},
+						}
+					);
 				}
-			} );
+			}
 		} );
 
 		test( 'should see shop catalog with all its products', async ( {
@@ -235,14 +213,16 @@ test.describe(
 		test( 'should see and sort tags page with all the products', async ( {
 			page,
 		} ) => {
-			await page.goto( 'shop/' );
+			await page.goto( 'shop/?orderby=date' );
 			await page.locator( `text=${ simpleProductName } 1` ).click();
 			await page.getByRole( 'link', { name: productTagName1 } ).click();
 			await expect(
 				page.getByRole( 'heading', { name: productTagName1 } )
 			).toBeVisible();
 			await expect(
-				page.getByText( `Products tagged “${ productTagName1 }”` )
+				page.getByText(
+					new RegExp( `Products tagged .*${ productTagName1 }.*` )
+				)
 			).toBeVisible();
 			await expect(
 				page.getByText( 'Showing all 3 results' )
@@ -253,14 +233,28 @@ test.describe(
 			page,
 		} ) => {
 			// the api setting for enabling attribute term page doesn't apply for some reason
-			// but I could see it as checked/enabled in the settings
-			// workaround for the change to take effect is to just save the settings.
-			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
-			// Modify a random unrelated settings so we can save the form.
-			await page
-				.locator( '#woocommerce_allowed_countries' )
-				.selectOption( 'all' );
-			await page.locator( 'text=Save changes' ).click();
+			// workaround for the change to take effect is to just update via the settings ui.
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=products&section=advanced'
+			);
+
+			const attributeLookupCheckbox = page.locator(
+				'#woocommerce_attribute_lookup_enabled'
+			);
+			await expect( attributeLookupCheckbox ).toBeVisible();
+
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( ! ( await attributeLookupCheckbox.isChecked() ) ) {
+				await attributeLookupCheckbox.click();
+				await page.locator( 'text=Save changes' ).click();
+				await expect(
+					page
+						.locator( '#message' )
+						.getByText( 'Your settings have been saved' )
+				).toBeVisible();
+			}
+
+			await expect( attributeLookupCheckbox ).toBeChecked();
 
 			const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 			await page.goto( `product/${ slug }` );
@@ -288,23 +282,9 @@ test.describe(
 		test( 'can see products showcase', async ( { page } ) => {
 			// create as a merchant a new page with Product Collection block
 			await goToPageEditor( { page } );
-
+			await fillPageTitle( page, pageTitle );
+			await insertBlockByShortcut( page, 'Product Collection' );
 			const canvas = await getCanvas( page );
-
-			await canvas
-				.getByRole( 'textbox', { name: 'Add Title' } )
-				.fill( pageTitle );
-
-			await canvas
-				.getByRole( 'button', { name: 'Add default block' } )
-				.click();
-
-			await canvas
-				.getByRole( 'document', {
-					name: 'Empty block; start writing or type forward slash to choose a block',
-				} )
-				.pressSequentially( '/product collection' );
-			await page.keyboard.press( 'Enter' );
 
 			// Product Collection requires choosing some collection.
 			await canvas
@@ -316,24 +296,7 @@ test.describe(
 				} )
 				.click();
 
-			await page
-				.getByRole( 'button', { name: 'Publish', exact: true } )
-				.click();
-
-			await page
-				.getByRole( 'region', { name: 'Editor publish' } )
-				.getByRole( 'button', { name: 'Publish', exact: true } )
-				.click();
-
-			await expect(
-				// WP 6.6 updates the button text from "Update" to "Save", so we'll need to check for either.
-				page.getByRole( 'button', { name: 'Update', exact: true } ).or(
-					page.getByRole( 'button', {
-						name: 'Save',
-						exact: true,
-					} )
-				)
-			).toBeVisible();
+			await publishPage( page, pageTitle );
 
 			// go to created page with products showcase
 			await page.goto( 'product-showcase' );

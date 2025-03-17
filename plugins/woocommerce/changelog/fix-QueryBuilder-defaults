@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Add some defaults to the QueryBuilder::get_final_frontend_query()

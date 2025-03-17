@@ -61,7 +61,18 @@ const program = new Command( 'ci-jobs' )
 				options.baseRef,
 				options.prNumber
 			);
+
 			Logger.endTask( true );
+
+			if ( fileChanges ) {
+				Logger.notice(
+					`Changes detected: ${ JSON.stringify(
+						Object.keys( fileChanges )
+					) } `
+				);
+			} else {
+				Logger.notice( 'No changes detected.' );
+			}
 		}
 
 		Logger.startTask( 'Creating Jobs', true );
@@ -77,7 +88,7 @@ const program = new Command( 'ci-jobs' )
 		for ( const job of jobs.test ) {
 			const optional = job.optional ? ' (optional)' : '';
 			job.name = `${ job.name } - ${ job.projectName } [${ job.testType }]${ optional }`;
-			Logger.notice( `-  ${ job.name }` );
+			// Logger.notice( `-  ${ job.name }` );
 		}
 
 		const resultsBlobNames = jobs.test

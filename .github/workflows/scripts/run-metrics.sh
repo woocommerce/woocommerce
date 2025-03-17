@@ -21,13 +21,17 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	if [ "$GITHUB_EVENT_NAME" == "push" ]
 	then
-		# Use-case: performance comparison on trunk push with fixed reference point
-		# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
-		# where compare-perf reporting mode was introduced for processing the provided reports.
+		# Use-case: performance comparison on trunk push with fixed reference
+		# point It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we
+		# pick 55f855a2e6d769b5ae44305b2772eb30d3e721df where compare-perf
+		# reporting mode was introduced for processing the provided reports.
 		BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	else
-		# Use-case: performance comparison on PRs changes.
-		BASE_SHA=$GITHUB_BASE_SHA
+		# Use-case: performance comparison on PRs changes. We need to explicitly
+		# fetch trunk because $GITHUB_BASE_SHA might point to the base of a PR
+		# chain rather than trunk.
+		git fetch --depth=1 --no-tags origin trunk
+		BASE_SHA=$(git rev-parse origin/trunk)
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)

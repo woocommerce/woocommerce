@@ -395,7 +395,7 @@ class OrderController {
 
 		foreach ( $current_locale as $address_field_key => $address_field ) {
 			// Skip validation if field is not required.
-			if ( ! $address_field['required'] ) {
+			if ( true !== $address_field['required'] ) {
 				continue;
 			}
 

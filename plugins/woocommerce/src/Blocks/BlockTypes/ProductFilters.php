@@ -36,6 +36,12 @@ class ProductFilters extends AbstractBlock {
 		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
 		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
 		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
+
+		$canonical_url_no_pagination = get_pagenum_link( 1 );
+		if ( is_singular() ) {
+			$canonical_url_no_pagination = get_permalink();
+		}
+		$this->asset_data_registry->add( 'canonicalUrl', html_entity_decode( $canonical_url_no_pagination ) );
 	}
 
 	/**
@@ -47,6 +53,9 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		wp_enqueue_script( 'wc-settings' );
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$query_id      = $block->context['queryId'] ?? 0;
 		$filter_params = $this->get_filter_params( $query_id );
 		/**
@@ -95,22 +104,25 @@ class ProductFilters extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'class'                            => $classes,
-			'data-wc-interactive'              => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-watch--navigation'        => 'callbacks.maybeNavigate',
-			'data-wc-watch--scrolling'         => 'callbacks.scrollLimit',
-			'data-wc-on--keyup'                => 'actions.closeOverlayOnEscape',
-			'data-wc-navigation-id'            => $this->generate_navigation_id( $block ),
-			'data-wc-context'                  => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-class--is-overlay-opened' => 'context.isOverlayOpened',
+			'data-wp-interactive'              => $this->get_full_block_name(),
+			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
+			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
+			'data-wp-context'                  => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wp-class--is-overlay-opened' => 'context.isOverlayOpened',
 			'style'                            => $styles,
 		);
+
+		// TODO: Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
+		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
+			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
+		}
 
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<button
 				class="wc-block-product-filters__open-overlay"
-				data-wc-on--click="actions.openOverlay"
+				data-wp-on--click="actions.openOverlay"
 			>
 				<?php echo $this->get_svg_icon( 'filter-icon-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
@@ -124,7 +136,7 @@ class ProductFilters extends AbstractBlock {
 						<header class="wc-block-product-filters__overlay-header">
 							<button
 								class="wc-block-product-filters__close-overlay"
-								data-wc-on--click="actions.closeOverlay"
+								data-wp-on--click="actions.closeOverlay"
 							>
 								<span><?php echo esc_html__( 'Close', 'woocommerce' ); ?></span>
 								<?php echo $this->get_svg_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -138,8 +150,8 @@ class ProductFilters extends AbstractBlock {
 						>
 							<button
 								class="wc-block-product-filters__apply wp-element-button"
-								data-wc-interactive="<?php echo esc_attr( wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
-								data-wc-on--click="actions.closeOverlay"
+								data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>"
+								data-wp-on--click="actions.closeOverlay"
 							>
 								<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
 							</button>
@@ -226,5 +238,16 @@ class ProductFilters extends AbstractBlock {
 			},
 			ARRAY_FILTER_USE_KEY
 		);
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

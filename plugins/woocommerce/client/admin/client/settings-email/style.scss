@@ -287,6 +287,10 @@ $wc-setting-email-width: 634px;
 	max-width: $wc-setting-email-width;
 }
 
+.wc-settings-email-color-palette-header {
+	max-width: $wc-setting-email-width;
+}
+
 .wc-settings-email-color-palette-title {
 	display: inline-block;
 	margin-right: 15px;
@@ -296,4 +300,8 @@ $wc-setting-email-width: 634px;
 	align-items: center;
 	display: inline-flex;
 	gap: 12px;
+
+	.components-toggle-control {
+		margin-bottom: 0;
+	}
 }

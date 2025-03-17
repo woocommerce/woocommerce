@@ -2686,3 +2686,124 @@ function wc_cache_get_multiple( $keys, $group = '', $force = false ) {
 	}
 	return $values;
 }
+
+/**
+ * Delete multiple transients in a single operation.
+ *
+ * IMPORTANT: This is a private function (internal use ONLY).
+ *
+ * This function efficiently deletes multiple transients at once, using a direct
+ * database query when possible for better performance.
+ *
+ * @internal
+ *
+ * @since 9.8.0
+ * @param array $transients Array of transient names to delete (without the '_transient_' prefix).
+ * @return bool True on success, false on failure.
+ */
+function _wc_delete_transients( $transients ) {
+	global $wpdb;
+
+	if ( empty( $transients ) || ! is_array( $transients ) ) {
+		return false;
+	}
+
+	// If using external object cache, delete each transient individually.
+	if ( wp_using_ext_object_cache() ) {
+		foreach ( $transients as $transient ) {
+			delete_transient( $transient );
+		}
+		return true;
+	} else {
+		// For database storage, create a list of transient option names.
+		$transient_names = array();
+		foreach ( $transients as $transient ) {
+			$transient_names[] = '_transient_' . $transient;
+			$transient_names[] = '_transient_timeout_' . $transient;
+		}
+
+		// Limit the number of items in a single query to avoid exceeding database query parameter limits.
+		if ( count( $transients ) > 199 ) {
+			// Process in smaller chunks to reduce memory usage.
+			$chunks  = array_chunk( $transients, 100 );
+			$success = true;
+
+			foreach ( $chunks as $chunk ) {
+				$result = _wc_delete_transients( $chunk );
+				if ( ! $result ) {
+					$success = false;
+				}
+				// Force garbage collection after each chunk to free memory.
+				gc_collect_cycles();
+			}
+
+			return $success;
+		}
+
+		try {
+			// Before deleting, get the list of options to clear from cache.
+			// Since we already have the option names we could skip this step but this mirrors WP's delete_option functionality.
+			// It also allows us to only delete the options we know exist.
+			$options_to_clear = array();
+			if ( ! wp_installing() ) {
+				$options_to_clear = $wpdb->get_col(
+					$wpdb->prepare(
+						'SELECT option_name FROM ' . $wpdb->options . ' WHERE option_name IN ( ' . implode( ', ', array_fill( 0, count( $transient_names ), '%s' ) ) . ' )',
+						$transient_names
+					)
+				);
+			}
+
+			if ( empty( $options_to_clear ) ) {
+				// If there are no options to clear, return true immediately.
+				return true;
+			}
+
+			// Use a single query for better performance.
+			$wpdb->query(
+				$wpdb->prepare(
+					'DELETE FROM ' . $wpdb->options . ' WHERE option_name IN ( ' . implode( ', ', array_fill( 0, count( $options_to_clear ), '%s' ) ) . ' )',
+					$options_to_clear
+				)
+			);
+
+			// Lets clear our options data from the cache.
+			// We can batch delete if available, introduced in WP 6.0.0.
+			if ( ! wp_installing() ) {
+				if ( function_exists( 'wp_cache_delete_multiple' ) ) {
+					wp_cache_delete_multiple( $options_to_clear, 'options' );
+				} else {
+					foreach ( $options_to_clear as $option_name ) {
+						wp_cache_delete( $option_name, 'options' );
+					}
+				}
+
+				// Also update alloptions cache if needed.
+				// This is required to prevent phantom transients from being returned.
+				$alloptions         = wp_load_alloptions( true );
+				$updated_alloptions = false;
+
+				if ( is_array( $alloptions ) ) {
+					foreach ( $options_to_clear as $option_name ) {
+						if ( isset( $alloptions[ $option_name ] ) ) {
+							unset( $alloptions[ $option_name ] );
+							$updated_alloptions = true;
+						}
+					}
+
+					if ( $updated_alloptions ) {
+						wp_cache_set( 'alloptions', $alloptions, 'options' );
+					}
+				}
+			}
+
+			return true;
+		} catch ( Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Exception when deleting transients: %s', $e->getMessage() ),
+				array( 'source' => '_wc_delete_transients' )
+			);
+			return false;
+		}
+	}
+}

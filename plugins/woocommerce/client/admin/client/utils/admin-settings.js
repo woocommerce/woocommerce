@@ -7,7 +7,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { createDeprecatedObjectProxy } from './index';
+import { createDeprecatedPropertiesProxy } from './index';
 
 // Remove mutable data from settings object to prevent access. Data stores should be used instead.
 const mutableSources = [ 'wcAdminSettings', 'preloadSettings' ];
@@ -74,7 +74,10 @@ export function getAdminSetting(
 	// Return proxied object if the requested object has deprecated properties.
 	return deprecatedProperties?.[ name ] &&
 		process.env.NODE_ENV === 'development'
-		? createDeprecatedObjectProxy( filtered, deprecatedProperties[ name ] )
+		? createDeprecatedPropertiesProxy(
+				filtered,
+				deprecatedProperties[ name ]
+		  )
 		: filtered;
 }
 

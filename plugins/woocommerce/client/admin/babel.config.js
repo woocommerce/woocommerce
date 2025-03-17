@@ -20,7 +20,7 @@ module.exports = function ( api ) {
 			 * This allows arrow functions as class methods so that binding
 			 * methods to `this` in the constructor isn't required.
 			 */
-			'@babel/plugin-proposal-class-properties',
+			'@babel/plugin-transform-class-properties',
 		],
 		ignore: [ 'packages/**/node_modules' ],
 		env: {

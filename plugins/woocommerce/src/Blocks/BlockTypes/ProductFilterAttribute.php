@@ -161,25 +161,27 @@ final class ProductFilterAttribute extends AbstractBlock {
 			return '';
 		}
 
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
 		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
 		$hide_empty        = $block_attributes['hideEmpty'] ?? true;
+		$orderby           = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
+		$order             = $block_attributes['sortOrder'] ? strtoupper( explode( '-', $block_attributes['sortOrder'] )[1] ) : 'DESC';
+
+		$args = array(
+			'taxonomy' => $product_attribute->slug,
+			'orderby'  => $orderby,
+			'order'    => $order,
+		);
 
 		if ( $hide_empty ) {
-			$attribute_terms = get_terms(
-				array(
-					'taxonomy' => $product_attribute->slug,
-					'include'  => array_keys( $attribute_counts ),
-				)
-			);
+			$args['include'] = array_keys( $attribute_counts );
 		} else {
-			$attribute_terms = get_terms(
-				array(
-					'taxonomy'   => $product_attribute->slug,
-					'hide_empty' => false,
-				)
-			);
+			$args['hide_empty'] = false;
 		}
+
+		$attribute_terms = get_terms( $args );
 
 		$filter_param_key = 'filter_' . str_replace( 'pa_', '', $product_attribute->slug );
 		$filter_params    = $block->context['filterParams'] ?? array();
@@ -224,10 +226,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-key'          => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
-			'data-wc-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-bind--hidden' => '!context.hasFilterOptions',
+			'data-wp-interactive'  => $this->get_full_block_name(),
+			'data-wp-key'          => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
+			'data-wp-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wp-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( empty( $filter_context ) ) {
@@ -411,5 +413,16 @@ final class ProductFilterAttribute extends AbstractBlock {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

@@ -49,7 +49,7 @@ class ExportSchemaTest extends TestCase {
 		$result = $mock->export();
 		$this->assertCount( 1, $result['steps'] );
 		$this->assertEquals( 'setSiteOptions', $result['steps'][0]['step'] );
-		$this->assertEquals( array(), $result['steps'][0]['options'] );
+		$this->assertEquals( (object) array(), $result['steps'][0]['options'] );
 	}
 
 	/**

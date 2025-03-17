@@ -21,8 +21,9 @@ on:
         required: false
       wc-version:
         type: string
-        description: 'Optional. Only for `on-demand` or `custom` triggers. Most jobs (wp-env) ignore this. Available WC versions: https://github.com/woocommerce/woocommerce/releases'
+        description: 'Optional, for `on-demand` or `custom` jobs. Most jobs (wp-env) ignore this. It can be `latest`, `nightly`, or a specific WC version (e.g., `9.7.0-rc.1`).'
         required: false
+        default: latest
 
 jobs:
   validate-input:

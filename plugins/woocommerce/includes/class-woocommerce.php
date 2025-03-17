@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Caches\OrderCountCacheService;
 
 /**
  * Main WooCommerce Class.
@@ -42,7 +43,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.8.0';
+	public $version = '9.9.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -330,6 +331,7 @@ final class WooCommerce {
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
+		$container->get( OrderCountCacheService::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -341,6 +343,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::instance()->register();
 
 		// Classes inheriting from RestApiControllerBase.

@@ -20,7 +20,7 @@ type Block = WPBlock & { supports?: BlockSupports };
 function alterSupportConfiguration() {
 	addFilter(
 		'blocks.registerBlockType',
-		'mailpoet-email-editor/block-support',
+		'woocommerce-email-editor/block-support',
 		( settings: Block ) => {
 			if ( settings.supports?.shadow ) {
 				return {

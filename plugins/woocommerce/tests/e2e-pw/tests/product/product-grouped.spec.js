@@ -1,9 +1,10 @@
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { test, expect, tags } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContent } from '../../utils/cart';
+
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
 const groupedProductName = 'Grouped single product';
@@ -18,16 +19,10 @@ test.describe(
 		const simpleProduct1 = simpleProductName + ' 1';
 		const simpleProduct2 = simpleProductName + ' 2';
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// add products
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProduct1,
 					type: 'simple',
 					regular_price: productPrice,
@@ -35,8 +30,8 @@ test.describe(
 				.then( ( response ) => {
 					simpleProductId = response.data.id;
 				} );
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProduct2,
 					type: 'simple',
 					regular_price: productPrice,
@@ -44,8 +39,8 @@ test.describe(
 				.then( ( response ) => {
 					simpleProduct2Id = response.data.id;
 				} );
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: groupedProductName,
 					type: 'grouped',
 					grouped_products: [ simpleProductId, simpleProduct2Id ],
@@ -60,22 +55,25 @@ test.describe(
 			await context.clearCookies();
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.delete( `products/${ simpleProductId }`, {
-				force: true,
-			} );
-			await api.delete( `products/${ simpleProduct2Id }`, {
-				force: true,
-			} );
-			await api.delete( `products/${ groupedProductId }`, {
-				force: true,
-			} );
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ simpleProductId }`,
+				{
+					force: true,
+				}
+			);
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ simpleProduct2Id }`,
+				{
+					force: true,
+				}
+			);
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ groupedProductId }`,
+				{
+					force: true,
+				}
+			);
 		} );
 
 		test( 'should be able to add grouped products to the cart', async ( {
@@ -99,23 +97,33 @@ test.describe(
 				.click();
 			await expect(
 				page.getByText(
-					`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart`
+					new RegExp(
+						`${ simpleProduct1 }.*and.*${ simpleProduct2 }.*have been added to your cart`
+					)
 				)
 			).toBeVisible();
 			await page.goto( 'cart/' );
-			await expect(
-				page.locator( 'td.product-name >> nth=0' )
-			).toContainText( simpleProduct1 );
-			await expect(
-				page.locator( 'td.product-name >> nth=1' )
-			).toContainText( simpleProduct2 );
-			let totalPrice = await page
-				.locator( 'tr.order-total > td' )
-				.last()
-				.textContent();
-			totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-			await expect( totalPrice ).toBeGreaterThanOrEqual(
-				productPrice * 10
+
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: simpleProduct1,
+							price: productPrice,
+						},
+						qty: 5,
+					},
+					{
+						data: {
+							name: simpleProduct2,
+							price: productPrice,
+						},
+						qty: 5,
+					},
+				],
+				0
 			);
 		} );
 
@@ -129,13 +137,25 @@ test.describe(
 				.getByRole( 'button', { name: 'Add to cart', exact: true } )
 				.click();
 
-			await page.goto( 'cart/' );
-			await page.locator( 'a.remove >> nth=1' ).click();
-			await page.locator( 'a.remove >> nth=0' ).click();
-
 			await expect(
-				page.getByText( 'Your cart is currently empty.' )
+				page.getByText(
+					new RegExp(
+						`${ simpleProduct1 }.*and.*${ simpleProduct2 }.*have been added to your cart`
+					)
+				)
 			).toBeVisible();
+
+			await page.goto( 'cart/' );
+			await page
+				.getByRole( 'button', { name: 'Remove' } )
+				.first()
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Remove' } )
+				.first()
+				.click();
+
+			await checkCartContent( false, page, [], 0 );
 		} );
 	}
 );

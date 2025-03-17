@@ -1,16 +1,20 @@
-const { tags, test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 
-	page: async ( { page, wcAdminApi }, use ) => {
-		const initialTaskListState = await wcAdminApi.get(
-			'options?options=woocommerce_task_list_hidden'
+	page: async ( { page, restApi }, use ) => {
+		const initialTaskListState = await restApi.get(
+			`${ WC_ADMIN_API_PATH }/options?options=woocommerce_task_list_hidden`
 		);
 
 		// Ensure task list is visible.
-		await wcAdminApi.put( 'options', {
+		await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
 			woocommerce_task_list_hidden: 'no',
 		} );
 
@@ -19,25 +23,34 @@ const test = baseTest.extend( {
 		await use( page );
 
 		// Reset the task list to its initial state.
-		await wcAdminApi.put( 'options', initialTaskListState.data );
+		await restApi.put(
+			`${ WC_ADMIN_API_PATH }/options`,
+			initialTaskListState.data
+		);
 	},
 
-	nonSupportedWooPaymentsCountryPage: async ( { page, api }, use ) => {
+	nonSupportedWooPaymentsCountryPage: async ( { page, restApi }, use ) => {
 		// Ensure store's base country location is a WooPayments non-supported country (e.g. AF).
 		// Otherwise, the WooPayments task page logic or WooPayments redirects will kick in.
-		const initialDefaultCountry = await api.get(
-			'settings/general/woocommerce_default_country'
+		const initialDefaultCountry = await restApi.get(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`
 		);
-		await api.put( 'settings/general/woocommerce_default_country', {
-			value: 'AF',
-		} );
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
+			{
+				value: 'AF',
+			}
+		);
 
 		await use( page );
 
 		// Reset the default country to its initial state.
-		await api.put( 'settings/general/woocommerce_default_country', {
-			value: initialDefaultCountry.data.value,
-		} );
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
+			{
+				value: initialDefaultCountry.data.value,
+			}
+		);
 	},
 } );
 

@@ -251,14 +251,6 @@ export type Feature =
 	| 'fixedToolbar'
 	| 'focusMode';
 
-export type MailPoetEmailPostContentExtended = {
-	id?: string;
-	subject: string;
-	preheader: string;
-	preview_url: string;
-	deleted_at?: string;
-};
-
 export type EmailEditorPostType = Omit< Post, 'type' > & {
 	type: string;
 };

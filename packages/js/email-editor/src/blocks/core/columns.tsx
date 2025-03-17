@@ -35,7 +35,7 @@ const columnsEditCallback = createHigherOrderComponent(
 function deactivateStackOnMobile() {
 	addFilter(
 		'editor.BlockEdit',
-		'mailpoet-email-editor/deactivate-stack-on-mobile',
+		'woocommerce-email-editor/deactivate-stack-on-mobile',
 		columnsEditCallback
 	);
 }
@@ -47,7 +47,7 @@ function deactivateStackOnMobile() {
 function disableColumnsLayout() {
 	addFilter(
 		'blocks.registerBlockType',
-		'mailpoet-email-editor/disable-columns-layout',
+		'woocommerce-email-editor/disable-columns-layout',
 		( settings, name ) => {
 			if ( name === 'core/columns' || name === 'core/column' ) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -69,7 +69,7 @@ function disableColumnsLayout() {
 function enhanceColumnsBlock() {
 	addFilter(
 		'blocks.registerBlockType',
-		'mailpoet-email-editor/change-columns',
+		'woocommerce-email-editor/change-columns',
 		( settings: Block, name ) => {
 			if ( name === 'core/columns' ) {
 				return {

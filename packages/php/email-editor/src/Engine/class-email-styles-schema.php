@@ -1,14 +1,14 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use MailPoet\EmailEditor\Validator\Builder;
+use Automattic\WooCommerce\EmailEditor\Validator\Builder;
 
 /**
  * Class for email styles schema.

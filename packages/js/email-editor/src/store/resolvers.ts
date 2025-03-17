@@ -28,7 +28,7 @@ export function* getPersonalizationTagsList() {
 
 	try {
 		const data = yield apiFetch( {
-			path: `/mailpoet-email-editor/v1/get_personalization_tags`,
+			path: `/woocommerce-email-editor/v1/get_personalization_tags`,
 			method: 'GET',
 		} );
 

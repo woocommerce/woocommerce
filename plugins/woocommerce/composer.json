@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "9.8.0",
+	"version": "9.9.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -25,6 +25,13 @@
 			"options": {
 				"symlink": false
 			}
+		},
+		{
+			"type": "path",
+			"url": "../../packages/php/email-editor",
+			"options": {
+				"symlink": false
+			}
 		}
 	],
 	"require": {
@@ -39,7 +46,8 @@
 		"opis/json-schema": "*",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.9.2",
-		"woocommerce/blueprint": "*"
+		"woocommerce/blueprint": "*",
+		"woocommerce/email-editor": "*"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -140,7 +148,8 @@
 	"extra": {
 		"installer-paths": {
 			"packages/{$name}": [
-				"woocommerce/action-scheduler"
+				"woocommerce/action-scheduler",
+				"woocommerce/email-editor"
 			]
 		},
 		"scripts-description": {

@@ -110,7 +110,7 @@
   - team: woo-fse
   - team: ghidorah
 
-"plugins/woocommerce-blocks/**/*":
+"plugins/woocommerce/client/blocks/**/*":
   - team: rubik
   - team: woo-fse
 

@@ -207,11 +207,26 @@ class WC_Admin {
 				}
 			}
 
-			try {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				$message = $email_preview->render();
 				$message = $email_preview->ensure_links_open_in_new_tab( $message );
-			} catch ( Throwable $e ) {
-				wp_die( esc_html__( 'There was an error rendering an email preview.', 'woocommerce' ), 404 );
+			} else {
+				// Start output buffering to prevent partial renders with PHP notices or warnings.
+				ob_start();
+				try {
+					$message = $email_preview->render();
+					$message = $email_preview->ensure_links_open_in_new_tab( $message );
+				} catch ( Throwable $e ) {
+					ob_end_clean();
+					wp_die(
+						esc_html__(
+							'There was an error rendering the email preview. This doesn\'t affect actual email delivery. Please contact the extension author for assistance.',
+							'woocommerce'
+						),
+						404
+					);
+				}
+				ob_end_clean();
 			}
 
 			// print the preview email.

@@ -25,13 +25,13 @@ export function SaveEmailButton() {
 	);
 
 	const isSaved = ! isEmpty && ! isSaving && ! hasEdits;
-	const isDisabled = isEmpty || isSaving || isSaved;
+	const isDisabled = ! hasEdits && ( isEmpty || isSaving || isSaved );
 
-	let label = __( 'Save Draft', 'mailpoet' );
+	let label = __( 'Save Draft', 'woocommerce' );
 	if ( isSaved ) {
-		label = __( 'Saved', 'mailpoet' );
+		label = __( 'Saved', 'woocommerce' );
 	} else if ( isSaving ) {
-		label = __( 'Saving', 'mailpoet' );
+		label = __( 'Saving', 'woocommerce' );
 	}
 
 	return (

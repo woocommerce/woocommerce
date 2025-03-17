@@ -37,9 +37,9 @@
 		"@types/lodash": "^4.14.202",
 		"@types/prop-types": "^15.7.11",
 		"@types/wordpress__blocks": "11.0.7",
-		"@woocommerce/product-editor": "workspace:^",
-		"@woocommerce/settings": "^1.0.0",
-		"@woocommerce/tracks": "workspace:^",
+		"@woocommerce/product-editor": "workspace:*",
+		"@woocommerce/settings": "1.0.0",
+		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.6",
 		"@wordpress/components": "wp-6.6",
 		"@wordpress/compose": "wp-6.6",
@@ -58,6 +58,7 @@
 		"@wordpress/interface": "wp-6.6",
 		"@wordpress/keyboard-shortcuts": "wp-6.6",
 		"@wordpress/keycodes": "wp-6.6",
+		"@wordpress/notices": "wp-6.6",
 		"@wordpress/media-utils": "wp-6.6",
 		"@woocommerce/navigation": "workspace:*",
 		"@wordpress/plugins": "wp-6.6",
@@ -155,7 +156,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"

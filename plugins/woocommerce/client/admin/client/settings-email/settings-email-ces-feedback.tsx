@@ -5,7 +5,7 @@ import { Button, TextareaControl, TextControl } from '@wordpress/components';
 import { isEmail } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useRef } from '@wordpress/element';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 
 /**
@@ -27,6 +27,7 @@ export const EmailCesFeedback = ( {
 	showOnLoad = false,
 }: EmailCesFeedbackProps ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
+	const hasShownModalRef = useRef( false );
 
 	const handleFeedbackClick = useCallback( () => {
 		showCesModal( {
@@ -58,7 +59,7 @@ export const EmailCesFeedback = ( {
 								} )
 							}
 							placeholder={ __(
-								'What did you try to achieve with the customizer? What did and didn’t work?',
+								"What did you try to achieve with the customizer? What did and didn't work?",
 								'woocommerce'
 							) }
 						/>
@@ -102,10 +103,15 @@ export const EmailCesFeedback = ( {
 				return errors;
 			},
 		} );
-	}, [ action, question, showCesModal ] );
+	}, [ action, description, question, showCesModal ] );
 
 	useEffect( () => {
-		if ( window.wcTracks?.isEnabled && showOnLoad ) {
+		if (
+			window.wcTracks?.isEnabled &&
+			showOnLoad &&
+			! hasShownModalRef.current
+		) {
+			hasShownModalRef.current = true;
 			handleFeedbackClick();
 		}
 	}, [ handleFeedbackClick, showOnLoad ] );

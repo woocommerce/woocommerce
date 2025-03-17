@@ -1,12 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 
 /**
  * Integration test for Theme_Controller class
@@ -26,7 +29,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 
 		// Switch theme for easier testing theme colors.
-		switch_theme('twentytwentyfour');
+		switch_theme( 'twentytwentyfour' );
 
 		// Crete a custom user theme post.
 		$styles_data = array(
@@ -40,8 +43,8 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 			),
 		);
 		$post_data   = array(
-			'post_title'   => __( 'Custom Email Styles', 'mailpoet' ),
-			'post_name'    => 'wp-global-styles-mailpoet-email',
+			'post_title'   => __( 'Custom Email Styles', 'woocommerce' ),
+			'post_name'    => 'wp-global-styles-woocommerce-email',
 			'post_content' => (string) wp_json_encode( $styles_data, JSON_FORCE_OBJECT ),
 			'post_status'  => 'publish',
 			'post_type'    => 'wp_global_styles',

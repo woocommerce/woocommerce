@@ -1,14 +1,14 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Validator\Schema;
+namespace Automattic\WooCommerce\EmailEditor\Validator\Schema;
 
-use MailPoet\EmailEditor\Validator\Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema;
 
 /**
  * Represents a schema that allows a value to match any of the given schemas.

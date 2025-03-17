@@ -78,6 +78,7 @@ const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
 
 	return (
 		<Fill>
+			{ ! isWide && <h2>{ __( 'Email preview', 'woocommerce' ) }</h2> }
 			<div
 				className={ `wc-settings-email-preview-container ${
 					isWide ? 'wc-settings-email-preview-container-floating' : ''

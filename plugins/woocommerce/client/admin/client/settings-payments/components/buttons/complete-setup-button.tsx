@@ -75,7 +75,9 @@ export const CompleteSetupButton = ( {
 		// Record the click of this button.
 		recordEvent( 'settings_payments_provider_complete_setup_click', {
 			provider_id: gatewayId,
-			onboarding_state: onboardingState,
+			onboarding_started: onboardingState.started,
+			onboarding_completed: onboardingState.completed,
+			onboarding_test_mode: onboardingState.test_mode,
 		} );
 
 		setIsUpdating( true );

@@ -1,14 +1,14 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Templates;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Templates;
 
-use MailPoet\EmailEditor\Validator\Builder;
+use Automattic\WooCommerce\EmailEditor\Validator\Builder;
 use WP_Block_Template;
 
 /**
@@ -20,7 +20,7 @@ class Templates {
 	 *
 	 * @var string $plugin_slug
 	 */
-	private string $template_prefix = 'mailpoet';
+	private string $template_prefix = 'woocommerce';
 	/**
 	 * The post type.
 	 *
@@ -57,7 +57,7 @@ class Templates {
 	public function initialize( array $post_types ): void {
 		$this->post_types = $post_types;
 		add_filter( 'theme_templates', array( $this, 'add_theme_templates' ), 10, 4 ); // Workaround needed when saving post – template association.
-		add_filter( 'mailpoet_email_editor_register_templates', array( $this, 'register_templates' ) );
+		add_filter( 'woocommerce_email_editor_register_templates', array( $this, 'register_templates' ) );
 		$this->templates_registry->initialize();
 		$this->register_post_types_to_api();
 	}
@@ -87,8 +87,8 @@ class Templates {
 		$general_email = new Template(
 			$this->template_prefix,
 			$general_email_slug,
-			__( 'General Email', 'mailpoet' ),
-			__( 'A general template for emails.', 'mailpoet' ),
+			__( 'General Email', 'woocommerce' ),
+			__( 'A general template for emails.', 'woocommerce' ),
 			(string) file_get_contents( $this->template_directory . $template_filename ),
 			$this->post_types
 		);
@@ -155,14 +155,21 @@ class Templates {
 		if ( $post_type && ! in_array( $post_type, $this->post_types, true ) ) {
 			return $templates;
 		}
-		$block_templates = get_block_templates();
+		$block_templates       = get_block_templates();
+		$email_templates_slugs = array_map(
+			function ( Template $template ) {
+				return $template->get_slug();
+			},
+			$this->templates_registry->get_all()
+		);
 		foreach ( $block_templates as $block_template ) {
-			// Ideally we could check for supported post_types but there seems to be a bug and once a template has some edits and is stored in DB
-			// the core returns null for post_types.
-			if ( $block_template->plugin !== $this->template_prefix ) {
+			if ( ! in_array( $block_template->slug, $email_templates_slugs, true ) ) {
 				continue;
 			}
-			$templates[ $block_template->slug ] = $block_template;
+			if ( isset( $templates[ $block_template->slug ] ) ) {
+				continue;
+			}
+			$templates[ $block_template->slug ] = $block_template->title;  // Requires only the template title, not the full template object.
 		}
 		return $templates;
 	}

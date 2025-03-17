@@ -102,6 +102,8 @@ final class ProductFilterRating extends AbstractBlock {
 			return '';
 		}
 
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$min_rating    = $attributes['minRating'] ?? 0;
 		$rating_counts = $this->get_rating_counts( $block );
 		// User selected minimum rating to display.
@@ -145,8 +147,8 @@ final class ProductFilterRating extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-context'      => wp_json_encode(
+			'data-wp-interactive'  => $this->get_full_block_name(),
+			'data-wp-context'      => wp_json_encode(
 				array(
 					'hasFilterOptions'    => ! empty( $filter_options ),
 					/* translators: {{labe}} is the rating filter item label. */
@@ -154,7 +156,7 @@ final class ProductFilterRating extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'data-wc-bind--hidden' => '!context.hasFilterOptions',
+			'data-wp-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( empty( $filter_options ) ) {
@@ -238,5 +240,16 @@ final class ProductFilterRating extends AbstractBlock {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

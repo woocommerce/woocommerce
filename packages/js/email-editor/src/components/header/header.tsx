@@ -121,15 +121,15 @@ export function Header() {
 	};
 
 	const shortLabelInserter = ! isInserterSidebarOpened
-		? __( 'Add', 'mailpoet' )
-		: __( 'Close', 'mailpoet' );
+		? __( 'Add', 'woocommerce' )
+		: __( 'Close', 'woocommerce' );
 
 	return (
 		<div className="editor-header edit-post-header">
 			<div className="editor-header__toolbar">
 				<NavigableToolbar
 					className="editor-document-tools edit-post-header-toolbar is-unstyled"
-					aria-label={ __( 'Email document tools', 'mailpoet' ) }
+					aria-label={ __( 'Email document tools', 'woocommerce' ) }
 				>
 					<div className="editor-document-tools__left">
 						<ToolbarItem
@@ -158,7 +158,7 @@ export function Header() {
 							} }
 							disabled={ ! hasUndo }
 							icon={ undo }
-							label={ __( 'Undo', 'mailpoet' ) }
+							label={ __( 'Undo', 'woocommerce' ) }
 							showTooltip
 						/>
 						<ToolbarItem
@@ -173,7 +173,7 @@ export function Header() {
 							} }
 							disabled={ ! hasRedo }
 							icon={ redo }
-							label={ __( 'Redo', 'mailpoet' ) }
+							label={ __( 'Redo', 'woocommerce' ) }
 							showTooltip
 						/>
 						<ToolbarItem
@@ -185,7 +185,7 @@ export function Header() {
 							onClick={ toggleTheListviewSidebar }
 							disabled={ false }
 							icon={ listView }
-							label={ __( 'List view', 'mailpoet' ) }
+							label={ __( 'List view', 'woocommerce' ) }
 							showTooltip
 							aria-expanded={ isInserterSidebarOpened }
 						/>
@@ -217,8 +217,8 @@ export function Header() {
 							} }
 							label={
 								isBlockToolsCollapsed
-									? __( 'Show block tools', 'mailpoet' )
-									: __( 'Hide block tools', 'mailpoet' )
+									? __( 'Show block tools', 'woocommerce' )
+									: __( 'Hide block tools', 'woocommerce' )
 							}
 						/>
 					</>

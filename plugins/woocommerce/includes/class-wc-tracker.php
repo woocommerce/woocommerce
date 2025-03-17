@@ -1452,6 +1452,7 @@ class WC_Tracker {
 		return array(
 			'enabled'                        => get_option( 'woocommerce_feature_email_improvements_enabled', 'no' ),
 			'default_enabled'                => get_option( 'woocommerce_email_improvements_default_enabled', 'no' ),
+			'auto_sync_enabled'              => get_option( 'woocommerce_email_auto_sync_with_theme', 'no' ),
 			'first_enabled_at'               => get_option( 'woocommerce_email_improvements_first_enabled_at', null ),
 			'last_enabled_at'                => get_option( 'woocommerce_email_improvements_last_enabled_at', null ),
 			'enabled_count'                  => get_option( 'woocommerce_email_improvements_enabled_count', 0 ),

@@ -1,8 +1,15 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const path = require( 'path' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import path from 'path';
+
+/**
+ * Internal dependencies
+ */
+import { test, expect, tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
+
 const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(
 	'tests/e2e-pw/test-data/sample_products_override.csv'
@@ -97,69 +104,73 @@ const errorMessage = 'File is empty. Please upload something more substantial.';
 test.describe.serial( 'Import Products from a CSV file', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { restApi } ) => {
 		// make sure the currency is USD
-		await api.put( 'settings/general/woocommerce_currency', {
-			value: 'USD',
-		} );
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_currency`,
+			{
+				value: 'USD',
+			}
+		);
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { restApi } ) => {
 		// get a list of all products
-		await api.get( 'products?per_page=50' ).then( ( response ) => {
-			for ( let i = 0; i < response.data.length; i++ ) {
-				// if the product is one we imported, add it to the array
-				for ( let j = 0; j < productNamesOverride.length; j++ ) {
-					if (
-						response.data[ i ].name === productNamesOverride[ j ]
-					) {
-						productIds.push( response.data[ i ].id );
+		await restApi
+			.get( `${ WC_API_PATH }/products?per_page=50` )
+			.then( ( response ) => {
+				for ( let i = 0; i < response.data.length; i++ ) {
+					// if the product is one we imported, add it to the array
+					for ( let j = 0; j < productNamesOverride.length; j++ ) {
+						if (
+							response.data[ i ].name ===
+							productNamesOverride[ j ]
+						) {
+							productIds.push( response.data[ i ].id );
+						}
 					}
 				}
-			}
-		} );
+			} );
 		// batch delete all products in the array
-		await api.post( 'products/batch', { delete: [ ...productIds ] } );
+		await restApi.post( `${ WC_API_PATH }/products/batch`, {
+			delete: [ ...productIds ],
+		} );
 		// get a list of all product categories
-		await api.get( 'products/categories' ).then( ( response ) => {
-			for ( let i = 0; i < response.data.length; i++ ) {
-				// if the product category is one that was created, add it to the array
-				for ( let j = 0; j < productCategories.length; j++ ) {
-					if ( response.data[ i ].name === productCategories[ j ] ) {
-						categoryIds.push( response.data[ i ].id );
+		await restApi
+			.get( `${ WC_API_PATH }/products/categories` )
+			.then( ( response ) => {
+				for ( let i = 0; i < response.data.length; i++ ) {
+					// if the product category is one that was created, add it to the array
+					for ( let j = 0; j < productCategories.length; j++ ) {
+						if (
+							response.data[ i ].name === productCategories[ j ]
+						) {
+							categoryIds.push( response.data[ i ].id );
+						}
 					}
 				}
-			}
-		} );
+			} );
 		// batch delete all categories in the array
-		await api.post( 'products/categories/batch', {
+		await restApi.post( `${ WC_API_PATH }/products/categories/batch`, {
 			delete: [ ...categoryIds ],
 		} );
 		// get a list of all product attributes
-		await api.get( 'products/attributes' ).then( ( response ) => {
-			for ( let i = 0; i < response.data.length; i++ ) {
-				// if the product attribute is one that was created, add it to the array
-				for ( let j = 0; j < productAttributes.length; j++ ) {
-					if ( response.data[ i ].name === productAttributes[ j ] ) {
-						attributeIds.push( response.data[ i ].id );
+		await restApi
+			.get( `${ WC_API_PATH }/products/attributes` )
+			.then( ( response ) => {
+				for ( let i = 0; i < response.data.length; i++ ) {
+					// if the product attribute is one that was created, add it to the array
+					for ( let j = 0; j < productAttributes.length; j++ ) {
+						if (
+							response.data[ i ].name === productAttributes[ j ]
+						) {
+							attributeIds.push( response.data[ i ].id );
+						}
 					}
 				}
-			}
-		} );
+			} );
 		// batch delete attributes in the array
-		await api.post( 'products/attributes/batch', {
+		await restApi.post( `${ WC_API_PATH }/products/attributes/batch`, {
 			delete: [ ...attributeIds ],
 		} );
 	} );

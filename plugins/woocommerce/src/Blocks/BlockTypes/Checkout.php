@@ -417,7 +417,6 @@ class Checkout extends AbstractBlock {
 
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
-		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location() );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
 			false === filter_var(

@@ -1,6 +1,10 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { random } = require( '../../utils/helpers' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { random } from '../../utils/helpers';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const taxClasses = [
 	{
@@ -60,22 +64,24 @@ async function addProductToOrder( page, product, quantity ) {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	order: async ( { api }, use ) => {
+	order: async ( { restApi }, use ) => {
 		const order = {};
 
 		await use( order );
 
 		if ( order.id ) {
-			await api.delete( `orders/${ order.id }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+				force: true,
+			} );
 		}
 	},
 
-	customer: async ( { api }, use ) => {
+	customer: async ( { restApi }, use ) => {
 		let customer = {};
 		const username = `sideshowbob_${ random() }`;
 
-		await api
-			.post( 'customers', {
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, {
 				email: `${ username }@example.com`,
 				first_name: 'Sideshow',
 				last_name: 'Bob',
@@ -112,14 +118,16 @@ const test = baseTest.extend( {
 		await use( customer );
 
 		// Cleanup
-		await api.delete( `customers/${ customer.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
+			force: true,
+		} );
 	},
 
-	simpleProduct: async ( { api }, use ) => {
+	simpleProduct: async ( { restApi }, use ) => {
 		let product = {};
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product simple ${ random() }`,
 				type: 'simple',
 				regular_price: '100',
@@ -132,10 +140,12 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 
-	variableProduct: async ( { api }, use ) => {
+	variableProduct: async ( { restApi }, use ) => {
 		let product = {};
 
 		const variations = [
@@ -169,8 +179,8 @@ const test = baseTest.extend( {
 			},
 		];
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product variable ${ random() }`,
 				type: 'variable',
 				tax_class: 'Tax Class Variable',
@@ -180,8 +190,8 @@ const test = baseTest.extend( {
 			} );
 
 		for ( const key in variations ) {
-			api.post(
-				`products/${ product.id }/variations`,
+			restApi.post(
+				`${ WC_API_PATH }/products/${ product.id }/variations`,
 				variations[ key ]
 			);
 		}
@@ -189,14 +199,16 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 
-	externalProduct: async ( { api }, use ) => {
+	externalProduct: async ( { restApi }, use ) => {
 		let product = {};
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product external ${ random() }`,
 				regular_price: '800',
 				tax_class: 'Tax Class External',
@@ -211,32 +223,34 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 
-	groupedProduct: async ( { api }, use ) => {
+	groupedProduct: async ( { restApi }, use ) => {
 		let product = {};
 		let subProductAId;
 		let subProductBId;
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: 'Add-on A',
 				regular_price: '11.95',
 			} )
 			.then( ( response ) => {
 				subProductAId = response.data.id;
 			} );
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: 'Add-on B',
 				regular_price: '18.97',
 			} )
 			.then( ( response ) => {
 				subProductBId = response.data.id;
 			} );
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product grouped ${ random() }`,
 				regular_price: '29.99',
 				grouped_products: [ subProductAId, subProductBId ],
@@ -249,7 +263,9 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 } );
 
@@ -257,26 +273,32 @@ test.describe(
 	'WooCommerce Orders > Add new order',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		test.beforeAll( async ( { api } ) => {
+		test.beforeAll( async ( { restApi } ) => {
 			// enable taxes on the account
-			await api.put( 'settings/general/woocommerce_calc_taxes', {
-				value: 'yes',
-			} );
+			await restApi.put(
+				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
+				{
+					value: 'yes',
+				}
+			);
 			// add tax classes
 			for ( const taxClass of taxClasses ) {
-				await api.post( 'taxes/classes', taxClass );
+				await restApi.post(
+					`${ WC_API_PATH }/taxes/classes`,
+					taxClass
+				);
 			}
 			// attach rates to the classes
 			for ( let i = 0; i < taxRates.length; i++ ) {
-				await api.post( 'taxes', taxRates[ i ] );
+				await restApi.post( `${ WC_API_PATH }/taxes`, taxRates[ i ] );
 			}
 		} );
 
-		test.afterAll( async ( { api } ) => {
+		test.afterAll( async ( { restApi } ) => {
 			// clean up tax classes and rates
 			for ( const { slug } of taxClasses ) {
-				await api
-					.delete( `taxes/classes/${ slug }`, {
+				await restApi
+					.delete( `${ WC_API_PATH }/taxes/classes/${ slug }`, {
 						force: true,
 					} )
 					.catch( ( error ) => {
@@ -292,9 +314,12 @@ test.describe(
 					} );
 			}
 			// turn off taxes
-			await api.put( 'settings/general/woocommerce_calc_taxes', {
-				value: 'no',
-			} );
+			await restApi.put(
+				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
+				{
+					value: 'no',
+				}
+			);
 		} );
 
 		test( 'can create a simple guest order', async ( {

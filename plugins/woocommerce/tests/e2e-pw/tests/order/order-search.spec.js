@@ -1,7 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const searchString = 'James Doe';
 const itemName = 'Wanted Product';
@@ -55,10 +57,13 @@ const queries = [
 /**
  * Check first if customer already exists. Delete if it does.
  */
-const deleteCustomer = async ( api ) => {
-	const { data: customersList } = await api.get( 'customers', {
-		email: customerBilling.email,
-	} );
+const deleteCustomer = async ( restApi ) => {
+	const { data: customersList } = await restApi.get(
+		`${ WC_API_PATH }/customers`,
+		{
+			email: customerBilling.email,
+		}
+	);
 
 	if ( customersList && customersList.length ) {
 		const customerId = customersList[ 0 ].id;
@@ -67,7 +72,9 @@ const deleteCustomer = async ( api ) => {
 			`Customer with email ${ customerBilling.email } exists! Deleting it before starting test...`
 		);
 
-		await api.delete( `customers/${ customerId }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
+			force: true,
+		} );
 	}
 };
 
@@ -79,16 +86,10 @@ test.describe(
 
 		let productId, customerId, orderId;
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: 'Wanted Product',
 					type: 'simple',
 					regular_price: '7.99',
@@ -97,11 +98,11 @@ test.describe(
 					productId = response.data.id;
 				} );
 
-			await deleteCustomer( api );
+			await deleteCustomer( restApi );
 
 			// Create test customer.
-			await api
-				.post( 'customers', {
+			await restApi
+				.post( `${ WC_API_PATH }/customers`, {
 					email: customerBilling.email,
 					first_name: customerBilling.first_name,
 					last_name: customerBilling.last_name,
@@ -114,8 +115,8 @@ test.describe(
 				} );
 
 			// create order
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					line_items: [
 						{
 							product_id: productId,
@@ -131,16 +132,17 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
+				force: true,
 			} );
-			await api.delete( `products/${ productId }`, { force: true } );
-			await api.delete( `orders/${ orderId }`, { force: true } );
-			await api.delete( `customers/${ customerId }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
+			await restApi.delete(
+				`${ WC_API_PATH }/customers/${ customerId }`,
+				{ force: true }
+			);
 		} );
 
 		test( 'can search for order by order id', async ( { page } ) => {

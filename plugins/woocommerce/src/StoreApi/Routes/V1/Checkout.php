@@ -264,7 +264,7 @@ class Checkout extends AbstractCartRoute {
 
 			foreach ( $additional_fields as $field_key => $field ) {
 				// Skip values that were not posted if the request is partial or the field is not required.
-				if ( ! isset( $field_values[ $field_key ] ) && ( $is_partial || empty( $field['required'] ) ) ) {
+				if ( ! isset( $field_values[ $field_key ] ) && ( $is_partial || true !== $field['required'] ) ) {
 					continue;
 				}
 
@@ -273,7 +273,7 @@ class Checkout extends AbstractCartRoute {
 				$sanitized_field_value = $sanitized_field_values[ $field_key ] ?? '';
 
 				if ( empty( $field_value ) ) {
-					if ( ! empty( $field['required'] ) ) {
+					if ( true === $field['required'] ) {
 						/* translators: %s: is the field label */
 						$error_message = sprintf( __( '%s is required', 'woocommerce' ), $field['label'] );
 						if ( 'shipping_address' === $context ) {

@@ -7,7 +7,9 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\Email\EmailColors;
 use Automattic\WooCommerce\Internal\Email\EmailFont;
+use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -38,7 +40,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 			add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_email_header_image', array( $this, 'sanitize_email_header_image' ), 10, 3 );
 		}
-		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_feature_email_improvements_to_tracks' ), 10, 2 );
+		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_feature_email_improvements_to_tracks' ) );
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'track_email_improvements_feature_change' ), 10, 2 );
 		parent::__construct();
 	}
@@ -102,7 +104,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'body_bg_color_default' => $body_bg_color_default,
 			'body_text_color_default' => $body_text_color_default,
 			'footer_text_color_default' => $footer_text_color_default,
-		) = $this->get_email_default_colors();
+		) = EmailColors::get_default_colors();
 
 		$base_color_title = __( 'Base color', 'woocommerce' );
 		/* translators: %s: default color */
@@ -388,82 +390,24 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 				$footer_text_color_setting_in_palette,
 
+				array(
+					'title'    => __( 'Auto-sync with theme', 'woocommerce' ),
+					'desc'     => __( 'Automatically update email styles when theme styles change', 'woocommerce' ),
+					'id'       => 'woocommerce_email_auto_sync_with_theme',
+					'type'     => 'hidden',
+					'default'  => 'no',
+					'autoload' => false,
+				),
+
 				$color_palette_section_end,
 
 				array( 'type' => 'email_preview' ),
-
-				array(
-					'title' => __( 'Store management insights', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'email_merchant_notes',
-				),
-
-				array(
-					'title'         => __( 'Enable email insights', 'woocommerce' ),
-					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
-					'id'            => 'woocommerce_merchant_email_notifications',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'default'       => 'no',
-					'autoload'      => false,
-				),
-
-				array(
-					'type' => 'sectionend',
-					'id'   => 'email_merchant_notes',
-				),
 			);
 
 		// Remove empty elements that depend on the email_improvements feature flag.
 		$settings = array_filter( $settings );
 
 		return apply_filters( 'woocommerce_email_settings', $settings );
-	}
-
-	/**
-	 * Get default colors for emails.
-	 */
-	private function get_email_default_colors() {
-		$base_color_default        = '#720eec';
-		$bg_color_default          = '#f7f7f7';
-		$body_bg_color_default     = '#ffffff';
-		$body_text_color_default   = '#3c3c3c';
-		$footer_text_color_default = '#3c3c3c';
-
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$base_color_default        = '#8526ff';
-			$bg_color_default          = '#ffffff';
-			$body_bg_color_default     = '#ffffff';
-			$body_text_color_default   = '#1e1e1e';
-			$footer_text_color_default = '#787c82';
-
-			if ( wc_current_theme_is_fse_theme() && function_exists( 'wp_get_global_styles' ) ) {
-				$global_styles             = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
-				$base_color_global         = isset( $global_styles['elements']['button']['color']['text'] )
-					? sanitize_hex_color( $global_styles['elements']['button']['color']['text'] ) : '';
-				$bg_color_global           = isset( $global_styles['color']['background'] )
-					? sanitize_hex_color( $global_styles['color']['background'] ) : '';
-				$body_bg_color_global      = isset( $global_styles['color']['background'] )
-					? sanitize_hex_color( $global_styles['color']['background'] ) : '';
-				$body_text_color_global    = isset( $global_styles['color']['text'] )
-					? sanitize_hex_color( $global_styles['color']['text'] ) : '';
-				$footer_text_color_global  = isset( $global_styles['elements']['caption']['color']['text'] )
-					? sanitize_hex_color( $global_styles['elements']['caption']['color']['text'] ) : '';
-				$base_color_default        = $base_color_global ? $base_color_global : $base_color_default;
-				$bg_color_default          = $bg_color_global ? $bg_color_global : $bg_color_default;
-				$body_bg_color_default     = $body_bg_color_global ? $body_bg_color_global : $body_bg_color_default;
-				$body_text_color_default   = $body_text_color_global ? $body_text_color_global : $body_text_color_default;
-				$footer_text_color_default = $footer_text_color_global ? $footer_text_color_global : $footer_text_color_default;
-			}
-		}
-
-		return compact(
-			'base_color_default',
-			'bg_color_default',
-			'body_bg_color_default',
-			'body_text_color_default',
-			'footer_text_color_default',
-		);
 	}
 
 	/**
@@ -842,17 +786,26 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * @param array $value Field value array.
 	 */
 	public function email_color_palette( $value ) {
-		$default_colors = $this->get_email_default_colors();
+		$default_colors = EmailColors::get_default_colors();
+		$auto_sync = get_option( EmailStyleSync::AUTO_SYNC_OPTION, 'no' );
 
 		?>
 		<hr class="wc-settings-email-color-palette-separator" />
-		<h2 class="wc-settings-email-color-palette-title"><?php echo esc_html( $value['title'] ); ?></h2>
-		<div
-			class="wc-settings-email-color-palette-buttons"
-			id="wc_settings_email_color_palette_slotfill"
-			data-default-colors="<?php echo esc_attr( wp_json_encode( $default_colors ) ); ?>"
-			<?php echo wp_theme_has_theme_json() ? 'data-has-theme-json' : ''; ?>
-		></div>
+		<div class="wc-settings-email-color-palette-header">
+			<h2 class="wc-settings-email-color-palette-title"><?php echo esc_html( $value['title'] ); ?></h2>
+			<div
+				class="wc-settings-email-color-palette-buttons"
+				id="wc_settings_email_color_palette_slotfill"
+				data-default-colors="<?php echo esc_attr( wp_json_encode( $default_colors ) ); ?>"
+				<?php echo wp_theme_has_theme_json() ? 'data-has-theme-json' : ''; ?>
+			></div>
+			<input
+				type="hidden"
+				name="woocommerce_email_auto_sync_with_theme"
+				id="woocommerce_email_auto_sync_with_theme"
+				value="<?php echo esc_attr( $auto_sync ); ?>"
+			/>
+		</div>
 		<table class="form-table">
 		<?php
 	}

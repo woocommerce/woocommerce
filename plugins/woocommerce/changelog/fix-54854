@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix add to cart action url to be the same as the current url so it does not redirect after submitting the form
-
-

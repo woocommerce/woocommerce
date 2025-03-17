@@ -7,21 +7,39 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorItemCTAMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorItemTemplateMock;
 
 /**
  * Tests for the AddToCartWithOptions block type
  */
 class AddToCartWithOptions extends \WP_UnitTestCase {
+
+	/**
+	 * Tracks whether blocks have been registered.
+	 *
+	 * @var bool
+	 */
+	protected static $are_blocks_registered = false;
+
 	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		// We need to register the blocks after set up. They are no registered
-		// on `init` because `init` is called with a classic theme.
-		new AddToCartWithOptionsMock();
-		new AddToCartWithOptionsQuantitySelectorMock();
+		if ( ! self::$are_blocks_registered ) {
+			// We need to register the blocks after set up. They are no registered
+			// on `init` because `init` is called with a classic theme.
+			new AddToCartWithOptionsMock();
+			new AddToCartWithOptionsQuantitySelectorMock();
+			new AddToCartWithOptionsGroupedProductSelectorMock();
+			new AddToCartWithOptionsGroupedProductSelectorItemTemplateMock();
+			new AddToCartWithOptionsGroupedProductSelectorItemCTAMock();
+
+			self::$are_blocks_registered = true;
+		}
 	}
 
 	/**
@@ -47,6 +65,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		// Single Products contain the Add to Cart button and the quantity selector blocks.
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-button', $markup, 'The Simple Product Add to Cart with Options contains the product button block.' );
+		$this->assertStringContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button reads "Add to cart".' );
 		$this->assertStringContainsString( 'woocommerce/add-to-cart-with-options-quantity-selector', $markup, 'The Simple Product Add to Cart with Options contains the quantity selector block.' );
 
 		$product    = new \WC_Product_External();
@@ -55,6 +74,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		// External Products contain the Add to Cart button block but do not contain the quantity selector block.
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-button', $markup, 'The External Product Add to Cart with Options contains the product button block.' );
+		$this->assertStringContainsString( 'Buy product', $markup, 'The External Product Add to Cart Button reads "Buy product".' );
 		$this->assertStringNotContainsString( 'woocommerce/add-to-cart-with-options-quantity-selector', $markup, 'The External Product Add to Cart with Options does not contain the quantity selector block.' );
 
 		$product    = new WC_Product_Custom();
@@ -65,5 +85,30 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'Custom Product Type Add to Cart Form', $markup, 'The Custom Product Type Add to Cart with Options contains the custom product type add to cart form.' );
 
 		remove_action( 'woocommerce_custom_add_to_cart', array( $this, 'print_custom_product_type_add_to_cart_markup' ) );
+	}
+
+	/**
+	 * Tests that the correct CTA is rendered in the Grouped Product Selector.
+	 */
+	public function test_grouped_product_selector_cta() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product_id = $simple_product->save();
+		$grouped_product   = new \WC_Product_Grouped();
+		$grouped_product->set_children( array( $simple_product_id ) );
+		$grouped_product_id = $grouped_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringContainsString( 'type="number"', $markup, 'The Grouped Product Add to Cart with Options form contains a numeric input.' );
+
+		$simple_product->set_sold_individually( true );
+		$simple_product->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringContainsString( 'type="checkbox"', $markup, 'The Grouped Product Add to Cart with Options form contains a checkbox.' );
+
+		$simple_product->set_stock_status( 'outofstock' );
+		$simple_product->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringContainsString( 'Read more', $markup, 'The Grouped Product Add to Cart with Options form contains a button.' );
 	}
 }

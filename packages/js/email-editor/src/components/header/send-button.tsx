@@ -45,8 +45,8 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 		isDirty;
 
 	const label = applyFilters(
-		'mailpoet_email_editor_send_button_label',
-		__( 'Send', 'mailpoet' )
+		'woocommerce_email_editor_send_button_label',
+		__( 'Send', 'woocommerce' )
 	) as string;
 
 	return (
@@ -56,7 +56,7 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 				recordEvent( 'header_send_button_clicked' );
 				if ( validateContent() ) {
 					const action = applyFilters(
-						'mailpoet_email_editor_send_action_callback',
+						'woocommerce_email_editor_send_action_callback',
 						sendAction
 					) as () => void;
 					action();

@@ -1,15 +1,16 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Codeception\Stub\Expected;
-use MailPoet\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use MailPoet\WP\Functions as WPFunctions;
 
 /**

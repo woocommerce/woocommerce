@@ -4,11 +4,20 @@
  *
  * @package WooCommerce\Tests\Cart.
  */
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+	/**
+	 * Called before every test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+	}
 
 	/**
 	 * tearDown.
@@ -219,6 +228,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Set address for shipping calculation required for "woocommerce_shipping_cost_requires_address".
 		WC()->cart->get_customer()->set_shipping_country( 'US' );
 		WC()->cart->get_customer()->set_shipping_state( 'NY' );
+		WC()->cart->get_customer()->set_shipping_city( 'New York' );
 		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
@@ -227,6 +237,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		WC()->cart->get_customer()->set_shipping_country( 'GB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( '' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
 
@@ -246,12 +257,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Country that does not require state.
 		WC()->cart->get_customer()->set_shipping_country( 'LB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
 		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
 		// Country that does not require postcode.
 		WC()->cart->get_customer()->set_shipping_country( 'NG' );
 		WC()->cart->get_customer()->set_shipping_state( 'AB' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
@@ -260,6 +273,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		WC()->cart->get_customer()->set_shipping_country( 'GB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
 

@@ -31,7 +31,7 @@ export function DimensionsPanel() {
 
 	return (
 		<ToolsPanel
-			label={ __( 'Dimensions', 'mailpoet' ) }
+			label={ __( 'Dimensions', 'woocommerce' ) }
 			resetAll={ () => {
 				updateStyleProp( [ 'spacing' ], defaultStyles.spacing );
 				recordEvent(
@@ -47,7 +47,7 @@ export function DimensionsPanel() {
 						defaultStyles.spacing.padding
 					)
 				}
-				label={ __( 'Padding', 'mailpoet' ) }
+				label={ __( 'Padding', 'woocommerce' ) }
 				onDeselect={ () => {
 					updateStyleProp(
 						[ 'spacing', 'padding' ],
@@ -69,7 +69,7 @@ export function DimensionsPanel() {
 							{ value }
 						);
 					} }
-					label={ __( 'Padding', 'mailpoet' ) }
+					label={ __( 'Padding', 'woocommerce' ) }
 					sides={ [
 						'horizontal',
 						'vertical',
@@ -83,7 +83,7 @@ export function DimensionsPanel() {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				isShownByDefault
-				label={ __( 'Block spacing', 'mailpoet' ) }
+				label={ __( 'Block spacing', 'woocommerce' ) }
 				hasValue={ () =>
 					styles.spacing.blockGap !== defaultStyles.spacing.blockGap
 				}
@@ -99,7 +99,7 @@ export function DimensionsPanel() {
 				className="tools-panel-item-spacing"
 			>
 				<SpacingSizesControl
-					label={ __( 'Block spacing', 'mailpoet' ) }
+					label={ __( 'Block spacing', 'woocommerce' ) }
 					min={ 0 }
 					onChange={ ( value ) => {
 						updateStyleProp( [ 'spacing', 'blockGap' ], value.top );
