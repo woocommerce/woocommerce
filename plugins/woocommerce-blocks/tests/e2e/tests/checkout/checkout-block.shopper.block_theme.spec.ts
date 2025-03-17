@@ -215,9 +215,11 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&section=options'
 		);
 
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.uncheck();
+		await expect(
+			admin.page.getByLabel(
+				'Hide shipping costs until an address is entered'
+			)
+		).toBeDisabled();
 
 		let saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',
@@ -280,9 +282,11 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&section=options'
 		);
 
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.check();
+		await expect(
+			admin.page.getByLabel(
+				'Hide shipping costs until an address is entered'
+			)
+		).toBeDisabled();
 
 		let saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',
