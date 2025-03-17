@@ -170,6 +170,7 @@ const Blueprint = () => {
 					>
 						{ group.items.map( ( step ) => (
 							<ToggleControl
+								__nextHasNoMarginBottom
 								key={ step.id }
 								label={ step.label }
 								checked={ checkedState[ group.id ][ step.id ] }

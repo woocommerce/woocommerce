@@ -66,9 +66,6 @@ test.describe( `${ blockData.name }`, () => {
 				'DimensionsAll options are currently hidden'
 			)
 		).toBeVisible();
-		await expect(
-			editor.page.getByText( 'DisplayListChips' )
-		).toBeVisible();
 	} );
 
 	test( 'should display the correct inspector setting controls', async ( {
@@ -81,8 +78,9 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await editor.openDocumentSettingsSidebar();
 		await block.click();
+		await editor.openDocumentSettingsSidebar();
+		await editor.page.getByRole( 'tab', { name: 'Settings' } ).click();
 
 		await expect(
 			editor.page.getByLabel( 'Editor settings' ).getByRole( 'button', {
@@ -90,13 +88,10 @@ test.describe( `${ blockData.name }`, () => {
 				exact: true,
 			} )
 		).toBeVisible();
-		await expect(
-			editor.page
-				.getByLabel( 'Editor settings' )
-				.getByRole( 'button', { name: 'Settings', exact: true } )
-		).toBeVisible();
+
 		await expect( editor.page.getByText( 'Sort order' ) ).toBeVisible();
 		await expect( editor.page.getByText( 'LogicAnyAll' ) ).toBeVisible();
+		await expect( editor.page.getByText( 'ListChips' ) ).toBeVisible();
 	} );
 
 	test( 'should dynamically set block title and heading based on the selected attribute', async ( {
