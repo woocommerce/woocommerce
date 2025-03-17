@@ -17,6 +17,12 @@ use WC_Tracks;
  * @internal
  */
 class ShippingController {
+
+	/**
+	 * Script handle used for enqueueing the scripts needed for managing the Local Pickup Shipping Settings.
+	 */
+	private const LOCAL_PICKUP_ADMIN_JS_HANDLE = 'wc-shipping-method-pickup-location';
+
 	/**
 	 * Instance of the asset API.
 	 *
@@ -66,7 +72,7 @@ class ShippingController {
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'hydrate_client_settings' ) );
+		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
 		add_action( 'woocommerce_load_shipping_methods', array( $this, 'register_local_pickup' ) );
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
@@ -232,6 +238,11 @@ class ShippingController {
 	 * Hydrate client settings
 	 */
 	public function hydrate_client_settings() {
+		if ( ! wp_script_is( self::LOCAL_PICKUP_ADMIN_JS_HANDLE, 'enqueued' ) ) {
+			// Only hydrate the settings if the script dependent on them is enqueued.
+			return;
+		}
+
 		$locations = get_option( 'pickup_location_pickup_locations', array() );
 
 		$formatted_pickup_locations = array();
@@ -281,7 +292,7 @@ class ShippingController {
 		);
 
 		wp_add_inline_script(
-			'wc-shipping-method-pickup-location',
+			self::LOCAL_PICKUP_ADMIN_JS_HANDLE,
 			sprintf(
 				'var hydratedScreenSettings = %s;',
 				wp_json_encode( $settings )
@@ -293,7 +304,7 @@ class ShippingController {
 	 * Load admin scripts.
 	 */
 	public function admin_scripts() {
-		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
+		$this->asset_api->register_script( self::LOCAL_PICKUP_ADMIN_JS_HANDLE, 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
 	}
 
 	/**
