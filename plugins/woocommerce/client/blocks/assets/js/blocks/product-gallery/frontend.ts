@@ -12,6 +12,7 @@ import {
  * Internal dependencies
  */
 import type { ProductGalleryContext } from './types';
+import { checkOverflow } from './utils';
 
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
@@ -411,10 +412,8 @@ const productGallery = {
 	},
 };
 
-const { state, actions } = store(
-	'woocommerce/product-gallery',
-	productGallery,
-	{ lock: true }
-);
+const { actions } = store( 'woocommerce/product-gallery', productGallery, {
+	lock: true,
+} );
 
 export type Store = typeof productGallery;
