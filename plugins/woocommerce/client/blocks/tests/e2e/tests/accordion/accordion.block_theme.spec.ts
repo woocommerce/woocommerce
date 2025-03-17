@@ -36,12 +36,16 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} ) => {
 			await requestUtils.setFeatureFlag( 'experimental-blocks', false );
 			await admin.createNewPost();
-			await editor.insertBlock( { name: blockData.slug } );
+
+			try {
+				await editor.insertBlock( { name: blockData.slug } );
+			} catch ( _error ) {
+				// noop
+			}
+
 			await expect(
-				editor.canvas.getByText(
-					'Your site doesn’t include support for the "woocommerce/accordion-group" block'
-				)
-			).toBeVisible();
+				await editor.getBlockByName( blockData.slug )
+			).toBeHidden();
 		} );
 	} );
 

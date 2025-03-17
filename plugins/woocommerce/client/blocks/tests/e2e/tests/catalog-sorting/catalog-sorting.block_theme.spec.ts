@@ -15,12 +15,16 @@ test.describe( `${ blockData.slug } Block`, () => {
 		admin,
 	} ) => {
 		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.slug } );
+
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( _error ) {
+			// noop
+		}
+
 		await expect(
-			editor.canvas.getByText(
-				`Your site doesn’t include support for the "${ blockData.slug }" block`
-			)
-		).toBeVisible();
+			await editor.getBlockByName( blockData.slug )
+		).toBeHidden();
 	} );
 
 	test( 'block can be inserted in the Site Editor', async ( {

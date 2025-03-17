@@ -17,12 +17,16 @@ const blockData: BlockData = {
 test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor", async ( { admin, editor } ) => {
 		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.slug } );
+
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( _error ) {
+			// noop
+		}
+
 		await expect(
-			editor.canvas.getByText(
-				`Your site doesn’t include support for the "${ blockData.slug }" block`
-			)
-		).toBeVisible();
+			await editor.getBlockByName( blockData.slug )
+		).toBeHidden();
 	} );
 
 	test( "can't be added in the Product Catalog Template", async ( {
