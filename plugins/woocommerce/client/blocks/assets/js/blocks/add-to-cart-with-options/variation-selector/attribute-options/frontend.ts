@@ -22,10 +22,30 @@ type PillsContext = Context & {
 	focused?: string;
 };
 
-const { actions } = store(
+const { state, actions } = store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
 	{
-		state: {},
+		state: {
+			get isPillSelected() {
+				const { selected, option } = getContext< PillsContext >();
+				return selected === option.value;
+			},
+			get pillTabIndex() {
+				const { selected, focused, option, options } =
+					getContext< PillsContext >();
+
+				// Allow the first pill to be focused when no option is selected.
+				if ( ! selected && ! focused && options[ 0 ] === option ) {
+					return 0;
+				}
+
+				if ( state.isPillSelected || focused === option.value ) {
+					return 0;
+				}
+
+				return -1;
+			},
+		},
 		actions: {
 			toggleSelected() {
 				const context = getContext< PillsContext >();
@@ -97,31 +117,12 @@ const { actions } = store(
 		},
 		callbacks: {
 			watchSelected() {
-				const context = getContext< PillsContext >();
+				const { focused } = getContext< PillsContext >();
 
-				if ( ! context.selected && ! context.focused ) {
-					if ( context.options[ 0 ] === context.option ) {
-						context.tabIndex = 0;
-					}
-					return;
+				if ( state.pillTabIndex === 0 && focused ) {
+					const { ref } = getElement();
+					ref?.focus();
 				}
-
-				context.option.isSelected =
-					context.selected === context.option.value;
-
-				if (
-					context.option.isSelected ||
-					context.focused === context.option.value
-				) {
-					context.tabIndex = 0;
-					if ( context.focused ) {
-						const { ref } = getElement();
-						ref?.focus();
-					}
-					return;
-				}
-
-				context.tabIndex = -1;
 			},
 		},
 	}

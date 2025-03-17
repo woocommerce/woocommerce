@@ -157,16 +157,13 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 			$this->get_normalized_attributes(
 				array(
 					'role'                       => 'radio',
-					'data-wp-bind--tabindex'     => 'context.tabIndex',
-					'data-wp-bind--aria-checked' => 'context.option.isSelected',
 					'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
+					'data-wp-bind--tabindex'     => 'state.pillTabIndex',
+					'data-wp-bind--aria-checked' => 'state.isPillSelected',
 					'data-wp-text'               => 'context.option.label',
 					'data-wp-watch'              => 'callbacks.watchSelected',
 					'data-wp-on--click'          => 'actions.handleClick',
 					'data-wp-on--keydown'        => 'actions.handleKeyDown',
-					'data-wp-context'            => array(
-						'tabIndex' => -1,
-					),
 				),
 			),
 		);
