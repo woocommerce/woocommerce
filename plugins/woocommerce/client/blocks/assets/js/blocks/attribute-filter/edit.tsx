@@ -176,6 +176,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
+				<PanelBody>
+					<UpgradeNotice clientId={ clientId } />
+				</PanelBody>
 				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __( 'Display product count', 'woocommerce' ) }
@@ -374,12 +377,6 @@ const Edit = ( {
 		<div { ...blockProps }>
 			{ getBlockControls() }
 			{ getInspectorControls() }
-			<UpgradeNotice
-				clientId={ clientId }
-				attributes={ attributes }
-				setAttributes={ setAttributes }
-				filterType="attribute-filter"
-			/>
 			{ isEditing ? (
 				renderEditMode()
 			) : (

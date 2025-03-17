@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
 import type { AnchorHTMLAttributes, HTMLAttributes } from 'react';
 
@@ -55,9 +54,6 @@ export const ProductName = ( {
 }: ProductNameProps ): JSX.Element => {
 	const classes = clsx( 'wc-block-components-product-name', className );
 	const DisabledTagName = disabledTagName as DisabledTagNameType;
-	// This HTML is safe because the store API runs titles through `wp_kses_post()` which removes dangerous HTML tags.
-	// Ref: https://github.com/woocommerce/woocommerce/blob/trunk/src/StoreApi/Schemas/V1/ProductSchema.php#L100
-	const decodedName = decodeEntities( name );
 
 	if ( disabled ) {
 		const disabledProps = props as HTMLAttributes<
@@ -69,7 +65,7 @@ export const ProductName = ( {
 				{ ...disabledProps }
 				// eslint-disable-next-line react/no-danger
 				dangerouslySetInnerHTML={ {
-					__html: decodedName,
+					__html: name,
 				} }
 			/>
 		);
@@ -82,7 +78,7 @@ export const ProductName = ( {
 			{ ...props }
 			// eslint-disable-next-line react/no-danger
 			dangerouslySetInnerHTML={ {
-				__html: decodedName,
+				__html: name,
 			} }
 			style={ style }
 		/>

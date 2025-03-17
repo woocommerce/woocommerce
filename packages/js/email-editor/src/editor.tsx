@@ -16,7 +16,7 @@ import { createStore, storeName, editorCurrentPostType } from './store';
 import { initHooks } from './editor-hooks';
 import { KeyboardShortcuts } from './components/keybord-shortcuts';
 import { initEventCollector } from './events';
-import './index.scss';
+import './style.scss';
 
 function Editor() {
 	const { postId, settings } = useSelect(

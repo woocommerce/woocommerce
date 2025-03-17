@@ -23,11 +23,15 @@
 		"automattic/jetpack-changelogger": "3.3.0",
 		"phpunit/phpunit": "^9.6",
 		"pelago/emogrifier": "^7.3",
-		"yoast/phpunit-polyfills": "^4.0"
+		"yoast/phpunit-polyfills": "^4.0",
+		"woocommerce/woocommerce-sniffs": "1.0.0"
 	},
 	"config": {
 		"platform": {
 			"php": "7.4"
+		},
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	},
 	"scripts": {
@@ -36,8 +40,8 @@
 		"env:start": "wp-env start",
 		"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit",
 		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
-		"code-style": "../../../plugins/woocommerce/bin/composer/phpcs/vendor/squizlabs/php_codesniffer/bin/phpcs -ps",
-		"code-style-fix": "../../../plugins/woocommerce/bin/composer/phpcs/vendor/squizlabs/php_codesniffer/bin/phpcbf -p",
+		"phpcs": "phpcs -s -p",
+		"phpcbf": "phpcbf -p",
 		"phpstan": "php ./tasks/run-phpstan.php"
 	},
 	"extra": {

@@ -1,10 +1,12 @@
 /**
  * Internal dependencies
  */
-import apiClient from './api-client';
+import ApiClient, { WC_API_PATH } from './api-client';
+
+const apiClient = ApiClient.getInstance();
 
 function resolvePath( path ) {
-	return `wc/v3/settings/${ path }`.replace( /\/+/g, '/' );
+	return `${ WC_API_PATH }/settings/${ path }`.replace( /\/+/g, '/' );
 }
 
 /**
@@ -15,7 +17,7 @@ function resolvePath( path ) {
  * @return {Promise<void>} A promise that resolves when the update is complete.
  */
 export async function updateValue( path, desiredValue ) {
-	await apiClient().put( resolvePath( path ), { value: desiredValue } );
+	await apiClient.put( resolvePath( path ), { value: desiredValue } );
 }
 
 /**
@@ -26,7 +28,7 @@ export async function updateValue( path, desiredValue ) {
  * @return {Promise<{initial: string, updated: string}>} A promise that resolves to an object containing the initial and updated values.
  */
 export async function updateIfNeeded( path, desiredValue ) {
-	const initialValue = await apiClient()
+	const initialValue = await apiClient
 		.get( resolvePath( path ) )
 		.then( ( r ) => r.data.value );
 	if ( initialValue !== desiredValue ) {

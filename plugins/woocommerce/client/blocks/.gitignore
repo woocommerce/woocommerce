@@ -29,13 +29,6 @@ Thumbs.db
 # ApiGen
 /wc-apidocs/
 
-# Behat/CLI Tests
-tests/cli/installer
-tests/cli/composer.phar
-tests/cli/composer.lock
-tests/cli/composer.json
-tests/cli/vendor
-
 # Unit tests
 /tmp
 /tests/bin/tmp
@@ -54,9 +47,6 @@ tests/cli/vendor
 # Logs
 /logs
 
-# Composer
-/vendor/
-
 # Built files
 /build/
 bin/languages
@@ -68,4 +58,3 @@ blocks.ini
 /.wp-env.override.json
 /eslint_report.json
 /storybook/dist
-.phpunit.result.cache

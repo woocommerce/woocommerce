@@ -1,6 +1,10 @@
-const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { logIn } = require( '../../utils/login' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect } from '../../fixtures/fixtures';
+import { logIn } from '../../utils/login';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const now = Date.now();
 const users = [
@@ -15,11 +19,13 @@ const users = [
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	user: async ( { api }, use ) => {
+	user: async ( { restApi }, use ) => {
 		const user = {};
 		await use( user );
 		console.log( `Deleting user ${ user.id }` );
-		await api.delete( `customers/${ user.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ user.id }`, {
+			force: true,
+		} );
 	},
 } );
 

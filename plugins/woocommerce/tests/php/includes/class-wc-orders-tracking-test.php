@@ -69,7 +69,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		$order->save();
 
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-		do_action( 'woocommerce_order_status_changed', $order->get_id(), OrderStatus::PENDING, 'finished' );
+		do_action( 'woocommerce_order_status_changed', $order->get_id(), OrderStatus::PENDING, 'finished', $order );
 		$this->assertRecordedTracksEvent( 'wcadmin_orders_edit_status_change' );
 		$this->assertTracksEventHasRequestTimestampAndNoCache( 'wcadmin_orders_edit_status_change' );
 	}

@@ -13,10 +13,10 @@ import {
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { fillPageTitle } = require( '../../utils/editor' );
-const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
+import { WC_API_PATH } from '../../utils/api-client';
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { fillPageTitle } from '../../utils/editor';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -25,7 +25,6 @@ const singleProductPrice = '555.00';
 // - default cart and checkout blocks, mini-cart
 // - Product Gallery (Beta) - it's not intended to be used in posts
 const blocks = [
-	'Active Filters',
 	'All Reviews',
 	'Best Sellers',
 	'Cross-Sells',
@@ -33,10 +32,6 @@ const blocks = [
 	'Featured Category',
 	'Featured Product',
 	'Featured Products',
-	'Filter by Attribute',
-	'Filter by Price',
-	'Filter by Rating',
-	'Filter by Stock',
 	'Hand-Picked Products',
 	'New Arrivals',
 	'On Sale Products',
@@ -64,10 +59,10 @@ test.describe(
 		tag: [ tags.GUTENBERG, tags.SKIP_ON_EXTERNAL_ENV ],
 	},
 	() => {
-		test.beforeAll( async ( { api } ) => {
+		test.beforeAll( async ( { restApi } ) => {
 			// add product attribute
-			await api
-				.post( 'products/attributes', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/attributes`, {
 					name: 'testattribute',
 					has_archives: true,
 				} )
@@ -75,28 +70,31 @@ test.describe(
 					attributeId = response.data.id;
 				} );
 			// add product attribute term
-			await api.post( `products/attributes/${ attributeId }/terms`, {
-				name: 'attributeterm',
-			} );
+			await restApi.post(
+				`${ WC_API_PATH }/products/attributes/${ attributeId }/terms`,
+				{
+					name: 'attributeterm',
+				}
+			);
 			// add product categories
-			await api
-				.post( 'products/categories', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/categories`, {
 					name: 'simple category',
 				} )
 				.then( ( response ) => {
 					productCategoryId = response.data.id;
 				} );
 			// add product tags
-			await api
-				.post( 'products/tags', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/tags`, {
 					name: 'simpletag',
 				} )
 				.then( ( response ) => {
 					productTagId = response.data.id;
 				} );
 			// add product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProductName,
 					type: 'simple',
 					regular_price: singleProductPrice,
@@ -122,34 +120,40 @@ test.describe(
 					productId = response.data.id;
 				} );
 			// add shipping zone and method
-			await api
-				.post( 'shipping/zones', {
+			await restApi
+				.post( `${ WC_API_PATH }/shipping/zones`, {
 					name: 'Shipping Zone',
 				} )
 				.then( ( response ) => {
 					shippingZoneId = response.data.id;
 				} );
-			await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
-				method_id: 'free_shipping',
-			} );
+			await restApi.post(
+				`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/methods`,
+				{
+					method_id: 'free_shipping',
+				}
+			);
 		} );
 
-		test.afterAll( async ( { api } ) => {
-			await api.delete( `products/${ productId }`, {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
 				force: true,
 			} );
-			await api.post( 'products/tags/batch', {
+			await restApi.post( `${ WC_API_PATH }/products/tags/batch`, {
 				delete: [ productTagId ],
 			} );
-			await api.post( 'products/attributes/batch', {
+			await restApi.post( `${ WC_API_PATH }/products/attributes/batch`, {
 				delete: [ attributeId ],
 			} );
-			await api.post( 'products/categories/batch', {
+			await restApi.post( `${ WC_API_PATH }/products/categories/batch`, {
 				delete: [ productCategoryId ],
 			} );
-			await api.delete( `shipping/zones/${ shippingZoneId }`, {
-				force: true,
-			} );
+			await restApi.delete(
+				`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
+				{
+					force: true,
+				}
+			);
 		} );
 
 		test( `can insert all WooCommerce blocks into page`, async ( {

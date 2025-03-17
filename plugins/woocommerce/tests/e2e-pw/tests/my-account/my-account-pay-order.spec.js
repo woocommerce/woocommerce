@@ -1,9 +1,9 @@
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+
 const randomNum = new Date().getTime().toString();
 const customer = {
 	username: `customer${ randomNum }`,
@@ -17,16 +17,10 @@ test.describe(
 	() => {
 		let productId, orderId;
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// add product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: 'Pay Order My Account',
 					type: 'simple',
 					regular_price: '15.77',
@@ -35,12 +29,12 @@ test.describe(
 					productId = response.data.id;
 				} );
 			// create customer
-			await api
-				.post( 'customers', customer )
+			await restApi
+				.post( `${ WC_API_PATH }/customers`, customer )
 				.then( ( response ) => ( customer.id = response.data.id ) );
 			// create an order
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					set_paid: false,
 					billing: {
 						first_name: 'Jane',
@@ -58,28 +52,27 @@ test.describe(
 					orderId = response.data.id;
 				} );
 			// once the order is created, assign it to our existing customer user
-			await api.put( `orders/${ orderId }`, {
+			await restApi.put( `${ WC_API_PATH }/orders/${ orderId }`, {
 				customer_id: customer.id,
 			} );
 			// enable COD payment
-			await api.put( 'payment_gateways/cod', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: true,
 			} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.delete( `products/${ productId }`, {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
 				force: true,
 			} );
-			await api.delete( `orders/${ orderId }`, { force: true } );
-			await api.delete( `customers/${ customer.id }`, { force: true } );
-			await api.put( 'payment_gateways/cod', {
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
+			await restApi.delete(
+				`${ WC_API_PATH }/customers/${ customer.id }`,
+				{ force: true }
+			);
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
 				enabled: false,
 			} );
 		} );

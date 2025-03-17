@@ -46,6 +46,9 @@ export default function ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
+				<PanelBody>
+					<UpgradeNotice clientId={ clientId } />
+				</PanelBody>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
 						label={ __( 'Price Range Selector', 'woocommerce' ) }
@@ -146,12 +149,6 @@ export default function ( {
 			) : (
 				<>
 					{ getInspectorControls() }
-					<UpgradeNotice
-						attributes={ attributes }
-						clientId={ clientId }
-						setAttributes={ setAttributes }
-						filterType="price-filter"
-					/>
 					{ heading && (
 						<BlockTitle
 							className="wc-block-price-filter__title"

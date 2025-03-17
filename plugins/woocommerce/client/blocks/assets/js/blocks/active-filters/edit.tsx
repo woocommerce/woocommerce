@@ -37,6 +37,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
+				<PanelBody>
+					<UpgradeNotice clientId={ clientId } />
+				</PanelBody>
 				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
 						label={ __( 'Display Style', 'woocommerce' ) }
@@ -66,12 +69,6 @@ const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			{ getInspectorControls() }
-			<UpgradeNotice
-				attributes={ attributes }
-				clientId={ clientId }
-				setAttributes={ setAttributes }
-				filterType="active-filters"
-			/>
 			{ heading && (
 				<BlockTitle
 					className="wc-block-active-filters__title"

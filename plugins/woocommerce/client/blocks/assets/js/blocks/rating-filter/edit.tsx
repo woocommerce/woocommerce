@@ -23,6 +23,7 @@ import {
 import Block from './block';
 import type { Attributes } from './types';
 import './editor.scss';
+import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
 const noRatingsNotice = (
 	<Notice status="warning" isDismissible={ false }>
@@ -38,6 +39,7 @@ const noRatingsNotice = (
 const Edit = ( {
 	attributes,
 	setAttributes,
+	clientId,
 }: BlockEditProps< Attributes > ) => {
 	const {
 		className,
@@ -54,6 +56,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
+				<PanelBody>
+					<UpgradeNotice clientId={ clientId } />
+				</PanelBody>
 				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __( 'Display product count', 'woocommerce' ) }

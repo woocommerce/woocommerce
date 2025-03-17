@@ -6,6 +6,9 @@
 	"keywords": [
 		"WooCommerce"
 	],
+	"supports": {
+		"inserter": false
+	},
 	"attributes": {
 		"filterType": {
 			"type": "string"

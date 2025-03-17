@@ -262,6 +262,39 @@ Display an input field to select the number of products to add to cart.
 -	**Supports:** 
 -	**Attributes:** quantitySelectorStyle
 
+## Variation Selector Item Template (Experimental) - woocommerce/add-to-cart-with-options-variation-selector-item
+
+A list item template that represents an attribute within the Variation Selector block.
+
+-	**Name:** woocommerce/add-to-cart-with-options-variation-selector-item
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector
+-   **Parent:** 
+-	**Supports:** ~~inserter~~
+-	**Attributes:** 
+
+## Variation Selector Attribute Name (Experimental) - woocommerce/add-to-cart-with-options-variation-selector-attribute-name
+
+The name of a given variable product attribute.
+
+-	**Name:** woocommerce/add-to-cart-with-options-variation-selector-attribute-name
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-item
+-   **Parent:** 
+-	**Supports:** color (background, gradients, text), spacing (padding), typography (fontSize, lineHeight), ~~alignWide~~, ~~align~~, ~~inserter~~
+-	**Attributes:** 
+
+## Variation Selector Attribute Options (Experimental) - woocommerce/add-to-cart-with-options-variation-selector-attribute-options
+
+The attribute options of a given variable product attribute.
+
+-	**Name:** woocommerce/add-to-cart-with-options-variation-selector-attribute-options
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-item
+-   **Parent:** 
+-	**Supports:** ~~inserter~~
+-	**Attributes:** style
+
 ## Variation Selector (Experimental) - woocommerce/add-to-cart-with-options-variation-selector
 
 Display a dropdown to select a variation to add to cart.
@@ -853,7 +886,7 @@ Highlight a product or variation.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** 
+-	**Supports:** ~~inserter~~
 -	**Attributes:** filterType, heading
 
 ## Hand-picked Products - woocommerce/handpicked-products
@@ -1252,7 +1285,7 @@ Display a button so the customer can add a product to their cart. Options will a
 -	**Supports:** interactivity
 -	**Attributes:** quantitySelectorStyle
 
-## Product Filters (Experimental) - woocommerce/product-filters
+## Product Filters - woocommerce/product-filters
 
 Let shoppers filter products displayed on the page.
 
@@ -1263,7 +1296,7 @@ Let shoppers filter products displayed on the page.
 -	**Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), multiple, spacing (blockGap), typography (fontSize)
 -	**Attributes:** isPreview
 
-## Active (Experimental) - woocommerce/product-filter-active
+## Active - woocommerce/product-filter-active
 
 Display the currently active filters.
 
@@ -1274,7 +1307,7 @@ Display the currently active filters.
 -	**Supports:** interactivity, spacing (margin, padding, ~~blockGap~~)
 -	**Attributes:** 
 
-## Attribute (Experimental) - woocommerce/product-filter-attribute
+## Attribute - woocommerce/product-filter-attribute
 
 Enable customers to filter the product grid by selecting one or more attributes, such as color.
 
@@ -1293,7 +1326,7 @@ Display a list of filter options.
 -	**Category:** woocommerce
 -   **Ancestor:** woocommerce/product-filter-attribute,woocommerce/product-filter-status
 -   **Parent:** 
--	**Supports:** color (background, text, ~~enableContrastChecker~~)
+-	**Supports:** color (background, text, ~~enableContrastChecker~~), interactivity
 -	**Attributes:** customOptionElement, customOptionElementBorder, customOptionElementSelected, optionElement, optionElementBorder, optionElementSelected
 
 ## Chips - woocommerce/product-filter-chips
@@ -1304,10 +1337,10 @@ Display filter options as chips.
 -	**Category:** woocommerce
 -   **Ancestor:** woocommerce/product-filter-attribute,woocommerce/product-filter-status
 -   **Parent:** 
--	**Supports:** 
+-	**Supports:** interactivity
 -	**Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
-## Clear filters (Experimental) - woocommerce/product-filter-clear-button
+## Clear filters - woocommerce/product-filter-clear-button
 
 Allows shoppers to clear active filters.
 
@@ -1318,7 +1351,7 @@ Allows shoppers to clear active filters.
 -	**Supports:** inserter, interactivity
 -	**Attributes:** 
 
-## Price (Experimental) - woocommerce/product-filter-price
+## Price - woocommerce/product-filter-price
 
 Let shoppers filter products by choosing a price range.
 
@@ -1337,10 +1370,10 @@ A slider helps shopper choose a price range.
 -	**Category:** woocommerce
 -   **Ancestor:** woocommerce/product-filter-price
 -   **Parent:** 
--	**Supports:** color (~~background~~, ~~enableContrastChecker~~, ~~text~~), ~~html~~
+-	**Supports:** color (~~background~~, ~~enableContrastChecker~~, ~~text~~), interactivity, ~~html~~
 -	**Attributes:** customSlider, customSliderHandle, customSliderHandleBorder, inlineInput, showInputFields, slider, sliderHandle, sliderHandleBorder
 
-## Rating (Experimental) - woocommerce/product-filter-rating
+## Rating - woocommerce/product-filter-rating
 
 Enable customers to filter the product collection by rating.
 
@@ -1359,10 +1392,10 @@ Display removable active filters as chips.
 -	**Category:** woocommerce
 -   **Ancestor:** woocommerce/product-filter-active
 -   **Parent:** 
--	**Supports:** layout (default, ~~allowInheriting~~, ~~allowJustification~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
+-	**Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowJustification~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
 -	**Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
-## Status (Experimental) - woocommerce/product-filter-status
+## Status - woocommerce/product-filter-status
 
 Let shoppers filter products by choosing stock status.
 
@@ -1404,17 +1437,6 @@ Display next and previous buttons.
 -   **Ancestor:** woocommerce/product-gallery-large-image
 -   **Parent:** 
 -	**Supports:** layout (allowVerticalAlignment, default, ~~allowInheriting~~, ~~allowJustification~~, ~~allowOrientation~~)
--	**Attributes:** 
-
-## Pager - woocommerce/product-gallery-pager
-
-Display the gallery pager in format "current image/total images".
-
--	**Name:** woocommerce/product-gallery-pager
--	**Category:** woocommerce
--   **Ancestor:** woocommerce/product-gallery
--   **Parent:** 
--	**Supports:** color (background, text), spacing (margin, padding), typography (fontSize, lineHeight, textAlign)
 -	**Attributes:** 
 
 ## Thumbnails - woocommerce/product-gallery-thumbnails

@@ -40,8 +40,6 @@
 			],
 			"@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
 			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
-			"@woocommerce/interactivity": [ "assets/js/interactivity" ],
-			"@woocommerce/interactivity/*": [ "assets/js/interactivity/*" ],
 			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
 			"@woocommerce/base-utils/*": [ "assets/js/base/utils/*" ],
 			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
@@ -54,9 +52,6 @@
 			"@woocommerce/blocks-checkout": [ "packages/checkout" ],
 			"@woocommerce/blocks-checkout-events": [ "assets/js/events" ],
 			"@woocommerce/blocks-components": [ "packages/components" ],
-			"@woocommerce/interactivity-components/*": [
-				"packages/interactivity-components/*"
-			],
 			"@woocommerce/price-format": [ "packages/prices" ],
 			"@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
 			"@woocommerce/icons": [ "assets/js/icons" ],
@@ -64,6 +59,8 @@
 			"@woocommerce/settings": [ "assets/js/settings/shared" ],
 			"@woocommerce/shared-context": [ "assets/js/shared/context" ],
 			"@woocommerce/shared-hocs": [ "assets/js/shared/hocs" ],
+			"@woocommerce/stores/store-notices": [ "assets/js/base/stores/store-notices" ],
+			"@woocommerce/stores/woocommerce/cart": [ "assets/js/base/stores/woocommerce/cart" ],
 			"@woocommerce/type-defs/*": [ "assets/js/types/type-defs/*" ],
 			"@woocommerce/types": [ "assets/js/types" ],
 			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ],

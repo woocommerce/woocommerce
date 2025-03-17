@@ -71,6 +71,30 @@ const SelectControlExample = () => {
 		inlineSelected: [],
 		allOptionsIncludingSelected: options[ options.length - 1 ].key,
 		virtualScrollSelected: [],
+		disabledSelected: [
+			{
+				key: 'apple',
+				label: 'Apple',
+				value: { id: 'apple' },
+			},
+			{
+				key: 'banana',
+				label: 'Banana',
+				value: { id: 'banana' },
+			},
+		],
+		disabledInlineSelected: [
+			{
+				key: 'apple',
+				label: 'Apple',
+				value: { id: 'apple' },
+			},
+			{
+				key: 'banana',
+				label: 'Banana',
+				value: { id: 'banana' },
+			},
+		],
 	} );
 
 	const {
@@ -82,6 +106,8 @@ const SelectControlExample = () => {
 		inlineSelected,
 		allOptionsIncludingSelected,
 		virtualScrollSelected,
+		disabledSelected,
+		disabledInlineSelected,
 	} = state;
 
 	return (
@@ -186,6 +212,35 @@ const SelectControlExample = () => {
 				virtualScroll={ true }
 				virtualItemHeight={ 56 }
 				virtualListHeight={ 56 * 6 }
+			/>
+			<br />
+			<SelectControl
+				label="Disabled select control"
+				isSearchable
+				multiple
+				disabled
+				onChange={ ( selected ) =>
+					setState( { ...state, disabledSelected: selected } )
+				}
+				options={ options }
+				placeholder="Start typing to filter options..."
+				selected={ disabledSelected }
+				showClearButton
+			/>
+			<br />
+			<SelectControl
+				label="Disabled select control with inline tags"
+				isSearchable
+				multiple
+				disabled
+				inlineTags
+				onChange={ ( selected ) =>
+					setState( { ...state, disabledInlineSelected: selected } )
+				}
+				options={ options }
+				placeholder="Start typing to filter options..."
+				selected={ disabledInlineSelected }
+				showClearButton
 			/>
 		</div>
 	);

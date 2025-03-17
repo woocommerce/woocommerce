@@ -18,15 +18,6 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 	protected $block_name = 'add-to-cart-with-options-grouped-product-selector-item';
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 * Get product row HTML.
 	 *
 	 * @param string   $product_id Product ID.
@@ -35,13 +26,15 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 	 * @return string Row HTML
 	 */
 	private function get_product_row( $product_id, $attributes, $block ): string {
-		global $post;
-		$previous_post = $post;
+		global $post, $product;
+		$previous_post    = $post;
+		$previous_product = $product;
 
 		// Since this template uses the core/post-title block to show the product name
 		// a temporally replacement of the global post is needed. This is reverted back
 		// to its initial post value that is stored in the $previous_post variable.
-		$post = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$product = wc_get_product( $product_id );
 
 		// Get an instance of the current Post Template block.
 		$block_instance = $block->parsed_block;
@@ -58,8 +51,8 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 		// `render_callback` and ensure that no wrapper markup is included.
 		$block_content = $new_block->render( array( 'dynamic' => false ) );
 
-		$post = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
+		$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$product = $previous_product;
 		return $block_content;
 	}
 
@@ -74,7 +67,13 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 	protected function render( $attributes, $content, $block ): string {
 		global $product;
 
+		if ( ! $product instanceof \WC_Product_Grouped ) {
+			return '';
+		}
+
 		$content = '';
+
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$children = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
@@ -83,5 +82,15 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Disable the frontend script for this block type, it's built with script modules.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

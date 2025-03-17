@@ -823,70 +823,6 @@ const getStylingConfig = ( options = {} ) => {
 	};
 };
 
-const getInteractivityAPIConfig = ( options = {} ) => {
-	const { alias, resolvePlugins = [] } = options;
-	return {
-		entry: {
-			'wc-interactivity': './assets/js/interactivity',
-		},
-		output: {
-			filename: '[name].js',
-			path: BUILD_DIR,
-			library: [ 'wc', '__experimentalInteractivity' ],
-			libraryTarget: 'this',
-			chunkLoadingGlobal: 'webpackWcBlocksJsonp',
-		},
-		resolve: {
-			alias,
-			plugins: resolvePlugins,
-			extensions: [ '.js', '.ts', '.tsx' ],
-		},
-		plugins: [
-			...getSharedPlugins( {
-				bundleAnalyzerReportTitle: 'WP directives',
-				checkCircularDeps: false,
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'WP directives' )
-			),
-		],
-		module: {
-			rules: [
-				{
-					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: [
-						{
-							loader: require.resolve( 'babel-loader' ),
-							options: {
-								babelrc: false,
-								configFile: false,
-								presets: [
-									'@babel/preset-typescript',
-									[
-										'@babel/preset-react',
-										{
-											runtime: 'automatic',
-											importSource: 'preact',
-										},
-									],
-								],
-								// Required until Webpack is updated to ^5.0.0
-								plugins: [
-									'@babel/plugin-transform-optional-chaining',
-									'@babel/plugin-transform-class-properties',
-								],
-								cacheDirectory: BABEL_CACHE_DIR,
-								cacheCompression: false,
-							},
-						},
-					],
-				},
-			],
-		},
-	};
-};
-
 const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 
@@ -1019,6 +955,5 @@ module.exports = {
 	getExtensionsConfig,
 	getSiteEditorConfig,
 	getStylingConfig,
-	getInteractivityAPIConfig,
 	getCartAndCheckoutFrontendConfig,
 };

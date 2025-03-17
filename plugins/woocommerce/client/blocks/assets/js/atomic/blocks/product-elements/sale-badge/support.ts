@@ -34,14 +34,7 @@ export const supports = {
 	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
 		spacing: {
 			margin: true,
-			padding: true,
 		},
 	} ),
 	__experimentalSelector: '.wc-block-components-product-sale-badge',
-
-	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
-		spacing: {
-			margin: true,
-		},
-	} ),
 };

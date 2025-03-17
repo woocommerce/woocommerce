@@ -597,4 +597,16 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$query = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
 	}
+
+	/**
+	 * @testDox The get_query_args method returns the initial args sent.
+	 */
+	public function test_get_query_args() {
+		$args = array(
+			's' => 'test',
+		);
+
+		$query = new OrdersTableQuery( $args );
+		$this->assertEquals( $args, $query->get_query_args() );
+	}
 }

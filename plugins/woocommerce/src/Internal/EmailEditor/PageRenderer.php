@@ -90,11 +90,11 @@ class PageRenderer {
 
 		// Email editor rich text JS - Because the Personalization Tags depend on Gutenberg 19.8.0 and higher
 		// the following code replaces used Rich Text for the version containing the necessary changes.
-		$rich_text_assets_params = require $email_editor_assets_path . 'rich-text.asset.php';
+		$rich_text_assets_params = require $email_editor_assets_path . 'assets/rich-text.asset.php';
 		wp_deregister_script( 'wp-rich-text' );
 		wp_enqueue_script(
 			'wp-rich-text',
-			$email_editor_assets_url . 'rich-text.js',
+			$email_editor_assets_url . 'assets/rich-text.js',
 			$rich_text_assets_params['dependencies'],
 			$rich_text_assets_params['version'],
 			true
@@ -113,13 +113,13 @@ class PageRenderer {
 		);
 		wp_enqueue_style(
 			'woocommerce_email_editor',
-			$email_editor_assets_url . "{$file_name}.css",
+			$email_editor_assets_url . "style-{$file_name}.css",
 			array(),
 			$assets_params['version']
 		);
 
 		$current_user_email = wp_get_current_user()->user_email;
-		
+
 		// Fetch all email types from WooCommerce including those added by other plugins.
 		$wc_emails = \WC_Emails::instance();
 		$email_types = $wc_emails->get_emails();
@@ -161,9 +161,9 @@ class PageRenderer {
 		$routes             = array(
 			"/wp/v2/{$email_post_type}/" . intval( $post->ID ) . '?context=edit',
 			"/wp/v2/types/{$email_post_type}?context=edit",
-			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=edit', // Global email styles.
+			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=view', // Global email styles.
 			'/wp/v2/block-patterns/patterns',
-			'/wp/v2/templates?context=edit',
+			'/wp/v2/templates?context=view',
 			'/wp/v2/block-patterns/categories',
 			'/wp/v2/settings',
 			'/wp/v2/types?context=view',

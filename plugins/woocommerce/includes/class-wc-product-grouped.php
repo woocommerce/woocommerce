@@ -168,7 +168,7 @@ class WC_Product_Grouped extends WC_Product {
 	*/
 
 	/**
-	 * Return the children of this product.
+	 * Sets an array of children for the product.
 	 *
 	 * @param array $children List of product children.
 	 */

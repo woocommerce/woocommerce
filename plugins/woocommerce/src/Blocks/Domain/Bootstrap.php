@@ -101,7 +101,6 @@ class Bootstrap {
 	protected function init() {
 		$this->register_dependencies();
 		$this->register_payment_methods();
-		$this->load_interactivity_api();
 
 		// This is just a temporary solution to make sure the migrations are run. We have to refactor this. More details: https://github.com/woocommerce/woocommerce-blocks/issues/10196.
 		if ( $this->package->get_version() !== $this->package->get_version_stored_on_db() ) {
@@ -138,8 +137,12 @@ class Bootstrap {
 		$is_rest              = wc()->is_rest_api_request();
 		$is_store_api_request = wc()->is_store_api_request();
 
+		// Initialize Store API in non-admin context.
+		if ( ! is_admin() ) {
+			$this->container->get( StoreApi::class )->init();
+		}
+
 		// Load and init assets.
-		$this->container->get( StoreApi::class )->init();
 		$this->container->get( PaymentsApi::class )->init();
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
@@ -205,13 +208,6 @@ class Bootstrap {
 				echo '</p></div>';
 			}
 		);
-	}
-
-	/**
-	 * Load and set up the Interactivity API if enabled.
-	 */
-	protected function load_interactivity_api() {
-			require_once __DIR__ . '/../Interactivity/load.php';
 	}
 
 	/**

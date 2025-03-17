@@ -4,26 +4,31 @@
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeCustomer, getFakeProduct } from '../../utils/data';
 import { setFilterValue } from '../../utils/filters';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product;
 
 		// Using dec: 0 to avoid small rounding issues
-		await api.post( 'products', getFakeProduct() ).then( ( response ) => {
-			product = response.data;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/products`, getFakeProduct() )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
 		await use( product );
 
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
-	order: async ( { api, product }, use ) => {
+	order: async ( { restApi, product }, use ) => {
 		const customer = getFakeCustomer();
 		let order;
 
-		await api
-			.post( 'orders', {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 				payment_method: 'bacs',
 				payment_method_title: 'Direct Bank Transfer',
@@ -43,7 +48,9 @@ const test = baseTest.extend( {
 
 		await use( order );
 
-		await api.delete( `orders/${ order.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+			force: true,
+		} );
 	},
 } );
 
@@ -79,6 +86,8 @@ test( 'guest shopper can verify their email address after the grace period', asy
 			'woocommerce_order_email_verification_grace_period',
 			0
 		);
+
+		// eslint-disable-next-line playwright/no-wait-for-timeout
 		await page.waitForTimeout( 2000 ); // needs some time before reload for change to take effect.
 		await page.reload();
 		await expect(
@@ -110,7 +119,7 @@ test( 'guest shopper can verify their email address after the grace period', asy
 		await page.getByLabel( 'Email address' ).fill( order.billing.email );
 		await page.getByRole( 'button', { name: /Verify|Confirm/ } ).click();
 		await expect(
-			page.getByText( 'Your order has been received' )
+			page.getByText( 'Thank you. Your order has been received.' )
 		).toBeVisible();
 	} );
 } );

@@ -13,8 +13,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 } );
 
 test.describe( 'woocommerce/product-filter-active - Frontend', () => {
-	test.beforeEach( async ( { requestUtils, page, templateCompiler } ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+	test.beforeEach( async ( { page, templateCompiler } ) => {
 		await templateCompiler.compile();
 
 		await page.addInitScript( () => {
