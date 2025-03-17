@@ -268,9 +268,17 @@ test.describe( `${ blockData.name } Block `, () => {
 		await editor.page.getByRole( 'button', { name: 'Reset' } ).click();
 		await expect( resetNotice ).toBeVisible();
 
+		const editButton = editor.page.getByRole( 'menuitem', {
+			name: 'Edit',
+		} );
+
+		// Keep WP v6.7 compatibility.
+		if ( await editButton.isHidden() ) {
+			await actionsButton.click();
+		}
+
 		// Edit the template again.
-		await actionsButton.click();
-		await editor.page.getByRole( 'menuitem', { name: 'Edit' } ).click();
+		await editButton.click();
 
 		// Verify the Classic Template block is still registered.
 		const classicTemplateBlocks = await getClassicTemplateBlocksInInserter(
