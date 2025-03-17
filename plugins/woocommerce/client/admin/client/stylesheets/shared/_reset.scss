@@ -33,7 +33,7 @@
 
 	#adminmenu {
 		#toplevel_page_woocommerce.menu-top > a:focus,
-		#toplevel_page_woodash--analytics > a:focus {
+		#toplevel_page_wc-admin-path--analytics-overview > a:focus {
 			& + .wp-submenu {
 				top: auto;
 			}
