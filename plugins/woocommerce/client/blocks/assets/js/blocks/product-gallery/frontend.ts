@@ -8,32 +8,14 @@ import {
 	withScope,
 	getConfig,
 } from '@wordpress/interactivity';
-import type { StorePart } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
-import type { ImageDataObject, ImageDataItem } from './types';
-
-export interface ProductGalleryContext {
-	selectedImageId: number;
-	isDialogOpen: boolean;
-	productId: string;
-	disableLeft: boolean;
-	disableRight: boolean;
-	touchStartX: number;
-	touchCurrentX: number;
-	isDragging: boolean;
-	userHasInteracted: boolean;
-	imageData: ImageDataObject;
-	image: ImageDataItem;
-}
+import type { ProductGalleryContext } from './types';
 
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
-
-type Store = typeof productGallery & StorePart< ProductGallery >;
-const { actions } = store< Store >( 'woocommerce/product-gallery' );
 
 const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
 	// One-based index so it ranges from 1 to imagesIds.length.
@@ -341,10 +323,6 @@ const productGallery = {
 		// Will eventually be replaced by a slider.
 		displayViewAll: () => {
 			const { numberOfThumbnails } = getConfig();
-			const state = store(
-				'woocommerce/product-gallery',
-				productGallery
-			).state;
 			const allImages = state.processedImageData;
 			if ( allImages.length <= numberOfThumbnails ) {
 				return false;
@@ -451,6 +429,10 @@ const productGallery = {
 	},
 };
 
-store( 'woocommerce/product-gallery', productGallery );
+const { state, actions } = store(
+	'woocommerce/product-gallery',
+	productGallery,
+	{ lock: true }
+);
 
-export type ProductGallery = typeof productGallery;
+export type Store = typeof productGallery;
