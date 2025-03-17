@@ -32,6 +32,8 @@ import {
 	isSwitchIncentive,
 	isWooPayments,
 	getWooPaymentsTestDriveAccountLink,
+	isIncentiveDismissedEarlierThanTimestamp,
+	providersContainWooPaymentsEnabled,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -193,6 +195,7 @@ export const SettingsPaymentsMain = () => {
 	// Determine what type of incentive surface to display.
 	let showModalIncentive = false;
 	let showBannerIncentive = false;
+	let shouldHighlightIncentive = false;
 	if ( incentiveProvider && incentive ) {
 		if ( isSwitchIncentive( incentive ) ) {
 			if (
@@ -208,7 +211,22 @@ export const SettingsPaymentsMain = () => {
 					'wc_settings_payments__banner'
 				)
 			) {
-				showBannerIncentive = true;
+				const referenceTimestamp = new Date();
+				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
+				// After 30 days - if a merchant has not enabled WooPayments and have dismissed the switcher incentive modal,
+				// We push showing banner instead of just highlighting the incentive.
+				if (
+					isIncentiveDismissedEarlierThanTimestamp(
+						incentive,
+						'wc_settings_payments__modal',
+						referenceTimestamp.getTime()
+					) &&
+					! providersContainWooPaymentsEnabled( providers )
+				) {
+					showBannerIncentive = true;
+				} else {
+					shouldHighlightIncentive = true;
+				}
 			}
 		} else if (
 			! isIncentiveDismissedInContext(
@@ -440,6 +458,7 @@ export const SettingsPaymentsMain = () => {
 					installingPlugin={ installingPlugin }
 					setupPlugin={ setupPlugin }
 					acceptIncentive={ acceptIncentive }
+					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ handleOrderingUpdate }
 					isFetching={ isFetching }
 					businessRegistrationCountry={ storeCountry }

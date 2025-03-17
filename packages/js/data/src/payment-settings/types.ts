@@ -35,7 +35,7 @@ export enum PaymentProviderType {
 	Gateway = 'gateway',
 }
 interface Dismissal {
-	timestamp: number;
+	timestamp: number; // timestamp in seconds
 	context: string;
 }
 

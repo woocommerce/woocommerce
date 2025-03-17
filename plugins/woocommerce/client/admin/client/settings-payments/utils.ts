@@ -64,6 +64,28 @@ export const isIncentiveDismissedInContext = (
 };
 
 /**
+ * Checks whether an incentive is dismissed in a given context and if it was dismissed before a given reference timestamp.
+ */
+export const isIncentiveDismissedEarlierThanTimestamp = (
+	incentive: PaymentIncentive | undefined,
+	context: string,
+	referenceTimestampMs: number // UNIX timestamp in milliseconds
+): boolean => {
+	if ( ! incentive ) {
+		return false;
+	}
+
+	// Check if any dismissal happened before the provided reference timestamp
+	return incentive._dismissals.some( ( dismissal ) => {
+		const dismissalTimestampMs = dismissal.timestamp * 1000; // Convert to milliseconds if stored in seconds
+		return (
+			( dismissal.context === 'all' || dismissal.context === context ) &&
+			dismissalTimestampMs < referenceTimestampMs
+		);
+	} );
+};
+
+/**
  * Handles enabling WooPayments and redirection based on Jetpack connection status.
  */
 export const parseScriptTag = ( elementId: string ) => {
@@ -168,4 +190,16 @@ export const providersContainWooPaymentsInDevMode = (
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return !! wooPayments?.state?.dev_mode;
+};
+
+/**
+ * Checks whether providers contain WooPayments gateway that is enabled.
+ *
+ * @param providers payment providers
+ */
+export const providersContainWooPaymentsEnabled = (
+	providers: PaymentProvider[]
+): boolean => {
+	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
+	return !! wooPayments?.state?.enabled;
 };
