@@ -74,7 +74,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			return '';
 		}
 
-		if ( ! $product->is_in_stock() ) {
+		if ( ProductType::SIMPLE === $product->get_type() && ! $product->is_in_stock() ) {
 			$product = $previous_product;
 
 			return wc_get_stock_html( $product );
