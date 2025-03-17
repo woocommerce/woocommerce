@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { MouseEvent, KeyboardEvent } from 'react';
 import { store, getContext, getElement } from '@wordpress/interactivity';
 
 type Option = {
@@ -21,12 +22,12 @@ type PillsContext = Context & {
 	focused?: string;
 };
 
-store(
+const { actions } = store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
 	{
 		state: {},
 		actions: {
-			handleClick() {
+			toggleSelected() {
 				const context = getContext< PillsContext >();
 				if ( context.selected === context.option.value ) {
 					context.selected = '';
@@ -35,19 +36,19 @@ store(
 				}
 				context.focused = context.option.value;
 			},
-			handleKeyDown( event: KeyboardEvent ) {
+			handleClick( event: MouseEvent< HTMLElement > ) {
+				event.preventDefault();
+
+				actions.toggleSelected();
+			},
+			handleKeyDown( event: KeyboardEvent< HTMLElement > ) {
 				const context = getContext< PillsContext >();
 
 				let keyWasProcessed = false;
 
 				switch ( event.key ) {
 					case ' ':
-						if ( context.selected === context.option.value ) {
-							context.selected = '';
-						} else {
-							context.selected = context.option.value;
-						}
-						context.focused = context.option.value;
+						actions.toggleSelected();
 						keyWasProcessed = true;
 						break;
 
