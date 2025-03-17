@@ -450,9 +450,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 
 				$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
-				if($cogs_controller->feature_is_enabled()) {
-					$params['cogs_value_tooltip_simple_products'] = esc_attr($cogs_controller->get_general_cost_edit_field_tooltip(false));
-					$params['cogs_value_tooltip_variable_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip(true));
+				if( $cogs_controller->feature_is_enabled() ) {
+					$params['cogs_value_tooltip_simple_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip( false ) );
+					$params['cogs_value_tooltip_variable_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip( true ) );
 				}
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
 			}
