@@ -157,6 +157,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 						</div>
 						<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-remove-test-data__group">
 							<ToggleControl
+								__nextHasNoMarginBottom
 								label={ sprintf(
 									// translators: %d is the number of test orders
 									__(
