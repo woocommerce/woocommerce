@@ -53,7 +53,7 @@ export const isIncentiveDismissedInContext = (
 	incentive: PaymentIncentive | undefined,
 	context: string
 ) => {
-	if ( ! incentive ) {
+	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
 		return false;
 	}
 
@@ -71,7 +71,7 @@ export const isIncentiveDismissedEarlierThanTimestamp = (
 	context: string,
 	referenceTimestampMs: number // UNIX timestamp in milliseconds
 ): boolean => {
-	if ( ! incentive ) {
+	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
 		return false;
 	}
 

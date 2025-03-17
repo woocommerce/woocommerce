@@ -34,6 +34,7 @@ import {
 	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
 	providersContainWooPaymentsEnabled,
+	isActionIncentive,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -228,13 +229,17 @@ export const SettingsPaymentsMain = () => {
 					shouldHighlightIncentive = true;
 				}
 			}
-		} else if (
-			! isIncentiveDismissedInContext(
-				incentive,
-				'wc_settings_payments__banner'
-			)
-		) {
-			showBannerIncentive = true;
+		} else if ( isActionIncentive( incentive ) ) {
+			if (
+				! isIncentiveDismissedInContext(
+					incentive,
+					'wc_settings_payments__banner'
+				)
+			) {
+				showBannerIncentive = true;
+			} else {
+				shouldHighlightIncentive = true;
+			}
 		}
 	}
 
