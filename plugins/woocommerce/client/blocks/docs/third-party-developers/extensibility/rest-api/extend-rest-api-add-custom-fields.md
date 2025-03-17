@@ -103,17 +103,17 @@ Screenshots of Redux Dev tool showing the data store before and after the setExt
 
 | Before | After |
 | ------ | ----- |
-|    <img width="713" alt="image" src="https://github.com/woocommerce/woocommerce-blocks/assets/14235870/948581f5-fdc2-4df1-963f-9aeb4b18b042">    |    <img width="723" alt="image" src="https://github.com/woocommerce/woocommerce-blocks/assets/14235870/ddc7dbe7-3fad-44cd-bd19-ce78bc49b951">   |
+| ![Redux Dev tool showing the data store before the setExtensionData call](https://github.com/woocommerce/woocommerce-blocks/assets/14235870/948581f5-fdc2-4df1-963f-9aeb4b18b042) | ![Redux Dev tool showing the data store  after the setExtensionData call](https://github.com/woocommerce/woocommerce-blocks/assets/14235870/ddc7dbe7-3fad-44cd-bd19-ce78bc49b951) |
 
 ### 4. Processing the Checkout POST Request
 
-To process the added field data, we'll need extend the Store API to tell it to expect additional data. See more details in the [Exposing your data in the Store API](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
+To process the added field data, we'll need extend the Store API to tell it to expect additional data. See more details in the [Exposing your data in the Store API](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
 
 #### Code Example
 
 We will use the following PHP files in our example:
 
-- The `custom-inner-block-blocks-integration.php` file: Enqueue scripts, styles, and data on the frontend when the Checkout blocks is being used. See more details in the [IntegrationInterface](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-block/integration-interface.md) documentation.
+- The `custom-inner-block-blocks-integration.php` file: Enqueue scripts, styles, and data on the frontend when the Checkout blocks is being used. See more details in the [IntegrationInterface](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/integration-interface.md) documentation.
 
 ```php
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
