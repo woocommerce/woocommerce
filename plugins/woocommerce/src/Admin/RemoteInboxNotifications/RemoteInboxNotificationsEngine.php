@@ -169,11 +169,11 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 
 		if ( false === $stored_state || ! is_object( $stored_state) ) {
 			$stored_state = new \stdClass();
-			
+
 			$stored_state = StoredStateSetupForProducts::init_stored_state(
 				$stored_state
 			);
-			
+
 			add_option(
 				self::STORED_STATE_OPTION_NAME,
 				$stored_state,
