@@ -320,6 +320,12 @@ module.exports = {
 			},
 		},
 		{
+			files: [ '**/frontend.ts' ],
+			rules: {
+				'@typescript-eslint/no-use-before-define': 'off',
+			},
+		},
+		{
 			files: [ './assets/js/mapped-types.ts' ],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'off',
