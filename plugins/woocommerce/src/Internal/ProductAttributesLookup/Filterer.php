@@ -59,7 +59,9 @@ class Filterer {
 	public function filter_by_attribute_post_clauses( array $args, \WP_Query $wp_query, array $attributes_to_filter_by ) {
 		global $wpdb;
 
-		if ( ! $wp_query->is_main_query() || ! $this->filtering_via_lookup_table_is_active() ) {
+		$enable_filtering = apply_filters( 'woocommerce_enable_filter_post_clauses', $wp_query->is_main_query(), $wp_query );
+
+		if ( ! $enable_filtering || ! $this->filtering_via_lookup_table_is_active() ) {
 			return $args;
 		}
 

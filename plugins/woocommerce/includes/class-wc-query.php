@@ -670,8 +670,10 @@ class WC_Query {
 	public function price_filter_post_clauses( $args, $wp_query ) {
 		global $wpdb;
 
+		$enable_filtering = apply_filters( 'woocommerce_enable_filter_post_clauses', $wp_query->is_main_query(), $wp_query );
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $wp_query->is_main_query() || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
 			return $args;
 		}
 
