@@ -3,6 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Messages providing guidance for HTML element usage in block editor controls.
+ * These messages help developers and users choose the appropriate semantic HTML elements
+ * for their blocks.
+ *
+ * @example
+ * ```tsx
+ * <SelectControl
+ *   value={ TagName }
+ *   onChange={ (value) => setAttributes({ tagName: value }) }
+ *   help={ htmlElementMessages[TagName] }
+ * />
+ * ```
+ */
 export const htmlElementMessages = {
 	article: __(
 		'The <article> element should represent a self-contained, syndicatable portion of the document.',

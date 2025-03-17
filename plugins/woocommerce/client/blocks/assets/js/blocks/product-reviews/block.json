@@ -57,5 +57,5 @@
 				}
 			}
 	},
-	"usesContext": [ "postId", "postType", "productId" ]
+	"usesContext": [ "postId", "postType" ]
 }
