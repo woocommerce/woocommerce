@@ -25,7 +25,7 @@ export class FrontendUtils {
 		const cartResponsePromise = this.page.waitForResponse( ( response ) => {
 			const url = response.url();
 			return (
-				url.includes( 'cart/items' ) ||
+				url.includes( 'cart' ) ||
 				url.includes( 'add_to_cart' ) ||
 				url.includes( 'batch' )
 			);

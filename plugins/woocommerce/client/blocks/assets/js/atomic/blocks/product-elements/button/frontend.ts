@@ -6,12 +6,11 @@ import {
 	getContext as getContextFn,
 	useLayoutEffect,
 } from '@wordpress/interactivity';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
-/**
- * Internal dependencies
- */
-import type { Store as WooStore } from '../../../../base/stores/cart-items';
-import { StoreNoticesStore } from '../../../../blocks/product-collection/notices-frontend';
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 interface Context {
 	addToCartText: string;
@@ -21,8 +20,6 @@ interface Context {
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
 }
-
-const getContext = () => getContextFn< Context >();
 
 enum AnimationStatus {
 	IDLE = 'IDLE',
@@ -52,16 +49,12 @@ interface Store {
 	};
 }
 
-// TS error should be fixed by https://github.com/woocommerce/gutenberg/pull/1
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { state: wooState } = store< WooStore >(
+const getContext = () => getContextFn< Context >();
+
+const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
 	{},
-	{
-		// Stores are locked to prevent 3PD usage until the API is stable.
-		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-	}
+	{ lock: universalLock }
 );
 
 const { state } = store< Store >(
@@ -70,7 +63,7 @@ const { state } = store< Store >(
 		state: {
 			get quantity() {
 				const { productId } = getContext();
-				const product = wooState.cart.items.find(
+				const product = wooState.cart?.items.find(
 					( item ) => item.id === productId
 				);
 				return product?.quantity || 0;
@@ -114,61 +107,31 @@ const { state } = store< Store >(
 				const context = getContext();
 				const { productId, quantityToAdd } = context;
 
-				// Todo: move the CartItems store part to its own module.
-				const { actions } = ( yield import(
-					'../../../../base/stores/cart-items'
-				) ) as WooStore;
+				// Todo: Use the module exports instead of `store()` once the
+				// woocommerce store is public.
+				yield import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
 
-				try {
-					yield actions.addCartItem( {
-						id: productId,
-						quantity: state.quantity + quantityToAdd,
-					} );
-				} catch ( error ) {
-					const message = ( error as Error ).message;
-
-					const { actions: noticeActions } =
-						store< StoreNoticesStore >(
-							'woocommerce/product-collection-notices',
-							{},
-							{
-								// Stores are locked to prevent 3PD usage until the API is stable.
-								lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-							}
-						);
-
-					// Technically as long as the product collection is present, noticeActions
-					// will be too, but we check for 'addNotice' to guard against possible fatal errors.
-					if ( 'addNotice' in noticeActions ) {
-						// The old implementation always overwrites the last
-						// notice, so we remove the last notice before adding a
-						// new one.
-						if ( state.noticeId !== '' ) {
-							noticeActions.removeNotice( state.noticeId );
-						}
-
-						const noticeId = noticeActions.addNotice( {
-							notice: message,
-							type: 'error',
-							dismissible: true,
-						} );
-
-						state.noticeId = noticeId;
-					}
-
-					// We don't care about errors blocking execution, but will
-					// console.error for troubleshooting.
-					// eslint-disable-next-line no-console
-					console.error( error );
-				}
+				yield actions.addCartItem( {
+					id: productId,
+					quantity: state.quantity + quantityToAdd,
+				} );
 
 				context.displayViewCart = true;
 			},
 			*refreshCartItems() {
-				// Todo: move the CartItems store part to its own module.
-				const { actions } = ( yield import(
-					'../../../../base/stores/cart-items'
-				) ) as WooStore;
+				// Todo: Use the module exports instead of `store()` once the
+				// woocommerce store is public.
+				yield import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
 				actions.refreshCartItems();
 			},
 			handleAnimationEnd( event: AnimationEvent ) {

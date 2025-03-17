@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { store, getContext as getContextFn } from '@wordpress/interactivity';
-import type { StorePart } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
-import type { ProductGalleryContext, ProductGallery } from '../../frontend';
+import type { ProductGalleryContext } from '../../types';
+import type { Store as ProductGallery } from '../../frontend';
 
 type Context = {
 	styles: {
@@ -19,8 +19,7 @@ type Context = {
 
 const getContext = ( ns?: string ) => getContextFn< Context >( ns );
 
-type Store = typeof productGalleryLargeImage & StorePart< ProductGallery >;
-const { actions } = store< Store >( 'woocommerce/product-gallery' );
+type Store = typeof productGalleryLargeImage & ProductGallery;
 
 const productGalleryLargeImage = {
 	actions: {
@@ -70,4 +69,10 @@ const productGalleryLargeImage = {
 	},
 };
 
-store< Store >( 'woocommerce/product-gallery', productGalleryLargeImage );
+const { actions } = store< Store >(
+	'woocommerce/product-gallery',
+	productGalleryLargeImage,
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
+);
