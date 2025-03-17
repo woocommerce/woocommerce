@@ -53,8 +53,10 @@ const entries = {
 		'./assets/js/blocks/add-to-cart-with-options/variation-selector/frontend.ts',
 
 	// Other
-	'stores/woocommerce/cart': './assets/js/base/stores/woocommerce/cart.ts',
-	'stores/store-notices': './assets/js/base/stores/store-notices.ts',
+	'@woocommerce/stores/woocommerce/cart':
+		'./assets/js/base/stores/woocommerce/cart.ts',
+	'@woocommerce/stores/store-notices':
+		'./assets/js/base/stores/store-notices.ts',
 };
 
 module.exports = {

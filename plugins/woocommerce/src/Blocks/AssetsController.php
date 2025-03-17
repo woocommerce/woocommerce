@@ -115,26 +115,6 @@ final class AssetsController {
 			",
 			'before'
 		);
-
-		wp_register_script_module(
-			'@woocommerce/stores/store-notices',
-			// Todo: Replace with some way to get this URL using the Woo Asset handling classes??
-			plugins_url( '/assets/client/blocks/stores/store-notices.js', WC_PLUGIN_FILE ),
-			array( '@wordpress/interactivity' ),
-		);
-
-		wp_register_script_module(
-			'@woocommerce/stores/woocommerce/cart',
-			// Todo: Replace with some way to get this URL using the Woo Asset handling classes??
-			plugins_url( '/assets/client/blocks/stores/woocommerce/cart.js', WC_PLUGIN_FILE ),
-			array(
-				'@wordpress/interactivity',
-				array(
-					'id'     => '@woocommerce/stores/store-notices',
-					'import' => 'dynamic',
-				),
-			),
-		);
 	}
 
 	/**
@@ -375,10 +355,10 @@ final class AssetsController {
 	 */
 	public function skip_boost_minification_for_cart_checkout( $do_concat, $handle ) {
 		$boost_is_outdated = defined( 'JETPACK_BOOST_VERSION' ) && version_compare( JETPACK_BOOST_VERSION, '3.4.2', '<' );
-		$scripts_to_ignore = [
+		$scripts_to_ignore = array(
 			'wc-cart-checkout-vendors',
 			'wc-cart-checkout-base',
-		];
+		);
 
 		return $boost_is_outdated && in_array( $handle, $scripts_to_ignore, true ) ? false : $do_concat;
 	}

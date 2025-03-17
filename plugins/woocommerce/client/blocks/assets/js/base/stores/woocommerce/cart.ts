@@ -75,7 +75,6 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*addCartItem( { id, quantity }: { id: number; quantity: number } ) {
-				yield import( '@woocommerce/stores/store-notices' );
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId
 				);

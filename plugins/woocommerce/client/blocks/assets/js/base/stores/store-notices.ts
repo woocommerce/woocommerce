@@ -138,7 +138,5 @@ store< Store >(
 			},
 		},
 	},
-	{
-		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-	}
+	{ lock: true }
 );
