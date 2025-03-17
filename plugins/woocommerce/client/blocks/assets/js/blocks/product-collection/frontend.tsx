@@ -3,6 +3,18 @@
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
 
+// Todo: Remove after support for WP .6.6 is dropped.
+const htmlMap = new Map< string, string >();
+const data = document.getElementById( 'wp-interactivity-data' );
+if ( data ) {
+	const interactivityData = JSON.parse( data.textContent );
+	if ( interactivityData.state?.[ 'woocommerce/product-button' ] ) {
+		interactivityData.state[ 'woocommerce/product-button' ].addToCartText =
+			undefined;
+		data.textContent = JSON.stringify( interactivityData );
+	}
+}
+
 /**
  * Internal dependencies
  */
@@ -41,6 +53,27 @@ function isValidEvent( event: MouseEvent ): boolean {
 	);
 }
 
+// Todo: Remove after support for WP .6.6 is dropped.
+async function fetchUrlAndReplaceState( url: string ): Promise< string > {
+	if ( ! htmlMap.has( url ) ) {
+		const response = await window.fetch( url );
+		const html = await response.text();
+		const dom = new window.DOMParser().parseFromString( html, 'text/html' );
+		const dataElement = dom.getElementById( 'wp-interactivity-data' );
+		const interactivityData = JSON.parse( data.textContent );
+
+		if ( interactivityData.state?.[ 'woocommerce/product-button' ] ) {
+			interactivityData.state[
+				'woocommerce/product-button'
+			].addToCartText = undefined;
+			dataElement.textContent = JSON.stringify( interactivityData );
+		}
+
+		htmlMap.set( url, dom.documentElement.outerHTML );
+	}
+	return htmlMap.get( url ) || '';
+}
+
 const productCollectionStore = {
 	actions: {
 		*navigate( event: MouseEvent ) {
@@ -59,7 +92,13 @@ const productCollectionStore = {
 					'@wordpress/interactivity-router'
 				);
 
-				yield actions.navigate( ref.href );
+				// Todo: Remove after support for WP .6.6 is dropped.
+				if ( document.getElementById( 'wp-interactivity-data' ) ) {
+					const html = yield fetchUrlAndReplaceState( ref.href );
+					yield actions.navigate( ref.href, { html } );
+				} else {
+					yield actions.navigate( ref.href );
+				}
 
 				ctx.isPrefetchNextOrPreviousLink = ref.href;
 
@@ -86,7 +125,14 @@ const productCollectionStore = {
 				const { actions } = yield import(
 					'@wordpress/interactivity-router'
 				);
-				yield actions.prefetch( ref.href );
+
+				// Todo: Remove after support for WP .6.6 is dropped.
+				if ( document.getElementById( 'wp-interactivity-data' ) ) {
+					const html = yield fetchUrlAndReplaceState( ref.href );
+					yield actions.prefetch( ref.href, { html } );
+				} else {
+					yield actions.prefetch( ref.href );
+				}
 			}
 		},
 		*viewProduct() {
@@ -111,7 +157,14 @@ const productCollectionStore = {
 				const { actions } = yield import(
 					'@wordpress/interactivity-router'
 				);
-				yield actions.prefetch( ref.href );
+
+				// Todo: Remove after support for WP .6.6 is dropped.
+				if ( document.getElementById( 'wp-interactivity-data' ) ) {
+					const html = yield fetchUrlAndReplaceState( ref.href );
+					yield actions.prefetch( ref.href, { html } );
+				} else {
+					yield actions.prefetch( ref.href );
+				}
 			}
 		},
 		*onRender() {

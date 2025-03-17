@@ -248,6 +248,7 @@ export const BusinessInfo = ( {
 					autoComplete="off"
 				>
 					<TextControl
+						__nextHasNoMarginBottom
 						className="woocommerce-profiler-business-info-store-name"
 						onChange={ ( value ) => {
 							setStoreName( value );
@@ -445,6 +446,7 @@ export const BusinessInfo = ( {
 					{
 						<>
 							<TextControl
+								__nextHasNoMarginBottom
 								className={ clsx(
 									'woocommerce-profiler-business-info-email-adddress',
 									{ 'is-error': isEmailInvalid }
@@ -487,6 +489,7 @@ export const BusinessInfo = ( {
 								/>
 							) }
 							<CheckboxControl
+								__nextHasNoMarginBottom
 								className="core-profiler__checkbox"
 								label={ __(
 									'Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox.',
