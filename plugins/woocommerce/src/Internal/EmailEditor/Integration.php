@@ -8,6 +8,7 @@ use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -70,6 +71,7 @@ class Integration {
 		$container->get( TemplatesController::class );
 		$container->get( PersonalizationTagManager::class );
 		$container->get( BlockEmailRenderer::class );
+		$container->get( WCTransactionalEmails::class );
 		$this->editor_page_renderer = $container->get( PageRenderer::class );
 	}
 

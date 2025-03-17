@@ -118,7 +118,7 @@ class BlockEmailRenderer {
 		$args = array(
 			'post_type'      => Integration::EMAIL_POST_TYPE,
 			'name'           => $email->id,
-			'post_status'    => 'draft', // Temporarily use draft status we will change it to publish or custom active later.
+			'post_status'    => 'draft,publish', // Temporarily use draft status we will change it to publish or custom active later.
 			'posts_per_page' => 1,
 		);
 
