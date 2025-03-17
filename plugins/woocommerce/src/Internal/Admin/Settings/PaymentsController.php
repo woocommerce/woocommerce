@@ -260,6 +260,7 @@ class PaymentsController {
 				// we rely on the fact that the modal falls back to the banner, once dismissed.
 				// But there's one special case. If the merchant have dismissed the switcher incentive modal
 				// and 30 days have passed, highlight the incentive.
+				// @see it's frontend bro in client/admin/client/settings-payments/settings-payments-main.tsx
 				$is_dismissed_modal_more_than_30_days_ago = array_filter( $dismissals, function ( $dismissal ) {
 					return isset( $dismissal['context'], $dismissal['timestamp'] ) &&
 						$dismissal['context'] === 'wc_settings_payments__modal' &&
