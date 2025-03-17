@@ -177,7 +177,7 @@ class Renderer {
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region() {
-		// Todo: Remove the extra div wrapper once we can use two context
+		// Remove this extra div wrapper once we can use two context
 		// directives in the top level div (https://github.com/WordPress/gutenberg/discussions/62720).
 		ob_start();
 		?>
