@@ -82,7 +82,9 @@ export const PaymentExtensionSuggestionListItem = ( {
 		<div
 			id={ extension.id }
 			className={ `transitions-disabled woocommerce-list__item woocommerce-list__item-enter-done ${
-				hasIncentive( extension ) && shouldHighlightIncentive ? `has-incentive` : ''
+				hasIncentive( extension ) && shouldHighlightIncentive
+					? `has-incentive`
+					: ''
 			}` }
 			{ ...props }
 		>

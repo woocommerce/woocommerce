@@ -87,7 +87,9 @@ export const PaymentGatewayListItem = ( {
 					? `woocommerce-item__woocommerce-payments`
 					: ''
 			} ${
-				hasIncentive( gateway ) && shouldHighlightIncentive ? `has-incentive` : ''
+				hasIncentive( gateway ) && shouldHighlightIncentive
+					? `has-incentive`
+					: ''
 			}` }
 			{ ...props }
 		>
