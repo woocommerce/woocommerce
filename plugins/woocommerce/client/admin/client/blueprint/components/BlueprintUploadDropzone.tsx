@@ -149,7 +149,7 @@ type FileUploadEvents =
 	| { type: 'UPLOAD'; file: File }
 	| { type: 'SUCCESS' }
 	| { type: 'ERROR'; error: Error }
-	| { type: 'DISMISS' }
+	| { type: 'DISMISS_FILE_UPLOAD' }
 	| { type: 'DISMISS_OVERWRITE_MODAL' }
 	| { type: 'IMPORT' }
 	| { type: 'CONFIRM_IMPORT' }
@@ -338,13 +338,13 @@ export const fileUploadMachine = setup( {
 		importSuccess: {},
 	},
 	on: {
-		DISMISS: {
+		DISMISS_FILE_UPLOAD: {
 			actions: assign( {
 				error: () => undefined,
 				file: () => undefined,
 				steps: () => undefined,
 			} ),
-			target: '#fileUpload.idle',
+			target: '.idle',
 		},
 	},
 } );
@@ -423,7 +423,7 @@ export const BlueprintUploadDropzone = () => {
 						<Button
 							icon={ <Icon icon={ closeSmall } /> }
 							onClick={ () => {
-								send( { type: 'DISMISS' } );
+								send( { type: 'DISMISS_FILE_UPLOAD' } );
 							} }
 						/>
 					</p>
