@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Avoid fatal error in "meta_is_product_attribute" when calling it with an attribute not used for variations.
