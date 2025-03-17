@@ -12,4 +12,3 @@ export * from './is-site-editor-page';
 export * from './is-widget-editor-page';
 export * from './trim-words';
 export * from './find-block';
-export * from './interactivity';

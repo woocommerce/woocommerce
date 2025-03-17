@@ -4,7 +4,7 @@
 	--wp--style--root--padding-bottom: 0;
 }
 
-.woocommerce-coming-soon-entire-site {
+.woocommerce-coming-soon-default {
 	// This is default font family when no font family is selected. Users can override this in the block settings.
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	min-width: 320px;
@@ -18,7 +18,7 @@
 	}
 }
 
-.woocommerce-coming-soon-entire-site,
+.woocommerce-coming-soon-default,
 .woocommerce-coming-soon-image-gallery,
 .woocommerce-coming-soon-minimal-left-image {
 	.wp-block-loginout a {
