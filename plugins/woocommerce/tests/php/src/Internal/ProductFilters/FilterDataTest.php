@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
-use Automattic\WooCommerce\Internal\ProductFilters\FilterData;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
  * Tests related to Counts service.
@@ -23,7 +24,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		parent::setUp();
 
 		$container = wc_get_container();
-		$this->sut = $container->get( FilterData::class );
+		$this->sut = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
 
 		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
 		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
@@ -187,7 +188,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @testdox Test attribute count with query_type set to `and`.
 	 */
 	public function test_get_attribute_counts_with_query_type_and() {
-		$this->markTestSkipped( 'Skipping tests with query_type `and` because there is an issue with Filterer::filter_by_attribute_post_clauses that generate wrong clauses for `and`. We can fix the same issue in FilterClausesGenerator::add_attribute_clauses but doing so will make the attribute counts data doesnt match with current query. A fix for both methods is pending.' );
+		$this->markTestSkipped( 'Skipping tests with query_type `and` because there is an issue with Filterer::filter_by_attribute_post_clauses that generate wrong clauses for `and`. We can fix the same issue in FilterClausesGenerator::add_attribute_clauses but doing so will make the attribute counts data doesnt match with current query. A fix for both methods is pending. See https://github.com/woocommerce/woocommerce/pull/44825.' );
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'filter_color', 'blue-slug,green-slug' );
 		$wp_query->set( 'query_type_color', 'and' );
@@ -314,7 +315,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	private function test_get_stock_status_counts_with( $wp_query, $filter_callback = null ) {
 		$query_vars = array_filter( $wp_query->query_vars );
 
-		$actual_stock_status_counts = (array) $this->sut->get_stock_status_counts( $query_vars );
+		$actual_stock_status_counts = (array) $this->sut->get_stock_status_counts( $query_vars, array( 'instock', 'outofstock', 'onbackorder' ) );
 
 		$expected_stock_status_counts = array(
 			'instock'     => 0,
