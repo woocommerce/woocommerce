@@ -135,19 +135,18 @@ type DropdownContext = Context & {
 store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 	{
-		state: {},
+		state: {
+			get isOptionSelected() {
+				const context = getContext< DropdownContext >();
+				if ( context.selected === context.option.value ) {
+					return 'selected';
+				}
+			},
+		},
 		actions: {
 			handleChange() {
 				const context = getContext< DropdownContext >();
 				context.selected = context.option.value;
-			},
-		},
-		callbacks: {
-			init() {
-				const context = getContext< DropdownContext >();
-				if ( context.selected === context.option.value ) {
-					context.isSelected = 'selected';
-				}
 			},
 		},
 	}

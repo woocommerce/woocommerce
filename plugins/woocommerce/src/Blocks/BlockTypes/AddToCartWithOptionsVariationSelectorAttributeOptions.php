@@ -212,12 +212,8 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 				array(
 					'data-wp-text'           => 'context.option.label',
 					'data-wp-bind--value'    => 'context.option.value',
-					'data-wp-bind--selected' => 'context.isSelected',
-					'data-wp-init'           => 'callbacks.init',
+					'data-wp-bind--selected' => 'state.isOptionSelected',
 					'data-wp-on--change'     => 'actions.handleChange',
-					'data-wp-context'        => array(
-						'isSelected' => null,
-					),
 				),
 			),
 		);
