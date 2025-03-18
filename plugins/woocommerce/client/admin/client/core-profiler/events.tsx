@@ -74,7 +74,6 @@ export type PluginsInstallationRequestedEvent = {
 		pluginsShown: string[];
 		pluginsSelected: string[];
 		pluginsUnselected: string[];
-		pluginsTruncated: string[];
 	};
 };
 

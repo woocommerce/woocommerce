@@ -8,7 +8,7 @@ import { type BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import useProductTypeSelector from '../hooks/use-product-type-selector';
+import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import { GROUPED_PRODUCT_ITEM_TEMPLATE } from './product-item-template/constants';
 
 interface Attributes {

@@ -19,13 +19,7 @@ const createAccordionItem = (
 };
 
 const descriptionAccordion = createAccordionItem( 'Description', [
-	[
-		'core/paragraph',
-		{
-			content:
-				'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget turpis eget nunc fermentum ultricies. Nullam nec sapien nec0',
-		},
-	],
+	[ 'woocommerce/product-description', {}, [] ],
 ] );
 
 const additionalInformationAccordion = createAccordionItem(
@@ -42,13 +36,7 @@ const additionalInformationAccordion = createAccordionItem(
 );
 
 const reviewsAccordion = createAccordionItem( 'Reviews', [
-	[
-		'core/paragraph',
-		{
-			content:
-				'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget turpis eget nunc fermentum ultricies. Nullam nec sapien nec0',
-		},
-	],
+	[ 'woocommerce/blockified-product-reviews', {} ],
 ] );
 
 const TEMPLATE: InnerBlockTemplate[] = [
