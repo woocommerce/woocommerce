@@ -41,7 +41,7 @@ class Init {
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_settings_editor_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_settings_editor_styles' ) );
-		add_action( 'woocommerce_navigation_is_connected_page', array( $this, 'turn_off_embed_page' ) );
+		add_action( 'woocommerce_navigation_is_connected_page', array( $this, 'disable_embed_page_for_settings' ) );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Init {
 	 * @param string $current_page The current page.
 	 * @return bool
 	 */
-	public function turn_off_embed_page( $is_connected_page, $current_page = null ) {
+	public function disable_embed_page_for_settings( $is_connected_page, $current_page = null ) {
 		if ( self::get_instance()->is_settings_page() ) {
 			return false;
 		}
