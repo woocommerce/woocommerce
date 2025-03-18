@@ -1,8 +1,4 @@
 <?php
-/**
- * MainQueryFilters class file.
- */
-
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
@@ -14,7 +10,7 @@ use WC_Cache_Helper;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * MainQueryFilters class.
+ * Hooks into WordPress and WooCommerce actions and filters to register main query filter and cache invalidation.
  */
 class Controller implements RegisterHooksInterface {
 	use AccessiblePrivateMethods;
