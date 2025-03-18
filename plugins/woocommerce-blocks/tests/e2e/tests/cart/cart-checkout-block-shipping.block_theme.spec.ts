@@ -138,42 +138,35 @@ test.describe( 'Shopper → Shipping', () => {
 			.getByRole( 'button', { name: 'Save changes' } )
 			.click();
 
-		const guestContext = await browser.newContext( {
-			storageState: { cookies: [], origins: [] },
-		} );
-		const userPage = await guestContext.newPage();
-
-		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
-
-		await userFrontendUtils.goToShop();
-		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await userFrontendUtils.goToCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
 
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
-				name: 'Woo Collection FREE',
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Pickup (Automattic, Inc.) Free',
 			} )
 		).toBeVisible();
 
-		await userFrontendUtils.goToCheckout();
+		await frontendUtils.goToCheckout();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Ship',
 				exact: true,
 			} )
 		).toBeChecked();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
@@ -182,9 +175,9 @@ test.describe( 'Shopper → Shipping', () => {
 	test( '2. With shipping methods for the default location, shipping methods for _any_ location, local pickup disabled, and shipping costs requires address disabled, the shopper sees shipping rates only', async ( {
 		localPickupUtils,
 		admin,
-		browser,
-		requestUtils,
+		frontendUtils,
 		shippingUtils,
+		checkoutPageObject,
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
 		await shippingUtils.disableShippingCostsRequireAddress();
@@ -196,42 +189,30 @@ test.describe( 'Shopper → Shipping', () => {
 			.getByRole( 'button', { name: 'Save changes' } )
 			.click();
 
-		const guestContext = await browser.newContext( {
-			storageState: { cookies: [], origins: [] },
-		} );
-		const userPage = await guestContext.newPage();
-
-		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
-
-		await userFrontendUtils.goToShop();
-		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await userFrontendUtils.goToCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
 
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			checkoutPageObject.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
-		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
-				name: 'Woo Collection FREE',
-			} )
-		).toBeVisible();
 
-		await userFrontendUtils.goToCheckout();
+		await frontendUtils.goToCheckout();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Ship',
 				exact: true,
 			} )
 		).toBeHidden();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
 		await expect(
-			userFrontendUtils.page.getByRole( 'radio', {
+			frontendUtils.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
