@@ -60,7 +60,7 @@
 		"@types/expect-puppeteer": "^4.4.7",
 		"@types/puppeteer": "^5.4.7",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
-		"@woocommerce/api": "^0.2.0",
+		"@woocommerce/api": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
@@ -106,6 +106,13 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"node_modules/@woocommerce/api/dist/",
+				"!node_modules/@woocommerce/api/*.ts.map",
+				"!node_modules/@woocommerce/api/*.tsbuildinfo",
+				"!node_modules/@woocommerce/api/dist/**/__tests__/",
+				"!node_modules/@woocommerce/api/dist/**/__mocks__/",
+				"!node_modules/@woocommerce/api/dist/**/__snapshops__/",
+				"!node_modules/@woocommerce/api/dist/**/__test_data__/",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

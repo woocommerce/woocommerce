@@ -126,10 +126,13 @@ const coreModules = [
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-components',
+	'@woocommerce/blocks-registry',
 	'@woocommerce/price-format',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
+	'@woocommerce/stores/store-notices',
+	'@woocommerce/stores/woocommerce/cart',
 	'@woocommerce/tracks',
 	'@woocommerce/data',
 	'@woocommerce/customer-effort-score',
@@ -314,6 +317,12 @@ module.exports = {
 					'@wordpress/blocks',
 					'@wordpress/notices',
 				],
+			},
+		},
+		{
+			files: [ '**/frontend.ts' ],
+			rules: {
+				'@typescript-eslint/no-use-before-define': 'off',
 			},
 		},
 		{

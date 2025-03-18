@@ -768,7 +768,8 @@
 			"node_modules/@woocommerce/block-library/build",
 			"node_modules/@woocommerce/block-library/blocks.ini",
 			"node_modules/@woocommerce/classic-assets/build",
-			"node_modules/@woocommerce/admin-library/build"
+			"node_modules/@woocommerce/admin-library/build",
+			"client/admin/node_modules/@woocommerce/email-editor/build/"
 		],
 		"ext": "js,css,php,json",
 		"ignoreRoot": []

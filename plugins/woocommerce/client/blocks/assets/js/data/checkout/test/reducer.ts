@@ -226,7 +226,7 @@ describe.only( 'Checkout Store Reducer', () => {
 			expect(
 				reducer(
 					defaultState,
-					actions.__internalSetExtensionData(
+					actions.setExtensionData(
 						'extensionNamespace',
 						mockExtensionData.extensionNamespace
 					)
@@ -246,13 +246,13 @@ describe.only( 'Checkout Store Reducer', () => {
 			};
 			const firstState = reducer(
 				defaultState,
-				actions.__internalSetExtensionData( 'extensionNamespace', {
+				actions.setExtensionData( 'extensionNamespace', {
 					testKey: 'test-value',
 				} )
 			);
 			const secondState = reducer(
 				firstState,
-				actions.__internalSetExtensionData( 'extensionNamespace', {
+				actions.setExtensionData( 'extensionNamespace', {
 					testKey2: 'test-value-2',
 				} )
 			);
@@ -270,19 +270,48 @@ describe.only( 'Checkout Store Reducer', () => {
 			};
 			const firstState = reducer(
 				defaultState,
-				actions.__internalSetExtensionData( 'extensionNamespace', {
+				actions.setExtensionData( 'extensionNamespace', {
 					testKeyOld: 'test-value',
 				} )
 			);
 			const secondState = reducer(
 				firstState,
-				actions.__internalSetExtensionData(
+				actions.setExtensionData(
 					'extensionNamespace',
 					{ testKey: 'test-value' },
 					true
 				)
 			);
 			expect( secondState ).toEqual( expectedState );
+		} );
+		it( 'should work with deprecated __internalSetExtensionData and show deprecation warning', () => {
+			const consoleSpy = jest
+				.spyOn( console, 'warn' )
+				.mockImplementation();
+			const mockExtensionData = {
+				extensionNamespace: {
+					testKey: 'test-value',
+				},
+			};
+			const expectedState = {
+				...defaultState,
+				extensionData: mockExtensionData,
+			};
+
+			const state = reducer(
+				defaultState,
+				actions.__internalSetExtensionData(
+					'extensionNamespace',
+					mockExtensionData.extensionNamespace
+				)
+			);
+
+			expect( state ).toEqual( expectedState );
+			expect( consoleSpy ).toHaveBeenCalledWith(
+				'__internalSetExtensionData is deprecated. Please use setExtensionData instead.'
+			);
+
+			consoleSpy.mockRestore();
 		} );
 	} );
 } );

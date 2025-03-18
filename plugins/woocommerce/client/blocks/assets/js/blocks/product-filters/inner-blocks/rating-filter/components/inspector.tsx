@@ -68,11 +68,10 @@ export const Inspector = ( {
 					label={ __( 'Display product count', 'woocommerce' ) }
 					checked={ showCounts }
 					onChange={ setCountVisibility }
+					__nextHasNoMarginBottom
 				/>
-			</PanelBody>
-
-			<PanelBody title={ __( 'Minimum rating', 'woocommerce' ) }>
 				<RadioControl
+					label={ __( 'Minimum rating', 'woocommerce' ) }
 					selected={ minRating }
 					className="wc-block-rating-filter__rating-control"
 					options={ [

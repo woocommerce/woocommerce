@@ -53,6 +53,11 @@ const blocks = {
 			'add-to-cart-with-options/grouped-product-selector/product-item-template',
 		isExperimental: true,
 	},
+	'add-to-cart-with-options-grouped-product-selector-item-cta': {
+		customDir:
+			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
+		isExperimental: true,
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -64,6 +69,10 @@ const blocks = {
 	'blockified-product-details': {
 		isExperimental: true,
 		customDir: 'product-details',
+	},
+	'product-description': {
+		isExperimental: true,
+		customDir: 'product-description',
 	},
 	'catalog-sorting': {},
 	'coming-soon': {},
@@ -97,9 +106,6 @@ const blocks = {
 	'product-gallery-large-image-next-previous': {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
-	},
-	'product-gallery-pager': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',

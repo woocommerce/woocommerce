@@ -50,7 +50,7 @@ class Integration {
 			return;
 		}
 
-		add_action( 'init', array( $this, 'initialize' ) );
+		add_action( 'woocommerce_init', array( $this, 'initialize' ) );
 	}
 
 	/**
