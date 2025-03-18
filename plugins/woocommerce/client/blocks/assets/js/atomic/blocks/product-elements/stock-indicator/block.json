@@ -1,0 +1,22 @@
+{
+	"name": "woocommerce/product-stock-indicator",
+	"version": "1.0.0",
+	"icon": "info",
+	"title": "Product Stock Indicator",
+	"description": "Display product stock status.",
+	"attributes": {
+		"isDescendentOfQueryLoop": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendantOfAllProducts": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
