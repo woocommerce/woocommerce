@@ -272,8 +272,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @param callable $filter_callback Callback passed to filter test products.
 	 */
 	private function get_expected_attribute_counts( $attribute_name, $filter_callback = null ) {
-		$attribute_counts  = array();
-		$_attribute_counts = array();
+		$attribute_counts_by_term_id   = array();
+		$attribute_counts_by_term_name = array();
 
 		if ( $filter_callback ) {
 			$filtered_products_data = array_filter(
@@ -290,20 +290,20 @@ class FilterDataTest extends AbstractProductFiltersTest {
 			}
 
 			foreach ( $product_data['variations'] as $variation_data ) {
-				if ( ! isset( $_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] ) ) {
-					$_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] = 0;
+				if ( ! isset( $attribute_counts_by_term_name[ $variation_data['attributes'][ $attribute_name ] ] ) ) {
+					$attribute_counts_by_term_name[ $variation_data['attributes'][ $attribute_name ] ] = 0;
 				}
-				$_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] += 1;
+				$attribute_counts_by_term_name[ $variation_data['attributes'][ $attribute_name ] ] += 1;
 			}
 		}
 
 		foreach ( get_terms( array( 'taxonomy' => 'pa_color' ) ) as $term ) {
-			if ( isset( $_attribute_counts[ $term->name ] ) ) {
-				$attribute_counts[ $term->term_id ] = $_attribute_counts[ $term->name ];
+			if ( isset( $attribute_counts_by_term_name[ $term->name ] ) ) {
+				$attribute_counts_by_term_id[ $term->term_id ] = $attribute_counts_by_term_name[ $term->name ];
 			}
 		}
 
-		return $attribute_counts;
+		return $attribute_counts_by_term_id;
 	}
 
 	/**
