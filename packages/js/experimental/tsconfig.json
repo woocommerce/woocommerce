@@ -3,7 +3,6 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
-		"target": "esnext",
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",

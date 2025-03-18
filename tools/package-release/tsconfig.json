@@ -2,11 +2,11 @@
 	"compilerOptions": {
 		"declaration": true,
 		"importHelpers": true,
+		"target": "esnext",
 		"module": "commonjs",
 		"outDir": "dist",
 		"rootDir": "src",
 		"strict": true,
-		"target": "esnext",
 		"typeRoots": [
 			"./node_modules/@types"
 		],

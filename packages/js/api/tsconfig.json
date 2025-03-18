@@ -4,7 +4,6 @@
 		"types": [ "node", "jest", "create-hmac" ],
 		"rootDir": "src",
 		"outDir": "dist",
-		"target": "esnext",
 		"typeRoots": [ "./node_modules/@types" ]
 	},
 	"include": [
