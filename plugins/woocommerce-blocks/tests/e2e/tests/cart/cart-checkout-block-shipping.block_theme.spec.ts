@@ -87,18 +87,23 @@ test.describe( 'Shopper → Shipping', () => {
 	 * Rates enabled for default customer location
 	 * Rates enabled for _any_ location
 	 * Local pickup enabled
+	 * Hide rates until an address is entered (only applicable when Local pickup is DISABLED)
 	 *
-	 * 1. Y Y Y
-	 * 2. Y Y N
-	 * 3. Y N Y
-	 * 4. Y N N
-	 * 5. N Y Y
-	 * 6. N Y N
-	 * 7. N N Y
-	 * 8. N N N
+	 * 1.  Y Y Y #
+	 * 2.  Y Y N N
+	 * 3.  Y N Y # - Skipping because this behaves the same as test 1.
+	 * 4.  Y N N N
+	 * 5.  N Y Y #
+	 * 6.  N Y N N
+	 * 7.  N N Y #
+	 * 8.  N N N N
+	 * 9.  Y Y N Y
+	 * 10. Y N N Y
+	 * 11. N Y N Y
+	 * 12. N N N Y
 	 */
 
-	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees rates and pickup options in the sidebar', async ( {
+	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees shipping rates and pickup options - rates are selected default', async ( {
 		localPickupUtils,
 		admin,
 		browser,
