@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use WC_Product;
 use WC_Product_Variable;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Tests related to FilterClausesGenerator service.
@@ -83,26 +84,26 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				'name'          => 'Product 1',
 				'regular_price' => 10,
-				'stock_status'  => 'onbackorder',
+				'stock_status'  => ProductStockStatus::ON_BACKORDER,
 			),
 			array(
 				'name'          => 'Product 2',
 				'regular_price' => 20,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 			),
 			array(
 				'name'          => 'Product 3',
 				'regular_price' => 30,
-				'stock_status'  => 'outofstock',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
 			),
 			array(
 				'name'          => 'Product 4',
 				'regular_price' => 40,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 			),
 			array(
 				'name'         => 'Product 5',
-				'stock_status' => 'instock',
+				'stock_status' => ProductStockStatus::IN_STOCK,
 				'variations'   => array(
 					array(
 						'attributes' => array(
@@ -110,7 +111,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 						),
 						'props'      => array(
 							'regular_price' => 50,
-							'stock_status'  => 'instock',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
 						),
 					),
 					array(
@@ -119,14 +120,14 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 						),
 						'props'      => array(
 							'regular_price' => 50,
-							'stock_status'  => 'instock',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
 						),
 					),
 				),
 			),
 			array(
 				'name'         => 'Product 6',
-				'stock_status' => 'instock',
+				'stock_status' => ProductStockStatus::IN_STOCK,
 				'variations'   => array(
 					array(
 						'attributes' => array(
@@ -134,7 +135,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 						),
 						'props'      => array(
 							'regular_price' => 60,
-							'stock_status'  => 'instock',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
 						),
 					),
 					array(
@@ -143,7 +144,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 						),
 						'props'      => array(
 							'regular_price' => 60,
-							'stock_status'  => 'instock',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
 						),
 					),
 				),
