@@ -33,6 +33,13 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	protected $products;
 
 	/**
+	 * Backup options.
+	 *
+	 * @var array
+	 */
+	protected $backup_options;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -52,6 +59,12 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			  in_stock tinyint(1) NOT NULL
 			  );
 			"
+		);
+
+		$this->backup_options = array(
+			'woocommerce_attribute_lookup_enabled' => get_option( 'woocommerce_attribute_lookup_enabled' ),
+			'woocommerce_calc_taxes'               => get_option( 'woocommerce_calc_taxes' ),
+			'woocommerce_tax_display_shop'         => get_option( 'woocommerce_tax_display_shop' ),
 		);
 
 		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
@@ -148,6 +161,15 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		$this->remove_all_attributes();
 		$this->remove_all_products();
 		$this->empty_lookup_tables();
+
+		foreach ( $this->backup_options as $option => $value ) {
+			if ( $value === false ) {
+				delete_option( $option );
+			} else {
+				update_option( $option, $value );
+			}
+		}
+
 		wp_cache_flush();
 	}
 
