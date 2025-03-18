@@ -399,6 +399,7 @@ export function StoreAddress( {
 
 			{ ! locale?.address_1?.hidden && (
 				<TextControl
+					__nextHasNoMarginBottom
 					id={ 'woocommerce-store-address-form-address_1' }
 					label={
 						locale?.address_1?.label ||
@@ -411,6 +412,7 @@ export function StoreAddress( {
 
 			{ ! locale?.postcode?.hidden && (
 				<TextControl
+					__nextHasNoMarginBottom
 					id={ 'woocommerce-store-address-form-postcode' }
 					label={
 						locale?.postcode?.label ||
@@ -423,6 +425,7 @@ export function StoreAddress( {
 
 			{ ! locale?.city?.hidden && (
 				<TextControl
+					__nextHasNoMarginBottom
 					id={ 'woocommerce-store-address-form-city' }
 					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
 					{ ...getInputProps( 'city' ) }

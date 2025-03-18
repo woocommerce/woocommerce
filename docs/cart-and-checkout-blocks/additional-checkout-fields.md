@@ -215,6 +215,9 @@ These options apply to all field types (except in a few circumstances which are 
 | `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `order`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                                                                                                                                                         |
 | `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                                                                                                                                                           |
+| `required`          | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
+| `hidden`            | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
+| `validation`        | An array of JSON Schema objects that define validation rules for the field. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `[{"type": "object", "properties": {...}}]` | `[]` |
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
 | `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
@@ -238,11 +241,7 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-As well as the options above, text fields also support a `required` option. If this is `true` then the shopper _must_ provide a value for this field during the checkout process.
-
-| Option name     | Description                                                                                                                         | Required? | Example                                      | Default value |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------|----------------------------------------------|---|
-| `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
+Text fields don't have any additional options beyond the general options listed above.
 
 #### Options for `select` fields
 
@@ -255,7 +254,6 @@ You can set a placeholder to be shown on the select by passing a `placeholder` v
 | Option name | Description | Required? | Example        | Default value |
 |-----|-----|-----|----------------|--------------|
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | see below | No default - this must be provided. |
-| `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
 | `placeholder` | If this value is set, the shopper will see this option in the select. If the select is required, the shopper cannot select this option. | No | `Select a role` | Select a $label |
 
 ##### Example of `options` value
@@ -280,11 +278,10 @@ You can set a placeholder to be shown on the select by passing a `placeholder` v
 
 #### Options for `checkbox` fields
 
-As well as the options above, checkbox fields also support a `required` option. If this is `true` then the shopper _must_ check this box to place the order.
+As well as the options above, checkbox field support showing an error message if it's required and not checked.
 
 | Option name     | Description                                                                  | Required? | Example                                                      | Default value |
 |-----------------|------------------------------------------------------------------------------|-----------|--------------------------------------------------------------|---|
-| `required`      | If this is `true` then the shopper _must_ check this box to place the order. | No | `true`                                                       | `false` |
 | `error_message` | A custom message to show if the box is unchecked.                            | No | `You must confirm you are over 18 before placing the order.` | `Please check this box if you want to proceed.` |
 
 ### Attributes
@@ -568,6 +565,426 @@ add_action(
 ```
 
 If these fields were rendered in the "contact" location instead, the code would be the same except the hook used would be: `woocommerce_blocks_validate_location_contact_fields`.
+
+## Conditional visibility and validation via JSON Schema
+
+The `required`, `hidden`, and `validation` properties accept an `array` of [JSON Schema](https://json-schema.org/understanding-json-schema/about) to create conditional logic for fields. This allows you to dynamically control field visibility, requirement status, and validation rules based on the values of other fields.
+
+Schema is evaluated in the frontend in real-time, and on the backend at any update. This ensures fast and responsive UI, and consistent results between the client and server.
+
+### JSON Schema Structure
+
+Each schema in the array should be a valid JSON Schema object that defines conditions for when the property should be applied. The schema is evaluated against the current cart and checkout state, which includes all field values and various options (payment, shipping, customer).
+
+Basic structure of a JSON Schema object:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fieldId": {
+      "enum": ["value1", "value2"]
+    }
+  },
+  "required": ["fieldId"]
+}
+```
+
+If you're not familiar with JSON Schema, you can get a quick introduction to it [from the official website](https://json-schema.org/understanding-json-schema/basics), or from one of the libraries used [like AJV](https://ajv.js.org/json-schema.html) or [OPIS.](https://opis.io/json-schema/2.x/examples.html) Checkout builds an abstraction on top of both of them.
+
+### Document object
+
+When you're writing your rules, you're writing a partial schema for the document object, essentially describing the ideal state you want for your field to be required or hidden. An example of the document object looks like this:
+
+<!-- markdownlint-disable MD033 -->
+<details>
+	<summary>Document object</summary>
+
+```json
+{
+	"cart": {
+		"coupons": [
+			"my_coupon"
+		],
+		"shipping_rates": [
+			"free_shipping:1"
+		],
+		"items": [
+			27,
+			27,
+			68
+		],
+		"items_type": [
+			"simple",
+			"variation"
+		],
+		"items_count": 3,
+		"items_weight": 0,
+		"needs_shipping": true,
+		"prefers_collection": false,
+		"totals": {
+			"totalPrice": 6600,
+			"totalTax": 600
+		},
+		"extensions": {}
+	},
+	"checkout": {
+		"create_account": false,
+		"customer_note": "",
+		"additional_fields": {
+			"namespace/mycontact-field": "myvalue"
+		},
+		"payment_method": "bacs"
+	},
+	"customer": {
+		"id": 1,
+		"billing_address": {
+			"first_name": "First Name",
+			"last_name": "Last Name",
+			"company": "Company",
+			"address_1": "Address 1",
+			"address_2": "Address 2",
+			"city": "City",
+			"state": "State",
+			"postcode": "08000",
+			"country": "US",
+			"email": "email@example.com",
+			"phone": "1234567890",
+			"namespace/myfield": "myvalue"
+		},
+		"shipping_address": {
+			"first_name": "First Name",
+			"last_name": "Last Name",
+			"company": "Company",
+			"address_1": "Address 1",
+			"address_2": "Address 2",
+			"city": "City",
+			"state": "State",
+			"postcode": "08000",
+			"country": "US",
+			"phone": "1234567890",
+			"namespace/myfield": "myvalue"
+		},
+		"address": {
+			"first_name": "First Name",
+			"last_name": "Last Name",
+			"company": "Company",
+			"address_1": "Address 1",
+			"address_2": "Address 2",
+			"city": "City",
+			"state": "State",
+			"postcode": "08000",
+			"country": "US",
+			"phone": "1234567890",
+			"namespace/myfield": "myvalue"
+		}
+	}
+}
+```
+
+</details>
+<!-- markdownlint-enable MD033 -->
+
+
+It's full schema is this one:
+<!-- markdownlint-disable MD033 -->
+<details>
+	<summary>Document schema</summary>
+	
+```json
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Cart and Checkout Schema",
+	"description": "Schema for cart, checkout, and customer information",
+	"type": "object",
+	"properties": {
+		"cart": {
+			"type": "object",
+			"description": "Information about the shopping cart",
+			"properties": {
+				"coupons": {
+					"type": "array",
+					"description": "List of coupon codes applied to the cart",
+					"items": {
+						"type": "string"
+					}
+				},
+				"shipping_rates": {
+					"type": "array",
+					"description": "List of currently selected shipping rates",
+					"items": {
+						"type": "string",
+						"description": "Shipping rate identifier using the full shipping rate ID so method_id:instance_id, for example: flat_rate:1"
+					}
+				},
+				"items": {
+					"type": "array",
+					"description": "List of product IDs in the cart, IDs will be dubplicated depending on the quantity of the product in the cart, so if you have 2 of product ID 1, the array will have 2 entries of product ID 1",
+					"items": {
+						"type": "integer"
+					}
+				},
+				"items_type": {
+					"type": "array",
+					"description": "Types of items in the cart, for example: simple, variation, subscription, etc.",
+					"items": {
+						"type": "string"
+					}
+				},
+				"items_count": {
+					"type": "integer",
+					"description": "Total number of items in the cart",
+					"minimum": 0
+				},
+				"items_weight": {
+					"type": "number",
+					"description": "Total weight of items in the cart",
+					"minimum": 0
+				},
+				"needs_shipping": {
+					"type": "boolean",
+					"description": "Whether the items in the cart require shipping"
+				},
+				"prefers_collection": {
+					"type": "boolean",
+					"description": "Whether the customer prefers using Local Pickup"
+				},
+				"totals": {
+					"type": "object",
+					"description": "Cart totals information",
+					"properties": {
+						"totalPrice": {
+							"type": "integer",
+							"description": "Total price of the cart in smallest currency unit (e.g., cents), after applying all discounts, shipping, and taxes"
+						},
+						"totalTax": {
+							"type": "integer",
+							"description": "Total tax amount in smallest currency unit (e.g., cents), after applying all discounts, shipping, and taxes"
+						}
+					}
+				},
+				"extensions": {
+					"type": "object",
+					"description": "Additional cart extension data, this is similar to what's passed in Store API's extensions parameter"
+				}
+			}
+		},
+		"checkout": {
+			"type": "object",
+			"description": "Checkout preferences and settings",
+			"properties": {
+				"create_account": {
+					"type": "boolean",
+					"description": "Whether the customer checked the create account checkbox, this will be false if the customer is logged in, cannot create an account, or forced to create an account."
+				},
+				"customer_note": {
+					"type": "string",
+					"description": "Customer's note or special instructions for the order, this will be empty if the customer didn't add a note."
+				},
+				"additional_fields": {
+					"type": "object",
+					"description": "Additional checkout fields, both applied to the contact or the order locations.",
+					"additionalProperties": {
+						"type": "string"
+					},
+					"patternProperties": {
+						"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$": {
+							"type": "string",
+							"description": "Custom fields with namespace identifiers"
+						}
+					}
+				},
+				"payment_method": {
+					"type": "string",
+					"description": "Selected payment method identifier, this will be the payment method ID regardless if the customer selected a saved payment method or new payment method"
+				}
+			}
+		},
+		"customer": {
+			"type": "object",
+			"description": "Customer information",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"description": "Customer ID, this will be 0 if the customer is not logged in"
+				},
+				"billing_address": {
+					"$ref": "#/definitions/address",
+					"description": "Customer's billing address"
+				},
+				"shipping_address": {
+					"$ref": "#/definitions/address",
+					"description": "Customer's shipping address"
+				},
+				"address": {
+					"$ref": "#/definitions/address",
+					"description": "This is a dynamic field that will be the billing or shipping address depending on the context of the field being evaluted."
+				}
+			}
+		}
+	},
+	"definitions": {
+		"address": {
+			"type": "object",
+			"description": "Customer address information",
+			"properties": {
+				"first_name": {
+					"type": "string",
+					"description": "First name of the recipient"
+				},
+				"last_name": {
+					"type": "string",
+					"description": "Last name of the recipient"
+				},
+				"company": {
+					"type": "string",
+					"description": "Company name"
+				},
+				"address_1": {
+					"type": "string",
+					"description": "Primary address line"
+				},
+				"address_2": {
+					"type": "string",
+					"description": "Secondary address line"
+				},
+				"city": {
+					"type": "string",
+					"description": "City name"
+				},
+				"state": {
+					"type": "string",
+					"description": "State or province, this will be the state code if it's a predefined list, for example: CA, TX, NY, etc, or the field value if it's a freeform state, for example: London."
+				},
+				"postcode": {
+					"type": "string",
+					"description": "Postal or ZIP code"
+				},
+				"country": {
+					"type": "string",
+					"description": "Country code (e.g., US, UK)"
+				},
+				"email": {
+					"type": "string",
+					"format": "email",
+					"description": "Email address"
+				},
+				"phone": {
+					"type": "string",
+					"description": "Phone number"
+				}
+			},
+			"additionalProperties": {
+				"type": "string",
+				"description": "Custom fields with namespace identifiers"
+			},
+			"patternProperties": {
+				"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$": {
+					"type": "string",
+					"description": "Custom fields with namespace identifiers"
+				}
+			}
+		}
+	}
+}
+```
+
+</details>
+<!-- markdownlint-enable MD033 -->
+
+### Examples
+
+#### Required and visible field
+
+In this example we make the field required and visible only if local pickup is being used.
+
+```php
+'required' => [
+    "type" => "object",
+	"properties" => [
+		"cart" => [
+			"properties" => [
+				"prefers_collection" => [
+					"const" => true
+				]
+			]
+		]
+	]
+],
+'hidden' => [
+	"type" => "object",
+	"properties" => [
+		"cart" => [
+			"properties" => [
+				"prefers_collection" => [
+					"const" => false
+				]
+			]
+		]
+	]
+]
+```
+
+Notice that for hidden, we inverse the field, meaning, this field should only be hidden if `prefers_collection` is false, which is almost all cases except when it's selected. In the examples above, we used [the keyword `const`](https://ajv.js.org/json-schema.html#const).
+
+
+#### Validation schema example
+
+Validation is slightly different from conditional visibility and requirement. In validation, you will pass in a subset of schema (only applicable to your field), and its role is to validate the field and show any errors if there.
+
+In this example, we ensure that VAT is made up of a country code and 8-12 numbers.
+
+```php
+'validation' => [
+	"type" => "string",
+	"pattern" => "^[A-Z]{2}[0-9]{8,12}$"
+	"errorMessage" => "Please enter a valid VAT code with 2 letters for country code and 8-12 numbers."
+]
+```
+
+Validation can also be against other fields, for example, an alternative email field that shouldn't the current email:
+
+```php
+'validation' => [
+	"type" => "string",
+	"format" => "email",
+	"not" => [
+		"const" => ["$data", "0/customer/billing_address/email"]
+	]
+	"errorMessage" => "Please enter a valid VAT code with 2 letters for country code and 8-12 numbers."
+]
+```
+
+In the example above, we used [format keyword](https://github.com/ajv-validator/ajv-formats) and `$data` to refer to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference). We also used the `errorMessage` property to provide a custom error message.
+
+#### `$data` keyword and JSON pointers
+
+`$data` keyword is a way in JSON schema to reference another field's value. In the above example, we use it to refer to the billing email via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference).
+
+When dealing with JSON pointers, there are some things to keep in mind:
+
+- The forward slash `/` is used to navigate through the JSON object, so for additional fields, a field named `my-plugin-namespace/my-field` will need to be referenced as `my-plugin-namespace~1my-field`.
+- Navigation in JSON pointers can be from the current field backward, or from the root. If you have an address field and want to validate say the phone field, this means you will validate 2 values, one for shipping, and one for billing, so you can reference the phone field in 2 ways:
+    - `0/customer/address/phone` which uses root navigation (via the `0/`) prefix, and uses the dynamic `address` group, which will change depending if the billing or shipping value is being validated.
+    - `1/phone` which uses relative pointers to step back, in this case, it will access its sibling field, the `phone` field. Increase the number to step back even further, for example, `2/id` will access the customer ID.
+
+### Keywords and values that are not in spec
+
+We support [JSON Schema Draft-07](https://json-schema.org/draft-07), which is simple and doesn't support all the keywords and values that are in the latest spec, but we feel like it covers most of the use cases. On top of that, we introduced some non-standard keywords and values that are not in the spec, their implementation might be different between Opis and AJV (or any future implementation), this is the list of such keywords and values:
+
+- `errorMessage`: Custom error message for validation, in AJV, this is `errorMessage` and in Opis, this is `$error`, we only support `errorMessage` and maps that internally for Opis. We also don't support templates in `errorMessage` for now.
+- `$data`: Refers to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference), both Opis and AJV use the same implementation.
+
+
+### Evaluation Logic
+
+- For `required`: If any schema in the array matches the current checkout state, the field will be required.
+- For `hidden`: If any schema in the array matches the current checkout state, the field will be hidden.
+- For `validation`: The value of the field will be evaluated against the partial schema provided and an error will be shown if it didn't match.
+
+### Performance Considerations
+
+Complex JSON Schema conditions can impact checkout performance. Keep your schemas as simple as possible and limit the number of conditions to what's necessary for your use case.
 
 ## Backward compatibility
 
