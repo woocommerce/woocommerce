@@ -6,7 +6,6 @@ import {
 	useResizeObserver,
 	useReducedMotion,
 } from '@wordpress/compose';
-import { __ } from '@wordpress/i18n';
 /* eslint-disable @woocommerce/dependency-group */
 import {
 	// @ts-expect-error missing type.
@@ -16,7 +15,7 @@ import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
 } from '@wordpress/components';
-import { createElement, Fragment, useRef } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { SidebarContent } from '@automattic/site-admin';
 
 /**

@@ -3,14 +3,12 @@
  */
 import { createElement } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __experimentalItemGroup as ItemGroup } from '@wordpress/components';
 import * as IconPackage from '@wordpress/icons';
 import {
 	SidebarNavigationScreen,
 	SidebarNavigationItem,
 } from '@automattic/site-admin';
-import { getPath } from '@woocommerce/navigation';
 
 const { Icon, ...icons } = IconPackage;
 
