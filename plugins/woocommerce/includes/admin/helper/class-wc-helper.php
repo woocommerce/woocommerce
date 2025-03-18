@@ -1638,6 +1638,16 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get cached connection data
+	 *
+	 * @return array|bool cached connection data or false connection data is not cached.
+	 */
+	public static function get_cached_connection_data() {
+		$cache_key = '_woocommerce_helper_connection_data';
+		return get_transient( $cache_key );
+	}
+
+	/**
 	 * Get details of the current WooCommerce.com connection.
 	 *
 	 * @return array|WP_Error
@@ -1647,6 +1657,11 @@ class WC_Helper {
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
 			return $data;
+		}
+
+		$connection_data = self::get_cached_connection_data();
+		if ( false !== $data ) {
+			return $connection_data;
 		}
 
 		$request = WC_Helper_API::get(
