@@ -6,6 +6,7 @@
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { isEmail } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -14,8 +15,42 @@ import { wooContentPlaceholderBlock } from './blocks/woo-email-content';
 import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 
+// The type is copied from the email-editor package.
+// When the type was imported from the email-editor package, the build failed due to more than 50 type errors.
+type EmailContentValidationRule = {
+	id: string;
+	testContent: ( emailContent: string ) => boolean;
+	message: string;
+	actions: [];
+};
+
 addFilter( 'woocommerce_email_editor_send_button_label', NAME_SPACE, () =>
 	__( 'Save email', 'woocommerce' )
+);
+
+// Add email validation rule
+addFilter(
+	'woocommerce_email_editor_content_validation_rules',
+	NAME_SPACE,
+	( rules: EmailContentValidationRule[] ) => {
+		const emailValidationRule: EmailContentValidationRule = {
+			id: 'sender-email-validation',
+			testContent: () => {
+				const email = document.querySelector< HTMLInputElement >(
+					'input[name="from_email"]'
+				)?.value;
+				if ( ! email ) return false;
+
+				return ! email || ! isEmail( email );
+			},
+			message: __(
+				'The "from" email address is invalid. Please enter a valid email address that will appear as the sender in outgoing WooCommerce emails.',
+				'woocommerce'
+			),
+			actions: [],
+		};
+		return [ ...( rules || [] ), emailValidationRule ];
+	}
 );
 
 addFilter(

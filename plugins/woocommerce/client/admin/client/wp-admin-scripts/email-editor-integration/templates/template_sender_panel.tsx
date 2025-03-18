@@ -4,10 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { Panel, PanelBody, PanelRow, TextControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
+import { useRef } from '@wordpress/element';
 
 function TemplateSenderPanel() {
 	const [ woocommerce_template_data, setWoocommerceTemplateData ] =
 		useEntityProp( 'postType', 'wp_template', 'woocommerce_data' );
+	const emailInputRef = useRef< HTMLInputElement >( null );
 
 	const handleFromNameChange = ( value: string ) => {
 		setWoocommerceTemplateData( {
@@ -27,6 +29,12 @@ function TemplateSenderPanel() {
 				from_address: value,
 			},
 		} );
+
+		// Use HTML5 validation
+		if ( emailInputRef.current ) {
+			emailInputRef.current.checkValidity();
+			emailInputRef.current.reportValidity();
+		}
 	};
 
 	return (
@@ -58,6 +66,7 @@ function TemplateSenderPanel() {
 				</PanelRow>
 				<PanelRow>
 					<TextControl
+						ref={ emailInputRef }
 						className="woocommerce-email-sidebar-template-settings-sender-options-input"
 						label={ __( '"from" email', 'woocommerce' ) }
 						name="from_email"
@@ -67,6 +76,7 @@ function TemplateSenderPanel() {
 								?.from_address || ''
 						}
 						onChange={ handleFromAddressChange }
+						required
 					/>
 				</PanelRow>
 			</PanelBody>
