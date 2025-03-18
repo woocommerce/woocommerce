@@ -725,8 +725,6 @@
 		"axios": "^0.24.0",
 		"babel-eslint": "10.1.0",
 		"buildkite-test-collector": "^1.7.1",
-		"chai": "4.2.0",
-		"chai-as-promised": "7.1.1",
 		"config": "3.3.7",
 		"cross-env": "6.0.3",
 		"dotenv": "^10.0.0",
