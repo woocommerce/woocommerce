@@ -370,7 +370,9 @@ export const BlueprintUploadDropzone = () => {
 					</Notice>
 				</div>
 			) }
-			{ ( state.matches( 'idle' ) || state.matches( 'error' ) ) && (
+			{ ( state.matches( 'idle' ) ||
+				state.matches( 'error' ) ||
+				state.matches( 'parsingSteps' ) ) && (
 				<div className="blueprint-upload-form">
 					<FormFileUpload
 						className="blueprint-upload-field"
