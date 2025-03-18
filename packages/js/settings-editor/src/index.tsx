@@ -14,8 +14,8 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
-/* eslint-enable @woocommerce/dependency-group */
 import { RouterProvider } from '@automattic/site-admin';
+/* eslint-enable @woocommerce/dependency-group */
 
 /**
  * Internal dependencies

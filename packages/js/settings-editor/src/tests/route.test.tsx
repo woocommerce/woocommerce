@@ -82,6 +82,7 @@ describe( 'route.tsx', () => {
 		window.wcSettings = {
 			admin: {
 				settingsData: mockSettingsPages,
+				settingsScripts: {},
 			},
 		};
 
