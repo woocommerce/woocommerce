@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+When using local pickup during block checkout, persist the correct shipping address to the order.

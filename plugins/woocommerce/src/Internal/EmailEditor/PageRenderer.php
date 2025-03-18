@@ -161,9 +161,9 @@ class PageRenderer {
 		$routes             = array(
 			"/wp/v2/{$email_post_type}/" . intval( $post->ID ) . '?context=edit',
 			"/wp/v2/types/{$email_post_type}?context=edit",
-			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=edit', // Global email styles.
+			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=view', // Global email styles.
 			'/wp/v2/block-patterns/patterns',
-			'/wp/v2/templates?context=edit',
+			'/wp/v2/templates?context=view',
 			'/wp/v2/block-patterns/categories',
 			'/wp/v2/settings',
 			'/wp/v2/types?context=view',

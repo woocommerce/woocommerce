@@ -29,7 +29,6 @@
 				"@testing-library/*",
 				"@types/*",
 				"@typescript-eslint/*",
-				"@woocommerce/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
 				"@wordpress/babel-preset-default",
@@ -294,7 +293,6 @@
 				"@wordpress/env"
 			],
 			"packages": [
-				"@woocommerce/block-library",
 				"**"
 			],
 			"pinVersion": "10.17.0"
@@ -307,6 +305,30 @@
 				"**"
 			],
 			"pinVersion": "^1.15.0"
+		},
+		{
+			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
+			"dependencies": [
+				"@woocommerce/settings"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "1.0.0"
+		},
+		{
+			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself (except peer-deps for now).",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
+			"dependencies": [
+				"@woocommerce/*"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "workspace:*"
 		},
 		{
 			"label": "@wordpress/* build-dependencies (always ahead of runtime-dependencies)",

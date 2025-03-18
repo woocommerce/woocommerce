@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 9.9.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -305,7 +305,7 @@ body {
 
 #body_content td ul.wc-item-meta {
 	font-size: small;
-	margin: 1em 0 0>;
+	margin: 1em 0 0;
 	padding: 0;
 	list-style: none;
 }

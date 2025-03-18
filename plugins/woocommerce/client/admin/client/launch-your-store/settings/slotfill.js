@@ -191,6 +191,7 @@ const SiteVisibility = () => {
 					) }
 				>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={
 							<>
 								{ __(
@@ -219,6 +220,7 @@ const SiteVisibility = () => {
 						} }
 					/>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={
 							<>
 								{ __(
