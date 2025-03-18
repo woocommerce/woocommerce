@@ -26,10 +26,6 @@ jest.mock( '@automattic/site-admin', () => ( {
 	useLocation: jest.fn(),
 } ) );
 
-jest.mock( '@wordpress/edit-site/build-module/lock-unlock', () => ( {
-	unlock: jest.fn( ( apis ) => apis ),
-} ) );
-
 jest.mock( '../components/sidebar', () => ( {
 	__esModule: true,
 	Sidebar: ( { children }: { children: React.ReactNode } ) => (
