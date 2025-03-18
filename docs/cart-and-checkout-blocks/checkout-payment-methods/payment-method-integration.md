@@ -394,7 +394,7 @@ const bankTransferPaymentMethod = {
 };
 ```
 
-Payment method nodes are passed everything from the [usePaymentMethodInterface hook](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/block-client-apis/checkout/checkout-api.md#usepaymentmethodinterface). So we can consume this in our `<Content />` component like this:
+Payment method nodes are passed everything from the [usePaymentMethodInterface hook](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/block-client-apis/checkout/checkout-api.md#usepaymentmethodinterface). So we can consume this in our `<Content />` component like this:
 
 ```js
 const Content = ( props ) => {
