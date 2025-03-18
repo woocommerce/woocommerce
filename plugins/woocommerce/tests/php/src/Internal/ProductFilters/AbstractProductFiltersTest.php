@@ -47,6 +47,10 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 
 		$this->fixture_data = new FixtureData();
 
+		/**
+		 * Create the lookup table if it doesn't exist.
+		 * Unit tests can be run selectively, so we need to ensure the lookup table exists.
+		 */
 		global $wpdb;
 		$wpdb->query(
 			"
