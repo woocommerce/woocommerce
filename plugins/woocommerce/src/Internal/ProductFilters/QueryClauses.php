@@ -98,7 +98,7 @@ class QueryClauses implements QueryClausesGenerator {
 
 		global $wpdb;
 
-		$adjust_for_taxes = $this->adjust_price_filters_for_displayed_taxes();
+		$adjust_for_taxes = $this->should_adjust_price_filters_for_displayed_taxes();
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
 		if ( isset( $price_range['min_price'] ) ) {
@@ -263,7 +263,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 *
 	 * @return boolean
 	 */
-	private function adjust_price_filters_for_displayed_taxes() {
+	private function should_adjust_price_filters_for_displayed_taxes() {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
 		$database = wc_prices_include_tax() ? 'incl' : 'excl';
 
