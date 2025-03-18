@@ -1,7 +1,4 @@
-const {
-	test,
-	expect,
-} = require( '../../../fixtures/api-tests-fixtures' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const {
 	setNewPaymentsSettingsPage,
 } = require( '../../../utils/payments-settings' );
