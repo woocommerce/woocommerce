@@ -88,7 +88,7 @@ class WooContentProcessor {
 		remove_all_filters( 'woocommerce_email_header' );
 		remove_all_filters( 'woocommerce_email_footer' );
 
-		$woo_content = $wc_email->get_content_html();
+		$woo_content = $wc_email->get_block_editor_email_template_content();
 
 		// Restore the original header and footer filters.
 		if ( $original_header_filters ) {

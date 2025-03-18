@@ -163,6 +163,27 @@ class CustomerNewAccount extends \WC_Email {
 	}
 
 	/**
+	 * Get block editor email template content.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		return wc_get_template_html(
+			$this->template_block_content,
+			array(
+				'user_login'         => $this->user_login,
+				'blogname'           => $this->get_blogname(),
+				'set_password_url'   => $this->set_password_url,
+				'sent_to_admin'      => false,
+				'plain_text'         => false,
+				'email'              => $this,
+			),
+			'',
+			$this->default_template_path
+		);
+	}
+
+	/**
 	 * Default content to show below main email content.
 	 *
 	 * @since 3.7.0
