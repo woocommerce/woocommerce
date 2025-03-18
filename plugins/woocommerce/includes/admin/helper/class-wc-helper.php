@@ -1653,6 +1653,7 @@ class WC_Helper {
 			'connection-info',
 			array(
 				'authenticated' => true,
+				'query_string'  => '?url=' . base64_encode( home_url() ),
 			)
 		);
 
