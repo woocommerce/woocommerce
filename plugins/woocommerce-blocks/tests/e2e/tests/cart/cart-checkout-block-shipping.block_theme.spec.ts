@@ -270,6 +270,9 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeVisible();
 	} );
 
+	// 5. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup enabled, the shopper sees pickup rates until entering an address for the zone with rates
+	// Not testing because this is a "bug" we are going to fix - see https://github.com/woocommerce/woocommerce/issues/56462
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
