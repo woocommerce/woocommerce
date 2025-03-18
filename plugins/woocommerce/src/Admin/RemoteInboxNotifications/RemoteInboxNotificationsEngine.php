@@ -174,10 +174,9 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				$stored_state
 			);
 
-			add_option(
+			update_option(
 				self::STORED_STATE_OPTION_NAME,
 				$stored_state,
-				'',
 				false
 			);
 		}
