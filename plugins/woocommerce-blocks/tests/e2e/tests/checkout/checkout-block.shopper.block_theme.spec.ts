@@ -203,8 +203,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		);
 	} );
 
-	test( 'Delivery/pickup toggle is not shown when other shipping methods are disabled and hide rates until address is entered is off', async ( {
-	test( 'Delivery/pickup toggle is not shown when other shipping methods are disabled and hide rates until address is entered is on', async ( {
+	test( 'Delivery/pickup toggle is not shown when shipping methods are disabled', async ( {
 		admin,
 		page,
 		frontendUtils,
