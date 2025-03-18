@@ -715,7 +715,6 @@
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/babel-preset-default": "next",
 		"@wordpress/e2e-test-utils-playwright": "^1.15.0",
 		"@wordpress/env": "10.17.0",
 		"@wordpress/scripts": "30.6.0",
