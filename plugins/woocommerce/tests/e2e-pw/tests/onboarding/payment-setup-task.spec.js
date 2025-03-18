@@ -1,22 +1,5 @@
-const {
-	test: baseTest,
-	expect,
-	tags,
-	request: apiRequest,
-} = require( '../../fixtures/fixtures' );
+const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const { setOption } = require( '../../utils/options' );
-
-const { BASE_URL } = process.env;
-
-const disableNewPaymentsSettingsFeature = async () => {
-	await setOption(
-		apiRequest,
-		BASE_URL,
-		'woocommerce_feature_reactify-classic-payments-settings',
-		'no'
-	);
-};
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -64,9 +47,6 @@ const test = baseTest.extend( {
 			value: initialDefaultCountry.data.value,
 		} );
 		await wcAdminApi.put( 'options', initialTaskListHiddenState.data );
-
-		// Disable the new payments settings feature.
-		await disableNewPaymentsSettingsFeature();
 	},
 } );
 

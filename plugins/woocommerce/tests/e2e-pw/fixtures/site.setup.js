@@ -5,6 +5,7 @@ import { test as setup } from './fixtures';
 import { ADMIN_STATE_PATH } from '../playwright.config';
 import { setComingSoon } from '../utils/coming-soon';
 import { skipOnboardingWizard } from '../utils/onboarding';
+import { setNewPaymentsSettingsPage } from '../utils/payments-settings';
 
 setup.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -108,6 +109,10 @@ setup( 'disable coming soon', async ( { baseURL } ) => {
 
 setup( 'disable onboarding wizard', async () => {
 	await skipOnboardingWizard();
+} );
+
+setup( 'disable new payments settings page', async ( { baseURL } ) => {
+	await setNewPaymentsSettingsPage( { baseURL, enabled: 'no' } );
 } );
 
 setup( 'determine if multisite', async ( { api } ) => {
