@@ -262,7 +262,8 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
-						relativePath
+						relativePath,
+					{ dotRelative: true }
 				);
 				if ( filePaths.length > 0 ) {
 					return [ blockCode, filePaths ];
@@ -312,7 +313,9 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 const entries = {
 	styling: {
 		// Packages styles
-		'packages-style': glob.sync( './packages/**/index.{t,j}s' ),
+		'packages-style': glob.sync( './packages/**/index.{t,j}s', {
+			dotRelative: true,
+		} ),
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
