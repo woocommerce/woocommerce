@@ -12,7 +12,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	/**
 	 * The system under test.
 	 *
-	 * @var DataRegenerator
+	 * @var QueryClauses
 	 */
 	private $sut;
 
@@ -127,14 +127,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 *           ["pa_color",["red-slug","not-exist-slug"],"or"]
 	 *           ["pa_color",["red-slug","green-slug"],"or"]
 	 *
-	 * Skipping tests with query_type `and` because there is an issue with
-	 * Filterer::filter_by_attribute_post_clauses that generate wrong clauses
-	 * for `and`. We can fix the same issue in
-	 * FilterClausesGenerator::add_attribute_clauses but doing so will make the
-	 * attribute counts data doesnt match with current query. A fix for both
-	 * methods is pending.
-	 *
-	 * ["pa_color",["red-slug","green-slug"],"and"]
+	 * @todo Add tests for `and` query type once https://github.com/woocommerce/woocommerce/pull/44825 is merged.
 	 *
 	 * @param string   $taxonomy   Attribute taxonomy name.
 	 * @param string[] $terms      Chosen terms' slug.

@@ -1,7 +1,4 @@
 <?php
-/**
- * Class for filter counts.
- */
 
 declare(strict_types=1);
 
@@ -258,7 +255,7 @@ class FilterData {
 	 */
 	private function pre_get_filter_counts( string $filter_type, array $query_vars, array $extra = array() ) {
 		/**
-		 * Allows offloading the filter data.
+		 * Allows offloading the filter data to external services like Elasticsearch.
 		 *
 		 * @hook woocommerce_pre_product_filter_data
 		 *

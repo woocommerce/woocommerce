@@ -253,7 +253,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build and create attribute from variations data.
+	 * Build and create attributes from variations data.
 	 *
 	 * @param array $variations_data Variation data.
 	 */
