@@ -273,6 +273,91 @@ test.describe( 'Shopper → Shipping', () => {
 	// 5. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup enabled, the shopper sees pickup rates until entering an address for the zone with rates
 	// Not testing because this is a "bug" we are going to fix - see https://github.com/woocommerce/woocommerce/issues/56462
 
+	test( '6. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup disabled, and shipping costs require address disabled, the shopper sees shipping rates only after entering an address', async ( {
+		localPickupUtils,
+		admin,
+		frontendUtils,
+		checkoutPageObject,
+		shippingUtils,
+		page,
+	} ) => {
+		await page.goto(
+			'/?disable_third_party_local_pickup_method_registration'
+		);
+		await expect(
+			page.getByText(
+				'Third party local pickup method registration disabled.'
+			)
+		).toBeVisible();
+		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.disableShippingCostsRequireAddress();
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
+		await admin.page
+			.getByLabel( 'Default customer location' )
+			.selectOption( 'No location by default' );
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+
+		await admin.page
+			.getByRole( 'row', { name: 'Rest of the world' } )
+			.getByRole( 'link' )
+			.click();
+
+		// There are two shipping rates enabled. Clicking the first one turns it off.
+		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter address to check delivery options'
+			)
+		).toBeHidden();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Pickup (Automattic, Inc.) Free',
+			} )
+		).toBeHidden();
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter a shipping address to view shipping options'
+			)
+		).toBeVisible();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+
+		await expect(
+			checkoutPageObject.page
+				.getByLabel( 'Checkout' )
+				.getByText(
+					'No shipping options are available for this address. Please verify the address is correct or try a different address.'
+				)
+		).toBeVisible();
+
+		await checkoutPageObject.fillInCheckoutWithTestData( {
+			country: 'GB',
+			postcode: 'SW19 5AE',
+		} );
+
+		await expect(
+			checkoutPageObject.page.getByRole( 'radio', {
+				name: 'Flat rate Free',
+			} )
+		).toBeChecked();
+	} );
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
