@@ -31,11 +31,9 @@
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
-				"@wordpress/babel-preset-default",
 				"@wordpress/base-styles",
 				"@wordpress/block-editor",
 				"@wordpress/blocks",
-				"@wordpress/browserslist-config",
 				"@wordpress/components",
 				"@wordpress/compose",
 				"@wordpress/core-data",
@@ -70,7 +68,6 @@
 				"@wordpress/wordcount",
 				"babel*",
 				"eslint*",
-				"glob*",
 				"postcss*",
 				"webpack*"
 			],
@@ -227,7 +224,6 @@
 		{
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
-				"@wordpress/babel-preset-default",
 				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
@@ -333,7 +329,9 @@
 		{
 			"label": "@wordpress/* build-dependencies (always ahead of runtime-dependencies)",
 			"dependencies": [
-				"@wordpress/dependency-extraction-webpack-plugin"
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/babel-preset-default",
+				"@wordpress/browserslist-config"
 			],
 			"packages": [
 				"**"
