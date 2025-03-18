@@ -70,6 +70,10 @@ const blocks = {
 		isExperimental: true,
 		customDir: 'product-details',
 	},
+	'product-description': {
+		isExperimental: true,
+		customDir: 'product-description',
+	},
 	'catalog-sorting': {},
 	'coming-soon': {},
 	'customer-account': {},
@@ -213,6 +217,10 @@ const blocks = {
 	'order-confirmation-create-account': {
 		customDir: 'order-confirmation/create-account',
 		isExperimental: true,
+	},
+	'blockified-product-reviews': {
+		isExperimental: true,
+		customDir: 'product-reviews',
 	},
 };
 
