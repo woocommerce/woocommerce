@@ -118,12 +118,13 @@ class Tax extends Task {
 			$third_party_complete = apply_filters( 'woocommerce_admin_third_party_tax_setup_complete', false );
 
 			$this->is_complete_result = $is_wc_connect_taxes_enabled ||
-				false !== get_option( 'woocommerce_no_sales_tax' ) ||
 				$third_party_complete ||
+				false !== get_option( 'woocommerce_no_sales_tax' ) ||
 				$this->is_actioned();
 
 			if ( ! $this->is_complete_result && $this->has_existing_tax_rates() ) {
 				$this->mark_actioned();
+				$this->is_complete_result = true;
 			}
 		}
 
