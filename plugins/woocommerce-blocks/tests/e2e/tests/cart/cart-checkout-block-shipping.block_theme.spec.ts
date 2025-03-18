@@ -46,6 +46,14 @@ test.describe( 'Shopper → Shipping', () => {
 	} );
 
 	test.beforeEach( async ( { admin } ) => {
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
+		await admin.page
+			.getByLabel( 'Default customer location' )
+			.selectOption( 'No location by default' );
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
 		await admin.visitAdminPage(
 			'admin.php?page=wc-settings&tab=shipping&zone_id=new'
 		);
@@ -130,14 +138,6 @@ test.describe( 'Shopper → Shipping', () => {
 			},
 		} );
 
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
-		await admin.page
-			.getByLabel( 'Default customer location' )
-			.selectOption( 'No location by default' );
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
-
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -174,20 +174,12 @@ test.describe( 'Shopper → Shipping', () => {
 
 	test( '2. With shipping methods for the default location, shipping methods for _any_ location, local pickup disabled, and shipping costs requires address disabled, the shopper sees shipping rates only', async ( {
 		localPickupUtils,
-		admin,
 		frontendUtils,
 		shippingUtils,
 		checkoutPageObject,
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
 		await shippingUtils.disableShippingCostsRequireAddress();
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
-		await admin.page
-			.getByLabel( 'Default customer location' )
-			.selectOption( 'No location by default' );
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
@@ -229,13 +221,6 @@ test.describe( 'Shopper → Shipping', () => {
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
 		await shippingUtils.enableShippingCostsRequireAddress();
-		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
-		await admin.page
-			.getByLabel( 'Default customer location' )
-			.selectOption( 'No location by default' );
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
 
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
