@@ -7,6 +7,7 @@ import { useSelect } from '@wordpress/data';
 import { SnackbarList } from '@wordpress/components';
 import { store as noticesStore } from '@wordpress/notices';
 import { RouterProvider } from '@automattic/site-admin';
+/* eslint-enable @woocommerce/dependency-group */
 
 /**
  * Internal dependencies
