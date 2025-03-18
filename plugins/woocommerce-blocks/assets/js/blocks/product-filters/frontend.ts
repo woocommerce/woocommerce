@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { getContext, store, getServerContext } from '@wordpress/interactivity';
+import * as iAPI from '@wordpress/interactivity';
+
+const { getContext, store, getServerContext } = iAPI;
 
 const getSetting = window.wc.wcSettings.getSetting;
 const isBlockTheme = getSetting( 'isBlockTheme' );
@@ -197,8 +199,9 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 			);
 		},
 		*navigate() {
-			const { originalParams } =
-				getServerContext< ProductFiltersContext >();
+			const { originalParams } = getServerContext
+				? getServerContext< ProductFiltersContext >()
+				: getContext< ProductFiltersContext >();
 
 			if (
 				isParamsEqual(
