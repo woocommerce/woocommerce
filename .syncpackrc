@@ -122,21 +122,7 @@
 			]
 		},
 		{
-			"label": "React-related dependencies: @woocommerce/blocks-library",
-			"dependencies": [
-				"react",
-				"react-dom",
-				"@types/react-dom",
-				"@types/react"
-			],
-			"pinVersion": "18.3.x",
-			"packages": [
-				"@woocommerce/block-library",
-				"@woocommerce/storybook"
-			]
-		},
-		{
-			"label": "React-related dependencies: Everything else",
+			"label": "React-related dependencies: React 18",
 			"dependencies": [
 				"react",
 				"react-dom",
@@ -223,7 +209,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
@@ -329,9 +314,10 @@
 		{
 			"label": "@wordpress/* build-dependencies (always ahead of runtime-dependencies)",
 			"dependencies": [
-				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
-				"@wordpress/browserslist-config"
+				"@wordpress/browserslist-config",
+				"@wordpress/dependency-extraction-webpack-plugin"
 			],
 			"packages": [
 				"**"
