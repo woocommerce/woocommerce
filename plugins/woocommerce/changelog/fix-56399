@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix warning for no_found_rows in orders list table
