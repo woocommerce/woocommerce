@@ -108,7 +108,6 @@ const getCoreConfig = ( options = {} ) => {
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							],
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -204,7 +203,6 @@ const getMainConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -337,7 +335,6 @@ const getFrontConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -438,7 +435,6 @@ const getPaymentsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -528,7 +524,6 @@ const getExtensionsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -618,7 +613,6 @@ const getSiteEditorConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -747,7 +741,6 @@ const getStylingConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -892,7 +885,6 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
