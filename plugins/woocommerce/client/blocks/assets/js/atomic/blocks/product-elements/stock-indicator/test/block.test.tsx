@@ -58,6 +58,10 @@ jest.mock( '@woocommerce/settings', () => ( {
 				simple: 'Simple product',
 			};
 		}
+		if ( param === 'globalPaymentMethods' ) {
+			return [];
+		}
+		return {};
 	} ),
 	getSettingWithCoercion: jest.fn().mockReturnValue( false ),
 	STORE_PAGES: {
