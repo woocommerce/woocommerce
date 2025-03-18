@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Check the product variable type to avoid fatal errors.
