@@ -162,7 +162,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					'data-wp-bind--aria-checked' => 'state.isPillSelected',
 					'data-wp-text'               => 'context.option.label',
 					'data-wp-watch'              => 'callbacks.watchSelected',
-					'data-wp-on--click'          => 'actions.handleClick',
+					'data-wp-on--click'          => 'actions.toggleSelected',
 					'data-wp-on--keydown'        => 'actions.handleKeyDown',
 				),
 			),

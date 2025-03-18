@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { MouseEvent, KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 import { store, getContext, getElement } from '@wordpress/interactivity';
 
 type Option = {
@@ -55,11 +55,6 @@ const { state, actions } = store(
 					context.selected = context.option.value;
 				}
 				context.focused = context.option.value;
-			},
-			handleClick( event: MouseEvent< HTMLElement > ) {
-				event.preventDefault();
-
-				actions.toggleSelected();
 			},
 			handleKeyDown( event: KeyboardEvent< HTMLElement > ) {
 				const context = getContext< PillsContext >();
