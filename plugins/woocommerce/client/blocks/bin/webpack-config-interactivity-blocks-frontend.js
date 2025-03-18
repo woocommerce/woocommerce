@@ -12,13 +12,13 @@ const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const entries = {
 	// Blocks
 	'woocommerce/product-button':
-		'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
+		'./assets/js/atomic/blocks/product-elements/button/frontend.ts',
 	'woocommerce/product-gallery':
-		'./assets/js/blocks/product-gallery/frontend.tsx',
+		'./assets/js/blocks/product-gallery/frontend.ts',
 	'woocommerce/product-gallery-large-image':
-		'./assets/js/blocks/product-gallery/inner-blocks/product-gallery-large-image/frontend.tsx',
+		'./assets/js/blocks/product-gallery/inner-blocks/product-gallery-large-image/frontend.ts',
 	'woocommerce/product-collection':
-		'./assets/js/blocks/product-collection/frontend.tsx',
+		'./assets/js/blocks/product-collection/frontend.ts',
 	'woocommerce/product-filters':
 		'./assets/js/blocks/product-filters/frontend.ts',
 	'woocommerce/product-filter-active':
@@ -53,8 +53,10 @@ const entries = {
 		'./assets/js/blocks/add-to-cart-with-options/variation-selector/frontend.ts',
 
 	// Other
-	'woocommerce/product-collection-notices':
-		'./assets/js/blocks/product-collection/notices-frontend.ts',
+	'@woocommerce/stores/woocommerce/cart':
+		'./assets/js/base/stores/woocommerce/cart.ts',
+	'@woocommerce/stores/store-notices':
+		'./assets/js/base/stores/store-notices.ts',
 };
 
 module.exports = {
@@ -73,6 +75,7 @@ module.exports = {
 		path: path.resolve( __dirname, '../build/' ),
 		asyncChunks: false,
 		chunkFormat: 'module',
+		environment: { module: true },
 		module: true,
 	},
 	resolve: {
@@ -82,6 +85,11 @@ module.exports = {
 		new DependencyExtractionWebpackPlugin( {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
+			requestToExternalModule( request ) {
+				if ( request.startsWith( '@woocommerce/stores/' ) ) {
+					return `import ${ request }`;
+				}
+			},
 		} ),
 	],
 	module: {

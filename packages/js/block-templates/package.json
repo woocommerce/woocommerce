@@ -70,7 +70,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.6",
+		"@wordpress/browserslist-config": "next",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",

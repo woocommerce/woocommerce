@@ -528,12 +528,6 @@ jobs:
       contents: read
 
     steps:
-      - name: 'Temporary blocked: evaluating tj-actions/changed-files related SIRT report'
-        shell: bash
-        run: |
-          echo 'Temporary blocked: evaluating tj-actions/changed-files related SIRT report'
-          exit 1
-
       - name: 'Calculate checkout depth'
         id: checkout_depth
         shell: bash
