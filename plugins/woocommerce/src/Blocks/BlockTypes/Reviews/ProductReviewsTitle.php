@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
@@ -18,6 +18,8 @@ class ProductReviewsTitle extends AbstractBlock {
 	 * Render the block.
 	 *
 	 * @param array $attributes Block attributes.
+	 * @param string $content Block content.
+	 * @param WP_Block $block Block instance.
 	 * @return string Rendered block content.
 	 */
 	protected function render( $attributes, $content, $block ) {
