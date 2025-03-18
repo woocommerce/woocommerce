@@ -44,6 +44,43 @@ test.describe( 'Shopper → Shipping', () => {
 		await shippingUtils.enableShippingCostsRequireAddress();
 	} );
 
+	test.beforeEach( async ( { admin } ) => {
+		await admin.visitAdminPage(
+			'admin.php?page=wc-settings&tab=shipping&zone_id=new'
+		);
+		await admin.page.getByLabel( 'Zone name' ).fill( 'UK' );
+		await admin.page
+			.getByRole( 'combobox', { name: 'Start typing to filter zones' } )
+			.fill( 'United Kingdom' );
+		await admin.page
+			.getByRole( 'checkbox', { name: 'United Kingdom (UK)' } )
+			.click(); // .check() won't work here as the input disappears immediately after checking.
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+		await admin.page
+			.getByRole( 'button', { name: 'Add shipping method' } )
+			.click();
+		await admin.page.getByText( 'Flat rate' ).click();
+		await admin.page.getByRole( 'button', { name: 'Continue' } ).click();
+		await admin.page
+			.getByRole( 'button', { name: 'Create and save' } )
+			.click();
+		await expect( admin.page.getByText( 'Flat rate' ) ).toBeVisible();
+		if (
+			! ( await admin.page
+				.getByRole( 'button', { name: 'Save changes' } )
+				.isDisabled() )
+		) {
+			await admin.page
+				.getByRole( 'button', { name: 'Save changes' } )
+				.click();
+		}
+		await expect(
+			admin.page.getByRole( 'button', { name: 'Save changes' } )
+		).toBeDisabled();
+	} );
+
 	// Series of tests below to cover the following scenarios: see PR https://github.com/woocommerce/woocommerce/pull/56460 for more details
 
 	/**
