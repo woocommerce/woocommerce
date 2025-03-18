@@ -8849,6 +8849,12 @@ html:has(#status-table-templates){
 }
 
 body.woocommerce_page_wc-settings {
+	.woocommerce-layout {
+		.woocommerce-store-alerts {
+			margin-top: 5px;
+		}
+	}
+	
 	#wpcontent {
 		background: #f0f0f1;
 	}
