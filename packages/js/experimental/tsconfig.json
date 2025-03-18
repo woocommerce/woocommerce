@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
-		"target": "es2019",
+		"target": "esnext",
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
