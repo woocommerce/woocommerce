@@ -44,6 +44,79 @@ test.describe( 'Shopper → Shipping', () => {
 		await shippingUtils.enableShippingCostsRequireAddress();
 	} );
 
+	// Series of tests below to cover the following scenarios: see PR https://github.com/woocommerce/woocommerce/pull/56460 for more details
+
+	/**
+	 * Rates enabled for default customer location
+	 * Rates enabled for _any_ location
+	 * Local pickup enabled
+	 *
+	 * 1. Y Y Y
+	 * 2. Y Y N
+	 * 3. Y N Y
+	 * 4. Y N N
+	 * 5. N Y Y
+	 * 6. N Y N
+	 * 7. N N Y
+	 * 8. N N N
+	 */
+
+	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees rates and pickup options in the sidebar', async ( {
+		localPickupUtils,
+		admin,
+		browser,
+		requestUtils,
+	} ) => {
+		await localPickupUtils.enableLocalPickup();
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
+		await admin.page
+			.getByLabel( 'Default customer location' )
+			.selectOption( 'No location by default' );
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		const guestContext = await browser.newContext( {
+			storageState: { cookies: [], origins: [] },
+		} );
+		const userPage = await guestContext.newPage();
+
+		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
+
+		await userFrontendUtils.goToShop();
+		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await userFrontendUtils.goToCart();
+
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Woo Collection FREE',
+			} )
+		).toBeVisible();
+
+		await userFrontendUtils.goToCheckout();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Ship',
+				exact: true,
+			} )
+		).toBeChecked();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
+	} );
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
