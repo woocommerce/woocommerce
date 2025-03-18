@@ -32,6 +32,9 @@ const test = baseTest.extend( {
 
 		// Reset the task list to its initial state.
 		await wcAdminApi.put( 'options', initialTaskListState.data );
+
+		// Make sure the new payments settings feature is disabled.
+		await disableNewPaymentsSettingsFeature();
 	},
 
 	nonSupportedWooPaymentsCountryPage: async ( { page, api }, use ) => {
@@ -52,8 +55,6 @@ const test = baseTest.extend( {
 		} );
 	},
 } );
-
-test.beforeAll( disableNewPaymentsSettingsFeature );
 
 test(
 	'Can hide the task list',
