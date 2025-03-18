@@ -58,10 +58,9 @@ class Init {
 	 * Turn off the embed page if the current page is the WooCommerce settings page.
 	 *
 	 * @param bool $is_connected_page Whether the current page is a connected page.
-	 * @param string $current_page The current page.
 	 * @return bool
 	 */
-	public function disable_embed_page_for_settings( $is_connected_page, $current_page = null ) {
+	public function disable_embed_page_for_settings( $is_connected_page ) {
 		if ( self::get_instance()->is_settings_page() ) {
 			return false;
 		}
@@ -87,8 +86,8 @@ class Init {
 			$style_name,
 			WCAdminAssets::get_url( $style_path_name . '/style', 'css' ),
 			// Manually set dependencies for now, because the asset file is not being generated correctly.
-			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php
-			array( 'wp-components' ), //isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),
+			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php.
+			array( 'wp-components' ), // isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),.
 			WCAdminAssets::get_file_version( 'css', $style_assets['version'] ),
 		);
 

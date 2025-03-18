@@ -314,8 +314,8 @@ class Features {
 	 */
 	public static function load_scripts() {
 		$settings_page_feature_enabled = self::is_enabled( 'settings' ) && get_current_screen()->id === 'woocommerce_page_wc-settings';
-		
-		if ( PageController::is_admin_or_embed_page() || $settings_page_feature_enabled) {
+
+		if ( PageController::is_admin_or_embed_page() || $settings_page_feature_enabled ) {
 			$features         = self::get_features();
 			$enabled_features = array();
 			foreach ( $features as $key ) {
