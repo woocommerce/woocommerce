@@ -526,6 +526,49 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeVisible();
 	} );
 
+	test( '10. With shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping costs require address enabled, the shopper sees shipping rates only after entering an address', async ( {
+		localPickupUtils,
+		admin,
+		frontendUtils,
+		checkoutPageObject,
+		shippingUtils,
+	} ) => {
+		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.enableShippingCostsRequireAddress();
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+		// Accept the delete dialog, then remove the listener;
+		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
+		admin.page.on( 'dialog', acceptDialog );
+		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
+		admin.page.off( 'dialog', acceptDialog );
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter address to check delivery options'
+			)
+		).toBeVisible();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter a shipping address to view shipping options'
+			)
+		).toBeVisible();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+
+		await expect(
+			checkoutPageObject.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeVisible();
+	} );
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
