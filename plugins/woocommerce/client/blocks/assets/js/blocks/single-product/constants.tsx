@@ -80,5 +80,6 @@ export const ALLOWED_INNER_BLOCKS = [
 	'woocommerce/add-to-cart-with-options',
 	'woocommerce/product-meta',
 	'woocommerce/product-gallery',
+	'woocommerce/blockified-product-reviews',
 	...Object.keys( getBlockMap( metadata.name ) ),
 ];
