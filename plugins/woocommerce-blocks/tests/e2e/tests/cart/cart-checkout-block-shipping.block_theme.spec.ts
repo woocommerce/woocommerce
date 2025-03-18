@@ -211,7 +211,7 @@ test.describe( 'Shopper → Shipping', () => {
 
 	// 3. With shipping methods for the default location, no shipping methods for _any_ other location, and local pickup enabled, the shopper sees shipping rates and pickup options - skipped as same result as 1.
 
-	test( '4. With shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping costs require address enabled, the shopper sees shipping rates only after entering an address', async ( {
+	test( '4. With shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping costs require address disabled, the shopper sees shipping rates only after entering an address', async ( {
 		localPickupUtils,
 		admin,
 		frontendUtils,
@@ -219,7 +219,7 @@ test.describe( 'Shopper → Shipping', () => {
 		shippingUtils,
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
-		await shippingUtils.enableShippingCostsRequireAddress();
+		await shippingUtils.disableShippingCostsRequireAddress();
 
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
@@ -236,7 +236,13 @@ test.describe( 'Shopper → Shipping', () => {
 			frontendUtils.page.getByText(
 				'Enter address to check delivery options'
 			)
-		).toBeVisible();
+		).toBeHidden();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
 
 		await frontendUtils.goToCheckout();
 
@@ -244,14 +250,13 @@ test.describe( 'Shopper → Shipping', () => {
 			frontendUtils.page.getByText(
 				'Enter a shipping address to view shipping options'
 			)
-		).toBeVisible();
-		await checkoutPageObject.fillInCheckoutWithTestData();
+		).toBeHidden();
 
 		await expect(
 			checkoutPageObject.page.getByRole( 'radio', {
 				name: 'Flat rate shipping $',
 			} )
-		).toBeVisible();
+		).toBeChecked();
 	} );
 
 	// 5. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup enabled, the shopper sees pickup rates until entering an address for the zone with rates
