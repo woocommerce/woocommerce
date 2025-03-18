@@ -1,13 +1,12 @@
 <?php
+declare(strict_types=1);
 /**
  * Plugin Name: WooCommerce Blocks Test Additional Checkout Fields
  * Description: Adds custom checkout fields to the checkout form.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
- *
  * @package woocommerce-blocks-test-additional-checkout-fields
  */
-
 class Additional_Checkout_Fields_Test_Helper {
 	/**
 	 * Constructor.
@@ -51,7 +50,7 @@ class Additional_Checkout_Fields_Test_Helper {
 	 * @throws Exception If there is an error during the registration of the checkout fields.
 	 */
 	public function register_custom_checkout_fields() {
-		// Address fields, checkbox, textbox, select
+		// Address fields, checkbox, textbox, select.
 		woocommerce_register_additional_checkout_field(
 			array(
 				'id'                => 'first-plugin-namespace/government-ID',
@@ -59,10 +58,10 @@ class Additional_Checkout_Fields_Test_Helper {
 				'location'          => 'address',
 				'type'              => 'text',
 				'required'          => true,
-				'sanitize_callback' => function( $field_value ) {
+				'sanitize_callback' => function ( $field_value ) {
 					return str_replace( ' ', '', $field_value );
 				},
-				'validate_callback' => function( $field_value ) {
+				'validate_callback' => function ( $field_value ) {
 					$match = preg_match( '/^[0-9]{5}$/', $field_value );
 					if ( 0 === $match || false === $match ) {
 						return new \WP_Error( 'invalid_government_id', 'Invalid government ID.' );
@@ -72,15 +71,15 @@ class Additional_Checkout_Fields_Test_Helper {
 		);
 		woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'first-plugin-namespace/confirm-government-ID',
-				'label'    => 'Confirm government ID',
-				'location' => 'address',
-				'type'     => 'text',
-				'required' => true,
-				'sanitize_callback' => function( $field_value ) {
+				'id'                => 'first-plugin-namespace/confirm-government-ID',
+				'label'             => 'Confirm government ID',
+				'location'          => 'address',
+				'type'              => 'text',
+				'required'          => true,
+				'sanitize_callback' => function ( $field_value ) {
 					return str_replace( ' ', '', $field_value );
 				},
-				'validate_callback' => function( $field_value ) {
+				'validate_callback' => function ( $field_value ) {
 					$match = preg_match( '/^[0-9]{5}$/', $field_value );
 					if ( 0 === $match || false === $match ) {
 						return new \WP_Error( 'invalid_government_id', 'Invalid government ID.' );
@@ -94,6 +93,58 @@ class Additional_Checkout_Fields_Test_Helper {
 				'label'    => 'Can a truck fit down your road?',
 				'location' => 'address',
 				'type'     => 'checkbox',
+			)
+		);
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'first-plugin-namespace/shipping-insurance',
+				'label'    => 'Add shipping insurance',
+				'location' => 'order',
+				'type'     => 'checkbox',
+				'hidden'   => array(
+					'cart' => array(
+						'properties' => array(
+							'totals' => array(
+								'properties' => array(
+									'totalPrice' => array(
+										'maximum' => 4000,
+									),
+								),
+							),
+						),
+					),
+
+				),
+				'required' => array(
+					'cart' => array(
+						'properties' => array(
+							'totals' => array(
+								'properties' => array(
+									'totalPrice' => array(
+										'minimum' => 5900,
+									),
+								),
+							),
+
+						),
+					),
+				),
+			)
+		);
+
+		// Field with validation schema.
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'first-plugin-namespace/vat-number',
+				'label'      => 'VAT Number',
+				'location'   => 'address',
+				'type'       => 'text',
+				'validation' => array(
+					'type'         => 'string',
+					'pattern'      => '^[A-Z]{2}[0-9]{8,12}$',
+					'errorMessage' => 'Please enter a valid VAT number (country code + 8-12 digits)',
+				),
 			)
 		);
 
@@ -193,16 +244,16 @@ class Additional_Checkout_Fields_Test_Helper {
 				'location' => 'contact',
 				'required' => true,
 				'type'     => 'select',
-				'options'  => [
-					[
+				'options'  => array(
+					array(
 						'label' => 'Personal',
 						'value' => 'personal',
-					],
-					[
+					),
+					array(
 						'label' => 'Business',
 						'value' => 'business',
-					],
-				],
+					),
+				),
 			)
 		);
 
