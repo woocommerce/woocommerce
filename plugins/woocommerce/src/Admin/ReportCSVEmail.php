@@ -54,7 +54,7 @@ class ReportCSVEmail extends \WC_Email {
 		/**
 		 * Used to customise report email labels.
 		 *
-		 * @since <x.x.x>
+		 * @since 9.9.0
 		 *
 		 * @param string[] $labels An array of labels.
 		 *
