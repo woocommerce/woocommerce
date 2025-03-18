@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { expect, test as base, FrontendUtils } from '@woocommerce/e2e-utils';
+import { Dialog } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -215,6 +216,58 @@ test.describe( 'Shopper → Shipping', () => {
 				name: 'Flat rate shipping $',
 			} )
 		).toBeChecked();
+	} );
+
+	// 3. With shipping methods for the default location, no shipping methods for _any_ other location, and local pickup enabled, the shopper sees shipping rates and pickup options - skipped as same result as 1.
+
+	test( '4. With shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping costs require address enabled, the shopper sees shipping rates only after entering an address', async ( {
+		localPickupUtils,
+		admin,
+		frontendUtils,
+		checkoutPageObject,
+		shippingUtils,
+	} ) => {
+		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.enableShippingCostsRequireAddress();
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
+		await admin.page
+			.getByLabel( 'Default customer location' )
+			.selectOption( 'No location by default' );
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+		// Accept the delete dialog, then remove the listener;
+		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
+		admin.page.on( 'dialog', acceptDialog );
+		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
+		admin.page.off( 'dialog', acceptDialog );
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter address to check delivery options'
+			)
+		).toBeVisible();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter a shipping address to view shipping options'
+			)
+		).toBeVisible();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+
+		await expect(
+			checkoutPageObject.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeVisible();
 	} );
 
 	test( 'Guest user can see shipping calculator on cart page', async ( {
