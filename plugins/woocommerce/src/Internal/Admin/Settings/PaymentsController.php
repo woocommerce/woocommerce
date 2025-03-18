@@ -264,7 +264,7 @@ class PaymentsController {
 
 			// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
 			// we rely on the fact that the modal falls back to the banner, once dismissed, after 30 days.
-			// @see here's frontend "brother" in client/admin/client/settings-payments/settings-payments-main.tsx.
+			// @see here's its frontend "brother" in client/admin/client/settings-payments/settings-payments-main.tsx.
 			$is_dismissed_modal = ! empty( array_filter( $dismissals, function ( $dismissal ) {
 				return isset( $dismissal['context'] ) && 'wc_settings_payments__modal' === $dismissal['context'];
 			} ) );

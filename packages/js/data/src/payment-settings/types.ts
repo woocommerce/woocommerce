@@ -155,6 +155,7 @@ export type SuggestedPaymentExtension = {
 	tags: string[];
 	plugin: PluginData;
 	links: PaymentGatewayLink[];
+	_incentive?: PaymentIncentive;
 };
 
 export type SuggestedPaymentExtensionCategory = {

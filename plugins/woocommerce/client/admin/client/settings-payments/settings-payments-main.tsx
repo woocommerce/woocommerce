@@ -213,10 +213,10 @@ export const SettingsPaymentsMain = () => {
 			) {
 				const referenceTimestamp = new Date();
 				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
-				// If the merchant have dismissed the switcher incentive modal and 30 days have passed,
+				// If the merchant dismissed the switcher incentive modal more than 30 days ago,
 				// show the banner instead of just highlighting the incentive.
-				// @see it's server bro in plugins/woocommerce/src/Internal/Admin/Settings/PaymentsController::store_has_providers_with_incentive()
-				// for red dot notice logic.
+				// @see its server brother in plugins/woocommerce/src/Internal/Admin/Settings/PaymentsController::store_has_providers_with_incentive()
+				// for the admin menu red dot notice logic.
 				if (
 					isIncentiveDismissedEarlierThanTimestamp(
 						incentive,
