@@ -88,7 +88,7 @@ class CartCheckoutUtils {
 			$page_id                = wc_get_page_id( 'checkout' );
 			self::$is_checkout_page = $page_id && is_page( $page_id );
 
-			// If the is_page check returned false, check the page contents for a cart block or shortcode.
+			// If the is_page check returned false, check the page contents for a checkout block or shortcode.
 			if ( ! self::$is_checkout_page && $post instanceof WP_Post ) {
 				self::$is_checkout_page = wc_post_content_has_shortcode( 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout', $post->post_content );
 			}
