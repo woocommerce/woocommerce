@@ -30,7 +30,7 @@ class CartCheckoutUtils {
 	 * @param string $page_type The page type to check for.
 	 * @return bool|null
 	 */
-	private static function is_page_type( string $page_type ) {
+	private static function is_page_type( string $page_type ): ?bool {
 		if ( ! did_action( 'pre_get_posts' ) ) {
 			return null;
 		}
@@ -56,7 +56,7 @@ class CartCheckoutUtils {
 	 *
 	 * @return bool
 	 */
-	public static function is_cart_page() {
+	public static function is_cart_page(): bool {
 		if ( null === self::$is_cart_page ) {
 			self::$is_cart_page = self::is_page_type( 'cart' );
 		}
@@ -68,7 +68,7 @@ class CartCheckoutUtils {
 	 *
 	 * @return bool
 	 */
-	public static function is_checkout_page() {
+	public static function is_checkout_page(): bool {
 		if ( null === self::$is_checkout_page ) {
 			self::$is_checkout_page = self::is_page_type( 'checkout' );
 		}
