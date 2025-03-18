@@ -245,7 +245,6 @@ abstract class Incentive {
 			)
 		);
 
-		// Map to return an array of associative arrays containing both 'context' and 'timestamp'.
 		return array_map(
 			fn( $dismissed_incentive ) => array(
 				'timestamp' => $dismissed_incentive['timestamp'],
