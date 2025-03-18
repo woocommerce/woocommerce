@@ -569,6 +569,9 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeVisible();
 	} );
 
+	// 11. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled, the shopper sees no shipping until an address is entered no pickup rates
+	// Skipping testing 11 because it is the same as 6.
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
