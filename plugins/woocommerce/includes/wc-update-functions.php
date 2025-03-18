@@ -2955,7 +2955,16 @@ function wc_update_980_remove_order_attribution_install_banner_dismissed_option(
 }
 
 /**
- * One-time force enable the new Payments Settings page feature for all stores.
+ * Remove the transient wc_count_comments as this has migrated to use cache.
+ */
+function wc_update_990_remove_wc_count_comments_transient() {
+	delete_transient( 'wc_count_comments' );
+}
+
+/**
+ * Remove all notes of type 'email' from wp_wc_admin_notes table.
+ *
+ * @return void
  */
 function wc_update_985_enable_new_payments_settings_page_feature() {
 	update_option( 'woocommerce_feature_reactify-classic-payments-settings_enabled', 'yes' );

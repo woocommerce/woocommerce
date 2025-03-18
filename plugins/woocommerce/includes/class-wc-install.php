@@ -279,6 +279,7 @@ class WC_Install {
 		),
 		'9.8.5' => array(
 			'wc_update_985_enable_new_payments_settings_page_feature',
+			'wc_update_990_remove_wc_count_comments_transient',
 		),
 	);
 
