@@ -104,7 +104,7 @@ test.describe( 'Shopper → Shipping', () => {
 	 * 4.  Y N N N
 	 * 5.  N Y Y #
 	 * 6.  N Y N N
-	 * 7.  N N Y #
+	 * 7.  N N Y # - known bug here with the text/UI to enter an address, despite there being no methods.
 	 * 8.  N N N N
 	 * 9.  Y Y N Y
 	 * 10. Y N N Y
@@ -341,6 +341,87 @@ test.describe( 'Shopper → Shipping', () => {
 				name: 'Flat rate Free',
 			} )
 		).toBeChecked();
+	} );
+
+	test( '7. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup enabled the shopper sees local pickup rates only', async ( {
+		localPickupUtils,
+		admin,
+		frontendUtils,
+		page,
+	} ) => {
+		await page.goto(
+			'/?disable_third_party_local_pickup_method_registration'
+		);
+		await expect(
+			page.getByText(
+				'Third party local pickup method registration disabled.'
+			)
+		).toBeVisible();
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+		// Accept the delete dialog, then remove the listener;
+		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
+		admin.page.on( 'dialog', acceptDialog );
+		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
+		admin.page.off( 'dialog', acceptDialog );
+
+		await localPickupUtils.enableLocalPickup();
+		await localPickupUtils.addPickupLocation( {
+			location: {
+				name: 'Automattic, Inc.',
+				address: '60 29th Street, Suite 343',
+				city: 'San Francisco',
+				postcode: '94110',
+				state: 'US:CA',
+				details: 'American entity',
+			},
+		} );
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+
+		await admin.page
+			.getByRole( 'row', { name: 'Rest of the world' } )
+			.getByRole( 'link' )
+			.click();
+
+		// There are two shipping rates enabled. Clicking the first one turns it off.
+		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter address to check delivery options'
+			)
+		).toBeHidden();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Pickup (Automattic, Inc.) Free',
+			} )
+		).toBeChecked();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Automattic, Inc. free 60 29th',
+			} )
+		).toBeChecked();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Ship',
+				exact: true,
+			} )
+		).toBeHidden();
 	} );
 
 	test( 'Guest user can see shipping calculator on cart page', async ( {
