@@ -483,6 +483,44 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeHidden();
 	} );
 
+	test( '9. With shipping methods for the default location, shipping methods for _any_ other location, local pickup disabled and shipping requires address enabled, shopper sees shipping rates immediately.', async ( {
+		localPickupUtils,
+		frontendUtils,
+		shippingUtils,
+		page,
+	} ) => {
+		await page.goto(
+			'/?disable_third_party_local_pickup_method_registration'
+		);
+		await expect(
+			page.getByText(
+				'Third party local pickup method registration disabled.'
+			)
+		).toBeVisible();
+
+		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.enableShippingCostsRequireAddress();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Ship',
+				exact: true,
+			} )
+		).toBeHidden();
+
+		await expect(
+			frontendUtils.page.getByRole( 'heading', {
+				name: 'Shipping options',
+			} )
+		).toBeVisible();
+	} );
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
