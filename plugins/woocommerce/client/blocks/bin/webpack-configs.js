@@ -107,9 +107,7 @@ const getCoreConfig = ( options = {} ) => {
 						loader: 'babel-loader',
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								'@babel/plugin-transform-class-properties',
-							],
+							plugins: [],
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -203,7 +201,6 @@ const getMainConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -335,7 +332,6 @@ const getFrontConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -435,7 +431,6 @@ const getPaymentsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -524,7 +519,6 @@ const getExtensionsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -741,7 +735,6 @@ const getStylingConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -885,7 +878,6 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
