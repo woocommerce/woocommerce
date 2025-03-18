@@ -17,8 +17,8 @@ class ProductReviewsTitle extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array $attributes Block attributes.
-	 * @param string $content Block content.
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.
 	 * @return string Rendered block content.
 	 */
@@ -32,7 +32,7 @@ class ProductReviewsTitle extends AbstractBlock {
 		if ( ! $product ) {
 			return '';
 		}
-	
+
 		$align_class_name   = empty( $attributes['textAlign'] ) ? '' : "has-text-align-{$attributes['textAlign']}";
 		$show_product_title = ! empty( $attributes['showProductTitle'] ) && $attributes['showProductTitle'];
 		$show_reviews_count = ! empty( $attributes['showReviewsCount'] ) && $attributes['showReviewsCount'];
@@ -40,15 +40,15 @@ class ProductReviewsTitle extends AbstractBlock {
 		$reviews_count      = $product->get_review_count();
 		/* translators: %s: Product title. */
 		$product_title = sprintf( __( '&#8220;%s&#8221;', 'woocommerce' ), $product->get_title() );
-		$tag_name   = 'h2';
+		$tag_name      = 'h2';
 		if ( isset( $attributes['level'] ) ) {
 			$tag_name = 'h' . $attributes['level'];
 		}
-	
+
 		if ( '0' === $reviews_count ) {
 			return;
 		}
-	
+
 		if ( $show_reviews_count ) {
 			if ( $show_product_title ) {
 				if ( '1' === $reviews_count ) {
@@ -89,7 +89,7 @@ class ProductReviewsTitle extends AbstractBlock {
 		} else {
 			$reviews_title = __( 'Reviews', 'woocommerce' );
 		}
-	
+
 		return sprintf(
 			'<%1$s id="reviews" %2$s>%3$s</%1$s>',
 			$tag_name,

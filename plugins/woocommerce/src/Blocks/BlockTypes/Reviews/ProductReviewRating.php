@@ -27,8 +27,8 @@ class ProductReviewRating extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array $attributes Block attributes.
-	 * @param string $content Block content.
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.
 	 * @return string Rendered block content.
 	 */
@@ -44,6 +44,7 @@ class ProductReviewRating extends AbstractBlock {
 		$html = '';
 
 		if ( 0 < $rating ) {
+			// translators: %s: Rating.
 			$label = sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating );
 			$html  = sprintf(
 				'<div class="wc-block-components-product-review-rating__container">
