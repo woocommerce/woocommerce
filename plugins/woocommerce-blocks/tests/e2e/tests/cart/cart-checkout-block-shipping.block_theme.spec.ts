@@ -159,6 +159,64 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeChecked();
 	} );
 
+	test( '2. With shipping methods for the default location, shipping methods for _any_ location, local pickup disabled, and shipping costs requires address disabled, the shopper sees shipping rates only', async ( {
+		localPickupUtils,
+		admin,
+		browser,
+		requestUtils,
+		shippingUtils,
+	} ) => {
+		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.disableShippingCostsRequireAddress();
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
+		await admin.page
+			.getByLabel( 'Default customer location' )
+			.selectOption( 'No location by default' );
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		const guestContext = await browser.newContext( {
+			storageState: { cookies: [], origins: [] },
+		} );
+		const userPage = await guestContext.newPage();
+
+		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
+
+		await userFrontendUtils.goToShop();
+		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await userFrontendUtils.goToCart();
+
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Woo Collection FREE',
+			} )
+		).toBeVisible();
+
+		await userFrontendUtils.goToCheckout();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Ship',
+				exact: true,
+			} )
+		).toBeHidden();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
+		await expect(
+			userFrontendUtils.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
+			} )
+		).toBeChecked();
+	} );
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
