@@ -572,6 +572,68 @@ test.describe( 'Shopper → Shipping', () => {
 	// 11. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled, the shopper sees no shipping until an address is entered no pickup rates
 	// Skipping testing 11 because it is the same as 6.
 
+	// Skipping test due to a known bug with needs_shipping - see issue <TODO>
+	test.skip( '12. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled the shopper sees no shipping and no pickup rates', async ( {
+		localPickupUtils,
+		admin,
+		frontendUtils,
+		page,
+		shippingUtils,
+	} ) => {
+		await page.goto(
+			'/?disable_third_party_local_pickup_method_registration'
+		);
+		await expect(
+			page.getByText(
+				'Third party local pickup method registration disabled.'
+			)
+		).toBeVisible();
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+		// Accept the delete dialog, then remove the listener;
+		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
+		admin.page.on( 'dialog', acceptDialog );
+		await admin.page.getByRole( 'link', { name: 'Delete' } ).click();
+		admin.page.off( 'dialog', acceptDialog );
+
+		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.enableShippingCostsRequireAddress();
+
+		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
+
+		await admin.page
+			.getByRole( 'row', { name: 'Rest of the world' } )
+			.getByRole( 'link' )
+			.click();
+
+		// There are two shipping rates enabled. Clicking the first one turns it off.
+		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.click();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByRole( 'radio', {
+				name: 'Ship',
+				exact: true,
+			} )
+		).toBeHidden();
+
+		await expect(
+			frontendUtils.page.getByRole( 'heading', {
+				name: 'Shipping options',
+			} )
+		).toBeHidden();
+	} );
+
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		requestUtils,
 		browser,
