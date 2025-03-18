@@ -40,8 +40,8 @@ class DraftOrders {
 		add_filter( 'wc_order_statuses', [ $this, 'register_draft_order_status' ] );
 		add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
 		add_filter( 'woocommerce_analytics_excluded_order_statuses', [ $this, 'append_draft_order_post_status' ] );
-		add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ] );
-		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ] );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ], 999 );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ], 999 );
 		// Hook into the query to retrieve My Account orders so draft status is excluded.
 		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
 		add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
@@ -174,7 +174,7 @@ class DraftOrders {
 			if ( $orders ) {
 				foreach ( $orders as $order ) {
 					$order->delete( true );
-					$count ++;
+					++$count;
 				}
 			}
 			if ( $batch_size === $count && function_exists( 'as_enqueue_async_action' ) ) {
