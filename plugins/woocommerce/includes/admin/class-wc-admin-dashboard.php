@@ -137,8 +137,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$version = Constants::get_constant( 'WC_VERSION' );
 
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'flot' ), $version, true );
-
-
 			wp_enqueue_script( 'wc-status-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-status-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
 
 			wp_localize_script(
@@ -150,7 +148,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				)
 			);
 
-			// Display loading placeholder
+			// Display loading placeholder.
 			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
 			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
 			echo '</div>';

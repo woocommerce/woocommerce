@@ -45,7 +45,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->status_widget();
 		$this->expectOutputRegex( '/Loading status data.../' );
-		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-status-widget-loading">/');
+		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-status-widget-loading">/' );
 	}
 
 	/**
