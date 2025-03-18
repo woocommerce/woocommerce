@@ -107,10 +107,29 @@ test.describe( 'Shopper → Shipping', () => {
 	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees shipping rates and pickup options - rates are selected default', async ( {
 		localPickupUtils,
 		admin,
-		browser,
-		requestUtils,
+		frontendUtils,
+		page,
 	} ) => {
+		await page.goto(
+			'/?disable_third_party_local_pickup_method_registration'
+		);
+		await expect(
+			page.getByText(
+				'Third party local pickup method registration disabled.'
+			)
+		).toBeVisible();
 		await localPickupUtils.enableLocalPickup();
+		await localPickupUtils.addPickupLocation( {
+			location: {
+				name: 'Automattic, Inc.',
+				address: '60 29th Street, Suite 343',
+				city: 'San Francisco',
+				postcode: '94110',
+				state: 'US:CA',
+				details: 'American entity',
+			},
+		} );
+
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
 		await admin.page
 			.getByLabel( 'Default customer location' )
