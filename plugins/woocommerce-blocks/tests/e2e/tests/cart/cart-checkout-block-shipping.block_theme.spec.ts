@@ -114,7 +114,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees shipping rates and pickup options - rates are selected default', async ( {
 		localPickupUtils,
-		admin,
 		frontendUtils,
 		page,
 	} ) => {
