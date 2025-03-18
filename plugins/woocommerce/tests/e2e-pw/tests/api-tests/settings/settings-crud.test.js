@@ -1661,7 +1661,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						label: 'Logo width (px)',
 						type: 'number',
 						default: 120,
-						value: '120',
+						value: 120,
 					} ),
 				] )
 			);
