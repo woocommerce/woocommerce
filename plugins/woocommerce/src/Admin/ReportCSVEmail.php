@@ -60,7 +60,7 @@ class ReportCSVEmail extends \WC_Email {
 		 *
 		 * @return string[] An Array of labels.
 		 */
-		$this->report_labels  = apply_filters(
+		$this->report_labels = apply_filters(
 			'woocommerce_report_export_email_labels',
 			array(
 				'categories' => __( 'Categories', 'woocommerce' ),
