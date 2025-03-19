@@ -5,7 +5,7 @@ import { DataViews, View } from '@wordpress/dataviews/wp';
 import { Post, store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import { edit } from '@wordpress/icons';
+import { edit, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -85,6 +85,16 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	];
 
 	const actions = [
+		{
+			id: 'preview',
+			label: __( 'Preview', 'woocommerce' ),
+			icon: <Icon icon={ external } />,
+			supportsBulk: false,
+			callback: ( items: EmailType[] ) => {
+				window.open( items[ 0 ].link );
+			},
+			isPrimary: true,
+		},
 		{
 			id: 'edit',
 			label: __( 'Edit', 'woocommerce' ),

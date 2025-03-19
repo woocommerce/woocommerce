@@ -17,6 +17,7 @@ export type EmailType = {
 	post_id: string;
 	recipients: string;
 	status?: string;
+	link?: string;
 };
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );

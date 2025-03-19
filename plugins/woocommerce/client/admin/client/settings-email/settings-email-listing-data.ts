@@ -38,6 +38,7 @@ export const useTransactionalEmails = (
 		return {
 			...emailType,
 			status: post?.status || 'draft',
+			link: post?.link || '',
 		};
 	} );
 
