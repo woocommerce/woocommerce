@@ -391,7 +391,9 @@ abstract class Task {
 	}
 
 	/**
-	 * Track task completion if task is viewable.
+	 * Track task completion if task is viewable and is complete.
+	 *
+	 * @return void
 	 */
 	public function possibly_track_completion() {
 		if ( $this->has_previously_completed() ) {
@@ -499,7 +501,10 @@ abstract class Task {
 	 * @return array
 	 */
 	public function get_json() {
-		$this->possibly_track_completion();
+		$is_complete = $this->is_complete();
+		if ( $is_complete ) {
+			$this->possibly_track_completion();
+		}
 
 		return array(
 			'id'              => $this->get_id(),
@@ -511,7 +516,7 @@ abstract class Task {
 			'additionalInfo'  => $this->get_additional_info(),
 			'actionLabel'     => $this->get_action_label(),
 			'actionUrl'       => $this->get_action_url(),
-			'isComplete'      => $this->is_complete(),
+			'isComplete'      => $is_complete,
 			'time'            => $this->get_time(),
 			'level'           => 3,
 			'isActioned'      => $this->is_actioned(),

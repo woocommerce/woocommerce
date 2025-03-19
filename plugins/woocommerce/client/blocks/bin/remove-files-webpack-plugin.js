@@ -13,7 +13,7 @@ function RemoveFilesPlugin( filePath = '' ) {
 
 RemoveFilesPlugin.prototype.apply = function ( compiler ) {
 	compiler.hooks.afterEmit.tap( 'afterEmit', () => {
-		const files = glob.sync( this.filePath );
+		const files = glob.sync( this.filePath, { dotRelative: true } );
 		files.forEach( ( f ) => {
 			fs.unlink( f, ( err ) => {
 				if ( err ) {

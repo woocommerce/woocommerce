@@ -108,7 +108,7 @@
           "menu_title": "Slot and Fill",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "hash": "9502f8cd0af0594c36e0f527472d6d785bb1394c970be35355a652aa8ddad4bb",
+          "hash": "80451d27bcc912da1fceb99bdf054f27cb8d2e4c9189cd7bb2b5f5cedf8a9fd9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
           "id": "e388101586765dd9aca752d66d667d74951a1504",
           "links": {
@@ -309,7 +309,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "556c1142efe91adcfcbb0f92f511b27ded573e7ba01d17965f05d363aed58fd4",
+              "hash": "7f5226a48549be8129b374f35ba93da35639ccda9a3d9d81583b3e2b8825663a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -1992,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "be7652f149a963b04712ec1b9053f497941de5b1bb8fde8f96d0e6886e27122f"
+  "hash": "9337aafb07fe1610667484f0eb00e0574c72e562cf41f3937691a99a7a5fd55d"
 }
