@@ -141,6 +141,7 @@ class BlockEmailRenderer {
 		$context['recipient_email'] = $wc_email->get_recipient();
 		$context['order']           = $wc_email->object instanceof \WC_Order ? $wc_email->object : null;
 		$context['wp_user']         = $wc_email->object instanceof \WP_User ? $wc_email->object : null;
+		$context['wc_email']     	= $wc_email;
 		return $context;
 	}
 
