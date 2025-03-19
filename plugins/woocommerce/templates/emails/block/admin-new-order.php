@@ -42,6 +42,6 @@ printf( esc_html__( 'Woo! You’ve received a new order from %s', 'woocommerce' 
 <div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woo/email-content -->
 
-<!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Congratulations on the sale!', 'woocommerce' ); ?> </p>
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"> <?php echo esc_html__( 'Congratulations on the sale!', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->

@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> 
+<h2>
 <?php
 /* translators: %s: Site title*/
 printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
@@ -35,7 +35,7 @@ printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-tit
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 	/* translators: %s: Site title */
 	printf( esc_html__( 'Thanks for creating an account on %s. Here’s a copy of your user details.', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
@@ -44,7 +44,7 @@ printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-tit
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 /* translators: %s: Username */
 echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/shopper-username]-->' ), array( 'b' => array() ) );
@@ -63,7 +63,7 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 <!-- wp:paragraph -->
 <p>
 <?php
-	$text = '<a href="%1$s" contenteditable="false" style="text-decoration: underline;"> %2$s </a>';
+	$text = '<a data-link-href="%1$s" contenteditable="false" style="text-decoration: underline;"> %2$s </a>';
 	printf( wp_kses_post( $text ), '<!--[woocommerce/my-account-url]-->', esc_html__( 'My account', 'woocommerce' ) );
 ?>
 </p>

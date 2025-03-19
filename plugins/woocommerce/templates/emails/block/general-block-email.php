@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
-if ( $email->id === 'customer_invoice' ) :
+if ( 'customer_invoice' === $email->id ) :
 	// Customer invoice email
 	// We are keeping this here until we have a better way to handle conditional content in the email editor.
 	?>
@@ -63,48 +63,56 @@ if ( $email->id === 'customer_invoice' ) :
 	}
 endif;
 
-if ( $email->id === 'customer_new_account' ) :
-	if ( isset( $set_password_url ) ) {
-		echo esc_html__( 'To set your password, visit the following address: ', 'woocommerce' ) . "\n\n";
-		echo esc_html( $set_password_url ) . "\n\n";
-	}
-
-	// Only send the set new password link if the user hasn't set their password during sign-up.
-	if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && isset( $password_generated, $set_password_url ) ) {
-		/* translators: URL follows */
-		echo esc_html__( 'To set your password, visit the following address: ', 'woocommerce' ) . "\n\n";
-		echo esc_html( $set_password_url ) . "\n\n";
-	}
+if ( 'customer_new_account' === $email->id ) :
+	?>
+	<?php if ( $set_password_url ) : ?>
+		<p><a href="<?php echo esc_attr( $set_password_url ); ?>"><?php printf( esc_html__( 'Set your new password.', 'woocommerce' ) ); ?></a></p>
+		<?php
+	endif;
 endif;
 
-if ( $email->id === 'customer_reset_password' && isset( $reset_key, $user_id ) ) :
-	// Customer reset password email
-?>
+if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) ) :
+	// Customer reset password email.
+	?>
 <p>
 	<a class="link" href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ); ?>"><?php // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound ?>
-		<?php esc_html_e( 'Reset your password', 'woocommerce' );?>
+		<?php esc_html_e( 'Reset your password', 'woocommerce' ); ?>
 	</a>
 </p>
-<?php
+	<?php
 endif;
 
-if ( isset( $order ) ) {
-	/*
-	* @hooked WC_Emails::order_details() Shows the order details table.
-	* @hooked WC_Structured_Data::generate_order_data() Generates structured data.
-	* @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
-	* @since 2.5.0
-	*/
+$accounts_related_emails = array(
+	'customer_reset_password',
+	'customer_new_account',
+);
+
+if ( isset( $order ) && ! in_array( $email->id, $accounts_related_emails, true ) ) {
+
+	/**
+	 * Woocommerce_email_order_details
+	 *
+	 * @hooked WC_Emails::order_details() Shows the order details table.
+	 * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+	 * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
+	 * @since 2.5.0
+	 */
 	do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
-	/*
-	* @hooked WC_Emails::order_meta() Shows order meta data.
-	*/
+	/**
+	 * Woocommerce_email_order_meta
+	 *
+	 * @hooked WC_Emails::order_meta() Shows order meta data.
+	 * @since 2.0.17
+	 */
 	do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-	/*
-	* @hooked WC_Emails::customer_details() Shows customer details
-	* @hooked WC_Emails::email_address() Shows email address
-	*/
+	/**
+	 * Woocommerce_email_customer_details
+	 *
+	 * @hooked WC_Emails::customer_details() Shows customer details
+	 * @hooked WC_Emails::email_address() Shows email address
+	 * @since 2.5.0
+	 */
 	do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 }

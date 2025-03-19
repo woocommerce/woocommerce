@@ -47,6 +47,8 @@ class WCEmailTemplateGenerator {
 
 		$wc_emails = \WC_Emails::instance();
 		$email_types = $wc_emails->get_emails();
+
+		// Filter the emails to include only the core transactional emails.
 		$email_types = array_filter( $email_types, function( $email ) use ( $core_transactional_emails ) {
 			return in_array( $email->id, $core_transactional_emails );
 		} );

@@ -38,9 +38,9 @@ defined( 'ABSPATH' ) || exit;
 <p> <?php echo esc_html__( 'The following note has been added to your order:', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
-<!-- wp:quote -->
+<!-- wp:quote {"lock":{"move":false,"remove":true}} -->
 <blockquote class="wp-block-quote">
-<!-- wp:paragraph -->
+<!-- wp:paragraph {"lock":{"move":false,"remove":true}} -->
 <p> <?php echo '<!--[woocommerce/admin-order-note]-->'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>  </p>
 <!-- /wp:paragraph -->
 </blockquote>
