@@ -129,15 +129,6 @@ const getCoreConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Core',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
-			new CreateFileWebpack( {
-				path: './',
-				// file name
-				fileName: 'blocks.ini',
-				// content of the file
-				content: `
-woocommerce_blocks_env = ${ NODE_ENV }
-`.trim(),
-			} ),
 		],
 		optimization: {
 			...sharedOptimizationConfig,

@@ -336,8 +336,7 @@
 		]
 	},
 	"files": [
-		"build",
-		"blocks.ini"
+		"build"
 	],
 	"config": {
 		"ci": {
@@ -395,8 +394,7 @@
 				"packages"
 			],
 			"output": [
-				"build",
-				"blocks.ini"
+				"build"
 			],
 			"dependencies": [
 				"dependencyOutputs"
