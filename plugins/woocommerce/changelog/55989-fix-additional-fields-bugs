@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix contact additional fields not persisting, required checkboxes persisting when invalid and `woocommerce_store_api_checkout_update_order_from_request` not triggered on a PUT request to the `/wc/store/v1/checkout` endpoint.

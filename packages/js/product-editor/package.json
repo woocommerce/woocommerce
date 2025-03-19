@@ -109,7 +109,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/block-editor": "wp-6.6",
-		"@wordpress/browserslist-config": "wp-6.6",
+		"@wordpress/browserslist-config": "next",
 		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
