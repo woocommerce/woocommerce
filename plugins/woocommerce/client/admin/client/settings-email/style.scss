@@ -12,6 +12,12 @@
 		font-weight: 400;
 		white-space: wrap;
 	}
+	.woocommerce-email-listing-status {
+		svg {
+			fill: currentColor;
+			margin-right: $grid-unit-05;
+		}
+	}
 }
 
 $wc-setting-email-preview-gap: 16px;

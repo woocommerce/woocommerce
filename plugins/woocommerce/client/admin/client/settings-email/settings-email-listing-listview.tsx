@@ -14,6 +14,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
+import { Status } from './settings-email-listing-status';
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
@@ -73,7 +74,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				operators: [ 'isAny' ],
 			},
 			render: ( row: { item: EmailType } ) => {
-				return row.item.status;
+				return <Status slug={ row.item.status } />;
 			},
 			elements: [
 				{ value: 'draft', label: 'Draft' },
