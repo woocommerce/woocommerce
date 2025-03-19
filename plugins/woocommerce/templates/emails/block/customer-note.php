@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:quote {"lock":{"move":false,"remove":true}} -->
 <blockquote class="wp-block-quote">
 <!-- wp:paragraph {"lock":{"move":false,"remove":true}} -->
-<p> <?php echo '<!--[woocommerce/admin-order-note]-->'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>  </p>
+<p> <?php echo '| <!--[woocommerce/admin-order-note]--> |'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>  </p>
 <!-- /wp:paragraph -->
 </blockquote>
 <!-- /wp:quote -->
