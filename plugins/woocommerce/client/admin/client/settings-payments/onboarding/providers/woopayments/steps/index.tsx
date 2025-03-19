@@ -9,6 +9,7 @@ import React from 'react';
 import { useOnboardingContext } from '../data/onboarding-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import WooPaymentsStepHeader from '../components/header';
+import PaymentMethodsSelection from './payment-methods-selection';
 
 /**
  * Step Components
@@ -50,7 +51,6 @@ export const JetpackStep = () => {
 				</div>
 			</div>
 		</>
-		
 	);
 };
 
@@ -94,31 +94,40 @@ export const FrontendStep = () => {
 
 export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
-		id: 'welcome',
+		id: 'payment-methods-selection',
 		order: 1,
+		type: 'backend',
+		label: 'Choose payment methods',
+		content: <PaymentMethodsSelection />,
+	},
+	{
+		id: 'welcome',
+		order: 2,
 		type: 'backend',
 		label: 'Welcome to WooPayments',
 		content: <WelcomeStep />,
+		dependencies: [ 'payment-methods-selection' ],
 	},
 	{
 		id: 'jetpack',
-		order: 2,
+		order: 3,
 		type: 'backend',
 		label: 'Connect with Jetpack',
 		content: <JetpackStep />,
+		dependencies: [ 'welcome' ],
 	},
 	{
 		id: 'congratulations',
-		order: 3,
+		order: 4,
 		type: 'frontend',
 		label: 'Congratulations',
 		path: '/woopayments/onboarding/congratulations',
-		dependencies: [ 'jetpack', 'welcome' ],
+		dependencies: [ 'jetpack' ],
 		content: <FrontendStep />,
 	},
 	{
 		id: 'final',
-		order: 4,
+		order: 5,
 		type: 'backend',
 		label: 'Payment methods',
 		dependencies: [ 'congratulations' ],
