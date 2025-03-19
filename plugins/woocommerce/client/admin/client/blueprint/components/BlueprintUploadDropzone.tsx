@@ -359,7 +359,9 @@ export const BlueprintUploadDropzone = () => {
 				<div className="blueprint-upload-dropzone-error">
 					<Notice
 						status="error"
-						onDismiss={ () => send( { type: 'DISMISS_FILE_UPLOAD' } ) }
+						onDismiss={ () =>
+							send( { type: 'DISMISS_FILE_UPLOAD' } )
+						}
 					>
 						<pre>{ state.context.error.message }</pre>
 					</Notice>
