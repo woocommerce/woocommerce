@@ -98,10 +98,10 @@ export default function AttributeOptionsEdit(
 				</PanelBody>
 			</InspectorControls>
 
-			{ style === 'pills' ? (
-				<Pills id={ attribute.taxonomy } options={ options } />
-			) : (
-				<Disabled>
+			<Disabled>
+				{ style === 'pills' ? (
+					<Pills id={ attribute.taxonomy } options={ options } />
+				) : (
 					<select
 						id={ attribute.taxonomy }
 						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
@@ -112,8 +112,8 @@ export default function AttributeOptionsEdit(
 							</option>
 						) ) }
 					</select>
-				</Disabled>
-			) }
+				) }
+			</Disabled>
 		</div>
 	);
 }
