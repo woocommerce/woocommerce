@@ -230,7 +230,9 @@ export const saveSettingsGroup =
 		}
 
 		try {
-			const results = await apiFetch< Setting[] >( {
+			const results = await apiFetch< {
+				update: ( Setting | { id: string; error: APIError } )[];
+			} >( {
 				path: `${ NAMESPACE }/settings/${ groupId }/batch`,
 				method: 'POST',
 				data: { update: editedSettings },
@@ -240,7 +242,7 @@ export const saveSettingsGroup =
 			const successfulUpdates: Setting[] = [];
 			const errors: Array< { id: string; error: APIError } > = [];
 
-			results.forEach( ( result ) => {
+			results.update.forEach( ( result ) => {
 				if (
 					'error' in result &&
 					result.error &&
@@ -250,14 +252,12 @@ export const saveSettingsGroup =
 					// If the result has an error, collect it
 					errors.push( {
 						id: result.id,
-						error: result.error as APIError,
+						error: result.error,
 					} );
-					dispatch(
-						setError( groupId, result.id, result.error as APIError )
-					);
+					dispatch( setError( groupId, result.id, result.error ) );
 				} else {
 					// If no error, add to successful updates
-					successfulUpdates.push( result );
+					successfulUpdates.push( result as Setting );
 				}
 			} );
 
