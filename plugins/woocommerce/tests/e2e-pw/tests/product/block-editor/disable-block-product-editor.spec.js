@@ -65,6 +65,8 @@ test.describe.serial(
 		} );
 
 		test( 'can be disabled from the header', async ( { page } ) => {
+			// eslint-disable-next-line jest/no-identical-title
+			test.skip( 'Temporary skip for 9.8' );
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
 			);

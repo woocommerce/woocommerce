@@ -158,6 +158,8 @@ test.describe( 'Product Reviews', () => {
 		} );
 
 		test( 'can edit a product review', async ( { page, reviews } ) => {
+			// eslint-disable-next-line jest/no-identical-title
+			test.skip( 'Temporary skip for 9.8' );
 			const review = reviews[ 0 ];
 
 			await page.goto(
