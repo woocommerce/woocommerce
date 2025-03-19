@@ -52,8 +52,29 @@ export const useTransactionalEmails = (
 		),
 	} ) );
 
+	let filteredEmails: EmailType[] = [];
+	// Apply search filter
+	filteredEmails = emails.filter( ( email ) => {
+		if ( ! view.search ) {
+			return true;
+		}
+		return email.title.toLowerCase().includes( view.search.toLowerCase() );
+	} );
+
+	// Apply Filter
+	filteredEmails = filteredEmails.filter( ( email ) => {
+		const statusFilter = view.filters.find(
+			( filter: View.Filter ) => filter.field === 'status'
+		);
+		if ( ! statusFilter || ! statusFilter.value ) {
+			return true;
+		}
+		return statusFilter.value.includes( email.status );
+	} );
+
 	return {
-		emails,
+		emails: filteredEmails,
 		statuses,
+		total: filteredEmails.length,
 	};
 };

@@ -33,8 +33,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		return select( coreStore ).getEntityRecords( 'root', 'status' ) || [];
 	}, [] );
 
-	const { emails, statuses } = useTransactionalEmails( emailTypes, view );
-	const totalRecords = emails.length;
+	const { emails, statuses, total } = useTransactionalEmails( emailTypes, view );
 
 	const fields = [
 		{
@@ -76,11 +75,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			render: ( row: { item: EmailType } ) => {
 				return <Status slug={ row.item.status } />;
 			},
-			elements: [
-				{ value: 'draft', label: 'Draft' },
-				{ value: 'sent', label: 'Sent' },
-				{ value: 'active', label: 'Active' },
-			],
+			elements: statuses,
 		},
 	];
 
@@ -121,8 +116,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			fields={ fields }
 			data={ emails ?? [] }
 			paginationInfo={ {
-				totalItems: totalRecords,
-				totalPages: Math.ceil( totalRecords / view.perPage ),
+				totalItems: total,
+				totalPages: Math.ceil( total / view.perPage ),
 			} }
 			defaultLayouts={ {
 				table: {
