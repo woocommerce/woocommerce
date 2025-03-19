@@ -3755,30 +3755,29 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$meta_value = 'test_meta_value';
 
 		$query = $wpdb->prepare(
-			"SELECT COUNT(*) FROM {$this->sut::get_meta_table_name()} WHERE meta_key = %s AND meta_value = %s",
+			"SELECT COUNT(*) FROM {$this->sut::get_meta_table_name()} WHERE meta_key = %s AND meta_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- variable is a table name.
 			$meta_key,
 			$meta_value
 		);
 
 		// Confirm there's no meta at the start.
-		$this->assertEquals( $wpdb->get_var( $query ), 0 );
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 
-		// Confirm there's no meta
+		// Confirm there's no meta.
 		$order = new \WC_Order();
 		$order->add_meta_data( $meta_key, $meta_value );
 		$order->save_meta_data();
 
 		// Confirm there's still no meta after calling `save_meta_data()` on an unsaved order.
-		$this->assertEquals( $wpdb->get_var( $query ), 0 );
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 
 		// Confirm that saving the order persists everything.
 		$order->save();
-		$this->assertEquals( $wpdb->get_var( $query ), 1 );
+		$this->assertEquals( $wpdb->get_var( $query ), 1 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 
 		// Calling `save_meta_data()` on an already saved order does update metadata.
 		$order->add_meta_data( $meta_key, $meta_value, false );
 		$order->save_meta_data();
-		$this->assertEquals( $wpdb->get_var( $query ), 2 );
+		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 	}
-
 }
