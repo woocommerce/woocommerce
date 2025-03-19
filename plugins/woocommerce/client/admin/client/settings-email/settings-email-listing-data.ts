@@ -86,8 +86,13 @@ export const useTransactionalEmails = (
 		return statusFilter.value.includes( email.status );
 	} );
 
+	// Apply pagination
+	const startIndex = ( view.page - 1 ) * view.perPage;
+	const endIndex = startIndex + view.perPage;
+	const renderedEmails = filteredEmails.slice( startIndex, endIndex );
+
 	return {
-		emails: filteredEmails,
+		emails: renderedEmails,
 		statuses,
 		total: filteredEmails.length,
 	};
