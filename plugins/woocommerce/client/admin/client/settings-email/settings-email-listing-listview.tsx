@@ -41,7 +41,15 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			label: __( 'Title', 'woocommerce' ),
 			enableHiding: false,
 			render: ( row: { item: EmailType } ) => {
-				return row.item.title;
+				return (
+					<div className="woocommerce-email-listing-title">
+						{ row.item.title }
+						<br />
+						<span className="woocommerce-email-listing-description">
+							{ row.item.description }
+						</span>
+					</div>
+				);
 			},
 		},
 		{

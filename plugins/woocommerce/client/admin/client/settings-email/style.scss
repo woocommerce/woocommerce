@@ -4,6 +4,14 @@
 	.dataviews-wrapper {
 		background-color: $white;
 	}
+	.woocommerce-email-listing-description {
+		display: inline-block;
+		margin-top: 4px;
+		color: $gray-700;
+		font-size: 12px;
+		font-weight: 400;
+		white-space: wrap;
+	}
 }
 
 $wc-setting-email-preview-gap: 16px;
