@@ -26,6 +26,7 @@ const OPTIONS_GROUPS = {
 	woocommerce_shop_page_id: 'Products',
 	woocommerce_cart_redirect_after_add: 'Products',
 	woocommerce_enable_ajax_add_to_cart: 'Products',
+	woocommerce_enable_ajax_add_to_cart_product_pages: 'Products',
 	woocommerce_placeholder_image: 'Products',
 	woocommerce_weight_unit: 'Products',
 	woocommerce_dimension_unit: 'Products',

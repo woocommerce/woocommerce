@@ -91,6 +91,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_shop_page_id'                     => 'single_select_page',
 			'woocommerce_cart_redirect_after_add'          => 'checkbox',
 			'woocommerce_enable_ajax_add_to_cart'          => 'checkbox',
+			'woocommerce_enable_ajax_add_to_cart_product_pages' => 'checkbox',
 			'woocommerce_placeholder_image'                => 'text',
 			'product_measurement_options'                  => array( 'title', 'sectionend' ),
 			'woocommerce_weight_unit'                      => 'select',
@@ -141,13 +142,13 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'digital_download_options'                         => array( 'title', 'sectionend' ),
-			'woocommerce_file_download_method'                 => 'select',
-			'woocommerce_downloads_redirect_fallback_allowed'  => 'checkbox',
-			'woocommerce_downloads_require_login'              => 'checkbox',
+			'digital_download_options'                   => array( 'title', 'sectionend' ),
+			'woocommerce_file_download_method'           => 'select',
+			'woocommerce_downloads_redirect_fallback_allowed' => 'checkbox',
+			'woocommerce_downloads_require_login'        => 'checkbox',
 			'woocommerce_downloads_grant_access_after_payment' => 'checkbox',
-			'woocommerce_downloads_add_hash_to_filename'       => 'checkbox',
-			'woocommerce_downloads_deliver_inline'             => 'checkbox',
+			'woocommerce_downloads_add_hash_to_filename' => 'checkbox',
+			'woocommerce_downloads_deliver_inline'       => 'checkbox',
 			'woocommerce_downloads_count_partial'        => 'checkbox',
 		);
 
@@ -162,7 +163,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_recount_all_terms' => function() use ( &$wc_recount_all_terms_called ) {
+				'wc_recount_all_terms' => function () use ( &$wc_recount_all_terms_called ) {
 					$wc_recount_all_terms_called = true;
 				},
 			)

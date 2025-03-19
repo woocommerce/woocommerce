@@ -50,6 +50,7 @@ function wc_beta_tester_setting_list() {
 		'woocommerce_downloads_grant_access_after_payment',
 		'woocommerce_downloads_require_login',
 		'woocommerce_enable_ajax_add_to_cart',
+		'woocommerce_enable_ajax_add_to_cart_product_pages',
 		'woocommerce_enable_coupons',
 		'woocommerce_enable_guest_checkout',
 		'woocommerce_enable_myaccount_registration',
