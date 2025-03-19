@@ -8,6 +8,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -263,66 +264,33 @@ class WC_Admin {
 				}
 			}
 
-			$message = $this->capture_woo_content( $email_preview );
+			/**
+			 * Woo content processor service.
+			 *
+			 * @var WooContentProcessor $woo_content_processor - service for processing Woo content.
+			 */
+			$woo_content_processor = wc_get_container()->get( WooContentProcessor::class );
 
-			// print the preview email.
+			$email_preview->set_up_filters();
+			// Start output buffering to prevent partial renders with PHP notices or warnings.
+			ob_start();
+			try {
+				add_filter( 'woocommerce_email_styles', array( $woo_content_processor, 'prepare_css' ), 10, 2 );
+				$message = $woo_content_processor->get_woo_content( $email_preview->get_email() );
+				$message = $email_preview->get_email()->style_inline( $message );
+			} catch ( Throwable $e ) {
+				ob_end_clean();
+				wp_die( esc_html__( 'There was an error rendering an email editor dummy content.', 'woocommerce' ), 404 );
+			}
+			ob_end_clean();
+			$email_preview->clean_up_filters();
+
+			// print the preview content.
 			// phpcs:ignore WordPress.Security.EscapeOutput
 			echo $message;
 			// phpcs:enable
 			exit;
 		}
-	}
-
-	/**
-	 * Captures and returns the main content of a WooCommerce email preview without header and footer.
-	 *
-	 * This is an extracted function from an active PR.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/pull/56199
-	 *
-	 * Updater after https://github.com/woocommerce/woocommerce/pull/56199 is merged
-	 *
-	 * @param EmailPreview $email_preview - email preview instance.
-	 * @return string
-	 */
-	private function capture_woo_content( $email_preview ): string {
-		// Store the existing header and footer callbacks.
-		global $wp_filter;
-		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_footer'] : null;
-
-		// Remove header and footer filters because we want to get only the main content.
-		remove_all_filters( 'woocommerce_email_header' );
-		remove_all_filters( 'woocommerce_email_footer' );
-
-		// Start output buffering to prevent partial renders with PHP notices or warnings.
-		ob_start();
-		try {
-			$message = $email_preview->render();
-			$message = $email_preview->ensure_links_open_in_new_tab( $message );
-		} catch ( Throwable $e ) {
-			ob_end_clean();
-			wp_die( esc_html__( 'There was an error rendering an email preview.', 'woocommerce' ), 404 );
-		}
-		ob_end_clean();
-
-		// Restore the original header and footer filters.
-		if ( $original_header_filters ) {
-			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		if ( $original_footer_filters ) {
-			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-
-		return $message;
 	}
 
 	/**

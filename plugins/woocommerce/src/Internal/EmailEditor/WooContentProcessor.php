@@ -48,6 +48,22 @@ class WooContentProcessor {
 	}
 
 	/**
+	 * Filter CSS for the email.
+	 * The CSS was from email editor was already inlined.
+	 * The method hookes to woocommerce_email_styles and removes CSS rules that we don't want to apply to the email.
+	 *
+	 * @param string $css CSS.
+	 * @return string
+	 */
+	public function prepare_css( string $css ): string {
+		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
+		// Remove color and font-family declarations from WooCommerce CSS.
+		$css = preg_replace( '/color\s*:\s*[^;]+;/', '', $css );
+		$css = preg_replace( '/font-family\s*:\s*[^;]+;/', '', $css );
+		return $css;
+	}
+
+	/**
 	 * Get the content of the body tag from the HTML.
 	 *
 	 * @param string $html HTML.
