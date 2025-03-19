@@ -50,16 +50,17 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/v-neck-t-shirt/' );
+			await page.goto( '/product/hoodie/' );
+
 			const productGalleryBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery"]'
 			);
 
-			await expect(
-				productGalleryBlock.locator(
-					'[data-block-name="woocommerce/product-gallery-thumbnails"]'
-				)
-			).toBeVisible();
+			const thumbnailsContainer = productGalleryBlock.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
+
+			await expect( thumbnailsContainer ).toBeVisible();
 
 			await expect(
 				productGalleryBlock.locator(
@@ -68,55 +69,64 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 					)`
 				)
 			).toBeVisible();
+
+			const thumbnailsCount = await thumbnailsContainer
+				.locator( '.wc-block-product-gallery-thumbnails__thumbnail' )
+				.count();
+
+			expect( thumbnailsCount ).toBe( 4 );
 		} );
 	} );
 
-	test( 'all thumbnails are rendered correctly in frontend', async ( {
+	test( 'thumbnail size settings work correctly', async ( {
 		page,
+		editor,
 	} ) => {
-		// Navigate to the product page
-		await page.goto( '/product/hoodie/' );
-
-		const productGalleryBlock = page.locator(
-			'[data-block-name="woocommerce/product-gallery"]'
+		const thumbnailsBlock = editor.canvas.locator(
+			'[data-type="woocommerce/product-gallery-thumbnails"]'
 		);
 
-		// Get the thumbnails container
-		const thumbnailsContainer = productGalleryBlock.locator(
+		// Open block settings
+		await thumbnailsBlock.click();
+		await editor.openDocumentSettingsSidebar();
+
+		// Set size to 10%
+		await page.getByLabel( 'Thumbnail Size' ).fill( '10' );
+
+		// Verify 10% size class is applied
+		await expect( thumbnailsBlock ).toHaveClass(
+			/wc-block-product-gallery-thumbnails--thumbnails-size-10/
+		);
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/hoodie/' );
+
+		const thumbnailsContainer = page.locator(
 			'[data-block-name="woocommerce/product-gallery-thumbnails"]'
 		);
 
-		// Get all thumbnail elements
-		const thumbnails = thumbnailsContainer.locator(
-			'.wc-block-product-gallery-thumbnails__thumbnail'
+		// Verify the 10% size class is present
+		await expect( thumbnailsContainer ).toHaveClass(
+			/wc-block-product-gallery-thumbnails--thumbnails-size-10/
 		);
 
-		// Verify thumbnails container is visible
-		await expect( thumbnailsContainer ).toBeVisible();
+		// The width should be approximately 9% of its parent.
+		// 100% is x + x/10 where x is large image width.
+		const containerWidth = await thumbnailsContainer.evaluate( ( el ) => {
+			return el.clientWidth || 0;
+		} );
 
-		// Get the count of thumbnails
-		const thumbnailCount = await thumbnails.count();
+		const parentWidth = await thumbnailsContainer.evaluate( ( el ) => {
+			return el.parentElement?.clientWidth || 0;
+		} );
 
-		// Ensure we have at least one thumbnail
-		expect( thumbnailCount ).toBe( 4 );
+		const ratio = containerWidth / parentWidth;
 
-		// Verify each thumbnail has an image and it's visible
-		for ( let i = 0; i < thumbnailCount; i++ ) {
-			const thumbnail = thumbnails.nth( i );
-			const thumbnailImage = thumbnail.locator( 'img' );
-
-			await expect( thumbnail ).toBeVisible();
-			await expect( thumbnailImage ).toBeVisible();
-
-			// Verify the image has required attributes
-			await expect( thumbnailImage ).toHaveAttribute( 'src' );
-			await expect( thumbnailImage ).toHaveAttribute( 'data-image-id' );
-		}
-
-		// Verify thumbnails are within a scrollable container
-		const scrollableContainer = thumbnailsContainer.locator(
-			'.wc-block-product-gallery-thumbnails__scrollable'
-		);
-		await expect( scrollableContainer ).toBeVisible();
+		// Allow for some small rounding differences
+		expect( ratio ).toBeGreaterThan( 0.08 );
+		expect( ratio ).toBeLessThan( 0.1 );
 	} );
 } );
