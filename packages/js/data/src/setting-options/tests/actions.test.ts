@@ -293,18 +293,20 @@ describe( 'setting-options actions', () => {
 	describe( 'saveSettingsGroup', () => {
 		it( 'should handle successful batch update', async () => {
 			const groupId = 'test-group';
-			const mockResults = [
-				createTestSetting( {
-					id: 'setting1',
-					value: 'value1',
-					label: 'Setting 1',
-				} ),
-				createTestSetting( {
-					id: 'setting2',
-					value: 'value2',
-					label: 'Setting 2',
-				} ),
-			];
+			const mockResults = {
+				update: [
+					createTestSetting( {
+						id: 'setting1',
+						value: 'value1',
+						label: 'Setting 1',
+					} ),
+					createTestSetting( {
+						id: 'setting2',
+						value: 'value2',
+						label: 'Setting 2',
+					} ),
+				],
+			};
 
 			// Mock API response
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
@@ -331,28 +333,30 @@ describe( 'setting-options actions', () => {
 
 			// Verify state updates
 			expect( store.getState().settings[ groupId ] ).toEqual( {
-				setting1: mockResults[ 0 ],
-				setting2: mockResults[ 1 ],
+				setting1: mockResults.update[ 0 ],
+				setting2: mockResults.update[ 1 ],
 			} );
 			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
 		} );
 
 		it( 'should handle partial success in batch update', async () => {
 			const groupId = 'test-group';
-			const mockResults = [
-				createTestSetting( {
-					id: 'setting1',
-					value: 'value1',
-					label: 'Setting 1',
-				} ),
-				{
-					id: 'setting2',
-					error: {
-						code: 'invalid_value',
-						message: 'Invalid value',
+			const mockResults = {
+				update: [
+					createTestSetting( {
+						id: 'setting1',
+						value: 'value1',
+						label: 'Setting 1',
+					} ),
+					{
+						id: 'setting2',
+						error: {
+							code: 'invalid_value',
+							message: 'Invalid value',
+						},
 					},
-				},
-			];
+				],
+			};
 
 			registry.dispatch( STORE_NAME ).updateSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
@@ -370,12 +374,12 @@ describe( 'setting-options actions', () => {
 
 			// Verify successful update
 			expect( store.getState().settings[ groupId ]?.setting1 ).toEqual(
-				mockResults[ 0 ]
+				mockResults.update[ 0 ]
 			);
 
 			// Verify error state
 			expect( store.getState().errors[ groupId ]?.setting2 ).toEqual(
-				( mockResults[ 1 ] as { error: APIError } ).error
+				( mockResults.update[ 1 ] as { error: APIError } ).error
 			);
 			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
 		} );
@@ -481,18 +485,20 @@ describe( 'setting-options actions', () => {
 	describe( 'updateSettings with save', () => {
 		it( 'should update and save multiple settings in one call', async () => {
 			const groupId = 'test-group';
-			const mockResults = [
-				createTestSetting( {
-					id: 'setting1',
-					value: 'value1',
-					label: 'Setting 1',
-				} ),
-				createTestSetting( {
-					id: 'setting2',
-					value: 'value2',
-					label: 'Setting 2',
-				} ),
-			];
+			const mockResults = {
+				update: [
+					createTestSetting( {
+						id: 'setting1',
+						value: 'value1',
+						label: 'Setting 1',
+					} ),
+					createTestSetting( {
+						id: 'setting2',
+						value: 'value2',
+						label: 'Setting 2',
+					} ),
+				],
+			};
 
 			const updates = [
 				{ id: 'setting1', value: 'value1' },
@@ -519,8 +525,8 @@ describe( 'setting-options actions', () => {
 
 			// Verify state updates after save
 			expect( store.getState().settings[ groupId ] ).toEqual( {
-				setting1: mockResults[ 0 ],
-				setting2: mockResults[ 1 ],
+				setting1: mockResults.update[ 0 ],
+				setting2: mockResults.update[ 1 ],
 			} );
 			expect( store.getState().edits[ groupId ] ).toBeUndefined();
 			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
@@ -528,20 +534,22 @@ describe( 'setting-options actions', () => {
 
 		it( 'should handle partial success when updating and saving multiple settings', async () => {
 			const groupId = 'test-group';
-			const mockResults = [
-				createTestSetting( {
-					id: 'setting1',
-					value: 'value1',
-					label: 'Setting 1',
-				} ),
-				{
-					id: 'setting2',
-					error: {
-						code: 'invalid_value',
-						message: 'Invalid value',
+			const mockResults = {
+				update: [
+					createTestSetting( {
+						id: 'setting1',
+						value: 'value1',
+						label: 'Setting 1',
+					} ),
+					{
+						id: 'setting2',
+						error: {
+							code: 'invalid_value',
+							message: 'Invalid value',
+						},
 					},
-				},
-			];
+				],
+			};
 
 			const updates = [
 				{ id: 'setting1', value: 'value1' },
@@ -566,12 +574,12 @@ describe( 'setting-options actions', () => {
 
 			// Verify successful update
 			expect( store.getState().settings[ groupId ]?.setting1 ).toEqual(
-				mockResults[ 0 ]
+				mockResults.update[ 0 ]
 			);
 
 			// Verify error state
 			expect( store.getState().errors[ groupId ]?.setting2 ).toEqual(
-				( mockResults[ 1 ] as { error: APIError } ).error
+				( mockResults.update[ 1 ] as { error: APIError } ).error
 			);
 			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
 		} );
