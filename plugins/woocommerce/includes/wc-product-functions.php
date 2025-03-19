@@ -495,7 +495,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 
 	$list_type = $include_names ? 'dl' : 'ul';
 
-	if ( is_array( $variation_attributes ) ) {
+	if ( is_array( $variation_attributes ) && ! empty( $variation_attributes ) ) {
 
 		if ( ! $flat ) {
 			$return = '<' . $list_type . ' class="variation">';
