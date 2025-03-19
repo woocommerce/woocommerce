@@ -390,8 +390,7 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) {
 			global $product;
-			// if ( $product && ! in_array( $product->get_type(), ['external', 'grouped'], true ) ) {
-			if ( $product && ! in_array( $product->get_type(), ['external'], true ) ) {
+			if ( $product && ! in_array( $product->get_type(), array( 'external' ), true ) ) {
 				self::enqueue_script( 'wc-ajax-add-to-cart' );
 			}
 		}
