@@ -631,14 +631,18 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$email_types = array();
 		foreach ( $emails as $type => $email ) {
 			if ( $email->recipient === null ) {
-				$email->recipient = '';
+				$email->recipient = 'customers';
 			}
 			$email_types[] = array(
 				'title' => $email->get_title(),
 				'description' => $email->get_description(),
 				'id' => $email->id,
 				'post_id' => $email->get_email_template_post_id(),
-				'recipients' => $email->get_recipient(),
+				'recipients' => array(
+					'to' => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
+					'cc' => $email->get_cc_recipient(),
+					'bcc' => $email->get_bcc_recipient(),
+				),
 			);
 		}
 		?>

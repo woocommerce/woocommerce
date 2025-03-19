@@ -18,6 +18,13 @@
 			margin-right: $grid-unit-05;
 		}
 	}
+	.woocommerce-email-listing-recipients {
+		white-space: wrap;
+	}
+}
+
+.woocommerce-email-listing-recipients-tooltip {
+	text-align: left;
 }
 
 $wc-setting-email-preview-gap: 16px;

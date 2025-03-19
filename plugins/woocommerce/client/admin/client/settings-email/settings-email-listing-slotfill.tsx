@@ -10,12 +10,18 @@ import { registerPlugin } from '@wordpress/plugins';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
 import { ListView } from './settings-email-listing-listview';
 
+export type Recipients = {
+	to: string;
+	cc: string;
+	bcc: string;
+};
+
 export type EmailType = {
 	title: string;
 	description: string;
 	id: string;
 	post_id: string;
-	recipients: string;
+	recipients: Recipients;
 	status?: string;
 	link?: string;
 };

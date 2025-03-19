@@ -16,6 +16,7 @@ import { __ } from '@wordpress/i18n';
 import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
 import { Status } from './settings-email-listing-status';
+import { RecipientsList } from './settings-email-listing-recipients';
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
@@ -34,7 +35,10 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		return select( coreStore ).getEntityRecords( 'root', 'status' ) || [];
 	}, [] );
 
-	const { emails, statuses, total } = useTransactionalEmails( emailTypes, view );
+	const { emails, statuses, total } = useTransactionalEmails(
+		emailTypes,
+		view
+	);
 
 	const fields = [
 		{
@@ -64,7 +68,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			enableSorting: false,
 			enableHiding: false,
 			render: ( row: { item: EmailType } ) => {
-				return row.item.recipients || __( 'Customers', 'woocommerce' );
+				return <RecipientsList recipients={ row.item.recipients } />;
 			},
 		},
 		{
