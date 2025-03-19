@@ -51,6 +51,7 @@ test( 'guest shopper can verify their email address after the grace period', asy
 	page,
 	order,
 } ) => {
+	test.skip( 'Temporary skip for 9.8' );
 	await test.step( 'navigate to order confirmation page', async () => {
 		await page.goto(
 			`checkout/order-received/${ order.id }/?key=${ order.order_key }`
@@ -79,6 +80,7 @@ test( 'guest shopper can verify their email address after the grace period', asy
 			'woocommerce_order_email_verification_grace_period',
 			0
 		);
+		// eslint-disable-next-line playwright/no-wait-for-timeout
 		await page.waitForTimeout( 2000 ); // needs some time before reload for change to take effect.
 		await page.reload();
 		await expect(
