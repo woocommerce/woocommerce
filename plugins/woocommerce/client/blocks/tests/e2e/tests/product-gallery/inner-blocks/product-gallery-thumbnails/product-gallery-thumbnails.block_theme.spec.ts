@@ -129,4 +129,56 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		expect( ratio ).toBeGreaterThan( 0.08 );
 		expect( ratio ).toBeLessThan( 0.1 );
 	} );
+
+	test( 'thumbnails are scrollable and last thumbnail is reachable', async ( {
+		page,
+		editor,
+	} ) => {
+		const thumbnailsBlock = editor.canvas.locator(
+			'[data-type="woocommerce/product-gallery-thumbnails"]'
+		);
+
+		// Open block settings and set size to 50% to make thumbnails scrollable
+		await thumbnailsBlock.click();
+		await editor.openDocumentSettingsSidebar();
+		await page.getByLabel( 'Thumbnail Size' ).fill( '50' );
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/hoodie/' );
+
+		const thumbnailsContainer = page.locator(
+			'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+		);
+
+		const scrollableContainer = page.locator(
+			'.wc-block-product-gallery-thumbnails__scrollable'
+		);
+
+		// Get all thumbnails
+		const thumbnails = scrollableContainer.locator(
+			'.wc-block-product-gallery-thumbnails__thumbnail'
+		);
+
+		// Get the last thumbnail
+		const lastThumbnail = thumbnails.last();
+
+		// Check if overflow classes are present initially
+		await expect( thumbnailsContainer ).toHaveClass(
+			/wc-block-product-gallery-thumbnails--overflow-bottom/
+		);
+
+		// Scroll to the last thumbnail
+		await lastThumbnail.scrollIntoViewIfNeeded();
+
+		// Verify the last thumbnail is visible
+		await expect( lastThumbnail ).toBeVisible();
+
+		// After scrolling to the end, the bottom overflow should be gone
+		await expect( thumbnailsContainer ).not.toHaveClass(
+			/wc-block-product-gallery-thumbnails--overflow-bottom/
+		);
+	} );
 } );
