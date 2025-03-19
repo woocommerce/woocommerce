@@ -753,7 +753,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						description:
 							'Enable AJAX add to cart buttons on archives',
 						type: 'checkbox',
-						default: 'yes',
+						default: 'no',
 						value: 'yes',
 					} ),
 				] )
