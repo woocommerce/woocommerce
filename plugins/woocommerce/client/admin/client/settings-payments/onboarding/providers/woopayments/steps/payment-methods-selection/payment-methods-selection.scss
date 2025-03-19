@@ -584,9 +584,8 @@
 	flex-direction: column;
 	height: calc(100% - 60px); // Account for continue button
 
-    // Remove flex-direction: column on small screens.
-    @media screen and (max-width: $break-medium) {
-        flex-direction: row;
+    // Remove padding on medium screens or less.
+    @media screen and (min-width: $break-mobile) {
         padding: 0 !important;
     }
 
