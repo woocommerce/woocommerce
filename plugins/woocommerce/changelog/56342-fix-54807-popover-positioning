@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix placement of Analytics Dashboard popover by removing explicit placement attribute.
