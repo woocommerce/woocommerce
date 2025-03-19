@@ -547,7 +547,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
+		$attributes = $this->get_prop( 'attributes', $context );
+		if ( ! is_array( $attributes ) ) {
+			return array();
+		}
+
+		return $attributes;
 	}
 
 	/**
