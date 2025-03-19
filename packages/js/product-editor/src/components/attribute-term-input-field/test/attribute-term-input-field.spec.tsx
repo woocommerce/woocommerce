@@ -9,8 +9,7 @@ import { ProductAttributeTerm } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AttributeTermInputField } from '../attribute-term-input-field'; // see below explanation for the skip
-/* eslint-disable react/jsx-no-undef */
+import { AttributeTermInputField } from '../attribute-term-input-field';
 
 jest.mock( '@wordpress/core-data', () => ( {
 	registerStore: jest.fn(),
@@ -156,8 +155,7 @@ jest.mock( '@woocommerce/components', () => {
 // 	},
 // ];
 
-// TODO: react-18-upgrade - not sure why there's an error where it's calling require("@wordpress/core-data") and erroring with "Cannot unlock an undefined object."
-describe.skip( 'AttributeTermInputField', () => {
+describe( 'AttributeTermInputField', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
@@ -207,7 +205,6 @@ describe.skip( 'AttributeTermInputField', () => {
 				/>
 			);
 		} );
-		// debug();
 		await waitFor( () => {
 			expect( screen.queryByText( 'spinner' ) ).toBeInTheDocument();
 		} );
