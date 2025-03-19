@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\Jetpack\Connection\Manager;
+
 defined( 'ABSPATH' ) || exit;
 /**
  * Payments settings utilities class.
@@ -306,5 +308,36 @@ class Utils {
 		}
 
 		return $truncated;
+	}
+
+	/**
+	 * Retrieves a URL to relative path inside WooCommerce admin Payments settings with
+	 * the provided query parameters.
+	 *
+	 * @param string|null $path  Relative path of the desired page.
+	 * @param array       $query Query parameters to append to the path.
+	 *
+	 * @return string       Fully qualified URL pointing to the desired path.
+	 */
+	public static function wc_payments_settings_url( string $path = null, array $query = array() ): string {
+		$path = $path ? '&path=' . $path : '';
+
+		$query_string = '';
+		if ( ! empty( $query ) ) {
+			$query_string = http_build_query( $query );
+		}
+
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout' . $path . $query_string, dirname( __FILE__ ) );
+	}
+
+	/**
+	 * Check if the store is properly connected to WPCOM (aka has a Jetpack connection).
+	 *
+	 * @return bool
+	 */
+	public static function store_has_wpcom_connection(): bool {
+		$jetpack_connection_manager = new Manager( 'woocommerce' );
+
+		return $jetpack_connection_manager->is_connected() && $jetpack_connection_manager->has_connected_owner();
 	}
 }
