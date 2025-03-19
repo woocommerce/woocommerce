@@ -295,9 +295,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Fields with JSON schema validation show appropriate error messages', async ( {
 			checkoutPageObject,
-			requestUtils,
 		} ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 			await checkoutPageObject.editShippingDetails();
 
 			// Required setup - get all of the required fields filled properly
@@ -351,17 +349,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					'Please enter a valid VAT number (country code + 8-12 digits)'
 				)
 			).toBeHidden();
-
-			await requestUtils.setFeatureFlag( 'experimental-blocks', false );
 		} );
 
 		test( 'Conditional fields are shown/hidden based on cart state', async ( {
 			checkoutPageObject,
 			frontendUtils,
-			requestUtils,
 		} ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-
 			// The shipping insurance field should be hidden by default (cart total < 2000)
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
@@ -422,8 +415,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					'Add shipping insurance is a required field.'
 				)
 			).toBeHidden();
-
-			await requestUtils.setFeatureFlag( 'experimental-blocks', false );
 		} );
 	} );
 } );
