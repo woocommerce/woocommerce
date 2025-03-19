@@ -33,10 +33,24 @@ const TEMPLATE: InnerBlockTemplate[] = [
 						{},
 						[
 							[
-								'core/comment-author-name',
+								'core/group',
 								{
-									fontSize: 'small',
+									tagName: 'div',
+									layout: {
+										type: 'flex',
+										flexWrap: 'nowrap',
+										justifyContent: 'space-between',
+									},
 								},
+								[
+									[
+										'core/comment-author-name',
+										{
+											fontSize: 'small',
+										},
+									],
+									[ 'woocommerce/product-review-rating' ],
+								],
 							],
 							[
 								'core/group',
@@ -68,11 +82,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 							],
 							[ 'core/comment-content' ],
 						],
-					],
-					[
-						'core/column',
-						{ width: '80px' },
-						[ [ 'woocommerce/product-review-rating' ] ],
 					],
 				],
 			],
