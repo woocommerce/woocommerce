@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
 import { DataViews, View } from '@wordpress/dataviews/wp';
 import { Post, store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
@@ -60,6 +61,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		{
 			id: 'recipients',
 			label: __( 'Recipient(s)', 'woocommerce' ),
+			enableSorting: false,
 			enableHiding: false,
 			render: ( row: { item: EmailType } ) => {
 				return row.item.recipients || __( 'Customers', 'woocommerce' );

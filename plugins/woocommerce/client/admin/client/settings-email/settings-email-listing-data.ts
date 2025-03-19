@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
 import { View } from '@wordpress/dataviews/wp';
 import { Post, useEntityRecords } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -52,9 +53,22 @@ export const useTransactionalEmails = (
 		),
 	} ) );
 
+	// Apply Sort
+	let sortedEmails: EmailType[] = emails;
+	if ( view.sort ) {
+		sortedEmails = sortedEmails.sort( ( a, b ) => {
+			const field = view.sort.field as keyof EmailType;
+			if ( a[ field ] === undefined || b[ field ] === undefined ) {
+				return 0;
+			}
+			const direction = view.sort.direction === 'asc' ? 1 : -1;
+			return direction * a[ field ].localeCompare( b[ field ] );
+		} );
+	}
+
 	let filteredEmails: EmailType[] = [];
 	// Apply search filter
-	filteredEmails = emails.filter( ( email ) => {
+	filteredEmails = sortedEmails.filter( ( email ) => {
 		if ( ! view.search ) {
 			return true;
 		}
