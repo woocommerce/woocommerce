@@ -93,7 +93,9 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		$merged_attributes = array_merge( $default_attributes, $attributes );
 
 		foreach ( $merged_attributes as $key => $value ) {
-			if ( is_null( $value ) ) continue;
+			if ( is_null( $value ) ) {
+				continue;
+			}
 			if ( is_array( $value ) || is_object( $value ) ) {
 				$value = wp_json_encode(
 					$value,
@@ -192,7 +194,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		$default_option  = array(
 			'label'      => esc_html__( 'Choose an option', 'woocommerce' ),
 			'value'      => '',
-			'isSelected' => false
+			'isSelected' => false,
 		);
 
 		$attribute_terms = array_merge(
