@@ -22,7 +22,15 @@ export class FrontendUtils {
 	}
 
 	async addToCart( itemName = '' ) {
-		await this.page.waitForLoadState( 'domcontentloaded' );
+		const cartResponsePromise = this.page.waitForResponse( ( response ) => {
+			const url = response.url();
+			return (
+				url.includes( 'cart/items' ) ||
+				url.includes( 'add_to_cart' ) ||
+				url.includes( 'batch' )
+			);
+		} );
+
 		if ( itemName !== '' ) {
 			// We can't use `getByRole()` here because the Add to Cart button
 			// might be a button (in blocks) or a link (in the legacy template).
@@ -33,19 +41,20 @@ export class FrontendUtils {
 			await this.page.click( 'text=Add to cart' );
 		}
 
-		await this.page.waitForResponse( ( response ) => {
-			const url = response.url();
-			return (
-				url.includes( 'cart/items' ) ||
-				url.includes( 'add_to_cart' ) ||
-				url.includes( 'batch' )
-			);
-		} );
+		await cartResponsePromise;
+
+		/**
+		 * There's a race condition where the cart is not fully updated
+		 * immediately when adding multiple items one by one, even though the
+		 * response is received. This timeout ensures the cart is updated before
+		 * the next test step.
+		 */
+		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+		await this.page.waitForTimeout( 2000 );
 	}
 
 	async goToCheckout() {
 		await this.page.goto( '/checkout' );
-		await this.page.locator( '#email' ).waitFor();
 	}
 
 	async goToCart() {
