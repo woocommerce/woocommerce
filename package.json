@@ -64,7 +64,6 @@
 	},
 	"dependencies": {
 		"@babel/core": "7.12.9",
-		"@wordpress/babel-plugin-import-jsx-pragma": "wp-6.6",
 		"@wordpress/babel-preset-default": "next",
 		"lodash": "^4.17.21",
 		"wp-textdomain": "1.0.1"
