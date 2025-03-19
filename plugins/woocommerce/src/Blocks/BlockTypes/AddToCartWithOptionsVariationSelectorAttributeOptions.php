@@ -93,6 +93,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		$merged_attributes = array_merge( $default_attributes, $attributes );
 
 		foreach ( $merged_attributes as $key => $value ) {
+			if ( is_null( $value ) ) continue;
 			if ( is_array( $value ) || is_object( $value ) ) {
 				$value = wp_json_encode(
 					$value,
@@ -134,12 +135,30 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		$attribute_name  = $block->context['woocommerce/attributeName'];
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 
+		$pills = '';
+		foreach ( $attribute_terms as $attribute_term ) {
+			$pills .= sprintf(
+				'<div %s>%s</div>',
+				$this->get_normalized_attributes(
+					array(
+						'role'                       => 'radio',
+						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
+						'data-wp-bind--tabindex'     => 'state.pillTabIndex',
+						'data-wp-bind--aria-checked' => 'state.isPillSelected',
+						'data-wp-watch'              => 'callbacks.watchSelected',
+						'data-wp-on--click'          => 'actions.toggleSelected',
+						'data-wp-on--keydown'        => 'actions.handleKeyDown',
+						'data-wp-context'            => array(
+							'option' => $attribute_term,
+						),
+					),
+				),
+				$attribute_term['label']
+			);
+		}
+
 		return sprintf(
-			'<div %s>
-				<template data-wp-each--option="context.options">
-        	<div %s></div>
-    		</template>
-			</div>',
+			'<div %s>%s</div>',
 			$this->get_normalized_attributes(
 				array(
 					'role'                => 'radiogroup',
@@ -154,18 +173,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					),
 				),
 			),
-			$this->get_normalized_attributes(
-				array(
-					'role'                       => 'radio',
-					'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-					'data-wp-bind--tabindex'     => 'state.pillTabIndex',
-					'data-wp-bind--aria-checked' => 'state.isPillSelected',
-					'data-wp-text'               => 'context.option.label',
-					'data-wp-watch'              => 'callbacks.watchSelected',
-					'data-wp-on--click'          => 'actions.toggleSelected',
-					'data-wp-on--keydown'        => 'actions.handleKeyDown',
-				),
-			),
+			$pills,
 		);
 	}
 
@@ -182,40 +190,48 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 		$attribute_name  = $block->context['woocommerce/attributeName'];
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 		$default_option  = array(
-			'label' => esc_html__( 'Choose an option', 'woocommerce' ),
-			'value' => '',
+			'label'      => esc_html__( 'Choose an option', 'woocommerce' ),
+			'value'      => '',
+			'isSelected' => false
 		);
 
-		$options = array_merge(
+		$attribute_terms = array_merge(
 			array( $default_option ),
 			$attribute_terms
 		);
 
+		$options = '';
+		foreach ( $attribute_terms as $attribute_term ) {
+			$options .= sprintf(
+				'<option %s>%s</option>',
+				$this->get_normalized_attributes(
+					array(
+						'value'              => $attribute_term['value'],
+						'selected'           => $attribute_term['isSelected'] ? 'selected' : null,
+						'data-wp-on--change' => 'actions.handleChange',
+						'data-wp-context'    => array(
+							'option' => $attribute_term,
+						),
+					),
+				),
+				$attribute_term['label']
+			);
+		}
+
 		return sprintf(
-			'<select %s>
-				<template data-wp-each--option="context.options">
-        	<option %s></option>
-    		</template>
-			</select>',
+			'<select %s>%s</select>',
 			$this->get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                  => $attribute_id,
 					'data-wp-interactive' => $this->get_full_block_name() . '__dropdown',
 					'data-wp-context'     => array(
-						'options'  => $options,
+						'options'  => $attribute_terms,
 						'selected' => $this->get_default_selected_attribute( $attribute_terms ),
 					),
 				),
 			),
-			$this->get_normalized_attributes(
-				array(
-					'data-wp-text'           => 'context.option.label',
-					'data-wp-bind--value'    => 'context.option.value',
-					'data-wp-bind--selected' => 'state.isOptionSelected',
-					'data-wp-on--change'     => 'actions.handleChange',
-				),
-			),
+			$options,
 		);
 	}
 }

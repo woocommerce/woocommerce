@@ -35,7 +35,11 @@ const { state, actions } = store(
 					getContext< PillsContext >();
 
 				// Allow the first pill to be focused when no option is selected.
-				if ( ! selected && ! focused && options[ 0 ] === option ) {
+				if (
+					! selected &&
+					! focused &&
+					options[ 0 ]?.value === option.value
+				) {
 					return 0;
 				}
 
