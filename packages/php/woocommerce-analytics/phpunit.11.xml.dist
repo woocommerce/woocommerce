@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+	bootstrap="tests/php/bootstrap.php"
+	cacheDirectory=".phpunit.cache"
+	colors="true"
+	executionOrder="depends"
+	beStrictAboutOutputDuringTests="true"
+	displayDetailsOnPhpunitDeprecations="true"
+	displayDetailsOnTestsThatTriggerDeprecations="true"
+	displayDetailsOnTestsThatTriggerErrors="true"
+	displayDetailsOnTestsThatTriggerNotices="true"
+	displayDetailsOnTestsThatTriggerWarnings="true"
+	failOnDeprecation="true"
+	failOnEmptyTestSuite="false"
+	failOnPhpunitDeprecation="true"
+	failOnNotice="true"
+	failOnRisky="true"
+	failOnWarning="true"
+>
+	<testsuites>
+		<testsuite name="main">
+			<directory suffix="Test.php">tests/php</directory>
+		</testsuite>
+	</testsuites>
+
+	<source>
+		<include>
+			<!-- Better to only include "src" than to add "." and then exclude "tests", "vendor", and so on, as PHPUnit still scans the excluded directories. -->
+			<!-- Add additional lines for any files or directories outside of src/ that need coverage. -->
+			<directory suffix=".php">src</directory>
+		</include>
+	</source>
+	<coverage ignoreDeprecatedCodeUnits="true">
+	</coverage>
+</phpunit>

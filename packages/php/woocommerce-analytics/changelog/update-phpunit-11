@@ -1,0 +1,5 @@
+Significance: patch
+Type: changed
+Comment: Update `yoast/phpunit-polyfills` to v3, which brings in PHPUnit 11 for PHP 8.2+. Also regularize configs for PHPUnit 9.
+
+
