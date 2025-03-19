@@ -89,10 +89,6 @@ Returns a specific setting.
 
 Returns the current value of a specific setting. This selector will trigger the `getSetting` resolver if the setting is not in the state.
 
-### `getSettingsByType( state, type )`
-
-Returns all settings of a specific type.
-
 ### `hasEdits( state, groupId )`
 
 Returns whether a group has unsaved changes.
@@ -105,7 +101,10 @@ Returns whether a specific setting has unsaved changes.
 
 Returns whether a group or specific setting is being saved.
 
-### `getError( state, groupId, settingId? )`
+### `getGroupError( state, groupId )`
 
-Returns the error state for a group or specific setting.
+Returns the error state for a specific group.
 
+### `getSettingError( state, groupId, settingId )`
+
+Returns the error state for a specific setting.
