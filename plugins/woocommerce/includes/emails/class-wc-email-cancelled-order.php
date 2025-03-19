@@ -151,10 +151,10 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
-					'order'              => $this->object,
-					'sent_to_admin'      => true,
-					'plain_text'         => false,
-					'email'              => $this,
+					'order'         => $this->object,
+					'sent_to_admin' => true,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

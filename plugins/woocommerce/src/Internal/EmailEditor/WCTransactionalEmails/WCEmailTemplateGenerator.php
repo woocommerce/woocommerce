@@ -5,22 +5,37 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
-use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 
+/**
+ * Class WCEmailTemplateGenerator
+ *
+ * Handles the generation of WooCommerce transactional email templates.
+ * This class is responsible for initializing and managing default email templates,
+ * as well as generating new templates when required.
+ *
+ * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
+ */
 class WCEmailTemplateGenerator {
 	/**
 	 * WooCommerce Email Template Manager instance.
+	 *
 	 * @var WCEmailTemplateManager
 	 */
 	private $template_manager;
 
 	/**
 	 * Default templates.
+	 *
 	 * @var array
 	 */
-	private $default_templates = [];
+	private $default_templates = array();
 
+	/**
+	 * Constructor.
+	 *
+	 * Initializes the WCEmailTemplateGenerator by setting up the template manager.
+	 */
 	public function __construct() {
 		$this->template_manager = WCEmailTemplateManager::get_instance();
 	}
@@ -28,9 +43,12 @@ class WCEmailTemplateGenerator {
 	/**
 	 * Initialize the email template generator.
 	 *
-	 * This function initializes the email template generator by loading the default templates and generating initial email templates if needed.
+	 * This function initializes the email template generator by loading the default templates
+	 * and generating initial email templates if needed.
+	 *
+	 * @internal
 	 */
-	public function init() {
+	final public function init() {
 		$this->init_default_templates();
 		$this->generate_initial_email_templates();
 	}
@@ -40,27 +58,33 @@ class WCEmailTemplateGenerator {
 	 *
 	 * This function initializes the default templates for the core transactional emails.
 	 * It fetches all the emails from WooCommerce and filters them to include only the core transactional emails.
-	 *
 	 */
 	private function init_default_templates() {
 		$core_transactional_emails = WCTransactionalEmails::$core_transactional_emails;
 
-		$wc_emails = \WC_Emails::instance();
+		$wc_emails   = \WC_Emails::instance();
 		$email_types = $wc_emails->get_emails();
 
 		// Filter the emails to include only the core transactional emails.
-		$email_types = array_filter( $email_types, function( $email ) use ( $core_transactional_emails ) {
-			return in_array( $email->id, $core_transactional_emails );
-		} );
+		$email_types = array_filter(
+			$email_types,
+			function ( $email ) use ( $core_transactional_emails ) {
+				return in_array( $email->id, $core_transactional_emails, true );
+			}
+		);
 
-		$this->default_templates = array_reduce( $email_types, function( $acc, $email ) {
-			$acc[ $email->id ] = [
-				'title' => $email->title,
-				'content' => $this->get_email_template( $email ),
-				'enabled' => $email->is_enabled(),
-			];
-			return $acc;
-		}, [] );
+		$this->default_templates = array_reduce(
+			$email_types,
+			function ( $acc, $email ) {
+				$acc[ $email->id ] = array(
+					'title'   => $email->title,
+					'content' => $this->get_email_template( $email ),
+					'enabled' => $email->is_enabled(),
+				);
+				return $acc;
+			},
+			array()
+		);
 	}
 
 	/**
@@ -73,12 +97,12 @@ class WCEmailTemplateGenerator {
 	 */
 	public function get_email_template( $email ) {
 		return wc_get_template_html(
-			 str_replace('plain', 'block', $email->template_plain),
+			str_replace( 'plain', 'block', $email->template_plain ),
 			array(
-				'order'              => $email->object,
-				'sent_to_admin'      => true,
-				'plain_text'         => false,
-				'email'              => $email,
+				'order'         => $email->object,
+				'sent_to_admin' => true,
+				'plain_text'    => false,
+				'email'         => $email,
 			)
 		);
 	}
@@ -94,13 +118,13 @@ class WCEmailTemplateGenerator {
 	public function generate_initial_email_templates() {
 
 		if ( get_option( 'wc_email_editor_initial_templates_generated' ) ) {
-			// if templates are already generated, we don't need to run this function again
+			// if templates are already generated, we don't need to run this function again.
 			return true;
 		}
 
 		$core_transactional_emails = WCTransactionalEmails::$core_transactional_emails;
 
-		$templates_to_generate = [];
+		$templates_to_generate = array();
 		foreach ( $core_transactional_emails as $email_type ) {
 			if ( empty( $this->template_manager->get_email_template_post_id( $email_type ) ) ) {
 				$templates_to_generate[] = $email_type;
@@ -142,28 +166,32 @@ class WCEmailTemplateGenerator {
 	public function generate_email_templates( $templates_to_generate ) {
 		global $wpdb;
 
-		$templates = array_filter( $this->default_templates, function( $email_template_id ) use ( $templates_to_generate ) {
-			return in_array( $email_template_id, $templates_to_generate );
-		}, ARRAY_FILTER_USE_KEY);
+		$templates = array_filter(
+			$this->default_templates,
+			function ( $email_template_id ) use ( $templates_to_generate ) {
+				return in_array( $email_template_id, $templates_to_generate, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
 
 		if ( empty( $templates ) ) {
 			return true;
 		}
 
-		// Start transaction
-		$wpdb->query('START TRANSACTION');
+		// Start transaction.
+		$wpdb->query( 'START TRANSACTION' );
 
 		try {
-			foreach ( $templates as $email_type => $template) {
-				$this->generate_single_template($email_type, $template);
+			foreach ( $templates as $email_type => $template ) {
+				$this->generate_single_template( $email_type, $template );
 			}
 
-			$wpdb->query('COMMIT');
+			$wpdb->query( 'COMMIT' );
 			return true;
 
-		} catch (\Exception $e) {
-			$wpdb->query('ROLLBACK');
-			return new \WP_Error('email_generation_failed', $e->getMessage());
+		} catch ( \Exception $e ) {
+			$wpdb->query( 'ROLLBACK' );
+			return new \WP_Error( 'email_generation_failed', $e->getMessage() );
 		}
 	}
 
@@ -172,28 +200,29 @@ class WCEmailTemplateGenerator {
 	 *
 	 * This function generates a single email template post and sets its postmeta association.
 	 *
-	 * @param string $email_type The email type.
-	 * @param array $template_data The template data.
+	 * @param string $email_type    The email type.
+	 * @param array  $template_data The template data.
 	 * @return int The post ID of the generated template.
+	 * @throws \Exception When post creation fails.
 	 */
-	private function generate_single_template($email_type, $template_data) {
-		$post_data = [
-			'post_type' => Integration::EMAIL_POST_TYPE,
-			'post_status' => $template_data['enabled'] ? 'publish' : 'draft',
-			'post_name' => $email_type,
-			'post_title' => $template_data['title'],
+	private function generate_single_template( $email_type, $template_data ) {
+		$post_data = array(
+			'post_type'    => Integration::EMAIL_POST_TYPE,
+			'post_status'  => $template_data['enabled'] ? 'publish' : 'draft',
+			'post_name'    => $email_type,
+			'post_title'   => $template_data['title'],
 			'post_content' => $template_data['content'],
-			'meta_input' => [
+			'meta_input'   => array(
 				'_wc_email_enabled' => $template_data['enabled'],
-				'_wc_email_type' => $email_type,
+				'_wc_email_type'    => $email_type,
 				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
-			]
-		];
+			),
+		);
 
-		$post_id = wp_insert_post($post_data, true);
+		$post_id = wp_insert_post( $post_data, true );
 
-		if (is_wp_error($post_id)) {
-			throw new \Exception($post_id->get_error_message());
+		if ( is_wp_error( $post_id ) ) {
+			throw new \Exception( esc_html( $post_id->get_error_message() ) );
 		}
 
 		$this->template_manager->save_email_template_post_id( $email_type, $post_id );

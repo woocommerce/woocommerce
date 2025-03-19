@@ -175,13 +175,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
-					'user_id'            => $this->user_id,
-					'user_login'         => $this->user_login,
-					'reset_key'          => $this->reset_key,
-					'blogname'           => $this->get_blogname(),
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
+					'user_id'       => $this->user_id,
+					'user_login'    => $this->user_login,
+					'reset_key'     => $this->reset_key,
+					'blogname'      => $this->get_blogname(),
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

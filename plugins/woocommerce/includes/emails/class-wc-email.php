@@ -636,11 +636,11 @@ class WC_Email extends WC_Settings_API {
 		return wc_get_template_html(
 			$this->template_block_content,
 			array(
-				'order'              => $this->object,
-				'sent_to_admin'      => false,
-				'plain_text'         => false,
-				'email'              => $this,
-				'blogname'           => $this->get_blogname(),
+				'order'         => $this->object,
+				'sent_to_admin' => false,
+				'plain_text'    => false,
+				'email'         => $this,
+				'blogname'      => $this->get_blogname(),
 			)
 		);
 	}

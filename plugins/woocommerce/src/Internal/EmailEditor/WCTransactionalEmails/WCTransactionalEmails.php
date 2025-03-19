@@ -1,9 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
+/**
+ * Class WCTransactionalEmails
+ *
+ * Handles the initialization and management of WooCommerce transactional emails.
+ *
+ * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
+ */
 class WCTransactionalEmails {
 
+	/**
+	 * Array of core transactional email types.
+	 *
+	 * @var array
+	 */
 	public static $core_transactional_emails = array(
 		'cancelled_order',
 		'customer_completed_order',
@@ -19,15 +32,25 @@ class WCTransactionalEmails {
 		'new_order',
 	);
 
-	public function init() {
+	/**
+	 * Initialize the class.
+	 *
+	 * @internal
+	 */
+	final public function init() {
 		$this->init_email_templates();
 	}
 
+	/**
+	 * Initialize email templates based on the current page context.
+	 */
 	public function init_email_templates() {
-		$is_wc_email_settings_page = is_admin()
-        && isset($_GET['page'], $_GET['tab'])
-        && $_GET['page'] === 'wc-settings'
-        && $_GET['tab'] === 'email';
+		if ( ! isset( $_GET['page'], $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		$is_wc_email_settings_page = 'wc-settings' === $_GET['page'] // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& 'email' === $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $is_wc_email_settings_page ) {
 			$email_template_generator = new WCEmailTemplateGenerator();

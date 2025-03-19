@@ -177,11 +177,11 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
-					'order'              => $this->object,
-					'customer_note'      => $this->customer_note,
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
+					'order'         => $this->object,
+					'customer_note' => $this->customer_note,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

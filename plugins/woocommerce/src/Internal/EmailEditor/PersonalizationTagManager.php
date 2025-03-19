@@ -88,7 +88,9 @@ class PersonalizationTagManager {
 					if ( isset( $context['order'] ) ) {
 						return $context['order']->get_formatted_billing_full_name() ?? '';
 					} elseif ( isset( $context['wp_user'] ) ) {
-						return $context['wp_user']->first_name ?? '' . ' ' . $context['wp_user']->last_name ?? '';
+						$first_name = $context['wp_user']->first_name ?? '';
+						$last_name  = $context['wp_user']->last_name ?? '';
+						return trim( "$first_name $last_name" );
 					}
 					return '';
 				},

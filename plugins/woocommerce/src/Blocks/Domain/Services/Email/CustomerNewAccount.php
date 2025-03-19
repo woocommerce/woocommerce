@@ -1,4 +1,6 @@
 <?php
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Blocks\Domain\Services\Email;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
@@ -171,12 +173,12 @@ class CustomerNewAccount extends \WC_Email {
 		return wc_get_template_html(
 			$this->template_block_content,
 			array(
-				'user_login'         => $this->user_login,
-				'blogname'           => $this->get_blogname(),
-				'set_password_url'   => $this->set_password_url,
-				'sent_to_admin'      => false,
-				'plain_text'         => false,
-				'email'              => $this,
+				'user_login'       => $this->user_login,
+				'blogname'         => $this->get_blogname(),
+				'set_password_url' => $this->set_password_url,
+				'sent_to_admin'    => false,
+				'plain_text'       => false,
+				'email'            => $this,
 			),
 			'',
 			$this->default_template_path
