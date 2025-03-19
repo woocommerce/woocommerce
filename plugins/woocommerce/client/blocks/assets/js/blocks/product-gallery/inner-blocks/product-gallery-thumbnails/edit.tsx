@@ -29,7 +29,7 @@ export const Edit = ( {
 
 	useEffect( () => {
 		const scrollableElement = scrollableRef.current;
-		if ( ! ( scrollableElement instanceof HTMLElement ) ) {
+		if ( ! scrollableElement ) {
 			return;
 		}
 

@@ -307,7 +307,7 @@ const productGallery = {
 		},
 		onScroll: () => {
 			const scrollableElement = getElement()?.ref;
-			if ( ! ( scrollableElement instanceof HTMLElement ) ) {
+			if ( ! scrollableElement ) {
 				return;
 			}
 			const context = getContext();
