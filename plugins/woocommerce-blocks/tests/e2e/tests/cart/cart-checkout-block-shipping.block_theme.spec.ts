@@ -493,6 +493,7 @@ test.describe( 'Shopper → Shipping', () => {
 		frontendUtils,
 		shippingUtils,
 		page,
+		checkoutPageObject,
 	} ) => {
 		await page.goto(
 			'/?disable_third_party_local_pickup_method_registration'
@@ -510,7 +511,19 @@ test.describe( 'Shopper → Shipping', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter address to check delivery options'
+			)
+		).toBeVisible();
+
 		await frontendUtils.goToCheckout();
+
+		await expect(
+			frontendUtils.page.getByText(
+				'Enter a shipping address to view shipping options.'
+			)
+		).toBeVisible();
 
 		await expect(
 			frontendUtils.page.getByRole( 'radio', {
@@ -522,6 +535,14 @@ test.describe( 'Shopper → Shipping', () => {
 		await expect(
 			frontendUtils.page.getByRole( 'heading', {
 				name: 'Shipping options',
+			} )
+		).toBeVisible();
+
+		await checkoutPageObject.fillInCheckoutWithTestData();
+
+		await expect(
+			checkoutPageObject.page.getByRole( 'radio', {
+				name: 'Flat rate shipping $',
 			} )
 		).toBeVisible();
 	} );
