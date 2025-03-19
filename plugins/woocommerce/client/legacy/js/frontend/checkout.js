@@ -651,9 +651,9 @@ jQuery( function( $ ) {
 					errorMessage.className = 'checkout-inline-error-message';
 					errorMessage.textContent = msg;
 
-					$formRow.appendChild( errorMessage );
-					$field.setAttribute( 'aria-describedby', descriptionId );
-					$field.setAttribute( 'aria-invalid', 'true' );
+					$formRow.append( errorMessage );
+					$field.attr( 'aria-describedby', descriptionId );
+					$field.attr( 'aria-invalid', 'true' );
 				}
 			} );
 		},
