@@ -1689,7 +1689,7 @@ class WC_Helper {
 			$auth        = WC_Helper_Options::get( 'auth' );
 			$auth['url'] = $url;
 			WC_Helper_Options::update( 'auth', $auth );
-			set_transient( $cache_key, $connection_data, 15 * MINUTE_IN_SECONDS );
+			set_transient( $cache_key, $connection_data, 1 * HOUR_IN_SECONDS );
 		}
 
 		return $connection_data;
