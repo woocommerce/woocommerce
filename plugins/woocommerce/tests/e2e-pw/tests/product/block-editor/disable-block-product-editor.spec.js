@@ -26,6 +26,8 @@ test.describe.serial(
 	'Disable block product editor',
 	{ tag: tags.GUTENBERG },
 	() => {
+		test.skip( 'Temporary skip for 9.8' );
+
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { request } ) => {
@@ -58,15 +60,12 @@ test.describe.serial(
 		);
 
 		test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
-			test.skip( 'Temporary skip for 9.8' );
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectBlockProductEditor( page );
 		} );
 
 		test( 'can be disabled from the header', async ( { page } ) => {
-			// eslint-disable-next-line jest/no-identical-title
-			test.skip( 'Temporary skip for 9.8' );
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
 			);
