@@ -39,10 +39,15 @@ class TemplateApiController {
 	 *
 	 * @param array              $data - WP_Block_Template data.
 	 * @param \WP_Block_Template $template_post - WP_Block_Template object.
+	 * @throws \InvalidArgumentException If the email address is invalid.
 	 */
 	public function save_template_data( array $data, \WP_Block_Template $template_post ): void {
 		if ( WooEmailTemplate::TEMPLATE_SLUG === $template_post->slug && isset( $data['sender_settings'] ) ) {
 			update_option( 'woocommerce_email_from_name', $data['sender_settings']['from_name'] );
+
+			if ( ! is_email( $data['sender_settings']['from_address'] ) ) {
+				throw new \InvalidArgumentException( esc_html( __( 'Invalid email address provided for sender settings', 'woocommerce' ) ) );
+			}
 			update_option( 'woocommerce_email_from_address', $data['sender_settings']['from_address'] );
 		}
 	}

@@ -105,4 +105,24 @@ class TemplateApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $original_from_name, get_option( 'woocommerce_email_from_name' ) );
 		$this->assertEquals( $original_from_address, get_option( 'woocommerce_email_from_address' ) );
 	}
+
+	/**
+	 * Test that saveTemplateData throws an exception for invalid email addresses.
+	 */
+	public function testItThrowsExceptionForInvalidEmailAddress(): void {
+		$template       = new \WP_Block_Template();
+		$template->slug = WooEmailTemplate::TEMPLATE_SLUG;
+
+		$data = array(
+			'sender_settings' => array(
+				'from_name'    => 'Test Store',
+				'from_address' => 'invalid-email',
+			),
+		);
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Invalid email address provided for sender settings' );
+
+		$this->template_api_controller->save_template_data( $data, $template );
+	}
 }
