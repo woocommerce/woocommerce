@@ -98,9 +98,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that the correct content is rendered for each product type.
+	 * Tests that the  woocommerce_<product_type>_add_to_cart hooks are rendered when rendering the block.
 	 */
-	public function test_add_to_cart_hooks_render() {
+	public function test_product_type_add_to_cart_hooks_are_rendered() {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
 
 		global $product;
@@ -109,7 +109,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$product_id = $product->save();
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		// Single Products contain the Add to Cart button and the quantity selector blocks.
 		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart with Options correctly renders the contents from the hook.' );
 
 		remove_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
