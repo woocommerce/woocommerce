@@ -225,7 +225,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/block**",
 				"@wordpress/interface",
 				"@wordpress/router",
 				"@wordpress/edit-site",
@@ -234,11 +233,9 @@
 				"@wordpress/icons"
 			],
 			"packages": [
-				"@woocommerce/block-templates",
 				"@woocommerce/product-editor",
 				"@woocommerce/settings-editor",
 				"@woocommerce/admin-library",
-				"@woocommerce/components"
 			],
 			"isIgnored": true
 		},
