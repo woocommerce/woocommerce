@@ -4,7 +4,7 @@
 		"checkJs": true,
 		"allowSyntheticDefaultImports": true,
 		"jsx": "preserve",
-		"target": "es6",
+		"target": "esnext",
 		"module": "commonjs",
 		"declaration": true,
 		"declarationMap": true,
