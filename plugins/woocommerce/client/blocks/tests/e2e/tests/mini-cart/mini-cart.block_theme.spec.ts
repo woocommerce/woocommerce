@@ -7,15 +7,15 @@ import { test, expect, BlockData } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import { blockData as baseBlockData } from './utils';
 
-const blockData: BlockData = {
-	name: 'Mini-Cart',
-	slug: 'woocommerce/mini-cart',
-	mainClass: '.wc-block-minicart',
-	selectors: {
-		frontend: {},
-		editor: {},
-	},
+type ExtendedBlockData = BlockData & {
+	productPage: string;
+};
+
+const blockData: ExtendedBlockData = {
+	...baseBlockData,
+	productPage: '/product/polo/',
 };
 
 test.describe( `${ blockData.name } Block`, () => {
@@ -92,12 +92,27 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect( page.getByRole( 'dialog' ) ).toHaveCount( 0 );
 	} );
 
-	test( 'should open the filled cart drawer', async ( {
+	test( 'should open the filled cart drawer on the archive page', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
 		await frontendUtils.goToShop();
+		await page.click( 'text=Add to cart' );
+		await miniCartUtils.openMiniCart();
+
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Your cart (1 item)'
+		);
+	} );
+
+	test( 'should open the filled cart drawer on the product page', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		await frontendUtils.goToShop();
+		await page.goto( blockData.productPage );
 		await page.click( 'text=Add to cart' );
 		await miniCartUtils.openMiniCart();
 

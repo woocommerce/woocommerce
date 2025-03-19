@@ -3,16 +3,19 @@
  */
 import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
+/**
+ * Internal dependencies
+ */
+import { blockData as baseBlockData } from './utils';
+
 const blockData: BlockData = {
-	name: 'Mini-Cart',
-	slug: 'woocommerce/mini-cart',
-	mainClass: '.wc-block-minicart',
+	...baseBlockData,
 	selectors: {
+		...baseBlockData.selectors,
 		editor: {
 			block: '.wp-block-woocommerce-mini-cart',
 			insertButton: "//button//span[text()='Mini-Cart']",
 		},
-		frontend: {},
 	},
 };
 
