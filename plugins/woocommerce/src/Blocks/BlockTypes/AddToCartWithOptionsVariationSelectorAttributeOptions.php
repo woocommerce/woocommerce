@@ -169,9 +169,9 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					'aria-labeledby'      => $attribute_id . '_label',
 					'data-wp-interactive' => $this->get_full_block_name() . '__pills',
 					'data-wp-context'     => array(
-						'options'  => $attribute_terms,
-						'selected' => $this->get_default_selected_attribute( $attribute_terms ),
-						'focused'  => '',
+						'options'       => $attribute_terms,
+						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
+						'focused'       => '',
 					),
 				),
 			),
@@ -228,8 +228,8 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 					'id'                  => $attribute_id,
 					'data-wp-interactive' => $this->get_full_block_name() . '__dropdown',
 					'data-wp-context'     => array(
-						'options'  => $attribute_terms,
-						'selected' => $this->get_default_selected_attribute( $attribute_terms ),
+						'options'       => $attribute_terms,
+						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
 					),
 				),
 			),

@@ -11,14 +11,12 @@ type Option = {
 };
 
 type Context = {
-	selected: string | null;
+	selectedValue: string | null;
 	option: Option;
 	options: Option[];
 };
 
 type PillsContext = Context & {
-	tabIndex?: number;
-	selected?: string;
 	focused?: string;
 };
 
@@ -27,16 +25,16 @@ const { state, actions } = store(
 	{
 		state: {
 			get isPillSelected() {
-				const { selected, option } = getContext< PillsContext >();
-				return selected === option.value;
+				const { selectedValue, option } = getContext< PillsContext >();
+				return selectedValue === option.value;
 			},
 			get pillTabIndex() {
-				const { selected, focused, option, options } =
+				const { selectedValue, focused, option, options } =
 					getContext< PillsContext >();
 
 				// Allow the first pill to be focused when no option is selected.
 				if (
-					! selected &&
+					! selectedValue &&
 					! focused &&
 					options[ 0 ]?.value === option.value
 				) {
@@ -53,10 +51,10 @@ const { state, actions } = store(
 		actions: {
 			toggleSelected() {
 				const context = getContext< PillsContext >();
-				if ( context.selected === context.option.value ) {
-					context.selected = '';
+				if ( context.selectedValue === context.option.value ) {
+					context.selectedValue = '';
 				} else {
-					context.selected = context.option.value;
+					context.selectedValue = context.option.value;
 				}
 				context.focused = context.option.value;
 			},
@@ -82,8 +80,8 @@ const { state, actions } = store(
 						const at =
 							index > 0 ? index - 1 : context.options.length - 1;
 
-						context.selected = context.options[ at ].value;
-						context.focused = context.selected;
+						context.selectedValue = context.options[ at ].value;
+						context.focused = context.selectedValue;
 						keyWasProcessed = true;
 						break;
 					}
@@ -99,8 +97,8 @@ const { state, actions } = store(
 						const at =
 							index < context.options.length - 1 ? index + 1 : 0;
 
-						context.selected = context.options[ at ].value;
-						context.focused = context.selected;
+						context.selectedValue = context.options[ at ].value;
+						context.focused = context.selectedValue;
 						keyWasProcessed = true;
 						break;
 					}
@@ -128,25 +126,13 @@ const { state, actions } = store(
 	{ lock: true }
 );
 
-type DropdownContext = Context & {
-	isSelected: 'selected' | undefined;
-};
-
 store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 	{
-		state: {
-			get isOptionSelected() {
-				const context = getContext< DropdownContext >();
-				if ( context.selected === context.option.value ) {
-					return 'selected';
-				}
-			},
-		},
 		actions: {
 			handleChange() {
-				const context = getContext< DropdownContext >();
-				context.selected = context.option.value;
+				const context = getContext< Context >();
+				context.selectedValue = context.option.value;
 			},
 		},
 	},
