@@ -510,7 +510,6 @@
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@automattic/color-studio",
-				"@types/node",
 				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"config",
