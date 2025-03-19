@@ -6,7 +6,6 @@
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { isEmail } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -36,12 +35,13 @@ addFilter(
 		const emailValidationRule: EmailContentValidationRule = {
 			id: 'sender-email-validation',
 			testContent: () => {
-				const email = document.querySelector< HTMLInputElement >(
+				const input = document.querySelector< HTMLInputElement >(
 					'input[name="from_email"]'
-				)?.value;
+				);
+				const email = input?.value;
 				if ( ! email ) return false;
 
-				return ! email || ! isEmail( email );
+				return ! email || ! input?.checkValidity();
 			},
 			message: __(
 				'The "from" email address is invalid. Please enter a valid email address that will appear as the sender in outgoing WooCommerce emails.',
