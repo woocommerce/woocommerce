@@ -25,17 +25,6 @@ export const getGroups =
 			dispatch( receiveGroups( groups ) );
 			return groups;
 		} catch ( error ) {
-			// Since this is a top-level resolver, we don't have a groupId
-			// We'll use 'general' as a fallback for the error
-			dispatch(
-				setError(
-					'general',
-					null,
-					error instanceof Error
-						? error
-						: new Error( String( error ) )
-				)
-			);
 			throw error;
 		}
 	};
