@@ -26,8 +26,6 @@ test.describe.serial(
 	'Disable block product editor',
 	{ tag: tags.GUTENBERG },
 	() => {
-		test.skip( 'Temporary skip for 9.8' );
-
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { request } ) => {
@@ -53,6 +51,8 @@ test.describe.serial(
 				await toggleBlockProductEditor( 'disable', page );
 			}
 		} );
+
+		test.skip( 'Temporary skip for 9.8' );
 
 		test.skip(
 			isNewProductEditorEnabled && isTrackingSupposedToBeEnabled,
