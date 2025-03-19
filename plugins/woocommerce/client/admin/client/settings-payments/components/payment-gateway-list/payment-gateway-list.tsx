@@ -48,6 +48,10 @@ interface PaymentGatewayListProps {
 	 */
 	acceptIncentive: ( id: string ) => void;
 	/**
+	 * Indicates whether the incentive should be highlighted.
+	 */
+	shouldHighlightIncentive: boolean;
+	/**
 	 * Callback to update the ordering of payment providers after sorting.
 	 */
 	updateOrdering: ( providers: PaymentProvider[] ) => void;
@@ -67,6 +71,7 @@ export const PaymentGatewayList = ( {
 	installingPlugin,
 	setupPlugin,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	updateOrdering,
 }: PaymentGatewayListProps ) => {
 	return (
@@ -95,6 +100,7 @@ export const PaymentGatewayList = ( {
 									setupPlugin,
 									pluginInstalled,
 									acceptIncentive,
+									shouldHighlightIncentive,
 								} ) }
 							</SortableItem>
 						);
@@ -109,6 +115,7 @@ export const PaymentGatewayList = ( {
 									gateway,
 									installingPlugin,
 									acceptIncentive,
+									shouldHighlightIncentive,
 								} ) }
 							</SortableItem>
 						);

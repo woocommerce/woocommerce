@@ -1,9 +1,6 @@
 const babelOptions = {
 	presets: [ '@babel/preset-typescript', '@wordpress/babel-preset-default' ],
-	plugins: [
-		'explicit-exports-references',
-		'@babel/plugin-transform-class-properties',
-	],
+	plugins: [ 'explicit-exports-references' ],
 };
 
 module.exports =
