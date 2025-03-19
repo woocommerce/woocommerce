@@ -70,4 +70,53 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			).toBeVisible();
 		} );
 	} );
+
+	test( 'all thumbnails are rendered correctly in frontend', async ( {
+		page,
+	} ) => {
+		// Navigate to the product page
+		await page.goto( '/product/v-neck-t-shirt/' );
+
+		const productGalleryBlock = page.locator(
+			'[data-block-name="woocommerce/product-gallery"]'
+		);
+
+		// Get the thumbnails container
+		const thumbnailsContainer = productGalleryBlock.locator(
+			'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+		);
+
+		// Get all thumbnail elements
+		const thumbnails = thumbnailsContainer.locator(
+			'.wc-block-product-gallery-thumbnails__thumbnail'
+		);
+
+		// Verify thumbnails container is visible
+		await expect( thumbnailsContainer ).toBeVisible();
+
+		// Get the count of thumbnails
+		const thumbnailCount = await thumbnails.count();
+
+		// Ensure we have at least one thumbnail
+		expect( thumbnailCount ).toBeGreaterThan( 0 );
+
+		// Verify each thumbnail has an image and it's visible
+		for ( let i = 0; i < thumbnailCount; i++ ) {
+			const thumbnail = thumbnails.nth( i );
+			const thumbnailImage = thumbnail.locator( 'img' );
+
+			await expect( thumbnail ).toBeVisible();
+			await expect( thumbnailImage ).toBeVisible();
+
+			// Verify the image has required attributes
+			await expect( thumbnailImage ).toHaveAttribute( 'src' );
+			await expect( thumbnailImage ).toHaveAttribute( 'data-image-id' );
+		}
+
+		// Verify thumbnails are within a scrollable container
+		const scrollableContainer = thumbnailsContainer.locator(
+			'.wc-block-product-gallery-thumbnails__scrollable'
+		);
+		await expect( scrollableContainer ).toBeVisible();
+	} );
 } );
