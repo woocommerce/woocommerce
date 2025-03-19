@@ -245,6 +245,7 @@ $dialog-padding: 20px;
 .is-horizontal .wc-block-product-gallery-thumbnails {
 	&__scrollable {
 		flex-direction: row;
+		scrollbar-width: auto;
 	}
 
 	// These are min - max range values for thumbnails size.
