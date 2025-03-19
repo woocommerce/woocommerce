@@ -513,7 +513,6 @@
 				"@types/node",
 				"@types/wordpress__components",
 				"@typescript-eslint/**",
-				"@wordpress/**",
 				"config",
 				"eslint",
 				"node",
