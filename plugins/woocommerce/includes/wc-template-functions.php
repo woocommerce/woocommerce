@@ -2104,6 +2104,10 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 			);
 		}
 
+		if ( ! ( $product instanceof WC_Product ) ) {
+			return $tabs;
+		}
+
 		// Additional information tab - shows attributes.
 
 		/**
@@ -2113,7 +2117,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		 *
 		 * @since 2.0.14
 		 */
-		if ( ( $product instanceof WC_Product ) && ( $product->has_attributes() || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ) ) ) {
+		if ( $product->has_attributes() || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional information', 'woocommerce' ),
 				'priority' => 20,

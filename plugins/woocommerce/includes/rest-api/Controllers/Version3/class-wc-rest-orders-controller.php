@@ -52,7 +52,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
 			function ( $coupon ) {
-				return $coupon->get_code();
+				return wc_strtolower( $coupon->get_code() );
 			},
 			$current_order_coupons
 		);
@@ -71,7 +71,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			$coupon      = new WC_Coupon( $coupon_code );
 
 			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
-			if ( ! in_array( $coupon_code, $current_order_coupon_codes, true ) ) {
+			if ( ! in_array( wc_strtolower( $coupon_code ), $current_order_coupon_codes, true ) ) {
 				$check_result = $discounts->is_coupon_valid( $coupon );
 				if ( is_wp_error( $check_result ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_' . $check_result->get_error_code(), $check_result->get_error_message(), 400 );
