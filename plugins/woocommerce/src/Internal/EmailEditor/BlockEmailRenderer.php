@@ -8,7 +8,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer as EmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Renderer\Blocks\WooContent;
-
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateManager;
 /**
  * Class responsible for rendering block-based emails.
  */
@@ -39,12 +39,20 @@ class BlockEmailRenderer {
 	private $woo_content_processor;
 
 	/**
+	 * WooCommerce Email Template Manager instance.
+	 *
+	 * @var WCEmailTemplateManager
+	 */
+	private $template_manager;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$editor_container   = Email_Editor_Container::container();
-		$this->renderer     = $editor_container->get( EmailRenderer::class );
-		$this->personalizer = $editor_container->get( Personalizer::class );
+		$editor_container       = Email_Editor_Container::container();
+		$this->renderer         = $editor_container->get( EmailRenderer::class );
+		$this->personalizer     = $editor_container->get( Personalizer::class );
+		$this->template_manager = WCEmailTemplateManager::get_instance();
 	}
 
 	/**
@@ -115,19 +123,7 @@ class BlockEmailRenderer {
 	 * @return \WP_Post|null
 	 */
 	private function get_email_post_by_wc_email( \WC_Email $email ): ?\WP_Post {
-		$args = array(
-			'post_type'      => Integration::EMAIL_POST_TYPE,
-			'name'           => $email->id,
-			'post_status'    => 'draft,publish', // Temporarily use draft status we will change it to publish or custom active later.
-			'posts_per_page' => 1,
-		);
-
-		$posts = get_posts( $args );
-		if ( empty( $posts ) ) {
-			return null;
-		}
-
-		return $posts[0];
+		return $this->template_manager->get_email_post( $email->id );
 	}
 
 	/**
@@ -141,7 +137,7 @@ class BlockEmailRenderer {
 		$context['recipient_email'] = $wc_email->get_recipient();
 		$context['order']           = $wc_email->object instanceof \WC_Order ? $wc_email->object : null;
 		$context['wp_user']         = $wc_email->object instanceof \WP_User ? $wc_email->object : null;
-		$context['wc_email']     	= $wc_email;
+		$context['wc_email']        = $wc_email;
 		return $context;
 	}
 

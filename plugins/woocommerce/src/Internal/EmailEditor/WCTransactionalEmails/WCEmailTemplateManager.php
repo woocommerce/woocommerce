@@ -4,41 +4,82 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
-use Automattic\WooCommerce\Internal\EmailEditor\Integration;
-
+/**
+ * Class responsible for managing WooCommerce email editor post templates.
+ */
 class WCEmailTemplateManager {
+	/**
+	 * Singleton instance of the class.
+	 *
+	 * @var WCEmailTemplateManager|null
+	 */
 	private static $instance = null;
 
+	/**
+	 * Gets the singleton instance of the class.
+	 *
+	 * @return WCEmailTemplateManager Instance of the class.
+	 */
 	public static function get_instance() {
-		if (null === self::$instance) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
 	}
 
-	// Get email post by type
-	public function get_email_post($email_type) {
-		$args = [
-			'post_type' => Integration::EMAIL_POST_TYPE,
-			'name' => $email_type,
-			'posts_per_page' => 1,
-		];
+	/**
+	 * Retrieves the email post by its type.
+	 *
+	 * Type here refers to the email type, e.g. 'customer_new_account' from the WC_Email->id property.
+	 *
+	 * @param string $email_type The type of email to retrieve.
+	 * @return \WP_Post|null The email post if found, null otherwise.
+	 */
+	public function get_email_post( $email_type ) {
+		$post_id = $this->get_email_template_post_id( $email_type );
 
-		$query = new \WP_Query($args);
-		return $query->posts[0] ?? null;
+		if ( ! $post_id ) {
+			return null;
+		}
+
+		$post = get_post( $post_id );
+
+		if ( ! $post ) {
+			return null;
+		}
+
+		return $post;
 	}
 
-	// Check if email template exists
-	public function template_exists($email_type) {
-		return null !== $this->get_email_post($email_type);
+	/**
+	 * Checks if an email template exists for the given type.
+	 *
+	 * Type here refers to the email type, e.g. 'customer_new_account' from the WC_Email->id property.
+	 *
+	 * @param string $email_type The type of email to check.
+	 * @return bool True if the template exists, false otherwise.
+	 */
+	public function template_exists( $email_type ) {
+		return null !== $this->get_email_post( $email_type );
 	}
 
-
+	/**
+	 * Saves the post ID for a specific email template type.
+	 *
+	 * @param string $email_type The type of email template e.g. 'customer_new_account' from the WC_Email->id property.
+	 * @param int    $post_id    The post ID to save.
+	 */
 	public function save_email_template_post_id( $email_type, $post_id ) {
 		$option_name = 'woocommerce_email_templates_' . $email_type . '_post_id';
 		update_option( $option_name, $post_id );
 	}
 
+	/**
+	 * Gets the post ID for a specific email template type.
+	 *
+	 * @param string $email_type The type of email template e.g. 'customer_new_account' from the WC_Email->id property.
+	 * @return int|false The post ID if found, false otherwise.
+	 */
 	public function get_email_template_post_id( $email_type ) {
 		$option_name = 'woocommerce_email_templates_' . $email_type . '_post_id';
 		return get_option( $option_name );
