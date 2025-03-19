@@ -428,7 +428,7 @@ test.describe( 'Shopper → Shipping', () => {
 		).toBeHidden();
 	} );
 
-	// Skipping test due to a known bug with needs_shipping - see issue <TODO>
+	// Skipping test due to a known bug with needs_shipping - see issue https://github.com/woocommerce/woocommerce/issues/56507
 	test.skip( '8. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled the shopper sees no shipping and no pickup rates', async ( {
 		localPickupUtils,
 		admin,
@@ -572,7 +572,7 @@ test.describe( 'Shopper → Shipping', () => {
 	// 11. With no shipping methods for the default location, but shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled, the shopper sees no shipping until an address is entered no pickup rates
 	// Skipping testing 11 because it is the same as 6.
 
-	// Skipping test due to a known bug with needs_shipping - see issue <TODO>
+	// Skipping test due to a known bug with needs_shipping - see issue https://github.com/woocommerce/woocommerce/issues/56507
 	test.skip( '12. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup disabled, and shipping requires address enabled the shopper sees no shipping and no pickup rates', async ( {
 		localPickupUtils,
 		admin,
