@@ -526,7 +526,17 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 		return $terms;
 	}
 
-	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ), true ) ) {
+	/**
+	 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array $valid_taxonomies List of taxonomy slugs.
+	 */
+	$valid_taxonomies   = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) );
+	$current_taxonomies = array_intersect( (array) $taxonomies, $valid_taxonomies );
+
+	if ( empty( $current_taxonomies ) ) {
 		return $terms;
 	}
 
@@ -534,21 +544,24 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	$term_counts   = false === $o_term_counts ? array() : $o_term_counts;
 
 	foreach ( $terms as &$term ) {
-		if ( is_object( $term ) ) {
-			$term_counts[ $term->term_id ] =
-				isset( $term_counts[ $term->term_id ] ) ?
-					$term_counts[ $term->term_id ] :
-					get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
+		if ( $term instanceof WP_Term && in_array( $term->taxonomy, $current_taxonomies, true ) ) {
+			$key = $term->term_id . '_' . $term->taxonomy;
+			if ( isset( $term_counts[ $key ] ) ) {
+				continue;
+			}
 
-			if ( '' !== $term_counts[ $term->term_id ] ) {
-				$term->count = absint( $term_counts[ $term->term_id ] );
+			$count = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
+			if ( '' !== $count ) {
+				$count               = absint( $count );
+				$term->count         = $count;
+				$term_counts[ $key ] = $count;
 			}
 		}
 	}
 
 	// Update transient.
 	if ( $term_counts !== $o_term_counts ) {
-		set_transient( 'wc_term_counts', $term_counts, DAY_IN_SECONDS * 30 );
+		set_transient( 'wc_term_counts', $term_counts, MONTH_IN_SECONDS );
 	}
 
 	return $terms;
