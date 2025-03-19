@@ -102,6 +102,20 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			},
 			isPrimary: true,
 		},
+		{
+			id: 'disable',
+			label: ( items: EmailType[] ) =>
+				items[ 0 ].status === 'publish'
+					? __( 'Disable email', 'woocommerce' )
+					: __( 'Enable email', 'woocommerce' ),
+			supportsBulk: false,
+			isVisible: ( items: EmailType[] ) =>
+				items[ 0 ].status === 'publish' ||
+				items[ 0 ].status === 'draft',
+			callback: ( items: EmailType[] ) => {
+				return true; // TODO: Implement disable/enable
+			},
+		},
 	];
 
 	const form = {
