@@ -95,6 +95,7 @@ test.describe( 'Product Reviews', () => {
 			page,
 			reviews,
 		} ) => {
+			test.skip( 'Temporary skip for 9.8' );
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
 			);

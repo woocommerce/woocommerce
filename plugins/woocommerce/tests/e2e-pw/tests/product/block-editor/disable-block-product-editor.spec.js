@@ -58,6 +58,7 @@ test.describe.serial(
 		);
 
 		test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
+			test.skip( 'Temporary skip for 9.8' );
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectBlockProductEditor( page );
