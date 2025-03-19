@@ -22,6 +22,10 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		await editor.insertBlock( {
 			name: 'woocommerce/product-gallery',
 		} );
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 	} );
 
 	test( 'renders as expected', async ( { page, editor } ) => {
@@ -43,10 +47,6 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 					)`
 				)
 			).toBeVisible();
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
 		} );
 
 		await test.step( 'in frontend', async () => {
@@ -75,7 +75,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		page,
 	} ) => {
 		// Navigate to the product page
-		await page.goto( '/product/v-neck-t-shirt/' );
+		await page.goto( '/product/hoodie/' );
 
 		const productGalleryBlock = page.locator(
 			'[data-block-name="woocommerce/product-gallery"]'
@@ -98,7 +98,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		const thumbnailCount = await thumbnails.count();
 
 		// Ensure we have at least one thumbnail
-		expect( thumbnailCount ).toBeGreaterThan( 0 );
+		expect( thumbnailCount ).toBe( 4 );
 
 		// Verify each thumbnail has an image and it's visible
 		for ( let i = 0; i < thumbnailCount; i++ ) {
