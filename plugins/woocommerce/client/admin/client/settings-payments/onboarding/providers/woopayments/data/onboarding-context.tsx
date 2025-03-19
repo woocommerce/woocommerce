@@ -173,6 +173,8 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 					status: backendStep?.status || 'incomplete',
 					dependencies: backendStep?.dependencies || [],
 					path: backendStep?.path,
+					data: backendStep?.data,
+					actions: backendStep?.actions,
 					// Maybe actions too
 				} );
 			}

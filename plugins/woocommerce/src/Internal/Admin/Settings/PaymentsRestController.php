@@ -1046,6 +1046,15 @@ class PaymentsRestController extends RestApiControllerBase {
 			array(
 				'steps' => array(
 					array(
+						'id' => 'payment-methods-selection',
+						'label' => 'Choose payment methods',
+						'path' => '/woopayments/onboarding/payment-methods-selection',
+						'status' => 'incomplete',
+						'data' => array(
+							'recommended_payment_methods' => $this->payments->get_payment_providers( 'US' )[ 0 ][ "onboarding" ][ "recommended_payment_methods" ],
+						),
+					),
+					array(
 						'id' => 'welcome',
 						'label' => 'Welcome to WooPayments',
 						'path' => '/woopayments/onboarding/welcome',

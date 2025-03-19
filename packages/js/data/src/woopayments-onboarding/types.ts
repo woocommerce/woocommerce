@@ -5,6 +5,8 @@ export interface StepContent {
 	order: number;
 	status: 'completed' | 'incomplete';
 	dependencies: string[];
+	actions: Record< string, unknown >;
+	data: Record< string, unknown >;
 }
 
 export interface OnboardingState {
