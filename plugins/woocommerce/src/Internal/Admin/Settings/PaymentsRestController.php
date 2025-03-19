@@ -1058,8 +1058,8 @@ class PaymentsRestController extends RestApiControllerBase {
 						'id' => 'welcome',
 						'label' => 'Welcome to WooPayments',
 						'path' => '/woopayments/onboarding/welcome',
-						'status' => 'completed',
-						'dependencies' => array(),
+						'status' => 'incomplete',
+						'dependencies' => array('payment-methods-selection'),
 					),
 					array(
 						'id' => 'jetpack',
