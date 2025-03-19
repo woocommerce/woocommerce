@@ -21,15 +21,25 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'New order: #{order_number}', 'woocommerce' ); ?> </h2>
+<h2>
+<?php
+/* translators: %s: order number */
+printf( esc_html__( 'New order: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
+?>
+</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Woo! You’ve received a new order from #{get_formatted_billing_full_name}', 'woocommerce' ); ?> </p>
+<p>
+<?php
+/* translators: %s: Customer full name */
+printf( esc_html__( 'Woo! You’ve received a new order from %s', 'woocommerce' ), '<!--[woocommerce/shopper-full-name]-->' );
+?>
+</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html(BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER); ?> </div>
+<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->

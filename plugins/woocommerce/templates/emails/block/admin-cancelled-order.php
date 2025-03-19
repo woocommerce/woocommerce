@@ -22,33 +22,35 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Order cancelled: #{order_number}', 'woocommerce' ); ?> </h2>
+<h2>
+<?php
+/* translators: %s: order number */
+printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
+?>
+</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>
 <?php
-if ( isset( $order, $order->get_billing_first_name ) && ! empty( $order->get_billing_first_name() ) ) {
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
-} else {
-	printf( esc_html__( 'Hi,', 'woocommerce' ) );
-}
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php
+<p>
+<?php
 	/* translators: %1$s: Order number. %2$s: Customer full name */
 	$text = __( 'We’re getting in touch to let you know that order #%1$s from %2$s has been cancelled.', 'woocommerce' );
-	echo sprintf( esc_html( $text ), esc_html( $order->get_order_number() ), esc_html( $order->get_formatted_billing_full_name() ) );
-	?>
+	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/shopper-full-name]-->' );
+?>
 </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html(BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER); ?> </div>
+<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->

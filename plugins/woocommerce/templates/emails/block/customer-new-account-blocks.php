@@ -17,38 +17,43 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Welcome to {site_title}', 'woocommerce' ); ?> </h2>
+<h2> 
+<?php
+/* translators: %s: Site title*/
+printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
+?>
+</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>
 <?php
-if ( isset( $order, $order->get_billing_first_name ) && ! empty( $order->get_billing_first_name() ) ) {
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
-} else {
-	printf( esc_html__( 'Hi,', 'woocommerce' ) );
-}
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php
+<p> 
+<?php
 	/* translators: %s: Site title */
-	echo sprintf( esc_html__( 'Thanks for creating an account on %s. Here’s a copy of your user details.', 'woocommerce' ), esc_html( $blogname ) );
-?> </p>
+	printf( esc_html__( 'Thanks for creating an account on %s. Here’s a copy of your user details.', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
+?>
+</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php
+<p> 
+<?php
 /* translators: %s: Username */
-echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), esc_html( $user_login ) ), array( 'b' => array() ) );
-?> </p>
+echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/shopper-username]-->' ), array( 'b' => array() ) );
+?>
+</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html(BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER); ?> </div>
+<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
@@ -56,7 +61,12 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), esc_html( $us
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p><a href="<?php echo esc_attr( wc_get_page_permalink( 'myaccount' ) ); ?>"><?php printf( esc_html__( 'My account', 'woocommerce' ) ); ?></a></p>
+<p>
+<?php
+	$text = '<a href="%1$s" contenteditable="false" style="text-decoration: underline;"> %2$s </a>';
+	printf( wp_kses_post( $text ), '<!--[woocommerce/my-account-url]-->', esc_html__( 'My account', 'woocommerce' ) );
+?>
+</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->

@@ -22,22 +22,32 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Order failed: #{order_number}', 'woocommerce' ); ?> </h2>
+<h2>
+<?php
+/* translators: %s: order number */
+printf( esc_html__( 'Order failed: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
+?>
+</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p> <?php
+<p>
+<?php
 	/* translators: %1$s: Order number. %2$s: Customer full name. */
 	$text = __( 'Unfortunately, the payment for order #%1$s from %2$s has failed. The order was as follows:', 'woocommerce' );
-	echo sprintf( esc_html( $text ), esc_html( $order->get_order_number() ), esc_html( $order->get_formatted_billing_full_name() ) );
-	?>
+	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/shopper-full-name]-->' );
+?>
 </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html(BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER); ?> </div>
+<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'We hope they’ll be back soon! Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.', 'woocommerce' ); ?> </p>
+<p>
+<?php
+echo wp_kses_post( __( 'We hope they’ll be back soon! Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.', 'woocommerce' ) );
+?>
+</p>
 <!-- /wp:paragraph -->

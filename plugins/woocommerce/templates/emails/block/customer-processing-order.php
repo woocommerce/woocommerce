@@ -28,12 +28,8 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:paragraph -->
 <p>
 <?php
-if ( isset( $order, $order->get_billing_first_name ) && ! empty( $order->get_billing_first_name() ) ) {
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
-} else {
-	printf( esc_html__( 'Hi,', 'woocommerce' ) );
-}
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
@@ -47,9 +43,14 @@ if ( isset( $order, $order->get_billing_first_name ) && ! empty( $order->get_bil
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html(BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER); ?> </div>
+<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Thanks again! If you need any help with your order, please contact us at {store_email}.', 'woocommerce' ); ?> </p>
+<p> 
+<?php
+/* translators: %s: Store admin email */
+	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s,', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
+?>
+	</p>
 <!-- /wp:paragraph -->
