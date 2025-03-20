@@ -165,6 +165,8 @@ $dialog-padding: 20px;
 		justify-content: center;
 		align-items: center;
 		aspect-ratio: 1 / 1;
+		// Keep it for Safari.
+		height: 100%;
 	}
 
 	&__thumbnail__image {
@@ -246,6 +248,8 @@ $dialog-padding: 20px;
 	&__scrollable {
 		flex-direction: row;
 		scrollbar-width: auto;
+		// Keep it for Safari.
+		overflow-y: hidden;
 	}
 
 	// These are min - max range values for thumbnails size.
@@ -350,6 +354,8 @@ body.wc-block-product-gallery-dialog-open {
 
 		.wc-block-product-gallery-thumbnails__scrollable {
 			flex-direction: row;
+			// Keep it for Safari.
+			overflow-y: hidden;
 		}
 	}
 }
