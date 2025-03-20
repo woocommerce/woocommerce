@@ -95,7 +95,7 @@ describe( 'setting-options reducer', () => {
 				value: 'new-value',
 			} );
 
-			expect( newState.edits[ testGroup.id ][ testSetting.id ] ).toBe(
+			expect( newState.edits[ testGroup.id ]?.[ testSetting.id ] ).toBe(
 				'new-value'
 			);
 		} );
@@ -142,7 +142,7 @@ describe( 'setting-options reducer', () => {
 			} );
 
 			expect(
-				newState.isSaving.settings[ testGroup.id ][ testSetting.id ]
+				newState.isSaving.settings[ testGroup.id ]?.[ testSetting.id ]
 			).toBe( true );
 		} );
 	} );
@@ -179,9 +179,9 @@ describe( 'setting-options reducer', () => {
 				error,
 			} );
 
-			expect( newState.errors[ testGroup.id ][ testSetting.id ] ).toEqual(
-				error
-			);
+			expect(
+				newState.errors[ testGroup.id ]?.[ testSetting.id ]
+			).toEqual( error );
 		} );
 	} );
 

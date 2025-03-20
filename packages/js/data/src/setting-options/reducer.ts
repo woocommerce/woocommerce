@@ -3,7 +3,7 @@
  */
 import { TYPES } from './action-types';
 import type { Actions } from './actions';
-import type { SettingsState } from './types';
+import type { SettingsState, Setting, SettingValue } from './types';
 
 export const DEFAULT_STATE: SettingsState = {
 	groups: [],
@@ -14,6 +14,16 @@ export const DEFAULT_STATE: SettingsState = {
 		settings: {},
 	},
 	errors: {},
+};
+
+const ensureGroupExists = < T >(
+	obj: { [ groupId: string ]: T | undefined },
+	groupId: string
+): T => {
+	if ( ! obj[ groupId ] ) {
+		obj[ groupId ] = {} as T;
+	}
+	return obj[ groupId ] as T;
 };
 
 const reducer = (
@@ -30,20 +40,26 @@ const reducer = (
 		case TYPES.RECEIVE_SETTINGS: {
 			const settings = { ...state.settings };
 			const edits = { ...state.edits };
-			settings[ action.groupId ] = settings[ action.groupId ] || {};
+			const groupSettings = ensureGroupExists< {
+				[ settingId: string ]: Setting;
+			} >( settings, action.groupId );
 
 			// Remove edits for successfully updated settings
 			action.settings.forEach( ( setting ) => {
-				settings[ action.groupId ][ setting.id ] = setting;
+				groupSettings[ setting.id ] = setting;
+
 				if ( edits[ action.groupId ] ) {
-					delete edits[ action.groupId ][ setting.id ];
+					const groupEdits = edits[ action.groupId ];
+					if ( groupEdits && setting.id in groupEdits ) {
+						delete groupEdits[ setting.id ];
+					}
 				}
 			} );
 
 			// Remove edits for the group if it's empty
 			if (
 				edits[ action.groupId ] &&
-				Object.keys( edits[ action.groupId ] ).length === 0
+				Object.keys( edits[ action.groupId ] || {} ).length === 0
 			) {
 				delete edits[ action.groupId ];
 			}
@@ -57,8 +73,10 @@ const reducer = (
 
 		case TYPES.UPDATE_SETTING: {
 			const edits = { ...state.edits };
-			edits[ action.groupId ] = edits[ action.groupId ] || {};
-			edits[ action.groupId ][ action.settingId ] = action.value;
+			const groupEdits = ensureGroupExists< {
+				[ settingId: string ]: SettingValue;
+			} >( edits, action.groupId );
+			groupEdits[ action.settingId ] = action.value;
 
 			return {
 				...state,
@@ -68,10 +86,12 @@ const reducer = (
 
 		case TYPES.UPDATE_SETTINGS: {
 			const edits = { ...state.edits };
-			edits[ action.groupId ] = edits[ action.groupId ] || {};
+			const groupEdits = ensureGroupExists< {
+				[ settingId: string ]: SettingValue;
+			} >( edits, action.groupId );
 
 			action.updates.forEach( ( update ) => {
-				edits[ action.groupId ][ update.id ] = update.value;
+				groupEdits[ update.id ] = update.value;
 			} );
 
 			return {
@@ -86,10 +106,10 @@ const reducer = (
 			if ( action.settingId === null ) {
 				isSaving.groups[ action.groupId ] = action.isSaving;
 			} else {
-				isSaving.settings[ action.groupId ] =
-					isSaving.settings[ action.groupId ] || {};
-				isSaving.settings[ action.groupId ][ action.settingId ] =
-					action.isSaving;
+				const groupSavingState = ensureGroupExists< {
+					[ settingId: string ]: boolean;
+				} >( isSaving.settings, action.groupId );
+				groupSavingState[ action.settingId ] = action.isSaving;
 			}
 
 			return {
@@ -100,16 +120,16 @@ const reducer = (
 
 		case TYPES.SET_ERROR: {
 			const errors = { ...state.errors };
-			errors[ action.groupId ] = errors[ action.groupId ] || {};
+			const groupErrors = ensureGroupExists< {
+				[ settingId: string ]: unknown;
+			} >( errors, action.groupId );
 
 			if ( action.settingId === null ) {
-				Object.keys( errors[ action.groupId ] ).forEach(
-					( settingId ) => {
-						errors[ action.groupId ][ settingId ] = action.error;
-					}
-				);
+				Object.keys( groupErrors ).forEach( ( settingId ) => {
+					groupErrors[ settingId ] = action.error;
+				} );
 			} else {
-				errors[ action.groupId ][ action.settingId ] = action.error;
+				groupErrors[ action.settingId ] = action.error;
 			}
 
 			return {
@@ -120,11 +140,15 @@ const reducer = (
 
 		case TYPES.REVERT_SETTING: {
 			const edits = { ...state.edits };
-			edits[ action.groupId ] = edits[ action.groupId ] || {};
-			delete edits[ action.groupId ][ action.settingId ];
+			if ( edits[ action.groupId ] ) {
+				const groupEdits = edits[ action.groupId ];
+				if ( groupEdits && action.settingId in groupEdits ) {
+					delete groupEdits[ action.settingId ];
+				}
 
-			if ( Object.keys( edits[ action.groupId ] ).length === 0 ) {
-				delete edits[ action.groupId ];
+				if ( Object.keys( groupEdits || {} ).length === 0 ) {
+					delete edits[ action.groupId ];
+				}
 			}
 
 			return {

@@ -1,5 +1,11 @@
-export type SettingValue = string | number | boolean | null | string[];
+/**
+ * Represents the value of a setting. It's unknown because any value can be stored.
+ */
+export type SettingValue = unknown;
 
+/**
+ * Represents the type of a setting
+ */
 export type SettingType =
 	| 'text'
 	| 'password'
@@ -28,11 +34,14 @@ export type SettingType =
 	| 'single_select_country'
 	| 'slotfill_placeholder';
 
+/**
+ * Represents a setting group
+ */
 export type SettingsGroup = {
 	id: string;
 	label: string;
 	description: string;
-	parent_id: string;
+	parent_id?: string;
 	sub_groups: string[];
 	_links?: {
 		options: Array< {
@@ -41,6 +50,9 @@ export type SettingsGroup = {
 	};
 };
 
+/**
+ * Represents a setting
+ */
 export type Setting = {
 	id: string;
 	label: string;
@@ -53,12 +65,18 @@ export type Setting = {
 	placeholder?: string;
 };
 
+/**
+ * Represents an error that occurred during a batch settings update
+ */
 export type APIError = {
 	code: string;
 	message: string;
 	data?: Record< string, unknown >;
 };
 
+/**
+ * Represents an error that occurred during a batch settings update
+ */
 export type BatchSettingsError = Error & {
 	settingErrors: Array< {
 		id: string;
@@ -67,37 +85,76 @@ export type BatchSettingsError = Error & {
 };
 
 export type SettingsState = {
+	/**
+	 * Array of setting groups
+	 */
 	groups: SettingsGroup[];
+
+	/**
+	 * Settings organized by group ID and setting ID
+	 */
 	settings: {
-		[ groupId: string ]: {
-			[ settingId: string ]: Setting;
-		};
+		[ groupId: string ]:
+			| {
+					[ settingId: string ]: Setting;
+			  }
+			| undefined;
 	};
+
+	/**
+	 * Edited setting values by group ID and setting ID
+	 */
 	edits: {
-		[ groupId: string ]: {
-			[ settingId: string ]: SettingValue;
-		};
+		[ groupId: string ]:
+			| {
+					[ settingId: string ]: SettingValue;
+			  }
+			| undefined;
 	};
+
+	/**
+	 * Tracks save operations in progress
+	 */
 	isSaving: {
+		/**
+		 * Tracks save operations in progress by group ID
+		 */
 		groups: {
 			[ groupId: string ]: boolean;
 		};
+		/**
+		 * Tracks save operations in progress by group ID and setting ID
+		 */
 		settings: {
-			[ groupId: string ]: {
-				[ settingId: string ]: boolean;
-			};
+			[ groupId: string ]:
+				| {
+						[ settingId: string ]: boolean;
+				  }
+				| undefined;
 		};
 	};
+
+	/**
+	 * Error states by group ID and setting ID
+	 */
 	errors: {
-		[ groupId: string ]: {
-			[ settingId: string ]: unknown;
-		};
+		[ groupId: string ]:
+			| {
+					[ settingId: string ]: unknown;
+			  }
+			| undefined;
 	};
 };
 
+/**
+ * Represents an update to a setting
+ */
 export type SettingUpdate = {
 	id: string;
 	value: SettingValue;
 };
 
+/**
+ * Represents an object of setting IDs and their values
+ */
 export type SettingsUpdateObject = Record< string, SettingValue >;

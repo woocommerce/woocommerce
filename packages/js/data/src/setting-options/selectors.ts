@@ -153,7 +153,7 @@ export const getEditedSettingIds = createSelector(
 export const isGroupSaving = (
 	state: SettingsState,
 	groupId: string
-): boolean => !! state.isSaving.groups[ groupId ];
+): boolean => !! state.isSaving.groups?.[ groupId ];
 
 /**
  * Check if a specific setting is currently being saved.
@@ -167,7 +167,7 @@ export const isSettingSaving = (
 	groupId: string,
 	settingId: string
 ): boolean => {
-	const groupSaving = state.isSaving.settings[ groupId ];
+	const groupSaving = state.isSaving.settings?.[ groupId ];
 	return !! groupSaving && !! groupSaving[ settingId ];
 };
 
