@@ -589,6 +589,8 @@
 	height: calc(100% - 60px); // Account for continue button
 	max-height: 100%; // Ensure it doesn't grow beyond parent
 	overflow: hidden; // Prevent content from spilling out
+	padding: 0 !important; // There is a padding on the parent container that we need to override.
+	border-bottom: none !important;
 
     // Remove padding on medium screens or less.
     @media screen and (min-width: $break-mobile) {
@@ -609,6 +611,10 @@
 
 		.woocommerce-settings-payments-header__title {
 			margin-bottom: $gap-smaller;
+
+			@media screen and (max-width: $break-medium) {
+				padding: 0px !important;
+			}
 		}
 	}
 
