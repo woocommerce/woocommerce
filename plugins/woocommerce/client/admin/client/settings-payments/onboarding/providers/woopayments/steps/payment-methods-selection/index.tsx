@@ -10,7 +10,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { useOnboardingContext } from '../../data/onboarding-context';
-import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
+import { PaymentMethodListItem } from './payment-method-list-item';
 import './payment-methods-selection.scss';
 
 export default function PaymentMethodsSelection() {
