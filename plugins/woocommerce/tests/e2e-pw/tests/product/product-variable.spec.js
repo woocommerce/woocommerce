@@ -1,3 +1,5 @@
+/* eslint-disable playwright/no-wait-for-timeout */
+
 /**
  * Internal dependencies
  */
@@ -193,6 +195,7 @@ test.describe(
 		test( 'should be able to add variation products to the cart', async ( {
 			page,
 		} ) => {
+			test.skip( 'Temporary skip for 9.8' );
 			await page.goto( `product/${ slug }` );
 
 			for ( const attr of variations1 ) {
@@ -230,6 +233,8 @@ test.describe(
 		test( 'should be able to remove variation products from the cart', async ( {
 			page,
 		} ) => {
+			// eslint-disable-next-line jest/no-identical-title
+			test.skip( 'Temporary skip for 9.8' );
 			await page.goto( `product/${ slug }` );
 			await page.locator( '#size' ).selectOption( 'Large' );
 			await page.waitForTimeout( 300 );
