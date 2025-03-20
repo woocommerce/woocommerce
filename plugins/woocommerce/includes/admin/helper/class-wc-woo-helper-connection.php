@@ -1,12 +1,12 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * A utility class to handle WooCommerce.com connection.
  *
  * @class WC_Woo_Update_Manager_Plugin
  * @package WooCommerce\Admin\Helper
  */
+
+declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

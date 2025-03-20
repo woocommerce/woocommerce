@@ -1654,21 +1654,16 @@ class WC_Helper {
 	 * @return array|WP_Error
 	 */
 	public static function fetch_helper_connection_info() {
-		$data      = self::get_cached_connection_data();
+		$data = self::get_cached_connection_data();
 		if ( false !== $data ) {
 			return $data;
-		}
-
-		$connection_data = self::get_cached_connection_data();
-		if ( false !== $data ) {
-			return $connection_data;
 		}
 
 		$request = WC_Helper_API::get(
 			'connection-info',
 			array(
 				'authenticated' => true,
-				'query_string'  => '?url=' . urlencode( home_url() ),
+				'query_string'  => '?url=' . rawurlencode( home_url() ),
 			)
 		);
 
