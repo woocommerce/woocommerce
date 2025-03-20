@@ -23,7 +23,7 @@ class ActivatePluginTest extends TestCase {
 
 		$expected_array = array(
 			'step'       => 'activatePlugin',
-			'pluginName' => $plugin_name,
+			'pluginPath' => $plugin_name,
 		);
 
 		$this->assertEquals( $expected_array, $activatePlugin->prepare_json_array() );
@@ -50,8 +50,11 @@ class ActivatePluginTest extends TestCase {
 				'pluginName' => array(
 					'type' => 'string',
 				),
+				'pluginPath' => array(
+					'type' => 'string',
+				),
 			),
-			'required'   => array( 'step', 'pluginName' ),
+			'required'   => array( 'step', 'pluginPath' ),
 		);
 
 		$this->assertEquals( $expected_schema, ActivatePlugin::get_schema() );

@@ -19,7 +19,7 @@ class InstallPluginTest extends TestCase {
 
 		$expected_array = array(
 			'step'          => 'installPlugin',
-			'pluginZipFile' => array(
+			'pluginData' => array(
 				'resource' => $resource,
 				'slug'     => $slug,
 			),
@@ -47,7 +47,7 @@ class InstallPluginTest extends TestCase {
 					'type' => 'string',
 					'enum' => array( 'installPlugin' ),
 				),
-				'pluginZipFile' => array(
+				'pluginData' => array(
 					'type'       => 'object',
 					'properties' => array(
 						'resource' => array(
@@ -68,7 +68,7 @@ class InstallPluginTest extends TestCase {
 					),
 				),
 			),
-			'required'   => array( 'step', 'pluginZipFile' ),
+			'required'   => array( 'step', 'pluginData' ),
 		);
 
 		$this->assertEquals( $expected_schema, InstallPlugin::get_schema() );

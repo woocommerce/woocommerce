@@ -19,7 +19,7 @@ class InstallThemeTest extends TestCase {
 
 		$expected_array = array(
 			'step'         => 'installTheme',
-			'themeZipFile' => array(
+			'themeData' => array(
 				'resource' => $resource,
 				'slug'     => $slug,
 			),
@@ -47,7 +47,7 @@ class InstallThemeTest extends TestCase {
 					'type' => 'string',
 					'enum' => array( 'installTheme' ),
 				),
-				'themeZipFile' => array(
+				'themeData' => array(
 					'type'       => 'object',
 					'properties' => array(
 						'resource' => array(
@@ -68,7 +68,7 @@ class InstallThemeTest extends TestCase {
 					),
 				),
 			),
-			'required'   => array( 'step', 'themeZipFile' ),
+			'required'   => array( 'step', 'themeData' ),
 		);
 
 		$this->assertEquals( $expected_schema, InstallTheme::get_schema() );

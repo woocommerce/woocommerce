@@ -16,7 +16,7 @@ class ActivateThemeTest extends TestCase {
 
 		$expected_array = array(
 			'step'      => 'activateTheme',
-			'themeName' => $theme_name,
+			'themeFolderName' => $theme_name,
 		);
 
 		$this->assertEquals( $expected_array, $activateTheme->prepare_json_array() );
@@ -40,11 +40,11 @@ class ActivateThemeTest extends TestCase {
 					'type' => 'string',
 					'enum' => array( 'activateTheme' ),
 				),
-				'themeName' => array(
+				'themeFolderName' => array(
 					'type' => 'string',
 				),
 			),
-			'required'   => array( 'step', 'themeName' ),
+			'required'   => array( 'step', 'themeFolderName' ),
 		);
 
 		$this->assertEquals( $expected_schema, ActivateTheme::get_schema() );

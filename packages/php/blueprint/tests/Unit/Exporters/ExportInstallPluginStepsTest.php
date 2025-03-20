@@ -46,7 +46,7 @@ class ExportInstallPluginStepsTest extends TestCase {
 		$result = $mock->export();
 		$this->assertCount( 3, $result );
 
-		$slugs = array_map(fn($step) => $step->prepare_json_array()['pluginZipFile']['slug'], $result);
+		$slugs = array_map(fn($step) => $step->prepare_json_array()['pluginData']['slug'], $result);
 		$this->assertContains('plugina', $slugs);
 		$this->assertContains('pluginb', $slugs);
 		$this->assertContains('pluginc', $slugs);
