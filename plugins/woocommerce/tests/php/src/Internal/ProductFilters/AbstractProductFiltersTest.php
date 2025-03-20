@@ -168,7 +168,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		$this->empty_lookup_tables();
 
 		foreach ( $this->backup_options as $option => $value ) {
-			if ( $value === false ) {
+			if ( false === $value ) {
 				delete_option( $option );
 			} else {
 				update_option( $option, $value );
