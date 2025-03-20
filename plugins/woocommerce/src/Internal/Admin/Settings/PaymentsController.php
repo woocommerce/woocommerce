@@ -330,6 +330,4 @@ class PaymentsController {
 		// contains details_submitted = true entry. This implies that WooPayments was connected.
 		return $account_data['data']['details_submitted'];
 	}
-
-
 }
