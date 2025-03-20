@@ -26,6 +26,8 @@ class WC_Helper {
 	 */
 	public static $log;
 
+	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
+
 	/**
 	 * Get an absolute path to the requested helper view.
 	 *
@@ -1643,8 +1645,7 @@ class WC_Helper {
 	 * @return array|bool cached connection data or false connection data is not cached.
 	 */
 	public static function get_cached_connection_data() {
-		$cache_key = '_woocommerce_helper_connection_data';
-		return get_transient( $cache_key );
+		return get_transient( self::CACHE_KEY_CONNECTION_DATA );
 	}
 
 	/**
@@ -1688,7 +1689,7 @@ class WC_Helper {
 			$auth        = WC_Helper_Options::get( 'auth' );
 			$auth['url'] = $url;
 			WC_Helper_Options::update( 'auth', $auth );
-			set_transient( $cache_key, $connection_data, 1 * HOUR_IN_SECONDS );
+			set_transient( self::CACHE_KEY_CONNECTION_DATA, $connection_data, 1 * HOUR_IN_SECONDS );
 		}
 
 		return $connection_data;
