@@ -26,7 +26,6 @@ class WooPaymentsService {
 	const ONBOARDING_STEP_STATUS_NOT_STARTED = 'not_started';
 	const ONBOARDING_STEP_STATUS_STARTED = 'started';
 	const ONBOARDING_STEP_STATUS_COMPLETED = 'completed';
-	const ONBOARDING_STEP_STATUS_ERROR = 'error';
 
 	const ACTION_TYPE_REST = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
@@ -63,7 +62,7 @@ class WooPaymentsService {
 	 */
 	public function get_onboarding_details( string $location, string $rest_path ): array {
 		// If the WooPayments plugin is not active, we don't do onboarding.
-		if ( ! $this->is_woopayments_active() ) {
+		if ( ! $this->is_extension_active() ) {
 			throw new Exception( 'WooPayments is not active.' );
 		}
 
@@ -147,7 +146,6 @@ class WooPaymentsService {
 			// Try to generate the authorization URL.
 			$wpcom_connection = $this->get_wpcom_connection_authorization( Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE ), 'woocommerce' );
 			if ( ! $wpcom_connection['success'] ) {
-				$wpcom_step_details['status'] = self::ONBOARDING_STEP_STATUS_ERROR;
 				$wpcom_step_details['errors'] = $wpcom_connection['errors'];
 			}
 			$wpcom_step_details['actions'] = array(
@@ -301,26 +299,31 @@ class WooPaymentsService {
 	/**
 	 * Mark an onboarding step as started.
 	 *
-	 * @param string $step_id  The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $step_id   The ID of the onboarding step.
+	 * @param string $location  The location for which we are onboarding.
+	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 * @param bool   $overwrite Whether to overwrite the step status if it is already started and update the timestamp.
 	 *
 	 * @return bool Whether the onboarding step was marked as started.
 	 * @throws Exception If the given onboarding step ID is invalid.
 	 */
-	public function set_onboarding_step_started( string $step_id, string $location ): bool {
+	public function set_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
 		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
 			throw new Exception( 'Invalid onboarding step ID.' );
 		}
 
 		// Check step requirements.
 		if( ! $this->check_onboarding_step_requirements( $step_id, $location ) ) {
-			throw new Exception( 'Onboarding step requirements are not met.' );
+			throw new Exception( 'Onboarding step can no be started because requirements are not met.' );
 		}
 
 		$step_details = $this->get_nox_profile_onboarding_step( $step_id, $location );
 		if ( empty( $step_details['statuses'] ) ) {
 			$step_details['statuses'] = array();
+		}
+
+		if ( ! $overwrite && ! empty( $step_details['statuses'][ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
+			return true;
 		}
 
 		// Mark the step as started and record the timestamp.
@@ -333,14 +336,15 @@ class WooPaymentsService {
 	/**
 	 * Mark an onboarding step as completed.
 	 *
-	 * @param string $step_id  The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $step_id   The ID of the onboarding step.
+	 * @param string $location  The location for which we are onboarding.
+	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 * @param bool   $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
 	 *
 	 * @return bool Whether the onboarding step was marked as completed.
 	 * @throws Exception If the given onboarding step ID is invalid.
 	 */
-	public function set_onboarding_step_completed( string $step_id, string $location ): bool {
+	public function set_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false ): bool {
 		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
 			throw new Exception( 'Invalid onboarding step ID.' );
 		}
@@ -355,6 +359,10 @@ class WooPaymentsService {
 			$step_details['statuses'] = array();
 		}
 
+		if ( ! $overwrite && ! empty( $step_details['statuses'][ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
+			return true;
+		}
+
 		// Mark the step as completed and record the timestamp.
 		$step_details['statuses'][ self::ONBOARDING_STEP_STATUS_COMPLETED ] = time();
 
@@ -365,9 +373,9 @@ class WooPaymentsService {
 	/**
 	 * Save the data for an onboarding step.
 	 *
-	 * @param string $step_id The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $step_id      The ID of the onboarding step.
+	 * @param string $location     The location for which we are onboarding.
+	 *                             This is a ISO 3166-1 alpha-2 country code.
 	 * @param array  $request_data The entire data received in the request.
 	 *
 	 * @return bool Whether the onboarding step data was saved.
@@ -383,7 +391,7 @@ class WooPaymentsService {
 			$step_details['data'] = array();
 		}
 
-		// We support save for only certain steps.
+		// We support save for only certain steps, each with its own data structure.
 		switch ( $step_id ) {
 			case self::ONBOARDING_STEP_PAYMENT_METHODS:
 				if ( ! isset( $request_data['payment_methods'] ) || ! is_array( $request_data['payment_methods'] ) ) {
@@ -400,7 +408,7 @@ class WooPaymentsService {
 				$step_details['data']['self_assessment'] = $request_data['self_assessment'];
 				break;
 			default:
-				return false;
+				throw new Exception( 'Invalid onboarding step ID.' );
 		}
 
 		// Store the updated step data.
@@ -444,7 +452,7 @@ class WooPaymentsService {
 		$payment_methods = $this->provider->get_recommended_payment_methods( $this->get_payment_gateway(), $location );
 
 		// Grab the stored payment methods state
-		// (a key-value array of payment method IDs and if they should be enabled or not).
+		// (a key-value array of payment method IDs and if they should be automatically enabled or not).
 		$step_data = $this->get_nox_profile_onboarding_step_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'data' );
 		if ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) {
 			foreach ( $payment_methods as $key => $payment_method ) {
@@ -489,6 +497,13 @@ class WooPaymentsService {
 			);
 		}
 
+		// Nothing to do if there is an account, but it is not a test account.
+		if ( $this->has_account() ) {
+			return array(
+				'message' => __( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+			);
+		}
+
 		// Check step requirements.
 		if( ! $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
 			throw new Exception( 'Onboarding step requirements are not met.' );
@@ -517,8 +532,8 @@ class WooPaymentsService {
 			throw new Exception( 'Failed to initialize the test account.' );
 		}
 
-		// Mark the business verification step as completed.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+		// Mark the test account step as completed.
+		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		return $response;
 	}
@@ -526,9 +541,10 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding KYC progressive onboarding (PO) eligibility.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param array  $self_assessment The self-assessment data.
+	 * @param string $location        The location for which we are onboarding.
+	 *                                This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $self_assessment Optional. The self-assessment data.
+	 *                                If not provided, the stored data will be used.
 	 *
 	 * @return array The KYC PO eligibility data.
 	 * @throws Exception If the eligibility could not be determined or there was an error.
@@ -542,8 +558,8 @@ class WooPaymentsService {
 			}
 		}
 
-		// Gather the needed details.
-		$payload = array(
+		// Prepare the needed details.
+		$request_payload = array(
 			'business' => array(
 				'country' => $self_assessment['country'] ?? $location,
 				'type'    => $self_assessment['business_type'] ?? '',
@@ -556,7 +572,7 @@ class WooPaymentsService {
 		);
 
 		// Call the WooPayments API to determine PO eligibility.
-		$response_data = Utils::rest_endpoint_post_request( '/wc/v3/payments/onboarding/router/po_eligible', $payload );
+		$response_data = Utils::rest_endpoint_post_request( '/wc/v3/payments/onboarding/router/po_eligible', $request_payload );
 
 		if ( is_wp_error( $response_data ) ) {
 			throw new Exception( $response_data->get_error_message(), $response_data->get_error_code() );
@@ -575,10 +591,12 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding KYC account session.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param array  $self_assessment The self-assessment data.
-	 * @param bool   $progressive Whether the KYC session is for progressive onboarding.
+	 * @param string $location        The location for which we are onboarding.
+	 *                                This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $self_assessment Optional. The self-assessment data.
+	 *                                If not provided, the stored data will be used.
+	 * @param bool   $progressive     Optional. Whether the KYC session is for progressive onboarding.
+	 *                                Default is to get the KYC session for regular onboarding.
 	 *
 	 * @return array The KYC account session data.
 	 * @throws Exception If the KYC session data could not be retrieved or there was an error.
@@ -615,8 +633,8 @@ class WooPaymentsService {
 	/**
 	 * Finish the onboarding KYC account session.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $location        The location for which we are onboarding.
+	 *                                This is a ISO 3166-1 alpha-2 country code.
 	 * @param string $tracking_source Optional. The tracking source for the KYC session.
 	 *                                If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
@@ -645,7 +663,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the stored NOX profile.
+	 * Get the entire stored NOX profile data
 	 *
 	 * @return array The stored NOX profile.
 	 */
@@ -664,11 +682,12 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding step data from the NOX profile.
 	 *
-	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
 	 *
-	 * @return array The onboarding step data from the NOX profile.
+	 * @return array The onboarding step stored data from the NOX profile.
+	 *               If the step data is not found, an empty array is returned.
 	 */
 	private function get_nox_profile_onboarding_step( string $step_id, string $location ): array {
 		$nox_profile = $this->get_nox_profile();
@@ -692,12 +711,12 @@ class WooPaymentsService {
 	/**
 	 * Save the onboarding step data in the NOX profile.
 	 *
-	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param array  $data The onboarding step data to save in the profile.
+	 * @param array  $data     The onboarding step data to save in the profile.
 	 *
-	 * @return bool
+	 * @return bool Whether the onboarding step data was saved.
 	 */
 	private function save_nox_profile_onboarding_step( string $step_id, string $location, array $data ): bool {
 		$nox_profile = $this->get_nox_profile();
@@ -721,11 +740,11 @@ class WooPaymentsService {
 	/**
 	 * Get an entry from the NOX profile onboarding step details.
 	 *
-	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $entry The entry to get from the step data.
-	 * @param mixed  $default The default value to return if the entry is not found.
+	 * @param string $entry    The entry to get from the step data.
+	 * @param mixed  $default  The default value to return if the entry is not found.
 	 *
 	 * @return mixed The entry from the NOX profile step details. If the entry is not found, the default value is returned.
 	 */
@@ -742,11 +761,11 @@ class WooPaymentsService {
 	/**
 	 * Save an entry in the NOX profile onboarding step details.
 	 *
-	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $entry The entry key under which to save in the step data.
-	 * @param array  $data The data to save in the step data.
+	 * @param string $entry    The entry key under which to save in the step data.
+	 * @param array  $data     The data to save in the step data.
 	 *
 	 * @return bool Whether the onboarding step data was saved.
 	 */
@@ -768,10 +787,10 @@ class WooPaymentsService {
 	 */
 	private function get_onboarding_step_required_steps( string $step_id ): array {
 		switch ( $step_id ) {
+			// Both the test account and business verification (live account) steps require a working WPCOM connection.
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
 			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
 				return array(
-					self::ONBOARDING_STEP_PAYMENT_METHODS,
 					self::ONBOARDING_STEP_WPCOM_CONNECTION,
 				);
 			default:
@@ -804,7 +823,7 @@ class WooPaymentsService {
 	 * Get the WPCOM (Jetpack) connection authorization details.
 	 *
 	 * @param string $redirect_url The URL to redirect to after the connection is set up.
-	 * @param string $from
+	 * @param string $from         The source of the connection setup.
 	 *
 	 * @return array The WPCOM connection authorization details.
 	 */
@@ -823,14 +842,14 @@ class WooPaymentsService {
 	 *
 	 * @return boolean
 	 */
-	private function is_woopayments_active(): bool {
+	private function is_extension_active(): bool {
 		return class_exists( '\WC_Payments' );
 	}
 
 	/**
 	 * Get the main payment gateway instance.
 	 *
-	 * @return \WC_Payment_Gateway_WCPay
+	 * @return \WC_Payment_Gateway_WCPay The main payment gateway instance.
 	 */
 	private function get_payment_gateway(): \WC_Payment_Gateway_WCPay {
 		return \WC_Payments::get_gateway();
@@ -839,7 +858,7 @@ class WooPaymentsService {
 	/**
 	 * Determine if WooPayments has an account set up.
 	 *
-	 * @return bool
+	 * @return bool Whether WooPayments has an account set up.
 	 */
 	private function has_account(): bool {
 		return $this->provider->is_account_connected( $this->get_payment_gateway() );
@@ -848,7 +867,7 @@ class WooPaymentsService {
 	/**
 	 * Determine if WooPayments has a valid, fully onboarded account set up.
 	 *
-	 * @return bool
+	 * @return bool Whether WooPayments has a valid, fully onboarded account set up.
 	 */
 	private function has_valid_account(): bool {
 		if ( ! $this->has_account() ) {
@@ -861,7 +880,7 @@ class WooPaymentsService {
 	/**
 	 * Determine if WooPayments has a test account set up.
 	 *
-	 * @return bool
+	 * @return bool Whether WooPayments has a test account set up.
 	 */
 	private function has_test_account(): bool {
 		if ( ! $this->has_account() ) {

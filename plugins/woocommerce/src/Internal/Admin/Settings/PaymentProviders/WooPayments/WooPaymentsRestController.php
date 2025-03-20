@@ -185,7 +185,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_test_account_initialize' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_test_account_init' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
@@ -360,7 +360,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		$response = array(
 			'success'         => true,
 			'previous_status' => $previous_status,
-			'status'          => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
+			'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
 		);
 
 		return rest_ensure_response( $response );
@@ -468,14 +468,15 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @return WP_Error|WP_REST_Response The response.
 	 */
-	protected function handle_onboarding_test_account_initialize( WP_REST_Request $request ) {
+	protected function handle_onboarding_test_account_init( WP_REST_Request $request ) {
 		$location = $request->get_param( 'location' );
 		if ( empty( $location ) ) {
 			// Fall back to the providers country if no location is provided
 			$location = $this->payments->get_country();
 		}
 
-		// @todo Mark the step as started, if not already.
+		// Mark the step as started, if not already.
+		$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		try {
 			$result = $this->woopayments->onboarding_test_account_init( $location );
@@ -777,19 +778,18 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						),
 						'status' => array(
 							'type'        => 'enum',
-							'description' => esc_html__( 'The status of the step.', 'woocommerce' ),
+							'description' => esc_html__( 'The current status of the step.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'enum'        => array(
 								WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
-								WooPaymentsService::ONBOARDING_STEP_STATUS_ERROR,
 							),
 						),
 						'errors' => array(
 							'type'        => 'array',
-							'description' => esc_html__( 'The errors for the step.', 'woocommerce' ),
+							'description' => esc_html__( 'Errors list for the step.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'items'       => array(
