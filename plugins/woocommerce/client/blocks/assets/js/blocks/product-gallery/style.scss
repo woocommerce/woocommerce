@@ -355,6 +355,10 @@ body.wc-block-product-gallery-dialog-open {
 			aspect-ratio: 5 / 1 !important;
 		}
 
+		.wc-block-product-gallery-thumbnails__thumbnail {
+			aspect-ratio: 1 / 1;
+		}
+
 		.wc-block-product-gallery-thumbnails__scrollable {
 			flex-direction: row;
 			// Keep it for Safari.
