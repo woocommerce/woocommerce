@@ -26,6 +26,7 @@ class WC_Admin {
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
+		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -235,6 +236,93 @@ class WC_Admin {
 			// phpcs:enable
 			exit;
 		}
+	}
+
+	/**
+	 * Preview email editor placeholder dummy content.
+	 */
+	public function preview_email_editor_dummy_content() {
+		if ( isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
+			if ( ! ( isset( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) ) {
+				die( 'Security check' );
+			}
+
+			/**
+			 * Email preview instance for rendering dummy content.
+			 *
+			 * @var EmailPreview $email_preview - email preview instance
+			 */
+			$email_preview = wc_get_container()->get( EmailPreview::class );
+
+			if ( isset( $_GET['type'] ) ) {
+				$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
+				try {
+					$email_preview->set_email_type( $type_param );
+				} catch ( InvalidArgumentException $e ) {
+					wp_die( esc_html__( 'Invalid email type.', 'woocommerce' ), 400 );
+				}
+			}
+
+			$message = $this->capture_woo_content( $email_preview );
+
+			// print the preview email.
+			// phpcs:ignore WordPress.Security.EscapeOutput
+			echo $message;
+			// phpcs:enable
+			exit;
+		}
+	}
+
+	/**
+	 * Captures and returns the main content of a WooCommerce email preview without header and footer.
+	 *
+	 * This is an extracted function from an active PR.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/56199
+	 *
+	 * Updater after https://github.com/woocommerce/woocommerce/pull/56199 is merged
+	 *
+	 * @param EmailPreview $email_preview - email preview instance.
+	 * @return string
+	 */
+	private function capture_woo_content( $email_preview ): string {
+		// Store the existing header and footer callbacks.
+		global $wp_filter;
+		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
+		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_footer'] : null;
+
+		// Remove header and footer filters because we want to get only the main content.
+		remove_all_filters( 'woocommerce_email_header' );
+		remove_all_filters( 'woocommerce_email_footer' );
+
+		// Start output buffering to prevent partial renders with PHP notices or warnings.
+		ob_start();
+		try {
+			$message = $email_preview->render();
+			$message = $email_preview->ensure_links_open_in_new_tab( $message );
+		} catch ( Throwable $e ) {
+			ob_end_clean();
+			wp_die( esc_html__( 'There was an error rendering an email preview.', 'woocommerce' ), 404 );
+		}
+		ob_end_clean();
+
+		// Restore the original header and footer filters.
+		if ( $original_header_filters ) {
+			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $filter ) {
+					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
+				}
+			}
+		}
+		if ( $original_footer_filters ) {
+			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $filter ) {
+					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
+				}
+			}
+		}
+
+		return $message;
 	}
 
 	/**

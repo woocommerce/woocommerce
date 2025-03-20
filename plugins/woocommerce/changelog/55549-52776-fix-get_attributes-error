@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Make sure the `get_attributes` function always returns an array.

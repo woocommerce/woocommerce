@@ -23,7 +23,7 @@
 
 	.components-radio-control__option {
 		column-gap: 0;
-		
+
 		&:not(:last-child) {
 			// Override package component style.
 			margin-bottom: 0;
@@ -104,6 +104,10 @@
 
 	textarea {
 		width: 100%;
+	}
+
+	.components-base-control__field {
+		margin-bottom: 8px;
 	}
 }
 

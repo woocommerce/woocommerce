@@ -100,6 +100,7 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 		before: <img src={ apm.icon } alt="" />,
 		after: (
 			<ToggleControl
+				__nextHasNoMarginBottom
 				label=""
 				checked={ enabledApms.has( apm ) }
 				onChange={ () => handleToggleChange( apm ) }
