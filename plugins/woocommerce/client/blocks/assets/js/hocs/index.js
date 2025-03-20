@@ -9,4 +9,3 @@ export {
 	SelectedOption,
 	WithMaybeSelectedOption,
 } from './with-transform-single-select-to-multiple-select';
-export { withQueryLoopProductContextValidation } from './with-query-loop-product-context-validation';

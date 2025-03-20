@@ -3,8 +3,8 @@
  */
 
 import { SelectControl } from '@wordpress/components';
-import { withQueryLoopProductContextValidation } from '@woocommerce/block-hocs';
 import { __ } from '@wordpress/i18n';
+import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -19,12 +19,28 @@ import TEMPLATE from './template';
 import { ProductReviewsEditProps } from './types';
 import { htmlElementMessages } from '../../utils/messages';
 
-const Edit = ( { attributes, setAttributes }: ProductReviewsEditProps ) => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+	clientId,
+	context,
+}: ProductReviewsEditProps ) => {
 	const { tagName: TagName } = attributes;
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		template: TEMPLATE,
 	} );
+
+	const { hasInvalidContext, warningElement } =
+		useQueryLoopProductContextValidation( {
+			clientId,
+			postType: context.postType,
+			blockName: 'Product Reviews',
+		} );
+
+	if ( hasInvalidContext ) {
+		return warningElement;
+	}
 
 	return (
 		<>
@@ -55,4 +71,4 @@ const Edit = ( { attributes, setAttributes }: ProductReviewsEditProps ) => {
 	);
 };
 
-export default withQueryLoopProductContextValidation( Edit, 'Product Reviews' );
+export default Edit;
