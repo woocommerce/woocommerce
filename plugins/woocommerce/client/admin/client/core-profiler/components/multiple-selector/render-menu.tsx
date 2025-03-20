@@ -51,6 +51,7 @@ export const renderMenu =
 							} }
 						>
 							<CheckboxControl
+								__nextHasNoMarginBottom
 								className={ clsx( 'core-profiler__checkbox', {
 									'is-selected': isSelected,
 								} ) }

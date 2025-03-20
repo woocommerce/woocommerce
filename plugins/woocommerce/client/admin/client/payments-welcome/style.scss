@@ -121,6 +121,10 @@
 
 					.woocommerce-list__item-after {
 						margin-left: $gap-large;
+
+						.components-base-control.components-toggle-control {
+							margin-bottom: 12px;
+						}
 					}
 
 					.woocommerce-list__item-before {

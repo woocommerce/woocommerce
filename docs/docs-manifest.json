@@ -82,7 +82,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "cc5157b6c46624a72effbb16ab4d25165c0d096e9bf78eb7af0f16fe2e20d266",
+          "hash": "2c9248ef789ef0bcf178500ef9b9792736e823bd73d222a512a80ecbbbf6cfbe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -108,7 +108,7 @@
           "menu_title": "Slot and Fill",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "hash": "9502f8cd0af0594c36e0f527472d6d785bb1394c970be35355a652aa8ddad4bb",
+          "hash": "80451d27bcc912da1fceb99bdf054f27cb8d2e4c9189cd7bb2b5f5cedf8a9fd9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
           "id": "e388101586765dd9aca752d66d667d74951a1504",
           "links": {
@@ -213,7 +213,7 @@
           "menu_title": "Additional Checkout Fields",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md",
-          "hash": "5b27bc3fa44a5c548a6cd1d1530f49108e960e858b607c69a981ccdd5ea9ab4e",
+          "hash": "3755ad8ba54e31678db6e275e566f97599e90e0a5ee7e67bb7b48a6a9a8ef076",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md",
           "id": "cb5dd8d59043a4e53929121b45da7b33b1661ab8"
         }
@@ -309,7 +309,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "556c1142efe91adcfcbb0f92f511b27ded573e7ba01d17965f05d363aed58fd4",
+              "hash": "7f5226a48549be8129b374f35ba93da35639ccda9a3d9d81583b3e2b8825663a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -736,6 +736,22 @@
           "hash": "9a3624adc70b6a30bc89ecd86519909c90335f75fcbc925e5b417fac20712e54",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/data-management/crud-objects.md",
           "id": "eaf29a28f438c0d03b4e7056dc3b6eaead4937b5"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nThis section provides documentation about the email preview system in WooCommerce\n",
+      "category_slug": "emails",
+      "category_title": "Emails",
+      "posts": [
+        {
+          "post_title": "Email Preview Integration",
+          "menu_title": "Email Preview Integration",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-preview.md",
+          "hash": "6d3fe596cb0b40babdbe14dd035bf374fbe696bd5a64b6c2c608a29c18e733e5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-preview.md",
+          "id": "b84b4684c6a48a280d57969773134698bc04401a"
         }
       ],
       "categories": []
@@ -1976,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "599c9356484835c43a80a4a03c99e25b5b3cbc32a97b22f737ef6f3a8235a230"
+  "hash": "9337aafb07fe1610667484f0eb00e0574c72e562cf41f3937691a99a7a5fd55d"
 }

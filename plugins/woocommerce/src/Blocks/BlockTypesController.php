@@ -455,7 +455,6 @@ final class BlockTypesController {
 			'ProductGallery',
 			'ProductGalleryLargeImage',
 			'ProductGalleryLargeImageNextPrevious',
-			'ProductGalleryPager',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
@@ -531,6 +530,9 @@ final class BlockTypesController {
 			$block_types[] = 'Accordion\AccordionPanel';
 			$block_types[] = 'Accordion\AccordionHeader';
 			$block_types[] = 'BlockifiedProductDetails';
+			$block_types[] = 'ProductDescription';
+
+			$block_types[] = 'Reviews\ProductReviews';
 		}
 
 		/**
