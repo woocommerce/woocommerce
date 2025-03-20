@@ -55,7 +55,7 @@ class InstallTheme extends Step {
 	public function prepare_json_array(): array {
 		return array(
 			'step'         => static::get_step_name(),
-			'themeZipFile' => array(
+			'themeData' => array(
 				'resource' => $this->resource,
 				'slug'     => $this->slug,
 			),
@@ -77,7 +77,7 @@ class InstallTheme extends Step {
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
-				'themeZipFile' => array(
+				'themeData' => array(
 					'type'       => 'object',
 					'properties' => array(
 						'resource' => array(
