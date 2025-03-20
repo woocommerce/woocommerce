@@ -1,0 +1,165 @@
+{
+	"name": "@woocommerce/email-editor",
+	"version": "0.1.0",
+	"description": "Gutenberg based email editor that is used in WooCommerce emails.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"email"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/email-editor",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"build",
+		"assets"
+	],
+	"sideEffects": [
+		"build/**/*.css",
+		"src/**/*.scss"
+	],
+	"scripts": {
+		"start": "wp-scripts start",
+		"lint:css": "wp-scripts lint-style",
+		"lint:css-fix": "wp-scripts lint-style --fix",
+		"lint:js": "wp-scripts lint-js './src/**/*.{js,jsx,json,ts,tsx,yml,yaml}'",
+		"lint:js-fix": "wp-scripts lint-js './src/**/*.{js,jsx,json,ts,tsx}' --fix",
+		"check-types": "NODE_OPTIONS=--max_old_space_size=2048 tsc --noEmit",
+		"format": "./node_modules/.bin/prettier --config .prettierrc.js --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:editor": "wireit",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "pnpm lint:js-fix",
+		"lint:fix:lang:css": "pnpm lint:css-fix",
+		"lint:lang:js": "pnpm lint:js",
+		"lint:lang:css": "pnpm lint:css",
+		"prepack": "pnpm build",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:editor": "wireit",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
+	},
+	"lint-staged": {
+		"*.{js,jsx,json,ts,tsx,yml,yaml,scss}": "pnpm run format",
+		"*.{scss,css}": "pnpm run lint:css",
+		"*.{js,jsx,ts,tsx}": "pnpm run lint:js"
+	},
+	"dependencies": {
+		"@wordpress/api-fetch": "wp-6.6",
+		"@wordpress/base-styles": "wp-6.6",
+		"@wordpress/block-editor": "wp-6.6",
+		"@wordpress/block-library": "wp-6.6",
+		"@wordpress/blocks": "wp-6.6",
+		"@wordpress/components": "wp-6.6",
+		"@wordpress/compose": "wp-6.6",
+		"@wordpress/core-data": "wp-6.6",
+		"@wordpress/data": "wp-6.6",
+		"@wordpress/data-controls": "wp-6.6",
+		"@wordpress/editor": "wp-6.6",
+		"@wordpress/element": "wp-6.6",
+		"@wordpress/format-library": "wp-6.6",
+		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/html-entities": "wp-6.6",
+		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/icons": "wp-6.6",
+		"@wordpress/interface": "wp-6.6",
+		"@wordpress/is-shallow-equal": "wp-6.6",
+		"@wordpress/keyboard-shortcuts": "wp-6.6",
+		"@wordpress/keycodes": "wp-6.6",
+		"@wordpress/media-utils": "wp-6.6",
+		"@wordpress/notices": "wp-6.6",
+		"@wordpress/preferences": "wp-6.6",
+		"@wordpress/private-apis": "wp-6.6",
+		"@wordpress/rich-text": "wp-6.6",
+		"@wordpress/url": "wp-6.6",
+		"classnames": "^2.3.2",
+		"deepmerge": "^4.3.1",
+		"lodash": "^4.17.21",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
+	},
+	"devDependencies": {
+		"@types/history": "^4.7.11",
+		"@types/js-cookie": "^3.0.2",
+		"@types/lodash": "^4.14.180",
+		"@types/node": "20.x.x",
+		"@types/react": "18.3.x",
+		"@types/react-dom": "18.3.x",
+		"@types/wordpress__block-editor": "^11.5.14",
+		"@types/wordpress__block-library": "^2.6.3",
+		"@types/wordpress__blocks": "^12.5.14",
+		"@types/wordpress__edit-post": "^7.5.7",
+		"@types/wordpress__editor": "^13.6.8",
+		"@types/wordpress__media-utils": "^4.14.4",
+		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/prettier-config": "2.17.0",
+		"@wordpress/scripts": "wp-6.6",
+		"@wordpress/stylelint-config": "^21.36.0",
+		"copy-webpack-plugin": "^10.2.4",
+		"prettier": "npm:wp-prettier@^3.0.3",
+		"ts-loader": "9.5.x",
+		"typescript": "5.7.x",
+		"wireit": "0.14.10",
+		"wp-types": "^3.65.0"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,ts,tsx,scss,css}"
+			}
+		}
+	},
+	"wireit": {
+		"build:project:editor": {
+			"command": "wp-scripts build",
+			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				}
+			},
+			"files": [
+				"webpack.config.js",
+				"tsconfig.json",
+				"src/*"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:editor": {
+			"command": "wp-scripts start",
+			"service": true
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"package.json",
+				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
+				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/assets/",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js"
+			]
+		}
+	}
+}

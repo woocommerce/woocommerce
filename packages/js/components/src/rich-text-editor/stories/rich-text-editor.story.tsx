@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { createElement } from '@wordpress/element';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -45,6 +44,6 @@ export const MultipleEditors: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/experimental/RichTextEditor',
+	title: 'Experimental/RichTextEditor',
 	component: RichTextEditor,
 };

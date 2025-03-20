@@ -20,7 +20,7 @@ class ProductPrice extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
+	protected $api_version = '3';
 
 	/**
 	 * Get block supports. Shared with the frontend.

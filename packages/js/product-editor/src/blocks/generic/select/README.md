@@ -39,13 +39,6 @@ If provided, shows a tooltip next to the label with additional information.
 
 Indicates where the select is of multiple choices or not.
 
-### placeholder
-
--   **Type:** `String`
--   **Required:** `No`
-
-Placeholder text that appears in the field when it's empty.
-
 ### disabled
 
 -   **Type:** `Boolean`

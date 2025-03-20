@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 7.4.0
+ * @version 9.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -41,6 +41,16 @@ defined( 'ABSPATH' ) || exit;
 													<tr>
 														<td colspan="2" valign="middle" id="credit">
 															<?php
+															$email_footer_text = get_option( 'woocommerce_email_footer_text' );
+															/**
+															 * This filter is documented in templates/emails/email-styles.php
+															 *
+															 * @since 9.6.0
+															 */
+															if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
+																$text_transient    = get_transient( 'woocommerce_email_footer_text' );
+																$email_footer_text = false !== $text_transient ? $text_transient : $email_footer_text;
+															}
 															echo wp_kses_post(
 																wpautop(
 																	wptexturize(
@@ -51,7 +61,7 @@ defined( 'ABSPATH' ) || exit;
 																		 *
 																		 * @param string $email_footer_text
 																		 */
-																		apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) )
+																		apply_filters( 'woocommerce_email_footer_text', $email_footer_text )
 																	)
 																)
 															);

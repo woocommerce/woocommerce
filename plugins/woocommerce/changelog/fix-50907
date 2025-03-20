@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Remove the subscription to the OPTIONS_STORE_NAME since its trigered many times, using useSelect instead

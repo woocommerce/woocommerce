@@ -18,9 +18,17 @@
  *
  * @package         {{namespace}}
  */
-add_action( 'woocommerce_blocks_loaded',
+
+add_action(
+	'init',
 	function () {
 		register_block_type_from_metadata( __DIR__ . '/build/js/checkout-newsletter-subscription-block' );
+	}
+);
+
+add_action(
+	'woocommerce_blocks_loaded',
+	function () {
 		require_once __DIR__ . '/{{slug}}-blocks-integration.php';
 		add_action(
 			'woocommerce_blocks_cart_block_registration',

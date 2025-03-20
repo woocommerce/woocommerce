@@ -80,7 +80,7 @@ class WC_Admin_Marketplace_Promotions {
 	 */
 	private static function schedule_cron_event() {
 		if ( ! wp_next_scheduled( self::CRON_NAME ) ) {
-			wp_schedule_event( time(), 'daily', self::CRON_NAME );
+			wp_schedule_event( time(), 'twicedaily', self::CRON_NAME );
 		}
 	}
 

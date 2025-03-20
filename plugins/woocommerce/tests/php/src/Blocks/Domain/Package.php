@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
 use Automattic\WooCommerce\Blocks\Domain\Package as TestedPackage;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Tests the Package class
@@ -14,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 class Package extends \WP_UnitTestCase {
 
 	private function get_package() {
-		return new TestedPackage( '1.0.0', __DIR__, new FeatureGating() );
+		return new TestedPackage( '1.0.0', __DIR__ );
 	}
 
 	public function test_get_version() {

@@ -3,6 +3,20 @@ on:
     push:
         branches:
             - trunk
+        paths-ignore:
+            - 'docs/**'
+            - 'packages/php/**'
+            - 'tools/**'
+            - '**/changelog/**'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
+            - '**/tests/**'
+            - '**/*.md'
+            - '.husky/**'
+            - '.cursor/**'
+            - '.github/**'
+            - '!.github/workflows/build-live-branch.yml'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,7 +27,7 @@ permissions: {}
 jobs:
     build:
         if: github.repository_owner == 'woocommerce' && github.actor != 'github-actions[bot]'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
@@ -21,12 +35,10 @@ jobs:
 
             - name: Get current version
               id: version
-              uses: actions/github-script@v6.3.3
-              with:
-                  script:
-                      const { getVersion } = require( './.github/workflows/scripts/get-plugin-version' );
-                      const version = await getVersion( 'woocommerce' );
-                      core.setOutput( 'version', version );
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -49,16 +61,10 @@ jobs:
                   echo "$CURRENT_VERSION" > "$GITHUB_WORKSPACE/plugins/woocommerce/version.txt"
 
                   cd "$GITHUB_WORKSPACE/plugins/woocommerce"
-                  bash bin/build-zip.sh
+                  PLUGIN_SLUG='woocommerce-dev' bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
-                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
-                  cd "$GITHUB_WORKSPACE/zips"
-                  unzip -qq woocommerce.zip
-                  rm woocommerce.zip
-                  mv woocommerce woocommerce-dev
-                  zip -q -r -9 "woocommerce-dev.zip" "woocommerce-dev/"
-                  rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
+                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce-dev.zip" "$GITHUB_WORKSPACE/zips/woocommerce-dev.zip"
 
                   # Plugin data is passed as a JSON object.
                   PLUGIN_DATA="{}"          

@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Proxies;
 
+use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Proxies\ExampleClasses\ClassThatDependsOnLegacyCode;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
@@ -25,7 +26,12 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		$container = wc_get_container();
-		$container->add( ClassThatDependsOnLegacyCode::class )->addArgument( LegacyProxy::class );
+
+		// TODO: Remove this in WooCommerce 10.0.
+		if ( $container instanceof ExtendedContainer ) {
+			$container->add( ClassThatDependsOnLegacyCode::class )->addArgument( LegacyProxy::class );
+		}
+
 		$this->sut = $container->get( ClassThatDependsOnLegacyCode::class );
 	}
 
@@ -52,7 +58,7 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	public function test_function_mocks_can_be_used_via_injected_legacy_proxy_and_woocommerce_object( $method_to_use ) {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'hexdec' => function( $hex_string ) {
+				'hexdec' => function ( $hex_string ) {
 					return "Mocked hexdec for $hex_string";
 				},
 			)
@@ -85,7 +91,7 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_static_mocks(
 			array(
 				DependencyClass::class => array(
-					'concat' => function( ...$parts ) {
+					'concat' => function ( ...$parts ) {
 						return "I'm returning concat of these parts: " . join( ' ', $parts );
 					},
 				),

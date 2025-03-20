@@ -11,9 +11,10 @@ export type BlockSlotFillProps = {
 		| 'subsection-description';
 };
 
-export type BlockSlotProps = BlockSlotFillProps & Slot.Props;
+export type BlockSlotProps = BlockSlotFillProps &
+	React.ComponentProps< typeof Slot >;
 
 export type BlockFillProps = BlockSlotFillProps &
-	Fill.Props & {
+	React.ComponentProps< typeof Fill > & {
 		slotContainerBlockName: string | string[];
 	};

@@ -1,0 +1,106 @@
+.woocommerce-list {
+	border-top: 1px solid $gray-200;
+
+	.woocommerce-list__item {
+		padding: 0 48px;
+		border-bottom: 1px solid $gray-200;
+
+		&.clickable-list-item:hover {
+			background-color: rgba(0, 0, 0, 0.02); /* Light overlay effect */
+		}
+
+		&:hover {
+			background-color: $white;
+
+			.woocommerce-list__item-title {
+				color: $gray-900;
+			}
+		}
+
+		&-inner {
+			padding: $gap-large 0;
+			align-items: flex-start;
+
+			@media screen and ( max-width: 782px ) {
+				display: grid;
+				// Configuring the grid layout to two columns, resulting in the buttons shifting to a new row.
+				grid-template-columns: 30px minmax(200px, 1fr);
+			}
+		}
+
+		&-inner:focus {
+			box-shadow: none;
+		}
+
+		&-image {
+			max-width: 40px;
+			height: 40px;
+			border-radius: 4px;
+
+			@media screen and ( max-width: 782px ) {
+				display: none;
+			}
+		}
+
+		&-title {
+			font-size: 16px;
+			line-height: 24px;
+			color: $gray-900;
+			font-weight: 600;
+			display: inline-flex;
+			gap: 10px;
+			align-items: center;
+
+			@media screen and ( max-width: 782px ) {
+				font-size: 15px;
+				line-height: 20px;
+				font-weight: 500;
+			}
+		}
+
+		&-content {
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 20px;
+			color: $gray-700;
+
+			.woocommerce-woopayments-payment-methods-logos {
+				flex-wrap: wrap;
+			}
+		}
+
+		&-after {
+			&__actions {
+				display: flex;
+				gap: $gap;
+
+				.components-button {
+					height: 32px;
+				}
+			}
+		}
+
+		@media screen and ( max-width: 1024px ) {
+			padding: 0 $gap-large;
+		}
+
+		@media screen and ( max-width: 782px ) {
+			padding: 0 $gap;
+
+			&-before {
+				margin-right: 0;
+			}
+
+			.drag-handle-wrapper {
+				margin-right: $gap-smaller;
+			}
+
+			&-after {
+				margin-left: 0;
+				grid-column: 2; /* Start below the 2nd column */
+				grid-row: 2; /* Move to the second row */
+				margin-top: $gap;
+			}
+		}
+	}
+}

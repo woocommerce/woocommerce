@@ -2,6 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.5.0) - 2025-01-21 
+
+-   Patch - Fix some linting issues, update .nvmrc and .eslintrc [#54414]
+-   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
+
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.4.0) - 2025-01-08 
+
+-   Patch - Fix SASS errors when installing the template. [#54165]
+-   Patch - Prevent doing_it_wrong warnings while registering the example block. [#52195]
+-   Patch - CI: liverage composer packages cache in lint monorepo job [#52054]
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
+-   Minor - Update all blocks to use API Version 3. [#48720]
+
 ## [1.3.1](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.3.1) - 2024-07-10 
 
 -   Patch - Ensures the default text shows when saving the example newsletter subscription block. [#48581]

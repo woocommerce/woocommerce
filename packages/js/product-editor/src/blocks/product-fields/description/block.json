@@ -13,7 +13,7 @@
 	"attributes": {
 		"__contentEditable": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		}
 	},
 	"supports": {

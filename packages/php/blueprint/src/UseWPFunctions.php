@@ -119,6 +119,9 @@ trait UseWPFunctions {
 	 * @return WP_Theme The theme object.
 	 */
 	public function wp_get_theme( $stylesheet = null ) {
+		if ( ! function_exists( 'wp_get_theme' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
 		return wp_get_theme( $stylesheet );
 	}
 
@@ -196,6 +199,9 @@ trait UseWPFunctions {
 	 * @param string $name The name of the theme to switch to.
 	 */
 	public function wp_switch_theme( $name ) {
+		if ( ! function_exists( 'switch_theme' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
 		return switch_theme( $name );
 	}
 

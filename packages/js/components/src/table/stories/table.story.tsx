@@ -37,6 +37,6 @@ export const NoDataCustomMessage = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/Table',
+	title: 'Components/Table',
 	component: Table,
 };

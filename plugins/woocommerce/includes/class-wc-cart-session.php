@@ -6,6 +6,9 @@
  * @version 3.2.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -204,7 +207,27 @@ final class WC_Cart_Session {
 					)
 				);
 
+				/**
+				 * Filter to modify or add session data to the cart contents.
+				 *
+				 * @since 3.2.0
+				 *
+				 * @param array  $session_data Data for an item in the cart.
+				 * @param array  $values       Data for an item in the cart, without the product object.
+				 * @param string $key          The cart item hash.
+				 */
 				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+				if ( ! isset( $cart_contents[ $key ]['data'] ) || ! $cart_contents[ $key ]['data'] instanceof WC_Product ) {
+					// If the cart contents is missing the product object after filtering, something is wrong.
+					wc_doing_it_wrong(
+						__METHOD__,
+						'When filtering cart items with woocommerce_get_cart_item_from_session, each item must have a data key containing a product object.',
+						'9.8.0'
+					);
+
+					// Add the product back in.
+					$cart_contents[ $key ]['data'] = $product;
+				}
 
 				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
 				$this->cart->set_cart_contents( $cart_contents );
@@ -440,7 +463,15 @@ final class WC_Cart_Session {
 	private function populate_cart_from_order( $order_id, $cart ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order->get_id() || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
+		/**
+		 * Filter the valid order statuses for reordering.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $valid_statuses Array of valid order statuses.
+		 */
+		$valid_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( OrderStatus::COMPLETED ) );
+		if ( ! $order->get_id() || ! $order->has_status( $valid_statuses ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
 			return;
 		}
 
@@ -464,7 +495,7 @@ final class WC_Cart_Session {
 			}
 
 			// Prevent reordering variable products if no selected variation.
-			if ( ! $variation_id && $product->is_type( 'variable' ) ) {
+			if ( ! $variation_id && $product->is_type( ProductType::VARIABLE ) ) {
 				continue;
 			}
 

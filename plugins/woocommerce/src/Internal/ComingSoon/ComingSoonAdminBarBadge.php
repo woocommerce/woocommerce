@@ -18,6 +18,20 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 */
 	final public function init() {
+		add_action( 'init', array( $this, 'init_hooks' ) );
+	}
+
+	/**
+	 * Sets up the hooks if user has required capabilities.
+	 *
+	 * @internal
+	 */
+	public function init_hooks() {
+		// Early exit if the user is not logged in as administrator / shop manager.
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
 		add_action( 'admin_bar_menu', array( $this, 'site_visibility_badge' ), 31 );
 		add_action( 'wp_head', array( $this, 'output_css' ) );
 		add_action( 'admin_head', array( $this, 'output_css' ) );

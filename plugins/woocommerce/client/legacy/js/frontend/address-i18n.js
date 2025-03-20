@@ -13,11 +13,9 @@ jQuery( function( $ ) {
 			field.find( 'label .optional' ).remove();
 			field.addClass( 'validate-required' );
 
-			if ( field.find( 'label .required' ).length === 0 ) {
+			if ( field.find( 'label .required[aria-hidden="true"]' ).length === 0 ) {
 				field.find( 'label' ).append(
-					'&nbsp;<abbr class="required" title="' +
-					wc_address_i18n_params.i18n_required_text +
-					'">*</abbr>'
+					'&nbsp;<span class="required" aria-hidden="true">*</span>'
 				);
 			}
 		} else {

@@ -24,7 +24,6 @@ export function MultipleUpdateMenu( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'bottom-end',
 			} }

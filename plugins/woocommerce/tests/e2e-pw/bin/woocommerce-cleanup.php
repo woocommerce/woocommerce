@@ -2,10 +2,10 @@
 /**
  * Plugin Name: WooCommerce Cleanup
  * Description: Resets WooCommerce site to testing start state.
- * Version: 1.3
+ * Version: 1.5.1
  * Author: Solaris Team
  * Requires at least: 6.6
- * Requires PHP: 8.0
+ * Requires PHP: 7.4
  * @package WooCommerceCleanup
  *
  * This file contains the main functionality for the WooCommerce Cleanup plugin.
@@ -144,6 +144,33 @@ function wc_cleanup_analytics_table( $table_name ) {
 }
 
 /**
+ * Remove all email logs stored by WP Mail Logging.
+ */
+function wc_cleanup_email_logs() {
+	global $wpdb;
+
+	// Identify the correct email log table.
+	$table_name = $wpdb->prefix . 'wpml_mails';
+
+	// Check if the table exists before truncating.
+	$table_exists = $wpdb->get_var(
+		$wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name )
+	);
+
+	if ( $table_exists === $table_name ) {
+		$wpdb->query( 'TRUNCATE TABLE ' . esc_sql( $table_name ) );
+	}
+	if ( $table_exists === $table_name ) {
+		$wpdb->query( 'TRUNCATE TABLE ' . esc_sql( $table_name ) );
+	}
+
+	// Ensure WP Mail Logging cache is cleared.
+	delete_transient( 'wpml_mail_log_cache' );
+	delete_option( 'wpml_mail_log_cache' );
+	wp_cache_flush();
+}
+
+/**
  * Reset the WooCommerce site.
  */
 function wc_cleanup_reset_site() {
@@ -210,10 +237,7 @@ function wc_cleanup_reset_site() {
 	}
 
 	// Delete all product categories.
-	$product_categories = get_terms( 'product_cat' );
-	foreach ( $product_categories as $product_category ) {
-		wp_delete_term( $product_category->term_id, 'product_cat' );
-	}
+	wc_cleanup_product_categories();
 
 	// Delete all product tags.
 	$product_tags = get_terms( 'product_tag' );
@@ -331,6 +355,25 @@ function wc_cleanup_reset_site() {
 
 	// Set the WooCommerce "From" email address.
 	update_option( 'woocommerce_email_from_address', 'wordpress@example.com' );
+
+	// Set shipping location to "Ship to all countries".
+	update_option( 'woocommerce_allowed_countries', 'all' );
+	update_option( 'woocommerce_ship_to_countries', '' );
+
+	// Remove email logs from WP Mail Logging.
+	wc_cleanup_email_logs();
+
+	// Clear store address fields.
+	update_option( 'woocommerce_store_address', '' );
+	update_option( 'woocommerce_store_address_2', '' );
+	update_option( 'woocommerce_store_city', '' );
+	update_option( 'woocommerce_store_postcode', '' );
+
+	// Set WooCommerce measurement units to US standard (lbs, in).
+	update_option( 'woocommerce_weight_unit', 'lbs' );
+	update_option( 'woocommerce_dimension_unit', 'in' );
+
+	wc_cleanup_reset_customer_email();
 }
 
 add_action(
@@ -451,4 +494,49 @@ function wc_cleanup_csv_files( $dir ) {
         AND p.post_mime_type = 'text/csv'
     "
 	);
+}
+
+/**
+ * Remove all product categories except the default "Uncategorized" category.
+ */
+function wc_cleanup_product_categories() {
+	// Get all product categories.
+	$product_categories = get_terms(
+		array(
+			'taxonomy'   => 'product_cat',
+			'hide_empty' => false,
+		)
+	);
+
+	if ( ! empty( $product_categories ) && ! is_wp_error( $product_categories ) ) {
+		foreach ( $product_categories as $category ) {
+			// Skip the default "uncategorized" category as it cannot be deleted.
+			if ( (int) get_option( 'default_product_cat', 0 ) === $category->term_id ) {
+				continue;
+			}
+			wp_delete_term( $category->term_id, 'product_cat' );
+		}
+	}
+
+	// Reset the default category thumbnail and display type.
+	$default_cat_id = get_option( 'default_product_cat', 0 );
+	if ( $default_cat_id ) {
+		delete_term_meta( $default_cat_id, 'thumbnail_id' );
+		delete_term_meta( $default_cat_id, 'display_type' );
+	}
+}
+
+/**
+ * Reset customer user email address.
+ */
+function wc_cleanup_reset_customer_email() {
+	$customer = get_user_by( 'login', 'customer' );
+	if ( $customer ) {
+		wp_update_user(
+			array(
+				'ID'         => $customer->ID,
+				'user_email' => 'customer@woocommercecoree2etestsuite.com',
+			)
+		);
+	}
 }

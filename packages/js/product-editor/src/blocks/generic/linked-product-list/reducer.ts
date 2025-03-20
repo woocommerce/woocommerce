@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { productsStore, Product } from '@woocommerce/data';
 
 export type State = {
 	linkedProducts: Product[];
@@ -62,11 +62,11 @@ export function getLoadLinkedProductsDispatcher(
 				isLoading: true,
 			},
 		} );
-		return resolveSelect( PRODUCTS_STORE_NAME )
-			.getProducts< Product[] >( {
+		return resolveSelect( productsStore )
+			.getProducts( {
 				include: linkedProductIds,
 			} )
-			.then( ( response ) => {
+			.then( ( response: Product[] ) => {
 				dispatch( {
 					type: 'SET_LINKED_PRODUCTS',
 					payload: {

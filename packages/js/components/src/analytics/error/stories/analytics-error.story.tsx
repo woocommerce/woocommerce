@@ -14,6 +14,6 @@ const Template: Story = ( args ) => <AnalyticsError { ...args } />;
 export const Basic = Template.bind( {} );
 
 export default {
-	title: 'WooCommerce Admin/components/analytics/AnalyticsError',
+	title: 'Components/analytics/AnalyticsError',
 	component: AnalyticsError,
 };

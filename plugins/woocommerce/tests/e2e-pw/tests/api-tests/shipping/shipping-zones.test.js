@@ -16,7 +16,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 
 	test( 'cannot delete the default shipping zone "Locations not covered by your other zones"', async ({request}) => {
 		// //call API to get all pre-existing shipping zones
-		const response  = await request.get( '/wp-json/wc/v3/shipping/zones');
+		const response  = await request.get( './wp-json/wc/v3/shipping/zones');
 
 		//convert response to JSON array
 		const responseJSON = await response.json();
@@ -27,13 +27,13 @@ test.describe.serial( 'Shipping zones API tests', () => {
 		//for each id, delete the related shipping zone
 		for ( const id of ids ) {
 			//call API to delete each shipping zone
-			const deleteResponse = await request.delete( `/wp-json/wc/v3/shipping/zones/${id}`,{
+			const deleteResponse = await request.delete( `./wp-json/wc/v3/shipping/zones/${id}`,{
 				data:{force:true}
 			})
 		}
 
 		// Verify that the default shipping zone remains
-		const remainingZonesJSON = (await (await request.get( '/wp-json/wc/v3/shipping/zones')).json());
+		const remainingZonesJSON = (await (await request.get( './wp-json/wc/v3/shipping/zones')).json());
 
 		expect( remainingZonesJSON ).toHaveLength( 1 );
 		expect( remainingZonesJSON[ 0 ].id ).toEqual( 0 );
@@ -46,7 +46,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 		};
 
 		//call API to update default shipping zone
-		const response = await request.put( `/wp-json/wc/v3/shipping/zones/0`,{
+		const response = await request.put( `./wp-json/wc/v3/shipping/zones/0`,{
 			data:newZoneDetails
 		})
 
@@ -64,7 +64,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 	test( 'can create a shipping zone', async ({request}) => {
 
 		//call API to create a shipping zone
-		const response = await request.post( `/wp-json/wc/v3/shipping/zones`,{
+		const response = await request.post( `./wp-json/wc/v3/shipping/zones`,{
 			data:shippingZone
 		})
 
@@ -81,7 +81,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 
 	test( 'can retrieve a shipping zone', async ({request}) => {
 		//call API to retrieve the created shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
+		const response = await request.get( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
 		const responseJSON = await response.json();
 
 		//validate response
@@ -107,7 +107,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 		};
 
 		//call API to update the last created shipping zone
-		const response = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`,{
+		const response = await request.put( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}`,{
 			data:updatedShippingZone
 		});
 
@@ -122,12 +122,12 @@ test.describe.serial( 'Shipping zones API tests', () => {
 	test( 'can add a shipping region to a shipping zone', async ({request}) => {
 
 		//call API to retrieve the locations of the last created shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
+		const response = await request.get( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
 		expect( response.status() ).toEqual( 200 );
 
 		//no locations exist initially
 		//update the locations of a shipping zone region to include GB (UK) and US
-		const putResponse2Countries = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
+		const putResponse2Countries = await request.put( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
 			data:[{code:'GB'},{code:'US'}]
 		});
 
@@ -145,7 +145,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 
 		//GB and US locations exist initially
 		//update the locations of the shipping zone regions to contain an individual state
-		const putResponseStateOnly = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
+		const putResponseStateOnly = await request.put( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
 			data:[{
 				code: 'BR:SP',
 				type: 'state'
@@ -164,7 +164,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 
 		//GB and US locations exist initially
 		//update the locations of the shipping zone regions to contain an individual state
-		const putResponseStateOnly = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
+		const putResponseStateOnly = await request.put( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
 			data:[]
 		});
 
@@ -179,7 +179,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 	test( 'can delete a shipping zone', async ({request}) => {
 
 		//call API to delete the last created shipping zone
-		const deleteResponse = await request.delete( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`,{
+		const deleteResponse = await request.delete( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}`,{
 			data:{force:true}
 		})
 
@@ -192,7 +192,7 @@ test.describe.serial( 'Shipping zones API tests', () => {
 		// only run on wp-env because caching on external hosts makes unreliable
 		if ( ! shouldSkip ) {
 			//call API to attempt to retrieve the deleted shipping zone
-			const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
+			const response = await request.get( `./wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
 			//validate response
 			await expect( response.status() ).toEqual( 404 );
 		}

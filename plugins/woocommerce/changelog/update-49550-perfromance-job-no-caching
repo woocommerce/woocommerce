@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: omit caching baseline results in perfromance metrics job.

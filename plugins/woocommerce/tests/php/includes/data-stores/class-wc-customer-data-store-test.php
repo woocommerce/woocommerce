@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -63,7 +65,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return string[]
 	 */
 	public function get_pending_only_as_order_statuses() {
-		return array( 'wc-pending' => 'pending' );
+		return array( OrderInternalStatus::PENDING => OrderStatus::PENDING );
 	}
 
 	/**
@@ -76,7 +78,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
 		WC_Helper_Order::create_order( $customer_1->get_id() );
 		$last_valid_order_of_1 = WC_Helper_Order::create_order( $customer_1->get_id() );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 
@@ -102,10 +104,13 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$sql =
 			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
-			( id, customer_id, status, type )
+				( id, customer_id, status, type )
 			VALUES
-			( 1, %d, 'wc-completed', 'shop_order' ), ( %d, %d, 'wc-completed', 'shop_order' ), ( 3, %d, 'wc-invalid-status', 'shop_order' ),
-			( 4, %d, 'wc-completed', 'shop_order' ), ( 5, %d, 'wc-completed', 'shop_order' )";
+				( 1, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
+				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
+				( 3, %d, 'wc-invalid-status', 'shop_order' ),
+				( 4, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
+				( 5, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' )";
 
 		$customer_1_id = $customer_1->get_id();
 		$customer_2_id = $customer_2->get_id();
@@ -165,7 +170,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		WC_Helper_Order::create_order( $customer_1->get_id() );
 		WC_Helper_Order::create_order( $customer_1->get_id() );
 		WC_Helper_Order::create_order( $customer_1->get_id() );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 
@@ -190,10 +195,14 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$sql =
 			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
-			( id, customer_id, status )
+				( id, customer_id, status )
 			VALUES
-			( 1, %d, 'wc-completed' ), ( 2, %d, 'wc-completed' ), ( 3, %d, 'wc-completed' ), ( 4, %d, 'wc-invalid-status' ),
-			( 5, %d, 'wc-completed' ), ( 6, %d, 'wc-completed' )";
+				( 1, %d, '" . OrderInternalStatus::COMPLETED . "' ),
+				( 2, %d, '" . OrderInternalStatus::COMPLETED . "' ),
+				( 3, %d, '" . OrderInternalStatus::COMPLETED . "' ),
+				( 4, %d, 'wc-invalid-status' ),
+				( 5, %d, '" . OrderInternalStatus::COMPLETED . "' ),
+				( 6, %d, '" . OrderInternalStatus::COMPLETED . "' )";
 
 		$customer_1_id = $customer_1->get_id();
 		$customer_2_id = $customer_2->get_id();
@@ -216,10 +225,10 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
 		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'completed' ) );
-		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => 'pending' ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+		WC_Helper_Order::create_order( $customer_1->get_id(), null, array( 'status' => OrderStatus::PENDING ) );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 		WC_Helper_Order::create_order( $customer_2->get_id() );
 
@@ -245,10 +254,14 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$sql =
 			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
-			( id, customer_id, status, total_amount )
+				( id, customer_id, status, total_amount )
 			VALUES
-			( 1, %d, 'wc-completed', 10 ), ( 2, %d, 'wc-completed', 20 ), ( 3, %d, 'wc-completed', 30 ), ( 4, %d, 'wc-invalid-status', 40 ),
-			( 5, %d, 'wc-completed', 200 ), ( 6, %d, 'wc-completed', 300 )";
+				( 1, %d, '" . OrderInternalStatus::COMPLETED . "', 10 ),
+				( 2, %d, '" . OrderInternalStatus::COMPLETED . "', 20 ),
+				( 3, %d, '" . OrderInternalStatus::COMPLETED . "', 30 ),
+				( 4, %d, 'wc-invalid-status', 40 ),
+				( 5, %d, '" . OrderInternalStatus::COMPLETED . "', 200 ),
+				( 6, %d, '" . OrderInternalStatus::COMPLETED . "', 300 )";
 
 		$customer_1_id = $customer_1->get_id();
 		$customer_2_id = $customer_2->get_id();

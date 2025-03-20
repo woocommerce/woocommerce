@@ -22,7 +22,6 @@ import {
 	DatePicker,
 	DateTimePicker as WpDateTimePicker,
 	Dropdown,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -194,10 +193,10 @@ export type DateTimePickerControlProps = {
 	onBlur?: () => void;
 	label?: string;
 	placeholder?: string;
-	help?: string | null;
+	help?: React.ReactNode;
 	onChangeDebounceWait?: number;
 	popoverProps?: Record< string, boolean | string >;
-} & Omit< React.HTMLAttributes< HTMLInputElement >, 'onChange' >;
+} & Omit< React.ComponentProps< typeof InputControl >, 'onChange' | 'onDrag' >;
 
 export const DateTimePickerControl = forwardRef(
 	function ForwardedDateTimePickerControl(
@@ -225,7 +224,7 @@ export const DateTimePickerControl = forwardRef(
 			'inspector-date-time-picker-control',
 			props.id
 		) as string;
-		const inputControl = useRef< InputControl >();
+		const inputControl = useRef< HTMLInputElement >();
 
 		const displayFormat = useMemo( () => {
 			if ( dateTimeFormat ) {
@@ -252,7 +251,7 @@ export const DateTimePickerControl = forwardRef(
 				: moment.utc( dateString, moment.ISO_8601, true );
 		}
 
-		function parseAsLocalDateTime( dateString: string | null ): Moment {
+		function parseAsLocalDateTime( dateString?: string | null ): Moment {
 			// parse input date string as local time;
 			// be lenient of user input and try to match any format Moment can
 			return dateTimeFormat && dateString
@@ -326,14 +325,14 @@ export const DateTimePickerControl = forwardRef(
 		}, [ onChange ] );
 
 		const setInputStringAndMaybeCallOnChange = useCallback(
-			( newInputString: string, isUserTypedInput: boolean ) => {
+			( newInputString: string | null, isUserTypedInput: boolean ) => {
 				// InputControl doesn't fire an onChange if what the user has typed
 				// matches the current value of the input field. To get around this,
 				// we pull the value directly out of the input field. This fixes
 				// the issue where the user ends up typing the same value. Unless they
 				// are typing extra slow. Without this workaround, we miss the last
 				// character typed.
-				const lastTypedValue = inputControl.current.value;
+				const lastTypedValue = inputControl.current?.value ?? '';
 
 				const newDateTime = maybeForceTime(
 					isUserTypedInput
@@ -383,7 +382,7 @@ export const DateTimePickerControl = forwardRef(
 
 				if ( ! newDateTime.isValid() ) {
 					// keep the invalid string, so the user can correct it
-					return currentDate;
+					return currentDate ?? '';
 				}
 
 				if ( ! newDateTime.isSame( inputStringDateTime ) ) {
@@ -413,23 +412,26 @@ export const DateTimePickerControl = forwardRef(
 			onBlurRef.current = onBlur;
 		}, [ onBlur ] );
 
-		const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
-			if (
-				! willOpen &&
-				typeof onBlurRef.current === 'function' &&
-				inputControl.current
-			) {
-				// in case the component is blurred before a debounced
-				// change has been processed, immediately set the input string
-				// to the current value of the input field, so that
-				// it won't be set back to the pre-change value
-				setInputStringAndMaybeCallOnChange(
-					inputControl.current.value,
-					true
-				);
-				onBlurRef.current();
-			}
-		}, [] );
+		const callOnBlurIfDropdownIsNotOpening = useCallback(
+			( willOpen: boolean ) => {
+				if (
+					! willOpen &&
+					typeof onBlurRef.current === 'function' &&
+					inputControl.current
+				) {
+					// in case the component is blurred before a debounced
+					// change has been processed, immediately set the input string
+					// to the current value of the input field, so that
+					// it won't be set back to the pre-change value
+					setInputStringAndMaybeCallOnChange(
+						inputControl.current.value,
+						true
+					);
+					onBlurRef.current();
+				}
+			},
+			[]
+		);
 
 		return (
 			<Dropdown
@@ -438,7 +440,6 @@ export const DateTimePickerControl = forwardRef(
 					className
 				) }
 				focusOnMount={ false }
-				// @ts-expect-error `onToggle` does exist.
 				onToggle={ callOnBlurIfDropdownIsNotOpening }
 				renderToggle={ ( { isOpen, onClose, onToggle } ) => (
 					<BaseControl id={ id } label={ label } help={ help }>
@@ -453,9 +454,9 @@ export const DateTimePickerControl = forwardRef(
 							} }
 							disabled={ disabled }
 							value={ getUserInputOrUpdatedCurrentDate() }
-							onChange={ ( newValue: string ) =>
+							onChange={ ( newValue: string | undefined ) =>
 								debouncedSetInputStringAndMaybeCallOnChange(
-									newValue,
+									newValue ?? '',
 									true
 								)
 							}
@@ -479,7 +480,7 @@ export const DateTimePickerControl = forwardRef(
 								/>
 							}
 							placeholder={ placeholder }
-							describedBy={ sprintf(
+							aria-describedby={ sprintf(
 								/* translators: A datetime format */
 								__(
 									'Date input describing a selected date in format %s',
@@ -511,23 +512,20 @@ export const DateTimePickerControl = forwardRef(
 
 					return (
 						<Picker
-							// @ts-expect-error null is valid for currentDate
 							currentDate={
 								inputStringDateTime.isValid()
 									? formatDateTimeAsISO( inputStringDateTime )
 									: null
 							}
-							onChange={ ( newDateTimeISOString: string ) =>
+							onChange={ (
+								newDateTimeISOString: string | null
+							) =>
 								setInputStringAndMaybeCallOnChange(
 									newDateTimeISOString,
 									false
 								)
 							}
 							is12Hour={ is12HourPicker }
-							// Opt out of the Reset and Help buttons, as they are going to be removed.
-							// These properties are removed in @wordpress/components 25.0.0 (Gutenberg 15.9.0).
-							__nextRemoveResetButton
-							__nextRemoveHelpButton
 						/>
 					);
 				} }

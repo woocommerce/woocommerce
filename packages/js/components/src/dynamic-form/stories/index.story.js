@@ -90,6 +90,6 @@ const DynamicExample = () => {
 export const Basic = () => <DynamicExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/DynamicForm',
+	title: 'Components/DynamicForm',
 	component: DynamicForm,
 };

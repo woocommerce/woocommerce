@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', 'woocommerce' ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', 'woocommerce' );
 $cost_link = sprintf( '<span id="wc-shipping-advanced-costs-help-text">%s <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">%s</a>.</span>', __( 'Charge a flat rate per item, or enter a cost formula to charge a percentage based cost or a minimum fee. Learn more about', 'woocommerce' ), __( 'advanced costs', 'woocommerce' ) );
 
@@ -23,10 +25,10 @@ $settings = array(
 		'title'   => __( 'Tax status', 'woocommerce' ),
 		'type'    => 'select',
 		'class'   => 'wc-enhanced-select',
-		'default' => 'taxable',
+		'default' => ProductTaxStatus::TAXABLE,
 		'options' => array(
-			'taxable' => __( 'Taxable', 'woocommerce' ),
-			'none'    => _x( 'None', 'Tax status', 'woocommerce' ),
+			ProductTaxStatus::TAXABLE => __( 'Taxable', 'woocommerce' ),
+			ProductTaxStatus::NONE    => _x( 'None', 'Tax status', 'woocommerce' ),
 		),
 	),
 	'cost'       => array(

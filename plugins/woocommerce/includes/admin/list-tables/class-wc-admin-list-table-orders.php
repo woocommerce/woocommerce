@@ -6,6 +6,7 @@
  * @version 3.3.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -351,7 +352,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$actions        = array();
 		$status_actions = array();
 
-		if ( $order->has_status( array( 'pending' ) ) ) {
+		if ( $order->has_status( array( OrderStatus::PENDING ) ) ) {
 			$status_actions['on-hold'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'On-hold', 'woocommerce' ),
@@ -360,7 +361,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			);
 		}
 
-		if ( $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+		if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::ON_HOLD ) ) ) {
 			$status_actions['processing'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Processing', 'woocommerce' ),
@@ -369,7 +370,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			);
 		}
 
-		if ( $order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
+		if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING ) ) ) {
 			$status_actions['complete'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Completed', 'woocommerce' ),

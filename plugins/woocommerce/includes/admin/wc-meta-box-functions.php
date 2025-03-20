@@ -17,10 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Output a text input box.
  *
- * @param array   $field Field data.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param array        $field Field data.
+ * @param WC_Data|null $data  WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
+function woocommerce_wp_text_input( $field, ?WC_Data $data = null ) {
 	global $post;
 
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
@@ -84,10 +84,10 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 /**
  * Output a hidden input box.
  *
- * @param array   $field Field data.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param array        $field Field data.
+ * @param WC_Data|null $data  WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_hidden_input( $field, WC_Data $data = null ) {
+function woocommerce_wp_hidden_input( $field, ?WC_Data $data = null ) {
 	global $post;
 
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
@@ -99,10 +99,10 @@ function woocommerce_wp_hidden_input( $field, WC_Data $data = null ) {
 /**
  * Output a textarea input box.
  *
- * @param array   $field Field data.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param array        $field Field data.
+ * @param WC_Data|null $data  WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_textarea_input( $field, WC_Data $data = null ) {
+function woocommerce_wp_textarea_input( $field, ?WC_Data $data = null ) {
 	global $post;
 
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
@@ -144,10 +144,10 @@ function woocommerce_wp_textarea_input( $field, WC_Data $data = null ) {
 /**
  * Output a checkbox input box.
  *
- * @param array   $field Field data.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param array        $field Field data.
+ * @param WC_Data|null $data  WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_checkbox( $field, WC_Data $data = null ) {
+function woocommerce_wp_checkbox( $field, ?WC_Data $data = null ) {
 	global $post;
 
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
@@ -214,10 +214,10 @@ function woocommerce_wp_checkbox( $field, WC_Data $data = null ) {
 /**
  * Output a select input box.
  *
- * @param array   $field Field data.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param array        $field Field data.
+ * @param WC_Data|null $data  WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_select( $field, WC_Data $data = null ) {
+function woocommerce_wp_select( $field, ?WC_Data $data = null ) {
 	global $post;
 
 	$field = wp_parse_args(
@@ -272,10 +272,10 @@ function woocommerce_wp_select( $field, WC_Data $data = null ) {
 /**
  * Output a radio input box.
  *
- * @param array   $field Field data.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param array        $field Field data.
+ * @param WC_Data|null $data  WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_radio( $field, WC_Data $data = null ) {
+function woocommerce_wp_radio( $field, ?WC_Data $data = null ) {
 	global $post;
 
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';

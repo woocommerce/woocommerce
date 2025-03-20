@@ -3,15 +3,22 @@
 This directory contains WooCommerce legacy code. Ideally, the code in this folder should only get the minimum required changes for bug fixing, and any new code should go in [the `src` directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/README.md) instead.
 
 
+## A note on `@internal` annotations
+
+Some classes, methods and functions in this folder have an `@internal` annotation in their documentation comment block. This means that the code entity is intended for internal usage of WooCommerce core only, and **must not** be used in extensions. Backwards compatibility for these code entities is not guaranteed: they could be renamed, modified (in behavior, return value or arguments accepted) or deleted.
+
+
 ## Interacting with the `src` folder
 
 Whenever you need to get an instance of a class from the `src` directory, please don't instantiate it directly, but instead use [the container](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/README.md#the-container). To get an instance of the container itself you can use the `wc_get_container` function, for example:
+
 
 ```php
 $container = wc_get_container();
 $service = $container->get( \Automattic\WooCommerce\TheNamespace\TheService::class );
 $service->do_something();
 ```
+
 The exception to this rule might be data-only classes that could be created the old way (using a plain `new` statement); but in general, all classes in the `src` directory are registered in the container and should be resolved using it.
 
 

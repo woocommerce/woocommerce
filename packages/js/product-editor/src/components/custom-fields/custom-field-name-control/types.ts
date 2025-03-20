@@ -4,7 +4,7 @@
 import { ComboboxControl } from '@wordpress/components';
 
 export type CustomFieldNameControlProps = Omit<
-	ComboboxControl.Props,
+	React.ComponentProps< typeof ComboboxControl >,
 	'options' | 'onFilterValueChange'
 > &
 	Pick<
@@ -14,3 +14,8 @@ export type CustomFieldNameControlProps = Omit<
 		>,
 		'onBlur'
 	>;
+
+export type CustomFieldName = {
+	value: string;
+	label: string;
+};

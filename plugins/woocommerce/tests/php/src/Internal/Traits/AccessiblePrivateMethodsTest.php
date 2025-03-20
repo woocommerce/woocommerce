@@ -7,7 +7,10 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
- * Tests for the AccessiblePrivateMethods class.
+ * Tests for the AccessiblePrivateMethods trait.
+ *
+ * DON'T USE THE TRAIT. It will be removed in TWooCommerce 10.5.
+ * Instead, make the hook target methods public and mark them with an @internal annotation.
  */
 class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 	/**

@@ -115,4 +115,9 @@ export default [
 		description: <SetWccomBaseUrl />,
 		action: UPDATE_WCCOM_BASE_URL_ACTION_NAME,
 	},
+	{
+		command: 'Reset Launch Your Store',
+		description: 'Resets Launch Your Store and coming soon mode changes.',
+		action: 'resetLaunchYourStore',
+	},
 ];

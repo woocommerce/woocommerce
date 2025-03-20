@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Approved_Directories;
 
 /**
@@ -230,7 +231,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$product  = WC_Helper_Product::create_downloadable_product( $downloadable_files );
 		$customer = WC_Helper_Customer::create_customer();
 		$order    = WC_Helper_Order::create_order( $customer->get_id(), $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		return array(

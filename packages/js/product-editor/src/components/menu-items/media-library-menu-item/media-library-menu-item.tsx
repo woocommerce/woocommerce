@@ -13,12 +13,10 @@ import { MediaUpload } from '@wordpress/media-utils';
 import type { MediaLibraryMenuItemProps } from './types';
 
 export function MediaLibraryMenuItem( {
-	// MenuItem.Props
 	icon,
 	iconPosition,
 	text,
 	info,
-	// MediaUpload.Props
 	...props
 }: MediaLibraryMenuItemProps ) {
 	return (

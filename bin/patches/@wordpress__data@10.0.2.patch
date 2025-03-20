@@ -1,0 +1,439 @@
+diff --git a/build-types/index.d.ts b/build-types/index.d.ts
+index db195ec1d0d981dce1622c12382f2b2394b25208..8c923576fbaf0fb34fd675ee0ec615a8e1c145db 100644
+--- a/build-types/index.d.ts
++++ b/build-types/index.d.ts
+@@ -9,6 +9,7 @@ export { controls } from "./controls";
+ export { default as createReduxStore } from "./redux-store";
+ export { dispatch } from "./dispatch";
+ export { select } from "./select";
++export { resolveSelect } from "./resolve-select";
+ export { plugins };
+ /**
+  * The combineReducers helper function turns an object whose values are different
+@@ -50,26 +51,7 @@ export { plugins };
+  *                    object, and constructs a state object with the same shape.
+  */
+ export const combineReducers: import('./types').combineReducers;
+-/**
+- * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
+- * so that you only need to supply additional arguments, and modified so that they return promises
+- * that resolve to their eventual values, after any resolvers have ran.
+- *
+- * @param {StoreDescriptor|string} storeNameOrDescriptor The store descriptor. The legacy calling
+- *                                                       convention of passing the store name is
+- *                                                       also supported.
+- *
+- * @example
+- * ```js
+- * import { resolveSelect } from '@wordpress/data';
+- * import { store as myCustomStore } from 'my-custom-store';
+- *
+- * resolveSelect( myCustomStore ).getPrice( 'hammer' ).then(console.log)
+- * ```
+- *
+- * @return {Object} Object containing the store's promise-wrapped selectors.
+- */
+-export const resolveSelect: any;
++
+ /**
+  * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
+  * so that you only need to supply additional arguments, and modified so that they throw promises
+diff --git a/build-types/redux-store/metadata/actions.d.ts b/build-types/redux-store/metadata/actions.d.ts
+index 79f7bca6dbf5329568720413a51e8ecd009a1fcd..1e1fc7742a2a305536c2402b85763199507eab35 100644
+--- a/build-types/redux-store/metadata/actions.d.ts
++++ b/build-types/redux-store/metadata/actions.d.ts
+@@ -1,127 +1,113 @@
++/**
++ * Internal dependencies
++ */
++import type { MapOf, Selector, SelectorParameters } from '../../types';
+ /**
+  * Returns an action object used in signalling that selector resolution has
+  * started.
+  *
+- * @param {string}    selectorName Name of selector for which resolver triggered.
+- * @param {unknown[]} args         Arguments to associate for uniqueness.
+- *
+- * @return {{ type: 'START_RESOLUTION', selectorName: string, args: unknown[] }} Action object.
++ * @param selectorName Name of selector for which resolver triggered.
++ * @param args         Arguments to associate for uniqueness.
+  */
+-export function startResolution(selectorName: string, args: unknown[]): {
++export declare function startResolution<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]>): {
+     type: 'START_RESOLUTION';
+-    selectorName: string;
+-    args: unknown[];
++    selectorName: keyof Selectors;
++    args: SelectorParameters<Selectors[typeof selectorName]>;
+ };
+ /**
+  * Returns an action object used in signalling that selector resolution has
+  * completed.
+  *
+- * @param {string}    selectorName Name of selector for which resolver triggered.
+- * @param {unknown[]} args         Arguments to associate for uniqueness.
+- *
+- * @return {{ type: 'FINISH_RESOLUTION', selectorName: string, args: unknown[] }} Action object.
++ * @param selectorName Name of selector for which resolver triggered.
++ * @param args         Arguments to associate for uniqueness.
+  */
+-export function finishResolution(selectorName: string, args: unknown[]): {
++export declare function finishResolution<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]>): {
+     type: 'FINISH_RESOLUTION';
+-    selectorName: string;
+-    args: unknown[];
++    selectorName: keyof Selectors;
++    args: SelectorParameters<Selectors[typeof selectorName]>;
+ };
+ /**
+  * Returns an action object used in signalling that selector resolution has
+  * failed.
+  *
+- * @param {string}        selectorName Name of selector for which resolver triggered.
+- * @param {unknown[]}     args         Arguments to associate for uniqueness.
+- * @param {Error|unknown} error        The error that caused the failure.
+- *
+- * @return {{ type: 'FAIL_RESOLUTION', selectorName: string, args: unknown[], error: Error|unknown }} Action object.
++ * @param selectorName Name of selector for which resolver triggered.
++ * @param args         Arguments to associate for uniqueness.
++ * @param error        The error that caused the failure.
+  */
+-export function failResolution(selectorName: string, args: unknown[], error: Error | unknown): {
++export declare function failResolution<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]>, error: Error | unknown): {
+     type: 'FAIL_RESOLUTION';
+-    selectorName: string;
+-    args: unknown[];
++    selectorName: keyof Selectors;
++    args: SelectorParameters<Selectors[typeof selectorName]>;
+     error: Error | unknown;
+ };
+ /**
+  * Returns an action object used in signalling that a batch of selector resolutions has
+  * started.
+  *
+- * @param {string}      selectorName Name of selector for which resolver triggered.
+- * @param {unknown[][]} args         Array of arguments to associate for uniqueness, each item
+- *                                   is associated to a resolution.
+- *
+- * @return {{ type: 'START_RESOLUTIONS', selectorName: string, args: unknown[][] }} Action object.
++ * @param selectorName Name of selector for which resolver triggered.
++ * @param args         Array of arguments to associate for uniqueness, each item
++ *                     is associated to a resolution.
+  */
+-export function startResolutions(selectorName: string, args: unknown[][]): {
++export declare function startResolutions<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: Array<SelectorParameters<Selectors[typeof selectorName]>>): {
+     type: 'START_RESOLUTIONS';
+-    selectorName: string;
+-    args: unknown[][];
++    selectorName: keyof Selectors;
++    args: Array<SelectorParameters<Selectors[typeof selectorName]>>;
+ };
+ /**
+  * Returns an action object used in signalling that a batch of selector resolutions has
+  * completed.
+  *
+- * @param {string}      selectorName Name of selector for which resolver triggered.
+- * @param {unknown[][]} args         Array of arguments to associate for uniqueness, each item
+- *                                   is associated to a resolution.
+- *
+- * @return {{ type: 'FINISH_RESOLUTIONS', selectorName: string, args: unknown[][] }} Action object.
++ * @param selectorName Name of selector for which resolver triggered.
++ * @param args         Array of arguments to associate for uniqueness, each item
++ *                     is associated to a resolution.
+  */
+-export function finishResolutions(selectorName: string, args: unknown[][]): {
++export declare function finishResolutions<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: Array<SelectorParameters<Selectors[typeof selectorName]>>): {
+     type: 'FINISH_RESOLUTIONS';
+-    selectorName: string;
+-    args: unknown[][];
++    selectorName: keyof Selectors;
++    args: Array<SelectorParameters<Selectors[typeof selectorName]>>;
+ };
+ /**
+  * Returns an action object used in signalling that a batch of selector resolutions has
+  * completed and at least one of them has failed.
+  *
+- * @param {string}            selectorName Name of selector for which resolver triggered.
+- * @param {unknown[]}         args         Array of arguments to associate for uniqueness, each item
+- *                                         is associated to a resolution.
+- * @param {(Error|unknown)[]} errors       Array of errors to associate for uniqueness, each item
+- *                                         is associated to a resolution.
+- * @return {{ type: 'FAIL_RESOLUTIONS', selectorName: string, args: unknown[], errors: Array<Error|unknown> }} Action object.
++ * @param selectorName Name of selector for which resolver triggered.
++ * @param args         Array of arguments to associate for uniqueness, each item
++ *                     is associated to a resolution.
++ * @param errors       Array of errors to associate for uniqueness, each item
++ *                     is associated to a resolution.
+  */
+-export function failResolutions(selectorName: string, args: unknown[], errors: (Error | unknown)[]): {
++export declare function failResolutions<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: Array<SelectorParameters<Selectors[typeof selectorName]>>, errors: Array<Error | unknown>): {
+     type: 'FAIL_RESOLUTIONS';
+-    selectorName: string;
+-    args: unknown[];
++    selectorName: keyof Selectors;
++    args: Array<SelectorParameters<Selectors[typeof selectorName]>>;
+     errors: Array<Error | unknown>;
+ };
+ /**
+  * Returns an action object used in signalling that we should invalidate the resolution cache.
+  *
+- * @param {string}    selectorName Name of selector for which resolver should be invalidated.
+- * @param {unknown[]} args         Arguments to associate for uniqueness.
+- *
+- * @return {{ type: 'INVALIDATE_RESOLUTION', selectorName: string, args: any[] }} Action object.
++ * @param selectorName Name of selector for which resolver should be invalidated.
++ * @param args         Arguments to associate for uniqueness.
+  */
+-export function invalidateResolution(selectorName: string, args: unknown[]): {
++export declare function invalidateResolution<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]>): {
+     type: 'INVALIDATE_RESOLUTION';
+-    selectorName: string;
+-    args: any[];
++    selectorName: keyof Selectors;
++    args: SelectorParameters<Selectors[typeof selectorName]>;
+ };
+ /**
+  * Returns an action object used in signalling that the resolution
+  * should be invalidated.
+- *
+- * @return {{ type: 'INVALIDATE_RESOLUTION_FOR_STORE' }} Action object.
+  */
+-export function invalidateResolutionForStore(): {
++export declare function invalidateResolutionForStore(): {
+     type: 'INVALIDATE_RESOLUTION_FOR_STORE';
+ };
+ /**
+  * Returns an action object used in signalling that the resolution cache for a
+  * given selectorName should be invalidated.
+  *
+- * @param {string} selectorName Name of selector for which all resolvers should
+- *                              be invalidated.
+- *
+- * @return  {{ type: 'INVALIDATE_RESOLUTION_FOR_STORE_SELECTOR', selectorName: string }} Action object.
++ * @param selectorName Name of selector for which all resolvers should be invalidated.
+  */
+-export function invalidateResolutionForStoreSelector(selectorName: string): {
++export declare function invalidateResolutionForStoreSelector<Selectors extends MapOf<Selector>>(selectorName: keyof Selectors): {
+     type: 'INVALIDATE_RESOLUTION_FOR_STORE_SELECTOR';
+-    selectorName: string;
++    selectorName: keyof Selectors;
+ };
+ //# sourceMappingURL=actions.d.ts.map
+\ No newline at end of file
+diff --git a/build-types/redux-store/metadata/selectors.d.ts b/build-types/redux-store/metadata/selectors.d.ts
+index 3a44c74e8bb021444a3072331b546d1b16f4d58e..63ada9260ead278a0d1ae9295939b1a9d7b2c7c7 100644
+--- a/build-types/redux-store/metadata/selectors.d.ts
++++ b/build-types/redux-store/metadata/selectors.d.ts
+@@ -14,7 +14,7 @@
+  *
+  * @return {StateValue|undefined} isResolving value.
+  */
+-export function getResolutionState(state: State, selectorName: string, args: unknown[] | null): StateValue | undefined;
++export declare function getResolutionState<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined): StateValue | undefined | null;
+ /**
+  * Returns an `isResolving`-like value for a given selector name and arguments set.
+  * Its value is either `undefined` if the selector has never been resolved or has been
+@@ -33,7 +33,7 @@ export function getResolutionState(state: State, selectorName: string, args: unk
+  *
+  * @return {boolean | undefined} isResolving value.
+  */
+-export function getIsResolving(state: State, selectorName: string, args: unknown[] | null): boolean | undefined;
++export declare function getIsResolving<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined): boolean | undefined | null;
+ /**
+  * Returns true if resolution has already been triggered for a given
+  * selector name, and arguments set.
+@@ -44,7 +44,7 @@ export function getIsResolving(state: State, selectorName: string, args: unknown
+  *
+  * @return {boolean} Whether resolution has been triggered.
+  */
+-export function hasStartedResolution(state: State, selectorName: string, args: unknown[] | null): boolean;
++export declare function hasStartedResolution<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined | null): boolean;
+ /**
+  * Returns true if resolution has completed for a given selector
+  * name, and arguments set.
+@@ -55,7 +55,7 @@ export function hasStartedResolution(state: State, selectorName: string, args: u
+  *
+  * @return {boolean} Whether resolution has completed.
+  */
+-export function hasFinishedResolution(state: State, selectorName: string, args: unknown[] | null): boolean;
++export declare function hasFinishedResolution<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined | null): boolean;
+ /**
+  * Returns true if resolution has failed for a given selector
+  * name, and arguments set.
+@@ -66,7 +66,7 @@ export function hasFinishedResolution(state: State, selectorName: string, args:
+  *
+  * @return {boolean} Has resolution failed
+  */
+-export function hasResolutionFailed(state: State, selectorName: string, args: unknown[] | null): boolean;
++export declare function hasResolutionFailed<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined | null): boolean;
+ /**
+  * Returns the resolution error for a given selector name, and arguments set.
+  * Note it may be of an Error type, but may also be null, undefined, or anything else
+@@ -78,7 +78,7 @@ export function hasResolutionFailed(state: State, selectorName: string, args: un
+  *
+  * @return {Error|unknown} Last resolution error
+  */
+-export function getResolutionError(state: State, selectorName: string, args: unknown[] | null): Error | unknown;
++export declare function getResolutionError<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined | null): Error | unknown | null;
+ /**
+  * Returns true if resolution has been triggered but has not yet completed for
+  * a given selector name, and arguments set.
+@@ -89,7 +89,7 @@ export function getResolutionError(state: State, selectorName: string, args: unk
+  *
+  * @return {boolean} Whether resolution is in progress.
+  */
+-export function isResolving(state: State, selectorName: string, args: unknown[] | null): boolean;
++export declare function isResolving<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>, selectorName: keyof Selectors, args: SelectorParameters<Selectors[typeof selectorName]> | undefined | null): boolean;
+ /**
+  * Returns the list of the cached resolvers.
+  *
+@@ -97,7 +97,7 @@ export function isResolving(state: State, selectorName: string, args: unknown[]
+  *
+  * @return {State} Resolvers mapped by args and selectorName.
+  */
+-export function getCachedResolvers(state: State): State;
++export declare function getCachedResolvers<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>): Record<keyof Selectors, State>;
+ /**
+  * Whether the store has any currently resolving selectors.
+  *
+@@ -105,7 +105,7 @@ export function getCachedResolvers(state: State): State;
+  *
+  * @return {boolean} True if one or more selectors are resolving, false otherwise.
+  */
+-export function hasResolvingSelectors(state: State): boolean;
++export declare function hasResolvingSelectors<Selectors extends Record<string, (...args: any[]) => any>>(state: Record<keyof Selectors, State>): boolean;
+ /**
+  * Retrieves the total number of selectors, grouped per status.
+  *
+@@ -114,7 +114,9 @@ export function hasResolvingSelectors(state: State): boolean;
+  * @return {Object} Object, containing selector totals by status.
+  */
+ export const countSelectorsByStatus: ((state: any) => {}) & import("rememo").EnhancedSelector;
+-export type State = Record<string, import('./reducer').State>;
+-export type StateValue = import('./reducer').StateValue;
++
++import type { State, StateValue } from './reducer';
++
++import type { SelectorParameters } from '../../types';
+ export type Status = import('./reducer').Status;
+ //# sourceMappingURL=selectors.d.ts.map
+\ No newline at end of file
+diff --git a/build-types/resolve-select.d.ts b/build-types/resolve-select.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..dc0d1c27debdb895007c52061e7944ff51c62adc
+--- /dev/null
++++ b/build-types/resolve-select.d.ts
+@@ -0,0 +1,32 @@
++/**
++ * Internal dependencies
++ */
++import type { AnyConfig, CurriedSelectorsOf, StoreDescriptor } from './types';
++/**
++ * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
++ * so that you only need to supply additional arguments, and modified so that they return promises
++ * that resolve to their eventual values, after any resolvers have ran.
++ *
++ * @param {StoreDescriptor|string} storeNameOrDescriptor The store descriptor. The legacy calling
++ *                                                       convention of passing the store name is
++ *                                                       also supported.
++ *
++ * @example
++ * ```ts
++ * import { resolveSelect } from '@wordpress/data';
++ * import { store as myCustomStore } from 'my-custom-store';
++ *
++ * resolveSelect( myCustomStore ).getPrice( 'hammer' ).then(console.log)
++ * ```
++ *
++ * @return {Object} Object containing the store's promise-wrapped selectors.
++ */
++export declare function resolveSelect<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: string | T): PromiseifySelectors<CurriedSelectorsOf<T>>;
++
++export type PromiseifySelectors< Selectors > = {
++	[ SelectorFunction in keyof Selectors ]: Selectors[ SelectorFunction ] extends (
++		...args: infer SelectorArgs
++	) => infer SelectorReturnType
++		? ( ...args: SelectorArgs ) => Promise< SelectorReturnType >
++		: never;
++};
+\ No newline at end of file
+diff --git a/build-types/types.d.ts b/build-types/types.d.ts
+index 70261db904a6038c3ac61377d2bd9115e0c9f10c..3a371e91ef70e26e7692ea2032a7f9ff79e3a0a8 100644
+--- a/build-types/types.d.ts
++++ b/build-types/types.d.ts
+@@ -2,6 +2,13 @@
+  * External dependencies
+  */
+ import type { combineReducers as reduxCombineReducers } from 'redux';
++/**
++ * Internal dependencies
++ */
++import type * as MetadataActions from './redux-store/metadata/actions';
++import type * as MetadataSelectors from './redux-store/metadata/selectors';
++export type SelectorParameters<Selector> = Selector extends (state: any, ...args: infer Parameters) => any ? Parameters : never;
++
+ type MapOf<T> = {
+     [name: string]: T;
+ };
+@@ -45,6 +52,8 @@ export type SelectFunction = <S>(store: S) => CurriedSelectorsOf<S>;
+ export type ListenerFunction = () => void;
+ export type CurriedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>> ? {
+     [key in keyof Selectors]: CurriedState<Selectors[key]>;
++} & {
++    [key in keyof TypedMetadataSelectors<ConfigOf<S>>]: CurriedState<TypedMetadataSelectors<ConfigOf<S>>[key]>;
+ } : never;
+ /**
+  * Removes the first argument from a function.
+@@ -121,15 +130,48 @@ export interface DataEmitter {
+     isPaused: boolean;
+ }
+ export type ConfigOf<S> = S extends StoreDescriptor<infer C> ? C : never;
+-export type ActionCreatorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, infer ActionCreators, any> ? PromisifiedActionCreators<ActionCreators> : never;
+-export type PromisifiedActionCreators<ActionCreators extends MapOf<ActionCreator>> = {
++export type ActionCreatorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, infer ActionCreators, any> ? PromisifiedActionCreators<ActionCreators & TypedMetadataActions<Config>> : never;export type PromisifiedActionCreators<ActionCreators extends MapOf<ActionCreator>> = {
+     [Action in keyof ActionCreators]: PromisifyActionCreator<ActionCreators[Action]>;
+ };
+-export type PromisifyActionCreator<Action extends ActionCreator> = (...args: Parameters<Action>) => Promise<ReturnType<Action> extends (..._args: any[]) => any ? ThunkReturnType<Action> : ReturnType<Action>>;
++export type PromisifyActionCreator<Action extends ActionCreator> = (...args: Parameters<Action>) => 
++    Promise<
++        ReturnType<Action> extends (..._args: any[]) => any
++        ? ThunkReturnType<Action>
++        : ReturnType<Action> extends Generator
++        ? GeneratorReturnType<ReturnType<Action>>
++        : ReturnType<Action>
++>;
+ export type ThunkReturnType<Action extends ActionCreator> = Awaited<ReturnType<ReturnType<Action>>>;
++
++type GeneratorReturnType<T> = T extends Generator<any, infer R, any> ? R : never;
++
+ type SelectorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, any, infer Selectors> ? {
+-    [name in keyof Selectors]: Function;
++    [name in keyof Selectors]: Selectors[name] extends (...args: any[]) => any ? (...args: Parameters<Selectors[name]>) => ReturnType<Selectors[name]> : (...args: any[]) => any;
+ } : never;
+ export type combineReducers = typeof reduxCombineReducers;
++
++export type TypedMetadataActions<Config extends AnyConfig> = {
++    startResolution: typeof MetadataActions.startResolution<SelectorsOf<Config>>;
++    finishResolution: typeof MetadataActions.finishResolution<SelectorsOf<Config>>;
++    failResolution: typeof MetadataActions.failResolution<SelectorsOf<Config>>;
++    startResolutions: typeof MetadataActions.startResolutions<SelectorsOf<Config>>;
++    finishResolutions: typeof MetadataActions.finishResolutions<SelectorsOf<Config>>;
++    failResolutions: typeof MetadataActions.failResolutions<SelectorsOf<Config>>;
++    invalidateResolution: typeof MetadataActions.invalidateResolution<SelectorsOf<Config>>;
++    invalidateResolutionForStore: typeof MetadataActions.invalidateResolutionForStore;
++    invalidateResolutionForStoreSelector: typeof MetadataActions.invalidateResolutionForStoreSelector<SelectorsOf<Config>>;
++};
++export type TypedMetadataSelectors<Config extends AnyConfig> = {
++    getResolutionState: typeof MetadataSelectors.getResolutionState<SelectorsOf<Config>>;
++    getIsResolving: typeof MetadataSelectors.getIsResolving<SelectorsOf<Config>>;
++    hasStartedResolution: typeof MetadataSelectors.hasStartedResolution<SelectorsOf<Config>>;
++    hasFinishedResolution: typeof MetadataSelectors.hasFinishedResolution<SelectorsOf<Config>>;
++    hasResolutionFailed: typeof MetadataSelectors.hasResolutionFailed<SelectorsOf<Config>>;
++    getResolutionError: typeof MetadataSelectors.getResolutionError<SelectorsOf<Config>>;
++    isResolving: typeof MetadataSelectors.isResolving<SelectorsOf<Config>>;
++    getCachedResolvers: typeof MetadataSelectors.getCachedResolvers;
++    hasResolvingSelectors: typeof MetadataSelectors.hasResolvingSelectors;
++    countSelectorsByStatus: typeof MetadataSelectors.countSelectorsByStatus;
++};
+ export {};
+ //# sourceMappingURL=types.d.ts.map

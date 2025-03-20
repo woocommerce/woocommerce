@@ -62,11 +62,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		// Test updating 2 fields separately.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
-		$industry = array(
-			array(
-				'slug' => 'health-beauty',
-			),
-		);
+		$industry = array( 'health-beauty' );
 		$request->set_body(
 			wp_json_encode(
 				array(
@@ -114,7 +110,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'health-beauty', $data['industry'][0]['slug'] );
+		$this->assertEquals( 'health-beauty', $data['industry'][0] );
 		$this->assertEquals( 'storefront', $data['theme'] );
 	}
 
@@ -131,7 +127,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 18, $properties );
+		$this->assertCount( 22, $properties );
 		$this->assertArrayHasKey( 'completed', $properties );
 		$this->assertArrayHasKey( 'skipped', $properties );
 		$this->assertArrayHasKey( 'industry', $properties );
@@ -150,6 +146,10 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'store_email', $properties );
 		$this->assertArrayHasKey( 'is_store_country_set', $properties );
 		$this->assertArrayHasKey( 'is_plugins_page_skipped', $properties );
+		$this->assertArrayHasKey( 'business_choice', $properties );
+		$this->assertArrayHasKey( 'selling_online_answer', $properties );
+		$this->assertArrayHasKey( 'selling_platforms', $properties );
+		$this->assertArrayHasKey( 'core_profiler_completed_steps', $properties );
 	}
 
 	/**

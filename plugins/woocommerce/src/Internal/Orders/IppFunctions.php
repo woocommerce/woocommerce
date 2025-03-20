@@ -1,9 +1,9 @@
 <?php
 
-
 namespace Automattic\WooCommerce\Internal\Orders;
 
 use WC_Order;
+use WC_Gateway_COD;
 
 /**
  * Class with methods for handling order In-Person Payments.
@@ -19,7 +19,7 @@ class IppFunctions {
 	 */
 	public static function is_order_in_person_payment_eligible( WC_Order $order ): bool {
 		$has_status            = in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true );
-		$has_payment_method    = in_array( $order->get_payment_method(), array( 'cod', 'woocommerce_payments', 'none' ), true );
+		$has_payment_method    = in_array( $order->get_payment_method(), array( WC_Gateway_COD::ID, 'woocommerce_payments', 'none' ), true );
 		$order_is_not_paid     = null === $order->get_date_paid();
 		$order_is_not_refunded = empty( $order->get_refunds() );
 

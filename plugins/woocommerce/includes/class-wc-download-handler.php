@@ -8,15 +8,12 @@
  * @version 2.2.0
  */
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Download handler class.
  */
 class WC_Download_Handler {
-	use AccessiblePrivateMethods;
-
 	/**
 	 * The hook used for deferred tracking of partial download attempts.
 	 */
@@ -32,7 +29,7 @@ class WC_Download_Handler {
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
 		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
 		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
-		self::add_action( self::TRACK_DOWNLOAD_CALLBACK, array( __CLASS__, 'track_download' ), 10, 3 );
+		add_action( self::TRACK_DOWNLOAD_CALLBACK, array( __CLASS__, 'track_download' ), 10, 3 );
 	}
 
 	/**
@@ -719,8 +716,10 @@ class WC_Download_Handler {
 	 *
 	 * @return void
 	 * @throws Exception If the active version of Action Scheduler is less than 3.6.0.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function track_download( $download, $user_id = null, $user_ip_address = null, bool $defer = false ): void {
+	public static function track_download( $download, $user_id = null, $user_ip_address = null, bool $defer = false ): void {
 		try {
 			// If we were supplied with an integer, convert it to a download object.
 			$download = new WC_Customer_Download( $download );

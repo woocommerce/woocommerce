@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add util to fix several flaky tests using 'saveSiteEditorEntities()'

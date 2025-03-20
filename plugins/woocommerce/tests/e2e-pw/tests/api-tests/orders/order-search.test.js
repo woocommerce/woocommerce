@@ -33,7 +33,6 @@ const order = {
  * ```
  */
 const searchParams = [
-	[ 'orderId', 'orderId' ],
 	[ 'billing first name', order.billing.first_name ],
 	[ 'billing company name', order.billing.company ],
 	[ 'billing address 2', order.billing.address_2 ],
@@ -47,6 +46,7 @@ const searchParams = [
 	[ 'shipping city', order.shipping.city ],
 	[ 'shipping post code', order.shipping.postcode ],
 	[ 'shipping state', order.shipping.state ],
+	[ 'orderId', 'orderId' ],
 ];
 
 test.describe( 'Order Search API tests', () => {
@@ -61,7 +61,7 @@ test.describe( 'Order Search API tests', () => {
 		order.line_items[ 0 ].product_id = productResponseJSON.id;
 
 		// Create an order and save its ID
-		const response = await request.post( '/wp-json/wc/v3/orders', {
+		const response = await request.post( './wp-json/wc/v3/orders', {
 			data: order,
 		} );
 		const responseJSON = await response.json();
@@ -71,13 +71,13 @@ test.describe( 'Order Search API tests', () => {
 	test.afterAll( async ( { request } ) => {
 		// Cleanup: Delete the product
 		await request.delete(
-			`/wp-json/wc/v3/products/${ order.line_items[ 0 ].product_id }`,
+			`./wp-json/wc/v3/products/${ order.line_items[ 0 ].product_id }`,
 			{
 				data: { force: true },
 			}
 		);
 		// Cleanup: Delete the order
-		await request.delete( `/wp-json/wc/v3/orders/${ order.id }`, {
+		await request.delete( `./wp-json/wc/v3/orders/${ order.id }`, {
 			data: { force: true },
 		} );
 	} );
@@ -94,7 +94,7 @@ test.describe( 'Order Search API tests', () => {
 				searchParamRow[ paramIndex ] === 'orderId'
 					? order.id
 					: searchParamRow[ paramIndex ];
-			const response = await request.get( '/wp-json/wc/v3/orders/', {
+			const response = await request.get( './wp-json/wc/v3/orders/', {
 				params: { search: searchValue },
 			} );
 			const responseJSON = await response.json();
@@ -108,7 +108,7 @@ test.describe( 'Order Search API tests', () => {
 	test( 'can return an empty result set when no matches were found', async ( {
 		request,
 	} ) => {
-		const response = await request.get( '/wp-json/wc/v3/orders/', {
+		const response = await request.get( './wp-json/wc/v3/orders/', {
 			params: { search: 'Chauncey Smith Kunde' },
 		} );
 		const responseJSON = await response.json();

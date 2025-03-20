@@ -30,6 +30,7 @@ export function useProductEdits( productType = <string>'product' ) {
 			// @ts-ignore
 			const { getEntityRecordNonTransientEdits } = select( 'core' );
 
+			// @ts-expect-error Selector is not typed
 			const _edits = getEntityRecordNonTransientEdits(
 				'postType',
 				productType,

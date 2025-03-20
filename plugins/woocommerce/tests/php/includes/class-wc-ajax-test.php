@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\WC_AJAX.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 
@@ -59,7 +60,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
+		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
 		$data = array(
@@ -73,7 +74,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			return static::maybe_add_order_item( $order->get_id(), '', $data );
 		};
 		$maybe_add_order_item_func->call( new WC_AJAX() );
-		$order->set_status( 'processing' );
+		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 
 		// Refresh from DB.

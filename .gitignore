@@ -110,3 +110,7 @@ changes.json
 /artifacts
 /plugins/*/artifacts
 /tools/*/artifacts
+
+# Cursor related files
+.cursorignore
+.cursorindexingignore

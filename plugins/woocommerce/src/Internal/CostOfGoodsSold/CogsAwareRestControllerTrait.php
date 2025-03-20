@@ -16,7 +16,7 @@ trait CogsAwareRestControllerTrait {
 	 * @param array      $data Array of response data.
 	 * @param WC_Product $product Product to get the information from.
 	 */
-	private function add_cogs_info_to_returned_data( array &$data, $product ): void {
+	private function add_cogs_info_to_returned_product_data( array &$data, $product ): void {
 		if ( ! $this->cogs_is_enabled() ) {
 			return;
 		}
@@ -32,7 +32,7 @@ trait CogsAwareRestControllerTrait {
 		);
 
 		if ( $product instanceof \WC_Product_Variation ) {
-			$data['cost_of_goods_sold']['defined_value_overrides_parent'] = $product->get_cogs_value_overrides_parent();
+			$data['cost_of_goods_sold']['defined_value_is_additive'] = $product->get_cogs_value_is_additive();
 		}
 	}
 
@@ -54,9 +54,9 @@ trait CogsAwareRestControllerTrait {
 		}
 
 		if ( $product instanceof \WC_Product_Variation ) {
-			$overrides = $request['cost_of_goods_sold']['defined_value_overrides_parent'] ?? null;
-			if ( ! is_null( $overrides ) ) {
-				$product->set_cogs_value_overrides_parent( $overrides );
+			$is_additive = $request['cost_of_goods_sold']['defined_value_is_additive'] ?? null;
+			if ( ! is_null( $is_additive ) ) {
+				$product->set_cogs_value_is_additive( $is_additive );
 			}
 		}
 	}
@@ -68,13 +68,13 @@ trait CogsAwareRestControllerTrait {
 	 * @param bool  $for_variations_controller True if the information is for an endpoint in the variations controller.
 	 * @return array Updated schema information.
 	 */
-	private function add_cogs_related_schema( array $schema, bool $for_variations_controller ): array {
+	private function add_cogs_related_product_schema( array $schema, bool $for_variations_controller ): array {
 		$schema['properties']['cost_of_goods_sold'] = array(
 			'description' => __( 'Cost of Goods Sold data.', 'woocommerce' ),
 			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
 			'properties'  => array(
-				'values'                         => array(
+				'values'                    => array(
 					'description' => __( 'Cost of Goods Sold values for the product.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
@@ -96,13 +96,13 @@ trait CogsAwareRestControllerTrait {
 					),
 
 				),
-				'defined_value_overrides_parent' => array(
-					'description' => __( 'Applies to variations only. If true, the defined value is the final effective value; if false, the effective value is the base value from the parent product plus the defined value.', 'woocommerce' ),
+				'defined_value_is_additive' => array(
+					'description' => __( 'Applies to variations only. If true, the effective value is the base value from the parent product plus the defined value; if false, the defined value is the final effective value.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'total_value'                    => array(
+				'total_value'               => array(
 					'description' => __( 'Total monetary value of the Cost of Goods Sold for the product (sum of all the effective values).', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
@@ -112,8 +112,8 @@ trait CogsAwareRestControllerTrait {
 		);
 
 		if ( $for_variations_controller ) {
-			$schema['properties']['cost_of_goods_sold']['properties']['defined_value_overrides_parent']['description'] =
-				__( 'If true, the defined value is the final effective value; if false, the effective value is the base value from the parent product plus the defined value.', 'woocommerce' );
+			$schema['properties']['cost_of_goods_sold']['properties']['defined_value_is_additive']['description'] =
+				__( 'If true, the effective value is the base value from the parent product plus the defined value; if false, the defined value is the final effective value.', 'woocommerce' );
 		}
 
 		return $schema;

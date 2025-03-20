@@ -15,6 +15,17 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 class ExportInstallThemeSteps implements StepExporter {
 	use UseWPFunctions;
 
+	private $filter_callback;
+	/**
+	 * Register a filter callback to filter the plugins to export.
+	 *
+	 * @param callable $callback
+	 *
+	 * @return void
+	 */
+	public function filter(callable $callback) {
+		$this->filter_callback = $callback;
+	}
 	/**
 	 * Export the steps.
 	 *
@@ -23,6 +34,9 @@ class ExportInstallThemeSteps implements StepExporter {
 	public function export() {
 		$steps        = array();
 		$themes       = $this->wp_get_themes();
+		if ( is_callable( $this->filter_callback ) ) {
+			$themes = call_user_func( $this->filter_callback, $themes );
+		}
 		$active_theme = $this->wp_get_theme();
 
 		foreach ( $themes as $slug => $theme ) {

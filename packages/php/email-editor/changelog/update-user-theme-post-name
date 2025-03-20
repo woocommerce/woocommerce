@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Updated user theme post name from `wp-global-styles-mailpoet` to `wp-global-styles-woocommerce-email` to align with WooCommerce naming standards.

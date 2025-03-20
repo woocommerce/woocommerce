@@ -9,7 +9,7 @@ import { Modal } from '@wordpress/components';
 import { Metadata } from '../../../types';
 
 export type EditModalProps = Omit<
-	Modal.Props,
+	React.ComponentProps< typeof Modal >,
 	'title' | 'onRequestClose' | 'children'
 > & {
 	initialValue: Metadata< string >;

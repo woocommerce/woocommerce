@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Admin
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Tests for the WC_Admin_Report class.
  */
@@ -36,18 +38,29 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: status_widget placeholder
+	 */
+	public function test_status_widget_placeholder() {
+		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
+		wp_set_current_user( $this->user );
+		( new WC_Admin_Dashboard() )->status_widget();
+		$this->expectOutputRegex( '/Loading status data.../' );
+		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-status-widget-loading">/' );
+	}
+
+	/**
 	 * Test: get_status_widget
 	 */
-	public function test_status_widget() {
+	public function test_status_widget_content() {
 		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->expectOutputRegex( '/98,765\.00/' );
 
-		( new WC_Admin_Dashboard() )->status_widget();
+		( new WC_Admin_Dashboard() )->status_widget_content();
 
 		$widget_output = $this->getActualOutput();
 
@@ -64,14 +77,14 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		add_filter( 'woocommerce_admin_disabled', '__return_true' );
 
 		$this->expectOutputRegex( '/50\.00 worth in the/' );
 
-		( new WC_Admin_Dashboard() )->status_widget();
+		( new WC_Admin_Dashboard() )->status_widget_content();
 
 		$widget_output = $this->getActualOutput();
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );

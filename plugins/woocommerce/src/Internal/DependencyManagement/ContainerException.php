@@ -17,7 +17,7 @@ class ContainerException extends \Exception {
 	 * @param int             $code The error code.
 	 * @param \Exception|null $previous The previous throwable used for exception chaining.
 	 */
-	public function __construct( $message = null, $code = 0, \Exception $previous = null ) {
+	public function __construct( $message = null, $code = 0, ?\Exception $previous = null ) {
 		parent::__construct( $message, $code, $previous );
 	}
 }

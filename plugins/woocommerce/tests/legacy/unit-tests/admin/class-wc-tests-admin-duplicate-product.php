@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Admin
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 /**
  * WC_Tests_Admin_Duplicate_Product tests.
  *
@@ -22,7 +24,7 @@ class WC_Tests_Admin_Duplicate_Product extends WC_Unit_Test_Case {
 
 		$this->assertNotEquals( $product->get_id(), $duplicate->get_id() );
 		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicate->get_name() );
-		$this->assertEquals( 'draft', $duplicate->get_status() );
+		$this->assertEquals( ProductStatus::DRAFT, $duplicate->get_status() );
 		$this->assertDuplicateWasReset( $duplicate );
 	}
 
@@ -36,7 +38,7 @@ class WC_Tests_Admin_Duplicate_Product extends WC_Unit_Test_Case {
 
 		$this->assertNotEquals( $product->get_id(), $duplicate->get_id() );
 		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicate->get_name() );
-		$this->assertEquals( 'draft', $duplicate->get_status() );
+		$this->assertEquals( ProductStatus::DRAFT, $duplicate->get_status() );
 		$this->assertDuplicateWasReset( $duplicate );
 
 		$product_children   = $product->get_children();
@@ -50,7 +52,7 @@ class WC_Tests_Admin_Duplicate_Product extends WC_Unit_Test_Case {
 
 			$this->assertNotEquals( $product_child->get_id(), $duplicate_child->get_id() );
 			$this->assertEquals( $product_child->get_name() . ' (Copy)', $duplicate_child->get_name() );
-			$this->assertEquals( 'publish', $duplicate_child->get_status() );
+			$this->assertEquals( ProductStatus::PUBLISH, $duplicate_child->get_status() );
 			$this->assertDuplicateWasReset( $duplicate_child );
 		}
 	}

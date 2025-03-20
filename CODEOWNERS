@@ -8,8 +8,10 @@
 /tools/ @woocommerce/flux
 /packages/js/eslint-plugin/ @woocommerce/flux
 /packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
+/packages/js/e2e-utils-playwright/ @woocommerce/solaris
 
 # Files in root of repository
 /.* @woocommerce/flux
 /*.* @woocommerce/flux
 /changelog.txt
+/pnpm-lock.yaml

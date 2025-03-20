@@ -5,7 +5,11 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 ?>
 <div id="general_product_data" class="panel woocommerce_options_panel">
@@ -73,6 +77,28 @@ defined( 'ABSPATH' ) || exit;
 		do_action( 'woocommerce_product_options_pricing' );
 		?>
 	</div>
+
+	<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+		<div class="options_group pricing show_if_simple show_if_external show_if_variable hidden">
+			<?php
+			$is_variable = $product_object instanceof WC_Product_Variable;
+
+			woocommerce_wp_text_input(
+				array(
+					'id'          => '_cogs_value',
+					'value'       => $product_object->get_cogs_value() ?? 0,
+					'label'       => __( 'Cost of goods', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+					'data_type'   => 'price',
+					'desc_tip'    => 'true',
+					'description' =>
+						$is_variable ?
+						__( 'Add the amount it costs you to buy or make this product. This will be applied as the default value for variations.', 'woocommerce' ) :
+						__( 'Add the amount it costs you to buy or make this product.', 'woocommerce' ),
+				)
+			);
+			?>
+		</div>
+	<?php endif; ?>
 
 	<div class="options_group show_if_downloadable hidden">
 		<div class="form-field downloadable_files">
@@ -178,9 +204,9 @@ defined( 'ABSPATH' ) || exit;
 					'value'       => $product_object->get_tax_status( 'edit' ),
 					'label'       => __( 'Tax status', 'woocommerce' ),
 					'options'     => array(
-						'taxable'  => __( 'Taxable', 'woocommerce' ),
-						'shipping' => __( 'Shipping only', 'woocommerce' ),
-						'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
+						ProductTaxStatus::TAXABLE  => __( 'Taxable', 'woocommerce' ),
+						ProductTaxStatus::SHIPPING => __( 'Shipping only', 'woocommerce' ),
+						ProductTaxStatus::NONE     => _x( 'None', 'Tax status', 'woocommerce' ),
 					),
 					'desc_tip'    => 'true',
 					'description' => __( 'Define whether or not the entire product is taxable, or just the cost of shipping it.', 'woocommerce' ),

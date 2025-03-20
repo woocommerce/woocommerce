@@ -1,0 +1,151 @@
+.woocommerce-incentive-banner {
+	background-color: $studio-woocommerce-purple-0;
+	margin: 24px;
+	box-shadow: none;
+	border-radius: 8px;
+
+	&__content {
+		display: flex;
+		align-items: center;
+		padding: 0 calc(48px);
+		gap: $gap-large;
+		overflow: hidden;
+
+		@media screen and ( max-width: $break-wide ) {
+			padding: 0 calc(24px);
+		}
+
+		@media screen and ( max-width: $break-medium ) {
+			padding: 0;
+		}
+	}
+
+	&__image {
+		width: 316px;
+		align-self: stretch;
+
+		img {
+			height: 141%;
+			position: relative;
+			top: -20%;
+		}
+
+		@media screen and ( max-width: $break-wide ) {
+			width: 30%;
+
+			img {
+				height: 120%;
+				top: -9%;
+				float: right;
+			}
+		}
+
+		@media screen and ( max-width: 1140px ) {
+			width: 30%;
+
+			img {
+				height: 100%;
+				top: 0;
+				float: right;
+			}
+		}
+
+		@media screen and ( max-width: $break-xlarge ) {
+			width: 28%;
+
+			img {
+				height: 80%;
+				top: 10%;
+				float: right;
+			}
+		}
+
+		@media screen and ( max-width: $break-large ) {
+			width: 28%;
+
+			img {
+				height: 80%;
+				top: 10%;
+				float: right;
+			}
+		}
+
+		@media screen and ( max-width: $break-small ) {
+			display: none;
+		}
+	}
+
+	&__body {
+		padding: calc(32px) 0;
+		max-width: calc(720px);
+		flex: 1;
+
+		display: flex;
+		flex-direction: column;
+		gap: $gap-smaller;
+		align-items: start;
+
+		@media screen and ( max-width: $break-xlarge ) {
+			max-width: calc(420px + 48px);
+		}
+
+		@media screen and ( max-width: $break-large ) {
+			padding: $gap-large $gap-large;
+		}
+
+		@media screen and ( max-width: $break-medium ) {
+			padding: $gap-large $gap;
+		}
+
+		@media screen and ( max-width: $break-small ) {
+			max-width: 100%;
+		}
+	}
+
+	&__copy {
+		display: flex;
+		flex-direction: column;
+		gap: $gap-smallest;
+
+		h2 {
+			font-size: 14px;
+			line-height: 20px;
+			color: $gray-900;
+			margin: 0;
+			text-wrap: auto !important;
+		}
+
+		p {
+			font-size: 13px;
+			line-height: 20px;
+			color: $gray-700;
+			margin: 0;
+		}
+	}
+
+	&__terms {
+		font-size: 12px;
+		color: $gray-700;
+	}
+
+	&__actions {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: $grid-unit-20;
+
+		button.components-button {
+			height: 32px;
+			padding: $grid-unit-05 $grid-unit-10;
+		}
+	}
+
+	@media screen and ( max-width: $break-xlarge ) {
+		margin: 24px 0;
+	}
+
+	@media screen and ( max-width: $break-medium ) {
+		margin: 24px -20px;
+		border-radius: 0;
+	}
+}

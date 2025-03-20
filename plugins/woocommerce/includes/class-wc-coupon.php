@@ -8,6 +8,7 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
@@ -927,7 +928,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		$valid        = false;
-		$product_cats = wc_get_product_cat_ids( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() );
+		$product_cats = wc_get_product_cat_ids( $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id() );
 		$product_ids  = array( $product->get_id(), $product->get_parent_id() );
 
 		// Specific products get the discount.

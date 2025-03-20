@@ -12,6 +12,10 @@
 /playwright-report/
 /storybook/
 /tests/
+/vendor/*/*/tests
+/packages/*/tests
+/packages/*/changelog
+/packages/email-editor/tasks
 /e2e/
 babel.config.js
 blocks.ini
@@ -29,10 +33,13 @@ packages/woocommerce-blocks/docs
 phpcs.xml
 phpunit.xml
 phpunit.xml.dist
+phpunit-*.xml.dist
 postcss.config.js
 project.json
 README.md
 renovate.json
 tsconfig.*
 webpack.config.js
-client/legacy/
+/client/legacy/
+/client/admin/
+/client/blocks/

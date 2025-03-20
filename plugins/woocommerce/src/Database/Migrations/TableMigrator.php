@@ -80,7 +80,7 @@ abstract class TableMigrator {
 	 * @param string      $output Any of ARRAY_A | ARRAY_N | OBJECT | OBJECT_K constants.
 	 * @return mixed Whatever $wpdb->get_results returns.
 	 */
-	protected function db_get_results( string $query = null, string $output = OBJECT ) {
+	protected function db_get_results( ?string $query = null, string $output = OBJECT ) {
 		$wpdb = WC()->get_global( 'wpdb' );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

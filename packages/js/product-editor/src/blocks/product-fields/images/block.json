@@ -15,7 +15,7 @@
 	"attributes": {
 		"mediaId": {
 			"type": "number",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"property": {
 			"type": "string"
@@ -25,7 +25,7 @@
 			"default": true
 		},
 		"images": {
-			"__experimentalRole": "content",
+			"role": "content",
 			"type": "array",
 			"items": {
 				"type": "number"

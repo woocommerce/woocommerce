@@ -251,12 +251,13 @@ const countryCodes = [
 	'ye',
 	'zm',
 	'zw',
+	'hr',
 ];
 
 test.describe( 'Data API tests', () => {
 	test( 'can list all data', async ( { request } ) => {
 		// call API to retrieve data values
-		const response = await request.get( '/wp-json/wc/v3/data' );
+		const response = await request.get( './wp-json/wc/v3/data' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -284,7 +285,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view all continents', async ( { request } ) => {
 		// call API to retrieve all continents
-		const response = await request.get( '/wp-json/wc/v3/data/continents' );
+		const response = await request.get( './wp-json/wc/v3/data/continents' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -1892,10 +1893,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'GBP',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'foot',
+							dimension_unit: 'cm',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'oz',
+							weight_unit: 'kg',
 							states: [],
 						},
 						{
@@ -1944,7 +1945,7 @@ test.describe( 'Data API tests', () => {
 							num_decimals: 2,
 							thousand_sep: '.',
 							weight_unit: 'kg',
-							states: [],
+							states: expect.arrayContaining( [] ),
 						},
 						{
 							code: 'HU',
@@ -2766,10 +2767,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'foot',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'oz',
+							weight_unit: 'lbs',
 							states: expect.arrayContaining( [] ),
 						},
 						{
@@ -2802,10 +2803,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'cm',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'kg',
+							weight_unit: 'lbs',
 							states: [],
 						},
 					],
@@ -2824,10 +2825,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'cm',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'kg',
+							weight_unit: 'lbs',
 							states: [],
 						},
 						{
@@ -2884,10 +2885,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'cm',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'kg',
+							weight_unit: 'lbs',
 							states: [],
 						},
 						{
@@ -3317,7 +3318,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view continent data', async ( { request } ) => {
 		// call API to retrieve a specific continent data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/continents/eu'
+			'./wp-json/wc/v3/data/continents/eu'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -3538,10 +3539,10 @@ test.describe( 'Data API tests', () => {
 						currency_code: 'GBP',
 						currency_pos: 'left',
 						decimal_sep: '.',
-						dimension_unit: 'foot',
+						dimension_unit: 'cm',
 						num_decimals: 2,
 						thousand_sep: ',',
-						weight_unit: 'oz',
+						weight_unit: 'kg',
 						states: [],
 					},
 					{
@@ -3590,7 +3591,7 @@ test.describe( 'Data API tests', () => {
 						num_decimals: 2,
 						thousand_sep: '.',
 						weight_unit: 'kg',
-						states: [],
+						states: expect.arrayContaining( [] ),
 					},
 					{
 						code: 'HU',
@@ -3959,7 +3960,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view country data', async ( { request } ) => {
 		// call API to retrieve all countries
-		const response = await request.get( '/wp-json/wc/v3/data/countries' );
+		const response = await request.get( './wp-json/wc/v3/data/countries' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -3967,7 +3968,7 @@ test.describe( 'Data API tests', () => {
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
 			const countryData = require( `../../../data/countries/${ country }.json` );
-			expect( responseJSON ).toEqual(
+			expect( responseJSON, `Checking country ${ country }` ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						code: countryData.code,
@@ -3977,14 +3978,15 @@ test.describe( 'Data API tests', () => {
 							self: [
 								{
 									href: expect.stringContaining(
-										`/wp-json/wc/v3/data/countries/${ country }`
+										`wp-json/wc/v3/data/countries/${ country }`
 									),
+									targetHints: { allow: [ 'GET' ] },
 								},
 							],
 							collection: [
 								{
 									href: expect.stringContaining(
-										'/wp-json/wc/v3/data/countries'
+										'wp-json/wc/v3/data/countries'
 									),
 								},
 							],
@@ -3997,7 +3999,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view all currencies', async ( { request } ) => {
 		// call API to retrieve all currencies
-		const response = await request.get( '/wp-json/wc/v3/data/currencies' );
+		const response = await request.get( './wp-json/wc/v3/data/currencies' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -4014,6 +4016,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AED'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4039,6 +4042,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AFN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4064,6 +4068,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ALL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4089,6 +4094,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AMD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4114,6 +4120,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ANG'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4139,6 +4146,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AOA'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4164,6 +4172,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ARS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4189,6 +4198,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AUD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4214,6 +4224,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AWG'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4239,6 +4250,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/AZN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4264,6 +4276,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BAM'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4289,6 +4302,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BBD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4314,6 +4328,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BDT'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4339,6 +4354,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BGN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4364,6 +4380,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BHD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4389,6 +4406,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BIF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4414,6 +4432,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BMD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4439,6 +4458,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BND'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4464,6 +4484,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BOB'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4489,6 +4510,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BRL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4514,6 +4536,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BSD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4539,6 +4562,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BTC'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4564,6 +4588,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BTN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4589,6 +4614,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BWP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4614,6 +4640,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BYR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4639,6 +4666,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BYN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4664,6 +4692,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/BZD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4689,6 +4718,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CAD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4714,6 +4744,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CDF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4739,6 +4770,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CHF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4764,6 +4796,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CLP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4789,6 +4822,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CNY'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4814,6 +4848,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/COP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4839,6 +4874,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CRC'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4864,6 +4900,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CUC'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4889,6 +4926,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CUP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4914,6 +4952,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CVE'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4939,6 +4978,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/CZK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4964,6 +5004,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/DJF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -4989,6 +5030,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/DKK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5014,6 +5056,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/DOP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5039,6 +5082,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/DZD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5064,6 +5108,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/EGP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5089,6 +5134,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ERN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5114,6 +5160,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ETB'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5139,6 +5186,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/EUR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5164,6 +5212,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/FJD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5189,6 +5238,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/FKP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5214,6 +5264,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GBP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5239,6 +5290,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GEL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5264,6 +5316,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GGP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5289,6 +5342,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GHS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5314,6 +5368,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GIP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5339,6 +5394,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GMD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5364,6 +5420,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GNF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5389,6 +5446,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GTQ'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5414,6 +5472,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/GYD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5439,6 +5498,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/HKD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5464,6 +5524,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/HNL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5489,6 +5550,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/HRK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5514,6 +5576,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/HTG'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5539,6 +5602,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/HUF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5564,6 +5628,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/IDR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5589,6 +5654,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ILS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5614,6 +5680,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/IMP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5639,6 +5706,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/INR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5664,6 +5732,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/IQD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5689,6 +5758,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/IRR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5714,6 +5784,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/IRT'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5739,6 +5810,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ISK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5764,6 +5836,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/JEP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5789,6 +5862,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/JMD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5814,6 +5888,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/JOD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5839,6 +5914,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/JPY'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5864,6 +5940,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KES'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5889,6 +5966,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KGS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5914,6 +5992,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KHR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5939,6 +6018,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KMF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5964,6 +6044,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KPW'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -5989,6 +6070,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KRW'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6014,6 +6096,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KWD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6039,6 +6122,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KYD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6064,6 +6148,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/KZT'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6089,6 +6174,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/LAK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6114,6 +6200,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/LBP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6139,6 +6226,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/LKR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6164,6 +6252,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/LRD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6189,6 +6278,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/LSL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6215,6 +6305,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/LYD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6240,6 +6331,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MAD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6265,6 +6357,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MDL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6290,6 +6383,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MGA'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6315,6 +6409,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MKD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6340,6 +6435,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MMK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6365,6 +6461,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MNT'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6390,6 +6487,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MOP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6415,6 +6513,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MRU'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6440,6 +6539,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MUR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6465,6 +6565,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MVR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6490,6 +6591,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MWK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6515,6 +6617,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MXN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6540,6 +6643,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MYR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6565,6 +6669,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/MZN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6590,6 +6695,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/NAD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6615,6 +6721,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/NGN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6640,6 +6747,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/NIO'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6665,6 +6773,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/NOK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6690,6 +6799,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/NPR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6715,6 +6825,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/NZD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6740,6 +6851,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/OMR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6765,6 +6877,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PAB'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6790,6 +6903,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PEN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6815,6 +6929,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PGK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6840,6 +6955,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PHP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6865,6 +6981,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PKR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6890,6 +7007,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PLN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6915,6 +7033,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PRB'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6940,6 +7059,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/PYG'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6965,6 +7085,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/QAR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -6990,6 +7111,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/RON'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7015,6 +7137,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/RSD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7040,6 +7163,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/RUB'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7065,6 +7189,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/RWF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7090,6 +7215,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SAR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7115,6 +7241,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SBD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7140,6 +7267,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SCR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7165,6 +7293,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SDG'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7190,6 +7319,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SEK'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7215,6 +7345,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SGD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7240,6 +7371,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SHP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7265,6 +7397,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SLL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7290,6 +7423,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SOS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7315,6 +7449,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SRD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7340,6 +7475,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SSP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7365,6 +7501,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/STN'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7390,6 +7527,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SYP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7415,6 +7553,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/SZL'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7440,6 +7579,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/THB'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7465,6 +7605,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TJS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7490,6 +7631,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TMT'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7515,6 +7657,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TND'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7540,6 +7683,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TOP'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7565,6 +7709,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TRY'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7590,6 +7735,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TTD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7615,6 +7761,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TWD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7640,6 +7787,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/TZS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7665,6 +7813,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/UAH'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7690,6 +7839,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/UGX'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7715,6 +7865,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/USD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7740,6 +7891,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/UYU'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7765,6 +7917,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/UZS'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7790,6 +7943,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/VEF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7815,6 +7969,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/VES'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7840,6 +7995,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/VND'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7865,6 +8021,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/VUV'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7890,6 +8047,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/WST'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7915,6 +8073,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/XAF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7940,6 +8099,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/XCD'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7965,6 +8125,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/XOF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -7990,6 +8151,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/XPF'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -8015,6 +8177,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/YER'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -8040,6 +8203,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ZAR'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -8065,6 +8229,7 @@ test.describe( 'Data API tests', () => {
 								href: expect.stringContaining(
 									'data/currencies/ZMW'
 								),
+								targetHints: { allow: [ 'GET' ] },
 							},
 						],
 						collection: [
@@ -8083,7 +8248,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view currency data', async ( { request } ) => {
 		// call API to retrieve a specific currency data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/currencies/fkp'
+			'./wp-json/wc/v3/data/currencies/fkp'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -8101,7 +8266,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view current currency', async ( { request } ) => {
 		// call API to retrieve current currency data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/currencies/current'
+			'./wp-json/wc/v3/data/currencies/current'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );

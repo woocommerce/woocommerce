@@ -16,6 +16,7 @@ export { NAVIGATION_STORE_NAME } from './navigation';
 export { OPTIONS_STORE_NAME } from './options';
 export { ITEMS_STORE_NAME } from './items';
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+export { PAYMENT_SETTINGS_STORE_NAME } from './payment-settings';
 export { SHIPPING_METHODS_STORE_NAME } from './shipping-methods';
 export { PRODUCTS_STORE_NAME } from './products';
 export { ORDERS_STORE_NAME } from './orders';
@@ -26,10 +27,52 @@ export { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 export { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
 export { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 export { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
-export { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
 export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 export { PaymentGateway } from './payment-gateways/types';
+export {
+	PaymentProvider,
+	PaymentProviderType,
+	PaymentProviderState,
+	PaymentProviderOnboardingState,
+	PaymentGatewayProvider,
+	OfflinePaymentMethodProvider,
+	PaymentExtensionSuggestionProvider,
+	OfflinePmsGroupProvider,
+	SuggestedPaymentExtension,
+	SuggestedPaymentExtensionCategory,
+	PaymentIncentive,
+	EnableGatewayResponse,
+	PaymentGatewayLink,
+	RecommendedPaymentMethod,
+	PluginData,
+} from './payment-settings/types';
 export { ShippingMethod } from './shipping-methods/types';
+export { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
+
+// Export stores
+export { store as onboardingStore } from './onboarding';
+export { store as experimentalProductAttributesStore } from './product-attributes';
+export { store as experimentalProductAttributeTermsStore } from './product-attribute-terms';
+export { store as experimentalProductVariationsStore } from './product-variations';
+export { store as experimentalProductTagsStore } from './product-tags';
+export { store as experimentalShippingZonesStore } from './shipping-zones';
+export { store as experimentalProductShippingClassesStore } from './product-shipping-classes';
+export { store as experimentalProductCategoriesStore } from './product-categories';
+export { store as experimentalTaxClassesStore } from './tax-classes';
+export { store as notesStore } from './notes';
+export { store as reviewsStore } from './reviews';
+export { store as shippingMethodsStore } from './shipping-methods';
+export { store as settingsStore } from './settings';
+export { store as ordersStore } from './orders';
+export { store as pluginsStore } from './plugins';
+export { store as optionsStore } from './options';
+export { store as userStore } from './user';
+export { store as productsStore } from './products';
+export { store as countriesStore } from './countries';
+export { store as paymentGatewaysStore } from './payment-gateways';
+export { store as importStore } from './import';
+export { store as experimentalProductFormStore } from './product-form';
+export { store as paymentSettingsStore } from './payment-settings';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
@@ -86,6 +129,9 @@ export {
 export * from './onboarding/types';
 export * from './plugins/types';
 export { PluginSelectors } from './plugins/selectors';
+export { PaymentSelectors } from './payment-gateways/selectors';
+export { OnboardingSelectors } from './onboarding/selectors';
+export { PaymentSettingsSelectors } from './payment-settings/selectors';
 export { ActionDispatchers as PluginActions } from './plugins/actions';
 export * from './products/types';
 export type {
@@ -130,6 +176,7 @@ import type { REPORTS_STORE_NAME } from './reports';
 import type { ITEMS_STORE_NAME } from './items';
 import type { COUNTRIES_STORE_NAME } from './countries';
 import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+import type { PAYMENT_SETTINGS_STORE_NAME } from './payment-settings';
 import type { SHIPPING_METHODS_STORE_NAME } from './shipping-methods';
 import type { PRODUCTS_STORE_NAME } from './products';
 import type { ORDERS_STORE_NAME } from './orders';
@@ -138,10 +185,10 @@ import type { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product
 import type { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 import type { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 import type { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
-import type { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
 import type { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 import type { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
 import type { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
+import type { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -156,6 +203,7 @@ export type WCDataStoreName =
 	| typeof ITEMS_STORE_NAME
 	| typeof COUNTRIES_STORE_NAME
 	| typeof PAYMENT_GATEWAYS_STORE_NAME
+	| typeof PAYMENT_SETTINGS_STORE_NAME
 	| typeof SHIPPING_METHODS_STORE_NAME
 	| typeof PRODUCTS_STORE_NAME
 	| typeof ORDERS_STORE_NAME
@@ -174,6 +222,7 @@ export type WCDataStoreName =
  */
 import { WPDataSelectors } from './types';
 import { PaymentSelectors } from './payment-gateways/selectors';
+import { PaymentSettingsSelectors } from './payment-settings/selectors';
 import { ShippingMethodsSelectors } from './shipping-methods/selectors';
 import { PluginSelectors } from './plugins/selectors';
 import { OnboardingSelectors } from './onboarding/selectors';
@@ -202,6 +251,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? OnboardingSelectors
 	: T extends typeof PAYMENT_GATEWAYS_STORE_NAME
 	? PaymentSelectors
+	: T extends typeof PAYMENT_SETTINGS_STORE_NAME
+	? PaymentSettingsSelectors
 	: T extends typeof SHIPPING_METHODS_STORE_NAME
 	? ShippingMethodsSelectors
 	: T extends typeof USER_STORE_NAME
@@ -248,10 +299,10 @@ export interface WCDataSelector {
 
 // Other exports
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
-export { CustomActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';
 export { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
 export { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';
+export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductVariationsActions } from './product-variations/types';
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
 export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';

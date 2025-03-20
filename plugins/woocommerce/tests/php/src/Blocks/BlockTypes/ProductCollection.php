@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use WC_Helper_Product;
 use WC_Tax;
 use WP_Query;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Tests for the ProductCollection block type
@@ -40,9 +41,9 @@ class ProductCollection extends \WP_UnitTestCase {
 					'isProductCollectionBlock' => true,
 					'woocommerceAttributes'    => array(),
 					'woocommerceStockStatus'   => array(
-						'instock',
-						'outofstock',
-						'onbackorder',
+						ProductStockStatus::IN_STOCK,
+						ProductStockStatus::OUT_OF_STOCK,
+						ProductStockStatus::ON_BACKORDER,
 					),
 				),
 			),
@@ -152,15 +153,15 @@ class ProductCollection extends \WP_UnitTestCase {
 	public function test_merging_stock_status_queries() {
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
-			'outofstock',
-			'onbackorder',
+			ProductStockStatus::OUT_OF_STOCK,
+			ProductStockStatus::ON_BACKORDER,
 		);
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
-				'value'   => array( 'outofstock', 'onbackorder' ),
+				'value'   => array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
 				'compare' => 'IN',
 				'key'     => '_stock_status',
 			),
@@ -175,9 +176,9 @@ class ProductCollection extends \WP_UnitTestCase {
 	public function test_merging_default_stock_queries() {
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
-			'instock',
-			'outofstock',
-			'onbackorder',
+			ProductStockStatus::IN_STOCK,
+			ProductStockStatus::OUT_OF_STOCK,
+			ProductStockStatus::ON_BACKORDER,
 		);
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -187,8 +188,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		// Test with hide out of stock items option enabled.
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
-			'instock',
-			'onbackorder',
+			ProductStockStatus::IN_STOCK,
+			ProductStockStatus::ON_BACKORDER,
 		);
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -281,8 +282,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		$parsed_block                              = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'rating';
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
-			'instock',
-			'outofstock',
+			ProductStockStatus::IN_STOCK,
+			ProductStockStatus::OUT_OF_STOCK,
 		);
 		$parsed_block['attrs']['query']['woocommerceAttributes']  = array(
 			array(
@@ -303,7 +304,7 @@ class ProductCollection extends \WP_UnitTestCase {
 			array(
 				'compare' => 'IN',
 				'key'     => '_stock_status',
-				'value'   => array( 'instock', 'outofstock' ),
+				'value'   => array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK ),
 			),
 			$merged_query['meta_query']
 		);
@@ -402,7 +403,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	 * Test merging filter by stock status queries.
 	 */
 	public function test_merging_filter_by_stock_status_queries() {
-		set_query_var( 'filter_stock_status', 'instock' );
+		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
 		$merged_query = $this->initialize_merged_query();
 
@@ -410,7 +411,7 @@ class ProductCollection extends \WP_UnitTestCase {
 			array(
 				'operator' => 'IN',
 				'key'      => '_stock_status',
-				'value'    => array( 'instock' ),
+				'value'    => array( ProductStockStatus::IN_STOCK ),
 			),
 			$merged_query['meta_query']
 		);
@@ -541,7 +542,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	public function test_merging_multiple_filter_queries() {
 		set_query_var( 'max_price', 100 );
 		set_query_var( 'min_price', 20 );
-		set_query_var( 'filter_stock_status', 'instock' );
+		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
 		$merged_query = $this->initialize_merged_query();
 
@@ -549,7 +550,7 @@ class ProductCollection extends \WP_UnitTestCase {
 			array(
 				'operator' => 'IN',
 				'key'      => '_stock_status',
-				'value'    => array( 'instock' ),
+				'value'    => array( ProductStockStatus::IN_STOCK ),
 			),
 			$merged_query['meta_query']
 		);
@@ -680,7 +681,7 @@ class ProductCollection extends \WP_UnitTestCase {
 					'termId'   => 1,
 				),
 			),
-			'woocommerceStockStatus' => array( 'instock', 'outofstock' ),
+			'woocommerceStockStatus' => array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK ),
 			'timeFrame'              => array(
 				'operator' => 'in',
 				'value'    => $time_frame_date,
@@ -698,7 +699,7 @@ class ProductCollection extends \WP_UnitTestCase {
 		$this->assertContainsEquals(
 			array(
 				'key'     => '_stock_status',
-				'value'   => array( 'instock', 'outofstock' ),
+				'value'   => array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK ),
 				'compare' => 'IN',
 			),
 			$updated_query['meta_query'],
@@ -1209,6 +1210,37 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the cross-sells collection handler works as expected.
+	 */
+	public function test_collection_cross_sells() {
+		$expected_product_ids = array( 2, 3, 4 );
+		$test_product         = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_cross_sell_ids( $expected_product_ids );
+		$test_product->save();
+
+		// Frontend.
+		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/cross-sells';
+		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
+		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
+
+		// Editor.
+		$request = $this->build_request(
+			array( 'productReference' => $test_product->get_id() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
+			)
+		);
+		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
+	}
+
+	/**
 	 * Test the add_price_sorting_posts_clauses method.
 	 */
 	public function test_add_price_sorting_posts_clauses() {
@@ -1246,5 +1278,84 @@ class ProductCollection extends \WP_UnitTestCase {
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales DESC', $query->request );
+	}
+
+	/**
+	 * Test the menu_order sorting functionality.
+	 */
+	public function test_menu_order_sorting() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
+		$parsed_block['attrs']['query']['order']   = 'asc';
+		$merged_query                              = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals( 'menu_order', $merged_query['orderby'] );
+		$this->assertEquals( 'ASC', $merged_query['order'] );
+	}
+
+	/**
+	 * Test the random sorting functionality.
+	 */
+	public function test_random_sorting() {
+		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['orderBy'] = 'random';
+		$merged_query                              = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals( 'rand', $merged_query['orderby'] );
+	}
+
+	/**
+	 * Tests that the hand-picked collection handler works with empty product selection.
+	 */
+	public function test_collection_hand_picked_empty() {
+		// Frontend.
+		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/hand-picked';
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array();
+		$result_frontend = $this->initialize_merged_query( $parsed_block );
+
+		// Editor.
+		$request = $this->build_request(
+			array( 'woocommerceHandPickedProducts' => array() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/hand-picked',
+			)
+		);
+		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertEquals( array( -1 ), $result_frontend['post__in'] );
+		$this->assertEquals( array( -1 ), $result_editor['post__in'] );
+	}
+
+	/**
+	 * Tests that the hand-picked collection handler preserves product order.
+	 */
+	public function test_collection_hand_picked_order() {
+		$product_ids = array( 4, 2, 7, 1 );
+
+		// Frontend.
+		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/hand-picked';
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $product_ids;
+		$result_frontend = $this->initialize_merged_query( $parsed_block );
+
+		// Editor.
+		$request = $this->build_request(
+			array( 'woocommerceHandPickedProducts' => $product_ids )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/hand-picked',
+			)
+		);
+		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		// Order should be preserved exactly as specified.
+		$this->assertEquals( $product_ids, $result_frontend['post__in'] );
+		$this->assertEquals( $product_ids, $result_editor['post__in'] );
 	}
 }

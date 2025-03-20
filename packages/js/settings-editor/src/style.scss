@@ -1,0 +1,88 @@
+@import "~@wordpress/dataviews/build-style/style.css";
+
+.woocommerce-settings-header {
+	&.edit-site-page-header.woocommerce-settings-header--has-tabs {
+		border-bottom: none;
+	}
+}
+
+.woocommerce-settings-section-tabs {
+	.components-tab-panel__tabs {
+		border-bottom: 1px solid #f0f0f0;
+		padding: 0 32px;
+		z-index: 1;
+	}
+}
+
+#wc-settings-page .edit-site-layout__area {
+	overflow: scroll;
+}
+
+.components-tab-panel__tabs {
+	position: sticky;
+	top: 72px; // For now
+	background-color: #fff;
+}
+
+.woocommerce-settings-content {
+	padding-inline: 48px;
+	display: flex;
+	flex-direction: column;
+}
+
+.woocommerce-settings-group {
+	display: flex;
+	gap: 48px;
+
+	.dataforms-layouts-regular__header:not(:first-child) {
+		margin-top: 40px;
+	}
+
+	@media (max-width: 960px) {
+		flex-direction: column;
+	}
+}
+
+.dataforms-layouts-regular__field:has(> .woocommerce-settings-group) {
+	padding-block: 48px;
+
+	&:not(:last-child) {
+		border-bottom: 1px solid #f0f0f0;
+	}
+}
+
+.woocommerce-settings-group-title {
+	flex: 1;
+	max-width: 400px;
+}
+
+.woocommerce-settings-group-content {
+	flex: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 48px;
+}
+
+.woocommerce-settings-content-footer {
+	display: flex;
+	justify-content: flex-end;
+	padding: 48px;
+}
+
+#wc-settings-page {
+	.components-input-control__label {
+		white-space: normal;
+	}
+
+	.components-snackbar-list {
+		bottom: 24px;
+		left: 308px;
+	}
+}
+
+.woocommerce-settings-color-picker {
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+	margin: 8px 0;
+}

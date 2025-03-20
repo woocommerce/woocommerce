@@ -11,6 +11,7 @@ export default () => (
 		data-name="Layer 1"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 38 24"
+		style={ { background: '#B2FCE4' } }
 	>
 		<path
 			fill="#B2FCE4"

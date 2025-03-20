@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 /**
@@ -525,7 +526,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		// New order should be created using shop currency.
 		$order = wc_create_order(
 			array(
-				'status'      => 'pending',
+				'status'      => OrderStatus::PENDING,
 				'customer_id' => 1,
 				'created_via' => 'unit tests',
 				'cart_hash'   => '',

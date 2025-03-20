@@ -36,11 +36,13 @@ export const trackView = async ( taskId: string, variant?: string ) => {
 
 type WooOnboardingTaskProps = {
 	id: string;
+	children: React.ComponentProps< typeof Fill >[ 'children' ];
 	variant?: string;
 };
 
-type WooOnboardingTaskSlotProps = Slot.Props & {
+type WooOnboardingTaskSlotProps = {
 	id: string;
+	fillProps: React.ComponentProps< typeof Slot >[ 'fillProps' ];
 };
 
 /**
@@ -53,13 +55,11 @@ type WooOnboardingTaskSlotProps = Slot.Props & {
  * @param {Object} props.children  React component children
  * @param {string} props.id        Task id.
  */
-const WooOnboardingTask: React.FC< WooOnboardingTaskProps > & {
-	Slot: React.VFC< WooOnboardingTaskSlotProps >;
-} = ( { id, ...props } ) => {
+const WooOnboardingTask = ( { id, ...props }: WooOnboardingTaskProps ) => {
 	return <Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />;
 };
 
-WooOnboardingTask.Slot = ( { id, fillProps } ) => {
+WooOnboardingTask.Slot = ( { id, fillProps }: WooOnboardingTaskSlotProps ) => {
 	// The Slot is a React component and this hook works as expected.
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	useEffect( () => {

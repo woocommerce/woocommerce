@@ -6,6 +6,10 @@
 namespace Automattic\WooCommerce\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use WC_Gateway_BACS;
+use WC_Gateway_Cheque;
+use WC_Gateway_COD;
+use WC_Gateway_Paypal;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -294,9 +298,9 @@ class PageController {
 		$tabs_with_sections = apply_filters(
 			'woocommerce_navigation_page_tab_sections',
 			array(
-				'products'          => array( '', 'inventory', 'downloadable' ),
-				'shipping'          => array( '', 'options', 'classes' ),
-				'checkout'          => array( 'bacs', 'cheque', 'cod', 'paypal' ),
+				'products'          => array( '', 'inventory', 'downloadable', 'download_urls', 'advanced' ),
+				'shipping'          => array( '', 'options', 'classes', 'pickup_location' ),
+				'checkout'          => array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Paypal::ID ),
 				'email'             => $wc_email_ids,
 				'advanced'          => array(
 					'',
@@ -304,6 +308,8 @@ class PageController {
 					'webhooks',
 					'legacy_api',
 					'woocommerce_com',
+					'features',
+					'blueprint',
 				),
 				'browse-extensions' => array( 'helper' ),
 			)
@@ -324,7 +330,7 @@ class PageController {
 					$section = wc_clean( wp_unslash( $_GET['section'] ) );
 					if (
 						isset( $tabs_with_sections[ $tab ] ) &&
-						in_array( $section, array_keys( $tabs_with_sections[ $tab ] ) )
+						in_array( $section, array_values( $tabs_with_sections[ $tab ] ), true )
 					) {
 						$screen_pieces[] = $section;
 					}
@@ -564,6 +570,15 @@ class PageController {
 	public static function is_admin_page() {
 		// phpcs:disable WordPress.Security.NonceVerification
 		return isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
+		// phpcs:enable WordPress.Security.NonceVerification
+	}
+
+	/**
+	 * Returns true if we are on a settings page.
+	 */
+	public static function is_settings_page() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'];
 		// phpcs:enable WordPress.Security.NonceVerification
 	}
 

@@ -17,7 +17,7 @@ type WooPaymentGatewayConfigureProps = {
  * @param {string} props.id gateway id.
  */
 export const WooPaymentGatewayConfigure: React.FC< WooPaymentGatewayConfigureProps > & {
-	Slot: React.VFC< Slot.Props & { id: string } >;
+	Slot: React.VFC< React.ComponentProps< typeof Slot > & { id: string } >;
 } = ( { id, ...props } ) => (
 	<Fill name={ 'woocommerce_payment_gateway_configure_' + id } { ...props } />
 );

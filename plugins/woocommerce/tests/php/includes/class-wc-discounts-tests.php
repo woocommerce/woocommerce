@@ -5,7 +5,9 @@
  * @package WooCommerce\Tests.
  */
 
- /**
+use Automattic\WooCommerce\Enums\OrderStatus;
+
+/**
   * Class WC_Discounts_Tests.
   */
 class WC_Discounts_Tests extends WC_Unit_Test_Case {
@@ -62,7 +64,7 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$data_store = WC_Data_Store::load( 'coupon' );
 		$order      = wc_create_order(
 			array(
-				'status'      => 'pending',
+				'status'      => OrderStatus::PENDING,
 				'customer_id' => $customer->get_id(),
 			)
 		);

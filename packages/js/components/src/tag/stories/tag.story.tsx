@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -26,6 +25,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/Tag',
+	title: 'Components/Tag',
 	component: Tag,
 };

@@ -103,6 +103,10 @@ class SingleProduct extends AbstractBlock {
 			$result[] = $block['blockName'];
 		}
 
+		if ( 'woocommerce/product-template' === $block['blockName'] || 'core/post-template' === $block['blockName'] ) {
+			return $result;
+		}
+
 		if ( isset( $block['innerBlocks'] ) ) {
 			foreach ( $block['innerBlocks'] as $inner_block ) {
 				$this->extract_single_product_inner_block_names( $inner_block, $result );
@@ -123,9 +127,10 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
 		if ( $this->single_product_inner_blocks_names ) {
-			$block_name = array_pop( $this->single_product_inner_blocks_names );
+			$block_name = end( $this->single_product_inner_blocks_names );
 
 			if ( $block_name === $block['blockName'] ) {
+				array_pop( $this->single_product_inner_blocks_names );
 				/**
 				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
 				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.

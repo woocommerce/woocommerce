@@ -16,6 +16,7 @@ import {
 	Transition,
 	CSSTransition,
 	TransitionGroup,
+	TransitionStatus,
 } from 'react-transition-group';
 import classnames from 'classnames';
 
@@ -92,7 +93,7 @@ function getUpdatedShownChildren(
 }
 
 const getTransitionStyle = (
-	state: 'entering' | 'entered' | 'exiting' | 'exited',
+	state: TransitionStatus,
 	isCollapsed: boolean,
 	elementRef: HTMLDivElement | null
 ) => {
@@ -262,9 +263,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 					mountOnEnter={ true }
 					unmountOnExit={ false }
 				>
-					{ (
-						state: 'entering' | 'entered' | 'exiting' | 'exited'
-					) => {
+					{ ( state ) => {
 						const transitionStyles = getTransitionStyle(
 							state,
 							isCollapsed,

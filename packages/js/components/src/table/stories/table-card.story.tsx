@@ -3,7 +3,7 @@
  */
 import { TableCard } from '@woocommerce/components';
 import { useState, createElement } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -84,10 +84,51 @@ const TableCardWithActionsExample = () => {
 	);
 };
 
+const TableCardWithTablePrefaceExample = () => {
+	const [ { query }, setState ] = useState( {
+		query: {
+			paged: 1,
+		},
+	} );
+
+	const [ showNotice, setShowNotice ] = useState( true );
+
+	return (
+		<TableCard
+			title="Revenue last week"
+			rows={ rows }
+			headers={ headers }
+			tablePreface={
+				showNotice && (
+					<Notice
+						status="info"
+						isDismissible={ true }
+						onRemove={ () => setShowNotice( false ) }
+					>
+						This is an important notice about the table
+					</Notice>
+				)
+			}
+			onQueryChange={ ( param ) => ( value ) =>
+				setState( {
+					// @ts-expect-error: ignore for storybook
+					query: {
+						[ param ]: value,
+					},
+				} ) }
+			query={ query }
+			rowsPerPage={ 7 }
+			totalRows={ 10 }
+			summary={ summary }
+		/>
+	);
+};
+
 export const Basic = () => <TableCardExample />;
 export const Actions = () => <TableCardWithActionsExample />;
+export const TablePreface = () => <TableCardWithTablePrefaceExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/TableCard',
+	title: 'Components/TableCard',
 	component: TableCard,
 };

@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				 *
 				 * @since 3.4.0
 				 * @param array|null $attribute_taxonomy Attribute taxonomy object.
-				 * @param number $i Attribute index.
+				 * @param int $i Attribute index.
 				 * @param WC_Product_Attribute $attribute Attribute object.
 				 */
 				do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 *
 	 * @since 3.4.0
 	 * @param WC_Product_Attribute $attribute Attribute object.
-	 * @param number $i Attribute index.
+	 * @param int $i Attribute index.
 	 */
 	do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i );
 	?>

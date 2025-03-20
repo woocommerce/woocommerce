@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * Local Pickup Shipping Method.
  *
@@ -88,18 +90,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * @return string
 	 */
 	public function sanitize_cost( $value ) {
-		$value = is_null( $value ) ? '' : $value;
-		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
-		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
-
-		$test_value = str_replace( wc_get_price_decimal_separator(), '.', $value );
-		$test_value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $test_value );
-
-		if ( $test_value && ! is_numeric( $test_value ) ) {
-			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
-		}
-
-		return $value;
+		return \Automattic\WooCommerce\Utilities\NumberUtil::sanitize_cost_in_current_locale( $value );
 	}
 
 	/**
@@ -119,10 +110,10 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'title'   => __( 'Tax status', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
-				'default' => 'taxable',
+				'default' => ProductTaxStatus::TAXABLE,
 				'options' => array(
-					'taxable' => __( 'Taxable', 'woocommerce' ),
-					'none'    => _x( 'None', 'Tax status', 'woocommerce' ),
+					ProductTaxStatus::TAXABLE => __( 'Taxable', 'woocommerce' ),
+					ProductTaxStatus::NONE    => _x( 'None', 'Tax status', 'woocommerce' ),
 				),
 			),
 			'cost'       => array(

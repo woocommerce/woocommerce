@@ -20,7 +20,7 @@ class PrepareUrl implements TransformerInterface {
 	 *
 	 * @return mixed|null
 	 */
-	public function transform( $value, stdClass $arguments = null, $default_value = null ) {
+	public function transform( $value, ?stdClass $arguments = null, $default_value = null ) {
 		if ( ! is_string( $value ) ) {
 			return $default_value;
 		}
@@ -49,7 +49,7 @@ class PrepareUrl implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function validate( stdClass $arguments = null ) {
+	public function validate( ?stdClass $arguments = null ) {
 		return true;
 	}
 }

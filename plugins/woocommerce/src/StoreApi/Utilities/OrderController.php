@@ -6,7 +6,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
-
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 /**
  * OrderController class.
  * Helper class which creates and syncs orders with the cart.
@@ -113,6 +113,7 @@ class OrderController {
 		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->update_meta_data( 'is_vat_exempt', wc()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no' );
 		$order->calculate_totals();
+		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
 	}
 
 	/**
@@ -379,11 +380,13 @@ class OrderController {
 	protected function validate_address_fields( \WC_Order $order, $address_type, \WP_Error $errors ) {
 		$all_locales    = wc()->countries->get_country_locale();
 		$address        = $order->get_address( $address_type );
-		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : array();
+		$current_locale = $all_locales[ $address['country'] ] ?? [];
 
 		foreach ( $all_locales['default'] as $key => $value ) {
-			$default_value          = empty( $current_locale[ $key ] ) ? [] : $current_locale[ $key ];
-			$current_locale[ $key ] = wp_parse_args( $default_value, $value );
+			// If $current_locale[ $key ] is not empty, merge it with locale default, otherwise just use default locale.
+			$current_locale[ $key ] = ! empty( $current_locale[ $key ] )
+				? wp_parse_args( $current_locale[ $key ], $value )
+				: $value;
 		}
 
 		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $order, $address_type );
@@ -391,7 +394,17 @@ class OrderController {
 		$address = array_merge( $address, $additional_fields );
 
 		foreach ( $current_locale as $address_field_key => $address_field ) {
-			if ( empty( $address[ $address_field_key ] ) && $address_field['required'] ) {
+			// Skip validation if field is not required.
+			if ( true !== $address_field['required'] ) {
+				continue;
+			}
+
+			// Check if field is not set, is an empty string, or is an empty array.
+			$is_empty = ! isset( $address[ $address_field_key ] ) ||
+				( is_string( $address[ $address_field_key ] ) && '' === trim( $address[ $address_field_key ] ) ) ||
+				( is_array( $address[ $address_field_key ] ) && 0 === count( $address[ $address_field_key ] ) );
+
+			if ( $is_empty ) {
 				/* translators: %s Field label. */
 				$errors->add( $address_type, sprintf( __( '%s is required', 'woocommerce' ), $address_field['label'] ), $address_field_key );
 			}
@@ -417,8 +430,11 @@ class OrderController {
 	 */
 	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, \WC_Order $order ) {
 		$restrictions = $coupon->get_email_restrictions();
+		// Email is forced lowercase like in validate_coupon_allowed_emails.
+		$billing_email = strtolower( $order->get_billing_email() );
 
-		if ( ! empty( $restrictions ) && $order->get_billing_email() && ! DiscountsUtil::is_coupon_emails_allowed( array( $order->get_billing_email() ), $restrictions ) ) {
+		if ( ! empty( $restrictions ) && $billing_email && ! DiscountsUtil::is_coupon_emails_allowed( array( $billing_email ), $restrictions ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
 		}
 	}
@@ -687,25 +703,25 @@ class OrderController {
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
-		if ( $order->get_meta_data( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
+		if ( $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
 			$order->remove_order_items( 'shipping' );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 		}
 
-		if ( $order->get_meta_data( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
+		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
 			$order->remove_order_items( 'coupon' );
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
 			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta_data( '_fees_hash' ) !== $cart_hashes['fees'] ) {
+		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
 			$order->remove_order_items( 'fee' );
 			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta_data( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
+		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
 			$order->remove_order_items( 'tax' );
 			wc()->checkout->create_order_tax_lines( $order, $cart );

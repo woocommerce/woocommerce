@@ -1,0 +1,91 @@
+.wc-block-checkout__shipping-method .wc-block-checkout__shipping-method-container {
+	width: 100%;
+	display: flex;
+	gap: $gap;
+	justify-content: space-between;
+}
+
+// This nested selector is solely for specificity to override a quite specific style set in the button component.
+// We have avoided nesting all the styles in case specificity changes introduce regressions elsewhere.
+.edit-post-visual-editor {
+	.wc-block-checkout__shipping-method-container {
+		.wc-block-checkout__shipping-method-option {
+			min-height: 80px;
+		}
+	}
+}
+
+.edit-post-visual-editor .wc-block-checkout__shipping-method-option,
+.wc-block-checkout__shipping-method-option {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	flex-wrap: wrap;
+	align-items: center;
+	height: 100%;
+	min-height: 80px;
+	box-sizing: border-box;
+	flex-basis: 0;
+	gap: 4px;
+	padding: 16px 12px;
+	background-color: transparent;
+	outline: 1px solid $universal-border-light;
+	border-radius: $universal-border-radius;
+	cursor: pointer;
+	position: relative; // Add this for pseudo-element positioning
+
+	.has-dark-controls & {
+		outline: 1px solid $input-border-dark;
+	}
+
+	&::after {
+		content: "";
+		position: absolute;
+		top: -3px;
+		right: -3px;
+		bottom: -3px;
+		left: -3px;
+		border-radius: calc(#{$universal-border-radius} + 2px);
+		pointer-events: none;
+	}
+
+	&:focus-within {
+		outline: 1.5px solid currentColor;
+		&::after {
+			outline: 1px solid currentColor;
+		}
+	}
+
+	&:hover {
+		background-color: $universal-background;
+	}
+
+	&.wc-block-checkout__shipping-method-option--selected {
+		outline: 1.5px solid currentColor;
+		background-color: $universal-background;
+		&:focus-within::after {
+			outline: 1px solid currentColor;
+		}
+	}
+}
+
+.wc-block-checkout__shipping-method-option-icon {
+	fill: currentColor;
+}
+
+.wc-block-checkout__shipping-method-option-title {
+	@include font-size(regular, 1rem);
+	font-weight: bold;
+}
+
+.wc-block-checkout__shipping-method-option-price {
+	@include font-size(small, 1rem);
+	flex-basis: 100%;
+	text-align: center;
+
+	em {
+		text-transform: uppercase;
+		font-style: inherit;
+	}
+}

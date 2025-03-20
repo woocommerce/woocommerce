@@ -21,10 +21,12 @@ tests/cli/vendor
 /tests/e2e/plugins
 .phpunit.result.cache
 
+# Test translations
+/i18n/languages/woocommerce*
+
 # Packages
 /packages/*
 !/packages/README.md
-!/packages/woocommerce-admin/woocommerce-admin.php
 
 # Language files
 i18n/languages/woocommerce.pot

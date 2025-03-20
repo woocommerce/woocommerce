@@ -1,0 +1,97 @@
+.woocommerce-products-card-list {
+	a {
+		color: #007cba;
+	}
+
+	.woocommerce-list {
+		display: grid;
+		grid-template-columns: auto auto;
+		grid-column-gap: 16px;
+		grid-row-gap: 24px;
+		// Set it to center here since we only have one import option.
+		// We can change it to start when we have more import options.
+		justify-content: center;
+	}
+
+	.woocommerce-list__item {
+		float: left;
+		border-radius: 3px;
+		border: 1.5px solid #dcdcde;
+		text-align: center;
+
+
+		&:hover {
+			background-color: #fff;
+			border: 1.5px solid #007cba;
+			.woocommerce-list__item-title {
+				color: #1e1e1e;
+			}
+		}
+
+		.woocommerce-list__item-inner {
+			display: flex;
+			height: 226px;
+			width: 263px;
+			padding: 40px 25px;
+			flex-direction: column;
+			align-items: center;
+			gap: 16px;
+		}
+
+		&:not(.transitions-disabled) {
+			&.woocommerce-list__item-enter {
+				transform: none;
+				transition: none;
+			}
+
+			&.woocommerce-list__item-enter-active {
+				transform: none;
+				transition: none;
+			}
+
+			&.woocommerce-list__item-exit-active {
+				display: none;
+			}
+		}
+
+		> .woocommerce-list__item-inner {
+			box-shadow: none;
+		}
+	}
+
+	.woocommerce-list__item-before {
+		margin-right: 0;
+		background: #f0f6fc;
+		padding: 8px;
+		border-radius: 50%;
+	}
+
+
+	.woocommerce-list__item-text {
+		display: flex;
+		gap: 16px;
+		flex-direction: column;
+
+		.woocommerce-list__item-title {
+			color: $gray-900;
+			line-height: 16px;
+			font-weight: 600;
+			text-transform: uppercase;
+			text-align: center;
+			font-size: 13px;
+			font-weight: 600;
+			line-height: 16px; /* 123.077% */
+		}
+
+		.woocommerce-list__item-content {
+			margin: 0;
+			color: $gray-700;
+			line-height: 16px;
+			font-weight: 400;
+			text-align: center;
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 16px; /* 123.077% */
+		}
+	}
+}

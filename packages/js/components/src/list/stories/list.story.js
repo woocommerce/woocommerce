@@ -39,7 +39,7 @@ function logItemClick( event ) {
 }
 
 export default {
-	title: 'WooCommerce Admin/components/List',
+	title: 'Components/List',
 	component: List,
 	decorators: [
 		( storyFn, context ) => withConsole()( storyFn )( context ),

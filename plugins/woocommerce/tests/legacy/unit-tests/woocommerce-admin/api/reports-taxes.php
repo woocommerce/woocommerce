@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * WC_Admin_Tests_API_Reports_Taxes
  */
@@ -98,7 +100,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->add_item( $tax_item );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
@@ -322,7 +324,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->add_item( $tax_item );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
@@ -335,7 +337,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order_ca->set_shipping_state( 'ON' );
 		$order_ca->set_shipping_country( 'CA' );
 		$order_ca->add_item( $tax_item_ca );
-		$order_ca->set_status( 'completed' );
+		$order_ca->set_status( OrderStatus::COMPLETED );
 		$order_ca->set_total( 100 ); // $25 x 4.
 		$order_ca->save();
 		$order_ca->calculate_totals( true );
@@ -349,7 +351,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order_es->set_shipping_state( 'B' );
 		$order_es->set_shipping_country( 'ES' );
 		$order_es->add_item( $tax_item_es );
-		$order_es->set_status( 'completed' );
+		$order_es->set_status( OrderStatus::COMPLETED );
 		$order_es->set_total( 100 ); // $25 x 4.
 		$order_es->save();
 		$order_es->calculate_totals( true );
@@ -363,7 +365,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order_es_2->set_shipping_state( 'B' );
 		$order_es_2->set_shipping_country( 'ES' );
 		$order_es_2->add_item( $tax_item_es_2 );
-		$order_es_2->set_status( 'completed' );
+		$order_es_2->set_status( OrderStatus::COMPLETED );
 		$order_es_2->set_total( 100 ); // $25 x 4.
 		$order_es_2->save();
 		$order_es_2->calculate_totals( true );

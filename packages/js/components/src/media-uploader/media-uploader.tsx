@@ -23,7 +23,7 @@ export type MediaUploaderErrorCallback = ( error: ErrorType ) => void;
 type MediaUploaderProps = {
 	allowedMediaTypes?: string[];
 	buttonText?: string;
-	buttonProps?: Button.Props;
+	buttonProps?: React.ComponentProps< typeof Button >;
 	hasDropZone?: boolean;
 	icon?: JSX.Element;
 	label?: string | JSX.Element;

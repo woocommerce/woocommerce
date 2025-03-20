@@ -14,7 +14,7 @@ If you have any questions about testing please reach out to the developer commun
 
 ## API Testing
 
-`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.
+`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api-core-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.
 
 ## Calls for Testing
 

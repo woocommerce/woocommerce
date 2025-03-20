@@ -244,3 +244,8 @@
 		padding: 0 6px;
 	}
 }
+
+// Overrides woocommerce-admin-page globals
+.woocommerce-admin-page .woocommerce-filters-advanced__add-dropdown {
+	text-wrap: nowrap;
+}

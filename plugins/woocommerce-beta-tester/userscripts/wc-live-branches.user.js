@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WooCommerce Live Branches
 // @namespace    https://wordpress.com/
-// @version      1.1
+// @version      1.1.1
 // @description  Adds links to PRs pointing to Jurassic Ninja sites for live-testing a changeset
 // @grant        GM_xmlhttpRequest
 // @connect      jurassic.ninja
@@ -107,11 +107,13 @@
 			// TODO: Fetch the list of feature flags dynamically from the API or something.
 			const featureFlags = [
 				'async-product-editor-category-field',
+				'coming-soon-newsletter-template',
 				'launch-your-store',
 				'minified-js',
 				'product-custom-fields',
 				'reactify-classic-payments-settings',
 				'settings',
+				'experimental-blocks',
 			];
 
 			const contents = `

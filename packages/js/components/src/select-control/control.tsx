@@ -29,7 +29,7 @@ type Props = {
 	/**
 	 * Help text to be appended beneath the input.
 	 */
-	help?: string | JSX.Element;
+	help?: React.ReactNode;
 	/**
 	 * Render tags inside input, otherwise render below input.
 	 */
@@ -305,7 +305,11 @@ class Control extends Component< Props, State > {
 			selected,
 		} = this.props;
 		const selectedValue =
-			isArray( selected ) && selected.length ? selected[ 0 ].label : '';
+			isArray( selected ) &&
+			selected.length &&
+			typeof selected[ 0 ].label === 'string'
+				? selected[ 0 ].label
+				: '';
 
 		// Show the selected value for simple select dropdowns.
 		if ( ! multiple && ! isFocused && ! inlineTags ) {

@@ -42,3 +42,33 @@ index 2265f933ceec19f65ca6776c24c3f88b368d713f..e9e10980bfd1b584ab0a037c3b72edae
 +
 +export const { lock, unlock } = optInToUnstableAPIs();
  //# sourceMappingURL=lock-unlock.js.map
+diff --git a/build-module/store/actions.js b/build-module/store/actions.js
+index a2f9fcd42f..c6bbf6a8c7 100644
+--- a/build-module/store/actions.js
++++ b/build-module/store/actions.js
+@@ -240,7 +240,24 @@ export const setPage = page => async ({
+     page.path = getPathAndQueryString(entity?.link);
+   }
+ 
+-  const template = await registry.resolveSelect(coreStore).__experimentalGetTemplateForLink(page.path);
++  let fetchedTemplate;
++  try {
++    // This is NOT calling a REST endpoint but rather ends up with a response from
++    // an Ajax function which has a different shape from a WP_REST_Response.
++    fetchedTemplate = await apiFetch( {
++      url: addQueryArgs( page.path, {
++        '_wp-find-template': true,
++      } ),
++    } ).then( ( { data } ) => data );
++  } catch ( e ) {
++    // For non-FSE themes, it is possible that this request returns an error.
++  }
++
++  const template = await registry.resolveSelect(coreStore).getEntityRecord(
++    'postType',
++    'wp_template',
++    fetchedTemplate.id
++  );
+ 
+   if (!template) {
+     return;

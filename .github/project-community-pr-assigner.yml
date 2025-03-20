@@ -1,34 +1,34 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 "*":
-  - team: vortex
+  - team: flux
 
 ".github/**/*":
-  - team: vortex
+  - team: flux
 
 "bin/*":
-  - team: vortex
+  - team: flux
 
 "docs/**/*":
   - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - team: vortex
+  - team: solaris
 
 "packages/js/e2e-utils/**/*":
-  - team: vortex
+  - team: solaris
 
 "packages/js/e2e-environment/**/*":
-  - team: vortex
+  - team: solaris
 
 "packages/js/api-core-tests/**/*":
-  - team: vortex
+  - team: solaris
 
 "packages/js/e2e-core-tests/**/*":
-  - team: vortex
+  - team: solaris
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: vortex
+  - team: solaris
 
 "packages/js/components/**/*":
   - team: woo-fse
@@ -38,7 +38,7 @@
   - team: woo-fse
 
 "packages/js/currency/**/*":
-  - team: woo-fse
+  - team: fractal
 
 "packages/js/customer-effort-score/**/*":
   - team: woo-fse
@@ -52,10 +52,10 @@
   - team: woo-fse
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/eslint-plugin/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/experimental/**/*":
   - team: woo-fse
@@ -106,22 +106,22 @@
   - team: rubik
   - team: woo-fse
 
-"plugins/woocommerce-admin/**/*":
+"plugins/woocommerce/client/admin/**/*":
   - team: woo-fse
   - team: ghidorah
 
-"plugins/woocommerce-blocks/**/*":
+"plugins/woocommerce/client/blocks/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: vortex
+  - team: ghidorah
 
 "tools/**/*":
-  - team: vortex
+  - team: flux
 
 '**/composer.json':
-  - team: vortex
+  - team: flux
 
 '**/package.json':
-  - team: vortex
+  - team: flux

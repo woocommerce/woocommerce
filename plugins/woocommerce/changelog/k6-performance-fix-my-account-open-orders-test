@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix k6 performance test that checks for incorrect title when viewing order page

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import React, { DragEvent, useEffect } from 'react';
+import { DragEvent, useEffect } from 'react';
 import classnames from 'classnames';
 import { createElement, useRef, useContext } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';

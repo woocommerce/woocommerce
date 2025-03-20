@@ -26,7 +26,6 @@ export function SingleUpdateMenu( {
 	return (
 		<DropdownMenu
 			popoverProps={ {
-				// @ts-expect-error missing TS.
 				placement: 'left-start',
 			} }
 			icon={ moreVertical }

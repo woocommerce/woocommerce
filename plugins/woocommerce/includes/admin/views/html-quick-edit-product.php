@@ -5,6 +5,10 @@
  * @package WooCommerce\Admin\Notices
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 defined( 'ABSPATH' ) || exit;
 ?>
 
@@ -44,6 +48,18 @@ defined( 'ABSPATH' ) || exit;
 			<br class="clear" />
 		</div>
 
+		<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+			<div class="cost_fields">
+				<label>
+					<span class="title"><?php esc_html_e( 'Cost', 'woocommerce' ); ?></span>
+					<span class="input-text-wrap">
+						<input type="text" name="_cogs_value" class="text wc_input_price cogs_value" placeholder="<?php esc_attr_e( 'Cost value', 'woocommerce' ); ?>" value="">
+					</span>
+				</label>
+				<br class="clear" />
+			</div>
+		<?php endif; ?>
+
 		<?php if ( wc_tax_enabled() ) : ?>
 			<label class="alignleft">
 				<span class="title"><?php esc_html_e( 'Tax status', 'woocommerce' ); ?></span>
@@ -51,9 +67,9 @@ defined( 'ABSPATH' ) || exit;
 					<select class="tax_status" name="_tax_status">
 						<?php
 						$options = array(
-							'taxable'  => __( 'Taxable', 'woocommerce' ),
-							'shipping' => __( 'Shipping only', 'woocommerce' ),
-							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
+							ProductTaxStatus::TAXABLE  => __( 'Taxable', 'woocommerce' ),
+							ProductTaxStatus::SHIPPING => __( 'Shipping only', 'woocommerce' ),
+							ProductTaxStatus::NONE     => _x( 'None', 'Tax status', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
@@ -142,10 +158,10 @@ defined( 'ABSPATH' ) || exit;
 						$options = apply_filters(
 							'woocommerce_product_visibility_options',
 							array(
-								'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
-								'catalog' => __( 'Catalog', 'woocommerce' ),
-								'search'  => __( 'Search', 'woocommerce' ),
-								'hidden'  => __( 'Hidden', 'woocommerce' ),
+								CatalogVisibility::VISIBLE => __( 'Catalog &amp; search', 'woocommerce' ),
+								CatalogVisibility::CATALOG => __( 'Catalog', 'woocommerce' ),
+								CatalogVisibility::SEARCH  => __( 'Search', 'woocommerce' ),
+								CatalogVisibility::HIDDEN  => __( 'Hidden', 'woocommerce' ),
 							)
 						);
 						foreach ( $options as $key => $value ) {

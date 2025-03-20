@@ -1,0 +1,55 @@
+.woocommerce-email-editor-styles-panel {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	.components-panel,
+	.components-navigator-provider,
+	.components-navigator-screen {
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.components-navigator-screen {
+		overflow: hidden auto;
+	}
+
+	.components-navigator-button {
+		width: 100%;
+	}
+
+	.woocommerce-email-editor-styles-header {
+		margin-bottom: 0;
+	}
+
+	.woocommerce-email-editor-styles-header-description {
+		padding: 0 16px;
+	}
+
+	h3.edit-site-global-styles-subtitle {
+		margin-bottom: 0;
+	}
+
+	.single-column {
+		grid-column: span 1;
+	}
+
+	.edit-site-global-styles-screen-typography__indicator {
+		border-radius: 3px;
+		height: 2em;
+		line-height: 2;
+		padding: 0;
+		width: 2em;
+	}
+
+	.edit-site-typography-preview {
+		align-items: center;
+		background: #f0f0f0;
+		border-radius: 2px;
+		display: flex;
+		justify-content: center;
+		margin-bottom: 16px;
+		min-height: 100px;
+		overflow: hidden;
+	}
+}

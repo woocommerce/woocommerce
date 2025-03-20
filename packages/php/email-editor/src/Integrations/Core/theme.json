@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "styles": {
+    "blocks": {
+      "core/button": {
+        "variations": {}
+      }
+    },
+    "elements": {
+      "button": {
+        "color": {
+          "background": "#32373c",
+          "text": "#ffffff"
+        },
+        "spacing": {
+          "padding": {
+            "bottom": "0.7em",
+            "left": "1.4em",
+            "right": "1.4em",
+            "top": "0.7em"
+          }
+        }
+      }
+    }
+  }
+}

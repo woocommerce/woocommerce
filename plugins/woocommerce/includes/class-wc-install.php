@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -16,7 +17,6 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 
@@ -26,8 +26,6 @@ defined( 'ABSPATH' ) || exit;
  * WC_Install Class.
  */
 class WC_Install {
-	use AccessiblePrivateMethods;
-
 	/**
 	 * DB updates and callbacks that need to be run per version.
 	 *
@@ -270,6 +268,21 @@ class WC_Install {
 			'wc_update_940_add_phone_to_order_address_fts_index',
 			'wc_update_940_remove_help_panel_highlight_shown',
 		),
+		'9.5.0' => array(
+			'wc_update_950_tracking_option_autoload',
+		),
+		'9.6.1' => array(
+			'wc_update_961_migrate_default_email_base_color',
+		),
+		'9.8.0' => array(
+			'wc_update_980_remove_order_attribution_install_banner_dismissed_option',
+		),
+		'9.9.0' => array(
+			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
+			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
+			'wc_update_990_remove_wc_count_comments_transient',
+			'wc_update_990_remove_email_notes',
+		),
 	);
 
 	/**
@@ -301,6 +314,7 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
@@ -311,16 +325,18 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
-		self::add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
-		self::add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
+		add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
+		add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
 	}
 
 	/**
 	 * Trigger `woocommerce_newly_installed` action for new installations.
 	 *
 	 * @since 8.0.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function newly_installed() {
+	public static function newly_installed() {
 		if ( 'yes' === get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
 			/**
 			 * Run when WooCommerce has been installed for the first time.
@@ -996,14 +1012,29 @@ class WC_Install {
 	}
 
 	/**
-	 * Add the woocommerce_coming_soon option for new shops.
+	 * Add the coming soon options for new shops.
 	 *
-	 * Ensure that the option is set for all shops, even if core profiler is disabled on the host.
+	 * Ensure that the options are set for all shops for performance even if core profiler is disabled on the host.
 	 *
 	 * @since 9.3.0
 	 */
 	public static function add_coming_soon_option() {
-		add_option( 'woocommerce_coming_soon', 'no' );
+		add_option( 'woocommerce_coming_soon', 'yes' );
+		add_option( 'woocommerce_store_pages_only', 'yes' );
+	}
+
+	/**
+	 * Enable email improvements by default for new shops.
+	 *
+	 * @since 9.8.0
+	 */
+	public static function enable_email_improvements() {
+		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
+		update_option( 'woocommerce_email_improvements_default_enabled', 'yes' );
+		update_option( 'woocommerce_email_auto_sync_with_theme', 'yes' );
+		update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
+		update_option( 'woocommerce_email_improvements_last_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
+		update_option( 'woocommerce_email_improvements_enabled_count', 1 );
 	}
 
 	/**
@@ -1075,6 +1106,7 @@ class WC_Install {
 			'wc-admin-set-up-additional-payment-types',
 			'wc-admin-deactivate-plugin',
 			'wc-admin-complete-store-details',
+			'wc-admin-choosing-a-theme',
 		);
 
 		/**
@@ -1180,10 +1212,10 @@ class WC_Install {
 	public static function create_terms() {
 		$taxonomies = array(
 			'product_type'       => array(
-				'simple',
-				'grouped',
-				'variable',
-				'external',
+				ProductType::SIMPLE,
+				ProductType::GROUPED,
+				ProductType::VARIABLE,
+				ProductType::EXTERNAL,
 			),
 			'product_visibility' => array(
 				'exclude-from-search',
@@ -1239,8 +1271,10 @@ class WC_Install {
 	 *
 	 * In multisite setups it could happen that the plugin was installed by an installation process performed in another site.
 	 * In this case we check if the plugin was autoinstalled in such a way, and if so we activate it if the conditions are fulfilled.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function maybe_install_legacy_api_plugin() {
+	public static function maybe_install_legacy_api_plugin() {
 		if ( self::is_new_install() ) {
 			return;
 		}
@@ -1761,7 +1795,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id),
+	PRIMARY KEY  (order_item_id, order_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),
@@ -2582,7 +2616,7 @@ $hpos_table_schema;
 <p>If you are approved, then your refund will be processed, and a credit will automatically be applied to your credit card or original method of payment, within a certain amount of days.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading -->
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Late or missing refunds</h3>
 <!-- /wp:heading -->
 
@@ -2602,7 +2636,7 @@ $hpos_table_schema;
 <p>If you’ve done all of this and you still have not received your refund yet, please contact us at {email address}.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading -->
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Sale items</h3>
 <!-- /wp:heading -->
 

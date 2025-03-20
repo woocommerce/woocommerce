@@ -15,6 +15,8 @@ use Automattic\WooCommerce\Vendor\League\Container\Definition\DefinitionInterfac
 /**
  * This class extends the original League's Container object by adding some functionality
  * that we need for WooCommerce.
+ *
+ * NOTE: This class will be removed in WooCommerce 10.0.
  */
 class ExtendedContainer extends BaseContainer {
 
@@ -65,7 +67,7 @@ class ExtendedContainer extends BaseContainer {
 	 * @return DefinitionInterface The generated definition for the container.
 	 * @throws ContainerException Invalid parameters.
 	 */
-	public function add( string $class_name, $concrete = null, bool $shared = null ) : DefinitionInterface {
+	public function add( string $class_name, $concrete = null, ?bool $shared = null ): DefinitionInterface {
 		if ( ! $this->is_class_allowed( $class_name ) ) {
 			throw new ContainerException( "You cannot add '$class_name', only classes in the {$this->woocommerce_namespace} namespace are allowed." );
 		}
@@ -92,7 +94,7 @@ class ExtendedContainer extends BaseContainer {
 	 * @return DefinitionInterface The modified definition.
 	 * @throws ContainerException Invalid parameters.
 	 */
-	public function replace( string $class_name, $concrete ) : DefinitionInterface {
+	public function replace( string $class_name, $concrete ): DefinitionInterface {
 		if ( ! $this->has( $class_name ) ) {
 			throw new ContainerException( "The container doesn't have '$class_name' registered, please use 'add' instead of 'replace'." );
 		}
@@ -117,7 +119,7 @@ class ExtendedContainer extends BaseContainer {
 	 * @param string $class_name The class name whose definition had been replaced.
 	 * @return bool True if the registration has been reset, false if no replacement had been made for the specified class name.
 	 */
-	public function reset_replacement( string $class_name ) : bool {
+	public function reset_replacement( string $class_name ): bool {
 		if ( ! array_key_exists( $class_name, $this->original_concretes ) ) {
 			return false;
 		}

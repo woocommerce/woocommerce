@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update ProductImage component so it doesn't forces a 1:1 aspect ratio by setting the default 'height' to 'auto'

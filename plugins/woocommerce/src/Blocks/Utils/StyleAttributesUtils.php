@@ -604,13 +604,15 @@ class StyleAttributesUtils {
 	 * @return array
 	 */
 	public static function get_text_align_class_and_style( $attributes ) {
-		if ( isset( $attributes['textAlign'] ) ) {
+		// Check if the text align is set in the attributes manually (legacy) or in the global styles.
+		$text_align = $attributes['textAlign'] ?? $attributes['style']['typography']['textAlign'] ?? null;
+
+		if ( $text_align ) {
 			return array(
-				'class' => 'has-text-align-' . $attributes['textAlign'],
+				'class' => 'has-text-align-' . $text_align,
 				'style' => null,
 			);
 		}
-
 		return self::EMPTY_STYLE;
 	}
 
@@ -699,7 +701,7 @@ class StyleAttributesUtils {
 
 		if ( '' !== $extra_css_classes ) {
 			return array(
-				'class' => $extra_css_classes,
+				'class' => esc_attr( $extra_css_classes ),
 				'style' => null,
 			);
 		}
@@ -758,14 +760,14 @@ class StyleAttributesUtils {
 		$classes_and_styles = array_filter( $classes_and_styles );
 
 		$classes = array_map(
-			function( $item ) {
+			function ( $item ) {
 				return $item['class'];
 			},
 			$classes_and_styles
 		);
 
 		$styles = array_map(
-			function( $item ) {
+			function ( $item ) {
 				return $item['style'];
 			},
 			// Exclude link color styles from parent to avoid conflict with text color.

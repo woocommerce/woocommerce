@@ -2,29 +2,45 @@ name: 'Changelog Auto Add'
 on:
     pull_request_target:
         types: [opened, synchronize, reopened, edited]
+        paths-ignore:
+          - 'docs/**'
+          - '**/changelog/**'
+          - '**/changelog.txt'
+          - '.husky/**'
+          - '.cursor/**'
+          - '.github/**'
+          - '!.github/workflows/changelog-auto-add.yml'
     workflow_dispatch:
         inputs:
             prNumber:
                 description: Pull request number
                 required: true
+concurrency:
+    group: changelog-auto-add-${{ github.event_name }}-${{ github.event.number || inputs.prNumber }}
+    cancel-in-progress: true
 
 jobs:
     add-changelog:
         name: 'Add changelog to PR'
-        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
-        runs-on: ubuntu-20.04
+        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' && ( github.event_name != 'pull_request_target' || contains( github.event.pull_request.body, '[x] Automatically create a changelog' ) ) }}
+        runs-on: ubuntu-latest
         permissions:
             contents: write
             issues: write
             pull-requests: write
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@v4
 
             - name: Generate Changelog File
               env:
                   GITHUB_TOKEN: ${{ secrets.PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
-              run: pnpm utils changefile ${{github.event.number || inputs.prNumber}} -o ${{ github.repository_owner }}
+              run: pnpm utils changefile ${{ github.event.number || inputs.prNumber }} -o ${{ github.repository_owner }}

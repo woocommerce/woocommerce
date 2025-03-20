@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -68,8 +69,9 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		$order->save();
 
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-		do_action( 'woocommerce_order_status_changed', $order->get_id(), 'pending', 'finished' );
+		do_action( 'woocommerce_order_status_changed', $order->get_id(), OrderStatus::PENDING, 'finished', $order );
 		$this->assertRecordedTracksEvent( 'wcadmin_orders_edit_status_change' );
+		$this->assertTracksEventHasRequestTimestampAndNoCache( 'wcadmin_orders_edit_status_change' );
 	}
 
 	/**
@@ -89,6 +91,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		do_action( $hpos_enabled ? 'load-woocommerce_page_wc-orders' : 'load-edit.php' );
 
 		$this->assertRecordedTracksEvent( 'wcadmin_orders_view' );
+		$this->assertTracksEventHasRequestTimestampAndNoCache( 'wcadmin_orders_view' );
 	}
 
 	/**
@@ -108,6 +111,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		do_action( 'load-edit.php' );
 
 		$this->assertRecordedTracksEvent( 'wcadmin_orders_view_search' );
+		$this->assertTracksEventHasRequestTimestampAndNoCache( 'wcadmin_orders_view_search' );
 	}
 
 	/**
@@ -154,5 +158,4 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	public function allow_edit_shop_orders( $caps, $cap, $user_id ) {
 		return ( 0 === $user_id && 'edit_shop_orders' === $cap ) ? array() : $caps;
 	}
-
 }

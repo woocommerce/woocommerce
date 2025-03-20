@@ -129,7 +129,6 @@ export function DownloadsMenuItem( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'right-start',
 			} }
@@ -157,7 +156,6 @@ export function DownloadsMenuItem( {
 					<MenuGroup>
 						<MediaUpload
 							modalClass={ MODAL_CLASS_NAME }
-							// @ts-expect-error multiple also accepts string.
 							multiple={ 'add' }
 							value={ downloadsIds }
 							onSelect={ handleMediaUploadSelect }
@@ -196,7 +194,7 @@ export function DownloadsMenuItem( {
 					</MenuGroup>
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'downloads' }
-						onChange={ onChange }
+						onChange={ ( value ) => onChange( value ) }
 						onClose={ onClose }
 						selection={ selection }
 						supportsMultipleSelection={ supportsMultipleSelection }

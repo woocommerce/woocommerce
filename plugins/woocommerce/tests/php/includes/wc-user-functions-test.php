@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
@@ -42,26 +43,33 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 
 		$order_1 = WC_Helper_Order::create_order( $customer_id_1, $product_1 );
 		$order_1->set_billing_email( 'test@example.com' );
-		$order_1->set_status( 'completed' );
+		$order_1->set_status( OrderStatus::COMPLETED );
 		$order_1->save();
 		$order_2 = WC_Helper_Order::create_order( $customer_id_2, $product_2 );
 		$order_2->set_billing_email( 'test2@example.com' );
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( OrderStatus::COMPLETED );
 		$order_2->save();
 		$order_3 = WC_Helper_Order::create_order( $customer_id_1, $product_2 );
 		$order_3->set_billing_email( 'test@example.com' );
-		$order_3->set_status( 'pending' );
+		$order_3->set_status( OrderStatus::PENDING );
 		$order_3->save();
 		$order_4 = wc_create_order();
 		$order_4->add_product( $product_1 );
-		$order_4->set_status( 'completed' );
+		$order_4->set_status( OrderStatus::COMPLETED );
 		$order_4->save();
 
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+		// Manually trigger the product lookup tables update, since it may take a few moments for it to happen automatically.
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		foreach ( array( '__return_true', '__return_false' ) as $lookup_tables ) {
+			add_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
+			$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
+			$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
+			$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+			remove_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+		}
 	}
 
 	/**
@@ -117,7 +125,7 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$order->add_item( $item2 );
 
 		$order->set_total( 30 ); // 10 + 20
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$args = array(

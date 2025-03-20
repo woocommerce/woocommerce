@@ -9,7 +9,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 	test.describe( 'Create a tax rate', () => {
 		test( 'can create a tax rate', async ( { request } ) => {
 			// call API to create a tax rate
-			const response = await request.post( '/wp-json/wc/v3/taxes', {
+			const response = await request.post( './wp-json/wc/v3/taxes', {
 				data: {
 					country: 'US',
 					state: 'AL',
@@ -50,7 +50,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 		test( 'can retrieve a tax rate', async ( { request } ) => {
 			// call API to retrieve the previously saved tax rates
 			const response = await request.get(
-				`/wp-json/wc/v3/taxes/${ taxRateId }`
+				`./wp-json/wc/v3/taxes/${ taxRateId }`
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -76,7 +76,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 
 		test( 'can retrieve all tax rates', async ( { request } ) => {
 			// call API to retrieve all tax rates
-			const response = await request.get( '/wp-json/wc/v3/taxes' );
+			const response = await request.get( './wp-json/wc/v3/taxes' );
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -88,7 +88,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 		test( `can update a tax rate`, async ( { request } ) => {
 			// update tax rate name
 			const response = await request.put(
-				`/wp-json/wc/v3/taxes/${ taxRateId }`,
+				`./wp-json/wc/v3/taxes/${ taxRateId }`,
 				{
 					data: {
 						name: 'Not State Tax',
@@ -109,7 +109,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 		test( 'retrieve after update tax rate', async ( { request } ) => {
 			// call API to retrieve all tax rates
 			const response = await request.get(
-				`/wp-json/wc/v3/taxes/${ taxRateId }`
+				`./wp-json/wc/v3/taxes/${ taxRateId }`
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -122,7 +122,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 		test( 'can permanently delete a tax rate', async ( { request } ) => {
 			// Delete the tax rate.
 			const response = await request.delete(
-				`/wp-json/wc/v3/taxes/${ taxRateId }`,
+				`./wp-json/wc/v3/taxes/${ taxRateId }`,
 				{
 					data: {
 						force: true,
@@ -136,7 +136,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 			if ( ! shouldSkip ) {
 				// Verify that the tax rate can no longer be retrieved.
 				const getDeletedTaxRateResponse = await request.get(
-					`/wp-json/wc/v3/taxes/${ taxRateId }`
+					`./wp-json/wc/v3/taxes/${ taxRateId }`
 				);
 				expect( getDeletedTaxRateResponse.status() ).toEqual( 404 );
 			}

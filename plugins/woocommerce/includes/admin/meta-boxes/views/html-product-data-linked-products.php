@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 ?>
 <div id="linked_product_data" class="panel woocommerce_options_panel hidden">
@@ -14,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 			<label for="grouped_products"><?php esc_html_e( 'Grouped products', 'woocommerce' ); ?></label>
 			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="grouped_products" name="grouped_products[]" data-sortable="true" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
-				$product_ids = $product_object->is_type( 'grouped' ) ? $product_object->get_children( 'edit' ) : array();
+				$product_ids = $product_object->is_type( ProductType::GROUPED ) ? $product_object->get_children( 'edit' ) : array();
 
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );

@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use WC_Product_Simple;
 use WC_Product_External;
 use WC_Product_Grouped;
@@ -14,6 +15,7 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WC_Product_Attribute;
 use WC_Cache_Helper;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Class ProductHelper.
@@ -58,10 +60,10 @@ class ProductHelper {
 				'price'         => 10,
 				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
-				'tax_status'    => 'taxable',
+				'tax_status'    => ProductTaxStatus::TAXABLE,
 				'downloadable'  => false,
 				'virtual'       => false,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 				'weight'        => '1.1',
 			)
 		);

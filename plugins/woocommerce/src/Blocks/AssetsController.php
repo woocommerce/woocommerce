@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
@@ -31,8 +33,9 @@ final class AssetsController {
 	/**
 	 * Initialize class features.
 	 */
-	protected function init() {
+	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_assets' ) );
+		add_action( 'init', array( $this, 'register_script_modules' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_and_enqueue_site_editor_assets' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
@@ -41,6 +44,23 @@ final class AssetsController {
 		add_action( 'wp_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_filter( 'js_do_concat', array( $this, 'skip_boost_minification_for_cart_checkout' ), 10, 2 );
+	}
+
+	/**
+	 * Register script modules.
+	 */
+	public function register_script_modules() {
+		// Right now we only have one script modules build for supported interactivity API powered block front-ends.
+		// We generate a combined asset file for that via DependencyExtractionWebpackPlugin to make registration more
+		// efficient.
+		$asset_data = $this->api->get_asset_data(
+			$this->api->get_block_asset_build_path( 'interactivity-blocks-frontend-assets', 'php' )
+		);
+
+		foreach ( $asset_data as $handle => $data ) {
+			$handle_without_js = str_replace( '.js', '', $handle );
+			wp_register_script_module( $handle_without_js, plugins_url( $this->api->get_block_asset_build_path( $handle_without_js ), dirname( __DIR__ ) ), $data['dependencies'], $data['version'] );
+		}
 	}
 
 	/**
@@ -70,13 +90,20 @@ final class AssetsController {
 		$this->api->register_script( 'wc-cart-checkout-vendors', $this->api->get_block_asset_build_path( 'wc-cart-checkout-vendors-frontend' ), array(), true );
 		$this->api->register_script( 'wc-cart-checkout-base', $this->api->get_block_asset_build_path( 'wc-cart-checkout-base-frontend' ), array(), true );
 		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js' );
+		$this->api->register_script( 'wc-blocks-checkout-events', 'assets/client/blocks/blocks-checkout-events.js' );
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
+		$this->api->register_script( 'wc-schema-parser', 'assets/client/blocks/wc-schema-parser.js', array(), false );
 
-		// Register the interactivity components here for now.
-		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', array() );
-		$this->api->register_script( 'wc-interactivity-checkbox-list', 'assets/client/blocks/wc-interactivity-checkbox-list.js', array() );
-		$this->register_style( 'wc-interactivity-checkbox-list', plugins_url( $this->api->get_block_asset_build_path( 'wc-interactivity-checkbox-list', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
-		$this->register_style( 'wc-interactivity-dropdown', plugins_url( $this->api->get_block_asset_build_path( 'wc-interactivity-dropdown', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
+		// Customer Effort Score.
+		$this->api->register_script(
+			'wc-customer-effort-score',
+			'assets/client/admin/customer-effort-score/index.js',
+			array( 'wp-data', 'wp-data-controls', 'wc-store-data' )
+		);
+		$this->api->register_style(
+			'wc-customer-effort-score',
+			'assets/client/admin/customer-effort-score/style.css',
+		);
 
 		wp_add_inline_script(
 			'wc-blocks-middleware',
@@ -102,6 +129,10 @@ final class AssetsController {
 			wp_enqueue_script( 'wc-blocks-classic-template-revert-button' );
 			wp_enqueue_style( 'wc-blocks-classic-template-revert-button-style' );
 		}
+
+		// Customer Effort Score.
+		wp_enqueue_script( 'wc-customer-effort-score' );
+		wp_enqueue_style( 'wc-customer-effort-score' );
 	}
 
 	/**
@@ -197,6 +228,50 @@ final class AssetsController {
 	}
 
 	/**
+	 * Get the block asset resource hints in the cache or null if not found.
+	 *
+	 * @return array|null Array of resource hints.
+	 */
+	private function get_block_asset_resource_hints_cache() {
+		if ( wp_is_development_mode( 'plugin' ) ) {
+			return null;
+		}
+
+		$cache = get_site_transient( 'woocommerce_block_asset_resource_hints' );
+
+		$current_version = array(
+			'woocommerce' => WOOCOMMERCE_VERSION,
+			'wordpress'   => get_bloginfo( 'version' ),
+		);
+
+		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
+			return $cache['files'];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set the block asset resource hints in the cache.
+	 *
+	 * @param string $filename File name.
+	 * @param array  $data Array of resource hints.
+	 */
+	private function set_block_asset_resource_hints_cache( $filename, $data ) {
+		$cache   = $this->get_block_asset_resource_hints_cache();
+		$updated = array(
+			'files'   => $cache ?? array(),
+			'version' => array(
+				'woocommerce' => WOOCOMMERCE_VERSION,
+				'wordpress'   => get_bloginfo( 'version' ),
+			),
+		);
+
+		$updated['files'][ $filename ] = $data;
+		set_site_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
+	}
+
+	/**
 	 * Get resource hint for a block by name.
 	 *
 	 * @param string $filename Block filename.
@@ -206,6 +281,13 @@ final class AssetsController {
 		if ( ! $filename ) {
 			return array();
 		}
+
+		$cached = $this->get_block_asset_resource_hints_cache();
+
+		if ( isset( $cached[ $filename ] ) ) {
+			return $cached[ $filename ];
+		}
+
 		$script_data = $this->api->get_script_data(
 			$this->api->get_block_asset_build_path( $filename )
 		);
@@ -213,7 +295,8 @@ final class AssetsController {
 			array( esc_url( add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ) ),
 			$this->get_script_dependency_src_array( $script_data['dependencies'] )
 		);
-		return array_map(
+
+		$data = array_map(
 			function ( $src ) {
 				return array(
 					'href' => $src,
@@ -222,6 +305,10 @@ final class AssetsController {
 			},
 			array_unique( array_filter( $resources ) )
 		);
+
+		$this->set_block_asset_resource_hints_cache( $filename, $data );
+
+		return $data;
 	}
 
 	/**
@@ -268,10 +355,10 @@ final class AssetsController {
 	 */
 	public function skip_boost_minification_for_cart_checkout( $do_concat, $handle ) {
 		$boost_is_outdated = defined( 'JETPACK_BOOST_VERSION' ) && version_compare( JETPACK_BOOST_VERSION, '3.4.2', '<' );
-		$scripts_to_ignore = [
+		$scripts_to_ignore = array(
 			'wc-cart-checkout-vendors',
 			'wc-cart-checkout-base',
-		];
+		);
 
 		return $boost_is_outdated && in_array( $handle, $scripts_to_ignore, true ) ? false : $do_concat;
 	}

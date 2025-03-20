@@ -34,6 +34,12 @@ class WC_Tracks {
 	public static function get_blog_details( $user_id ) {
 		$blog_details = get_transient( 'wc_tracks_blog_details' );
 		if ( false === $blog_details ) {
+			// Ensure the store ID is set.
+			if ( ! class_exists( '\WC_Install' ) ) {
+				include_once WC_ABSPATH . 'includes/class-wc-install.php';
+			}
+			\WC_Install::maybe_set_store_id();
+
 			$blog_details = array(
 				'url'            => home_url(),
 				'blog_lang'      => get_user_locale( $user_id ),
@@ -65,6 +71,21 @@ class WC_Tracks {
 		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri : '';
 
 		return $data;
+	}
+
+	/**
+	 * Get role-related details.
+	 *
+	 * @param WP_User $user The user object.
+	 * @return array The role details.
+	 */
+	public static function get_role_details( $user ) {
+		return array(
+			'role'                   => ! empty( $user->roles ) ? reset( $user->roles ) : '',
+			'can_install_plugins'    => $user->has_cap( 'install_plugins' ),
+			'can_activate_plugins'   => $user->has_cap( 'activate_plugins' ),
+			'can_manage_woocommerce' => $user->has_cap( 'manage_woocommerce' ),
+		);
 	}
 
 	/**
@@ -101,6 +122,29 @@ class WC_Tracks {
 	}
 
 	/**
+	 * Track when the user attempts to toggle
+	 * woocommerce_allow_tracking option.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $prev_value The previous value for the setting. 'yes' or 'no'.
+	 * @param string $new_value The new value for the setting. 'yes' or 'no'.
+	 * @param string $context Which avenue the user utilized to toggle.
+	 */
+	public static function track_woocommerce_allow_tracking_toggled( $prev_value, $new_value, $context = 'settings' ) {
+		if ( $new_value !== $prev_value ) {
+			self::record_event(
+				'woocommerce_allow_tracking_toggled',
+				array(
+					'previous_value' => $prev_value,
+					'new_value'      => $new_value,
+					'context'        => $context,
+				)
+			);
+		}
+	}
+
+	/**
 	 * Get all properties for the event including filtered and identity properties.
 	 *
 	 * @param string $event_name Event name.
@@ -130,7 +174,8 @@ class WC_Tracks {
 
 		$server_details = self::get_server_details();
 		$blog_details   = self::get_blog_details( $user->ID );
+		$role_details   = self::get_role_details( $user );
 
-		return array_merge( $properties, $data, $server_details, $identity, $blog_details );
+		return array_merge( $properties, $data, $server_details, $identity, $blog_details, $role_details );
 	}
 }

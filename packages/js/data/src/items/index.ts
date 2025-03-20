@@ -19,6 +19,7 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
+// @ts-expect-error migrate store to createReduxStore function https://github.com/woocommerce/woocommerce/issues/55380
 registerStore< State >( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,

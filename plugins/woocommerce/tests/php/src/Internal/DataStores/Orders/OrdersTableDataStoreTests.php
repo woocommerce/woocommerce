@@ -4,9 +4,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
@@ -33,6 +37,7 @@ use WC_Tests_Webhook_Functions;
  */
 class OrdersTableDataStoreTests extends \HposTestCase {
 	use HPOSToggleTrait;
+	use CogsAwareUnitTestSuiteTrait;
 
 	/**
 	 * Original timezone before this test started.
@@ -99,9 +104,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		update_option( 'timezone_string', $this->original_time_zone );
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
 		$this->clean_up_cot_setup();
+		$this->disable_cogs_feature();
 
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-
+		remove_all_filters( 'woocommerce_load_order_cogs_value' );
+		remove_all_filters( 'woocommerce_save_order_cogs_value' );
+		wc()->cart->empty_cart();
 		parent::tearDown();
 	}
 
@@ -359,7 +367,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		foreach ( $props_to_update as $prop => $value ) {
 			$this->assertEquals( $order->{"get_$prop"}( 'edit' ), $value );
 		}
-
 	}
 
 	/**
@@ -454,7 +461,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$wpdb->delete( $this->sut::get_addresses_table_name(), array( 'order_id' => $order->get_id() ), array( '%d' ) );
 
 		// Try to update the order.
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_billing_address_1( 'New address' );
 		$order->save();
 
@@ -539,7 +546,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->delete();
 
 		$orders_table = $this->sut::get_orders_table_name();
-		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Make sure order data persists in the database.
 		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
@@ -564,7 +571,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		// Tests trashing of orders.
 		$order = $this->create_complex_cot_order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( OrderStatus::ON_HOLD );
 		$order->save();
 		$order_id = $order->get_id();
 
@@ -572,14 +579,14 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
 		$orders_table = $this->sut::get_orders_table_name();
-		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
-		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
+		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
+		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
 
 		$this->sut->read( $order );
 		$this->sut->untrash_order( $order );
 
-		$this->assertEquals( 'on-hold', $order->get_status() );
-		$this->assertEquals( 'wc-on-hold', get_post_status( $order_id ) );
+		$this->assertEquals( OrderStatus::ON_HOLD, $order->get_status() );
+		$this->assertEquals( OrderInternalStatus::ON_HOLD, get_post_status( $order_id ) );
 
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
@@ -689,7 +696,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order1->add_meta_data( 'animal', 'lion', true );
 		$order1->add_meta_data( 'place', 'London', true );
 		$order1->add_meta_data( 'movie', 'Magnolia', true );
-		$order1->set_status( 'completed' );
+		$order1->set_status( OrderStatus::COMPLETED );
 		$order1->save();
 
 		$order2 = new WC_Order();
@@ -697,7 +704,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order2->add_meta_data( 'color', 'blue', true );
 		$order2->add_meta_data( 'animal', 'cow', true );
 		$order2->add_meta_data( 'place', 'near London', true );
-		$order2->set_status( 'completed' );
+		$order2->set_status( OrderStatus::COMPLETED );
 		$order2->save();
 
 		$order3 = new WC_Order();
@@ -706,7 +713,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order3->add_meta_data( 'animal', 'lion', true );
 		$order3->add_meta_data( 'place', 'Paris', true );
 		$order3->add_meta_data( 'movie', 'Citizen Kane', true );
-		$order3->set_status( 'completed' );
+		$order3->set_status( OrderStatus::COMPLETED );
 		$order3->save();
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
@@ -863,7 +870,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$query_args['orderby']['color_meta'] = 'ASC';
 		$q                                   = new OrdersTableQuery( $query_args );
 		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
-
 	}
 
 	/**
@@ -936,7 +942,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			)
 		);
 		$this->assertEquals( 0, $query->found_orders );
-
 	}
 
 	/**
@@ -1108,7 +1113,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$test_orders = array();
 		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
 
-		for ( $i = 0; $i < 30; $i ++ ) {
+		for ( $i = 0; $i < 30; $i++ ) {
 			$order = new WC_Order();
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -1155,7 +1160,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_cot_query_count() {
 		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
 
-		for ( $i = 0; $i < 30; $i ++ ) {
+		for ( $i = 0; $i < 30; $i++ ) {
 			$order = new WC_Order();
 			$this->switch_data_store( $order, $this->sut );
 			if ( 0 === $i % 2 ) {
@@ -1194,9 +1199,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_get_order_count(): void {
 		$number_of_orders_by_status = array(
-			'wc-completed'  => 4,
-			'wc-processing' => 2,
-			'wc-pending'    => 4,
+			OrderInternalStatus::COMPLETED  => 4,
+			OrderInternalStatus::PROCESSING => 2,
+			OrderInternalStatus::PENDING    => 4,
 		);
 
 		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
@@ -1230,8 +1235,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		// Create a few orders.
 		$orders_by_status = array(
-			'wc-completed' => 3,
-			'wc-pending'   => 2,
+			OrderInternalStatus::COMPLETED => 3,
+			OrderInternalStatus::PENDING   => 2,
 		);
 		$unpaid_ids       = array();
 		foreach ( $orders_by_status as $order_status => $order_count ) {
@@ -1249,7 +1254,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		}
 
 		// Confirm not all orders are unpaid.
-		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count( 'wc-completed' ) );
+		$this->assertEquals( $orders_by_status[ OrderInternalStatus::COMPLETED ], $this->sut->get_order_count( OrderInternalStatus::COMPLETED ) );
 
 		// Find unpaid orders.
 		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist ) );
@@ -1557,9 +1562,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 * Test methods get_total_tax_refunded, get_total_shipping_refunded, and get_total_shipping_tax_refunded.
 	 */
-	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded_and_get_total_shipping_tax_refunded() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -1623,6 +1628,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
 		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+		$this->assertEquals( 3, $order->get_data_store()->get_total_shipping_tax_refunded( $order ) );
 	}
 
 	/**
@@ -1640,7 +1646,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		foreach ( $orders_test_data as $i => $order_data ) {
 			$order = new \WC_Order();
 			$this->switch_data_store( $order, $this->sut );
-			$order->set_status( 'wc-completed' );
+			$order->set_status( OrderInternalStatus::COMPLETED );
 			$order->set_shipping_city( 'The Universe' );
 			$order->set_billing_first_name( $order_data[0] );
 			$order->set_billing_last_name( $order_data[1] );
@@ -2097,7 +2103,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$created_date->setTimezone( new DateTimeZone( 'GMT' ) );
 		$this->assertEquals( $created_date->format( 'Y-m-d H:i:s' ), $post->post_date_gmt );
 
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$this->sut->backfill_post_record( $order );
 
@@ -2156,7 +2162,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$order_id = $order->get_id();
 
-		$should_sync_callable = function( $order ) {
+		$should_sync_callable = function ( $order ) {
 			return $this->should_sync_order( $order );
 		};
 
@@ -2175,7 +2181,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_child_orders_are_promoted_when_parent_is_deleted_if_order_type_is_hierarchical() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'is_post_type_hierarchical' => function( $post_type ) {
+				'is_post_type_hierarchical' => function ( $post_type ) {
 					return 'shop_order' === $post_type || is_post_type_hierarchical( $post_type );
 				},
 			)
@@ -2202,7 +2208,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_child_orders_are_promoted_when_parent_is_deleted_if_order_type_is_not_hierarchical() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'is_post_type_hierarchical' => function( $post_type ) {
+				'is_post_type_hierarchical' => function ( $post_type ) {
 					return 'shop_order' === $post_type ? false : is_post_type_hierarchical( $post_type );
 				},
 			)
@@ -2368,7 +2374,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'is_post_type_hierarchical' => function( $post_type ) {
+				'is_post_type_hierarchical' => function ( $post_type ) {
 					return 'shop_order' === $post_type ? true : is_post_type_hierarchical( $post_type );
 				},
 			)
@@ -2380,6 +2386,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
 
+		/** @var $order WC_Abstract_Legacy_Order */
 		list($order, $refund) = $this->create_order_with_refund();
 		$order_id             = $order->get_id();
 		$refund_id            = $refund->get_id();
@@ -2408,7 +2415,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	private function allow_current_user_to_delete_posts() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'current_user_can' => function( $capability ) {
+				'current_user_can' => function ( $capability ) {
 					return 'delete_posts' === $capability ? true : current_user_can( $capability );
 				},
 			)
@@ -2466,14 +2473,14 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_get_db_row_from_order_only_prefixed_status_is_written_to_db() {
 		$order = wc_create_order();
 
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$db_row_callback = function ( $order, $only_changes ) {
 			return $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
 		};
 
 		$db_row = $db_row_callback->call( $this->sut, $order, false );
 
-		$this->assertEquals( 'wc-completed', $db_row['data']['status'] );
+		$this->assertEquals( OrderInternalStatus::COMPLETED, $db_row['data']['status'] );
 	}
 
 	/**
@@ -2552,7 +2559,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_logger' => function() use ( $fake_logger ) {
+				'wc_get_logger' => function () use ( $fake_logger ) {
 					return $fake_logger;
 				},
 			)
@@ -2588,6 +2595,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				array( 'parent_order_id' => '%d' ),
 				array( 'id' => '%d' ),
 			);
+
+			// We have to clear the cache after a direct DB update.
+			$this->sut->clear_cached_data( array( $refund->get_id() ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -2683,12 +2693,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEquals( 0, $product->get_total_sales() );
 
-		$order->set_status( 'processing' );
+		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is increased when status is changed to processing.
 
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is not increased when status is changed to completed (from processing).
@@ -2790,7 +2800,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$new_count    = 0;
 		$update_count = 0;
 
-		$callback = function( $order_id ) use ( &$new_count, &$update_count ) {
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+		$callback = function ( $order_id ) use ( &$new_count, &$update_count ) {
 			$new_count    += 'woocommerce_new_order' === current_action() ? 1 : 0;
 			$update_count += 'woocommerce_update_order' === current_action() ? 1 : 0;
 		};
@@ -2822,7 +2833,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		// Trashing should not fire an update.
 		$order->get_data_store()->delete( $order );
-		$this->assertEquals( $order->get_status(), 'trash' );
+		$this->assertEquals( $order->get_status(), OrderStatus::TRASH );
 		$this->assertEquals( 2, $update_count );
 
 		// Untrashing should not fire an update.
@@ -2833,19 +2844,19 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			wp_untrash_post( $order->get_id() );
 			$order = wc_get_order( $order->get_id() ); // Refresh order.
 		}
-		$this->assertNotEquals( $order->get_status(), 'trash' );
+		$this->assertNotEquals( $order->get_status(), OrderStatus::TRASH );
 		$this->assertEquals( 2, $update_count );
 
 		// An auto-draft order should not trigger 'woocommerce_new_order' until first saved with a valid status.
 		if ( $cot_is_authoritative ) {
 			$order = new WC_Order();
-			$order->set_status( 'auto-draft' );
+			$order->set_status( OrderStatus::AUTO_DRAFT );
 			$order->save();
 
 			$this->assertEquals( 1, $new_count );
 			$this->assertEquals( 2, $update_count );
 
-			$order->set_status( 'on-hold' );
+			$order->set_status( OrderStatus::ON_HOLD );
 			$order->save();
 
 			$this->assertEquals( 2, $new_count );
@@ -2918,7 +2929,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			self::$reading_order_ids     = array();
 		};
 		$reset_state->call( $sut );
-		wp_cache_flush();
+		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();
 	}
 
 	/**
@@ -2964,7 +2975,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->set_discount_total( '1.23' );
 		$order->save();
 
-		$call_protected = function( $ids ) {
+		$call_protected = function ( $ids ) {
 			return $this->get_order_data_for_ids( $ids );
 		};
 
@@ -3210,7 +3221,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'current_time' => function( $type, $gmt ) use ( &$current_time_called, $now ) {
+				// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+				'current_time' => function ( $type, $gmt ) use ( &$current_time_called, $now ) {
 					$current_time_called = true;
 					return $now;
 				},
@@ -3357,7 +3369,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		// phpcs:enable Squiz.Commenting
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_logger' => function() use ( $fake_logger ) {
+				'wc_get_logger' => function () use ( $fake_logger ) {
 					return $fake_logger;
 				},
 			)
@@ -3372,8 +3384,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order_id = $order->get_id();
 
 		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$order->set_date_modified( time() + 1 );
-		$order->save();
+		$order->save(); // Trigger a meta cache purge since the above was a direct DB write.
 
 		// Test fetching an order with meta data containing an object of a non-existent class.
 		$fetched_order = wc_get_order( $order->get_id() );
@@ -3445,7 +3456,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$other_counts = OrderUtil::get_count_for_type( 'shop_something' );
 		$this->assertEquals( 0, array_pop( $other_counts ) );
-
 	}
 
 	/**
@@ -3464,7 +3474,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$draft_statuses = array( 'auto-draft', 'checkout-draft' );
+		$draft_statuses = array( OrderStatus::AUTO_DRAFT, 'checkout-draft' );
 
 		$orders_data_store = new OrdersTableDataStore();
 
@@ -3492,7 +3502,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		add_action( 'woocommerce_new_order', $callback );
 
 		$order = new WC_Order();
-		$order->set_status( 'draft' );
+		$order->set_status( OrderStatus::DRAFT );
 
 		$this->assertEquals( 0, $new_count );
 
@@ -3501,7 +3511,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save();
 		$this->assertEquals( 0, $new_count );
 
-		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
+		$triggering_order_statuses = array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::COMPLETED, OrderStatus::PROCESSING );
 
 		foreach ( $triggering_order_statuses as $status ) {
 			$order->set_status( $status );
@@ -3529,7 +3539,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		add_action( 'woocommerce_new_order', $callback );
 
 		$order = new WC_Order();
-		$order->set_status( 'processing' );
+		$order->set_status( OrderStatus::PROCESSING );
 
 		$this->assertEquals( 0, $new_count );
 
@@ -3539,5 +3549,197 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 1, $new_count );
 
 		remove_action( 'woocommerce_new_order', $callback );
+	}
+
+
+	/**
+	 * @testdox Saving an order does not persist its Cost of Goods Sold total value if the feature is disabled.
+	 */
+	public function test_saving_order_does_not_save_cogs_value_if_cogs_disabled() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::set_cogs_total_value' );
+
+		$meta_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		$this->assertFalse( $meta_objects );
+	}
+
+	/**
+	 * @testdox Saving an order does not persist its Cost of Goods Sold total value if the feature is enabled but the order doesn't manage it.
+	 */
+	public function test_saving_order_does_not_save_cogs_value_if_order_has_no_cogs() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$meta_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
+
+		// phpcs:disable Squiz.Commenting
+		$order = new class() extends WC_Order {
+			public function has_cogs(): bool {
+				return false;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		$this->assertFalse( $meta_objects );
+	}
+
+	/**
+	 * @testdox Saving an order persists its Cost of Goods Sold total value if the feature is enabled and the order manages it.
+	 */
+	public function test_saving_order_saves_cogs_value_if_not_zero_and_cogs_enabled() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$meta_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		$this->assertEquals( 12.34, (float) $meta_objects[0]->meta_value );
+
+		$order->set_cogs_total_value( 56.78 );
+		$order->save();
+
+		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		$this->assertEquals( 56.78, (float) $meta_objects[0]->meta_value );
+
+		$order->set_cogs_total_value( 0 );
+		$order->save();
+
+		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		$this->assertFalse( $meta_objects );
+	}
+
+	/**
+	 * @testdox Loading an order reads its Cost of Goods Sold value from the database if the feature is enabled and the order manages it.
+	 *
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 *           [false, false]
+	 *
+	 * @param bool $cogs_enabled True if the feature is enabled.
+	 * @param bool $order_has_cogs True if the order manages COGS.
+	 */
+	public function test_loading_order_loads_cogs_value_if_cogs_enabled( bool $cogs_enabled, bool $order_has_cogs ) {
+		$this->toggle_cot_feature_and_usage( true );
+		if ( $cogs_enabled ) {
+			$this->enable_cogs_feature();
+		} elseif ( $order_has_cogs ) {
+			$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::get_cogs_total_value' );
+		}
+
+		$meta_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
+
+		$order = new WC_Order();
+		$order->save();
+
+		$saved_meta = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		if ( $saved_meta ) {
+			$meta_store->delete_meta( $order, $saved_meta[0] );
+		}
+
+		$meta        = new \WC_Meta_Data();
+		$meta->key   = '_cogs_total_value';
+		$meta->value = '12.34';
+		$meta_store->add_meta( $order, $meta );
+
+		if ( $order_has_cogs ) {
+			$order2 = wc_get_order( $order->get_id() );
+		} else {
+			// phpcs:disable Squiz.Commenting
+			$order2 = new class($order->get_id()) extends WC_Order {
+				public function has_cogs(): bool {
+					return false;
+				}
+			};
+			// phpcs:enable Squiz.Commenting
+		}
+		$this->assertEquals( ( $cogs_enabled && $order_has_cogs ) ? 12.34 : 0, $order2->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox It's possible to modify the Cost of Goods Sold value that gets loaded from the database for an order using the 'woocommerce_load_order_cogs_value' filter.
+	 */
+	public function test_loaded_cogs_value_can_be_modified_via_filter() {
+		$received_filter_cogs_value = null;
+		$received_filter_item       = null;
+
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		add_filter(
+			'woocommerce_load_order_cogs_value',
+			function ( $cogs_value, $item ) use ( &$received_filter_cogs_value, &$received_filter_item ) {
+				$received_filter_cogs_value = $cogs_value;
+				$received_filter_item       = $item;
+				return 56.78;
+			},
+			10,
+			2
+		);
+
+		$order2 = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 12.34, $received_filter_cogs_value );
+		$this->assertSame( $order2, $received_filter_item );
+		$this->assertEquals( 56.78, $order2->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox It's possible to modify the Cost of Goods Sold value that gets persisted for an order using the 'woocommerce_save_order_cogs_value' filter, returning null suppresses the saving.
+	 *
+	 * @testWith [56.78, "56.78"]
+	 *           [null, "12.34"]
+	 *
+	 * @param mixed  $filter_return_value The value that the filter will return.
+	 * @param string $expected_saved_value The value that is expected to be persisted after the save attempt.
+	 */
+	public function test_saved_cogs_value_can_be_altered_via_filter_with_null_meaning_dont_save( $filter_return_value, string $expected_saved_value ) {
+		$received_filter_cogs_value = null;
+		$received_filter_item       = null;
+
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		add_filter(
+			'woocommerce_save_order_cogs_value',
+			function ( $cogs_value, $item ) use ( &$received_filter_cogs_value, &$received_filter_item, $filter_return_value ) {
+				$received_filter_cogs_value = $cogs_value;
+				$received_filter_item       = $item;
+				return $filter_return_value;
+			},
+			10,
+			2
+		);
+
+		$order->set_cogs_total_value( 56.78 );
+		$order->save();
+
+		$this->assertEquals( 56.78, $received_filter_cogs_value );
+		$this->assertSame( $order, $received_filter_item );
+
+		$meta_store   = wc_get_container()->get( OrdersTableDataStoreMeta::class );
+		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
+		$this->assertEquals( $expected_saved_value, (float) $meta_objects[0]->meta_value );
 	}
 }

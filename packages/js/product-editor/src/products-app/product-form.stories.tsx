@@ -45,7 +45,7 @@ const ProductForm = ( { fields, form, productData }: ProductFormProps ) => {
 };
 
 export default {
-	title: 'Product App/Product Form',
+	title: 'Product Editor/Product App/Product Form',
 	component: ProductForm,
 };
 

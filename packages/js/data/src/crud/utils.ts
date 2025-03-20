@@ -197,7 +197,7 @@ export const getUrlParameters = (
 	const keys = getNamespaceKeys( namespace );
 	keys.forEach( ( key ) => {
 		if ( query.hasOwnProperty( key ) ) {
-			params.push( query[ key ] as IdType );
+			params.push( ( query as Record< string, IdType > )[ key ] );
 		}
 	} );
 

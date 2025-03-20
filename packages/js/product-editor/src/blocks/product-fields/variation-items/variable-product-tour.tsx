@@ -11,8 +11,8 @@ import {
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	OPTIONS_STORE_NAME,
+	experimentalProductVariationsStore,
+	optionsStore,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -36,8 +36,8 @@ export const VariableProductTour: React.FC = () => {
 			product_id: productId,
 			page: 1,
 			per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
-			order: 'asc',
-			orderby: 'menu_order',
+			order: 'asc' as const,
+			orderby: 'menu_order' as const,
 		} ),
 		[ productId ]
 	);
@@ -45,11 +45,10 @@ export const VariableProductTour: React.FC = () => {
 	const { totalCount } = useSelect(
 		( select ) => {
 			const { getProductVariationsTotalCount } = select(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				experimentalProductVariationsStore
 			);
 			return {
-				totalCount:
-					getProductVariationsTotalCount< number >( requestParams ),
+				totalCount: getProductVariationsTotalCount( requestParams ),
 			};
 		},
 		[ productId ]
@@ -141,12 +140,12 @@ export const VariableProductTour: React.FC = () => {
 	}, [ totalCount ] );
 
 	const { hasShownProductEditorTour } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption } = select( optionsStore );
 		return {
 			hasShownProductEditorTour:
 				getOption( 'woocommerce_block_product_tour_shown' ) === 'yes',
 		};
-	} );
+	}, [] );
 
 	if (
 		hasShownTour === 'yes' ||

@@ -3,7 +3,7 @@
  */
 import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
-import React, { createElement, useCallback, useRef, useState } from 'react';
+import { createElement, useCallback, useRef, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -255,6 +255,6 @@ export const HighlightFirstMatchingItem: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/experimental/TreeControl',
+	title: 'Experimental/TreeControl',
 	component: TreeControl,
 };

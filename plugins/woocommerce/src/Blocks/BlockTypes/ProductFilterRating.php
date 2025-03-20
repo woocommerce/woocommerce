@@ -1,9 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
-use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
@@ -32,8 +30,8 @@ final class ProductFilterRating extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 
-		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
-		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+		add_filter( 'woocommerce_blocks_product_filters_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
+		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
 	}
 
 	/**
@@ -59,15 +57,15 @@ final class ProductFilterRating extends AbstractBlock {
 	}
 
 	/**
-	 * Register the active filters data.
+	 * Prepare the active filter items.
 	 *
-	 * @param array $data   The active filters data.
+	 * @param array $items  The active filter items.
 	 * @param array $params The query param parsed from the URL.
-	 * @return array Active filters data.
+	 * @return array Active filters items.
 	 */
-	public function register_active_filters_data( $data, $params ) {
+	public function prepare_selected_filters( $items, $params ) {
 		if ( empty( $params[ self::RATING_FILTER_QUERY_VAR ] ) ) {
-			return $data;
+			return $items;
 		}
 
 		$active_ratings = array_filter(
@@ -75,29 +73,19 @@ final class ProductFilterRating extends AbstractBlock {
 		);
 
 		if ( empty( $active_ratings ) ) {
-			return $data;
+			return $items;
 		}
 
-		$active_ratings = array_map(
-			function( $rating ) {
-				return array(
-					/* translators: %d is the rating value. */
-					'title'      => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating ),
-					'attributes' => array(
-						'data-wc-on--click' => esc_attr( "{$this->get_full_block_name()}::actions.removeFilter" ),
-						'data-wc-context'   => esc_attr( "{$this->get_full_block_name()}::" ) . wp_json_encode( array( 'value' => $rating ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					),
-				);
-			},
-			$active_ratings
-		);
+		foreach ( $active_ratings as $rating ) {
+			$items[] = array(
+				'type'  => 'rating',
+				'value' => $rating,
+				/* translators: %s is referring to rating value. Example: Rated 4 out of 5. */
+				'label' => sprintf( __( 'Rating: Rated %d out of 5', 'woocommerce' ), $rating ),
+			);
+		}
 
-		$data['rating'] = array(
-			'type'  => __( 'Rating', 'woocommerce' ),
-			'items' => $active_ratings,
-		);
-
-		return $data;
+		return $items;
 	}
 
 	/**
@@ -114,49 +102,78 @@ final class ProductFilterRating extends AbstractBlock {
 			return '';
 		}
 
-		$rating_counts = $this->get_rating_counts( $block );
-		$display_style = $attributes['displayStyle'] ?? 'list';
-		$show_counts   = $attributes['showCounts'] ?? false;
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
-		$filtered_rating_counts = array_filter(
+		$min_rating    = $attributes['minRating'] ?? 0;
+		$rating_counts = $this->get_rating_counts( $block );
+		// User selected minimum rating to display.
+		$rating_counts_with_min = array_filter(
 			$rating_counts,
-			function( $rating ) {
-				return $rating['count'] > 0;
+			function ( $rating ) use ( $min_rating ) {
+				return $rating['rating'] >= $min_rating;
 			}
 		);
+		$filter_params          = $block->context['filterParams'] ?? array();
+		$rating_query           = $filter_params[ self::RATING_FILTER_QUERY_VAR ] ?? '';
+		$selected_rating        = array_filter( explode( ',', $rating_query ) );
 
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'data-wc-interactive' => $this->get_full_block_name(),
-				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
-			)
+		$filter_options = array_map(
+			function ( $rating ) use ( $selected_rating, $attributes ) {
+				$value       = (string) $rating['rating'];
+				$count_label = $attributes['showCounts'] ? "({$rating['count']})" : '';
+
+				$aria_label = sprintf(
+					/* translators: %s is referring to rating value. Example: Rated 4 out of 5. */
+					__( 'Rated %s out of 5', 'woocommerce' ),
+					$value,
+				);
+
+				return array(
+					'id'        => 'rating-' . $value,
+					'selected'  => in_array( $value, $selected_rating, true ),
+					'label'     => $this->render_rating_label( (int) $value, $count_label ),
+					'ariaLabel' => $aria_label,
+					'value'     => $value,
+					'type'      => 'rating',
+					'data'      => $rating,
+				);
+			},
+			$rating_counts_with_min
 		);
 
-		if ( empty( $filtered_rating_counts ) ) {
-			return sprintf(
-				'<div %s></div>',
-				$wrapper_attributes
-			);
+		$filter_context = array(
+			'items'  => $filter_options,
+			'parent' => $this->get_full_block_name(),
+		);
+
+		$wrapper_attributes = array(
+			'data-wp-interactive'  => $this->get_full_block_name(),
+			'data-wp-context'      => wp_json_encode(
+				array(
+					'hasFilterOptions'    => ! empty( $filter_options ),
+					/* translators: {{labe}} is the rating filter item label. */
+					'activeLabelTemplate' => __( 'Rating: {{label}}', 'woocommerce' ),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+			'data-wp-bind--hidden' => '!context.hasFilterOptions',
+		);
+
+		if ( empty( $filter_options ) ) {
+			$wrapper_attributes['hidden'] = true;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
-
-		$input = 'list' === $display_style ? CheckboxList::render(
-			array(
-				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
-				'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
-			)
-		) : Dropdown::render(
-			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
-		);
-
 		return sprintf(
-			'<div %1$s>
-				%2$s
-			</div>',
-			$wrapper_attributes,
-			$input
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 
@@ -192,93 +209,6 @@ final class ProductFilterRating extends AbstractBlock {
 	}
 
 	/**
-	 * Get the checkbox list items.
-	 *
-	 * @param array  $rating_counts    The rating counts.
-	 * @param string $selected_ratings_query The url query param for selected ratings.
-	 * @param bool   $show_counts      Whether to show the counts.
-	 * @return array
-	 */
-	private function get_checkbox_list_items( $rating_counts, $selected_ratings_query, $show_counts ) {
-		$ratings_array = explode( ',', $selected_ratings_query );
-
-		return array_map(
-			function( $rating ) use ( $ratings_array, $show_counts ) {
-				$rating_str  = (string) $rating['rating'];
-				$count       = $rating['count'];
-				$count_label = $show_counts ? "($count)" : '';
-
-				$aria_label = sprintf(
-					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
-					__( 'Rated %s out of 5', 'woocommerce' ),
-					$rating_str,
-				);
-
-				return array(
-					'id'         => 'rating-' . $rating_str,
-					'checked'    => in_array( $rating_str, $ratings_array, true ),
-					'label'      => $this->render_rating_label( (int) $rating_str, $count_label ),
-					'aria_label' => $aria_label,
-					'value'      => $rating_str,
-				);
-			},
-			$rating_counts
-		);
-	}
-
-	/**
-	 * Get the dropdown props.
-	 *
-	 * @param mixed  $rating_counts The rating counts.
-	 * @param mixed  $selected_ratings_query The url query param for selected ratings.
-	 * @param bool   $show_counts Whether to show the counts.
-	 * @param string $select_type The select type. (single|multiple).
-	 * @return array<array-key, array>
-	 */
-	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type ) {
-		$ratings_array    = explode( ',', $selected_ratings_query );
-		$placeholder_text = 'single' === $select_type ? __( 'Select a rating', 'woocommerce' ) : __( 'Select ratings', 'woocommerce' );
-
-		$selected_items = array_reduce(
-			$rating_counts,
-			function( $carry, $rating ) use ( $ratings_array, $show_counts ) {
-				if ( in_array( (string) $rating['rating'], $ratings_array, true ) ) {
-					$count       = $rating['count'];
-					$count_label = $show_counts ? "($count)" : '';
-					$rating_str  = (string) $rating['rating'];
-					$carry[]     = array(
-						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
-						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
-						'value' => $rating['rating'],
-					);
-				}
-				return $carry;
-			},
-			array()
-		);
-
-		return array(
-			'items'          => array_map(
-				function ( $rating ) use ( $show_counts ) {
-					$count = $rating['count'];
-					$count_label = $show_counts ? "($count)" : '';
-					$rating_str = (string) $rating['rating'];
-					return array(
-						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
-						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
-						'value' => $rating['rating'],
-					);
-				},
-				$rating_counts
-			),
-			'select_type'    => $select_type,
-			'selected_items' => $selected_items,
-			'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
-			'placeholder'    => $placeholder_text,
-		);
-	}
-
-	/**
 	 * Retrieve the rating filter data for current block.
 	 *
 	 * @param WP_Block $block Block instance.
@@ -292,6 +222,13 @@ final class ProductFilterRating extends AbstractBlock {
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'rating_filter', true );
 		}
 
+		if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
+			unset(
+				$query_vars['taxonomy'],
+				$query_vars['term']
+			);
+		}
+
 		$counts = $filters->get_rating_counts( $query_vars );
 		$data   = array();
 
@@ -303,5 +240,16 @@ final class ProductFilterRating extends AbstractBlock {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

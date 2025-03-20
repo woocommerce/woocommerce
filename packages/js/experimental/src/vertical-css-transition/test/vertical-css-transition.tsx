@@ -2,14 +2,11 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { createElement, createRef } from '@wordpress/element';
+import { createElement, createRef, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import {
-	VerticalCSSTransition,
-	VerticalCSSTransitionProps,
-} from '../vertical-css-transition';
+import { VerticalCSSTransition } from '../vertical-css-transition';
 
 describe( 'VerticalCSSTransition', () => {
 	const originalClientHeight = Object.getOwnPropertyDescriptor(
@@ -37,7 +34,7 @@ describe( 'VerticalCSSTransition', () => {
 	it( 'should set maxHeight of children to container on entering and remove it when entered', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		let onEnteringCalledCount = 0;
-		const props: VerticalCSSTransitionProps = {
+		const props = {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
@@ -80,7 +77,7 @@ describe( 'VerticalCSSTransition', () => {
 	it( 'should update maxHeight when children are updated', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		let onEnteringCalledCount = 0;
-		const props: VerticalCSSTransitionProps = {
+		const props = {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
@@ -112,10 +109,12 @@ describe( 'VerticalCSSTransition', () => {
 
 		rerender(
 			<VerticalCSSTransition { ...props } in={ true }>
-				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
-					Test
-				</div>
-				<div>New child</div>
+				<>
+					<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
+						Test
+					</div>
+					<div>New child</div>
+				</>
 			</VerticalCSSTransition>
 		);
 		expect(
@@ -201,7 +200,7 @@ describe( 'VerticalCSSTransition', () => {
 
 	it( 'should still set css classes on enter transition', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
-		const props: VerticalCSSTransitionProps = {
+		const props = {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
@@ -238,7 +237,7 @@ describe( 'VerticalCSSTransition', () => {
 
 	it( 'should still set css classes on exit transition', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
-		const props: VerticalCSSTransitionProps = {
+		const props = {
 			in: true,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,

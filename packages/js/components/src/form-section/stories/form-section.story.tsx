@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Button, Card, CardBody, TextControl } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 
@@ -79,6 +78,6 @@ export const CustomElements: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/FormSection',
+	title: 'Components/FormSection',
 	component: FormSection,
 };

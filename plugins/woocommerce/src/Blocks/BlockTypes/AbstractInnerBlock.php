@@ -26,8 +26,8 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 			'style'           => $this->get_block_type_style(),
 		];
 
-		if ( isset( $this->api_version ) && '2' === $this->api_version ) {
-			$block_settings['api_version'] = 2;
+		if ( isset( $this->api_version ) ) {
+			$block_settings['api_version'] = intval( $this->api_version );
 		}
 
 		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name, 'inner-blocks/' );

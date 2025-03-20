@@ -407,64 +407,6 @@ class PatternsDictionary {
 				],
 			],
 			[
-				'name'          => 'Product Hero 2 Column 2 Row',
-				'slug'          => 'woocommerce-blocks/product-hero-2-col-2-row',
-				'images_total'  => 2,
-				'images_format' => 'landscape',
-				'content'       => [
-					'titles'       => [
-						[
-							'default'   => __( 'The Eden Jacket', 'woocommerce' ),
-							'ai_prompt' => __( 'A three words title that advertises a product related to the following image description: [image.0]', 'woocommerce' ),
-						],
-						[
-							'default'   => __( '100% Woolen', 'woocommerce' ),
-							'ai_prompt' => __( 'A two words title that advertises a product feature', 'woocommerce' ),
-						],
-						[
-							'default'   => __( 'Fits your wardrobe', 'woocommerce' ),
-							'ai_prompt' => __( 'A three words title that advertises a product feature', 'woocommerce' ),
-						],
-						[
-							'default'   => __( 'Versatile', 'woocommerce' ),
-							'ai_prompt' => __( 'An one word title that advertises a product feature', 'woocommerce' ),
-						],
-						[
-							'default'   => __( 'Normal Fit', 'woocommerce' ),
-							'ai_prompt' => __( 'A two words title that advertises a product feature', 'woocommerce' ),
-						],
-					],
-					'descriptions' => [
-						[
-							'default'   => __( 'Perfect for any look featuring a mid-rise, relax fitting silhouette.', 'woocommerce' ),
-							'ai_prompt' => __( 'The description of a product with at least 65 characters related to the following image: [image.0]', 'woocommerce' ),
-						],
-						[
-							'default'   => __( 'Reflect your fashionable style.', 'woocommerce' ),
-							'ai_prompt' => __( 'The description of a product feature with at least 30 characters', 'woocommerce' ),
-						],
-						[
-							'default'   => __( 'Half tuck into your pants or layer over.', 'woocommerce' ),
-							'ai_prompt' => __( 'The description of a product feature with at least 30 characters', 'woocommerce' ),
-						],
-						[
-							'default'   => __( 'Button-down front for any type of mood or look.', 'woocommerce' ),
-							'ai_prompt' => __( 'The description of a product feature with at least 30 characters', 'woocommerce' ),
-						],
-						[
-							'default'   => __( '42% Cupro 34% Linen 24% Viscose', 'woocommerce' ),
-							'ai_prompt' => __( 'The description of a product feature with at least 30 characters', 'woocommerce' ),
-						],
-					],
-					'buttons'      => [
-						[
-							'default'   => __( 'View product', 'woocommerce' ),
-							'ai_prompt' => __( 'A two words button text to go to the product page', 'woocommerce' ),
-						],
-					],
-				],
-			],
-			[
 				'name'    => 'Shop by Price',
 				'slug'    => 'woocommerce-blocks/shop-by-price',
 				'content' => [

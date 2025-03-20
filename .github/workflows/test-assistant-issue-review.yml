@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   send-slack-notification-when-issue-contains-team-solaris-label:
     if: "${{ github.event.label.name == 'team: Solaris' }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Wait 2 minutes for other labelling jobs to finish
         run: sleep 2m
@@ -21,10 +21,10 @@ jobs:
         id: notify
         with:
             slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
-            slack-channel: ${{ secrets.TEAM_SOLARIS_ISSUE_ANALYSIS_CHANNEL }}
+            slack-channel: ${{ secrets.WOO_PR_TESTING_ISSUE_ANALYSIS_SLACK_CHANNEL }}
             slack-text: |
                 <${{ github.event.issue.html_url }}|${{ github.event.issue.title }}>
                 *Labels:* ${{ join(github.event.issue.labels.*.name, ', ') }}
-                Please review this issue to check if it has been correctly assigned to Solaris.
+                Please review this issue to check if it has been correctly assigned.
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false

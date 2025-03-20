@@ -316,13 +316,13 @@ class BlockTemplateUtils {
 
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
+			'coming-soon-social-links.html',
 			'mini-cart.html',
+			'simple-product-add-to-cart-with-options.html',
+			'external-product-add-to-cart-with-options.html',
+			'variable-product-add-to-cart-with-options.html',
+			'grouped-product-add-to-cart-with-options.html',
 		);
-
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$wp_template_part_filenames[] = 'product-filters.html';
-			$wp_template_part_filenames[] = 'product-filters-overlay.html';
-		}
 
 		/*
 		* This may return the blockified directory for wp_templates.

@@ -3,6 +3,8 @@
  * Loads WooCommerce packages from the /packages directory. These are packages developed outside of core.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce;
 
 use Automattic\Jetpack\Constants;
@@ -27,7 +29,9 @@ class Packages {
 	 *
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
-	protected static $packages = array();
+	protected static $packages = array(
+		'email-editor' => '\\Automattic\\WooCommerce\\Internal\\EmailEditor\\Package',
+	);
 
 	/**
 	 * Array of package names and their main package classes.
@@ -122,7 +126,21 @@ class Packages {
 
 		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
 
-			// For gradual rollouts, ensure that a package is enabled for user's remote variant number.
+			$option       = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
+			$option_value = get_option( $option, '' );
+
+			// Opt out from the feature.
+			if ( 'no' === $option_value ) {
+				continue;
+			}
+
+			// Force enable feature -- mainly for testing purpose.
+			if ( 'yes' === $option_value ) {
+				$enabled_packages[ $merged_package_name ] = $package_class;
+				continue;
+			}
+
+			// If an option is not set, ensure that a package is enabled for user's remote variant number. Mainly for gradual releases.
 			$experimental_package_enabled = method_exists( $package_class, 'is_enabled' ) ?
 				call_user_func( array( $package_class, 'is_enabled' ) ) :
 				false;
@@ -131,10 +149,7 @@ class Packages {
 				continue;
 			}
 
-			$option = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
-			if ( 'yes' === get_option( $option, 'no' ) ) {
-				$enabled_packages[ $merged_package_name ] = $package_class;
-			}
+			$enabled_packages[ $merged_package_name ] = $package_class;
 		}
 
 		return array_merge( $enabled_packages, self::$base_packages );
@@ -193,7 +208,7 @@ class Packages {
 			deactivate_plugins( $active_plugin_path );
 			add_action(
 				'admin_notices',
-				function() use ( $plugin_data ) {
+				function () use ( $plugin_data ) {
 					echo '<div class="error"><p>';
 					printf(
 					/* translators: %s: is referring to the plugin's name. */
@@ -256,13 +271,14 @@ class Packages {
 	public static function display_notice_for_merged_plugins( $plugin_file ) {
 		global $wp_list_table;
 
-		$plugin_dir    = basename( dirname( $plugin_file ) );
+		$plugin_dir = basename( dirname( $plugin_file ) );
+		if ( ! self::is_package_enabled( $plugin_dir ) || is_null( $wp_list_table ) ) {
+			return;
+		}
+
 		$columns_count = $wp_list_table->get_column_count();
 		$notice        = __( 'This plugin can no longer be activated because its functionality is now included in <strong>WooCommerce</strong>. It is recommended to <strong>delete</strong> it.', 'woocommerce' );
-
-		if ( self::is_package_enabled( $plugin_dir ) ) {
-			echo '<tr class="plugin-update-tr"><td colspan="' . esc_attr( $columns_count ) . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . wp_kses_post( $notice ) . '</p></div></td></tr>';
-		}
+		echo '<tr class="plugin-update-tr"><td colspan="' . esc_attr( $columns_count ) . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . wp_kses_post( $notice ) . '</p></div></td></tr>';
 	}
 
 	/**

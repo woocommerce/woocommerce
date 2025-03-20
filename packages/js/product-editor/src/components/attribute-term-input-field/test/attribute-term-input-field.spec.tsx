@@ -11,6 +11,10 @@ import { ProductAttributeTerm } from '@woocommerce/data';
  */
 import { AttributeTermInputField } from '../attribute-term-input-field';
 
+jest.mock( '@wordpress/core-data', () => ( {
+	registerStore: jest.fn(),
+} ) );
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	resolveSelect: jest.fn(),
@@ -201,7 +205,6 @@ describe( 'AttributeTermInputField', () => {
 				/>
 			);
 		} );
-		// debug();
 		await waitFor( () => {
 			expect( screen.queryByText( 'spinner' ) ).toBeInTheDocument();
 		} );

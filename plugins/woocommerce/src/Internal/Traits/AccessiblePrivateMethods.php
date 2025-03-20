@@ -2,9 +2,10 @@
 
 namespace Automattic\WooCommerce\Internal\Traits;
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
-
 /**
+ * DON'T USE THIS TRAIT. It will be removed in WooCommerce 10.5.
+ * Instead, make the hook target methods public and mark them with an @internal annotation.
+ *
  * This trait allows making private methods of a class accessible from outside.
  * This is useful to define hook handlers with the [$this, 'method'] or [__CLASS__, 'method'] syntax
  * without having to make the method public (and thus having to keep it forever for backwards compatibility).
@@ -35,6 +36,8 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
  *
  * No special procedure is needed to remove hooks set up with these methods, the regular 'remove_action'
  * and 'remove_filter' functions provided by WordPress can be used as usual.
+ *
+ * @deprecated 9.6.0 Make the hook target methods public and mark them with an @internal annotation. This trait will be removed in WooCommerce 10.5.
  */
 trait AccessiblePrivateMethods {
 

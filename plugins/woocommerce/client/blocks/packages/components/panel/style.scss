@@ -1,0 +1,55 @@
+.wc-block-components-panel.has-border {
+	@include with-translucent-border(1px 0);
+
+	+ .wc-block-components-panel.has-border::after {
+		border-top-width: 0;
+	}
+}
+
+.wc-block-components-panel.has-border.no-top-border {
+	@include with-translucent-border(1px 0);
+	&::after {
+		border-top-width: 0;
+	}
+}
+
+.wc-block-components-panel__button {
+	box-sizing: border-box;
+	height: auto;
+	padding-right: #{24px + $gap-smaller};
+	padding-top: em($gap-small - 6px);
+	padding-left: 0 !important;
+	position: relative;
+	text-align: left;
+	width: 100%;
+	word-break: break-word;
+
+	&[aria-expanded="true"] {
+		margin-bottom: $gap-smaller * 2;
+	}
+
+	&,
+	&:hover,
+	&:focus,
+	&:active {
+		cursor: pointer;
+		padding-left: 0 !important;
+	}
+
+	> .wc-block-components-panel__button-icon {
+		fill: currentColor;
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: auto;
+	}
+}
+
+.wc-block-components-panel__content {
+	// Ensures the panel contents are not visible for any theme that tweaked the
+	// `display` property of div elements.
+	&[hidden] {
+		display: none;
+	}
+}

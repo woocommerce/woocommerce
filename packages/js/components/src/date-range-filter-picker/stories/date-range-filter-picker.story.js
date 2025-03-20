@@ -44,6 +44,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/DateRangeFilterPicker',
+	title: 'Components/DateRangeFilterPicker',
 	component: DateRangeFilterPicker,
 };

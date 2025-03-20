@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/3.1.0) - 2025-01-06 
+
+-   Minor - Add JS remote logging package [#49702]
+-   Minor - Add Settings package, feature flag, and initial page. [#52391]
+-   Patch - CI: liverage composer packages cache in lint monorepo job [#52054]
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
+-   Patch - Monorepo: consolidate syncpack config around React 17/18 usage. [#52022]
+-   Patch - Update pnpm to 9.1.0 [#47385]
+-   Minor - Upgraded Typescript in the monorepo to 5.7.2 [#53165]
+
 ## [3.0.1](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/3.0.1) - 2024-05-07 
 
 -   Patch - Add @woocommerce/price-format package. [#47099]
@@ -10,7 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 -   Patch - Fix a bug where the assets folder was not distributed with @woocommerce/dependency-extraction-webpack-plugin [#46755]
 -   Patch - bump php version in packages/js/*/composer.json [#42020]
--    - Bump node to version 20 [#46702]
+-   Bump node to version 20 [#46702]
 -   Minor - Bump node version. [#45148]
 
 ## [2.3.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/2.3.0) - 2023-10-27 

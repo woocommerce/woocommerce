@@ -18,6 +18,6 @@ const ImageUploadExample = () => {
 export const Basic = () => <ImageUploadExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/ImageUpload',
+	title: 'Components/ImageUpload',
 	component: ImageUpload,
 };

@@ -1,0 +1,40 @@
+name: 📱 REST API issue for mobile apps
+description: Bug reports and enhancement requests for the REST API related to its usage by the native mobile apps.
+title: "[REST API]: "
+labels: ["type: task", "focus: rest api", "stakeholder: mobile teams"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thanks for contributing!
+
+        Please provide the information requested in this form.
+        
+        **Note:** To report a bug or request an enhancement to the native mobile apps, please create your request directly in the [iOS](https://github.com/woocommerce/woocommerce-ios/issues) or [Android](https://github.com/woocommerce/woocommerce-android/issues) repositories.
+  - type: textarea
+    id: Problem
+    attributes:
+      label: Describe the issue or limitation
+      description: A clear and concise description of what is happening and what you would like to see happen.
+    validations:
+      required: true
+  - type: textarea
+    id: Solution
+    attributes:
+      label: Describe a solution you suggest
+      description: A clear and concise description of the solution you propose to address the issue or limitation.
+  - type: textarea
+    id: Value
+    attributes:
+      label: Describe the value it will bring
+      description: A clear and concise description of the benefits the solution will unlock or why now is the right time to address this.
+  - type: textarea
+    id: Alternatives
+    attributes:
+      label: Describe alternative solutions
+      description: A clear and concise description of other solutions you have considered and their potential downsides.
+  - type: textarea
+    id: Timeline
+    attributes:
+      label: When do you need this solved
+      description: By when do you need this issue or limitation resolved? (This is an indication for prioritization; we cannot guarantee delivery within the suggested timeline.)

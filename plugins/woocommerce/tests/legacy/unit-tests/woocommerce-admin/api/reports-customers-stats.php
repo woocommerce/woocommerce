@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Reports Customers Stats REST API Test Class
  * @runTestsInSeparateProcesses
@@ -108,22 +110,22 @@ class WC_Admin_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case 
 
 		// Place some test orders.
 		$order = WC_Helper_Order::create_order( $test_customers[0]->get_id(), $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
 		$order = WC_Helper_Order::create_order( $test_customers[0]->get_id(), $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 234 );
 		$order->save();
 
 		$order = WC_Helper_Order::create_order( $test_customers[1]->get_id(), $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 55 );
 		$order->save();
 
 		$order = WC_Helper_Order::create_order( $test_customers[2]->get_id(), $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 9.12 );
 		$order->save();
 

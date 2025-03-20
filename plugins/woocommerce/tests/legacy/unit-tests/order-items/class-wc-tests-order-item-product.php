@@ -6,10 +6,22 @@
  * @since 3.2.0
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+
 /**
  * Order Item Product unit tests.
  */
 class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
+
+	use CogsAwareUnitTestSuiteTrait;
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->disable_cogs_feature();
+	}
 
 	/**
 	 * Test generic setters and getters for WC_Order_Item_Product.
@@ -381,5 +393,46 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertFalse( $item->meta_exists( 'foo' ) );
 		$item->add_meta_data( 'foo', 'bar' );
 		$this->assertEquals( 'bar', $item->get_meta( 'foo' ) );
+	}
+
+	/**
+	 * @testdox Product order items manage a Cost of Goods Sold value.
+	 */
+	public function test_has_cogs() {
+		$product_item = new WC_Order_Item_Product();
+
+		$this->assertTrue( $product_item->has_cogs() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value is calculated as the product cost times the quantity.
+	 */
+	public function test_cogs_is_calculated_as_product_cogs_times_quantity() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product_Simple();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $product );
+		$product_item->set_quantity( 3 );
+		$product_item->save();
+
+		$this->assertTrue( $product_item->calculate_cogs_value() );
+		$this->assertEquals( 12.34 * 3, $product_item->get_cogs_value() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value calculation fails if the product can't be retrieved, and then the current value isn't modified.
+	 */
+	public function test_cogs_calculation_fails_if_product_cant_be_retrieved() {
+		$this->enable_cogs_feature();
+
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_cogs_value( 12.34 );
+
+		$this->assertFalse( $product_item->calculate_cogs_value() );
+		$this->assertEquals( 12.34, $product_item->get_cogs_value() );
 	}
 }

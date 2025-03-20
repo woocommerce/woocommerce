@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import React from 'react';
-
-/**
  * Internal dependencies
  */
 import { SuggestionPillItem } from './suggestion-pill-item';

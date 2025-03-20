@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Redirect to the canonical single product URL if the wrong category slug has been used.

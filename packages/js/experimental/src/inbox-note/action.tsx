@@ -25,10 +25,13 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 } ) => {
 	const [ inAction, setInAction ] = useState( false );
 
-	const handleActionClick: React.MouseEventHandler< HTMLAnchorElement > = (
-		event
-	) => {
-		const targetHref = event.currentTarget.href || '';
+	const handleActionClick: React.MouseEventHandler<
+		HTMLAnchorElement | HTMLButtonElement
+	> = ( event ) => {
+		const targetHref =
+			event.currentTarget && 'href' in event.currentTarget
+				? event.currentTarget.href
+				: '';
 		let isActionable = true;
 
 		let adminUrl = '';
@@ -56,11 +59,10 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 	return (
 		<Button
 			className="woocommerce-inbox-note__action-button"
-			isSecondary={ variant === 'secondary' }
-			isLink={ variant === 'link' }
+			variant={ variant }
 			isBusy={ inAction }
 			disabled={ inAction }
-			href={ href }
+			href={ href || undefined }
 			onClick={ handleActionClick }
 		>
 			<span>{ label }</span>

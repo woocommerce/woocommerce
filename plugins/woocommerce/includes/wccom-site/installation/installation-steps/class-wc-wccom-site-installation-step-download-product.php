@@ -41,7 +41,7 @@ class WC_WCCOM_Site_Installation_Step_Download_Product implements WC_WCCOM_Site_
 
 		$download_path = $upgrader->download_package( $this->state->get_download_url() );
 
-		if ( empty( $download_path ) ) {
+		if ( is_wp_error( $download_path ) || empty( $download_path ) ) {
 			throw new Installer_Error( Installer_Error_Codes::MISSING_DOWNLOAD_PATH );
 		}
 

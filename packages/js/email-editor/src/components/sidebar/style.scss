@@ -1,0 +1,18 @@
+@import "~@wordpress/base-styles/colors";
+
+.background-block-support-panel .woocommerce-grid-full-width,
+.border-block-support-panel .woocommerce-grid-full-width {
+	// setting the grid to 100% width
+	// because border block contains two grid columns
+	grid-column: 1/3;
+	// resetting margin fits the notice to the full column width
+	margin: 0;
+}
+
+// Disable focus outline for buttons in the sidebar
+.edit-post-sidebar {
+	.components-button:focus:not(:disabled) {
+		box-shadow: none;
+		outline: none;
+	}
+}

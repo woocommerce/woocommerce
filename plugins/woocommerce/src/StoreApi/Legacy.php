@@ -5,7 +5,7 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\Blocks\Package;
-
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 /**
  * Legacy class.
  */
@@ -23,6 +23,8 @@ class Legacy {
 	 *
 	 * @param PaymentContext $context Holds context for the payment.
 	 * @param PaymentResult  $result  Result of the payment.
+	 *
+	 * @throws RouteException If the gateway returns an explicit error message.
 	 */
 	public function process_legacy_payment( PaymentContext $context, PaymentResult &$result ) {
 		if ( $result->status ) {
@@ -56,9 +58,14 @@ class Legacy {
 		// Restore $_POST data.
 		$_POST = $post_data;
 
-		// If `process_payment` added notices, clear them. Notices are not displayed from the API -- payment should fail,
-		// and a generic notice will be shown instead if payment failed.
-		wc_clear_notices();
+		// If the payment failed with a message, throw an exception.
+		if ( isset( $gateway_result['result'] ) && 'failure' === $gateway_result['result'] ) {
+			if ( isset( $gateway_result['message'] ) ) {
+				throw new RouteException( 'woocommerce_rest_payment_error', esc_html( wp_strip_all_tags( $gateway_result['message'] ) ), 400 );
+			} else {
+				NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_payment_error' );
+			}
+		}
 
 		// Handle result. If status was not returned we consider this invalid and return failure.
 		$result_status = $gateway_result['result'] ?? 'failure';
@@ -66,8 +73,11 @@ class Legacy {
 		$valid_status = array( 'success', 'failure', 'pending', 'error' );
 		$result->set_status( in_array( $result_status, $valid_status, true ) ? $result_status : 'failure' );
 
+		// If `process_payment` added notices but didn't set the status to failure, clear them. Notices are not displayed from the API unless status is failure.
+		wc_clear_notices();
+
 		// set payment_details from result.
 		$result->set_payment_details( array_merge( $result->payment_details, $gateway_result ) );
-		$result->set_redirect_url( $gateway_result['redirect'] );
+		$result->set_redirect_url( $gateway_result['redirect'] ?? '' );
 	}
 }

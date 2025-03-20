@@ -3,30 +3,30 @@
 
 .woocommerce-customer-effort-score__selection {
 	margin: 1em 0 1.5em 0;
+	max-width: 100%;
+	width: 500px;
 
-	.components-base-control__field {
-		display: flex;
-		flex-direction: column;
-		margin: 0 auto;
-		color: var(--wp-admin-theme-color);
+	.woocommerce-customer-effort-score__radio-control {
 
-		@include breakpoint( '>600px' ) {
-			flex-direction: row;
-			justify-content: center;
-		}
-
-		.components-h-stack {
-			@include breakpoint( '>600px' ) {
-				flex-direction: row;
-			}
+		.components-radio-control__group-wrapper,
+		.components-v-stack {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+			margin: 0 auto;
+			color: var(--wp-admin-theme-color);
+			gap: 4px;
+			justify-items: center;
 		}
 	}
 
+
+
 	.components-radio-control__option {
+		column-gap: 0;
+
 		&:not(:last-child) {
 			// Override package component style.
 			margin-bottom: 0;
-			margin-right: 4px;
 		}
 
 		input {
@@ -49,13 +49,13 @@
 			}
 		}
 
-		input:focus + label {
+		input:focus+label {
 			outline: 2px solid $studio-wordpress-blue;
 			background-color: peach;
 			color: $studio-blue-60;
 		}
 
-		input:checked + label {
+		input:checked+label {
 			outline: 2px solid $studio-wordpress-blue;
 			background-color: $studio-wordpress-blue-0;
 		}
@@ -69,23 +69,23 @@
 			color: $studio-wordpress-blue;
 		}
 
-		input[value='1'] + label::before {
+		input[value='1']+label::before {
 			content: '😞';
 		}
 
-		input[value='2'] + label::before {
+		input[value='2']+label::before {
 			content: '🙁';
 		}
 
-		input[value='3'] + label::before {
+		input[value='3']+label::before {
 			content: '😑';
 		}
 
-		input[value='4'] + label::before {
+		input[value='4']+label::before {
 			content: '🙂';
 		}
 
-		input[value='5'] + label::before {
+		input[value='5']+label::before {
 			content: '😍';
 		}
 	}
@@ -105,6 +105,10 @@
 	textarea {
 		width: 100%;
 	}
+
+	.components-base-control__field {
+		margin-bottom: 8px;
+	}
 }
 
 .woocommerce-customer-effort-score {
@@ -120,7 +124,7 @@
 	left: 0;
 	right: 0;
 	background-color: #fff;
-	padding: calc( 2 * $gap );
+	padding: calc(2 * $gap );
 
 	.components-button {
 		margin-left: 1em;

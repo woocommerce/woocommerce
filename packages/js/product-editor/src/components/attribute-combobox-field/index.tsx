@@ -30,12 +30,15 @@ import type {
  * the `__experimentalRenderItem` property.
  */
 interface ComboboxControlProps
-	extends Omit< CoreComboboxControl.Props, 'label' | 'help' > {
+	extends Omit<
+		React.ComponentProps< typeof CoreComboboxControl >,
+		'label' | 'help'
+	> {
 	__experimentalRenderItem?: ( args: {
 		item: ComboboxControlOption;
 	} ) => string | JSX.Element;
+	className?: string;
 }
-
 /*
  * Create an alias for the ComboboxControl core component,
  * but with the custom ComboboxControlProps interface.

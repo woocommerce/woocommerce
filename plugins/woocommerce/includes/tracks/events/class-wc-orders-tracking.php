@@ -5,6 +5,7 @@
  * @package WooCommerce\Tracks
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
@@ -127,7 +128,7 @@ class WC_Orders_Tracking {
 		}
 
 		$order = wc_get_order( $id );
-		if ( ! $order || 'auto-draft' === $order->get_status() ) {
+		if ( ! $order || OrderStatus::AUTO_DRAFT === $order->get_status() ) {
 			return;
 		}
 

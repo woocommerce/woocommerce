@@ -66,7 +66,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * Dispatch
 	 *
 	 * @access public
-	 * @return void
+	 * @return array|WP_Error
 	 */
 	public function dispatch() {
 		// Schedule the cron healthcheck.

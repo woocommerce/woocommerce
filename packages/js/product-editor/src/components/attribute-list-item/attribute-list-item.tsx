@@ -80,7 +80,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 					<Tooltip
 						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
-						position="top center"
+						placement="top"
 						text={ VISIBLE_TEXT }
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">

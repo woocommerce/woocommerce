@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issues with Segments Intervals when Order Date Paid is further than Order Date Created

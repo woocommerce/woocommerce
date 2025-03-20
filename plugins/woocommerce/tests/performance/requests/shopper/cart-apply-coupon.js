@@ -14,8 +14,6 @@ import {
  */
 import {
 	base_url,
-	product_sku,
-	product_id,
 	coupon_code,
 	think_time_min,
 	think_time_max,
@@ -29,6 +27,7 @@ import {
 	commonNonStandardHeaders,
 	contentTypeRequestHeader,
 } from '../../headers.js';
+import { getDefaultProduct } from '../../utils.js';
 
 export function cartApplyCoupon() {
 	let apply_coupon_nonce;
@@ -44,11 +43,12 @@ export function cartApplyCoupon() {
 			commonNonStandardHeaders
 		);
 
+		const product = getDefaultProduct( 'Shopper' );
+
 		const response = http.post(
 			`${ base_url }/?wc-ajax=add_to_cart`,
 			{
-				product_sku: `${ product_sku }`,
-				product_id: `${ product_id }`,
+				product_id: `${ product.id }`,
 				quantity: '1',
 			},
 			{

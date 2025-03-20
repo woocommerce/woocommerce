@@ -22,7 +22,7 @@ export const setOption = async (
 	} );
 
 	return await apiContext
-		.post( '/wp-json/e2e-options/update', {
+		.post( './wp-json/e2e-options/update', {
 			failOnStatusCode: true,
 			data: { option_name: optionName, option_value: optionValue },
 		} )

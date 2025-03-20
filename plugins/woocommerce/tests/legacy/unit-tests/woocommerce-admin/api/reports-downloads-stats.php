@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\API.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * WC_Admin_Tests_API_Reports_Downloads_Stats
  */
@@ -60,7 +62,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -147,7 +149,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 25 );
 		$order->save();
 		$order_1 = $order->get_id();
@@ -170,7 +172,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 		}
 
 		$order = WC_Helper_Order::create_order( 2, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 10 );
 		$order->save();
 
@@ -242,7 +244,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 

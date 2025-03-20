@@ -55,7 +55,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			array_filter(
 				$gateways,
 				function( $gateway ) {
-					return 'cheque' === $gateway['id'];
+					return WC_Gateway_Cheque::ID === $gateway['id'];
 				}
 			)
 		);
@@ -63,7 +63,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 
 		$this->assertArraySubset(
 			array(
-				'id'                     => 'cheque',
+				'id'                     => WC_Gateway_Cheque::ID,
 				'title'                  => 'Check payments',
 				'description'            => 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.',
 				'order'                  => '',
@@ -128,7 +128,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals(
 			array(
-				'id'                     => 'paypal',
+				'id'                     => WC_Gateway_Paypal::ID,
 				'title'                  => 'PayPal',
 				'description'            => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
 				'order'                  => '',

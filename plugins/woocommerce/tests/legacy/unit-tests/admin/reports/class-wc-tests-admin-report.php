@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Admin\Reports
  */
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Tests for the WC_Admin_Report class.
  */
@@ -42,7 +45,7 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	 */
 	public function test_get_order_report_data() {
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$report = new WC_Admin_Report();
@@ -79,7 +82,7 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	 */
 	public function test_get_order_report_data_for_post_meta() {
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$report = new WC_Admin_Report();
@@ -130,7 +133,7 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	 */
 	public function test_get_order_report_data_for_post_data() {
 		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$report = new WC_Admin_Report();
@@ -146,7 +149,7 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 'wc-completed', $data->post_status );
+		$this->assertEquals( OrderInternalStatus::COMPLETED, $data->post_status );
 	}
 
 	/**
@@ -155,7 +158,7 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	public function test_get_order_report_data_for_order_items() {
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = WC_Helper_Order::create_order( 0, $product->get_id() );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$report = new WC_Admin_Report();

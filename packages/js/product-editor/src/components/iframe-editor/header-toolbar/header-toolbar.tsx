@@ -14,15 +14,10 @@ import {
 	Fragment,
 	useEffect,
 } from '@wordpress/element';
-import { isWpVersion } from '@woocommerce/settings';
 import classnames from 'classnames';
 import { MouseEvent } from 'react';
-import {
-	Button,
-	Popover,
-	/* @ts-expect-error missing types. */
-	ToolbarItem,
-} from '@wordpress/components';
+import { Button, Popover, ToolbarItem } from '@wordpress/components';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as preferencesStore,
@@ -36,10 +31,6 @@ import {
 	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -49,7 +40,6 @@ import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
 import { MoreMenu } from './more-menu';
-import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
 import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../constants';
 
 type HeaderToolbarProps = {
@@ -89,7 +79,6 @@ export function HeaderToolbar( {
 			// @ts-expect-error These selectors are available in the block data store.
 			getBlockSelectionStart,
 		} = select( blockEditorStore );
-		// @ts-expect-error These selectors are available in the block data store.
 		const { get: getPreference } = select( preferencesStore );
 
 		return {
@@ -115,9 +104,6 @@ export function HeaderToolbar( {
 		}
 	}, [ hasBlockSelection ] );
 
-	const renderBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
-
 	return (
 		<div className="woocommerce-iframe-editor__header">
 			<div className="woocommerce-iframe-editor__header-left">
@@ -132,6 +118,7 @@ export function HeaderToolbar( {
 							ref={ inserterButton }
 							as={ Button }
 							className="woocommerce-iframe-editor__header-inserter-toggle"
+							// @ts-expect-error the prop variant is passed to the Button component
 							variant="primary"
 							isPressed={ isInserterOpened }
 							onMouseDown={ (
@@ -152,16 +139,20 @@ export function HeaderToolbar( {
 						{ isLargeViewport && (
 							<ToolbarItem
 								as={ ToolSelector }
+								// @ts-expect-error the prop size is passed to the ToolSelector component
 								disabled={ isTextModeEnabled }
 								size="compact"
 							/>
 						) }
+						{ /* @ts-expect-error the prop size is passed to the EditorHistoryUndo component */ }
 						<ToolbarItem as={ EditorHistoryUndo } size="compact" />
+						{ /* @ts-expect-error the prop size is passed to the EditorHistoryRedo component */ }
 						<ToolbarItem as={ EditorHistoryRedo } size="compact" />
+						{ /* @ts-expect-error the prop size is passed to the DocumentOverview component */ }
 						<ToolbarItem as={ DocumentOverview } size="compact" />
 					</div>
 				</NavigableToolbar>
-				{ hasFixedToolbar && isLargeViewport && renderBlockToolbar && (
+				{ hasFixedToolbar && isLargeViewport && (
 					<>
 						<div
 							className={ classnames(
@@ -174,7 +165,7 @@ export function HeaderToolbar( {
 							{ /* @ts-expect-error missing type */ }
 							<BlockToolbar hideDragHandle />
 						</div>
-						{ /* @ts-expect-error missing type */ }
+						{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
 						<Popover.Slot name="block-toolbar" />
 						{ hasBlockSelection && (
 							<Button

@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Reports
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -106,7 +107,7 @@ class WC_Admin_Report {
 			'nocache'             => false,
 			'debug'               => false,
 			'order_types'         => wc_get_order_types( 'reports' ),
-			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
+			'order_status'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD ),
 			'parent_order_status' => false,
 		);
 		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );

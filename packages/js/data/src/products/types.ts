@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Schema } from '@wordpress/core-data';
+import { Post } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -74,7 +74,7 @@ export type ProductCatalogVisibility =
 	| 'hidden';
 
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
-	Schema.Post,
+	Post,
 	'status' | 'categories'
 > & {
 	attributes: ProductProductAttribute[];
@@ -183,7 +183,8 @@ export type ProductQuery<
 		| 'slug'
 		| 'price'
 		| 'popularity'
-		| 'rating';
+		| 'rating'
+		| 'menu_order';
 	slug?: string;
 	status?: Status;
 	type?: Type;

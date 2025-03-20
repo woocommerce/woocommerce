@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * Class WC_Helper_Product.
  *
@@ -49,10 +52,10 @@ class WC_Helper_Product {
 				'price'         => 10,
 				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
-				'tax_status'    => 'taxable',
+				'tax_status'    => ProductTaxStatus::TAXABLE,
 				'downloadable'  => false,
 				'virtual'       => false,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 				'weight'        => '1.1',
 			);
 
@@ -86,10 +89,10 @@ class WC_Helper_Product {
 				'regular_price' => 10,
 				'price'         => 10,
 				'manage_stock'  => false,
-				'tax_status'    => 'taxable',
+				'tax_status'    => ProductTaxStatus::TAXABLE,
 				'downloadable'  => true,
 				'virtual'       => false,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 			)
 		);
 

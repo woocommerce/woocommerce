@@ -6,6 +6,8 @@
  * @since   3.4.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * WC_Tests_Template_Functions class.
  */
@@ -37,7 +39,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'post-' . $product->get_id(),
 			'status-publish',
 			'first',
-			'instock',
+			ProductStockStatus::IN_STOCK,
 			'product_cat-some-category',
 			'sale',
 			'virtual',
@@ -56,7 +58,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'type-product',
 			'post-' . $product->get_id(),
 			'status-publish',
-			'instock',
+			ProductStockStatus::IN_STOCK,
 			'product_cat-some-category',
 			'sale',
 			'virtual',
@@ -234,7 +236,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			),
 			'1'
 		);
-		$expected_html = '<p class="form-row validate-required" id="test_radio_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="radio" class="input-radio " value="1" name="test" aria-required="true" id="test_radio_1" checked=\'checked\' /><label for="test_radio_1" class="radio ">Option 1</label><input type="radio" class="input-radio " value="2" name="test" aria-required="true" id="test_radio_2" /><label for="test_radio_2" class="radio ">Option 2</label></span></p>';
+		$expected_html = '<p class="form-row validate-required" id="test_radio_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="radio" class="input-radio " value="1" name="test" aria-required="true" id="test_radio_1" checked=\'checked\' /><label for="test_radio_1" class="radio required_field">Option 1&nbsp;<span class="required" aria-hidden="true">*</span></label><input type="radio" class="input-radio " value="2" name="test" aria-required="true" id="test_radio_2" /><label for="test_radio_2" class="radio required_field">Option 2&nbsp;<span class="required" aria-hidden="true">*</span></label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
 	}
@@ -271,7 +273,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			),
 			'1'
 		);
-		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<abbr class="required" title="required">*</abbr></label></span></p>';
+		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<span class="required" aria-hidden="true">*</span></label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
 	}

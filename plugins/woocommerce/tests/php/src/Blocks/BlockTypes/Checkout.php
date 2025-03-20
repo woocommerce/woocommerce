@@ -67,6 +67,41 @@ class Checkout extends \WP_UnitTestCase {
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
 		$this->assertEquals( 'Changed pickup', $pickup_location_settings['title'] );
 
+		// Updates the pickup title with the default value.
+		$updated_content = '<!-- wp:woocommerce/checkout {"showOrderNotes":false} --> <div class="wp-block-woocommerce-checkout is-loading"> <!-- wp:woocommerce/checkout-shipping-method-block {"localPickupText":"Pickup"} --> <div class="wp-block-woocommerce-checkout-shipping-method-block"></div> <!-- /wp:woocommerce/checkout-shipping-method-block --></div> <!-- /wp:woocommerce/checkout -->';
+		wp_update_post(
+			[
+				'ID'           => $page_id,
+				'post_content' => $updated_content,
+			]
+		);
+
+		// Now the post was saved with an updated localPickupText attribute, the title on Local Pickup settings should be updated.
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
+		$this->assertEquals( 'Pickup', $pickup_location_settings['title'] );
+
+		// Updates the pickup title with an empty value.
+		$updated_content = '<!-- wp:woocommerce/checkout {"showOrderNotes":false} --> <div class="wp-block-woocommerce-checkout is-loading"> <!-- wp:woocommerce/checkout-shipping-method-block {"localPickupText":""} --> <div class="wp-block-woocommerce-checkout-shipping-method-block"></div> <!-- /wp:woocommerce/checkout-shipping-method-block --></div> <!-- /wp:woocommerce/checkout -->';
+		wp_update_post(
+			[
+				'ID'           => $page_id,
+				'post_content' => $updated_content,
+			]
+		);
+
+		// Now the post was saved with an updated localPickupText attribute, the title on Local Pickup settings should be updated.
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
+		$this->assertEquals( 'Pickup', $pickup_location_settings['title'] );
+
+		// Updates the pickup title back to "Changed pickup" to test AssetDataRegistry.
+		$updated_content = '<!-- wp:woocommerce/checkout {"showOrderNotes":false} --> <div class="wp-block-woocommerce-checkout is-loading"> <!-- wp:woocommerce/checkout-shipping-method-block {"localPickupText":"Changed pickup"} --> <div class="wp-block-woocommerce-checkout-shipping-method-block"></div> <!-- /wp:woocommerce/checkout-shipping-method-block --></div> <!-- /wp:woocommerce/checkout -->';
+		wp_update_post(
+			[
+				'ID'           => $page_id,
+				'post_content' => $updated_content,
+			]
+		);
+
 		// Create a new Checkout block class with the mocked AssetDataRegistry. This is so we can inspect it after the change.
 		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
 		$checkout->mock_enqueue_data();

@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Helper_Order.
  *
@@ -53,7 +55,7 @@ class WC_Helper_Order {
 		WC_Helper_Shipping::create_simple_flat_rate();
 
 		$default_order_data = array(
-			'status'        => 'pending',
+			'status'        => OrderStatus::PENDING,
 			'customer_id'   => $customer_id,
 			'customer_note' => '',
 			'total'         => '',
@@ -108,7 +110,7 @@ class WC_Helper_Order {
 
 		// Set payment gateway.
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$order->set_payment_method( $payment_gateways['bacs'] );
+		$order->set_payment_method( $payment_gateways[ WC_Gateway_BACS::ID ] );
 
 		// Set totals.
 		$order->set_shipping_total( 10 );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Create a wrapper function for all external dependency function calls for safety for remote logging

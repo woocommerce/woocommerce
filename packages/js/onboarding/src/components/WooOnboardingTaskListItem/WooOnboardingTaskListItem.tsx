@@ -6,6 +6,7 @@ import { Slot, Fill } from '@wordpress/components';
 
 type WooOnboardingTaskListItemProps = {
 	id: string;
+	children: React.ComponentProps< typeof Fill >[ 'children' ];
 };
 
 /**
@@ -16,13 +17,20 @@ type WooOnboardingTaskListItemProps = {
  * @param {Object} props    React props.
  * @param {string} props.id Task id.
  */
-export const WooOnboardingTaskListItem: React.FC< WooOnboardingTaskListItemProps > & {
-	Slot: React.VFC< Slot.Props & { id: string } >;
-} = ( { id, ...props } ) => (
+export const WooOnboardingTaskListItem = ( {
+	id,
+	...props
+}: WooOnboardingTaskListItemProps ) => (
 	<Fill name={ 'woocommerce_onboarding_task_list_item_' + id } { ...props } />
 );
 
-WooOnboardingTaskListItem.Slot = ( { id, fillProps } ) => (
+WooOnboardingTaskListItem.Slot = ( {
+	id,
+	fillProps,
+}: {
+	id: string;
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => (
 	<Slot
 		name={ 'woocommerce_onboarding_task_list_item_' + id }
 		fillProps={ fillProps }

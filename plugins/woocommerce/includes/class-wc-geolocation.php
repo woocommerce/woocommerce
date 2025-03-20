@@ -83,7 +83,11 @@ class WC_Geolocation {
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			return (string) rest_is_ip_address( trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) ) );
+			$value = trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) );
+			// Account for the '<IPv4 address>:<port>', '[<IPv6>]' and '[<IPv6>]:<port>' cases, removing the port.
+			// The regular expression is oversimplified on purpose, later 'rest_is_ip_address' will do the actual IP address validation.
+			$value = preg_replace( '/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\:.*|\[([^]]+)\].*/', '$1$2', $value );
+			return (string) rest_is_ip_address( $value );
 		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
 			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
@@ -142,7 +146,16 @@ class WC_Geolocation {
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
-		// Filter to allow custom geolocation of the IP address.
+		/**
+		 * Filter to allow custom geolocation of the IP address.
+		 *
+		 * @since 3.9.0
+		 * @param string $geolocation Country code.
+		 * @param string $ip_address IP Address.
+		 * @param bool $fallback If true, fallbacks to alternative IP detection (can be slower).
+		 * @param bool $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
+		 * @return string
+		 */
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
 		if ( false !== $country_code ) {

@@ -102,7 +102,6 @@ const completer: AutoCompleter = {
 					className="woocommerce-search__result-thumbnail"
 					product={ variation }
 					width={ 18 }
-					height={ 18 }
 					alt=""
 				/>
 				<span

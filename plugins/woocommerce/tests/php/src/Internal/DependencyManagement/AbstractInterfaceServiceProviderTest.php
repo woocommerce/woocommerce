@@ -59,7 +59,7 @@ class AbstractInterfaceServiceProviderTest extends \WC_Unit_Test_Case {
 			 *
 			 * @return DefinitionInterface
 			 */
-			public function add_with_implements_tags( string $id, $concrete = null, bool $shared = null ): DefinitionInterface {
+			public function add_with_implements_tags( string $id, $concrete = null, ?bool $shared = null ): DefinitionInterface {
 				return parent::add_with_implements_tags( $id, $concrete, $shared );
 			}
 

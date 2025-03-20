@@ -5,7 +5,7 @@ menu_title: Classic theme development
 
 ---
 
-**Note:** this document is geared toward the development of classic themes. Check this other document for [block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md).
+**Note:** this document is geared toward the development of classic themes. Check this other document for [block theme development](../block-theme-development/theming-woo-blocks.md).
 
 ---
 

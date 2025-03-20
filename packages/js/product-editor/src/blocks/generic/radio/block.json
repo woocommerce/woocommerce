@@ -27,7 +27,7 @@
 				"type": "object"
 			},
 			"default": [],
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"disabled": {
 			"type": "boolean",

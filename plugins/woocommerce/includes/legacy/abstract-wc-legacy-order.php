@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -683,7 +686,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function cancel_order( $note = '' ) {
 		wc_deprecated_function( 'WC_Order::cancel_order', '3.0', 'WC_Order::update_status' );
 		WC()->session->set( 'order_awaiting_payment', false );
-		$this->update_status( 'cancelled', $note );
+		$this->update_status( OrderStatus::CANCELLED, $note );
 	}
 
 	/**

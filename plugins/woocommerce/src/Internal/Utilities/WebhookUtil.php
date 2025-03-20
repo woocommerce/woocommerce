@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Cache_Helper;
 
 /**
@@ -13,14 +12,12 @@ use WC_Cache_Helper;
  */
 class WebhookUtil {
 
-	use AccessiblePrivateMethods;
-
 	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		self::add_action( 'deleted_user', array( $this, 'reassign_webhooks_to_new_user_id' ), 10, 2 );
-		self::add_action( 'delete_user_form', array( $this, 'maybe_render_user_with_webhooks_warning' ), 10, 2 );
+		add_action( 'deleted_user', array( $this, 'reassign_webhooks_to_new_user_id' ), 10, 2 );
+		add_action( 'delete_user_form', array( $this, 'maybe_render_user_with_webhooks_warning' ), 10, 2 );
 	}
 
 	/**
@@ -34,8 +31,10 @@ class WebhookUtil {
 	 *
 	 * @return void
 	 * @since 7.8.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function reassign_webhooks_to_new_user_id( int $old_user_id, ?int $new_user_id ): void {
+	public function reassign_webhooks_to_new_user_id( int $old_user_id, ?int $new_user_id ): void {
 		$webhook_ids = $this->get_webhook_ids_for_user( $old_user_id );
 
 		foreach ( $webhook_ids as $webhook_id ) {
@@ -52,8 +51,10 @@ class WebhookUtil {
 	 * @param array    $userids Array with the ids of the users that are about to be deleted.
 	 * @return void
 	 * @since 7.8.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function maybe_render_user_with_webhooks_warning( \WP_User $current_user, array $userids ): void {
+	public function maybe_render_user_with_webhooks_warning( \WP_User $current_user, array $userids ): void {
 		global $wpdb;
 
 		$at_least_one_user_with_webhooks = false;

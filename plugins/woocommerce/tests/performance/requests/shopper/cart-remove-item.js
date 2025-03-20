@@ -12,13 +12,7 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	base_url,
-	product_sku,
-	product_id,
-	think_time_min,
-	think_time_max,
-} from '../../config.js';
+import { base_url, think_time_min, think_time_max } from '../../config.js';
 import {
 	htmlRequestHeader,
 	jsonRequestHeader,
@@ -27,6 +21,7 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { getDefaultProduct } from '../../utils.js';
 
 export function cartRemoveItem() {
 	let item_to_remove;
@@ -41,11 +36,12 @@ export function cartRemoveItem() {
 			commonNonStandardHeaders
 		);
 
+		const product = getDefaultProduct( 'Shopper' );
+
 		const response = http.post(
 			`${ base_url }/?wc-ajax=add_to_cart`,
 			{
-				product_sku: `${ product_sku }`,
-				product_id: `${ product_id }`,
+				product_id: `${ product.id }`,
 				quantity: '1',
 			},
 			{

@@ -6,6 +6,10 @@ namespace Automattic\WooCommerce\Internal;
 /**
  * Interface RegisterHooksInterface
  *
+ * The following must be added at the end of the 'init_hooks' method in the 'WooCommerce' class
+ * for each class implementing this interface:
+ * $container->get( <full class name>::class )->register();
+ *
  * @since 8.5.0
  */
 interface RegisterHooksInterface {

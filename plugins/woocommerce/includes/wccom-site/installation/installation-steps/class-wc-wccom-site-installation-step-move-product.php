@@ -59,12 +59,30 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 
 			$this->state->set_installed_path( $existing_folder_path );
 			$this->state->set_already_installed_plugin_info( $plugin_info );
+			$this->maybe_connect_theme();
 
 			return $this->state;
+		}
+
+		if ( ! is_wp_error( $result ) ) {
+			$this->maybe_connect_theme();
 		}
 
 		$this->state->set_installed_path( $result['destination'] );
 
 		return $this->state;
+	}
+
+	/**
+	 * Connect to wccom if installing a theme
+	 *
+	 * @return void
+	 */
+	protected function maybe_connect_theme() {
+		if ( 'theme' !== $this->state->get_product_type() ) {
+			return;
+		}
+
+		WC_Helper::connect_theme( $this->state->get_product_id() );
 	}
 }

@@ -28,59 +28,66 @@ const areAllBlocksInvisible = ( blocks: BlockInstance[], context: any ) => {
 	} );
 };
 
-const maybeHideInventoryAdvancedCollapsible = createHigherOrderComponent<
-	Record< string, unknown >
->( ( BlockEdit ) => {
-	return ( props ) => {
-		const { hasInnerBlocks, allBlocksInvisible: blocksInvisible } =
-			useSelect( ( select ) => {
-				// bail early if not the product-inventory-advanced block
-				if (
-					( props?.attributes as Record< string, string > )
-						?._templateBlockId !== 'product-inventory-advanced'
-				) {
-					return {
-						hasInnerBlocks: true,
-						allBlocksInvisible: false,
-					};
-				}
-				const evalContext = useEvaluationContext(
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					props.context as any
+const maybeHideInventoryAdvancedCollapsible = createHigherOrderComponent(
+	( BlockEdit ) => {
+		return ( props ) => {
+			const { hasInnerBlocks, allBlocksInvisible: blocksInvisible } =
+				useSelect(
+					( select ) => {
+						// bail early if not the product-inventory-advanced block
+						if (
+							( props?.attributes as Record< string, string > )
+								?._templateBlockId !==
+							'product-inventory-advanced'
+						) {
+							return {
+								hasInnerBlocks: true,
+								allBlocksInvisible: false,
+							};
+						}
+						const evalContext = useEvaluationContext(
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							props.context as any
+						);
+						const advancedCollapsibleBlock = select(
+							'core/block-editor'
+							// @ts-expect-error Selector is not typed
+						).getBlock( props?.clientId as string );
+
+						let allBlocksInvisible = false;
+						if ( advancedCollapsibleBlock?.innerBlocks?.length ) {
+							const advancedSectionBlock =
+								advancedCollapsibleBlock?.innerBlocks[ 0 ];
+							allBlocksInvisible = areAllBlocksInvisible(
+								advancedSectionBlock?.innerBlocks,
+								evalContext.getEvaluationContext( select )
+							);
+						}
+
+						return {
+							hasInnerBlocks:
+								!! advancedCollapsibleBlock?.innerBlocks
+									?.length,
+							allBlocksInvisible,
+						};
+					},
+					[ props.attributes, props.context, props.clientId ]
 				);
-				const advancedCollapsibleBlock = select(
-					'core/block-editor'
-				).getBlock( props?.clientId as string );
 
-				let allBlocksInvisible = false;
-				if ( advancedCollapsibleBlock?.innerBlocks?.length ) {
-					const advancedSectionBlock =
-						advancedCollapsibleBlock?.innerBlocks[ 0 ];
-					allBlocksInvisible = areAllBlocksInvisible(
-						advancedSectionBlock?.innerBlocks,
-						evalContext.getEvaluationContext( select )
-					);
-				}
+			// No inner blocks, so we can render the default block edit.
+			if ( ! hasInnerBlocks ) {
+				return <BlockEdit { ...props } />;
+			}
 
-				return {
-					hasInnerBlocks:
-						!! advancedCollapsibleBlock?.innerBlocks?.length,
-					allBlocksInvisible,
-				};
-			} );
+			if ( blocksInvisible ) {
+				return null;
+			}
 
-		// No inner blocks, so we can render the default block edit.
-		if ( ! hasInnerBlocks ) {
 			return <BlockEdit { ...props } />;
-		}
-
-		if ( blocksInvisible ) {
-			return null;
-		}
-
-		return <BlockEdit { ...props } />;
-	};
-}, 'maybeHideInventoryAdvancedCollapsible' );
+		};
+	},
+	'maybeHideInventoryAdvancedCollapsible'
+);
 
 export default function () {
 	addFilter(

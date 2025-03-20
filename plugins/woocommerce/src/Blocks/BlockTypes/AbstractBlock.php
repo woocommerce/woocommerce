@@ -112,6 +112,18 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Are we currently on the admin block editor screen?
+	 */
+	protected function is_block_editor() {
+		if ( ! is_admin() || ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+		$screen = get_current_screen();
+
+		return $screen && $screen->is_block_editor();
+	}
+
+	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -215,8 +227,8 @@ abstract class AbstractBlock {
 			'style'           => $this->get_block_type_style(),
 		];
 
-		if ( isset( $this->api_version ) && '2' === $this->api_version ) {
-			$block_settings['api_version'] = 2;
+		if ( isset( $this->api_version ) ) {
+			$block_settings['api_version'] = intval( $this->api_version );
 		}
 
 		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );

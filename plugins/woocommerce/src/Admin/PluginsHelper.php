@@ -72,6 +72,16 @@ class PluginsHelper {
 	const DISMISS_MISSING_SUBS_NOTICE = 'woo_subscription_missing_notice_dismiss';
 
 	/**
+	 * Meta key for dismissing disconnected notice
+	 */
+	const DISMISS_DISCONNECT_NOTICE = 'woo_disconnect_notice_dismiss';
+
+	/**
+	 * Meta key for dismissing connected notice
+	 */
+	const DISMISS_CONNECT_NOTICE = 'woo_connect_notice_dismiss';
+
+	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {
@@ -217,7 +227,7 @@ class PluginsHelper {
 	 *
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, PluginsInstallLogger $logger = null ) {
+	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -420,7 +430,7 @@ class PluginsHelper {
 	 *
 	 * @return WP_Error|array Plugin Status
 	 */
-	public static function activate_plugins( $plugins, PluginsInstallLogger $logger = null ) {
+	public static function activate_plugins( $plugins, ?PluginsInstallLogger $logger = null ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
 			return new WP_Error(
 				'woocommerce_plugins_invalid_plugins',
@@ -1078,17 +1088,75 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Get notice information when WCCOM connection is disconnected.
+	 *
+	 * @return string disconnect notice.
+	 */
+	public static function get_wccom_disconnected_notice() {
+		if ( WC_Helper::is_site_connected() ) {
+			return '';
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_DISCONNECT_NOTICE, false ) ) {
+			return '';
+		}
+
+		$user_email = \WC_Helper_Options::get( 'last_disconnected_user_data' )['email'] ?? null;
+		if ( empty( $user_email ) ) {
+			return '';
+		}
+
+		return sprintf(
+			/* translators: 1: Disconnected user email */
+			__( 'Successfully disconnected from <b>%1$s</b>.', 'woocommerce' ),
+			$user_email
+		);
+	}
+
+	/**
+	 * Get the connected status notice message.
+	 *
+	 * @param string $user_email the user email.
+	 *
+	 * @return string the connected notice message.
+	 */
+	public static function get_wccom_connected_notice( $user_email ) {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return '';
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_CONNECT_NOTICE, false ) ) {
+			return '';
+		}
+
+		if ( ! $user_email ) {
+			return '';
+		}
+
+		return sprintf(
+		/* translators: 1: Disconnected user email */
+			__( 'Successfully connected to <b>%s</b>.', 'woocommerce' ),
+			$user_email
+		);
+	}
+
+	/**
 	 * Determine whether a specific notice should be shown to the current user.
 	 *
 	 * @param string $dismiss_notice_meta User meta that includes the timestamp when a store notice was dismissed.
+	 * @param bool   $show_after_one_month Show the notices dismissed earlier than one month.
 	 * @return bool True if the notice should be shown, false otherwise.
 	 */
-	public static function should_show_notice( $dismiss_notice_meta ) {
+	public static function should_show_notice( $dismiss_notice_meta, $show_after_one_month = true ) {
 		// Get the current user ID.
 		$user_id = get_current_user_id();
 
 		// Get the timestamp when the notice was dismissed.
 		$dismissed_timestamp = get_user_meta( $user_id, $dismiss_notice_meta, true );
+
+		if ( ! $show_after_one_month ) {
+			return empty( $dismissed_timestamp );
+		}
 
 		// If the notice was dismissed within the last month, do not show it.
 		if ( ! empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {

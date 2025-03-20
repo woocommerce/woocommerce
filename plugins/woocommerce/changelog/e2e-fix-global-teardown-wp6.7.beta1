@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: fix the global teardown failing with wp6.7-beta1

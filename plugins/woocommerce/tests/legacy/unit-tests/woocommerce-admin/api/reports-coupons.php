@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Coupons
  */
@@ -63,20 +65,20 @@ class WC_Admin_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 
 		// Order without coupon.
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
 		// Order with 1 coupon.
 		$order_1c = WC_Helper_Order::create_order( 1, $product );
-		$order_1c->set_status( 'completed' );
+		$order_1c->set_status( OrderStatus::COMPLETED );
 		$order_1c->apply_coupon( $coupon_1 );
 		$order_1c->calculate_totals();
 		$order_1c->save();
 
 		// Order with 2 coupons.
 		$order_2c = WC_Helper_Order::create_order( 1, $product );
-		$order_2c->set_status( 'completed' );
+		$order_2c->set_status( OrderStatus::COMPLETED );
 		$order_2c->apply_coupon( $coupon_1 );
 		$order_2c->apply_coupon( $coupon_2 );
 		$order_2c->calculate_totals();
@@ -127,7 +129,7 @@ class WC_Admin_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 
 		// Order with 1 coupon.
 		$order_1c = WC_Helper_Order::create_order( 1, $product );
-		$order_1c->set_status( 'completed' );
+		$order_1c->set_status( OrderStatus::COMPLETED );
 		$order_1c->apply_coupon( $coupon_1 );
 		$order_1c->calculate_totals();
 		$order_1c->save();

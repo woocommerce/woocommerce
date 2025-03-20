@@ -5,16 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\ProductImage;
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for the product image matching by SKU.
  */
 class MatchImageBySKU {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The name of the setting for this feature.
@@ -34,7 +30,7 @@ class MatchImageBySKU {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		self::add_filter( 'woocommerce_get_settings_products', array( $this, 'add_product_image_sku_setting' ), 110, 2 );
+		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_product_image_sku_setting' ), 110, 2 );
 	}
 
 	/**
@@ -53,8 +49,10 @@ class MatchImageBySKU {
 	 * @param array  $settings Original settings configuration array.
 	 * @param string $section_id Settings section identifier.
 	 * @return array New settings configuration array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function add_product_image_sku_setting( array $settings, string $section_id ): array {
+	public function add_product_image_sku_setting( array $settings, string $section_id ): array {
 		if ( 'advanced' !== $section_id ) {
 			return $settings;
 		}

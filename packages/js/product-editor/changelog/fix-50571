@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the icon alignment when shown as part of the input label

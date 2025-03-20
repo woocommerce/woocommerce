@@ -106,7 +106,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		if ( isset( $context['error']['file'] ) && is_string( $context['error']['file'] ) && '' !== $context['error']['file'] ) {
-			$log_data['file'] = $this->sanitize( $context['error']['file'] );
+			$log_data['file'] = $this->normalize_paths( $context['error']['file'] );
 			unset( $context['error']['file'] );
 		}
 
@@ -152,10 +152,6 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! $this->is_variant_assignment_allowed() ) {
-			return false;
-		}
-
 		if ( ! $this->should_current_version_be_logged() ) {
 			return false;
 		}
@@ -182,22 +178,19 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
-		if ( WC_Log_Levels::get_level_severity( $level ) < WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
-			return false;
-		}
-
 		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
 			return false;
 		}
 
-		try {
-			// Record fatal error stats.
-			$mc_stats = wc_get_container()->get( McStats::class );
-			$mc_stats->add( 'error', 'critical-errors' );
-			$mc_stats->do_server_side_stats();
-		} catch ( \Throwable $e ) {
-			error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		// Record fatal error stats.
+		if ( WC_Log_Levels::get_level_severity( $level ) >= WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
+			try {
+				$mc_stats = wc_get_container()->get( McStats::class );
+				$mc_stats->add( 'error', 'critical-errors' );
+				$mc_stats->do_server_side_stats();
+			} catch ( \Throwable $e ) {
+				error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
 		}
 
 		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
@@ -269,16 +262,6 @@ class RemoteLogger extends \WC_Log_Handler {
 	}
 
 	/**
-	 * Check if the store is allowed to log based on the variant assignment percentage.
-	 *
-	 * @return bool
-	 */
-	private function is_variant_assignment_allowed() {
-		$assignment = SafeGlobalFunctionProxy::get_option( 'woocommerce_remote_variant_assignment', 0 ) ?? 0;
-		return ( $assignment <= 12 ); // Considering 10% of the 0-120 range.
-	}
-
-	/**
 	 * Check if the current WooCommerce version is the latest.
 	 *
 	 * @return bool
@@ -340,11 +323,6 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// If backtrace is not available, we can't determine if the error is third-party. Log it for further investigation.
-		if ( ! isset( $context['backtrace'] ) || ! is_array( $context['backtrace'] ) ) {
-			return false;
-		}
-
 		$wc_plugin_dir = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
 
 		// Check if the error message contains the WooCommerce plugin directory.
@@ -352,13 +330,29 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// Check if the backtrace contains the WooCommerce plugin directory.
-		foreach ( $context['backtrace'] as $trace ) {
-			if ( is_string( $trace ) && str_contains( $trace, $wc_plugin_dir ) ) {
-				return false;
+		// Without a backtrace, it's impossible to ascertain if the error is third-party. To avoid logging numerous irrelevant errors, we'll consider it a third-party error and ignore it.
+		if ( isset( $context['backtrace'] ) && is_array( $context['backtrace'] ) ) {
+			$wp_includes_dir = StringUtil::normalize_local_path_slashes( ABSPATH . WPINC );
+			$wp_admin_dir    = StringUtil::normalize_local_path_slashes( ABSPATH . 'wp-admin' );
+
+			// Find the first relevant frame that is not from WordPress core and not empty.
+			$relevant_frame = null;
+			foreach ( $context['backtrace'] as $frame ) {
+				if ( empty( $frame ) || ! is_string( $frame ) ) {
+					continue;
+				}
+
+				// Skip frames from WordPress core.
+				if ( strpos( $frame, $wp_includes_dir ) !== false || strpos( $frame, $wp_admin_dir ) !== false ) {
+					continue;
+				}
+
+				$relevant_frame = $frame;
+				break;
 			}
 
-			if ( is_array( $trace ) && isset( $trace['file'] ) && str_contains( $trace['file'], $wc_plugin_dir ) ) {
+			// Check if the relevant frame is from WooCommerce.
+			if ( $relevant_frame && strpos( $relevant_frame, $wc_plugin_dir ) !== false ) {
 				return false;
 			}
 		}
@@ -409,30 +403,58 @@ class RemoteLogger extends \WC_Log_Handler {
 	 *
 	 * 1. Remove the absolute path to the plugin directory based on WC_ABSPATH. This is more accurate than using WP_PLUGIN_DIR when the plugin is symlinked.
 	 * 2. Remove the absolute path to the WordPress root directory.
+	 * 3. Redact potential user data such as email addresses and phone numbers.
 	 *
 	 * For example, the trace:
 	 *
 	 * /var/www/html/wp-content/plugins/woocommerce/includes/class-wc-remote-logger.php on line 123
 	 * will be sanitized to: **\/woocommerce/includes/class-wc-remote-logger.php on line 123
 	 *
-	 * @param string $message The message to sanitize.
-	 * @return string The sanitized message.
+	 * Additionally, any user data like email addresses or phone numbers will be redacted.
+	 *
+	 * @param string $content The content to sanitize.
+	 *
+	 * @return string The sanitized content.
 	 */
-	private function sanitize( $message ) {
-		if ( ! is_string( $message ) ) {
-			return $message;
+	private function sanitize( $content ) {
+		if ( ! is_string( $content ) ) {
+			return $content;
 		}
 
+		$sanitized = $this->normalize_paths( $content );
+		$sanitized = $this->redact_user_data( $sanitized );
+
+		if ( ! function_exists( 'apply_filters' ) ) {
+			require_once ABSPATH . WPINC . '/plugin.php';
+		}
+
+		/**
+		 * Filter the sanitized log content before it's sent to the remote logging service.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param string $sanitized The sanitized content.
+		 * @param string $content The original content.
+		 */
+		return apply_filters( 'woocommerce_remote_logger_sanitized_content', $sanitized, $content );
+	}
+
+	/**
+	 * Normalize file paths by replacing absolute paths with relative ones.
+	 *
+	 * @param string $content The content containing paths to normalize.
+	 *
+	 * @return string The content with normalized paths.
+	 */
+	private function normalize_paths( string $content ): string {
 		$plugin_path = StringUtil::normalize_local_path_slashes( trailingslashit( dirname( WC_ABSPATH ) ) );
 		$wp_path     = StringUtil::normalize_local_path_slashes( trailingslashit( ABSPATH ) );
 
-		$sanitized = str_replace(
+		return str_replace(
 			array( $plugin_path, $wp_path ),
 			array( './', './' ),
-			$message
+			$content
 		);
-
-		return $sanitized;
 	}
 
 	/**
@@ -468,6 +490,54 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return implode( "\n", $sanitized_trace );
+	}
+
+
+	/**
+	 * Redact potential user data from the content.
+	 *
+	 * @param string $content The content to redact.
+	 * @return string The redacted message.
+	 */
+	private function redact_user_data( $content ) {
+		// Redact email addresses.
+		$content = preg_replace( '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '[redacted_email]', $content );
+
+		// Redact potential IP addresses.
+		$content = preg_replace( '/\b(?:\d{1,3}\.){3}\d{1,3}\b/', '[redacted_ip]', $content );
+
+		// Redact potential credit card numbers.
+		$content = preg_replace( '/(\d{4}[- ]?){3}\d{4}/', '[redacted_credit_card]', $content );
+
+		// API key redaction patterns.
+		$api_patterns = array(
+			'/\b[A-Za-z0-9]{32,40}\b/',                // Generic API key.
+			'/\b[0-9a-f]{32}\b/i',                     // 32 hex characters.
+			'/\b(?:[A-Z0-9]{4}-){3,7}[A-Z0-9]{4}\b/i', // Segmented API key (e.g., XXXX-XXXX-XXXX-XXXX).
+			'/\bsk_[A-Za-z0-9]{24,}\b/i',              // Stripe keys (starts with sk_).
+		);
+
+		foreach ( $api_patterns as $pattern ) {
+			$content = preg_replace( $pattern, '[redacted_api_key]', $content );
+		}
+
+		/**
+		 * Redact potential phone numbers.
+		 *
+		 * This will match patterns like:
+		 * +1 (123) 456 7890 (with parentheses around area code)
+		 * +44-123-4567-890 (with area code, no parentheses)
+		 * 1234567890 (10 consecutive digits, no area code)
+		 * (123) 456-7890 (area code in parentheses, groups)
+		 * +91 12345 67890 (international format with space)
+		 */
+		$content = preg_replace(
+			'/(?:(?:\+?\d{1,3}[-\s]?)?\(?\d{3}\)?[-\s]?\d{3}[-\s]?\d{4}|\b\d{10,11}\b)/',
+			'[redacted_phone]',
+			$content
+		);
+
+		return $content;
 	}
 
 	/**

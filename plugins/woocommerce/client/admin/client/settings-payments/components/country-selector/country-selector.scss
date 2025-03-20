@@ -1,0 +1,151 @@
+.components-country-select-control {
+	font-size: 13px;
+	color: $gray-900;
+	width: 100%;
+	flex-grow: 1;
+	min-width: 0;
+
+	&__label {
+		color: $gray-700;
+		margin-right: 3px;
+	}
+
+	&__item {
+		padding: $gap-small;
+		margin: 0;
+		line-height: initial;
+		cursor: pointer;
+		position: relative;
+		padding-left: 48px;
+
+		&.is-highlighted {
+			background: #3858e90a;
+		}
+
+		svg {
+			position: absolute;
+			left: 20px;
+			top: 50%;
+			-ms-transform: translateY(-50%);
+			transform: translateY(-50%);
+			color: $gray-700;
+		}
+
+		&-icon {
+			margin-left: auto;
+		}
+	}
+
+	&__button {
+		width: 100%;
+		margin: 0 1px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 6px 8px;
+		text-overflow: ellipsis;
+
+		&:hover {
+			color: initial;
+		}
+
+		&[aria-expanded="true"] {
+			color: var(--wp-components-color-foreground, #1e1e1e);
+		}
+
+		&.placeholder {
+			color: #000;
+		}
+
+		&-value {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow-x: hidden;
+		}
+
+		svg {
+			fill: initial;
+			width: 18px;
+			flex: 0 0 18px;
+			margin-left: auto;
+		}
+	}
+
+	&__menu[aria-hidden="true"] {
+		display: none;
+	}
+
+	&__menu {
+		margin: -3px -1px;
+		background-color: #fff;
+		border: 1px solid $gray-300;
+		border-top: none;
+		border-radius: 2px;
+		max-height: 450px;
+		width: 100%;
+		outline: none;
+		overflow: hidden;
+		padding: 0;
+		position: absolute;
+		transition: none;
+		z-index: 1000;
+		box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.05), 0 4px 5px 0 rgba(0, 0, 0, 0.04), 0 4px 5px 0 rgba(0, 0, 0, 0.03), 0 16px 16px 0 rgba(0, 0, 0, 0.02);
+	}
+
+	&__list {
+		overflow: auto;
+		max-height: 300px;
+		-ms-overflow-style: none;  /* IE and Edge */
+		scrollbar-width: none;  /* Firefox */
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	&__apply {
+		width: auto;
+		padding: $gap-small;
+
+		button {
+			width: 100%;
+			text-align: center;
+			display: inline;
+		}
+	}
+
+	&__search {
+		width: auto;
+		margin: $gap-small;
+		position: relative;
+
+		&--input {
+			height: 40px;
+			line-height: 1;
+			width: 100%;
+			border: none;
+			padding-right: 40px;
+			position: relative;
+			color: $gray-600;
+			font-size: 13px;
+
+			&:focus {
+				background-color: #fff;
+			}
+		}
+
+		&--input-suffix {
+			position: absolute;
+			right: 5px;
+			top: 7px;
+			background: transparent;
+			border: none;
+		}
+	}
+}
+
+.components-button.components-country-select-control__button {
+	&:focus {
+		box-shadow: none;
+	}
+}

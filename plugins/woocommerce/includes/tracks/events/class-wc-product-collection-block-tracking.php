@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * This class adds actions to track usage of the Product Collection Block.
@@ -273,7 +274,7 @@ class WC_Product_Collection_Block_Tracking {
 
 		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
 			$stock_statuses = wc_get_product_stock_status_options();
-			$default_values = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array_diff_key( $stock_statuses, array( 'outofstock' => '' ) ) : $stock_statuses;
+			$default_values = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array_diff_key( $stock_statuses, array( ProductStockStatus::OUT_OF_STOCK => '' ) ) : $stock_statuses;
 			$default_diff   = array_diff( array_keys( $default_values ), $query_attrs['woocommerceStockStatus'] );
 			if ( ! empty( $default_diff ) ) {
 				$filters['stock-status'] = 'yes';

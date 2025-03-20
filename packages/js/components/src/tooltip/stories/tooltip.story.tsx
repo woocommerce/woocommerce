@@ -3,7 +3,6 @@
  */
 import { createElement } from '@wordpress/element';
 import { Icon, warning } from '@wordpress/icons';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -31,6 +30,6 @@ export const CustomIcon = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/experimental/Tooltip',
+	title: 'Experimental/Tooltip',
 	component: Tooltip,
 };

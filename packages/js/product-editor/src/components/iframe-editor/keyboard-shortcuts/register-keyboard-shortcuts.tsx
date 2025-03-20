@@ -5,8 +5,6 @@ import { useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
-// @ts-expect-error missing types.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { isAppleOS } from '@wordpress/keycodes';
 
 export const RegisterKeyboardShortcuts = () => {

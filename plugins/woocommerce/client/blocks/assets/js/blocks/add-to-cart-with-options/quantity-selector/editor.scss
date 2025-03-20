@@ -1,0 +1,24 @@
+.wc-block-add-to-cart-with-options__quantity-selector {
+	.quantity .qty {
+		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
+		width: 3.631em;
+		text-align: center;
+	}
+
+	&.wc-block-add-to-cart-with-options__quantity-selector--input {
+		.quantity .qty {
+			padding-top: 0;
+			padding-bottom: 0;
+			height: 2.5rem;
+			width: 3rem;
+		}
+	}
+
+	&.wc-block-add-to-cart-with-options__quantity-selector--stepper {
+		.wc-block-components-quantity-selector {
+			margin: 0 4px 0 0;
+			background: #fff;
+			width: unset !important;
+		}
+	}
+}

@@ -21,11 +21,12 @@ import {
 	TreeControlProps,
 } from '../experimental-tree-control';
 
+type PopoverProps = React.ComponentProps< typeof Popover >;
 type MenuProps = {
-	isEventOutside: ( event: React.FocusEvent ) => boolean;
+	isEventOutside: ( event: React.SyntheticEvent ) => boolean;
 	isOpen: boolean;
 	isLoading?: boolean;
-	position?: Popover.Position;
+	position?: PopoverProps[ 'position' ];
 	scrollIntoViewOnOpen?: boolean;
 	highlightedIndex?: number;
 	items: LinkedTree[];
@@ -98,7 +99,6 @@ export const SelectTreeMenu = ( {
 			<div>
 				<Popover
 					focusOnMount={ false }
-					// @ts-expect-error this prop does exist
 					inline
 					className={ classnames(
 						'woocommerce-experimental-select-tree-control__popover-menu',

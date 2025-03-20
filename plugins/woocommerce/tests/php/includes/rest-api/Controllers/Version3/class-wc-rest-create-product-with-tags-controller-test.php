@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * This tests when creating a product with tags, it will properly assign
  * the tags when they exist or will create them if they don't.
@@ -18,7 +21,7 @@ class WC_REST_Create_Product_With_Tags_Controller_Test extends WC_REST_Unit_Test
 
 		$json_data = array(
 			'name' => 'Product with existing tags',
-			'type' => 'simple',
+			'type' => ProductType::SIMPLE,
 			'tags' => array(
 				array(
 					'id' => $term['term_id'],
@@ -50,7 +53,7 @@ class WC_REST_Create_Product_With_Tags_Controller_Test extends WC_REST_Unit_Test
 
 		$json_data = array(
 			'name' => 'Product with new tags',
-			'type' => 'simple',
+			'type' => ProductType::SIMPLE,
 			'tags' => array(
 				array(
 					'name' => 'clothes',
@@ -89,7 +92,7 @@ class WC_REST_Create_Product_With_Tags_Controller_Test extends WC_REST_Unit_Test
 
 		$json_data = array(
 			'name' => 'Product with existing tags',
-			'type' => 'simple',
+			'type' => ProductType::SIMPLE,
 			'tags' => array(
 				array(
 					'id' => $term['term_id'],

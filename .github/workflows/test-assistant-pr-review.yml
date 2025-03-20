@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
   send-pr-to-slack-for-review:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env: 
       WOO_PR_TESTING_REVIEW_TEAM: ${{ secrets.WOO_PR_TESTING_REVIEW_TEAM }}
     steps:
