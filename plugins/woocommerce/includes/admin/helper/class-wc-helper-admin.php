@@ -106,11 +106,11 @@ class WC_Helper_Admin {
 	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
+	 * @param bool $reconnect indicate if the site is being reconnected.
+	 *
 	 * @return string
 	 */
 	public static function get_connection_url( $reconnect = false ) {
-		global $current_screen;
-
 		// Default to wc-addons, although this can be changed from the frontend
 		// in the function `connectUrl()` within marketplace functions.tsx.
 		$connect_url_args = array(
