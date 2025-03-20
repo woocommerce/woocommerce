@@ -587,6 +587,8 @@
 	display: flex;
 	flex-direction: column;
 	height: calc(100% - 60px); // Account for continue button
+	max-height: 100%; // Ensure it doesn't grow beyond parent
+	overflow: hidden; // Prevent content from spilling out
 
     // Remove padding on medium screens or less.
     @media screen and (min-width: $break-mobile) {
