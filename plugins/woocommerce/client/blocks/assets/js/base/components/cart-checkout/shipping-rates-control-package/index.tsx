@@ -29,11 +29,10 @@ export const ShippingRatesControlPackage = ( {
 	showItems,
 	highlightChecked = false,
 }: PackageProps ): ReactElement => {
-	const { selectShippingRate, isSelectingRate } = useShippingData();
+	const { selectShippingRate, isSelectingRate, shippingRates } =
+		useShippingData();
 
-	const internalPackageCount = useSelect(
-		( select ) => select( cartStore )?.getCartData()?.shippingRates?.length
-	);
+	const internalPackageCount = shippingRates?.length || 1;
 
 	const packageClass = 'wc-block-components-shipping-rates-control__package';
 	const [ instanceCount, setInstanceCount ] = useState( 0 );

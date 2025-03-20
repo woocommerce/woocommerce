@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import type { EmptyObjectType, PaymentResult } from '@woocommerce/types';
+import type {
+	EmptyObjectType,
+	PaymentResult,
+	GlobalPaymentMethod,
+} from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import {
 	PlainPaymentMethods,
@@ -12,13 +16,21 @@ import {
  * Internal dependencies
  */
 import { SavedPaymentMethod } from './types';
+import { isEditor } from '../utils';
 import { STATUS as PAYMENT_STATUS } from './constants';
 import { checkoutData } from '../checkout/constants';
 
-const defaultPaymentMethod = checkoutData?.payment_method;
+const globalPaymentMethods = getSetting< GlobalPaymentMethod[] >(
+	'globalPaymentMethods'
+);
+
 const savedPaymentMethods = getSetting<
 	Record< string, SavedPaymentMethod[] > | EmptyObjectType
 >( 'customerPaymentMethods', {} );
+
+const defaultPaymentMethod = isEditor()
+	? globalPaymentMethods[ 0 ].id
+	: checkoutData?.payment_method;
 
 function getDefaultPaymentMethod() {
 	if ( ! defaultPaymentMethod ) {
