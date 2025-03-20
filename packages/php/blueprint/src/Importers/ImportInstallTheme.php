@@ -106,7 +106,7 @@ class ImportInstallTheme implements StepProcessor {
 	 */
 	protected function activate_theme( $schema ) {
 		// phpcs:ignore
-		$theme = $schema->themeZipFile;
+		$theme = $schema->themeData;
 		if ( isset( $schema->options->activate ) && true === $schema->options->activate ) {
 			$this->wp_switch_theme( $theme->slug );
 			$current_theme = $this->wp_get_theme()->get_stylesheet();
