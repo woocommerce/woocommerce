@@ -88,37 +88,41 @@ export const Edit = withProductDataContext(
 		const blockProps = useBlockProps( { className } );
 
 		return (
-			renderThumbnails && (
-				<div { ...blockProps }>
-					<InspectorControls>
-						<PanelBody>
-							<ProductGalleryThumbnailsBlockSettings
-								attributes={ attributes }
-								setAttributes={ setAttributes }
-							/>
-						</PanelBody>
-					</InspectorControls>
-					<div
-						ref={ scrollableRef }
-						className="wc-block-product-gallery-thumbnails__scrollable"
-					>
-						{ productThumbnails.map( ( { src, alt }, index ) => {
-							return (
-								<div
-									className="wc-block-product-gallery-thumbnails__thumbnail"
-									key={ index }
-								>
-									<img
-										className="wc-block-product-gallery-thumbnails__thumbnail__image"
-										src={ src }
-										alt={ alt }
-									/>
-								</div>
-							);
-						} ) }
+			<>
+				<InspectorControls>
+					<PanelBody>
+						<ProductGalleryThumbnailsBlockSettings
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
+					</PanelBody>
+				</InspectorControls>
+				{ renderThumbnails && (
+					<div { ...blockProps }>
+						<div
+							ref={ scrollableRef }
+							className="wc-block-product-gallery-thumbnails__scrollable"
+						>
+							{ productThumbnails.map(
+								( { src, alt }, index ) => {
+									return (
+										<div
+											className="wc-block-product-gallery-thumbnails__thumbnail"
+											key={ index }
+										>
+											<img
+												className="wc-block-product-gallery-thumbnails__thumbnail__image"
+												src={ src }
+												alt={ alt }
+											/>
+										</div>
+									);
+								}
+							) }
+						</div>
 					</div>
-				</div>
-			)
+				) }
+			</>
 		);
 	}
 );
