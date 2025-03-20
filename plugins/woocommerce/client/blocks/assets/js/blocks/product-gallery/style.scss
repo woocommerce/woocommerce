@@ -251,6 +251,10 @@ $dialog-padding: 20px;
 		overflow-y: hidden;
 	}
 
+	&__thumbnail {
+		aspect-ratio: 1 / 1;
+	}
+
 	// These are min - max range values for thumbnails size.
 	@for $i from 10 through 50 {
 		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
