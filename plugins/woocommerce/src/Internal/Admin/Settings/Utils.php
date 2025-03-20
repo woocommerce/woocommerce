@@ -362,7 +362,7 @@ class Utils {
 	}
 
 	/**
-	 * Post data to a WooCommerce API endpoint.
+	 * Post data to a WooCommerce API endpoint and return the response data.
 	 *
 	 * @param string $endpoint Endpoint.
 	 * @param array  $params   Params to pass with request body.
