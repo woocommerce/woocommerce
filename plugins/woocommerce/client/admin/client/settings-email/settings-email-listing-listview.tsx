@@ -102,22 +102,24 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		{
 			id: 'test',
 			label: __( 'Send test email', 'woocommerce' ),
+			disabled: true,
 			supportsBulk: false,
 			callback: ( items: EmailType[] ) => {
 				return true; // TODO: Implement send test email
 			},
 		},
 		{
-			id: 'disable',
+			id: 'change-status',
 			label: ( items: EmailType[] ) =>
 				items[ 0 ].status === 'enabled'
 					? __( 'Disable email', 'woocommerce' )
 					: __( 'Enable email', 'woocommerce' ),
 			supportsBulk: false,
+			disabled: true,
 			isEligible: ( item: EmailType ) =>
 				item.status === 'enabled' || item.status === 'disabled',
 			callback: ( items: EmailType[] ) => {
-				return true; // TODO: Implement disable/enable
+				return true; // TODO: Implement changing status
 			},
 		},
 	];
