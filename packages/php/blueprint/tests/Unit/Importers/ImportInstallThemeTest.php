@@ -19,7 +19,7 @@ class ImportInstallThemeTest extends TestCase {
 		$themeSlug = 'sample-theme';
 
 		$schema = Mockery::mock();
-		$schema->themeZipFile = (object)[
+		$schema->themeData = (object)[
 			'slug' => $themeSlug,
 			'resource' => 'valid-resource',
 			'activate' => true,
@@ -56,18 +56,18 @@ class ImportInstallThemeTest extends TestCase {
 		$themeSlug = 'failed-theme';
 
 		$schema = Mockery::mock();
-		$schema->themeZipFile = (object)[
+		$schema->themeData = (object)[
 			'slug' => $themeSlug,
-			'resource' => 'valid-resource',
+			'resource' => 'wordpress.org/themes',
 			'activate' => false,
 		];
 
 		$resourceStorage = Mockery::mock(ResourceStorages::class);
 		$resourceStorage->shouldReceive('is_supported_resource')
-		                ->with('valid-resource')
+		                ->with('wordpress.org/themes')
 		                ->andReturn(true);
 		$resourceStorage->shouldReceive('download')
-		                ->with($themeSlug, 'valid-resource')
+		                ->with($themeSlug, 'wordpress.org/themes')
 		                ->andReturn('/path/to/theme.zip');
 
 		$importInstallTheme = Mockery::mock(ImportInstallTheme::class, [$resourceStorage])

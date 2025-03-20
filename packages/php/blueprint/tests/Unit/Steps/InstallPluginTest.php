@@ -48,16 +48,15 @@ class InstallPluginTest extends TestCase {
 					'enum' => array( 'installPlugin' ),
 				),
 				'pluginData' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
-					),
-					'required'   => array( 'resource', 'slug' ),
+					"anyOf" => [
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/VFSReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/LiteralReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/CorePluginReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/CoreThemeReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/UrlReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/GitDirectoryReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/DirectoryLiteralReference.php",
+					]
 				),
 				'options'       => array(
 					'type'       => 'object',
