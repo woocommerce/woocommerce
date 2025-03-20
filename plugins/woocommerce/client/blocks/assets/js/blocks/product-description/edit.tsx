@@ -18,7 +18,12 @@ import {
 } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
-import { withQueryLoopProductContextValidation } from '@woocommerce/block-hocs';
+import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
+
+/**
+ * Internal dependencies
+ */
+import { ProductDescriptionEditProps } from './types';
 
 /**
  * Returns whether the current user can edit the given entity.
@@ -173,13 +178,23 @@ function RecursionError() {
 	);
 }
 
-function ProductDescriptionEdit( {
+export default function ProductDescriptionEdit( {
 	context,
 	__unstableLayoutClassNames: layoutClassNames,
 	__unstableParentLayout: parentLayout,
-} ) {
+	clientId,
+}: ProductDescriptionEditProps ) {
 	const { postId: contextPostId, postType: contextPostType } = context;
 	const hasAlreadyRendered = useHasRecursion( contextPostId );
+	const { hasInvalidContext, warningElement } =
+		useQueryLoopProductContextValidation( {
+			clientId,
+			postType: contextPostType,
+			blockName: 'Product Description',
+		} );
+	if ( hasInvalidContext ) {
+		return warningElement;
+	}
 
 	if ( contextPostId && contextPostType && hasAlreadyRendered ) {
 		return <RecursionError />;
@@ -199,8 +214,3 @@ function ProductDescriptionEdit( {
 		</RecursionProvider>
 	);
 }
-
-export default withQueryLoopProductContextValidation(
-	ProductDescriptionEdit,
-	'Product Description'
-);
