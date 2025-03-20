@@ -70,11 +70,11 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				)
 			).toBeVisible();
 
-			const thumbnailsCount = await thumbnailsContainer
-				.locator( '.wc-block-product-gallery-thumbnails__thumbnail' )
-				.count();
+			const thumbnailsCount = thumbnailsContainer.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
 
-			expect( thumbnailsCount ).toBe( 4 );
+			await expect( thumbnailsCount ).toHaveCount( 4 );
 		} );
 	} );
 
