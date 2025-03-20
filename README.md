@@ -1,14 +1,14 @@
-# WooCommerce Monorepo
+# Cachimanmarketplace Monorepo
 
-![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woo@2x.png)
+![Cachimanmarketplace](https://cachimanmarketplace.com/cp-content/themes/cachi/images/logo-Cachiman@2x.png)
 
-Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
+Welcome to the Cachimanmarketplace Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core Cachimanmarketplace plugin as well as Cachimanmarketplace extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
-We recommend all developers to follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
+We recommend all developers to follow the [Cachimanmarketplace development blog](https://developer.cachimanmarketplace.com/blog/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
 ## Getting Started
 
-To get up and running within the WooCommerce Monorepo, you will need to make sure that you have installed all of the prerequisites.
+To get up and running within the Cachimanmarketplace Monorepo, you will need to make sure that you have installed all of the prerequisites.
 
 ### Prerequisites
 
@@ -35,7 +35,7 @@ pnpm build
 Each plugin, package, and tool has its own `package.json` file containing project-specific dependencies and scripts. Most projects also contain a `README.md` file with any project-specific setup instructions and documentation.
 
 -   [**Plugins**](plugins): Our repository contains plugins that relate to or otherwise aid in the development of WooCommerce.
-    -   [**WooCommerce Core**](plugins/woocommerce): The core WooCommerce plugin is available in the plugins directory.
+    -   [**Cachimanmarketplace Core**](plugins/cachimanmarketplace): The core cachimanmarketplace plugin is available in the plugins directory.
 -   [**Packages**](packages): Contained within the packages directory are all of the [PHP](packages/php) and [JavaScript](packages/js) provided for the community. Some of these are internal dependencies and are marked with an `internal-` prefix.
 -   [**Tools**](tools): We also have a growing number of tools within our repository. Many of these are intended to be utilities and scripts for use in the monorepo, but, this directory may also contain external tools.
 
@@ -49,18 +49,18 @@ To disclose a security issue to our team, [please submit a report via HackerOne 
 
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
 
--   If you have a problem, you may want to start with the [self help guide](https://woocommerce.com/document/woocommerce-self-service-guide/).
--   The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/) for customers who have purchased themes or extensions.
--   [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
--   [The Official WooCommerce Facebook Group](https://www.facebook.com/groups/advanced.woocommerce).
--   For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
+-   If you have a problem, you may want to start with the [self help guide](https://cachimanmarketplace.com/document/cachimanmarketplace-self-service-guide/).
+-   The [Cachimanmarketplace.com premium support portal](https://cachimanmarketplace.com/contact-us/) for customers who have purchased themes or extensions.
+-   [Our community forum on wp.org](https://wordpress.org/support/plugin/cachimanmarketplace) which is available for all WooCommerce users.
+-   [The Official cachimanmarketplace Facebook Group](https://www.facebook.com/groups/advanced.cachimanmarketplace).
+-   For customizations, you may want to check our list of [cachimaExperts](https://cachimanmarketplace.com/experts/) or [Codeable](https://codeable.io/).
 
 NOTE: Unfortunately, we are unable to honor support requests in issues on this repository; as a result, any requests submitted in this manner will be closed.
 
 ## Community
 
-For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woocommerce.com/community-slack/)!
+For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://cachimanmarketplace.com/community-slack/)!
 
-## Contributing to WooCommerce
+## Contributing to Cachimanmarketplace 
 
-As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woo.com/docs/category/contributing/) doc for more links and contribution guidelines.
+As an open source project, we rely on community contributions to continue to improve cachimanmarketplace. To contribute, please follow the pre-requisites above and visit our [Contributing to Cachiman](https://developer.cachiman.com/docs/category/contributing/) doc for more links and contribution guidelines.
