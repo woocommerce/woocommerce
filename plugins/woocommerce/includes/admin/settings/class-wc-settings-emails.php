@@ -278,7 +278,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$body_text_color_setting_in_palette   = $reorder_colors ? $body_text_color_setting : null;
 		$footer_text_color_setting_in_palette = $reorder_colors ? $footer_text_color_setting : null;
 
-		$block_email_editor_enabled = get_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
+		$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 
 		$settings =
 			array(
@@ -304,7 +304,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			);
 		// Email sender options is available in the new email editor.
 		// If the feature flag is disabled, we show the email sender options.
-		if ( 'no' === $block_email_editor_enabled ) {
+		if ( ! $block_email_editor_enabled ) {
 			$settings = array_merge(
 				$settings,
 				array(
