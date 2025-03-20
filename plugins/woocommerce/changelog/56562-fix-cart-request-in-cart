@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a bug in which real address was being shown on the editor page for Checkout.
