@@ -23,7 +23,6 @@ import { useSelect } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type {
 	StoreCart,
-	CartResponse,
 	CartResponseTotals,
 	CartResponseFeeItem,
 	CartResponseBillingAddress,

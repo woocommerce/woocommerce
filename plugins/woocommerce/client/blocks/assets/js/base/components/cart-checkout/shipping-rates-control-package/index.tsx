@@ -8,8 +8,6 @@ import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
-import { useSelect } from '@wordpress/data';
-import { cartStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
