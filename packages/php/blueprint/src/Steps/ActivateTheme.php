@@ -51,7 +51,7 @@ class ActivateTheme extends Step {
 					'type' => 'string',
 				),
 			),
-			'required'   => array( 'step', 'themeName' ),
+			'required'   => array( 'step', 'themeFolderName' ),
 		);
 	}
 

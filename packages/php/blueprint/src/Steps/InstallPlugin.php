@@ -98,7 +98,7 @@ class InstallPlugin extends Step {
 					),
 				),
 			),
-			'required'   => array( 'step', 'pluginZipFile' ),
+			'required'   => array( 'step', 'pluginData' ),
 		);
 	}
 

@@ -24,13 +24,13 @@ class ImportActivatePlugin implements StepProcessor {
 		$result = StepProcessorResult::success( ActivatePlugin::get_step_name() );
 
 		// phpcs:ignore
-		$name = $schema->pluginName;
+		$plugin_path = $schema->pluginPath;
 
-		$activate = $this->activate_plugin_by_slug( $name );
+		$activate = $this->wp_activate_plugin($plugin_path);
 		if ( $activate ) {
-			$result->add_info( "Activated {$name}." );
+			$result->add_info( "Activated {$plugin_path}." );
 		} else {
-			$result->add_error( "Unable to activate {$name}." );
+			$result->add_error( "Unable to activate {$plugin_path}." );
 		}
 
 		return $result;

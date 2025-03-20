@@ -98,7 +98,7 @@ class InstallTheme extends Step {
 					),
 				),
 			),
-			'required'   => array( 'step', 'themeZipFile' ),
+			'required'   => array( 'step', 'themeData' ),
 		);
 	}
 
