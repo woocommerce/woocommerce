@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
+import { expect, test as base, wpCLI, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -13,6 +13,16 @@ import {
 import { getTestTranslation } from '../../utils/get-test-translation';
 import { translations } from '../../test-data/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
+import { blockData as baseBlockData } from './utils';
+
+type ExtendedBlockData = BlockData & {
+	productPage: string;
+};
+
+const blockData: ExtendedBlockData = {
+	...baseBlockData,
+	productPage: '/product/beanie/',
+};
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async ( { page, admin, editor }, use ) => {
@@ -26,7 +36,7 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Shopper → Notices', () => {
-	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
+	test( 'Shopper can add item to cart from the archive page, and will not see a notice in the mini cart', async ( {
 		page,
 		editor,
 		admin,
@@ -74,6 +84,33 @@ test.describe( 'Shopper → Notices', () => {
 					`The quantity of "${ SIMPLE_PHYSICAL_PRODUCT_NAME }" was`
 				)
 		).toBeHidden();
+	} );
+
+	test( 'Shopper can add item to cart from the single product page, and will not see a notice in the mini cart', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postId: `twentytwentyfour//header`,
+			postType: 'wp_template_part',
+			canvas: 'edit',
+		} );
+		const miniCart = await editor.getBlockByName( 'woocommerce/mini-cart' );
+		await editor.selectBlocks( miniCart );
+		const openDrawerControl = editor.page.getByLabel(
+			'Open drawer when adding'
+		);
+		await openDrawerControl.check();
+		await editor.page
+			.getByRole( 'button', { name: 'Save', exact: true } )
+			.click();
+
+		await page.goto( blockData.productPage );
+		await page.click( 'text=Add to cart' );
+
+		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
+		await expect( page.getByText( '(3 items)' ) ).toBeVisible();
 	} );
 } );
 
