@@ -43,14 +43,25 @@ class TemplateApiController {
 	 */
 	public function save_template_data( array $data, \WP_Block_Template $template_post ): void {
 		if ( WooEmailTemplate::TEMPLATE_SLUG === $template_post->slug && isset( $data['sender_settings'] ) ) {
-			update_option( 'woocommerce_email_from_name', $data['sender_settings']['from_name'] );
+			$new_from_name     = $data['sender_settings']['from_name'] ?? null;
+			$current_from_name = get_option( 'woocommerce_email_from_name' );
 
+			if ( null !== $new_from_name && $new_from_name !== $current_from_name ) {
+				update_option( 'woocommerce_email_from_name', $new_from_name );
+			}
+
+			$new_from_address = $data['sender_settings']['from_address'] ?? null;
 			// This validation matches HTML input type email validation.
 			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#validation.
-			if ( ! preg_match( '/^[a-zA-Z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/', $data['sender_settings']['from_address'] ) ) {
+			$email_validation_pattern = '/^[a-zA-Z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/';
+			if ( null === $new_from_address || ! preg_match( $email_validation_pattern, $new_from_address ) ) {
 				throw new \InvalidArgumentException( esc_html( __( 'Invalid email address provided for sender settings', 'woocommerce' ) ) );
 			}
-			update_option( 'woocommerce_email_from_address', $data['sender_settings']['from_address'] );
+
+			$current_from_address = get_option( 'woocommerce_email_from_address' );
+			if ( $new_from_address !== $current_from_address ) {
+				update_option( 'woocommerce_email_from_address', $new_from_address );
+			}
 		}
 	}
 
