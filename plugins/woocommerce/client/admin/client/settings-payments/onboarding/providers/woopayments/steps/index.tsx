@@ -9,6 +9,7 @@ import React from 'react';
 import { useOnboardingContext } from '../data/onboarding-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import WooPaymentsStepHeader from '../components/header';
+import MOXStep from './mox';
 
 /**
  * Step Components
@@ -117,8 +118,17 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		content: <FrontendStep />,
 	},
 	{
-		id: 'final',
+		id: 'mox',
 		order: 4,
+		type: 'backend',
+		label: 'Activate Payments',
+		path: '/woopayments/onboarding/mox',
+		dependencies: [ 'jetpack', 'welcome' ],
+		content: <MOXStep />,
+	},
+	{
+		id: 'final',
+		order: 5,
 		type: 'backend',
 		label: 'Payment methods',
 		dependencies: [ 'congratulations' ],
