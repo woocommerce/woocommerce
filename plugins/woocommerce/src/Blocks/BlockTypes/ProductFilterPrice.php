@@ -129,6 +129,9 @@ final class ProductFilterPrice extends AbstractBlock {
 		$min_price     = intval( $filter_params[ self::MIN_PRICE_QUERY_VAR ] ?? $min_range );
 		$max_price     = intval( $filter_params[ self::MAX_PRICE_QUERY_VAR ] ?? $max_range );
 
+		$formatted_min_price = html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) );
+		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
+
 		$filter_context = array(
 			'price' => array(
 				'minPrice' => $min_price,
@@ -156,6 +159,16 @@ final class ProductFilterPrice extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
+		);
+
+		wp_interactivity_state(
+			'woocommerce/product-filters',
+			array(
+				'formattedMinPrice' => $formatted_min_price,
+				'formattedMaxPrice' => $formatted_max_price,
+				'minPrice'          => $min_price,
+				'maxPrice'          => $max_price,
+			)
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {

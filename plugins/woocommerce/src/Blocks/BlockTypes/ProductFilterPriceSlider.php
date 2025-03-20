@@ -55,9 +55,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
-		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
-
 		$show_input_fields = isset( $attributes['showInputFields'] ) ? $attributes['showInputFields'] : false;
 		$inline_input      = isset( $attributes['inlineInput'] ) ? $attributes['inlineInput'] : false;
 
@@ -79,6 +76,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$__high      = 100 * ( $max_price - $min_range ) / ( $max_range - $min_range );
 		$range_style = "--low: $__low%; --high: $__high%";
 
+		wp_interactivity_state(
+			'woocommerce/product-filters',
+			array(
+				'rangeStyle' => $range_style,
+			)
+		);
+
 		ob_start();
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
@@ -94,12 +98,11 @@ class ProductFilterPriceSlider extends AbstractBlock {
 							aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
-						<span data-wp-text="state.formattedMinPrice"><?php echo wp_kses_post( $formatted_min_price ); ?></span>
+						<span data-wp-text="state.formattedMinPrice"></span>
 					<?php endif; ?>
 				</div>
 				<div
 					class="wc-block-product-filter-price-slider__range"
-					style="<?php echo esc_attr( $range_style ); ?>"
 					data-wp-bind--style="state.rangeStyle"
 				>
 					<div class="range-bar"></div>
@@ -143,7 +146,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 							aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
-					<span data-wp-text="state.formattedMaxPrice"><?php echo wp_kses_post( $formatted_max_price ); ?></span>
+					<span data-wp-text="state.formattedMaxPrice"></span>
 					<?php endif; ?>
 				</div>
 			</div>
