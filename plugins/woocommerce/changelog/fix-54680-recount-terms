@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure term counts are calculated correctly when the term count method is not given a list of term taxonomy IDs. Also improve performance by avoiding unnecessary queries while counting terms.
