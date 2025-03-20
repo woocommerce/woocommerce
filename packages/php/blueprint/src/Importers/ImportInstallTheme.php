@@ -53,7 +53,12 @@ class ImportInstallTheme implements StepProcessor {
 	public function process( $schema ): StepProcessorResult {
 		$installed_themes = $this->wp_get_themes();
 		// phpcs:ignore
-		$theme = $schema->themeZipFile;
+		$theme = $schema->themeData;
+
+		if (  'wordpress.org/themes' !== $theme->resource ) {
+			$this->result->add_info("Skipped installing a theme. Unsupported resource type. Only 'wordpress.org/themes' is supported at the moment.");
+			return $this->result;
+		}
 
 		if ( ! isset( $schema->options ) ) {
 			$schema->options = new \stdClass();
