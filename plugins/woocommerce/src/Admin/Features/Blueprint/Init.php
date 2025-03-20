@@ -55,6 +55,18 @@ class Init {
 		);
 
 		add_filter( 'wooblueprint_exporters', array( $this, 'add_woo_exporters' ) );
+
+		// Add a filter to hide the save button on the blueprint settings page.
+		add_action(
+			'woocommerce_settings_advanced',
+			function () {
+				global $hide_save_button;
+				$page_id = PageController::get_instance()->get_current_screen_id();
+				if ( 'woocommerce_page_wc-settings-advanced-blueprint' === $page_id ) {
+					$hide_save_button = true;
+				}
+			}
+		);
 	}
 
 	/**

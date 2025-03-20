@@ -16,5 +16,6 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
+	"example": {},
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

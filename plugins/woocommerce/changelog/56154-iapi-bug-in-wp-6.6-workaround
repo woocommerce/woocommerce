@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Workaround for a bug present in WP 6.6's Interactivity API. It can be removed once Woo doesn't need to support WP 6.6 anymore.

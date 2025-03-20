@@ -16,7 +16,7 @@ import {
 /**
  * Internal dependencies
  */
-import useProductTypeSelector from '../../hooks/use-product-type-selector';
+import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
 
 export default function ToolbarProductTypeGroup() {
 	const {

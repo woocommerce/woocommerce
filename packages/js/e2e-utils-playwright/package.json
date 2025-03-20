@@ -33,7 +33,7 @@
 	"devDependencies": {
 		"@babel/cli": "^7.25.9",
 		"@babel/core": "^7.26.0",
-		"@wordpress/babel-preset-default": "7.28.0",
+		"@wordpress/babel-preset-default": "next",
 		"jest": "27.5.x"
 	},
 	"publishConfig": {
