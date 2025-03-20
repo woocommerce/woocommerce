@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import createSelector from 'rememo';
+
+/**
  * Internal dependencies
  */
 import type {
@@ -30,6 +35,9 @@ export const getGroup = (
 ): SettingsGroup | undefined =>
 	state.groups.find( ( group ) => group.id === groupId );
 
+// Ensure we have a consistent empty object to return when there are no settings.
+const EMPTY_OBJECT = {};
+
 /**
  * Get all settings for a specific group.
  *
@@ -40,7 +48,7 @@ export const getGroup = (
 export const getSettings = ( state: SettingsState, groupId: string ) => {
 	const groupSettings = state.settings[ groupId ];
 	if ( ! groupSettings ) {
-		return {};
+		return EMPTY_OBJECT;
 	}
 	return groupSettings;
 };
@@ -53,27 +61,33 @@ export const getSettings = ( state: SettingsState, groupId: string ) => {
  * @param {string}        settingId - The ID of the setting to get.
  * @return {Setting | undefined} The setting if found, otherwise undefined.
  */
-export const getSetting = (
-	state: SettingsState,
-	groupId: string,
-	settingId: string
-): Setting | undefined => {
-	const groupSettings = state.settings[ groupId ];
-	if ( ! groupSettings ) {
-		return undefined;
-	}
+export const getSetting = createSelector(
+	(
+		state: SettingsState,
+		groupId: string,
+		settingId: string
+	): Setting | undefined => {
+		const groupSettings = state.settings[ groupId ];
+		if ( ! groupSettings ) {
+			return undefined;
+		}
 
-	// If the setting is being edited, return the setting with the edited value
-	const groupEdits = state.edits[ groupId ];
-	if ( groupEdits && settingId in groupEdits ) {
-		return {
-			...groupSettings[ settingId ],
-			value: groupEdits[ settingId ],
-		};
-	}
+		// If the setting is being edited, return the setting with the edited value
+		const groupEdits = state.edits[ groupId ];
+		if ( groupEdits && settingId in groupEdits ) {
+			return {
+				...groupSettings[ settingId ],
+				value: groupEdits[ settingId ],
+			};
+		}
 
-	return groupSettings[ settingId ];
-};
+		return groupSettings[ settingId ];
+	},
+	( state: SettingsState, groupId: string ) => [
+		state.settings[ groupId ],
+		state.edits[ groupId ],
+	]
+);
 
 /**
  * Get the value of a specific setting.
@@ -119,16 +133,16 @@ export const isSettingEdited = (
  * @param {SettingsState} state   - The current state of the settings.
  * @param {string}        groupId - The ID of the group to get settings for.
  */
-export const getEditedSettingIds = (
-	state: SettingsState,
-	groupId: string
-): string[] => {
-	const groupEdits = state.edits[ groupId ];
-	if ( ! groupEdits ) {
-		return [];
-	}
-	return Object.keys( groupEdits );
-};
+export const getEditedSettingIds = createSelector(
+	( state: SettingsState, groupId: string ): string[] => {
+		const groupEdits = state.edits[ groupId ];
+		if ( ! groupEdits ) {
+			return [];
+		}
+		return Object.keys( groupEdits );
+	},
+	( state: SettingsState, groupId: string ) => [ state.edits[ groupId ] ]
+);
 
 /**
  * Check if a specific group is currently being saved.
