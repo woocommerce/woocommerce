@@ -49,6 +49,9 @@ class AddToCartForm extends AbstractBlock {
 			return;
 		}
 
+		// Enqueue the wc-ajax-add-to-cart script when the Add to Cart Form block is rendered.
+		wp_enqueue_script( 'wc-ajax-add-to-cart' );
+
 		parent::enqueue_assets( $attributes, $content, $block );
 	}
 

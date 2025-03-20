@@ -41,6 +41,20 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	}
 
 	/**
+	 * Enqueue frontend assets for this block, just in time for rendering.
+	 *
+	 * @param array    $attributes  Any attributes that currently are available from the block.
+	 * @param string   $content    The block content.
+	 * @param WP_Block $block    The block object.
+	 */
+	protected function enqueue_assets( array $attributes, $content, $block ) {
+		// Enqueue the wc-ajax-add-to-cart script when the Classic Template block is rendered.
+		wp_enqueue_script( 'wc-ajax-add-to-cart' );
+
+		parent::enqueue_assets( $attributes, $content, $block );
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
