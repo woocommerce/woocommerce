@@ -658,7 +658,8 @@ function wc_get_product_visibility_term_ids() {
 
 	static $term_ids = array();
 
-	if ( count( $term_ids ) > 0 ) {
+	// The static variable doesn't work well with unit tests.
+	if ( count( $term_ids ) > 0 && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
 		return $term_ids;
 	}
 
