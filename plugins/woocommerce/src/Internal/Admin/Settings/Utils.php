@@ -340,4 +340,44 @@ class Utils {
 
 		return $jetpack_connection_manager->is_connected() && $jetpack_connection_manager->has_connected_owner();
 	}
+
+	/**
+	 * Get data from a WooCommerce API endpoint.
+	 *
+	 * @param string $endpoint Endpoint.
+	 * @param array  $params   Params to pass with request query.
+	 *
+	 * @return array|\WP_Error The response data or a WP_Error object.
+	 */
+	public static function rest_endpoint_get_request( $endpoint, $params = array() ) {
+		$request = new \WP_REST_Request( 'GET', $endpoint );
+		if ( $params ) {
+			$request->set_query_params( $params );
+		}
+		$response = rest_do_request( $request );
+		$server   = rest_get_server();
+		$json     = wp_json_encode( $server->response_to_data( $response, false ) );
+
+		return json_decode( $json, true );
+	}
+
+	/**
+	 * Post data to a WooCommerce API endpoint.
+	 *
+	 * @param string $endpoint Endpoint.
+	 * @param array  $params   Params to pass with request body.
+	 *
+	 * @return array|\WP_Error The response data or a WP_Error object.
+	 */
+	public static function rest_endpoint_post_request( $endpoint, $params = array() ) {
+		$request = new \WP_REST_Request( 'POST', $endpoint );
+		if ( $params ) {
+			$request->set_body_params( $params );
+		}
+		$response = rest_do_request( $request );
+		$server   = rest_get_server();
+		$json     = wp_json_encode( $server->response_to_data( $response, false ) );
+
+		return json_decode( $json, true );
+	}
 }
