@@ -69,7 +69,7 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 <p>
 <?php
 	$text = '<a data-link-href="%1$s" contenteditable="false" style="text-decoration: underline;"> %2$s </a>';
-	printf( wp_kses_post( $text ), '<!--[woocommerce/my-account-url]-->', esc_html__( 'My account', 'woocommerce' ) );
+	printf( wp_kses_post( $text ), '[woocommerce/my-account-url]', esc_html__( 'My account', 'woocommerce' ) );
 ?>
 </p>
 <!-- /wp:paragraph -->
