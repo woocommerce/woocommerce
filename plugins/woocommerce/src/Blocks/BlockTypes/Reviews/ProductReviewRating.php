@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * ProductReviewRating class.
@@ -39,8 +38,6 @@ class ProductReviewRating extends AbstractBlock {
 
 		$rating = intval( get_comment_meta( $block->context['commentId'], 'rating', true ) );
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
 		$html = '';
 
 		if ( 0 < $rating ) {
@@ -62,12 +59,7 @@ class ProductReviewRating extends AbstractBlock {
 			'<div %1$s>
 				%2$s
 			</div>',
-			get_block_wrapper_attributes(
-				array(
-					'class' => esc_attr( $classes_and_styles['classes'] ),
-					'style' => $classes_and_styles['styles'],
-				)
-			),
+			get_block_wrapper_attributes(),
 			$html
 		);
 	}
