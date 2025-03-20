@@ -78,16 +78,15 @@ class InstallTheme extends Step {
 					'enum' => array( static::get_step_name() ),
 				),
 				'themeData' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
-					),
-					'required'   => array( 'resource', 'slug' ),
+					"anyOf" => [
+						require_once __DIR__ . "/schemas/definitions/VFSReference.php",
+						require_once __DIR__ . "/schemas/definitions/LiteralReference.php",
+						require_once __DIR__ . "/schemas/definitions/CorePluginReference.php",
+						require_once __DIR__ . "/schemas/definitions/CoreThemeReference.php",
+						require_once __DIR__ . "/schemas/definitions/UrlReference.php",
+						require_once __DIR__ . "/schemas/definitions/GitDirectoryReference.php",
+						require_once __DIR__ . "/schemas/definitions/DirectoryLiteralReference.php",
+					]
 				),
 				'options'      => array(
 					'type'       => 'object',
