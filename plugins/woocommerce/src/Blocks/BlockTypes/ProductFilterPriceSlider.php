@@ -66,7 +66,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 				'class'           => esc_attr( $classes ),
 				'style'           => esc_attr( $style ),
 				'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-				'data-wp-context' => '{}',
 			)
 		);
 

@@ -1,14 +1,16 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
 import type { HTMLElementEvent } from '@woocommerce/types';
+import * as iAPI from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
  */
 import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils';
+
+const { store, getContext, getServerContext } = iAPI;
 
 function inRange( value: number, min: number, max: number ) {
 	return value >= min && value <= max;
@@ -46,9 +48,10 @@ const { state, actions } = store<
 >( 'woocommerce/product-filters', {
 	state: {
 		get minPrice() {
-			const { activeFilters, minRange } = getContext<
-				ProductFiltersContext & ProductFilterPriceContext
-			>();
+			const { activeFilters } = getContext< ProductFiltersContext >();
+			const { minRange } = getServerContext
+				? getServerContext< ProductFilterPriceContext >()
+				: getContext< ProductFilterPriceContext >();
 			const priceFilter = activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
@@ -59,9 +62,10 @@ const { state, actions } = store<
 			return minRange;
 		},
 		get maxPrice() {
-			const { activeFilters, maxRange } = getContext<
-				ProductFiltersContext & ProductFilterPriceContext
-			>();
+			const { activeFilters } = getContext< ProductFiltersContext >();
+			const { maxRange } = getServerContext
+				? getServerContext< ProductFilterPriceContext >()
+				: getContext< ProductFilterPriceContext >();
 			const priceFilter = activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
