@@ -217,7 +217,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context' => wp_json_encode(
 				array(
-					/* translators: {{label}} is the product attribute filter item label. */
 					'activeLabelTemplate' => "{$product_attribute->name}: {{label}}",
 					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
 				),
