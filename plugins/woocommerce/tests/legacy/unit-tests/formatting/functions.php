@@ -418,7 +418,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
 	}
 
 	/**

@@ -13,7 +13,7 @@ import { useState, createInterpolateElement } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
-import { settings, plugins, brush } from '@wordpress/icons';
+import { settings, plugins, layout } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -26,8 +26,8 @@ const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const icons = {
 	plugins,
-	brush,
 	settings,
+	layout,
 };
 
 const Blueprint = () => {
