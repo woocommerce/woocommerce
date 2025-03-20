@@ -82,46 +82,76 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		page,
 		editor,
 	} ) => {
-		const thumbnailsBlock = editor.canvas.locator(
-			'[data-type="woocommerce/product-gallery-thumbnails"]'
-		);
+		await test.step( 'in editor', async () => {
+			const largeImageBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-large-image"]'
+			);
+			const thumbnailsBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-thumbnails"]'
+			);
+			const thumbnailsSizeInput = page.getByLabel( 'Thumbnail Size' );
 
-		// Open block settings
-		await thumbnailsBlock.click();
-		await editor.openDocumentSettingsSidebar();
+			// Open block settings
+			await thumbnailsBlock.click();
+			await editor.openDocumentSettingsSidebar();
 
-		// Set size to 10%
-		await page.getByLabel( 'Thumbnail Size' ).fill( '10' );
+			await expect( thumbnailsSizeInput ).toHaveValue( '33' );
+			await expect( async () => {
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.33,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			await expect( async () => {
+				// Set size to 10%
+				await thumbnailsSizeInput.fill( '10' );
+
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
+
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.1,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		} );
 
-		await page.goto( '/product/hoodie/' );
+		await test.step( 'in frontend', async () => {
+			await page.goto( '/product/hoodie/' );
 
-		const thumbnailsContainer = page.locator(
-			'[data-block-name="woocommerce/product-gallery-thumbnails"]'
-		);
-
-		await expect( async () => {
-			// The width should be approximately 9% of its parent.
-			// 100% is x + x/10 where x is large image width.
-			const containerWidth = await thumbnailsContainer.evaluate(
-				( el ) => {
-					return el.clientWidth || 0;
-				}
+			const thumbnailsBlock = page.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
+			const largeImageBlock = page.locator(
+				'[data-block-name="woocommerce/product-gallery-large-image"]'
 			);
 
-			const parentWidth = await thumbnailsContainer.evaluate( ( el ) => {
-				return el.parentElement?.clientWidth || 0;
-			} );
+			await expect( async () => {
+				await page.reload();
 
-			const ratio = containerWidth / parentWidth;
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
-			// Allow for some small rounding differences
-			expect( ratio ).toBeGreaterThan( 0.08 );
-			expect( ratio ).toBeLessThan( 0.1 );
-		} ).toPass( { timeout: 5_000 } );
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.1,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+		} );
 	} );
 
 	test( 'thumbnails are scrollable and last thumbnail is reachable', async ( {
