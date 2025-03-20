@@ -125,7 +125,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	public function test_hide_out_of_stock_products(): void {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
-		wc_recount_all_terms();
+		wc_recount_all_terms( false );
 		delete_transient( 'wc_term_counts' );
 
 		$terms       = get_terms(

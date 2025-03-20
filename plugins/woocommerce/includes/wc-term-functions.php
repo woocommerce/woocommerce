@@ -661,28 +661,33 @@ function wc_get_product_visibility_term_ids() {
 }
 
 /**
- * Recounts all terms.
+ * Recounts all terms for product categories and product tags.
  *
  * @since 5.2
+ *
+ * @param bool $include_callback True to update the standard term counts in addition to the product-specific counts,
+ *                               which will cause a lot more queries to run.
+ *
  * @return void
  */
-function wc_recount_all_terms() {
+function wc_recount_all_terms( bool $include_callback = true ) {
 	$product_cats = get_terms(
-		'product_cat',
 		array(
+			'taxonomy'   => 'product_cat',
 			'hide_empty' => false,
 			'fields'     => 'id=>parent',
 		)
 	);
-	_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
+	_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), $include_callback, false );
+
 	$product_tags = get_terms(
-		'product_tag',
 		array(
+			'taxonomy'   => 'product_tag',
 			'hide_empty' => false,
 			'fields'     => 'id=>parent',
 		)
 	);
-	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
+	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), $include_callback, false );
 }
 
 /**

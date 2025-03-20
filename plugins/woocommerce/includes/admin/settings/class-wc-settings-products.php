@@ -490,7 +490,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 		 * Product->Inventory has a setting `Out of stock visibility`.
 		 * Because of this, we need to recount the terms to keep them in-sync.
 		 */
-		WC()->call_function( 'wc_recount_all_terms' );
+		WC()->call_function( 'wc_recount_all_terms', false );
 
 		$this->do_update_options_action();
 	}
