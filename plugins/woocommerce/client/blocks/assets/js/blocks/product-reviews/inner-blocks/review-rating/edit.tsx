@@ -3,16 +3,18 @@
  */
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
-import { useEntityProp } from '@wordpress/core-data';
 import {
 	AlignmentToolbar,
 	BlockControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import { REVIEWS_STORE_NAME } from '@woocommerce/data';
 
 export default function Edit( {
-	context: { commentId },
+	// commentId is the ID of the review.
+	context: { commentId: reviewId },
 	attributes,
 	setAttributes,
 }: BlockEditProps< {
@@ -27,8 +29,14 @@ export default function Edit( {
 	const blockProps = useBlockProps( {
 		className,
 	} );
-	let [ rating ] = useEntityProp( 'root', 'comment', 'rating', commentId );
-	rating = rating ?? 4;
+	const rating = useSelect(
+		( select ) => {
+			const { getReview } = select( REVIEWS_STORE_NAME );
+			const review = reviewId ? getReview( Number( reviewId ) ) : null;
+			return review?.rating ?? 4;
+		},
+		[ reviewId ]
+	);
 
 	const starStyle = {
 		width: ( rating / 5 ) * 100 + '%',
