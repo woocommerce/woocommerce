@@ -94,7 +94,7 @@ class Integration {
 		$post_types[] = array(
 			'name' => self::EMAIL_POST_TYPE,
 			'args' => array(
-				'labels'       => array(
+				'labels'   => array(
 					'name'          => __( 'Woo Emails', 'woocommerce' ),
 					'singular_name' => __( 'Woo Email', 'woocommerce' ),
 					'add_new_item'  => __( 'Add New Woo Email', 'woocommerce' ),
@@ -103,12 +103,8 @@ class Integration {
 					'view_item'     => __( 'View Woo Email', 'woocommerce' ),
 					'search_items'  => __( 'Search Woo Emails', 'woocommerce' ),
 				),
-				'rewrite'      => array( 'slug' => self::EMAIL_POST_TYPE ),
-				'supports'     => array( 'title', 'editor' ),
-				'public'       => false,
-				'show_ui'      => true,  // Showing in the admin UI is temporary, it will be removed in the future.
-				'show_in_menu' => true,
-				'show_in_rest' => true,
+				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
+				'supports' => array( 'title', 'editor' ),
 			),
 		);
 		return $post_types;
