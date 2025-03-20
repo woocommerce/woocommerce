@@ -592,10 +592,10 @@
 	padding: 0 !important; // There is a padding on the parent container that we need to override.
 	border-bottom: none !important;
 
-    // Remove padding on medium screens or less.
-    @media screen and (min-width: $break-mobile) {
-        padding: 0 !important;
-    }
+	@media screen and (max-width: $break-medium) {
+		height: calc(100% - 100px); // Account for small screen content being longer on the page.
+		margin-top: $gap-larger;
+	}
 
 	.woocommerce-layout__header-wrapper {
 		padding: $gap-large 1.5 * $gap-large;
