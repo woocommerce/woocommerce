@@ -51,6 +51,8 @@ const entries = {
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 	'woocommerce/add-to-cart-with-options-variation-selector':
 		'./assets/js/blocks/add-to-cart-with-options/variation-selector/frontend.ts',
+	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options':
+		'./assets/js/blocks/add-to-cart-with-options/variation-selector/attribute-options/frontend.ts',
 
 	// Other
 	'@woocommerce/stores/woocommerce/cart':

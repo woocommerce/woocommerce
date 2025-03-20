@@ -36,62 +36,70 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `comments_clauses_without_product_reviews` modifies the comment query clauses to exclude product reviews if the current screen is for the `edit-comments` page.
+	 * @testdox      `comments_clauses_without_product_reviews` modifies the comment query clauses to exclude product reviews for most queries
+	 *                where it can be assumed reviews are not being explicitly requested.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::comments_clauses_without_product_reviews()
-	 * @dataProvider provider_can_get_comments_clauses_without_product_reviews
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::comments_clauses_without_product_reviews()
+	 * @dataProvider provider_comments_clauses_without_product_reviews_filter
 	 *
-	 * @param string $current_screen_value The current screen value.
-	 * @param string $where_value          The current WHERE clause value.
-	 * @param string $expected_join        The expected JOIN value.
-	 * @param string $expected_where       The expected WHERE value.
+	 * @param array $args The query args passed to WP_Comment_Query.
+	 * @param bool  $should_exclude_reviews Whether the query should be modified to exclude reviews.
+	 *
 	 */
-	public function test_can_get_comments_clauses_without_product_reviews( string $current_screen_value, string $where_value, string $expected_join, string $expected_where ) : void {
-		global $wpdb, $current_screen;
+	public function test_comments_clauses_without_product_reviews_filter( array $args, bool $should_exclude_reviews ) {
+		global $wpdb;
 
-		$wpdb = (object) [ 'posts' => 'test_table' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$join  = " LEFT JOIN {$wpdb->posts} AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ";
+		$where = ' wp_posts_to_exclude_reviews.post_type NOT IN (\'product\') ';
+		$query = new \WP_Comment_Query();
+		$query->query( $args );
+		$sql = $query->request;
 
-		$current_screen = (object) [ 'base' => $current_screen_value ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$clauses = ReviewsUtil::comments_clauses_without_product_reviews(
-			[
-				'join' => '',
-				'where' => $where_value,
-			]
-		);
-
-		$this->assertArrayHasKey( 'join', $clauses );
-		$this->assertArrayHasKey( 'where', $clauses );
-		$this->assertSame( $expected_join, $clauses['join'] );
-		$this->assertSame( $expected_where, $clauses['where'] );
+		if ( $should_exclude_reviews ) {
+			$this->assertStringContainsString( $join, $sql );
+			$this->assertStringContainsString( $where, $sql );
+		} else {
+			$this->assertStringNotContainsString( $join, $sql );
+			$this->assertStringNotContainsString( $where, $sql );
+		}
 	}
 
-	/** @see test_can_get_comments_clauses_without_product_reviews */
-	public function provider_can_get_comments_clauses_without_product_reviews() : Generator {
+	/** @see test_comments_clauses_without_product_reviews_filter */
+	public function provider_comments_clauses_without_product_reviews_filter() {
+		yield 'Query for product comments' => array(
+			'args'                   => array(
+				'post_type' => 'product',
+			),
+			'should_exclude_reviews' => false,
+		);
 
-		$join = ' LEFT JOIN test_table AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ';
-		$where = ' wp_posts_to_exclude_reviews.post_type NOT IN (\'product\') ';
+		yield 'Query for product and post comments' => array(
+			'args'                   => array(
+				'post_type' => 'post,product',
+			),
+			'should_exclude_reviews' => false,
+		);
 
-		yield 'Current screen is not edit comments' => [
-			'current_screen_value' => 'test-page',
-			'where_value' => '',
-			'expected_join' => '',
-			'expected_where' => '',
-		];
+		yield 'Query for post comments' => array(
+			'args'                   => array(
+				'post_type' => 'post',
+			),
+			'should_exclude_reviews' => true,
+		);
 
-		yield 'Where is empty' => [
-			'current_screen_value' => 'edit-comments',
-			'where_value' => '',
-			'expected_join' => $join,
-			'expected_where' => $where,
-		];
+		yield 'Query by comment ID' => array(
+			'args'                   => array(
+				'type' => 'comment',
+			),
+			'should_exclude_reviews' => false,
+		);
 
-		yield 'Where is not empty' => [
-			'current_screen_value' => 'edit-comments',
-			'where_value' => 'WHERE 1=1',
-			'expected_join' => $join,
-			'expected_where' => 'WHERE 1=1 AND ' . $where,
-		];
+		yield 'Query by non-Product Post ID' => array(
+			'args'                   => array(
+				'post_id' => PHP_INT_MAX,
+			),
+			'should_exclude_reviews' => true,
+		);
 	}
 
 }

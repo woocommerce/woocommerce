@@ -26,7 +26,6 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"devDependencies": {
-		"@babel/plugin-transform-class-properties": "^7.23.3",
 		"@babel/preset-env": "^7.23.5",
 		"@babel/preset-react": "7.23.3",
 		"@babel/preset-typescript": "7.23.3",
