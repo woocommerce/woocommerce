@@ -121,8 +121,8 @@ class PaymentsController {
 	public function add_menu() {
 		global $menu;
 
-		// When WooPayments account is connected, WooPayments will own the Payments menu item since it is the native Woo payments solution.
-		if ( $this->is_woopayments_account_connected() ) {
+		// When WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
+		if ( $this->is_woopayments_account_onboarded() ) {
 			return;
 		} else {
 			// Otherwise, remove payments connect page from the menu to avoid Payments item duplication.
@@ -308,31 +308,28 @@ class PaymentsController {
 	}
 
 	/**
-	 * Check if the WooPayments plugin is active.
+	 * Check if the WooPayments account is onboarded.
 	 *
 	 * @return boolean
 	 */
-	private function is_woopayments_account_connected(): bool {
+	private function is_woopayments_account_onboarded(): bool {
 		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
 		if ( ! class_exists( '\WC_Payments' ) ) {
 			return false;
 		}
-		// We consider the store to have WooPayments if there is meaningful account data in the WooPayments account cache.
-		// This implies that WooPayments was connected.
-		return $this->has_wcpay_account_data();
-	}
 
-	/**
-	 * Check if there is meaningful data in the WooPayments account cache.
-	 *
-	 * @return boolean
-	 */
-	private function has_wcpay_account_data(): bool {
 		$account_data = get_option( 'wcpay_account_data', array() );
-		if ( ! empty( $account_data['data']['account_id'] ) ) {
-			return true;
+		if ( empty( $account_data['data']['account_id'] ) ) {
+			return false;
 		}
 
-		return false;
+		if ( empty( $account_data['data']['details_submitted'] ) ) {
+			return false;
+		}
+		// We consider the store to have WooPayments account connected if account data in the WooPayments account cache
+		// contains details_submitted = true entry. This implies that WooPayments was connected.
+		return $account_data['data']['details_submitted'];
 	}
+
+
 }
