@@ -5,6 +5,8 @@ import clsx from 'clsx';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
+import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { useProductDataContext } from '@woocommerce/shared-context';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useRef, useState, useEffect } from '@wordpress/element';
 
@@ -15,88 +17,108 @@ import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import { checkOverflow } from '../../utils';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
-export const Edit = ( {
-	attributes,
-	setAttributes,
-}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
-	const { thumbnailSize } = attributes;
+export const Edit = withProductDataContext(
+	( {
+		attributes,
+		setAttributes,
+	}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
+		const { thumbnailSize } = attributes;
 
-	const scrollableRef = useRef< HTMLDivElement >( null );
-	const [ overflowState, setOverflowState ] = useState( {
-		overflowBottom: false,
-		overflowRight: false,
-	} );
+		const maxThumbnails = 10;
+		const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
+		const productContext = useProductDataContext();
+		const productImages =
+			productContext?.product?.images ||
+			Array( maxThumbnails ).fill( null );
+		const productThumbnails = productImages
+			?.slice( 0, maxThumbnails )
+			.map( ( image ) => {
+				return {
+					src: image?.src || placeholderSrc,
+					alt: image?.alt || '',
+				};
+			} );
+		const renderThumbnails = productThumbnails.length > 1;
 
-	useEffect( () => {
-		const scrollableElement = scrollableRef.current;
-		if ( ! scrollableElement ) {
-			return;
-		}
-
-		// Create a ResizeObserver to watch for layout changes
-		const resizeObserver = new ResizeObserver( () => {
-			const overflow = checkOverflow( scrollableElement );
-			setOverflowState( overflow );
+		const scrollableRef = useRef< HTMLDivElement >( null );
+		const [ overflowState, setOverflowState ] = useState( {
+			overflowBottom: false,
+			overflowRight: false,
 		} );
 
-		// Observe both the scrollable element and its parent for size changes
-		resizeObserver.observe( scrollableElement );
-		if ( scrollableElement.parentElement ) {
-			resizeObserver.observe( scrollableElement.parentElement );
-		}
+		useEffect( () => {
+			const scrollableElement = scrollableRef.current;
+			if ( ! scrollableElement ) {
+				return;
+			}
 
-		// Initial check
-		const overflow = checkOverflow( scrollableElement );
-		setOverflowState( overflow );
+			// Create a ResizeObserver to watch for layout changes
+			const resizeObserver = new ResizeObserver( () => {
+				const overflow = checkOverflow( scrollableElement );
+				setOverflowState( overflow );
+			} );
 
-		return () => {
-			resizeObserver.disconnect();
-		};
-	}, [ thumbnailSize ] ); // Re-run when thumbnailSize changes as it affects layout
+			// Observe both the scrollable element and its parent for size changes
+			resizeObserver.observe( scrollableElement );
+			if ( scrollableElement.parentElement ) {
+				resizeObserver.observe( scrollableElement.parentElement );
+			}
 
-	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
+			// Initial check
+			const overflow = checkOverflow( scrollableElement );
+			setOverflowState( overflow );
 
-	const className = clsx(
-		'wc-block-product-gallery-thumbnails',
-		`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
-		{
-			'wc-block-product-gallery-thumbnails--overflow-right':
-				overflowState.overflowRight,
-			'wc-block-product-gallery-thumbnails--overflow-bottom':
-				overflowState.overflowBottom,
-		}
-	);
-	const blockProps = useBlockProps( { className } );
+			return () => {
+				resizeObserver.disconnect();
+			};
+		}, [ thumbnailSize ] ); // Re-run when thumbnailSize changes as it affects layout
 
-	return (
-		<div { ...blockProps }>
-			<InspectorControls>
-				<PanelBody>
-					<ProductGalleryThumbnailsBlockSettings
-						attributes={ attributes }
-						setAttributes={ setAttributes }
-					/>
-				</PanelBody>
-			</InspectorControls>
-			<div
-				ref={ scrollableRef }
-				className="wc-block-product-gallery-thumbnails__scrollable"
-			>
-				{ [ ...Array( 10 ).keys() ].map( ( index ) => {
-					return (
-						<div
-							className="wc-block-product-gallery-thumbnails__thumbnail"
-							key={ index }
-						>
-							<img
-								className="wc-block-product-gallery-thumbnails__thumbnail__image"
-								src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
-								alt=""
+		const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
+
+		const className = clsx(
+			'wc-block-product-gallery-thumbnails',
+			`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
+			{
+				'wc-block-product-gallery-thumbnails--overflow-right':
+					overflowState.overflowRight,
+				'wc-block-product-gallery-thumbnails--overflow-bottom':
+					overflowState.overflowBottom,
+			}
+		);
+		const blockProps = useBlockProps( { className } );
+
+		return (
+			renderThumbnails && (
+				<div { ...blockProps }>
+					<InspectorControls>
+						<PanelBody>
+							<ProductGalleryThumbnailsBlockSettings
+								attributes={ attributes }
+								setAttributes={ setAttributes }
 							/>
-						</div>
-					);
-				} ) }
-			</div>
-		</div>
-	);
-};
+						</PanelBody>
+					</InspectorControls>
+					<div
+						ref={ scrollableRef }
+						className="wc-block-product-gallery-thumbnails__scrollable"
+					>
+						{ productThumbnails.map( ( { src, alt }, index ) => {
+							return (
+								<div
+									className="wc-block-product-gallery-thumbnails__thumbnail"
+									key={ index }
+								>
+									<img
+										className="wc-block-product-gallery-thumbnails__thumbnail__image"
+										src={ src }
+										alt={ alt }
+									/>
+								</div>
+							);
+						} ) }
+					</div>
+				</div>
+			)
+		);
+	}
+);
