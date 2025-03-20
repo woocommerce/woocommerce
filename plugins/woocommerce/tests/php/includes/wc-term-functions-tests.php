@@ -144,4 +144,36 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_hide_out_of_stock_items' );
 	}
+
+	/**
+	 * @testdox The call to WP Core's _update_post_term_count function in _wc_term_recount should receive
+	 *          term_taxonomy_id values rather than term_id values for its first parameter.
+	 */
+	public function test_standard_callback_gets_correct_params(): void {
+		$target_tt_id = $this->terms['parent']['term_taxonomy_id'];
+		$success      = false;
+
+		$action_callback = function ( $tt_id ) use ( $target_tt_id, &$success ) {
+			if ( $tt_id === $target_tt_id ) {
+				$success = true;
+			}
+		};
+
+		add_action( 'edited_term_taxonomy', $action_callback );
+
+		$target_term = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'include'    => $this->terms['parent']['term_id'],
+				'hide_empty' => false,
+				'fields'     => 'id=>parent',
+			)
+		);
+
+		_wc_term_recount( $target_term, get_taxonomy( 'product_cat' ), true, false );
+
+		$this->assertTrue( $success );
+
+		remove_action( 'edited_term_taxonomy', $action_callback );
+	}
 }

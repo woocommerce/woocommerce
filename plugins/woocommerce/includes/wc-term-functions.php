@@ -386,10 +386,10 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
- * @param array  $terms                       List of terms.
- * @param object $taxonomy                    Taxonomy.
- * @param bool   $callback                    Callback.
- * @param bool   $terms_are_term_taxonomy_ids If terms are from term_taxonomy_id column.
+ * @param array       $terms                       List of terms.
+ * @param WP_Taxonomy $taxonomy                    Taxonomy.
+ * @param bool        $callback                    Callback.
+ * @param bool        $terms_are_term_taxonomy_ids If terms are from term_taxonomy_id column.
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
@@ -407,9 +407,22 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		return;
 	}
 
-	// Standard callback.
+	// Standard callback for calculating post term counts.
 	if ( $callback ) {
-		_update_post_term_count( $terms, $taxonomy );
+		$callback_terms = $terms;
+		if ( true !== $terms_are_term_taxonomy_ids ) {
+			// The _update_post_term_count function expects term_taxonomy_id instead of term_id.
+			// We currently have terms in format of term_id=>parent.
+			$callback_terms = array_map(
+				function ( $term_id ) use ( $taxonomy ) {
+					$term = get_term_by( 'term_id', $term_id, $taxonomy->name );
+					return $term->term_taxonomy_id;
+				},
+				array_keys( $terms )
+			);
+		}
+
+		_update_post_term_count( $callback_terms, $taxonomy );
 	}
 
 	$exclude_term_ids            = array();
