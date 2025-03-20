@@ -121,16 +121,12 @@ class PaymentsController {
 	public function add_menu() {
 		global $menu;
 
-		// The WooPayments plugin must not be onboarded.
-		// When onboarded, WooPayments will own the Payments menu item as the native Woo payments solution.
-		if ( $this->is_woopayments_active_and_connected() ) {
+		// When WooPayments account is connected, WooPayments will own the Payments menu item since it is the native Woo payments solution.
+		if ( $this->is_woopayments_account_connected() ) {
 			return;
-		}
-
-		$wcpay_version_less_than_9_2 = false; // TODO
-		// Remove the menu item for not onboarded accounts if WooPayments version is less than 9.2 to avoid duplicated Payments menu item.
-		if ( $wcpay_version_less_than_9_2 ) {
-			return;
+		} else {
+			// Otherwise, remove payments connect page from the menu to avoid Payments item duplication.
+			remove_menu_page( 'wc-admin&path=/payments/connect' );
 		}
 
 		$menu_title = esc_html__( 'Payments', 'woocommerce' );
@@ -316,16 +312,7 @@ class PaymentsController {
 	 *
 	 * @return boolean
 	 */
-	private function is_woopayments_active(): bool {
-		return class_exists( '\WC_Payments' );
-	}
-
-	/**
-	 * Check if the WooPayments plugin is active.
-	 *
-	 * @return boolean
-	 */
-	private function is_woopayments_active_and_connected(): bool {
+	private function is_woopayments_account_connected(): bool {
 		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
 		if ( ! class_exists( '\WC_Payments' ) ) {
 			return false;
