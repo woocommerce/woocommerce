@@ -100,6 +100,14 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			isPrimary: true,
 		},
 		{
+			id: 'test',
+			label: __( 'Send test email', 'woocommerce' ),
+			supportsBulk: false,
+			callback: ( items: EmailType[] ) => {
+				return true; // TODO: Implement send test email
+			},
+		},
+		{
 			id: 'disable',
 			label: ( items: EmailType[] ) =>
 				items[ 0 ].status === 'enabled'
