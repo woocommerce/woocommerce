@@ -1653,8 +1653,7 @@ class WC_Helper {
 	 * @return array|WP_Error
 	 */
 	public static function fetch_helper_connection_info() {
-		$cache_key = '_woocommerce_helper_connection_data';
-		$data      = get_transient( $cache_key );
+		$data      = self::get_cached_connection_data();
 		if ( false !== $data ) {
 			return $data;
 		}
@@ -1668,7 +1667,7 @@ class WC_Helper {
 			'connection-info',
 			array(
 				'authenticated' => true,
-				'query_string'  => '?url=' . base64_encode( home_url() ),
+				'query_string'  => '?url=' . urlencode( home_url() ),
 			)
 		);
 
