@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
+use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Exception;
 use WP_Error;
@@ -276,6 +277,18 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/woopay-eligibility',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 				),
 			),
 			$override
@@ -564,6 +577,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Get WooPay eligibility status.
+	 *
+	 * @return WP_REST_Response The response.
+	 */
+	protected function get_woopay_eligibility() {
+		return rest_ensure_response(
+			array(
+				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
+			)
+		);
 	}
 
 	/**

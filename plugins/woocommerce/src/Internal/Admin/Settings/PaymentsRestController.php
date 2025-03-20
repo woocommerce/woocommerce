@@ -53,18 +53,6 @@ class PaymentsRestController extends RestApiControllerBase {
 	public function register_routes( bool $override = false ) {
 		register_rest_route(
 			$this->route_namespace,
-			'/' . $this->rest_base . '/woopay-eligibility',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-				),
-			),
-			$override
-		);
-		register_rest_route(
-			$this->route_namespace,
 			'/' . $this->rest_base . '/country',
 			array(
 				array(
@@ -1197,19 +1185,6 @@ class PaymentsRestController extends RestApiControllerBase {
 					'readonly'    => true,
 				),
 			),
-		);
-	}
-
-	/**
-	 * Get WooPay eligibility status.
-	 *
-	 * @return array The WooPay eligibility status.
-	 */
-	protected function get_woopay_eligibility() {
-		return rest_ensure_response(
-			array(
-				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
-			)
 		);
 	}
 }
