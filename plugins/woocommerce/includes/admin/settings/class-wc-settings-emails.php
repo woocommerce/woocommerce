@@ -210,8 +210,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
 			$email_notifications_field = 'email_notification_block_emails';
+			$email_notifications_desc = __( 'Manage email notifications sent from WooCommerce below or click on \'Edit template\' to customize your email template design.', 'woocommerce' );
 		} else {
 			$email_notifications_field = 'email_notification';
+			/* translators: %s: help description with link to WP Mail logging and support page. */
+			$email_notifications_desc = sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text );
 		}
 
 
@@ -292,8 +295,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			array(
 				array(
 					'title' => __( 'Email notifications', 'woocommerce' ),
-					/* translators: %s: help description with link to WP Mail logging and support page. */
-					'desc'  => sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text ),
+					'desc'  => $email_notifications_desc,
 					'type'  => 'title',
 					'id'    => 'email_notification_settings',
 				),
@@ -627,6 +629,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * Creates the React mount point for listing of block based emails.
 	 */
 	public function email_notification_setting_block_emails() {
+		$desc_help_text = sprintf(
+			/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
+				__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
+				'https://wordpress.org/plugins/wp-mail-logging/',
+				'https://woocommerce.com/document/email-faq'
+			);
 		$emails      = WC()->mailer()->get_emails();
 		$email_types = array();
 		foreach ( $emails as $type => $email ) {
@@ -652,6 +660,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			id="wc_settings_email_listing_slotfill"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 		></div>
+		<div>
+			<p><?php echo wp_kses_post( wpautop( wptexturize( $desc_help_text ) ) ); ?></p>
+		</div>
 		<?php
 	}
 
