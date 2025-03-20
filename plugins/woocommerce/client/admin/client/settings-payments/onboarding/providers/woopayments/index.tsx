@@ -4,7 +4,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
