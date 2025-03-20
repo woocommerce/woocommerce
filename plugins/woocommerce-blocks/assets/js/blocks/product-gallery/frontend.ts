@@ -6,27 +6,14 @@ import {
 	getContext as getContextFn,
 	getElement,
 } from '@wordpress/interactivity';
-import type { StorePart } from '@woocommerce/utils';
 
-export interface ProductGalleryContext {
-	// It's an actual image number, not an index, hence one-based!
-	selectedImageNumber: number;
-	imageId: string;
-	imageIds: string[];
-	isDialogOpen: boolean;
-	productId: string;
-	disableLeft: boolean;
-	disableRight: boolean;
-	touchStartX: number;
-	touchCurrentX: number;
-	isDragging: boolean;
-}
+/**
+ * Internal dependencies
+ */
+import type { ProductGalleryContext } from './types';
 
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
-
-type Store = typeof productGallery & StorePart< ProductGallery >;
-const { state, actions } = store< Store >( 'woocommerce/product-gallery' );
 
 const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
 	// One-based index so it ranges from 1 to imagesIds.length.
@@ -272,6 +259,12 @@ const productGallery = {
 	},
 };
 
-store( 'woocommerce/product-gallery', productGallery );
+const { state, actions } = store(
+	'woocommerce/product-gallery',
+	productGallery,
+	{ lock: true }
+);
+
+export type Store = typeof productGallery;
 
 export type ProductGallery = typeof productGallery;
