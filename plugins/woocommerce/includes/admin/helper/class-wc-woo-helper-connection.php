@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * A utility class to handle WooCommerce.com connection.
  *
