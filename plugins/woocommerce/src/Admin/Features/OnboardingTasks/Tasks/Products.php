@@ -224,38 +224,56 @@ class Products extends Task {
 			return 'yes' === $product_exists;
 		}
 
-		// Query to determine if there are any published products that are either not headstart posts (sample products) or have been modified by a user.
-		$args = array(
-			'post_type'      => 'product',
-			'post_status'    => ProductStatus::PUBLISH,
-			'posts_per_page' => 1,
-			'no_found_rows'  => true,
-			'fields'         => 'ids',
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			'meta_query'     => array(
-				'relation' => 'OR',
-				array(
-					'relation' => 'OR',
-					array(
-						'key'     => '_headstart_post',
-						'value'   => null,
-						'compare' => 'IS',
+		global $wpdb;
+
+		/*
+		 * Check if any valid products exist and return 'yes' or 'no'
+		 * A valid product must:
+		 * 1. Be a published product post type
+		 * 2. Meet one of these conditions:
+		 *    - Have been edited by a user (_edit_last meta exists), OR
+		 *    - Not have _headstart_post meta, OR
+		 *    - Have _headstart_post meta but it's NULL
+		 */
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT IF(
+					EXISTS (
+						SELECT 1 FROM {$wpdb->posts} p
+						WHERE p.post_type = %s
+						AND p.post_status = %s
+						AND (
+							EXISTS (
+								SELECT 1 FROM {$wpdb->postmeta} pm
+								WHERE pm.post_id = p.ID
+								AND pm.meta_key = %s
+							)
+							OR
+							NOT EXISTS (
+								SELECT 1 FROM {$wpdb->postmeta} pm
+								WHERE pm.post_id = p.ID
+								AND pm.meta_key = %s
+							)
+							OR
+							EXISTS (
+								SELECT 1 FROM {$wpdb->postmeta} pm
+								WHERE pm.post_id = p.ID
+								AND pm.meta_key = %s
+								AND pm.meta_value = ''
+							)
+						)
+						LIMIT 1
 					),
-					array(
-						'key'     => '_headstart_post',
-						'compare' => 'NOT EXISTS',
-					),
-				),
-				array(
-					'key'     => '_edit_last',
-					'compare' => 'EXISTS',
-				),
-			),
+					'yes', 'no'
+				)",
+				'product',
+				ProductStatus::PUBLISH,
+				'_edit_last',
+				'_headstart_post',
+				'_headstart_post'
+			)
 		);
 
-		$products_query = new \WP_Query( $args );
-
-		$value = $products_query->post_count > 0 ? 'yes' : 'no';
 		set_transient( self::HAS_PRODUCT_TRANSIENT, $value );
 		return 'yes' === $value;
 	}
