@@ -388,9 +388,10 @@ class WC_Frontend_Scripts {
 		if ( 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart' ) ) {
 			self::enqueue_script( 'wc-add-to-cart' );
 		}
-		if ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) {
+
+		if ( ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) ) {
 			global $product;
-			if ( $product && ! in_array( $product->get_type(), array( 'external' ), true ) ) {
+			if ( $product->is_purchasable() && ! in_array( $product->get_type(), array( 'external' ), true ) ) {
 				self::enqueue_script( 'wc-ajax-add-to-cart' );
 			}
 		}
