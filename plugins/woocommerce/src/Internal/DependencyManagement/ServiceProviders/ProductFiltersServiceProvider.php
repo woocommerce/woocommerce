@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\ProductFilters\Controller;
+use Automattic\WooCommerce\Internal\ProductFilters\MainQueryController;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
@@ -18,7 +18,7 @@ class ProductFiltersServiceProvider extends AbstractInterfaceServiceProvider {
 	 */
 	protected $provides = array(
 		QueryClauses::class,
-		Controller::class,
+		MainQueryController::class,
 		FilterDataProvider::class,
 	);
 
@@ -29,7 +29,7 @@ class ProductFiltersServiceProvider extends AbstractInterfaceServiceProvider {
 	 */
 	public function register() {
 		$this->share( QueryClauses::class );
-		$this->share_with_implements_tags( Controller::class )->addArgument( QueryClauses::class );
+		$this->share_with_implements_tags( MainQueryController::class )->addArgument( QueryClauses::class );
 		$this->share( FilterDataProvider::class );
 	}
 }

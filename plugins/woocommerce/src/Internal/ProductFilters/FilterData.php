@@ -279,7 +279,7 @@ class FilterData {
 	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
 		return sprintf(
 			'wc_%s_%s',
-			Controller::TRANSIENT_GROUP,
+			CacheController::TRANSIENT_GROUP,
 			md5(
 				wp_json_encode(
 					array(
@@ -299,7 +299,7 @@ class FilterData {
 	 */
 	private function get_cache( $key ) {
 		$cache             = get_transient( $key );
-		$transient_version = WC_Cache_Helper::get_transient_version( Controller::TRANSIENT_GROUP );
+		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
 
 		if ( empty( $cache['version'] ) ||
 			empty( $cache['value'] ) ||
@@ -318,7 +318,7 @@ class FilterData {
 	 * @param mix    $value Value to set.
 	 */
 	private function set_cache( $key, $value ) {
-		$transient_version = WC_Cache_Helper::get_transient_version( Controller::TRANSIENT_GROUP );
+		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
 		$transient_value   = array(
 			'version' => $transient_version,
 			'value'   => $value,
