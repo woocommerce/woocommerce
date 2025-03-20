@@ -54,7 +54,8 @@ function TemplateSenderPanel() {
 				<PanelRow>
 					<TextControl
 						className="woocommerce-email-sidebar-template-settings-sender-options-input"
-						label={ __( '"from" name', 'woocommerce' ) }
+						/* translators: Label for the sender's `“from” name` in email settings. */
+						label={ __( '“from” name', 'woocommerce' ) }
 						name="from_name"
 						type="text"
 						value={
@@ -68,7 +69,8 @@ function TemplateSenderPanel() {
 					<TextControl
 						ref={ emailInputRef }
 						className="woocommerce-email-sidebar-template-settings-sender-options-input"
-						label={ __( '"from" email', 'woocommerce' ) }
+						/* translators: Label for the sender's `“from” email` in email settings. */
+						label={ __( '“from” email', 'woocommerce' ) }
 						name="from_email"
 						type="email"
 						value={
