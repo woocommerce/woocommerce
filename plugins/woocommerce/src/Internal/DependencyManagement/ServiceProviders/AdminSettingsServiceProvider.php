@@ -46,6 +46,6 @@ class AdminSettingsServiceProvider extends AbstractInterfaceServiceProvider {
 		// Provider-specific.
 		$this->share( WooPaymentsService::class );
 		$this->share_with_implements_tags( WooPaymentsRestController::class )
-			 ->addArguments( array( Payments::class, WooPaymentsService::class ) );
+			->addArguments( array( Payments::class, WooPaymentsService::class ) );
 	}
 }
