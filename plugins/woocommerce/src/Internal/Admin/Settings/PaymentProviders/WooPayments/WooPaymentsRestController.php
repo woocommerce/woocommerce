@@ -89,6 +89,21 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_start' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'source'   => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 			),
 			$override
@@ -101,6 +116,15 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_save' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
 				),
 			),
 			$override
@@ -113,18 +137,145 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_check' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
 				),
 			),
 			$override
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/' . $this->rest_base . '/onboarding/step/(?P<step>[a-zA-Z0-9_-]+)/complete',
+			'/' . $this->rest_base . '/onboarding/step/(?P<step>[a-zA-Z0-9_-]+)/finish',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_complete' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_finish' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'source'   => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
+		// Onboarding step specific routes.
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/init',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_test_account_initialize' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/check/po_eligible',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_check_po_eligible' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/session/start',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_session_start' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'progressive' => array(
+							'description'       => __( 'Whether the session is for progressive onboarding.', 'woocommerce' ),
+							'type'              => 'boolean',
+							'default'           => false,
+							'sanitize_callback' => 'wc_string_to_bool',
+						),
+						'source'   => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/session/finish',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_session_finish' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'source'   => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 			),
 			$override
@@ -167,27 +318,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Get the controller's REST URL path.
-	 *
-	 * @param string $relative_path Optional. Relative path to append to the REST URL.
-	 *
-	 * @return string The REST URL path.
-	 */
-	protected function get_rest_url_path( string $relative_path = '' ): string {
-		$path = '/' . trim( $this->route_namespace, '/' ) . '/' . trim( $this->rest_base, '/' );
-		if ( ! empty( $relative_path ) ) {
-			$path .= '/' . ltrim( $relative_path, '/' );
-		}
-
-		return $path;
-	}
-
-	/**
 	 * Handle the onboarding step start action.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_Error|WP_REST_Response The response.
 	 */
 	protected function handle_onboarding_step_start( WP_REST_Request $request ) {
 		$step_id = $request->get_param( 'step' );
@@ -209,9 +344,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
-
-
 		$response = array(
+			'success'         => true,
 			'previous_status' => $previous_status,
 			'status'          => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
 		);
@@ -224,7 +358,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_Error|WP_REST_Response The response.
 	 */
 	protected function handle_onboarding_step_save( WP_REST_Request $request ) {
 		$step_id = $request->get_param( 'step' );
@@ -244,17 +378,48 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array() );
+		return rest_ensure_response( array( 'success' => true ) );
 	}
 
 	/**
-	 * Handle the onboarding step complete action.
+	 * Handle the onboarding step check action.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_Error|WP_REST_Response The response.
 	 */
-	protected function handle_onboarding_step_complete( WP_REST_Request $request ) {
+	protected function handle_onboarding_step_check( WP_REST_Request $request ) {
+		$step_id = $request->get_param( 'step' );
+		if ( empty( $step_id ) || ! $this->woopayments->is_valid_onboarding_step_id( $step_id ) ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_invalid_step', __( 'Invalid onboarding step ID.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$result = $this->woopayments->onboarding_step_check( $step_id, $location );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		// Merge the result with the success flag.
+		$response = array_merge( array( 'success' => true ), $result );
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding step finish action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function handle_onboarding_step_finish( WP_REST_Request $request ) {
 		$step_id = $request->get_param( 'step' );
 		if ( empty( $step_id ) || ! $this->woopayments->is_valid_onboarding_step_id( $step_id ) ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_invalid_step', __( 'Invalid onboarding step ID.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -275,6 +440,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		$response = array(
+			'success'         => true,
 			'previous_status' => $previous_status,
 			'status'          => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
 		);
@@ -283,9 +449,128 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Handle the onboarding test account initialize action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function handle_onboarding_test_account_initialize( WP_REST_Request $request ) {
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided
+			$location = $this->payments->get_country();
+		}
+
+		// @todo Mark the step as started, if not already.
+
+		try {
+			$result = $this->woopayments->onboarding_test_account_init( $location );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( array_merge( array(
+			'success' => true,
+		), $result ) );
+	}
+
+	/**
+	 * Handle the onboarding business verification step check PO eligible action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function handle_onboarding_business_verification_check_po_eligible( WP_REST_Request $request ) {
+		// If we receive self assessment data with the request, we will use it.
+		$self_assessment = ! empty( $request->get_param( 'self_assessment' ) ) ? wc_clean( wp_unslash( $request->get_param( 'self_assessment' ) ) ) : [];
+
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$result = $this->woopayments->get_onboarding_kyc_po_eligible( $location, $self_assessment );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response( array_merge( array(
+			'success' => true,
+		), $result ) );
+	}
+
+	/**
+	 * Handle the onboarding business verification step session start action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function handle_onboarding_business_verification_session_start( WP_REST_Request $request ) {
+		$progressive = (bool) $request->get_param( 'progressive' );
+
+		// If we receive self assessment data with the request, we will use it.
+		$self_assessment = ! empty( $request->get_param( 'self_assessment' ) ) ? wc_clean( wp_unslash( $request->get_param( 'self_assessment' ) ) ) : [];
+
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment, $progressive );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response( array(
+			'success' => true,
+			'session' => $account_session,
+		) );
+	}
+
+	/**
+	 * Handle the onboarding business verification step session finish action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function handle_onboarding_business_verification_session_finish( WP_REST_Request $request ) {
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $request->get_param( 'source' ) ?? '' );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		// If there is no success key in the response, we assume the operation was successful.
+		if ( ! isset( $response['success'] ) ) {
+			$response['success'] = true;
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
 	 * General permissions check for Payments settings REST API endpoint.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
+	 *
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 */
 	private function check_permissions( WP_REST_Request $request ) {
@@ -526,6 +811,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
+								'init'    => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to initialize a test account.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'kyc_session' => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to start a KYC session.', 'woocommerce' ),
@@ -535,9 +827,9 @@ class WooPaymentsRestController extends RestApiControllerBase {
 								),
 							),
 						),
-						'data'   => array(
+						'context'   => array(
 							'type'        => 'object',
-							'description' => esc_html__( 'Various data for the step.', 'woocommerce' ),
+							'description' => esc_html__( 'Various contextual data for the step to use.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
@@ -570,5 +862,21 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				'readonly'    => true,
 			),
 		);
+	}
+
+	/**
+	 * Get the controller's REST URL path.
+	 *
+	 * @param string $relative_path Optional. Relative path to append to the REST URL.
+	 *
+	 * @return string The REST URL path.
+	 */
+	private function get_rest_url_path( string $relative_path = '' ): string {
+		$path = '/' . trim( $this->route_namespace, '/' ) . '/' . trim( $this->rest_base, '/' );
+		if ( ! empty( $relative_path ) ) {
+			$path .= '/' . ltrim( $relative_path, '/' );
+		}
+
+		return $path;
 	}
 }
