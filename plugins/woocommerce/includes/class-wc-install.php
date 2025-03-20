@@ -291,6 +291,7 @@ class WC_Install {
 			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
 			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
+			'wc_update_990_disable_ajax_add_to_cart_on_product_pages',
 		),
 	);
 
@@ -516,11 +517,6 @@ class WC_Install {
 		// Force a flush of rewrite rules even if the corresponding hook isn't initialized yet.
 		if ( ! has_action( 'woocommerce_flush_rewrite_rules' ) ) {
 			flush_rewrite_rules();
-		}
-
-		// Enable AJAX add to cart on product pages by default for new installations of WooCommerce 9.9 and above.
-		if ( self::is_new_install() && version_compare( WC()->version, '9.9', '>=' ) ) {
-			update_option( 'woocommerce_enable_ajax_add_to_cart_product_pages', 'yes' );
 		}
 
 		/**
