@@ -9,6 +9,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -82,6 +83,7 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_post_types', array( $this, 'add_email_post_type' ) );
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
+		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_post' ), 10, 2 );
 	}
 
 	/**
@@ -144,5 +146,21 @@ class Integration {
 			return true;
 		}
 		return $replace;
+	}
+
+	/**
+	 * Delete the email template associated with the email editor post when the post is permanently deleted.
+	 *
+	 * @param int     $post_id The post ID.
+	 * @param WP_Post $post    The post object.
+	 */
+	public function delete_email_template_associated_with_post( $post_id, $post ) {
+		$email_type = get_post_meta( $post_id, '_wc_email_type', true );
+
+		if ( self::EMAIL_POST_TYPE !== $post->post_type || ! $email_type ) {
+			return;
+		}
+
+		WCEmailTemplateManager::get_instance()->delete_email_template( $email_type );
 	}
 }

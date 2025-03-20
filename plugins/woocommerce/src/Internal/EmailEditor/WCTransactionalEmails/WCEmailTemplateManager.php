@@ -84,4 +84,17 @@ class WCEmailTemplateManager {
 		$option_name = 'woocommerce_email_templates_' . $email_type . '_post_id';
 		return get_option( $option_name );
 	}
+
+	/**
+	 * Deletes the post ID for a specific email template type.
+	 *
+	 * @param string $email_type The type of email template e.g. 'customer_new_account' from the WC_Email->id property.
+	 */
+	public function delete_email_template( $email_type ) {
+		$option_name = 'woocommerce_email_templates_' . $email_type . '_post_id';
+		if ( ! get_option( $option_name ) ) {
+			return;
+		}
+		delete_option( $option_name );
+	}
 }
