@@ -79,13 +79,13 @@ class InstallTheme extends Step {
 				),
 				'themeData' => array(
 					"anyOf" => [
-						require_once __DIR__ . "/schemas/definitions/VFSReference.php",
-						require_once __DIR__ . "/schemas/definitions/LiteralReference.php",
-						require_once __DIR__ . "/schemas/definitions/CorePluginReference.php",
-						require_once __DIR__ . "/schemas/definitions/CoreThemeReference.php",
-						require_once __DIR__ . "/schemas/definitions/UrlReference.php",
-						require_once __DIR__ . "/schemas/definitions/GitDirectoryReference.php",
-						require_once __DIR__ . "/schemas/definitions/DirectoryLiteralReference.php",
+						require __DIR__ . "/schemas/definitions/VFSReference.php",
+						require __DIR__ . "/schemas/definitions/LiteralReference.php",
+						require __DIR__ . "/schemas/definitions/CorePluginReference.php",
+						require __DIR__ . "/schemas/definitions/CoreThemeReference.php",
+						require __DIR__ . "/schemas/definitions/UrlReference.php",
+						require __DIR__ . "/schemas/definitions/GitDirectoryReference.php",
+						require __DIR__ . "/schemas/definitions/DirectoryLiteralReference.php",
 					]
 				),
 				'options'      => array(
