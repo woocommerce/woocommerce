@@ -117,7 +117,9 @@ class WCEmailTemplateGenerator {
 	 */
 	public function generate_initial_email_templates() {
 
-		if ( get_option( 'wc_email_editor_initial_templates_generated' ) ) {
+		$transient_name = 'wc_email_editor_initial_templates_generated';
+
+		if ( WOOCOMMERCE_VERSION === get_transient( $transient_name ) ) {
 			// if templates are already generated, we don't need to run this function again.
 			return true;
 		}
@@ -135,7 +137,7 @@ class WCEmailTemplateGenerator {
 			return $this->generate_email_templates( $templates_to_generate );
 		}
 
-		update_option( 'wc_email_editor_initial_templates_generated', true );
+		set_transient( $transient_name, WOOCOMMERCE_VERSION, MONTH_IN_SECONDS );
 		return true;
 	}
 
