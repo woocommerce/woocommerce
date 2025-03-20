@@ -99,6 +99,7 @@ export function WooContentPlaceholderEditContent() {
 						iframeRef?.current?.contentWindow?.document?.body
 							?.clientHeight || '750px',
 					backgroundColor: 'initial',
+					minHeight: '100px',
 				} }
 				ref={ iframeRef }
 				src={ `${ previewUrlBase }&type=${ DEFAULT_EMAIL_TYPE }` }

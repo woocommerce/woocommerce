@@ -84,6 +84,9 @@ class WooContentProcessor {
 	 * @return string
 	 */
 	private function inline_css( string $woo_content ): string {
+		if ( empty( $woo_content ) ) {
+			return '';
+		}
 		$css = $this->theme_controller->get_stylesheet_for_rendering();
 		return $this->css_inliner->from_html( $woo_content )->inline_css( $css )->render();
 	}

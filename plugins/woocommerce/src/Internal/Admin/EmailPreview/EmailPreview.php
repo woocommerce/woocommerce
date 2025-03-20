@@ -177,9 +177,12 @@ class EmailPreview {
 		$object           = null;
 
 		if ( in_array( $email_type, self::USER_OBJECT_EMAILS, true ) ) {
-			$object                  = new WP_User( 0 );
-			$this->email->user_email = 'user_preview@example.com';
-			$this->email->user_login = 'user_preview';
+			$object                        = new WP_User( 0 );
+			$this->email->user_email       = 'user_preview@example.com';
+			$this->email->user_login       = 'user_preview';
+			$this->email->reset_key        = 'reset_key';
+			$this->email->user_id          = 0;
+			$this->email->set_password_url = 'https://example.com/set-password';
 			$this->email->set_object( $object );
 		} else {
 			$object = $this->get_dummy_order();
