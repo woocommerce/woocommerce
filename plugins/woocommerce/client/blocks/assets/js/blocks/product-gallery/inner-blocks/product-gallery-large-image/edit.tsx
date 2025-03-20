@@ -3,7 +3,10 @@
  */
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { useProductDataContext } from '@woocommerce/shared-context';
 import { memo } from '@wordpress/element';
+import type { ReactElement } from 'react';
 import clsx from 'clsx';
 
 /**
@@ -16,18 +19,29 @@ const getInnerBlocksTemplate = () => [
 	[ largeImageNextPreviousButtonMetadata.name ],
 ];
 
-const Placeholder = memo( () => {
-	return (
-		<div className="wc-block-product-gallery-large-image wc-block-editor-product-gallery-large-image">
-			<img
-				src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg` }
-				alt="Placeholder"
-			/>
-		</div>
-	);
-} );
+const ProductImage = memo(
+	( { image }: { image: { src: string; alt: string } } ) => {
+		const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 
-export const Edit = () => {
+		const src = image.src || placeholderSrc;
+		const alt = image.alt || '';
+
+		return (
+			<div className="wc-block-product-gallery-large-image wc-block-editor-product-gallery-large-image">
+				<img src={ src } alt={ alt } />
+			</div>
+		);
+	}
+);
+
+export const Edit = withProductDataContext( (): ReactElement => {
+	const productContext = useProductDataContext();
+	const firstImage = productContext?.product?.images?.[ 0 ];
+	const image = {
+		src: firstImage?.src || '',
+		alt: firstImage?.alt || '',
+	};
+
 	const innerBlocksProps = useInnerBlocksProps(
 		{
 			className: 'wc-block-product-gallery-large-image__inner-blocks',
@@ -47,8 +61,8 @@ export const Edit = () => {
 
 	return (
 		<div { ...blockProps }>
-			<Placeholder />
+			<ProductImage image={ image } />
 			<div { ...innerBlocksProps } />
 		</div>
 	);
-};
+} );
