@@ -125,7 +125,7 @@ class PaymentsController {
 		if ( $this->is_woopayments_account_onboarded() ) {
 			return;
 		} else {
-			// Otherwise, remove payments connect page from the menu to avoid Payments item duplication.
+			// Otherwise, remove Payments menu item linking to the connect page to avoid Payments menu item duplication.
 			remove_menu_page( 'wc-admin&path=/payments/connect' );
 		}
 
