@@ -9,7 +9,7 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import largeImageNextPreviousButtonMetadata from '../product-gallery-large-image-next-previous/block.json';
+import largeImageNextPreviousButtonMetadata from '../product-gallery-next-previous-buttons/block.json';
 import './editor.scss';
 
 const getInnerBlocksTemplate = () => [
