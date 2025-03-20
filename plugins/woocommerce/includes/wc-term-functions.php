@@ -632,7 +632,14 @@ function wc_get_product_visibility_term_ids() {
 		wc_doing_it_wrong( __FUNCTION__, 'wc_get_product_visibility_term_ids should not be called before taxonomies are registered (woocommerce_after_register_post_type action).', '3.1' );
 		return array();
 	}
-	return array_map(
+
+	static $term_ids = array();
+
+	if ( count( $term_ids ) > 0 ) {
+		return $term_ids;
+	}
+
+	$term_ids = array_map(
 		'absint',
 		wp_parse_args(
 			wp_list_pluck(
@@ -658,6 +665,8 @@ function wc_get_product_visibility_term_ids() {
 			)
 		)
 	);
+
+	return $term_ids;
 }
 
 /**
