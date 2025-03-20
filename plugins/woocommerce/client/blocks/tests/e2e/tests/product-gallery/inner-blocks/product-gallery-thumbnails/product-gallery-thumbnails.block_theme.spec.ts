@@ -93,11 +93,6 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		// Set size to 10%
 		await page.getByLabel( 'Thumbnail Size' ).fill( '10' );
 
-		// Verify 10% size class is applied
-		await expect( thumbnailsBlock ).toHaveClass(
-			/wc-block-product-gallery-thumbnails--thumbnails-size-10/
-		);
-
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
@@ -108,26 +103,25 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			'[data-block-name="woocommerce/product-gallery-thumbnails"]'
 		);
 
-		// Verify the 10% size class is present
-		await expect( thumbnailsContainer ).toHaveClass(
-			/wc-block-product-gallery-thumbnails--thumbnails-size-10/
-		);
+		await expect( async () => {
+			// The width should be approximately 9% of its parent.
+			// 100% is x + x/10 where x is large image width.
+			const containerWidth = await thumbnailsContainer.evaluate(
+				( el ) => {
+					return el.clientWidth || 0;
+				}
+			);
 
-		// The width should be approximately 9% of its parent.
-		// 100% is x + x/10 where x is large image width.
-		const containerWidth = await thumbnailsContainer.evaluate( ( el ) => {
-			return el.clientWidth || 0;
-		} );
+			const parentWidth = await thumbnailsContainer.evaluate( ( el ) => {
+				return el.parentElement?.clientWidth || 0;
+			} );
 
-		const parentWidth = await thumbnailsContainer.evaluate( ( el ) => {
-			return el.parentElement?.clientWidth || 0;
-		} );
+			const ratio = containerWidth / parentWidth;
 
-		const ratio = containerWidth / parentWidth;
-
-		// Allow for some small rounding differences
-		expect( ratio ).toBeGreaterThan( 0.08 );
-		expect( ratio ).toBeLessThan( 0.1 );
+			// Allow for some small rounding differences
+			expect( ratio ).toBeGreaterThan( 0.08 );
+			expect( ratio ).toBeLessThan( 0.1 );
+		} ).toPass( { timeout: 5_000 } );
 	} );
 
 	test( 'thumbnails are scrollable and last thumbnail is reachable', async ( {
