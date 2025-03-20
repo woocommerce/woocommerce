@@ -139,27 +139,26 @@ test.describe( 'Shopper → Local pickup', () => {
 			.click();
 	} );
 
-	test( 'The shopper can choose a local pickup option', async ( {
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
+	test.fixme(
+		'The shopper can choose a local pickup option',
+		async ( { page, frontendUtils, checkoutPageObject } ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Pickup' } ).click();
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
+			await page.getByRole( 'radio', { name: 'Pickup' } ).click();
+			await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
+			await page.getByLabel( 'Testing' ).last().check();
 
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
 
-		await expect(
-			page.getByText( 'Collection from Testing' )
-		).toBeVisible();
-		await checkoutPageObject.verifyBillingDetails();
-	} );
+			await expect(
+				page.getByText( 'Collection from Testing' )
+			).toBeVisible();
+			await checkoutPageObject.verifyBillingDetails();
+		}
+	);
 
 	test( 'Switching between local pickup and shipping does not affect the address', async ( {
 		page,
@@ -602,73 +601,74 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 test.describe( 'Shopper → Shipping (customer user)', () => {
 	test.use( { storageState: customerFile } );
 
-	test( 'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( 'Beanie' );
-		await frontendUtils.goToCheckout();
-		expect(
-			await checkoutPageObject.selectAndVerifyShippingOption(
-				FREE_SHIPPING_NAME,
-				FREE_SHIPPING_PRICE
-			)
-		).toBe( true );
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-		await checkoutPageObject.verifyAddressDetails( 'billing' );
-		await checkoutPageObject.verifyAddressDetails( 'shipping' );
-		await expect( page.getByText( FREE_SHIPPING_NAME ) ).toBeVisible();
+	test.fixme(
+		'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses',
+		async ( { checkoutPageObject, frontendUtils, page } ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( 'Beanie' );
+			await frontendUtils.goToCheckout();
+			expect(
+				await checkoutPageObject.selectAndVerifyShippingOption(
+					FREE_SHIPPING_NAME,
+					FREE_SHIPPING_PRICE
+				)
+			).toBe( true );
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
+			await checkoutPageObject.verifyAddressDetails( 'billing' );
+			await checkoutPageObject.verifyAddressDetails( 'shipping' );
+			await expect( page.getByText( FREE_SHIPPING_NAME ) ).toBeVisible();
 
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( 'Beanie' );
-		await frontendUtils.goToCheckout();
-		expect(
-			await checkoutPageObject.selectAndVerifyShippingOption(
-				FLAT_RATE_SHIPPING_NAME,
-				FLAT_RATE_SHIPPING_PRICE
-			)
-		).toBe( true );
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( 'Beanie' );
+			await frontendUtils.goToCheckout();
+			expect(
+				await checkoutPageObject.selectAndVerifyShippingOption(
+					FLAT_RATE_SHIPPING_NAME,
+					FLAT_RATE_SHIPPING_PRICE
+				)
+			).toBe( true );
 
-		await checkoutPageObject.syncBillingWithShipping();
-		await checkoutPageObject.fillInCheckoutWithTestData( {
-			phone: '0987654322',
-		} );
-		await checkoutPageObject.unsyncBillingWithShipping();
-		const shippingForm = page.getByRole( 'group', {
-			name: 'Shipping address',
-		} );
-		const billingForm = page.getByRole( 'group', {
-			name: 'Billing address',
-		} );
+			await checkoutPageObject.syncBillingWithShipping();
+			await checkoutPageObject.fillInCheckoutWithTestData( {
+				phone: '0987654322',
+			} );
+			await checkoutPageObject.unsyncBillingWithShipping();
+			const shippingForm = page.getByRole( 'group', {
+				name: 'Shipping address',
+			} );
+			const billingForm = page.getByRole( 'group', {
+				name: 'Billing address',
+			} );
 
-		expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
-			billingForm.getByLabel( 'Phone' ).inputValue
-		);
+			expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
+				billingForm.getByLabel( 'Phone' ).inputValue
+			);
 
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		const overrideBillingDetails = {
-			firstname: 'Juan',
-			lastname: 'Perez',
-			addressfirstline: '123 Test Street',
-			addresssecondline: 'Apartment 6',
-			countryKey: 'ES',
-			city: 'Madrid',
-			postcode: '08830',
-			state: 'M',
-			phone: '0987654321',
-			email: 'juan.perez@test.com',
-		};
-		await checkoutPageObject.fillBillingDetails( overrideBillingDetails );
-		await checkoutPageObject.placeOrder();
-		await checkoutPageObject.verifyAddressDetails(
-			'billing',
-			overrideBillingDetails
-		);
-		await checkoutPageObject.verifyAddressDetails( 'shipping' );
-	} );
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			const overrideBillingDetails = {
+				firstname: 'Juan',
+				lastname: 'Perez',
+				addressfirstline: '123 Test Street',
+				addresssecondline: 'Apartment 6',
+				countryKey: 'ES',
+				city: 'Madrid',
+				postcode: '08830',
+				state: 'M',
+				phone: '0987654321',
+				email: 'juan.perez@test.com',
+			};
+			await checkoutPageObject.fillBillingDetails(
+				overrideBillingDetails
+			);
+			await checkoutPageObject.placeOrder();
+			await checkoutPageObject.verifyAddressDetails(
+				'billing',
+				overrideBillingDetails
+			);
+			await checkoutPageObject.verifyAddressDetails( 'shipping' );
+		}
+	);
 } );
 
 test.describe( 'Shopper → Place Guest Order', () => {

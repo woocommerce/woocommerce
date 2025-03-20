@@ -295,6 +295,7 @@ const frontendScriptModuleBlocksToSkip = [
 	'add-to-cart-with-options',
 	'add-to-cart-with-options-quantity-selector',
 	'add-to-cart-with-options-variation-selector',
+	'add-to-cart-with-options-variation-selector-attribute-options',
 	'add-to-cart-with-options-grouped-product-selector',
 	'add-to-cart-with-options-grouped-product-selector-item',
 	'accordion-group',
