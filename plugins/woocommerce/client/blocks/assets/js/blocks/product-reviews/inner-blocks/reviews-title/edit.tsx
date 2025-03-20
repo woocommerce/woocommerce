@@ -23,6 +23,67 @@ import {
  */
 import type { ProductReviewsTitleEditProps } from './types';
 
+function getProductReviewsTitle(
+	showReviewsCount: boolean,
+	reviewsCount: number,
+	showProductTitle: boolean,
+	productTitle: string
+) {
+	if ( showReviewsCount && showProductTitle ) {
+		return reviewsCount === 1
+			? sprintf(
+					/* translators: %s: Post title. */
+					__( 'One review for %s', 'woocommerce' ),
+					productTitle
+			  )
+			: sprintf(
+					/* translators: 1: Number of comments, 2: Post title. */
+					_n(
+						'%1$s review for %2$s',
+						'%1$s reviews for %2$s',
+						reviewsCount,
+						'woocommerce'
+					),
+					reviewsCount,
+					productTitle
+			  );
+	}
+
+	if ( ! showReviewsCount && showProductTitle ) {
+		return reviewsCount === 1
+			? sprintf(
+					/* translators: %s: Post title. */
+					__( 'Review for %s', 'woocommerce' ),
+					productTitle
+			  )
+			: sprintf(
+					/* translators: %s: Post title. */
+					__( 'Reviews for %s', 'woocommerce' ),
+					productTitle
+			  );
+	}
+
+	if ( showReviewsCount && ! showProductTitle ) {
+		return reviewsCount === 1
+			? __( 'One review', 'woocommerce' )
+			: sprintf(
+					/* translators: %s: Number of reviews. */
+					_n(
+						'%s review',
+						'%s reviews',
+						reviewsCount,
+						'woocommerce'
+					),
+					reviewsCount
+			  );
+	}
+
+	if ( reviewsCount === 1 ) {
+		return __( 'Review', 'woocommerce' );
+	}
+	return __( 'Reviews', 'woocommerce' );
+}
+
 export default function Edit( {
 	attributes: {
 		textAlign,
@@ -105,60 +166,16 @@ export default function Edit( {
 		</InspectorControls>
 	);
 
-	const postTitle = isSiteEditor
-		? __( '“Product Title”', 'woocommerce' )
+	const productTitle = isSiteEditor
+		? __( '"Product Title"', 'woocommerce' )
 		: `"${ rawTitle }"`;
 
-	let placeholder;
-	if ( showReviewsCount && reviewsCount !== undefined ) {
-		if ( showProductTitle ) {
-			if ( reviewsCount === 1 ) {
-				placeholder = sprintf(
-					/* translators: %s: Post title. */
-					__( 'One review for %s', 'woocommerce' ),
-					postTitle
-				);
-			} else {
-				placeholder = sprintf(
-					/* translators: 1: Number of comments, 2: Post title. */
-					_n(
-						'%1$s review for %2$s',
-						'%1$s reviews for %2$s',
-						reviewsCount,
-						'woocommerce'
-					),
-					reviewsCount,
-					postTitle
-				);
-			}
-		} else if ( reviewsCount === 1 ) {
-			placeholder = __( 'One review', 'woocommerce' );
-		} else {
-			placeholder = sprintf(
-				/* translators: %s: Number of reviews. */
-				_n( '%s review', '%s reviews', reviewsCount, 'woocommerce' ),
-				reviewsCount
-			);
-		}
-	} else if ( showProductTitle ) {
-		if ( reviewsCount === 1 ) {
-			placeholder = sprintf(
-				/* translators: %s: Post title. */
-				__( 'Review for %s', 'woocommerce' ),
-				postTitle
-			);
-		} else {
-			placeholder = sprintf(
-				/* translators: %s: Post title. */
-				__( 'Reviews for %s', 'woocommerce' ),
-				postTitle
-			);
-		}
-	} else if ( reviewsCount === 1 ) {
-		placeholder = __( 'Review', 'woocommerce' );
-	} else {
-		placeholder = __( 'Reviews', 'woocommerce' );
-	}
+	const placeholder = getProductReviewsTitle(
+		showReviewsCount,
+		reviewsCount,
+		showProductTitle,
+		productTitle
+	);
 
 	return (
 		<>
