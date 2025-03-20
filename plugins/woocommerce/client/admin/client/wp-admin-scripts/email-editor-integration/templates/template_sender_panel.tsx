@@ -4,38 +4,43 @@
 import { __ } from '@wordpress/i18n';
 import { Panel, PanelBody, PanelRow, TextControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { useRef } from '@wordpress/element';
+import { useCallback, useRef } from '@wordpress/element';
 
 function TemplateSenderPanel() {
 	const [ woocommerce_template_data, setWoocommerceTemplateData ] =
 		useEntityProp( 'postType', 'wp_template', 'woocommerce_data' );
 	const emailInputRef = useRef< HTMLInputElement >( null );
 
-	const handleFromNameChange = ( value: string ) => {
-		setWoocommerceTemplateData( {
-			...woocommerce_template_data,
-			sender_settings: {
-				...woocommerce_template_data?.sender_settings,
-				from_name: value,
-			},
-		} );
-	};
+	const handleFromNameChange = useCallback(
+		( value: string ) => {
+			setWoocommerceTemplateData( {
+				...woocommerce_template_data,
+				sender_settings: {
+					...woocommerce_template_data?.sender_settings,
+					from_name: value,
+				},
+			} );
+		},
+		[ woocommerce_template_data, setWoocommerceTemplateData ]
+	);
+	const handleFromAddressChange = useCallback(
+		( value: string ) => {
+			setWoocommerceTemplateData( {
+				...woocommerce_template_data,
+				sender_settings: {
+					...woocommerce_template_data?.sender_settings,
+					from_address: value,
+				},
+			} );
 
-	const handleFromAddressChange = ( value: string ) => {
-		setWoocommerceTemplateData( {
-			...woocommerce_template_data,
-			sender_settings: {
-				...woocommerce_template_data?.sender_settings,
-				from_address: value,
-			},
-		} );
-
-		// Use HTML5 validation
-		if ( emailInputRef.current ) {
-			emailInputRef.current.checkValidity();
-			emailInputRef.current.reportValidity();
-		}
-	};
+			// Use HTML5 validation
+			if ( emailInputRef.current ) {
+				emailInputRef.current.checkValidity();
+				emailInputRef.current.reportValidity();
+			}
+		},
+		[ woocommerce_template_data, setWoocommerceTemplateData ]
+	);
 
 	return (
 		<Panel className="woocommerce-email-sidebar-template-settings-sender-options">
