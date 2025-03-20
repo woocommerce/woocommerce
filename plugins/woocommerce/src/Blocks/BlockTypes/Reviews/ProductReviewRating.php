@@ -47,8 +47,8 @@ class ProductReviewRating extends AbstractBlock {
 			// translators: %s: Rating.
 			$label = sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating );
 			$html  = sprintf(
-				'<div class="wc-block-components-product-review-rating__container">
-					<div class="wc-block-components-product-review-rating__stars" role="img" aria-label="%1$s">
+				'<div class="wc-block-product-review-rating__container">
+					<div class="wc-block-product-review-rating__stars" role="img" aria-label="%1$s">
 						%2$s
 					</div>
 				</div>

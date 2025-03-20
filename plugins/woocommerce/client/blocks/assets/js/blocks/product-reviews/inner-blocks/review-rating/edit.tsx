@@ -9,20 +9,8 @@ import {
 	BlockControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { useStyleProps } from '@woocommerce/base-hooks';
 import type { BlockEditProps } from '@wordpress/blocks';
 
-/**
- * Renders the `woocommerce/product-review-rating` block on the editor.
- *
- * @param   {Object}  props                    React props.
- * @param   {Object}  props.attributes         Block attributes.
- * @param   {Object}  props.setAttributes      Function to set block attributes.
- * @param   {Object}  props.context           Inherited context.
- * @param   {string}  props.context.commentId The comment ID.
- *
- * @return {JSX.Element} React element.
- */
 export default function Edit( {
 	context: { commentId },
 	attributes,
@@ -33,14 +21,9 @@ export default function Edit( {
 	context: { commentId: string };
 } ) {
 	const { textAlign } = attributes;
-	const styleProps = useStyleProps( attributes );
-	const className = clsx(
-		styleProps.className,
-		'wc-block-components-product-review-rating',
-		{
-			[ `has-text-align-${ textAlign }` ]: textAlign,
-		}
-	);
+	const className = clsx( 'wc-block-product-review-rating', {
+		[ `has-text-align-${ textAlign }` ]: textAlign,
+	} );
 	const blockProps = useBlockProps( {
 		className,
 	} );
@@ -77,9 +60,7 @@ export default function Edit( {
 			</BlockControls>
 			<div { ...blockProps }>
 				<div
-					className={
-						'wc-block-components-product-review-rating__stars'
-					}
+					className="wc-block-product-review-rating__stars"
 					role="img"
 					aria-label={ ratingText }
 				>
