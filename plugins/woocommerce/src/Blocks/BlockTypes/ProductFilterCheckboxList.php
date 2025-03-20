@@ -90,7 +90,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									data-wp-on--change="actions.toggleFilter"
 									value="<?php echo esc_attr( $item['value'] ); ?>"
 									data-wp-bind--checked="state.isFilterSelected"
-									data-wp-context="<?php echo esc_attr( wp_json_encode( array( 'item' => $item ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
+									<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); ?>
 								>
 								<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
 									<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

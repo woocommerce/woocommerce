@@ -75,7 +75,7 @@ final class ProductFilterChips extends AbstractBlock {
 						data-wp-on--click="actions.toggleFilter"
 						value="<?php echo esc_attr( $item['value'] ); ?>"
 						data-wp-bind--aria-checked="state.isFilterSelected"
-						data-wp-context="<?php echo esc_attr( wp_json_encode( array( 'item' => $item ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
+						<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); ?>
 						<?php if ( ! $item['selected'] ) : ?>
 							<?php if ( $count >= $remaining_initial_unchecked ) : ?>
 								data-wp-bind--hidden="!context.showAll"
