@@ -22,7 +22,7 @@ export type EmailType = {
 	id: string;
 	post_id: string;
 	recipients: Recipients;
-	status?: string;
+	status: string;
 	link?: string;
 };
 

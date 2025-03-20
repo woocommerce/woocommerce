@@ -15,7 +15,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
-import { Status } from './settings-email-listing-status';
+import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
@@ -31,14 +31,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		layout: {},
 	} );
 
-	const allStatuses = useSelect( ( select ) => {
-		return select( coreStore ).getEntityRecords( 'root', 'status' ) || [];
-	}, [] );
-
-	const { emails, statuses, total } = useTransactionalEmails(
-		emailTypes,
-		view
-	);
+	const { emails, total } = useTransactionalEmails( emailTypes, view );
 
 	const fields = [
 		{
@@ -81,7 +74,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			render: ( row: { item: EmailType } ) => {
 				return <Status slug={ row.item.status } />;
 			},
-			elements: statuses,
+			elements: EMAIL_STATUSES,
 		},
 	];
 
@@ -109,13 +102,12 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		{
 			id: 'disable',
 			label: ( items: EmailType[] ) =>
-				items[ 0 ].status === 'publish'
+				items[ 0 ].status === 'enabled'
 					? __( 'Disable email', 'woocommerce' )
 					: __( 'Enable email', 'woocommerce' ),
 			supportsBulk: false,
-			isVisible: ( items: EmailType[] ) =>
-				items[ 0 ].status === 'publish' ||
-				items[ 0 ].status === 'draft',
+			isEligible: ( item: EmailType ) =>
+				item.status === 'enabled' || item.status === 'disabled',
 			callback: ( items: EmailType[] ) => {
 				return true; // TODO: Implement disable/enable
 			},

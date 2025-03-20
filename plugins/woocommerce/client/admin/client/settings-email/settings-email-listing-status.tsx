@@ -10,32 +10,27 @@ import { __ } from '@wordpress/i18n';
 import { drafts, scheduled, published } from '@wordpress/icons';
 import { __experimentalHStack as HStack, Icon } from '@wordpress/components';
 
-const STATUSES = [
+export const EMAIL_STATUSES = [
 	{
-		value: 'draft',
-		label: __( 'Draft', 'woocommerce' ),
-		icon: drafts,
-	},
-	{
-		value: 'future',
-		label: __( 'Scheduled', 'woocommerce' ),
-		icon: scheduled,
-	},
-	{
-		value: 'active',
+		value: 'enabled',
 		label: __( 'Active', 'woocommerce' ),
 		icon: published,
 	},
 	{
-		value: 'publish',
-		label: __( 'Published', 'woocommerce' ),
-		icon: published,
+		value: 'disabled',
+		label: __( 'Draft', 'woocommerce' ),
+		icon: drafts,
+	},
+	{
+		value: 'manual',
+		label: __( 'Manually sent', 'woocommerce' ),
+		icon: scheduled,
 	},
 ];
 
 export const Status = ( { slug }: { slug: string | undefined } ) => {
 	const status = slug
-		? STATUSES.find( ( s ) => s.value === slug )
+		? EMAIL_STATUSES.find( ( s ) => s.value === slug )
 		: undefined;
 	if ( ! status ) {
 		return slug;

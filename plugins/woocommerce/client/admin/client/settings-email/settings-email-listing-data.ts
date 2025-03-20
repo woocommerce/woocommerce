@@ -12,8 +12,7 @@ import { __ } from '@wordpress/i18n';
 import { EmailType } from './settings-email-listing-slotfill';
 
 /**
- * Hook providing transactional emails enriched by woo_email post data,
- * and the available statuses of the posts.
+ * Hook providing transactional emails enriched by woo_email post data for DataViews component.
  */
 export const useTransactionalEmails = (
 	emailTypes: EmailType[],
@@ -38,20 +37,9 @@ export const useTransactionalEmails = (
 		) as Post | null;
 		return {
 			...emailType,
-			status: post?.status || 'draft',
 			link: post?.link || '',
 		};
 	} );
-
-	const statuses = Array.from(
-		new Set( emails.map( ( email ) => email.status ) )
-	).map( ( status ) => ( {
-		value: status,
-		label: __(
-			status.charAt( 0 ).toUpperCase() + status.slice( 1 ),
-			'woocommerce'
-		),
-	} ) );
 
 	// Apply Sort
 	let sortedEmails: EmailType[] = emails;
@@ -93,7 +81,6 @@ export const useTransactionalEmails = (
 
 	return {
 		emails: renderedEmails,
-		statuses,
 		total: filteredEmails.length,
 	};
 };
