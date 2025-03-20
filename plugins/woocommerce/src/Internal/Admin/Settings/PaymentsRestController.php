@@ -119,18 +119,6 @@ class PaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/' . $this->rest_base . '/onboarding-steps',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'get_onboarding_steps' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-				),
-			),
-			$override
-		);
-		register_rest_route(
-			$this->route_namespace,
 			'/' . $this->rest_base . '/suggestion/(?P<id>[\w\d\-]+)/hide',
 			array(
 				array(
@@ -1021,43 +1009,6 @@ class PaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
-		);
-	}
-
-	/**
-	 * Get the onboarding steps.
-	 *
-	 * @return array The onboarding steps.
-	 */
-	protected function get_onboarding_steps() {
-		return rest_ensure_response(
-			array(
-				'steps' => array(
-					array(
-						'id' => 'welcome',
-						'label' => 'Welcome to WooPayments',
-						'path' => '/woopayments/onboarding/welcome',
-						'status' => 'completed',
-						'dependencies' => array(),
-					),
-					array(
-						'id' => 'jetpack',
-						'label' => 'Connect with Jetpack',
-						'path' => '/woopayments/onboarding/jetpack',
-						'status' => 'incomplete',
-						'dependencies' => array(
-							'welcome',
-						),
-					),
-					array(
-						'id' => 'final',
-						'label' => 'Payment methods',
-						'path' => '/woopayments/onboarding/payment-methods',
-						'status' => 'incomplete',
-						'dependencies' => array( "jetpack"),
-					),
-				),
-			)
 		);
 	}
 
