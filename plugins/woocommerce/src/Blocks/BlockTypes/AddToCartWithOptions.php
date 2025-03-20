@@ -229,7 +229,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			/**
 			 * Trigger the single product add to cart action that prints the markup.
 			 *
-			 * @since 9.7.0
+			 * @since 9.9.0
 			 */
 			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 			add_action( 'woocommerce_' . $product_type . '_add_to_cart', 'woocommerce_' . $product_type . '_add_to_cart', 30 );
