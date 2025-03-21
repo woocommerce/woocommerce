@@ -41,7 +41,7 @@
 	},
 	"devDependencies": {
 		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
+		"@babel/core": "7.12.9",
 		"@babel/plugin-transform-react-jsx": "7.25.7",
 		"@babel/plugin-transform-runtime": "7.25.7",
 		"@babel/polyfill": "7.12.1",

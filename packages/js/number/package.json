@@ -52,7 +52,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "^7.23.5",
 		"@babel/runtime": "7.25.7",
 		"@types/jest": "27.5.x",
 		"@types/lodash": "^4.14.202",
