@@ -1434,8 +1434,8 @@ importers:
         version: 3.3.7
     devDependencies:
       '@babel/cli':
-        specifier: 7.12.8
-        version: 7.12.8(@babel/core@7.12.9)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.12.9)
       '@babel/core':
         specifier: 7.12.9
         version: 7.12.9
@@ -1534,8 +1534,8 @@ importers:
         version: 1.1.3
     devDependencies:
       '@babel/cli':
-        specifier: 7.12.8
-        version: 7.12.8(@babel/core@7.12.9)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.12.9)
       '@babel/core':
         specifier: 7.12.9
         version: 7.12.9
@@ -1598,8 +1598,8 @@ importers:
         version: 1.4.0
     devDependencies:
       '@babel/cli':
-        specifier: 7.12.8
-        version: 7.12.8(@babel/core@7.12.9)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.12.9)
       '@babel/core':
         specifier: 7.12.9
         version: 7.12.9
@@ -1652,8 +1652,8 @@ importers:
   packages/js/e2e-utils-playwright:
     devDependencies:
       '@babel/cli':
-        specifier: ^7.25.9
-        version: 7.26.4(@babel/core@7.26.0)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.26.0)
       '@babel/core':
         specifier: ^7.26.0
         version: 7.26.0
@@ -1810,7 +1810,7 @@ importers:
         version: 2.17.0(wp-prettier@3.0.3)
       '@wordpress/scripts':
         specifier: wp-6.6
-        version: 28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(encoding@0.1.13)(file-loader@6.2.0(webpack@5.91.0(@swc/core@1.3.100)))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)
+        version: 28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(file-loader@6.2.0(webpack@5.91.0(@swc/core@1.3.100)))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.36.0(postcss@8.4.32)(stylelint@14.16.1)
@@ -3503,8 +3503,8 @@ importers:
         version: 6.13.1-next.a9f418477.0
     devDependencies:
       '@babel/cli':
-        specifier: 7.12.8
-        version: 7.12.8(@babel/core@7.12.9)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.12.9)
       '@babel/core':
         specifier: 7.12.9
         version: 7.12.9
@@ -3940,8 +3940,8 @@ importers:
         specifier: ^4.0.0
         version: 4.1.0
       '@babel/cli':
-        specifier: ^7.23.4
-        version: 7.23.4(@babel/core@7.23.5)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.23.5)
       '@babel/core':
         specifier: ^7.23.5
         version: 7.23.5
@@ -4473,8 +4473,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       '@babel/cli':
-        specifier: 7.23.0
-        version: 7.23.0(@babel/core@7.23.2)
+        specifier: 7.25.7
+        version: 7.25.7(@babel/core@7.23.2)
       '@babel/core':
         specifier: 7.23.2
         version: 7.23.2
@@ -5662,28 +5662,8 @@ packages:
     resolution: {integrity: sha512-Xk1sIhyNC/esHGGVjL/niHLowM0csl/kFO5uawBy4IrWwy0o1G8LGt3jP6nmWGz+USxeeqbihAmp/oVZju6wug==}
     hasBin: true
 
-  '@babel/cli@7.12.8':
-    resolution: {integrity: sha512-/6nQj11oaGhLmZiuRUfxsujiPDc9BBReemiXgIbxc+M5W+MIiFKYwvNDJvBfnGKNsJTKbUfEheKc9cwoPHAVQA==}
-    hasBin: true
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/cli@7.23.0':
-    resolution: {integrity: sha512-17E1oSkGk2IwNILM4jtfAvgjt+ohmpfBky8aLerUfYZhiPNg7ca+CRCxZn8QDxwNhV/upsc2VHBCqGFIR+iBfA==}
-    engines: {node: '>=6.9.0'}
-    hasBin: true
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/cli@7.23.4':
-    resolution: {integrity: sha512-j3luA9xGKCXVyCa5R7lJvOMM+Kc2JEnAEIgz2ggtjQ/j5YUVgfsg/WsG95bbsgq7YLHuiCOzMnoSasuY16qiCw==}
-    engines: {node: '>=6.9.0'}
-    hasBin: true
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/cli@7.26.4':
-    resolution: {integrity: sha512-+mORf3ezU3p3qr+82WvJSnQNE1GAYeoCfEv4fik6B5/2cvKZ75AX8oawWQdXtM9MmndooQj15Jr9kelRFWsuRw==}
+  '@babel/cli@7.25.7':
+    resolution: {integrity: sha512-vQw4QjrqjLSuL0Tt3gfVXbxEHOfsCcHN8tKyTclpSMYLq3Bp0BTzWYZfMKBs3PQ+to8q3BnumBIAsMdOqDJ6nw==}
     engines: {node: '>=6.9.0'}
     hasBin: true
     peerDependencies:
@@ -7819,9 +7799,6 @@ packages:
 
   '@ndelangen/get-tarball@3.0.9':
     resolution: {integrity: sha512-9JKTEik4vq+yGosHYhZ1tiH/3WpUS0Nh0kej4Agndhox8pAdWhEx5knFVRcb/ya9knCRCs1rPxNrSXTDdfVqpA==}
-
-  '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents':
-    resolution: {integrity: sha512-+nb9vWloHNNMFHjGofEam3wopE3m1yuambrrd/fnPc+lFOMB9ROTqQlche9ByFWNkdNqfSgR/kkQtQ8DzEWt2w==}
 
   '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3':
     resolution: {integrity: sha512-s88O1aVtXftvp5bCPB7WnmXc5IwOZZ7YPuwNPt+GtOOXpPvad1LfbmjYv+qII7zP6RU2QGnqve27dnLycEnyEQ==}
@@ -26452,7 +26429,7 @@ snapshots:
 
   '@automattic/puppeteer-utils@https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50(react-native@0.73.0(@babel/core@7.12.9)(@babel/preset-env@7.25.7(@babel/core@7.12.9))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
-      '@babel/cli': 7.23.4(@babel/core@7.23.5)
+      '@babel/cli': 7.25.7(@babel/core@7.23.5)
       '@babel/core': 7.23.5
       '@babel/preset-env': 7.25.7(@babel/core@7.23.5)
       '@slack/web-api': 5.15.0
@@ -26509,28 +26486,25 @@ snapshots:
     dependencies:
       default-browser-id: 3.0.0
 
-  '@babel/cli@7.12.8(@babel/core@7.12.9)':
+  '@babel/cli@7.25.7(@babel/core@7.12.9)':
     dependencies:
       '@babel/core': 7.12.9
-      commander: 4.1.1
-      convert-source-map: 1.9.0
+      '@jridgewell/trace-mapping': 0.3.25
+      commander: 6.2.1
+      convert-source-map: 2.0.0
       fs-readdir-recursive: 1.1.0
       glob: 7.2.3
-      lodash: 4.17.21
       make-dir: 2.1.0
       slash: 2.0.0
-      source-map: 0.5.7
     optionalDependencies:
-      '@nicolo-ribaudo/chokidar-2': 2.1.8-no-fsevents
-      chokidar: 3.5.3
-    transitivePeerDependencies:
-      - supports-color
+      '@nicolo-ribaudo/chokidar-2': 2.1.8-no-fsevents.3
+      chokidar: 3.6.0
 
-  '@babel/cli@7.23.0(@babel/core@7.23.2)':
+  '@babel/cli@7.25.7(@babel/core@7.23.2)':
     dependencies:
       '@babel/core': 7.23.2
-      '@jridgewell/trace-mapping': 0.3.20
-      commander: 4.1.1
+      '@jridgewell/trace-mapping': 0.3.25
+      commander: 6.2.1
       convert-source-map: 2.0.0
       fs-readdir-recursive: 1.1.0
       glob: 7.2.3
@@ -26538,13 +26512,13 @@ snapshots:
       slash: 2.0.0
     optionalDependencies:
       '@nicolo-ribaudo/chokidar-2': 2.1.8-no-fsevents.3
-      chokidar: 3.5.3
+      chokidar: 3.6.0
 
-  '@babel/cli@7.23.4(@babel/core@7.23.5)':
+  '@babel/cli@7.25.7(@babel/core@7.23.5)':
     dependencies:
       '@babel/core': 7.23.5
-      '@jridgewell/trace-mapping': 0.3.20
-      commander: 4.1.1
+      '@jridgewell/trace-mapping': 0.3.25
+      commander: 6.2.1
       convert-source-map: 2.0.0
       fs-readdir-recursive: 1.1.0
       glob: 7.2.3
@@ -26552,9 +26526,9 @@ snapshots:
       slash: 2.0.0
     optionalDependencies:
       '@nicolo-ribaudo/chokidar-2': 2.1.8-no-fsevents.3
-      chokidar: 3.5.3
+      chokidar: 3.6.0
 
-  '@babel/cli@7.26.4(@babel/core@7.26.0)':
+  '@babel/cli@7.25.7(@babel/core@7.26.0)':
     dependencies:
       '@babel/core': 7.26.0
       '@jridgewell/trace-mapping': 0.3.25
@@ -32223,7 +32197,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@jest/test-sequencer@26.6.3':
+  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -32231,7 +32205,11 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   '@jest/test-sequencer@27.5.1':
     dependencies:
@@ -32518,23 +32496,6 @@ snapshots:
       gunzip-maybe: 1.4.2
       pump: 3.0.2
       tar-fs: 2.1.1
-
-  '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents':
-    dependencies:
-      anymatch: 2.0.0
-      async-each: 1.0.6
-      braces: 2.3.2(supports-color@6.1.0)
-      glob-parent: 3.1.0
-      inherits: 2.0.4
-      is-binary-path: 1.0.1
-      is-glob: 4.0.3
-      normalize-path: 3.0.0
-      path-is-absolute: 1.0.1
-      readdirp: 2.2.1
-      upath: 1.2.0
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
 
   '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3':
     optional: true
@@ -43562,7 +43523,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -43641,7 +43602,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -43692,7 +43653,7 @@ snapshots:
       - utf-8-validate
       - webpack-dev-server
 
-  '@wordpress/scripts@28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(encoding@0.1.13)(file-loader@6.2.0(webpack@5.91.0(@swc/core@1.3.100)))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)':
+  '@wordpress/scripts@28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(file-loader@6.2.0(webpack@5.91.0(@swc/core@1.3.100)))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)':
     dependencies:
       '@babel/core': 7.26.0
       '@playwright/test': 1.50.1
@@ -43738,7 +43699,7 @@ snapshots:
       postcss: 8.4.32
       postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.91.0(@swc/core@1.3.100))
       prettier: wp-prettier@3.0.3
-      puppeteer-core: 13.7.0(encoding@0.1.13)
+      puppeteer-core: 13.7.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.14.2
@@ -52410,7 +52371,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jest-circus@26.6.3:
+  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@babel/traverse': 7.25.9
       '@jest/environment': 26.6.2
@@ -52434,7 +52395,11 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   jest-circus@27.5.1:
     dependencies:
@@ -52692,7 +52657,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@babel/core': 7.26.0
-      '@jest/test-sequencer': 26.6.3
+      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.26.0)
       chalk: 4.1.2
@@ -58388,7 +58353,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  puppeteer-core@13.7.0(encoding@0.1.13):
+  puppeteer-core@13.7.0:
     dependencies:
       cross-fetch: 3.1.5(encoding@0.1.13)
       debug: 4.3.4(supports-color@9.4.0)
