@@ -53,7 +53,11 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$result = $this->sut->calculate_shipping_for_package(
 			array(
 				'contents'    => array(),
-				'destination' => array( 'country' => 'US' ),
+				'destination' => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '00000',
+				),
 			),
 		);
 
