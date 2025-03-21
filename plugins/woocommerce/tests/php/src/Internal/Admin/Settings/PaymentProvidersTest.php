@@ -1311,7 +1311,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_test_attach_extension_suggestion_paypal() {
 		return array(
-			'PayPal full-stack' => array(
+			'PayPal full-stack'          => array(
 				ExtensionSuggestions::PAYPAL_FULL_STACK,
 				ExtensionSuggestions::PAYPAL_FULL_STACK,
 				ExtensionSuggestions::TYPE_PSP,
@@ -1321,12 +1321,12 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				PaymentProviders::SUGGESTION_ORDERING_PREFIX . ExtensionSuggestions::PAYPAL_FULL_STACK,
 				ExtensionSuggestions::TYPE_PSP,
 			),
-			'PayPal wallet' => array(
+			'PayPal wallet'              => array(
 				ExtensionSuggestions::PAYPAL_WALLET,
 				ExtensionSuggestions::PAYPAL_WALLET,
 				ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT,
 			),
-			'PayPal wallet prefixed' => array(
+			'PayPal wallet prefixed'     => array(
 				ExtensionSuggestions::PAYPAL_WALLET,
 				PaymentProviders::SUGGESTION_ORDERING_PREFIX . ExtensionSuggestions::PAYPAL_WALLET,
 				ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT,

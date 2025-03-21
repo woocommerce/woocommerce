@@ -520,11 +520,11 @@ class PaymentsRestController extends RestApiControllerBase {
 			if ( ! empty( $provider['_type'] ) &&
 				PaymentProviders::TYPE_SUGGESTION === $provider['_type'] &&
 				! empty( $provider['_suggestion_id'] )
-				) {
+			) {
 				$providers[ $key ]['_links']['attach'] = array(
 					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/attach', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),
 				);
-				$providers[ $key ]['_links']['hide'] = array(
+				$providers[ $key ]['_links']['hide']   = array(
 					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/hide', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),
 				);
 			}
@@ -1052,7 +1052,7 @@ class PaymentsRestController extends RestApiControllerBase {
 								),
 							),
 						),
-						'hide' => array(
+						'hide'   => array(
 							'type'        => 'object',
 							'description' => esc_html__( 'The link to hide the suggestion.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
