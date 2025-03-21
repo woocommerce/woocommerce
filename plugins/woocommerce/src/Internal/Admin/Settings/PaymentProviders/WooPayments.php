@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
 use WooCommerce\Admin\Experimental_Abtest;
@@ -21,6 +22,32 @@ defined( 'ABSPATH' ) || exit;
 class WooPayments extends PaymentGateway {
 
 	const PREFIX = 'woocommerce_admin_settings_payments__woopayments__';
+
+	/**
+	 * Extract the payment gateway provider details from the object.
+	 *
+	 * @param WC_Payment_Gateway $gateway      The payment gateway object.
+	 * @param int                $order        Optional. The order to assign.
+	 *                                         Defaults to 0 if not provided.
+	 * @param string             $country_code Optional. The country code for which the details are being gathered.
+	 *                                         This should be a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The payment gateway provider details.
+	 */
+	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
+		$details = parent::get_details( $gateway, $order, $country_code );
+
+		// Switch the onboarding type to native in-context.
+		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE_IN_CONTEXT;
+
+		// Provide the native, in-context onboarding URL instead of the external one.
+		// This is a catch-all URL that should start or continue the onboarding process.
+		$details['onboarding']['_links']['onboard'] = array(
+			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding' ),
+		);
+
+		return $details;
+	}
 
 	/**
 	 * Check if the payment gateway needs setup.

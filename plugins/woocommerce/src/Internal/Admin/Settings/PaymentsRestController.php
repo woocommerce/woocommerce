@@ -42,7 +42,7 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return 'wc-admin';
+		return 'wc-admin-settings-payments';
 	}
 
 	/**
@@ -51,18 +51,6 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @param bool $override Whether to override the existing routes. Useful for testing.
 	 */
 	public function register_routes( bool $override = false ) {
-		register_rest_route(
-			$this->route_namespace,
-			'/' . $this->rest_base . '/woopay-eligibility',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-				),
-			),
-			$override
-		);
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/country',
@@ -125,18 +113,6 @@ class PaymentsRestController extends RestApiControllerBase {
 							'sanitize_callback' => fn( $value ) => $this->sanitize_providers_order_arg( $value ),
 						),
 					),
-				),
-			),
-			$override
-		);
-		register_rest_route(
-			$this->route_namespace,
-			'/' . $this->rest_base . '/onboarding-steps',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'get_onboarding_steps' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 				),
 			),
 			$override
@@ -1037,43 +1013,6 @@ class PaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Get the onboarding steps.
-	 *
-	 * @return array The onboarding steps.
-	 */
-	protected function get_onboarding_steps() {
-		return rest_ensure_response(
-			array(
-				'steps' => array(
-					array(
-						'id' => 'welcome',
-						'label' => 'Welcome to WooPayments',
-						'path' => '/woopayments/onboarding/welcome',
-						'status' => 'completed',
-						'dependencies' => array(),
-					),
-					array(
-						'id' => 'jetpack',
-						'label' => 'Connect with Jetpack',
-						'path' => '/woopayments/onboarding/jetpack',
-						'status' => 'incomplete',
-						'dependencies' => array(
-							'welcome',
-						),
-					),
-					array(
-						'id' => 'final',
-						'label' => 'Payment methods',
-						'path' => '/woopayments/onboarding/payment-methods',
-						'status' => 'incomplete',
-						'dependencies' => array( "jetpack"),
-					),
-				),
-			)
-		);
-	}
-
-	/**
 	 * Get the schema for a suggestion.
 	 *
 	 * @return array The schema for a suggestion.
@@ -1197,19 +1136,6 @@ class PaymentsRestController extends RestApiControllerBase {
 					'readonly'    => true,
 				),
 			),
-		);
-	}
-
-	/**
-	 * Get WooPay eligibility status.
-	 *
-	 * @return array The WooPay eligibility status.
-	 */
-	protected function get_woopay_eligibility() {
-		return rest_ensure_response(
-			array(
-				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
-			)
 		);
 	}
 }
