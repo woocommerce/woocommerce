@@ -1016,18 +1016,25 @@ class WC_Helper {
 
 	/**
 	 * Flush helper authentication cache.
+	 *
+	 * @throws Exception If there is an error refreshing subscriptions.
 	 */
 	public static function refresh_helper_subscriptions() {
-		/**
-		 * Fires when Helper subscriptions are refreshed.
-		 *
-		 * @since 8.3.0
-		 */
-		do_action( 'woocommerce_helper_subscriptions_refresh' );
-		self::_flush_authentication_cache();
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
-		self::flush_product_usage_notice_rules_cache();
+		try {
+			/**
+			 * Fires when Helper subscriptions are refreshed.
+			 *
+			 * @since 8.3.0
+			 */
+			do_action( 'woocommerce_helper_subscriptions_refresh' );
+			self::_flush_authentication_cache();
+			self::_flush_subscriptions_cache();
+			self::_flush_updates_cache();
+			self::flush_product_usage_notice_rules_cache();
+		} catch ( Exception $e ) {
+			self::log( 'Error refreshing subscriptions: ' . $e->getMessage(), 'error' );
+			throw new Exception( __( 'There was an error refreshing your subscriptions.', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -1581,6 +1588,7 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
+	 * @throws Exception If there is an error getting product usage notice rules.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
@@ -1589,27 +1597,35 @@ class WC_Helper {
 			return $data;
 		}
 
-		$request = WC_Helper_API::get(
-			'product-usage-notice-rules',
-			array(
-				'authenticated' => false,
-				'timeout'       => 2,
-			)
-		);
+		try {
+			$request = WC_Helper_API::get(
+				'product-usage-notice-rules',
+				array(
+					'authenticated' => false,
+					'timeout'       => 2,
+				)
+			);
 
-		// Retry in 15 minutes for non-200 response.
-		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
-			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
-			return array();
+			if ( is_wp_error( $request ) ) {
+				throw new Exception( $request->get_error_message() );
+			}
+
+			$code = wp_remote_retrieve_response_code( $request );
+			if ( 200 !== $code ) {
+				throw new Exception( sprintf( __( 'HTTP %d received from API', 'woocommerce' ), $code ) );
+			}
+
+			$data = json_decode( wp_remote_retrieve_body( $request ), true );
+			if ( empty( $data ) || ! is_array( $data ) ) {
+				throw new Exception( __( 'Invalid response from WooCommerce.com', 'woocommerce' ) );
+			}
+
+			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			return $data;
+		} catch ( Exception $e ) {
+			self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
+			throw new Exception( __( 'There was an error getting product usage notice rules.', 'woocommerce' ) );
 		}
-
-		$data = json_decode( wp_remote_retrieve_body( $request ), true );
-		if ( empty( $data ) || ! is_array( $data ) ) {
-			$data = array();
-		}
-
-		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
-		return $data;
 	}
 
 	/**
@@ -1683,6 +1699,7 @@ class WC_Helper {
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
+	 * @throws Exception If there is an error getting subscriptions.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
@@ -1691,43 +1708,52 @@ class WC_Helper {
 			return $data;
 		}
 
-		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$source      = '';
-		if ( stripos( $request_uri, 'wc-addons' ) ) :
-			$source = 'my-subscriptions';
-		elseif ( stripos( $request_uri, 'plugins.php' ) ) :
-			$source = 'plugins';
-		elseif ( stripos( $request_uri, 'wc-admin' ) ) :
-			$source = 'inbox-notes';
-		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
-			$source = 'heartbeat-api';
-		elseif ( stripos( $request_uri, 'installer' ) ) :
-			$source = 'wccom-site-installer';
-		elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
-			$source = 'wc-cli';
-		endif;
+		try {
+			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$source      = '';
+			if ( stripos( $request_uri, 'wc-addons' ) ) :
+				$source = 'my-subscriptions';
+			elseif ( stripos( $request_uri, 'plugins.php' ) ) :
+				$source = 'plugins';
+			elseif ( stripos( $request_uri, 'wc-admin' ) ) :
+				$source = 'inbox-notes';
+			elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
+				$source = 'heartbeat-api';
+			elseif ( stripos( $request_uri, 'installer' ) ) :
+				$source = 'wccom-site-installer';
+			elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
+				$source = 'wc-cli';
+			endif;
 
-		// Obtain the connected user info.
-		$request = WC_Helper_API::get(
-			'subscriptions',
-			array(
-				'authenticated' => true,
-				'query_string'  => '' !== $source ? esc_url( '?source=' . $source ) : '',
-			)
-		);
+			// Obtain the connected user info.
+			$request = WC_Helper_API::get(
+				'subscriptions',
+				array(
+					'authenticated' => true,
+					'query_string'  => '' !== $source ? esc_url( '?source=' . $source ) : '',
+				)
+			);
 
-		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
-			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
-			return array();
+			if ( is_wp_error( $request ) ) {
+				throw new Exception( $request->get_error_message() );
+			}
+
+			$code = wp_remote_retrieve_response_code( $request );
+			if ( 200 !== $code ) {
+				throw new Exception( sprintf( __( 'HTTP %d received from API', 'woocommerce' ), $code ) );
+			}
+
+			$data = json_decode( wp_remote_retrieve_body( $request ), true );
+			if ( empty( $data ) || ! is_array( $data ) ) {
+				throw new Exception( __( 'Invalid response from WooCommerce.com', 'woocommerce' ) );
+			}
+
+			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			return $data;
+		} catch ( Exception $e ) {
+			self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
+			throw new Exception( __( 'There was an error getting your subscriptions.', 'woocommerce' ) );
 		}
-
-		$data = json_decode( wp_remote_retrieve_body( $request ), true );
-		if ( empty( $data ) || ! is_array( $data ) ) {
-			$data = array();
-		}
-
-		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
-		return $data;
 	}
 
 	/**
