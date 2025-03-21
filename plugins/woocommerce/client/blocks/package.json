@@ -40,7 +40,6 @@
 		"./assets/js/blocks/product-gallery/inner-blocks/**/index.tsx",
 		"./assets/js/templates/revert-button/index.tsx",
 		"./assets/js/settings/blocks/index.ts",
-		"./assets/js/atomic/utils/blocks-registration-manager/index.ts",
 		"./packages/**/*.{tsx,ts,js}"
 	],
 	"scripts": {
@@ -108,8 +107,6 @@
 		"@babel/cli": "7.23.0",
 		"@babel/core": "7.23.2",
 		"@babel/plugin-syntax-jsx": "7.22.5",
-		"@babel/plugin-transform-class-properties": "^7.23.3",
-		"@babel/plugin-transform-optional-chaining": "^7.23.4",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-react": "7.23.3",
 		"@babel/preset-typescript": "7.23.3",
@@ -147,7 +144,6 @@
 		"@types/wordpress__block-library": "2.6.3",
 		"@types/wordpress__blocks": "11.0.9",
 		"@types/wordpress__components": "^23.0.10",
-		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.2",
 		"@types/wordpress__data-controls": "2.2.0",
 		"@types/wordpress__editor": "^13.6.7",
@@ -168,15 +164,13 @@
 		"@wordpress/blocks": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/components": "19.17.0",
-		"@wordpress/core-data": "5.5.0",
+		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data-controls": "2.2.7",
 		"@wordpress/date": "4.44.0",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
 		"@wordpress/dom": "3.27.0",
 		"@wordpress/dom-ready": "3.27.0",
-		"@wordpress/e2e-test-utils": "10.12.0",
-		"@wordpress/e2e-test-utils-playwright": "^1.15.0",
-		"@wordpress/e2e-tests": "^4.9.2",
+		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/editor": "wp-6.7",
 		"@wordpress/element": "5.22.0",
 		"@wordpress/env": "10.17.0",
@@ -207,7 +201,6 @@
 		"circular-dependency-plugin": "5.2.2",
 		"copy-webpack-plugin": "11.0.0",
 		"core-js": "3.25.0",
-		"create-file-webpack": "1.0.2",
 		"cross-env": "7.0.3",
 		"css-loader": "^6.8.1",
 		"cssnano": "5.1.12",
@@ -336,8 +329,7 @@
 		]
 	},
 	"files": [
-		"build",
-		"blocks.ini"
+		"build"
 	],
 	"config": {
 		"ci": {
@@ -395,8 +387,7 @@
 				"packages"
 			],
 			"output": [
-				"build",
-				"blocks.ini"
+				"build"
 			],
 			"dependencies": [
 				"dependencyOutputs"

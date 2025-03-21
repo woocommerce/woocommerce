@@ -35,8 +35,10 @@ export interface ProductGalleryContext {
 	userHasInteracted: boolean;
 	imageData: ImageDataObject;
 	image: ImageDataItem;
-	thumbnailsOverflowTop: boolean;
-	thumbnailsOverflowBottom: boolean;
-	thumbnailsOverflowLeft: boolean;
-	thumbnailsOverflowRight: boolean;
+	thumbnailsOverflow: {
+		top: boolean;
+		bottom: boolean;
+		left: boolean;
+		right: boolean;
+	};
 }

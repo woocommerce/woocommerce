@@ -158,51 +158,76 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		page,
 		editor,
 	} ) => {
-		const thumbnailsBlock = editor.canvas.locator(
-			'[data-type="woocommerce/product-gallery-thumbnails"]'
-		);
+		await test.step( 'in editor', async () => {
+			const largeImageBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-large-image"]'
+			);
+			const thumbnailsBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-thumbnails"]'
+			);
+			const thumbnailsSizeInput = page.getByLabel( 'Thumbnail Size' );
 
-		// Open block settings and set size to 50% to make thumbnails scrollable
-		await thumbnailsBlock.click();
-		await editor.openDocumentSettingsSidebar();
-		await page.getByLabel( 'Thumbnail Size' ).fill( '50' );
+			// Open block settings
+			await thumbnailsBlock.click();
+			await editor.openDocumentSettingsSidebar();
 
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+			await expect( thumbnailsSizeInput ).toHaveValue( '33' );
+			await expect( async () => {
+				// Set size to 10%
+				await thumbnailsSizeInput.fill( '50' );
+
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
+
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.5,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		} );
 
-		await page.goto( '/product/hoodie/' );
+		await test.step( 'in frontend', async () => {
+			await page.goto( '/product/hoodie/' );
 
-		const thumbnailsContainer = page.locator(
-			'[data-block-name="woocommerce/product-gallery-thumbnails"]'
-		);
+			const thumbnailsContainer = page.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
 
-		const scrollableContainer = page.locator(
-			'.wc-block-product-gallery-thumbnails__scrollable'
-		);
+			const scrollableContainer = page.locator(
+				'.wc-block-product-gallery-thumbnails__scrollable'
+			);
 
-		// Get all thumbnails
-		const thumbnails = scrollableContainer.locator(
-			'.wc-block-product-gallery-thumbnails__thumbnail'
-		);
+			const thumbnails = scrollableContainer.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
 
-		// Get the last thumbnail
-		const lastThumbnail = thumbnails.last();
+			// Get the last thumbnail
+			const lastThumbnail = thumbnails.last();
 
-		// Check if overflow classes are present initially
-		await expect( thumbnailsContainer ).toHaveClass(
-			/wc-block-product-gallery-thumbnails--overflow-bottom/
-		);
+			await expect( async () => {
+				await page.reload();
+				// Check if overflow classes are present initially
+				await expect( thumbnailsContainer ).toHaveClass(
+					/wc-block-product-gallery-thumbnails--overflow-bottom/
+				);
 
-		// Scroll to the last thumbnail
-		await lastThumbnail.scrollIntoViewIfNeeded();
+				// Scroll to the last thumbnail
+				await lastThumbnail.scrollIntoViewIfNeeded();
 
-		// Verify the last thumbnail is visible
-		await expect( lastThumbnail ).toBeVisible();
+				// Verify the last thumbnail is visible
+				await expect( lastThumbnail ).toBeVisible();
 
-		// After scrolling to the end, the bottom overflow should be gone
-		await expect( thumbnailsContainer ).not.toHaveClass(
-			/wc-block-product-gallery-thumbnails--overflow-bottom/
-		);
+				// After scrolling to the end, the bottom overflow should be gone
+				await expect( thumbnailsContainer ).not.toHaveClass(
+					/wc-block-product-gallery-thumbnails--overflow-bottom/
+				);
+			} ).toPass( { timeout: 3_000 } );
+		} );
 	} );
 } );

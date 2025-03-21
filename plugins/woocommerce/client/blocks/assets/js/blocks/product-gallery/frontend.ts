@@ -313,10 +313,7 @@ const productGallery = {
 			const context = getContext();
 			const overflowState = checkOverflow( scrollableElement );
 
-			context.thumbnailsOverflowTop = overflowState.overflowTop;
-			context.thumbnailsOverflowBottom = overflowState.overflowBottom;
-			context.thumbnailsOverflowLeft = overflowState.overflowLeft;
-			context.thumbnailsOverflowRight = overflowState.overflowRight;
+			context.thumbnailsOverflow = overflowState;
 		},
 	},
 	callbacks: {

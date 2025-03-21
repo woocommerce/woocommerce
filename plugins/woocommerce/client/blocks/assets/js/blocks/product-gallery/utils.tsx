@@ -1,20 +1,20 @@
 export const checkOverflow = (
 	scrollableElement: HTMLElement
 ): {
-	overflowTop: boolean;
-	overflowBottom: boolean;
-	overflowLeft: boolean;
-	overflowRight: boolean;
+	top: boolean;
+	bottom: boolean;
+	left: boolean;
+	right: boolean;
 } => {
 	// This is a threshold to allow for little remaining space when scrolling.
 	// Browsers may return fractions of a pixel, so we need to account for that.
 	const overflowThreshold = 3;
 	if ( ! scrollableElement ) {
 		return {
-			overflowTop: false,
-			overflowBottom: false,
-			overflowLeft: false,
-			overflowRight: false,
+			top: false,
+			bottom: false,
+			left: false,
+			right: false,
 		};
 	}
 	const {
@@ -27,11 +27,9 @@ export const checkOverflow = (
 	} = scrollableElement;
 
 	return {
-		overflowTop: scrollTop > overflowThreshold,
-		overflowBottom:
-			scrollTop + clientHeight < scrollHeight - overflowThreshold,
-		overflowLeft: scrollLeft > overflowThreshold,
-		overflowRight:
-			scrollLeft + clientWidth < scrollWidth - overflowThreshold,
+		top: scrollTop > overflowThreshold,
+		bottom: scrollTop + clientHeight < scrollHeight - overflowThreshold,
+		left: scrollLeft > overflowThreshold,
+		right: scrollLeft + clientWidth < scrollWidth - overflowThreshold,
 	};
 };

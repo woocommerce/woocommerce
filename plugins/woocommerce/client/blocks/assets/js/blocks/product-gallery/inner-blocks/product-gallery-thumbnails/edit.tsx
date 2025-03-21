@@ -42,8 +42,8 @@ export const Edit = withProductDataContext(
 
 		const scrollableRef = useRef< HTMLDivElement >( null );
 		const [ overflowState, setOverflowState ] = useState( {
-			overflowBottom: false,
-			overflowRight: false,
+			bottom: false,
+			right: false,
 		} );
 
 		useEffect( () => {
@@ -74,15 +74,14 @@ export const Edit = withProductDataContext(
 		}, [ thumbnailSize ] ); // Re-run when thumbnailSize changes as it affects layout
 
 		const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
-
 		const className = clsx(
 			'wc-block-product-gallery-thumbnails',
 			`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
 			{
 				'wc-block-product-gallery-thumbnails--overflow-right':
-					overflowState.overflowRight,
+					overflowState.right,
 				'wc-block-product-gallery-thumbnails--overflow-bottom':
-					overflowState.overflowBottom,
+					overflowState.bottom,
 			}
 		);
 		const blockProps = useBlockProps( { className } );
