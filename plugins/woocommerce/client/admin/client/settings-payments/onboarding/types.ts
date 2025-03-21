@@ -43,7 +43,20 @@ export interface WooPaymentsProviderOnboardingStep {
 	order: number;
 	status?: 'completed' | 'incomplete';
 	dependencies?: string[];
-	actions?: string[];
+	actions?: {
+		save?: {
+			type?: string;
+			href?: string;
+		};
+		start?: {
+			type?: string;
+			href?: string;
+		};
+		complete?: {
+			type?: string;
+			href?: string;
+		};
+	};
 	content?: ReactNode;
 	context?: {
 		payment_methods: RecommendedPaymentMethod[];
