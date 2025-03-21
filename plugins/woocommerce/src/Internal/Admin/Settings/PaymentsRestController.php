@@ -1040,7 +1040,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'properties' => array(
 						'attach' => array(
 							'type'        => 'object',
-							'description' => esc_html__( 'The link to mark the suggestion as attached.', 'woocommerce' ),
+							'description' => esc_html__( 'The link to mark the suggestion as attached. This should be called when an extension is installed.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(

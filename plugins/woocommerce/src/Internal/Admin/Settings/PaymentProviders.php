@@ -400,6 +400,10 @@ class PaymentProviders {
 	/**
 	 * Attach a payment extension suggestion.
 	 *
+	 * Attachment is a broad concept that can mean different things depending on the suggestion.
+	 * Currently, we use it to record the extension installation. This is why we expect to receive
+	 * instructions to record attachment when the extension is installed.
+	 *
 	 * @param string $id The ID of the payment extension suggestion to attach.
 	 *
 	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
