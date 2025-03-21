@@ -87,6 +87,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			callback: ( items: EmailType[] ) => {
 				window.open( items[ 0 ].link );
 			},
+			isEligible: ( item: EmailType ) => !!item.post_id,
 			isPrimary: true,
 		},
 		{
@@ -97,6 +98,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			callback: ( items: EmailType[] ) => {
 				window.location.href = `/wp-admin/post.php?post=${ items[ 0 ].post_id }&action=edit`;
 			},
+			isEligible: ( item: EmailType ) => !!item.post_id,
 			isPrimary: true,
 		},
 		{
