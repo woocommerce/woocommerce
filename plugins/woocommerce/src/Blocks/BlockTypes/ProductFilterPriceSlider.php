@@ -60,9 +60,9 @@ class ProductFilterPriceSlider extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'           => esc_attr( $classes ),
-				'style'           => esc_attr( $style ),
-				'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'class'       => esc_attr( $classes ),
+				'style'       => esc_attr( $style ),
+				'data-wp-key' => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			)
 		);
 

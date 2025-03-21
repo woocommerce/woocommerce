@@ -80,7 +80,7 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 							class="wc-block-product-filter-removable-chips__remove"
 							aria-label="<?php echo esc_attr( $remove_label ); ?>"
 							data-wp-on--click="actions.removeActiveFilter"
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); ?>
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" class="wc-block-product-filter-removable-chips__remove-icon" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path></svg>
 							<span class="screen-reader-text"><?php echo esc_html( $remove_label ); ?></span>
