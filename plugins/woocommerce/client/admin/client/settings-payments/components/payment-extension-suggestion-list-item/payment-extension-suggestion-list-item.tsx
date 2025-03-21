@@ -40,7 +40,8 @@ type PaymentExtensionSuggestionListItemProps = {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	/**
 	 * Indicates whether the plugin is already installed.
@@ -152,7 +153,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 									extension.id,
 									extension.plugin.slug,
 									extension.onboarding?._links.onboard.href ??
-										null
+										null,
+									pluginInstalled
+										? null
+										: extension._links?.attach?.href ?? null
 								);
 							} }
 							isBusy={ installingPlugin === extension.id }
