@@ -32,12 +32,12 @@ function getProductReviewsTitle(
 	if ( showReviewsCount && showProductTitle ) {
 		return reviewsCount === 1
 			? sprintf(
-					/* translators: %s: Post title. */
+					/* translators: %s: Product title. */
 					__( 'One review for %s', 'woocommerce' ),
 					productTitle
 			  )
 			: sprintf(
-					/* translators: 1: Number of comments, 2: Post title. */
+					/* translators: 1: Number of comments, 2: Product title. */
 					_n(
 						'%1$s review for %2$s',
 						'%1$s reviews for %2$s',
@@ -52,12 +52,12 @@ function getProductReviewsTitle(
 	if ( ! showReviewsCount && showProductTitle ) {
 		return reviewsCount === 1
 			? sprintf(
-					/* translators: %s: Post title. */
+					/* translators: %s: Product title. */
 					__( 'Review for %s', 'woocommerce' ),
 					productTitle
 			  )
 			: sprintf(
-					/* translators: %s: Post title. */
+					/* translators: %s: Product title. */
 					__( 'Reviews for %s', 'woocommerce' ),
 					productTitle
 			  );
