@@ -68,9 +68,24 @@ export default function PaymentMethodsSelection() {
 										paymentMethodsState={
 											paymentMethodsState
 										}
-										setPaymentMethodsState={
-											setPaymentMethodsState
-										}
+										setPaymentMethodsState={ ( state ) => {
+											// Update the local state
+											setPaymentMethodsState( state );
+
+											// Send the updated state to the server
+											const href =
+												currentStep?.actions?.save
+													?.href;
+											// Send POST request to the href with the payment methods state
+											if ( href ) {
+												fetch( href, {
+													method: 'POST',
+													body: JSON.stringify( {
+														payment_methods: state,
+													} ),
+												} );
+											}
+										} }
 										isExpanded={ isExpanded }
 										key={ method.id }
 									/>
