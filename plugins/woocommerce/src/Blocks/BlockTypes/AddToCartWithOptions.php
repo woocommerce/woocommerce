@@ -68,16 +68,10 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$previous_product = $product;
 		$product          = wc_get_product( $post_id );
-		if ( ! $product instanceof \WC_Product || ( ProductType::SIMPLE === $product->get_type() && ! $product->is_purchasable() ) ) {
+		if ( ! $product instanceof \WC_Product ) {
 			$product = $previous_product;
 
 			return '';
-		}
-
-		if ( ProductType::SIMPLE === $product->get_type() && ! $product->is_in_stock() ) {
-			$product = $previous_product;
-
-			return wc_get_stock_html( $product );
 		}
 
 		wp_enqueue_script_module( $this->get_full_block_name() );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * AddToCartWithOptionsQuantitySelector class.
@@ -116,14 +117,22 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 			return '';
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
+		if ( ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() ) ) {
+			$product = $previous_product;
+
+			return '';
+		}
 
 		$is_external_product_with_url        = $product instanceof \WC_Product_External && $product->get_product_url();
 		$can_only_be_purchased_one_at_a_time = $product->is_sold_individually();
 
 		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time ) {
+			$product = $previous_product;
+
 			return '';
 		}
+
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually();
 
