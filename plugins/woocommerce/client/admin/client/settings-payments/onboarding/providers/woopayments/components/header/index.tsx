@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import { close } from '@wordpress/icons';
 
 /**
@@ -18,9 +17,9 @@ interface WooPaymentsStepHeaderProps {
 /**
  * WooPaymentsStepHeader component for WooPayments onboarding
  */
-export default function WooPaymentsStepHeader(
-	{ onClose }: WooPaymentsStepHeaderProps
-): React.ReactNode {
+export default function WooPaymentsStepHeader( {
+	onClose,
+}: WooPaymentsStepHeaderProps ): React.ReactNode {
 	return (
 		<div className="settings-payments-onboarding-modal__header">
 			<img

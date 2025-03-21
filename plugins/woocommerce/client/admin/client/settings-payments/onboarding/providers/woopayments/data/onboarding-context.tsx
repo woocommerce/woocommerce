@@ -20,7 +20,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
  */
 import {
 	WooPaymentsProviderOnboardingStep,
-	OnboardingContextType
+	OnboardingContextType,
 } from '~/settings-payments/onboarding/types';
 import { steps as woopaymentsSteps } from '../steps';
 
