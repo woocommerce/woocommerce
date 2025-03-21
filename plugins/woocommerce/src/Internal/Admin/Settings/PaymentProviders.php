@@ -417,7 +417,7 @@ class PaymentProviders {
 			throw new Exception( esc_html__( 'Invalid suggestion ID.', 'woocommerce' ) );
 		}
 
-		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY, array() );
+		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY, array() );
 		if ( empty( $payments_nox_profile ) ) {
 			$payments_nox_profile = array();
 		} else {
@@ -442,7 +442,7 @@ class PaymentProviders {
 		$payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] = time();
 
 		// Store the modified profile data.
-		$result = update_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY, $payments_nox_profile, false );
+		$result = update_option( Payments::PAYMENTS_NOX_PROFILE_KEY, $payments_nox_profile, false );
 		// Since we already check if the suggestion is already attached, we should not get a false result
 		// for trying to update with the same value.
 		// False means the update failed and the suggestion is not marked as attached.
@@ -484,7 +484,7 @@ class PaymentProviders {
 			throw new Exception( esc_html__( 'Invalid suggestion ID.', 'woocommerce' ) );
 		}
 
-		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		if ( empty( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
 		} else {
@@ -504,7 +504,7 @@ class PaymentProviders {
 			'timestamp' => time(),
 		);
 
-		$result = update_user_meta( get_current_user_id(), Payments::USER_PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+		$result = update_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
 		// Since we already check if the suggestion is already hidden, we should not get a false result
 		// for trying to update with the same value. False means the update failed and the suggestion is not hidden.
 		if ( false === $result ) {
@@ -1045,7 +1045,7 @@ class PaymentProviders {
 	 * @return bool True if the extension suggestion is hidden, false otherwise.
 	 */
 	private function is_payment_extension_suggestion_hidden( array $extension ): bool {
-		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		if ( empty( $user_payments_nox_profile ) ) {
 			return false;
 		}

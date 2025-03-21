@@ -786,7 +786,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		// We have 5 suggestions, but two are hidden from the preferred places.
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'hidden_suggestions' => array(
 					array(
@@ -1223,7 +1223,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			->willReturn( $suggestion_details );
 
 		update_option(
-			Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'something_other' => 'value',
 			)
@@ -1234,7 +1234,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY );
+		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 		$this->assertIsArray( $nox_profile );
 		$this->assertArrayHasKey( 'suggestions', $nox_profile );
 		$this->assertIsArray( $nox_profile['suggestions'] );
@@ -1247,7 +1247,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'value', $nox_profile['something_other'] );
 
 		// Clean up.
-		delete_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY );
+		delete_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1295,13 +1295,13 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 		$branded_option = get_option( 'woocommerce_paypal_branded' );
 		$this->assertSame( 'yes', $branded_option );
-		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY );
+		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 		$this->assertIsArray( $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 		$this->assertArrayHasKey( 'timestamp', $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 
 		// Clean up.
 		delete_option( 'woocommerce_paypal_branded' );
-		delete_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY );
+		delete_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1369,7 +1369,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'something_other' => 'value',
 			)
@@ -1380,7 +1380,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		$this->assertIsArray( $user_nox_profile );
 		$this->assertArrayHasKey( 'hidden_suggestions', $user_nox_profile );
 		$this->assertIsList( $user_nox_profile['hidden_suggestions'] );
@@ -1391,7 +1391,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'value', $user_nox_profile['something_other'] );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1431,7 +1431,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'something_other' => 'value',
 			)
@@ -1442,7 +1442,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		$this->assertIsArray( $user_nox_profile );
 		$this->assertArrayHasKey( 'hidden_suggestions', $user_nox_profile );
 		$this->assertIsList( $user_nox_profile['hidden_suggestions'] );
@@ -1454,7 +1454,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'value', $user_nox_profile['something_other'] );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1494,7 +1494,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'something_other'    => 'value',
 				'hidden_suggestions' => array(
@@ -1511,7 +1511,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		$this->assertIsArray( $user_nox_profile );
 		$this->assertArrayHasKey( 'hidden_suggestions', $user_nox_profile );
 		$this->assertIsList( $user_nox_profile['hidden_suggestions'] );
@@ -1523,7 +1523,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'value', $user_nox_profile['something_other'] );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1564,7 +1564,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'something_other'    => 'value',
 				'hidden_suggestions' => array(
@@ -1581,7 +1581,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		$this->assertIsArray( $user_nox_profile );
 		$this->assertArrayHasKey( 'hidden_suggestions', $user_nox_profile );
 		$this->assertIsList( $user_nox_profile['hidden_suggestions'] );
@@ -1593,7 +1593,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'value', $user_nox_profile['something_other'] );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1631,7 +1631,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'something_other'    => 'value',
 				'hidden_suggestions' => array(
@@ -1650,7 +1650,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertFalse( $result );
-		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_profile = get_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		$this->assertIsArray( $user_nox_profile );
 		$this->assertArrayHasKey( 'hidden_suggestions', $user_nox_profile );
 		$this->assertIsList( $user_nox_profile['hidden_suggestions'] );
@@ -1661,7 +1661,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		remove_filter( 'update_user_metadata', '__return_false' );
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**

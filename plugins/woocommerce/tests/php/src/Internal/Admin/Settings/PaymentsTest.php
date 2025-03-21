@@ -460,7 +460,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				'business_country_code' => $country,
 				'something_other'       => 'value',
@@ -474,7 +474,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertSame( $country, $result );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -486,7 +486,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		update_user_meta(
 			$this->store_admin_id,
-			Payments::USER_PAYMENTS_NOX_PROFILE_KEY,
+			Payments::PAYMENTS_NOX_PROFILE_KEY,
 			array(
 				// business_country_code not set.
 				'something_other' => 'value',
@@ -503,7 +503,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertSame( $country, $result );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 		update_option( 'woocommerce_default_country', $initial_country );
 	}
 
@@ -521,13 +521,13 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 
 		// Check the value was saved.
-		$meta = get_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$meta = get_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		$this->assertIsArray( $meta );
 		$this->assertArrayHasKey( 'business_country_code', $meta );
 		$this->assertSame( $country, $meta['business_country_code'] );
 
 		// Clean up.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
