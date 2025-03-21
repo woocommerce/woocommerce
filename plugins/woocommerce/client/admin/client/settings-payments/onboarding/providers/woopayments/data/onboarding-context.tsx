@@ -138,12 +138,23 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 				);
 			}
 
-			const nextStep = allSteps[ currentStepIndex + 1 ];
+			// Find the next step that is not completed and has completed dependencies
+			const nextStep = allSteps.find(
+				( step ) =>
+					step.status !== 'completed' &&
+					areStepDependenciesCompleted( step, allSteps )
+			);
+
 			if ( nextStep ) {
 				navigateToStep( nextStep.id );
 			}
 		}
-	}, [ currentStep, allSteps, navigateToStep ] );
+	}, [
+		currentStep,
+		allSteps,
+		navigateToStep,
+		areStepDependenciesCompleted,
+	] );
 
 	const refreshOnboardingSteps = useCallback( () => {
 		invalidateResolutionForStoreSelector( 'getOnboardingSteps' );
