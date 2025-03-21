@@ -1223,7 +1223,6 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			->willReturn( $suggestion_details );
 
 		update_option(
-			$this->store_admin_id,
 			Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY,
 			array(
 				'something_other' => 'value',
