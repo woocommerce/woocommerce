@@ -1963,7 +1963,7 @@
           "menu_title": "Commands",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
-          "hash": "17bbb18fd0ad0523a5b864f74acbec64c853ae7b42ecd7e6d9dbce1fbe2669aa",
+          "hash": "46fbe6fcda6f8b79d031fc47618031f7c2aa15a8c999b8960f7558fdab6e5ba4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
           "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
         },
@@ -1992,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "9337aafb07fe1610667484f0eb00e0574c72e562cf41f3937691a99a7a5fd55d"
+  "hash": "16f282fa95c0d6495cc17a273d3b2aa725cca2d3b6e911c777304f83e12e1555"
 }
