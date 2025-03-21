@@ -160,7 +160,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		}
 	);
 
-	test( 'Switching between local pickup and shipping does not affect the address', async ( {
+	test( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
 		page,
 		frontendUtils,
 		checkoutPageObject,
@@ -197,6 +197,16 @@ test.describe( 'Shopper → Local pickup', () => {
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
+
+		await page
+			.getByRole( 'radio', { name: 'Pickup', exact: true } )
+			.click();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Collection from Testing' )
+		).toBeVisible();
+		await checkoutPageObject.verifyBillingDetails();
 	} );
 
 	test( 'Delivery/pickup toggle is not shown when other shipping methods are disabled and hide rates until address is entered is off', async ( {
