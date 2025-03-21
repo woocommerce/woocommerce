@@ -1,0 +1,164 @@
+/**
+ * External dependencies
+ */
+import React, { useState, useEffect } from 'react';
+import {
+	loadConnectAndInitialize,
+	LoadError,
+	LoaderStart,
+	StripeConnectInstance,
+} from '@stripe/connect-js';
+import {
+	ConnectAccountOnboarding,
+	ConnectComponentsProvider,
+} from '@stripe/react-connect-js';
+
+/**
+ * Internal dependencies
+ */
+import { createKycAccountSession } from './hooks';
+import appearance from './appearance';
+import { OnboardingFields } from '../../types';
+import BannerNotice from '../../../../components/banner-notice';
+import { AccountSession } from './types';
+import { trackRedirected } from '../../utils/tracking';
+
+interface EmbeddedComponentProps {
+	onLoaderStart?: ( { elementTagName }: LoaderStart ) => void;
+	onLoadError?: ( { error, elementTagName }: LoadError ) => void;
+}
+
+interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
+	onboardingData: OnboardingFields;
+	onExit: () => void;
+	onStepChange?: ( step: string ) => void;
+	collectPayoutRequirements?: boolean;
+	isPoEligible?: boolean;
+}
+
+/**
+ * Hook to initialize Stripe Connect.
+ *
+ * @param isOnboarding - Whether this is an onboarding flow.
+ * @param onboardingData - Data required for onboarding.
+ * @param isPoEligible - Whether the user is eligible for progressive onboarding.
+ *
+ * @return Returns stripeConnectInstance, error, and loading state.
+ */
+const useInitializeStripe = (
+	onboardingData: OnboardingFields,
+	isPoEligible: boolean
+) => {
+	const [
+		stripeConnectInstance,
+		setStripeConnectInstance,
+	] = useState< StripeConnectInstance | null >( null );
+	const [ initializationError, setInitializationError ] = useState<
+		string | null
+	>( null );
+	const [ loading, setLoading ] = useState< boolean >( true );
+
+	useEffect( () => {
+		const initializeStripe = async () => {
+			try {
+				let session: AccountSession;
+
+				session = await createKycAccountSession(
+					onboardingData,
+					isPoEligible
+				);
+
+				// Track the embedded component redirection event.
+				trackRedirected( isPoEligible, true );
+
+				const { clientSecret, publishableKey } = session;
+
+				if ( ! publishableKey ) {
+					throw new Error(
+						'Missing publishable key in session response'
+					);
+				}
+
+				const instance = loadConnectAndInitialize( {
+					publishableKey,
+					fetchClientSecret: async () => clientSecret,
+					appearance: {
+						overlays: 'drawer',
+						...appearance,
+					},
+					locale: session.locale.replace( '_', '-' ),
+				} );
+
+				setStripeConnectInstance( instance );
+			} catch ( err ) {
+				setInitializationError(
+					err instanceof Error ? err.message : 'Unknown error'
+				);
+			} finally {
+				setLoading( false );
+			}
+		};
+
+		initializeStripe();
+	}, [ onboardingData, isPoEligible ] );
+
+	return { stripeConnectInstance, initializationError, loading };
+};
+
+/**
+ * Embedded Stripe Account Onboarding Component.
+ *
+ * @param onboardingData - Data required for onboarding.
+ * @param onExit - Callback function when the onboarding flow is exited.
+ * @param onLoaderStart - Callback function when the onboarding loader starts.
+ * @param onLoadError - Callback function when the onboarding load error occurs.
+ * @param [onStepChange] - Callback function when the onboarding step changes.
+ * @param [collectPayoutRequirements=false] - Whether to collect payout requirements.
+ * @param [isPoEligible=false] - Whether the user is eligible for progressive onboarding.
+ *
+ * @return Rendered Account Onboarding component.
+ */
+export const EmbeddedAccountOnboarding: React.FC< EmbeddedAccountOnboardingProps > = ( {
+	onboardingData,
+	onExit,
+	onLoaderStart,
+	onLoadError,
+	onStepChange,
+	isPoEligible = false,
+	collectPayoutRequirements = false,
+} ) => {
+	const { stripeConnectInstance, initializationError } = useInitializeStripe(
+		onboardingData,
+		isPoEligible
+	);
+
+	return (
+		<>
+			{ initializationError && (
+				<BannerNotice status="error">
+					{ initializationError }
+				</BannerNotice>
+			) }
+			{ stripeConnectInstance && (
+				<ConnectComponentsProvider
+					connectInstance={ stripeConnectInstance }
+				>
+					<ConnectAccountOnboarding
+						onLoaderStart={ onLoaderStart }
+						onLoadError={ onLoadError }
+						onExit={ onExit }
+						onStepChange={ ( stepChange ) =>
+							onStepChange?.( stepChange.step )
+						}
+						collectionOptions={ {
+							fields: collectPayoutRequirements
+								? 'eventually_due'
+								: 'currently_due',
+							futureRequirements: 'omit',
+						} }
+					/>
+				</ConnectComponentsProvider>
+			) }
+		</>
+	);
+};
