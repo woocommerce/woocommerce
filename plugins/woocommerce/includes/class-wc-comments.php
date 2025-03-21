@@ -8,7 +8,6 @@
  * @version 2.3.0
  */
 
-use Automattic\WooCommerce\Caches\CommentCountCache;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,14 +18,14 @@ defined( 'ABSPATH' ) || exit;
 class WC_Comments {
 
 	/**
-	 * Cache Group
+	 * The cache group to use for comment counts.
 	 *
-	 * @var string COMMENT_COUNT_CACHE_GROUP The cache group to use for comment counts.
+	 * @var string
 	 */
 	private const COMMENT_COUNT_CACHE_GROUP = 'wc_comment_counts';
 
 	/**
-	 * The cache group to use for comment counts.
+	 * The cache key to use for pending product reviews counts.
 	 *
 	 * @var string
 	 */
@@ -323,9 +322,8 @@ class WC_Comments {
 	 *
 	 * @return int
 	 */
-	public static function get_products_reviews_pending_moderation_counter() {
-		$cache = wc_get_container()->get( CommentCountCache::class );
-		$count = $cache->get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
+	public static function get_products_reviews_pending_moderation_counter(): int {
+		$count = wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP );
 		if ( false === $count ) {
 			$count = (int) get_comments(
 				array(
@@ -335,7 +333,7 @@ class WC_Comments {
 					'count'     => true,
 				)
 			);
-			$cache->set( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, $count );
+			wp_cache_set( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, $count, self::COMMENT_COUNT_CACHE_GROUP, DAY_IN_SECONDS );
 		}
 
 		return $count;
@@ -346,14 +344,14 @@ class WC_Comments {
 	 *
 	 * @param int         $comment_id Comment ID.
 	 * @param \WP_Comment $comment    Comment object.
+	 * @return void
 	 */
-	public static function maybe_bump_products_reviews_pending_moderation_counter( $comment_id, $comment ) {
+	public static function maybe_bump_products_reviews_pending_moderation_counter( $comment_id, $comment ): void {
 		$needs_bump = '0' === $comment->comment_approved;
 		if ( $needs_bump && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
 			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
-			$cache      = wc_get_container()->get( CommentCountCache::class );
-			if ( $is_product && $cache->has( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY ) ) {
-				$cache->increment( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
+			if ( $is_product && false !== wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP ) ) {
+				wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
 			}
 		}
 	}
@@ -364,17 +362,17 @@ class WC_Comments {
 	 * @param int|string  $new_status New status.
 	 * @param int|string  $old_status Old status.
 	 * @param \WP_Comment $comment    Comment object.
+	 * @return void
 	 */
-	public static function maybe_adjust_products_reviews_pending_moderation_counter( $new_status, $old_status, $comment ) {
+	public static function maybe_adjust_products_reviews_pending_moderation_counter( $new_status, $old_status, $comment ): void {
 		$needs_adjustments = 'unapproved' === $new_status || 'unapproved' === $old_status;
 		if ( $needs_adjustments && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
 			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
-			$cache      = wc_get_container()->get( CommentCountCache::class );
-			if ( $is_product && $cache->has( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY ) ) {
+			if ( $is_product && false !== wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP ) ) {
 				if ( '0' === $comment->comment_approved ) {
-					$cache->increment( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
+					wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
 				} else {
-					$cache->decrement( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY );
+					wp_cache_decr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
 				}
 			}
 		}

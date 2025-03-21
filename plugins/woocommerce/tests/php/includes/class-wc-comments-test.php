@@ -1,7 +1,6 @@
 <?php
 declare( strict_types=1 );
 
-use Automattic\WooCommerce\Caches\CommentCountCache;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
@@ -53,15 +52,8 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_products_reviews_pending_moderation_counter.
-	 *
-	 * @param CommentCountCache $substitute_cache_facade Cache facade instance to inject into DI-container.
-	 * @dataProvider cache_facade_instance_provider
 	 */
-	public function test_get_pending_review_count_is_getting_updated( CommentCountCache $substitute_cache_facade ) {
-		$di                    = wc_get_container();
-		$original_cache_facade = $di->get( CommentCountCache::class );
-		$di->replace( CommentCountCache::class, $substitute_cache_facade );
-
+	public function test_get_pending_review_count_is_getting_updated() {
 		// Populate the cache entry, otherwise lazy updates will not be performed.
 		$this->assertSame( 0, WC_Comments::get_products_reviews_pending_moderation_counter() );
 
@@ -95,39 +87,5 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 			);
 		}
 		$this->assertSame( count( $unapproved_reviews ), WC_Comments::get_products_reviews_pending_moderation_counter() );
-
-		$di->replace( CommentCountCache::class, $original_cache_facade );
-	}
-
-	/**
-	 * Data provider supplying the caching facade instance testing against different caching APIs.
-	 *
-	 * @return Generator<CommentCountCache>
-	 */
-	public function cache_facade_instance_provider() {
-		yield from array(
-			'use cache API'     => array(
-				new class() extends CommentCountCache {
-					/**
-					 * Constructor override.
-					 */
-					public function __construct() {
-						parent::__construct();
-						$this->use_cache_api = true;
-					}
-				},
-			),
-			'use transient API' => array(
-				new class() extends CommentCountCache {
-					/**
-					 * Constructor override.
-					 */
-					public function __construct() {
-						parent::__construct();
-						$this->use_cache_api = false;
-					}
-				},
-			),
-		);
 	}
 }
