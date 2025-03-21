@@ -5,6 +5,8 @@
 import { View } from '@wordpress/dataviews/wp';
 import { Post, useEntityRecords } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { settingsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -30,14 +32,37 @@ export const useTransactionalEmails = (
 		status: 'any',
 	} );
 
+	// Fetch email settings from the DB to get fresh statuses
+	const { emailSettings } = useSelect( ( select ) => {
+		const getSettings = select( settingsStore ).getSettings;
+		return {
+			emailSettings: emailTypes.reduce( ( acc, type ) => {
+				const settingsId = `email_${ type.id }`;
+				return {
+					...acc,
+					[ type.id ]: getSettings( settingsId ),
+				};
+			}, {} ),
+		};
+	}, [] );
+
 	const emails = emailTypes.map( ( emailType ) => {
 		const postId = postIdsMap.get( emailType.id ) || '';
 		const post: Post | null = emailPosts.records?.find(
 			( p ) => parseInt( p.id ) === parseInt( postId )
 		) as Post | null;
+		let status = emailType.enabled ? 'enabled' : 'disabled';
+		if ( emailSettings[ emailType.id ]?.enabled === 'yes' ) {
+			status = 'enabled';
+		} else if ( emailSettings[ emailType.id ].enabled === 'no' ) {
+			status = 'disabled';
+		} else if ( emailType.manual ) {
+			status = 'manual';
+		}
 		return {
 			...emailType,
 			link: post?.link || '',
+			status,
 		};
 	} );
 

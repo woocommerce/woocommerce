@@ -637,17 +637,14 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			);
 		$emails      = WC()->mailer()->get_emails();
 		$email_types = array();
-		foreach ( $emails as $type => $email ) {
-			$status = $email->is_enabled() ? 'enabled' : 'disabled';
-			if ($email->is_manual()) {
-				$status = 'manual';
-			}
+		foreach ( $emails as $email ) {
 			$email_types[] = array(
 				'title' => $email->get_title(),
 				'description' => $email->get_description(),
 				'id' => $email->id,
 				'post_id' => $email->get_email_template_post_id(),
-				'status' => $status,
+				'enabled' => $email->is_enabled(),
+				'manual' => $email->is_manual(),
 				'recipients' => array(
 					'to' => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
 					'cc' => $email->get_cc_recipient(),

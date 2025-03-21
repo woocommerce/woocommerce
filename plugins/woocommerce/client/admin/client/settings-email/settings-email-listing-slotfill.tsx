@@ -22,7 +22,8 @@ export type EmailType = {
 	id: string;
 	post_id: string;
 	recipients: Recipients;
-	status: string;
+	enabled: boolean;
+	manual: boolean;
 	link?: string;
 };
 
