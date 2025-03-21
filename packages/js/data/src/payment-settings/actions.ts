@@ -82,6 +82,20 @@ export function* togglePaymentGateway(
 	}
 }
 
+export function* attachPaymentExtensionSuggestion( url: string ) {
+	try {
+		// Use apiFetch for the AJAX request
+		const result: { success: boolean } = yield apiFetch( {
+			url,
+			method: 'POST',
+		} );
+
+		return result;
+	} catch ( error ) {
+		throw error;
+	}
+}
+
 export function* hidePaymentExtensionSuggestion( url: string ) {
 	try {
 		// Use apiFetch for the AJAX request
@@ -131,6 +145,7 @@ export type Actions =
 	| ReturnType< typeof getPaymentProvidersSuccess >
 	| ReturnType< typeof getPaymentProvidersError >
 	| ReturnType< typeof togglePaymentGateway >
+	| ReturnType< typeof attachPaymentExtensionSuggestion >
 	| ReturnType< typeof hidePaymentExtensionSuggestion >
 	| ReturnType< typeof updateProviderOrdering >
 	| ReturnType< typeof setIsWooPayEligible >;
