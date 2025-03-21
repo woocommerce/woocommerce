@@ -14,6 +14,7 @@ import WooPaymentsStepHeader from '../../components/header';
 import { OnboardingContextProvider } from './data/onboarding-context';
 import { OnboardingForm } from './components/form';
 import BusinessDetails from './steps/business-details';
+import EmbeddedKyc from './steps/embedded-kyc';
 import { Stepper } from './components/stepper';
 import Step from './components/step';
 import './style.scss';
@@ -42,9 +43,7 @@ export const MOXStep: React.FC = () => {
                         </OnboardingForm>
                     </Step>
                     <Step name="embedded" showHeading={ false }>
-                        <>
-                            To-Do: Embedded Onboarding
-                        </>
+                        <EmbeddedKyc />
                     </Step>
                 </Stepper>
 			</OnboardingContextProvider>
