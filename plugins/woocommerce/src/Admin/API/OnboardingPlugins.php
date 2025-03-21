@@ -222,7 +222,6 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 * @param WP_REST_Request $request WP_REST_Request object.
 	 *
 	 * @return array
-	 * @throws \Exception If there is an error registering the site.
 	 */
 	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
 		$manager = new Manager( 'woocommerce' );

@@ -18,11 +18,11 @@ type NoticeWithId = Notice & {
 };
 
 const getContext = getContextFn< {
+	notices: NoticeWithId[];
 	notice: NoticeWithId;
 } >;
 
 type StoreNoticesState = {
-	notices: NoticeWithId[];
 	get role(): string;
 	get iconPath(): string;
 	get isError(): boolean;
@@ -30,7 +30,7 @@ type StoreNoticesState = {
 	get isInfo(): boolean;
 };
 
-export type StoreNoticesStore = {
+export type Store = {
 	state: StoreNoticesState;
 	actions: {
 		addNotice: ( notice: Notice ) => string;
@@ -58,8 +58,9 @@ const generateNoticeId = () => {
 		.substring( 2, 15 ) }`;
 };
 
-const { state } = store< StoreNoticesStore >(
-	'woocommerce/product-collection-notices',
+// Todo: export this store once the store is public.
+store< Store >(
+	'woocommerce/store-notices',
 	{
 		state: {
 			get role() {
@@ -93,26 +94,28 @@ const { state } = store< StoreNoticesStore >(
 		},
 		actions: {
 			addNotice: ( notice: Notice ) => {
+				const { notices } = getContext();
 				const noticeId = generateNoticeId();
 				const noticeWithId = {
 					...notice,
 					id: noticeId,
 				};
-				state.notices.push( noticeWithId );
+				notices.push( noticeWithId );
 
 				return noticeId;
 			},
 
 			removeNotice: ( noticeId: string | PointerEvent ) => {
+				const { notices } = getContext();
 				noticeId =
 					typeof noticeId === 'string'
 						? noticeId
 						: getContext().notice.id;
-				const index = state.notices.findIndex(
+				const index = notices.findIndex(
 					( { id } ) => id === noticeId
 				);
 				if ( index !== -1 ) {
-					state.notices.splice( index, 1 );
+					notices.splice( index, 1 );
 				}
 			},
 		},

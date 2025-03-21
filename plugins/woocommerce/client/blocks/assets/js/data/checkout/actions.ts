@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { OrderFormValues } from '@woocommerce/settings';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -177,7 +178,7 @@ export const setPrefersCollection = ( prefersCollection: boolean ) => ( {
 /**
  * Registers additional data under an extension namespace.
  */
-export const __internalSetExtensionData = (
+export const setExtensionData = (
 	// The namespace for the extension. Defaults to 'default'. Must be unique to prevent conflicts.
 	namespace: string,
 	// Data to register under the namespace.
@@ -190,3 +191,16 @@ export const __internalSetExtensionData = (
 	namespace,
 	replace,
 } );
+
+/**
+ * @deprecated Use setExtensionData instead
+ */
+export const __internalSetExtensionData = (
+	...args: Parameters< typeof setExtensionData >
+) => {
+	deprecated( '__internalSetExtensionData', {
+		alternative: 'setExtensionData',
+		plugin: 'WooCommerce',
+	} );
+	return setExtensionData( ...args );
+};

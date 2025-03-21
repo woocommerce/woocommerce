@@ -453,7 +453,7 @@ class ListTable extends WP_List_Table {
 	 * @return int
 	 */
 	private function get_max_num_pages( &$orders ) {
-		if ( ! $this->order_query_args['no_found_rows'] ) {
+		if ( ! isset( $this->order_query_args['no_found_rows'] ) || ! $this->order_query_args['no_found_rows'] ) {
 			return $orders->max_num_pages;
 		}
 
