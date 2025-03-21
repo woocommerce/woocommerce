@@ -117,7 +117,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 	// Find the first incomplete step with completed dependencies
 	const currentStep = allSteps.find(
 		( step ) =>
-			step.status === 'incomplete' &&
+			step.status !== 'completed' &&
 			areStepDependenciesCompleted( step, allSteps )
 	);
 
@@ -127,11 +127,11 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 		);
 		if ( currentStepIndex !== -1 ) {
 			// Mark current step as completed
-			if ( currentStep?.status === 'incomplete' ) {
+			if ( currentStep?.status !== 'completed' ) {
 				// Change step completion status in allSteps
 				setAllSteps(
 					allSteps.map( ( step ) =>
-						step.id === currentStep.id
+						step.id === currentStep?.id
 							? { ...step, status: 'completed' as const }
 							: step
 					)
@@ -170,10 +170,10 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 				);
 
 				return Object.assign( {}, step, {
-					status: backendStep?.status || 'incomplete',
+					status: backendStep?.status || 'not_started',
 					dependencies: backendStep?.dependencies || [],
 					path: backendStep?.path,
-					data: backendStep?.data,
+					context: backendStep?.context,
 					actions: backendStep?.actions,
 					// Maybe actions too
 				} );
@@ -194,7 +194,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 							mapWooPaymentsSteps
 						)
 							? ( 'completed' as const )
-							: ( 'incomplete' as const ),
+							: ( 'not_started' as const ),
 					};
 				}
 				return step;
