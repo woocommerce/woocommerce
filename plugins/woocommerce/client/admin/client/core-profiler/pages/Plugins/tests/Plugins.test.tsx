@@ -64,7 +64,6 @@ describe( 'Plugins Component', () => {
 		],
 		pluginsSelected: [],
 		pluginsInstallationErrors: [],
-		pluginsTruncated: [],
 	};
 	const navigationProgress = 80;
 
@@ -78,7 +77,7 @@ describe( 'Plugins Component', () => {
 		);
 		expect(
 			screen.getByText(
-				/Enhance your store by installing these free business features/
+				/No commitment required – you can remove them at any time/
 			)
 		).toBeInTheDocument();
 		expect( screen.getByText( 'Plugin 1' ) ).toBeInTheDocument();
@@ -111,7 +110,6 @@ describe( 'Plugins Component', () => {
 				pluginsSelected: [ 'plugin1' ],
 				pluginsShown: [ 'plugin1', 'plugin2', 'plugin3', 'plugin4' ],
 				pluginsUnselected: [ 'plugin3', 'plugin4' ],
-				pluginsTruncated: [],
 			},
 		} );
 	} );

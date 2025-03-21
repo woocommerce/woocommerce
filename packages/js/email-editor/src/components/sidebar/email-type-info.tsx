@@ -11,9 +11,10 @@ import {
 	MenuItem,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Icon, megaphone } from '@wordpress/icons';
+import { Icon, postContent } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -23,14 +24,39 @@ import { EditTemplateModal } from './edit-template-modal';
 import { SelectTemplateModal } from '../template-select';
 import { recordEvent } from '../../events';
 
+const TypeInfoIcon = applyFilters(
+	'woocommerce_email_editor_sidebar_email_type_info_icon',
+	() => <Icon icon={ postContent } />
+) as () => JSX.Element;
+
+const TypeInfoContent = applyFilters(
+	'woocommerce_email_editor_sidebar_email_type_info_content',
+	() => (
+		<>
+			<h2>{ __( 'Email content', 'woocommerce' ) }</h2>
+			<span>
+				{ __(
+					'This block represents the main content of your email, such as the invoice or order details. When the email is sent, it will be replaced with the actual email content.',
+					'woocommerce'
+				) }
+			</span>
+		</>
+	)
+) as () => JSX.Element;
+
 export function EmailTypeInfo() {
-	const { template, currentEmailContent } = useSelect(
-		( select ) => ( {
-			template: select( storeName ).getCurrentTemplate(),
-			currentEmailContent: select( storeName ).getEditedEmailContent(),
-		} ),
+	const { template, currentEmailContent, canUpdateTemplates } = useSelect(
+		( select ) => {
+			return {
+				template: select( storeName ).getCurrentTemplate(),
+				currentEmailContent:
+					select( storeName ).getEditedEmailContent(),
+				canUpdateTemplates: select( storeName ).canUserEditTemplates(),
+			};
+		},
 		[]
 	);
+
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
 		useState( false );
 	const [ isSelectTemplateModalOpen, setSelectTemplateModalOpen ] =
@@ -42,16 +68,10 @@ export function EmailTypeInfo() {
 				<PanelBody>
 					<PanelRow>
 						<span className="woocommerce-email-type-info-icon">
-							<Icon icon={ megaphone } />
+							<TypeInfoIcon />
 						</span>
 						<div className="woocommerce-email-type-info-content">
-							<h2>{ __( 'Newsletter', 'woocommerce' ) }</h2>
-							<span>
-								{ __(
-									'Send or schedule a newsletter to connect with your subscribers.',
-									'woocommerce'
-								) }
-							</span>
+							<TypeInfoContent />
 						</div>
 					</PanelRow>
 					{ template && (
@@ -82,22 +102,25 @@ export function EmailTypeInfo() {
 									>
 										{ ( { onClose } ) => (
 											<>
-												<MenuItem
-													onClick={ () => {
-														recordEvent(
-															'sidebar_template_actions_edit_template_clicked'
-														);
-														setEditTemplateModalOpen(
-															true
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Edit template',
-														'woocommerce'
-													) }
-												</MenuItem>
+												{ canUpdateTemplates && (
+													<MenuItem
+														onClick={ () => {
+															recordEvent(
+																'sidebar_template_actions_edit_template_clicked'
+															);
+															setEditTemplateModalOpen(
+																true
+															);
+															onClose();
+														} }
+													>
+														{ __(
+															'Edit template',
+															'woocommerce'
+														) }
+													</MenuItem>
+												) }
+
 												<MenuItem
 													onClick={ () => {
 														recordEvent(
