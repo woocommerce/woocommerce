@@ -17,48 +17,36 @@ type ActiveFiltersContext = {
 	item: ActiveFilterItem;
 };
 
-type ActiveFiltersStore = {
+const activeFiltersStore = {
 	state: {
-		removeActiveFilterLabel: () => string;
-		hasActiveFilters: () => boolean;
-	};
+		get removeActiveFilterLabel() {
+			const { item, removeLabelTemplate } =
+				getContext< ActiveFiltersContext >();
+			return removeLabelTemplate.replace( '{{label}}', item.activeLabel );
+		},
+		get hasActiveFilters() {
+			const { activeFilters } = getContext< ProductFiltersContext >();
+			return activeFilters.length > 0;
+		},
+	},
 	actions: {
-		removeAllActiveFilters: () => void;
-		removeActiveFilter: () => void;
-	};
+		removeAllActiveFilters: () => {
+			const context = getContext< ProductFiltersContext >();
+			context.activeFilters = [];
+			actions.navigate();
+		},
+		removeActiveFilter: () => {
+			const { item } = getContext< ActiveFiltersContext >();
+			actions.removeActiveFiltersBy(
+				( filter ) =>
+					filter.value === item.value && filter.type === item.type
+			);
+			actions.navigate();
+		},
+	},
 };
 
-const { actions } = store< ProductFiltersStore & ActiveFiltersStore >(
+const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
 	'woocommerce/product-filters',
-	{
-		state: {
-			get removeActiveFilterLabel() {
-				const { item, removeLabelTemplate } =
-					getContext< ActiveFiltersContext >();
-				return removeLabelTemplate.replace(
-					'{{label}}',
-					item.activeLabel
-				);
-			},
-			get hasActiveFilters() {
-				const { activeFilters } = getContext< ProductFiltersContext >();
-				return activeFilters.length > 0;
-			},
-		},
-		actions: {
-			removeAllActiveFilters: () => {
-				const context = getContext< ProductFiltersContext >();
-				context.activeFilters = [];
-				actions.navigate();
-			},
-			removeActiveFilter: () => {
-				const { item } = getContext< ActiveFiltersContext >();
-				actions._removeActiveFiltersBy(
-					( filter ) =>
-						filter.value === item.value && filter.type === item.type
-				);
-				actions.navigate();
-			},
-		},
-	}
+	activeFiltersStore
 );

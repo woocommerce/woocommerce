@@ -34,58 +34,44 @@ function debounceWithScope< Args extends unknown[] >(
 	};
 }
 
-type ProductFilterPriceSliderStore = ProductFiltersStore &
-	ProductFilterPriceStore & {
-		state: {
-			rangeStyle: () => string;
-		};
-		actions: {
-			selectInputContent: () => void;
-			debounceSetMinPrice: (
-				e: HTMLElementEvent< HTMLInputElement >
-			) => void;
-			debounceSetMaxPrice: (
-				e: HTMLElementEvent< HTMLInputElement >
-			) => void;
-		};
-	};
-
-const { state, actions } = store< ProductFilterPriceSliderStore >(
-	'woocommerce/product-filters',
-	{
-		state: {
-			rangeStyle: () => {
-				const context = getContext< ProductFilterPriceContext >();
-				return `--low: ${
-					( 100 * ( state.minPrice - context.minRange ) ) /
-					( context.maxRange - context.minRange )
-				}%; --high: ${
-					( 100 * ( state.maxPrice - context.minRange ) ) /
-					( context.maxRange - context.minRange )
-				}%;`;
-			},
+const productFilterPriceSliderStore = {
+	state: {
+		rangeStyle: () => {
+			const context = getContext< ProductFilterPriceContext >();
+			return `--low: ${
+				( 100 * ( state.minPrice - context.minRange ) ) /
+				( context.maxRange - context.minRange )
+			}%; --high: ${
+				( 100 * ( state.maxPrice - context.minRange ) ) /
+				( context.maxRange - context.minRange )
+			}%;`;
 		},
-		actions: {
-			selectInputContent: () => {
-				const element = getElement();
-				if ( element?.ref instanceof HTMLInputElement ) {
-					element.ref.select();
-				}
-			},
-			debounceSetMinPrice: debounceWithScope(
-				( e: HTMLElementEvent< HTMLInputElement > ) => {
-					actions.setMinPrice( e );
-					actions.navigate();
-				},
-				1000
-			),
-			debounceSetMaxPrice: debounceWithScope(
-				( e: HTMLElementEvent< HTMLInputElement > ) => {
-					actions.setMaxPrice( e );
-					actions.navigate();
-				},
-				1000
-			),
+	},
+	actions: {
+		selectInputContent: () => {
+			const element = getElement();
+			if ( element?.ref instanceof HTMLInputElement ) {
+				element.ref.select();
+			}
 		},
-	}
-);
+		debounceSetMinPrice: debounceWithScope(
+			( e: HTMLElementEvent< HTMLInputElement > ) => {
+				actions.setMinPrice( e );
+				actions.navigate();
+			},
+			1000
+		),
+		debounceSetMaxPrice: debounceWithScope(
+			( e: HTMLElementEvent< HTMLInputElement > ) => {
+				actions.setMaxPrice( e );
+				actions.navigate();
+			},
+			1000
+		),
+	},
+};
+const { state, actions } = store<
+	ProductFiltersStore &
+		ProductFilterPriceStore &
+		typeof productFilterPriceSliderStore
+>( 'woocommerce/product-filters', productFilterPriceSliderStore );

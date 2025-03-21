@@ -28,6 +28,37 @@ function isParamsEqual(
 	return true;
 }
 
+function selectFilter() {
+	const context = getContext< ProductFiltersContext >();
+	const newActiveFilter = {
+		value: context.item.value,
+		type: context.item.type,
+		attributeQueryType: context.item.attributeQueryType,
+		activeLabel: context.activeLabelTemplate.replace(
+			'{{label}}',
+			context.item.ariaLabel
+		),
+	};
+	const newActiveFilters = context.activeFilters.filter(
+		( activeFilter ) =>
+			! (
+				activeFilter.value === newActiveFilter.value &&
+				activeFilter.type === newActiveFilter.type
+			)
+	);
+
+	newActiveFilters.push( newActiveFilter );
+
+	context.activeFilters = newActiveFilters;
+}
+function unselectFilter() {
+	const { item } = getContext< ProductFiltersContext >();
+	actions.removeActiveFiltersBy(
+		( activeFilter ) =>
+			activeFilter.type === item.type && activeFilter.value === item.value
+	);
+}
+
 type FilterItem = {
 	label: string;
 	ariaLabel: string;
@@ -35,7 +66,7 @@ type FilterItem = {
 	selected: boolean;
 	count: number;
 	type: string;
-	attributeQueryType: 'and' | 'or' | undefined;
+	attributeQueryType?: 'and' | 'or' | undefined;
 };
 
 export type ActiveFilterItem = Pick<
@@ -55,7 +86,7 @@ export type ProductFiltersContext = {
 	filterType: string;
 };
 
-const { state, actions } = store( 'woocommerce/product-filters', {
+const productFiltersStore = {
 	state: {
 		get params() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
@@ -144,7 +175,7 @@ const { state, actions } = store( 'woocommerce/product-filters', {
 				actions.closeOverlay();
 			}
 		},
-		_removeActiveFiltersBy: (
+		removeActiveFiltersBy: (
 			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
 			const context = getContext< ProductFiltersContext >();
@@ -152,46 +183,15 @@ const { state, actions } = store( 'woocommerce/product-filters', {
 				( item ) => ! callback( item )
 			);
 		},
-		_selectFilter: () => {
-			const context = getContext< ProductFiltersContext >();
-			const newActiveFilter = {
-				value: context.item.value,
-				type: context.item.type,
-				attributeQueryType: context.item.attributeQueryType,
-				activeLabel: context.activeLabelTemplate.replace(
-					'{{label}}',
-					context.item.ariaLabel
-				),
-			};
-			const newActiveFilters = context.activeFilters.filter(
-				( activeFilter ) =>
-					! (
-						activeFilter.value === newActiveFilter.value &&
-						activeFilter.type === newActiveFilter.type
-					)
-			);
-
-			newActiveFilters.push( newActiveFilter );
-
-			context.activeFilters = newActiveFilters;
-		},
-		_unselectFilter: () => {
-			const { item } = getContext< ProductFiltersContext >();
-			actions._removeActiveFiltersBy(
-				( activeFilter ) =>
-					activeFilter.type === item.type &&
-					activeFilter.value === item.value
-			);
-		},
 		toggleFilter: () => {
 			if ( state.isFilterSelected ) {
-				actions._unselectFilter();
+				unselectFilter();
 			} else {
-				actions._selectFilter();
+				selectFilter();
 			}
 			actions.navigate();
 		},
-		*navigate() {
+		*navigate(): Generator {
 			const { originalParams } = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
@@ -242,9 +242,11 @@ const { state, actions } = store( 'woocommerce/product-filters', {
 			}
 		},
 	},
-} );
-
-export type ProductFiltersStore = {
-	state: typeof state;
-	actions: typeof actions;
 };
+
+export type ProductFiltersStore = typeof productFiltersStore;
+
+const { state, actions } = store< ProductFiltersStore >(
+	'woocommerce/product-filters',
+	productFiltersStore
+);
