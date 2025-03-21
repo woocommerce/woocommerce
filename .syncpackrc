@@ -86,6 +86,7 @@
 			"label": "Babel dependencies, must be aligned with versions in @wordpress/babel-preset-default package",
 			"dependencies": [
 				"@babel/cli",
+				"@babel/plugin-syntax-jsx",
 				"@babel/plugin-transform-react-jsx",
 				"@babel/plugin-transform-runtime",
 				"@babel/preset-env",
