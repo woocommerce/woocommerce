@@ -186,7 +186,6 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 					path: backendStep?.path,
 					context: backendStep?.context,
 					actions: backendStep?.actions,
-					// Maybe actions too
 				} );
 			}
 
