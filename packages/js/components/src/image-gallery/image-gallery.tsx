@@ -40,7 +40,7 @@ export type ImageGalleryProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const ImageGallery: React.FC< ImageGalleryProps > = ( {
+export const ImageGallery = ( {
 	children,
 	columns = 4,
 	allowDragging = true,

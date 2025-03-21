@@ -120,7 +120,7 @@ const getTransitionStyle = (
 	return styles;
 };
 
-export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
+export const ExperimentalCollapsibleList = ( {
 	children,
 	collapsed = true,
 	collapseLabel,
@@ -130,7 +130,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	onExpand,
 	direction = 'up',
 	...listProps
-} ): JSX.Element => {
+}: CollapsibleListProps ): JSX.Element => {
 	const [ isCollapsed, setCollapsed ] = useState( collapsed );
 	const [ isTransitionComponentCollapsed, setTransitionComponentCollapsed ] =
 		useState( collapsed );

@@ -18,12 +18,12 @@ type EmailPreviewIframeProps = {
 	settingsIds: string[];
 };
 
-export const EmailPreviewIframe: React.FC< EmailPreviewIframeProps > = ( {
+export const EmailPreviewIframe = ( {
 	src,
 	isLoading,
 	setIsLoading,
 	settingsIds,
-} ) => {
+}: EmailPreviewIframeProps ) => {
 	const [ counter, setCounter ] = useState( 0 );
 	const nonce = emailPreviewNonce();
 	const iframeRef = useRef< HTMLIFrameElement | null >( null );
