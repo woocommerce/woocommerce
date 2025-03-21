@@ -613,7 +613,7 @@
 			margin-bottom: $gap-smaller;
 
 			@media screen and (max-width: $break-medium) {
-				padding: 0px !important;
+				padding: 0 !important;
 			}
 		}
 	}
@@ -622,13 +622,13 @@
 		flex: 1;
 		min-height: 0;
 		position: relative;
-		
+
 		.settings-payments-methods__container {
 			height: 100%;
 			overflow-y: auto;
 			scrollbar-width: none;
 			-ms-overflow-style: none;
-			
+
 			&::-webkit-scrollbar {
 				display: none;
 			}
