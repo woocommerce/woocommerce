@@ -213,10 +213,10 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 								return (
 									// eslint-disable-next-line react/jsx-key
 									<li
+										key={ item.key }
 										{ ...getItemProps( {
 											item,
 											index,
-											key: item.key,
 											className: clsx(
 												'components-grouped-select-control__item',
 												item.className,
