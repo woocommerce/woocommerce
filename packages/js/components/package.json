@@ -132,7 +132,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/runtime": "7.25.7",
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/addon-docs": "7.6.19",
 		"@storybook/addon-links": "7.6.19",
