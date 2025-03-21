@@ -225,7 +225,7 @@ $dialog-padding: 20px;
 
 // Percentage width
 .is-nowrap .wc-block-product-gallery-thumbnails,
-.is-horizontal.is-nowrap .wc-block-product-gallery-thumbnails {
+.is-horizontal .wc-block-product-gallery-thumbnails {
 	&__scrollable {
 		flex-direction: column;
 	}
@@ -242,12 +242,10 @@ $dialog-padding: 20px;
 	}
 }
 
-.is-vertical .wc-block-product-gallery-thumbnails,
-.is-horizontal .wc-block-product-gallery-thumbnails {
+.is-vertical .wc-block-product-gallery-thumbnails {
 	&__scrollable {
 		flex-direction: row;
 		scrollbar-width: auto;
-		// Keep it for Safari.
 		overflow-y: hidden;
 	}
 
