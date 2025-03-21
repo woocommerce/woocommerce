@@ -54,5 +54,10 @@
 				"padding": true
 			}
 		}
-	}
+	},
+	"usesContext": [
+		"woocommerce/attributeId",
+		"woocommerce/attributeName",
+		"woocommerce/attributeTerms"
+	]
 }

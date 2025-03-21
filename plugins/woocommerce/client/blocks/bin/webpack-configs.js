@@ -9,7 +9,6 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
-const CreateFileWebpack = require( 'create-file-webpack' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
@@ -107,10 +106,7 @@ const getCoreConfig = ( options = {} ) => {
 						loader: 'babel-loader',
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
-							],
+							plugins: [],
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -129,15 +125,6 @@ const getCoreConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Core',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
-			new CreateFileWebpack( {
-				path: './',
-				// file name
-				fileName: 'blocks.ini',
-				// content of the file
-				content: `
-woocommerce_blocks_env = ${ NODE_ENV }
-`.trim(),
-			} ),
 		],
 		optimization: {
 			...sharedOptimizationConfig,
@@ -204,8 +191,6 @@ const getMainConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -337,8 +322,6 @@ const getFrontConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -438,8 +421,6 @@ const getPaymentsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -528,8 +509,6 @@ const getExtensionsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -618,7 +597,6 @@ const getSiteEditorConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -747,8 +725,6 @@ const getStylingConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -892,8 +868,6 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								'@babel/plugin-transform-optional-chaining',
-								'@babel/plugin-transform-class-properties',
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,

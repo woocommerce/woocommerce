@@ -17,11 +17,16 @@ const blockData: BlockData = {
 test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor", async ( { admin, editor } ) => {
 		await admin.createNewPost();
+
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( _error ) {
+			// noop
+		}
+
 		await expect(
-			editor.insertBlock( { name: blockData.slug } )
-		).rejects.toThrow(
-			new RegExp( `Block type '${ blockData.slug }' is not registered.` )
-		);
+			await editor.getBlockByName( blockData.slug )
+		).toBeHidden();
 	} );
 
 	test( "can't be added in the Product Catalog Template", async ( {

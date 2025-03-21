@@ -251,6 +251,7 @@ function CustomerFeedbackModal( {
 				) && (
 					<div className="woocommerce-customer-effort-score__comments">
 						<TextareaControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'How is that screen useful to you? What features would you add or change?',
 								'woocommerce'
