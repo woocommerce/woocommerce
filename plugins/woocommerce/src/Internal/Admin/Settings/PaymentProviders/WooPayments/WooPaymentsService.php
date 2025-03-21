@@ -207,7 +207,7 @@ class WooPaymentsService {
 			'status'         => $this->get_onboarding_step_status( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ),
 			'errors'         => array(),
 			'context'        => array(
-				'business_types' => $this->get_onboarding_kyc_business_types(),
+				'fields' => $this->get_onboarding_kyc_fields(),
 			),
 		);
 
@@ -906,21 +906,21 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the business types data for the KYC business verification.
+	 * Get the onboarding fields data for the KYC business verification.
 	 *
-	 * @return array The business types data.
-	 * @throws Exception If the business types data could not be retrieved or there was an error.
+	 * @return array The onboarding fields data.
+	 * @throws Exception If the onboarding fields data could not be retrieved or there was an error.
 	 */
-	private function get_onboarding_kyc_business_types(): array {
-		// Call the WooPayments API to get the business types.
-		$response = Utils::rest_endpoint_get_request( '/wc/v3/payments/onboarding/business_types' );
+	private function get_onboarding_kyc_fields(): array {
+		// Call the WooPayments API to get the onboarding fields.
+		$response = Utils::rest_endpoint_get_request( '/wc/v3/payments/onboarding/fields' );
 
 		if ( is_wp_error( $response ) ) {
 			throw new Exception( esc_html( $response->get_error_message() ), esc_attr( $response->get_error_code() ) );
 		}
 
 		if ( ! is_array( $response ) || ! isset( $response['data'] ) ) {
-			throw new Exception( esc_html__( 'Failed to get business types data.', 'woocommerce' ) );
+			throw new Exception( esc_html__( 'Failed to get onboarding fields data.', 'woocommerce' ) );
 		}
 
 		return $response['data'];
