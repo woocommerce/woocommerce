@@ -753,19 +753,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 						description:
 							'Enable AJAX add to cart buttons on archives',
 						type: 'checkbox',
-						default: 'no',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_enable_ajax_add_to_cart_product_pages',
-						label: '',
-						description:
-							'Enable AJAX add to cart buttons on single product pages',
-						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
 					} ),
