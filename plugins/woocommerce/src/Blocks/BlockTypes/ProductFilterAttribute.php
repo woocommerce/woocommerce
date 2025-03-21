@@ -131,7 +131,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				$items[]     = array(
 					'type'               => 'attribute/' . $product_attribute,
 					'value'              => $term,
-					'activeLabel'        => $attribute_label . ': ' . $term_object->name,
+					'activeLabel'        => "$attribute_label: $term_object->name",
 					'attributeQueryType' => $attribute_query_type,
 				);
 			}
@@ -217,7 +217,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context' => wp_json_encode(
 				array(
-					'activeLabelTemplate' => "{$product_attribute->name}: {{label}}",
+					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
 					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
