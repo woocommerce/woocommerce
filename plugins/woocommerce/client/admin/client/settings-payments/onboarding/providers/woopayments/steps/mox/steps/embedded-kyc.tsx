@@ -11,7 +11,7 @@ import { LoadError } from '@stripe/connect-js';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useOnboardingContext } from '../data/onboarding-context';
-import { isPoEligible } from '../utils';
+import { finalizeOnboarding, isPoEligible } from '../utils';
 import { trackEmbeddedStepChange } from '../utils/tracking';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
 
@@ -51,7 +51,15 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	const handleOnExit = async () => {
 		setFinalizingAccount( true );
 
-		// To-Do: Add on exit logic
+		try {
+			const response = await finalizeOnboarding( 'NOX' ); // To-Do: Replace with the source.
+
+			if ( response.success ) {
+				// To-Do: navigate to the next step.
+			}
+		} catch ( error ) {
+			// To-Do: Handle error.
+		}
 	};
 
 	const handleLoadError = ( err: LoadError ) => {
