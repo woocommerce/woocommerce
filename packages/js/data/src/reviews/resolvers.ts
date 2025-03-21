@@ -38,7 +38,7 @@ export function* getReviews( query: ReviewsQueryParams ) {
 
 export function* getReview( id: number ) {
 	try {
-		const url = addQueryArgs( `${ NAMESPACE }/products/reviews/${ id }` );
+		const url = addQueryArgs( `wc/v3/products/reviews/${ id }` );
 		const response: {
 			headers: Map< string, string >;
 			data: ReviewObject;
