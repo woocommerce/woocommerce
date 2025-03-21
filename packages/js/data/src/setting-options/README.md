@@ -32,11 +32,11 @@ Receives and stores settings groups.
 
 Receives and stores settings for a specific group.
 
-### `updateSetting( groupId: string, settingId: string, value: SettingValue, options?: { save?: boolean } )`
+### `editSetting( groupId: string, settingId: string, value: SettingValue, options?: { save?: boolean } )`
 
 Updates a single setting value. If `options.save` is true, the setting will be immediately saved to the server.
 
-### `updateSettings( groupId: string, updates: SettingUpdate[] | SettingsUpdateObject, options?: { save?: boolean } )`
+### `editSettings( groupId: string, updates: SettingUpdate[] | SettingsUpdateObject, options?: { save?: boolean } )`
 
 Updates multiple settings at once. If `options.save` is true, the settings will be immediately saved to the server. Accepts either:
 

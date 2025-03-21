@@ -81,7 +81,7 @@ const createUpdateSettingAction = (
  * @param options      - Options object
  * @param options.save - Whether to immediately save the setting (default: false)
  */
-export function updateSetting(
+export function editSetting(
 	groupId: string,
 	settingId: string,
 	value: SettingValue,
@@ -99,7 +99,7 @@ export function updateSetting(
 /**
  * Internal action creator for array format
  */
-const updateSettingsArray = ( groupId: string, updates: SettingUpdate[] ) => ( {
+const editSettingsArray = ( groupId: string, updates: SettingUpdate[] ) => ( {
 	type: TYPES.UPDATE_SETTINGS,
 	groupId,
 	updates,
@@ -113,7 +113,7 @@ const updateSettingsArray = ( groupId: string, updates: SettingUpdate[] ) => ( {
  * @param options      - Options object
  * @param options.save - Whether to immediately save the settings (default: false)
  */
-export function updateSettings(
+export function editSettings(
 	groupId: string,
 	updates: SettingUpdate[] | SettingsUpdateObject,
 	{ save = false }: { save?: boolean } = {}
@@ -127,7 +127,7 @@ export function updateSettings(
 					value,
 			  } ) );
 
-		dispatch( updateSettingsArray( groupId, updatesArray ) );
+		dispatch( editSettingsArray( groupId, updatesArray ) );
 
 		if ( save ) {
 			return dispatch.saveSettingsGroup( groupId );
@@ -327,7 +327,7 @@ export type Actions = ReturnType<
 	| typeof revertSetting
 	| typeof revertGroup
 	| typeof createUpdateSettingAction
-	| typeof updateSettingsArray
+	| typeof editSettingsArray
 >;
 
 export type ActionDispatchersForThunk = {
@@ -337,8 +337,8 @@ export type ActionDispatchersForThunk = {
 	setError: typeof setError;
 	revertSetting: typeof revertSetting;
 	revertGroup: typeof revertGroup;
-	updateSetting: typeof updateSetting;
-	updateSettings: typeof updateSettings;
+	editSetting: typeof editSetting;
+	editSettings: typeof editSettings;
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
 	< T = Record< string, unknown > >( args: T ): void;

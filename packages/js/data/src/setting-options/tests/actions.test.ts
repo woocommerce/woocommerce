@@ -27,7 +27,7 @@ describe( 'setting-options actions', () => {
 		( apiFetch as unknown as jest.Mock ).mockReset();
 	} );
 
-	describe( 'updateSetting', () => {
+	describe( 'editSetting', () => {
 		it( 'should update a single setting value in edits state', () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
@@ -35,7 +35,7 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, settingId, value );
+				.editSetting( groupId, settingId, value );
 
 			expect( store.getState().edits[ groupId ]?.[ settingId ] ).toBe(
 				value
@@ -51,10 +51,10 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, setting1Id, value1 );
+				.editSetting( groupId, setting1Id, value1 );
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, setting2Id, value2 );
+				.editSetting( groupId, setting2Id, value2 );
 
 			expect( store.getState().edits[ groupId ] ).toEqual( {
 				[ setting1Id ]: value1,
@@ -63,7 +63,7 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'updateSettings', () => {
+	describe( 'editSettings', () => {
 		it( 'should update multiple settings in edits state', () => {
 			const groupId = 'test-group';
 			const updates = [
@@ -71,7 +71,7 @@ describe( 'setting-options actions', () => {
 				{ id: 'setting2', value: 'value2' },
 			];
 
-			registry.dispatch( STORE_NAME ).updateSettings( groupId, updates );
+			registry.dispatch( STORE_NAME ).editSettings( groupId, updates );
 
 			expect( store.getState().edits[ groupId ] ).toEqual( {
 				setting1: 'value1',
@@ -85,14 +85,14 @@ describe( 'setting-options actions', () => {
 			// First update
 			registry
 				.dispatch( STORE_NAME )
-				.updateSettings( groupId, [
+				.editSettings( groupId, [
 					{ id: 'setting1', value: 'value1' },
 				] );
 
 			// Second update
 			registry
 				.dispatch( STORE_NAME )
-				.updateSettings( groupId, [
+				.editSettings( groupId, [
 					{ id: 'setting2', value: 'value2' },
 				] );
 
@@ -107,13 +107,13 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSettings( groupId, [
+				.editSettings( groupId, [
 					{ id: 'setting1', value: 'old-value' },
 				] );
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSettings( groupId, [
+				.editSettings( groupId, [
 					{ id: 'setting1', value: 'new-value' },
 				] );
 
@@ -131,7 +131,7 @@ describe( 'setting-options actions', () => {
 			// First make an edit
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, settingId, 'new-value' );
+				.editSetting( groupId, settingId, 'new-value' );
 
 			// Then revert it
 			registry.dispatch( STORE_NAME ).revertSetting( groupId, settingId );
@@ -147,7 +147,7 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, settingId, 'new-value' );
+				.editSetting( groupId, settingId, 'new-value' );
 
 			registry.dispatch( STORE_NAME ).revertSetting( groupId, settingId );
 
@@ -157,7 +157,7 @@ describe( 'setting-options actions', () => {
 		it( 'should not affect other settings when reverting', () => {
 			const groupId = 'test-group';
 
-			registry.dispatch( STORE_NAME ).updateSettings( groupId, [
+			registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -176,7 +176,7 @@ describe( 'setting-options actions', () => {
 		it( 'should remove all edits for a group', () => {
 			const groupId = 'test-group';
 
-			registry.dispatch( STORE_NAME ).updateSettings( groupId, [
+			registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -192,12 +192,12 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSettings( group1Id, [
+				.editSettings( group1Id, [
 					{ id: 'setting1', value: 'value1' },
 				] );
 			registry
 				.dispatch( STORE_NAME )
-				.updateSettings( group2Id, [
+				.editSettings( group2Id, [
 					{ id: 'setting2', value: 'value2' },
 				] );
 
@@ -233,7 +233,7 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, settingId, value );
+				.editSetting( groupId, settingId, value );
 
 			// Mock API response
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
@@ -272,7 +272,7 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, settingId, '' );
+				.editSetting( groupId, settingId, '' );
 
 			await expect(
 				registry
@@ -313,7 +313,7 @@ describe( 'setting-options actions', () => {
 				mockResults
 			);
 
-			registry.dispatch( STORE_NAME ).updateSettings( groupId, [
+			registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -358,7 +358,7 @@ describe( 'setting-options actions', () => {
 				],
 			};
 
-			registry.dispatch( STORE_NAME ).updateSettings( groupId, [
+			registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -398,7 +398,7 @@ describe( 'setting-options actions', () => {
 			const groupId = 'test-group';
 			const error = createTestError( 'Network Error' );
 
-			registry.dispatch( STORE_NAME ).updateSettings( groupId, [
+			registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -424,7 +424,7 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'updateSetting with save', () => {
+	describe( 'editSetting with save', () => {
 		it( 'should update and save setting in one call', async () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
@@ -441,7 +441,7 @@ describe( 'setting-options actions', () => {
 
 			await registry
 				.dispatch( STORE_NAME )
-				.updateSetting( groupId, settingId, value, { save: true } );
+				.editSetting( groupId, settingId, value, { save: true } );
 
 			// Verify API call was made
 			expect( apiFetch ).toHaveBeenCalledWith( {
@@ -474,7 +474,7 @@ describe( 'setting-options actions', () => {
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.updateSetting( groupId, settingId, value, { save: true } )
+					.editSetting( groupId, settingId, value, { save: true } )
 			).rejects.toThrow( error );
 
 			// Verify the setting was updated in edits state despite the error
@@ -492,7 +492,7 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'updateSettings with save', () => {
+	describe( 'editSettings with save', () => {
 		it( 'should update and save multiple settings in one call', async () => {
 			const groupId = 'test-group';
 			const mockResults = {
@@ -522,7 +522,7 @@ describe( 'setting-options actions', () => {
 
 			await registry
 				.dispatch( STORE_NAME )
-				.updateSettings( groupId, updates, { save: true } );
+				.editSettings( groupId, updates, { save: true } );
 
 			// Verify API call was made
 			expect( apiFetch ).toHaveBeenCalledWith( {
@@ -574,7 +574,7 @@ describe( 'setting-options actions', () => {
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.updateSettings( groupId, updates, { save: true } )
+					.editSettings( groupId, updates, { save: true } )
 			).rejects.toThrow( 'Failed to update some settings' );
 
 			// Verify settings were updated in edits state
@@ -608,7 +608,7 @@ describe( 'setting-options actions', () => {
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.updateSettings( groupId, updates, { save: true } )
+					.editSettings( groupId, updates, { save: true } )
 			).rejects.toThrow( error );
 
 			// Verify settings were updated in edits state despite the error
