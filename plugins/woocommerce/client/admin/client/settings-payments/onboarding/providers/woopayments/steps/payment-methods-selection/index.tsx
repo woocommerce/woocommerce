@@ -14,7 +14,7 @@ import { PaymentMethodListItem } from '~/settings-payments/components/payment-me
 import './payment-methods-selection.scss';
 
 export default function PaymentMethodsSelection() {
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, navigateToNextStep } = useOnboardingContext();
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
 		[ key: string ]: boolean;
@@ -116,7 +116,16 @@ export default function PaymentMethodsSelection() {
 				<div className="woocommerce-recommended-payment-methods__list_footer">
 					<Button
 						className="components-button is-primary"
-						onClick={ () => {} }
+						onClick={ () => {
+							const href = currentStep?.actions?.complete?.href;
+							if ( href ) {
+								fetch( href, {
+									method: 'POST',
+								} );
+
+								navigateToNextStep();
+							}
+						} }
 						isBusy={ false }
 						disabled={ false }
 					>
