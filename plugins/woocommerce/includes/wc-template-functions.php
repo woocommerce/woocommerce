@@ -4411,7 +4411,7 @@ function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
 			continue;
 		}
 
-		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( $n ) );
+		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( (int) $n ) );
 		++$n;
 	}
 

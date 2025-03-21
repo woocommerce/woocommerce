@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Avoid fatal by casting page number to integer

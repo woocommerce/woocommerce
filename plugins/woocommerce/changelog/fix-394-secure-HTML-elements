@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Replaced concatenated string-based HTML elements in JS with createElement().

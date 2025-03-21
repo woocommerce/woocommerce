@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes an error when `_wc_delete_transients` is called but there aren't any transients stored in DB to delete yet.

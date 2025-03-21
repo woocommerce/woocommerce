@@ -49,6 +49,14 @@ class Integration {
 			// If dependencies are not met, do not initialize the email editor integration.
 			return;
 		}
+
+		add_action( 'init', array( $this, 'initialize' ) );
+	}
+
+	/**
+	 * Initialize the integration.
+	 */
+	public function initialize() {
 		$this->init_hooks();
 		$this->register_hooks();
 	}
