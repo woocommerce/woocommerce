@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { useStepperContext } from '../components/stepper';
 import { useOnboardingContext } from '../data/onboarding-context';
 import { OnboardingFields } from '../types';
-import { recordEvent } from 'tracks';
+import { recordEvent } from '@woocommerce/tracks';
 
 const trackedSteps: Set< string > = new Set();
 let startTime: number;
