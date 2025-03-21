@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,8 +20,24 @@ export default function PaymentMethodsSelection() {
 		[ key: string ]: boolean;
 	} >( {} );
 
+	useEffect( () => {
+		if ( currentStep?.context?.payment_methods ) {
+			const paymentMethods = currentStep?.context?.payment_methods.reduce(
+				(
+					acc: Record< string, boolean >,
+					method: RecommendedPaymentMethod
+				) => {
+					acc[ method.id ] = method.enabled;
+					return acc;
+				},
+				{}
+			);
+			setPaymentMethodsState( paymentMethods );
+		}
+	}, [ currentStep?.context?.payment_methods ] );
+
 	const recommendedPaymentMethods =
-		currentStep?.data?.recommended_payment_methods ?? [];
+		currentStep?.context?.payment_methods ?? [];
 
 	return (
 		<>
