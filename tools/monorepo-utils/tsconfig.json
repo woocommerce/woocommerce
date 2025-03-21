@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "dist",
-		"target": "es2018",
+		"target": "esnext",
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"moduleResolution": "node",

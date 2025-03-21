@@ -27,7 +27,7 @@ import { recordEvent, recordEventOnce } from '../../events';
 
 const sendingMethodConfigurationLink = applyFilters(
 	'woocommerce_email_editor_check_sending_method_configuration_link',
-	'admin.php?page=mailpoet-settings#mta'
+	`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }`
 ) as string;
 
 function RawSendPreviewEmail() {
@@ -130,7 +130,7 @@ function RawSendPreviewEmail() {
 									link: (
 										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
 										<a
-											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=mailpoet_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }` }
+											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }` }
 											key="sign-up-for-free"
 											target="_blank"
 											rel="noopener noreferrer"

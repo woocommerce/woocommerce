@@ -12,6 +12,7 @@
 	border-radius: 2px;
 	font-size: 0.875em;
 	cursor: pointer;
+	color: var(--wc-product-filter-chips-text, currentColor);
 
 	.has-chip-text-color & {
 		color: var(--wc-product-filter-chips-text);
