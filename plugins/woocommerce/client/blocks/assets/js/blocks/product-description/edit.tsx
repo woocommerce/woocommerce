@@ -190,7 +190,7 @@ export default function ProductDescriptionEdit( {
 		useQueryLoopProductContextValidation( {
 			clientId,
 			postType: contextPostType,
-			blockName: 'Product Description',
+			blockName: __( 'Product Description', 'woocommerce' ),
 		} );
 	if ( hasInvalidContext ) {
 		return warningElement;

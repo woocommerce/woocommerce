@@ -12,7 +12,4 @@ type Context = {
 };
 
 export type ProductDescriptionEditProps = BlockEditProps< Attributes > &
-	Context & {
-		__unstableLayoutClassNames: string;
-		__unstableParentLayout: string;
-	};
+	Context;

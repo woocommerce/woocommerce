@@ -35,7 +35,7 @@ const Edit = ( {
 		useQueryLoopProductContextValidation( {
 			clientId,
 			postType: context.postType,
-			blockName: 'Product Reviews',
+			blockName: __( 'Product Reviews', 'woocommerce' ),
 		} );
 
 	if ( hasInvalidContext ) {
