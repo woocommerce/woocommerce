@@ -398,6 +398,71 @@ class PaymentProviders {
 	}
 
 	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * @param string $id The ID of the payment extension suggestion to attach.
+	 *
+	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
+	 * @throws Exception If the suggestion ID is invalid.
+	 */
+	public function attach_extension_suggestion( string $id ): bool {
+		// We may receive a suggestion ID that is actually an order map ID used in the settings page providers list.
+		// Extract the suggestion ID from the order map ID.
+		if ( $this->is_suggestion_order_map_id( $id ) ) {
+			$id = $this->get_suggestion_id_from_order_map_id( $id );
+		}
+
+		$suggestion = $this->get_extension_suggestion_by_id( $id );
+		if ( is_null( $suggestion ) ) {
+			throw new Exception( esc_html__( 'Invalid suggestion ID.', 'woocommerce' ) );
+		}
+
+		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY, array() );
+		if ( empty( $payments_nox_profile ) ) {
+			$payments_nox_profile = array();
+		} else {
+			$payments_nox_profile = maybe_unserialize( $payments_nox_profile );
+		}
+
+		// Mark the suggestion as attached.
+		if ( empty( $payments_nox_profile['suggestions'] ) ) {
+			$payments_nox_profile['suggestions'] = array();
+		}
+		if ( empty( $payments_nox_profile['suggestions'][ $id ] ) ) {
+			$payments_nox_profile['suggestions'][ $id ] = array();
+		}
+		if ( empty( $payments_nox_profile['suggestions'][ $id ]['attached'] ) ) {
+			$payments_nox_profile['suggestions'][ $id ]['attached'] = array();
+		}
+		// Check if it is already marked as attached.
+		if ( ! empty( $payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] ) ) {
+			return true;
+		}
+		$payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] = time();
+
+		$result = update_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY, $payments_nox_profile, false );
+		// Since we already check if the suggestion is already attached, we should not get a false result
+		// for trying to update with the same value.
+		// False means the update failed and the suggestion is not marked as attached.
+		if ( false === $result ) {
+			return false;
+		}
+
+		// Handle custom attachment logic per-provider.
+		switch ( $id ) {
+			case ExtensionSuggestions::PAYPAL_FULL_STACK:
+			case ExtensionSuggestions::PAYPAL_WALLET:
+				// Set an option to inform the extension.
+				update_option( 'woocommerce_paypal_branded', 'yes', false );
+				break;
+			default:
+				break;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Hide a payment extension suggestion.
 	 *
 	 * @param string $id The ID of the payment extension suggestion to hide.

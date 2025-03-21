@@ -12,7 +12,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class Payments {
 
-	const USER_PAYMENTS_NOX_PROFILE_KEY = 'woocommerce_payments_nox_profile';
+	const PAYMENTS_NOX_PROFILE_OPTION_KEY = 'woocommerce_payments_nox_profile';
+	const USER_PAYMENTS_NOX_PROFILE_KEY   = 'woocommerce_payments_nox_profile';
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
@@ -223,6 +224,20 @@ class Payments {
 	 */
 	public function update_payment_providers_order_map( array $order_map ): bool {
 		return $this->providers->update_payment_providers_order_map( $order_map );
+	}
+
+	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * This is only an internal recording of attachment. No actual extension installation or activation happens.
+	 *
+	 * @param string $id The ID of the payment extension suggestion to hide.
+	 *
+	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
+	 * @throws Exception If the suggestion ID is invalid.
+	 */
+	public function attach_payment_extension_suggestion( string $id ): bool {
+		return $this->providers->attach_extension_suggestion( $id );
 	}
 
 	/**
