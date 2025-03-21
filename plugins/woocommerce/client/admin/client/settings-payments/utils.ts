@@ -53,14 +53,36 @@ export const isIncentiveDismissedInContext = (
 	incentive: PaymentIncentive | undefined,
 	context: string
 ) => {
-	if ( ! incentive ) {
+	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
 		return false;
 	}
 
-	return (
-		incentive._dismissals.includes( 'all' ) ||
-		incentive._dismissals.includes( context )
+	return incentive._dismissals.some(
+		( dismissal ) =>
+			dismissal.context === 'all' || dismissal.context === context
 	);
+};
+
+/**
+ * Checks whether an incentive is dismissed in a given context and if it was dismissed before a given reference timestamp.
+ */
+export const isIncentiveDismissedEarlierThanTimestamp = (
+	incentive: PaymentIncentive | undefined,
+	context: string,
+	referenceTimestampMs: number // UNIX timestamp in milliseconds.
+): boolean => {
+	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
+		return false;
+	}
+
+	// Check if the dismissal happened before the provided reference timestamp.
+	return incentive._dismissals.some( ( dismissal ) => {
+		const dismissalTimestampMs = dismissal.timestamp * 1000; // Convert to milliseconds if stored in seconds
+		return (
+			( dismissal.context === 'all' || dismissal.context === context ) &&
+			dismissalTimestampMs < referenceTimestampMs
+		);
+	} );
 };
 
 /**

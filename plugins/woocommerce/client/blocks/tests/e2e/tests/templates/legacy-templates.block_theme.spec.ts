@@ -73,7 +73,7 @@ test.describe( 'Legacy templates', () => {
 			await page.getByPlaceholder( 'Search' ).fill( template.name );
 
 			await expect(
-				page.getByRole( 'link', { name: template.name } )
+				page.getByRole( 'button', { name: template.name } ).first()
 			).toBeVisible();
 		} );
 

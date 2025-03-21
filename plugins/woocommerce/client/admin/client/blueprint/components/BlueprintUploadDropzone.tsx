@@ -149,11 +149,12 @@ type FileUploadEvents =
 	| { type: 'UPLOAD'; file: File }
 	| { type: 'SUCCESS' }
 	| { type: 'ERROR'; error: Error }
-	| { type: 'DISMISS' }
+	| { type: 'DISMISS_FILE_UPLOAD' }
 	| { type: 'DISMISS_OVERWRITE_MODAL' }
 	| { type: 'IMPORT' }
 	| { type: 'CONFIRM_IMPORT' }
 	| { type: 'RETRY' }
+	| { type: 'DISMISS_ERRORS' }
 	| {
 			type: `xstate.done.actor.${ number }.fileUpload.uploading`;
 			output: BlueprintQueueResponse;
@@ -274,14 +275,6 @@ export const fileUploadMachine = setup( {
 		},
 		success: {
 			on: {
-				DISMISS: {
-					actions: assign( {
-						error: () => undefined,
-						file: () => undefined,
-						steps: () => undefined,
-					} ),
-					target: 'idle',
-				},
 				IMPORT: [
 					{
 						target: 'overrideModal',
@@ -345,6 +338,16 @@ export const fileUploadMachine = setup( {
 		},
 		importSuccess: {},
 	},
+	on: {
+		DISMISS_FILE_UPLOAD: {
+			actions: assign( {
+				error: () => undefined,
+				file: () => undefined,
+				steps: () => undefined,
+			} ),
+			target: '.idle',
+		},
+	},
 } );
 
 export const BlueprintUploadDropzone = () => {
@@ -354,12 +357,19 @@ export const BlueprintUploadDropzone = () => {
 		<>
 			{ state.context.error && (
 				<div className="blueprint-upload-dropzone-error">
-					<Notice status="error" isDismissible={ false }>
+					<Notice
+						status="error"
+						onDismiss={ () =>
+							send( { type: 'DISMISS_FILE_UPLOAD' } )
+						}
+					>
 						<pre>{ state.context.error.message }</pre>
 					</Notice>
 				</div>
 			) }
-			{ ( state.matches( 'idle' ) || state.matches( 'error' ) ) && (
+			{ ( state.matches( 'idle' ) ||
+				state.matches( 'error' ) ||
+				state.matches( 'parsingSteps' ) ) && (
 				<div className="blueprint-upload-form">
 					<FormFileUpload
 						className="blueprint-upload-field"
@@ -420,7 +430,9 @@ export const BlueprintUploadDropzone = () => {
 						</span>
 						<Button
 							icon={ <Icon icon={ closeSmall } /> }
-							onClick={ () => send( { type: 'DISMISS' } ) }
+							onClick={ () => {
+								send( { type: 'DISMISS_FILE_UPLOAD' } );
+							} }
 						/>
 					</p>
 				</div>

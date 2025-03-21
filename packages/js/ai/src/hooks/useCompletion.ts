@@ -56,7 +56,11 @@ export const useCompletion = ( {
 
 	const onCompletionError = ( error: string | Error ) => {
 		stopCompletion( 'error' );
-		onStreamError( typeof error === 'object' ? error : new Error( error ) );
+		onStreamError(
+			( typeof error === 'object'
+				? error
+				: new Error( error ) ) as UseCompletionError
+		);
 	};
 
 	const requestCompletion = async (
