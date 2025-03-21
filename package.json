@@ -41,7 +41,7 @@
 		"babel-loader": "^8.3.0",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "^10.2.4",
-		"core-js": "^3.34.0",
+		"core-js": "^3.41.0",
 		"css-loader": "^6.8.1",
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",

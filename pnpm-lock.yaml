@@ -73,8 +73,8 @@ importers:
         specifier: ^10.2.4
         version: 10.2.4(webpack@5.89.0(@swc/core@1.3.100))
       core-js:
-        specifier: ^3.34.0
-        version: 3.34.0
+        specifier: ^3.41.0
+        version: 3.41.0
       css-loader:
         specifier: ^6.8.1
         version: 6.8.1(webpack@5.89.0(@swc/core@1.3.100))
@@ -739,8 +739,8 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2
       core-js:
-        specifier: ^3.34.0
-        version: 3.34.0
+        specifier: ^3.41.0
+        version: 3.41.0
       d3-axis:
         specifier: ^1.0.12
         version: 1.0.12
@@ -3861,8 +3861,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       core-js:
-        specifier: ^3.34.0
-        version: 3.34.0
+        specifier: ^3.41.0
+        version: 3.41.0
       debug:
         specifier: ^4.3.4
         version: 4.3.4(supports-color@9.4.0)
@@ -4746,8 +4746,8 @@ importers:
         specifier: 11.0.0
         version: 11.0.0(webpack@5.91.0)
       core-js:
-        specifier: 3.25.0
-        version: 3.25.0
+        specifier: ^3.41.0
+        version: 3.41.0
       create-file-webpack:
         specifier: 1.0.2
         version: 1.0.2
@@ -14518,14 +14518,11 @@ packages:
     resolution: {integrity: sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==}
     deprecated: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
 
-  core-js@3.25.0:
-    resolution: {integrity: sha512-CVU1xvJEfJGhyCpBrzzzU1kjCfgsGUxhEvwUV2e/cOedYWHdmluamx+knDnmhqALddMG16fZvIqvs9aijsHHaA==}
-
-  core-js@3.34.0:
-    resolution: {integrity: sha512-aDdvlDder8QmY91H88GzNi9EtQi2TjvQhpCX6B1v/dAZHU1AuLgHvRh54RiOerpEhEW46Tkf+vgAViB/CWC0ag==}
-
   core-js@3.40.0:
     resolution: {integrity: sha512-7vsMc/Lty6AGnn7uFpYT56QesI5D2Y/UkgKounk87OP9Z2H9Z8kj6jzcSGAxFmUtDOS0ntK6lbQz+Nsa0Jj6mQ==}
+
+  core-js@3.41.0:
+    resolution: {integrity: sha512-SJ4/EHwS36QMJd6h/Rg+GyR4A5xE0FSI3eZ+iBVpfqf1x0eTSg1smWLHrA+2jQThZSh97fmSgFSU8B61nxosxA==}
 
   core-util-is@1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
@@ -31678,7 +31675,7 @@ snapshots:
       '@storybook/core-events': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/theming': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      core-js: 3.40.0
+      core-js: 3.41.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -32058,7 +32055,7 @@ snapshots:
       '@storybook/router': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/theming': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/webpack-env': 1.18.4
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -32090,7 +32087,7 @@ snapshots:
       '@storybook/router': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/semver': 7.3.2
       '@storybook/theming': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      core-js: 3.40.0
+      core-js: 3.41.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -32278,7 +32275,7 @@ snapshots:
       autoprefixer: 9.8.6
       babel-loader: 8.3.0(@babel/core@7.25.7)(webpack@4.47.0(webpack-cli@3.3.12))
       case-sensitive-paths-webpack-plugin: 2.4.0
-      core-js: 3.40.0
+      core-js: 3.41.0
       css-loader: 3.6.0(webpack@4.47.0(webpack-cli@3.3.12))
       file-loader: 6.2.0(webpack@4.47.0(webpack-cli@3.3.12))
       find-up: 5.0.0
@@ -32419,7 +32416,7 @@ snapshots:
       '@storybook/channels': 6.5.17-alpha.0
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/core-events': 6.5.17-alpha.0
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
       qs: 6.11.2
       telejson: 6.0.8
@@ -32428,13 +32425,13 @@ snapshots:
     dependencies:
       '@storybook/channels': 6.5.17-alpha.0
       '@storybook/client-logger': 6.5.17-alpha.0
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
       telejson: 6.0.8
 
   '@storybook/channels@6.5.17-alpha.0':
     dependencies:
-      core-js: 3.40.0
+      core-js: 3.41.0
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
 
@@ -32573,7 +32570,7 @@ snapshots:
       '@storybook/store': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/qs': 6.9.10
       '@types/webpack-env': 1.18.4
-      core-js: 3.40.0
+      core-js: 3.41.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -32594,7 +32591,7 @@ snapshots:
 
   '@storybook/client-logger@6.5.17-alpha.0':
     dependencies:
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
 
   '@storybook/client-logger@7.5.2':
@@ -32652,7 +32649,7 @@ snapshots:
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/theming': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      core-js: 3.40.0
+      core-js: 3.41.0
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 18.3.1
@@ -32746,7 +32743,7 @@ snapshots:
       '@storybook/ui': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -32774,7 +32771,7 @@ snapshots:
       '@storybook/ui': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -32835,7 +32832,7 @@ snapshots:
       babel-plugin-macros: 3.1.0
       babel-plugin-polyfill-corejs3: 0.1.7(@babel/core@7.25.7)
       chalk: 4.1.2
-      core-js: 3.40.0
+      core-js: 3.41.0
       express: 4.18.2
       file-system-cache: 1.1.0
       find-up: 5.0.0
@@ -32955,7 +32952,7 @@ snapshots:
 
   '@storybook/core-events@6.5.17-alpha.0':
     dependencies:
-      core-js: 3.40.0
+      core-js: 3.41.0
 
   '@storybook/core-events@7.5.2':
     dependencies:
@@ -32993,7 +32990,7 @@ snapshots:
       cli-table3: 0.6.3
       commander: 6.2.1
       compression: 1.7.4
-      core-js: 3.40.0
+      core-js: 3.41.0
       cpy: 8.1.2
       detect-port: 1.5.1
       express: 4.18.2
@@ -33205,7 +33202,7 @@ snapshots:
       '@babel/types': 7.26.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/mdx1-csf': 0.0.1(@babel/core@7.25.7)
-      core-js: 3.40.0
+      core-js: 3.41.0
       fs-extra: 9.1.0
       global: 4.4.0
       regenerator-runtime: 0.13.11
@@ -33274,7 +33271,7 @@ snapshots:
       '@babel/core': 7.25.7
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/store': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      core-js: 3.40.0
+      core-js: 3.41.0
       doctrine: 3.0.0
       lodash: 4.17.21
       regenerator-runtime: 0.13.11
@@ -33400,7 +33397,7 @@ snapshots:
       babel-loader: 8.3.0(@babel/core@7.25.7)(webpack@4.47.0(webpack-cli@3.3.12))
       case-sensitive-paths-webpack-plugin: 2.4.0
       chalk: 4.1.2
-      core-js: 3.40.0
+      core-js: 3.41.0
       css-loader: 3.6.0(webpack@4.47.0(webpack-cli@3.3.12))
       express: 4.18.2
       file-loader: 6.2.0(webpack@4.47.0(webpack-cli@3.3.12))
@@ -33461,7 +33458,7 @@ snapshots:
     dependencies:
       '@types/npmlog': 4.1.6
       chalk: 4.1.2
-      core-js: 3.40.0
+      core-js: 3.41.0
       npmlog: 5.0.1
       pretty-hrtime: 1.0.3
 
@@ -33613,7 +33610,7 @@ snapshots:
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/store': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ansi-to-html: 0.6.15
-      core-js: 3.40.0
+      core-js: 3.41.0
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -33761,7 +33758,7 @@ snapshots:
       acorn-walk: 7.2.0
       babel-plugin-add-react-displayname: 0.0.5
       babel-plugin-react-docgen: 4.2.1
-      core-js: 3.40.0
+      core-js: 3.41.0
       escodegen: 2.1.0
       fs-extra: 9.1.0
       global: 4.4.0
@@ -33898,7 +33895,7 @@ snapshots:
   '@storybook/router@6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/client-logger': 6.5.17-alpha.0
-      core-js: 3.40.0
+      core-js: 3.41.0
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 18.3.1
@@ -33927,7 +33924,7 @@ snapshots:
 
   '@storybook/semver@7.3.2':
     dependencies:
-      core-js: 3.40.0
+      core-js: 3.41.0
       find-up: 4.1.0
 
   '@storybook/source-loader@7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -33954,7 +33951,7 @@ snapshots:
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/core-events': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
-      core-js: 3.40.0
+      core-js: 3.41.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -33973,7 +33970,7 @@ snapshots:
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/core-common': 6.5.17-alpha.0(eslint@8.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2)(webpack-cli@3.3.12)
       chalk: 4.1.2
-      core-js: 3.40.0
+      core-js: 3.41.0
       detect-package-manager: 2.0.1
       fetch-retry: 5.0.6
       fs-extra: 9.1.0
@@ -34024,7 +34021,7 @@ snapshots:
   '@storybook/theming@6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/client-logger': 6.5.17-alpha.0
-      core-js: 3.40.0
+      core-js: 3.41.0
       memoizerific: 1.11.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -34089,7 +34086,7 @@ snapshots:
       '@storybook/router': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/semver': 7.3.2
       '@storybook/theming': 6.5.17-alpha.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      core-js: 3.40.0
+      core-js: 3.41.0
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 18.3.1
@@ -36417,7 +36414,7 @@ snapshots:
       '@wordpress/element': 4.20.0
       '@wordpress/warning': 2.47.0
       browserslist: 4.19.3
-      core-js: 3.40.0
+      core-js: 3.41.0
     transitivePeerDependencies:
       - supports-color
 
@@ -36433,7 +36430,7 @@ snapshots:
       '@wordpress/browserslist-config': 5.30.0
       '@wordpress/warning': 2.47.0
       browserslist: 4.22.2
-      core-js: 3.40.0
+      core-js: 3.41.0
       react: 18.3.1
     transitivePeerDependencies:
       - supports-color
@@ -36449,7 +36446,7 @@ snapshots:
       '@wordpress/browserslist-config': 6.0.1
       '@wordpress/warning': 3.0.1
       browserslist: 4.24.4
-      core-js: 3.40.0
+      core-js: 3.41.0
       react: 18.3.1
     transitivePeerDependencies:
       - supports-color
@@ -43801,11 +43798,9 @@ snapshots:
 
   core-js@2.6.12: {}
 
-  core-js@3.25.0: {}
-
-  core-js@3.34.0: {}
-
   core-js@3.40.0: {}
+
+  core-js@3.41.0: {}
 
   core-util-is@1.0.2: {}
 
@@ -51474,7 +51469,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.7
       app-root-dir: 1.0.2
-      core-js: 3.40.0
+      core-js: 3.41.0
       dotenv: 8.6.0
       dotenv-expand: 5.1.0
 
