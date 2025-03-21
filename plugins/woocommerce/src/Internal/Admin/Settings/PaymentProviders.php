@@ -424,6 +424,11 @@ class PaymentProviders {
 			$payments_nox_profile = maybe_unserialize( $payments_nox_profile );
 		}
 
+		// Check if it is already marked as attached.
+		if ( ! empty( $payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] ) ) {
+			return true;
+		}
+
 		// Mark the suggestion as attached.
 		if ( empty( $payments_nox_profile['suggestions'] ) ) {
 			$payments_nox_profile['suggestions'] = array();
@@ -434,12 +439,9 @@ class PaymentProviders {
 		if ( empty( $payments_nox_profile['suggestions'][ $id ]['attached'] ) ) {
 			$payments_nox_profile['suggestions'][ $id ]['attached'] = array();
 		}
-		// Check if it is already marked as attached.
-		if ( ! empty( $payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] ) ) {
-			return true;
-		}
 		$payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] = time();
 
+		// Store the modified profile data.
 		$result = update_option( Payments::PAYMENTS_NOX_PROFILE_OPTION_KEY, $payments_nox_profile, false );
 		// Since we already check if the suggestion is already attached, we should not get a false result
 		// for trying to update with the same value.
