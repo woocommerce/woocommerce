@@ -45,8 +45,8 @@ export interface WooPaymentsProviderOnboardingStep {
 	dependencies?: string[];
 	actions?: string[];
 	content?: ReactNode;
-	data?: {
-		recommended_payment_methods?: RecommendedPaymentMethod[];
+	context?: {
+		payment_methods: RecommendedPaymentMethod[];
 	};
 }
 
