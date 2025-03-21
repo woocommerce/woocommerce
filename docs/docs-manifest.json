@@ -1238,7 +1238,7 @@
       "categories": []
     },
     {
-      "content": "\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n",
+      "content": "\n**Important:** WooCommerce is shifting focus to work on a new beta of the Product Editor Experience, v3. [Read more on our Developer Blog](https://developer.woocommerce.com/2024/11/06/whats-next-in-the-product-editor/).\n\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n",
       "category_slug": "product-editor",
       "category_title": "Product Editor",
       "posts": [
@@ -1246,7 +1246,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "bbf230f9f13bc2404096f5b5b2f7394ba5ab391d78e5efa9627342f5b33be7dd",
+          "hash": "1b7e414d622a78e3303a419af99dea6c106634e1bf1f0b40d1f64857eadf1fd8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1992,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "16f282fa95c0d6495cc17a273d3b2aa725cca2d3b6e911c777304f83e12e1555"
+  "hash": "0d47b9e67327ccda193449f48ec83d434513d5872bf0cda226a414368216b435"
 }
