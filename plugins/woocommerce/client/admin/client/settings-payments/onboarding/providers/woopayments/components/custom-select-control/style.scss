@@ -20,7 +20,7 @@
 		list-style-type: none;
 
 		&.is-highlighted {
-			background: $gray-0;
+			background: $studio-gray-0;
 		}
 	}
 
@@ -44,7 +44,7 @@
 		}
 
 		&.placeholder {
-			color: $gray-50;
+			color: $studio-gray-50;
 		}
 
 		.components-custom-select-control__button-value {

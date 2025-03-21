@@ -1,4 +1,4 @@
-.woopayments.components-grouped-select-control {
+.components-grouped-select-control {
 	position: relative;
 
 	&__label {
@@ -27,7 +27,7 @@
 		}
 
 		&.placeholder {
-			color: $gray-50;
+			color: $studio-gray-50;
 		}
 
 		@media screen and ( max-width: 782px ) {
@@ -80,7 +80,7 @@
 		min-height: 24px + $gap-small * 2;
 
 		&.is-highlighted {
-			background: $gray-0;
+			background: $studio-gray-0;
 		}
 
 		&.is-item &-content {
