@@ -455,7 +455,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		$response = array(
 			'success'         => true,
 			'previous_status' => $previous_status,
-			'status'          => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
+			'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
 		);
 
 		return rest_ensure_response( $response );
@@ -835,7 +835,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'complete'    => array(
+								'finish'    => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to signal the step completion.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),

@@ -178,21 +178,21 @@ class WooPaymentsService {
 		// If the step is not completed, we need to add the actions.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step_details['status'] ) {
 			$test_account_step_details['actions'] = array(
-				'start'    => array(
+				'start'  => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
 				),
-				'init'     => array(
+				'init'   => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
 				),
-				'check'    => array(
+				'check'  => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/check' ),
 				),
-				'complete' => array(
+				'finish' => array(
 					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/complete' ),
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
 				),
 			);
 		}
@@ -226,9 +226,9 @@ class WooPaymentsService {
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/session/start' ),
 				),
-				'complete'      => array(
+				'finish'        => array(
 					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/complete' ),
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
 				),
 			);
 		}
