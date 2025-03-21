@@ -101,10 +101,6 @@ class ProductReviewsTitle extends AbstractBlock {
 			$tag_name = 'h' . $attributes['level'];
 		}
 
-		if ( 0 === $reviews_count ) {
-			return;
-		}
-
 		$reviews_title = $this->get_reviews_title( $attributes, $product );
 
 		return sprintf(
