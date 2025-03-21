@@ -9,11 +9,8 @@ import { chevronRight, chevronLeft } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
 import {
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalHStack as HStack,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalHeading as Heading,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import React from 'react';
