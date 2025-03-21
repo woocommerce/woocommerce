@@ -23,8 +23,8 @@ export const Edit = ( {
 
 	const scrollableRef = useRef< HTMLDivElement >( null );
 	const [ overflowState, setOverflowState ] = useState( {
-		overflowBottom: false,
-		overflowRight: false,
+		bottom: false,
+		right: false,
 	} );
 
 	useEffect( () => {
@@ -61,9 +61,9 @@ export const Edit = ( {
 		`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
 		{
 			'wc-block-product-gallery-thumbnails--overflow-right':
-				overflowState.overflowRight,
+				overflowState.right,
 			'wc-block-product-gallery-thumbnails--overflow-bottom':
-				overflowState.overflowBottom,
+				overflowState.bottom,
 		}
 	);
 	const blockProps = useBlockProps( { className } );
