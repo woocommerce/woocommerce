@@ -70,7 +70,14 @@ class FilterData {
 		WHERE product_id IN ( {$query->request} )
 		";
 
-		$results = $wpdb->get_row( $price_filter_sql ); // phpcs:ignore
+		/**
+		 * We can't use $wpdb->prepare() here because using %s with
+		 * $wpdb->prepare() for a subquery won't work as it will escape the SQL
+		 * query.
+		 * We're using the query as is, same as Core does.
+		 */
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_row( $price_filter_sql );
 
 		$this->set_cache( $transient_key, $results );
 
@@ -124,7 +131,14 @@ class FilterData {
 				WHERE posts.ID IN ( {$query->request} )
 			";
 
-			$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
+			/**
+			 * We can't use $wpdb->prepare() here because using %s with
+			 * $wpdb->prepare() for a subquery won't work as it will escape the
+			 * SQL query.
+			 * We're using the query as is, same as Core does.
+			 */
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$result = $wpdb->get_row( $stock_status_count_sql );
 			$stock_status_counts[ $status ] = $result->status_count;
 		}
 
@@ -177,7 +191,14 @@ class FilterData {
 			ORDER BY rounded_average_rating DESC
 		";
 
-		$results = $wpdb->get_results( $rating_count_sql ); // phpcs:ignore
+		/**
+		 * We can't use $wpdb->prepare() here because using %s with
+		 * $wpdb->prepare() for a subquery won't work as it will escape the
+		 * SQL query.
+		 * We're using the query as is, same as Core does.
+		 */
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $rating_count_sql );
 		$results = array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
 
 		$this->set_cache( $transient_key, $results );
@@ -233,7 +254,14 @@ class FilterData {
 			GROUP BY terms.term_id
 		";
 
-		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
+		/**
+		 * We can't use $wpdb->prepare() here because using %s with
+		 * $wpdb->prepare() for a subquery won't work as it will escape the
+		 * SQL query.
+		 * We're using the query as is, same as Core does.
+		 */
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $attribute_count_sql );
 		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 
 		$this->set_cache( $transient_key, $results );
