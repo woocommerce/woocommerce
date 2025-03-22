@@ -259,7 +259,7 @@ class FilterData {
 		 *
 		 * @hook woocommerce_pre_product_filter_data
 		 *
-		 * @since 8.7.0
+		 * @since 9.9.0
 		 *
 		 * @param mixed $results      The results for current query.
 		 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
