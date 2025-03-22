@@ -6,9 +6,8 @@ namespace Automattic\WooCommerce\Internal\ProductFilters;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
-
 /**
- * Hooks into WordPress and WooCommerce actions and filters to register main query filter and cache invalidation.
+ * Hooks into WordPress filters to handle product filters for the main query.
  */
 class MainQueryController implements RegisterHooksInterface {
 

@@ -9,7 +9,7 @@ use WC_Cache_Helper;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Hooks into WordPress and WooCommerce actions and filters to register main query filter and cache invalidation.
+ * Hooks into WooCommerce actions to register cache invalidation.
  */
 class CacheController implements RegisterHooksInterface {
 	const TRANSIENT_GROUP = 'filter_data';
