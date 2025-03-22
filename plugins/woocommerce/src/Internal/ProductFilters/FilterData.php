@@ -297,6 +297,10 @@ class FilterData {
 	 * @param string $key Transient key.
 	 */
 	private function get_cache( $key ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			return null;
+		}
+
 		$cache             = get_transient( $key );
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
 
