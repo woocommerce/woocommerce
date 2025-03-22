@@ -117,13 +117,12 @@ class FilterData {
 		$stock_status_counts = array();
 
 		foreach ( $statuses as $status ) {
-			$status                 = esc_sql( $status );
 			$stock_status_count_sql = "
 				SELECT COUNT( DISTINCT posts.ID ) as status_count
 				FROM {$wpdb->posts} as posts
 				INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
 				AND postmeta.meta_key = '_stock_status'
-				AND postmeta.meta_value = '{$status}'
+				AND postmeta.meta_value = '" . esc_sql( $status ) . "'
 				WHERE posts.ID IN ( {$product_query_sql} )
 			";
 
