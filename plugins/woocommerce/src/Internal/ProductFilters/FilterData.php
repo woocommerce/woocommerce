@@ -60,7 +60,6 @@ class FilterData {
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );
-		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -68,7 +67,7 @@ class FilterData {
 		$price_filter_sql = "
 		SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
 		FROM {$wpdb->wc_product_meta_lookup}
-		WHERE product_id IN ( {$product_query_sql} )
+		WHERE product_id IN ( {$query->request} )
 		";
 
 		$results = $wpdb->get_row( $price_filter_sql ); // phpcs:ignore
@@ -108,7 +107,6 @@ class FilterData {
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );
-		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -123,7 +121,7 @@ class FilterData {
 				INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
 				AND postmeta.meta_key = '_stock_status'
 				AND postmeta.meta_value = '" . esc_sql( $status ) . "'
-				WHERE posts.ID IN ( {$product_query_sql} )
+				WHERE posts.ID IN ( {$query->request} )
 			";
 
 			$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
@@ -166,7 +164,6 @@ class FilterData {
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );
-		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -174,7 +171,7 @@ class FilterData {
 		$rating_count_sql = "
 			SELECT COUNT( DISTINCT product_id ) as product_count, ROUND( average_rating, 0 ) as rounded_average_rating
 			FROM {$wpdb->wc_product_meta_lookup}
-			WHERE product_id IN ( {$product_query_sql} )
+			WHERE product_id IN ( {$query->request} )
 			AND average_rating > 0
 			GROUP BY rounded_average_rating
 			ORDER BY rounded_average_rating DESC
@@ -220,7 +217,6 @@ class FilterData {
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );
-		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -232,7 +228,7 @@ class FilterData {
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-			WHERE posts.ID IN ( {$product_query_sql} )
+			WHERE posts.ID IN ( {$query->request} )
 			{$attributes_to_count_sql}
 			GROUP BY terms.term_id
 		";
