@@ -56,7 +56,7 @@ class WCTransactionalEmailPostsGenerator {
 	 *
 	 * @internal
 	 */
-	final public function init() {
+	public function initialize() {
 		if ( WOOCOMMERCE_VERSION === get_transient( $this->transient_name ) ) {
 			// if templates are already generated, we don't need to run this function again.
 			return true;
@@ -72,7 +72,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * This function initializes the default templates for the core transactional emails.
 	 * It fetches all the emails from WooCommerce and filters them to include only the core transactional emails.
 	 */
-	private function init_default_templates() {
+	public function init_default_templates() {
 		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
 
 		$wc_emails = \WC_Emails::instance();
@@ -217,7 +217,7 @@ class WCTransactionalEmailPostsGenerator {
 		);
 
 		if ( empty( $core_emails ) ) {
-			return true;
+			return false;
 		}
 
 		// Start transaction.

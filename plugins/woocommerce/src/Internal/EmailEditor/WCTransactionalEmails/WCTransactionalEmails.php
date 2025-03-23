@@ -96,6 +96,6 @@ class WCTransactionalEmails {
 		}
 
 		// run only on WooCommerce admin pages.
-		$this->email_template_generator->init();
+		$this->email_template_generator->initialize();
 	}
 }
