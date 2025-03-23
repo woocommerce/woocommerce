@@ -7,18 +7,18 @@ namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 /**
  * Class responsible for managing WooCommerce email editor post templates.
  */
-class WCEmailTemplateManager {
+class WCTransactionalEmailPostsManager {
 	/**
 	 * Singleton instance of the class.
 	 *
-	 * @var WCEmailTemplateManager|null
+	 * @var WCTransactionalEmailPostsManager|null
 	 */
 	private static $instance = null;
 
 	/**
 	 * Gets the singleton instance of the class.
 	 *
-	 * @return WCEmailTemplateManager Instance of the class.
+	 * @return WCTransactionalEmailPostsManager Instance of the class.
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
@@ -44,7 +44,7 @@ class WCEmailTemplateManager {
 
 		$post = get_post( $post_id );
 
-		if ( ! $post ) {
+		if ( ! $post instanceof \WP_Post ) {
 			return null;
 		}
 

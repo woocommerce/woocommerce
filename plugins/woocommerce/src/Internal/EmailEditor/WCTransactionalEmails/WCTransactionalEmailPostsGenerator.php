@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 
 /**
- * Class WCEmailTemplateGenerator
+ * Class WCTransactionalEmailPostsGenerator
  *
  * Handles the generation of WooCommerce transactional email templates.
  * This class is responsible for initializing and managing default email templates,
@@ -16,11 +16,11 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
  *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  */
-class WCEmailTemplateGenerator {
+class WCTransactionalEmailPostsGenerator {
 	/**
 	 * WooCommerce Email Template Manager instance.
 	 *
-	 * @var WCEmailTemplateManager
+	 * @var WCTransactionalEmailPostsManager
 	 */
 	private $template_manager;
 
@@ -34,10 +34,10 @@ class WCEmailTemplateGenerator {
 	/**
 	 * Constructor.
 	 *
-	 * Initializes the WCEmailTemplateGenerator by setting up the template manager.
+	 * Initializes the WCTransactionalEmailPostsGenerator by setting up the template manager.
 	 */
 	public function __construct() {
-		$this->template_manager = WCEmailTemplateManager::get_instance();
+		$this->template_manager = WCTransactionalEmailPostsManager::get_instance();
 	}
 
 	/**
@@ -90,7 +90,7 @@ class WCEmailTemplateGenerator {
 	/**
 	 * Get the email template for the given email.
 	 *
-	 * This is a temporary solution to get the initial email block content.
+	 * Looks for the initial email block content in plugins/woocommerce/templates/emails/block.
 	 *
 	 * @param \WC_Email $email The email object.
 	 * @return string The email template.

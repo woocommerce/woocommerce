@@ -9,7 +9,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
-use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -161,6 +161,6 @@ class Integration {
 			return;
 		}
 
-		WCEmailTemplateManager::get_instance()->delete_email_template( $email_type );
+		WCTransactionalEmailPostsManager::get_instance()->delete_email_template( $email_type );
 	}
 }

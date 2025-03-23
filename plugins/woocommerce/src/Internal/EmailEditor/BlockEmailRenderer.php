@@ -8,7 +8,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer as EmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Renderer\Blocks\WooContent;
-use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 /**
  * Class responsible for rendering block-based emails.
  */
@@ -41,7 +41,7 @@ class BlockEmailRenderer {
 	/**
 	 * WooCommerce Email Template Manager instance.
 	 *
-	 * @var WCEmailTemplateManager
+	 * @var WCTransactionalEmailPostsManager
 	 */
 	private $template_manager;
 
@@ -52,7 +52,7 @@ class BlockEmailRenderer {
 		$editor_container       = Email_Editor_Container::container();
 		$this->renderer         = $editor_container->get( EmailRenderer::class );
 		$this->personalizer     = $editor_container->get( Personalizer::class );
-		$this->template_manager = WCEmailTemplateManager::get_instance();
+		$this->template_manager = WCTransactionalEmailPostsManager::get_instance();
 	}
 
 	/**

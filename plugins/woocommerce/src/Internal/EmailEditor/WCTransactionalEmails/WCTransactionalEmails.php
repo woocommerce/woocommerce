@@ -33,6 +33,22 @@ class WCTransactionalEmails {
 	);
 
 	/**
+	 * Email template generator instance.
+	 *
+	 * @var WCTransactionalEmailPostsGenerator
+	 */
+	private $email_template_generator;
+
+	/**
+	 * Constructor.
+	 *
+	 * Initializes the WCTransactionalEmailPostsGenerator by setting up the template generator.
+	 */
+	public function __construct() {
+		$this->email_template_generator = new WCTransactionalEmailPostsGenerator();
+	}
+
+	/**
 	 * Initialize the class.
 	 *
 	 * @internal
@@ -53,8 +69,7 @@ class WCTransactionalEmails {
 			&& 'email' === $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $is_wc_email_settings_page ) {
-			$email_template_generator = new WCEmailTemplateGenerator();
-			$email_template_generator->init();
+			$this->email_template_generator->init();
 		}
 	}
 }
