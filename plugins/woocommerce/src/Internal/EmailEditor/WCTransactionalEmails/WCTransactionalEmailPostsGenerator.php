@@ -32,6 +32,13 @@ class WCTransactionalEmailPostsGenerator {
 	private $default_templates = array();
 
 	/**
+	 * Transient name.
+	 *
+	 * @var string
+	 */
+	private $transient_name = 'wc_email_editor_initial_templates_generated';
+
+	/**
 	 * Constructor.
 	 *
 	 * Initializes the WCTransactionalEmailPostsGenerator by setting up the template manager.
@@ -49,6 +56,11 @@ class WCTransactionalEmailPostsGenerator {
 	 * @internal
 	 */
 	final public function init() {
+		if ( WOOCOMMERCE_VERSION === get_transient( $this->transient_name ) ) {
+			// if templates are already generated, we don't need to run this function again.
+			return true;
+		}
+
 		$this->init_default_templates();
 		$this->generate_initial_email_templates();
 	}
@@ -60,7 +72,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * It fetches all the emails from WooCommerce and filters them to include only the core transactional emails.
 	 */
 	private function init_default_templates() {
-		$core_transactional_emails = WCTransactionalEmails::$core_transactional_emails;
+		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
 
 		$wc_emails   = \WC_Emails::instance();
 		$email_types = $wc_emails->get_emails();
@@ -80,6 +92,7 @@ class WCTransactionalEmailPostsGenerator {
 					'title'   => $email->title,
 					'content' => $this->get_email_template( $email ),
 					'enabled' => $email->is_enabled(),
+					'manual'  => $email->is_manual(),
 				);
 				return $acc;
 			},
@@ -116,15 +129,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * @return bool True if the templates are generated, false otherwise.
 	 */
 	public function generate_initial_email_templates() {
-
-		$transient_name = 'wc_email_editor_initial_templates_generated';
-
-		if ( WOOCOMMERCE_VERSION === get_transient( $transient_name ) ) {
-			// if templates are already generated, we don't need to run this function again.
-			return true;
-		}
-
-		$core_transactional_emails = WCTransactionalEmails::$core_transactional_emails;
+		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
 
 		$templates_to_generate = array();
 		foreach ( $core_transactional_emails as $email_type ) {
@@ -133,11 +138,17 @@ class WCTransactionalEmailPostsGenerator {
 			}
 		}
 
-		if ( ! empty( $templates_to_generate ) ) {
-			return $this->generate_email_templates( $templates_to_generate );
+		if ( empty( $templates_to_generate ) ) {
+			return;
 		}
 
-		set_transient( $transient_name, WOOCOMMERCE_VERSION, MONTH_IN_SECONDS );
+		$result = $this->generate_email_templates( $templates_to_generate );
+
+		if ( is_wp_error( $result ) ) {
+			return false;
+		}
+
+		set_transient( $this->transient_name, WOOCOMMERCE_VERSION, MONTH_IN_SECONDS );
 		return true;
 	}
 
@@ -208,14 +219,16 @@ class WCTransactionalEmailPostsGenerator {
 	 * @throws \Exception When post creation fails.
 	 */
 	private function generate_single_template( $email_type, $template_data ) {
+		$email_enabled = $template_data['enabled'] || $template_data['manual'];
+
 		$post_data = array(
 			'post_type'    => Integration::EMAIL_POST_TYPE,
-			'post_status'  => $template_data['enabled'] ? 'publish' : 'draft',
+			'post_status'  => $email_enabled ? 'publish' : 'draft',
 			'post_name'    => $email_type,
 			'post_title'   => $template_data['title'],
 			'post_content' => $template_data['content'],
 			'meta_input'   => array(
-				'_wc_email_enabled' => $template_data['enabled'],
+				'_wc_email_enabled' => $email_enabled,
 				'_wc_email_type'    => $email_type,
 				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
 			),

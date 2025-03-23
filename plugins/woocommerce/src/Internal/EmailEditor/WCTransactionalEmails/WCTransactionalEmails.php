@@ -54,22 +54,48 @@ class WCTransactionalEmails {
 	 * @internal
 	 */
 	final public function init() {
-		$this->init_email_templates();
+		add_action( 'current_screen', array( $this, 'init_email_templates' ), 50 );
 	}
 
 	/**
-	 * Initialize email templates based on the current page context.
+	 * Get the Core WooCommerce transactional emails for the block editor.
+	 *
+	 * @return array
+	 */
+	public static function get_transactional_emails() {
+		/**
+		 * Filter the transactional emails for the block editor.
+		 *
+		 * @param array $transactional_emails The transactional emails.
+		 * @return array
+		 * @since 9.9.0
+		 */
+		return apply_filters( 'woocommerce_transactional_emails_for_block_editor', self::$core_transactional_emails );
+	}
+
+	/**
+	 * Initialize email templates on WooCommerce admin pages.
 	 */
 	public function init_email_templates() {
-		if ( ! isset( $_GET['page'], $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! function_exists( 'wc_get_screen_ids' ) ) {
 			return;
 		}
 
-		$is_wc_email_settings_page = 'wc-settings' === $_GET['page'] // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& 'email' === $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$screen = get_current_screen();
 
-		if ( $is_wc_email_settings_page ) {
-			$this->email_template_generator->init();
+		$wc_screen_ids = array_merge(
+			wc_get_screen_ids(),
+			array(
+				'woocommerce_page_wc-admin',
+				'edit-woo_email',
+			)
+		);
+
+		if ( ! $screen || ! in_array( $screen->id, $wc_screen_ids, true ) ) {
+			return;
 		}
+
+		// run only on WooCommerce admin pages.
+		$this->email_template_generator->init();
 	}
 }
