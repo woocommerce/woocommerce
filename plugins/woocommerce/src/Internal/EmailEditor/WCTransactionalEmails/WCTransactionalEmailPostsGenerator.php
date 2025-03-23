@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Class WCTransactionalEmailPostsGenerator
@@ -109,15 +110,41 @@ class WCTransactionalEmailPostsGenerator {
 	 * @return string The email template.
 	 */
 	public function get_email_template( $email ) {
-		return wc_get_template_html(
-			str_replace( 'plain', 'block', $email->template_plain ),
-			array(
-				'order'         => $email->object,
-				'sent_to_admin' => true,
-				'plain_text'    => false,
-				'email'         => $email,
-			)
-		);
+		$template_name = str_replace( 'plain', 'block', $email->template_plain );
+
+		try {
+			$template_html = wc_get_template_html(
+				$template_name,
+				array(
+					'order'         => $email->object,
+					'sent_to_admin' => true,
+					'plain_text'    => false,
+					'email'         => $email,
+				)
+			);
+		} catch ( \Exception $e ) {
+			$template_html = '';
+		}
+
+		$has_template_error =
+			StringUtil::contains( $template_html, 'No such file or directory', false ) ||
+			StringUtil::contains( $template_html, 'Failed to open stream', false ) ||
+			StringUtil::contains( $template_html, 'Warning: include', false );
+
+		if ( is_wp_error( $template_html ) || empty( $template_html ) || $has_template_error ) {
+			$default_template_name = 'emails/block/default-block-content.php';
+			$template_html         = wc_get_template_html(
+				$default_template_name,
+				array(
+					'order'         => $email->object,
+					'sent_to_admin' => true,
+					'plain_text'    => false,
+					'email'         => $email,
+				)
+			);
+		}
+
+		return $template_html;
 	}
 
 	/**
