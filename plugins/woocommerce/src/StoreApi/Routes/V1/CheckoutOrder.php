@@ -137,7 +137,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		 *
 		 * This logic ensures the order is valid before payment is attempted.
 		 */
-		$this->order_controller->validate_order_before_payment( $this->order );
+		$this->order_controller->validate_existing_order_before_payment( $this->order );
 
 		/**
 		 * Fires before an order is processed by the Checkout Block/Store API.
@@ -175,6 +175,16 @@ class CheckoutOrder extends AbstractCartRoute {
 			],
 			$request
 		);
+	}
+
+	/**
+	 * Since this endpoint only operates on existing orders, we don't need to do updates based on
+	 * the cart data.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	protected function cart_updated( \WP_REST_Request $request ) {
+		return;
 	}
 
 	/**

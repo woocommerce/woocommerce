@@ -171,7 +171,26 @@ class OrderController {
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
 		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
-		$this->validate_addresses( $order );
+		$this->validate_addresses( $order, $needs_shipping );
+	}
+
+	/**
+	 * Final validation for existing orders, ran before payment is taken.
+	 *
+	 * By this point we have an order populated with customer data and items.
+	 *
+	 * Since the cart is not involved, we don't validate shipping methods and assume the order already
+	 * contains the correct shipping items.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 * @param \WC_Order $order Order object.
+	 */
+	public function validate_existing_order_before_payment( \WC_Order $order ) {
+		$needs_shipping = $order->needs_shipping();
+
+		$this->validate_coupons( $order, true );
+		$this->validate_email( $order );
+		$this->validate_addresses( $order, $needs_shipping );
 	}
 
 	/**
@@ -189,8 +208,9 @@ class OrderController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
+	 * @param bool $use_order_data Whether to use order data or cart data.
 	 */
-	protected function validate_coupons( \WC_Order $order ) {
+	protected function validate_coupons( \WC_Order $order, bool $use_order_data = false ) {
 		$coupon_codes  = $order->get_coupon_codes();
 		$coupons       = array_filter( array_map( array( $this, 'get_coupon' ), $coupon_codes ) );
 		$validators    = array( 'validate_coupon_email_restriction', 'validate_coupon_usage_limit' );
@@ -212,15 +232,24 @@ class OrderController {
 
 		if ( $coupon_errors ) {
 			// Remove all coupons that were not valid.
-			foreach ( $coupon_errors as $coupon_code => $message ) {
-				wc()->cart->remove_coupon( $coupon_code );
+			if ( $use_order_data ) {
+				foreach ( $coupon_errors as $coupon_code => $message ) {
+					$order->remove_coupon( $coupon_code );
+				}
+
+				// Recalculate totals.
+				$order->calculate_totals();
+			} else {
+				foreach ( $coupon_errors as $coupon_code => $message ) {
+					wc()->cart->remove_coupon( $coupon_code );
+				}
+
+				// Recalculate totals.
+				wc()->cart->calculate_totals();
+
+				// Re-sync order with cart.
+				$this->update_order_from_cart( $order );
 			}
-
-			// Recalculate totals.
-			wc()->cart->calculate_totals();
-
-			// Re-sync order with cart.
-			$this->update_order_from_cart( $order );
 
 			// Return exception so customer can review before payment.
 			if ( 1 === count( $coupon_errors ) ) {
@@ -290,9 +319,8 @@ class OrderController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
 	 */
-	protected function validate_addresses( \WC_Order $order ) {
+	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
 		$errors           = new \WP_Error();
-		$needs_shipping   = wc()->cart->needs_shipping();
 		$billing_country  = $order->get_billing_country();
 		$shipping_country = $order->get_shipping_country();
 

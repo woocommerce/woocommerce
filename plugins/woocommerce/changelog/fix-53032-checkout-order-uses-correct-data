@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Store API: Use the order data instead of cart data for validation in checkout order requests. Avoid modifying the cart data.
