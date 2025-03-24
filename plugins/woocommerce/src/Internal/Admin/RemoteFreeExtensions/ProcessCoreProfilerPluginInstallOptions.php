@@ -84,7 +84,7 @@ class ProcessCoreProfilerPluginInstallOptions {
 			'autoload'    => false,
 		);
 
-		$options = $install_option->options ?? new \stdClass();
+		$options = $install_option->options ? (object) $install_option->options : new \stdClass();
 		foreach ( $default_options as $key => $value ) {
 			if ( ! isset( $options->$key ) ) {
 				$options->$key = $value;
