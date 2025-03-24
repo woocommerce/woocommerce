@@ -5,13 +5,14 @@
 import { View } from '@wordpress/dataviews/wp';
 import { Post, useEntityRecords } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, select, subscribe } from '@wordpress/data';
 import { settingsStore } from '@woocommerce/data';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { EmailType } from './settings-email-listing-slotfill';
+import { EmailType, EmailStatus } from './settings-email-listing-slotfill';
 
 /**
  * Hook providing transactional emails enriched by woo_email post data for DataViews component.
@@ -20,8 +21,10 @@ export const useTransactionalEmails = (
 	emailTypes: EmailType[],
 	view: View
 ) => {
+	const [ emailTypesData, setEmailTypesData ] =
+		useState< EmailType[] >( emailTypes );
 	const postIdsMap = new Map< string, string >();
-	emailTypes.forEach( ( emailType ) => {
+	emailTypesData.forEach( ( emailType: EmailType ) => {
 		postIdsMap.set( emailType.id, emailType.post_id );
 	} );
 
@@ -30,39 +33,23 @@ export const useTransactionalEmails = (
 		include: validPostIds.join( ',' ),
 		per_page: -1,
 		status: 'any',
-	} );
+	} ) as { records: Post[] };
 
-	// Fetch email settings from the DB to get fresh statuses
-	const { emailSettings } = useSelect( ( select ) => {
-		const getSettings = select( settingsStore ).getSettings;
-		return {
-			emailSettings: emailTypes.reduce( ( acc, type ) => {
-				const settingsId = `email_${ type.id }`;
-				return {
-					...acc,
-					[ type.id ]: getSettings( settingsId ),
-				};
-			}, {} ),
-		};
-	}, [] );
+	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 
-	const emails = emailTypes.map( ( emailType ) => {
+	const emails = emailTypesData.map( ( emailType: EmailType ) => {
 		const postId = postIdsMap.get( emailType.id ) || '';
 		const post: Post | null = emailPosts.records?.find(
-			( p ) => parseInt( p.id ) === parseInt( postId )
+			( p ) => p.id === parseInt( postId )
 		) as Post | null;
 		let status = emailType.enabled ? 'enabled' : 'disabled';
-		if ( emailSettings[ emailType.id ]?.enabled === 'yes' ) {
-			status = 'enabled';
-		} else if ( emailSettings[ emailType.id ].enabled === 'no' ) {
-			status = 'disabled';
-		} else if ( emailType.manual ) {
+		if ( emailType.manual ) {
 			status = 'manual';
 		}
 		return {
 			...emailType,
 			link: post?.link || '',
-			status,
+			status: status as EmailStatus,
 		};
 	} );
 
@@ -71,7 +58,12 @@ export const useTransactionalEmails = (
 	if ( view.sort ) {
 		sortedEmails = sortedEmails.sort( ( a, b ) => {
 			const field = view.sort.field as keyof EmailType;
-			if ( a[ field ] === undefined || b[ field ] === undefined ) {
+			if (
+				a[ field ] === undefined ||
+				b[ field ] === undefined ||
+				typeof a[ field ] !== 'string' ||
+				typeof b[ field ] !== 'string'
+			) {
 				return 0;
 			}
 			const direction = view.sort.direction === 'asc' ? 1 : -1;
@@ -104,8 +96,65 @@ export const useTransactionalEmails = (
 	const endIndex = startIndex + view.perPage;
 	const renderedEmails = filteredEmails.slice( startIndex, endIndex );
 
+	const updateEmailEnabledStatus = async (
+		emailId: string,
+		value: boolean
+	) => {
+		const enabled = value ? 'yes' : 'no';
+		const settingsGroup = `email_${ emailId }`;
+		try {
+			// The email settings has to be stored in DB complete.
+			// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
+			if (
+				! select( settingsStore ).hasFinishedResolution(
+					'getSettings',
+					[ settingsGroup ]
+				)
+			) {
+				await select( settingsStore ).getSettings( settingsGroup );
+				await new Promise( ( resolve ) => {
+					const unsubscribe = subscribe( () => {
+						const finished = select(
+							settingsStore
+						).hasFinishedResolution( 'getSettings', [
+							settingsGroup,
+						] );
+						if ( finished ) {
+							unsubscribe();
+							resolve( true );
+						}
+					} );
+				} );
+			}
+
+			// Now we can fetch the old settings and update the settings
+			const currentSettings = await select( settingsStore ).getSettings(
+				settingsGroup
+			);
+			const updatedSettings = { ...currentSettings } as { [ key: string ]: { [ key: string ]: unknown } };
+			updatedSettings[ settingsGroup ].enabled = enabled;
+			await updateAndPersistSettingsForGroup(
+				settingsGroup,
+				updatedSettings
+			);
+
+			// Apply change in local state to update UI
+			const updatedEmailTypesData = [ ...emailTypesData ];
+			const emailIndex = updatedEmailTypesData.findIndex(
+				( email ) => email.id === emailId
+			);
+			if ( emailIndex !== -1 ) {
+				updatedEmailTypesData[ emailIndex ].enabled = value;
+				setEmailTypesData( updatedEmailTypesData );
+			}
+		} catch ( error ) {
+			console.error( error );
+		}
+	};
+
 	return {
 		emails: renderedEmails,
 		total: filteredEmails.length,
+		updateEmailEnabledStatus,
 	};
 };

@@ -31,7 +31,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		layout: {},
 	} );
 
-	const { emails, total } = useTransactionalEmails( emailTypes, view );
+	const { emails, total, updateEmailEnabledStatus } = useTransactionalEmails( emailTypes, view );
 
 	const fields = [
 		{
@@ -117,11 +117,10 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					? __( 'Disable email', 'woocommerce' )
 					: __( 'Enable email', 'woocommerce' ),
 			supportsBulk: false,
-			disabled: true,
 			isEligible: ( item: EmailType ) =>
 				item.status === 'enabled' || item.status === 'disabled',
 			callback: ( items: EmailType[] ) => {
-				return true; // TODO: Implement changing status
+				updateEmailEnabledStatus( items[ 0 ].id, !items[ 0 ].enabled );
 			},
 		},
 	];

@@ -16,6 +16,8 @@ export type Recipients = {
 	bcc: string;
 };
 
+export type EmailStatus = 'enabled' | 'disabled' | 'manual';
+
 export type EmailType = {
 	title: string;
 	description: string;
@@ -25,6 +27,7 @@ export type EmailType = {
 	enabled: boolean;
 	manual: boolean;
 	link?: string;
+	status?: EmailStatus;
 };
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
