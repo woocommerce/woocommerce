@@ -13,9 +13,7 @@ const {
 	currencies,
 	stateOptions,
 } = require( '../../../data/settings' );
-const {
-	setNewPaymentsSettingsPage,
-} = require( '../../../utils/payments-settings' );
+const { resetGatewayOrder } = require( '../../../utils/payments-settings' );
 
 const enableEmailImprovementsFeature = async () => {
 	await setOption(
@@ -38,7 +36,7 @@ const disableEmailImprovementsFeature = async () => {
 test.describe( 'Settings API tests: CRUD', () => {
 	test.describe( 'List all settings groups', () => {
 		test.beforeAll( async () => {
-			await setNewPaymentsSettingsPage( { BASE_URL, enabled: 'no' } );
+			await resetGatewayOrder( BASE_URL );
 			await disableEmailImprovementsFeature();
 		} );
 		test( 'can retrieve all settings groups', async ( { request } ) => {

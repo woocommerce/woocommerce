@@ -14,6 +14,20 @@ const setNewPaymentsSettingsPage = async ( { baseURL, enabled } ) => {
 	}
 };
 
+const resetGatewayOrder = async ( baseURL ) => {
+	try {
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_feature_reactify-classic-payments-settings',
+			''
+		);
+	} catch ( error ) {
+		console.log( error );
+	}
+};
+
 module.exports = {
 	setNewPaymentsSettingsPage,
+	resetGatewayOrder,
 };
