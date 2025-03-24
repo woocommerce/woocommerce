@@ -8,8 +8,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
-use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsDataSourcePoller;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
@@ -41,8 +39,6 @@ use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooCommerceSubscriptions;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init;
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\ProcessCoreProfilerPluginInstallOptions;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
