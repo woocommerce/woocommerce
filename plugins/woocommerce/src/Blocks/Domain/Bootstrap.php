@@ -163,13 +163,13 @@ class Bootstrap {
 		if ( ! $is_store_api_request ) {
 			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
 			// regular rest requests to maintain compatibility with the store editor.
+			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
 
 			if ( is_admin() || $is_rest ) {
 				$this->container->get( AIPatterns::class );
-				$this->container->get( BlockPatterns::class );
 				$this->container->get( PTKPatternsStore::class );
 			}
 
