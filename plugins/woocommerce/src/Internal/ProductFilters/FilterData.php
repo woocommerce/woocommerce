@@ -138,7 +138,7 @@ class FilterData {
 			 * We're using the query as is, same as Core does.
 			 */
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$result = $wpdb->get_row( $stock_status_count_sql );
+			$result                         = $wpdb->get_row( $stock_status_count_sql );
 			$stock_status_counts[ $status ] = $result->status_count;
 		}
 
