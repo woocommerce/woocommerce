@@ -131,4 +131,36 @@ class ProcessCoreProfilerPluginInstallOptionsTest extends WC_Unit_Test_Case {
 		// The value should not change.
 		$this->assertEquals( 'new-value', get_option( 'test-option' ) );
 	}
+
+	/**
+	 * Test that disallowed options are not added and an error is logged.
+	 *
+	 * @return void
+	 */
+	public function test_disallowed_option_is_not_added_and_logs_error() {
+		$disallowed_option = 'siteurl';
+		$option_value = 'should-not-be-added';
+
+		$logger = Mockery::mock( \WC_Logger_Interface::class );
+		$logger->shouldReceive( 'error' )
+				->once()
+				->with( 'Disallowed option: ' . $disallowed_option );
+
+		$plugins = array(
+			(object) array(
+				'key'             => 'test-plugin',
+				'install_options' => array(
+					(object) array(
+						'name'  => $disallowed_option,
+						'value' => $option_value,
+					),
+				),
+			),
+		);
+
+		$instance = new ProcessCoreProfilerPluginInstallOptions( $plugins, 'test-plugin', $logger );
+		$instance->process_install_options();
+
+		$this->assertNotEquals( $option_value, get_option( $disallowed_option ) );
+	}
 }
