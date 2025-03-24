@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, useContext, useEffect } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useSelect, dispatch } from '@wordpress/data';
 import { SnackbarList } from '@wordpress/components';
 import { store as noticesStore } from '@wordpress/notices';
 import { RouterProvider } from '@automattic/site-admin';
