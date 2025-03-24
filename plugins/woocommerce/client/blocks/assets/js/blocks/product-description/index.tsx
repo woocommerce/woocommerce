@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import { registerProductBlockType } from '@woocommerce/atomic-utils';
 
 /**
@@ -17,8 +16,6 @@ const blockConfig = {
 	edit,
 };
 
-if ( isExperimentalBlocksEnabled() ) {
-	registerProductBlockType( blockConfig, {
-		isAvailableOnPostEditor: true,
-	} );
-}
+registerProductBlockType( blockConfig, {
+	isAvailableOnPostEditor: true,
+} );
