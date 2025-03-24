@@ -394,7 +394,7 @@ class FeaturesController {
 					'is_experimental'    => false,
 				),
 				'reactify-classic-payments-settings' => array(
-					'name'               => __( 'Payment Settings (beta)', 'woocommerce' ),
+					'name'               => __( 'Payments Settings (beta)', 'woocommerce' ),
 					'description'        => __(
 						'Enable the new payments settings experience',
 						'woocommerce'

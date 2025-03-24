@@ -141,7 +141,7 @@ function api_delete_option( WP_REST_Request $request ) {
 
 	$option_exists = get_option( $option_name, null );
 
-	if ( ! $option_exists ) {
+	if ( null === $option_exists ) {
 		return new WP_REST_Response( 'Option ' . $option_name . ' does not exist.', 200 );
 	}
 
