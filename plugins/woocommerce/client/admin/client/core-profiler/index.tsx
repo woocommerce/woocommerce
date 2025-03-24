@@ -1274,7 +1274,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										src: 'getGeolocation',
 										onDone: {
 											target: 'done',
-											actions: [ 'handleGeolocation' ],
+											actions: 'handleGeolocation',
 										},
 										onError: {
 											target: 'done',
@@ -1292,7 +1292,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										src: 'getCountries',
 										onDone: [
 											{
-												actions: [ 'handleCountries' ],
+												actions: 'handleCountries',
 												target: 'done',
 											},
 										],
