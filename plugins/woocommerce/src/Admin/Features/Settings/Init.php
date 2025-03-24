@@ -41,6 +41,7 @@ class Init {
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_settings_editor_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_settings_editor_styles' ) );
+		add_action( 'woocommerce_navigation_is_connected_page', array( $this, 'disable_embed_if_woocommerce_settings_page' ) );
 	}
 
 	/**
@@ -51,6 +52,20 @@ class Init {
 	public function is_settings_page() {
 		$screen = get_current_screen();
 		return $screen && 'woocommerce_page_wc-settings' === $screen->id;
+	}
+
+	/**
+	 * Turn off the embed page if the current page is the WooCommerce settings page.
+	 *
+	 * @param bool $is_connected_page Whether the current page is a connected page.
+	 * @return bool
+	 */
+	public function disable_embed_if_woocommerce_settings_page( $is_connected_page ) {
+		if ( self::get_instance()->is_settings_page() ) {
+			return false;
+		}
+
+		return $is_connected_page;
 	}
 
 	/**
@@ -70,7 +85,9 @@ class Init {
 		wp_register_style(
 			$style_name,
 			WCAdminAssets::get_url( $style_path_name . '/style', 'css' ),
-			isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),
+			// Manually set dependencies for now, because the asset file is not being generated correctly.
+			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php.
+			array( 'wp-components' ), // isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),.
 			WCAdminAssets::get_file_version( 'css', $style_assets['version'] ),
 		);
 
@@ -80,27 +97,7 @@ class Init {
 		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
 		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
 		wp_enqueue_style( 'wc-global-presets' );
-
-		// Gutenberg posts editor styles.
-		if ( function_exists( 'gutenberg_url' ) ) {
-			// phpcs:disable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_style(
-				'wp-gutenberg-posts-dashboard',
-				gutenberg_url( 'build/edit-site/posts.css', __FILE__ ),
-				array( 'wp-components' ),
-			);
-			// phpcs:enable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'wp-gutenberg-posts-dashboard' );
-
-			// phpcs:disable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_style(
-				'wp-gutenberg-edit-site',
-				gutenberg_url( 'build/edit-site/style.css', __FILE__ ),
-				array( 'wp-components' ),
-			);
-			// phpcs:enable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'wp-gutenberg-edit-site' );
-		}
+		WCAdminAssets::register_style( 'settings-embed', 'style', array( 'wp-components' ) );
 	}
 
 	/**
@@ -123,12 +120,13 @@ class Init {
 		wp_enqueue_script(
 			$script_name,
 			WCAdminAssets::get_url( $script_path_name . '/index', 'js' ),
-			array_merge( array( 'wp-edit-site' ), $script_assets['dependencies'] ),
+			$script_assets['dependencies'],
 			WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
 			true
 		);
 
 		wp_set_script_translations( 'wc-admin-' . $script_name, 'woocommerce' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'settings-embed', true );
 	}
 
 	/**

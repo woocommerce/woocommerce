@@ -3,23 +3,18 @@
 body.woocommerce_page_wc-settings {
 	#wpcontent {
 		margin-left: 0 !important;
+		padding-left: 0 !important;
 	}
-	#wpadminbar {
-		display: none;
-	}
-
+	#wpadminbar,
 	#adminmenumain,
-	#woocommerce-embedded-root {
+	#screen-meta-links,
+	#wpfooter {
 		display: none;
-	}
-
-	#wpbody {
-		background: #1d2327;
 	}
 
 	#wc-settings-page {
 		// Because this uses negative margins, we have to compensate for the height.
-		margin-top: -46px;
+		margin-top: -32px;
 		min-height: 100vh;
 		position: absolute;
 		top: 0;
@@ -28,26 +23,73 @@ body.woocommerce_page_wc-settings {
 		left: 0;
 		display: flex !important;
 
-		.edit-site-layout {
-			background: #1e1e1e;
+		.woocommerce-site-layout {
+			height: 100%;
+			background: $gray-900;
+			color: $gray-400;
+			display: flex;
+			flex-direction: column;
 			flex: 1 1 0;
 			min-height: 100%;
 			height: auto;
 		}
 	}
 
-	.edit-site-layout__area {
-		background: #fff;
-		color: #1e1e1e;
-	}
-
-	.edit-site-site-hub_toggle-command-center {
+	.notice {
 		display: none;
 	}
 
-	@media (min-width: 782px) {
-		.edit-site-layout__area {
+	.woocommerce-site-layout__area {
+		background: #fff;
+		color: #1e1e1e;
+		flex-grow: 1;
+		margin: 0;
+
+		@media (min-width: 782px) {
 			border-radius: 8px;
+			margin: 16px 16px 16px 0;
+		}
+	}
+
+	.woocommerce-site-layout__content {
+		height: 100%;
+		flex-grow: 1;
+		display: flex;
+	}
+
+	.woocommerce-site-layout__sidebar {
+		width: 300px;
+		flex-shrink: 0;
+	}
+
+	.woocommerce-site-page-header {
+		padding: $grid-unit-20 $grid-unit-60;
+		border-bottom: 1px solid $gray-100;
+		background: $white;
+		position: sticky;
+		top: 0;
+		z-index: z-index(".edit-site-page-header");
+
+		@media not (prefers-reduced-motion) {
+			transition: padding ease-out 0.1s;
+		}
+
+		.components-heading {
+			color: $gray-900;
+		}
+
+		.edit-site-page-header__page-title {
+			min-height: $grid-unit-50;
+
+			.components-heading {
+				flex-grow: 1;
+				flex-basis: 0;
+				white-space: nowrap;
+			}
+		}
+
+		.edit-site-page-header__sub-title {
+			margin-bottom: $grid-unit-10;
 		}
 	}
 }
