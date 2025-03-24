@@ -167,10 +167,13 @@ class Bootstrap {
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
 
-			if ( is_admin() ) {
+			if ( is_admin() || $is_rest ) {
 				$this->container->get( AIPatterns::class );
 				$this->container->get( BlockPatterns::class );
 				$this->container->get( PTKPatternsStore::class );
+			}
+
+			if ( is_admin() ) {
 				$this->container->get( TemplateOptions::class )->init();
 			}
 		}
