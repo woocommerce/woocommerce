@@ -35,18 +35,20 @@ export const MOXStep: React.FC = () => {
 		<>
 			<WooPaymentsStepHeader onClose={ () => {} } />
 
-            <OnboardingContextProvider initialData={ initialData }>
-                <Stepper onStepChange={ handleStepChange } onExit={ () => {} }>
-                    <Step name="business">
-                        <OnboardingForm>
-                            <BusinessDetails />
-                        </OnboardingForm>
-                    </Step>
-                    <Step name="embedded" showHeading={ false }>
-                        <EmbeddedKyc />
-                    </Step>
-                </Stepper>
-			</OnboardingContextProvider>
+            <div className="settings-payments-onboarding-modal__step-mox-content">
+                <OnboardingContextProvider initialData={ initialData }>
+                    <Stepper onStepChange={ handleStepChange } onExit={ () => {} }>
+                        <Step name="business">
+                            <OnboardingForm>
+                                <BusinessDetails />
+                            </OnboardingForm>
+                        </Step>
+                        <Step name="embedded" showHeading={ false }>
+                            <EmbeddedKyc />
+                        </Step>
+                    </Stepper>
+                </OnboardingContextProvider>
+            </div>
 		</>
 	);
 };

@@ -142,7 +142,7 @@ const BusinessDetails: React.FC = () => {
 							name="go_live_timeframe"
 							options={ goLiveTimeframes }
 						/>
-						<span className={ 'wcpay-onboarding__tos' }>
+						<span className={ 'woopayments-onboarding__tos' }>
 							{ strings.tos }
 						</span>
 					</>
