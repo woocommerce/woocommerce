@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
 import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -78,11 +79,12 @@ export default function PaymentMethodsSelection() {
 													?.href;
 											// Send POST request to the href with the payment methods state
 											if ( href ) {
-												fetch( href, {
+												apiFetch( {
+													url: href,
 													method: 'POST',
-													body: JSON.stringify( {
+													data: {
 														payment_methods: state,
-													} ),
+													},
 												} );
 											}
 										} }
@@ -119,7 +121,8 @@ export default function PaymentMethodsSelection() {
 						onClick={ () => {
 							const href = currentStep?.actions?.complete?.href;
 							if ( href ) {
-								fetch( href, {
+								apiFetch( {
+									url: href,
 									method: 'POST',
 								} );
 
