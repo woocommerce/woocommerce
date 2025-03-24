@@ -50,7 +50,7 @@ const test = baseTest.extend( {
 
 		// Make sure the new Payments settings page feature is not enabled.
 		await wcAdminApi.put( 'options', {
-			'woocommerce_feature_reactify-classic-payments-settings': 'no',
+			'woocommerce_feature_reactify-classic-payments-settings_enabled': 'no',
 		} );
 	},
 } );

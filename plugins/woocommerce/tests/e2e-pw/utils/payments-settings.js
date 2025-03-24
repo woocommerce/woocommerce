@@ -6,7 +6,7 @@ const setNewPaymentsSettingsPage = async ( { baseURL, enabled } ) => {
 		await setOption(
 			request,
 			baseURL,
-			'woocommerce_feature_reactify-classic-payments-settings',
+			'woocommerce_feature_reactify-classic-payments-settings_enabled',
 			enabled
 		);
 	} catch ( error ) {
