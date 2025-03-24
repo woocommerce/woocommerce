@@ -37,6 +37,15 @@ if ( ! $tab_exists ) {
 
 $hide_nav = Features::is_enabled( 'reactify-classic-payments-settings' ) &&
 	( 'checkout' === $current_tab && 'offline' === $current_section );
+
+// Move 'Advanced' to the last.
+if ( array_key_exists( 'advanced', $tabs ) ) {
+	$advanced = $tabs['advanced'];
+	unset( $tabs['advanced'] );
+	// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	$tabs['advanced'] = $advanced;
+}
+
 ?>
 
 <div class="wrap woocommerce">

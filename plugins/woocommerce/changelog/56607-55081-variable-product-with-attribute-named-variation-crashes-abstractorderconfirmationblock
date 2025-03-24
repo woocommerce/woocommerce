@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix get_permalink method logic in WC_Product_Variation.

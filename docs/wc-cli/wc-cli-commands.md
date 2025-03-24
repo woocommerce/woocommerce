@@ -8,7 +8,7 @@ tags: reference
 
 This document serves as a comprehensive reference for the WooCommerce Command Line Interface (WC-CLI) commands. It includes syntax, options, and brief descriptions for each command. These commands are applicable for WooCommerce version 3.0.0 and later.
 
-### General Command Structure
+## General Command Structure
 
 The general syntax for WC-CLI commands is:
 
@@ -22,7 +22,7 @@ For detailed help on any specific command, use:
 wp wc [command] --help
 ```
 
-### Commands
+## Commands
 
 ### wc shop_coupon
 
