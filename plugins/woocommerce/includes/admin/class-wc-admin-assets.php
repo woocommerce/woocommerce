@@ -177,6 +177,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
 					'search_product_attributes_nonce' => wp_create_nonce( 'search-product-attributes' ),
 					'search_pages_nonce'              => wp_create_nonce( 'search-pages' ),
+					'search_order_metakeys_nonce'     => wp_create_nonce( 'search-order-metakeys' ),
 				)
 			);
 

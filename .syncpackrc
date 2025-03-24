@@ -83,37 +83,19 @@
 			]
 		},
 		{
+			"label": "Babel dependencies, must be aligned with versions in @wordpress/babel-preset-default package",
 			"dependencies": [
-				"@babel/preset-env"
-			],
-			"pinVersion": "^7.23.5",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@babel/preset-react"
-			],
-			"pinVersion": "7.23.3",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@babel/preset-typescript"
-			],
-			"pinVersion": "7.23.3",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
+				"@babel/core",
+				"@babel/cli",
+				"@babel/plugin-syntax-jsx",
+				"@babel/plugin-transform-react-jsx",
+				"@babel/plugin-transform-runtime",
+				"@babel/preset-env",
+				"@babel/preset-react",
+				"@babel/preset-typescript",
 				"@babel/runtime"
 			],
-			"pinVersion": "^7.23.5",
+			"pinVersion": "7.25.7",
 			"packages": [
 				"**"
 			]
