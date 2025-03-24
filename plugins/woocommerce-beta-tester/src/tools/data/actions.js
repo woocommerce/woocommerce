@@ -357,3 +357,26 @@ export function* resetLaunchYourStore() {
 		} );
 	} );
 }
+
+export function* loadTemplateVersion( params ) {
+	console.log( 'loadTemplateVersion', params );
+	if ( ! params || ! params.template_name || ! params.version ) {
+		yield updateMessage(
+			'Load Template Version',
+			'Please select a template and version',
+			'error'
+		);
+		return;
+	}
+
+	yield runCommand( 'Load Template Version', function* () {
+		yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/load-template-version`,
+			method: 'POST',
+			data: {
+				template_name: params.template_name,
+				version: params.version,
+			},
+		} );
+	} );
+}
