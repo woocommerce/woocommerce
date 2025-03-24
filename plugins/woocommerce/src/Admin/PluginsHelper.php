@@ -321,7 +321,7 @@ class PluginsHelper {
 			/**
 			 * Action triggered before a plugin is installed.
 			 *
-			 * @since 9.9
+			 * @since 9.8
 			 */
 			do_action( 'woocommerce_plugins_install_before', $slug, $source );
 
