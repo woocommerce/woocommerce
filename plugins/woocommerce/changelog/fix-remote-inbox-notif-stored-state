@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure Remote Inbox Notifications stored state is an object before attempting to use
