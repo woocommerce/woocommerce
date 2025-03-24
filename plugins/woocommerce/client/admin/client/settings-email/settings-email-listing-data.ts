@@ -7,7 +7,7 @@ import { Post, useEntityRecords } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select, subscribe } from '@wordpress/data';
 import { settingsStore } from '@woocommerce/data';
-import { useState } from '@wordpress/element';
+import { useState, useCallback, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -37,7 +37,7 @@ export const useTransactionalEmails = (
 
 	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 
-	const emails = emailTypesData.map( ( emailType: EmailType ) => {
+	const emails = useMemo( () => emailTypesData.map( ( emailType: EmailType ) => {
 		const postId = postIdsMap.get( emailType.id ) || '';
 		const post: Post | null = emailPosts.records?.find(
 			( p ) => p.id === parseInt( postId )
@@ -51,7 +51,7 @@ export const useTransactionalEmails = (
 			link: post?.link || '',
 			status: status as EmailStatus,
 		};
-	} );
+	}), [emailTypesData, emailPosts] );
 
 	// Apply Sort
 	let sortedEmails: EmailType[] = emails;
@@ -96,61 +96,63 @@ export const useTransactionalEmails = (
 	const endIndex = startIndex + view.perPage;
 	const renderedEmails = filteredEmails.slice( startIndex, endIndex );
 
-	const updateEmailEnabledStatus = async (
-		emailId: string,
-		value: boolean
-	) => {
-		const enabled = value ? 'yes' : 'no';
-		const settingsGroup = `email_${ emailId }`;
-		try {
-			// The email settings has to be stored in DB complete.
-			// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
-			if (
-				! select( settingsStore ).hasFinishedResolution(
-					'getSettings',
-					[ settingsGroup ]
-				)
-			) {
-				await select( settingsStore ).getSettings( settingsGroup );
-				await new Promise( ( resolve ) => {
-					const unsubscribe = subscribe( () => {
-						const finished = select(
-							settingsStore
-						).hasFinishedResolution( 'getSettings', [
-							settingsGroup,
-						] );
-						if ( finished ) {
-							unsubscribe();
-							resolve( true );
-						}
+	const updateEmailEnabledStatus = useCallback(
+		async ( emailId: string, value: boolean ) => {
+			const enabled = value ? 'yes' : 'no';
+			const settingsGroup = `email_${ emailId }`;
+			try {
+				// The email settings has to be stored in DB complete.
+				// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
+				if (
+					! select( settingsStore ).hasFinishedResolution(
+						'getSettings',
+						[ settingsGroup ]
+					)
+				) {
+					await select( settingsStore ).getSettings( settingsGroup );
+					await new Promise( ( resolve ) => {
+						const unsubscribe = subscribe( () => {
+							const finished = select(
+								settingsStore
+							).hasFinishedResolution( 'getSettings', [
+								settingsGroup,
+							] );
+							if ( finished ) {
+								unsubscribe();
+								resolve( true );
+							}
+						} );
 					} );
-				} );
-			}
+				}
 
-			// Now we can fetch the old settings and update the settings
-			const currentSettings = await select( settingsStore ).getSettings(
-				settingsGroup
-			);
-			const updatedSettings = { ...currentSettings } as { [ key: string ]: { [ key: string ]: unknown } };
-			updatedSettings[ settingsGroup ].enabled = enabled;
-			await updateAndPersistSettingsForGroup(
-				settingsGroup,
-				updatedSettings
-			);
+				// Now we can fetch the old settings and update the settings
+				const currentSettings = await select(
+					settingsStore
+				).getSettings( settingsGroup );
+				const updatedSettings = { ...currentSettings } as {
+					[ key: string ]: { [ key: string ]: unknown };
+				};
+				updatedSettings[ settingsGroup ].enabled = enabled;
+				await updateAndPersistSettingsForGroup(
+					settingsGroup,
+					updatedSettings
+				);
 
-			// Apply change in local state to update UI
-			const updatedEmailTypesData = [ ...emailTypesData ];
-			const emailIndex = updatedEmailTypesData.findIndex(
-				( email ) => email.id === emailId
-			);
-			if ( emailIndex !== -1 ) {
-				updatedEmailTypesData[ emailIndex ].enabled = value;
-				setEmailTypesData( updatedEmailTypesData );
+				// Apply change in local state to update UI
+				const updatedEmailTypesData = [ ...emailTypesData ];
+				const emailIndex = updatedEmailTypesData.findIndex(
+					( email ) => email.id === emailId
+				);
+				if ( emailIndex !== -1 ) {
+					updatedEmailTypesData[ emailIndex ].enabled = value;
+					setEmailTypesData( updatedEmailTypesData );
+				}
+			} catch ( error ) {
+				console.error( error );
 			}
-		} catch ( error ) {
-			console.error( error );
-		}
-	};
+		},
+		[ emailTypesData ]
+	);
 
 	return {
 		emails: renderedEmails,

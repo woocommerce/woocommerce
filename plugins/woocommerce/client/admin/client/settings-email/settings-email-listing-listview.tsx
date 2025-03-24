@@ -3,9 +3,8 @@
  */
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
 import { DataViews, View } from '@wordpress/dataviews/wp';
-import { Post, store as coreStore } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { Post } from '@wordpress/core-data';
+import { useState, useMemo } from '@wordpress/element';
 import { edit, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -31,99 +30,113 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		layout: {},
 	} );
 
-	const { emails, total, updateEmailEnabledStatus } = useTransactionalEmails( emailTypes, view );
+	const { emails, total, updateEmailEnabledStatus } = useTransactionalEmails(
+		emailTypes,
+		view
+	);
 
-	const fields = [
-		{
-			id: 'title',
-			label: __( 'Title', 'woocommerce' ),
-			enableHiding: false,
-			render: ( row: { item: EmailType } ) => {
-				return (
-					<div className="woocommerce-email-listing-title">
-						{ row.item.title }
-						<br />
-						<span className="woocommerce-email-listing-description">
-							{ row.item.description }
-						</span>
-					</div>
-				);
+	const fields = useMemo(
+		() => [
+			{
+				id: 'title',
+				label: __( 'Title', 'woocommerce' ),
+				enableHiding: false,
+				render: ( row: { item: EmailType } ) => {
+					return (
+						<div className="woocommerce-email-listing-title">
+							{ row.item.title }
+							<br />
+							<span className="woocommerce-email-listing-description">
+								{ row.item.description }
+							</span>
+						</div>
+					);
+				},
 			},
-		},
-		{
-			id: 'id',
-			label: 'Id',
-			enableHiding: false,
-		},
-		{
-			id: 'recipients',
-			label: __( 'Recipient(s)', 'woocommerce' ),
-			enableSorting: false,
-			enableHiding: false,
-			render: ( row: { item: EmailType } ) => {
-				return <RecipientsList recipients={ row.item.recipients } />;
+			{
+				id: 'id',
+				label: 'Id',
+				enableHiding: false,
 			},
-		},
-		{
-			id: 'status',
-			label: __( 'Status', 'woocommerce' ),
-			enableHiding: true,
-			filterBy: {
-				operators: [ 'isAny' ],
+			{
+				id: 'recipients',
+				label: __( 'Recipient(s)', 'woocommerce' ),
+				enableSorting: false,
+				enableHiding: false,
+				render: ( row: { item: EmailType } ) => {
+					return (
+						<RecipientsList recipients={ row.item.recipients } />
+					);
+				},
 			},
-			render: ( row: { item: EmailType } ) => {
-				return <Status slug={ row.item.status } />;
+			{
+				id: 'status',
+				label: __( 'Status', 'woocommerce' ),
+				enableHiding: true,
+				filterBy: {
+					operators: [ 'isAny' ],
+				},
+				render: ( row: { item: EmailType } ) => {
+					return <Status slug={ row.item.status } />;
+				},
+				elements: EMAIL_STATUSES,
 			},
-			elements: EMAIL_STATUSES,
-		},
-	];
+		],
+		[]
+	);
 
-	const actions = [
-		{
-			id: 'preview',
-			label: __( 'Preview', 'woocommerce' ),
-			icon: <Icon icon={ external } />,
-			supportsBulk: false,
-			callback: ( items: EmailType[] ) => {
-				window.open( items[ 0 ].link );
+	const actions = useMemo(
+		() => [
+			{
+				id: 'preview',
+				label: __( 'Preview', 'woocommerce' ),
+				icon: <Icon icon={ external } />,
+				supportsBulk: false,
+				callback: ( items: EmailType[] ) => {
+					window.open( items[ 0 ].link );
+				},
+				isEligible: ( item: EmailType ) => !! item.post_id,
+				isPrimary: true,
 			},
-			isEligible: ( item: EmailType ) => !!item.post_id,
-			isPrimary: true,
-		},
-		{
-			id: 'edit',
-			label: __( 'Edit', 'woocommerce' ),
-			icon: <Icon icon={ edit } />,
-			supportsBulk: false,
-			callback: ( items: EmailType[] ) => {
-				window.location.href = `/wp-admin/post.php?post=${ items[ 0 ].post_id }&action=edit`;
+			{
+				id: 'edit',
+				label: __( 'Edit', 'woocommerce' ),
+				icon: <Icon icon={ edit } />,
+				supportsBulk: false,
+				callback: ( items: EmailType[] ) => {
+					window.location.href = `/wp-admin/post.php?post=${ items[ 0 ].post_id }&action=edit`;
+				},
+				isEligible: ( item: EmailType ) => !! item.post_id,
+				isPrimary: true,
 			},
-			isEligible: ( item: EmailType ) => !!item.post_id,
-			isPrimary: true,
-		},
-		{
-			id: 'test',
-			label: __( 'Send test email', 'woocommerce' ),
-			disabled: true,
-			supportsBulk: false,
-			callback: ( items: EmailType[] ) => {
-				return true; // TODO: Implement send test email
+			{
+				id: 'test',
+				label: __( 'Send test email', 'woocommerce' ),
+				disabled: true,
+				supportsBulk: false,
+				callback: ( items: EmailType[] ) => {
+					return true; // TODO: Implement send test email
+				},
 			},
-		},
-		{
-			id: 'change-status',
-			label: ( items: EmailType[] ) =>
-				items[ 0 ].status === 'enabled'
-					? __( 'Disable email', 'woocommerce' )
-					: __( 'Enable email', 'woocommerce' ),
-			supportsBulk: false,
-			isEligible: ( item: EmailType ) =>
-				item.status === 'enabled' || item.status === 'disabled',
-			callback: ( items: EmailType[] ) => {
-				updateEmailEnabledStatus( items[ 0 ].id, !items[ 0 ].enabled );
+			{
+				id: 'change-status',
+				label: ( items: EmailType[] ) =>
+					items[ 0 ].status === 'enabled'
+						? __( 'Disable email', 'woocommerce' )
+						: __( 'Enable email', 'woocommerce' ),
+				supportsBulk: false,
+				isEligible: ( item: EmailType ) =>
+					item.status === 'enabled' || item.status === 'disabled',
+				callback: ( items: EmailType[] ) => {
+					updateEmailEnabledStatus(
+						items[ 0 ].id,
+						! items[ 0 ].enabled
+					);
+				},
 			},
-		},
-	];
+		],
+		[ updateEmailEnabledStatus ]
+	);
 
 	const form = {
 		type: 'panel',

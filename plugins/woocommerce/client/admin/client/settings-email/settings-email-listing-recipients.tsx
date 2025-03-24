@@ -31,6 +31,7 @@ export const RecipientsList = ( {
 			{ copyCount > 0 && (
 				<Tooltip
 					className="woocommerce-email-listing-recipients-tooltip"
+					// @ts-expect-error - Text prop accepts also ReactNode
 					text={
 						<>
 							<div>
