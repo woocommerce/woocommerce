@@ -31,17 +31,43 @@ class ProcessCoreProfilerPluginInstallOptions {
 	 */
 	private WC_Logger_Interface $logger;
 
+	private const DISALLOWED_OPTIONS = array(
+		'siteurl',              // The URL to your WordPress installation.
+		'home',                 // The home URL of the site.
+		'admin_email',          // Administrator email address.
+		'wp_user_roles',        // Serialized roles and capabilities.
+		'active_plugins',       // List of active plugins.
+		'template',             // The current theme template.
+		'stylesheet',           // The current theme stylesheet.
+		'default_role',         // Default role for new users.
+		'ftp_hostname',         // FTP server hostname.
+		'ftp_username',         // FTP server username.
+		'ftp_password',         // FTP server password.
+		'ftp_port',             // FTP server port.
+		'ftp_ssl',              // Whether to use FTP over SSL.
+		'ftp_pasv',             // Whether to use passive FTP.
+		'rewrite_rules',        // URL rewrite rules.
+		'permalink_structure',  // Structure of permalinks.
+		'cron',                 // Scheduled tasks (WP-Cron jobs).
+		'upload_path',          // Filesystem path for uploads.
+		'upload_url_path',      // URL path for uploads.
+		'mailserver_url',       // Mail server hostname.
+		'mailserver_login',     // Mail server login.
+		'mailserver_pass',      // Mail server password.
+		'mailserver_port',       // Mail server port.
+	);
+
 	/**
 	 * Constructor.
 	 *
-	 * @param array               $plugins List of plugins.
-	 * @param string              $slug Plugin slug.
-	 * @param WC_Logger_Interface $logger Logger instance.
+	 * @param array $plugins List of plugins.
+	 * @param string $slug Plugin slug.
+	 * @param WC_Logger_Interface|null $logger Logger instance.
 	 */
-	public function __construct( array $plugins, string $slug, WC_Logger_Interface $logger ) {
+	public function __construct( array $plugins, string $slug, ?WC_Logger_Interface $logger = null ) {
 		$this->plugins = $plugins;
 		$this->slug    = $slug;
-		$this->logger  = $logger;
+		$this->logger  = $logger ?? wc_get_logger();
 	}
 
 	/**
@@ -113,6 +139,10 @@ class ProcessCoreProfilerPluginInstallOptions {
 	 * @return void
 	 */
 	protected function add_option( string $name, $value, $autoload = null ) {
+		if ( in_array( $name, self::DISALLOWED_OPTIONS, true ) ) {
+			$this->logger && $this->logger->error( 'Disallowed option: ' . $name );
+			return;
+		}
 		// phpcs:ignore WordPress.WP.DeprecatedParameters.Add_optionParam3Found
 		add_option( $name, $value, $autoload );
 	}
