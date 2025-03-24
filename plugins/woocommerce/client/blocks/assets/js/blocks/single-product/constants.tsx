@@ -81,5 +81,6 @@ export const ALLOWED_INNER_BLOCKS = [
 	'woocommerce/product-meta',
 	'woocommerce/product-gallery',
 	'woocommerce/blockified-product-reviews',
+	'woocommerce/blockified-product-details',
 	...Object.keys( getBlockMap( metadata.name ) ),
 ];

@@ -241,16 +241,65 @@ class PaymentsController {
 
 		// Go through the providers and check if any of them have a "prominently" visible incentive (i.e., modal or banner).
 		foreach ( $providers as $provider ) {
-			// We check to see if the incentive was dismissed in the banner context.
-			// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
-			// we rely on the fact that the modal falls back to the banner, once dismissed.
-			if ( ! empty( $provider['_incentive'] ) &&
-				( empty( $provider['_incentive']['_dismissals'] ) ||
-					! in_array( 'wc_settings_payments__banner', $provider['_incentive']['_dismissals'], true )
-				)
-			) {
+			if ( empty( $provider['_incentive'] ) ) {
+				continue;
+			}
+
+			$dismissals = $provider['_incentive']['_dismissals'] ?? array();
+
+			// If there are no dismissals at all, the incentive is prominently visible.
+			if ( empty( $dismissals ) ) {
 				return true;
 			}
+
+			// First, we check to see if the incentive was dismissed in the banner context.
+			// The banner context has the lowest priority, so if it was dismissed, we don't need to check the modal context.
+			// If the banner is dismissed, there is no prominent incentive.
+			$is_dismissed_banner = ! empty(
+				array_filter(
+					$dismissals,
+					function ( $dismissal ) {
+						return isset( $dismissal['context'] ) && 'wc_settings_payments__banner' === $dismissal['context'];
+					}
+				)
+			);
+			if ( $is_dismissed_banner ) {
+				continue;
+			}
+
+			// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
+			// we rely on the fact that the modal falls back to the banner, once dismissed, after 30 days.
+			// @see here's its frontend "brother" in client/admin/client/settings-payments/settings-payments-main.tsx.
+			$is_dismissed_modal = ! empty(
+				array_filter(
+					$dismissals,
+					function ( $dismissal ) {
+						return isset( $dismissal['context'] ) && 'wc_settings_payments__modal' === $dismissal['context'];
+					}
+				)
+			);
+			// If there are no modal dismissals, the incentive is still visible.
+			if ( ! $is_dismissed_modal ) {
+				return true;
+			}
+
+			$is_dismissed_modal_more_than_30_days_ago = ! empty(
+				array_filter(
+					$dismissals,
+					function ( $dismissal ) {
+						return isset( $dismissal['context'], $dismissal['timestamp'] ) &&
+							'wc_settings_payments__modal' === $dismissal['context'] &&
+							$dismissal['timestamp'] < strtotime( '-30 days' );
+					}
+				)
+			);
+			// If the modal was dismissed less than 30 days ago, there is no prominent incentive (aka the banner is not shown).
+			if ( ! $is_dismissed_modal_more_than_30_days_ago ) {
+				continue;
+			}
+
+			// The modal was dismissed more than 30 days ago, so the banner is visible.
+			return true;
 		}
 
 		return false;
