@@ -6,10 +6,10 @@ import { select as wpSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
 import { getResourceName } from '../utils';
 import { ItemInfer, ItemType, Query } from './types';
 import { ItemsSelector } from './';
+import { itemsStore } from '..';
 
 type Options = {
 	id: number;
@@ -44,7 +44,7 @@ export function getLeaderboard( options: Options ) {
 		filterQuery,
 	} = options;
 
-	const { getItems, getItemsError, isResolving } = select( STORE_NAME );
+	const { getItems, getItemsError, isResolving } = select( itemsStore );
 	const response = {
 		isRequesting: false,
 		isError: false,
