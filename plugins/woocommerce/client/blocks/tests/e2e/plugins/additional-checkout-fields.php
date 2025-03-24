@@ -20,12 +20,12 @@ class Additional_Checkout_Fields_Test_Helper {
 	/**
 	 * @var string Define option name to decide if additional fields should be turned on.
 	 */
-	private $additional_checkout_fields_option_name = 'woocommerce_additional_checkout_fields';
+	private string $additional_checkout_fields_option_name = 'woocommerce_additional_checkout_fields';
 
 	/**
 	 * Define URL endpoint for enabling additional checkout fields.
 	 */
-	public function enable_custom_checkout_fields() {
+	public function enable_custom_checkout_fields(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['enable_custom_checkout_fields'] ) ) {
 			update_option( $this->additional_checkout_fields_option_name, 'yes' );
@@ -35,7 +35,7 @@ class Additional_Checkout_Fields_Test_Helper {
 	/**
 	 * Define URL endpoint for disabling additional checkout fields.
 	 */
-	public function disable_custom_checkout_fields() {
+	public function disable_custom_checkout_fields(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['disable_custom_checkout_fields'] ) ) {
 			update_option( $this->additional_checkout_fields_option_name, 'no' );
@@ -49,7 +49,7 @@ class Additional_Checkout_Fields_Test_Helper {
 	 * @return void
 	 * @throws Exception If there is an error during the registration of the checkout fields.
 	 */
-	public function register_custom_checkout_fields() {
+	public function register_custom_checkout_fields(): void {
 		// Address fields, checkbox, textbox, select.
 		woocommerce_register_additional_checkout_field(
 			array(

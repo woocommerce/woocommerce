@@ -14,7 +14,6 @@ import {
 } from './constants';
 
 export class CheckoutPage {
-	private BLOCK_NAME = 'woocommerce/checkout';
 	public page: Page;
 	public requestUtils: RequestUtils;
 	private testData = {

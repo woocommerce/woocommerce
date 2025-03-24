@@ -391,8 +391,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.check();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
-
-			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+			
 			await checkoutPageObject.placeOrder( false );
 
 			// Should see a required field error for insurance
