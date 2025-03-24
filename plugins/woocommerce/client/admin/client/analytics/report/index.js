@@ -112,9 +112,6 @@ export default compose(
 		const query = getQuery();
 		const { search } = query;
 
-		/* eslint @wordpress/no-unused-vars-before-return: "off" */
-		const itemsSelector = select( itemsStore );
-
 		if ( ! search ) {
 			return {};
 		}
@@ -126,6 +123,9 @@ export default compose(
 			report === 'categories' && query.filter === 'single_category'
 				? 'products'
 				: report;
+
+		const itemsSelector = select( itemsStore );
+
 		const itemsResult = searchItemsByString(
 			itemsSelector,
 			mappedReport,

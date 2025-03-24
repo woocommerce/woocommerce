@@ -136,8 +136,6 @@ export default compose(
 			query.products &&
 			query.products.split( ',' ).length === 1;
 
-		const { getItems, isResolving, getItemsError } = select( itemsStore );
-
 		if ( isRequesting ) {
 			return {
 				query: {
@@ -149,6 +147,8 @@ export default compose(
 		}
 
 		if ( isSingleProductView ) {
+			const { getItems, isResolving, getItemsError } =
+				select( itemsStore );
 			const productId = parseInt( query.products, 10 );
 			const includeArgs = { include: productId };
 			// TODO Look at similar usage to populate tags in the Search component.

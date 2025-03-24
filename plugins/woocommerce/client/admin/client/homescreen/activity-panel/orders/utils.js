@@ -9,9 +9,6 @@ import { settingsStore, itemsStore } from '@woocommerce/data';
 import { DEFAULT_ACTIONABLE_STATUSES } from '../../../analytics/settings/config';
 
 export function getUnreadOrders( select, orderStatuses ) {
-	const { getItemsTotalCount, getItemsError, isResolving } =
-		select( itemsStore );
-
 	if ( ! orderStatuses.length ) {
 		return 0;
 	}
@@ -24,6 +21,9 @@ export function getUnreadOrders( select, orderStatuses ) {
 	};
 
 	const defaultValue = null;
+
+	const { getItemsTotalCount, getItemsError, isResolving } =
+		select( itemsStore );
 
 	// Disable eslint rule requiring `totalOrders` to be defined below because the next two statements
 	// depend on `getItemsTotalCount` to have been called.

@@ -372,8 +372,6 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query, isRequesting } = props;
 
-		const { getItems, getItemsError, isResolving } = select( itemsStore );
-
 		if (
 			isRequesting ||
 			( query.search && ! ( query.products && query.products.length ) )
@@ -381,6 +379,7 @@ export default compose(
 			return {};
 		}
 
+		const { getItems, getItemsError, isResolving } = select( itemsStore );
 		const tableQuery = {
 			per_page: -1,
 		};

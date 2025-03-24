@@ -274,8 +274,6 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	} = useSelect( ( select ) => {
 		const { getOrders, hasFinishedResolution, getOrdersError } =
 			select( ordersStore );
-		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-		const { getItems } = select( itemsStore );
 
 		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
 			return { isRequesting: false };
@@ -299,6 +297,8 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 				orderStatuses,
 			};
 		}
+
+		const { getItems } = select( itemsStore );
 
 		const customers = getItems( 'customers', {
 			users: actionableOrders
