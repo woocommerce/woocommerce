@@ -1,5 +1,5 @@
 const { request } = require( '@playwright/test' );
-const { setOption } = require( './options' );
+const { setOption, deleteOption } = require( './options' );
 
 const setNewPaymentsSettingsPage = async ( { baseURL, enabled } ) => {
 	try {
@@ -16,12 +16,7 @@ const setNewPaymentsSettingsPage = async ( { baseURL, enabled } ) => {
 
 const resetGatewayOrder = async ( baseURL ) => {
 	try {
-		await setOption(
-			request,
-			baseURL,
-			'woocommerce_feature_reactify-classic-payments-settings',
-			''
-		);
+		await deleteOption( request, baseURL, 'woocommerce_gateway_order' );
 	} catch ( error ) {
 		console.log( error );
 	}
