@@ -18,7 +18,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets:legacy": "rsync -avhW --checksum --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --delete --quiet client/legacy/build/js/ assets/js",
 		"build:project:copy-assets:admin": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin && pnpm email-editor:build:project:copy-assets",
-		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && rsync -avhW --checksum --quiet client/blocks/blocks.ini blocks.ini && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
+		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
 		"email-editor:build:project:copy-assets": "rsync -avhW --checksum --delete --quiet client/admin/node_modules/@woocommerce/email-editor/build/ assets/client/admin/email-editor",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -703,10 +703,9 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.12.8",
-		"@babel/core": "7.12.9",
-		"@babel/preset-env": "^7.23.5",
-		"@babel/register": "7.12.1",
+		"@babel/cli": "7.25.7",
+		"@babel/core": "7.25.7",
+		"@babel/preset-env": "7.25.7",
 		"@faker-js/faker": "^9.3.0",
 		"@playwright/test": "^1.50.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -715,7 +714,7 @@
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/e2e-test-utils-playwright": "^1.15.0",
+		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/env": "10.17.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
@@ -762,7 +761,6 @@
 		"delay": 2500,
 		"watch": [
 			"node_modules/@woocommerce/block-library/build",
-			"node_modules/@woocommerce/block-library/blocks.ini",
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build",
 			"client/admin/node_modules/@woocommerce/email-editor/build/"
@@ -789,7 +787,6 @@
 				"package.json",
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
-				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/api/dist/",
 				"!node_modules/@woocommerce/api/*.ts.map",

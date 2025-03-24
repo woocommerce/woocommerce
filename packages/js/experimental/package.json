@@ -52,8 +52,8 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/core": "7.25.7",
+		"@babel/runtime": "7.25.7",
 		"@storybook/addon-actions": "6.5.17-alpha.0",
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/react": "6.5.17-alpha.0",
