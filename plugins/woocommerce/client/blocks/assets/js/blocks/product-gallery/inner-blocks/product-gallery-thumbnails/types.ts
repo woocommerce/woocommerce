@@ -1,5 +1,5 @@
 export type ProductGalleryThumbnailsBlockAttributes = {
-	numberOfThumbnails: number;
+	thumbnailSize: string;
 };
 
 export type ProductGalleryThumbnailsSettingsProps = {

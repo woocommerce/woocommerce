@@ -37,7 +37,7 @@ test.describe( 'Merchant → Cart', () => {
 			editor,
 		} ) => {
 			const blockPresence = await editor.getBlockByName( blockData.slug );
-			expect( blockPresence ).toBeTruthy();
+			await expect( blockPresence ).toBeVisible();
 
 			await editor.openGlobalBlockInserter();
 			await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
@@ -101,7 +101,7 @@ test.describe( 'Merchant → Cart', () => {
 				.getByRole( 'button', { name: 'Add block' } );
 			await addBlockButton.dispatchEvent( 'click' );
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( 'Table' );
 			const tableButton = editor.page.getByRole( 'option', {
 				name: 'Table',
@@ -109,7 +109,7 @@ test.describe( 'Merchant → Cart', () => {
 			await expect( tableButton ).toBeVisible();
 
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( 'Audio' );
 
 			const audioButton = editor.page.getByRole( 'option', {

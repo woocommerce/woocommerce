@@ -23,7 +23,11 @@ const Notices = () => {
 		[]
 	);
 
-	return <SnackbarList notices={ notices } onRemove={ () => {} } />;
+	const onRemove = ( id: string ) => {
+		dispatch( noticesStore ).removeNotice( id );
+	};
+
+	return <SnackbarList notices={ notices } onRemove={ onRemove } />;
 };
 
 const appendSettingsScripts = ( scripts: string[] ) => {

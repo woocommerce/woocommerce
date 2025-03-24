@@ -123,10 +123,7 @@ const StoreNotices = ( {
 								decodeEntities( notice.content )
 							),
 						} ) );
-					const noticeProps: Omit< NoticeBannerProps, 'children' > & {
-						key: string;
-					} = {
-						key: `store-notice-${ status }`,
+					const noticeProps: Omit< NoticeBannerProps, 'children' > = {
 						status,
 						onRemove: () => {
 							noticeGroup.forEach( ( notice ) => {
@@ -135,11 +132,15 @@ const StoreNotices = ( {
 						},
 					};
 					return uniqueNotices.length === 1 ? (
-						<StoreNotice { ...noticeProps }>
+						<StoreNotice
+							key={ 'store-notice-' + status }
+							{ ...noticeProps }
+						>
 							<RawHTML>{ noticeGroup[ 0 ].content }</RawHTML>
 						</StoreNotice>
 					) : (
 						<StoreNotice
+							key={ 'store-notice-' + status }
 							{ ...noticeProps }
 							summary={
 								status === 'error'
