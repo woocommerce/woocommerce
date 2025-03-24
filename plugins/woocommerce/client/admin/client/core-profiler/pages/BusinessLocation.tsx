@@ -15,6 +15,8 @@ import { BusinessLocationEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
+import { GeolocationCountrySelect } from '../components/geolocation-country-select/geolocation-country-select';
+
 export const BusinessLocation = ( {
 	sendEvent,
 	navigationProgress,
@@ -22,8 +24,13 @@ export const BusinessLocation = ( {
 }: {
 	sendEvent: ( event: BusinessLocationEvent ) => void;
 	navigationProgress: number;
-	context: Pick< CoreProfilerStateMachineContext, 'countries' >;
+	context: Pick<
+		CoreProfilerStateMachineContext,
+		'geolocatedLocation' | 'countries'
+	>;
 } ) => {
+	const { geolocatedLocation } = context;
+	console.log( context );
 	const [ storeCountry, setStoreCountry ] = useState< CountryStateOption >( {
 		key: '',
 		label: '',
@@ -49,34 +56,21 @@ export const BusinessLocation = ( {
 						'woocommerce'
 					) }
 				/>
-				<SelectControl
-					className="woocommerce-profiler-select-control__country"
-					instanceId={ 1 }
+				<GeolocationCountrySelect
+					countries={ context.countries }
+					initialValue={ storeCountry }
+					label={ inputLabel }
+					geolocatedLocation={ geolocatedLocation }
 					placeholder={ inputLabel }
-					label={ storeCountry.key === '' ? inputLabel : '' }
-					getSearchExpression={ ( query: string ) => {
-						return new RegExp(
-							'(^' + query + '| — (' + query + '))',
-							'i'
-						);
+					onChange={ ( countryStateOption ) => {
+						setStoreCountry( countryStateOption );
 					} }
-					autoComplete="new-password" // disable autocomplete and autofill
-					options={ context.countries }
-					excludeSelectedOptions={ false }
-					help={ <Icon icon={ chevronDown } /> }
-					onChange={ ( results ) => {
-						if ( Array.isArray( results ) && results.length ) {
-							setStoreCountry(
-								results[ 0 ] as CountryStateOption
-							);
-						}
+					onRetry={ () => {
+						// Retry geolocation
 					} }
-					selected={ storeCountry ? [ storeCountry ] : [] }
-					showAllOnFocus
-					isSearchable
-					virtualScroll={ true }
-					virtualItemHeight={ 40 }
-					virtualListHeight={ 40 * 9 }
+					onSkip={ () => {
+						// Skip geolocation
+					} }
 				/>
 				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">
 					<Button
