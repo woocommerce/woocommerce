@@ -122,10 +122,12 @@ class OrderCountCacheService {
 			return;
 		}
 
+		// If the order status count has already been incremented, we can skip incrementing it again.
 		if ( isset( $this->order_statuses[ $order_id ] ) && $this->order_statuses[ $order_id ] === $next_status ) {
 			return;
 		}
 
+		// Set the initial order status in case this is a new order and the previous status should not be decremented.
 		if ( ! isset( $this->initial_order_statuses[ $order_id ] ) ) {
 			$this->initial_order_statuses[ $order_id ] = $previous_status;
 		}
