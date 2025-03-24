@@ -81,6 +81,7 @@ export const PluginCard = ( {
 			{ /* this label element acts as the catchment area for the checkbox */ }
 			{ ! installed && (
 				<CheckboxControl
+					__nextHasNoMarginBottom
 					id={ `${ pluginKey }-checkbox` }
 					className="woocommerce-profiler__checkbox"
 					disabled={ disabled }

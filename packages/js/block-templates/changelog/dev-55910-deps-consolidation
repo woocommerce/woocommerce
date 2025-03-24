@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: consolidate @wordpress/babel-preset-default, @wordpress/browserslist-config, glob packages versions.

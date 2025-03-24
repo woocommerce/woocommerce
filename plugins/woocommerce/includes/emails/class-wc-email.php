@@ -1406,7 +1406,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * This method checks if there is email created in the block editor associated with this WC_Email
+	 * Gerenerates the HTML content for the email from a block based email.
 	 * and if so, it renders the block email content.
 	 *
 	 * @return string|null
@@ -1417,40 +1417,7 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		/** Service for rendering emails from block content @var BlockEmailRenderer $renderer */
-		$renderer   = wc_get_container()->get( BlockEmailRenderer::class );
-		$email_post = $renderer->get_email_post_by_wc_email( $this );
-
-		if ( ! $email_post ) {
-			return null;
-		}
-
-		// Get the Woo content excluding headers and footers.
-		// Store the existing header and footer callbacks.
-		global $wp_filter;
-		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-
-		// Remove header and footer filters because we want to get only the main content.
-		remove_all_filters( 'woocommerce_email_header' );
-		remove_all_filters( 'woocommerce_email_footer' );
-
-		$woo_content = $this->get_content_html();
-
-		// Restore the original header and footer filters.
-		if ( $original_header_filters ) {
-			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		if ( $original_footer_filters ) {
-			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		return $renderer->render_block_email( $email_post, $woo_content, $this );
+		$renderer = wc_get_container()->get( BlockEmailRenderer::class );
+		return $renderer->maybe_render_block_email( $this );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent fatal error when context in not an array in "LogHandlerFileV2".

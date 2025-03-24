@@ -127,7 +127,7 @@ class InitTest extends MockeryTestCase {
 				'id'          => 'themes',
 				'description' => 'It includes all the installed themes.',
 				'label'       => 'Themes',
-				'icon'        => 'brush',
+				'icon'        => 'layout',
 				'items'       => $mock_themes,
 			),
 		);
