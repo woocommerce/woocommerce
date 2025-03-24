@@ -3,8 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { SelectControl } from '@woocommerce/components';
-import { Icon, chevronDown } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 
 /**
@@ -29,8 +27,6 @@ export const BusinessLocation = ( {
 		'geolocatedLocation' | 'countries'
 	>;
 } ) => {
-	const { geolocatedLocation } = context;
-	console.log( context );
 	const [ storeCountry, setStoreCountry ] = useState< CountryStateOption >( {
 		key: '',
 		label: '',
@@ -60,7 +56,7 @@ export const BusinessLocation = ( {
 					countries={ context.countries }
 					initialValue={ storeCountry }
 					label={ inputLabel }
-					geolocatedLocation={ geolocatedLocation }
+					geolocatedLocation={ context.geolocatedLocation }
 					placeholder={ inputLabel }
 					onChange={ ( countryStateOption ) => {
 						setStoreCountry( countryStateOption );
