@@ -69,7 +69,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@testing-library/react": "^16.x.x",
 		"@testing-library/dom": "^10.4.x",
 		"@types/jest": "27.5.x",
