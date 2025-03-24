@@ -459,7 +459,7 @@ class PaymentProviders {
 			case ExtensionSuggestions::PAYPAL_FULL_STACK:
 			case ExtensionSuggestions::PAYPAL_WALLET:
 				// Set an option to inform the extension.
-				update_option( 'woocommerce_paypal_branded', 'yes', false );
+				update_option( 'woocommerce_paypal_branded', 'payments_settings', false );
 				break;
 			default:
 				break;

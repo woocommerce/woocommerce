@@ -1294,7 +1294,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		// Assert.
 		$this->assertTrue( $result );
 		$branded_option = get_option( 'woocommerce_paypal_branded' );
-		$this->assertSame( 'yes', $branded_option );
+		$this->assertSame( 'payments_settings', $branded_option );
 		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 		$this->assertIsArray( $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 		$this->assertArrayHasKey( 'timestamp', $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
