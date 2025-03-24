@@ -192,7 +192,7 @@
 		"ajv-cli": "3.3.x",
 		"allure-playwright": "^2.9.2",
 		"autoprefixer": "10.4.14",
-		"babel-jest": "^29.7.0",
+		"babel-jest": "29.7.x",
 		"babel-plugin-react-docgen": "4.2.1",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"buildkite-test-collector": "^1.7.1",
