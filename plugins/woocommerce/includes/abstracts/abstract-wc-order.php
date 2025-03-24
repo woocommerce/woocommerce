@@ -2475,7 +2475,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		return apply_filters( 'woocommerce_order_needs_shipping', $needs_shipping );
+		/**
+		 * Filter to modify the needs shipping value for a given order.
+		 *
+		 * @since 9.8.0
+		 *
+		 * @param bool $needs_shipping The value originally calculated.
+		 * @param WC_Abstract_Order $order The order for which the value is calculated.
+		 */
+		return apply_filters( 'woocommerce_order_needs_shipping', $needs_shipping, $this );
 	}
 
 	/**

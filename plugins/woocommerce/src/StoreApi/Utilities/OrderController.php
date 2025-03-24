@@ -208,7 +208,7 @@ class OrderController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
-	 * @param bool $use_order_data Whether to use order data or cart data.
+	 * @param bool      $use_order_data Whether to use order data or cart data.
 	 */
 	protected function validate_coupons( \WC_Order $order, bool $use_order_data = false ) {
 		$coupon_codes  = $order->get_coupon_codes();
@@ -318,6 +318,7 @@ class OrderController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
+	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
 	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
 		$errors           = new \WP_Error();

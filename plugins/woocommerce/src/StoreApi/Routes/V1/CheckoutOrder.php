@@ -183,9 +183,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 */
-	protected function cart_updated( \WP_REST_Request $request ) {
-		return;
-	}
+	protected function cart_updated( \WP_REST_Request $request ) {}
 
 	/**
 	 * Updates the current customer session using data from the request (e.g. address data).
