@@ -100,6 +100,16 @@
 			]
 		},
 		{
+			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
+			"dependencies": [
+				"babel-plugin-transform-react-remove-prop-types"
+			],
+			"pinVersion": "0.4.24",
+			"packages": [
+				"**"
+			]
+		},
+		{
 			"label": "React-related dependencies: React 18",
 			"dependencies": [
 				"react",
