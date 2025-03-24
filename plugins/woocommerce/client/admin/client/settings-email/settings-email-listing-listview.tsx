@@ -54,11 +54,6 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 			},
 			{
-				id: 'id',
-				label: 'Id',
-				enableHiding: false,
-			},
-			{
 				id: 'recipients',
 				label: __( 'Recipient(s)', 'woocommerce' ),
 				enableSorting: false,
