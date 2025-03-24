@@ -131,6 +131,18 @@ class PaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/suggestion/(?P<id>[\w\d\-]+)/attach',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'attach_payment_extension_suggestion' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/suggestion/(?P<id>[\w\d\-]+)/hide',
 			array(
 				array(
@@ -249,6 +261,25 @@ class PaymentsRestController extends RestApiControllerBase {
 		$order_map = $request->get_param( 'order_map' );
 
 		$result = $this->payments->update_payment_providers_order_map( $order_map );
+
+		return rest_ensure_response( array( 'success' => $result ) );
+	}
+
+	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	protected function attach_payment_extension_suggestion( WP_REST_Request $request ) {
+		$suggestion_id = $request->get_param( 'id' );
+
+		try {
+			$result = $this->payments->attach_payment_extension_suggestion( $suggestion_id );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_payment_extension_suggestion_error', $e->getMessage(), array( 'status' => 400 ) );
+		}
 
 		return rest_ensure_response( array( 'success' => $result ) );
 	}
@@ -485,12 +516,15 @@ class PaymentsRestController extends RestApiControllerBase {
 				$providers[ $key ]['_links'] = array();
 			}
 
-			// If this is a suggestion, add a link to hide it.
+			// If this is a suggestion, add dedicated links.
 			if ( ! empty( $provider['_type'] ) &&
 				PaymentProviders::TYPE_SUGGESTION === $provider['_type'] &&
 				! empty( $provider['_suggestion_id'] )
-				) {
-				$providers[ $key ]['_links']['hide'] = array(
+			) {
+				$providers[ $key ]['_links']['attach'] = array(
+					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/attach', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),
+				);
+				$providers[ $key ]['_links']['hide']   = array(
 					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/hide', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),
 				);
 			}
@@ -1004,7 +1038,21 @@ class PaymentsRestController extends RestApiControllerBase {
 					'context'    => array( 'view', 'edit' ),
 					'readonly'   => true,
 					'properties' => array(
-						'hide' => array(
+						'attach' => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to mark the suggestion as attached. This should be called when an extension is installed.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to attach the suggestion.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'hide'   => array(
 							'type'        => 'object',
 							'description' => esc_html__( 'The link to hide the suggestion.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
