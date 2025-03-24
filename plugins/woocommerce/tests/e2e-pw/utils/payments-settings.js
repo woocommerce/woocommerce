@@ -1,5 +1,5 @@
 const { request } = require( '@playwright/test' );
-const { setOption, deleteOption } = require( './options' );
+const { setOption } = require( './options' );
 
 const setNewPaymentsSettingsPage = async ( { baseURL, enabled } ) => {
 	try {
@@ -14,15 +14,6 @@ const setNewPaymentsSettingsPage = async ( { baseURL, enabled } ) => {
 	}
 };
 
-const resetGatewayOrder = async ( baseURL ) => {
-	try {
-		await deleteOption( request, baseURL, 'woocommerce_gateway_order' );
-	} catch ( error ) {
-		console.log( error );
-	}
-};
-
 module.exports = {
 	setNewPaymentsSettingsPage,
-	resetGatewayOrder,
 };

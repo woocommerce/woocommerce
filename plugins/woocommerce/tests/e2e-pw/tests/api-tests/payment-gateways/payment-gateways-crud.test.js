@@ -1,7 +1,6 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const {
 	setNewPaymentsSettingsPage,
-	resetGatewayOrder,
 } = require( '../../../utils/payments-settings' );
 
 const { BASE_URL } = process.env;
@@ -11,10 +10,7 @@ const disableNewPaymentsSettingsFeature = async () => {
 };
 
 test.describe( 'Payment Gateways API tests', () => {
-	test.beforeAll( async () => {
-		await resetGatewayOrder( BASE_URL );
-		await disableNewPaymentsSettingsFeature();
-	} );
+	test.beforeAll( disableNewPaymentsSettingsFeature );
 	test( 'can view all payment gateways', async ( { request } ) => {
 		// call API to retrieve the payment gateways
 		const response = await request.get(
