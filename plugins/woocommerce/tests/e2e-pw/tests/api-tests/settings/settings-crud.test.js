@@ -13,7 +13,6 @@ const {
 	currencies,
 	stateOptions,
 } = require( '../../../data/settings' );
-const { resetGatewayOrder } = require( '../../../utils/payments-settings' );
 
 const enableEmailImprovementsFeature = async () => {
 	await setOption(
@@ -35,10 +34,7 @@ const disableEmailImprovementsFeature = async () => {
 
 test.describe( 'Settings API tests: CRUD', () => {
 	test.describe( 'List all settings groups', () => {
-		test.beforeAll( async () => {
-			await resetGatewayOrder( BASE_URL );
-			await disableEmailImprovementsFeature();
-		} );
+		test.beforeAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all settings groups', async ( { request } ) => {
 			// call API to retrieve all settings groups
 			const response = await request.get( './wp-json/wc/v3/settings' );
