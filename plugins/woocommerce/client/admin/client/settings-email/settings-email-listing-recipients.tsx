@@ -14,7 +14,7 @@ export const RecipientsList = ( {
 }: {
 	recipients: Recipients;
 } ) => {
-	let { to, cc, bcc } = {
+	const { to, cc, bcc } = {
 		to: recipients.to ? recipients.to.split( ',' ).filter( Boolean ) : [],
 		cc: recipients.cc ? recipients.cc.split( ',' ).filter( Boolean ) : [],
 		bcc: recipients.bcc
@@ -54,11 +54,13 @@ export const RecipientsList = ( {
 					}
 				>
 					<Button variant="link">
-						{/* Translators: Displays info about count of additional recipients. %d is the number of additional recipients. */}
-						{ __( '+%d more', 'woocommerce' ).replace(
-							'%d',
-							copyCount.toString()
-						) }{ ' ' }
+						{
+							/* Translators: Link to info about count of additional recipients. */
+							__( '+%d more', 'woocommerce' ).replace(
+								'%d',
+								copyCount.toString()
+							)
+						}{ ' ' }
 					</Button>
 				</Tooltip>
 			) }

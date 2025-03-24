@@ -32,7 +32,9 @@ export type EmailType = {
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const EmailListingFill: React.FC< { emailTypes: any } > = ( { emailTypes } ) => {
+const EmailListingFill: React.FC< { emailTypes: EmailType[] } > = ( {
+	emailTypes,
+} ) => {
 	return (
 		<Fill>
 			<ListView emailTypes={ emailTypes } />
@@ -53,9 +55,7 @@ export const registerSettingsEmailListingFill = () => {
 	} catch ( e ) {}
 
 	registerPlugin( 'woocommerce-admin-settings-email-listing', {
-        scope: 'woocommerce-email-listing',
-		render: () => (
-			<EmailListingFill emailTypes={ emailTypes } />
-		),
+		scope: 'woocommerce-email-listing',
+		render: () => <EmailListingFill emailTypes={ emailTypes } />,
 	} );
 };

@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { View } from '@wordpress/dataviews/wp';
 import { Post, useEntityRecords } from '@wordpress/core-data';
-import { __ } from '@wordpress/i18n';
 import { useDispatch, select, subscribe } from '@wordpress/data';
 import { settingsStore } from '@woocommerce/data';
 import { useState, useCallback, useMemo } from '@wordpress/element';
+// @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
+import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
 
 /**
  * Internal dependencies
@@ -23,10 +22,13 @@ export const useTransactionalEmails = (
 ) => {
 	const [ emailTypesData, setEmailTypesData ] =
 		useState< EmailType[] >( emailTypes );
-	const postIdsMap = new Map< string, string >();
-	emailTypesData.forEach( ( emailType: EmailType ) => {
-		postIdsMap.set( emailType.id, emailType.post_id );
-	} );
+	const postIdsMap = useMemo( () => {
+		const map = new Map< string, string >();
+		emailTypesData.forEach( ( emailType: EmailType ) => {
+			map.set( emailType.id, emailType.post_id );
+		} );
+		return map;
+	}, [ emailTypesData ] );
 
 	const validPostIds = Array.from( postIdsMap.values() ).filter( Boolean );
 	const emailPosts = useEntityRecords( 'postType', 'woo_email', {
@@ -37,21 +39,25 @@ export const useTransactionalEmails = (
 
 	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 
-	const emails = useMemo( () => emailTypesData.map( ( emailType: EmailType ) => {
-		const postId = postIdsMap.get( emailType.id ) || '';
-		const post: Post | null = emailPosts.records?.find(
-			( p ) => p.id === parseInt( postId )
-		) as Post | null;
-		let status = emailType.enabled ? 'enabled' : 'disabled';
-		if ( emailType.manual ) {
-			status = 'manual';
-		}
-		return {
-			...emailType,
-			link: post?.link || '',
-			status: status as EmailStatus,
-		};
-	}), [emailTypesData, emailPosts] );
+	const emails = useMemo(
+		() =>
+			emailTypesData.map( ( emailType: EmailType ) => {
+				const postId = postIdsMap.get( emailType.id ) || '';
+				const post: Post | null = emailPosts.records?.find(
+					( p ) => p.id === parseInt( postId, 10 )
+				) as Post | null;
+				let status = emailType.enabled ? 'enabled' : 'disabled';
+				if ( emailType.manual ) {
+					status = 'manual';
+				}
+				return {
+					...emailType,
+					link: post?.link || '',
+					status: status as EmailStatus,
+				};
+			} ),
+		[ emailTypesData, emailPosts, postIdsMap ]
+	);
 
 	// Apply Sort
 	let sortedEmails: EmailType[] = emails;
@@ -100,58 +106,54 @@ export const useTransactionalEmails = (
 		async ( emailId: string, value: boolean ) => {
 			const enabled = value ? 'yes' : 'no';
 			const settingsGroup = `email_${ emailId }`;
-			try {
-				// The email settings has to be stored in DB complete.
-				// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
-				if (
-					! select( settingsStore ).hasFinishedResolution(
-						'getSettings',
-						[ settingsGroup ]
-					)
-				) {
-					await select( settingsStore ).getSettings( settingsGroup );
-					await new Promise( ( resolve ) => {
-						const unsubscribe = subscribe( () => {
-							const finished = select(
-								settingsStore
-							).hasFinishedResolution( 'getSettings', [
-								settingsGroup,
-							] );
-							if ( finished ) {
-								unsubscribe();
-								resolve( true );
-							}
-						} );
+			// The email settings has to be stored in DB complete.
+			// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
+			if (
+				! select( settingsStore ).hasFinishedResolution(
+					'getSettings',
+					[ settingsGroup ]
+				)
+			) {
+				await select( settingsStore ).getSettings( settingsGroup );
+				await new Promise( ( resolve ) => {
+					const unsubscribe = subscribe( () => {
+						const finished = select(
+							settingsStore
+						).hasFinishedResolution( 'getSettings', [
+							settingsGroup,
+						] );
+						if ( finished ) {
+							unsubscribe();
+							resolve( true );
+						}
 					} );
-				}
+				} );
+			}
 
-				// Now we can fetch the old settings and update the settings
-				const currentSettings = await select(
-					settingsStore
-				).getSettings( settingsGroup );
-				const updatedSettings = { ...currentSettings } as {
-					[ key: string ]: { [ key: string ]: unknown };
-				};
-				updatedSettings[ settingsGroup ].enabled = enabled;
-				await updateAndPersistSettingsForGroup(
-					settingsGroup,
-					updatedSettings
-				);
+			// Now we can fetch the old settings and update the settings
+			const currentSettings = await select( settingsStore ).getSettings(
+				settingsGroup
+			);
+			const updatedSettings = { ...currentSettings } as {
+				[ key: string ]: { [ key: string ]: unknown };
+			};
+			updatedSettings[ settingsGroup ].enabled = enabled;
+			await updateAndPersistSettingsForGroup(
+				settingsGroup,
+				updatedSettings
+			);
 
-				// Apply change in local state to update UI
-				const updatedEmailTypesData = [ ...emailTypesData ];
-				const emailIndex = updatedEmailTypesData.findIndex(
-					( email ) => email.id === emailId
-				);
-				if ( emailIndex !== -1 ) {
-					updatedEmailTypesData[ emailIndex ].enabled = value;
-					setEmailTypesData( updatedEmailTypesData );
-				}
-			} catch ( error ) {
-				console.error( error );
+			// Apply change in local state to update UI
+			const updatedEmailTypesData = [ ...emailTypesData ];
+			const emailIndex = updatedEmailTypesData.findIndex(
+				( email ) => email.id === emailId
+			);
+			if ( emailIndex !== -1 ) {
+				updatedEmailTypesData[ emailIndex ].enabled = value;
+				setEmailTypesData( updatedEmailTypesData );
 			}
 		},
-		[ emailTypesData ]
+		[ emailTypesData, updateAndPersistSettingsForGroup ]
 	);
 
 	return {

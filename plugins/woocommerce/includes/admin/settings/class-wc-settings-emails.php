@@ -210,13 +210,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
 			$email_notifications_field = 'email_notification_block_emails';
-			$email_notifications_desc = __( 'Manage email notifications sent from WooCommerce below or click on \'Edit template\' to customize your email template design.', 'woocommerce' );
+			$email_notifications_desc  = __( 'Manage email notifications sent from WooCommerce below or click on \'Edit template\' to customize your email template design.', 'woocommerce' );
 		} else {
 			$email_notifications_field = 'email_notification';
 			/* translators: %s: help description with link to WP Mail logging and support page. */
 			$email_notifications_desc = sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text );
 		}
-
 
 		// Reorder email color settings based on the email_improvements feature flag.
 
@@ -631,23 +630,23 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	public function email_notification_setting_block_emails() {
 		$desc_help_text = sprintf(
 			/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
-				__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
-				'https://wordpress.org/plugins/wp-mail-logging/',
-				'https://woocommerce.com/document/email-faq'
-			);
+			__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/wp-mail-logging/',
+			'https://woocommerce.com/document/email-faq'
+		);
 		$emails      = WC()->mailer()->get_emails();
 		$email_types = array();
 		foreach ( $emails as $email ) {
 			$email_types[] = array(
-				'title' => $email->get_title(),
+				'title'       => $email->get_title(),
 				'description' => $email->get_description(),
-				'id' => $email->id,
-				'post_id' => $email->get_email_template_post_id(),
-				'enabled' => $email->is_enabled(),
-				'manual' => $email->is_manual(),
-				'recipients' => array(
-					'to' => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
-					'cc' => $email->get_cc_recipient(),
+				'id'          => $email->id,
+				'post_id'     => $email->get_email_template_post_id(),
+				'enabled'     => $email->is_enabled(),
+				'manual'      => $email->is_manual(),
+				'recipients'  => array(
+					'to'  => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
+					'cc'  => $email->get_cc_recipient(),
 					'bcc' => $email->get_bcc_recipient(),
 				),
 			);

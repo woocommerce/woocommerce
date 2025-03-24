@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { DataViews, View } from '@wordpress/dataviews/wp';
 import { Post } from '@wordpress/core-data';
 import { useState, useMemo } from '@wordpress/element';
 import { edit, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+// @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
+import { DataViews, View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
 
 /**
  * Internal dependencies
@@ -109,7 +109,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Send test email', 'woocommerce' ),
 				disabled: true,
 				supportsBulk: false,
-				callback: ( items: EmailType[] ) => {
+				callback: () => {
 					return true; // TODO: Implement send test email
 				},
 			},
