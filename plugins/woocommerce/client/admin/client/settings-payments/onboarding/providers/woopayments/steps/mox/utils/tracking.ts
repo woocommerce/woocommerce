@@ -8,7 +8,7 @@ import { useEffect } from 'react';
  */
 
 import { useStepperContext } from '../components/stepper';
-import { useOnboardingContext } from '../data/onboarding-context';
+import { useMOXContext } from '../data/mox-context';
 import { OnboardingFields } from '../types';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -103,7 +103,7 @@ export const useTrackAbandoned = (): {
 	trackAbandoned: ( method: 'hide' | 'exit' ) => void;
 	removeTrackListener: () => void;
 } => {
-	const { errors, touched } = useOnboardingContext();
+	const { errors, touched } = useMOXContext();
 	const { currentStep: step } = useStepperContext();
 
 	const trackEvent = ( method = 'hide' ) => {

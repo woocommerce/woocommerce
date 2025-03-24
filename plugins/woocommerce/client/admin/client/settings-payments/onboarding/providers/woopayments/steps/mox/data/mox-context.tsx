@@ -9,7 +9,7 @@ import { isNil, omitBy } from 'lodash';
  */
 import { OnboardingFields } from '../types';
 
-const useContextValue = ( initialState = {} as OnboardingFields ) => {
+const useMOXContextValue = ( initialState = {} as OnboardingFields ) => {
 	const [ data, setData ] = useState( initialState );
 	const [ errors, setErrors ] = useState( {} as OnboardingFields );
 	const [ touched, setTouched ] = useState( {} as OnboardingFields );
@@ -27,26 +27,26 @@ const useContextValue = ( initialState = {} as OnboardingFields ) => {
 	};
 };
 
-type ContextValue = ReturnType< typeof useContextValue >;
+type MOXContextValue = ReturnType< typeof useMOXContextValue >;
 
-const OnboardingContext = createContext< ContextValue | null >( null );
+const MOXContext = createContext< MOXContextValue | null >( null );
 
-export const OnboardingContextProvider: React.FC< {
+export const MOXContextProvider: React.FC< {
 	initialData?: OnboardingFields;
 	children: React.ReactNode;
 } > = ( { children, initialData } ) => {
 	return (
-		<OnboardingContext.Provider value={ useContextValue( initialData ) }>
+		<MOXContext.Provider value={ useMOXContextValue( initialData ) }>
 			{ children }
-		</OnboardingContext.Provider>
+		</MOXContext.Provider>
 	);
 };
 
-export const useOnboardingContext = (): ContextValue => {
-	const context = useContext( OnboardingContext );
+export const useMOXContext = (): MOXContextValue => {
+	const context = useContext( MOXContext );
 	if ( ! context ) {
 		throw new Error(
-			'useOnboardingContext() must be used within <OnboardingContextProvider>'
+			'useMOXContext() must be used within <MOXContextProvider>'
 		);
 	}
 	return context;

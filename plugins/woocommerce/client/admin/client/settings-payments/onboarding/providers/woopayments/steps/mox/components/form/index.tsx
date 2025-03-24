@@ -19,18 +19,19 @@ import {
 	TextField,
 	TextFieldProps,
 } from './fields';
-import { useOnboardingContext } from '../../data/onboarding-context';
+import { useMOXContext } from '../../data/mox-context';
 import { OnboardingFields } from '../../types';
 import { useValidation } from '../../utils/validation';
 import { trackStepCompleted } from '../../utils/tracking';
 import strings from '../../strings';
+import './style.scss';
 
 type OnboardingFormProps = {
 	children: React.ReactNode;
 };
 
 export const OnboardingForm: React.FC<OnboardingFormProps> = ( { children } ) => {
-	const { errors, touched, setTouched } = useOnboardingContext();
+	const { errors, touched, setTouched } = useMOXContext();
 	const { currentStep, nextStep } = useStepperContext();
 
 	const handleContinue = () => {
@@ -68,7 +69,7 @@ export const OnboardingTextField: React.FC< OnboardingTextFieldProps > = (
 	props
 ) => {
 	const { name } = props;
-	const { data, setData, touched } = useOnboardingContext();
+	const { data, setData, touched } = useMOXContext();
 	const { validate, error } = useValidation( name );
 	const inputRef = React.useRef< HTMLInputElement >( null );
 
@@ -107,7 +108,7 @@ export const OnboardingSelectField = < ItemType extends SelectItem >( {
 	...rest
 }: OnboardingSelectFieldProps< ItemType > ): JSX.Element => {
 	const { name } = rest;
-	const { data, setData } = useOnboardingContext();
+	const { data, setData } = useMOXContext();
 	const { validate, error } = useValidation( name );
 
 	return (
@@ -148,7 +149,7 @@ export const OnboardingGroupedSelectField = <
 	...rest
 }: OnboardingGroupedSelectFieldProps< ListItemType > ): JSX.Element => {
 	const { name } = rest;
-	const { data, setData } = useOnboardingContext();
+	const { data, setData } = useMOXContext();
 	const { validate, error } = useValidation( name );
 
 	return (

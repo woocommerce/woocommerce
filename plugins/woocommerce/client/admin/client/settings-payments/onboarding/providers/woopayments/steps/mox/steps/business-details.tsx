@@ -6,7 +6,7 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { useOnboardingContext } from '../data/onboarding-context';
+import { useMOXContext } from '../data/mox-context';
 import { Item } from '../../../components/custom-select-control';
 import { OnboardingFields, BusinessType } from '../types';
 import { OnboardingGroupedSelectField, OnboardingSelectField } from '../components/form';
@@ -21,7 +21,7 @@ import strings from '../strings';
  * Contains business and store details KYC logic.
  */
 const BusinessDetails: React.FC = () => {
-	const { data, setData } = useOnboardingContext();
+	const { data, setData } = useMOXContext();
 	const countries = getAvailableCountries();
 	const businessTypes = getBusinessTypes();
 	const mccsFlatList = getMccsFlatList();

@@ -8,9 +8,12 @@ import { LoadError } from '@stripe/connect-js';
 /**
  * Internal dependencies
  */
+import {
+	useOnboardingContext,
+} from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
-import { useOnboardingContext } from '../data/onboarding-context';
+import { useMOXContext } from '../data/mox-context';
 import { finalizeOnboarding, isPoEligible } from '../utils';
 import { trackEmbeddedStepChange } from '../utils/tracking';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
@@ -24,7 +27,8 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	continueKyc = false,
 	collectPayoutRequirements = false,
 } ) => {
-	const { data } = useOnboardingContext();
+	const { data } = useMOXContext();
+	const { navigateToNextStep } = useOnboardingContext();
 	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
 	const [ isEligible, setIsEligible ] = useState< boolean | null >( null );
 	const [ loading, setLoading ] = useState( true );
@@ -55,7 +59,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			const response = await finalizeOnboarding( 'NOX' ); // To-Do: Replace with the source.
 
 			if ( response.success ) {
-				// To-Do: navigate to the next step.
+				navigateToNextStep();
 			}
 		} catch ( error ) {
 			// To-Do: Handle error.
