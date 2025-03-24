@@ -40,12 +40,12 @@
 		"config": "3.3.7"
 	},
 	"devDependencies": {
-		"@babel/cli": "7.12.8",
-		"@babel/core": "7.12.9",
-		"@babel/plugin-transform-react-jsx": "^7.23.4",
-		"@babel/plugin-transform-runtime": "^7.23.4",
+		"@babel/cli": "7.25.7",
+		"@babel/core": "7.25.7",
+		"@babel/plugin-transform-react-jsx": "7.25.7",
+		"@babel/plugin-transform-runtime": "7.25.7",
 		"@babel/polyfill": "7.12.1",
-		"@babel/preset-env": "^7.23.5",
+		"@babel/preset-env": "7.25.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-e2e-builds": "workspace:*",
 		"@wordpress/babel-plugin-import-jsx-pragma": "next",
