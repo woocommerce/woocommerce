@@ -3,6 +3,9 @@
  */
 import type { TemplateArray } from '@wordpress/blocks';
 
+/**
+ * Template definition for Grouped Product Item Template in the Add to Cart form.
+ */
 export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 	[
 		'woocommerce/add-to-cart-with-options-grouped-product-selector-item',

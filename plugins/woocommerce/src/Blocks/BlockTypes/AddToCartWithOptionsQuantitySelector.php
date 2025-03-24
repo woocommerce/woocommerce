@@ -97,6 +97,12 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
+	 * The selector is hidden for:
+	 * - Simple products that are out of stock.
+	 * - Not purchasable simple products.
+	 * - External products with URLs
+	 * - Products sold individually
+	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.

@@ -99,6 +99,13 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
 	 * Tests that no Add to Cart button is displayed for out of stock products and not purchasable products.
+	 *
+	 * Verifies that:
+	 * 1. Add to Cart button is hidden for not purchasable simple products
+	 * 2. Add to Cart button is visible for in-stock purchasable products
+	 * 3. Add to Cart button is hidden and stock indicator shows for out of stock products
+	 *
+	 * @covers AddToCartWithOptions::render
 	 */
 	public function test_out_of_stock_product() {
 		global $product;

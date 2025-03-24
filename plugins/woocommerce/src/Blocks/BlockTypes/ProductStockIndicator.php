@@ -63,7 +63,10 @@ class ProductStockIndicator extends AbstractBlock {
 	}
 
 	/**
-	 * Include and render the block.
+	 * Renders the stock indicator block.
+	 *
+	 * This method handles both direct product context and global product context,
+	 * ensuring the stock indicator displays correctly in various template scenarios.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
 	 * @param string   $content    Block content. Default empty string.
