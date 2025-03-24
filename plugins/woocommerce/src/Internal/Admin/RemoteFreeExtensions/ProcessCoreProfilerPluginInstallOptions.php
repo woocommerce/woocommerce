@@ -60,8 +60,8 @@ class ProcessCoreProfilerPluginInstallOptions {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $plugins List of plugins.
-	 * @param string $slug Plugin slug.
+	 * @param array                    $plugins List of plugins.
+	 * @param string                   $slug Plugin slug.
 	 * @param WC_Logger_Interface|null $logger Logger instance.
 	 */
 	public function __construct( array $plugins, string $slug, ?WC_Logger_Interface $logger = null ) {
@@ -110,7 +110,10 @@ class ProcessCoreProfilerPluginInstallOptions {
 			'autoload'    => false,
 		);
 
-		$options = $install_option->options ? (object) $install_option->options : new \stdClass();
+		$options = isset( $install_option->options )
+			? (object) $install_option->options
+			: new \stdClass();
+
 		foreach ( $default_options as $key => $value ) {
 			if ( ! isset( $options->$key ) ) {
 				$options->$key = $value;
