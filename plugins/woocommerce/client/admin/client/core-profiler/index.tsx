@@ -1260,20 +1260,54 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			],
 			states: {
 				preSkipFlowBusinessLocation: {
-					invoke: {
-						src: 'getCountries',
-						onDone: [
-							{
-								actions: [ 'handleCountries' ],
-								target: 'skipFlowBusinessLocation',
+					type: 'parallel',
+					onDone: {
+						target: 'skipFlowBusinessLocation',
+					},
+					states: {
+						getGeolocation: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										input: ( { context } ) => context,
+										src: 'getGeolocation',
+										onDone: {
+											target: 'done',
+											actions: [ 'handleGeolocation' ],
+										},
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: { type: 'final' },
 							},
-						],
-						onError: {
-							target: 'skipFlowBusinessLocation',
+						},
+						getCountries: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCountries',
+										onDone: [
+											{
+												actions: [ 'handleCountries' ],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: { type: 'final' },
+							},
 						},
 					},
 				},
 				skipFlowBusinessLocation: {
+					id: 'skipFlowBusinessLocation',
 					on: {
 						BUSINESS_LOCATION_COMPLETED: {
 							target: 'postSkipFlowBusinessLocation',
