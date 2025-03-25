@@ -26,7 +26,7 @@ const ProductImage = ( { image }: { image: { src: string; alt: string } } ) => {
 
 	return (
 		<div className="wc-block-product-gallery-large-image wc-block-editor-product-gallery-large-image">
-			<img src={ src } alt={ alt } />
+			<img src={ src } alt={ alt } loading="lazy" />
 		</div>
 	);
 };
