@@ -84,28 +84,106 @@ describe( 'setting-options reducer', () => {
 
 			expect( newState.edits[ testGroup.id ] ).toBeUndefined();
 		} );
+
+		it( 'should clear errors for received settings', () => {
+			state.errors = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: { message: 'Error' },
+					'other-setting': { message: 'Other error' },
+				},
+			};
+
+			const newState = reducer( state, {
+				type: TYPES.RECEIVE_SETTINGS,
+				groupId: testGroup.id,
+				settings: [ testSetting ],
+			} );
+
+			expect( newState.errors[ testGroup.id ] ).toEqual( {
+				'other-setting': { message: 'Other error' },
+			} );
+		} );
 	} );
 
-	describe( 'UPDATE_SETTING', () => {
-		it( 'should update a single setting edit', () => {
+	describe( 'EDIT_SETTING', () => {
+		beforeEach( () => {
+			// Set up initial settings
+			state.settings = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: testSetting,
+				},
+			};
+		} );
+
+		it( 'should not store edit if value is unchanged', () => {
 			const newState = reducer( state, {
 				type: TYPES.EDIT_SETTING,
 				groupId: testGroup.id,
 				settingId: testSetting.id,
-				value: 'new-value',
+				value: testSetting.value,
+			} );
+
+			expect( newState.edits[ testGroup.id ] ).toBeUndefined();
+		} );
+
+		it( 'should store edit if value is different', () => {
+			const newValue = 'new-value';
+			const newState = reducer( state, {
+				type: TYPES.EDIT_SETTING,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				value: newValue,
 			} );
 
 			expect( newState.edits[ testGroup.id ]?.[ testSetting.id ] ).toBe(
-				'new-value'
+				newValue
 			);
+		} );
+
+		it( 'should remove edit when value matches original', () => {
+			// First set an edit
+			state = reducer( state, {
+				type: TYPES.EDIT_SETTING,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				value: 'edited-value',
+			} );
+
+			// Then change it back to original
+			const newState = reducer( state, {
+				type: TYPES.EDIT_SETTING,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				value: testSetting.value,
+			} );
+
+			expect(
+				newState.edits[ testGroup.id ]?.[ testSetting.id ]
+			).toBeUndefined();
 		} );
 	} );
 
-	describe( 'UPDATE_SETTINGS', () => {
-		it( 'should update multiple setting edits', () => {
+	describe( 'EDIT_SETTINGS', () => {
+		beforeEach( () => {
+			// Set up initial settings
+			state.settings = {
+				[ testGroup.id ]: {
+					setting1: createTestSetting( {
+						id: 'setting1',
+						value: 'value1',
+					} ),
+					setting2: createTestSetting( {
+						id: 'setting2',
+						value: 'value2',
+					} ),
+				},
+			};
+		} );
+
+		it( 'should only store edits for changed values', () => {
 			const updates = [
-				{ id: 'setting-1', value: 'value-1' },
-				{ id: 'setting-2', value: 'value-2' },
+				{ id: 'setting1', value: 'value1' }, // unchanged
+				{ id: 'setting2', value: 'new-value2' }, // changed
 			];
 
 			const newState = reducer( state, {
@@ -115,8 +193,48 @@ describe( 'setting-options reducer', () => {
 			} );
 
 			expect( newState.edits[ testGroup.id ] ).toEqual( {
-				'setting-1': 'value-1',
-				'setting-2': 'value-2',
+				setting2: 'new-value2',
+			} );
+		} );
+
+		it( 'should remove edits when values match original', () => {
+			// First set some edits
+			state = reducer( state, {
+				type: TYPES.EDIT_SETTINGS,
+				groupId: testGroup.id,
+				updates: [
+					{ id: 'setting1', value: 'edited1' },
+					{ id: 'setting2', value: 'edited2' },
+				],
+			} );
+
+			// Then change them back to original
+			const newState = reducer( state, {
+				type: TYPES.EDIT_SETTINGS,
+				groupId: testGroup.id,
+				updates: [
+					{ id: 'setting1', value: 'value1' },
+					{ id: 'setting2', value: 'value2' },
+				],
+			} );
+
+			expect( newState.edits[ testGroup.id ] ).toBeUndefined();
+		} );
+
+		it( 'should handle mixed changes correctly', () => {
+			const updates = [
+				{ id: 'setting1', value: 'new-value1' }, // changed
+				{ id: 'setting2', value: 'value2' }, // unchanged
+			];
+
+			const newState = reducer( state, {
+				type: TYPES.EDIT_SETTINGS,
+				groupId: testGroup.id,
+				updates,
+			} );
+
+			expect( newState.edits[ testGroup.id ] ).toEqual( {
+				setting1: 'new-value1',
 			} );
 		} );
 	} );
@@ -144,6 +262,27 @@ describe( 'setting-options reducer', () => {
 			expect(
 				newState.isSaving.settings[ testGroup.id ]?.[ testSetting.id ]
 			).toBe( true );
+		} );
+
+		it( 'should clear saving state when done', () => {
+			// Set saving state first
+			state = reducer( state, {
+				type: TYPES.SET_SAVING,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				isSaving: true,
+			} );
+
+			const newState = reducer( state, {
+				type: TYPES.SET_SAVING,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				isSaving: false,
+			} );
+
+			expect(
+				newState.isSaving.settings[ testGroup.id ]?.[ testSetting.id ]
+			).toBe( false );
 		} );
 	} );
 
@@ -180,6 +319,46 @@ describe( 'setting-options reducer', () => {
 			expect(
 				newState.errors[ testGroup.id ]?.[ testSetting.id ]
 			).toEqual( error );
+		} );
+
+		it( 'should clear error when set to null', () => {
+			// Set an error first
+			state = reducer( state, {
+				type: TYPES.SET_ERROR,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				error,
+			} );
+
+			const newState = reducer( state, {
+				type: TYPES.SET_ERROR,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				error: null,
+			} );
+
+			expect(
+				newState.errors[ testGroup.id ]?.[ testSetting.id ]
+			).toBeUndefined();
+		} );
+
+		it( 'should remove group from errors if last error is cleared', () => {
+			// Set an error first
+			state = reducer( state, {
+				type: TYPES.SET_ERROR,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				error,
+			} );
+
+			const newState = reducer( state, {
+				type: TYPES.SET_ERROR,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+				error: null,
+			} );
+
+			expect( newState.errors[ testGroup.id ] ).toBeUndefined();
 		} );
 	} );
 
@@ -218,6 +397,29 @@ describe( 'setting-options reducer', () => {
 
 			expect( newState.edits[ testGroup.id ] ).toBeUndefined();
 		} );
+
+		it( 'should clear error when reverting', () => {
+			state.edits = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: 'edited-value',
+				},
+			};
+			state.errors = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: { message: 'Error' },
+				},
+			};
+
+			const newState = reducer( state, {
+				type: TYPES.REVERT_EDITED_SETTING,
+				groupId: testGroup.id,
+				settingId: testSetting.id,
+			} );
+
+			expect(
+				newState.errors[ testGroup.id ]?.[ testSetting.id ]
+			).toBeUndefined();
+		} );
 	} );
 
 	describe( 'REVERT_EDITED_SETTINGS_GROUP', () => {
@@ -239,6 +441,31 @@ describe( 'setting-options reducer', () => {
 
 			expect( newState.edits[ testGroup.id ] ).toBeUndefined();
 			expect( newState.edits[ 'other-group' ] ).toBeDefined();
+		} );
+
+		it( 'should clear all errors for the group', () => {
+			state.edits = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: 'edited-value',
+				},
+			};
+			state.errors = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: { message: 'Error' },
+					'other-setting': { message: 'Other error' },
+				},
+				'other-group': {
+					'some-setting': { message: 'Some error' },
+				},
+			};
+
+			const newState = reducer( state, {
+				type: TYPES.REVERT_EDITED_SETTINGS_GROUP,
+				groupId: testGroup.id,
+			} );
+
+			expect( newState.errors[ testGroup.id ] ).toBeUndefined();
+			expect( newState.errors[ 'other-group' ] ).toBeDefined();
 		} );
 	} );
 } );

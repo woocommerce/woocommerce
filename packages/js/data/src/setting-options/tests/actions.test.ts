@@ -28,12 +28,12 @@ describe( 'setting-options actions', () => {
 	} );
 
 	describe( 'editSetting', () => {
-		it( 'should update a single setting value in edits state', () => {
+		it( 'should update a single setting value in edits state', async () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
 			const value = 'new-value';
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, settingId, value );
 
@@ -42,17 +42,17 @@ describe( 'setting-options actions', () => {
 			);
 		} );
 
-		it( 'should not affect other settings in the group', () => {
+		it( 'should not affect other settings in the group', async () => {
 			const groupId = 'test-group';
 			const setting1Id = 'test-setting-1';
 			const setting2Id = 'test-setting-2';
 			const value1 = 'new-value-1';
 			const value2 = 'new-value-2';
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, setting1Id, value1 );
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, setting2Id, value2 );
 
@@ -64,14 +64,16 @@ describe( 'setting-options actions', () => {
 	} );
 
 	describe( 'editSettings', () => {
-		it( 'should update multiple settings in edits state', () => {
+		it( 'should update multiple settings in edits state', async () => {
 			const groupId = 'test-group';
 			const updates = [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			];
 
-			registry.dispatch( STORE_NAME ).editSettings( groupId, updates );
+			await registry
+				.dispatch( STORE_NAME )
+				.editSettings( groupId, updates );
 
 			expect( store.getState().edits[ groupId ] ).toEqual( {
 				setting1: 'value1',
@@ -79,18 +81,18 @@ describe( 'setting-options actions', () => {
 			} );
 		} );
 
-		it( 'should merge with existing edits', () => {
+		it( 'should merge with existing edits', async () => {
 			const groupId = 'test-group';
 
 			// First update
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSettings( groupId, [
 					{ id: 'setting1', value: 'value1' },
 				] );
 
 			// Second update
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSettings( groupId, [
 					{ id: 'setting2', value: 'value2' },
@@ -102,16 +104,16 @@ describe( 'setting-options actions', () => {
 			} );
 		} );
 
-		it( 'should override existing edits for the same setting', () => {
+		it( 'should override existing edits for the same setting', async () => {
 			const groupId = 'test-group';
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSettings( groupId, [
 					{ id: 'setting1', value: 'old-value' },
 				] );
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSettings( groupId, [
 					{ id: 'setting1', value: 'new-value' },
@@ -124,12 +126,12 @@ describe( 'setting-options actions', () => {
 	} );
 
 	describe( 'revertEditedSetting', () => {
-		it( 'should remove setting from edits state', () => {
+		it( 'should remove setting from edits state', async () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
 
 			// First make an edit
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, settingId, 'new-value' );
 
@@ -158,10 +160,10 @@ describe( 'setting-options actions', () => {
 			expect( store.getState().edits[ groupId ] ).toBeUndefined();
 		} );
 
-		it( 'should not affect other settings when reverting', () => {
+		it( 'should not affect other settings when reverting', async () => {
 			const groupId = 'test-group';
 
-			registry.dispatch( STORE_NAME ).editSettings( groupId, [
+			await registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -192,16 +194,16 @@ describe( 'setting-options actions', () => {
 			expect( store.getState().edits[ groupId ] ).toBeUndefined();
 		} );
 
-		it( 'should not affect other groups', () => {
+		it( 'should not affect other groups', async () => {
 			const group1Id = 'test-group-1';
 			const group2Id = 'test-group-2';
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSettings( group1Id, [
 					{ id: 'setting1', value: 'value1' },
 				] );
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSettings( group2Id, [
 					{ id: 'setting2', value: 'value2' },
@@ -239,7 +241,7 @@ describe( 'setting-options actions', () => {
 				value,
 			} );
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, settingId, value );
 
@@ -278,7 +280,7 @@ describe( 'setting-options actions', () => {
 			// Mock API error
 			( apiFetch as unknown as jest.Mock ).mockRejectedValue( error );
 
-			registry
+			await registry
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, settingId, '' );
 
@@ -321,7 +323,7 @@ describe( 'setting-options actions', () => {
 				mockResults
 			);
 
-			registry.dispatch( STORE_NAME ).editSettings( groupId, [
+			await registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -368,7 +370,7 @@ describe( 'setting-options actions', () => {
 				],
 			};
 
-			registry.dispatch( STORE_NAME ).editSettings( groupId, [
+			await registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );
@@ -410,7 +412,7 @@ describe( 'setting-options actions', () => {
 			const groupId = 'test-group';
 			const error = createTestError( 'Network Error' );
 
-			registry.dispatch( STORE_NAME ).editSettings( groupId, [
+			await registry.dispatch( STORE_NAME ).editSettings( groupId, [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			] );

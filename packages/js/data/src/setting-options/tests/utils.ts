@@ -11,24 +11,36 @@ import { STORE_NAME } from '../';
 import * as selectors from '../selectors';
 import * as actions from '../actions';
 import reducer from '../reducer';
+import type { SettingsState } from '../types';
 import { Setting, SettingsGroup } from '../types';
 
 /**
- * Creates a test registry with the settings store registered.
+ * Creates a fresh registry and store for testing.
  */
 export const createTestRegistryAndStore = () => {
 	const registry = createRegistry();
+
+	// Create initial state matching the reducer's initial state
+	const initialState: SettingsState = {
+		settings: {},
+		groups: [],
+		edits: {},
+		isSaving: {
+			settings: {},
+			groups: {},
+		},
+		errors: {},
+	};
+
 	const store = registry.registerStore( STORE_NAME, {
 		reducer,
 		actions,
 		controls,
 		selectors,
+		initialState, // Pass initial state to ensure fresh state each time
 	} );
 
-	return {
-		registry,
-		store,
-	};
+	return { registry, store };
 };
 
 /**

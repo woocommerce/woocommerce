@@ -17,14 +17,25 @@ import type {
 	BatchSettingsError,
 	SettingEdit,
 	SettingsEditObject,
+	SettingsState,
 } from './types';
 import { NAMESPACE } from '../constants';
 import { store } from './';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
 
+type CurriedState< F > = F extends (
+	state: SettingsState,
+	...args: infer P
+) => infer R
+	? ( ...args: P ) => R
+	: F;
+
+type Resolvers = typeof import('./resolvers');
+
 export type ThunkArgs = {
 	select: CurriedSelectorsOf< typeof store >;
+	resolveSelect: CurriedState< Resolvers >;
 	dispatch: ActionDispatchersForThunk;
 	registry: WPDataRegistry;
 };
@@ -54,24 +65,66 @@ export const receiveSettings = ( groupId: string, settings: Setting[] ) => ( {
 } );
 
 /**
+ * Action creator for editing a setting.
+ *
+ * @param groupId   - The settings group ID
+ * @param settingId - The setting ID
+ * @param value     - The new setting value
+ */
+const createEditSettingAction = (
+	groupId: string,
+	settingId: string,
+	value: SettingValue
+) => ( {
+	type: TYPES.EDIT_SETTING,
+	groupId,
+	settingId,
+	value,
+} );
+
+/**
  * Updates a single setting value.
  *
  * @param groupId   - The settings group ID
  * @param settingId - The setting ID
  * @param value     - The new setting value
  */
-export function editSetting(
-	groupId: string,
-	settingId: string,
-	value: SettingValue
-) {
-	return {
-		type: TYPES.EDIT_SETTING,
-		groupId,
-		settingId,
-		value,
+export const editSetting =
+	( groupId: string, settingId: string, value: SettingValue ) =>
+	async ( { resolveSelect, dispatch }: ThunkArgs ) => {
+		// Ensure setting is fetched before editing
+		await resolveSelect.getSettingValue( groupId, settingId );
+		dispatch( createEditSettingAction( groupId, settingId, value ) );
 	};
-}
+
+/**
+ * Action creator for editing multiple settings.
+ *
+ * @param groupId - The settings group ID
+ * @param updates - Array of setting updates or object with setting IDs as keys and values as values
+ */
+const createEditSettingsAction = (
+	groupId: string,
+	updates: SettingEdit[]
+) => ( {
+	type: TYPES.EDIT_SETTINGS,
+	groupId,
+	updates,
+} );
+
+/**
+ * Validates a setting edit.
+ *
+ * @param edit - The setting edit to validate.
+ * @return Whether the setting edit is valid.
+ */
+const validateSettingEdit = ( edit: SettingEdit ): boolean => {
+	return (
+		typeof edit.id === 'string' &&
+		edit.id.length > 0 &&
+		edit.value !== undefined
+	);
+};
 
 /**
  * Updates multiple settings at once.
@@ -79,24 +132,26 @@ export function editSetting(
  * @param groupId - The settings group ID
  * @param updates - Array of setting updates or object with setting IDs as keys and values as values
  */
-export function editSettings(
-	groupId: string,
-	updates: SettingEdit[] | SettingsEditObject
-) {
-	// Convert object format to array format if needed
-	const updatesArray = Array.isArray( updates )
-		? updates
-		: Object.entries( updates ).map( ( [ id, value ] ) => ( {
-				id,
-				value,
-		  } ) );
+export const editSettings =
+	( groupId: string, updates: SettingEdit[] | SettingsEditObject ) =>
+	async ( { resolveSelect, dispatch }: ThunkArgs ) => {
+		// Ensure settings are fetched before editing
+		await resolveSelect.getSettings( groupId );
 
-	return {
-		type: TYPES.EDIT_SETTINGS,
-		groupId,
-		updates: updatesArray,
+		// Convert object format to array format if needed
+		const updatesArray = Array.isArray( updates )
+			? updates
+			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
+					id,
+					value,
+			  } ) );
+
+		if ( ! updatesArray.every( validateSettingEdit ) ) {
+			throw new Error( 'Invalid setting edit payload' );
+		}
+
+		dispatch( createEditSettingsAction( groupId, updatesArray ) );
 	};
-}
 
 /**
  * Action creator for setting the saving state.
@@ -348,8 +403,8 @@ export type Actions = ReturnType<
 	| typeof setError
 	| typeof revertEditedSetting
 	| typeof revertEditedSettingsGroup
-	| typeof editSetting
-	| typeof editSettings
+	| typeof createEditSettingAction
+	| typeof createEditSettingsAction
 >;
 
 export type ActionDispatchersForThunk = {
