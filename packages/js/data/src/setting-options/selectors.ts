@@ -13,6 +13,15 @@ import type {
 	SettingValue,
 } from './types';
 
+type SelectorOptions = {
+	/**
+	 * Whether to include edits in the returned value.
+	 *
+	 * @default false
+	 */
+	includeEdits?: boolean;
+};
+
 /**
  * Get all groups.
  *
@@ -39,17 +48,27 @@ export const getGroup = (
 const EMPTY_OBJECT = {};
 
 /**
- * Get all settings for a specific group. When edits exist, they are applied to the settings.
+ * Get all settings for a specific group.
  *
- * @param {SettingsState} state   - The current state of the settings.
- * @param {string}        groupId - The ID of the group to get settings for.
- * @return {Record<string, Setting>} The settings for the specified group with any edited values.
+ * @param {SettingsState}   state   - The current state of the settings.
+ * @param {string}          groupId - The ID of the group to get settings for.
+ * @param {SelectorOptions} options - Options for the selector.
+ * @return {Record<string, Setting>} The settings for the specified group.
  */
 export const getSettings = createSelector(
-	( state: SettingsState, groupId: string ) => {
+	(
+		state: SettingsState,
+		groupId: string,
+		options: SelectorOptions = { includeEdits: false }
+	): Record< string, Setting > => {
 		const groupSettings = state.settings[ groupId ];
 		if ( ! groupSettings ) {
 			return EMPTY_OBJECT;
+		}
+
+		// If we don't want edits, return original settings
+		if ( options.includeEdits === false ) {
+			return groupSettings;
 		}
 
 		const groupEdits = state.edits[ groupId ];
@@ -77,67 +96,93 @@ export const getSettings = createSelector(
 			{}
 		);
 	},
-	( state: SettingsState, groupId: string ) => [
+	(
+		state: SettingsState,
+		groupId: string,
+		options: SelectorOptions = {}
+	) => [
 		state.settings[ groupId ],
-		state.edits[ groupId ],
+		options.includeEdits === false ? null : state.edits[ groupId ],
 	]
 );
 
 /**
  * Get a specific setting by ID.
  *
- * @param {SettingsState} state     - The current state of the settings.
- * @param {string}        groupId   - The ID of the group to get settings for.
- * @param {string}        settingId - The ID of the setting to get.
+ * @param {SettingsState}   state     - The current state of the settings.
+ * @param {string}          groupId   - The ID of the group to get settings for.
+ * @param {string}          settingId - The ID of the setting to get.
+ * @param {SelectorOptions} options   - Options for the selector.
  * @return {Setting | undefined} The setting if found, otherwise undefined.
  */
 export const getSetting = createSelector(
 	(
 		state: SettingsState,
 		groupId: string,
-		settingId: string
+		settingId: string,
+		options: SelectorOptions = { includeEdits: false }
 	): Setting | undefined => {
 		const groupSettings = state.settings[ groupId ];
 		if ( ! groupSettings ) {
 			return undefined;
 		}
 
+		const setting = groupSettings[ settingId ];
+		if ( ! setting ) {
+			return undefined;
+		}
+
+		// If we don't want edits, return original setting
+		if ( options.includeEdits === false ) {
+			return setting;
+		}
+
 		// If the setting is being edited, return the setting with the edited value
 		const groupEdits = state.edits[ groupId ];
 		if ( groupEdits && settingId in groupEdits ) {
 			return {
-				...groupSettings[ settingId ],
+				...setting,
 				value: groupEdits[ settingId ],
 			};
 		}
 
-		return groupSettings[ settingId ];
+		return setting;
 	},
-	( state: SettingsState, groupId: string ) => [
+	(
+		state: SettingsState,
+		groupId: string,
+		settingId: string,
+		options: SelectorOptions = {}
+	) => [
 		state.settings[ groupId ],
-		state.edits[ groupId ],
+		options.includeEdits === false ? null : state.edits[ groupId ],
 	]
 );
 
 /**
  * Get the value of a specific setting.
  *
- * @param {SettingsState} state     - The current state of the settings.
- * @param {string}        groupId   - The ID of the group to get settings for.
- * @param {string}        settingId - The ID of the setting to get.
+ * @param {SettingsState}   state     - The current state of the settings.
+ * @param {string}          groupId   - The ID of the group to get settings for.
+ * @param {string}          settingId - The ID of the setting to get.
+ * @param {SelectorOptions} options   - Options for the selector.
  * @return {SettingValue | undefined} The value of the setting if found, otherwise undefined.
  */
 export const getSettingValue = (
 	state: SettingsState,
 	groupId: string,
-	settingId: string
+	settingId: string,
+	options: SelectorOptions = { includeEdits: false }
 ): SettingValue | undefined => {
-	// Return the edited value if it exists
-	const groupEdits = state.edits[ groupId ];
-	if ( groupEdits && settingId in groupEdits ) {
-		return groupEdits[ settingId ];
+	// If we want edits and they exist, return the edited value
+	if ( options.includeEdits !== false ) {
+		const groupEdits = state.edits[ groupId ];
+		if ( groupEdits && settingId in groupEdits ) {
+			return groupEdits[ settingId ];
+		}
 	}
 
+	// Otherwise return the original value
 	const groupSettings = state.settings[ groupId ];
 	if ( ! groupSettings ) {
 		return undefined;
@@ -148,8 +193,9 @@ export const getSettingValue = (
 /**
  * Check if a specific setting has been edited.
  *
- * @param {SettingsState} state   - The current state of the settings.
- * @param {string}        groupId - The ID of the group to get settings for.
+ * @param {SettingsState} state     - The current state of the settings.
+ * @param {string}        groupId   - The ID of the group to get settings for.
+ * @param {string}        settingId - The ID of the setting to check.
  */
 export const isSettingEdited = (
 	state: SettingsState,

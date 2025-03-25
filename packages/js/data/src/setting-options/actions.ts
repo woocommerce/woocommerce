@@ -305,7 +305,9 @@ export const saveEditedSettingsGroup =
 			.getEditedSettingIds( groupId )
 			.map( ( settingId: string ) => ( {
 				id: settingId,
-				value: select.getSettingValue( groupId, settingId ),
+				value: select.getSettingValue( groupId, settingId, {
+					includeEdits: true,
+				} ),
 			} ) );
 
 		if ( editedSettings.length === 0 ) {
@@ -332,7 +334,9 @@ export const saveEditedSetting =
 			return;
 		}
 
-		const value = select.getSettingValue( groupId, settingId );
+		const value = select.getSettingValue( groupId, settingId, {
+			includeEdits: true,
+		} );
 		return saveSettingRequest( groupId, settingId, value, dispatch );
 	};
 

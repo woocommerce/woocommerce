@@ -53,16 +53,41 @@ describe( 'setting-options selectors', () => {
 			expect( settings ).toEqual( {} );
 		} );
 
-		it( 'should return settings for existing group', () => {
+		it( 'should return edited settings when includeEdits is true', () => {
+			const setting1 = createTestSetting( {
+				id: 'setting-1',
+				value: 'original-value-1',
+			} );
+			const setting2 = createTestSetting( {
+				id: 'setting-2',
+				value: 'original-value-2',
+			} );
+
 			state.settings = {
-				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+				[ testGroup.id ]: {
+					'setting-1': setting1,
+					'setting-2': setting2,
+				},
 			};
 
-			const settings = selectors.getSettings( state, testGroup.id );
-			expect( settings ).toEqual( { [ testSetting.id ]: testSetting } );
+			state.edits = {
+				[ testGroup.id ]: { 'setting-1': 'edited-value-1' },
+			};
+
+			const settings = selectors.getSettings( state, testGroup.id, {
+				includeEdits: true,
+			} );
+
+			expect( settings ).toEqual( {
+				'setting-1': {
+					...setting1,
+					value: 'edited-value-1',
+				},
+				'setting-2': setting2,
+			} );
 		} );
 
-		it( 'should return settings with edited values when edits exist', () => {
+		it( 'should not return settings with edits by default', () => {
 			const setting1 = createTestSetting( {
 				id: 'setting-1',
 				value: 'original-value-1',
@@ -86,11 +111,27 @@ describe( 'setting-options selectors', () => {
 			const settings = selectors.getSettings( state, testGroup.id );
 
 			expect( settings ).toEqual( {
-				'setting-1': {
-					...setting1,
-					value: 'edited-value-1',
-				},
+				'setting-1': setting1,
 				'setting-2': setting2,
+			} );
+		} );
+
+		it( 'should return original settings when no edits exist', () => {
+			const setting1 = createTestSetting( {
+				id: 'setting-1',
+				value: 'original-value-1',
+			} );
+
+			state.settings = {
+				[ testGroup.id ]: {
+					'setting-1': setting1,
+				},
+			};
+
+			const settings = selectors.getSettings( state, testGroup.id );
+
+			expect( settings ).toEqual( {
+				'setting-1': setting1,
 			} );
 		} );
 	} );
@@ -116,7 +157,27 @@ describe( 'setting-options selectors', () => {
 			expect( setting ).toBeUndefined();
 		} );
 
-		it( 'should return setting with edited value if it exists', () => {
+		it( 'should return edited setting when includeEdits is true', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+			state.edits = {
+				[ testGroup.id ]: { [ testSetting.id ]: 'edited-value' },
+			};
+
+			const result = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id,
+				{ includeEdits: true }
+			);
+			expect( result ).toEqual( {
+				...testSetting,
+				value: 'edited-value',
+			} );
+		} );
+
+		it( 'should not return setting with edits by default', () => {
 			state.settings = {
 				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
 			};
@@ -131,11 +192,10 @@ describe( 'setting-options selectors', () => {
 			);
 			expect( result ).toEqual( {
 				...testSetting,
-				value: 'edited-value',
 			} );
 		} );
 
-		it( 'should return original setting if no edits exist', () => {
+		it( 'should return original setting when no edits exist', () => {
 			state.settings = {
 				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
 			};
@@ -150,7 +210,24 @@ describe( 'setting-options selectors', () => {
 	} );
 
 	describe( 'getSettingValue', () => {
-		it( 'should return edited value if it exists', () => {
+		it( 'should return edited value when includeEdits is true', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+			state.edits = {
+				[ testGroup.id ]: { [ testSetting.id ]: 'edited-value' },
+			};
+
+			const value = selectors.getSettingValue(
+				state,
+				testGroup.id,
+				testSetting.id,
+				{ includeEdits: true }
+			);
+			expect( value ).toBe( 'edited-value' );
+		} );
+
+		it( 'should not return edited value by default', () => {
 			state.settings = {
 				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
 			};
@@ -163,10 +240,10 @@ describe( 'setting-options selectors', () => {
 				testGroup.id,
 				testSetting.id
 			);
-			expect( value ).toBe( 'edited-value' );
+			expect( value ).toBe( testSetting.value );
 		} );
 
-		it( 'should return original value if no edits exist', () => {
+		it( 'should return original value when no edits exist', () => {
 			state.settings = {
 				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
 			};

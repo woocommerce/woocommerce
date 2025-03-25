@@ -11,7 +11,12 @@ import { store as settingOptionsStore } from '@woocommerce/data';
 function MySettingsComponent() {
   const settings = useSelect((select) => {
     const { getSettings } = select(settingOptionsStore);
-    return getSettings('general');
+    // Get settings without edits
+    const editedSettings = getSettings('general');
+    // Get settings with edits
+    const originalSettings = getSettings('general', { includeEdits: true });
+    
+    return { editedSettings, originalSettings };
   }, []);
 
   return (
@@ -80,6 +85,9 @@ Directly saves multiple settings to the server without requiring them to be edit
 
 ## Selectors
 
+All selectors that return settings or setting values accept an optional `options` parameter with the following properties:
+- `includeEdits`: Whether to include edits in the returned value (default: `true`)
+
 ### `getGroups( state )`
 
 Returns all settings groups.
@@ -88,17 +96,17 @@ Returns all settings groups.
 
 Returns a specific settings group.
 
-### `getSettings( state, groupId )`
+### `getSettings( state, groupId, options? )`
 
-Returns all settings for a specific group.
+Returns all settings for a specific group. By default, returns settings without edits. Set `options.includeEdits` to `true` to get original settings with edits.
 
-### `getSetting( state, groupId, settingId )`
+### `getSetting( state, groupId, settingId, options? )`
 
-Returns a specific setting.
+Returns a specific setting. By default, returns the setting without edits. Set `options.includeEdits` to `true` to get the original setting with edits.
 
-### `getSettingValue( state, groupId, settingId )`
+### `getSettingValue( state, groupId, settingId, options? )`
 
-Returns the current value of a specific setting. This selector will trigger the `getSetting` resolver if the setting is not in the state.
+Returns the value of a specific setting. By default, returns the original value. Set `options.includeEdits` to `true` to get the edited value.
 
 ### `hasEditsForGroup( state, groupId )`
 
