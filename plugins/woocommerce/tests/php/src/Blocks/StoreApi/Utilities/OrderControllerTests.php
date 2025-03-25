@@ -66,10 +66,12 @@ class OrderControllerTests extends TestCase {
 
 		$order = WC_Helper_Order::create_order();
 
-		// Create a coupon with usage limit of 1 and mark it as used
-		$coupon = CouponHelper::create_coupon( 'limited-coupon', 'publish', array(
-			'usage_limit_per_user' => 1,
-		));
+		// Create a coupon with usage limit of 1 and mark it as used.
+		$coupon = CouponHelper::create_coupon(
+			'limited-coupon',
+			'publish',
+			array( 'usage_limit_per_user' => 1 )
+		);
 		$coupon->increase_usage_count( $order->get_billing_email() );
 		$order->apply_coupon( $coupon );
 		$order->save();
@@ -185,7 +187,7 @@ class OrderControllerTests extends TestCase {
 		$this->expectExceptionMessage( 'There was a problem with the provided billing address: First name is required, Last name is required' );
 
 		$order = WC_Helper_Order::create_order();
-		// Clear required billing fields
+		// Clear required billing fields.
 		$order->set_billing_first_name( '' );
 		$order->set_billing_last_name( '' );
 		$this->set_shipping_address( $order );
@@ -202,7 +204,7 @@ class OrderControllerTests extends TestCase {
 		$order = WC_Helper_Order::create_order();
 		$this->set_shipping_address( $order );
 
-		// Create a coupon without restrictions
+		// Create a coupon without restrictions.
 		$coupon = CouponHelper::create_coupon( 'valid-coupon' );
 		$order->apply_coupon( $coupon );
 		$order->save();
