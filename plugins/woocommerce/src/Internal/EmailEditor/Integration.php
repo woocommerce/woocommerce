@@ -19,6 +19,8 @@ defined( 'ABSPATH' ) || exit;
 class Integration {
 	const EMAIL_POST_TYPE = 'woo_email';
 
+	const WC_EMAIL_TYPE_ID_POST_META_KEY = '_wc_email_type';
+
 	/**
 	 * The email editor page renderer instance.
 	 *
@@ -83,7 +85,7 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_post_types', array( $this, 'add_email_post_type' ) );
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
-		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_post' ), 10, 2 );
+		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 	}
 
 	/**
@@ -154,10 +156,14 @@ class Integration {
 	 * @param int     $post_id The post ID.
 	 * @param WP_Post $post    The post object.
 	 */
-	public function delete_email_template_associated_with_post( $post_id, $post ) {
-		$email_type = get_post_meta( $post_id, '_wc_email_type', true );
+	public function delete_email_template_associated_with_email_editor_post( $post_id, $post ) {
+		if ( self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return;
+		}
 
-		if ( self::EMAIL_POST_TYPE !== $post->post_type || ! $email_type ) {
+		$email_type = get_post_meta( $post_id, self::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
+
+		if ( empty( $email_type ) ) {
 			return;
 		}
 

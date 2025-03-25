@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -57,7 +58,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * @internal
 	 */
 	public function initialize() {
-		if ( WOOCOMMERCE_VERSION === get_transient( $this->transient_name ) ) {
+		if ( Constants::get_constant( 'WC_VERSION' ) === get_transient( $this->transient_name ) ) {
 			// if templates are already generated, we don't need to run this function again.
 			return true;
 		}
@@ -172,7 +173,7 @@ class WCTransactionalEmailPostsGenerator {
 			return false;
 		}
 
-		set_transient( $this->transient_name, WOOCOMMERCE_VERSION, MONTH_IN_SECONDS );
+		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), MONTH_IN_SECONDS );
 		return true;
 	}
 
@@ -253,8 +254,7 @@ class WCTransactionalEmailPostsGenerator {
 			'post_title'   => $email_data->title,
 			'post_content' => $this->get_email_template( $email_data ),
 			'meta_input'   => array(
-				'_wc_email_enabled' => $email_enabled,
-				'_wc_email_type'    => $email_type,
+				Integration::WC_EMAIL_TYPE_ID_POST_META_KEY => $email_type,
 				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
 			),
 		);
