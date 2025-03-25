@@ -27,7 +27,6 @@
 				"@bartekbp/*",
 				"@storybook/*",
 				"@testing-library/*",
-				"@types/*",
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
@@ -426,7 +425,7 @@
 				"@woocommerce/block-library",
 				"@woocommerce/storybook"
 			],
-			"pinVersion": "29.7.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"label": "Testing related dependencies: React 17",
