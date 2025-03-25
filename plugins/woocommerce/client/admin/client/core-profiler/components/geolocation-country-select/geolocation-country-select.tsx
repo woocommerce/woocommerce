@@ -123,7 +123,7 @@ export const GeolocationCountrySelect = ( {
 							),
 							skipButton: (
 								<Button onClick={ onSkip } variant="tertiary">
-									{ __( 'skip this step', 'woocommerce' ) }
+									{ __( 'Skip this step', 'woocommerce' ) }
 								</Button>
 							),
 						}
