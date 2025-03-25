@@ -54,7 +54,6 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test get_products_reviews_pending_moderation_counter.
 	 */
 	public function test_get_pending_review_count_is_getting_updated() {
-		// Populate the cache entry, otherwise lazy updates will not be performed.
 		$this->assertSame( 0, WC_Comments::get_products_reviews_pending_moderation_counter() );
 
 		// Ensure the newly posted reviews processing is handled as intended.

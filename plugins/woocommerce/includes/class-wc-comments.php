@@ -350,7 +350,7 @@ class WC_Comments {
 		$needs_bump = '0' === $comment->comment_approved;
 		if ( $needs_bump && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
 			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
-			if ( $is_product && false !== wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP ) ) {
+			if ( $is_product ) {
 				wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
 			}
 		}
@@ -368,7 +368,7 @@ class WC_Comments {
 		$needs_adjustments = 'unapproved' === $new_status || 'unapproved' === $old_status;
 		if ( $needs_adjustments && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
 			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
-			if ( $is_product && false !== wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP ) ) {
+			if ( $is_product ) {
 				if ( '0' === $comment->comment_approved ) {
 					wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
 				} else {
