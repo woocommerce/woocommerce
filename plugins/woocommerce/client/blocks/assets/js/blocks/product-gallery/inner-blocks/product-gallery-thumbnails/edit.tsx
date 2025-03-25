@@ -18,9 +18,9 @@ import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import { checkOverflow } from '../../utils';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
-const maxThumbnails = 10;
+const MAX_THUMBNAILS = 10;
 const prepareProductImages = ( productImages: ProductResponseImageItem[] ) => {
-	return productImages.slice( 0, maxThumbnails ).map( ( image ) => {
+	return productImages.slice( 0, MAX_THUMBNAILS ).map( ( image ) => {
 		return {
 			src: image?.src,
 			alt: image?.alt,
@@ -43,7 +43,7 @@ export const Edit = withProductDataContext(
 		const isProductContext = Boolean( product?.id );
 		const productThumbnails = isProductContext
 			? prepareProductImages( product?.images )
-			: Array( maxThumbnails ).fill( {
+			: Array( MAX_THUMBNAILS ).fill( {
 					src: placeholderSrc,
 					alt: '',
 			  } );
