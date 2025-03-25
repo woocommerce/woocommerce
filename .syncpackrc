@@ -204,22 +204,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/interface",
-				"@wordpress/router",
-				"@wordpress/edit-site",
-				"@wordpress/private-apis",
-				"@wordpress/dataviews",
-				"@wordpress/icons"
-			],
-			"packages": [
-				"@woocommerce/product-editor",
-				"@woocommerce/settings-editor",
-				"@woocommerce/admin-library"
-			],
-			"isIgnored": true
-		},
-		{
-			"dependencies": [
 				"@wordpress/**"
 			],
 			"packages": [
