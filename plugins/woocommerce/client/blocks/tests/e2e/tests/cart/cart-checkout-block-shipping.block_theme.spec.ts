@@ -46,9 +46,7 @@ test.describe( 'Shopper → Shipping', () => {
 	} );
 
 	test.beforeEach( async ( { admin, requestUtils } ) => {
-		await requestUtils.deactivatePlugin(
-			'woocommerce-blocks-test-helper'
-		);
+		await requestUtils.deactivatePlugin( 'woocommerce-blocks-test-helper' );
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
 		await admin.page
 			.getByLabel( 'Default customer location' )
@@ -409,7 +407,6 @@ test.describe( 'Shopper → Shipping', () => {
 		admin,
 		frontendUtils,
 	} ) => {
-
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
 		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
