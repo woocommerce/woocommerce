@@ -44,7 +44,7 @@ export function RefreshButton() {
 							'Error refreshing subscriptions: %s',
 							'woocommerce'
 						),
-						error.message
+						error.data.message
 					),
 					NoticeStatus.Error,
 					{
