@@ -1,12 +1,18 @@
+.woocommerce_page_wc-settings-advanced-blueprint {
+	.blueprint-settings-slotfill {
+		min-height: 650px;
+	}
+}
+
 .blueprint-settings-slotfill {
 	max-width: 598px;
-
+	color: #2f2f2f;
 	label {
 		cursor: pointer;
 	}
 
 	h3 {
-		margin-bottom: 8px;
+		margin: 0 0 8px 0;
 		color: #23282d;
 		font-size: 18px;
 		font-style: normal;
@@ -120,10 +126,6 @@
 		}
 
 
-	}
-
-	h3 {
-		margin-top: 1.5em;
 	}
 
 	.woocommerce-blueprint-import-button {

@@ -27,42 +27,37 @@ import { dispatch } from '@wordpress/data';
  */
 import './style.scss';
 import { OverwriteConfirmationModal } from '../settings/overwrite-confirmation-modal';
+import { getOptionGroupsFromSteps } from './get-option-groups';
+import {
+	BlueprintQueueResponse,
+	BlueprintImportResponse,
+	BlueprintStep,
+	BlueprintImportStepResponse,
+} from './types';
 
-type BlueprintQueueResponse = {
-	reference?: string;
-	error_type?: string;
-	errors?: string[];
-	process_nonce?: string;
-	settings_to_overwrite?: string[];
+const parseBlueprintSteps = async ( file: File ) => {
+	// Create a FileReader instance
+	const reader = new FileReader();
+
+	// Create a promise to handle async file reading
+	const fileContent: string = await new Promise( ( resolve, reject ) => {
+		reader.onload = () => resolve( reader.result as string );
+		reader.onerror = () => reject( reader.error );
+		reader.readAsText( file );
+	} );
+
+	// Parse the file content as JSON
+	const steps = JSON.parse( fileContent ).steps;
+
+	// Ensure the parsed data is an array
+	if ( ! Array.isArray( steps ) ) {
+		throw new Error( 'Invalid JSON format: Expected an array.' );
+	}
+
+	return steps;
 };
 
-type BlueprintImportResponse = {
-	// TODO: flesh out this type with more concrete values
-	processed: boolean;
-	message: string;
-	data: {
-		redirect: string;
-		result: {
-			is_success: boolean;
-			messages: {
-				step: string;
-				type: string;
-				message: string;
-			}[];
-		};
-	};
-};
-
-type BlueprintImportStepResponse = {
-	success: boolean;
-	messages: {
-		step: string;
-		type: string;
-		message: string;
-	}[];
-};
-
-const importBlueprint = async ( file: File ) => {
+const importBlueprint = async ( steps: BlueprintStep[] ) => {
 	const errors = [] as {
 		step: string;
 		messages: {
@@ -73,19 +68,6 @@ const importBlueprint = async ( file: File ) => {
 	}[];
 
 	try {
-		// Create a FileReader instance
-		const reader = new FileReader();
-
-		// Create a promise to handle async file reading
-		const fileContent: string = await new Promise( ( resolve, reject ) => {
-			reader.onload = () => resolve( reader.result as string );
-			reader.onerror = () => reject( reader.error );
-			reader.readAsText( file );
-		} );
-
-		// Parse the file content as JSON
-		const steps = JSON.parse( fileContent ).steps;
-
 		// Ensure the parsed data is an array
 		if ( ! Array.isArray( steps ) ) {
 			throw new Error( 'Invalid JSON format: Expected an array.' );
@@ -158,8 +140,7 @@ const importBlueprint = async ( file: File ) => {
 
 interface FileUploadContext {
 	file?: File;
-	process_nonce?: string;
-	reference?: string;
+	steps?: BlueprintStep[];
 	error?: Error;
 	settings_to_overwrite?: string[];
 }
@@ -168,11 +149,12 @@ type FileUploadEvents =
 	| { type: 'UPLOAD'; file: File }
 	| { type: 'SUCCESS' }
 	| { type: 'ERROR'; error: Error }
-	| { type: 'DISMISS' }
+	| { type: 'DISMISS_FILE_UPLOAD' }
 	| { type: 'DISMISS_OVERWRITE_MODAL' }
 	| { type: 'IMPORT' }
 	| { type: 'CONFIRM_IMPORT' }
 	| { type: 'RETRY' }
+	| { type: 'DISMISS_ERRORS' }
 	| {
 			type: `xstate.done.actor.${ number }.fileUpload.uploading`;
 			output: BlueprintQueueResponse;
@@ -199,8 +181,6 @@ export const fileUploadMachine = setup( {
 		reportSuccess: enqueueActions( ( { event, enqueue } ) => {
 			assertEvent( event, 'xstate.done.actor.0.fileUpload.uploading' );
 			enqueue.assign( {
-				process_nonce: event.output.process_nonce,
-				reference: event.output.reference,
 				settings_to_overwrite: event.output.settings_to_overwrite,
 			} );
 		} ),
@@ -220,8 +200,12 @@ export const fileUploadMachine = setup( {
 		},
 	},
 	actors: {
-		importer: fromPromise( ( { input }: { input: { file: File } } ) =>
-			importBlueprint( input.file )
+		importer: fromPromise(
+			( { input }: { input: { steps: BlueprintStep[] } } ) =>
+				importBlueprint( input.steps )
+		),
+		stepsParser: fromPromise( ( { input }: { input: { file: File } } ) =>
+			parseBlueprintSteps( input.file )
 		),
 	},
 	guards: {
@@ -239,7 +223,7 @@ export const fileUploadMachine = setup( {
 		idle: {
 			on: {
 				UPLOAD: {
-					target: 'success',
+					target: 'parsingSteps',
 					actions: assign( {
 						file: ( { event } ) => event.file,
 						error: () => undefined,
@@ -259,15 +243,38 @@ export const fileUploadMachine = setup( {
 				target: 'idle',
 			},
 		},
-		success: {
-			on: {
-				DISMISS: {
+		parsingSteps: {
+			invoke: {
+				src: 'stepsParser',
+				input: ( { context } ) => {
+					return {
+						file: context.file!,
+					};
+				},
+				onDone: {
+					target: 'success',
 					actions: assign( {
 						error: () => undefined,
-						file: () => undefined,
+						steps: ( { event } ) => event.output,
+						settings_to_overwrite: ( { event } ) => {
+							return getOptionGroupsFromSteps(
+								event.output
+							) as string[];
+						},
 					} ),
-					target: 'idle',
 				},
+				onError: {
+					target: 'error',
+					actions: assign( {
+						error: new Error(
+							'Error reading or parsing file. Please check the schema.'
+						),
+					} ),
+				},
+			},
+		},
+		success: {
+			on: {
 				IMPORT: [
 					{
 						target: 'overrideModal',
@@ -290,7 +297,7 @@ export const fileUploadMachine = setup( {
 				src: 'importer',
 				input: ( { context } ) => {
 					return {
-						file: context.file!,
+						steps: context.steps!,
 					};
 				},
 				onDone: {
@@ -331,6 +338,16 @@ export const fileUploadMachine = setup( {
 		},
 		importSuccess: {},
 	},
+	on: {
+		DISMISS_FILE_UPLOAD: {
+			actions: assign( {
+				error: () => undefined,
+				file: () => undefined,
+				steps: () => undefined,
+			} ),
+			target: '.idle',
+		},
+	},
 } );
 
 export const BlueprintUploadDropzone = () => {
@@ -340,12 +357,19 @@ export const BlueprintUploadDropzone = () => {
 		<>
 			{ state.context.error && (
 				<div className="blueprint-upload-dropzone-error">
-					<Notice status="error" isDismissible={ false }>
+					<Notice
+						status="error"
+						onDismiss={ () =>
+							send( { type: 'DISMISS_FILE_UPLOAD' } )
+						}
+					>
 						<pre>{ state.context.error.message }</pre>
 					</Notice>
 				</div>
 			) }
-			{ ( state.matches( 'idle' ) || state.matches( 'error' ) ) && (
+			{ ( state.matches( 'idle' ) ||
+				state.matches( 'error' ) ||
+				state.matches( 'parsingSteps' ) ) && (
 				<div className="blueprint-upload-form">
 					<FormFileUpload
 						className="blueprint-upload-field"
@@ -406,7 +430,9 @@ export const BlueprintUploadDropzone = () => {
 						</span>
 						<Button
 							icon={ <Icon icon={ closeSmall } /> }
-							onClick={ () => send( { type: 'DISMISS' } ) }
+							onClick={ () => {
+								send( { type: 'DISMISS_FILE_UPLOAD' } );
+							} }
 						/>
 					</p>
 				</div>

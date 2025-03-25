@@ -71,11 +71,15 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	public function testItRendersAnEmail(): void {
 		$this->skip_if_unsupported_environment();
 
-		$test_woo_content        = 'Test Woo Content';
-		$wc_mail_mock            = new \WC_Email();
-		$wc_mail_mock->id        = 'test_email';
-		$wc_mail_mock->recipient = 'customer@test.com';
-		$rendered_email          = $this->block_email_renderer->render_block_email( $this->email_post, $test_woo_content, $wc_mail_mock );
+		$test_woo_content = 'Test Woo Content';
+		$wc_mail_mock     = $this->createMock( \WC_Email::class );
+		$wc_mail_mock->id = 'test_email';
+		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
+		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_content_html' )->willReturn( $test_woo_content );
+
+		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+
 		// Check that the Woo content placeholder was replaced.
 		$this->assertStringContainsString( $test_woo_content, $rendered_email );
 		// Check that the email standard block content was rendered correctly.

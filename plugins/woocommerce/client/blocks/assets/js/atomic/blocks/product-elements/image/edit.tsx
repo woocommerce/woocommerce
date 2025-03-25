@@ -50,8 +50,8 @@ const Edit = ( {
 	} = attributes;
 	const blockProps = useBlockProps( { style: { width, height } } );
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const isBlockThemeEnabled = getSettingWithCoercion(
-		'isBlockThemeEnabled',
+	const isBlockTheme = getSettingWithCoercion(
+		'isBlockTheme',
 		false,
 		isBoolean
 	);
@@ -127,7 +127,7 @@ const Edit = ( {
 						label={ __( 'Image Sizing', 'woocommerce' ) }
 						isBlock
 						help={
-							! isBlockThemeEnabled
+							! isBlockTheme
 								? createInterpolateElement(
 										__(
 											'Product image cropping can be modified in the <a>Customizer</a>.',

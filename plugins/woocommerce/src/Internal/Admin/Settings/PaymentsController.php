@@ -121,10 +121,12 @@ class PaymentsController {
 	public function add_menu() {
 		global $menu;
 
-		// The WooPayments plugin must not be active.
-		// When active, WooPayments will own the Payments menu item since it is the native Woo payments solution.
-		if ( $this->is_woopayments_active() ) {
+		// When WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
+		if ( $this->is_woopayments_account_onboarded() ) {
 			return;
+		} else {
+			// Otherwise, remove Payments menu item linking to the connect page to avoid Payments menu item duplication.
+			remove_menu_page( 'wc-admin&path=/payments/connect' );
 		}
 
 		$menu_title = esc_html__( 'Payments', 'woocommerce' );
@@ -241,27 +243,91 @@ class PaymentsController {
 
 		// Go through the providers and check if any of them have a "prominently" visible incentive (i.e., modal or banner).
 		foreach ( $providers as $provider ) {
-			// We check to see if the incentive was dismissed in the banner context.
-			// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
-			// we rely on the fact that the modal falls back to the banner, once dismissed.
-			if ( ! empty( $provider['_incentive'] ) &&
-				( empty( $provider['_incentive']['_dismissals'] ) ||
-					! in_array( 'wc_settings_payments__banner', $provider['_incentive']['_dismissals'], true )
-				)
-			) {
+			if ( empty( $provider['_incentive'] ) ) {
+				continue;
+			}
+
+			$dismissals = $provider['_incentive']['_dismissals'] ?? array();
+
+			// If there are no dismissals at all, the incentive is prominently visible.
+			if ( empty( $dismissals ) ) {
 				return true;
 			}
+
+			// First, we check to see if the incentive was dismissed in the banner context.
+			// The banner context has the lowest priority, so if it was dismissed, we don't need to check the modal context.
+			// If the banner is dismissed, there is no prominent incentive.
+			$is_dismissed_banner = ! empty(
+				array_filter(
+					$dismissals,
+					function ( $dismissal ) {
+						return isset( $dismissal['context'] ) && 'wc_settings_payments__banner' === $dismissal['context'];
+					}
+				)
+			);
+			if ( $is_dismissed_banner ) {
+				continue;
+			}
+
+			// In case an incentive uses the modal surface also (like the WooPayments Switch incentive),
+			// we rely on the fact that the modal falls back to the banner, once dismissed, after 30 days.
+			// @see here's its frontend "brother" in client/admin/client/settings-payments/settings-payments-main.tsx.
+			$is_dismissed_modal = ! empty(
+				array_filter(
+					$dismissals,
+					function ( $dismissal ) {
+						return isset( $dismissal['context'] ) && 'wc_settings_payments__modal' === $dismissal['context'];
+					}
+				)
+			);
+			// If there are no modal dismissals, the incentive is still visible.
+			if ( ! $is_dismissed_modal ) {
+				return true;
+			}
+
+			$is_dismissed_modal_more_than_30_days_ago = ! empty(
+				array_filter(
+					$dismissals,
+					function ( $dismissal ) {
+						return isset( $dismissal['context'], $dismissal['timestamp'] ) &&
+							'wc_settings_payments__modal' === $dismissal['context'] &&
+							$dismissal['timestamp'] < strtotime( '-30 days' );
+					}
+				)
+			);
+			// If the modal was dismissed less than 30 days ago, there is no prominent incentive (aka the banner is not shown).
+			if ( ! $is_dismissed_modal_more_than_30_days_ago ) {
+				continue;
+			}
+
+			// The modal was dismissed more than 30 days ago, so the banner is visible.
+			return true;
 		}
 
 		return false;
 	}
 
 	/**
-	 * Check if the WooPayments plugin is active.
+	 * Check if the WooPayments account is onboarded.
 	 *
 	 * @return boolean
 	 */
-	private function is_woopayments_active(): bool {
-		return class_exists( '\WC_Payments' );
+	private function is_woopayments_account_onboarded(): bool {
+		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
+		if ( ! class_exists( '\WC_Payments' ) ) {
+			return false;
+		}
+
+		$account_data = get_option( 'wcpay_account_data', array() );
+		if ( empty( $account_data['data']['account_id'] ) ) {
+			return false;
+		}
+
+		if ( empty( $account_data['data']['details_submitted'] ) ) {
+			return false;
+		}
+		// We consider the store to have WooPayments account connected if account data in the WooPayments account cache
+		// contains details_submitted = true entry. This implies that WooPayments was connected.
+		return $account_data['data']['details_submitted'];
 	}
 }

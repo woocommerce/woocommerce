@@ -51,6 +51,15 @@ test.describe( 'Merchant → Checkout', () => {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
+
+		// Dismiss the "Get started" modal if it appears.
+		const getStartedButton = admin.page.getByRole( 'button', {
+			name: 'Get started',
+		} );
+		if ( await getStartedButton.isVisible() ) {
+			await getStartedButton.click();
+		}
+
 		await editor.openDocumentSettingsSidebar();
 	} );
 
@@ -147,6 +156,7 @@ test.describe( 'Merchant → Checkout', () => {
 			).toBeVisible();
 		} );
 	} );
+
 	test( 'Merchant can see T&S and Privacy Policy links with checkbox', async ( {
 		frontendUtils,
 		checkoutPageObject,

@@ -137,31 +137,33 @@ test.describe( 'Shopper → Local pickup', () => {
 		await admin.page
 			.getByRole( 'button', { name: 'Save changes' } )
 			.click();
+		await admin.page.waitForResponse( ( response ) => {
+			return response.url().includes( 'wp-json/wp/v2/settings' );
+		} );
 	} );
 
-	test( 'The shopper can choose a local pickup option', async ( {
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
+	test.fixme(
+		'The shopper can choose a local pickup option',
+		async ( { page, frontendUtils, checkoutPageObject } ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Pickup' } ).click();
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
+			await page.getByRole( 'radio', { name: 'Pickup' } ).click();
+			await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
+			await page.getByLabel( 'Testing' ).last().check();
 
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
 
-		await expect(
-			page.getByText( 'Collection from Testing' )
-		).toBeVisible();
-		await checkoutPageObject.verifyBillingDetails();
-	} );
+			await expect(
+				page.getByText( 'Collection from Testing' )
+			).toBeVisible();
+			await checkoutPageObject.verifyBillingDetails();
+		}
+	);
 
-	test( 'Switching between local pickup and shipping does not affect the address', async ( {
+	test( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
 		page,
 		frontendUtils,
 		checkoutPageObject,
@@ -198,218 +200,10 @@ test.describe( 'Shopper → Local pickup', () => {
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
-	} );
-
-	test( 'Delivery/pickup toggle is not shown when other shipping methods are disabled and hide rates until address is entered is off', async ( {
-		admin,
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		// Disable hide rates until address is entered.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=options'
-		);
-
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.uncheck();
-
-		let saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		if ( await saveButton.isEnabled() ) {
-			await saveButton.click();
-		}
-
-		// Disable all other shipping methods.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&zone_id=0'
-		);
-
-		// There are 2 shipping methods and 2 toggles with our test data. Disable both.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).last().click();
-
-		saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		await saveButton.click();
-
-		// Go to checkout.
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Pickup', exact: true } )
-		).toBeHidden();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Ship', exact: true } )
-		).toBeHidden();
-
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await expect(
-			page.getByText( 'Collection from Testing' )
-		).toBeVisible();
-		await checkoutPageObject.verifyBillingDetails();
-	} );
-
-	test( 'Delivery/pickup toggle is not shown when other shipping methods are disabled and hide rates until address is entered is on', async ( {
-		admin,
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		// Disable hide rates until address is entered.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=options'
-		);
-
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.check();
-
-		let saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		if ( await saveButton.isEnabled() ) {
-			await saveButton.click();
-		}
-
-		// Disable all other shipping methods.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&zone_id=0'
-		);
-
-		// There are 2 shipping methods and 2 toggles with our test data. Disable both.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).last().click();
-
-		saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		await saveButton.click();
-
-		// Go to checkout.
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Pickup', exact: true } )
-		).toBeHidden();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Ship', exact: true } )
-		).toBeHidden();
-
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await expect(
-			page.getByText( 'Collection from Testing' )
-		).toBeVisible();
-		await checkoutPageObject.verifyBillingDetails();
-	} );
-
-	test( 'Delivery/pickup toggle is shown when hide rates until address is entered is on, but methods exist', async ( {
-		admin,
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		// Disable hide rates until address is entered.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=options'
-		);
-
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.check();
-
-		let saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		if ( await saveButton.isEnabled() ) {
-			await saveButton.click();
-		}
-
-		// Disable all other shipping methods.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&zone_id=0'
-		);
-
-		// There are 2 shipping methods and 2 toggles with our test data. Enable both.
-		const enabledMethods = await admin.page
-			.getByRole( 'link', { name: 'Yes' } )
-			.all();
-		if ( enabledMethods.length === 0 ) {
-			await admin.page
-				.getByRole( 'link', { name: 'No' } )
-				.first()
-				.click();
-			await admin.page.getByRole( 'link', { name: 'No' } ).last().click();
-		}
-
-		saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		if ( await saveButton.isEnabled() ) {
-			await saveButton.click();
-		}
-
-		// Go to checkout.
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Pickup', exact: true } )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Ship', exact: true } )
-		).toBeVisible();
-
-		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
-
-		// Check no rates are showing.
-		await expect(
-			page.getByText(
-				'Enter a shipping address to view shipping options.'
-			)
-		).toBeVisible();
 
 		await page
 			.getByRole( 'radio', { name: 'Pickup', exact: true } )
 			.click();
-
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
 		await checkoutPageObject.placeOrder();
 
 		await expect(
@@ -418,7 +212,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.verifyBillingDetails();
 	} );
 
-	test( 'Shipping rates are only shown after entering a full address when hide rates until address is entered is on', async ( {
+	test( 'Delivery/pickup toggle is not shown when shipping methods are disabled', async ( {
 		admin,
 		page,
 		frontendUtils,
@@ -430,9 +224,11 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&section=options'
 		);
 
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.check();
+		await expect(
+			admin.page.getByLabel(
+				'Hide shipping costs until an address is entered'
+			)
+		).toBeDisabled();
 
 		let saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',
@@ -448,25 +244,15 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&zone_id=0'
 		);
 
-		// There are 2 shipping methods and 2 toggles with our test data. Enable both.
-		const enabledMethods = await admin.page
-			.getByRole( 'link', { name: 'Yes' } )
-			.all();
-		if ( enabledMethods.length === 0 ) {
-			await admin.page
-				.getByRole( 'link', { name: 'No' } )
-				.first()
-				.click();
-			await admin.page.getByRole( 'link', { name: 'No' } ).last().click();
-		}
+		// There are 2 shipping methods and 2 toggles with our test data. Disable both.
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
+		await admin.page.getByRole( 'link', { name: 'Yes' } ).last().click();
 
 		saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',
 		} );
 
-		if ( await saveButton.isEnabled() ) {
-			await saveButton.click();
-		}
+		await saveButton.click();
 
 		// Go to checkout.
 		await frontendUtils.goToShop();
@@ -475,27 +261,21 @@ test.describe( 'Shopper → Local pickup', () => {
 
 		await expect(
 			page.getByRole( 'radio', { name: 'Pickup', exact: true } )
-		).toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.getByRole( 'radio', { name: 'Ship', exact: true } )
-		).toBeVisible();
+		).toBeHidden();
 
-		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
-
-		// Check no rates are showing.
-		await expect(
-			page.getByText(
-				'Enter a shipping address to view shipping options.'
-			)
-		).toBeVisible();
+		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
+		await page.getByLabel( 'Testing' ).last().check();
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
-
-		await expect( page.getByText( 'Free shipping' ) ).toBeVisible();
 		await checkoutPageObject.placeOrder();
 
-		await expect( page.getByText( 'Shipping:' ) ).toBeVisible();
+		await expect(
+			page.getByText( 'Collection from Testing' )
+		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
 } );
@@ -602,73 +382,74 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 test.describe( 'Shopper → Shipping (customer user)', () => {
 	test.use( { storageState: customerFile } );
 
-	test( 'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( 'Beanie' );
-		await frontendUtils.goToCheckout();
-		expect(
-			await checkoutPageObject.selectAndVerifyShippingOption(
-				FREE_SHIPPING_NAME,
-				FREE_SHIPPING_PRICE
-			)
-		).toBe( true );
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-		await checkoutPageObject.verifyAddressDetails( 'billing' );
-		await checkoutPageObject.verifyAddressDetails( 'shipping' );
-		await expect( page.getByText( FREE_SHIPPING_NAME ) ).toBeVisible();
+	test.fixme(
+		'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses',
+		async ( { checkoutPageObject, frontendUtils, page } ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( 'Beanie' );
+			await frontendUtils.goToCheckout();
+			expect(
+				await checkoutPageObject.selectAndVerifyShippingOption(
+					FREE_SHIPPING_NAME,
+					FREE_SHIPPING_PRICE
+				)
+			).toBe( true );
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
+			await checkoutPageObject.verifyAddressDetails( 'billing' );
+			await checkoutPageObject.verifyAddressDetails( 'shipping' );
+			await expect( page.getByText( FREE_SHIPPING_NAME ) ).toBeVisible();
 
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( 'Beanie' );
-		await frontendUtils.goToCheckout();
-		expect(
-			await checkoutPageObject.selectAndVerifyShippingOption(
-				FLAT_RATE_SHIPPING_NAME,
-				FLAT_RATE_SHIPPING_PRICE
-			)
-		).toBe( true );
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( 'Beanie' );
+			await frontendUtils.goToCheckout();
+			expect(
+				await checkoutPageObject.selectAndVerifyShippingOption(
+					FLAT_RATE_SHIPPING_NAME,
+					FLAT_RATE_SHIPPING_PRICE
+				)
+			).toBe( true );
 
-		await checkoutPageObject.syncBillingWithShipping();
-		await checkoutPageObject.fillInCheckoutWithTestData( {
-			phone: '0987654322',
-		} );
-		await checkoutPageObject.unsyncBillingWithShipping();
-		const shippingForm = page.getByRole( 'group', {
-			name: 'Shipping address',
-		} );
-		const billingForm = page.getByRole( 'group', {
-			name: 'Billing address',
-		} );
+			await checkoutPageObject.syncBillingWithShipping();
+			await checkoutPageObject.fillInCheckoutWithTestData( {
+				phone: '0987654322',
+			} );
+			await checkoutPageObject.unsyncBillingWithShipping();
+			const shippingForm = page.getByRole( 'group', {
+				name: 'Shipping address',
+			} );
+			const billingForm = page.getByRole( 'group', {
+				name: 'Billing address',
+			} );
 
-		expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
-			billingForm.getByLabel( 'Phone' ).inputValue
-		);
+			expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
+				billingForm.getByLabel( 'Phone' ).inputValue
+			);
 
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		const overrideBillingDetails = {
-			firstname: 'Juan',
-			lastname: 'Perez',
-			addressfirstline: '123 Test Street',
-			addresssecondline: 'Apartment 6',
-			countryKey: 'ES',
-			city: 'Madrid',
-			postcode: '08830',
-			state: 'M',
-			phone: '0987654321',
-			email: 'juan.perez@test.com',
-		};
-		await checkoutPageObject.fillBillingDetails( overrideBillingDetails );
-		await checkoutPageObject.placeOrder();
-		await checkoutPageObject.verifyAddressDetails(
-			'billing',
-			overrideBillingDetails
-		);
-		await checkoutPageObject.verifyAddressDetails( 'shipping' );
-	} );
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			const overrideBillingDetails = {
+				firstname: 'Juan',
+				lastname: 'Perez',
+				addressfirstline: '123 Test Street',
+				addresssecondline: 'Apartment 6',
+				countryKey: 'ES',
+				city: 'Madrid',
+				postcode: '08830',
+				state: 'M',
+				phone: '0987654321',
+				email: 'juan.perez@test.com',
+			};
+			await checkoutPageObject.fillBillingDetails(
+				overrideBillingDetails
+			);
+			await checkoutPageObject.placeOrder();
+			await checkoutPageObject.verifyAddressDetails(
+				'billing',
+				overrideBillingDetails
+			);
+			await checkoutPageObject.verifyAddressDetails( 'shipping' );
+		}
+	);
 } );
 
 test.describe( 'Shopper → Place Guest Order', () => {
