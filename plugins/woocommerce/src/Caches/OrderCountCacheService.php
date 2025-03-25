@@ -49,7 +49,7 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_on_order_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_before_trash_order', array( $this, 'update_on_order_trashed' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
-		add_action( 'woocommerce_order_count', array( $this, 'refresh_cache' ) );
+		add_action( 'woocommerce_refresh_order_count_cache', array( $this, 'refresh_cache' ) );
 		add_action( BackgroundScheduler::HOOK_NAME, array( $this, 'register_background_actions' ) );
 	}
 
@@ -70,16 +70,10 @@ class OrderCountCacheService {
 	 * @return void
 	 */
 	public function register_background_actions() {
-		if ( ! function_exists( 'as_schedule_recurring_action' ) ) {
-			return;
-		}
-
 		$order_types = wc_get_order_types( 'order-count' );
+		$frequency   = HOUR_IN_SECONDS * 12;
 		foreach ( $order_types as $order_type ) {
-			if ( false === as_has_scheduled_action( 'woocommerce_order_count' ) ) {
-				$frequency = HOUR_IN_SECONDS * 12;
-				as_schedule_recurring_action( time() + $frequency, $frequency, 'woocommerce_order_count', array( $order_type ) );
-			}
+			as_schedule_recurring_action( time() + $frequency, $frequency, 'woocommerce_refresh_order_count_cache', array( $order_type ), 'count', true );
 		}
 	}
 

@@ -19,8 +19,13 @@ class BackgroundScheduler {
 	 * Initialize the background scheduler.
 	 */
 	public function init() {
-		if ( function_exists( 'as_schedule_recurring_action' ) && false === as_has_scheduled_action( self::HOOK_NAME ) ) {
-			as_schedule_recurring_action( time(), HOUR_IN_SECONDS, self::HOOK_NAME, array() );
-		}
+		add_action( 'admin_init', array( $this, 'schedule_background_actions' ) );
+	}
+
+	/**
+	 * Schedule the background actions.
+	 */
+	public function schedule_background_actions() {
+		as_schedule_recurring_action( time(), HOUR_IN_SECONDS, self::HOOK_NAME, array(), '', true );
 	}
 }
