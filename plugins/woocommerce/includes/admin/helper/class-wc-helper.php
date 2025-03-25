@@ -1620,7 +1620,7 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				// translators: %d: HTTP status code
+				// translators: %d: HTTP status code.
 				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
 			}
 
@@ -1749,7 +1749,7 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				// translators: %d: HTTP status code
+				// translators: %d: HTTP status code.
 				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
 			}
 
