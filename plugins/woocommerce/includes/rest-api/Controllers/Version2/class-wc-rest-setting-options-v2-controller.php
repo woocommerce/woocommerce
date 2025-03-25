@@ -402,6 +402,19 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Makes sure the current user has access to WRITE the settings APIs.
+	 *
+	 * @since 9.5.2
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|boolean True if the request has permission, otherwise false.
+	 */
+	public function update_item_permissions_check( $request ) {
+		return $this->update_items_permissions_check( $request ); // We check for manager permission for all setting.
+	}
+
+	/**
 	 * Filters out bad values from the settings array/filter so we
 	 * only return known values via the API.
 	 *

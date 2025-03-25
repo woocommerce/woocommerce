@@ -9,12 +9,14 @@ import {
 import {
 	WooHeaderNavigationItem,
 	WooHeaderPageTitle,
+	WooHeaderItem,
 } from '@woocommerce/admin-layout';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { BackButton } from '../back-button/back-button';
+import { BackButton } from '../buttons/back-button';
 import './header.scss';
 
 interface HeaderProps {
@@ -26,6 +28,22 @@ interface HeaderProps {
 	 * The link to go back to. If not provided, the back button will not be shown.
 	 */
 	backLink?: string;
+	/**
+	 * The description of the header.
+	 */
+	description?: string;
+	/**
+	 * Whether to show the button or not.
+	 */
+	hasButton?: boolean;
+	/**
+	 * The label of the button.
+	 */
+	buttonLabel?: string;
+	/**
+	 * The callback function when the button is clicked.
+	 */
+	onButtonClick?: () => void;
 }
 
 const HEADER_PLUGIN_NAME = 'settings-payments-offline-header';
@@ -35,13 +53,19 @@ let hasRegisteredPlugins = false;
 /**
  * Registers the header component as a plugin to customize the header of the settings payments page.
  */
-export const Header = ( { title, backLink }: HeaderProps ) => {
+export const Header = ( {
+	title,
+	backLink,
+	description,
+	hasButton,
+	buttonLabel,
+	onButtonClick,
+}: HeaderProps ) => {
 	if ( ! hasRegisteredPlugins ) {
 		/**
 		 * Unregister existing header plugins since we don't want to show the default items such as activity panel.
 		 */
 		const unRegisterHeaderItems = () => {
-			// @ts-expect-error scope param is not typed
 			const plugins = getPlugins( 'woocommerce-admin' );
 			plugins.forEach( ( plugin ) => {
 				if ( ITEMS_TO_REMOVE.includes( plugin.name ) ) {
@@ -65,9 +89,27 @@ export const Header = ( { title, backLink }: HeaderProps ) => {
 							{ title }
 						</span>
 					</WooHeaderPageTitle>
+					{ hasButton && (
+						<WooHeaderItem>
+							<Button
+								variant="primary"
+								onClick={ onButtonClick }
+								isBusy={ false }
+								disabled={ false }
+							>
+								{ buttonLabel }
+							</Button>
+						</WooHeaderItem>
+					) }
+					{ description && (
+						<WooHeaderItem>
+							<div className="woocommerce-settings-payments-header__description">
+								{ description }
+							</div>
+						</WooHeaderItem>
+					) }
 				</>
 			),
-			// @ts-expect-error scope param is not typed
 			scope: 'woocommerce-admin',
 		} );
 

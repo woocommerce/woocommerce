@@ -117,7 +117,7 @@ export const SidebarNavigationScreen = ( {
 						}
 						color={ '#e0e0e0' /* $gray-200 */ }
 						level={ 1 }
-						size={ 20 }
+						as="h1"
 					>
 						{ title }
 					</Heading>

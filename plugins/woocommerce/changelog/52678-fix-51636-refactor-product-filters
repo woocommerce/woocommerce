@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Refactor individual filters to use a function instead of a hook.
-

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Load env vars from the .env file
+source "../.env"
+
 clear
 
 echo "--------------------------------------------------------"
@@ -60,7 +63,7 @@ echo "--------------------------------------------------------"
 echo -e 'Add Customer user'
 echo "--------------------------------------------------------"
 wp user create customer customer@woocommercecoree2etestsuite.com \
-    --user_pass=password \
+    --user_pass=$CUSTOMER_PASSWORD \
     --role=customer \
     --first_name='Jane' \
     --last_name='Smith' \

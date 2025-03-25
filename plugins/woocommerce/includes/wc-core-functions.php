@@ -10,6 +10,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -38,7 +39,6 @@ require WC_ABSPATH . 'includes/wc-webhook-functions.php';
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'wc_sanitize_coupon_code' );
-add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.
 add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
@@ -1553,14 +1553,11 @@ function wc_transaction_query( $type = 'start', $force = false ) {
  * @return string Url to cart page
  */
 function wc_get_cart_url() {
-	// We don't use is_cart() here because that also checks for a defined constant. We are only interested in the page.
-	$page_id      = wc_get_page_id( 'cart' );
-	$is_cart_page = ( $page_id && is_page( $page_id ) ) || wc_post_content_has_shortcode( 'woocommerce_cart' );
+	global $post;
 
-	if ( $is_cart_page && isset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] ) ) {
-		$protocol    = is_ssl() ? 'https' : 'http';
-		$current_url = esc_url_raw( $protocol . '://' . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		$cart_url    = remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), $current_url );
+	// We don't use is_cart() here because that also checks for a defined constant. We are only interested in the page.
+	if ( CartCheckoutUtils::is_cart_page() ) {
+		$cart_url = get_permalink( $post->ID );
 	} else {
 		$cart_url = wc_get_page_permalink( 'cart' );
 	}
@@ -1786,43 +1783,58 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = false ) {
 	global $wpdb;
 
-	$transient_name    = $include_legacy ? 'wc_shipping_method_count_legacy' : 'wc_shipping_method_count';
+	$transient_name    = 'wc_shipping_method_count';
 	$transient_version = WC_Cache_Helper::get_transient_version( 'shipping' );
 	$transient_value   = get_transient( $transient_name );
-
-	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
-		return absint( $transient_value['value'] );
-	}
-
-	// Count activated methods that don't support shipping zones if $include_legacy is true.
-	$methods      = WC()->shipping()->get_shipping_methods();
-	$method_ids   = array();
-	$method_count = 0;
-
-	foreach ( $methods as $method ) {
-		$method_ids[] = $method->id;
-
-		if ( $include_legacy && isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
-			++$method_count;
-		}
-	}
-
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	if ( $enabled_only ) {
-		$method_count = $method_count + absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE is_enabled=1 AND method_id IN ('" . implode( "','", array_map( 'esc_sql', $method_ids ) ) . "')" ) );
-	} else {
-		$method_count = $method_count + absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE method_id IN ('" . implode( "','", array_map( 'esc_sql', $method_ids ) ) . "')" ) );
-	}
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-
-	$transient_value = array(
-		'version' => $transient_version,
-		'value'   => $method_count,
+	$counts            = array(
+		'legacy'   => 0,
+		'enabled'  => 0,
+		'disabled' => 0,
 	);
 
-	set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
+	if ( ! isset( $transient_value['legacy'], $transient_value['enabled'], $transient_value['disabled'], $transient_value['version'] ) || $transient_value['version'] !== $transient_version ) {
+		// Count activated methods that don't support shipping zones if $include_legacy is true.
+		$methods    = WC()->shipping()->get_shipping_methods();
+		$method_ids = array();
 
-	return $method_count;
+		foreach ( $methods as $method ) {
+			$method_ids[] = $method->id;
+
+			if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
+				++$counts['legacy'];
+			}
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$counts['enabled']  = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE is_enabled=1 AND method_id IN ('" . implode( "','", array_map( 'esc_sql', $method_ids ) ) . "')" ) );
+		$counts['disabled'] = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE is_enabled=0 AND method_id IN ('" . implode( "','", array_map( 'esc_sql', $method_ids ) ) . "')" ) );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$transient_value = array(
+			'version'  => $transient_version,
+			'legacy'   => $counts['legacy'],
+			'enabled'  => $counts['enabled'],
+			'disabled' => $counts['disabled'],
+		);
+
+		set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
+	} else {
+		$counts = $transient_value;
+	}
+
+	$return = 0;
+
+	if ( $enabled_only ) {
+		$return = $counts['enabled'];
+	} else {
+		$return = $counts['enabled'] + $counts['disabled'];
+	}
+
+	if ( $include_legacy ) {
+		$return += $counts['legacy'];
+	}
+
+	return $return;
 }
 
 /**
@@ -2672,4 +2684,125 @@ function wc_cache_get_multiple( $keys, $group = '', $force = false ) {
 		$values[ $key ] = wp_cache_get( $key, $group, $force );
 	}
 	return $values;
+}
+
+/**
+ * Delete multiple transients in a single operation.
+ *
+ * IMPORTANT: This is a private function (internal use ONLY).
+ *
+ * This function efficiently deletes multiple transients at once, using a direct
+ * database query when possible for better performance.
+ *
+ * @internal
+ *
+ * @since 9.8.0
+ * @param array $transients Array of transient names to delete (without the '_transient_' prefix).
+ * @return bool True on success, false on failure.
+ */
+function _wc_delete_transients( $transients ) {
+	global $wpdb;
+
+	if ( empty( $transients ) || ! is_array( $transients ) ) {
+		return false;
+	}
+
+	// If using external object cache, delete each transient individually.
+	if ( wp_using_ext_object_cache() ) {
+		foreach ( $transients as $transient ) {
+			delete_transient( $transient );
+		}
+		return true;
+	} else {
+		// For database storage, create a list of transient option names.
+		$transient_names = array();
+		foreach ( $transients as $transient ) {
+			$transient_names[] = '_transient_' . $transient;
+			$transient_names[] = '_transient_timeout_' . $transient;
+		}
+
+		// Limit the number of items in a single query to avoid exceeding database query parameter limits.
+		if ( count( $transients ) > 199 ) {
+			// Process in smaller chunks to reduce memory usage.
+			$chunks  = array_chunk( $transients, 100 );
+			$success = true;
+
+			foreach ( $chunks as $chunk ) {
+				$result = _wc_delete_transients( $chunk );
+				if ( ! $result ) {
+					$success = false;
+				}
+				// Force garbage collection after each chunk to free memory.
+				gc_collect_cycles();
+			}
+
+			return $success;
+		}
+
+		try {
+			// Before deleting, get the list of options to clear from cache.
+			// Since we already have the option names we could skip this step but this mirrors WP's delete_option functionality.
+			// It also allows us to only delete the options we know exist.
+			$options_to_clear = array();
+			if ( ! wp_installing() ) {
+				$options_to_clear = $wpdb->get_col(
+					$wpdb->prepare(
+						'SELECT option_name FROM ' . $wpdb->options . ' WHERE option_name IN ( ' . implode( ', ', array_fill( 0, count( $transient_names ), '%s' ) ) . ' )',
+						$transient_names
+					)
+				);
+			}
+
+			if ( empty( $options_to_clear ) ) {
+				// If there are no options to clear, return true immediately.
+				return true;
+			}
+
+			// Use a single query for better performance.
+			$wpdb->query(
+				$wpdb->prepare(
+					'DELETE FROM ' . $wpdb->options . ' WHERE option_name IN ( ' . implode( ', ', array_fill( 0, count( $options_to_clear ), '%s' ) ) . ' )',
+					$options_to_clear
+				)
+			);
+
+			// Lets clear our options data from the cache.
+			// We can batch delete if available, introduced in WP 6.0.0.
+			if ( ! wp_installing() ) {
+				if ( function_exists( 'wp_cache_delete_multiple' ) ) {
+					wp_cache_delete_multiple( $options_to_clear, 'options' );
+				} else {
+					foreach ( $options_to_clear as $option_name ) {
+						wp_cache_delete( $option_name, 'options' );
+					}
+				}
+
+				// Also update alloptions cache if needed.
+				// This is required to prevent phantom transients from being returned.
+				$alloptions         = wp_load_alloptions( true );
+				$updated_alloptions = false;
+
+				if ( is_array( $alloptions ) ) {
+					foreach ( $options_to_clear as $option_name ) {
+						if ( isset( $alloptions[ $option_name ] ) ) {
+							unset( $alloptions[ $option_name ] );
+							$updated_alloptions = true;
+						}
+					}
+
+					if ( $updated_alloptions ) {
+						wp_cache_set( 'alloptions', $alloptions, 'options' );
+					}
+				}
+			}
+
+			return true;
+		} catch ( Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Exception when deleting transients: %s', $e->getMessage() ),
+				array( 'source' => '_wc_delete_transients' )
+			);
+			return false;
+		}
+	}
 }

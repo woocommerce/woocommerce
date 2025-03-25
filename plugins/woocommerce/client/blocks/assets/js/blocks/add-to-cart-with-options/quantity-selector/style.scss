@@ -1,0 +1,48 @@
+.wc-block-add-to-cart-with-options__quantity-selector {
+	/**
+	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
+	*
+	* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
+	*/
+	.input-text {
+		font-size: var(--wp--preset--font-size--small);
+		padding: 0.9rem 1.1rem;
+	}
+}
+
+// Stepper CSS
+.wc-block-add-to-cart-with-options__quantity-selector--stepper {
+	.wc-block-components-quantity-selector {
+		display: inline-flex;
+		width: unset;
+		background-color: #fff;
+		margin-right: 0.5em;
+		margin-bottom: 0;
+
+		.input-text {
+			font-size: var(--wp--preset--font-size--small);
+		}
+
+		input[type="number"].input-text.qty.text {
+			-moz-appearance: textfield;
+			border: unset;
+			text-align: center;
+			order: 1;
+			margin: 0;
+			/**
+			* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
+			*
+			* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
+			*/
+			padding: 0.9rem 0;
+			margin-right: unset;
+			font-size: var(--wp--preset--font-size--small);
+		}
+
+		input[type="number"]::-webkit-inner-spin-button,
+		input[type="number"]::-webkit-outer-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+	}
+}

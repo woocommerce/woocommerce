@@ -4,7 +4,6 @@
 # Built JS
 /assets/js/*
 /assets/client/*
-/blocks.ini
 
 # Behat/CLI Tests
 tests/cli/installer
@@ -20,6 +19,9 @@ tests/cli/vendor
 /tests/e2e/screenshots
 /tests/e2e/plugins
 .phpunit.result.cache
+
+# Test translations
+/i18n/languages/woocommerce*
 
 # Packages
 /packages/*

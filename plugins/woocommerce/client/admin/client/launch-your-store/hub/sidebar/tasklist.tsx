@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
+import { onboardingStore, TaskType } from '@woocommerce/data';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { resolveSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
@@ -55,9 +55,9 @@ export const getLysTasklist = async () => {
 		[ ...LYS_TASKS_WHITELIST ]
 	) as string[];
 
-	const tasklist = await resolveSelect(
-		ONBOARDING_STORE_NAME
-	).getTaskListsByIds( [ 'setup' ] );
+	const tasklist = await resolveSelect( onboardingStore ).getTaskListsByIds( [
+		'setup',
+	] );
 
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 
@@ -67,7 +67,7 @@ export const getLysTasklist = async () => {
 	 * 2. either not completed or recently actioned
 	 */
 	const visibleTasks = tasklist[ 0 ].tasks.filter(
-		( task ) =>
+		( task: TaskType ) =>
 			filteredTasks.includes( task.id ) &&
 			( ! task.isComplete || recentlyActionedTasks.includes( task.id ) )
 	);
@@ -76,7 +76,7 @@ export const getLysTasklist = async () => {
 		...tasklist[ 0 ],
 		tasks: visibleTasks,
 		recentlyActionedTasks,
-		fullLysTaskList: tasklist[ 0 ].tasks.filter( ( task ) =>
+		fullLysTaskList: tasklist[ 0 ].tasks.filter( ( task: TaskType ) =>
 			filteredTasks.includes( task.id )
 		),
 	};

@@ -39,4 +39,8 @@ export default [
 		label: 'Negative number',
 		key: 'neg_num',
 	},
+	{
+		label: 'Formula injection attempt',
+		key: 'formula_injection',
+	},
 ];

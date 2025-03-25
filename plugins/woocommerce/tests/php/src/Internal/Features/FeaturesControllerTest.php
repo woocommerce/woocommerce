@@ -39,37 +39,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) {
-				$this->reset_features_list( $this->sut );
-
-				$features = array(
-					'mature1'       => array(
-						'name'            => 'Mature feature 1',
-						'description'     => 'The mature feature number 1',
-						'is_experimental' => false,
-					),
-					'mature2'       => array(
-						'name'            => 'Mature feature 2',
-						'description'     => 'The mature feature number 2',
-						'is_experimental' => false,
-					),
-					'experimental1' => array(
-						'name'            => 'Experimental feature 1',
-						'description'     => 'The experimental feature number 1',
-						'is_experimental' => true,
-					),
-					'experimental2' => array(
-						'name'            => 'Experimental feature 2',
-						'description'     => 'The experimental feature number 2',
-						'is_experimental' => true,
-					),
-				);
-
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
-			},
-			11
+			array( $this, 'register_dummy_features' ),
+			11,
+			1
 		);
 
 		$this->sut = new FeaturesController();
@@ -81,6 +53,38 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_experimental2_enabled' );
 
 		remove_all_filters( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION );
+	}
+
+	/**
+	 * Register dummy features for unit tests.
+	 *
+	 * @param FeaturesController $features_controller The instance of FeaturesController to register the features in.
+	 */
+	public function register_dummy_features( $features_controller ) {
+		$features = array(
+			'mature1'       => array(
+				'name'            => 'Mature feature 1',
+				'description'     => 'The mature feature number 1',
+				'is_experimental' => false,
+			),
+			'mature2'       => array(
+				'name'            => 'Mature feature 2',
+				'description'     => 'The mature feature number 2',
+				'is_experimental' => false,
+			),
+			'experimental1' => array(
+				'name'            => 'Experimental feature 1',
+				'description'     => 'The experimental feature number 1',
+				'is_experimental' => true,
+			),
+			'experimental2' => array(
+				'name'            => 'Experimental feature 2',
+				'description'     => 'The experimental feature number 2',
+				'is_experimental' => true,
+			),
+		);
+
+		$this->reset_features_list( $features_controller, $features );
 	}
 
 	/**
@@ -123,26 +127,45 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Resets the array of registered features so we can populate it with test features.
+	 * Resets the array of registered features and repopulates it with test features.
 	 *
 	 * @param FeaturesController $sut The instance of the FeaturesController class.
+	 * @param array              $features The list of features to repopulate the controller with.
 	 *
 	 * @return void
 	 */
-	private function reset_features_list( $sut ) {
+	private function reset_features_list( $sut, $features ) {
 		$reflection_class = new \ReflectionClass( $sut );
 
-		$features = $reflection_class->getProperty( 'features' );
-		$features->setAccessible( true );
-		$features->setValue( $sut, array() );
+		$features_property = $reflection_class->getProperty( 'features' );
+		$features_property->setAccessible( true );
+		$features_property->setValue( $sut, array() );
+
+		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
+		$compat_property->setAccessible( true );
+		$compat_property->setValue( $sut, array() );
+
+		foreach ( $features as $slug => $definition ) {
+			$sut->add_feature_definition( $slug, $definition['name'], $definition );
+		}
+
+		$init_compat_info = $reflection_class->getMethod( 'init_compatibility_info_by_feature' );
+		$init_compat_info->setAccessible( true );
+		$init_compat_info->invoke( $sut );
 	}
 
 	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		$this->reset_features_list( $this->sut );
-		remove_all_actions( 'woocommerce_register_feature_definitions' );
+		remove_action(
+			'woocommerce_register_feature_definitions',
+			array( $this, 'register_dummy_features' ),
+			11,
+			1
+		);
+		$this->reset_container_replacements();
+		$this->reset_container_resolutions();
 
 		parent::tearDown();
 	}
@@ -492,8 +515,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		add_action(
 			'woocommerce_register_feature_definitions',
 			function ( $features_controller ) {
-				$this->reset_features_list( $this->sut );
-
 				$features = array(
 					'mature1'       => array(
 						'name'            => 'Mature feature 1',
@@ -527,13 +548,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
@@ -828,13 +849,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
-		$local_sut = new FeaturesController();
-
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) use ( $local_sut ) {
-				$this->reset_features_list( $local_sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
@@ -849,13 +866,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$local_sut = new FeaturesController();
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
 		$plugins = array( 'compatible_plugin1', 'compatible_plugin2' );
 		$fake_plugin_util->set_active_plugins( $plugins );
@@ -919,16 +935,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-        // phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
-
-		$local_sut = new FeaturesController();
-		$local_sut->change_feature_enable( 'custom_order_tables', $hpos_is_enabled );
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) use ( $local_sut ) {
-				$this->reset_features_list( $local_sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
@@ -945,14 +956,14 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$local_sut = new FeaturesController();
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
+		$local_sut->change_feature_enable( 'custom_order_tables', $hpos_is_enabled );
 		$plugins = array( 'compatible_plugin', 'incompatible_plugin' );
 		$fake_plugin_util->set_active_plugins( $plugins );
 		$local_sut->declare_compatibility( 'custom_order_tables', 'compatible_plugin' );

@@ -71,6 +71,7 @@ export default function Update( props: UpdateProps ) {
 							onClick: () => {
 								window.location.reload();
 							},
+							url: '',
 						},
 					],
 				}
@@ -117,6 +118,7 @@ export default function Update( props: UpdateProps ) {
 							{
 								label: __( 'Try again', 'woocommerce' ),
 								onClick: update,
+								url: '',
 							},
 						],
 					}

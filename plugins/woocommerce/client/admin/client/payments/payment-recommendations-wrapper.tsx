@@ -24,7 +24,8 @@ export const PaymentRecommendations: React.FC< EmbeddedBodyProps > = ( {
 	if (
 		page === 'wc-settings' &&
 		tab === 'checkout' &&
-		( ! section || section === 'main' )
+		( ! section || section === 'main' ) &&
+		! window.wcAdminFeatures?.[ 'reactify-classic-payments-settings' ] // don't show this on the new payment settings page.
 	) {
 		return (
 			<RecommendationsEligibilityWrapper>

@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/product-editor';
 import { Spinner } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import React, { lazy, Suspense, useContext, useEffect } from 'react';
+import { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
@@ -59,7 +59,6 @@ export default function ProductPage() {
 
 	useEffect( () => {
 		registerPlugin( 'wc-admin-product-editor', {
-			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
 			render: () => {
 				// eslint-disable-next-line react-hooks/rules-of-hooks
@@ -72,7 +71,7 @@ export default function ProductPage() {
 				return (
 					<>
 						<WooProductMoreMenuItem>
-							{ ( { onClose }: { onClose: () => void } ) => (
+							{ ( { onClose } ) => (
 								<MoreMenuFill onClose={ onClose } />
 							) }
 						</WooProductMoreMenuItem>

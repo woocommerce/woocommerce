@@ -59,6 +59,7 @@ type TaskItemProps = {
 	) => void;
 	actionLabel?: string;
 	className?: string;
+	children?: React.ReactNode;
 };
 
 const OptionalTaskTooltip: React.FC< {
@@ -87,6 +88,7 @@ const OptionalTaskTooltip: React.FC< {
 const OptionalExpansionWrapper: React.FC< {
 	expandable: boolean;
 	expanded: boolean;
+	children: JSX.Element;
 } > = ( { children, expandable, expanded } ) => {
 	if ( ! expandable ) {
 		return expanded ? <>{ children }</> : null;
@@ -105,7 +107,7 @@ const OptionalExpansionWrapper: React.FC< {
 	);
 };
 
-export const TaskItem: React.FC< TaskItemProps > = ( {
+export const TaskItem = ( {
 	completed,
 	title,
 	badge,
@@ -125,7 +127,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	action,
 	actionLabel,
 	...listItemProps
-} ) => {
+}: TaskItemProps ) => {
 	const [ isTaskExpanded, setTaskExpanded ] = useState( expanded );
 	useEffect( () => {
 		setTaskExpanded( expanded );

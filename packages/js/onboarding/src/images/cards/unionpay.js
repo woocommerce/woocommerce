@@ -11,15 +11,6 @@ export default () => (
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 	>
-		<rect
-			x="0.878906"
-			y="0.5"
-			width="50"
-			height="34"
-			rx="3.5"
-			fill="white"
-			stroke="#F3F3F3"
-		/>
 		<path
 			fillRule="evenodd"
 			clipRule="evenodd"

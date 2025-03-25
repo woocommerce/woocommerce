@@ -1,6 +1,6 @@
 # WooCommerce Monorepo
 
-![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png)
+![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woo@2x.png)
 
 Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
@@ -13,9 +13,11 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 ### Prerequisites
 
 -   [NVM](https://github.com/nvm-sh/nvm#installing-and-updating): While you can always install Node through other means, we recommend using NVM to ensure you're aligned with the version used by our development teams. Our repository contains [an `.nvmrc` file](.nvmrc) which helps ensure you are using the correct version of Node.
--   [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM version 9.1.3 to manage project dependencies and run various scripts involved in building and testing projects.
+-   [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects.
 -   [PHP 7.4+](https://www.php.net/manual/en/install.php): WooCommerce Core currently features a minimum PHP version of 7.4. It is also needed to run Composer and various project build scripts. See [troubleshooting](DEVELOPMENT.md#troubleshooting) for troubleshooting problems installing PHP.
 -   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
+
+Note: A POSIX compliant operating system (e.g., Linux, macOS) is assumed. If you're working on a Windows machine, the recommended approach is to use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (available since Windows 10).
 
 Once you've installed all of the prerequisites, the following will prepare all of the build outputs necessary for development:
 
@@ -23,7 +25,7 @@ Once you've installed all of the prerequisites, the following will prepare all o
 # Ensure that correct version of Node is installed and being used
 nvm install
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
-pnpm install
+pnpm install -frozen-lockfile
 # Build all of the plugins, packages, and tools in the monorepo
 pnpm build
 ```

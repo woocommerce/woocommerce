@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Exporter.
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 /**
  * Class WC_Product_CSV_Exporter_Test
  */
@@ -43,7 +45,7 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_column_value_published() {
 		$product = WC_Helper_Product::create_variation_product();
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
 
 		$reflected_exporter = new ReflectionClass( WC_Product_CSV_Exporter::class );

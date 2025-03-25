@@ -2652,7 +2652,7 @@ export const countryStateOptions = [
 		label: 'India — Nagaland',
 	},
 	{
-		key: 'IN:OR',
+		key: 'IN:OD',
 		label: 'India — Odisha',
 	},
 	{
@@ -4745,7 +4745,7 @@ export const countryStateOptions = [
 	},
 	{
 		key: 'NZ:MWT',
-		label: 'New Zealand — Manawatu-Wanganui',
+		label: 'New Zealand — Manawatu-Whanganui',
 	},
 	{
 		key: 'NZ:WGN',

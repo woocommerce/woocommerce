@@ -1,8 +1,10 @@
-# This workflow is used to cherry pick PRs from release branche into trunk.
+# This workflow is used to cherry pick PRs from release branch into trunk.
 name: New CFE workflow - Cherry pick
 on:
     pull_request:
         types: [closed]
+        branches-ignore:
+          - 'release/9.8'
     workflow_dispatch:
         inputs:
             skipSlackPing:
@@ -22,7 +24,10 @@ permissions: {}
 jobs:
     verify:
         name: Verify
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: read
         outputs:
             run: ${{ steps.check.outputs.run }}
             base_ref: ${{ steps.fetch_pr_details.outputs.base_ref }}
@@ -47,7 +52,7 @@ jobs:
                   core.setOutput('base_ref', prDetails.data.base.ref);
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
             - name: check
               id: check
               uses: actions/github-script@v7
@@ -62,7 +67,7 @@ jobs:
                       console.log("isBot:", isBot);
                       console.log("baseRef.startsWith('release/'):", baseRef.startsWith('release/'));
 
-                      if ( !isBot && baseRef.startsWith( 'release/' ) ) {
+                      if ( baseRef.startsWith( 'release/' ) ) {
                         core.setOutput( 'run', 'true' );
                       } else {
                         core.setOutput( 'run', 'false' );
@@ -72,7 +77,7 @@ jobs:
 
     prep:
         name: Prep inputs
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         if: needs.verify.outputs.run == 'true'
         needs: verify
         outputs:
@@ -95,7 +100,7 @@ jobs:
                       console.log( 'releaseBranch:', releaseBranch )
                       console.log( 'version:', version )
                       console.log( 'pr:', pr )
-    
+
                       core.setOutput( 'pr', pr )
                       core.setOutput( 'version', version )
                       core.setOutput( 'release', releaseBranch )
@@ -104,7 +109,7 @@ jobs:
 
     check-release-branch-exists:
         name: Check for existence of release branch
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: prep
         steps:
             - name: Check for release branch
@@ -123,7 +128,7 @@ jobs:
 
     cherry-pick-run:
         name: Run cherry pick tool
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
           actions: write
           contents: write
@@ -216,7 +221,7 @@ jobs:
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ secrets.WOO_CORE_RELESES_DAILY_SLACK_CHANNEL }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
                       :warning-8c: CFE cherry pick failed for '${{ needs.prep.outputs.release }}'
 
@@ -227,7 +232,7 @@ jobs:
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ secrets.WOO_CORE_RELESES_DAILY_SLACK_CHANNEL }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
                       :info: CFE cherry pick succeeded for `${{ needs.prep.outputs.release }}`
 
@@ -235,10 +240,22 @@ jobs:
 
                       ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
 
+            - name: Apply label "cherry pick failed" using the newly created PR url
+              if: ${{ failure() }}
+              run: |
+                gh pr edit $PR_NUMBER --add-label "cherry pick failed" --repo "$OWNER/$REPO"
+              env:
+                PR_NUMBER: ${{ needs.prep.outputs.pr }}
+                OWNER: ${{ github.event.repository.owner.login }}
+                REPO: ${{ github.event.repository.name }}
+                GH_TOKEN: ${{ github.token }}
+
             - name: Comment on PR about the failed cherry pick
               if: ${{ failure() }}
               run: |
-                  gh pr comment $HTML_URL --body "Cherry picking failed for the trunk. Please do it manually. Or debug, what happened and run the workflow again. Workflow link for debugging: https://github.com/${{ github.repository_owner }}/${{ github.repository }}/actions/workflows/new-cfe-cherry-pick.yml"
+                  gh pr comment $HTML_URL --body "IMPORTANT: Merging this PR to the appropriate branches is critical to the release process and ensures that the bug does not cause regressions in the future releases.
+
+                  Cherry picking failed for the trunk. Please bring this to release team's attention. Workflow link for debugging: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
               env:
                 GH_TOKEN: ${{ github.token }}
                 HTML_URL: ${{ github.event.pull_request.html_url }}
@@ -246,7 +263,9 @@ jobs:
             - name: Comment on PR about the cherry picked PRs to be merged
               if: ${{ success() }}
               run: |
-                gh pr comment $HTML_URL --body "Cherry picking was successful for trunk. Please merge the following PR: $CHERRY_PICK_PR"
+                gh pr comment $HTML_URL --body "IMPORTANT: Merging this PR to the appropriate branches is critical to the release process and ensures that the bug does not cause regressions in the future releases.
+
+                Cherry picking was successful for \`trunk\`. Please merge the following PR: $CHERRY_PICK_PR"
               env:
                 GH_TOKEN: ${{ github.token }}
                 HTML_URL: ${{ github.event.pull_request.html_url }}

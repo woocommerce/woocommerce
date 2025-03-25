@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -67,6 +68,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
+				add_action(
+					'admin_head',
+					function () {
+						if ( function_exists( 'get_current_screen' ) ) {
+							$screen = get_current_screen();
+							if ( 'woocommerce_page_wc-settings' === $screen->id ) {
+								$screen->remove_help_tabs();
+							}
+						}
+					}
+				);
 			}
 
 			return self::$settings;
@@ -78,7 +90,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function save() {
 			global $current_tab;
 
-			check_admin_referer( 'woocommerce-settings' );
+			if ( Features::is_enabled( 'settings' ) ) {
+				check_admin_referer( 'wp_rest' );
+			} else {
+				check_admin_referer( 'woocommerce-settings' );
+			}
 
 			// Trigger actions.
 			do_action( 'woocommerce_settings_save_' . $current_tab );
@@ -379,7 +395,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Textarea.
 					case 'textarea':
-						$option_value = $value['value'];
+						$option_value     = $value['value'];
+						$show_desc_at_end = $value['desc_at_end'] ?? false;
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
@@ -387,8 +404,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
-								<?php echo $description; // WPCS: XSS ok. ?>
-
+								<?php
+								if ( ! $show_desc_at_end ) {
+									echo wp_kses_post( $description );
+								}
+								?>
 								<textarea
 									name="<?php echo esc_attr( $value['field_name'] ); ?>"
 									id="<?php echo esc_attr( $value['id'] ); ?>"
@@ -397,6 +417,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 									><?php echo esc_textarea( $option_value ); // WPCS: XSS ok. ?></textarea>
+								<?php
+								if ( $show_desc_at_end ) {
+									echo wp_kses_post( $description );
+								}
+								?>
 							</td>
 						</tr>
 						<?php
@@ -816,9 +841,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$description = $value['desc'];
 			}
 
+			$desc_at_end = ( isset( $value['desc_at_end'] ) ? $value['desc_at_end'] : false );
 			$error_class = ( ! empty( $value['description_is_error'] ) ) ? 'is-error' : '';
 
-			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
+			if ( $description && in_array( $value['type'], array( 'textarea' ), true ) && true !== $desc_at_end ) {
+				$description = '<p class="description ' . $error_class . '" style="margin-top:0;">' . wp_kses_post( $description ) . '</p>';
+			} elseif ( $description && in_array( $value['type'], array( 'radio' ), true ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );

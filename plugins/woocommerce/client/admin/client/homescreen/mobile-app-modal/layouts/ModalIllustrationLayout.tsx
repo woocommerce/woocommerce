@@ -35,7 +35,6 @@ export const ModalIllustrationLayout = ( {
 				label={ __( 'Close', 'woocommerce' ) }
 				icon={ <Icon icon={ closeSmall } viewBox="6 4 12 14" /> }
 				iconSize={ 16 }
-				size={ 16 }
 				onClick={ onDismiss }
 			></Button>
 		</div>

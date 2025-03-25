@@ -8,10 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
-use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Plugins Controller.
  *
  * @internal
- * @extends WC_REST_Data_Controller
+ * @extends \WC_REST_Data_Controller
  */
 class Plugins extends \WC_REST_Data_Controller {
 	/**
@@ -213,8 +210,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Check if a given request has access to manage plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
@@ -226,8 +223,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Install the requested plugin.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Plugin Status
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Plugin Status
 	 */
 	public function install_plugin( $request ) {
 		wc_deprecated_function( 'install_plugin', '4.3', '\Automattic\WooCommerce\Admin\API\Plugins()->install_plugins' );
@@ -239,8 +236,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Installs the requested plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Plugin Status
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Plugin Status
 	 */
 	public function install_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
@@ -263,11 +260,30 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$data = PluginsHelper::install_plugins( $plugins );
 
+		// Gather some plugin details for each installed plugin.
+		$plugin_details = array();
+		if ( is_array( $data['installed'] ) ) {
+			foreach ( $data['installed'] as $plugin_slug ) {
+				$plugin_data = PluginsHelper::get_plugin_data( $plugin_slug );
+				if ( empty( $plugin_data ) ) {
+					continue;
+				}
+
+				$plugin_details[ $plugin_slug ] = array(
+					'name'        => $plugin_data['Name'],
+					'description' => $plugin_data['Description'],
+					'uri'         => $plugin_data['PluginURI'],
+					'version'     => $plugin_data['Version'],
+				);
+			}
+		}
+
 		return array(
 			'data'    => array(
-				'installed'    => $data['installed'],
-				'results'      => $data['results'],
-				'install_time' => $data['time'],
+				'installed'      => $data['installed'],
+				'results'        => $data['results'],
+				'install_time'   => $data['time'],
+				'plugin_details' => $plugin_details,
 			),
 			'errors'  => $data['errors'],
 			'success' => count( $data['errors']->errors ) === 0,
@@ -280,7 +296,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled installation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Jobs.
 	 */
 	public function get_installation_status( $request ) {
@@ -290,7 +306,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled installation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Job.
 	 */
 	public function get_job_installation_status( $request ) {
@@ -334,8 +350,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Activate the requested plugin.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Plugin Status
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
@@ -358,10 +374,29 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$data = PluginsHelper::activate_plugins( $plugins );
 
-		return( array(
+		// Gather some plugin details for each activated plugin.
+		$plugin_details = array();
+		if ( is_array( $data['activated'] ) ) {
+			foreach ( $data['activated'] as $plugin_slug ) {
+				$plugin_data = PluginsHelper::get_plugin_data( $plugin_slug );
+				if ( empty( $plugin_data ) ) {
+					continue;
+				}
+
+				$plugin_details[ $plugin_slug ] = array(
+					'name'        => $plugin_data['Name'],
+					'description' => $plugin_data['Description'],
+					'uri'         => $plugin_data['PluginURI'],
+					'version'     => $plugin_data['Version'],
+				);
+			}
+		}
+
+		return ( array(
 			'data'    => array(
-				'activated' => $data['activated'],
-				'active'    => $data['active'],
+				'activated'      => $data['activated'],
+				'active'         => $data['active'],
+				'plugin_details' => $plugin_details,
 			),
 			'errors'  => $data['errors'],
 			'success' => count( $data['errors']->errors ) === 0,
@@ -374,7 +409,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled activation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Job.
 	 */
 	public function get_activation_status( $request ) {
@@ -384,7 +419,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled activation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Jobs.
 	 */
 	public function get_job_activation_status( $request ) {
@@ -396,8 +431,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Generates a Jetpack Connect URL.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Connection URL for Jetpack
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Connection URL for Jetpack
 	 */
 	public function connect_jetpack( $request ) {
 		if ( ! class_exists( '\Jetpack' ) ) {
@@ -420,7 +455,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 *  Kicks off the WCCOM Connect process.
 	 *
-	 * @return WP_Error|array Connection URL for WooCommerce.com
+	 * @return \WP_Error|array Connection URL for WooCommerce.com
 	 */
 	public function request_wccom_connect() {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
@@ -480,7 +515,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * Finishes connecting to WooCommerce.com.
 	 *
 	 * @param  object $rest_request Request details.
-	 * @return WP_Error|array Contains success status.
+	 * @return \WP_Error|array Contains success status.
 	 */
 	public function finish_wccom_connect( $rest_request ) {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
@@ -542,7 +577,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a URL that can be used to connect to Square.
 	 *
-	 * @return WP_Error|array Connect URL.
+	 * @return \WP_Error|array Connect URL.
 	 */
 	public function connect_square() {
 		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {

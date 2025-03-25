@@ -7,7 +7,7 @@ export class AssemblerPage {
 	async setupSite( baseUrl ) {
 		const DESIGN_URL =
 			baseUrl +
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fdesign';
+			'wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fdesign';
 		await this.page.goto( DESIGN_URL );
 	}
 
@@ -28,7 +28,7 @@ export class AssemblerPage {
 	 * @return {(Promise<import('playwright').Frame> | Promise<import('playwright').Page>)} The assembler page or the iframe where the assembler is loaded.
 	 */
 	async getAssembler() {
-		const selector = '.cys-fullscreen-iframe[style="opacity: 1;"]';
+		const selector = 'iframe[title="assembler-hub"]';
 
 		if ( await this.page.isVisible( selector ) ) {
 			return this.page.frameLocator( selector );

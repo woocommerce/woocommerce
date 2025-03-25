@@ -7,19 +7,19 @@ export type Route = {
 		/**
 		 * The sidebar component.
 		 */
-		sidebar: React.JSX.Element | React.ComponentType | null;
+		sidebar: React.ReactNode;
 		/**
 		 * The content component.
 		 */
-		content?: React.JSX.Element | React.ComponentType;
+		content?: React.ReactNode;
 		/**
 		 * The edit component.
 		 */
-		edit?: React.JSX.Element | React.ComponentType | null;
+		edit?: React.ReactNode;
 		/**
 		 * The mobile component.
 		 */
-		mobile?: React.JSX.Element | React.ComponentType | boolean;
+		mobile?: React.ReactNode;
 		/**
 		 * Whether the page can be previewed.
 		 */
@@ -49,3 +49,5 @@ export type Location = {
 	key: string;
 	params: Record< string, string >;
 };
+
+export type DataFormItem = Record< string, BaseSettingsField[ 'value' ] >;

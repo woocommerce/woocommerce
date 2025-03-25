@@ -109,7 +109,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		remove_all_filters( 'woocommerce_load_order_cogs_value' );
 		remove_all_filters( 'woocommerce_save_order_cogs_value' );
-
+		wc()->cart->empty_cart();
 		parent::tearDown();
 	}
 
@@ -1562,9 +1562,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 * Test methods get_total_tax_refunded, get_total_shipping_refunded, and get_total_shipping_tax_refunded.
 	 */
-	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded_and_get_total_shipping_tax_refunded() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -1628,6 +1628,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
 		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+		$this->assertEquals( 3, $order->get_data_store()->get_total_shipping_tax_refunded( $order ) );
 	}
 
 	/**
@@ -2385,6 +2386,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
 
+		/** @var $order WC_Abstract_Legacy_Order */
 		list($order, $refund) = $this->create_order_with_refund();
 		$order_id             = $order->get_id();
 		$refund_id            = $refund->get_id();
@@ -2593,6 +2595,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				array( 'parent_order_id' => '%d' ),
 				array( 'id' => '%d' ),
 			);
+
+			// We have to clear the cache after a direct DB update.
+			$this->sut->clear_cached_data( array( $refund->get_id() ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -2924,7 +2929,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			self::$reading_order_ids     = array();
 		};
 		$reset_state->call( $sut );
-		wp_cache_flush();
+		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();
 	}
 
 	/**
@@ -3379,8 +3384,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order_id = $order->get_id();
 
 		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$order->set_date_modified( time() + 1 );
-		$order->save();
+		$order->save(); // Trigger a meta cache purge since the above was a direct DB write.
 
 		// Test fetching an order with meta data containing an object of a non-existent class.
 		$fetched_order = wc_get_order( $order->get_id() );
@@ -3737,5 +3741,43 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$meta_store   = wc_get_container()->get( OrdersTableDataStoreMeta::class );
 		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
 		$this->assertEquals( $expected_saved_value, (float) $meta_objects[0]->meta_value );
+	}
+
+	/**
+	 * @testdox Saving metadata for a non-persisted order doesn't save the order nor the metadata.
+	 */
+	public function test_save_meta_on_non_persisted_order() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+
+		$meta_key   = 'test_meta_key';
+		$meta_value = 'test_meta_value';
+
+		$query = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$this->sut::get_meta_table_name()} WHERE meta_key = %s AND meta_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- variable is a table name.
+			$meta_key,
+			$meta_value
+		);
+
+		// Confirm there's no meta at the start.
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Confirm there's no meta.
+		$order = new \WC_Order();
+		$order->add_meta_data( $meta_key, $meta_value );
+		$order->save_meta_data();
+
+		// Confirm there's still no meta after calling `save_meta_data()` on an unsaved order.
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Confirm that saving the order persists everything.
+		$order->save();
+		$this->assertEquals( $wpdb->get_var( $query ), 1 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Calling `save_meta_data()` on an already saved order does update metadata.
+		$order->add_meta_data( $meta_key, $meta_value, false );
+		$order->save_meta_data();
+		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 	}
 }

@@ -9,9 +9,6 @@ import {
 	Toolbar,
 	ToolbarButton,
 	ToolbarGroup,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	// eslint-disable-next-line @woocommerce/dependency-group
 	ToolbarItem,
 } from '@wordpress/components';
 
@@ -132,12 +129,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarItem>
-							{ ( toggleProps: {
-								'data-toolbar-item': boolean;
-								ref: React.ForwardedRef<
-									typeof ImageGalleryToolbarDropdown
-								>;
-							} ) => (
+							{ ( toggleProps ) => (
 								<ImageGalleryToolbarDropdown
 									canRemove={ true }
 									onRemove={ () => removeItem( childIndex ) }

@@ -121,7 +121,7 @@ export const InstallationNoPermissionError = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/Application/Core Profiler/Plugins',
+	title: 'WooCommerce Admin/Core Profiler/Plugins',
 	component: Plugins,
 	decorators: [ WithSetupWizardLayout ],
 };

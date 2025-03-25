@@ -1,13 +1,24 @@
 name: Build Live Branch
 on:
     pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - ready_for_review
         paths-ignore:
             - 'docs/**'
             - 'packages/php/**'
+            - '!packages/php/blueprint/**'
             - 'tools/**'
             - '**/changelog/**'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
             - '**/tests/**'
             - '**/*.md'
+            - '.husky/**'
+            - '.cursor/**'
             - '.github/**'
             - '!.github/workflows/pr-build-live-branch.yml'
 
@@ -23,8 +34,8 @@ permissions: {}
 
 jobs:
     build:
-        if: github.repository_owner == 'woocommerce' && github.event.pull_request.user.login != 'github-actions[bot]'
-        runs-on: ubuntu-20.04
+        if: github.repository_owner == 'woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
+        runs-on: ubuntu-latest
         permissions:
             contents: write
             pull-requests: write
@@ -35,12 +46,10 @@ jobs:
 
             - name: Get current version
               id: version
-              uses: actions/github-script@v6.3.3
-              with:
-                  script:
-                      const { getVersion } = require( './.github/workflows/scripts/get-plugin-version' );
-                      const version = await getVersion( 'woocommerce' );
-                      core.setOutput( 'version', version );
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -63,18 +72,16 @@ jobs:
                   echo "$CURRENT_VERSION" > "$GITHUB_WORKSPACE/plugins/woocommerce/version.txt"
 
                   cd "$GITHUB_WORKSPACE/plugins/woocommerce"
-                  bash bin/build-zip.sh
+                  PLUGIN_SLUG='woocommerce-dev' bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
+                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce-dev.zip" "$GITHUB_WORKSPACE/zips/woocommerce-dev.zip"
+                
                   mkdir -p "$GITHUB_WORKSPACE/unzips/woocommerce"
-                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
                   cd "$GITHUB_WORKSPACE/zips"
-                  unzip -qq woocommerce.zip
-                  cp -r woocommerce "$GITHUB_WORKSPACE/unzips/woocommerce/woocommerce"
-                  rm woocommerce.zip
-                  mv woocommerce woocommerce-dev
-                  zip -q -r -9 "woocommerce-dev.zip" "woocommerce-dev/"
-                  rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
+                  unzip -qq woocommerce-dev.zip
+                  mv "$GITHUB_WORKSPACE/zips/woocommerce-dev" "$GITHUB_WORKSPACE/unzips/woocommerce/woocommerce"
+                
                   # Plugin data is passed as a JSON object.
                   PLUGIN_DATA="{}"          
                   PLUGIN_DATA=$( jq -c --arg slug "woocommerce" --arg ver "$CURRENT_VERSION" '.[ $slug ] = { version: $ver }' <<<"$PLUGIN_DATA" )
@@ -113,7 +120,7 @@ jobs:
 
             - name: Comment on PR with WordPress Playground details
               uses: actions/github-script@v7
-              if: steps.prepare.outputs.plugin-data != '{}'
+              if: steps.prepare.outputs.plugin-data != '{}' && ! github.event.pull_request.head.repo.fork
               with:
                   script: |
                       const { run } = require('./.github/workflows/scripts/generate-playground-blueprint');

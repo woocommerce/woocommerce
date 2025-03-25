@@ -13,10 +13,10 @@ import { ExperimentalListItem } from '../experimental-list-item';
 import { ExperimentalCollapsibleList } from '../collapsible-list';
 
 jest.mock( 'react-transition-group', () => {
-	const EmptyTransition: React.FC< { component?: string } > = ( {
-		children,
-		component,
-	} ) => {
+	const EmptyTransition: React.FC< {
+		component?: string;
+		children: JSX.Element;
+	} > = ( { children, component } ) => {
 		if ( component === 'ul' ) {
 			return <ul>{ children }</ul>;
 		}

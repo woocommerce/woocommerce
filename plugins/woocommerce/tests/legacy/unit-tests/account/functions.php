@@ -225,7 +225,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( '1234' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_card_type( 'mastercard' );
 		$token->set_last4( '1234' );
 		$token->set_expiry_month( '12' );
@@ -241,7 +241,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				'cc' => array(
 					array(
 						'method'     => array(
-							'gateway' => 'bacs',
+							'gateway' => WC_Gateway_BACS::ID,
 							'last4'   => '1234',
 							'brand'   => 'Mastercard',
 						),
@@ -271,7 +271,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_saved_payment_methods_list_item_cc() {
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( '1234' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_card_type( 'mastercard' );
 		$token->set_last4( '1234' );
 		$token->set_expiry_month( '12' );
@@ -294,7 +294,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 		// Co-branded credit card.
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( '1001' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_card_type( 'cartes_bancaires' );
 		$token->set_last4( '1001' );
 		$token->set_expiry_month( '12' );
@@ -323,7 +323,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_saved_payment_methods_list_item_echeck() {
 		$token = new WC_Payment_Token_ECheck();
 		$token->set_token( '1234' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_last4( '1234' );
 		$token->save();
 

@@ -19,7 +19,7 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { get, isNull } from 'lodash';
-import { REVIEWS_STORE_NAME } from '@woocommerce/data';
+import { reviewsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -209,11 +209,7 @@ class ReviewsPanel extends Component {
 		const icon = (
 			<div className="woocommerce-review-activity-card__image-overlay">
 				<div className={ productImageClasses }>
-					<ProductImage
-						product={ product }
-						width={ 33 }
-						height={ 33 }
-					/>
+					<ProductImage product={ product } width={ 33 } />
 				</div>
 			</div>
 		);
@@ -350,7 +346,7 @@ export default compose( [
 	withSelect( ( select, props ) => {
 		const { hasUnapprovedReviews } = props;
 		const { getReviews, getReviewsError, isResolving } =
-			select( REVIEWS_STORE_NAME );
+			select( reviewsStore );
 		let reviews = [];
 		let isError = false;
 		let isRequesting = false;
@@ -368,7 +364,7 @@ export default compose( [
 	} ),
 	withDispatch( ( dispatch, props ) => {
 		const { deleteReview, updateReview, invalidateResolution } =
-			dispatch( REVIEWS_STORE_NAME );
+			dispatch( reviewsStore );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		const clearReviewsCache = () => {

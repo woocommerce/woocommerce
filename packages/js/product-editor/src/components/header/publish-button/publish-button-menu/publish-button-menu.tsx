@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
+import { MenuGroup, MenuItem } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
 import { createElement, Fragment, useState } from '@wordpress/element';
@@ -75,7 +75,7 @@ export function PublishButtonMenu( {
 		);
 	}
 
-	function renderMenu( { onClose }: Dropdown.RenderProps ) {
+	function renderMenu( { onClose }: { onClose?: () => void } ) {
 		return (
 			<>
 				<MenuGroup>
@@ -84,7 +84,9 @@ export function PublishButtonMenu( {
 							<MenuItem
 								onClick={ () => {
 									scheduleProduct();
-									onClose();
+									if ( onClose ) {
+										onClose();
+									}
 								} }
 							>
 								{ __( 'Publish now', 'woocommerce' ) }
@@ -93,7 +95,9 @@ export function PublishButtonMenu( {
 								info={ formattedDate }
 								onClick={ () => {
 									setShowScheduleModal( 'edit' );
-									onClose();
+									if ( onClose ) {
+										onClose();
+									}
 								} }
 							>
 								{ __( 'Edit schedule', 'woocommerce' ) }
@@ -106,7 +110,9 @@ export function PublishButtonMenu( {
 									source: TRACKS_SOURCE,
 								} );
 								setShowScheduleModal( 'schedule' );
-								onClose();
+								if ( onClose ) {
+									onClose();
+								}
 							} }
 						>
 							{ __( 'Schedule publish', 'woocommerce' ) }
@@ -147,7 +153,9 @@ export function PublishButtonMenu( {
 											errorProps
 										);
 									} );
-								onClose();
+								if ( onClose ) {
+									onClose();
+								}
 							} }
 						>
 							{ __( 'Copy to a new draft', 'woocommerce' ) }
@@ -185,7 +193,9 @@ export function PublishButtonMenu( {
 											errorProps
 										);
 									} );
-								onClose();
+								if ( onClose ) {
+									onClose();
+								}
 							} }
 						>
 							{ __( 'Move to trash', 'woocommerce' ) }
@@ -200,7 +210,7 @@ export function PublishButtonMenu( {
 		<>
 			<ButtonWithDropdownMenu
 				{ ...props }
-				onToggle={ ( isOpen: boolean ) => {
+				onToggle={ ( isOpen ) => {
 					if ( isOpen ) {
 						recordEvent( 'product_publish_dropdown_open', {
 							source: TRACKS_SOURCE,

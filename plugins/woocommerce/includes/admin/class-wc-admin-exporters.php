@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\ProductType;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -199,8 +200,8 @@ class WC_Admin_Exporters {
 	 * @return array The product types keys and labels.
 	 */
 	public static function get_product_types() {
-		$product_types              = wc_get_product_types();
-		$product_types['variation'] = __( 'Product variations', 'woocommerce' );
+		$product_types                           = wc_get_product_types();
+		$product_types[ ProductType::VARIATION ] = __( 'Product variations', 'woocommerce' );
 
 		/**
 		 * Allow third-parties to filter the exportable product types.

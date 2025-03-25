@@ -7,16 +7,16 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const UPDATE_WCCOM_BASE_URL_ACTION_NAME = 'updateWccomBaseUrl';
 
 export const SetWccomBaseUrl = () => {
 	const url = useSelect(
-		( select ) => select( STORE_KEY ).getWccomBaseUrl(),
+		( select ) => select( store ).getWccomBaseUrl(),
 		[]
 	);
-	const { updateCommandParams } = useDispatch( STORE_KEY );
+	const { updateCommandParams } = useDispatch( store );
 
 	function onUpdate( newUrl ) {
 		updateCommandParams( UPDATE_WCCOM_BASE_URL_ACTION_NAME, {

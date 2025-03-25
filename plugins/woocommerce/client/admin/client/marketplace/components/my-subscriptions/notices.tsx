@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { ComponentProps } from 'react';
 import { Notice } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
@@ -12,13 +13,15 @@ import { Notice as NoticeType } from '../../contexts/types';
 import { noticeStore } from '../../contexts/notice-store';
 import { removeNotice } from '../../utils/functions';
 
+type NoticeActions = ComponentProps< typeof Notice >[ 'actions' ];
+
 export default function Notices() {
 	const notices: NoticeType[] = useSelect(
 		( select ) => select( noticeStore ).notices(),
 		[]
 	);
 
-	const actions = ( notice: NoticeType ) => {
+	const actions = ( notice: NoticeType ): NoticeActions => {
 		if ( ! notice.options?.actions ) {
 			return [];
 		}

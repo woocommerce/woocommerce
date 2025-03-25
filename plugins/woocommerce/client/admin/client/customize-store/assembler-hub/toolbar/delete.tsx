@@ -5,10 +5,7 @@ import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { trash } from '@wordpress/icons';
-import {
-	store as blockEditorStore,
-	// @ts-expect-error missing type
-} from '@wordpress/block-editor';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -24,7 +21,6 @@ export default function Delete( {
 	currentBlockName: string | undefined;
 	nextBlockClientId: string | undefined;
 } ) {
-	// @ts-expect-error missing type
 	const { removeBlock, selectBlock } = useDispatch( blockEditorStore );
 
 	return (

@@ -5,17 +5,15 @@
  * External dependencies
  */
 import {
+	// @ts-expect-error No types for this exist
 	privateApis as blockEditorPrivateApis,
-	// @ts-ignore no types exist yet.
 } from '@wordpress/block-editor';
 import {
-	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
-	// @ts-ignore No types for this exist yet.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver } from '@wordpress/compose';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { __ } from '@wordpress/i18n';
 

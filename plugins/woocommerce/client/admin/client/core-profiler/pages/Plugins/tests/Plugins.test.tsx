@@ -7,7 +7,7 @@ import { Extension } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { computePluginsSelection, Plugins } from '../Plugins';
+import { computePluginsSelection, joinWithAnd, Plugins } from '../Plugins';
 
 describe( 'Plugins Component', () => {
 	const mockSendEvent = jest.fn();
@@ -77,7 +77,7 @@ describe( 'Plugins Component', () => {
 		);
 		expect(
 			screen.getByText(
-				/Enhance your store by installing these free business features/
+				/No commitment required – you can remove them at any time/
 			)
 		).toBeInTheDocument();
 		expect( screen.getByText( 'Plugin 1' ) ).toBeInTheDocument();
@@ -204,7 +204,8 @@ describe( 'Plugins Component', () => {
 			?.querySelector( 'input[type="checkbox"]' );
 		expect( checkbox3 ).not.toBeChecked();
 		const checkbox4 = screen
-			.getByText( 'Plugin 4' )
+			// use role because error message also contains the plugin name
+			.getByRole( 'heading', { level: 3, name: 'Plugin 4' } )
 			.closest( '.woocommerce-profiler-plugins-plugin-card' )
 			?.querySelector( 'input[type="checkbox"]' );
 		expect( checkbox4 ).toBeChecked();
@@ -289,5 +290,20 @@ describe( 'computePluginsSelection', () => {
 			pluginsUnselected: [],
 			selectedPluginSlugs: [],
 		} );
+	} );
+} );
+
+describe( 'joinWithAnd', () => {
+	it( 'should fallback to en_US locale when current locale is invalid', () => {
+		const items = [ 'apple', 'banana', 'orange' ];
+		const result = joinWithAnd( items, 'invalid-locale' );
+
+		expect( result ).toEqual( [
+			{ type: 'element', value: 'apple' },
+			{ type: 'literal', value: ', ' },
+			{ type: 'element', value: 'banana' },
+			{ type: 'literal', value: ', and ' },
+			{ type: 'element', value: 'orange' },
+		] );
 	} );
 } );

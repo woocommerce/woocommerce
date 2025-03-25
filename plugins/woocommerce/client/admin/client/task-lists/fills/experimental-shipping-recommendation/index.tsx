@@ -1,16 +1,12 @@
 /**
  * External dependencies
  */
-import {
-	OPTIONS_STORE_NAME,
-	PLUGINS_STORE_NAME,
-	SETTINGS_STORE_NAME,
-} from '@woocommerce/data';
+import { optionsStore, pluginsStore, settingsStore } from '@woocommerce/data';
 import { withSelect } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { compose } from '@wordpress/compose';
-
+import type { SelectFunction } from '@wordpress/data/build-types/types';
 /**
  * Internal dependencies
  */
@@ -18,36 +14,35 @@ import { ShippingRecommendation } from './shipping-recommendation';
 import { TaskProps } from './types';
 
 const ShippingRecommendationWrapper = compose(
-	withSelect( ( select ) => {
-		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+	withSelect( ( select: SelectFunction ) => {
+		const { getSettings } = select( settingsStore );
+		const { hasFinishedResolution } = select( optionsStore );
+		const { getActivePlugins } = select( pluginsStore );
 
 		return {
 			activePlugins: getActivePlugins(),
 			generalSettings: getSettings( 'general' )?.general,
-			isJetpackConnected:
-				select( PLUGINS_STORE_NAME ).isJetpackConnected(),
+			isJetpackConnected: select( pluginsStore ).isJetpackConnected(),
 			isResolving:
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_setup_jetpack_opted_in',
 				] ) ||
 				! hasFinishedResolution( 'getOption', [
-					'wc_connect_options',
+					'wcshipping_options',
 				] ) ||
-				! select( PLUGINS_STORE_NAME ).hasFinishedResolution(
-					'isJetpackConnected'
+				! select( pluginsStore ).hasFinishedResolution(
+					'isJetpackConnected',
+					[]
 				),
 		};
 	} )
-)( ShippingRecommendation );
+)( ShippingRecommendation ) as React.ComponentType< TaskProps >;
 
 registerPlugin( 'wc-admin-onboarding-task-shipping-recommendation', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="shipping-recommendation">
-			{ ( { onComplete, query, task }: TaskProps ) => (
+			{ ( { onComplete, query, task } ) => (
 				<ShippingRecommendationWrapper
 					onComplete={ onComplete }
 					query={ query }

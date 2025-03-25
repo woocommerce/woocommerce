@@ -1,5 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
@@ -12,8 +10,11 @@ import {
 } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-// @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
+import { BlockInstance } from '@wordpress/blocks';
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -25,15 +26,12 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../../context/highlighted-block-context';
 import { useEditorScroll } from '../../hooks/use-editor-scroll';
 import { findPatternByBlock } from '../utils';
-import {
-	__experimentalBlockPatternsList as BlockPatternList,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/block-editor';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
 
 import './style.scss';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-centered-menu',
@@ -56,7 +54,6 @@ export const SidebarNavigationScreenHeader = ( {
 
 	const currentTemplateId: string | undefined = useSelect(
 		( select ) =>
-			// @ts-expect-error No types for this exist yet.
 			select( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
 		[]
 	);
@@ -113,7 +110,7 @@ export const SidebarNavigationScreenHeader = ( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
 	const onClickHeaderPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: PatternWithBlocks, selectedBlocks: BlockInstance[] ) => {
 			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},

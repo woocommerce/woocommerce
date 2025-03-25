@@ -14,7 +14,6 @@ import {
 import { useResizeObserver } from '@wordpress/compose';
 import { PluginArea } from '@wordpress/plugins';
 import classNames from 'classnames';
-import { isWpVersion } from '@woocommerce/settings';
 import {
 	store as preferencesStore,
 	// @ts-expect-error No types for this exist yet.
@@ -51,8 +50,7 @@ import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { SettingsSidebar } from './sidebar/settings-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from './constants';
 import {
 	KeyboardShortcuts,
@@ -119,11 +117,11 @@ export function IframeEditor( {
 
 	// Pick the blocks from the store.
 	const blocks: BlockInstance[] = useSelect( ( select ) => {
-		return select( productEditorUiStore ).getModalEditorBlocks();
+		return select( wooProductEditorUiStore ).getModalEditorBlocks();
 	}, [] );
 
 	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
-		useDispatch( productEditorUiStore );
+		useDispatch( wooProductEditorUiStore );
 
 	const {
 		appendEdit: appendToEditorHistory,
@@ -163,19 +161,15 @@ export function IframeEditor( {
 		} );
 	}, [] );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
 		useDispatch( blockEditorStore );
 
 	const parentEditorSettings = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// @ts-expect-error Selector is not typed
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
 	const { hasFixedToolbar } = useSelect( ( select ) => {
-		// @ts-expect-error These selectors are available in the block data store.
 		const { get: getPreference } = select( preferencesStore );
 
 		return {
@@ -208,9 +202,6 @@ export function IframeEditor( {
 
 	const settings = __settings || parentEditorSettings;
 
-	const inlineFixedBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
-
 	return (
 		<div className="woocommerce-iframe-editor">
 			<EditorContext.Provider
@@ -228,8 +219,7 @@ export function IframeEditor( {
 				<BlockEditorProvider
 					settings={ {
 						...settings,
-						hasFixedToolbar:
-							hasFixedToolbar || ! inlineFixedBlockToolbar,
+						hasFixedToolbar,
 						templateLock: false,
 					} }
 					value={ temporalBlocks }
@@ -264,11 +254,7 @@ export function IframeEditor( {
 						<SecondarySidebar />
 						<BlockTools
 							className={ classNames(
-								'woocommerce-iframe-editor__content',
-								{
-									'old-fixed-toolbar-shown':
-										! inlineFixedBlockToolbar,
-								}
+								'woocommerce-iframe-editor__content'
 							) }
 							onClick={ (
 								event: React.MouseEvent<
@@ -305,6 +291,7 @@ export function IframeEditor( {
 									{ resizeObserver }
 									<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 								</EditorCanvas>
+								{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
 								<Popover.Slot />
 							</ResizableEditor>
 							{ /* This is a hack, but I couldn't find another (easy) way to not
@@ -318,7 +305,6 @@ export function IframeEditor( {
 							scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
 						/>
 					</div>
-					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 					<PluginArea scope="woocommerce-product-editor-modal-block-editor" />
 					<SettingsSidebar smallScreenTitle={ name } />
 				</BlockEditorProvider>

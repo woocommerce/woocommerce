@@ -186,8 +186,12 @@ jQuery( function( $ ) {
 
 			// View cart text.
 			if ( fragments && ! wc_add_to_cart_params.is_cart && $button.parent().find( '.added_to_cart' ).length === 0 ) {
-				$button.after( '<a href="' + wc_add_to_cart_params.cart_url + '" class="added_to_cart wc-forward" title="' +
-					wc_add_to_cart_params.i18n_view_cart + '">' + wc_add_to_cart_params.i18n_view_cart + '</a>' );
+				var anchor = document.createElement( 'a' );
+				anchor.href = wc_add_to_cart_params.cart_url;
+				anchor.className = 'added_to_cart wc-forward';
+				anchor.title = wc_add_to_cart_params.i18n_view_cart;
+				anchor.textContent = wc_add_to_cart_params.i18n_view_cart;
+				$button.after( anchor );
 			}
 
 			$( document.body ).trigger( 'wc_cart_button_updated', [ $button ] );
@@ -234,9 +238,9 @@ jQuery( function( $ ) {
 			if ( !message ) {
 				return;
 			}
-		
+
 			// If the response after adding/removing an item to/from the cart is really fast,
-			// screen readers may not have time to identify the changes in the live region element. 
+			// screen readers may not have time to identify the changes in the live region element.
 			// So, we add a delay to ensure an interval between messages.
 			e.data.addToCartHandler.$liveRegion
 				.delay(1000)
@@ -254,7 +258,7 @@ jQuery( function( $ ) {
 		if ( existingLiveRegion.length ) {
 			return existingLiveRegion;
 		}
-		
+
 		return $( '<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>' ).appendTo( 'body' );
 	};
 

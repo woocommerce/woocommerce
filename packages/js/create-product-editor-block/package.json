@@ -6,8 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"main": "index.js",
 	"engines": {
-		"node": "^20.11.1",
-		"pnpm": "9.1.3"
+		"node": "^20.11.1"
 	},
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
@@ -28,6 +27,6 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"wireit": "0.14.3"
+		"wireit": "0.14.10"
 	}
 }

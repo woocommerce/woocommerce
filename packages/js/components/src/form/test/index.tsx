@@ -10,7 +10,6 @@ import { TextControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { Form, useFormContext } from '../';
-import type { FormContextType } from '../';
 import { DateTimePickerControl } from '../../date-time-picker-control';
 
 const TestInputWithContext = () => {
@@ -42,9 +41,7 @@ describe( 'Form', () => {
 				onSubmit={ onSubmit }
 				validate={ () => ( {} ) }
 			>
-				{ ( {
-					handleSubmit,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { handleSubmit } ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
 				} }
 			</Form>
@@ -71,7 +68,7 @@ describe( 'Form', () => {
 				onChange={ mockOnChange }
 				validate={ () => ( {} ) }
 			>
-				{ ( { setValue }: FormContextType< Record< string, string > > ) => {
+				{ ( { setValue } ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -101,9 +98,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onSubmit={ mockOnSubmit } validate={ () => ( {} ) }>
-				{ ( {
-					handleSubmit,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { handleSubmit } ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
 				} }
 			</Form>
@@ -124,7 +119,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
-				{ ( { setValue }: FormContextType< Record< string, string > > ) => {
+				{ ( { setValue } ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -153,10 +148,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
-				{ ( {
-					setValue,
-					getInputProps,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -203,10 +195,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
-				{ ( {
-					setValue,
-					getInputProps,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -240,10 +229,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
-				{ ( {
-					setValue,
-					getInputProps,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -290,10 +276,7 @@ describe( 'Form', () => {
 
 		const { queryByLabelText } = render(
 			<Form< TestData > onChanges={ mockOnChanges } validate={ validate }>
-				{ ( {
-					setValue,
-					getInputProps,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -327,9 +310,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
-				{ ( {
-					setValues,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { setValues } ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -377,9 +358,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChanges={ mockOnChanges } validate={ validate }>
-				{ ( {
-					setValues,
-				}: FormContextType< Record< string, string > > ) => {
+				{ ( { setValues } ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -428,7 +407,7 @@ describe( 'Form', () => {
 
 		const { container, queryByText } = render(
 			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
-				{ ( { getInputProps, values }: FormContextType< TestData > ) => {
+				{ ( { getInputProps, values } ) => {
 					return (
 						<DateTimePickerControl
 							label={ 'Date' }

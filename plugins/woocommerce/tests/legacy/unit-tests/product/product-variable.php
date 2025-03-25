@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Product
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Class WC_Tests_Product_Variable.
  */
@@ -35,44 +37,44 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 		// Product should not have quantity and stock status should be based on children stock status if not managing stock.
 		$product->set_manage_stock( false );
 		$product->set_stock_quantity( 5 );
-		$product->set_stock_status( 'instock' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->save();
 		$this->assertEquals( '', $product->get_stock_quantity() );
-		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 
 		$product->set_manage_stock( true );
 
 		// Product should be out of stock if managing orders, no backorders allowed, and quantity too low.
 		$product->set_stock_quantity( 0 );
-		$product->set_stock_status( 'instock' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->set_backorders( 'no' );
 		$product->save();
 		$this->assertEquals( 0, $product->get_stock_quantity() );
-		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 
 		// Product should be on backorder if managing orders, backorders allowed, and quantity too low.
 		$product->set_stock_quantity( 0 );
-		$product->set_stock_status( 'instock' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->set_backorders( 'yes' );
 		$product->save();
 		$this->assertEquals( 0, $product->get_stock_quantity() );
-		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
 
 		// Product should go to in stock if backordered and inventory increases.
 		$product->set_stock_quantity( 5 );
-		$product->set_stock_status( 'onbackorder' );
+		$product->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$product->set_backorders( 'notify' );
 		$product->save();
 		$this->assertEquals( 5, $product->get_stock_quantity() );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 
 		// Product should go to in stock if out of stock and inventory increases.
 		$product->set_stock_quantity( 3 );
-		$product->set_stock_status( 'outofstock' );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product->set_backorders( 'no' );
 		$product->save();
 		$this->assertEquals( 3, $product->get_stock_quantity() );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 	}
 
 	/**
@@ -106,41 +108,41 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 		list($product, $child1, $child2) = $this->get_variable_product_with_children();
 
 		// Product should be in stock if a child is in stock.
-		$child1->set_stock_status( 'instock' );
+		$child1->set_stock_status( ProductStockStatus::IN_STOCK );
 		$child1->save();
-		$child2->set_stock_status( 'outofstock' );
+		$child2->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$child2->save();
 		WC_Product_Variable::sync( $product );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 
-		$child2->set_stock_status( 'onbackorder' );
+		$child2->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$child2->save();
 		WC_Product_Variable::sync( $product );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 
 		// Product should be out of stock if all children are out of stock.
-		$child1->set_stock_status( 'outofstock' );
+		$child1->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$child1->save();
-		$child2->set_stock_status( 'outofstock' );
+		$child2->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$child2->save();
 		WC_Product_Variable::sync( $product );
-		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 
 		// Product should be on backorder if all children are on backorder.
-		$child1->set_stock_status( 'onbackorder' );
+		$child1->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$child1->save();
-		$child2->set_stock_status( 'onbackorder' );
+		$child2->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$child2->save();
 		WC_Product_Variable::sync( $product );
-		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
 
 		// Product should be on backorder if at least one child is on backorder and the rest are out of stock.
-		$child1->set_stock_status( 'outofstock' );
+		$child1->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$child1->save();
-		$child2->set_stock_status( 'onbackorder' );
+		$child2->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$child2->save();
 		WC_Product_Variable::sync( $product );
-		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
 	}
 
 	/**

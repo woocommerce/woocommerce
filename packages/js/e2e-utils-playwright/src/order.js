@@ -1,4 +1,8 @@
 export function getOrderIdFromUrl( page ) {
 	const regex = /order-received\/(\d+)/;
-	return page.url().match( regex )[ 1 ];
+	try {
+		return page.url().match( regex )[ 1 ];
+	} catch ( error ) {
+		return undefined;
+	}
 }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -14,9 +14,9 @@ import { getCountryCode } from '~/dashboard/utils';
 import { hasCompleteAddress } from '../utils';
 import {
 	default as StoreLocationForm,
-	FormValues,
 	defaultValidate,
 } from '~/task-lists/fills/steps/location';
+import { FormValues } from '~/dashboard/components/settings/general/store-address';
 
 const validateLocationForm = ( values: FormValues ) => {
 	const errors = defaultValidate( values );
@@ -49,15 +49,14 @@ export const StoreLocation: React.FC< {
 	nextStep: () => void;
 } > = ( { nextStep } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } =
-		useDispatch( SETTINGS_STORE_NAME );
+	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 	const { generalSettings, isResolving, isUpdating } = useSelect(
 		( select ) => {
 			const {
 				getSettings,
 				hasFinishedResolution,
 				isUpdateSettingsRequesting,
-			} = select( SETTINGS_STORE_NAME );
+			} = select( settingsStore );
 
 			return {
 				generalSettings: getSettings( 'general' )?.general,
@@ -66,7 +65,8 @@ export const StoreLocation: React.FC< {
 				] ),
 				isUpdating: isUpdateSettingsRequesting( 'general' ),
 			};
-		}
+		},
+		[]
 	);
 
 	useEffect( () => {

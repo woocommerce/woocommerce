@@ -82,28 +82,24 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox 'get_settings' returns proper default settings, also 'options' is an alias for the default section.
-	 *
-	 * @testWith [""]
-	 *           ["options"]
-	 *
-	 * @param string $section_name The name of the section to get the settings for.
+	 * @testDox get_settings('options') should return all settings for the 'options' section.
 	 */
-	public function test_get_default_and_options_settings_returns_all_settings( $section_name ) {
+	public function test_get_options_settings_returns_all_settings() {
 		$sut = new WC_Settings_Shipping();
 
-		$settings               = $sut->get_settings_for_section( $section_name );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( 'options' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'shipping_options'                           => array( 'title', 'sectionend' ),
 			'woocommerce_enable_shipping_calc'           => 'checkbox',
 			'woocommerce_shipping_cost_requires_address' => 'checkbox',
+			'woocommerce_shipping_hide_rates_when_free'  => 'checkbox',
 			'woocommerce_ship_to_destination'            => 'radio',
 			'woocommerce_shipping_debug_mode'            => 'checkbox',
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**

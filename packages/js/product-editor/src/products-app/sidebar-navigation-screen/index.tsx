@@ -9,11 +9,8 @@ import { useSelect } from '@wordpress/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { createElement, Fragment } from '@wordpress/element';
 import {
-	// @ts-expect-error missing type.
 	__experimentalHStack as HStack,
-	// @ts-expect-error missing type.
 	__experimentalHeading as Heading,
-	// @ts-expect-error missing type.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 
@@ -96,10 +93,10 @@ export default function SidebarNavigationScreen( {
 						/>
 					) }
 					<Heading
+						as="h1"
 						className="edit-site-sidebar-navigation-screen__title"
 						color={ '#e0e0e0' /* $gray-200 */ }
 						level={ 1 }
-						size={ 20 }
 					>
 						{ title }
 					</Heading>

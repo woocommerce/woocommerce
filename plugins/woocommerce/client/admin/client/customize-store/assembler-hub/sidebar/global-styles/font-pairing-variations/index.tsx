@@ -5,12 +5,12 @@
  */
 // @ts-ignore No types for this exist yet.
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useContext, useMemo } from '@wordpress/element';
 import {
+	// @ts-expect-error No types for this exist yet.
 	privateApis as blockEditorPrivateApis,
-	// @ts-ignore no types exist yet.
 } from '@wordpress/block-editor';
 // @ts-expect-error no types exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
@@ -37,8 +37,7 @@ import {
 
 export const FontPairing = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 		return {
 			aiSuggestions: getOption(
 				'woocommerce_customize_store_ai_suggestions'
@@ -47,7 +46,7 @@ export const FontPairing = () => {
 				'woocommerce_customize_store_ai_suggestions',
 			] ),
 		};
-	} );
+	}, [] );
 
 	const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
@@ -71,9 +70,9 @@ export const FontPairing = () => {
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 	const trackingAllowed = useSelect(
 		( select ) =>
-			select( OPTIONS_STORE_NAME ).getOption(
-				'woocommerce_allow_tracking'
-			) === 'yes'
+			select( optionsStore ).getOption( 'woocommerce_allow_tracking' ) ===
+			'yes',
+		[]
 	);
 
 	const { optInFlowStatus } = useContext( OptInContext );

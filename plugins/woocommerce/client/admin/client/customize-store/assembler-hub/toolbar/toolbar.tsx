@@ -1,4 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
@@ -17,17 +16,12 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-
-import {
-	BlockMover,
-	store as blockEditorStore,
-	// @ts-expect-error missing type
-} from '@wordpress/block-editor';
+import { useQuery } from '@woocommerce/navigation';
+import { BlockMover, store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { useQuery } from '@woocommerce/navigation';
 import Shuffle from './shuffle';
 import Delete from './delete';
 import './style.scss';
@@ -53,35 +47,36 @@ export const Toolbar = () => {
 		previousBlock: BlockInstance | undefined;
 		allBlocks: BlockInstance[];
 	} = useSelect( ( select ) => {
-		const selectedBlockId =
-			// @ts-expect-error missing type
-			select( blockEditorStore ).getSelectedBlockClientId();
-		const nextBlockClientId =
-			// @ts-expect-error missing type
-			select( blockEditorStore ).getNextBlockClientId();
-		const previousBlockClientId =
-			// @ts-expect-error missing type
-			select( blockEditorStore ).getPreviousBlockClientId();
+		const {
+			// @ts-expect-error Selector is not typed
+			getSelectedBlockClientId,
+			// @ts-expect-error Selector is not typed
+			getNextBlockClientId,
+			// @ts-expect-error Selector is not typed
+			getPreviousBlockClientId,
+			// @ts-expect-error Selector is not typed
+			getBlocksByClientId,
+			// @ts-expect-error Selector is not typed
+			getBlocks,
+		} = select( blockEditorStore );
 
-		// @ts-expect-error missing type
-		const [ current ] = select( blockEditorStore ).getBlocksByClientId( [
-			selectedBlockId,
-		] );
+		const selectedBlockId = getSelectedBlockClientId();
+		const nextBlockClientId = getNextBlockClientId();
+		const previousBlockClientId = getPreviousBlockClientId();
 
-		// @ts-expect-error missing type
-		const [ next ] = select( blockEditorStore ).getBlocksByClientId( [
-			nextBlockClientId,
-		] );
+		const [ current ] = getBlocksByClientId(
+			selectedBlockId ? [ selectedBlockId ] : []
+		);
 
-		const [ previous ] = select(
-			blockEditorStore
-			// @ts-expect-error missing type
-		).getBlocksByClientId( [ previousBlockClientId ] );
+		const [ next ] = getBlocksByClientId(
+			nextBlockClientId ? [ nextBlockClientId ] : []
+		);
 
-		const blocks = select(
-			blockEditorStore
-			// @ts-expect-error missing type
-		).getBlocks();
+		const [ previous ] = getBlocksByClientId(
+			previousBlockClientId ? [ previousBlockClientId ] : []
+		);
+
+		const blocks = getBlocks();
 
 		return {
 			currentBlock: current,
@@ -188,7 +183,6 @@ export const Toolbar = () => {
 			as="div"
 			animate={ false }
 			className="components-tooltip woocommerce-customize-store_block-toolbar-popover"
-			// @ts-expect-error missing type
 			variant="unstyled"
 			resize={ false }
 			flip={ false }
@@ -203,6 +197,7 @@ export const Toolbar = () => {
 						<ToolbarGroup>
 							<BlockMover
 								clientIds={ [ selectedBlockClientId ] }
+								// @ts-expect-error - isBlockMoverUpButtonDisabled isn't defined in the type.
 								isBlockMoverUpButtonDisabled={
 									isBlockMoverUpButtonDisabled
 								}

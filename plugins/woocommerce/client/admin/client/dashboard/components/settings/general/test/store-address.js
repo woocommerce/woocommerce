@@ -233,11 +233,13 @@ jest.mock( '@wordpress/data', () => {
 
 describe( 'StoreAddress', () => {
 	const mockedGetInputProps = jest.fn().mockReturnValue( '' );
+	const mockedGetSelectControlProps = jest.fn().mockReturnValue( '' );
 
 	it( 'should render should in the order of Country / Region, Address, Post / Zip Code, City, Email Address.', () => {
 		const { container } = render(
 			<StoreAddress
 				getInputProps={ mockedGetInputProps }
+				getSelectControlProps={ mockedGetSelectControlProps }
 				setValue={ jest.fn() }
 			/>
 		);

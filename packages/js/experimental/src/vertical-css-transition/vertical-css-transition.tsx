@@ -9,12 +9,13 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { CSSTransitionProps } from 'react-transition-group/CSSTransition';
-import { CSSTransition } from 'react-transition-group';
+import { CSSTransition, TransitionStatus } from 'react-transition-group';
 
 export type VerticalCSSTransitionProps<
 	Ref extends HTMLElement | undefined = undefined
 > = CSSTransitionProps< Ref > & {
 	defaultStyle?: React.CSSProperties;
+	children: JSX.Element;
 };
 
 function getContainerHeight( container: HTMLDivElement ) {
@@ -40,9 +41,12 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 } ) => {
 	const [ containerHeight, setContainerHeight ] = useState( 0 );
 	const [ transitionIn, setTransitionIn ] = useState( props.in || false );
-	const cssTransitionRef = useRef< CSSTransition< HTMLElement > | null >(
-		null
-	);
+	const cssTransitionRef = useRef<
+		| ( CSSTransition< HTMLElement > & {
+				context: { isMounting: boolean };
+		  } )
+		| null
+	>( null );
 	const collapseContainerRef = useCallback(
 		( containerElement: HTMLDivElement ) => {
 			if ( containerElement ) {
@@ -79,9 +83,7 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 		exited: { maxHeight: 0 },
 	};
 
-	const getTransitionStyle = (
-		state: 'entering' | 'entered' | 'exiting' | 'exited'
-	) => {
+	const getTransitionStyle = ( state: TransitionStatus ) => {
 		const timeouts = getTimeouts();
 		const appearing =
 			cssTransitionRef.current &&
@@ -100,7 +102,9 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 				duration === undefined ? '500ms' : duration + 'ms',
 			overflow: 'hidden',
 			...( defaultStyle || {} ),
-			...transitionStyles[ state ],
+			...( state in transitionStyles
+				? transitionStyles[ state as keyof typeof transitionStyles ]
+				: {} ),
 		};
 		// only include transition styles when entering or exiting.
 		if ( state !== 'entering' && state !== 'exiting' ) {
@@ -121,7 +125,7 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 			in={ transitionIn }
 			ref={ cssTransitionRef }
 		>
-			{ ( state: 'entering' | 'entered' | 'exiting' | 'exited' ) => (
+			{ ( state ) => (
 				<div
 					className="vertical-css-transition-container"
 					style={ getTransitionStyle( state ) }

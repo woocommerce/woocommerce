@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { useEntityProp } from '@wordpress/core-data';
+import { useEntityProp, store as coreStore } from '@wordpress/core-data';
 import { dispatch, useSelect, select as wpSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
+import { Product, ProductStatus, productsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -47,18 +47,13 @@ export function useProductManager< T = Product >( postType: string ) {
 			setIsSaving( true );
 
 			await validate( extraProps );
-			const { saveEntityRecord } = dispatch( 'core' );
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			const { blocks, content, selection, ...editedProduct } =
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				wpSelect( 'core' ).getEntityRecordEdits(
-					'postType',
-					postType,
-					id
-				);
+			// @ts-expect-error saveEntityRecord is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
+			const { saveEntityRecord } = dispatch( coreStore );
+
+			const { blocks, content, selection, ...editedProduct } = wpSelect(
+				coreStore
+			).getEntityRecordEdits( 'postType', postType, id );
 
 			const savedProduct = await saveEntityRecord(
 				'postType',
@@ -93,7 +88,7 @@ export function useProductManager< T = Product >( postType: string ) {
 					: {};
 			setIsSaving( true );
 			const duplicatedProduct = await dispatch(
-				PRODUCTS_STORE_NAME
+				productsStore
 			).duplicateProduct( id, data );
 
 			return duplicatedProduct as T;

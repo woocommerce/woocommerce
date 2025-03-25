@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.5.0
+ * @version 9.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -31,7 +31,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 	<?php if ( empty( $available_variations ) && false !== $available_variations ) : ?>
 		<p class="stock out-of-stock"><?php echo esc_html( apply_filters( 'woocommerce_out_of_stock_message', __( 'This product is currently out of stock and unavailable.', 'woocommerce' ) ) ); ?></p>
 	<?php else : ?>
-		<table class="variations" role="presentation">
+		<table class="variations" cellspacing="0" role="presentation">
 			<tbody>
 				<?php foreach ( $attributes as $attribute_name => $options ) : ?>
 					<tr>
@@ -45,20 +45,14 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 										'product'   => $product,
 									)
 								);
-							?>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<?php
-							/**
-							 * Filters the reset variation button.
-							 *
-							 * @since 2.5.0
-							 *
-							 * @param string  $button The reset variation button HTML.
-							 */
-							echo end( $attribute_keys ) === $attribute_name ? wp_kses_post( apply_filters( 'woocommerce_reset_variations_link', '<button class="reset_variations"  aria-label="' . esc_html__( 'Clear options', 'woocommerce' ) . '">' . esc_html__( 'Clear', 'woocommerce' ) . '</button>' ) ) : '';
+								/**
+								 * Filters the reset variation button.
+								 *
+								 * @since 2.5.0
+								 *
+								 * @param string  $button The reset variation button HTML.
+								 */
+								echo end( $attribute_keys ) === $attribute_name ? wp_kses_post( apply_filters( 'woocommerce_reset_variations_link', '<a class="reset_variations" href="#" aria-label="' . esc_attr__( 'Clear options', 'woocommerce' ) . '">' . esc_html__( 'Clear', 'woocommerce' ) . '</a>' ) ) : '';
 							?>
 						</td>
 					</tr>

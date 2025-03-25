@@ -21,7 +21,7 @@ export const Action = ( {
 	isRecommended = false,
 	hasPlugins,
 	manageUrl = null,
-	markConfigured,
+	markConfigured = () => {},
 	onSetUp = () => {},
 	onSetupCallback,
 	setupButtonText = __( 'Get started', 'woocommerce' ),

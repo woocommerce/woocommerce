@@ -211,13 +211,17 @@ class BlockPatterns {
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {
+			// Only log once per day by using a transient.
+			$transient_key = 'wc_ptk_pattern_store_warning';
 			// By only logging when patterns are empty and no fetch is scheduled,
 			// we ensure that warnings are only generated in genuinely problematic situations,
 			// such as when the pattern fetching mechanism has failed entirely.
-			if ( ! call_user_func( $has_scheduled_action, 'fetch_patterns' ) ) {
+			if ( ! get_transient( $transient_key ) && ! call_user_func( $has_scheduled_action, 'fetch_patterns' ) ) {
 				wc_get_logger()->warning(
 					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
 				);
+				// Set the transient to true to indicate that the warning has been logged in the current day.
+				set_transient( $transient_key, true, DAY_IN_SECONDS );
 			}
 			return;
 		}

@@ -11,8 +11,6 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	product_sku,
-	product_id,
 	think_time_min,
 	think_time_max,
 	STORE_NAME,
@@ -26,6 +24,7 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { getDefaultProduct } from '../../utils.js';
 
 export function cart() {
 	group( 'Product Page Add to cart', function () {
@@ -37,11 +36,12 @@ export function cart() {
 			commonNonStandardHeaders
 		);
 
+		const product = getDefaultProduct( 'Shopper' );
+
 		const response = http.post(
 			`${ base_url }/?wc-ajax=add_to_cart`,
 			{
-				product_sku: `${ product_sku }`,
-				product_id: `${ product_id }`,
+				product_id: `${ product.id }`,
 				quantity: '1',
 			},
 			{

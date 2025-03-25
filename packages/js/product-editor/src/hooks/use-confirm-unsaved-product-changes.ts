@@ -24,7 +24,8 @@ export function useConfirmUnsavedProductChanges(
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				isSaving: isSavingEntityRecord< boolean >(
+				// @ts-expect-error Selector is not typed
+				isSaving: isSavingEntityRecord(
 					'postType',
 					productType,
 					productId

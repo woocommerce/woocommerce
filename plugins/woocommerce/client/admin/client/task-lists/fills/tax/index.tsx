@@ -5,11 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardBody, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
-import {
-	OPTIONS_STORE_NAME,
-	SETTINGS_STORE_NAME,
-	TaskType,
-} from '@woocommerce/data';
+import { optionsStore, settingsStore, TaskType } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import {
@@ -33,7 +29,7 @@ import { ManualConfiguration } from './manual-configuration';
 import { Partners } from './components/partners';
 import { WooCommerceTax } from './woocommerce-tax';
 
-const TaskCard: React.FC = ( { children } ) => {
+const TaskCard = ( { children }: { children: React.ReactNode } ) => {
 	return (
 		<Card className="woocommerce-task-card">
 			<CardBody>{ children }</CardBody>
@@ -49,14 +45,13 @@ export type TaxProps = {
 
 export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } =
-		useDispatch( SETTINGS_STORE_NAME );
+	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 	const { generalSettings, isResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
-				select( SETTINGS_STORE_NAME );
+				select( settingsStore );
 			return {
 				generalSettings: getSettings( 'general' ).general,
 				isResolving: ! hasFinishedResolution( 'getSettings', [
@@ -64,7 +59,8 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				] ),
 				taxSettings: getSettings( 'tax' ).tax || {},
 			};
-		}
+		},
+		[]
 	);
 
 	const onManual = useCallback( async () => {
@@ -258,11 +254,10 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 };
 
 registerPlugin( 'wc-admin-onboarding-task-tax', {
-	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="tax">
-			{ ( { onComplete, query, task }: TaxProps ) => (
+			{ ( { onComplete, query, task } ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />
 			) }
 		</WooOnboardingTask>

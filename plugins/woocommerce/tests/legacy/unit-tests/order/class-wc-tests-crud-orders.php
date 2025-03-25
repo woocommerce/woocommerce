@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -305,7 +306,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$item_2->set_props(
 			array(
 				'name'       => 'Some Fee',
-				'tax_status' => 'taxable',
+				'tax_status' => ProductTaxStatus::TAXABLE,
 				'total'      => '100',
 				'tax_class'  => '',
 			)
@@ -342,7 +343,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$item->set_props(
 			array(
 				'name'       => 'Some Fee',
-				'tax_status' => 'taxable',
+				'tax_status' => ProductTaxStatus::TAXABLE,
 				'total'      => '100',
 				'tax_class'  => '',
 			)
@@ -1304,7 +1305,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_get_payment_method() {
 		$object = new WC_Order();
-		$set_to = 'paypal';
+		$set_to = WC_Gateway_Paypal::ID;
 		$object->set_payment_method( $set_to );
 		$this->assertEquals( $set_to, $object->get_payment_method() );
 	}
@@ -1997,7 +1998,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			$fee->set_props(
 				array(
 					'name'       => 'Some Fee',
-					'tax_status' => 'taxable',
+					'tax_status' => ProductTaxStatus::TAXABLE,
 					'total'      => $total,
 					'tax_class'  => '',
 				)

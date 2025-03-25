@@ -17,6 +17,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 			.components-button {
 				top: 40px;
 				left: -20px;
+				position: relative;
 			}
 		}
 	}
@@ -30,7 +31,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 		}
 
 		&.secondary {
-			background-color: #faf7f3;
+			background-color: #fbf9f6;
 			height: 100%;
 			min-width: 392px;
 		}

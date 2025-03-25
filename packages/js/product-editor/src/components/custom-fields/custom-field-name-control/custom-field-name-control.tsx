@@ -87,7 +87,7 @@ export const CustomFieldNameControl = forwardRef(
 			useCallback(
 				function onFilterValueChange( search: string ) {
 					searchCustomFieldNames(
-						search === '' ? value : search
+						search === '' ? ( value as string ) : search
 					).then( setCustomFieldNames );
 				},
 				[ value ]

@@ -3,7 +3,6 @@
  */
 import { withConsole } from '@storybook/addon-console';
 import { createElement } from '@wordpress/element';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -22,7 +21,7 @@ function logLinkClick( event ) {
 }
 
 export default {
-	title: 'WooCommerce Admin/components/Link',
+	title: 'Components/Link',
 	component: Link,
 	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 };

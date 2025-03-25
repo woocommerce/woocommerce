@@ -74,9 +74,6 @@ export const Transitional = ( {
 				</Modal>
 			) }
 			<SiteHub
-				variants={ {
-					view: { x: 0 },
-				} }
 				isTransparent={ false }
 				className="woocommerce-edit-site-layout__hub"
 			/>

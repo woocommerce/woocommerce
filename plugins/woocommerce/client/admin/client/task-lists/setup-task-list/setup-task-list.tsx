@@ -9,12 +9,11 @@ import { EllipsisMenu } from '@woocommerce/components';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { WooOnboardingTaskListHeader } from '@woocommerce/onboarding';
 import {
-	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
 	getVisibleTasks,
 	TaskListType,
-	WCDataSelector,
+	onboardingStore,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, useSlot } from '@woocommerce/experimental';
@@ -57,18 +56,18 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 	cesHeader = true,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
-	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+	const { profileItems } = useSelect( ( select ) => {
+		const { getProfileItems } = select( onboardingStore );
 		return {
 			profileItems: getProfileItems(),
 		};
-	} );
+	}, [] );
 	const {
 		hideTaskList,
 		visitedTask,
 		keepCompletedTaskList: keepCompletedTasks,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( onboardingStore );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;

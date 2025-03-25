@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\Helpers;
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * FixtureData class.
  */
@@ -26,6 +28,10 @@ class FixtureData {
 			)
 		);
 		$product->save();
+
+		if ( isset( $props['brand_ids'] ) ) {
+			wp_set_object_terms( $product->get_id(), $props['brand_ids'], 'product_brand' );
+		}
 
 		return wc_get_product( $product->get_id() );
 	}
@@ -66,6 +72,52 @@ class FixtureData {
 			$product->set_attributes( $product_attributes );
 			$product->save();
 		}
+
+		return wc_get_product( $product->get_id() );
+	}
+
+	/**
+	 * Create a grouped product and return the result.
+	 *
+	 * @param array $props Product props.
+	 * @return \WC_Product
+	 */
+	public function get_grouped_product( $props ) {
+		$product = new \WC_Product_Grouped();
+		$product->set_props(
+			wp_parse_args(
+				$props,
+				array(
+					'name' => 'Grouped Product',
+				)
+			)
+		);
+
+		$children   = array();
+		$children[] = $this->get_simple_product(
+			array(
+				'name'          => 'Child Product 1',
+				'stock_status'  => 'instock',
+				'regular_price' => 10,
+			)
+		)->get_id();
+		$children[] = $this->get_simple_product(
+			array(
+				'name'          => 'Child Product 2',
+				'stock_status'  => 'instock',
+				'regular_price' => 9,
+			)
+		)->get_id();
+		$children[] = $this->get_simple_product(
+			array(
+				'name'          => 'Child Product 3',
+				'stock_status'  => 'instock',
+				'regular_price' => 10,
+			)
+		)->get_id();
+
+		$product->set_children( $children );
+		$product->save();
 
 		return wc_get_product( $product->get_id() );
 	}
@@ -211,6 +263,20 @@ class FixtureData {
 	}
 
 	/**
+	 * Create a product brand and return the result.
+	 *
+	 * @param array $props Product props.
+	 * @return array
+	 */
+	public function get_product_brand( $props ) {
+		return wp_insert_term(
+			$props['name'],
+			'product_brand',
+			$props
+		);
+	}
+
+	/**
 	 * Create a coupon and return the result.
 	 *
 	 * @param array $props Product props.
@@ -328,7 +394,7 @@ class FixtureData {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => $cost,
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
@@ -348,7 +414,7 @@ class FixtureData {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => $cost,
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );

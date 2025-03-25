@@ -12,7 +12,7 @@ import { Chart, AnalyticsError } from '@woocommerce/components';
 import {
 	getReportChartData,
 	getTooltipValueFormat,
-	SETTINGS_STORE_NAME,
+	settingsStore,
 	REPORTS_STORE_NAME,
 } from '@woocommerce/data';
 import {
@@ -345,7 +345,7 @@ export default compose(
 			getChartMode( selectedFilter, query ) ||
 			'time-comparison';
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
 		/* eslint @wordpress/no-unused-vars-before-return: "off" */

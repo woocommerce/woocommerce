@@ -5,7 +5,7 @@
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Card, CardBody } from '@wordpress/components';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
 import {
@@ -14,7 +14,7 @@ import {
 } from '@woocommerce/onboarding';
 
 const Task = ( { onComplete, task } ) => {
-	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const { actionTask } = useDispatch( onboardingStore );
 	const { isActioned } = task;
 
 	return (

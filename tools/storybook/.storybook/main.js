@@ -9,12 +9,14 @@ const staticDirs = [
 if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
 	// Add WooCommerce Blocks Storybook for build process.
 	staticDirs.push( {
-		from: '../../../plugins/woocommerce-blocks/storybook/dist',
+		from: '../../../plugins/woocommerce/client/blocks/storybook/dist',
 		to: '/assets/woocommerce-blocks',
 	} );
 }
 module.exports = {
 	stories: [
+		// Introductory documentation
+		'../stories/**/*.mdx',
 		// WooCommerce Admin / @woocommerce/components components
 		'../../../packages/js/components/src/**/stories/*.story.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/experimental components
@@ -30,7 +32,7 @@ module.exports = {
 			return {
 				'woocommerce-blocks': {
 					expanded: false,
-					title: 'WooCommerce Blocks',
+					title: 'Blocks',
 					url: 'http://localhost:6006',
 				},
 			};
@@ -45,7 +47,7 @@ module.exports = {
 		return {
 			'woocommerce-blocks': {
 				expanded: false,
-				title: 'WooCommerce Blocks',
+				title: 'Blocks',
 				url: pathPrefix + '/assets/woocommerce-blocks',
 			},
 		};

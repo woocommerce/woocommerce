@@ -4,7 +4,8 @@
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import { Options } from '@wordpress/notices';
+import type { Options } from 'wordpress__notices';
+import { store as coreNoticesStore } from '@wordpress/notices';
 import { Icon } from '@wordpress/components';
 
 /**
@@ -32,8 +33,11 @@ import { noticeStore } from '../contexts/notice-store';
 interface ProductGroup {
 	id: string;
 	title: string;
+	description: string;
 	items: Product[];
 	url: string;
+	url_text: string | null;
+	url_type: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	itemType: ProductType;
 }
 
@@ -112,6 +116,11 @@ async function fetchSearchResults(
 	totalPages: number;
 	totalProducts: number;
 } > {
+	// add user locale to search params if not already present
+	if ( LOCALE.userLocale && ! params.get( 'locale' ) ) {
+		params.set( 'locale', LOCALE.userLocale );
+	}
+
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -408,7 +417,7 @@ function addNotice(
 			};
 		}
 
-		dispatch( 'core/notices' ).createSuccessNotice( message, options );
+		dispatch( coreNoticesStore ).createSuccessNotice( message, options );
 	}
 }
 
@@ -480,15 +489,23 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
-const connectUrl = (): string => {
+// If you need to add support for a different page, make sure to
+// update WC_Helper::get_source_page() in the backend.
+const connectUrl = ( page = 'wc-admin' ): string => {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	if ( ! wccomSettings.connectURL ) {
 		return '';
 	}
 
+	// We have to manipulate `page` from the frontend, since `wccomHelper`
+	// settings remain static when switching pages on the frontend.
+	const updatedHref = new URL( window.location.href );
+	updatedHref.searchParams.set( 'page', page );
+
 	return appendURLParams( wccomSettings.connectURL, [
-		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+		[ 'redirect_admin_url', encodeURIComponent( updatedHref.toString() ) ],
+		[ 'page', page ],
 	] );
 };
 

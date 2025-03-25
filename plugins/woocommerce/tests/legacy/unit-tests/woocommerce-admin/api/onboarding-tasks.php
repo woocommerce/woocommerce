@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Admin\API\OnboardingTasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 
 require_once __DIR__ . '/../features/onboarding-tasks/test-task.php';
 
@@ -140,8 +142,8 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'id', $data );
 		$product = wc_get_product( $data['id'] );
-		$this->assertEquals( 'auto-draft', $product->get_status() );
-		$this->assertEquals( 'simple', $product->get_type() );
+		$this->assertEquals( ProductStatus::AUTO_DRAFT, $product->get_status() );
+		$this->assertEquals( ProductType::SIMPLE, $product->get_type() );
 
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/create_product_from_template' );
 		$request->set_param( 'template_name', 'digital' );
@@ -152,8 +154,8 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'id', $data );
 		$product = wc_get_product( $data['id'] );
-		$this->assertEquals( 'auto-draft', $product->get_status() );
-		$this->assertEquals( 'simple', $product->get_type() );
+		$this->assertEquals( ProductStatus::AUTO_DRAFT, $product->get_status() );
+		$this->assertEquals( ProductType::SIMPLE, $product->get_type() );
 	}
 
 	/**
@@ -175,8 +177,8 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'id', $data );
 		$product = wc_get_product( $data['id'] );
-		$this->assertEquals( 'auto-draft', $product->get_status() );
-		$this->assertEquals( 'variable', $product->get_type() );
+		$this->assertEquals( ProductStatus::AUTO_DRAFT, $product->get_status() );
+		$this->assertEquals( ProductType::VARIABLE, $product->get_type() );
 
 		// Set to initial locale.
 		switch_to_locale( $user_locale, $this->user );

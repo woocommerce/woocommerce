@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useState, useCallback } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { onboardingStore, pluginsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,17 +25,17 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 
 	const { installedPlugins, productTypes, profileItems } = useSelect(
 		( select ) => {
-			const { getProductTypes, getProfileItems } = select(
-				ONBOARDING_STORE_NAME
-			);
-			const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+			const { getProductTypes, getProfileItems } =
+				select( onboardingStore );
+			const { getInstalledPlugins } = select( pluginsStore );
 
 			return {
 				installedPlugins: getInstalledPlugins(),
 				productTypes: getProductTypes(),
 				profileItems: getProfileItems(),
 			};
-		}
+		},
+		[]
 	);
 
 	const toggleCartModal = useCallback( () => {
@@ -65,6 +64,7 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 				} }
 			/>
 			{ cartModalOpen && (
+				// @ts-expect-error Todo: convert CartModal to TS
 				<CartModal
 					onClose={ () => toggleCartModal() }
 					onClickPurchaseLater={ () => toggleCartModal() }
@@ -77,7 +77,7 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 const PurchaseTaskItemFill = () => {
 	return (
 		<WooOnboardingTaskListItem id="purchase">
-			{ ( { defaultTaskItem }: PurchaseTaskItemProps ) => (
+			{ ( { defaultTaskItem } ) => (
 				<PurchaseTaskItem defaultTaskItem={ defaultTaskItem } />
 			) }
 		</WooOnboardingTaskListItem>
@@ -85,7 +85,6 @@ const PurchaseTaskItemFill = () => {
 };
 
 registerPlugin( 'woocommerce-admin-task-purchase', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
 	render: PurchaseTaskItemFill,
 } );

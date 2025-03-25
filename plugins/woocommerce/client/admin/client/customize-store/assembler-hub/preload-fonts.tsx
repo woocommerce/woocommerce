@@ -3,9 +3,8 @@
  * External dependencies
  */
 import {
-	privateApis as blockEditorPrivateApis,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-expect-error No types for this exist yet.
+	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';

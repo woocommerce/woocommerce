@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -29,7 +31,6 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		public function __construct() {
 			$this->id             = 'cancelled_order';
 			$this->title          = __( 'Cancelled order', 'woocommerce' );
-			$this->description    = __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
 			$this->template_html  = 'emails/admin-cancelled-order.php';
 			$this->template_plain = 'emails/plain/admin-cancelled-order.php';
 			$this->placeholders   = array(
@@ -44,6 +45,11 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 
 			// Call parent constructor.
 			parent::__construct();
+
+			// Must be after parent's constructor which sets `email_improvements_enabled` property.
+			$this->description = $this->email_improvements_enabled
+				? __( 'Select who should be notified if an order that was previously processing or on-hold gets cancelled.', 'woocommerce' )
+				: __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
@@ -66,7 +72,9 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Order Cancelled: #{order_number}', 'woocommerce' );
+			return $this->email_improvements_enabled
+				? __( 'Order cancelled: #{order_number}', 'woocommerce' )
+				: __( 'Order Cancelled: #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -201,6 +209,10 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 					'desc_tip'    => true,
 				),
 			);
+			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+				$this->form_fields['cc']  = $this->get_cc_field();
+				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
 		}
 	}
 

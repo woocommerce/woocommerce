@@ -6,7 +6,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { EllipsisMenu } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, WCDataSelector, WEEK } from '@woocommerce/data';
+import { optionsStore, WEEK } from '@woocommerce/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import {
@@ -47,45 +47,52 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 export const TaskListCompletedHeader: React.FC<
 	TaskListCompletedHeaderProps
 > = ( { hideTasks, customerEffortScore } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
 	const [ hideCustomerEffortScore, setHideCustomerEffortScore ] =
 		useState( false );
 	const { storeAgeInWeeks, cesShownForActions, canShowCustomerEffortScore } =
-		useSelect( ( select: WCDataSelector ) => {
-			const { getOption, hasFinishedResolution } =
-				select( OPTIONS_STORE_NAME );
+		useSelect(
+			( select ) => {
+				const { getOption, hasFinishedResolution } =
+					select( optionsStore );
 
-			if ( customerEffortScore ) {
-				const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
-				const adminInstallTimestamp: number =
-					getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-				const cesActions = getOption< string[] >(
-					SHOWN_FOR_ACTIONS_OPTION_NAME
-				);
-				const loadingOptions =
-					! hasFinishedResolution( 'getOption', [
-						SHOWN_FOR_ACTIONS_OPTION_NAME,
-					] ) ||
-					! hasFinishedResolution( 'getOption', [
-						ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
-					] );
-				return {
-					storeAgeInWeeks: getStoreAgeInWeeks(
-						adminInstallTimestamp
-					),
-					cesShownForActions: cesActions,
-					canShowCustomerEffortScore:
-						! loadingOptions &&
-						allowTracking &&
-						! ( cesActions || [] ).includes( 'store_setup' ),
-					loading: loadingOptions,
-				};
-			}
-			return {};
-		} );
+				if ( customerEffortScore ) {
+					const allowTracking = getOption(
+						ALLOW_TRACKING_OPTION_NAME
+					) as string;
+					const adminInstallTimestamp: number =
+						( getOption(
+							ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
+						) as number ) || 0;
+					const cesActions = getOption(
+						SHOWN_FOR_ACTIONS_OPTION_NAME
+					) as string[];
+					const loadingOptions =
+						! hasFinishedResolution( 'getOption', [
+							SHOWN_FOR_ACTIONS_OPTION_NAME,
+						] ) ||
+						! hasFinishedResolution( 'getOption', [
+							ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+						] );
+					return {
+						storeAgeInWeeks: getStoreAgeInWeeks(
+							adminInstallTimestamp
+						),
+						cesShownForActions: cesActions,
+						canShowCustomerEffortScore:
+							! loadingOptions &&
+							allowTracking &&
+							! ( cesActions || [] ).includes( 'store_setup' ),
+						loading: loadingOptions,
+					};
+				}
+				return {};
+			},
+			[ customerEffortScore ]
+		);
 
 	useEffect( () => {
 		if ( hasSubmittedScore ) {

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 type Props = {
 	/** Set to false to disable this query, defaults to true to query the data */
@@ -21,43 +21,47 @@ export const useLaunchYourStore = (
 		storePagesOnly,
 		privateLink,
 		shareKey,
-	} = useSelect( ( select ) => {
-		if ( ! enabled ) {
+	} = useSelect(
+		( select ) => {
+			if ( ! enabled ) {
+				return {
+					isLoading: false,
+					comingSoon: null,
+					storePagesOnly: null,
+					privateLink: null,
+					shareKey: null,
+					launchYourStoreEnabled: null,
+				};
+			}
+
+			const { hasFinishedResolution, getOption } = select( optionsStore );
+
+			const allOptionResolutionsFinished =
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_coming_soon',
+				] ) &&
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_store_pages_only',
+				] ) &&
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_private_link',
+				] ) &&
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_share_key',
+				] );
+
 			return {
-				isLoading: false,
-				comingSoon: null,
-				storePagesOnly: null,
-				privateLink: null,
-				shareKey: null,
-				launchYourStoreEnabled: null,
+				isLoading: allOptionResolutionsFinished,
+				comingSoon: getOption( 'woocommerce_coming_soon' ),
+				storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
+				privateLink: getOption( 'woocommerce_private_link' ),
+				shareKey: getOption( 'woocommerce_share_key' ),
+				launchYourStoreEnabled:
+					window.wcAdminFeatures[ 'launch-your-store' ],
 			};
-		}
-
-		const { hasFinishedResolution, getOption } =
-			select( OPTIONS_STORE_NAME );
-
-		const allOptionResolutionsFinished =
-			! hasFinishedResolution( 'getOption', [
-				'woocommerce_coming_soon',
-			] ) &&
-			! hasFinishedResolution( 'getOption', [
-				'woocommerce_store_pages_only',
-			] ) &&
-			! hasFinishedResolution( 'getOption', [
-				'woocommerce_private_link',
-			] ) &&
-			! hasFinishedResolution( 'getOption', [ 'woocommerce_share_key' ] );
-
-		return {
-			isLoading: allOptionResolutionsFinished,
-			comingSoon: getOption( 'woocommerce_coming_soon' ),
-			storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
-			privateLink: getOption( 'woocommerce_private_link' ),
-			shareKey: getOption( 'woocommerce_share_key' ),
-			launchYourStoreEnabled:
-				window.wcAdminFeatures[ 'launch-your-store' ],
-		};
-	} );
+		},
+		[ enabled ]
+	);
 
 	return {
 		isLoading,

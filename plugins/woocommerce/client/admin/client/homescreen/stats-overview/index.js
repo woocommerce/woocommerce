@@ -12,7 +12,7 @@ import {
 	MenuTitle,
 	Link,
 } from '@woocommerce/components';
-import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { useUserPreferences, pluginsStore } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -48,8 +48,12 @@ export const StatsOverview = () => {
 		DEFAULT_HIDDEN_STATS
 	);
 
-	const jetPackIsConnected = useSelect( ( select ) => {
-		return select( PLUGINS_STORE_NAME ).isJetpackConnected();
+	const jetPackIsConnectedAndActivated = useSelect( ( select ) => {
+		const store = select( pluginsStore );
+		return (
+			store.isJetpackConnected() &&
+			store.getPluginInstallState( 'jetpack' ) === 'activated'
+		);
 	}, [] );
 
 	const homePageStats = userPrefs.homepage_stats || {};
@@ -134,7 +138,7 @@ export const StatsOverview = () => {
 			>
 				{ ( tab ) => (
 					<Fragment>
-						{ ! jetPackIsConnected &&
+						{ ! jetPackIsConnectedAndActivated &&
 							! userDismissedJetpackInstall && (
 								<InstallJetpackCTA />
 							) }

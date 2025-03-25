@@ -1,14 +1,12 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/d5ab7238e53d0947d4bb0853464b1c58325b6130/packages/edit-site/src/components/global-styles/style-variations-container.js
-// @ts-expect-error -- No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
+import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -20,8 +18,7 @@ import { ColorPaletteResponse } from '~/customize-store/design-with-ai/types';
 
 export const ColorPalette = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 		return {
 			aiSuggestions: getOption(
 				'woocommerce_customize_store_ai_suggestions'
@@ -30,7 +27,7 @@ export const ColorPalette = () => {
 				'woocommerce_customize_store_ai_suggestions',
 			] ),
 		};
-	} );
+	}, [] );
 
 	const [ colorPalettes, setColorPalettes ] = useState(
 		[] as typeof COLOR_PALETTES

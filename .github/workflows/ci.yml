@@ -5,7 +5,12 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**/changelog/**'
+      - '.cursor/**'
       - '**/*.md'
+      - '**/changelog.txt'
+      - '.gitignore'
+      - '.github/**'
+      - '!.github/workflows/ci.yml'
     branches:
       - 'trunk'
       - 'release/*'
@@ -17,6 +22,10 @@ on:
         description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
         required: true
         default: 'default'
+        type: string
+      wc-version:
+        description: 'Specific WooCommerce version to install by the test jobs supporting it'
+        required: false
         type: string
 
 concurrency:
@@ -31,22 +40,25 @@ jobs:
   identify-jobs-to-run:
     name: 'Analyze changes'
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    runs-on: 'ubuntu-20.04'
+    runs-on: ubuntu-latest
     outputs:
       needs-code-validation: ${{ steps.target-changes.outputs.needs-code-validation }}
       needs-changelog-validation: ${{ steps.target-changes.outputs.needs-changelog-validation }}
       needs-markdown-validation:  ${{ steps.target-changes.outputs.needs-markdown-validation }}
+      needs-syncpack-validation:  ${{ steps.target-changes.outputs.needs-syncpack-validation }}
     steps:
       - uses: 'dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36'
         id: target-changes
         with:
           filters: |
             needs-code-validation:
-              - '!((**/*.md)|(**/changelog/*))'
+              - '!((**/*.md)|(**/changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|(**/readme.txt))'
             needs-changelog-validation:
-              - '{packages,plugins}/*/!(changelog/**)/**'
+              - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
               - '!(.github/**)/**/*.md'
+            needs-syncpack-validation:
+              - '(.syncpackrc)|(pnpm-lock.yaml)'
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
@@ -56,38 +68,33 @@ jobs:
     name: 'Build Project Jobs'
     if: ${{ !cancelled() }}
     needs: 'identify-jobs-to-run'
-    runs-on: 'ubuntu-20.04'
+    runs-on: ubuntu-latest
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
-      - name: Setup - calculate checkout depth
-        id: checkout_depth
-        shell: bash
-        run: |
-          fetch_commits=$(( ${{ ( github.event_name == 'pull_request' && github.event.pull_request.commits ) || 1 }} + 1 ))
-          echo "fetch_commits=$fetch_commits" >> $GITHUB_OUTPUT
-      - name: Setup - checkout
-        uses: 'actions/checkout@v4'
-        with:
-          fetch-depth: ${{ steps.checkout_depth.outputs.fetch_commits }}
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+
       - name: Setup - pnpm
         uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+
       - name: Setup - spawn linting and testing jobs
         uses: actions/github-script@v7
         id: 'project-jobs'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         with:
           script: |
             // Intended behaviour of the jobs generation:
             // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
             // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
 
-            let baseRef   = '';
-            const baseSha = ${{ toJson( github.event.pull_request.base.sha ) }};
-            if ( baseSha ) {
-              // Use-case: trigger is pull request
-              baseRef = `--base-ref ${ baseSha }`;
+            let prNumberFilter   = '';
+            if ( '${{ github.event_name }}' === 'pull_request' ) {
+              prNumberFilter = `--pr-number ${{ github.event.pull_request.number }}`;
             }
 
             let githubEvent = ${{ toJson( github.event_name ) }};
@@ -115,47 +122,44 @@ jobs:
             }
 
             const child_process = require( 'node:child_process' );
-            child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
+            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
 
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
-    runs-on: 'ubuntu-20.04'
+    runs-on: ubuntu-latest
     needs: 'project-jobs'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
     steps:
-      - name: 'Calculate checkout depth'
-        id: checkout_depth
-        shell: bash
-        run: |
-          fetch_commits=$(( ${{ github.event.pull_request.commits }} + 1 ))
-          echo "fetch_commits=$fetch_commits" >> $GITHUB_OUTPUT
-
       - uses: 'actions/checkout@v4'
+        name: 'Checkout'
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: ${{ steps.checkout_depth.outputs.fetch_commits }}
+          # We tried to speed checkout up with shallow copies, but `git merge-base ...` used on different levels of tooling forces us to follow this approach.
+          fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         id: 'setup-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
           pull-package-deps: '${{ matrix.projectName }}'
+          php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
   project-test-jobs:
     name: '${{ matrix.name }}'
-    runs-on: 'ubuntu-20.04'
+    runs-on: ubuntu-latest
     needs: 'project-jobs'
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
+      max-parallel: 30
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
@@ -167,8 +171,8 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
-          build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
+          build: ${{ matrix.projectName }}
+          build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || ( matrix.testType == 'unit' && 'dependencies' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
 
@@ -178,7 +182,7 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
           ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
           # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce-blocks' || matrix.projectPath  }}
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
@@ -221,12 +225,14 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 25 ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          WC_VERSION: ${{ inputs.wc-version }}
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -296,12 +302,15 @@ jobs:
     # using a job that runs after all the others and either passes or fails based
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
-    runs-on: 'ubuntu-20.04'
-    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown' ]
+    runs-on: ubuntu-latest
+    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          sparse-checkout: |
+              .github/workflows/scripts
 
       - name: 'Evaluation'
         env:
@@ -320,12 +329,16 @@ jobs:
 
   alert-on-failure:
     name: 'Report results on Slack'
-    runs-on: 'ubuntu-20.04'
-    needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs']
+    runs-on: ubuntu-latest
+    needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce'  }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          sparse-checkout: |
+              package.json
+              ./tools/monorepo-utils
 
       - name: 'Setup PNPM'
         uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
@@ -352,10 +365,11 @@ jobs:
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['project-jobs', 'project-test-jobs']
-    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.report-jobs != '[]' }}
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'report-flaky-tests']
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
     runs-on: ubuntu-latest
@@ -363,8 +377,6 @@ jobs:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: 'Merge artifacts'
         id: merge-artifacts
         uses: actions/upload-artifact/merge@v4
@@ -411,7 +423,7 @@ jobs:
   report-flaky-tests:
     name: 'Create issues for flaky tests'
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
-    needs: ['project-jobs', 'project-test-jobs']
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'alert-on-failure']
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -420,6 +432,9 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          sparse-checkout: |
+              .github/actions/report-flaky-tests
 
       - uses: 'actions/download-artifact@v4'
         name: 'Download artifacts'
@@ -443,39 +458,72 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           label: 'metric: flaky e2e test'
 
-  validate-changelog:
-    name: 'Validate changelog'
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' }}
-    needs: [ 'identify-jobs-to-run', 'project-jobs' ]
-    runs-on: 'ubuntu-20.04'
+  validate-syncpack:
+    name: 'Validate dependencies version'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-syncpack-validation == 'true' }}
+    needs: [ 'identify-jobs-to-run' ]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
       - uses: 'actions/checkout@v4'
+
+      - name: 'Setup - node'
+        uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: '0'
+          node-version-file: .nvmrc
+
+      - name: 'Setup - syncpack'
+        run: npm install -g syncpack@^10.9.3
+
+      - name: 'Validate - mismatches'
+        run: syncpack list-mismatches
+
+      - name: 'Validate - prompt mitigation on failed validation'
+        if: failure()
+        run: |
+          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the pinned version in \`.syncpackrc\` and then running: \`pnpm sync-dependencies\`"
+          exit 1
+
+  validate-changelog:
+    name: 'Validate changelog'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && ! contains( github.event.pull_request.body, '[x] This Pull Request does not require a changelog' ) }}
+    needs: [ 'identify-jobs-to-run' ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: 'actions/checkout@v4'
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
-        with:
-          # The package has majority of composer-deps, therefore referencing it
-          pull-package-composer-deps: '@woocommerce/plugin-woocommerce'
 
       - name: 'Validate - missing entries'
+        id: validate_missing
         env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+            passed=$( php tools/monorepo/check-changelogger-use.php --debug --pr-number=${{ github.event.pull_request.number }} | tee -a /dev/stderr | grep 'Passed validation' )
+            echo "passed=${passed/Passed validation: /}" >> $GITHUB_OUTPUT
 
       - name: 'Validate - existing entries'
-        run: pnpm --recursive --parallel --stream changelog validate
+        run: |
+            echo "Validating: ${{ steps.validate_missing.outputs.passed }}"
+            filter='';
+            for package in $( echo "${{ steps.validate_missing.outputs.passed }}" | tr -d "[:space:]" | tr "," "\n" ); do
+                filter="$filter --filter $package"
+            done
+            echo "Populated filter: $filter"
+
+            pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 
   validate-markdown:
     name: 'Validate markdown'
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}
-    needs: [ 'identify-jobs-to-run', 'project-jobs' ]
-    runs-on: 'ubuntu-20.04'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}
+    needs: [ 'identify-jobs-to-run' ]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -538,15 +586,21 @@ jobs:
           NC="\e[0m"
           set -e
           rc=0
-          changed_files="${{ steps.repo-changed-files.outputs.all_changed_files  }}"
-          if [ -n "$changed_files" ]; then
+          added_and_modified_docs="${{ steps.repo-changed-files.outputs.added_files }} ${{ steps.repo-changed-files.outputs.modified_files }}"
+
+          if [ -n "$added_and_modified_docs" ]; then
             lint_results=""
-            for file in $changed_files; do
+
+            for file in $added_and_modified_docs; do
               lint_result=$( { cat "$file" | markdownlint --stdin ; } 2>&1 ) || rc="$?"
               if [ $rc -ne 0 ]; then
+                echo -e "${RED}[err] $file${NC}"
                 lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
+              else
+                echo -e "${GREEN}[ok] $file${NC}"
               fi
             done
+
             if [ $rc -ne 0 ]; then
               echo -e "${RED}Linting failed for one or more files${NC}"
               echo -e "$lint_results"
@@ -554,12 +608,13 @@ jobs:
             else
               echo -e "${GREEN}Linting successful for all files.${NC}"
             fi
+
           else
             echo "No repo markdown files changed."
           fi
 
       - name: Validate - manifest files for monorepo documentation
-        id: is-valid-json
+        id: manifest-validation
         run: node .github/workflows/scripts/is-valid-json.js docs/docs-manifest.json
 
       - name: Validate - changed markdown files from monorepo documentation
@@ -569,25 +624,34 @@ jobs:
           NC="\e[0m"
           set -e
           rc=0
-          changed_files="${{ steps.docs-changed-files.outputs.all_changed_files }}"
-          changed_manifest="${{ steps.docs-manifest.outputs.all_changed_files }}"
-          is_valid_json="${{ steps.is-valid-json.outputs.is-valid-json }}"
+          any_docs_changed=${{ steps.docs-changed-files.outputs.any_modified }}
           storybook="no"
+
           for L in ${{github.event.pull_request.labels.*.name}}
           do
             if [ $L == "type: storybook" ]; then
               storybook="yes"
             fi
           done
-          if [ -n "$changed_files" ]; then
+
+          if [ "$any_docs_changed" == "true" ]; then
+            added_and_modified_docs="${{ steps.docs-changed-files.outputs.added_files }} ${{ steps.docs-changed-files.outputs.modified_files }}"
+            manifest_changed="${{ steps.docs-manifest.outputs.any_changed }}"
+            is_manifest_valid_json="${{ steps.manifest-validation.outputs.is-valid-json }}"
             lint_results=""
             failed_check=""
-            for file in $changed_files; do
-              lint_result=$( { cat "$file" | markdownlint --stdin -c docs/.markdownlint.json ; } 2>&1 ) || rc="$?"
-              if [ $rc -ne 0 ]; then
-                lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
-              fi
-            done
+
+            if [ -n "$added_and_modified_docs" ]; then
+              for file in $added_and_modified_docs; do
+                lint_result=$( { cat "$file" | markdownlint --stdin -c docs/.markdownlint.json ; } 2>&1 ) || rc="$?"
+                if [ $rc -ne 0 ]; then
+                  echo -e "${RED}[err] $file${NC}"
+                  lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
+                else
+                  echo -e "${GREEN}[ok] $file${NC}"
+                fi
+              done
+            fi
           
             if [ $rc -ne 0 ]; then
               echo -e "${RED}Linting failed for one or more files${NC}"
@@ -598,13 +662,17 @@ jobs:
             fi
           
             if [ "$storybook" == "no" ]; then
-              if [ -z "$changed_manifest" ]; then
+              if [ "$manifest_changed" == "false" ]; then
                 echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
                 failed_check="manifest"
+              else
+                echo -e "${GREEN}[ok] docs/docs-manifest.json (updated)${NC}"
               fi
-              if [ "$is_valid_json" == "no" ]; then
+              if [ "$is_manifest_valid_json" == "no" ]; then
                 echo -e "${RED}'docs/docs-manifest.json' is not valid JSON${NC}"
                 failed_check="manifest"
+              else
+                echo -e "${GREEN}[ok] docs/docs-manifest.json (valid)${NC}"
               fi
               if [ "$failed_check" == "manifest" ]; then
                 echo -e "Generate a manifest with 'pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json'"

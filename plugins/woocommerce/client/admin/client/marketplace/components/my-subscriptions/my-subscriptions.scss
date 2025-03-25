@@ -28,7 +28,7 @@
 	}
 	.woocommerce-marketplace__my-subscriptions__header-refresh {
 		display: flex;
-		justify-content: end;
+		justify-content: flex-end;
 		order: 1;
 	}
 
@@ -69,12 +69,6 @@
 	font-weight: 400;
 	margin: 0;
 	line-height: 28px;
-}
-
-.woocommerce-marketplace__notice--error {
-	&:last-child {
-		margin-bottom: $grid-unit-50;
-	}
 }
 
 .woocommerce-marketplace__my-subscriptions__table-description {
@@ -276,7 +270,7 @@
 
 .woocommerce-marketplace__my-subscriptions__actions {
 	display: flex;
-	justify-content: end;
+	justify-content: flex-end;
 
 	.components-button {
 		margin-right: $grid-unit-10;

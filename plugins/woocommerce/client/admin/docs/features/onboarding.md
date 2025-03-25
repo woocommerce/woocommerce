@@ -39,7 +39,7 @@ To power the new onboarding flow client side, new REST API endpoints have been i
 -   `woocommerce_admin_onboarding_plugins_whitelist` filters the list of plugins that can installed & activated via onboarding. This acts as a whitelist so only certain plugins can be used via the `/wc-admin/onboarding/profile/install` and `/wc-admin/onboarding/profile/activate` endpoints.
 -   `woocommerce_admin_onboarding_themes` filters the themes displayed in the profile wizard.
 -   `woocommerce_admin_onboarding_jetpack_connect_redirect_url` filters the Jetpack connection redirect URL outlined in the Jetpack connection section below.
--   `woocommerce_admin_onboarding_task_list` filters the list of tasks on the task list dashboard. This allows extensions to add new tasks. See [the extension docs](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/docs/examples/extensions) for an example of how to do this.
+-   `woocommerce_admin_onboarding_task_list` filters the list of tasks on the task list dashboard. This allows extensions to add new tasks. 
 -   `woocommerce_rest_onboarding_profile_collection_params` filters the collection parameters for requests to `/wc-admin/onboarding/profile`.
 -   `woocommerce_rest_onboarding_profile_object_query` filters the query arguments for requests to `/wc-admin/onboarding/profile`.
 -   `woocommerce_rest_onboarding_prepare_onboarding_profile` filters the response for requests to `/wc-admin/onboarding/profile`.

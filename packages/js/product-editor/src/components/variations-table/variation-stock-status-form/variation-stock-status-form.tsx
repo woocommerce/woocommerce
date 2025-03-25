@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { FormEvent } from 'react';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import {
@@ -15,7 +15,6 @@ import classNames from 'classnames';
 import {
 	Button,
 	ToggleControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -56,7 +55,7 @@ export function VariationStockStatusForm( {
 
 	const { canManageStock, isLoadingManageStockOption } = useSelect(
 		( select ) => {
-			const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+			const { getOption, isResolving } = select( optionsStore );
 
 			return {
 				canManageStock: getOption( MANAGE_STOCK_OPTION ) === 'yes',
@@ -127,7 +126,9 @@ export function VariationStockStatusForm( {
 		setValue( ( current ) => ( { ...current, stock_status: selected } ) );
 	}
 
-	function handleStockQuantityInputControlChange( stock_quantity: string ) {
+	function handleStockQuantityInputControlChange(
+		stock_quantity: string | undefined
+	) {
 		setValue( ( current ) => ( { ...current, stock_quantity } ) );
 	}
 

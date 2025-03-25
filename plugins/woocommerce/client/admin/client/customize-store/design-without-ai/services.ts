@@ -1,16 +1,14 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, resolveSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 import { Sender } from 'xstate';
-// @ts-expect-error -- No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
-// @ts-expect-error -- No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -85,7 +83,7 @@ const updateGlobalStylesWithDefaultValues = async (
 	const colorPalette = COLOR_PALETTES[ 0 ];
 
 	const allowTracking =
-		( await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		( await resolveSelect( optionsStore ).getOption(
 			'woocommerce_allow_tracking'
 		) ) === 'yes';
 
@@ -99,7 +97,6 @@ const updateGlobalStylesWithDefaultValues = async (
 		return;
 	}
 
-	// @ts-expect-error No types for this exist yet.
 	const { saveEntityRecord } = dispatch( coreStore );
 
 	await saveEntityRecord(
@@ -212,7 +209,7 @@ const createProducts = async () => {
 
 export const enableTracking = async () => {
 	try {
-		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		await dispatch( optionsStore ).updateOptions( {
 			woocommerce_allow_tracking: 'yes',
 		} );
 		window.wcTracks.isEnabled = true;

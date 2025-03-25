@@ -1,0 +1,13 @@
+.wc-block-variation-selector__wrapper {
+	margin-bottom: $gap;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
+	.components-input-control__container {
+		padding: $gap-smaller;
+	}
+}

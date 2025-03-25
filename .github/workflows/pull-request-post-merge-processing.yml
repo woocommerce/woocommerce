@@ -5,6 +5,7 @@ on:
         paths:
             - 'packages/**'
             - 'plugins/woocommerce/**'
+            - '.github/workflows/pull-request-post-merge-processing.yml'
 
 permissions: {}
 
@@ -12,7 +13,7 @@ jobs:
     process-pull-request-after-merge:
         name: "Process a pull request after it's merged"
         if: github.event.pull_request.merged == true
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             pull-requests: write
         steps:
@@ -65,3 +66,16 @@ jobs:
                 TEST_ASSISTANCE_BOT_TOKEN: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
                 WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL: ${{ secrets.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
                 WOO_PR_TESTING_ANALYSIS_TEAM_ID: ${{ secrets.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}
+
+    process-pull-request-after-close:
+        name: "Process a pull request after it's been closed"
+        runs-on: ubuntu-latest
+        steps:
+            - name: 'Cleanup: GitHub caches associated with the merged branch'
+              run: |
+                  for cacheKey in $( gh cache list --ref refs/pull/${{ github.event.pull_request.number }}/merge --limit 100 --sort size_in_bytes --json id --jq '.[].id' ); do
+                      gh cache delete $cacheKey && echo "Dropped cache entry $cacheKey"
+                  done
+              env:
+                  GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
+                  GH_REPO: ${{ github.repository }}

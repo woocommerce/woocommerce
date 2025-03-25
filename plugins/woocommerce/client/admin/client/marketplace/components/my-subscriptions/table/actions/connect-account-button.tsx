@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { ComponentProps } from 'react';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -9,8 +10,10 @@ import { __ } from '@wordpress/i18n';
  */
 import { connectUrl } from '../../../../utils/functions';
 
+type ButtonProps = ComponentProps< typeof Button >;
+
 interface RenewProps {
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 	install?: string;
 }
 

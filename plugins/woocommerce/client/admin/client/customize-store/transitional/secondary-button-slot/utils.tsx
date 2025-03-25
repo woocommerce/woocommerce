@@ -36,7 +36,7 @@ export const WooCYSSecondaryButton: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< Slot.Props >;
+	Slot: React.FC< React.ComponentProps< typeof Slot > >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill
@@ -44,7 +44,7 @@ export const WooCYSSecondaryButton: React.FC< {
 				EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME
 			}
 		>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>

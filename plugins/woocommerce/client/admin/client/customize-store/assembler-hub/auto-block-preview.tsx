@@ -1,22 +1,35 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/release/16.4/packages/block-editor/src/components/block-preview/auto.js
 
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
-import { useResizeObserver, pure } from '@wordpress/compose';
-import { useContext, useEffect, useMemo, useState } from '@wordpress/element';
-import { Disabled, Popover } from '@wordpress/components';
+import { useResizeObserver } from '@wordpress/compose';
 import {
+	memo,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
+import { Disabled, Popover } from '@wordpress/components';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { noop } from 'lodash';
+import { __ } from '@wordpress/i18n';
+import { useQuery } from '@woocommerce/navigation';
+import clsx from 'clsx';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error No types for this exist yet.
 	__unstableEditorStyles as EditorStyles,
+	// @ts-expect-error No types for this exist yet.
 	__unstableIframe as Iframe,
+	// @ts-expect-error No types for this exist yet.
 	privateApis as blockEditorPrivateApis,
 	BlockList,
 	store as blockEditorStore,
-	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
@@ -30,23 +43,23 @@ import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-v
 import { CustomizeStoreContext } from '.';
 import { isAIFlow } from '../guards';
 import { selectBlockOnHover } from './utils/select-block-on-hover';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
-import { noop } from 'lodash';
 import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
 import { IsResizingContext } from './resizable-frame';
-import { __ } from '@wordpress/i18n';
-import { useQuery } from '@woocommerce/navigation';
-import clsx from 'clsx';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
 import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { useInsertPatternByName } from './hooks/use-insert-pattern-by-name';
 
-// @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
 
+type RenderAppenderType = boolean | ( () => Element ) | undefined;
+
+interface BlockListWithRenderAppender
+	extends Omit< React.ComponentProps< typeof BlockList >, 'renderAppender' > {
+	renderAppender?: RenderAppenderType;
+}
 // This is used to avoid rendering the block list if the sizes change.
-let MemoizedBlockList: typeof BlockList | undefined;
+let MemoizedBlockList: React.FC< BlockListWithRenderAppender >;
 
 const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 const MAX_HEIGHT = 2000;
@@ -105,7 +118,6 @@ function ScaledBlockPreview( {
 		hidePopover,
 	] = usePopoverHandler();
 
-	// @ts-expect-error No types for this exist yet.
 	const { selectBlock, setBlockEditingMode } =
 		useDispatch( blockEditorStore );
 
@@ -115,11 +127,11 @@ function ScaledBlockPreview( {
 	const { setSelectedBlockRef } = useContext( SelectedBlockContext );
 
 	const selectedBlockClientId = useSelect( ( select ) => {
-		const block = select( 'core/block-editor' ).getSelectedBlock();
+		// @ts-expect-error Selector is not typed
+		const block = select( blockEditorStore ).getSelectedBlock();
 
-		// @ts-expect-error No types for this exist yet.
 		return block?.clientId;
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if ( selectedBlockClientId && iframeRef ) {
@@ -166,8 +178,7 @@ function ScaledBlockPreview( {
 		: 0;
 
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
-	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
-
+	MemoizedBlockList = MemoizedBlockList || memo( BlockList );
 	const isResizing = useContext( IsResizingContext );
 	const query = useQuery();
 
@@ -202,7 +213,6 @@ function ScaledBlockPreview( {
 				popoverStatus === PopoverStatus.VISIBLE &&
 				! isResizing && (
 					<Popover
-						// @ts-ignore No types for this exist yet.
 						anchor={ virtualElement }
 						as="div"
 						variant="unstyled"
@@ -242,8 +252,6 @@ function ScaledBlockPreview( {
 				>
 					<CustomIframeComponent
 						aria-hidden
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
 						canEnableZoomOutView={ true }

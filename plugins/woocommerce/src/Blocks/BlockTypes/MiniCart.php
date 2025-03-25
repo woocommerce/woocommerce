@@ -90,7 +90,33 @@ class MiniCart extends AbstractBlock {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
-		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
+		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+	}
+
+	/**
+	 * Callback for the Block Hooks API to modify the attributes of the hooked block.
+	 *
+	 * @param array|null                      $parsed_hooked_block The parsed block array for the given hooked block type, or null to suppress the block.
+	 * @param string                          $hooked_block_type   The hooked block type name.
+	 * @param string                          $relative_position   The relative position of the hooked block.
+	 * @param array                           $parsed_anchor_block The anchor block, in parsed block array format.
+	 * @param WP_Block_Template|WP_Post|array $context             The block template, template part, `wp_navigation` post type,
+	 *                                                             or pattern that the anchor block belongs to.
+	 * @return array|null
+	 */
+	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+		$mini_cart_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/mini-cart', 'typography', 'fontSize' ) );
+
+		if ( ! is_string( $mini_cart_block_font_size ) ) {
+			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
+
+			if ( is_string( $navigation_block_font_size ) ) {
+				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
+			}
+		}
+
+		return $parsed_hooked_block;
 	}
 
 	/**
@@ -369,7 +395,7 @@ class MiniCart extends AbstractBlock {
 		}
 		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
 
-		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . ' "></span>' . $this->get_include_tax_label_markup( $attributes );
+		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . '"></span>' . $this->get_include_tax_label_markup( $attributes );
 	}
 
 	/**
@@ -420,20 +446,16 @@ class MiniCart extends AbstractBlock {
 
 		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
 		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$styles              = $product_count_color ? 'background:' . $product_count_color : '';
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-		$show_product_count       = 'always' === $product_count_visibility;
-		if ( 'greater_than_zero' === $product_count_visibility ) {
-			$cart               = $this->get_cart_instance();
-			$show_product_count = $cart && $cart->get_cart_contents_count() > 0;
-		}
 
-		$button_html = $this->get_cart_price_markup( $attributes ) . '
-		<span class="wc-block-mini-cart__quantity-badge">
+		$button_html = '<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
-			' . ( $show_product_count ? '<span class="wc-block-mini-cart__badge" style="background:' . $product_count_color . '"></span>' : '' ) . '
-		</span>';
+			' . ( 'never' !== $product_count_visibility ? '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '"></span>' : '' ) . '
+		</span>
+		' . $this->get_cart_price_markup( $attributes );
 
 		if ( is_cart() || is_checkout() ) {
 			if ( $this->should_not_render_mini_cart( $attributes ) ) {

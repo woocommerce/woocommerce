@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -31,13 +30,20 @@ describe( 'PluginErrorBanner', () => {
 				error: 'An error occurred during installation',
 			},
 		];
-		render( <PluginErrorBanner pluginsInstallationErrors={ errors } /> );
+		render(
+			<PluginErrorBanner
+				pluginsInstallationErrors={ errors }
+				pluginsSlugToName={ {
+					'test-plugin': 'Test Plugin',
+				} }
+			/>
+		);
 		expect(
 			screen.getByText(
 				/Oops! We encountered a problem while installing/i
 			)
 		).toBeInTheDocument();
-		expect( screen.getByText( 'test-plugin' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Test Plugin' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should render the correct strings if multiple plugins fail to install', () => {
@@ -57,14 +63,22 @@ describe( 'PluginErrorBanner', () => {
 				error: 'An error occurred during installation',
 			},
 		];
-		render( <PluginErrorBanner pluginsInstallationErrors={ errors } /> );
+		render(
+			<PluginErrorBanner
+				pluginsInstallationErrors={ errors }
+				pluginsSlugToName={ {
+					'test-plugin-1': 'Test Plugin 1',
+					'test-plugin-2': 'Test Plugin 2',
+				} }
+			/>
+		);
 		expect(
 			screen.getByText(
 				/Oops! We encountered a problem while installing/i
 			)
 		).toBeInTheDocument();
-		expect( screen.getByText( 'test-plugin-1' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'test-plugin-2' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Test Plugin 1' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Test Plugin 2' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should render permissions failure message when pluginsInstallationErrors contains a 403 error', () => {
@@ -80,7 +94,14 @@ describe( 'PluginErrorBanner', () => {
 				error: 'An error occurred during installation',
 			},
 		];
-		render( <PluginErrorBanner pluginsInstallationErrors={ errors } /> );
+		render(
+			<PluginErrorBanner
+				pluginsSlugToName={ {
+					'test-plugin': 'Test Plugin',
+				} }
+				pluginsInstallationErrors={ errors }
+			/>
+		);
 		expect(
 			screen.getByText(
 				/You do not have permissions to install plugins/i
@@ -101,6 +122,9 @@ describe( 'PluginErrorBanner', () => {
 		];
 		render(
 			<PluginErrorBanner
+				pluginsSlugToName={ {
+					'test-plugin': 'Test Plugin',
+				} }
 				pluginsInstallationErrors={ errors }
 				onClick={ mockOnClick }
 			/>

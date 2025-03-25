@@ -19,7 +19,7 @@ export const LookAndFeelPage = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/Application/Customize Store/Design with AI/Look and Feel',
+	title: 'WooCommerce Admin/Customize Store/Design with AI/Look and Feel',
 	component: LookAndFeel,
 	decorators: [ WithCustomizeYourStoreLayout ],
 };

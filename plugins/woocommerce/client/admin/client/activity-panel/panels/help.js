@@ -10,9 +10,9 @@ import { Icon, chevronRight, page } from '@wordpress/icons';
 import { partial } from 'lodash';
 import { List, Section } from '@woocommerce/components';
 import {
-	ONBOARDING_STORE_NAME,
-	PLUGINS_STORE_NAME,
-	SETTINGS_STORE_NAME,
+	onboardingStore,
+	pluginsStore,
+	settingsStore,
 } from '@woocommerce/data';
 import { compose } from 'redux';
 import { recordEvent as fallbackRecordEvent } from '@woocommerce/tracks';
@@ -387,18 +387,18 @@ export const HelpPanel = ( {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+		const { getSettings } = select( settingsStore );
+		const { getActivePlugins } = select( pluginsStore );
 		const { general: generalSettings = {} } = getSettings( 'general' );
 		const activePlugins = getActivePlugins();
-		const paymentGatewaySuggestions = select( ONBOARDING_STORE_NAME )
+		const paymentGatewaySuggestions = select( onboardingStore )
 			.getPaymentGatewaySuggestions()
 			.reduce( ( suggestions, suggestion ) => {
 				const { id } = suggestion;
 				suggestions[ id ] = true;
 				return suggestions;
 			}, {} );
-		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
+		const taskLists = select( onboardingStore ).getTaskLists();
 
 		const countryCode = getCountryCode(
 			generalSettings.woocommerce_default_country

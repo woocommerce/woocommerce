@@ -3,7 +3,7 @@
  */
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { PLUGINS_STORE_NAME, useUser } from '@woocommerce/data';
+import { pluginsStore, useUser } from '@woocommerce/data';
 import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 
 export const JetpackPluginStates = {
@@ -37,19 +37,22 @@ export const useJetpackPluginState = () => {
 		canUserInstallPlugins,
 		jetpackInstallState,
 		jetpackConnectionData,
-	} = useSelect( ( select ) => {
-		const { getPluginInstallState, getJetpackConnectionData } =
-			select( PLUGINS_STORE_NAME );
-		const installState = getPluginInstallState( 'jetpack' );
+	} = useSelect(
+		( select ) => {
+			const { getPluginInstallState, getJetpackConnectionData } =
+				select( pluginsStore );
+			const installState = getPluginInstallState( 'jetpack' );
 
-		return {
-			jetpackConnectionData: getJetpackConnectionData(),
-			jetpackInstallState: installState,
-			canUserInstallPlugins: currentUserCan( 'install_plugins' ),
-		};
-	} );
+			return {
+				jetpackConnectionData: getJetpackConnectionData(),
+				jetpackInstallState: installState,
+				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
+			};
+		},
+		[ currentUserCan ]
+	);
 
-	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
+	const { installJetpackAndConnect } = useDispatch( pluginsStore );
 
 	const [ pluginState, setPluginState ] = useState< JetpackPluginStates >(
 		JetpackPluginStates.INITIALIZING

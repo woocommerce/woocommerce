@@ -6,6 +6,14 @@
 class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * tearDown.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		WC()->cart->empty_cart();
+	}
+
+	/**
 	 * Tests whether discount tax is rounded properly in cart.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/23916.
@@ -33,7 +41,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		$product_1990 = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 1990 ) );
 		$product_3390 = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 3390 ) );
 		$product_6200 = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 6200 ) );
-		$coupon = WC_Helper_Coupon::create_coupon( 'flat2000', array( 'coupon_amount' => 2000 ) );
+		$coupon       = WC_Helper_Coupon::create_coupon( 'flat2000', array( 'coupon_amount' => 2000 ) );
 
 		WC()->cart->add_to_cart( $product_240->get_id(), 1 );
 		WC()->cart->add_to_cart( $product_1250->get_id(), 1 );

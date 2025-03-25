@@ -1,5 +1,7 @@
-.woocommerce-admin-page #wpcontent,
-.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
+.woocommerce-admin-page__home #wpcontent,
+.woocommerce-admin-page__home.woocommerce_page_wc-admin #wpbody-content,
+.woocommerce-admin-page__extensions #wpcontent,
+.woocommerce-admin-page__extensions.woocommerce_page_wc-admin #wpbody-content {
 	overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the right-hand column 'stick'
 	position: relative;
 }

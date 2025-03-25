@@ -2,17 +2,7 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet, natively (not until 7.0.0).
-// Including `@types/wordpress__data` as a devDependency causes build issues,
-// so just going type-free for now.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityRecord } from '@wordpress/core-data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet, natively (not until 7.0.0).
-// Including `@types/wordpress__data` as a devDependency causes build issues,
-// so just going type-free for now.
-// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityRecord, store as coreDataStore } from '@wordpress/core-data';
 import { dispatch, select } from '@wordpress/data';
 
 export const useLayoutTemplate = ( layoutTemplateId: string | null ) => {
@@ -21,13 +11,12 @@ export const useLayoutTemplate = ( layoutTemplateId: string | null ) => {
 	useEffect( () => {
 		if ( ! layoutTemplateId ) return;
 
-		const layoutTemplateEntity = select( 'core' ).getEntityConfig(
+		const layoutTemplateEntity = select( coreDataStore ).getEntityConfig(
 			'root',
 			'wcLayoutTemplate'
 		);
-
 		if ( ! layoutTemplateEntity ) {
-			dispatch( 'core' ).addEntities( [
+			dispatch( coreDataStore ).addEntities( [
 				{
 					kind: 'root',
 					name: 'wcLayoutTemplate',

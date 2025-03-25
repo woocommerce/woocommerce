@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Properly break from Note loop using break instead of continue, and also perform some tiny refactoring

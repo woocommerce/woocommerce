@@ -45,7 +45,7 @@ Make sure you change the  **wcslider**  parts to suit your extension's name / te
 
 ## How to Add Settings to a Section
 
-Now that you've got the tab, you need to filter the output of  `woocommerce_get_sections_products`  (or similar). You would add the settings like usual using the  [**WooCommerce Settings API**](https://github.com/woocommerce/woocommerce/blob/trunk/docs/settings-api/), but check for the current section before adding the settings to the tab's settings array. For example, let's add the sample settings we discussed above to the new  **wcslider**  section we just created:
+Now that you've got the tab, you need to filter the output of  `woocommerce_get_sections_products`  (or similar). You would add the settings like usual using the  [**WooCommerce Settings API**](./settings-api.md), but check for the current section before adding the settings to the tab's settings array. For example, let's add the sample settings we discussed above to the new  **wcslider**  section we just created:
 
 ```php
 /**

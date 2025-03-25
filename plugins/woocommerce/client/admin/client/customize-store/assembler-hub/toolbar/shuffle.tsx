@@ -5,10 +5,7 @@ import { capitalize } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Button, Path, SVG, ToolbarGroup } from '@wordpress/components';
-import {
-	store as blockEditorStore,
-	// @ts-expect-error missing type
-} from '@wordpress/block-editor';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -82,7 +79,7 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 		patternName: string;
 	} = useSelect(
 		( select ) => {
-			// @ts-expect-error missing type
+			// @ts-expect-error Selector is not typed
 			const { getBlockAttributes } = select( blockEditorStore );
 			const attributes = getBlockAttributes( clientId );
 			const categories = attributes?.metadata?.categories;
@@ -103,7 +100,6 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 
 	const { patterns } = usePatternsByCategory( category );
 
-	// @ts-expect-error missing type
 	const { replaceBlocks } = useDispatch( blockEditorStore );
 
 	// We need at least two patterns to shuffle.

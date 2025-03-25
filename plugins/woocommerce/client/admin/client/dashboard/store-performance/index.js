@@ -54,6 +54,7 @@ class StorePerformance extends Component {
 					'Choose which analytics to display and the section name',
 					'woocommerce'
 				) }
+				placement={ 'bottom-end' }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						<MenuTitle>

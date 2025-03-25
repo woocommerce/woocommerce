@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Order;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
@@ -29,7 +28,7 @@ class DeleteDraftOrders extends TestCase {
 	protected function setUp(): void {
 		global $wpdb;
 
-		$this->draft_orders_instance = new DraftOrders( new Package( 'test', './', new FeatureGating( 2 ) ) );
+		$this->draft_orders_instance = new DraftOrders( new Package( 'test', './' ) );
 
 		$order = new WC_Order();
 		$order->set_status( DraftOrders::STATUS );

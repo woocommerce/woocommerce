@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { ComponentProps } from 'react';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { queueRecordEvent } from '@woocommerce/tracks';
@@ -11,9 +12,11 @@ import { queueRecordEvent } from '@woocommerce/tracks';
 import { renewUrl } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
+type ButtonProps = ComponentProps< typeof Button >;
+
 interface RenewProps {
 	subscription: Subscription;
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 }
 
 export default function RenewButton( props: RenewProps ) {

@@ -44,8 +44,8 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_settings__all_settings_are_present() {
 		$sut = new WC_Settings_General();
 
-		$settings               = $sut->get_settings_for_section( '' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'woocommerce_store_address'               => 'text',
@@ -72,7 +72,7 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 			'pricing_options'                         => array( 'title', 'sectionend' ),
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**

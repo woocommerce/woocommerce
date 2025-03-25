@@ -37,12 +37,11 @@ export default function ProductPage() {
 
 	useEffect( () => {
 		registerPlugin( 'wc-admin-more-menu', {
-			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
 			render: () => (
 				<>
 					<WooProductMoreMenuItem>
-						{ ( { onClose }: { onClose: () => void } ) => (
+						{ ( { onClose } ) => (
 							<>
 								<DeleteVariationMenuItem onClose={ onClose } />
 								<MoreMenuFill

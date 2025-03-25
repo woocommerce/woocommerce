@@ -65,8 +65,13 @@ describe( 'Tracking clicks in shippingBanner', () => {
 		};
 	};
 
+	beforeEach( () => {
+		acceptWcsTos.mockClear();
+	} );
+
 	it( 'should record an event when user clicks "Create shipping label"', async () => {
 		const actionButtonLabel = 'Create shipping label';
+
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
@@ -93,6 +98,11 @@ describe( 'Tracking clicks in shippingBanner', () => {
 				getExpectedTrackingData( 'shipping_banner_create_label', false )
 			)
 		);
+
+		// Wait for any async calls to complete so we don't get `Warning: An update to ShippingBanner inside a test was not wrapped in act(...).
+		await waitFor( () => {
+			expect( acceptWcsTos ).toHaveBeenCalled();
+		} );
 	} );
 
 	it( 'should record an event when user clicks "WooCommerce Shipping"', async () => {
@@ -164,6 +174,10 @@ describe( 'Create shipping label button', () => {
 		href: 'http://wcship.test/wp-admin/post.php?post=1000&action=edit',
 	};
 
+	beforeEach( () => {
+		acceptWcsTos.mockClear();
+	} );
+
 	it( 'should install WooCommerce Shipping when button is clicked', async () => {
 		const actionButtonLabel = 'Create shipping label';
 
@@ -180,11 +194,17 @@ describe( 'Create shipping label button', () => {
 				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
+
 		userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
 		);
+
+		// Wait for any async calls to complete so we don't get `Warning: An update to ShippingBanner inside a test was not wrapped in act(...).
+		await waitFor( () => {
+			expect( acceptWcsTos ).toHaveBeenCalled();
+		} );
 
 		await waitFor( () =>
 			expect( installPlugins ).toHaveBeenCalledWith( [
@@ -208,11 +228,17 @@ describe( 'Create shipping label button', () => {
 				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
+
 		userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
 		);
+
+		// Wait for any async calls to complete so we don't get `Warning: An update to ShippingBanner inside a test was not wrapped in act(...).
+		await waitFor( () => {
+			expect( acceptWcsTos ).toHaveBeenCalled();
+		} );
 
 		await waitFor( () =>
 			expect( activatePlugins ).toHaveBeenCalledWith( [
@@ -546,7 +572,7 @@ describe( 'The message in the banner', () => {
 		);
 
 	const notActivatedMessage =
-		'By clicking "Create shipping label", WooCommerce Shipping(opens in a new tab) will be installed and you agree to its Terms of Service(opens in a new tab).';
+		'By clicking "Create shipping label", WooCommerce Shipping↗ will be installed and you agree to its Terms of Service↗.';
 
 	it( 'should show install text "By clicking "Create shipping label"..." when first loaded.', () => {
 		const { container } = createShippingBannerWrapper( {
@@ -600,7 +626,7 @@ describe( 'If incompatible WCS&T is active', () => {
 	it( 'should install and activate but show an error notice when an incompatible version of WCS&T is installed', async () => {
 		const actionButtonLabel = 'Install WooCommerce Shipping';
 
-		const { getByRole, getByText } = render(
+		const { getByRole, findByText } = render(
 			<Fragment>
 				<div id="woocommerce-order-data" />
 				<div id="woocommerce-order-actions" />
@@ -632,7 +658,7 @@ describe( 'If incompatible WCS&T is active', () => {
 			expect( acceptWcsTos ).not.toHaveBeenCalled();
 		} );
 
-		const notice = getByText( ( _, element ) => {
+		const notice = await findByText( ( _, element ) => {
 			const hasText = ( node ) =>
 				node.textContent ===
 				'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.';
@@ -646,7 +672,7 @@ describe( 'If incompatible WCS&T is active', () => {
 		await waitFor( () => expect( notice ).toBeInTheDocument() );
 
 		// Assert that the "update" link is present
-		const updateLink = getByText( /update/i );
+		const updateLink = await findByText( /update/i );
 		expect( updateLink ).toBeInTheDocument();
 		expect( updateLink.tagName ).toBe( 'A' ); // Ensures it's a link
 	} );

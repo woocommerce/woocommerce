@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import { SelectControl } from '@wordpress/components';
 
 export interface SelectBlockAttributes extends BlockAttributes {
 	property: string;
@@ -13,5 +12,5 @@ export interface SelectBlockAttributes extends BlockAttributes {
 	placeholder?: string;
 	disabled?: boolean;
 	multiple?: boolean;
-	options?: SelectControl.Option[];
+	options?: Array< { label: string; value: string } >;
 }

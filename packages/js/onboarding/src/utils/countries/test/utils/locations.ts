@@ -7436,8 +7436,8 @@ export const locations = [
 	},
 	{
 		country_short: 'NZ',
-		region: 'Manawatu-Wanganui',
-		city: 'Wanganui',
+		region: 'Manawatu-Whanganui',
+		city: 'Whanganui',
 	},
 	{
 		country_short: 'PK',

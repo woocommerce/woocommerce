@@ -286,6 +286,16 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Cost of Goods Sold value for a product is null by default.
+	 */
+	public function test_cogs_value_defaults_to_null() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product_Simple();
+		$this->assertNull( $product->get_cogs_value() );
+	}
+
+	/**
 	 * @testdox The total Cost of Goods Sold value van be modified using the woocommerce_get_cogs_total_value filter.
 	 */
 	public function test_cogs_total_value_can_be_altered_via_filter() {
@@ -297,5 +307,35 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_get_product_cogs_total_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
 		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value for a product can be set to zero, but it will be actually set to null.
+	 */
+	public function test_cogs_can_be_set_to_zero_but_reads_back_as_null() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 0 );
+
+		$this->assertNull( $product->get_cogs_value() );
+	}
+
+	/**
+	 * @testdox The "zero Cost of Goods Sold value is converted to null" behavior can be modified in derived classes.
+	 */
+	public function test_adjust_cogs_value_before_set() {
+		$this->enable_cogs_feature();
+
+		// phpcs:disable Squiz.Commenting
+		$product = new class() extends WC_Product {
+			protected function adjust_cogs_value_before_set( ?float $value ): ?float {
+				return $value * 10;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$product->set_cogs_value( 12.34 );
+		$this->assertEquals( 123.4, $product->get_cogs_value() );
 	}
 }

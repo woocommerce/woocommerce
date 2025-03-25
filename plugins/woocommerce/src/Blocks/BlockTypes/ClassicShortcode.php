@@ -23,7 +23,7 @@ class ClassicShortcode extends AbstractDynamicBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
+	protected $api_version = '3';
 
 	/**
 	 * Render method for the Classic Template block. This method will determine which template to render.

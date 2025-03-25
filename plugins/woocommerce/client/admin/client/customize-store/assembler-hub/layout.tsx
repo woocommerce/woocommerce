@@ -12,27 +12,23 @@ import {
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { useState, useContext, useEffect } from '@wordpress/element';
+import { __unstableMotion as motion } from '@wordpress/components';
 import {
-	// @ts-ignore No types for this exist yet.
-	__unstableMotion as motion,
-} from '@wordpress/components';
-import {
+	// @ts-expect-error No types for this exist yet.
 	privateApis as blockEditorPrivateApis,
-	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import useInitEditedEntityFromURL from '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import ErrorBoundary from '@wordpress/edit-site/build-module/components/error-boundary';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { NavigableRegion } from '@wordpress/interface';
-// @ts-ignore No types for this exist yet.
 import { EntityProvider } from '@wordpress/core-data';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 
 /**
@@ -122,6 +118,7 @@ export const Layout = () => {
 		currentState.transitionalScreen === 'transitional'
 	) {
 		return (
+			// @ts-expect-error Types are not correct when kind is root and type is site.
 			<EntityProvider kind="root" type="site">
 				<EntityProvider
 					kind="postType"
@@ -152,6 +149,7 @@ export const Layout = () => {
 			} }
 		>
 			<HighlightedBlockContextProvider>
+				{ /* @ts-expect-error Types are not correct when kind is root and type is site. */ }
 				<EntityProvider kind="root" type="site">
 					<EntityProvider
 						kind="postType"
@@ -166,9 +164,6 @@ export const Layout = () => {
 								animate={ 'view' }
 							>
 								<SiteHub
-									variants={ {
-										view: { x: 0 },
-									} }
 									isTransparent={ false }
 									className="woocommerce-edit-site-layout__hub"
 								/>

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { ComponentProps } from 'react';
 import { Button } from '@wordpress/components';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -18,10 +19,12 @@ import {
 import { Subscription } from '../../types';
 import { NoticeStatus } from '../../../../contexts/types';
 
+type ButtonProps = ComponentProps< typeof Button >;
+
 interface ConnectProps {
 	subscription: Subscription;
 	onClose?: () => void;
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 }
 
 export default function ConnectButton( props: ConnectProps ) {
@@ -68,6 +71,7 @@ export default function ConnectButton( props: ConnectProps ) {
 							{
 								label: __( 'Try again', 'woocommerce' ),
 								onClick: connect,
+								url: '',
 							},
 						],
 					}

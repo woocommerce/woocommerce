@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -10,13 +9,14 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { EllipsisMenu, List, Pill } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	PAYMENT_GATEWAYS_STORE_NAME,
-	PLUGINS_STORE_NAME,
+	pluginsStore,
 	Plugin,
+	type PaymentSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import ExternalIcon from 'gridicons/dist/external';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -25,9 +25,7 @@ import './payment-recommendations.scss';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
-
-const SEE_MORE_LINK =
-	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
 const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
@@ -40,7 +38,7 @@ const PaymentRecommendations: React.FC = () => {
 	const [ isDismissed, setIsDismissed ] = useState< boolean >( false );
 	const [ isInstalled, setIsInstalled ] = useState< boolean >( false );
 	const { installAndActivatePlugins, dismissRecommendedPlugins } =
-		useDispatch( PLUGINS_STORE_NAME );
+		useDispatch( pluginsStore );
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const {
@@ -55,13 +53,20 @@ const PaymentRecommendations: React.FC = () => {
 			return {
 				installedPaymentGateway:
 					installingGatewayId &&
-					select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway(
-						installingGatewayId
-					),
-				installedPaymentGateways: select( PAYMENT_GATEWAYS_STORE_NAME )
+					(
+						select(
+							PAYMENT_GATEWAYS_STORE_NAME
+						) as PaymentSelectors
+					 ).getPaymentGateway( installingGatewayId ),
+				installedPaymentGateways: (
+					select( PAYMENT_GATEWAYS_STORE_NAME ) as PaymentSelectors
+				 )
 					.getPaymentGateways()
 					.reduce(
-						( gateways: { [ id: string ]: boolean }, gateway ) => {
+						(
+							gateways: { [ id: string ]: boolean },
+							gateway: { id: string }
+						) => {
 							if ( installingGatewayId === gateway.id ) {
 								return gateways;
 							}
@@ -70,12 +75,12 @@ const PaymentRecommendations: React.FC = () => {
 						},
 						{}
 					),
-				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-					'getPaymentGatewaySuggestions'
+				isResolving: select( onboardingStore ).isResolving(
+					'getPaymentGatewaySuggestions',
+					[]
 				),
-				paymentGatewaySuggestions: select(
-					ONBOARDING_STORE_NAME
-				).getPaymentGatewaySuggestions(),
+				paymentGatewaySuggestions:
+					select( onboardingStore ).getPaymentGatewaySuggestions(),
 			};
 		},
 		[ isInstalled ]
@@ -254,10 +259,17 @@ const PaymentRecommendations: React.FC = () => {
 			</CardHeader>
 			<List items={ pluginsList } />
 			<CardFooter>
-				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
-					{ __( 'Discover other payment providers', 'woocommerce' ) }
-					<ExternalIcon size={ 18 } />
-				</Button>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'woocommerce'
+					) }
+					eventName="settings_payment_recommendations_visit_marketplace_click"
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					) }
+				/>
 			</CardFooter>
 		</Card>
 	);

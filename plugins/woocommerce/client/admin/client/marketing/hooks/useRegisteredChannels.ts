@@ -13,8 +13,8 @@ import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
 	ApiFetchError,
 	RegisteredChannel as APIRegisteredChannel,
-	RegisteredChannelsState,
 } from '~/marketing/data-multichannel/types';
+import { Selectors } from '~/marketing/data-multichannel/selectors';
 
 type UseRegisteredChannels = {
 	loading: boolean;
@@ -66,16 +66,20 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 		invalidateResolution( 'getRegisteredChannels', [] );
 	}, [ invalidateResolution ] );
 
-	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getRegisteredChannels } =
-			select( STORE_KEY );
-		const state = getRegisteredChannels< RegisteredChannelsState >();
+	return useSelect(
+		( select ) => {
+			const { hasFinishedResolution, getRegisteredChannels } = select(
+				STORE_KEY
+			) as Selectors;
+			const state = getRegisteredChannels();
 
-		return {
-			loading: ! hasFinishedResolution( 'getRegisteredChannels', [] ),
-			data: state.data?.map( convert ),
-			error: state.error,
-			refetch,
-		};
-	} );
+			return {
+				loading: ! hasFinishedResolution( 'getRegisteredChannels', [] ),
+				data: state.data?.map( convert ),
+				error: state.error,
+				refetch,
+			};
+		},
+		[ refetch ]
+	);
 };

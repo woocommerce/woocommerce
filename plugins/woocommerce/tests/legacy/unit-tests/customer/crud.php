@@ -278,9 +278,16 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_avatar_url() {
-		$customer = WC_Helper_Customer::create_customer();
-		$this->assertStringContainsString( 'gravatar.com/avatar', $customer->get_avatar_url() );
-		$this->assertStringContainsString( md5( 'test@woo.local' ), $customer->get_avatar_url() );
+		$customer            = WC_Helper_Customer::create_customer();
+		$customer_avatar_url = $customer->get_avatar_url();
+		$customer_email      = 'test@woo.local';
+
+		$this->assertStringContainsString( 'gravatar.com/avatar', $customer_avatar_url );
+
+		$this->assertTrue(
+			strpos( $customer_avatar_url, hash( 'sha256', $customer_email ) ) !== false || strpos( $customer_avatar_url, md5( $customer_email ) ) !== false,
+			"The retrieved avatar URL should be a SHA-256 or MD5 hash of the customer's email."
+		);
 	}
 
 	/**

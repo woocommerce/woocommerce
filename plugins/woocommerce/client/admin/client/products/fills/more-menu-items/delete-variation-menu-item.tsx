@@ -6,10 +6,7 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	ProductVariation,
-} from '@woocommerce/data';
+import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	RemoveConfirmationModal,
@@ -42,13 +39,9 @@ export const DeleteVariationMenuItem = ( {
 		variationId,
 	} );
 
-	const [ name ] = useEntityProp< string >(
-		'postType',
-		'product_variation',
-		'name'
-	);
+	const [ name ] = useEntityProp( 'postType', 'product_variation', 'name' );
 
-	const [ status ] = useEntityProp< string >(
+	const [ status ] = useEntityProp(
 		'postType',
 		'product_variation',
 		'status'
@@ -80,7 +73,7 @@ export const DeleteVariationMenuItem = ( {
 			product_status: status,
 		} );
 
-		return deleteProductVariation< Promise< ProductVariation > >( {
+		return deleteProductVariation( {
 			product_id: productId,
 			id: variationId,
 		} )
@@ -128,11 +121,7 @@ export const DeleteVariationMenuItem = ( {
 	return (
 		<>
 			<MenuGroup>
-				<MenuItem
-					isDestructive
-					variant="tertiary"
-					onClick={ handleMenuItemClick }
-				>
+				<MenuItem isDestructive onClick={ handleMenuItemClick }>
 					{ __( 'Delete variation', 'woocommerce' ) }
 				</MenuItem>
 			</MenuGroup>

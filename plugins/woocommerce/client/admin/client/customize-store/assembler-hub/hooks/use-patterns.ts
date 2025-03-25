@@ -1,10 +1,8 @@
 /* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import { dispatch, useSelect } from '@wordpress/data';
-// @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { parse } from '@wordpress/blocks';
@@ -19,21 +17,18 @@ import { THEME_SLUG } from '~/customize-store/data/constants';
 export const usePatterns = () => {
 	const { blockPatterns, isLoading, invalidateCache } = useSelect(
 		( select ) => ( {
-			blockPatterns: select(
-				coreStore
-				// @ts-expect-error -- No types for this exist yet.
-			).getBlockPatterns() as Pattern[],
+			blockPatterns: select( coreStore ).getBlockPatterns() as Pattern[],
 			isLoading:
 				// @ts-expect-error -- No types for this exist yet.
 				! select( coreStore ).hasFinishedResolution(
 					'getBlockPatterns'
 				),
 			invalidateCache: () =>
-				// @ts-expect-error -- No types for this exist yet.
 				dispatch( coreStore ).invalidateResolutionForStoreSelector(
 					'getBlockPatterns'
 				),
-		} )
+		} ),
+		[]
 	);
 
 	return {
@@ -79,7 +74,7 @@ export const usePatternsByCategory = ( category: string ) => {
 
 				blocks: parse(
 					content,
-					// @ts-ignore - Passing options is valid, but not in the type.
+					// @ts-expect-error - Passing options is valid, but not in the type.
 					{
 						__unstableSkipMigrationLogs: true,
 					}

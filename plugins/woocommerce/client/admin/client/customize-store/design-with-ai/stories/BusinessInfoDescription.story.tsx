@@ -19,7 +19,7 @@ export const BusinessInfoDescriptionPage = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/Application/Customize Store/Design with AI/Business Info Description',
+	title: 'WooCommerce Admin/Customize Store/Design with AI/Business Info Description',
 	component: BusinessInfoDescription,
 	decorators: [ WithCustomizeYourStoreLayout ],
 };

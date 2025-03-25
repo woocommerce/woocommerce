@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-gallery",
+	"version": "1.0.0",
+	"title": "Product Gallery (Beta)",
+	"description": "Showcase your products relevant images and media.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"align": true,
+		"interactivity": true
+	},
+	"textdomain": "woocommerce",
+	"usesContext": [ "postId" ],
+	"providesContext": {
+		"hoverZoom": "hoverZoom",
+		"fullScreenOnClick": "fullScreenOnClick",
+		"cropImages": "cropImages"
+	},
+	"ancestor": [ "woocommerce/single-product" ],
+	"attributes": {
+		"cropImages": {
+			"type": "boolean",
+			"default": false
+		},
+		"hoverZoom": {
+			"type": "boolean",
+			"default": true
+		},
+		"fullScreenOnClick": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"viewScript": "wc-product-gallery-frontend",
+	"example": {}
+}

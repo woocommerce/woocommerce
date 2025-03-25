@@ -11,22 +11,27 @@ import {
 export const WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME =
 	'woocommerce_tasklist_experimental_progress_title_item';
 
-export const WooTaskListProgressTitleItem: React.FC< {
-	children?: React.ReactNode;
+export const WooTaskListProgressTitleItem = ( {
+	children,
+	order = 1,
+}: {
+	children?: React.ComponentProps< typeof Fill >[ 'children' ];
 	order?: number;
-} > & {
-	Slot: React.FC< Slot.Props >;
-} = ( { children, order = 1 } ) => {
+} ) => {
 	return (
 		<Fill name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
 	);
 };
 
-WooTaskListProgressTitleItem.Slot = ( { fillProps } ) => {
+WooTaskListProgressTitleItem.Slot = ( {
+	fillProps,
+}: {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => {
 	return (
 		<Slot
 			name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME }

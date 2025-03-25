@@ -75,7 +75,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	}
 
 	function recordTracksEvent( event: string, data: ExtraProperties ) {
-		const tracksData = props.tracksData;
+		const { tracksData } = props;
 
 		if ( tracksData.position ) {
 			data.position = tracksData.position;
@@ -100,6 +100,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		if ( tracksData.category ) {
 			data.category = tracksData.category;
 		}
+
+		data.tab = query.tab || 'discover';
 
 		queueRecordEvent( event, data );
 	}
@@ -152,6 +154,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			className="woocommerce-marketplace__product-card__link"
 			href={ productUrl() }
 			rel="noopener noreferrer"
+			target="_blank"
 			onClick={ () => {
 				recordTracksEvent( 'marketplace_product_card_clicked', {
 					product_id: product.id,

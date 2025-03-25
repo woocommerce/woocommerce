@@ -40,5 +40,9 @@ export default [
 			display: '-123',
 			value: -123,
 		},
+		{
+			display: "-2+3+cmd|' /C calc'!A0",
+			value: "-2+3+cmd|' /C calc'!A0",
+		},
 	],
 ];

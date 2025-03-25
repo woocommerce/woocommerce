@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
@@ -26,13 +27,13 @@ describe( 'LysSurvey', () => {
 		).toBeNull();
 	} );
 
-	it( 'should submit the survey data when the submit button is clicked', () => {
+	it( 'should submit the survey data when the submit button is clicked', async () => {
 		const onSubmit = jest.fn();
 		const { getByText } = render(
 			<LysSurvey hasCompleteSurvey={ false } onSubmit={ onSubmit } />
 		);
-		getByText( '😞' ).click();
-		getByText( 'Send' ).click();
+		await userEvent.click( getByText( '😞' ) );
+		await userEvent.click( getByText( 'Send' ) );
 		expect( onSubmit ).toHaveBeenCalledWith( {
 			action: 'lys_experience',
 			score: 1,
@@ -40,27 +41,27 @@ describe( 'LysSurvey', () => {
 		} );
 	} );
 
-	it( 'should show the thanks message after submitting the survey', () => {
+	it( 'should show the thanks message after submitting the survey', async () => {
 		const onSubmit = jest.fn();
 		const { getByText } = render(
 			<LysSurvey hasCompleteSurvey={ false } onSubmit={ onSubmit } />
 		);
-		getByText( '😍' ).click();
-		getByText( 'Send' ).click();
+		await userEvent.click( getByText( '😍' ) );
+		await userEvent.click( getByText( 'Send' ) );
 		expect(
 			getByText( /We appreciate your feedback!/i )
 		).toBeInTheDocument();
 	} );
 
-	it( 'should send the comments correctly when the survey is submitted', () => {
+	it( 'should send the comments correctly when the survey is submitted', async () => {
 		const onSubmit = jest.fn();
 		const { getByText, getByTestId } = render(
 			<LysSurvey hasCompleteSurvey={ false } onSubmit={ onSubmit } />
 		);
-		getByText( '😍' ).click();
+		await userEvent.click( getByText( '😍' ) );
 		const commentTextBox = getByTestId( 'launch-your-store-comment' );
-		fireEvent.change( commentTextBox, { target: { value: 'Great job!' } } );
-		getByText( 'Send' ).click();
+		await userEvent.type( commentTextBox, 'Great job!' );
+		await userEvent.click( getByText( 'Send' ) );
 		expect( onSubmit ).toHaveBeenCalledWith( {
 			action: 'lys_experience',
 			score: 5,

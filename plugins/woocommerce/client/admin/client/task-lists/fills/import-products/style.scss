@@ -6,12 +6,6 @@
 			margin-top: 8px;
 		}
 	}
-
-	ul li:nth-child(2) {
-		.woocommerce-list__item-inner {
-			padding: 40px 17px 16px 17px;
-		}
-	}
 }
 
 .woocommerce-task-import-products {
@@ -21,6 +15,11 @@
 	h1 {
 		text-align: center;
 		padding: 0 0 32px 0;
+		font-size: 24px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 32px; /* 133.333% */
+		letter-spacing: 1px;
 	}
 
 	button {

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Button, Popover, SlotFillProvider } from '@wordpress/components';
 import { createElement, useCallback, useState } from '@wordpress/element';
 
@@ -11,7 +10,7 @@ import { createElement, useCallback, useState } from '@wordpress/element';
 import { DateTimePickerControl } from '../';
 
 export default {
-	title: 'WooCommerce Admin/components/DateTimePickerControl',
+	title: 'Components/DateTimePickerControl',
 	component: DateTimePickerControl,
 	argTypes: {
 		onChange: { action: 'onChange' },

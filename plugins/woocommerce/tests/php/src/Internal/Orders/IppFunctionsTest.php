@@ -5,6 +5,10 @@ namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\IppFunctions;
+use WC_Gateway_BACS;
+use WC_Gateway_Cheque;
+use WC_Gateway_Paypal;
+use WC_Gateway_COD;
 
 /**
  * Tests for IppFunctions.
@@ -58,7 +62,7 @@ class IppFunctionsTest extends \WC_Unit_Test_Case {
 	 * Tests that order is not eligible for IPP when it has one of not supported payment methods
 	 */
 	public function test_returns_false_if_order_has_NOT_required_payment_method() {
-		$invalid_methods = array( 'bacs', 'cheque', 'paypal' );
+		$invalid_methods = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_Paypal::ID );
 
 		foreach ( $invalid_methods as $invalid_status ) {
 			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
@@ -74,7 +78,7 @@ class IppFunctionsTest extends \WC_Unit_Test_Case {
 	 * Tests that order is eligible for IPP when it has one of supported payment methods
 	 */
 	public function test_returns_true_if_order_has_required_payment_method() {
-		$valid_method = array( 'cod', 'woocommerce_payments', 'none' );
+		$valid_method = array( WC_Gateway_COD::ID, 'woocommerce_payments', 'none' );
 
 		foreach ( $valid_method as $valid_status ) {
 			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();

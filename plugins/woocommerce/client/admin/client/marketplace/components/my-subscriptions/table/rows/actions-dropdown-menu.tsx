@@ -17,7 +17,6 @@ export default function ActionsDropdownMenu( props: {
 	const controls = [
 		{
 			title: __( 'Manage in Plugins', 'woocommerce' ),
-			icon: <></>,
 			onClick: () => {
 				window.location.href = ADMIN_URL + 'plugins.php';
 			},
@@ -27,7 +26,6 @@ export default function ActionsDropdownMenu( props: {
 	if ( ! props.subscription.is_shared ) {
 		controls.unshift( {
 			title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
-			icon: <></>,
 			onClick: () => {
 				window.open(
 					'https://woocommerce.com/my-account/my-subscriptions',
@@ -40,7 +38,6 @@ export default function ActionsDropdownMenu( props: {
 	if ( props.subscription.documentation_url ) {
 		controls.unshift( {
 			title: __( 'View documentation', 'woocommerce' ),
-			icon: <></>,
 			onClick: () => {
 				window.open( props.subscription.documentation_url, '_blank' );
 			},

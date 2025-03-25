@@ -3,10 +3,11 @@
  */
 import { useSelect } from '@wordpress/data';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	PAYMENT_GATEWAYS_STORE_NAME,
 	PaymentGateway,
-	WCDataSelector,
+	type PaymentSelectors,
+	type WPDataSelectors,
 } from '@woocommerce/data';
 
 /**
@@ -19,23 +20,23 @@ export const usePaymentsBanner = () => {
 		installedPaymentGateways,
 		paymentGatewaySuggestions,
 		hasFinishedResolution,
-	} = useSelect( ( select: WCDataSelector ) => {
+	} = useSelect( ( select ) => {
 		return {
-			installedPaymentGateways: select(
-				PAYMENT_GATEWAYS_STORE_NAME
-			).getPaymentGateways(),
-			paymentGatewaySuggestions: select(
-				ONBOARDING_STORE_NAME
-			).getPaymentGatewaySuggestions(),
+			installedPaymentGateways: (
+				select( PAYMENT_GATEWAYS_STORE_NAME ) as PaymentSelectors
+			 ).getPaymentGateways(),
+			paymentGatewaySuggestions:
+				select( onboardingStore ).getPaymentGatewaySuggestions(),
 			hasFinishedResolution:
-				select( ONBOARDING_STORE_NAME ).hasFinishedResolution(
-					'getPaymentGatewaySuggestions'
+				select( onboardingStore ).hasFinishedResolution(
+					'getPaymentGatewaySuggestions',
+					[]
 				) &&
-				select( PAYMENT_GATEWAYS_STORE_NAME ).hasFinishedResolution(
-					'getPaymentGateways'
-				),
+				(
+					select( PAYMENT_GATEWAYS_STORE_NAME ) as WPDataSelectors
+				 ).hasFinishedResolution( 'getPaymentGateways' ),
 		};
-	} );
+	}, [] );
 
 	const isWcPayInstalled = installedPaymentGateways.some(
 		( gateway: PaymentGateway ) => {

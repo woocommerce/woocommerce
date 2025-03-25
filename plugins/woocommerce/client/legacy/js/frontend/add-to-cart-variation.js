@@ -44,6 +44,12 @@
 		$form.on( 'found_variation.wc-variation-form', { variationForm: self }, self.onFoundVariation );
 		$form.on( 'check_variations.wc-variation-form', { variationForm: self }, self.onFindVariation );
 		$form.on( 'update_variation_values.wc-variation-form', { variationForm: self }, self.onUpdateAttributes );
+		$form.on(
+			'keydown.wc-variation-form',
+			'.reset_variations',
+			{ variationForm: self },
+			self.onResetKeyDown
+		);
 
 		// Init after gallery.
 		setTimeout( function() {
@@ -298,7 +304,6 @@
 		$template_html = $template_html.replace( '/*<![CDATA[*/', '' );
 		$template_html = $template_html.replace( '/*]]>*/', '' );
 
-		form.$singleVariation.html( $template_html );
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).trigger( 'change' );
 
 		// Hide or show qty input
@@ -325,12 +330,18 @@
 			purchasable = false;
 		}
 
-		// Reveal
-		if ( form.$singleVariation.text().trim() ) {
-			form.$singleVariation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
-		} else {
-			form.$singleVariation.show().trigger( 'show_variation', [ variation, purchasable ] );
-		}
+		// Add a delay before updating the live region to ensure screen readers pick up the content changes.
+		setTimeout( function() {
+			form.$singleVariation.html( $template_html );
+
+			// Reveal
+			if ( form.$singleVariation.text().trim() ) {
+				form.$singleVariation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
+			} else {
+				form.$singleVariation.show().trigger( 'show_variation', [ variation, purchasable ] );
+			}
+		}, 300);
+
 	};
 
 	/**
@@ -570,18 +581,15 @@
 	};
 
 	/**
-	 * Show or hide the reset button.
+	 * Show or hide the reset link.
 	 */
 	VariationForm.prototype.toggleResetLink = function( on ) {
-		this.$resetAlert.text( '' );
 		if ( on ) {
 			if ( this.$resetVariations.css( 'visibility' ) === 'hidden' ) {
 				this.$resetVariations.css( 'visibility', 'visible' ).hide().fadeIn();
-				this.$resetVariations.css( 'display', 'inline-block' );
 			}
 		} else {
 			this.$resetVariations.css( 'visibility', 'hidden' );
-			this.$resetVariations.css( 'display', 'none' );
 		}
 	};
 
@@ -601,6 +609,17 @@
 			.next( 'div' )
 			.find( '.wc-no-matching-variations' )
 			.slideDown( 200 );
+	};
+
+	/**
+	 * Handle reset key down event for accessibility.
+	 * @param {KeyboardEvent} event - The keyboard event object
+	 */
+	VariationForm.prototype.onResetKeyDown = function ( event ) {
+		if ( event.code === 'Enter' || event.code === 'Space' ) {
+			event.preventDefault();
+			event.data.variationForm.onReset( event );
+		}
 	};
 
 	/**

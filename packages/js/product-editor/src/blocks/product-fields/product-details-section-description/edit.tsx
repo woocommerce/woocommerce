@@ -29,7 +29,6 @@ import { useEntityId, useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { ProductEditorSettings } from '../../../components';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -56,13 +55,17 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
-			return getEditorSettings() as ProductEditorSettings;
-		} );
+			// @ts-expect-error Selector is not typed
+			return getEditorSettings();
+		}, [] );
 
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
-		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
-			( [ supported, unsupported ], productTemplate ) => {
+		productTemplates.reduce(
+			(
+				[ supported, unsupported ]: ProductTemplate[][],
+				productTemplate: ProductTemplate
+			) => {
 				if ( productTemplate.isSelectableByUser ) {
 					if ( productTemplate.layoutTemplateId ) {
 						supported.push( productTemplate );
@@ -94,6 +97,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const rootClientId = useSelect(
 		( select ) => {
 			const { getBlockRootClientId } = select( 'core/block-editor' );
+			// @ts-expect-error Selector is not typed
 			return getBlockRootClientId( clientId );
 		},
 		[ clientId ]
@@ -103,18 +107,29 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		useState< ProductTemplate >();
 
 	// Pull the product templates from the store.
-	const productFormPosts = useSelect( ( sel ) => {
-		// Do not fetch product form posts if the feature is not enabled.
-		if ( ! isProductFormTemplateSystemEnabled() ) {
-			return [];
-		}
+	const productFormPosts = useSelect(
+		(
+			sel: ( key: string ) => {
+				getEntityRecords: (
+					kind: string,
+					name: string,
+					query: Record< string, unknown >
+				) => ProductFormPostProps[] | undefined;
+			}
+		) => {
+			// Do not fetch product form posts if the feature is not enabled.
+			if ( ! isProductFormTemplateSystemEnabled() ) {
+				return [];
+			}
 
-		return (
-			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-				per_page: -1,
-			} ) || []
-		);
-	}, [] ) as ProductFormPostProps[];
+			return (
+				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+					per_page: -1,
+				} ) || []
+			);
+		},
+		[]
+	) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -123,7 +138,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				isSaving: isSavingEntityRecord< boolean >(
+				// @ts-expect-error Selector is not typed
+				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
 					productId
@@ -169,7 +185,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					],
 				} );
 
-				await saveEditedEntityRecord< Product >(
+				await saveEditedEntityRecord(
 					'postType',
 					'product',
 					productId,
@@ -264,7 +280,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 			await validate( productData );
 
-			const product = ( await saveEditedEntityRecord< Product >(
+			const product = ( await saveEditedEntityRecord(
 				'postType',
 				'product',
 				productId,
@@ -329,10 +345,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				recordEvent( 'product_template_selector_open', {
 					source: TRACKS_SOURCE,
 					supported_templates: supportedProductTemplates.map(
-						( productTemplate ) => productTemplate.id
+						( productTemplate: ProductTemplate ) =>
+							productTemplate.id
 					),
 					unsupported_template: unsupportedProductTemplates.map(
-						( productTemplate ) => productTemplate.id
+						( productTemplate: ProductTemplate ) =>
+							productTemplate.id
 					),
 				} );
 			}
@@ -360,7 +378,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				</p>
 
 				<Dropdown
-					// @ts-expect-error Property does exists
 					focusOnMount={ true }
 					popoverProps={ {
 						placement: 'bottom-start',
@@ -406,7 +423,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>
 									<Dropdown
-										// @ts-expect-error Property does exists
 										popoverProps={ {
 											placement: 'right-start',
 										} }

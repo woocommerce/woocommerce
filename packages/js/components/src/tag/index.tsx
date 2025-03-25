@@ -46,7 +46,8 @@ const Tag = forwardRef(
 	) => {
 		const [ isVisible, setIsVisible ] = useState( false );
 
-		const instanceId = useInstanceId( Tag ) as string;
+		const instanceId = useInstanceId( Tag ).toString();
+		const labelId = `woocommerce-tag__label-${ instanceId }`;
 
 		screenReaderLabel = screenReaderLabel || label;
 		if ( ! label ) {
@@ -58,7 +59,6 @@ const Tag = forwardRef(
 		const classes = classnames( 'woocommerce-tag', className, {
 			'has-remove': !! remove,
 		} );
-		const labelId = `woocommerce-tag__label-${ instanceId }`;
 		const labelTextNode = (
 			<Fragment>
 				<span className="screen-reader-text">

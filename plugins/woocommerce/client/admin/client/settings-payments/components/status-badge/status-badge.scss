@@ -1,4 +1,6 @@
 .woocommerce-status-badge {
+	display: inline-flex;
+	align-items: center;
 	background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
 	border: none;
 	border-radius: var(--radius-primitive, 4px);
@@ -16,5 +18,12 @@
 	&--info {
 		background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
 		color: var(--Alias-text-text, #070707);
+	}
+
+	& > .woocommerce-status-badge__icon-container {
+		margin-left: 4px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
 	}
 }

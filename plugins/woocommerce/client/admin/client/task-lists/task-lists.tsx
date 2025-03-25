@@ -6,12 +6,7 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
 import { Fragment } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	ONBOARDING_STORE_NAME,
-	TaskListType,
-	TaskType,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { onboardingStore, TaskListType, TaskType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -36,18 +31,17 @@ export type TaskListsProps = {
 
 export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 	const { task } = query;
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+	const { hideTaskList } = useDispatch( onboardingStore );
 
-	const { isResolving, taskLists } = useSelect(
-		( select: WCDataSelector ) => {
-			return {
-				isResolving: ! select(
-					ONBOARDING_STORE_NAME
-				).hasFinishedResolution( 'getTaskLists' ),
-				taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-			};
-		}
-	);
+	const { isResolving, taskLists } = useSelect( ( select ) => {
+		return {
+			isResolving: ! select( onboardingStore ).hasFinishedResolution(
+				'getTaskLists',
+				[]
+			),
+			taskLists: select( onboardingStore ).getTaskLists(),
+		};
+	}, [] );
 
 	const getCurrentTask = () => {
 		if ( ! task ) {

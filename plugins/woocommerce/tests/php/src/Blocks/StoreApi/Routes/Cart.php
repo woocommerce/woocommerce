@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Spy_REST_Server;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Cart Controller Tests.
@@ -30,7 +31,7 @@ class Cart extends ControllerTestCase {
 			$fixtures->get_simple_product(
 				array(
 					'name'          => 'Test Product 1',
-					'stock_status'  => 'instock',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
 				)
@@ -38,7 +39,7 @@ class Cart extends ControllerTestCase {
 			$fixtures->get_simple_product(
 				array(
 					'name'          => 'Test Product 2',
-					'stock_status'  => 'instock',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
 				)
@@ -46,7 +47,7 @@ class Cart extends ControllerTestCase {
 			$fixtures->get_simple_product(
 				array(
 					'name'          => 'Test Product 3',
-					'stock_status'  => 'instock',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
 				)
@@ -54,7 +55,7 @@ class Cart extends ControllerTestCase {
 			$fixtures->get_simple_product(
 				array(
 					'name'          => 'Test Product 4',
-					'stock_status'  => 'instock',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
 					'virtual'       => true,
@@ -103,6 +104,7 @@ class Cart extends ControllerTestCase {
 		wc()->customer->set_shipping_address_1( '' );
 		wc()->customer->set_billing_address_1( '' );
 	}
+
 	/**
 	 * Test getting cart.
 	 */
@@ -622,7 +624,7 @@ class Cart extends ControllerTestCase {
 		$variable_product = $fixtures->get_variable_product(
 			array(
 				'name'          => 'Test Variable Product 4',
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 				'regular_price' => 10,
 				'weight'        => 10,
 			),
@@ -681,6 +683,139 @@ class Cart extends ControllerTestCase {
 					),
 				),
 			)
+		);
+	}
+
+	/**
+	 * Test adding a variable product to cart with attribute_* attributes.
+	 */
+	public function test_add_variable_product_to_cart_with_attribute_data() {
+		wc_empty_cart();
+
+		$fixtures = new FixtureData();
+
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Test Variable Product with special characters',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+				'weight'        => 10,
+			),
+			array(
+				// this will create a "taxonomy"/"global" attribute.
+				$fixtures->get_product_attribute( 'Size', array( 'Small 🤏', 'Medium' ) ),
+				// this will create a "local" attribute.
+				[
+					'attribute_id'       => 0,
+					'attribute_taxonomy' => 'Autograph choice ✏️',
+					'term_ids'           => [ 'Yes 👍', 'No 👎' ],
+				],
+			)
+		);
+
+		$variation = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array(
+				// if we need to create a variation product with a taxonomy attribute using special chars,
+				// we need to use their encoded values.
+				'pa_size'                             => 'small-%f0%9f%a4%8f',
+				'autograph-choice-%e2%9c%8f%ef%b8%8f' => 'Yes 👍',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'pa_size',
+						'value'     => 'Small 🤏',
+					),
+					array(
+						'attribute' => 'attribute_autograph-choice-%e2%9c%8f%ef%b8%8f',
+						'value'     => 'Yes 👍',
+					),
+				),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items' => array(
+					array(
+						'variation' => array(
+							array(
+								'attribute' => 'Autograph choice ✏️',
+								'value'     => 'Yes 👍',
+							),
+							array(
+								'attribute' => 'Size',
+								'value'     => 'small-%f0%9f%a4%8f',
+							),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Test adding a variable product that doesn't exist to cart with attribute_* attributes.
+	 */
+	public function test_fails_add_variable_product_to_cart_with_wrong_attribute_data() {
+		wc_empty_cart();
+
+		$fixtures = new FixtureData();
+
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Test Variable Product with special characters',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+				'weight'        => 10,
+			),
+			array(
+				[
+					'attribute_id'       => 0,
+					'attribute_taxonomy' => 'Autograph choice ✏️',
+					'term_ids'           => [ 'Yes 👍', 'No 👎' ],
+				],
+			)
+		);
+
+		$variation = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array(
+				'autograph-choice-%e2%9c%8f%ef%b8%8f' => 'No 👎',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						// purposefully using the wrong attribute value, here.
+						'attribute' => 'attribute_autograph-choice-%e2%9c%8f%ef%b8%8f',
+						'value'     => 'Yes 👍',
+					),
+				),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400
 		);
 	}
 }

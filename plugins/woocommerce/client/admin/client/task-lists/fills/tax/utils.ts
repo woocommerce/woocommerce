@@ -50,6 +50,7 @@ export type TaxChildProps = {
 	onManual: () => void;
 	onDisable: () => void;
 	task: TaskType;
+	children?: React.ReactNode;
 };
 
 /**

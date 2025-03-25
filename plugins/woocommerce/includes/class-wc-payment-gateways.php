@@ -8,7 +8,6 @@
  * @package WooCommerce\Classes\Payment
  */
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -18,8 +17,6 @@ defined( 'ABSPATH' ) || exit;
  * Payment gateways class.
  */
 class WC_Payment_Gateways {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Payment gateway classes.
@@ -114,13 +111,13 @@ class WC_Payment_Gateways {
 			} else {
 				// Add to end of the array.
 				$this->payment_gateways[ $order_end ] = $gateway;
-				$order_end++;
+				++$order_end;
 			}
 		}
 
 		ksort( $this->payment_gateways );
 
-		self::add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ) );
+		add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ) );
 		/**
 		 * Hook that is called when the payment gateways have been initialized.
 		 *
@@ -130,26 +127,30 @@ class WC_Payment_Gateways {
 		do_action( 'wc_payment_gateways_initialized', $this );
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
+
 	/**
 	 * Hook into payment gateway settings changes.
 	 *
 	 * @param WC_Payment_Gateways $wc_payment_gateways The WC_Payment_Gateways instance.
 	 * @since 8.5.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
+	public function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
 		foreach ( $this->payment_gateways as $gateway ) {
 			$option_key = $gateway->get_option_key();
-			self::add_action(
+			add_action(
 				'add_option_' . $option_key,
-				function( $option, $value ) use ( $gateway ) {
+				function ( $option, $value ) use ( $gateway ) {
 					$this->payment_gateway_settings_option_changed( $gateway, $value, $option );
 				},
 				10,
 				2
 			);
-			self::add_action(
+			add_action(
 				'update_option_' . $option_key,
-				function( $old_value, $value, $option ) use ( $gateway ) {
+				function ( $old_value, $value, $option ) use ( $gateway ) {
 					$this->payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value );
 				},
 				10,
@@ -157,6 +158,8 @@ class WC_Payment_Gateways {
 			);
 		}
 	}
+
+	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 	/**
 	 * Callback for when a gateway settings option was added or updated.
@@ -205,7 +208,7 @@ class WC_Payment_Gateways {
 		$email_addresses   = array_unique(
 			array_filter(
 				$email_addresses,
-				function( $email_address ) {
+				function ( $email_address ) {
 					return filter_var( $email_address, FILTER_VALIDATE_EMAIL );
 				}
 			)
@@ -386,7 +389,7 @@ All at %6$s
 			$loop = 0;
 			foreach ( $gateway_order as $gateway_id ) {
 				$order[ esc_attr( $gateway_id ) ] = $loop;
-				$loop++;
+				++$loop;
 			}
 		}
 

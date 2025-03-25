@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Unformat Shipping Method numeric values before persisting data to the server.

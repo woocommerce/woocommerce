@@ -1,24 +1,37 @@
 let config = require( '../../playwright.config.js' );
-const { devices } = require( '@playwright/test' );
+const { tags } = require( '../../fixtures/fixtures' );
+
+process.env.IS_PRESSABLE = 'true';
+process.env.INSTALL_WC = 'true';
+
+const grepInvert = new RegExp(
+	`${ tags.SKIP_ON_PRESSABLE }|${ tags.SKIP_ON_EXTERNAL_ENV }|${ tags.COULD_BE_LOWER_LEVEL_TEST }|${ tags.NON_CRITICAL }|${ tags.TO_BE_REMOVED }`
+);
 
 config = {
-	...config,
+	...config.default,
 	projects: [
+		...config.setupProjects,
 		{
-			name: 'default pressable',
-			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: [
-				'**/basic.spec.js',
-				'**/activate-and-setup/**/*.spec.js',
-				'**/admin-analytics/**/*.spec.js',
-				'**/admin-marketing/**/*.spec.js',
-				'**/admin-tasks/**/*.spec.js',
-				'**/customize-store/**/*.spec.js',
-				'**/merchant/**/*.spec.js',
-				'**/shopper/**/*.spec.js',
-				'**/api-tests/**/*.test.js',
+			name: 'reset',
+			testDir: `${ config.TESTS_ROOT_PATH }/fixtures`,
+			testMatch: 'reset.setup.js',
+		},
+		{
+			name: 'e2e-pressable',
+			testIgnore: [
+				'**/api-tests/**',
+				'**/customize-store/**',
+				'**/js-file-monitor/**',
 			],
-			grepInvert: /@skip-on-default-pressable/,
+			grepInvert,
+			dependencies: [ 'reset', 'site setup' ],
+		},
+		{
+			name: 'api-pressable',
+			testMatch: [ '**/api-tests/**' ],
+			grepInvert,
+			dependencies: [ 'reset', 'site setup' ],
 		},
 	],
 };

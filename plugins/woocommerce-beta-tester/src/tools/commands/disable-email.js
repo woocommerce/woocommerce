@@ -6,11 +6,11 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const DisableEmail = () => {
 	const { isEmailDisabled } = useSelect( ( select ) => {
-		const { getIsEmailDisabled } = select( STORE_KEY );
+		const { getIsEmailDisabled } = select( store );
 		return {
 			isEmailDisabled: getIsEmailDisabled(),
 		};

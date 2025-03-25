@@ -17,12 +17,13 @@ import {
  */
 import { getMenuPropsType } from './types';
 
+type PopoverProps = React.ComponentProps< typeof Popover >;
 type MenuProps = {
 	children?: JSX.Element | JSX.Element[];
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 	className?: string;
-	position?: Popover.Position;
+	position?: PopoverProps[ 'position' ];
 	scrollIntoViewOnOpen?: boolean;
 };
 
@@ -74,7 +75,6 @@ export const Menu = ( {
 		>
 			<div>
 				<Popover
-					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
 					__unstableSlotName="woocommerce-select-control-menu"
 					focusOnMount={ false }
 					className={ classnames(

@@ -20,7 +20,7 @@ export class CustomizeStorePage {
 		} );
 
 		await apiContext.post(
-			'/wp-json/wc-admin-test-helper/tools/reset-cys'
+			'./wp-json/wc-admin-test-helper/tools/reset-cys'
 		);
 	}
 }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -13,16 +13,17 @@ import { getCountryCode } from '~/dashboard/utils';
 import { hasCompleteAddress } from '../../tax/utils';
 import { default as StoreLocationForm } from '~/task-lists/fills/steps/location';
 
-export const StoreLocation: React.FC< {
+export const StoreLocation = ( {
+	nextStep,
+	onLocationComplete,
+}: {
 	nextStep: () => void;
 	onLocationComplete: () => void;
-} > = ( { nextStep, onLocationComplete } ) => {
+} ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } =
-		useDispatch( SETTINGS_STORE_NAME );
+	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 	const { generalSettings, isResolving } = useSelect( ( select ) => {
-		const { getSettings, hasFinishedResolution } =
-			select( SETTINGS_STORE_NAME );
+		const { getSettings, hasFinishedResolution } = select( settingsStore );
 
 		return {
 			generalSettings: getSettings( 'general' )?.general,
@@ -30,7 +31,7 @@ export const StoreLocation: React.FC< {
 				'general',
 			] ),
 		};
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if ( isResolving || ! hasCompleteAddress( generalSettings || {} ) ) {

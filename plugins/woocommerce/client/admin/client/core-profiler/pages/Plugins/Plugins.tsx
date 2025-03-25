@@ -4,7 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Extension, ExtensionList } from '@woocommerce/data';
-import { useState } from 'react';
+import { useState, useMemo } from '@wordpress/element';
+import { useMediaQuery } from '@wordpress/compose';
 import clsx from 'clsx';
 
 /**
@@ -24,15 +25,26 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { PluginErrorBanner } from './components/plugin-error-banner/PluginErrorBanner';
 import { PluginsTermsOfService } from './components/plugin-terms-of-service/PluginsTermsOfService';
 
-const locale = ( getAdminSetting( 'locale' )?.siteLocale || 'en_US' ).replace(
-	'_',
-	'-'
-);
-export const joinWithAnd = ( items: string[] ) => {
-	return new Intl.ListFormat( locale, {
-		style: 'long',
-		type: 'conjunction',
-	} ).formatToParts( items );
+const currentLocale = (
+	getAdminSetting( 'locale' )?.siteLocale || 'en_US'
+).replaceAll( '_', '-' );
+
+export const joinWithAnd = (
+	items: string[],
+	locale: string = currentLocale
+) => {
+	try {
+		return new Intl.ListFormat( locale, {
+			style: 'long',
+			type: 'conjunction',
+		} ).formatToParts( items );
+	} catch ( error ) {
+		// Fallback to English
+		return new Intl.ListFormat( 'en-US', {
+			style: 'long',
+			type: 'conjunction',
+		} ).formatToParts( items );
+	}
 };
 
 export const composeListFormatParts = ( part: {
@@ -144,6 +156,22 @@ export const Plugins = ( {
 		context.pluginsAvailable.length / 2
 	);
 
+	const pluginsSlugToName = useMemo(
+		() =>
+			context.pluginsAvailable.reduce( ( acc, plugin ) => {
+				acc[ plugin.key ] = plugin.name;
+				return acc;
+			}, {} as Record< string, string > ),
+		[ context.pluginsAvailable ]
+	);
+
+	const baseHeight = 350;
+	const rowHeight = 100; // include the gap between the cards
+	const listHeight = baseHeight + rowHeight * pluginsCardRowCount;
+	const shouldShowStickyFooter = useMediaQuery(
+		`(max-height: ${ listHeight }px)`
+	);
+
 	return (
 		<div
 			className="woocommerce-profiler-plugins"
@@ -161,7 +189,7 @@ export const Plugins = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						'Enhance your store by installing these free business features. No commitment required – you can remove them at any time.',
+						'No commitment required – you can remove them at any time.',
 						'woocommerce'
 					) }
 				/>
@@ -170,20 +198,17 @@ export const Plugins = ( {
 						pluginsInstallationErrors={
 							context.pluginsInstallationErrors
 						}
+						pluginsSlugToName={ pluginsSlugToName }
 						onClick={ submitInstallationRequest }
 					/>
 				) }
 				<div
-					className={ clsx(
-						'woocommerce-profiler-plugins__list',
-						`rows-${ pluginsCardRowCount }`
-					) }
+					className={ clsx( 'woocommerce-profiler-plugins__list', {
+						'sticky-footer': shouldShowStickyFooter,
+					} ) }
 				>
 					{ context.pluginsAvailable.map( ( plugin ) => {
-						const {
-							key: pluginSlug,
-							learn_more_link: learnMoreLink,
-						} = plugin;
+						const { key: pluginSlug } = plugin;
 						return (
 							<PluginCard
 								key={ pluginSlug }
@@ -194,29 +219,14 @@ export const Plugins = ( {
 									}
 								} }
 								checked={ selectedPlugins.has( plugin ) }
-							>
-								{ learnMoreLink && (
-									<PluginCard.LearnMoreLink
-										onClick={ () => {
-											sendEvent( {
-												type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
-												payload: {
-													plugin: pluginSlug,
-													learnMoreLink,
-												},
-											} );
-										} }
-									/>
-								) }
-							</PluginCard>
+							></PluginCard>
 						);
 					} ) }
 				</div>
 				<div
-					className={ clsx(
-						'woocommerce-profiler-plugins__footer',
-						`rows-${ pluginsCardRowCount }`
-					) }
+					className={ clsx( 'woocommerce-profiler-plugins__footer', {
+						'sticky-footer': shouldShowStickyFooter,
+					} ) }
 				>
 					<div className="woocommerce-profiler-plugins-continue-button-container">
 						<Button

@@ -88,6 +88,10 @@
 	}
 }
 
+.woocommerce-table__preface {
+	margin: $gap-small $gap $gap-small $gap;
+}
+
 .woocommerce-table__caption {
 	@include font-size( 24 );
 	text-align: left;

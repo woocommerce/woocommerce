@@ -66,7 +66,6 @@ export const LysSurvey = ( {
 									/>
 								}
 								iconSize={ 14 }
-								size={ 24 }
 								onClick={ () => {
 									setIsShowThanks( false );
 									setIsShowSurvey( false );
@@ -104,6 +103,7 @@ export const LysSurvey = ( {
 										) }
 									</label>
 									<TextareaControl
+										__nextHasNoMarginBottom
 										id="launch-your-store-comment"
 										data-testid="launch-your-store-comment"
 										value={ feedbackText }

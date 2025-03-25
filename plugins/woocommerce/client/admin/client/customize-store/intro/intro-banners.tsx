@@ -13,7 +13,7 @@ import { Link } from '@woocommerce/components';
  */
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 import { trackEvent } from '../tracking';
 
@@ -369,7 +369,7 @@ export const NonDefaultBlockThemeBanner = () => {
 				trackEvent( 'customize_your_store_intro_customize_click', {
 					theme_type: 'block',
 				} );
-				navigateOrParent( window, 'site-editor.php' );
+				navigateOrParent( window, `${ ADMIN_URL }site-editor.php` );
 			} }
 			bannerButtonText={ __( 'Go to the Editor', 'woocommerce' ) }
 			showAIDisclaimer={ false }

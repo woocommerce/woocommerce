@@ -15,7 +15,7 @@ export type CurrencyInputProps = {
 	className: string;
 	value: string;
 	sanitize: ( value: string | number ) => string;
-	onChange: ( value: string ) => void;
+	onChange: ( value: string | undefined ) => void;
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
@@ -71,8 +71,8 @@ export const useCurrencyInputProps = ( {
 				onKeyUp( event );
 			}
 		},
-		onChange( newValue: string ) {
-			const sanitizeValue = sanitizePrice( newValue );
+		onChange( newValue ) {
+			const sanitizeValue = sanitizePrice( newValue ?? '' );
 			if ( onChange ) {
 				onChange(
 					Number( sanitizeValue ) <= CURRENCY_INPUT_MAX

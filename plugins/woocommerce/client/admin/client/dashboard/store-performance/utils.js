@@ -6,7 +6,7 @@ import { find } from 'lodash';
 import { getCurrentDates, appendTimestamp } from '@woocommerce/date';
 import {
 	getFilterQuery,
-	SETTINGS_STORE_NAME,
+	settingsStore,
 	REPORTS_STORE_NAME,
 } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
@@ -77,7 +77,7 @@ export const getIndicatorData = ( select, indicators, query, filters ) => {
 	const { getReportItems, getReportItemsError, isResolving } =
 		select( REPORTS_STORE_NAME );
 	const { woocommerce_default_date_range: defaultDateRange } = select(
-		SETTINGS_STORE_NAME
+		settingsStore
 	).getSetting( 'wc_admin', 'wcAdminSettings' );
 	const datesFromQuery = getCurrentDates( query, defaultDateRange );
 	const endPrimary = datesFromQuery.primary.before;

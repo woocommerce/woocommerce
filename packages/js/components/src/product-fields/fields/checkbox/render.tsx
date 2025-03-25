@@ -20,7 +20,7 @@ const CheckboxField: React.FC< CheckboxFieldProps > = ( {
 		<CheckboxControl
 			label={ label }
 			onChange={ onChange }
-			selected={ value }
+			checked={ value }
 		/>
 	);
 };

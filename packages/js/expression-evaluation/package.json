@@ -11,8 +11,7 @@
 		"evaluation"
 	],
 	"engines": {
-		"node": "^20.11.1",
-		"pnpm": "9.1.3"
+		"node": "^20.11.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/expression-evaluation/README.md",
 	"repository": {
@@ -32,7 +31,7 @@
 		"build-types"
 	],
 	"dependencies": {
-		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/i18n": "wp-6.6",
 		"peggy": "^3.0.2"
 	},
 	"publishConfig": {
@@ -55,7 +54,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@types/jest": "27.5.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
@@ -65,8 +64,8 @@
 		"jest-cli": "27.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.3.x",
-		"wireit": "0.14.3"
+		"typescript": "5.7.x",
+		"wireit": "0.14.10"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -125,13 +124,13 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-js-tests/build",
-				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
+				"package.json",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json"
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
 			]
 		}
 	}

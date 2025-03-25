@@ -10,6 +10,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import SelectControl from '../select-control';
+import { Option } from '../select-control/types';
 import {
 	attributes,
 	countries,
@@ -27,13 +28,6 @@ import {
 	AutoCompleter,
 	OptionCompletionValue,
 } from './autocompleters';
-
-type Option = {
-	key: string | number;
-	label: React.ReactNode;
-	keywords: string[];
-	value: unknown;
-};
 
 type SearchType =
 	| 'attributes'
@@ -61,8 +55,8 @@ type Props = {
 	selected?:
 		| string
 		| Array< {
-				key: number | string;
-				label?: string;
+				key: string;
+				label: string;
 		  } >;
 	inlineTags?: boolean;
 	showClearButton?: boolean;
@@ -72,7 +66,7 @@ type Props = {
 };
 
 type State = {
-	options: unknown[];
+	options: Option[];
 };
 
 /**
@@ -177,6 +171,7 @@ export class Search extends Component< Props, State > {
 		this.appendFreeTextSearch = this.appendFreeTextSearch.bind( this );
 		this.fetchOptions = this.fetchOptions.bind( this );
 		this.updateSelected = this.updateSelected.bind( this );
+		this.onChange = this.onChange.bind( this );
 	}
 
 	getAutocompleter() {
@@ -230,7 +225,7 @@ export class Search extends Component< Props, State > {
 
 		options.forEach( ( option ) => {
 			const formattedOption = {
-				key: autocompleter.getOptionIdentifier( option ),
+				key: autocompleter.getOptionIdentifier( option ).toString(),
 				label: autocompleter.getOptionLabel( option, query ),
 				keywords: autocompleter
 					.getOptionKeywords( option )
@@ -243,9 +238,9 @@ export class Search extends Component< Props, State > {
 		return formattedOptions;
 	}
 
-	fetchOptions( previousOptions: unknown[], query: string ) {
+	fetchOptions( previousOptions: unknown[], query: string | null ) {
 		if ( ! query ) {
-			return [];
+			return Promise.resolve( [] );
 		}
 
 		const autocompleterOptions = this.getAutocompleter().options;
@@ -265,7 +260,8 @@ export class Search extends Component< Props, State > {
 
 	updateSelected( selected: Option[] ) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { onChange = ( _option: unknown[] ) => {} } = this.props;
+		const { onChange: onChangeProp = ( _option: unknown[] ) => {} } =
+			this.props;
 		const autocompleter = this.getAutocompleter();
 
 		const formattedSelections = selected.map<
@@ -276,10 +272,16 @@ export class Search extends Component< Props, State > {
 				: option;
 		} );
 
-		onChange( formattedSelections );
+		onChangeProp( formattedSelections );
 	}
 
-	appendFreeTextSearch( options: unknown[], query: string ) {
+	onChange( selected: Option[] | string ) {
+		if ( Array.isArray( selected ) ) {
+			this.updateSelected( selected );
+		}
+	}
+
+	appendFreeTextSearch( options: Option[], query: string | null ) {
 		const { allowFreeTextSearch } = this.props;
 
 		if ( ! query || ! query.length ) {
@@ -295,7 +297,10 @@ export class Search extends Component< Props, State > {
 			return options;
 		}
 
-		return [ ...autocompleter.getFreeTextOptions( query ), ...options ];
+		return [
+			...( autocompleter.getFreeTextOptions( query ) as Option[] ),
+			...options,
+		];
 	}
 
 	render() {
@@ -328,7 +333,7 @@ export class Search extends Component< Props, State > {
 					getSearchExpression={ autocompleter.getSearchExpression }
 					multiple={ multiple }
 					placeholder={ placeholder }
-					onChange={ this.updateSelected }
+					onChange={ this.onChange }
 					onFilter={ this.appendFreeTextSearch }
 					onSearch={ this.fetchOptions }
 					options={ options }

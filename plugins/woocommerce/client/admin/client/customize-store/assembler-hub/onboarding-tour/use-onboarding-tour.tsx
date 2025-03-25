@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState } from 'react';
 
@@ -13,10 +13,9 @@ export const useOnboardingTour = () => {
 	const [ isResizeHandleVisible, setIsResizeHandleVisible ] =
 		useState( true );
 
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 	const { shouldTourBeShown } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const wasTourShown =
 			getOption( CUSTOMIZE_STORE_ONBOARDING_TOUR_HIDDEN ) === 'yes' ||
@@ -27,7 +26,7 @@ export const useOnboardingTour = () => {
 		return {
 			shouldTourBeShown: ! wasTourShown,
 		};
-	} );
+	}, [] );
 
 	const onClose = () => {
 		updateOptions( {

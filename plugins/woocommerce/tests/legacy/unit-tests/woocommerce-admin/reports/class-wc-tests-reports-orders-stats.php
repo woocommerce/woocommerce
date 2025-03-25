@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats
@@ -371,12 +372,22 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		}
 
 		// Add a partial refund on the last order.
-		$refund = wc_create_refund(
-			array(
-				'amount'   => 10,
-				'order_id' => $order->get_id(),
-			)
-		);
+		foreach ( $order->get_items() as  $item_key => $item_values ) {
+			$item_data = $item_values->get_data();
+			$refund    = wc_create_refund(
+				array(
+					'amount'     => 10,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_data['id'] => array(
+							'qty'          => 0,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+			break;
+		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -407,7 +418,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -60,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -521,7 +532,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -10,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -578,7 +589,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -50,       // @todo - does this value make sense?
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -3932,9 +3943,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$product_2->set_children( array( $child_1->get_id(), $child_2->get_id() ) );
 
-		$child_1->set_stock_status( 'instock' );
+		$child_1->set_stock_status( ProductStockStatus::IN_STOCK );
 		$child_1->save();
-		$child_2->set_stock_status( 'instock' );
+		$child_2->set_stock_status( ProductStockStatus::IN_STOCK );
 		$child_2->save();
 		WC_Product_Variable::sync( $product_2 );
 

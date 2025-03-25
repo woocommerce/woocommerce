@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow WC admin pages to open on new tabs if Ctrl/Command is pressed

@@ -3,6 +3,7 @@
  */
 import { createContext } from '@wordpress/element';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
@@ -68,58 +69,58 @@ describe( 'OnboardingTour', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should record an event when clicking on "Take a tour" button', () => {
+	it( 'should record an event when clicking on "Take a tour" button', async () => {
 		render( <OnboardingTour { ...props } /> );
 
-		screen
-			.getByRole( 'button', {
+		await userEvent.click(
+			screen.getByRole( 'button', {
 				name: /Take a tour/i,
 			} )
-			.click();
+		);
 
 		expect( props.takeTour ).toHaveBeenCalled();
 	} );
 
-	it( 'should record an event when clicking on "Skip" button', () => {
+	it( 'should record an event when clicking on "Skip" button', async () => {
 		render( <OnboardingTour { ...props } /> );
 
-		screen
-			.getByRole( 'button', {
+		await userEvent.click(
+			screen.getByRole( 'button', {
 				name: /Skip/i,
 			} )
-			.click();
+		);
 
 		expect( props.skipTour ).toHaveBeenCalled();
 	} );
 
-	it( 'should record an event when clicking on the "Close Tour" button', () => {
+	it( 'should record an event when clicking on the "Close Tour" button', async () => {
 		render( <OnboardingTour { ...props } showWelcomeTour={ false } /> );
 
-		screen
-			.getByRole( 'button', {
+		await userEvent.click(
+			screen.getByRole( 'button', {
 				name: 'Close Tour',
 			} )
-			.click();
+		);
 
 		expect( trackEvent ).toHaveBeenCalledWith(
 			'customize_your_store_assembler_hub_tour_close'
 		);
 	} );
 
-	it( 'should record an event when complete the tour', () => {
+	it( 'should record an event when complete the tour', async () => {
 		render( <OnboardingTour { ...props } showWelcomeTour={ false } /> );
 
-		screen
-			.getByRole( 'button', {
+		await userEvent.click(
+			screen.getByRole( 'button', {
 				name: 'Next',
 			} )
-			.click();
+		);
 
-		screen
-			.getByRole( 'button', {
+		await userEvent.click(
+			screen.getByRole( 'button', {
 				name: 'Done',
 			} )
-			.click();
+		);
 
 		expect( trackEvent ).toHaveBeenCalledWith(
 			'customize_your_store_assembler_hub_tour_complete'

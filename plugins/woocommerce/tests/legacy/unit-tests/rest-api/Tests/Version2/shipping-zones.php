@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
@@ -694,7 +695,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'title', $data['settings'] );
 		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
 		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
-		$this->assertEquals( 'taxable', $data['settings']['tax_status']['value'] );
+		$this->assertEquals( ProductTaxStatus::TAXABLE, $data['settings']['tax_status']['value'] );
 		$this->assertArrayHasKey( 'cost', $data['settings'] );
 		$this->assertEquals( '0', $data['settings']['cost']['value'] );
 
@@ -713,7 +714,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'title', $data['settings'] );
 		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
 		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
-		$this->assertEquals( 'taxable', $data['settings']['tax_status']['value'] );
+		$this->assertEquals( ProductTaxStatus::TAXABLE, $data['settings']['tax_status']['value'] );
 		$this->assertArrayHasKey( 'cost', $data['settings'] );
 		$this->assertEquals( '5', $data['settings']['cost']['value'] );
 
@@ -723,7 +724,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 			array(
 				'settings' => array(
 					'cost'       => 10,
-					'tax_status' => 'none',
+					'tax_status' => ProductTaxStatus::NONE,
 				),
 			)
 		);
@@ -733,7 +734,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'title', $data['settings'] );
 		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
 		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
-		$this->assertEquals( 'none', $data['settings']['tax_status']['value'] );
+		$this->assertEquals( ProductTaxStatus::NONE, $data['settings']['tax_status']['value'] );
 		$this->assertArrayHasKey( 'cost', $data['settings'] );
 		$this->assertEquals( '10', $data['settings']['cost']['value'] );
 

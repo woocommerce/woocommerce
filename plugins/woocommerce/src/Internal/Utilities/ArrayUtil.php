@@ -38,4 +38,56 @@ class ArrayUtil {
 
 		return true;
 	}
+
+	/**
+	 * Merge two lists of associative arrays by a key.
+	 *
+	 * @param array  $arr1 The first array.
+	 * @param array  $arr2 The second array.
+	 * @param string $key  The key to merge by.
+	 *
+	 * @return array The merged list sorted by the key values.
+	 */
+	public static function merge_by_key( array $arr1, array $arr2, string $key ): array {
+		$merged = array();
+		// Overwrite items in $arr1 with items in $arr2 if they have the same key entry value.
+		// The rest of items in $arr1 will be appended.
+		foreach ( $arr1 as $item1 ) {
+			$found = false;
+			foreach ( $arr2 as $item2 ) {
+				if ( $item1[ $key ] === $item2[ $key ] ) {
+					$merged[] = array_merge( $item1, $item2 );
+					$found    = true;
+					break;
+				}
+			}
+			if ( ! $found ) {
+				$merged[] = $item1;
+			}
+		}
+
+		// Append items from $arr2 that are don't have a corresponding key entry value in $arr1.
+		foreach ( $arr2 as $item2 ) {
+			$found = false;
+			foreach ( $arr1 as $item1 ) {
+				if ( $item1[ $key ] === $item2[ $key ] ) {
+					$found = true;
+					break;
+				}
+			}
+			if ( ! $found ) {
+				$merged[] = $item2;
+			}
+		}
+
+		// Sort the merged list by the key values.
+		usort(
+			$merged,
+			function ( $a, $b ) use ( $key ) {
+				return $a[ $key ] <=> $b[ $key ];
+			}
+		);
+
+		return array_values( $merged );
+	}
 }

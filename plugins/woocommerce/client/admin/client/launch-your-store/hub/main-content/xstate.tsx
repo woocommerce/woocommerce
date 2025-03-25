@@ -2,9 +2,8 @@
  * External dependencies
  */
 import { assertEvent, assign, fromCallback, fromPromise, setup } from 'xstate5';
-import React from 'react';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
-import { ONBOARDING_STORE_NAME, type TaskListType } from '@woocommerce/data';
+import { onboardingStore, type TaskListType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { getSetting } from '@woocommerce/settings';
@@ -85,9 +84,8 @@ export const mainContentMachine = setup( {
 			window.open( homeUrl, '_blank' );
 		},
 		navigateToHome: () => {
-			const { invalidateResolutionForStoreSelector } = dispatch(
-				ONBOARDING_STORE_NAME
-			);
+			const { invalidateResolutionForStoreSelector } =
+				dispatch( onboardingStore );
 			invalidateResolutionForStoreSelector( 'getTaskLists' );
 			navigateTo( { url: '/' } );
 		},

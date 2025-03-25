@@ -5,12 +5,20 @@
  * @package WooCommerce\Tests\Order.
  */
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class WC_Order_Functions_Test
  */
 class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
+	/**
+	 * tearDown.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		WC()->cart->empty_cart();
+	}
 
 	/**
 	 * Test that wc_restock_refunded_items() preserves order item stock metadata.
@@ -33,7 +41,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$checkout = WC_Checkout::instance();
 		$order    = new WC_Order();
 		$checkout->set_data_from_cart( $order );
-		$order->set_status( 'wc-processing' );
+		$order->set_status( OrderInternalStatus::PROCESSING );
 		$order->save();
 
 		// Get the line item.

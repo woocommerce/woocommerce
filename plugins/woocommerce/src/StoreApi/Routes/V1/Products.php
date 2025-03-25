@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
@@ -54,6 +56,7 @@ class Products extends AbstractRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => $this->get_collection_params(),
+				'allow_batch'         => [ 'v1' => true ],
 			],
 			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
@@ -264,7 +267,7 @@ class Products extends AbstractRoute {
 		$params['type'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array_keys( wc_get_product_types() ), [ 'variation' ] ),
+			'enum'              => array_merge( array_keys( wc_get_product_types() ), [ ProductType::VARIATION ] ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -284,14 +287,30 @@ class Products extends AbstractRoute {
 		);
 
 		$params['category'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a set of category IDs or slugs, separated by commas.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
+			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['category_operator'] = array(
 			'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => [ 'in', 'not_in', 'and' ],
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['brand'] = array(
+			'description'       => __( 'Limit result set to products assigned a set of brand IDs or slugs, separated by commas.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['brand_operator'] = array(
+			'description'       => __( 'Operator to compare product brand terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => [ 'in', 'not_in', 'and' ],
 			'default'           => 'in',
@@ -307,15 +326,15 @@ class Products extends AbstractRoute {
 
 			if ( str_starts_with( $param, '_unstable_tax_' ) && ! str_ends_with( $param, '_operator' ) ) {
 				$params[ $param ] = array(
-					'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
+					'description'       => __( 'Limit result set to products assigned a set of taxonomies IDs or slugs, separated by commas.', 'woocommerce' ),
 					'type'              => 'string',
-					'sanitize_callback' => 'wp_parse_id_list',
+					'sanitize_callback' => 'wp_parse_list',
 					'validate_callback' => 'rest_validate_request_arg',
 				);
 			}
 			if ( str_starts_with( $param, '_unstable_tax_' ) && str_ends_with( $param, '_operator' ) ) {
 				$params[ $param ] = array(
-					'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
+					'description'       => __( 'Operator to compare product taxonomies terms.', 'woocommerce' ),
 					'type'              => 'string',
 					'enum'              => [ 'in', 'not_in', 'and' ],
 					'default'           => 'in',
@@ -326,9 +345,9 @@ class Products extends AbstractRoute {
 		}
 
 		$params['tag'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a set of tag IDs or slugs, separated by commas.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
+			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -423,7 +442,7 @@ class Products extends AbstractRoute {
 		$params['catalog_visibility'] = array(
 			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array( 'any', 'visible', 'catalog', 'search', 'hidden' ),
+			'enum'              => array( 'any', CatalogVisibility::VISIBLE, CatalogVisibility::CATALOG, CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

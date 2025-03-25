@@ -82,9 +82,17 @@
 			align-self: flex-start;
 			background: none;
 			border: none;
+			bottom: 3px; // Better alignment with the notice text
 			cursor: pointer;
 			height: 24px;
+			position: relative;
 		}
+	}
+}
+
+.woocommerce-marketplace__notice--error {
+	&:last-child {
+		margin-bottom: $grid-unit-50;
 	}
 }
 

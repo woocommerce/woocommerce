@@ -109,7 +109,6 @@ export const Products = () => {
 };
 
 registerPlugin( 'wc-admin-onboarding-task-products', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="products">

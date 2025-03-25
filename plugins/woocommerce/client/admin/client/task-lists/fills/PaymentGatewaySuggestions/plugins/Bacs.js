@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Form, H, TextControl } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
@@ -20,10 +20,10 @@ const initialFormValues = {
 
 const BacsPaymentGatewaySetup = () => {
 	const isUpdating = useSelect( ( select ) => {
-		return select( OPTIONS_STORE_NAME ).isOptionsUpdating();
+		return select( optionsStore ).isOptionsUpdating();
 	} );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const validate = ( values ) => {
 		const errors = {};
@@ -96,6 +96,7 @@ const BacsPaymentGatewaySetup = () => {
 										</p>
 										<div className="woocommerce-task-payment-method__fields">
 											<TextControl
+												__nextHasNoMarginBottom
 												label={ __(
 													'Account name',
 													'woocommerce'
@@ -106,6 +107,7 @@ const BacsPaymentGatewaySetup = () => {
 												) }
 											/>
 											<TextControl
+												__nextHasNoMarginBottom
 												label={ __(
 													'Account number',
 													'woocommerce'
@@ -116,6 +118,7 @@ const BacsPaymentGatewaySetup = () => {
 												) }
 											/>
 											<TextControl
+												__nextHasNoMarginBottom
 												label={ __(
 													'Bank name',
 													'woocommerce'
@@ -126,6 +129,7 @@ const BacsPaymentGatewaySetup = () => {
 												) }
 											/>
 											<TextControl
+												__nextHasNoMarginBottom
 												label={ __(
 													'Sort code',
 													'woocommerce'
@@ -136,6 +140,7 @@ const BacsPaymentGatewaySetup = () => {
 												) }
 											/>
 											<TextControl
+												__nextHasNoMarginBottom
 												label={ __(
 													'IBAN',
 													'woocommerce'
@@ -144,6 +149,7 @@ const BacsPaymentGatewaySetup = () => {
 												{ ...getInputProps( 'iban' ) }
 											/>
 											<TextControl
+												__nextHasNoMarginBottom
 												label={ __(
 													'BIC / Swift',
 													'woocommerce'
@@ -153,7 +159,7 @@ const BacsPaymentGatewaySetup = () => {
 											/>
 										</div>
 										<Button
-											isPrimary
+											variant="primary"
 											isBusy={ isUpdating }
 											onClick={ handleSubmit }
 										>

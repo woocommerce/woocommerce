@@ -22,7 +22,7 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/Application/Core Profiler/Business Location',
+	title: 'WooCommerce Admin/Core Profiler/Business Location',
 	component: BusinessLocation,
 	decorators: [ WithSetupWizardLayout ],
 };

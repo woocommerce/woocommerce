@@ -28,7 +28,7 @@ class CatalogSorting extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		ob_start();
-		woocommerce_catalog_ordering();
+		woocommerce_catalog_ordering( $attributes );
 		$catalog_sorting = ob_get_clean();
 
 		if ( ! $catalog_sorting ) {

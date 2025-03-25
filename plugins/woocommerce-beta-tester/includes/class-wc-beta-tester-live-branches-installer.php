@@ -74,10 +74,11 @@ class WC_Beta_Tester_Live_Branches_Installer {
 	 * Install a WooCommerce plugin version by download url.
 	 *
 	 * @param string $download_url The download url of the plugin version.
-	 * @param string $pr_name The name of the associated PR.
 	 * @param string $version The version of the plugin.
+	 *
+	 * @return bool|WP_Error True if the plugin was installed successfully, otherwise a WP_Error object.
 	 */
-	public function install( $download_url, $pr_name, $version ) {
+	public function install( $download_url, $version ) {
 		// Download the plugin.
 		$tmp_dir = download_url( $download_url );
 
@@ -95,16 +96,34 @@ class WC_Beta_Tester_Live_Branches_Installer {
 
 		$unzip = unzip_file( $tmp_dir, $unzip_path );
 
-		// The plugin is nested under woocommerce-dev, so we need to move it up one level.
-		$this->file_system->mkdir( $plugin_path );
-		$this->move( $unzip_path . '/woocommerce-dev', $plugin_path );
-
 		if ( is_wp_error( $unzip ) ) {
-			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $result->get_error_message() ) ); // @codingStandardsIgnoreLine.
+			// Clean up the temporary file.
+			$this->file_system->delete( $tmp_dir );
+
+			/* translators: %1$s: Error message from unzip operation */
+			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $unzip->get_error_message() ) );
 		}
 
-		// Delete the downloaded zip file.
-		unlink( $tmp_dir );
+		$result = true;
+		// The plugin is nested under woocommerce-dev or woocommerce, so we need to move it up one level.
+		$source_paths = array(
+			$unzip_path . '/woocommerce-dev',
+			$unzip_path . '/woocommerce',
+		);
+		$source       = current( array_filter( $source_paths, 'file_exists' ) );
+
+		if ( $source ) {
+			$this->file_system->mkdir( $plugin_path );
+			$this->move( $source, $plugin_path );
+		} else {
+			$result = new WP_Error( 'unzip_error', __( 'Could not find woocommerce-dev or woocommerce in the zip file', 'woocommerce-beta-tester' ) );
+		}
+
+		// Clean up the temporary file and unzip directory.
+		if ( file_exists( $unzip_path ) ) {
+			$this->file_system->delete( $unzip_path, true );
+		}
+		$this->file_system->delete( $tmp_dir, true );
 
 		return true;
 	}

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -111,6 +110,6 @@ export const Columns: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/ImageGallery',
+	title: 'Components/ImageGallery',
 	component: ImageGallery,
 };

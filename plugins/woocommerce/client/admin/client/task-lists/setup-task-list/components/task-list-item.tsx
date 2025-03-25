@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
+import { onboardingStore, TaskType } from '@woocommerce/data';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
@@ -26,9 +26,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	trackClick,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { dismissTask, undoDismissTask } = useDispatch(
-		ONBOARDING_STORE_NAME
-	);
+	const { dismissTask, undoDismissTask } = useDispatch( onboardingStore );
 
 	const {
 		id: taskId,

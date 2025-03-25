@@ -15,6 +15,13 @@ require_once __DIR__ . '/class-wc-settings-migration-test.php';
  * Unit tests for the base functionality of WC_Settings_Page.
  */
 class WC_Settings_Page_Test extends WC_Unit_Test_Case {
+	/**
+	 * Tear down test environment.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings' ) );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test for constructor.
@@ -118,7 +125,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_get_settings_example',
-			function( $settings, $section ) use ( &$actual_settings, &$actual_section ) {
+			function ( $settings, $section ) use ( &$actual_settings, &$actual_section ) {
 				$actual_settings = $settings;
 				$actual_section  = $section;
 			},
@@ -159,7 +166,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_get_sections_example',
-			function( $sections ) use ( &$actual_sections ) {
+			function ( $sections ) use ( &$actual_sections ) {
 				$actual_sections = $sections;
 			},
 			10,
@@ -211,7 +218,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$actual ) {
+					'output_fields' => function ( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -238,7 +245,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$actual ) {
+					'output_fields' => function ( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -265,7 +272,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'save_fields' => function( $settings ) use ( &$actual ) {
+					'save_fields' => function ( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -292,7 +299,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'save_fields' => function( $settings ) use ( &$actual ) {
+					'save_fields' => function ( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -342,6 +349,8 @@ HTML;
 	 * Test for add_settings_page_data.
 	 */
 	public function test_add_settings_page_data() {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings' ) );
+
 		$migration               = new WC_Settings_Migration_Test();
 		$setting_data            = $migration->add_settings_page_data( array() );
 		$migration_page_data     = $setting_data[ $migration->get_id() ];
@@ -349,7 +358,56 @@ HTML;
 
 		$this->assertTrue( isset( $migration_page_data ) );
 		$this->assertEquals( count( $migration->get_sections() ), count( $migration_sections_data ) );
-		$this->assertEquals( $migration_sections_data['']['settings'][0]['title'], 'Default Section' );
+		$this->assertEquals( $migration_sections_data['default']['settings'][0]['title'], 'Default Section' );
 		$this->assertEquals( $migration_sections_data['foobar']['settings'][0]['title'], 'Foobar Section' );
+	}
+
+	/**
+	 * Test for add_settings_page_data (custom type field).
+	 */
+	public function test_add_settings_page_custom_type_field() {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings' ) );
+
+		$migration               = new WC_Settings_Migration_Test();
+		$setting_data            = $migration->add_settings_page_data( array() );
+		$migration_page_data     = $setting_data[ $migration->get_id() ];
+		$migration_sections_data = $migration_page_data['sections'];
+
+		$this->assertEquals( $migration_sections_data['foobar']['settings'][1]['content'], '<div>Custom Type Field</div>' );
+	}
+
+	/**
+	 * Test for add_settings_page_data (custom view).
+	 */
+	public function test_add_settings_page_data__custom_view() {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings' ) );
+
+		$migration               = new WC_Settings_Migration_Test();
+		$setting_data            = $migration->add_settings_page_data( array() );
+		$migration_page_data     = $setting_data[ $migration->get_id() ];
+		$migration_sections_data = $migration_page_data['sections'];
+
+		$this->assertEquals(
+			$migration_sections_data['custom_view_with_parent_output']['settings'][1]['content'],
+			'<div>Custom View With Parent Output</div>',
+			'Custom view should be rendered with other settings'
+		);
+
+		$this->assertEquals(
+			$migration_sections_data['custom_view_without_parent_output']['settings'][0]['content'],
+			'<div>Custom View Without Parent Output</div>',
+			'Custom view should be rendered with no other settings when parent::output is not called'
+		);
+	}
+
+	/**
+	 * Enable settings feature flag.
+	 *
+	 * @param array $features Array of feature flags.
+	 * @return array
+	 */
+	public function enable_modern_settings( $features ) {
+		$features[] = 'settings';
+		return $features;
 	}
 }

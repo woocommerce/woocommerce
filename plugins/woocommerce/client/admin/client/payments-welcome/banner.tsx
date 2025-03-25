@@ -3,7 +3,9 @@
  */
 import { Card, CardBody, Button, CardDivider } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { WooPaymentMethodsLogos } from '@woocommerce/onboarding';
+import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
+import { useSelect } from '@wordpress/data';
+import { paymentSettingsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -28,7 +30,10 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
 
-	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
+	const isWooPayEligible = useSelect( ( select ) => {
+		const store = select( paymentSettingsStore );
+		return store.getIsWooPayEligible();
+	}, [] );
 
 	const handleNoThanks = () => {
 		setNoThanksClicked( true );
@@ -67,7 +72,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 					{ strings.noThanks }
 				</Button>
 				<p>
-					{ isWooPayEligible
+					{ isWooPayEligible ?? false
 						? strings.TosAndPpWooPay
 						: strings.TosAndPp }
 				</p>
@@ -76,7 +81,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 			<CardDivider />
 			<CardBody className="woopayments-welcome-page__payments">
 				<p>{ strings.paymentOptions }</p>
-				<WooPaymentMethodsLogos
+				<WooPaymentsMethodsLogos
 					isWooPayEligible={ isWooPayEligible }
 					maxElements={ 10 }
 				/>

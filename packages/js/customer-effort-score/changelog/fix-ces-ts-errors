@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Update store registration to use createReduxStore and fix type errors

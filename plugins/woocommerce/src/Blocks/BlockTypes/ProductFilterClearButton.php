@@ -43,20 +43,26 @@ final class ProductFilterClearButton extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		// don't render if its admin, or ajax in progress.
-		if ( is_admin() || wp_doing_ajax() ) {
+		if (
+			is_admin() ||
+			wp_doing_ajax() ||
+			empty( $block->context['filterData'] ) ||
+			empty( $block->context['filterData']['parent'] )
+		) {
 			return '';
 		}
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wc-bind--hidden' => '!context.hasSelectedFilters',
+				'data-wp-bind--hidden' => '!state.hasSelectedFilters',
+				'data-wp-interactive'  => $block->context['filterData']['parent'],
 			)
 		);
 
 		$p = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $p->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
-			$p->set_attribute( 'data-wc-on--click', 'actions.clearFilters' );
+			$p->set_attribute( 'data-wp-on--click', 'actions.clearFilters' );
 
 			$style = $p->get_attribute( 'style' );
 			$p->set_attribute( 'style', 'outline:none;' . $style );

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\MobileMessagingHandler;
 use DateTime;
 use WC_Order;
+use WC_Gateway_COD;
 
 /**
  * Tests for MobileMessagingHandler.
@@ -167,7 +168,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$ipp_eligible_order->set_id( self::ORDER_ID );
 		$ipp_eligible_order->set_status( OrderStatus::PENDING );
 		try {
-			$ipp_eligible_order->set_payment_method( 'cod' );
+			$ipp_eligible_order->set_payment_method( WC_Gateway_COD::ID );
 		} catch ( WC_Data_Exception $e ) {
 			exit();
 		}

@@ -24,16 +24,20 @@ export default function HeaderAccountModal(
 
 	return (
 		<Modal
-			title={ __( 'Are you sure?', 'woocommerce' ) }
+			title={ __(
+				'Are you sure you want to disconnect?',
+				'woocommerce'
+			) }
 			onRequestClose={ closeModal }
 			focusOnMount={ true }
 			className="woocommerce-marketplace__header-account-modal"
 			style={ { borderRadius: 4 } }
+			size="medium"
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>
 			<p className="woocommerce-marketplace__header-account-modal-text">
 				{ __(
-					'Keep your your account connected to manage your subscriptions, get updates and support for your extensions and themes.',
+					'Keep your store connected to WooCommerce.com to get updates, manage your subscriptions, and receive streamlined support for your extensions and themes.',
 					'woocommerce'
 				) }
 			</p>
@@ -46,7 +50,7 @@ export default function HeaderAccountModal(
 					isDestructive={ true }
 					className="woocommerce-marketplace__header-account-modal-button"
 				>
-					{ __( 'Disconnect account', 'woocommerce' ) }
+					{ __( 'Disconnect', 'woocommerce' ) }
 				</Button>
 				<Button
 					variant="primary"

@@ -6,11 +6,20 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Unit tests for the CartController class.
  */
 class CartControllerTests extends TestCase {
+	/**
+	 * tearDown.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		WC()->cart->empty_cart();
+	}
+
 	/**
 	 * Test the normalize_cart method.
 	 */
@@ -105,7 +114,7 @@ class CartControllerTests extends TestCase {
 		$too_many_in_cart_product_key = wc()->cart->add_to_cart( $too_many_in_cart_product->get_id(), 4 );
 		$too_many_in_cart_in_cart     = wc()->cart->get_cart_item( $too_many_in_cart_product_key )['data'];
 
-		$out_of_stock_in_cart->set_stock_status( 'outofstock' );
+		$out_of_stock_in_cart->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$partially_out_of_stock_in_cart->set_manage_stock( true );
 		$partially_out_of_stock_in_cart->set_stock_quantity( 2 );
 		$too_many_in_cart_in_cart->set_sold_individually( true );

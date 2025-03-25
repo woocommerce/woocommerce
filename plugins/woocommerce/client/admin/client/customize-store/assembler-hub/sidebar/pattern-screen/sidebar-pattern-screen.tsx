@@ -10,18 +10,14 @@ import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { capitalize } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
+import { store as coreStore } from '@wordpress/core-data';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	store as coreStore,
 	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/core-data';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
 	__experimentalBlockPatternsList as BlockPatternList,
-	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 
 /**
@@ -109,9 +105,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const refElement = useRef< HTMLDivElement >( null );
 
 	const currentTemplateId: string | undefined = useSelect(
-		( sel ) =>
-			// @ts-expect-error No types for this exist yet.
-			sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
+		( sel ) => sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
 		[]
 	);
 

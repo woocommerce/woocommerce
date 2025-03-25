@@ -24,17 +24,20 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( empty( $block->context['filterData'] ) || empty( $block->context['filterData']['items'] ) ) {
+		if (
+			empty( $block->context['filterData'] ) ||
+			empty( $block->context['filterData']['parent'] )
+		) {
 			return '';
 		}
 
-		$context               = $block->context['filterData'];
-		$items                 = $context['items'] ?? array();
-		$interactivity_context = array( 'items' => $items );
-		$action                = $context['actions']['toggleFilter'] ?? '';
-		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-		$classes               = '';
-		$style                 = '';
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
+		$block_context = $block->context['filterData'];
+		$parent        = $block_context['parent'];
+		$items         = $block_context['items'] ?? array();
+		$classes       = '';
+		$style         = '';
 
 		$tags = new \WP_HTML_Tag_Processor( $content );
 		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-checkbox-list' ) ) ) {
@@ -48,14 +51,13 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				return $item['selected'];
 			}
 		);
-		$show_initially              = $context['show_initially'] ?? 15;
+		$show_initially              = $block_context['show_initially'] ?? 15;
 		$remaining_initial_unchecked = count( $checked_items ) > $show_initially ? count( $checked_items ) : $show_initially - count( $checked_items );
 		$count                       = 0;
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => esc_attr( $namespace ),
-			'data-wc-context'     => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-interactive' => $this->get_full_block_name(),
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'class'               => esc_attr( $classes ),
 			'style'               => esc_attr( $style ),
 		);
@@ -67,23 +69,20 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<?php foreach ( $items as $item ) { ?>
 					<?php
 					$item['id'] = $item['id'] ?? uniqid( 'checkbox-' );
-					// translators: %s: checkbox label.
-					$i18n_label = sprintf( __( 'Checkbox: %s', 'woocommerce' ), $item['aria_label'] ?? '' );
+					// translators: %s: item label.
+					$aria_label = sprintf( __( 'Filter item: %s', 'woocommerce' ), $item['ariaLabel'] ?? $item['label'] );
 					?>
 					<li
-						data-wc-key="<?php echo esc_attr( $item['id'] ); ?>"
-						<?php
-						if ( ! $item['selected'] ) :
-							if ( $count >= $remaining_initial_unchecked ) :
-								?>
-								class="wc-block-product-filter-checkbox-list__item"
-								data-wc-bind--hidden="!context.showAll"
+						data-wp-key="<?php echo esc_attr( $item['id'] ); ?>"
+						class="wc-block-product-filter-checkbox-list__item"
+						<?php if ( ! $item['selected'] ) : ?>
+							<?php if ( $count >= $remaining_initial_unchecked ) : ?>
+								data-wp-bind--hidden="!context.showAll"
 								hidden
 							<?php else : ?>
 								<?php ++$count; ?>
 							<?php endif; ?>
 						<?php endif; ?>
-						class="wc-block-product-filter-checkbox-list__item"
 					>
 						<label
 							class="wc-block-product-filter-checkbox-list__label"
@@ -94,13 +93,11 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									id="<?php echo esc_attr( $item['id'] ); ?>"
 									class="wc-block-product-filter-checkbox-list__input"
 									type="checkbox"
-									aria-invalid="false"
-									aria-label="<?php echo esc_attr( $i18n_label ); ?>"
-									data-wc-on--change--select-item="actions.selectCheckboxItem"
-									data-wc-on--change--parent-action="<?php echo esc_attr( $action ); ?>"
+									aria-label="<?php echo esc_attr( $aria_label ); ?>"
+									data-wp-on--change--parent-action="<?php echo esc_attr( $parent . '::actions.toggleFilter' ); ?>"
 									value="<?php echo esc_attr( $item['value'] ); ?>"
-									<?php checked( $item['selected'], 1 ); ?>
-									data-wc-bind--checked="state.isItemSelected"
+									data-wp-bind--checked="<?php echo esc_attr( $parent . '::state.isItemSelected' ); ?>"
+									data-filter-item="<?php echo esc_attr( wp_json_encode( $item, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
 								>
 								<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
 									<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -116,8 +113,8 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			<?php if ( count( $items ) > $show_initially ) : ?>
 				<button
 					class="wc-block-product-filter-checkbox-list__show-more"
-					data-wc-bind--hidden="context.showAll"
-					data-wc-on--click="actions.showAllItems"
+					data-wp-bind--hidden="context.showAll"
+					data-wp-on--click="actions.showAllItems"
 					hidden
 				>
 					<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
@@ -126,5 +123,16 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

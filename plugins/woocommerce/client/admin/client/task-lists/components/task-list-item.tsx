@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	TaskType,
 	useUserPreferences,
 } from '@woocommerce/data';
@@ -45,7 +45,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		undoSnoozeTask,
 		visitedTask,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( onboardingStore );
 	const userPreferences = useUserPreferences();
 
 	const {
@@ -157,13 +157,15 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		expandable: isExpandable,
 		expanded: isExpandable && isExpanded,
 		completed: isComplete,
-		onSnooze: isSnoozeable && onSnooze,
-		onDismiss: isDismissable && onDismiss,
+		onSnooze: isSnoozeable ? onSnooze : undefined,
+		onDismiss: isDismissable ? onDismiss : undefined,
 	};
 
 	const DefaultTaskItem = useCallback(
-		( props ) => {
-			const onClickActions = () => {
+		( props: Partial< React.ComponentProps< typeof TaskItem > > ) => {
+			const onClickActions = (
+				event?: React.MouseEvent | React.KeyboardEvent
+			) => {
 				trackClick().then( () => {
 					if ( ! isComplete ) {
 						// Invalidate the task list selector cache to force a re-fetch.
@@ -173,7 +175,9 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				} );
 
 				if ( props.onClick ) {
-					return props.onClick();
+					return props.onClick(
+						event as React.MouseEvent< HTMLElement, MouseEvent >
+					);
 				}
 
 				return onClickDefault();

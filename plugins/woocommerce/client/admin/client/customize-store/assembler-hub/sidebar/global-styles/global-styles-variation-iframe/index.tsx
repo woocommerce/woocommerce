@@ -5,9 +5,10 @@
  * External dependencies
  */
 import {
+	// @ts-expect-error No types for this
 	__unstableEditorStyles as EditorStyles,
+	// @ts-expect-error No types for this
 	privateApis as blockEditorPrivateApis,
-	// @ts-ignore no types exist yet.
 } from '@wordpress/block-editor';
 import { useRefEffect } from '@wordpress/compose';
 import { MutableRefObject, useMemo } from 'react';

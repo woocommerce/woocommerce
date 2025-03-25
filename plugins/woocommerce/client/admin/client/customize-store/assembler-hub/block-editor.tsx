@@ -3,6 +3,7 @@
  */
 import { BlockInstance } from '@wordpress/blocks';
 import { memo } from 'react';
+import { EditorSettings } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import { memo } from 'react';
 
 import BlockPreview from './block-preview';
 import Iframe from './iframe';
-import { ChangeHandler } from './hooks/use-editor-blocks';
 
 export const BlockEditor = memo(
 	( {
@@ -21,12 +21,16 @@ export const BlockEditor = memo(
 		onChange,
 	}: {
 		renderedBlocks: BlockInstance[];
-		settings: Record< string, unknown > & {
+		settings: EditorSettings & {
 			styles: string[];
+			[ key: string ]: unknown;
 		};
 		additionalStyles: string;
 		isScrollable: boolean;
-		onChange: ChangeHandler;
+		onChange: (
+			blocks: BlockInstance[],
+			options: Record< string, unknown >
+		) => void;
 	} ) => {
 		return (
 			<div className="woocommerce-customize-store__block-editor">

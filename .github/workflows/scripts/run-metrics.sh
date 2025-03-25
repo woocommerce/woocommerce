@@ -21,20 +21,25 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	if [ "$GITHUB_EVENT_NAME" == "push" ]
 	then
-		# Use-case: performance comparison on trunk push with fixed reference point
-		# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
-		# where compare-perf reporting mode was introduced for processing the provided reports.
+		# Use-case: performance comparison on trunk push with fixed reference
+		# point It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we
+		# pick 55f855a2e6d769b5ae44305b2772eb30d3e721df where compare-perf
+		# reporting mode was introduced for processing the provided reports.
 		BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	else
-		# Use-case: performance comparison on PRs changes.
-		BASE_SHA=$GITHUB_BASE_SHA
+		# Use-case: performance comparison on PRs changes. We need to explicitly
+		# fetch trunk because $GITHUB_BASE_SHA might point to the base of a PR
+		# chain rather than trunk.
+		git fetch --depth=1 --no-tags origin trunk
+		BASE_SHA=$(git rev-parse origin/trunk)
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
 	title "##[group]Setting up necessary tooling"
-	pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null &
+	npm install -g corepack@latest && corepack enable pnpm
+	# `npm install -g corepack@latest` addresses https://github.com/nodejs/corepack/issues/612.
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 	echo '##[endgroup]'
 
@@ -49,6 +54,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		# echo '##[endgroup]'
 
 		title "##[group]Benchmarking head"
+		pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null
 		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		RESULTS_ID="frontend_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics frontend
@@ -66,13 +72,14 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		( git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA > /dev/null || git reset --hard $BASE_SHA ) && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build &
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
-		pnpm --filter='@woocommerce/plugin-woocommerce' build
+		WIREIT_CACHE=local pnpm --filter='@woocommerce/plugin-woocommerce' build
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking baseline"
 		# This one is important: we run the same tests in the same state as we did at head benchmarking.
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce/tests)
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)
+		pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null
 		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		RESULTS_ID="frontend_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics frontend

@@ -187,7 +187,7 @@ public function set_last4( $last4 ) {
 }
 ```
 
-That's it! These meta functions are provided by [WC_Data](https://github.com/woothemes/woocommerce/blob/trunk/includes/abstracts/abstract-wc-data.php).
+That's it! These meta functions are provided by [WC_Data](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/abstracts/abstract-wc-data.php).
 
 #### Step 3: Use Your New Token Type
 

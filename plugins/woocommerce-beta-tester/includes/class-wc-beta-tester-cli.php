@@ -39,7 +39,7 @@ class WC_Beta_Tester_CLI extends WP_CLI_Command {
 		if ( ! $info ) {
 			WP_CLI::error( "Could not find branch $branch in manifest" );
 		} else {
-			$install_result = $installer->install( $info->download_url, $info->branch, $info->version );
+			$install_result = $installer->install( $info->download_url, $info->version );
 
 			if ( is_wp_error( $install_result ) ) {
 				WP_CLI::error( $install_result->get_error_message() );

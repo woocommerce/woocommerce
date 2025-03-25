@@ -36,7 +36,7 @@ export const WooHomescreenHeaderBannerItem = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_HOMESCREEN_HEADER_BANNER_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -46,7 +46,7 @@ export const WooHomescreenHeaderBannerItem = ( {
 WooHomescreenHeaderBannerItem.Slot = ( {
 	fillProps,
 }: {
-	fillProps?: Slot.Props;
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
 } ) => (
 	<Slot
 		name={ EXPERIMENTAL_WC_HOMESCREEN_HEADER_BANNER_SLOT_NAME }

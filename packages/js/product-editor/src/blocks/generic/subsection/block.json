@@ -17,7 +17,7 @@
 		},
 		"description": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"blockGap": {
 			"type": "string",

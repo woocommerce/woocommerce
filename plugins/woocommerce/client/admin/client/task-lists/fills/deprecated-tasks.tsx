@@ -5,52 +5,64 @@ import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { useSelect } from '@wordpress/data';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	TaskType,
 	DeprecatedTaskType,
 } from '@woocommerce/data';
-import { useEffect, useState } from '@wordpress/element';
 
-type MergedTask = TaskType & DeprecatedTaskType;
+/**
+ * Internal dependencies
+ */
+import { isTaskListActive } from '~/hooks/use-tasklists-state';
+
+type MergedTask = TaskType | DeprecatedTaskType;
 
 const DeprecatedWooOnboardingTaskFills = () => {
-	const [ deprecatedTasks, setDeprecatedTasks ] = useState< MergedTask[] >(
-		[]
-	);
-	const { isResolving, taskLists } = useSelect( ( select ) => {
-		return {
-			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskLists'
-			),
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-		};
-	} );
+	const { isResolving, deprecatedTasks } = useSelect( ( select ) => {
+		const taskLists = select( onboardingStore ).getTaskLists();
 
-	useEffect( () => {
-		if ( taskLists && taskLists.length > 0 ) {
-			const deprecatedTasksWithContainer: MergedTask[] = [];
-			for ( const tasklist of taskLists ) {
-				for ( const task of tasklist.tasks ) {
-					if (
-						( task as MergedTask ).isDeprecated &&
-						( task as MergedTask ).container
-					) {
-						deprecatedTasksWithContainer.push( task as MergedTask );
-					}
+		if ( ! taskLists || taskLists.length === 0 ) {
+			return {
+				isResolving: false,
+				deprecatedTasks: [],
+			};
+		}
+
+		const deprecatedTasksWithContainer: MergedTask[] = [];
+		for ( const tasklist of taskLists ) {
+			for ( const task of tasklist.tasks ) {
+				if (
+					'isDeprecated' in task &&
+					task.isDeprecated &&
+					'container' in task &&
+					task.container
+				) {
+					deprecatedTasksWithContainer.push( task );
 				}
 			}
-			setDeprecatedTasks( deprecatedTasksWithContainer );
 		}
-	}, [ taskLists ] );
+
+		return {
+			isResolving: select( onboardingStore ).isResolving(
+				'getTaskLists',
+				[]
+			),
+			deprecatedTasks: deprecatedTasksWithContainer,
+		};
+	}, [] );
 
 	if ( isResolving ) {
 		return null;
 	}
+
 	return (
 		<>
 			{ deprecatedTasks.map( ( task ) => (
-				<WooOnboardingTask id={ task.id } key={ task.id }>
-					{ () => task.container }
+				<WooOnboardingTask
+					id={ 'id' in task ? task.id : task.key }
+					key={ 'id' in task ? task.id : task.key }
+				>
+					{ () => ( 'container' in task ? task.container : null ) }
 				</WooOnboardingTask>
 			) ) }
 		</>
@@ -58,7 +70,12 @@ const DeprecatedWooOnboardingTaskFills = () => {
 };
 
 registerPlugin( 'wc-admin-deprecated-task-container', {
-	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
-	render: () => <DeprecatedWooOnboardingTaskFills />,
+	render: () => {
+		if ( isTaskListActive( 'setup' ) || isTaskListActive( 'extended' ) ) {
+			return <DeprecatedWooOnboardingTaskFills />;
+		}
+
+		return null;
+	},
 } );

@@ -11,12 +11,11 @@ import {
 import { useState, createElement, Fragment } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
-import { Form, FormContextType, FormErrors } from '@woocommerce/components';
+import { Form, FormErrors } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
-	ProductProductAttribute,
+	experimentalProductAttributeTermsStore,
 } from '@woocommerce/data';
 
 /**
@@ -41,8 +40,9 @@ export const CreateAttributeTermModal: React.FC<
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCreating, setIsCreating ] = useState( false );
-	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
-		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
+	const { createProductAttributeTerm } = useDispatch(
+		experimentalProductAttributeTermsStore
+	);
 
 	const onAdd = async ( attribute: Partial< ProductAttributeTerm > ) => {
 		recordEvent( 'product_attribute_term_add', {
@@ -50,15 +50,13 @@ export const CreateAttributeTermModal: React.FC<
 		} );
 		setIsCreating( true );
 		try {
-			const newAttribute: ProductAttributeTerm =
-				await createProductAttributeTerm( {
-					...attribute,
-					attribute_id: attributeId,
-				} );
+			const newAttribute = await createProductAttributeTerm( {
+				...attribute,
+				attribute_id: attributeId,
+			} );
 			recordEvent( 'product_attribute_term_add_success', {
 				source: TRACKS_SOURCE,
 			} );
-			invalidateResolutionForStoreSelector( 'getProductAttributes' );
 			setIsCreating( false );
 			onCreated( newAttribute );
 		} catch ( e ) {
@@ -92,21 +90,19 @@ export const CreateAttributeTermModal: React.FC<
 	return (
 		<Modal
 			title={ __( 'Create attribute', 'woocommerce' ) }
-			onRequestClose={ (
-				event:
-					| React.KeyboardEvent< Element >
-					| React.MouseEvent< Element >
-					| React.FocusEvent< Element >
-			) => {
-				event.stopPropagation();
+			onRequestClose={ ( event ) => {
+				event?.stopPropagation();
 				onCancel();
 			} }
 			className="woocommerce-create-attribute-term-modal"
 		>
-			<Form< Partial< ProductAttributeTerm > >
+			<Form<
+				Pick< ProductAttributeTerm, 'name' | 'slug' | 'description' >
+			>
 				initialValues={ {
 					name: initialAttributeTermName,
 					slug: cleanForSlug( initialAttributeTermName ),
+					description: '',
 				} }
 				validate={ validateForm }
 				errors={ {} }
@@ -118,8 +114,8 @@ export const CreateAttributeTermModal: React.FC<
 					isValidForm,
 					setValue,
 					values,
-				}: FormContextType< ProductProductAttribute > ) => {
-					const nameInputProps = getInputProps< string >( 'name' );
+				} ) => {
+					const nameInputProps = getInputProps( 'name' );
 					return (
 						<>
 							<TextControl

@@ -11,7 +11,7 @@ inputs:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
     build-type:
-        description: 'Given "full" or "backend" will perform optimized build steps.'
+        description: 'Given "full", "backend", "dependencies" will perform optimized build steps.'
         default: 'full'
     pull-package-deps:
         description: 'Given a string value, will pull the package specific dependencies cache.'
@@ -26,7 +26,7 @@ runs:
     using: 'composite'
     steps:
         - name: 'Setup PNPM'
-          uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+          uses: 'pnpm/action-setup@v4'
         # Next step is rudimentary - fixes a know composite action bug during post-actions:
         # Error: Index was out of range. Must be non-negative and less than the size of the collection.
         - name: 'Read PNPM version'
@@ -34,14 +34,14 @@ runs:
           shell: 'bash'
           run: 'echo "version=$(pnpm --version)" >> $GITHUB_OUTPUT'
         - name: 'Setup Node'
-          uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
+          uses: 'actions/setup-node@v4'
           with:
               node-version-file: '.nvmrc'
               # The built-in caching is not fit to per-package caching we are aiming.
               cache: ''
         - name: 'Setup PHP'
-          if: ${{ inputs.php-version != 'false' }}
-          uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
+          if: ${{ inputs.php-version != 'false' && inputs.build-type != 'dependencies' }}
+          uses: 'shivammathur/setup-php@v2'
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
@@ -52,28 +52,28 @@ runs:
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache: pnpm downloads'
           if: ${{ inputs.pull-package-deps != 'false' }}
-          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          uses: 'actions/cache@v4'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
-              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ ( inputs.build-type == 'backend' && 'backend' ) || 'full' }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ ( inputs.build-type == 'backend' && 'backend' ) || 'full' }}-"
         - name: 'Cache: node cache'
-          if: ${{ inputs.pull-package-deps != 'false' }}
-          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type != 'backend' }}
+          uses: 'actions/cache@v4'
           with:
               path: './node_modules/.cache'
-              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-'
+              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.pull-package-deps != 'false' || inputs.pull-package-composer-deps != 'false' }}
-          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          uses: 'actions/cache@v4'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
-              restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-"
+              key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
+              restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-build:${{ inputs.build-type }}-"
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
-          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          uses: 'actions/cache@v4'
           with:
               path: '~/.cache/ms-playwright/'
               key: "${{ runner.os }}-playwright-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
@@ -103,7 +103,7 @@ runs:
         - name: 'Cache Build Output'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
-          uses: 'google/wireit@4aad131006ea85c1e42af927534ebb13426dd730'
+          uses: 'google/wireit@setup-github-actions-caching/v2'
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
@@ -116,4 +116,7 @@ runs:
             fi
             if [[ '${{ inputs.build-type }}' == 'full' ]]; then
               pnpm ${{ steps.project-filters.outputs.build }} build
+            fi
+            if [[ '${{ inputs.build-type }}' == 'dependencies' ]]; then
+              pnpm --if-present --workspace-concurrency=Infinity --stream --filter="${{ inputs.build }}^..." '/^build:project:.*$/'
             fi

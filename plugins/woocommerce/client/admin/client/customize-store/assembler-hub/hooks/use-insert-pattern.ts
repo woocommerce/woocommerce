@@ -1,17 +1,15 @@
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import { useCallback, useMemo, useRef } from '@wordpress/element';
 import { useSelect, useDispatch, select } from '@wordpress/data';
 import { BlockInstance, cloneBlock } from '@wordpress/blocks';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
-// @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
+
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
@@ -23,14 +21,13 @@ import {
 } from '../utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from './use-is-active-new-neutral-variation';
 import { trackEvent } from '../../tracking';
+import { Pattern } from '~/customize-store/types/pattern';
 
 export const useInsertPattern = () => {
 	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
 	const currentTemplateId: string | undefined = useSelect(
-		( sel ) =>
-			// @ts-expect-error No types for this exist yet.
-			sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
+		( sel ) => sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
 		[]
 	);
 
@@ -41,7 +38,6 @@ export const useInsertPattern = () => {
 
 	const insertedPatternRef = useRef< string | null >( null );
 
-	// @ts-expect-error No types for this exist yet.
 	const { insertBlocks } = useDispatch( blockEditorStore );
 
 	const insertableIndex = useMemo( () => {
@@ -51,7 +47,7 @@ export const useInsertPattern = () => {
 	}, [ blocks ] );
 
 	const insertPattern = useCallback(
-		( pattern ) => {
+		( pattern: Pattern ) => {
 			const parsedPattern = unlock(
 				select( blockEditorStore )
 			).__experimentalGetParsedPattern( pattern.name );

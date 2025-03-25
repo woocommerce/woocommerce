@@ -42,7 +42,7 @@ test.describe('Shipping methods API tests', () => {
 		 * i.e. Flat rate, Free shipping and Local pickup
 		 */
 		const response = await request.post(
-			'/wp-json/wc/v3/shipping_methods', {
+			'./wp-json/wc/v3/shipping_methods', {
 				data: {
 					title: "flat_rate",
 					description: "Lets you charge a fixed rate for shipping.",
@@ -59,7 +59,7 @@ test.describe('Shipping methods API tests', () => {
 		request
 	}) => {
 		// call API to retrieve all shipping methods
-		const response = await request.get('/wp-json/wc/v3/shipping_methods');
+		const response = await request.get('./wp-json/wc/v3/shipping_methods');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
 		expect(Array.isArray(responseJSON)).toBe(true);
@@ -74,7 +74,7 @@ test.describe('Shipping methods API tests', () => {
 	}) => {
 		// call API to retrieve a shipping method
 		const response = await request.get(
-			`/wp-json/wc/v3/shipping_methods/local_pickup`
+			`./wp-json/wc/v3/shipping_methods/local_pickup`
 		);
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -92,7 +92,7 @@ test.describe('Shipping methods API tests', () => {
 		 * i.e. Flat rate, Free shipping and Local pickup
 		 */
 		const response = await request.put(
-			'/wp-json/wc/v3/shipping_methods/local_pickup', {
+			'./wp-json/wc/v3/shipping_methods/local_pickup', {
 				data: {
 					description: "update local pickup description"
 				}
@@ -114,7 +114,7 @@ test.describe('Shipping methods API tests', () => {
 		 * only retrieve the existing shipping methods
 		 * i.e. Flat rate, Free shipping and Local pickup
 		 */
-		const response = await request.delete('/wp-json/wc/v3/shipping_methods', {
+		const response = await request.delete('./wp-json/wc/v3/shipping_methods', {
 			data: {
 				force: true
 			}
@@ -138,7 +138,7 @@ test.describe('Shipping methods API tests', () => {
 				const shippingMethod = getShippingMethodExample(shippingMethodRow[methodIdIndex], shippingMethodRow[methodCostIndex]);
 
 				//call the API to create the shipping method on the shipping zone
-				const response = await request.post(`/wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods`, {
+				const response = await request.post(`./wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods`, {
 					data: shippingMethod
 				});
 				const responseJSON = await response.json();
@@ -158,7 +158,7 @@ test.describe('Shipping methods API tests', () => {
 				}
 
 				// Cleanup: Remove the shipping method from the shipping zone
-				const deleteResponse = await request.delete(`/wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods/${ shippingMethodInstanceId }`, {
+				const deleteResponse = await request.delete(`./wp-json/wc/v3/shipping/zones/${ shippingZoneId }/methods/${ shippingMethodInstanceId }`, {
 					data: {
 						force: true
 					}

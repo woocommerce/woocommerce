@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { ComponentProps } from 'react';
 import { Button } from '@wordpress/components';
 import { dispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
@@ -21,9 +22,11 @@ import { Subscription } from '../../types';
 import { installingStore } from '../../../../contexts/install-store';
 import { NoticeStatus } from '../../../../contexts/types';
 
+type ButtonProps = ComponentProps< typeof Button >;
+
 interface InstallProps {
 	subscription: Subscription;
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 	onSuccess?: () => void;
 	onError?: () => void;
 }
@@ -74,6 +77,7 @@ export default function Install( props: InstallProps ) {
 								'woocommerce'
 							),
 							url: 'https://woocommerce.com/my-account/downloads/',
+							onClick: () => {},
 						},
 					],
 				}

@@ -9,11 +9,15 @@ import { Dropdown } from '@wordpress/components';
 import { VariationActionsMenuProps } from '../variation-actions-menus';
 
 export type ImageActionsMenuProps = Omit<
-	Dropdown.Props,
+	React.ComponentProps< typeof Dropdown >,
 	'renderToggle' | 'renderContent'
 > &
 	VariationActionsMenuProps & {
 		renderToggle(
-			props: Dropdown.RenderProps & { isBusy?: boolean }
+			props: Parameters<
+				React.ComponentProps< typeof Dropdown >[ 'renderToggle' ]
+			>[ 0 ] & {
+				isBusy?: boolean;
+			}
 		): JSX.Element;
 	};

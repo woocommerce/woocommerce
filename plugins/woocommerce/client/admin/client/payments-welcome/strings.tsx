@@ -95,7 +95,7 @@ export default {
 	survey: {
 		title: __( 'No thanks, I don’t want WooPayments', 'woocommerce' ),
 		intro: __(
-			'Note that the extension hasn’t been installed, this will simply remove WooPayments from the navigation. Please take a moment to tell us why you’d like to dismiss WooPayments.',
+			'Note that the extension hasn’t been installed. This will simply dismiss our limited time offer. Please take a moment to tell us why you’d like to dismiss the WooPayments offer.',
 			'woocommerce'
 		),
 		question: __(

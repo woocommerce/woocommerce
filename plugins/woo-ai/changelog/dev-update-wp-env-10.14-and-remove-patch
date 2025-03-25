@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Bump @wordpress/env to 10.14.0 and remove patch for 10.10.0

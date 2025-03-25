@@ -64,14 +64,19 @@ export const BusinessLocation = ( {
 					options={ context.countries }
 					excludeSelectedOptions={ false }
 					help={ <Icon icon={ chevronDown } /> }
-					onChange={ ( results: Array< CountryStateOption > ) => {
-						if ( results.length ) {
-							setStoreCountry( results[ 0 ] );
+					onChange={ ( results ) => {
+						if ( Array.isArray( results ) && results.length ) {
+							setStoreCountry(
+								results[ 0 ] as CountryStateOption
+							);
 						}
 					} }
 					selected={ storeCountry ? [ storeCountry ] : [] }
 					showAllOnFocus
 					isSearchable
+					virtualScroll={ true }
+					virtualItemHeight={ 40 }
+					virtualListHeight={ 40 * 9 }
 				/>
 				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">
 					<Button

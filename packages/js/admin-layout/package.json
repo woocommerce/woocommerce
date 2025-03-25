@@ -53,35 +53,34 @@
 	},
 	"dependencies": {
 		"@woocommerce/components": "workspace:*",
-		"@wordpress/components": "wp-6.0",
-		"@wordpress/element": "wp-6.0"
+		"@wordpress/components": "wp-6.6",
+		"@wordpress/element": "wp-6.6"
 	},
 	"devDependencies": {
-		"@types/react": "17.0.x",
-		"@types/wordpress__components": "^19.10.5",
+		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0",
+		"@wordpress/browserslist-config": "next",
 		"concurrently": "^7.6.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"jest-cli": "27.5.x",
 		"postcss-loader": "^4.3.0",
-		"react": "17.0.x",
-		"react-dom": "17.0.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "29.1.x",
-		"typescript": "5.3.x",
+		"typescript": "5.7.x",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
-		"wireit": "0.14.3"
+		"wireit": "0.14.10"
 	},
 	"peerDependencies": {
-		"@types/react": "17.0.x",
-		"react": "17.0.x",
-		"react-dom": "17.0.x"
+		"@types/react": "18.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
 	},
 	"config": {
 		"ci": {
@@ -158,16 +157,16 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-style-build/index.js",
-				"node_modules/@woocommerce/internal-style-build/abstracts",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"package.json",
 				"node_modules/@woocommerce/components/build",
 				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",
 				"node_modules/@woocommerce/components/build-types",
-				"package.json"
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/abstracts"
 			]
 		}
 	}

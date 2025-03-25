@@ -6,6 +6,9 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,7 +29,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
 		$internal_meta_keys   = $this->internal_meta_keys;
-		$internal_meta_keys[] = '_cogs_value_overrides_parent';
+		$internal_meta_keys[] = '_cogs_value_is_additive';
 
 		return ! in_array( $meta->meta_key, $internal_meta_keys, true ) && 0 !== stripos( $meta->meta_key, 'attribute_' ) && 0 !== stripos( $meta->meta_key, 'wp_' );
 	}
@@ -147,7 +150,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'woocommerce_new_product_variation_data',
 				array(
 					'post_type'      => 'product_variation',
-					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
+					'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
 					'post_author'    => get_current_user_id(),
 					'post_title'     => $product->get_name( 'edit' ),
 					'post_excerpt'   => $product->get_attribute_summary( 'edit' ),
@@ -222,7 +225,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'post_excerpt'      => $product->get_attribute_summary( 'edit' ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
-				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : ProductStatus::PUBLISH,
 				'menu_order'        => $product->get_menu_order( 'edit' ),
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
@@ -381,10 +384,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		);
 
 		if ( $this->cogs_feature_is_enabled() ) {
+			$cogs_value = get_post_meta( $id, '_cogs_total_value', true );
+			$cogs_value = '' === $cogs_value ? null : (float) $cogs_value;
 			$product->set_props(
 				array(
-					'cogs_value'                  => (float) get_post_meta( $id, '_cogs_total_value', true ),
-					'cogs_value_overrides_parent' => 'yes' === get_post_meta( $id, '_cogs_value_overrides_parent', true ),
+					'cogs_value'             => $cogs_value,
+					'cogs_value_is_additive' => 'yes' === get_post_meta( $id, '_cogs_value_is_additive', true ),
 				)
 			);
 		}
@@ -402,13 +407,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names, true );
 
 		if ( $exclude_search && $exclude_catalog ) {
-			$catalog_visibility = 'hidden';
+			$catalog_visibility = CatalogVisibility::HIDDEN;
 		} elseif ( $exclude_search ) {
-			$catalog_visibility = 'catalog';
+			$catalog_visibility = CatalogVisibility::CATALOG;
 		} elseif ( $exclude_catalog ) {
-			$catalog_visibility = 'search';
+			$catalog_visibility = CatalogVisibility::SEARCH;
 		} else {
-			$catalog_visibility = 'visible';
+			$catalog_visibility = CatalogVisibility::VISIBLE;
 		}
 
 		$product->set_parent_data(
@@ -450,21 +455,21 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function load_cogs_data( $product ) {
 		parent::load_cogs_data( $product );
 
-		$cogs_value_overrides_parent = 'yes' === get_post_meta( $product->get_id(), '_cogs_value_overrides_parent', true );
+		$cogs_value_is_additive = 'yes' === get_post_meta( $product->get_id(), '_cogs_value_is_additive', true );
 
 		/**
-		 * Filter to customize the "Cost of Goods Sold value overrides the parent value" flag that gets loaded for a given variable product.
+		 * Filter to customize the "Cost of Goods Sold value is additive" flag that gets loaded for a given variable product.
 		 *
-		 * @since 9.5.0
+		 * @since 9.7.0
 		 *
-		 * @param bool $cogs_value_overrides_parent The flag as read from the database.
+		 * @param bool $cogs_value_is_additive The flag as read from the database.
 		 * @param WC_Product $product The product for which the flag is being loaded.
 		 */
-		$cogs_value_overrides_parent = apply_filters( 'woocommerce_load_product_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
+		$cogs_value_is_additive = apply_filters( 'woocommerce_load_product_cogs_is_additive_flag', $cogs_value_is_additive, $product );
 
 		$product->set_props(
 			array(
-				'cogs_value_overrides_parent' => $cogs_value_overrides_parent,
+				'cogs_value_is_additive' => $cogs_value_is_additive,
 			)
 		);
 	}
@@ -498,8 +503,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		if ( $force || array_intersect( array( 'stock_status' ), array_keys( $changes ) ) ) {
 			$terms = array();
 
-			if ( 'outofstock' === $product->get_stock_status() ) {
-				$terms[] = 'outofstock';
+			if ( ProductStockStatus::OUT_OF_STOCK === $product->get_stock_status() ) {
+				$terms[] = ProductStockStatus::OUT_OF_STOCK;
 			}
 
 			wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false );
@@ -566,24 +571,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		if ( $this->cogs_feature_is_enabled() ) {
-			$cogs_value_overrides_parent = $product->get_cogs_value_overrides_parent();
+			$cogs_value_is_additive = $product->get_cogs_value_is_additive();
 
 			/**
-			 * Filter to customize the "Cost of Goods Sold value overrides the parent value" flag that gets saved for a given variable product,
+			 * Filter to customize the "Cost of Goods Sold value is additive" flag that gets saved for a given variable product,
 			 * or to suppress the saving of the flag (so that custom storage can be used) if null is returned.
 			 * Note that returning null will suppress any database access (for either saving the flag or deleting it).
 			 *
-			 * @since 9.5.0
+			 * @since 9.7.0
 			 *
-			 * @param bool|null $cogs_value_overrides_parent The flag to be written to the database. If null is returned nothing will be written or deleted.
+			 * @param bool|null $cogs_value_is_additive The flag to be written to the database. If null is returned nothing will be written or deleted.
 			 * @param WC_Product $product The product for which the flag is being saved.
 			 */
-			$cogs_value_overrides_parent = apply_filters( 'woocommerce_save_product_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
+			$cogs_value_is_additive = apply_filters( 'woocommerce_save_product_cogs_is_additive_flag', $cogs_value_is_additive, $product );
 
-			if ( ! is_null( $cogs_value_overrides_parent ) ) {
-				$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_overrides_parent', $cogs_value_overrides_parent ? 'yes' : '' );
+			if ( ! is_null( $cogs_value_is_additive ) ) {
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_is_additive', $cogs_value_is_additive ? 'yes' : '' );
 				if ( $updated ) {
-					$this->updated_props[] = 'cogs_value_overrides_parent';
+					$this->updated_props[] = 'cogs_value_is_additive';
 				}
 			}
 		}

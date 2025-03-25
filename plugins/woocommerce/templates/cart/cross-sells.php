@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 4.4.0
+ * @version 9.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,7 +35,7 @@ if ( $cross_sells ) : ?>
 				<?php
 					$post_object = get_post( $cross_sell->get_id() );
 
-					setup_postdata( $GLOBALS['post'] =& $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
+					setup_postdata( $GLOBALS['post'] = $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
 
 					wc_get_template_part( 'content', 'product' );
 				?>

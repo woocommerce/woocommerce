@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Stock
  */
@@ -53,13 +55,13 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 		$low_stock->set_regular_price( 5 );
 		$low_stock->set_manage_stock( true );
 		$low_stock->set_stock_quantity( 1 );
-		$low_stock->set_stock_status( 'instock' );
+		$low_stock->set_stock_status( ProductStockStatus::IN_STOCK );
 		$low_stock->save();
 
 		$out_of_stock = new WC_Product_Simple();
 		$out_of_stock->set_name( 'Test out of stock' );
 		$out_of_stock->set_regular_price( 5 );
-		$out_of_stock->set_stock_status( 'outofstock' );
+		$out_of_stock->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$out_of_stock->save();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
@@ -72,14 +74,14 @@ class WC_Admin_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 2, count( $reports ) );
 
 		$this->assertEquals( $low_stock->get_id(), $reports[0]['id'] );
-		$this->assertEquals( 'instock', $reports[0]['stock_status'] );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $reports[0]['stock_status'] );
 		$this->assertEquals( 1, $reports[0]['stock_quantity'] );
 		$this->assertArrayHasKey( '_links', $reports[0] );
 		$this->assertArrayHasKey( 'product', $reports[0]['_links'] );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_param( 'include', implode( ',', array( $low_stock->get_id(), $out_of_stock->get_id() ) ) );
-		$request->set_param( 'type', 'lowstock' );
+		$request->set_param( 'type', ProductStockStatus::LOW_STOCK );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 

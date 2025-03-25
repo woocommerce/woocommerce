@@ -22,7 +22,7 @@
 		padding: $gap-larger;
 
 		img {
-			width: 143px;
+			width: 190px;
 		}
 
 		@media (min-width: #{ ($break-small) }) {
@@ -36,9 +36,8 @@
 		margin: $gap-large;
 		margin-top: $gap-smallest;
 		padding: $gap-large;
-		border: 1px solid #ae7dd0;
 		border-radius: 8px;
-		background-color: #faf8ff;
+		background-color: #f2edff;
 
 		&-pill {
 			display: inline-block;
@@ -122,6 +121,10 @@
 
 					.woocommerce-list__item-after {
 						margin-left: $gap-large;
+
+						.components-base-control.components-toggle-control {
+							margin-bottom: 12px;
+						}
 					}
 
 					.woocommerce-list__item-before {

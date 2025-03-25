@@ -107,6 +107,6 @@ Base.argTypes = {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/TreeSelectControl',
+	title: 'Components/TreeSelectControl',
 	component: TreeSelectControl,
 };

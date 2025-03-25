@@ -6,6 +6,8 @@ import {
 	useEffect,
 	useMemo,
 	useState,
+	useRef,
+	useContext,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -24,10 +26,10 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 /**
  * Internal dependencies
  */
-import { Sidebar } from './sidebar';
+import { Sidebar } from './components';
 import { Route, Location } from './types';
 import { LegacyContent } from './legacy';
-
+import { SettingsDataContext } from './data';
 const { useLocation } = unlock( routerPrivateApis );
 
 const NotFound = () => {
@@ -37,20 +39,19 @@ const NotFound = () => {
 /**
  * Default route when active page is not found.
  *
- * @param {string}       activePage - The active page.
- * @param {settingsData} settingsData - The settings data.
- *
+ * @param {string}        activePage - The active page.
+ * @param {settingsPages} settingsPages      - The settings pages.
  */
 const getNotFoundRoute = (
 	activePage: string,
-	settingsData: SettingsData
+	settingsPages: SettingsPages
 ): Route => ( {
 	key: activePage,
 	areas: {
 		sidebar: (
 			<Sidebar
 				activePage={ activePage }
-				settingsData={ settingsData }
+				pages={ settingsPages }
 				pageTitle={ __( 'Settings', 'woocommerce' ) }
 			/>
 		),
@@ -64,29 +65,56 @@ const getNotFoundRoute = (
 } );
 
 /**
+ * Get the tabs for a settings page.
+ *
+ * @param {settingsPage} settingsPage - The settings page.
+ * @return {Array<{ name: string; title: string }>} The tabs.
+ */
+const getSettingsPageTabs = (
+	settingsPage: SettingsPage
+): Array< {
+	name: string;
+	title: string;
+} > => {
+	const sections = Object.keys( settingsPage.sections );
+
+	return sections.map( ( key ) => ( {
+		name: key,
+		title: settingsPage.sections[ key ].label,
+	} ) );
+};
+
+/**
  * Creates a route configuration for legacy settings.
  *
- * @param {string}       activePage - The active page.
- * @param {settingsData} settingsData - The settings data.
+ * @param {string}       activePage    - The active page.
+ * @param {string}       activeSection - The active section.
+ * @param {settingsPage} settingsPage  - The settings page.
+ * @param {settingsData} settingsData  - The settings data.
  */
 const getLegacyRoute = (
 	activePage: string,
+	activeSection: string,
+	settingsPage: SettingsPage,
 	settingsData: SettingsData
 ): Route => {
-	const settingsPage = settingsData[ activePage ];
-	const pageTitle = settingsPage?.label || __( 'Settings', 'woocommerce' );
-
 	return {
 		key: activePage,
 		areas: {
 			sidebar: (
 				<Sidebar
 					activePage={ activePage }
-					settingsData={ settingsData }
-					pageTitle={ pageTitle }
+					pages={ settingsData.pages }
+					pageTitle={ __( 'Store settings', 'woocommerce' ) }
 				/>
 			),
-			content: <LegacyContent settingsPage={ settingsPage } />,
+			content: (
+				<LegacyContent
+					settingsData={ settingsData }
+					settingsPage={ settingsPage }
+					activeSection={ activeSection }
+				/>
+			),
 			edit: null,
 		},
 		widths: {
@@ -112,8 +140,12 @@ const getModernPages = () => {
  *
  * @return {Record<string, Route>} The pages.
  */
-export function useModernRoutes() {
-	const [ routes, setRoutes ] = useState( getModernPages() );
+export function useModernRoutes(): Record< string, Route > {
+	const [ routes, setRoutes ] = useState< Record< string, Route > >(
+		getModernPages()
+	);
+	const location = useLocation() as Location;
+	const isFirstRender = useRef( true );
 
 	/*
 	 * Handler for new pages being added after the initial filter has been run,
@@ -140,48 +172,89 @@ export function useModernRoutes() {
 		};
 	}, [] );
 
+	// Update modern pages when the location changes.
+	useEffect( () => {
+		if ( isFirstRender.current ) {
+			// Prevent updating routes again on first render.
+			isFirstRender.current = false;
+			return;
+		}
+
+		setRoutes( getModernPages() );
+	}, [ location.params ] );
+
 	return routes;
 }
 
 /**
  * Hook to determine and return the active route based on the current path.
  */
-export const useActiveRoute = () => {
-	const settingsData = window.wcSettings?.admin?.settingsData;
+export const useActiveRoute = (): {
+	route: Route;
+	settingsPage?: SettingsPage;
+	activePage?: string;
+	activeSection?: string;
+	tabs?: Array< { name: string; title: string } >;
+} => {
+	const { settingsData } = useContext( SettingsDataContext );
 	const location = useLocation() as Location;
 	const modernRoutes = useModernRoutes();
 
 	return useMemo( () => {
-		const { tab: activePage = 'general' } = location.params;
-		const settingsPage = settingsData?.[ activePage ];
+		const { tab: activePage = 'general', section: activeSection } =
+			location.params;
+		const settingsPage = settingsData?.pages?.[ activePage ];
 
 		if ( ! settingsPage ) {
-			return getNotFoundRoute( activePage, settingsData );
+			return {
+				route: getNotFoundRoute( activePage, settingsData.pages ),
+			};
 		}
+
+		const tabs = getSettingsPageTabs( settingsPage );
 
 		// Handle legacy pages.
 		if ( ! settingsPage.is_modern ) {
-			return getLegacyRoute( activePage, settingsData );
+			return {
+				route: getLegacyRoute(
+					activePage,
+					activeSection || 'default',
+					settingsPage,
+					settingsData
+				),
+				settingsPage,
+				activePage,
+				activeSection,
+				tabs,
+			};
 		}
 
 		const modernRoute = modernRoutes[ activePage ];
 
 		// Handle modern pages.
 		if ( ! modernRoute ) {
-			return getNotFoundRoute( activePage, settingsData );
+			return {
+				route: getNotFoundRoute( activePage, settingsData.pages ),
+			};
 		}
 
 		// Sidebar is responsibility of WooCommerce, not extensions so add it here.
 		modernRoute.areas.sidebar = (
 			<Sidebar
 				activePage={ activePage }
-				settingsData={ settingsData }
-				pageTitle={ settingsPage.label }
+				pages={ settingsData.pages }
+				pageTitle={ __( 'Store settings', 'woocommerce' ) }
 			/>
 		);
 		// Make sure we have a key.
 		modernRoute.key = activePage;
 
-		return modernRoute;
+		return {
+			route: modernRoute,
+			settingsPage,
+			activePage,
+			activeSection,
+			tabs,
+		};
 	}, [ settingsData, location.params, modernRoutes ] );
 };

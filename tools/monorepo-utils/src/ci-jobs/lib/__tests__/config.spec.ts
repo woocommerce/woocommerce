@@ -233,39 +233,6 @@ describe( 'Config', () => {
 			} );
 		} );
 
-		it( 'should parse test config with cascade', () => {
-			const parsed = parseCIConfig( {
-				name: 'foo',
-				config: {
-					ci: {
-						tests: [
-							{
-								name: 'default',
-								changes: '/src/**/*.{js,jsx,ts,tsx}',
-								command: 'foo',
-								cascade: 'bar',
-							},
-						],
-					},
-				},
-			} );
-
-			expect( parsed ).toMatchObject( {
-				jobs: [
-					{
-						type: JobType.Test,
-						name: 'default',
-						changes: [
-							/^package\.json$/,
-							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
-						],
-						command: 'foo',
-						cascadeKeys: [ 'bar' ],
-					},
-				],
-			} );
-		} );
-
 		it.each( testTypes )(
 			'should parse test config with expected testType',
 			( testType ) => {

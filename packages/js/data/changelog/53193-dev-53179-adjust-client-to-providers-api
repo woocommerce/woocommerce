@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Adjust client to use fixed version of providers API

@@ -5,18 +5,16 @@
  * External dependencies
  */
 import {
-	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
-	// @ts-ignore No types for this exist yet.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver, useViewportMatch } from '@wordpress/compose';
 import { useContext, useMemo, useRef, useState } from '@wordpress/element';
 import {
+	// @ts-expect-error No types for this exist yet.
 	privateApis as blockEditorPrivateApis,
-	// @ts-ignore no types exist yet.
 } from '@wordpress/block-editor';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { GlobalStylesVariationIframe } from '../global-styles-variation-iframe';
 import {

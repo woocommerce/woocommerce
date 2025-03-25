@@ -7,6 +7,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { Pill } from '@woocommerce/components';
+import { type TagsSlug } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,6 +27,13 @@ export type PluginProps = {
 	manageUrl?: string;
 	name: string;
 	slug: string;
+	tags?: TagsSlug[];
+	learnMoreLink?: string;
+	installExternal?: boolean;
+};
+
+const tagsToPillsMap = {
+	marketplace: __( 'Marketplace', 'woocommerce' ),
 };
 
 export const Plugin: React.FC< PluginProps > = ( {
@@ -41,6 +49,9 @@ export const Plugin: React.FC< PluginProps > = ( {
 	manageUrl,
 	name,
 	slug,
+	tags,
+	learnMoreLink = '',
+	installExternal = false,
 } ) => {
 	return (
 		<div className="woocommerce-plugin-list__plugin">
@@ -64,6 +75,14 @@ export const Plugin: React.FC< PluginProps > = ( {
 							{ __( 'Built by WooCommerce', 'woocommerce' ) }
 						</Pill>
 					) }
+					{ tags?.map(
+						( tag ) =>
+							tagsToPillsMap[ tag ] && (
+								<Pill key={ tag }>
+									{ tagsToPillsMap[ tag ] }
+								</Pill>
+							)
+					) }
 				</Text>
 				<Text variant="subtitle.small">{ description }</Text>
 			</div>
@@ -72,7 +91,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
-						isSecondary
+						variant="secondary"
 						href={ getAdminLink( manageUrl ) }
 						onClick={ () => {
 							recordEvent( 'marketing_manage', {
@@ -88,21 +107,43 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
-						isSecondary
+						variant="secondary"
 						onClick={ () => installAndActivate( slug ) }
 					>
 						{ __( 'Activate', 'woocommerce' ) }
 					</Button>
 				) }
-				{ ! isInstalled && (
+				{ ! isInstalled && ! installExternal && (
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
-						isSecondary
-						onClick={ () => installAndActivate( slug ) }
+						variant="secondary"
+						onClick={ () => {
+							installAndActivate( slug );
+						} }
 					>
 						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
+				) }
+				{ ! isInstalled && installExternal && (
+					<>
+						{ learnMoreLink ? (
+							<Button
+								disabled={ isDisabled }
+								isBusy={ isBusy }
+								variant="secondary"
+								onClick={ () => {
+									window.open( learnMoreLink, '_blank' );
+								} }
+							>
+								{ __( 'View extension', 'woocommerce' ) }
+							</Button>
+						) : (
+							<Button disabled={ true } variant="secondary">
+								{ __( 'View extension', 'woocommerce' ) }
+							</Button>
+						) }
+					</>
 				) }
 			</div>
 		</div>

@@ -23,13 +23,13 @@ use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Caches\OrderCountCacheService;
 
 /**
  * Main WooCommerce Class.
@@ -38,14 +38,12 @@ use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
  */
 final class WooCommerce {
 
-	use AccessiblePrivateMethods;
-
 	/**
 	 * WooCommerce version.
 	 *
 	 * @var string
 	 */
-	public $version = '9.6.0';
+	public $version = '9.9.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -259,7 +257,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Initiali Jetpack Connection Config.
+	 * Initialize Jetpack Connection Config.
 	 *
 	 * @return void
 	 */
@@ -304,14 +302,15 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
-		self::add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
+		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
+		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
 
-		self::add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
+		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
-		self::add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
+		add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -332,6 +331,7 @@ final class WooCommerce {
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
+		$container->get( OrderCountCacheService::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -341,12 +341,17 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
+		Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::instance()->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
 	}
 
 	/**
@@ -829,6 +834,9 @@ final class WooCommerce {
 	 * Init WooCommerce when WordPress Initialises.
 	 */
 	public function init() {
+		// See the comment inside FeaturesController::__construct.
+		wc_get_container()->get( FeaturesController::class )->register_additional_features();
+
 		/**
 		 * Action triggered before WooCommerce initialization begins.
 		 */
@@ -869,16 +877,21 @@ final class WooCommerce {
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
-		$locale = determine_locale();
-
 		/**
 		 * Filter to adjust the WooCommerce locale to use for translations.
 		 */
-		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$locale                  = apply_filters( 'plugin_locale', determine_locale(), 'woocommerce' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$custom_translation_path = WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo';
+		$plugin_translation_path = WP_LANG_DIR . '/plugins/woocommerce-' . $locale . '.mo';
 
-		unload_textdomain( 'woocommerce', true );
-		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( WC_PLUGIN_FILE ) ) . '/i18n/languages' );
+		// If a custom translation exists (by default it will not, as it is not a standard WordPress convention)
+		// we unload the existing translation, then essentially layer the custom translation on top of the canonical
+		// translation. Otherwise, we simply step back and let WP manage things.
+		if ( is_readable( $custom_translation_path ) ) {
+			unload_textdomain( 'woocommerce' );
+			load_textdomain( 'woocommerce', $custom_translation_path );
+			load_textdomain( 'woocommerce', $plugin_translation_path );
+		}
 	}
 
 	/**
@@ -1066,8 +1079,10 @@ final class WooCommerce {
 	 * @param string $output The contents that WordPress will output in a robots.txt file.
 	 *
 	 * @return string
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function robots_txt( $output ) {
+	public function robots_txt( $output ) {
 		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
@@ -1294,8 +1309,10 @@ final class WooCommerce {
 	 * This method used to be part of the now removed Legacy REST API.
 	 *
 	 * @since 9.0.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function register_wp_admin_settings() {
+	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
 		foreach ( $pages as $page ) {
 			new WC_Register_WP_Admin_Settings( $page, 'page' );
@@ -1329,9 +1346,32 @@ final class WooCommerce {
 	 * @param \WC_Log_Handler[] $handlers The handlers to register.
 	 *
 	 * @return \WC_Log_Handler[]
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function register_remote_log_handler( $handlers ) {
+	public function register_remote_log_handler( $handlers ) {
 		$handlers[] = wc_get_container()->get( RemoteLogger::class );
 		return $handlers;
+	}
+
+	/**
+	 * Tracks the history WooCommerce Allow Tracking option.
+	 * - When the field was first set to allow tracking
+	 * - Last time the option was changed
+	 *
+	 * @param string $old_value The old value for the woocommerce_allow_tracking option.
+	 * @param string $value The current value for the woocommerce_allow_tracking option.
+	 * @since x.x.x
+	 *
+	 * @return void
+	 */
+	public function get_tracking_history( $old_value, $value ) {
+		// If woocommerce_allow_tracking_first_optin is not set. It means is the first time it gets set.
+		if ( ! get_option( 'woocommerce_allow_tracking_first_optin' ) && 'yes' === $value ) {
+			update_option( 'woocommerce_allow_tracking_first_optin', time() );
+		}
+
+		// Always update the last change.
+		update_option( 'woocommerce_allow_tracking_last_modified', time() );
 	}
 }

@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<
 
 		// Limit the component stack to 10 calls so we don't send too much data.
 		const componentStack = errorInfo.componentStack
-			.trim()
+			?.trim()
 			.split( '\n' )
 			.slice( 0, 10 )
 			.map( ( line ) => line.trim() );

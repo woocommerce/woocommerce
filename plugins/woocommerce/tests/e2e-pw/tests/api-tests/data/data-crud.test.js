@@ -251,12 +251,13 @@ const countryCodes = [
 	'ye',
 	'zm',
 	'zw',
+	'hr',
 ];
 
 test.describe( 'Data API tests', () => {
 	test( 'can list all data', async ( { request } ) => {
 		// call API to retrieve data values
-		const response = await request.get( '/wp-json/wc/v3/data' );
+		const response = await request.get( './wp-json/wc/v3/data' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -284,7 +285,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view all continents', async ( { request } ) => {
 		// call API to retrieve all continents
-		const response = await request.get( '/wp-json/wc/v3/data/continents' );
+		const response = await request.get( './wp-json/wc/v3/data/continents' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -1892,10 +1893,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'GBP',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'foot',
+							dimension_unit: 'cm',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'oz',
+							weight_unit: 'kg',
 							states: [],
 						},
 						{
@@ -1944,7 +1945,7 @@ test.describe( 'Data API tests', () => {
 							num_decimals: 2,
 							thousand_sep: '.',
 							weight_unit: 'kg',
-							states: [],
+							states: expect.arrayContaining( [] ),
 						},
 						{
 							code: 'HU',
@@ -2766,10 +2767,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'foot',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'oz',
+							weight_unit: 'lbs',
 							states: expect.arrayContaining( [] ),
 						},
 						{
@@ -2802,10 +2803,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'cm',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'kg',
+							weight_unit: 'lbs',
 							states: [],
 						},
 					],
@@ -2824,10 +2825,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'cm',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'kg',
+							weight_unit: 'lbs',
 							states: [],
 						},
 						{
@@ -2884,10 +2885,10 @@ test.describe( 'Data API tests', () => {
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
-							dimension_unit: 'cm',
+							dimension_unit: 'in',
 							num_decimals: 2,
 							thousand_sep: ',',
-							weight_unit: 'kg',
+							weight_unit: 'lbs',
 							states: [],
 						},
 						{
@@ -3317,7 +3318,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view continent data', async ( { request } ) => {
 		// call API to retrieve a specific continent data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/continents/eu'
+			'./wp-json/wc/v3/data/continents/eu'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -3538,10 +3539,10 @@ test.describe( 'Data API tests', () => {
 						currency_code: 'GBP',
 						currency_pos: 'left',
 						decimal_sep: '.',
-						dimension_unit: 'foot',
+						dimension_unit: 'cm',
 						num_decimals: 2,
 						thousand_sep: ',',
-						weight_unit: 'oz',
+						weight_unit: 'kg',
 						states: [],
 					},
 					{
@@ -3590,7 +3591,7 @@ test.describe( 'Data API tests', () => {
 						num_decimals: 2,
 						thousand_sep: '.',
 						weight_unit: 'kg',
-						states: [],
+						states: expect.arrayContaining( [] ),
 					},
 					{
 						code: 'HU',
@@ -3959,7 +3960,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view country data', async ( { request } ) => {
 		// call API to retrieve all countries
-		const response = await request.get( '/wp-json/wc/v3/data/countries' );
+		const response = await request.get( './wp-json/wc/v3/data/countries' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -3967,7 +3968,7 @@ test.describe( 'Data API tests', () => {
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
 			const countryData = require( `../../../data/countries/${ country }.json` );
-			expect( responseJSON ).toEqual(
+			expect( responseJSON, `Checking country ${ country }` ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						code: countryData.code,
@@ -3977,7 +3978,7 @@ test.describe( 'Data API tests', () => {
 							self: [
 								{
 									href: expect.stringContaining(
-										`/wp-json/wc/v3/data/countries/${ country }`
+										`wp-json/wc/v3/data/countries/${ country }`
 									),
 									targetHints: { allow: [ 'GET' ] },
 								},
@@ -3985,7 +3986,7 @@ test.describe( 'Data API tests', () => {
 							collection: [
 								{
 									href: expect.stringContaining(
-										'/wp-json/wc/v3/data/countries'
+										'wp-json/wc/v3/data/countries'
 									),
 								},
 							],
@@ -3998,7 +3999,7 @@ test.describe( 'Data API tests', () => {
 
 	test( 'can view all currencies', async ( { request } ) => {
 		// call API to retrieve all currencies
-		const response = await request.get( '/wp-json/wc/v3/data/currencies' );
+		const response = await request.get( './wp-json/wc/v3/data/currencies' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -8247,7 +8248,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view currency data', async ( { request } ) => {
 		// call API to retrieve a specific currency data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/currencies/fkp'
+			'./wp-json/wc/v3/data/currencies/fkp'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -8265,7 +8266,7 @@ test.describe( 'Data API tests', () => {
 	test( 'can view current currency', async ( { request } ) => {
 		// call API to retrieve current currency data
 		const response = await request.get(
-			'/wp-json/wc/v3/data/currencies/current'
+			'./wp-json/wc/v3/data/currencies/current'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );

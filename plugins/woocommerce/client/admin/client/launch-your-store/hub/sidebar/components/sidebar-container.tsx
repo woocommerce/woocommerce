@@ -9,15 +9,11 @@ import { chevronRight, chevronLeft } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
 import {
-	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
-	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
-	// @ts-ignore No types for this exist yet.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import React from 'react';
-
 /**
  * Internal dependencies
  */
@@ -72,7 +68,7 @@ export const SidebarContainer = ( {
 					<Heading
 						className="woocommerce-edit-site-sidebar-navigation-screen__title"
 						level={ 1 }
-						size={ 20 }
+						as="h1"
 					>
 						{ title }
 					</Heading>

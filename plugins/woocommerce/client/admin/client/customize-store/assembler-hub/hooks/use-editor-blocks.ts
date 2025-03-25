@@ -7,7 +7,8 @@
 import { useEntityBlockEditor } from '@wordpress/core-data';
 import { BlockInstance } from '@wordpress/blocks';
 
-export type ChangeHandler = (
+type InputHandler = ( blocks: BlockInstance[] ) => void;
+type ChangeHandler = (
 	blocks: BlockInstance[],
 	options: Record< string, unknown >
 ) => void;
@@ -17,11 +18,11 @@ export type ChangeHandler = (
 export const useEditorBlocks = (
 	templateType: 'wp_template' | 'wp_template_part',
 	templateId: string
-): [ BlockInstance[], ChangeHandler, ChangeHandler ] => {
+): [ BlockInstance[], InputHandler, ChangeHandler ] => {
 	// @ts-ignore Types are not up to date.
 	const [ blocks, onInput, onChange ]: [
 		BlockInstance[] | undefined,
-		ChangeHandler,
+		InputHandler,
 		ChangeHandler
 	] = useEntityBlockEditor( 'postType', templateType, {
 		id: templateId,

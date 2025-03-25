@@ -117,6 +117,8 @@ export function* resetOnboardingWizard() {
 			woocommerce_price_decimal_sep: '.',
 			woocommerce_price_num_decimals: '2',
 			woocommerce_coming_soon: 'no',
+			woocommerce_weight_unit: 'lbs',
+			woocommerce_dimension_unit: 'in',
 		};
 
 		// Delete existing options

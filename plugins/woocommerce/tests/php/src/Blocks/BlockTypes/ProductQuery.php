@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductQueryMock;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Tests for the ProductQuery block type
@@ -37,9 +38,9 @@ class ProductQuery extends \WP_UnitTestCase {
 					'inherit'                  => false,
 					'__woocommerceAttributes'  => array(),
 					'__woocommerceStockStatus' => array(
-						'instock',
-						'outofstock',
-						'onbackorder',
+						ProductStockStatus::IN_STOCK,
+						ProductStockStatus::OUT_OF_STOCK,
+						ProductStockStatus::ON_BACKORDER,
 					),
 				),
 			),
@@ -118,15 +119,15 @@ class ProductQuery extends \WP_UnitTestCase {
 	public function test_merging_stock_status_queries() {
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
-			'outofstock',
-			'onbackorder',
+			ProductStockStatus::OUT_OF_STOCK,
+			ProductStockStatus::ON_BACKORDER,
 		);
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
-				'value'   => array( 'outofstock', 'onbackorder' ),
+				'value'   => array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
 				'compare' => 'IN',
 				'key'     => '_stock_status',
 			),
@@ -141,9 +142,9 @@ class ProductQuery extends \WP_UnitTestCase {
 	public function test_merging_default_stock_queries() {
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
-			'instock',
-			'outofstock',
-			'onbackorder',
+			ProductStockStatus::IN_STOCK,
+			ProductStockStatus::OUT_OF_STOCK,
+			ProductStockStatus::ON_BACKORDER,
 		);
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -153,8 +154,8 @@ class ProductQuery extends \WP_UnitTestCase {
 		// Test with hide out of stock items option enabled.
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
-			'instock',
-			'onbackorder',
+			ProductStockStatus::IN_STOCK,
+			ProductStockStatus::ON_BACKORDER,
 		);
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -261,7 +262,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			'pre_option_woocommerce_hide_out_of_stock_items',
 			$fn
 		);
-		$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+		$product_visibility_not_in[] = $product_visibility_terms[ ProductStockStatus::OUT_OF_STOCK ];
 
 		$parsed_block = $this->get_base_parsed_block();
 
@@ -289,8 +290,8 @@ class ProductQuery extends \WP_UnitTestCase {
 		$parsed_block                              = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'rating';
 		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
-			'instock',
-			'outofstock',
+			ProductStockStatus::IN_STOCK,
+			ProductStockStatus::OUT_OF_STOCK,
 		);
 		$parsed_block['attrs']['query']['__woocommerceAttributes']  = array(
 			array(
@@ -311,7 +312,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			array(
 				'compare' => 'IN',
 				'key'     => '_stock_status',
-				'value'   => array( 'instock', 'outofstock' ),
+				'value'   => array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK ),
 			),
 			$merged_query['meta_query']
 		);
@@ -410,7 +411,7 @@ class ProductQuery extends \WP_UnitTestCase {
 	 * Test merging filter by stock status queries.
 	 */
 	public function test_merging_filter_by_stock_status_queries() {
-		set_query_var( 'filter_stock_status', 'instock' );
+		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
 		$merged_query = $this->initialize_merged_query();
 
@@ -418,7 +419,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			array(
 				'operator' => 'IN',
 				'key'      => '_stock_status',
-				'value'    => array( 'instock' ),
+				'value'    => array( ProductStockStatus::IN_STOCK ),
 			),
 			$merged_query['meta_query']
 		);
@@ -494,7 +495,7 @@ class ProductQuery extends \WP_UnitTestCase {
 	public function test_merging_multiple_filter_queries() {
 		set_query_var( 'max_price', 100 );
 		set_query_var( 'min_price', 20 );
-		set_query_var( 'filter_stock_status', 'instock' );
+		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
 		$merged_query = $this->initialize_merged_query();
 
@@ -502,7 +503,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			array(
 				'operator' => 'IN',
 				'key'      => '_stock_status',
-				'value'    => array( 'instock' ),
+				'value'    => array( ProductStockStatus::IN_STOCK ),
 			),
 			$merged_query['meta_query']
 		);
@@ -574,7 +575,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				'termId'   => 1,
 			),
 		);
-		$stock_status = array( 'instock', 'outofstock' );
+		$stock_status = array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK );
 		$request      = $this->build_request( $on_sale, $attributes, $stock_status );
 
 		$updated_query = $this->block_instance->update_rest_query( $args, $request );
@@ -582,7 +583,7 @@ class ProductQuery extends \WP_UnitTestCase {
 		$this->assertContainsEquals(
 			array(
 				'key'     => '_stock_status',
-				'value'   => array( 'instock', 'outofstock' ),
+				'value'   => array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK ),
 				'compare' => 'IN',
 			),
 			$updated_query['meta_query'],

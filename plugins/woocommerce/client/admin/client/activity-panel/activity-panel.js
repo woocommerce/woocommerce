@@ -2,18 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState, useEffect } from '@wordpress/element';
+import { lazy, useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
-import {
-	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
-	useUser,
-	getVisibleTasks,
-} from '@woocommerce/data';
+import { onboardingStore, optionsStore, useUser } from '@woocommerce/data';
 import { addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
@@ -41,10 +36,11 @@ import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
-import { useActiveSetupTasklist } from '~/task-lists';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { useLaunchYourStore } from '~/launch-your-store';
+import { useTaskListsState } from '~/hooks/use-tasklists-state';
+import HeaderAccount from '../marketplace/components/header-account/header-account';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -71,7 +67,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
-	const activeSetupList = useActiveSetupTasklist();
 	const { comingSoon } = useLaunchYourStore( {
 		enabled: isHomescreen,
 	} );
@@ -98,119 +93,96 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	const updatedLayoutContext = useExtendLayout( 'activity-panel' );
 
-	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
-		let trackData = {};
-		if ( query.page === 'wc-admin' && query.task === 'appearance' ) {
-			const { getTaskLists } = select( ONBOARDING_STORE_NAME );
-			const taskLists = getTaskLists();
-			const tasks = taskLists.reduce(
-				( acc, taskList ) => [ ...acc, ...taskList.tasks ],
-				[]
+	const getPreviewSiteBtnTrackData = useCallback(
+		( select, getOption ) => {
+			let trackData = {};
+			if ( query.page === 'wc-admin' && query.task === 'appearance' ) {
+				const { getTaskLists } = select( onboardingStore );
+				const taskLists = getTaskLists();
+				const tasks = taskLists.reduce(
+					( acc, taskList ) => [ ...acc, ...taskList.tasks ],
+					[]
+				);
+				const task = tasks.find( ( t ) => t.id === 'appearance' );
+
+				const demoNotice = getOption( 'woocommerce_demo_store_notice' );
+				trackData = {
+					set_notice: demoNotice ? 'Y' : 'N',
+					create_homepage:
+						task?.additionalData?.hasHomepage === true ? 'Y' : 'N',
+					upload_logo: task?.additionalData?.themeMods?.custom_logo
+						? 'Y'
+						: 'N',
+				};
+			}
+
+			return trackData;
+		},
+		[ query.page, query.task ]
+	);
+
+	const checkIfHasAbbreviatedNotifications = useCallback(
+		( select, setupTaskListHidden, thingsToDoNextCount ) => {
+			const orderStatuses = getOrderStatuses( select );
+
+			const isOrdersCardVisible = setupTaskListHidden
+				? getUnreadOrders( select, orderStatuses ) > 0
+				: false;
+			const isReviewsCardVisible = setupTaskListHidden
+				? getUnapprovedReviews( select )
+				: false;
+			const isLowStockCardVisible = setupTaskListHidden
+				? getLowStockProducts( select )
+				: false;
+
+			return (
+				thingsToDoNextCount > 0 ||
+				isOrdersCardVisible ||
+				isReviewsCardVisible ||
+				isLowStockCardVisible ||
+				hasExtendedNotifications
 			);
-			const task = tasks.find( ( t ) => t.id === 'appearance' );
+		},
+		[ hasExtendedNotifications ]
+	);
 
-			const demoNotice = getOption( 'woocommerce_demo_store_notice' );
-			trackData = {
-				set_notice: demoNotice ? 'Y' : 'N',
-				create_homepage:
-					task?.additionalData?.hasHomepage === true ? 'Y' : 'N',
-				upload_logo: task?.additionalData?.themeMods?.custom_logo
-					? 'Y'
-					: 'N',
-			};
-		}
-
-		return trackData;
-	};
-
-	function getThingsToDoNextCount( extendedTaskList ) {
-		if (
-			! extendedTaskList ||
-			! extendedTaskList.tasks.length ||
-			extendedTaskList.isHidden
-		) {
-			return 0;
-		}
-		return extendedTaskList.tasks.filter(
-			( task ) => task.canView && ! task.isComplete && ! task.isDismissed
-		).length;
-	}
-
-	function checkIfHasAbbreviatedNotifications(
-		select,
+	const {
+		requestingTaskListOptions,
+		setupTaskListComplete,
 		setupTaskListHidden,
-		thingsToDoNextCount
-	) {
-		const orderStatuses = getOrderStatuses( select );
-
-		const isOrdersCardVisible = setupTaskListHidden
-			? getUnreadOrders( select, orderStatuses ) > 0
-			: false;
-		const isReviewsCardVisible = setupTaskListHidden
-			? getUnapprovedReviews( select )
-			: false;
-		const isLowStockCardVisible = setupTaskListHidden
-			? getLowStockProducts( select )
-			: false;
-
-		return (
-			thingsToDoNextCount > 0 ||
-			isOrdersCardVisible ||
-			isReviewsCardVisible ||
-			isLowStockCardVisible ||
-			hasExtendedNotifications
-		);
-	}
+		setupTasksCount,
+		setupTasksCompleteCount,
+		thingsToDoNextCount,
+	} = useTaskListsState();
 
 	const {
 		hasUnreadNotes,
 		hasAbbreviatedNotifications,
-		thingsToDoNextCount,
-		requestingTaskListOptions,
-		setupTaskListComplete,
-		setupTaskListHidden,
-		setupTasksCompleteCount,
-		setupTasksCount,
 		previewSiteBtnTrackData,
-	} = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const { getTask, getTaskList, hasFinishedResolution } = select(
-			ONBOARDING_STORE_NAME
-		);
+	} = useSelect(
+		( select ) => {
+			const { getOption } = select( optionsStore );
 
-		const setupList = activeSetupList && getTaskList( activeSetupList );
-
-		const isSetupTaskListHidden = setupList ? setupList.isHidden : true; // If setupList is null, it means the setup task list is disabled.
-		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
-		const extendedTaskList = getTaskList( 'extended' );
-
-		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
-
-		return {
-			hasUnreadNotes: checkIfHasUnreadNotes( select ),
-			hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
-				select,
-				isSetupTaskListHidden,
-				thingsToDoCount
-			),
-			thingsToDoNextCount: thingsToDoCount,
-			requestingTaskListOptions:
-				! hasFinishedResolution( 'getTaskLists' ),
-			setupTaskListComplete: setupList?.isComplete,
-			setupTaskListHidden: isSetupTaskListHidden,
-			setupTasksCount: setupVisibleTasks.length,
-			setupTasksCompleteCount: setupVisibleTasks.filter(
-				( task ) => task.isComplete
-			).length,
-			isCompletedTask: Boolean(
-				query.task && getTask( query.task )?.isComplete
-			),
-			previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
-				select,
-				getOption
-			),
-		};
-	} );
+			return {
+				hasUnreadNotes: checkIfHasUnreadNotes( select ),
+				hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
+					select,
+					setupTaskListHidden,
+					thingsToDoNextCount
+				),
+				previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
+					select,
+					getOption
+				),
+			};
+		},
+		[
+			checkIfHasAbbreviatedNotifications,
+			thingsToDoNextCount,
+			setupTaskListHidden,
+			getPreviewSiteBtnTrackData,
+		]
+	);
 
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
 
@@ -329,8 +301,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
-				! setupTaskListComplete &&
 				! setupTaskListHidden &&
+				! setupTaskListComplete &&
 				! isHomescreen &&
 				! isProductScreen(),
 		};
@@ -350,6 +322,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! isEmbedded &&
 				isHomescreen &&
 				! isPerformingSetupTask(),
+		};
+
+		const headerAccount = {
+			component: () => <HeaderAccount page="wc-admin" />,
+			visible: isHomescreen,
 		};
 
 		const previewSite = {
@@ -390,6 +367,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			previewSite,
 			previewStore,
 			displayOptions,
+			headerAccount,
 			help,
 		].filter( ( tab ) => tab.visible );
 	};

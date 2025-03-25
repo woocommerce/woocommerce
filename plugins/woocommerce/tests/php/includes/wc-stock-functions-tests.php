@@ -16,16 +16,16 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @var array List of statuses which reduces stock from inventory.
 	 */
 	public $order_stock_reduce_statuses = array(
-		'wc-processing',
-		'wc-completed',
-		'wc-on-hold',
+		OrderInternalStatus::PROCESSING,
+		OrderInternalStatus::COMPLETED,
+		OrderInternalStatus::ON_HOLD,
 	);
 
 	/**
 	 * @var array List of statuses which restores stock back into inventory.
 	 */
 	public $order_stock_restore_statuses = array(
-		'wc-cancelled',
+		OrderInternalStatus::CANCELLED,
 		OrderInternalStatus::PENDING,
 	);
 
@@ -33,9 +33,17 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @var array List of statuses which have no impact on inventory.
 	 */
 	public $order_stock_no_effect_statuses = array(
-		'wc-failed',
-		'wc-refunded',
+		OrderInternalStatus::FAILED,
+		OrderInternalStatus::REFUNDED,
 	);
+
+	/**
+	 * tearDown.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		WC()->cart->empty_cart();
+	}
 
 	/**
 	 * Helper function to simulate creating order from cart.

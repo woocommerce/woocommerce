@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore, ITEMS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -48,7 +48,7 @@ export function getUnreadOrders( select, orderStatuses ) {
 }
 
 export function getOrderStatuses( select ) {
-	const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
+	const { getSetting: getMutableSetting } = select( settingsStore );
 	const {
 		woocommerce_actionable_order_statuses:
 			orderStatuses = DEFAULT_ACTIONABLE_STATUSES,

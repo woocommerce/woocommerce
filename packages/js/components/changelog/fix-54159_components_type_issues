@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update component TypeScript types to work correctly with React 18 and WordPress 6.6 dependencies.

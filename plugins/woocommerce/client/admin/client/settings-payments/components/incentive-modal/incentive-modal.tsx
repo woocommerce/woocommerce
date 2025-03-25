@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import { useEffect } from 'react';
 import {
 	Button,
 	Card,
@@ -12,6 +12,8 @@ import {
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { PaymentIncentive, PaymentProvider } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -19,19 +21,129 @@ import { Link } from '@woocommerce/components';
 import './incentive-modal.scss';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { isIncentiveDismissedInContext } from '~/settings-payments/utils';
 
 interface IncentiveModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	onSubmit: () => void;
+	/**
+	 * Incentive data.
+	 */
+	incentive: PaymentIncentive;
+	/**
+	 * Payment provider.
+	 */
+	provider: PaymentProvider;
+	/**
+	 * Onboarding URL (if available).
+	 */
+	onboardingUrl: string | null;
+	/**
+	 * Callback used when an incentive is accepted.
+	 *
+	 * @param id Incentive ID.
+	 */
+	onAccept: ( id: string ) => void;
+	/**
+	 * Callback to handle dismiss action.
+	 *
+	 * @param dismissHref Dismiss URL.
+	 * @param context     The context in which the incentive is dismissed. (e.g. whether it was in a modal or banner).
+	 */
+	onDismiss: ( dismissUrl: string, context: string ) => void;
+	/**
+	 * Callback to setup the plugin.
+	 *
+	 * @param id            Extension ID.
+	 * @param slug          Extension slug.
+	 * @param onboardingUrl Onboarding URL (if available).
+	 */
+	setupPlugin: (
+		id: string,
+		slug: string,
+		onboardingUrl: string | null
+	) => void;
 }
 
+/**
+ * A modal component that displays a promotional incentive to the user.
+ * The modal allows the user to:
+ * - Accept the incentive, triggering setup actions.
+ * - Dismiss the incentive, removing it from the current context.
+ *
+ * This component manages its own visibility state. If the incentive is already dismissed
+ * for the current context, the modal does not render.
+ */
 export const IncentiveModal = ( {
-	isOpen,
-	onClose,
-	onSubmit,
+	incentive,
+	provider,
+	onboardingUrl,
+	onAccept,
+	onDismiss,
+	setupPlugin,
 }: IncentiveModalProps ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
+	const [ isOpen, setIsOpen ] = useState( true );
+
+	const context = 'wc_settings_payments__modal';
+	const isDismissed = isIncentiveDismissedInContext( incentive, context );
+
+	useEffect( () => {
+		// Record the event when the incentive is shown.
+		recordEvent( 'settings_payments_incentive_show', {
+			incentive_id: incentive.promo_id,
+			provider_id: provider.id,
+			display_context: context,
+		} );
+	}, [ incentive.promo_id, provider.id ] );
+
+	/**
+	 * Closes the modal.
+	 */
+	const handleClose = () => {
+		setIsOpen( false );
+	};
+
+	/**
+	 * Handles accepting the incentive.
+	 * Triggers the onAccept callback, dismisses the incentive, closes the modal, and trigger plugin setup.
+	 */
+	const handleAccept = () => {
+		// Record the event when the user accepts the incentive.
+		recordEvent( 'settings_payments_incentive_accept', {
+			incentive_id: incentive.promo_id,
+			provider_id: provider.id,
+			display_context: context,
+		} );
+
+		// Accept the incentive and setup the plugin.
+		setIsBusy( true );
+		onAccept( incentive.promo_id );
+		onDismiss( incentive._links.dismiss.href, context ); // We also dismiss the incentive when it is accepted.
+		handleClose(); // Close the modal.
+		setupPlugin( provider.id, provider.plugin.slug, onboardingUrl );
+		setIsBusy( false );
+	};
+
+	/**
+	 * Handles dismissing the incentive.
+	 * Triggers the onDismiss callback and hides the modal.
+	 */
+	const handleDismiss = () => {
+		// Record the event when the user dismisses the incentive.
+		recordEvent( 'settings_payments_incentive_dismiss', {
+			incentive_id: incentive.promo_id,
+			provider_id: provider.id,
+			display_context: context,
+		} );
+
+		// Dimiss the incentive.
+		onDismiss( incentive._links.dismiss.href, context );
+		handleClose();
+	};
+
+	// Do not render the modal if the incentive is dismissed in this context.
+	if ( isDismissed ) {
+		return null;
+	}
 
 	return (
 		<>
@@ -39,7 +151,7 @@ export const IncentiveModal = ( {
 				<Modal
 					title=""
 					className="woocommerce-incentive-modal"
-					onRequestClose={ onClose }
+					onRequestClose={ handleDismiss }
 				>
 					<Card className={ 'woocommerce-incentive-modal__card' }>
 						<div className="woocommerce-incentive-modal__content">
@@ -51,10 +163,10 @@ export const IncentiveModal = ( {
 								<img
 									src={
 										WC_ASSET_URL +
-										'images/settings-payments/incentives-icon.svg'
+										'images/settings-payments/incentives-illustration.svg'
 									}
 									alt={ __(
-										'Incentive hero image',
+										'Incentive illustration',
 										'woocommerce'
 									) }
 								/>
@@ -73,18 +185,8 @@ export const IncentiveModal = ( {
 										) }
 									/>
 								</div>
-								<h2>
-									{ __(
-										'Save 10% on processing fees for your first 3 months when you sign up for WooPayments',
-										'woocommerce'
-									) }
-								</h2>
-								<p>
-									{ __(
-										'Use the native payments solution built and supported by Woo to accept online and in-person payments, track revenue, and handle all payment activity in one place.',
-										'woocommerce'
-									) }
-								</p>
+								<h2>{ incentive.title }</h2>
+								<p>{ incentive.description }</p>
 								<p
 									className={
 										'woocommerce-incentive-modal__terms'
@@ -98,7 +200,7 @@ export const IncentiveModal = ( {
 										{
 											termsLink: (
 												<Link
-													href="https://woocommerce.com/terms-conditions/woopayments-action-promotion-2023/"
+													href={ incentive.tc_url }
 													target="_blank"
 													rel="noreferrer"
 													type="external"
@@ -112,18 +214,16 @@ export const IncentiveModal = ( {
 										}
 									) }
 								</p>
-								<Button
-									variant={ 'primary' }
-									isBusy={ isBusy }
-									disabled={ isBusy }
-									onClick={ () => {
-										setIsBusy( true );
-										onSubmit();
-										setIsBusy( false );
-									} }
-								>
-									{ __( 'Save 10%', 'woocommerce' ) }
-								</Button>
+								<div className="woocommerce-incentive-model__actions">
+									<Button
+										variant={ 'primary' }
+										isBusy={ isBusy }
+										disabled={ isBusy }
+										onClick={ handleAccept }
+									>
+										{ incentive.cta_label }
+									</Button>
+								</div>
 							</CardBody>
 						</div>
 					</Card>

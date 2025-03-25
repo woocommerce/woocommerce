@@ -110,9 +110,9 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Save default.
 		$default_unit = get_option( 'woocommerce_dimension_unit' );
 
-		// cm (default unit).
+		// in (default unit).
 		$this->assertEquals(
-			array( 10, 3.937, 0.10936133, 100, 0.1 ),
+			array( 25.4, 10, 0.2777777782, 254, 0.254 ),
 			array(
 				wc_get_dimension( 10, 'cm' ),
 				wc_get_dimension( 10, 'in' ),
@@ -122,10 +122,10 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			)
 		);
 
-		// in.
-		update_option( 'woocommerce_dimension_unit', 'in' );
+		// cm.
+		update_option( 'woocommerce_dimension_unit', 'cm' );
 		$this->assertEquals(
-			array( 25.4, 10, 0.2777777782, 254, 0.254 ),
+			array( 10, 3.937, 0.10936133, 100, 0.1 ),
 			array(
 				wc_get_dimension( 10, 'cm' ),
 				wc_get_dimension( 10, 'in' ),
@@ -201,7 +201,14 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Save default.
 		$default_unit = get_option( 'woocommerce_weight_unit' );
 
-		// kg (default unit).
+		// lbs (default unit).
+		$this->assertEquals( 4.53592, wc_get_weight( 10, 'kg' ) );
+		$this->assertEquals( 4535.92, wc_get_weight( 10, 'g' ) );
+		$this->assertEquals( 10, wc_get_weight( 10, 'lbs' ) );
+		$this->assertFloatEquals( 160.00004208, wc_get_weight( 10, 'oz' ) );
+
+		// kg.
+		update_option( 'woocommerce_weight_unit', 'kg' );
 		$this->assertEquals( 10, wc_get_weight( 10, 'kg' ) );
 		$this->assertEquals( 10000, wc_get_weight( 10, 'g' ) );
 		$this->assertEquals( 22.0462, wc_get_weight( 10, 'lbs' ) );
@@ -213,13 +220,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 10, wc_get_weight( 10, 'g' ) );
 		$this->assertEquals( 0.0220462, wc_get_weight( 10, 'lbs' ) );
 		$this->assertEquals( 0.35274, wc_get_weight( 10, 'oz' ) );
-
-		// lbs.
-		update_option( 'woocommerce_weight_unit', 'lbs' );
-		$this->assertEquals( 4.53592, wc_get_weight( 10, 'kg' ) );
-		$this->assertEquals( 4535.92, wc_get_weight( 10, 'g' ) );
-		$this->assertEquals( 10, wc_get_weight( 10, 'lbs' ) );
-		$this->assertFloatEquals( 160.00004208, wc_get_weight( 10, 'oz' ) );
 
 		// oz.
 		update_option( 'woocommerce_weight_unit', 'oz' );
@@ -418,7 +418,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
 	}
 
 	/**
@@ -950,7 +950,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_weight() {
-		$this->assertEquals( '10 kg', wc_format_weight( '10' ) );
+		$this->assertEquals( '10 lbs', wc_format_weight( '10' ) );
 	}
 
 	/**
@@ -959,7 +959,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_dimensions() {
-		$this->assertEquals( '10 &times; 10 &times; 10 cm', wc_format_dimensions( array( 10, 10, 10 ) ) );
+		$this->assertEquals( '10 &times; 10 &times; 10 in', wc_format_dimensions( array( 10, 10, 10 ) ) );
 	}
 
 	/**

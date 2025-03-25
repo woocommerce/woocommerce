@@ -44,7 +44,7 @@ class ImportSchema {
 	 * @param JsonSchema     $schema The schema instance.
 	 * @param Validator|null $validator The validator instance, optional.
 	 */
-	public function __construct( JsonSchema $schema, Validator $validator = null ) {
+	public function __construct( JsonSchema $schema, ?Validator $validator = null ) {
 		$this->schema = $schema;
 		if ( null === $validator ) {
 			$validator = new Validator();
@@ -52,7 +52,7 @@ class ImportSchema {
 
 		$this->validator = $validator;
 
-		$this->builtin_step_processors = new BuiltInStepProcessors( $schema );
+		$this->builtin_step_processors = new BuiltInStepProcessors();
 	}
 
 	/**

@@ -52,6 +52,7 @@ export function RefreshButton() {
 							{
 								label: __( 'Try again', 'woocommerce' ),
 								onClick: refresh,
+								url: '',
 							},
 						],
 					}

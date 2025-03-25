@@ -18,6 +18,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/TableSummary',
+	title: 'Components/TableSummary',
 	component: TableSummary,
 };

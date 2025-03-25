@@ -10,6 +10,7 @@ export default () => (
 		viewBox="0 0 64 40"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
+		style={ { background: '#FFB3C7' } }
 	>
 		<rect width="64" height="40" fill="#FFB3C7" />
 		<path

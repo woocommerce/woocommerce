@@ -18,7 +18,7 @@ Take a moment to familiarize yourself with our [Developer Resources](https://dev
 
 Once you're ready to move forward, consider one of the following:
 
-- [Tools for low code development](getting-started/tools-for-low-code-development.md)
+- [Tools for low-code development](getting-started/developer-tools.md)
 - [Building your first extension](extension-development/building-your-first-extension.md)
 - [How to design a simple extension](extension-development/how-to-design-a-simple-extension.md)
 
@@ -27,11 +27,11 @@ Once you're ready to move forward, consider one of the following:
 The WooCommerce ecosystem thrives on community contributions. Whether it's improving documentation, reporting bugs, or contributing code, we greatly appreciate every contribution from our community. 
 
 - To contribute to **the core WooCommerce project**, check out our [Contributing guide](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md).
-- To contribute to **documentation** please refer to the [documentation style guide](style-guide.md).
+- To contribute to **documentation** please refer to the [documentation style guide](contributing-docs/style-guide.md).
 
 ## Support
 
-- To request a **new document, correction, or improvement**, [create an issue](https://github.com/woocommerce/woodocs/issues/new/choose).
+- To request a **new document, correction, or improvement**, [create an issue](https://github.com/woocommerce/woocommerce/issues/new).
 - For development help, start with the [WooCommerce Community Forum](https://wordpress.org/support/plugin/woocommerce/), to see if someone else has already asked the same question. You can also pose your question in the `#developers` channel of our [Community Slack](https://woocommerce.com/community-slack/). If you're not sure where to ask your question, you can always [contact us](https://woocommerce.com/contact-us/), and our Happiness Engineers will be glad to point you in the right direction.
 - For additional support with customizations, you might consider hiring from [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
 
@@ -54,13 +54,12 @@ Available READMe files for the WooCommerce plugin:
 - [`packages`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/packages/README.md)
 - [`src`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/README.md)
 - [`src/Admin/RemoteInboxNotifications`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/RemoteInboxNotifications/README.md)
-- [`src/Admin/RemoteInboxNotifications/Transformers`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/RemoteInboxNotifications/Transformers/README.md)
-- [`src/Blocks`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/README.md)
+- [`src/Enums`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/README.md)
 - [`src/Internal`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/README.md)
-- [`src/Internal/Admin/ProductForm`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Admin/ProductForm/README.md)
-- [`src/TransientFiles`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/TransientFiles/README.md)
+- [`src/Internal/Admin/ProductForm`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Admin/ProductForm/README.md)blob
+- [`src/TransientFiles`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/TransientFiles/README.md)
 - [`tests`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
-- [`tests/api-core-tests`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/README.md)
+- [`tests/api-core-tests`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/api-core-tests/README.md)
 - [`tests/e2e`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md)
 - [`tests/e2e-pw`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e-pw/README.md)
 - [`tests/performance`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/performance/README.md)

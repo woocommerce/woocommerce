@@ -1,21 +1,22 @@
 /**
  * External dependencies
  */
-import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
+import { productsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
-	status: 'publish',
-	_fields: [ 'id' ],
+	status: 'publish' as const,
+	_fields: [ 'id' as const ],
 };
 
 export const usePublishedProductsCount = () => {
 	return useSelect( ( select ) => {
 		const { getProductsTotalCount, hasFinishedResolution } =
-			select( PRODUCTS_STORE_NAME );
+			select( productsStore );
 
 		const publishedProductsCount = getProductsTotalCount(
 			PUBLISHED_PRODUCTS_QUERY_PARAMS,
+			// @ts-expect-error Todo: type of default value is not inferred correctly.
 			0
 		) as number;
 
@@ -30,5 +31,5 @@ export const usePublishedProductsCount = () => {
 			// we consider a user new if they have no published products
 			isNewUser: publishedProductsCount < 1,
 		};
-	} );
+	}, [] );
 };

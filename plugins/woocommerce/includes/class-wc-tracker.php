@@ -201,7 +201,8 @@ class WC_Tracker {
 		$data['settings'] = self::get_all_woocommerce_options_values();
 
 		// Template overrides.
-		$data['template_overrides'] = self::get_all_template_overrides();
+		$template_overrides         = self::get_all_template_overrides();
+		$data['template_overrides'] = $template_overrides;
 
 		// Cart & checkout tech (blocks or shortcodes).
 		$data['cart_checkout'] = self::get_cart_checkout_info();
@@ -220,6 +221,14 @@ class WC_Tracker {
 
 		// Mobile info.
 		$data['wc_mobile_usage'] = self::get_woocommerce_mobile_usage();
+
+		// WC Tracker data.
+		$data['woocommerce_allow_tracking']               = get_option( 'woocommerce_allow_tracking', 'no' );
+		$data['woocommerce_allow_tracking_last_modified'] = get_option( 'woocommerce_allow_tracking_last_modified', 'unknown' );
+		$data['woocommerce_allow_tracking_first_optin']   = get_option( 'woocommerce_allow_tracking_first_optin', 'unknown' );
+
+		// Email improvements tracking data.
+		$data['email_improvements'] = self::get_email_improvements_info( $template_overrides );
 
 		/**
 		 * Filter the data that's sent with the tracker.
@@ -464,6 +473,8 @@ class WC_Tracker {
 	/**
 	 * Get order totals.
 	 *
+	 * Keeping the internal statuses names as strings to avoid regression issues (not referencing Automattic\WooCommerce\Enums\OrderInternalStatus class).
+	 *
 	 * @since 5.4.0
 	 * @return array
 	 */
@@ -686,7 +697,7 @@ class WC_Tracker {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
-				SELECT payment_method AS gateway, currency AS currency, SUM( total_amount ) AS totals, count( id ) AS counts
+				SELECT IFNULL(payment_method, '') AS gateway, currency AS currency, SUM( total_amount ) AS totals, count( id ) AS counts
 				FROM $orders_table
 				WHERE status IN ( 'wc-completed', 'wc-processing', 'wc-refunded' )
 				GROUP BY gateway, currency;
@@ -701,7 +712,7 @@ class WC_Tracker {
 				FROM (
 					SELECT
 						orders.id AS order_id,
-						MAX(CASE WHEN meta_key = '_payment_method' THEN meta_value END) gateway,
+						IFNULL(MAX(CASE WHEN meta_key = '_payment_method' THEN meta_value END), '') gateway,
 						MAX(CASE WHEN meta_key = '_order_total' THEN meta_value END) total,
 						MAX(CASE WHEN meta_key = '_order_currency' THEN meta_value END) currency
 					FROM
@@ -729,7 +740,7 @@ class WC_Tracker {
 			array_reduce(
 				$orders_and_gateway_details,
 				function ( $result, $item ) {
-					$item->gateway = preg_replace( '/\s+/', ' ', $item->gateway );
+					$item->gateway = preg_replace( '/\s+/', ' ', $item->gateway ?? '' );
 
 					// Introduce currency as a prefix for the key.
 					$key = $item->currency . '==' . $item->gateway;
@@ -787,9 +798,9 @@ class WC_Tracker {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$orders_origin = $wpdb->get_results(
 				"
-				SELECT created_via as origin, COUNT( order_id ) as count
+				SELECT IFNULL(created_via, '') as origin, COUNT( order_id ) as count
 				FROM $op_table_name
-				GROUP BY created_via;
+				GROUP BY origin;
 				"
 			);
 			// phpcs:enable
@@ -797,7 +808,7 @@ class WC_Tracker {
 			$orders_origin = $wpdb->get_results(
 				"
 				SELECT
-					meta_value as origin, COUNT( DISTINCT ( orders.id ) ) as count
+					IFNULL(meta_value, '') as origin, COUNT( DISTINCT ( orders.id ) ) as count
 				FROM
 					$wpdb->posts orders
 				LEFT JOIN
@@ -805,7 +816,7 @@ class WC_Tracker {
 				WHERE
 					meta_key = '_created_via'
 				GROUP BY
-					meta_value;
+					origin;
 			"
 			);
 		}
@@ -832,7 +843,7 @@ class WC_Tracker {
 
 		// Aggregate using group_key.
 		foreach ( $orders_and_origins as $origin ) {
-			$key = strtolower( $origin->group_key );
+			$key = strtolower( $origin->group_key ?? '' );
 
 			if ( array_key_exists( $key, $orders_by_origin ) ) {
 				$orders_by_origin[ $key ] = $orders_by_origin[ $key ] + (int) $origin->count;
@@ -1011,7 +1022,7 @@ class WC_Tracker {
 		 *
 		 * @since 2.3.0
 		 */
-		$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
+		$template_paths = (array) apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 		$scanned_files  = array();
 
 		require_once WC()->plugin_path() . '/includes/admin/class-wc-admin-status.php';
@@ -1425,6 +1436,92 @@ class WC_Tracker {
 		return array(
 			'first_20_orders' => $first_20,
 			'last_20_orders'  => $last_20,
+		);
+	}
+
+	/**
+	 * Get email improvements tracking data.
+	 *
+	 * @param array $template_overrides Template overrides.
+	 * @return array Email improvements tracking data.
+	 */
+	private static function get_email_improvements_info( $template_overrides ) {
+		$core_email_counts    = self::get_core_email_status_counts();
+		$core_email_overrides = self::get_core_email_overrides( $template_overrides );
+
+		return array(
+			'enabled'                        => get_option( 'woocommerce_feature_email_improvements_enabled', 'no' ),
+			'default_enabled'                => get_option( 'woocommerce_email_improvements_default_enabled', 'no' ),
+			'auto_sync_enabled'              => get_option( 'woocommerce_email_auto_sync_with_theme', 'no' ),
+			'first_enabled_at'               => get_option( 'woocommerce_email_improvements_first_enabled_at', null ),
+			'last_enabled_at'                => get_option( 'woocommerce_email_improvements_last_enabled_at', null ),
+			'enabled_count'                  => get_option( 'woocommerce_email_improvements_enabled_count', 0 ),
+			'first_disabled_at'              => get_option( 'woocommerce_email_improvements_first_disabled_at', null ),
+			'last_disabled_at'               => get_option( 'woocommerce_email_improvements_last_disabled_at', null ),
+			'disabled_count'                 => get_option( 'woocommerce_email_improvements_disabled_count', 0 ),
+			'core_email_enabled_count'       => $core_email_counts['enabled'],
+			'core_email_disabled_count'      => $core_email_counts['disabled'],
+			'core_email_overrides_count'     => $core_email_overrides['count'],
+			'core_email_overrides_templates' => array_keys( $core_email_overrides['templates'] ),
+		);
+	}
+
+	/**
+	 * Get counts of enabled and disabled core emails.
+	 *
+	 * @return array Array with counts of enabled and disabled emails.
+	 */
+	private static function get_core_email_status_counts() {
+		$core_emails = self::get_core_emails();
+		$enabled     = 0;
+		$disabled    = 0;
+
+		foreach ( $core_emails as $email ) {
+			if ( $email->is_enabled() ) {
+				++$enabled;
+			} else {
+				++$disabled;
+			}
+		}
+
+		return array(
+			'enabled'  => $enabled,
+			'disabled' => $disabled,
+		);
+	}
+
+	/**
+	 * Check if any core emails are being overridden by a template override.
+	 *
+	 * @param array $template_overrides Template overrides.
+	 * @return bool True if core emails are being overridden, false otherwise.
+	 */
+	private static function get_core_email_overrides( $template_overrides ) {
+		$core_emails            = self::get_core_emails();
+		$core_email_templates   = array_map(
+			function ( $email ) {
+				return basename( $email->template_html );
+			},
+			$core_emails
+		);
+		$intersecting_templates = array_intersect( $core_email_templates, $template_overrides );
+		return array(
+			'count'     => count( $intersecting_templates ),
+			'templates' => $intersecting_templates,
+		);
+	}
+
+	/**
+	 * Get all core emails.
+	 *
+	 * @return array Core emails.
+	 */
+	private static function get_core_emails() {
+		return array_filter(
+			WC()->mailer()->get_emails(),
+			function ( $email ) {
+				return strpos( get_class( $email ), 'WC_Email_' ) === 0;
+			}
 		);
 	}
 }

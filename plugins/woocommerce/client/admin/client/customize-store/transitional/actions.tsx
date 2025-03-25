@@ -3,7 +3,7 @@
  */
 import { assign, DoneInvokeEvent } from 'xstate';
 import { dispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -33,7 +33,7 @@ export const completeSurvey = assign<
 	customizeStoreStateMachineEvents
 >( {
 	transitionalScreen: ( context: customizeStoreStateMachineContext ) => {
-		dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		dispatch( optionsStore ).updateOptions( {
 			woocommerce_admin_customize_store_survey_completed: 'yes',
 		} );
 

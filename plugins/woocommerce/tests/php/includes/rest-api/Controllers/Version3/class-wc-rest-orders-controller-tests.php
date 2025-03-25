@@ -206,7 +206,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_orders_create(): void {
 		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$order_params             = array(
-			'payment_method'       => 'bacs',
+			'payment_method'       => WC_Gateway_BACS::ID,
 			'payment_method_title' => 'Direct Bank Transfer',
 			'set_paid'             => true,
 			'billing'              => array(
@@ -439,20 +439,32 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should also be updated.
 	 */
 	public function test_order_update_line_item_quantity_updates_product_stock() {
-		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
 		$product->set_stock_quantity( 10 );
 		$product->save();
 
-		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => 'on-hold' ) ); // Initial qty of 4.
-		$items = $order->get_items();
-		$item  = reset( $items );
-		wc_maybe_adjust_line_item_product_stock( $item );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'status'     => 'on-hold',
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 4,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
 
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 6, $product->get_stock_quantity() );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+		$items = $order->get_items();
+		$item  = reset( $items );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
@@ -470,6 +482,49 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$product = wc_get_product( $product );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should
+	 *          only be updated when the order is set to certain statuses.
+	 */
+	public function test_order_update_line_item_quantity_only_updates_product_stock_on_status_change() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'status'     => 'auto-draft',
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 4,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 10, $product->get_stock_quantity() );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'status' => 'processing',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product = wc_get_product( $product );
+		$this->assertEquals( 6, $product->get_stock_quantity() );
 	}
 
 	/**

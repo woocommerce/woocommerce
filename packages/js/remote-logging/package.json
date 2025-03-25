@@ -5,8 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1",
-		"pnpm": "9.1.3"
+		"node": "^20.11.1"
 	},
 	"keywords": [
 		"wordpress",
@@ -54,15 +53,15 @@
 	},
 	"dependencies": {
 		"@woocommerce/tracks": "workspace:*",
-		"@wordpress/hooks": "wp-6.0",
+		"@wordpress/hooks": "wp-6.6",
 		"debug": "^4.3.4",
 		"tracekit": "^0.4.6"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@types/debug": "^4.1.12",
 		"@types/jest": "27.5.x",
-		"@types/node": "^16.18.68",
+		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/jest-console": "^5.4.0",
@@ -72,8 +71,8 @@
 		"jest-cli": "27.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.3.x",
-		"wireit": "0.14.3"
+		"typescript": "5.7.x",
+		"wireit": "0.14.10"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -95,7 +94,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"
@@ -147,16 +145,16 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-js-tests/build",
-				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"package.json",
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
-				"package.json"
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
 			]
 		}
 	}

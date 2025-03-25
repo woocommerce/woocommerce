@@ -9,6 +9,8 @@ import {
 	getLineCommitHash,
 } from '@woocommerce/monorepo-utils/src/core/git';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 export type TemplateChangeDescription = {
 	filePath: string;
@@ -16,6 +18,25 @@ export type TemplateChangeDescription = {
 	// We could probably move message out into linter later
 	message: string;
 	pullRequests: number[];
+};
+
+const getFileVersion = async (
+	repositoryPath: string,
+	filePath: string
+): Promise< string > => {
+	const currentFileContent = await readFile(
+		join( repositoryPath, filePath ),
+		{ encoding: 'utf8' }
+	);
+	if ( currentFileContent ) {
+		const versionMatch = currentFileContent.match(
+			/@version\s+(\d+\.\d+\.\d+)/
+		);
+		if ( versionMatch ) {
+			return versionMatch[ 1 ];
+		}
+	}
+	return '';
 };
 
 export const scanForTemplateChanges = async (
@@ -43,9 +64,10 @@ export const scanForTemplateChanges = async (
 		const patch = patches[ p ];
 		const lines = patch.split( '\n' );
 		const filePath = getFilename( lines[ 0 ] );
-		const pullRequests = [];
+		const pullRequests: number[] = [];
 
 		let lineNumber = 1;
+		let passVersionBumpCheck = false;
 		let code = 'warning';
 		let message = `This template may require a version bump! Expected ${ version }`;
 
@@ -53,14 +75,16 @@ export const scanForTemplateChanges = async (
 			const line = lines[ l ];
 
 			if ( line.match( deletedRegex ) ) {
+				passVersionBumpCheck = true;
 				code = 'notice';
 				message = 'Template deleted';
 				break;
 			}
 
 			if ( line.match( versionRegex ) ) {
+				passVersionBumpCheck = true;
 				code = 'notice';
-				message = 'Version bump found';
+				message = 'Version bump found (diff)';
 				break;
 			}
 
@@ -101,6 +125,18 @@ export const scanForTemplateChanges = async (
 				if ( ! line.match( /^-/ ) ) {
 					lineNumber++;
 				}
+			}
+		}
+
+		if ( ! passVersionBumpCheck && repositoryPath ) {
+			// The version can be already bumped in the file, but not part of this specific diff.
+			const fileVersion = await getFileVersion(
+				repositoryPath,
+				filePath
+			);
+			if ( fileVersion === version ) {
+				code = 'notice';
+				message = 'Version bump found (file)';
 			}
 		}
 

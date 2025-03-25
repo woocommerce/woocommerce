@@ -6,6 +6,10 @@
  * @version 3.1.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -207,7 +211,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// If we're not updating existing posts, we may need a placeholder product to map to.
 			if ( ! $this->params['update_existing'] ) {
-				$product = wc_get_product_object( 'simple' );
+				$product = wc_get_product_object( ProductType::SIMPLE );
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
 				$product->add_meta_data( '_original_id', $id, true );
@@ -224,7 +228,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		try {
-			$product = wc_get_product_object( 'simple' );
+			$product = wc_get_product_object( ProductType::SIMPLE );
 			$product->set_name( 'Import placeholder for ' . $value );
 			$product->set_status( 'importing' );
 			$product->set_sku( $value );
@@ -278,7 +282,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				return $id_from_sku;
 			}
 
-			$product = wc_get_product_object( 'simple' );
+			$product = wc_get_product_object( ProductType::SIMPLE );
 			$product->set_name( 'Import placeholder for ' . $id );
 			$product->set_status( 'importing' );
 			$product->add_meta_data( '_original_id', $id, true );
@@ -396,7 +400,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$value = $this->unescape_data( $value );
 
 		if ( 'true' === strtolower( $value ) || 'false' === strtolower( $value ) ) {
-			$value = wc_string_to_bool( $value ) ? 'taxable' : 'none';
+			$value = wc_string_to_bool( $value ) ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE;
 		}
 
 		return wc_clean( $value );
@@ -866,7 +870,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
 
 			if ( ! $data['type'] ) {
-				$data['type'] = 'simple';
+				$data['type'] = ProductType::SIMPLE;
 			}
 		}
 
@@ -878,15 +882,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			$statuses       = array(
-				-1 => 'draft',
-				0  => 'private',
-				1  => 'publish',
+				-1 => ProductStatus::DRAFT,
+				0  => ProductStatus::PRIVATE,
+				1  => ProductStatus::PUBLISH,
 			);
-			$data['status'] = $statuses[ $published ] ?? 'draft';
+			$data['status'] = $statuses[ $published ] ?? ProductStatus::DRAFT;
 
 			// Fix draft status of variations.
-			if ( 'variation' === ( $data['type'] ?? null ) && -1 === $published ) {
-				$data['status'] = 'publish';
+			if ( ProductType::VARIATION === ( $data['type'] ?? null ) && -1 === $published ) {
+				$data['status'] = ProductStatus::PUBLISH;
 			}
 
 			unset( $data['published'] );
@@ -904,9 +908,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Stock is bool or 'backorder'.
 		if ( isset( $data['stock_status'] ) ) {
 			if ( 'backorder' === $data['stock_status'] ) {
-				$data['stock_status'] = 'onbackorder';
+				$data['stock_status'] = ProductStockStatus::ON_BACKORDER;
 			} else {
-				$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
+				$data['stock_status'] = $data['stock_status'] ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK;
 			}
 		}
 

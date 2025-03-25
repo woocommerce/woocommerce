@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Experimental: fix the filter counts when there are attribute filters selected.
-
-

@@ -3,26 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { countriesStore } from '@woocommerce/data';
 import { Fragment, useState } from '@wordpress/element';
 import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
-import { Status, Options } from 'wordpress__notices';
+import type { Status, Options } from 'wordpress__notices';
+
 /**
  * Internal dependencies
  */
 import {
 	StoreAddress,
 	getStoreAddressValidator,
-} from '../../../dashboard/components/settings/general/store-address';
-
-export type FormValues = {
-	addressLine1: string;
-	addressLine2: string;
-	countryState: string;
-	city: string;
-	postCode: string;
-};
+	FormValues,
+} from '~/dashboard/components/settings/general/store-address';
 
 type StoreLocationProps = {
 	onComplete: ( values: FormValues ) => void;
@@ -67,16 +61,17 @@ const StoreLocation = ( {
 	validate = defaultValidate,
 }: StoreLocationProps ) => {
 	const { hasFinishedResolution } = useSelect( ( select ) => {
-		const countryStore = select( COUNTRIES_STORE_NAME );
+		const countryStore = select( countriesStore );
 		countryStore.getCountries();
+
 		return {
 			getLocale: countryStore.getLocale,
 			locales: countryStore.getLocales(),
 			hasFinishedResolution:
-				countryStore.hasFinishedResolution( 'getLocales' ) &&
-				countryStore.hasFinishedResolution( 'getCountries' ),
+				countryStore.hasFinishedResolution( 'getLocales', undefined ) &&
+				countryStore.hasFinishedResolution( 'getCountries', undefined ),
 		};
-	} );
+	}, [] );
 	const [ isSubmitting, setSubmitting ] = useState( false );
 	const onSubmit = async ( values: FormValues ) => {
 		setSubmitting( true );
@@ -129,17 +124,18 @@ const StoreLocation = ( {
 		>
 			{ ( {
 				getInputProps,
+				getSelectControlProps,
 				handleSubmit,
 				setValue,
 			}: FormContextType< FormValues > ) => (
 				<Fragment>
 					<StoreAddress
-						// @ts-expect-error return type doesn't match, but they do work. We should revisit and refactor them in a follow up issue.
 						getInputProps={ getInputProps }
+						getSelectControlProps={ getSelectControlProps }
 						setValue={ setValue }
 					/>
 					<Button
-						isPrimary
+						variant="primary"
 						onClick={ handleSubmit }
 						isBusy={ isSubmitting }
 					>

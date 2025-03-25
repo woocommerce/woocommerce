@@ -10,6 +10,8 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -169,7 +171,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_tax_status() {
-		return 'taxable';
+		return ProductTaxStatus::TAXABLE;
 	}
 
 	/**
@@ -241,7 +243,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
 			return false;
 		}
-		if ( '0' !== $this->get_tax_class() && 'taxable' === $this->get_tax_status() && wc_tax_enabled() ) {
+		if ( '0' !== $this->get_tax_class() && ProductTaxStatus::TAXABLE === $this->get_tax_status() && wc_tax_enabled() ) {
 			$calculate_tax_for['tax_class'] = $this->get_tax_class();
 			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
 			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
@@ -316,7 +318,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
 				continue;
 			}
 
@@ -543,5 +545,42 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
 			$this->set_prop( 'cogs_value', $value );
 		}
+	}
+
+	/**
+	 * Returns the Cost of Goods Sold value in html format.
+	 *
+	 * @return string
+	 */
+	public function get_cogs_value_html(): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) ) {
+			return '';
+		}
+
+		if ( ! $this->has_cogs() ) {
+			/**
+			 * Filter to customize how a non-existing Cost of Goods Sold value for an order item (whose has_cogs method returns false) gets rendered to HTML.
+			 *
+			 * @param string $html The rendered HTML.
+			 * @param WC_Order_Item $product The order item for which the "there's no cost" indication is rendered.
+			 *
+			 * @since 9.9.0
+			 */
+			return apply_filters( 'woocommerce_order_item_no_cogs_html', "<span class='na'>&ndash;</span>", $this );
+		}
+
+		$cogs_value      = $this->get_cogs_value();
+		$cogs_value_html = wc_price( $cogs_value, array( 'currency' => $this->get_order()->get_currency() ) );
+
+		/**
+		 * Filter to customize how the Cost of Goods Sold value for an order item gets rendered to HTML.
+		 *
+		 * @param string $html The rendered HTML.
+		 * @param float $value The cost value that is being rendered.
+		 * @param WC_Order_Item $product The order item.
+		 *
+		 * @since 9.9.0
+		 */
+		return apply_filters( 'woocommerce_order_item_cogs_html', $cogs_value_html, $cogs_value, $this );
 	}
 }

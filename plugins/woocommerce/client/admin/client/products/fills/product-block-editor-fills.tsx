@@ -6,10 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
 import { Product, ProductVariation } from '@woocommerce/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityProp } from '@wordpress/core-data';
+import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -28,9 +25,9 @@ export const MoreMenuFill = ( {
 }: MoreMenuFillProps ) => {
 	const [ id ] = useEntityProp( 'postType', productType, 'id' );
 
-	const product = useSelect< Product | ProductVariation >(
+	const product = useSelect(
 		( select ) => {
-			const { getEntityRecord } = select( 'core' );
+			const { getEntityRecord } = select( coreStore );
 
 			return getEntityRecord( 'postType', productType, id ) as
 				| Product

@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * WC Tests API ProductsLowInStock
@@ -57,7 +58,7 @@ class WC_Admin_Tests_API_ProductsLowInStock extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/products/low-in-stock' );
 		$request->set_param( 'low_in_stock', true );
-		$request->set_param( 'status', 'publish' );
+		$request->set_param( 'status', ProductStatus::PUBLISH );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 

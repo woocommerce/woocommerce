@@ -22,10 +22,6 @@
 		"rootDir": "client",
 		"typeRoots": [ "./client/typings", "./node_modules/@types" ]
 	},
-	"include": [ 
-		"./client/**/*"
-	],
-	"exclude": [
-		"**/test/*",
-	]
+	"include": [ "./client/**/*" ],
+	"exclude": [ "**/test/*" ]
 }

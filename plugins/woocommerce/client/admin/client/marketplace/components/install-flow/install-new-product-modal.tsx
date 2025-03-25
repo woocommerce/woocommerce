@@ -7,7 +7,7 @@ import { dispatch } from '@wordpress/data';
 import { useState, useEffect, useContext } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { Status } from '@wordpress/notices';
+import type { Status } from 'wordpress__notices';
 
 /**
  * Internal dependencies
@@ -162,7 +162,9 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					throw response;
 				}
 
-				dispatch( installingStore ).startInstalling( product.id );
+				dispatch( installingStore ).startInstalling(
+					String( product.id ?? '' )
+				);
 				setDocumentationUrl( response.data.documentation_url );
 
 				if ( product.slug ) {
@@ -173,7 +175,9 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					response.data.product_type,
 					response.data.zip_slug
 				).then( ( downloadResponse ) => {
-					dispatch( installingStore ).stopInstalling( product.id );
+					dispatch( installingStore ).stopInstalling(
+						String( product.id ?? '' )
+					);
 
 					// No activateUrl means we can't activate the plugin.
 					if ( downloadResponse.data.activateUrl ) {

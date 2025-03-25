@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
-import { FocusEvent, KeyboardEvent } from 'react';
+import { KeyboardEvent } from 'react';
 import { Icon, help } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 
@@ -71,14 +71,13 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 
 				{ isPopoverVisible && (
 					<Popover
-						focusOnMount="container"
+						focusOnMount={ true }
 						position={ position }
-						// @ts-expect-error this prop does exist
 						inline
 						className="woocommerce-tooltip__text"
-						onFocusOutside={ ( event: FocusEvent ) => {
+						onFocusOutside={ ( event ) => {
 							if (
-								event.relatedTarget?.classList.contains(
+								event.currentTarget?.classList.contains(
 									uniqueIdentifier
 								)
 							) {

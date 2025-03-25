@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { useState, createElement } from '@wordpress/element';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 
@@ -117,6 +116,6 @@ export const ToggleWithTooltip: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/experimental/product-fields',
+	title: 'Experimental/product-fields',
 	component: Basic,
 };

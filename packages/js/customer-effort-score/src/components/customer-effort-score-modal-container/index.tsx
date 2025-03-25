@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -12,20 +12,19 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { CustomerFeedbackModal } from '../';
 import { getStoreAgeInWeeks } from '../../utils';
-import { STORE_KEY } from '../../store';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
+import store from '../../store';
 
 export const CustomerEffortScoreModalContainer: React.FC = () => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
-	const { hideCesModal } = useDispatch( STORE_KEY );
+	const { hideCesModal } = useDispatch( store );
 	const {
 		storeAgeInWeeks,
 		resolving: isLoading,
 		visibleCESModalData,
 	} = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-		const { getVisibleCESModalData } = select( STORE_KEY );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
+		const { getVisibleCESModalData } = select( store );
 
 		const adminInstallTimestamp =
 			( getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) as number ) || 0;
@@ -41,7 +40,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			visibleCESModalData: getVisibleCESModalData(),
 			resolving,
 		};
-	} );
+	}, [] );
 
 	const recordScore = (
 		score: number,
@@ -77,6 +76,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 	return (
 		<CustomerFeedbackModal
 			title={ visibleCESModalData.title }
+			description={ visibleCESModalData.description }
 			showDescription={ visibleCESModalData.showDescription }
 			firstQuestion={ visibleCESModalData.firstQuestion }
 			secondQuestion={ visibleCESModalData.secondQuestion }

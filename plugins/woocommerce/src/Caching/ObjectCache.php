@@ -58,8 +58,7 @@ abstract class ObjectCache {
 
 	/**
 	 * Gets an identifier for the types of objects cached by this class.
-	 * This identifier will be used to compose the keys passed to the cache engine,
-	 * to the name of the option that stores the cache prefix, and the names of the hooks used.
+	 * This identifier will be used to compose the keys passed to the cache engine.
 	 * It must be unique for each class inheriting from ObjectCache.
 	 *
 	 * @return string
@@ -226,7 +225,7 @@ abstract class ObjectCache {
 	 * @return object|array|null Cached object, or null if it's not cached and can't be retrieved from datastore or via callback.
 	 * @throws CacheException Invalid id parameter.
 	 */
-	public function get( $id, int $expiration = self::DEFAULT_EXPIRATION, callable $get_from_datastore_callback = null ) {
+	public function get( $id, int $expiration = self::DEFAULT_EXPIRATION, ?callable $get_from_datastore_callback = null ) {
 		if ( ! is_string( $id ) && ! is_int( $id ) ) {
 			throw new CacheException( "Object id must be an int or a string for 'get'", $this );
 		}

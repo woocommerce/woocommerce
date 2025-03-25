@@ -152,10 +152,6 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! $this->is_variant_assignment_allowed() ) {
-			return false;
-		}
-
 		if ( ! $this->should_current_version_be_logged() ) {
 			return false;
 		}
@@ -182,22 +178,19 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
-		if ( WC_Log_Levels::get_level_severity( $level ) < WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
-			return false;
-		}
-
 		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
 			return false;
 		}
 
-		try {
-			// Record fatal error stats.
-			$mc_stats = wc_get_container()->get( McStats::class );
-			$mc_stats->add( 'error', 'critical-errors' );
-			$mc_stats->do_server_side_stats();
-		} catch ( \Throwable $e ) {
-			error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		// Record fatal error stats.
+		if ( WC_Log_Levels::get_level_severity( $level ) >= WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
+			try {
+				$mc_stats = wc_get_container()->get( McStats::class );
+				$mc_stats->add( 'error', 'critical-errors' );
+				$mc_stats->do_server_side_stats();
+			} catch ( \Throwable $e ) {
+				error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
 		}
 
 		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
@@ -269,16 +262,6 @@ class RemoteLogger extends \WC_Log_Handler {
 	}
 
 	/**
-	 * Check if the store is allowed to log based on the variant assignment percentage.
-	 *
-	 * @return bool
-	 */
-	private function is_variant_assignment_allowed() {
-		$assignment = SafeGlobalFunctionProxy::get_option( 'woocommerce_remote_variant_assignment', 0 ) ?? 0;
-		return ( $assignment <= 12 ); // Considering 10% of the 0-120 range.
-	}
-
-	/**
 	 * Check if the current WooCommerce version is the latest.
 	 *
 	 * @return bool
@@ -340,39 +323,38 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// If backtrace is not available, we can't determine if the error is third-party. Log it for further investigation.
-		if ( ! isset( $context['backtrace'] ) || ! is_array( $context['backtrace'] ) ) {
-			return false;
-		}
-
-		$wc_plugin_dir   = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
-		$wp_includes_dir = StringUtil::normalize_local_path_slashes( ABSPATH . WPINC );
-		$wp_admin_dir    = StringUtil::normalize_local_path_slashes( ABSPATH . 'wp-admin' );
+		$wc_plugin_dir = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
 
 		// Check if the error message contains the WooCommerce plugin directory.
 		if ( str_contains( $message, $wc_plugin_dir ) ) {
 			return false;
 		}
 
-		// Find the first relevant frame that is not from WordPress core and not empty.
-		$relevant_frame = null;
-		foreach ( $context['backtrace'] as $frame ) {
-			if ( empty( $frame ) || ! is_string( $frame ) ) {
-				continue;
+		// Without a backtrace, it's impossible to ascertain if the error is third-party. To avoid logging numerous irrelevant errors, we'll consider it a third-party error and ignore it.
+		if ( isset( $context['backtrace'] ) && is_array( $context['backtrace'] ) ) {
+			$wp_includes_dir = StringUtil::normalize_local_path_slashes( ABSPATH . WPINC );
+			$wp_admin_dir    = StringUtil::normalize_local_path_slashes( ABSPATH . 'wp-admin' );
+
+			// Find the first relevant frame that is not from WordPress core and not empty.
+			$relevant_frame = null;
+			foreach ( $context['backtrace'] as $frame ) {
+				if ( empty( $frame ) || ! is_string( $frame ) ) {
+					continue;
+				}
+
+				// Skip frames from WordPress core.
+				if ( strpos( $frame, $wp_includes_dir ) !== false || strpos( $frame, $wp_admin_dir ) !== false ) {
+					continue;
+				}
+
+				$relevant_frame = $frame;
+				break;
 			}
 
-			// Skip frames from WordPress core.
-			if ( strpos( $frame, $wp_includes_dir ) !== false || strpos( $frame, $wp_admin_dir ) !== false ) {
-				continue;
+			// Check if the relevant frame is from WooCommerce.
+			if ( $relevant_frame && strpos( $relevant_frame, $wc_plugin_dir ) !== false ) {
+				return false;
 			}
-
-			$relevant_frame = $frame;
-			break;
-		}
-
-		// Check if the relevant frame is from WooCommerce.
-		if ( $relevant_frame && strpos( $relevant_frame, $wc_plugin_dir ) !== false ) {
-			return false;
 		}
 
 		if ( ! function_exists( 'apply_filters' ) ) {

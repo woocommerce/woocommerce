@@ -169,7 +169,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$dummy_product          = WC_Helper_Product::create_simple_product();
 		$status_entries         = array( OrderInternalStatus::PROCESSING, OrderInternalStatus::COMPLETED, OrderInternalStatus::REFUNDED, OrderInternalStatus::PENDING );
 		$created_via_entries    = array( 'api', 'checkout', 'admin' );
-		$payment_method_entries = array( 'paypal', 'stripe', 'cod' );
+		$payment_method_entries = array( WC_Gateway_Paypal::ID, 'stripe', WC_Gateway_COD::ID );
 
 		$order_count = count( $status_entries ) * count( $created_via_entries ) * count( $payment_method_entries );
 
@@ -232,7 +232,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		foreach ( array_merge( $first_20, $last_20 ) as $order_date ) {
 			$order = wc_create_order(
 				array(
-					'status' => 'wc-completed',
+					'status' => OrderInternalStatus::COMPLETED,
 				)
 			);
 			$order->add_product( $dummy_product );
@@ -304,5 +304,55 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_tracking_data_snapshot_generation_time() {
 		$this->assertGreaterThan( 0, WC_Tracker::get_tracking_data()['snapshot_generation_time'] );
+	}
+
+	/**
+	 * @testDox Test woocommerce_allow_tracking related data is included in tracking snapshot.
+	 */
+	public function test_tracking_data_woocommerce_allow_tracking() {
+		$current_woocommerce_allow_tracking = get_option( 'woocommerce_allow_tracking', 'no' );
+
+		// Clear everything.
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		delete_option( 'woocommerce_allow_tracking_last_modified' );
+		delete_option( 'woocommerce_allow_tracking_first_optin' );
+
+		$tracking_data = WC_Tracker::get_tracking_data();
+		$this->assertArrayHasKey( 'woocommerce_allow_tracking', $tracking_data );
+		$this->assertArrayHasKey( 'woocommerce_allow_tracking_last_modified', $tracking_data );
+		$this->assertArrayHasKey( 'woocommerce_allow_tracking_first_optin', $tracking_data );
+
+		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'no' );
+		$this->assertEquals( $tracking_data['woocommerce_allow_tracking_last_modified'], 'unknown' );
+		$this->assertEquals( $tracking_data['woocommerce_allow_tracking_first_optin'], 'unknown' );
+
+		$time_one = time();
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$tracking_data = WC_Tracker::get_tracking_data();
+		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
+		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_one );
+		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one );
+
+		sleep( 1 ); // be sure $time_two is at least one second after $time_one.
+		$time_two = time();
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'no' );
+		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_two );
+		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one && $tracking_data['woocommerce_allow_tracking_first_optin'] < $time_two );
+
+		sleep( 1 ); // be sure $time_three is at least one second after $time_two.
+		$time_three = time();
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$tracking_data = WC_Tracker::get_tracking_data();
+		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
+		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_three );
+		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one && $tracking_data['woocommerce_allow_tracking_first_optin'] < $time_two );
+
+		// Restore everything as it was.
+		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );
+		delete_option( 'woocommerce_allow_tracking_last_modified' );
+		delete_option( 'woocommerce_allow_tracking_first_optin' );
 	}
 }

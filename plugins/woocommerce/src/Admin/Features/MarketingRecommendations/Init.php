@@ -82,7 +82,7 @@ class Init extends RemoteSpecsEngine {
 	 * @param array|null $specs Marketing recommendations spec array.
 	 * @return array
 	 */
-	protected static function evaluate_specs( array $specs = null ) {
+	protected static function evaluate_specs( ?array $specs = null ) {
 		$suggestions = array();
 		$errors      = array();
 

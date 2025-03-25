@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { Button, Card, CardBody } from '@wordpress/components';
-import { useEffect, useCallback } from '@wordpress/element';
-import { plugins, external } from '@wordpress/icons';
+import { useDispatch } from '@wordpress/data';
+import { useEffect, useCallback, useState } from '@wordpress/element';
+import { plugins } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
 import { getPath } from '@woocommerce/navigation';
+import { pluginsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -19,9 +21,11 @@ import {
 	BANNER_TYPE_HEADER,
 } from './constants';
 import './style.scss';
+import { createNoticesFromResponse } from '~/lib/notices';
 
-const WC_ANALYTICS_PRODUCT_URL =
-	'https://woocommerce.com/products/woocommerce-analytics';
+const WC_ANALYTICS_PLUGIN_SLUG = 'woocommerce-analytics';
+const WC_ANALYTICS_ORDER_ATTRIBUTION_ADMIN_URL =
+	'admin.php?page=wc-admin&path=/analytics/order-attribution';
 
 /**
  * The banner to prompt users to install the Order Attribution extension.
@@ -55,14 +59,27 @@ export const OrderAttributionInstallBanner = ( {
 	description = '',
 	buttonText = '',
 } ) => {
+	const [ isInstalling, setIsInstalling ] = useState( false );
 	const { isDismissed, dismiss, shouldShowBanner } =
-		useOrderAttributionInstallBanner();
+		useOrderAttributionInstallBanner( { isInstalling } );
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 
 	const onButtonClick = () => {
+		setIsInstalling( true );
 		recordEvent( 'order_attribution_install_banner_clicked', {
 			path: getPath(),
 			context: eventContext,
 		} );
+
+		installAndActivatePlugins( [ WC_ANALYTICS_PLUGIN_SLUG ] )
+			.then( ( response ) => {
+				window.location.href = WC_ANALYTICS_ORDER_ATTRIBUTION_ADMIN_URL;
+				createNoticesFromResponse( response );
+			} )
+			.catch( ( error ) => {
+				createNoticesFromResponse( error );
+				setIsInstalling( false );
+			} );
 	};
 
 	const getShouldRender = useCallback( () => {
@@ -100,12 +117,12 @@ export const OrderAttributionInstallBanner = ( {
 		return (
 			<Button
 				className="woocommerce-order-attribution-install-header-banner"
-				href={ WC_ANALYTICS_PRODUCT_URL }
 				variant="secondary"
 				icon={ plugins }
 				size="default"
 				onClick={ onButtonClick }
-				target="_blank"
+				isBusy={ isInstalling }
+				disabled={ isInstalling }
 			>
 				{ __( 'Try Order Attribution', 'woocommerce' ) }
 			</Button>
@@ -167,12 +184,11 @@ export const OrderAttributionInstallBanner = ( {
 					<div>
 						<Button
 							className={ isSmallBanner ? 'small' : '' }
-							href={ WC_ANALYTICS_PRODUCT_URL }
 							variant={ isSmallBanner ? 'secondary' : 'primary' }
 							onClick={ onButtonClick }
-							icon={ isSmallBanner ? external : null }
 							iconPosition={ isSmallBanner ? 'right' : null }
-							target="_blank"
+							isBusy={ isInstalling }
+							disabled={ isInstalling }
 						>
 							{ buttonText }
 						</Button>
@@ -180,6 +196,7 @@ export const OrderAttributionInstallBanner = ( {
 							<Button
 								variant="tertiary"
 								onClick={ () => dismiss( eventContext ) }
+								disabled={ isInstalling }
 							>
 								{ __( 'Dismiss', 'woocommerce' ) }
 							</Button>

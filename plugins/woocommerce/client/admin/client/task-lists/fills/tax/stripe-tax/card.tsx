@@ -6,7 +6,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import { Plugins } from '@woocommerce/components';
 import { dispatch, useDispatch } from '@wordpress/data';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 
 /**
@@ -76,7 +76,7 @@ export const Card: React.FC< TaxChildProps > = ( {
 							selected_option: STRIPE_TAX_PLUGIN_SLUG,
 						} );
 						const { updateAndPersistSettingsForGroup } =
-							dispatch( SETTINGS_STORE_NAME );
+							dispatch( settingsStore );
 						updateAndPersistSettingsForGroup( 'general', {
 							general: {
 								woocommerce_calc_taxes: 'yes', // Stripe tax requires tax calculation to be enabled so let's do it here to save the user from doing it manually

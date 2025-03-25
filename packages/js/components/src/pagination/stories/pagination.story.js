@@ -15,7 +15,7 @@ import {
 } from '../';
 
 export default {
-	title: 'WooCommerce Admin/components/Pagination',
+	title: 'Components/Pagination',
 	component: Pagination,
 	args: {
 		total: 500,

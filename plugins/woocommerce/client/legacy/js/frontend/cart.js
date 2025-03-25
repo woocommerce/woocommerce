@@ -135,8 +135,8 @@ jQuery( function ( $ ) {
 			if ( $( '.woocommerce-checkout' ).length ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
-			
-			// Store the old coupon error message and value before the 
+
+			// Store the old coupon error message and value before the
 			// .woocommerce-cart-form is replaced with the new form.
 			var $old_coupon_field_val = $( '#coupon_code' ).val();
 			var $old_coupon_error_msg = $( '#coupon_code' )
@@ -151,7 +151,7 @@ jQuery( function ( $ ) {
 			if ( preserve_notices && $old_coupon_error_msg.length > 0 ) {
 				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
 				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
-				
+
 				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
@@ -206,30 +206,32 @@ jQuery( function ( $ ) {
 			return;
 		}
 
-		var $coupon_error_el = '';
+		var $coupon_error_el = html_element;
 
 		if ( typeof html_element === 'string' ) {
 			var msg = $( $.parseHTML( html_element ) ).text().trim();
-			
+
 			if ( msg === '' ) {
 				return;
 			}
-			
-			$coupon_error_el = $( '<p class="coupon-error-notice" id="coupon-error-notice">' + msg + '</p>' );
-		} else {
-			$coupon_error_el = html_element;
+
+			$coupon_error_el = $('<p>', {
+				class: 'coupon-error-notice',
+				id: 'coupon-error-notice',
+				text: msg
+			});
 		}
 
 		if ( is_live_region ) {
 			$coupon_error_el.attr( 'role', 'alert' );
 		}
-		
+
 		$target.find( '#coupon_code' )
 			.addClass( 'has-error' )
 			.attr( 'aria-invalid', 'true' )
 			.attr( 'aria-describedby', 'coupon-error-notice' );
 		$target.append( $coupon_error_el );
-	};	
+	};
 
 	/**
 	 * Object to handle AJAX calls for cart shipping changes.
@@ -280,7 +282,7 @@ jQuery( function ( $ ) {
 					$target.attr( 'aria-expanded', $form.is( ':visible' ) ? 'true' : 'false' );
 				}, 0 );
 			} );
-			
+
 			$( 'select.country_to_state, input.country_to_state' ).trigger(
 				'change'
 			);
@@ -315,7 +317,7 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
-					
+
 					var newCurrentTarget = document.getElementById( event.currentTarget.id );
 
 					if ( newCurrentTarget ) {
@@ -600,17 +602,17 @@ jQuery( function ( $ ) {
 						'.woocommerce-error, .woocommerce-message, .woocommerce-info, ' +
 						'.is-error, .is-info, .is-success, .coupon-error-notice'
 					).remove();
-					
+
 					// We only want to show coupon notices if they are not errors.
 					// Coupon errors are shown under the input.
 					if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
-						show_notice( response );						
+						show_notice( response );
 					} else {
 						var $coupon_wrapper = $text_field.closest( '.coupon' );
 
 						if ( $coupon_wrapper.length > 0 ) {
 							show_coupon_error( response, $coupon_wrapper, false );
-						}						
+						}
 					}
 
 					$( document.body ).trigger( 'applied_coupon', [
@@ -735,6 +737,7 @@ jQuery( function ( $ ) {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
 					$.scroll_to_notices( $( '[role="alert"]' ) );
+					$( document.body ).trigger( 'item_removed_from_classic_cart');
 				},
 			} );
 		},

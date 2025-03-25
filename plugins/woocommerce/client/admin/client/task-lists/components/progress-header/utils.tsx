@@ -11,22 +11,27 @@ import {
 export const WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME =
 	'woocommerce_tasklist_experimental_progress_header_item';
 
-export const WooTaskListProgressHeaderItem: React.FC< {
+export const WooTaskListProgressHeaderItem = ( {
+	children,
+	order = 1,
+}: {
 	children?: React.ReactNode;
 	order?: number;
-} > & {
-	Slot: React.FC< Slot.Props >;
-} = ( { children, order = 1 } ) => {
+} ) => {
 	return (
 		<Fill name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
 	);
 };
 
-WooTaskListProgressHeaderItem.Slot = ( { fillProps } ) => {
+WooTaskListProgressHeaderItem.Slot = ( {
+	fillProps,
+}: {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => {
 	return (
 		<Slot
 			name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME }

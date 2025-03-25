@@ -83,6 +83,10 @@ class WC_Brands {
 
 		// Product Editor compatibility.
 		add_action( 'woocommerce_layout_template_after_instantiation', array( $this, 'wc_brands_on_block_template_register' ), 10, 3 );
+
+		// Block theme integration.
+		add_filter( 'hooked_block_types', array( $this, 'hook_product_brand_block' ), 10, 4 );
+		add_filter( 'hooked_block_core/post-terms', array( $this, 'configure_product_brand_block' ), 10, 5 );
 	}
 
 	/**
@@ -171,6 +175,10 @@ class WC_Brands {
 			return $permalink;
 		}
 
+		if ( empty( $permalink ) ) {
+			return $permalink;
+		}
+
 		// Abort early if the placeholder rewrite tag isn't in the generated URL.
 		if ( false === strpos( $permalink, '%' ) ) {
 			return $permalink;
@@ -179,13 +187,15 @@ class WC_Brands {
 		// Get the custom taxonomy terms in use by this post.
 		$terms = get_the_terms( $post->ID, 'product_brand' );
 
-		if ( empty( $terms ) ) {
-			// If no terms are assigned to this post, use a string instead (can't leave the placeholder there).
-			$product_brand = _x( 'uncategorized', 'slug', 'woocommerce' );
-		} else {
+		// If no terms are assigned to this post, use a string instead (can't leave the placeholder there).
+		$product_brand = _x( 'uncategorized', 'slug', 'woocommerce' );
+
+		if ( is_array( $terms ) && ! empty( $terms ) ) {
 			// Replace the placeholder rewrite tag with the first term's slug.
-			$first_term    = array_shift( $terms );
-			$product_brand = $first_term->slug;
+			$first_term = array_shift( $terms );
+			if ( $first_term instanceof WP_Term ) {
+				$product_brand = $first_term->slug;
+			}
 		}
 
 		$find = array(
@@ -398,7 +408,18 @@ class WC_Brands {
 			$labels   = $taxonomy->labels;
 
 			/* translators: %s - Label name */
-			echo wc_get_brands( $post->ID, ', ', ' <span class="posted_in">' . sprintf( _n( '%s: ', '%s: ', $brand_count, 'woocommerce' ), $labels->singular_name, $labels->name ), '</span>' ); // phpcs:ignore WordPress.Security.EscapeOutput
+			$brand_output = wc_get_brands( $post->ID, ', ', ' <span class="posted_in">' . sprintf( _n( '%s: ', '%s: ', $brand_count, 'woocommerce' ), $labels->singular_name, $labels->name ), '</span>' );
+
+			/**
+			 * Filter the brand output in product meta.
+			 *
+			 * @since 9.8.0
+			 *
+			 * @param string $brand_output The HTML output for brands.
+			 * @param array  $terms        Array of brand term objects.
+			 * @param int    $post_id      The product ID.
+			 */
+			echo apply_filters( 'woocommerce_product_brands_output', $brand_output, $terms, $post->ID ); // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 	}
 
@@ -410,6 +431,10 @@ class WC_Brands {
 	 */
 	public function add_structured_data( $markup ) {
 		global $post;
+
+		if ( ! is_array( $markup ) ) {
+			$markup = array();
+		}
 
 		if ( array_key_exists( 'brand', $markup ) ) {
 			return $markup;
@@ -467,6 +492,10 @@ class WC_Brands {
 		}
 
 		$brands = wp_get_post_terms( $args['post_id'], 'product_brand', array( 'fields' => 'ids' ) );
+
+		if ( is_wp_error( $brands ) ) {
+			return '';
+		}
 
 		// Bail early if we don't have any brands registered.
 		if ( 0 === count( $brands ) ) {
@@ -1065,6 +1094,81 @@ class WC_Brands {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Hooks the product brand terms block into single product templates.
+	 *
+	 * @param array $hooked_block_types The array of hooked block types.
+	 * @param int $relative_position The relative position of the hooked block.
+	 * @param string $anchor_block_type The type of anchor block.
+	 * @param WP_Block_Template $context The context of the block.
+	 *
+	 * @return array The array of hooked block types.
+	 */
+	public function hook_product_brand_block( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {
+
+		// Only add the block as the last child of the product meta block
+		if ( 'woocommerce/product-meta' === $anchor_block_type &&
+			 'last_child' === $relative_position &&
+			 $context instanceof WP_Block_Template &&
+			 'single-product' === $context->slug ) {
+
+				remove_action( 'woocommerce_product_meta_end', array( $this, 'show_brand' ) );
+
+				// Check if the template already has a product brand block
+				if ( ! $this->template_already_has_brand_block( $context ) ) {
+					// Simply add the core/post-terms block type
+					$hooked_block_types[] = 'core/post-terms';
+				}
+		}
+
+		return $hooked_block_types;
+	}
+
+	/**
+	 * Check if the template already contains a product brand block.
+	 *
+	 * @param WP_Block_Template $template The template object.
+	 *
+	 * @return boolean True if template contains a brand block.
+	 */
+	private function template_already_has_brand_block( $template ) {
+		if ( ! $template || empty( $template->content ) ) {
+			return false;
+		}
+
+		return strpos( $template->content, '<!-- wp:post-terms {"term":"product_brand"' ) !== false;
+	}
+
+	/**
+	 * Configures the attributes for the hooked product brand terms block.
+	 *
+	 * @param array $parsed_hooked_block The parsed hooked block.
+	 * @param string $hooked_block_type The type of hooked block.
+	 * @param int $relative_position The relative position of the hooked block.
+	 * @param array $parsed_anchor_block The parsed anchor block.
+	 * @param WP_Block_Template $context The context of the block.
+	 *
+	 * @return array The parsed hooked block.
+	 */
+	public function configure_product_brand_block( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+		if ( is_null( $parsed_hooked_block ) ) {
+			return $parsed_hooked_block;
+		}
+
+		if ( 'core/post-terms' === $hooked_block_type &&
+			 'last_child' === $relative_position &&
+			 'woocommerce/product-meta' === $parsed_anchor_block['blockName'] &&
+			 empty( $parsed_anchor_block['attrs'] ) ) {
+
+			$parsed_hooked_block['attrs'] = array(
+				'term'	 => 'product_brand',
+				'prefix' => __( 'Brands: ', 'woocommerce' ),
+			);
+		}
+
+		return $parsed_hooked_block;
 	}
 }
 

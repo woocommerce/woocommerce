@@ -160,6 +160,7 @@ const DashboardCharts = ( props ) => {
 	const renderMenu = () => (
 		<EllipsisMenu
 			label={ __( 'Choose which charts to display', 'woocommerce' ) }
+			placement={ 'bottom-end' }
 			renderContent={ ( { onToggle } ) => (
 				<Fragment>
 					<MenuTitle>{ __( 'Charts', 'woocommerce' ) }</MenuTitle>

@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
@@ -56,7 +57,7 @@ class ProductQueryFilters {
 		$stock_status_options  = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
 		$hide_outofstock_items = get_option( 'woocommerce_hide_out_of_stock_items' );
 		if ( 'yes' === $hide_outofstock_items ) {
-			unset( $stock_status_options['outofstock'] );
+			unset( $stock_status_options[ ProductStockStatus::OUT_OF_STOCK ] );
 		}
 
 		add_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10, 2 );

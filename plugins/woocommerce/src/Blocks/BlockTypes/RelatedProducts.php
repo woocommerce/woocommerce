@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 /**
  * RelatedProducts class.
  */
@@ -106,7 +108,7 @@ class RelatedProducts extends AbstractBlock {
 		return array(
 			'post_type'      => 'product',
 			'post__in'       => $related_products_ids,
-			'post_status'    => 'publish',
+			'post_status'    => ProductStatus::PUBLISH,
 			'posts_per_page' => $query['posts_per_page'],
 		);
 	}

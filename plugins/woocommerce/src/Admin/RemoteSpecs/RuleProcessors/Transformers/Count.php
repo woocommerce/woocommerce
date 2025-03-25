@@ -20,7 +20,7 @@ class Count implements TransformerInterface {
 	 *
 	 * @return number
 	 */
-	public function transform( $value, stdClass $arguments = null, $default_value = null ) {
+	public function transform( $value, ?stdClass $arguments = null, $default_value = null ) {
 		if ( ! is_array( $value ) && ! $value instanceof \Countable ) {
 			return $default_value;
 		}
@@ -35,7 +35,7 @@ class Count implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function validate( stdClass $arguments = null ) {
+	public function validate( ?stdClass $arguments = null ) {
 		return true;
 	}
 }

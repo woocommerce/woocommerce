@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestionIncentives;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
@@ -17,6 +18,8 @@ class AdminSuggestionsServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		PaymentExtensionSuggestions::class,
+		PaymentExtensionSuggestionIncentives::class,
+		// The individual incentive providers are provided by the PaymentExtensionSuggestionIncentives class.
 	);
 
 	/**
@@ -25,6 +28,7 @@ class AdminSuggestionsServiceProvider extends AbstractServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		$this->add( PaymentExtensionSuggestions::class );
+		$this->share( PaymentExtensionSuggestionIncentives::class );
+		$this->share( PaymentExtensionSuggestions::class )->addArgument( PaymentExtensionSuggestionIncentives::class );
 	}
 }

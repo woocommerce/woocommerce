@@ -21,8 +21,6 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	setSelectedTab: () => {},
 	isProductInstalled: () => false,
 	addInstalledProduct: () => {},
-	hasBusinessServices: false,
-	setHasBusinessServices: () => {},
 	searchResultsCount: {
 		extensions: 0,
 		themes: 0,
@@ -39,7 +37,6 @@ export function MarketplaceContextProvider( props: {
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
-	const [ hasBusinessServices, setHasBusinessServices ] = useState( false );
 	const [ searchResultsCount, setSearchResultsCountState ] =
 		useState< SearchResultsCountType >( {
 			extensions: 0,
@@ -84,8 +81,6 @@ export function MarketplaceContextProvider( props: {
 		setSelectedTab,
 		isProductInstalled,
 		addInstalledProduct,
-		hasBusinessServices,
-		setHasBusinessServices,
 		searchResultsCount,
 		setSearchResultsCount,
 	};

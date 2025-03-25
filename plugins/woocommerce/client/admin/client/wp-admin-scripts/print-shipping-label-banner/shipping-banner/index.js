@@ -7,7 +7,7 @@ import { Button, ExternalLink } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from '@automattic/interpolate-components';
 import PropTypes from 'prop-types';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { pluginsStore } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting, getAdminLink } from '@woocommerce/settings';
@@ -497,7 +497,7 @@ ShippingBanner.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isPluginsRequesting, isJetpackConnected, getActivePlugins } =
-			select( PLUGINS_STORE_NAME );
+			select( pluginsStore );
 
 		const isRequesting =
 			isPluginsRequesting( 'activatePlugins' ) ||
@@ -531,8 +531,7 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { activatePlugins, installPlugins } =
-			dispatch( PLUGINS_STORE_NAME );
+		const { activatePlugins, installPlugins } = dispatch( pluginsStore );
 
 		return {
 			activatePlugins,

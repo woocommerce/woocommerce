@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Implement CollectionHandlerRegistry class to manage collection handlers #52509

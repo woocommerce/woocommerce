@@ -8,6 +8,9 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -31,7 +34,7 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function get_type() {
-		return 'external';
+		return ProductType::EXTERNAL;
 	}
 
 	/*
@@ -114,9 +117,9 @@ class WC_Product_External extends WC_Product {
 	 * @param string $stock_status Stock status.
 	 */
 	public function set_stock_status( $stock_status = '' ) {
-		$this->set_prop( 'stock_status', 'instock' );
+		$this->set_prop( 'stock_status', ProductStockStatus::IN_STOCK );
 
-		if ( 'instock' !== $stock_status ) {
+		if ( ProductStockStatus::IN_STOCK !== $stock_status ) {
 			$this->error( 'product_external_invalid_stock_status', __( 'External products cannot be stock managed.', 'woocommerce' ) );
 		}
 	}

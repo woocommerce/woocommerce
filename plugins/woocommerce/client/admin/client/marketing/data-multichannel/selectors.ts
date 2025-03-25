@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { WPDataSelector, WPDataSelectors } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
 import { State } from './types';
@@ -29,3 +34,11 @@ export const getCampaigns = ( state: State, page: number, perPage: number ) => {
 export const getCampaignTypes = ( state: State ) => {
 	return state.campaignTypes;
 };
+
+// Types
+export type Selectors = {
+	getRegisteredChannels: WPDataSelector< typeof getRegisteredChannels >;
+	getRecommendedChannels: WPDataSelector< typeof getRecommendedChannels >;
+	getCampaigns: WPDataSelector< typeof getCampaigns >;
+	getCampaignTypes: WPDataSelector< typeof getCampaignTypes >;
+} & WPDataSelectors;

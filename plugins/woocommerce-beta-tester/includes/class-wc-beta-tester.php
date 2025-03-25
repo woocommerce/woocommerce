@@ -301,6 +301,8 @@ class WC_Beta_Tester {
 			return $response;
 		}
 
+		$warning = '';
+
 		if ( $this->is_beta_version( $new_version ) ) {
 			$warning = __( '<h1><span>&#9888;</span>This is a beta release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );
 		}

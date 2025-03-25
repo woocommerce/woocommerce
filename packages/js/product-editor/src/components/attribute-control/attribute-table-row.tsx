@@ -21,7 +21,7 @@ import {
 } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	experimentalProductAttributeTermsStore,
 	type ProductAttributeTerm,
 } from '@woocommerce/data';
 import type { MouseEventHandler } from 'react';
@@ -32,7 +32,8 @@ import type { MouseEventHandler } from 'react';
 import AttributesComboboxControl from '../attribute-combobox-field';
 import type { AttributeTableRowProps } from './types';
 
-interface FormTokenFieldProps extends CoreFormTokenField.Props {
+interface FormTokenFieldProps
+	extends React.ComponentProps< typeof CoreFormTokenField > {
 	__experimentalExpandOnFocus: boolean;
 	__experimentalAutoSelectFirstMatch: boolean;
 	__experimentalShowHowTo?: boolean;
@@ -85,8 +86,9 @@ const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
  * @param {string | TokenItem} item - The item to convert.
  * @return {string} The string.
  */
-const tokenItemToString = ( item: string | TokenItem ): string =>
-	typeof item === 'string' ? item : item.value;
+const tokenItemToString = (
+	item: string | Omit< TokenItem, 'slug' >
+): string => ( typeof item === 'string' ? item : item.value );
 
 const INITIAL_MAX_TOKENS_TO_SHOW = 20;
 const MAX_TERMS_TO_LOAD = 100;
@@ -112,7 +114,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 } ) => {
 	const attributeId = attribute ? attribute.id : undefined;
 	const { createProductAttributeTerm } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+		experimentalProductAttributeTermsStore
 	);
 	const selectItemsQuery = useMemo(
 		() => ( {
@@ -132,7 +134,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		// @ts-ignore
 		( select: WCDataSelector ) => {
 			const { getProductAttributeTerms } = select(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+				experimentalProductAttributeTermsStore
 			);
 
 			return attributeId
@@ -288,7 +290,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		// Create the new terms.
 		const promises = newTokens.map( async ( token ) => {
 			try {
-				const newTerm = ( await createProductAttributeTerm(
+				const newTerm = await createProductAttributeTerm(
 					{
 						name: token.value,
 						slug: token.slug,
@@ -296,9 +298,11 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					},
 					{
 						optimisticQueryUpdate: selectItemsQuery,
-						optimisticUrlParameters: [ attributeId ],
+						optimisticUrlParameters: attributeId
+							? [ attributeId ]
+							: [],
 					}
-				) ) satisfies ProductAttributeTerm;
+				);
 
 				return newTerm;
 			} catch ( error ) {
@@ -333,18 +337,19 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		 * The optimistic rendering should be implemented in the store.
 		 */
 		const recentTermsList = sel(
-			EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-		).getProductAttributeTerms(
-			selectItemsQuery
-		) as ProductAttributeTerm[];
+			experimentalProductAttributeTermsStore
+		).getProductAttributeTerms( selectItemsQuery );
 
 		/*
 		 * New selected terms are the ones that are in the recent terms list
 		 * and also in the token field values.
 		 */
-		const newSelectedTerms = recentTermsList.filter( ( term ) =>
-			tokenFieldValues.map( ( item ) => item.value ).includes( term.name )
-		);
+		const newSelectedTerms =
+			recentTermsList?.filter( ( term ) =>
+				tokenFieldValues
+					.map( ( item ) => item.value )
+					.includes( term.name )
+			) ?? [];
 
 		// Call the callback to update the Form terms.
 		onTermsSelect(
@@ -400,7 +405,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					disabled={ ! attribute }
 					suggestions={ tokenFieldSuggestions }
 					value={ tokenFieldValues }
-					onChange={ ( nextTokens: ( TokenItem | string )[] ) => {
+					onChange={ ( nextTokens ) => {
 						// If there is no attribute, exit.
 						if ( ! attribute ) {
 							return;
@@ -419,8 +424,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 							.map( stringToTokenItem );
 
 						// Create a string list of the next string tokens.
-						const nextStringTokens =
-							nextTokens.map( tokenItemToString );
+						const nextStringTokens = nextTokens.map( ( value ) =>
+							tokenItemToString( value )
+						);
 
 						// *** LOCAL Attributes ***
 						if ( isLocalAttribute ) {

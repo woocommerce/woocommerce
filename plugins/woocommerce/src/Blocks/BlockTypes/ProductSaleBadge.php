@@ -20,7 +20,7 @@ class ProductSaleBadge extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
+	protected $api_version = '3';
 
 	/**
 	 * Get block attributes.
@@ -56,7 +56,6 @@ class ProductSaleBadge extends AbstractBlock {
 			'spacing'                =>
 			array(
 				'margin'                          => true,
-				'padding'                         => true,
 				'__experimentalSkipSerialization' => true,
 
 			),

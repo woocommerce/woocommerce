@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\BlockPatterns as TestedBlockPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 /**
@@ -45,7 +44,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		delete_site_transient( 'woocommerce_blocks_patterns' );
 
-		$package                  = new Package( '0.1.0', __DIR__, new FeatureGating() );
+		$package                  = new Package( '0.1.0', __DIR__ );
 		$this->pattern_registry   = $this->createMock( PatternRegistry::class );
 		$this->ptk_patterns_store = $this->createMock( PTKPatternsStore::class );
 

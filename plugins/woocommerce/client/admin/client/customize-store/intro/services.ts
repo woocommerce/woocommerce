@@ -1,11 +1,9 @@
-// @ts-expect-error -- No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { store as coreStore } from '@wordpress/core-data';
+import { onboardingStore, optionsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -32,7 +30,7 @@ export const fetchThemeCards = async () => {
 };
 
 export const fetchCustomizeStoreCompleted = async () => {
-	const task = await resolveSelect( ONBOARDING_STORE_NAME ).getTask(
+	const task = await resolveSelect( onboardingStore ).getTask(
 		'customize-store'
 	);
 
@@ -42,17 +40,16 @@ export const fetchCustomizeStoreCompleted = async () => {
 };
 
 export const fetchIntroData = async () => {
-	const currentTemplatePromise =
-		// @ts-expect-error No types for this exist yet.
-		resolveSelect( coreStore ).getDefaultTemplateId( { slug: 'home' } );
+	const currentTemplatePromise = resolveSelect(
+		coreStore
+	).getDefaultTemplateId( { slug: 'home' } );
 
 	const maybePreviousTemplatePromise = resolveSelect(
-		OPTIONS_STORE_NAME
+		optionsStore
 	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
 
-	const getTaskPromise = resolveSelect( ONBOARDING_STORE_NAME ).getTask(
-		'customize-store'
-	);
+	const getTaskPromise =
+		resolveSelect( onboardingStore ).getTask( 'customize-store' );
 
 	const themeDataPromise = fetchThemeCards();
 

@@ -67,7 +67,7 @@ class ExtendedContainer extends BaseContainer {
 	 * @return DefinitionInterface The generated definition for the container.
 	 * @throws ContainerException Invalid parameters.
 	 */
-	public function add( string $class_name, $concrete = null, bool $shared = null ): DefinitionInterface {
+	public function add( string $class_name, $concrete = null, ?bool $shared = null ): DefinitionInterface {
 		if ( ! $this->is_class_allowed( $class_name ) ) {
 			throw new ContainerException( "You cannot add '$class_name', only classes in the {$this->woocommerce_namespace} namespace are allowed." );
 		}

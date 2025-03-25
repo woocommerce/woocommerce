@@ -8,6 +8,8 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -396,7 +398,7 @@ class WC_Checkout {
 			 * different items or cost, create a new order. We use a hash to
 			 * detect changes which is based on cart items + order total.
 			 */
-			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) ) {
 				/**
 				 * Indicates that we are resuming checkout for an existing order (which is pending payment, and which
 				 * has not changed since it was added to the current shopping session).
@@ -426,7 +428,7 @@ class WC_Checkout {
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
-					// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
+					// Store custom fields prefixed with either shipping_ or billing_. This is for backwards compatibility with 2.6.x.
 				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
 					if ( ! isset( $shipping_fields[ $key ] ) ) {
 						$order->update_meta_data( '_' . $key, $value );
@@ -485,7 +487,7 @@ class WC_Checkout {
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order && $order instanceof WC_Order ) {
-				$order->get_data_store()->release_held_coupons( $order );
+				wc_release_coupons_for_order( $order );
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
 				 *
@@ -553,8 +555,8 @@ class WC_Checkout {
 					array(
 						'name'         => $product->get_name(),
 						'tax_class'    => $product->get_tax_class(),
-						'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
-						'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
+						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
+						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
 					)
 				);
 			}
@@ -631,6 +633,7 @@ class WC_Checkout {
 						'taxes'        => array(
 							'total' => $shipping_rate->taxes,
 						),
+						'tax_status'   => $shipping_rate->tax_status,
 					)
 				);
 
@@ -954,7 +957,7 @@ class WC_Checkout {
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
 					/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
-					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . $shipping_country ) );
+					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix( $shipping_country ) . ' ' . $shipping_country ) );
 				}
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -1200,7 +1203,7 @@ class WC_Checkout {
 				if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
 					$customer->{"set_{$key}"}( $value );
 
-					// Store custom fields prefixed with wither shipping_ or billing_.
+					// Store custom fields prefixed with either shipping_ or billing_.
 				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
 					$customer->update_meta_data( $key, $value );
 				}

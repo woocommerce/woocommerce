@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -13,6 +14,10 @@ import { Tax } from '..';
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
+} ) );
+
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
 } ) );
 
 const fakeTask: {
@@ -115,4 +120,46 @@ it( 'does not render WooCommerce Tax (powered by WCS&T) if not in a supported co
 	);
 
 	assertWooCommerceTaxIsNotRecommended();
+} );
+
+it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
+
+	fireEvent.click( screen.getByText( 'Official WooCommerce Marketplace' ) );
+
+	expect( recordEvent ).toHaveBeenCalledWith(
+		'tasklist_tax_visit_marketplace_click',
+		{}
+	);
+} );
+
+it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+	const mockLocation = {
+		href: 'test',
+	} as Location;
+
+	mockLocation.href = 'test';
+	Object.defineProperty( global.window, 'location', {
+		value: mockLocation,
+	} );
+
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
+
+	fireEvent.click( screen.getByText( 'Official WooCommerce Marketplace' ) );
+
+	expect( mockLocation.href ).toContain(
+		'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+	);
 } );

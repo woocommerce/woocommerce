@@ -15,7 +15,7 @@ import {
 import './style.scss';
 
 export default {
-	title: 'WooCommerce Admin/experimental/VerticalCSSTransition',
+	title: 'Experimental/VerticalCSSTransition',
 	component: VerticalCSSTransition,
 	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 } as Meta;
@@ -28,10 +28,12 @@ const Parent: React.FC< VerticalCSSTransitionProps > = ( args ) => {
 				{ expanded ? 'collapse' : 'expand' }
 			</button>
 			<VerticalCSSTransition { ...args } in={ expanded }>
-				<div>some content</div>
-				<div>
-					some more content <br /> line 2 <br /> line 3
-				</div>
+				<>
+					<div>some content</div>
+					<div>
+						some more content <br /> line 2 <br /> line 3
+					</div>
+				</>
 			</VerticalCSSTransition>
 		</>
 	);

@@ -112,24 +112,21 @@ class PaymentInfo {
 				return array();
 			}
 
-			$intent_id = $order->get_meta( '_intent_id' );
-			if ( ! $intent_id ) {
+			$payment_method_id = $order->get_meta( '_payment_method_id' );
+			if ( ! $payment_method_id ) {
 				return array();
 			}
 
 			try {
-				$payment_details = \WC_Payments::get_payments_api_client()
-					->get_intent( $intent_id )
-					->get_charge()
-					->get_payment_method_details();
-			} catch ( Exception $ex ) {
+				$payment_details = \WC_Payments::get_payments_api_client()->get_payment_method( $payment_method_id );
+			} catch ( \Throwable $ex ) {
 				$order_id = $order->get_id();
 				$message  = $ex->getMessage();
 				wc_get_logger()->error(
 					sprintf(
-						'%s - retrieving info for charge %s for order %s: %s',
+						'%s - retrieving info for payment method %s for order %s: %s',
 						StringUtil::class_name_without_namespace( static::class ),
-						$intent_id,
+						$payment_method_id,
 						$order_id,
 						$message
 					),

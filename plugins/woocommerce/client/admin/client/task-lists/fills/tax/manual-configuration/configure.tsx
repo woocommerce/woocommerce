@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -18,12 +18,12 @@ export const Configure: React.FC<
 	Pick< TaxChildProps, 'isPending' | 'onManual' >
 > = ( { isPending, onManual } ) => {
 	const { generalSettings } = useSelect( ( select ) => {
-		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { getSettings } = select( settingsStore );
 
 		return {
 			generalSettings: getSettings( 'general' )?.general,
 		};
-	} );
+	}, [] );
 
 	return (
 		<>

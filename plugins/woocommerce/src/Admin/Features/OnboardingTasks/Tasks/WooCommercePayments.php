@@ -8,6 +8,9 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
+use WC_Gateway_BACS;
+use WC_Gateway_Cheque;
+use WC_Gateway_COD;
 
 /**
  * WooCommercePayments Task
@@ -257,7 +260,7 @@ class WooCommercePayments extends Task {
 				// Filter out any WooPayments-related or offline gateways.
 				return 'yes' === $gateway->enabled
 					&& 0 !== strpos( $gateway->id, 'woocommerce_payments' )
-					&& ! in_array( $gateway->id, array( 'bacs', 'cheque', 'cod' ), true );
+					&& ! in_array( $gateway->id, array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true );
 			}
 		);
 
@@ -286,7 +289,7 @@ class WooCommercePayments extends Task {
 			}
 
 			// Check if there is an active WooPayments incentive via the welcome page.
-			if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
+			if ( WcPayWelcomePage::instance()->has_incentive() ) {
 				// Point to the WooPayments welcome page.
 				return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
 			}

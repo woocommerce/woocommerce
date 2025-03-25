@@ -45,7 +45,7 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 		$gateway = new WC_Gateway_Paypal();
 		$order   = WC_Helper_Order::create_order();
 
-		$order->set_payment_method( 'paypal' );
+		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->set_transaction_id( '12345' );
 		$order->save();
 

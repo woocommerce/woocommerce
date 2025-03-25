@@ -8,6 +8,8 @@
  * @version 2.6.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -321,7 +323,16 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['pay'] );
 	}
 
-	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ), true ) ) {
+	/**
+	 * Filters the valid order statuses for cancel action.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array    $statuses_for_cancel Array of valid order statuses for cancel action.
+	 * @param WC_Order $order                Order instance.
+	 */
+	$statuses_for_cancel = apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+	if ( ! in_array( $order->get_status(), $statuses_for_cancel, true ) ) {
 		unset( $actions['cancel'] );
 	}
 

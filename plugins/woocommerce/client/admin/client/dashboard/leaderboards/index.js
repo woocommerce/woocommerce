@@ -112,6 +112,7 @@ const Leaderboards = ( props ) => {
 				'Choose which leaderboards to display and other settings',
 				'woocommerce'
 			) }
+			placement={ 'bottom-end' }
 			renderContent={ ( { onToggle } ) => (
 				<Fragment>
 					<MenuTitle>

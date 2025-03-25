@@ -4,7 +4,6 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -17,8 +16,8 @@ describe( 'PluginsTermsOfService', () => {
 			<PluginsTermsOfService
 				selectedPlugins={ [
 					{
-						key: 'woocommerce-payments',
-						name: 'WooCommerce Payments',
+						key: 'test-plugin',
+						name: 'test-plugin',
 						description: '',
 						image_url: '',
 						manage_url: '',
@@ -68,7 +67,7 @@ describe( 'PluginsTermsOfService', () => {
 						is_visible: false,
 					},
 					{
-						key: 'woocommerce-services:shipping',
+						key: 'woocommerce-shipping',
 						name: 'WooCommerce Shipping',
 						description: '',
 						image_url: '',

@@ -1,18 +1,14 @@
 /* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import {
 	Button,
 	CheckboxControl,
-	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
 	Modal,
-	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorButton as NavigatorButton,
 	Spinner,
-	// @ts-ignore No types for this exist yet.
 } from '@wordpress/components';
 import {
 	createInterpolateElement,
@@ -22,11 +18,8 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
-import {
-	store as coreStore,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/core-data';
-// @ts-expect-error Missing type.
+import { store as coreStore } from '@wordpress/core-data';
+// @ts-expect-error No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
 /**
@@ -67,9 +60,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
 
 	const currentTemplateId: string | undefined = useSelect(
-		( sel ) =>
-			// @ts-expect-error No types for this exist yet.
-			sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
+		( sel ) => sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
 		[]
 	);
 
@@ -289,6 +280,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 									>
 										<CheckboxControl
 											className="core-profiler__checkbox"
+											// @ts-expect-error Types are incorrect for this prop.
 											label={ interpolateComponents( {
 												mixedString: __(
 													'More patterns from the WooCommerce.com library are available! Opt in to connect your store and access the full library, plus get more relevant content and a tailored store setup experience. Opting in will enable {{link}}usage tracking{{/link}}, which you can opt out of at any time via WooCommerce settings.',

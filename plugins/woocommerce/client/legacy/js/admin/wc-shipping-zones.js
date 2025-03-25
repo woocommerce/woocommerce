@@ -1,6 +1,13 @@
 /* global shippingZonesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
+		if ( 
+			! document.getElementById( 'tmpl-wc-shipping-zone-row' ) || 
+			! document.getElementById( 'tmpl-wc-shipping-zone-row-blank' ) 
+		) {
+			return;
+		}
+		
 		var $table          = $( '.wc-shipping-zones' ),
 			$tbody          = $( '.wc-shipping-zone-rows' ),
 			$save_button    = $( '.wc-shipping-zone-save' ),
@@ -169,7 +176,13 @@
 							}
 
 							$method_list.append(
-								'<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method.title + '</li>'
+								'<li data-id="' + 
+									shipping_method.instance_id + 
+									'" class="wc-shipping-zone-method ' + 
+									class_name + 
+									'">' + 
+									shipping_method.title + 
+								'</li>'
 							);
 						} );
 					} else {

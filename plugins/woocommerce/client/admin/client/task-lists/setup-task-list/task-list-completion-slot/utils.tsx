@@ -38,7 +38,7 @@ export const WooTaskListCompletion = ( {
 }: WooTaskListCompletionProps ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -57,7 +57,8 @@ export type WooTaskListCompletionFillProps = {
 WooTaskListCompletion.Slot = ( {
 	fillProps,
 }: {
-	fillProps: Slot.Props & WooTaskListCompletionFillProps;
+	fillProps: React.ComponentProps< typeof Slot >[ 'fillProps' ] &
+		WooTaskListCompletionFillProps;
 } ) => (
 	<Slot
 		name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }

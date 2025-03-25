@@ -24,7 +24,7 @@ const modalEditorActions = {
 		type: ACTION_MODAL_EDITOR_CLOSE,
 	} ),
 
-	setModalEditorBlocks: ( blocks: BlockInstance ) => ( {
+	setModalEditorBlocks: ( blocks: BlockInstance[] ) => ( {
 		type: ACTION_MODAL_EDITOR_SET_BLOCKS,
 		blocks,
 	} ),
@@ -32,6 +32,10 @@ const modalEditorActions = {
 	setModalEditorContentHasChanged: ( hasChanged: boolean ) => ( {
 		type: ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
 		hasChanged,
+	} ),
+
+	isModalEditorOpen: () => ( {
+		type: Boolean,
 	} ),
 };
 

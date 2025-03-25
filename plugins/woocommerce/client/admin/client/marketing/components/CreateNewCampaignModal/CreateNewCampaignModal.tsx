@@ -30,12 +30,15 @@ const isExternalURL = ( url: string ) =>
 	new URL( url ).origin !== location.origin;
 
 /**
- * Props for CreateNewCampaignModal, which is based on Modal.Props.
+ * Props for CreateNewCampaignModal, which is based on Modal.
  *
  * Modal's title and children props are omitted because they are specified within the component
  * and not needed to be specified by the consumer.
  */
-type CreateCampaignModalProps = Omit< Modal.Props, 'title' | 'children' >;
+type CreateCampaignModalProps = Omit<
+	React.ComponentProps< typeof Modal >,
+	'title' | 'children'
+>;
 
 export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { className, ...restProps } = props;

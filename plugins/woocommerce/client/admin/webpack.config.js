@@ -9,6 +9,7 @@ const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-web
 const BundleAnalyzerPlugin =
 	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
+const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
 /**
@@ -17,8 +18,6 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
 const UnminifyWebpackPlugin = require( './unminify' );
 const {
 	webpackConfig: styleConfig,
-	ForkTsCheckerWebpackPlugin,
-	TypeScriptWarnOnlyWebpackPlugin,
 } = require( '@woocommerce/internal-style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
@@ -65,7 +64,8 @@ const wcAdminPackages = [
 
 const getEntryPoints = () => {
 	const entryPoints = {
-		app: './client/index.js',
+		app: './client/index.tsx',
+		embed: './client/embed.tsx',
 		settings: './client/settings/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
@@ -139,7 +139,6 @@ const webpackConfig = {
 							[ '@babel/preset-typescript' ],
 						],
 						plugins: [
-							'@babel/plugin-proposal-class-properties',
 							! isProduction &&
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
@@ -180,10 +179,6 @@ const webpackConfig = {
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
-		! process.env.STORYBOOK &&
-			new TypeScriptWarnOnlyWebpackPlugin( [
-				/* specify TS error codes here, e.g. 'TS2322' */
-			] ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -230,18 +225,32 @@ const webpackConfig = {
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
-					if ( request === '@wordpress/components/build/ui' ) {
-						// The external wp.components does not include ui components, so we need to skip requesting to external here.
-						return null;
+					switch ( request ) {
+						case 'react/jsx-runtime':
+						case 'react/jsx-dev-runtime':
+							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
+							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
+							// For backward compatibility reasons we need to skip requesting to external here.
+							return null;
 					}
 
 					if ( request.startsWith( '@wordpress/dataviews' ) ) {
 						return null;
 					}
 
-					if ( request.startsWith( '@wordpress/edit-site' ) ) {
-						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here. We can remove this once the edit-site components are exported in the external wp.editSite.
-						// We use the edit-site components in the customize store.
+					// Skip requesting to external if the import path is from the build or build-module directory for WordPress packages.
+					// This is required for @wordpress/edit-site to work and also can reduce the bundle size when we don't need to load the entire WordPress package.
+					if (
+						request.match( /^@wordpress\/.*\/build(?:-module)?/ )
+					) {
+						return null;
+					}
+
+					// Skip requesting to external if the import path is from the build or build-module directory for WooCommerce packages.
+					// This can reduce the bundle size when we don't need to load the entire WooCommerce package.
+					if (
+						request.match( /^@woocommerce\/.*\/build(?:-module)?/ )
+					) {
 						return null;
 					}
 				},

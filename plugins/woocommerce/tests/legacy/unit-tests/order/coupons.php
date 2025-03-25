@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 /**
@@ -416,7 +417,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 
 		$product_3 = WC_Helper_Product::create_simple_product();
 		$product_3->set_regular_price( 9.53 );
-		$product_3->set_tax_status( 'none' );
+		$product_3->set_tax_status( ProductTaxStatus::NONE );
 		$product_3->save();
 		$product_3 = wc_get_product( $product_3->get_id() );
 

@@ -1,0 +1,105 @@
+.wp-block-woocommerce-checkout-order-summary-block {
+	border: 1px solid $universal-border-light;
+	border-radius: 5px;
+
+	&.checkout-order-summary-block-fill-wrapper {
+		.wc-block-components-order-summary {
+			padding: 0 $gap;
+		}
+	}
+
+	.wc-block-components-formatted-money-amount {
+		font-weight: 600;
+	}
+
+	.wc-block-components-totals-wrapper:first-of-type {
+		border-top: 0;
+	}
+
+	.wc-block-components-checkout-order-summary__title {
+		margin-top: $gap;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		.wc-block-components-checkout-order-summary__title-text {
+			margin: 0 0 $gap $gap;
+			flex-grow: 1;
+			font-weight: 500;
+		}
+
+		.wc-block-components-checkout-order-summary__title-open-close {
+			cursor: pointer;
+		}
+	}
+
+	.checkout-order-summary-block-fill {
+		border: 1px solid $universal-border-light;
+		border-radius: 5px;
+
+		.wc-block-components-totals-wrapper:first-of-type {
+			border-top: 0;
+		}
+
+		.wc-block-components-totals-item {
+			padding-left: $gap;
+			padding-right: $gap;
+		}
+
+		.wc-block-components-totals-coupon {
+			padding-left: $gap;
+			padding-right: $gap;
+		}
+	}
+}
+
+.has-dark-controls {
+	.wp-block-woocommerce-checkout-order-summary-block {
+		border: 1px solid $input-border-dark;
+	}
+}
+
+.is-small,
+.is-medium,
+.is-mobile {
+	.wp-block-woocommerce-checkout-order-summary-block {
+		margin-top: 0;
+		border: none;
+
+		&.checkout-order-summary-block-fill-wrapper {
+			padding-top: $gap-larger;
+		}
+
+		.wc-block-components-checkout-order-summary__title {
+			padding: 20px 0;
+			cursor: pointer;
+			border-top: 1px solid $universal-border-light;
+			border-bottom: 1px solid $universal-border-light;
+
+			&.is-open {
+				border-bottom: none;
+			}
+
+			.wc-block-components-checkout-order-summary__title-text {
+				margin: 0;
+			}
+
+			.wc-block-components-checkout-order-summary__title-icon {
+				fill: currentColor;
+			}
+		}
+
+		.wc-block-components-checkout-order-summary__content {
+			display: none;
+
+			&.is-open {
+				border-bottom: 1px solid $universal-border-light;
+				display: block;
+
+				.wc-block-components-totals-wrapper:first-child {
+					border-top: none;
+				}
+			}
+		}
+	}
+}

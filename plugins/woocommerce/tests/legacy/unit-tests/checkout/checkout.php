@@ -199,7 +199,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$checkout = WC_Checkout::instance();
 		$order_id = $checkout->create_order(
 			array(
-				'payment_method' => 'cod',
+				'payment_method' => WC_Gateway_COD::ID,
 				'billing_email'  => 'a@b.com',
 			)
 		);
@@ -287,7 +287,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$checkout = WC_Checkout::instance();
 		$order_id = $checkout->create_order(
 			array(
-				'payment_method' => 'cod',
+				'payment_method' => WC_Gateway_COD::ID,
 				'billing_email'  => 'a@b.com',
 			)
 		);

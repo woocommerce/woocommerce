@@ -2,14 +2,30 @@
 /**
  * Admin View: Settings
  *
+ * This file is included in WC_Admin_Settings::output().
+ *
  * @package WooCommerce
  */
+
+// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/**
+ * The current WC admin settings tab ID.
+ *
+ * @var string $current_tab
+ */
+
+/**
+ * The current WC admin settings section ID.
+ *
+ * @var string $current_section
+ */
 
 $tab_exists        = isset( $tabs[ $current_tab ] ) || has_action( 'woocommerce_sections_' . $current_tab ) || has_action( 'woocommerce_settings_' . $current_tab ) || has_action( 'woocommerce_settings_tabs_' . $current_tab );
 $current_tab_label = isset( $tabs[ $current_tab ] ) ? $tabs[ $current_tab ] : '';
@@ -20,7 +36,16 @@ if ( ! $tab_exists ) {
 }
 
 $hide_nav = Features::is_enabled( 'reactify-classic-payments-settings' ) &&
-	'checkout' === $current_tab && 'offline' === $current_section;
+	( 'checkout' === $current_tab && 'offline' === $current_section );
+
+// Move 'Advanced' to the last.
+if ( array_key_exists( 'advanced', $tabs ) ) {
+	$advanced = $tabs['advanced'];
+	unset( $tabs['advanced'] );
+	// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	$tabs['advanced'] = $advanced;
+}
+
 ?>
 
 <div class="wrap woocommerce">
@@ -44,21 +69,23 @@ $hide_nav = Features::is_enabled( 'reactify-classic-payments-settings' ) &&
 				?>
 			</nav>
 		<?php endif; ?>
-		<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
-		<?php
-			do_action( 'woocommerce_sections_' . $current_tab );
+		<div class="settings-content">
+			<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
+			<?php
+				do_action( 'woocommerce_sections_' . $current_tab );
 
-			self::show_messages();
+				WC_Admin_Settings::show_messages();
 
-			do_action( 'woocommerce_settings_' . $current_tab );
-			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
-		?>
-		<p class="submit">
-			<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>
-				<button name="save" disabled class="woocommerce-save-button components-button is-primary" type="submit" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
-			<?php endif; ?>
-			<?php wp_nonce_field( 'woocommerce-settings' ); ?>
-		</p>
+				do_action( 'woocommerce_settings_' . $current_tab );
+				do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
+			?>
+			<p class="submit">
+				<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>
+					<button name="save" disabled class="woocommerce-save-button components-button is-primary" type="submit" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+				<?php endif; ?>
+				<?php wp_nonce_field( 'woocommerce-settings' ); ?>
+			</p>
+		</div>
 	</form>
 	<?php do_action( 'woocommerce_after_settings_' . $current_tab ); ?>
 </div>

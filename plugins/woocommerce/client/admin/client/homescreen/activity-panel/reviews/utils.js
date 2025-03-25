@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { REVIEWS_STORE_NAME } from '@woocommerce/data';
+import { reviewsStore } from '@woocommerce/data';
 
 export const REVIEW_PAGE_LIMIT = 5;
 
@@ -14,7 +14,7 @@ export const unapprovedReviewsQuery = {
 };
 export function getUnapprovedReviews( select ) {
 	const { getReviewsTotalCount, getReviewsError, isResolving } =
-		select( REVIEWS_STORE_NAME );
+		select( reviewsStore );
 
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const totalReviews = getReviewsTotalCount( unapprovedReviewsQuery );

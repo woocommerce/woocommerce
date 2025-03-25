@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 import { WCUser } from '@woocommerce/data';
 
 /**
@@ -37,7 +36,7 @@ describe( 'NoPermissions', () => {
 			],
 			currentUser: {
 				capabilities: {},
-			} as WCUser< 'capabilities' >,
+			} as WCUser,
 		},
 		sendEvent: mockSendEvent,
 		navigationProgress: 50,
@@ -62,7 +61,7 @@ describe( 'NoPermissions', () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				'Enhance your store by installing these free business features. No commitment required – you can remove them at any time.'
+				'No commitment required – you can remove them at any time.'
 			)
 		).toBeInTheDocument();
 	} );

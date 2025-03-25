@@ -51,6 +51,6 @@ const DateRangeExample = () => {
 export const Basic = () => <DateRangeExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/calendar/DateRange',
+	title: 'Components/calendar/DateRange',
 	component: DateRange,
 };

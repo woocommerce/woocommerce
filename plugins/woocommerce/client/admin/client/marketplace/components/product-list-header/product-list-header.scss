@@ -3,18 +3,23 @@
 .woocommerce-marketplace {
 	&__product-list-header {
 		display: flex;
-		justify-content: center;
-		gap: $medium-gap;
+		flex-direction: column;
+		gap: $small-gap;
 		align-self: stretch;
+
+		@media screen and (min-width: $breakpoint-medium) {
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
 	}
 
 	&__product-list-title {
-		flex: 1 0 0;
+		flex: 1 0 100%;
 		font-size: 20px;
 		font-style: normal;
 		font-weight: 400;
-		margin-bottom: $medium-gap;
-		margin-top: $small-gap;
+		line-height: 28px;
+		margin: 0;
 
 		&.is-loading {
 			background: $skeleton-loader-color;
@@ -29,11 +34,25 @@
 		margin-bottom: 0;
 	}
 
+	&__product-list-description {
+		flex: 1 0 100%;
+		margin: 0;
+
+		@media screen and (min-width: $breakpoint-medium) {
+			flex: 1;
+		}
+	}
+
 	&__product-list-link {
 		display: flex;
-		justify-content: center;
-		align-items: center;
+		justify-content: flex-end;
 		gap: 12px;
+		margin-left: 0;
+
+		@media screen and (min-width: $breakpoint-medium) {
+			margin-left: auto;
+			align-items: center;
+		}
 	}
 
 	&__product-list-link a {

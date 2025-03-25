@@ -3,6 +3,7 @@
  */
 import { AUTO_DRAFT_NAME } from '@woocommerce/product-editor';
 import { type Product } from '@woocommerce/data';
+import { store as coreStore } from '@wordpress/core-data';
 import { dispatch } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 
@@ -17,7 +18,7 @@ export function useProductEntityRecord(
 			return;
 		}
 
-		const createProductPromise = dispatch( 'core' ).saveEntityRecord(
+		const createProductPromise = dispatch( coreStore ).saveEntityRecord(
 			'postType',
 			'product',
 			{

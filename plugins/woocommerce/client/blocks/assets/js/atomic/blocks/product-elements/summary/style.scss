@@ -1,0 +1,30 @@
+.wc-block-components-product-summary {
+	margin-top: 0;
+	margin-bottom: $gap-small;
+	word-wrap: break-word;
+
+	// While "classic" product editor allows inserting heading elements, they were
+	// never respected with previous Product Summary block (core/post-excerpt variation).
+	// To avoid heading in summary show too big and dominating the whole product,
+	// we decided to provide arbitrary sizing to headings used in product summary.
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-size: 1.15em;
+		color: inherit;
+	}
+
+	&__more-link {
+		display: inline-block;
+	}
+}
+.is-loading .wc-block-components-product-summary::before {
+	@include placeholder();
+	content: ".";
+	display: block;
+	width: 100%;
+	height: 6em;
+}

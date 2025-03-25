@@ -255,7 +255,7 @@ add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
  * @see woocommerce_demo_store()
  */
 add_action( 'wp_footer', 'wc_print_js', 25 );
-add_action( 'wp_footer', 'woocommerce_demo_store' );
+add_action( 'wp_body_open', 'woocommerce_demo_store' );
 
 /**
  * Order details.
@@ -323,4 +323,4 @@ add_action( 'woocommerce_before_reset_password_form', 'woocommerce_output_all_no
 /**
  * Hooked blocks.
  */
-add_action( 'after_switch_theme', 'wc_set_hooked_blocks_version_on_theme_switch', 10, 2 );
+add_action( 'after_switch_theme', 'wc_after_switch_theme', 10, 2 );

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 
 /**
  * Internal dependencies
@@ -22,7 +21,7 @@ describe( 'StatusBadge component', () => {
 
 	it( 'renders the correct message for needs_setup status', () => {
 		const { getByText } = render( <StatusBadge status="needs_setup" /> );
-		expect( getByText( 'Needs setup' ) ).toBeInTheDocument();
+		expect( getByText( 'Action needed' ) ).toBeInTheDocument();
 	} );
 
 	it( 'renders the correct message for test_mode status', () => {

@@ -2,18 +2,25 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { COUNTRIES_STORE_NAME, Country } from '@woocommerce/data';
+import { countriesStore, Country, Locale } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
-import { SelectControl, TextControl } from '@woocommerce/components';
+import {
+	SelectControl,
+	TextControl,
+	FormContextType,
+} from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
-/**
- * Internal dependencies
- */
-import { FormInputProps } from '~/utils/types';
+export type FormValues = {
+	addressLine1: string;
+	addressLine2: string;
+	countryState: string;
+	city: string;
+	postCode: string;
+};
 
 const storeAddressFields = [
 	'addressLine1',
@@ -281,39 +288,48 @@ export function useGetCountryStateAutofill(
 }
 
 type StoreAddressProps = {
-	getInputProps: ( key: string ) => FormInputProps;
+	getInputProps: FormContextType< FormValues >[ 'getInputProps' ];
+	getSelectControlProps: FormContextType< FormValues >[ 'getSelectControlProps' ];
 	setValue: ( key: string, value: string ) => void;
 };
 
 /**
  * Store address fields.
  *
- * @param {Object}   props               Props for input components.
- * @param {Function} props.getInputProps Get input props.
- * @param {Function} props.setValue      Set value of the countryState input.
- * @return {Object} -
+ * @param {Object}   props                       Props for input components.
+ * @param {Function} props.getInputProps         Get input props.
+ * @param {Function} props.getSelectControlProps Get select control props.
+ * @param {Function} props.setValue              Set value of the countryState input.
  */
 export function StoreAddress( {
 	getInputProps,
+	getSelectControlProps,
 	setValue,
 }: StoreAddressProps ): JSX.Element {
 	const countryState = getInputProps( 'countryState' ).value;
 	const { locale, hasFinishedResolution, countries, loadingCountries } =
-		useSelect( ( select ) => {
-			const {
-				getLocale,
-				getCountries,
-				hasFinishedResolution: hasFinishedCountryResolution,
-			} = select( COUNTRIES_STORE_NAME );
-			return {
-				locale: getLocale( countryState ),
-				countries: getCountries(),
-				loadingCountries:
-					! hasFinishedCountryResolution( 'getCountries' ),
-				hasFinishedResolution:
-					hasFinishedCountryResolution( 'getLocales' ),
-			};
-		} );
+		useSelect(
+			( select ) => {
+				const {
+					getLocale,
+					getCountries,
+					hasFinishedResolution: hasFinishedCountryResolution,
+				} = select( countriesStore );
+				return {
+					locale: getLocale( countryState ) as Locale,
+					countries: getCountries(),
+					loadingCountries: ! hasFinishedCountryResolution(
+						'getCountries',
+						undefined
+					),
+					hasFinishedResolution: hasFinishedCountryResolution(
+						'getLocales',
+						undefined
+					),
+				};
+			},
+			[ countryState ]
+		);
 	const countryStateOptions = useMemo(
 		() => getCountryStateOptions( countries ),
 		[ countries ]
@@ -351,11 +367,13 @@ export function StoreAddress( {
 		return <Spinner />;
 	}
 
+	const { onChange: onCountryStateChange, ...restCountryStateProps } =
+		getSelectControlProps( 'countryState' );
+
 	return (
 		<div className="woocommerce-store-address-fields">
 			<SelectControl
 				label={ __( 'Country / Region', 'woocommerce' ) + ' *' }
-				required
 				autoComplete="new-password" // disable autocomplete and autofill
 				getSearchExpression={ ( query: string ) => {
 					return new RegExp(
@@ -367,14 +385,21 @@ export function StoreAddress( {
 				excludeSelectedOptions={ false }
 				showAllOnFocus
 				isSearchable
-				{ ...getInputProps( 'countryState' ) }
+				{ ...restCountryStateProps }
+				onChange={ ( selected ) => {
+					onCountryStateChange( selected as string );
+				} }
 				controlClassName={ getInputProps( 'countryState' ).className }
+				virtualScroll={ true }
+				virtualItemHeight={ 56 }
+				virtualListHeight={ 56 * 6 }
 			>
 				{ countryStateAutofill }
 			</SelectControl>
 
 			{ ! locale?.address_1?.hidden && (
 				<TextControl
+					__nextHasNoMarginBottom
 					id={ 'woocommerce-store-address-form-address_1' }
 					label={
 						locale?.address_1?.label ||
@@ -387,6 +412,7 @@ export function StoreAddress( {
 
 			{ ! locale?.postcode?.hidden && (
 				<TextControl
+					__nextHasNoMarginBottom
 					id={ 'woocommerce-store-address-form-postcode' }
 					label={
 						locale?.postcode?.label ||
@@ -399,6 +425,7 @@ export function StoreAddress( {
 
 			{ ! locale?.city?.hidden && (
 				<TextControl
+					__nextHasNoMarginBottom
 					id={ 'woocommerce-store-address-form-city' }
 					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
 					{ ...getInputProps( 'city' ) }

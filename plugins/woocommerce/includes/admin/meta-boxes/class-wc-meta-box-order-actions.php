@@ -8,6 +8,7 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -73,7 +74,7 @@ class WC_Meta_Box_Order_Actions {
 					?>
 				</div>
 
-				<button type="submit" class="button save_order button-primary" name="save" value="<?php echo 'auto-draft' === $order->get_status() ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo 'auto-draft' === $order->get_status() ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
+				<button type="submit" class="button save_order button-primary" name="save" value="<?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
 			</li>
 
 			<?php

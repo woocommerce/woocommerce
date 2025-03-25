@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Exclude block pattern template files from unit tests

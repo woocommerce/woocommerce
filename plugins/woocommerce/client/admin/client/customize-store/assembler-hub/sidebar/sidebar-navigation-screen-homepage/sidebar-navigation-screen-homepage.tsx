@@ -1,5 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
@@ -11,17 +9,21 @@ import {
 	useContext,
 } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
-// @ts-expect-error Missing type.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
+import { BlockInstance } from '@wordpress/blocks';
+import { select, useSelect } from '@wordpress/data';
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
+	// @ts-expect-error No types for this exist yet.
 	__experimentalBlockPatternsList as BlockPatternList,
 	store as blockEditorStore,
-	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
-// @ts-expect-error Missing type in core-data.
-import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
@@ -29,18 +31,17 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { useHomeTemplates } from '../../hooks/use-home-templates';
-import { BlockInstance } from '@wordpress/blocks';
 import { useSelectedPattern } from '../../hooks/use-selected-pattern';
 import { useEditorScroll } from '../../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { select, useSelect } from '@wordpress/data';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
 } from '../../utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
 import './style.scss';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 
 export const SidebarNavigationScreenHomepage = ( {
 	onNavigateBackClick,
@@ -56,9 +57,7 @@ export const SidebarNavigationScreenHomepage = ( {
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	const currentTemplateId: string | undefined = useSelect(
-		( sel ) =>
-			// @ts-expect-error No types for this exist yet.
-			sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
+		( sel ) => sel( coreStore ).getDefaultTemplateId( { slug: 'home' } ),
 		[]
 	);
 
@@ -68,7 +67,7 @@ export const SidebarNavigationScreenHomepage = ( {
 	);
 
 	const onClickPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern: PatternWithBlocks, selectedBlocks: BlockInstance[] ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix incorrect net sales in analytics product reports for partial and full refunds

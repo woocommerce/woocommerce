@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: validate block.json files as part of build process.

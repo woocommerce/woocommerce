@@ -12,10 +12,14 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 3.7.0
+ * @version 9.8.0
  */
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 defined( 'ABSPATH' ) || exit;
+
+$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
@@ -23,12 +27,21 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
-if ( $partial_refund ) {
+if ( $email_improvements_enabled ) {
+	if ( $partial_refund ) {
+		/* translators: %s: Site title */
+		echo sprintf( esc_html__( 'Your order from %s has been partially refunded.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	} else {
+		/* translators: %s: Site title */
+		echo sprintf( esc_html__( 'Your order from %s has been refunded.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	}
+	echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ) . "\n\n";
+} elseif ( $partial_refund ) {
 	/* translators: %s: Site title */
-	echo sprintf( esc_html__( 'Your order on %s has been partially refunded. There are more details below for your reference:', 'woocommerce' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+	echo sprintf( esc_html__( 'Your order on %s has been partially refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
 } else {
 	/* translators: %s: Site title */
-	echo sprintf( esc_html__( 'Your order on %s has been refunded. There are more details below for your reference:', 'woocommerce' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+	echo sprintf( esc_html__( 'Your order on %s has been refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
 }
 
 /*

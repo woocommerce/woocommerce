@@ -17,7 +17,7 @@ export const AssembleHubLoaderWithSmoothTransition = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/Application/Customize Store/Design with AI/API Call Loader',
+	title: 'WooCommerce Admin/Customize Store/Design with AI/API Call Loader',
 	component: ApiCallLoader,
 	decorators: [ WithCustomizeYourStoreLayout ],
 };

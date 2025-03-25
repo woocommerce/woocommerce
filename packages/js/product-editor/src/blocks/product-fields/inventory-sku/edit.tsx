@@ -9,7 +9,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -33,7 +32,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const [ sku, setSku ] = useEntityProp(
+	const [ sku, setSku ] = useEntityProp< string >(
 		'postType',
 		context.postType,
 		'sku'
@@ -72,7 +71,9 @@ export function Edit( {
 					ref={ skuRef }
 					id={ inputControlId }
 					name={ 'woocommerce-product-sku' }
-					onChange={ setSku }
+					onChange={ ( nextValue ) => {
+						setSku( nextValue ?? '' );
+					} }
 					value={ sku || '' }
 					disabled={ attributes.disabled }
 				/>

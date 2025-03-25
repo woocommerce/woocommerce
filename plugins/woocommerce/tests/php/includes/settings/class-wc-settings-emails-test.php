@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Settings
  */
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
@@ -65,8 +66,8 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_returns_all_settings() {
 		$sut = new WC_Settings_Emails();
 
-		$settings               = $sut->get_settings_for_section( '' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'email_notification_settings'              => array( 'title', 'sectionend' ),
@@ -83,11 +84,51 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_email_body_background_color'  => 'color',
 			'woocommerce_email_text_color'             => 'color',
 			'woocommerce_email_footer_text_color'      => 'color',
-			'email_merchant_notes'                     => array( 'title', 'sectionend' ),
-			'woocommerce_merchant_email_notifications' => 'checkbox',
+			'woocommerce_email_auto_sync_with_theme'   => 'hidden',
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox get_settings_for_section('') should return all the settings for the default section
+	 * when the email improvements feature is enabled.
+	 */
+	public function test_get_default_settings_returns_all_settings_with_email_improvements_feature() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
+		$features_controller->change_feature_enable( 'email_improvements', true );
+
+		$sut = new WC_Settings_Emails();
+
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
+
+		$expected = array(
+			'email_notification_settings'              => array( 'title', 'sectionend' ),
+			''                                         => array( 'email_notification', 'email_preview' ),
+			'email_recipient_options'                  => 'sectionend',
+			'email_options'                            => array( 'title', 'sectionend' ),
+			'woocommerce_email_from_name'              => 'text',
+			'woocommerce_email_from_address'           => 'email',
+			'email_template_options'                   => array( 'title', 'sectionend', 'sectionend' ),
+			'woocommerce_email_header_image'           => 'email_image_url',
+			'woocommerce_email_header_image_width'     => 'number',
+			'woocommerce_email_header_alignment'       => 'select',
+			'woocommerce_email_font_family'            => 'email_font_family',
+			'woocommerce_email_footer_text'            => 'textarea',
+			'woocommerce_email_base_color'             => 'color',
+			'woocommerce_email_background_color'       => 'color',
+			'woocommerce_email_body_background_color'  => 'color',
+			'email_color_palette'                      => 'email_color_palette',
+			'woocommerce_email_text_color'             => 'color',
+			'woocommerce_email_footer_text_color'      => 'color',
+			'woocommerce_email_auto_sync_with_theme'   => 'hidden',
+		);
+
+		$this->assertEquals( $expected, $setting_ids_and_types );
+
+		$features_controller->change_feature_enable( 'email_improvements', $original_value );
 	}
 
 	/**

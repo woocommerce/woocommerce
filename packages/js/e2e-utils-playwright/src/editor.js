@@ -1,11 +1,8 @@
 export const closeChoosePatternModal = async ( { page } ) => {
 	const closeModal = page
-		.getByLabel( 'Scrollable section' )
-		.filter()
-		.getByRole( 'button', {
-			name: 'Close',
-			exact: true,
-		} );
+		.locator( 'div' )
+		.filter( { hasText: 'Choose a pattern' } )
+		.getByLabel( 'Close' );
 	await page.addLocatorHandler( closeModal, async () => {
 		await closeModal.click();
 	} );
@@ -16,12 +13,16 @@ export const disableWelcomeModal = async ( { page } ) => {
 	await page.waitForLoadState( 'domcontentloaded' );
 
 	const isWelcomeGuideActive = await page.evaluate( () =>
-		window.wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
+		window.wp.data
+			.select( 'core/edit-post' )
+			.isFeatureActive( 'welcomeGuide' )
 	);
 
 	if ( isWelcomeGuideActive ) {
 		await page.evaluate( () =>
-			window.wp.data.dispatch( 'core/edit-post' ).toggleFeature( 'welcomeGuide' )
+			window.wp.data
+				.dispatch( 'core/edit-post' )
+				.toggleFeature( 'welcomeGuide' )
 		);
 	}
 };
@@ -35,8 +36,20 @@ export const openEditorSettings = async ( { page } ) => {
 	}
 };
 
+/**
+ * Returns the editor canvas frame for Gutenberg interactions.
+ *
+ * The Gutenberg editor content can be contained within an iframe in some contexts.
+ * This helper function returns the content frame of the editor canvas iframe if it exists,
+ * or falls back to the main page if the iframe isn't present.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object
+ * @return {Promise<import('@playwright/test').FrameLocator|import('@playwright/test').Page>} The editor canvas frame or the original page
+ */
 export const getCanvas = async ( page ) => {
-	return page.frame( 'editor-canvas' ) || page;
+	return (
+		page.locator( 'iframe[name="editor-canvas"]' ).contentFrame() || page
+	);
 };
 
 export const goToPageEditor = async ( { page } ) => {
@@ -51,12 +64,21 @@ export const goToPostEditor = async ( { page } ) => {
 };
 
 export const insertBlock = async ( page, blockName ) => {
+	// Focus on "Empty block" element before inserting a new block.
+	// Otherwise, Gutenberg nightly (v19.9-nightly) would display "{Block name} can't be inserted."
+	const emptyBlock = ( await getCanvas( page ) ).getByLabel( 'Empty block' );
+	if ( await emptyBlock.isVisible() ) {
+		await emptyBlock.click();
+	}
+
+	// With Gutenberg active we have Block Inserter name
 	await page
 		.getByRole( 'button', {
-			name: 'Toggle block inserter',
+			name: /Toggle block inserter|Block Inserter/,
 			expanded: false,
 		} )
 		.click();
+
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 
@@ -69,12 +91,13 @@ export const insertBlock = async ( page, blockName ) => {
 
 export const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
-	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
-	await canvas
-		.getByRole( 'document', {
+	const emptyBlockField = canvas.getByText( 'Type / to choose a block' ).or(
+		canvas.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.pressSequentially( `/${ blockName }` );
+	);
+	await emptyBlockField.click();
+	await emptyBlockField.pressSequentially( `/${ blockName }` );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 

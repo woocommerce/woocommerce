@@ -1,0 +1,28 @@
+# Ignore all hidden files and directories
+/.* export-ignore
+
+# Ignore all markdown files
+/*.md export-ignore
+
+# Ignore following directories and contents
+/node_modules* export-ignore
+/tests export-ignore
+/bin export-ignore
+/docs export-ignore
+/storybook export-ignore
+
+# Ignore following configuration files
+/CODEOWNERS export-ignore
+/renovate.json export-ignore
+/webpack.config.js export-ignore
+/postcss.config.js export-ignore
+/bundlesize.config.json export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/babel.config.js export-ignore
+/docker-compose.yml export-ignore
+/globals.d.ts export-ignore
+/tsconfig.json export-ignore
+/tsconfig.base.json export-ignore
+/tsconfig.base export-ignore
+/webpack.config.js export-ignore

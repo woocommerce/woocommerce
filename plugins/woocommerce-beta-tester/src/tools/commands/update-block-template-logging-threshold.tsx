@@ -3,18 +3,12 @@
  */
 
 import { SelectControl } from '@wordpress/components';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore no types
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore no types
-// eslint-disable-next-line @woocommerce/dependency-group
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME =
 	'updateBlockTemplateLoggingThreshold';
@@ -25,24 +19,20 @@ interface LoggingLevel {
 }
 
 export const UpdateBlockTemplateLoggingThreshold = () => {
-	const { loggingLevels, threshold, isLoading } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore no types
-		( select ) => {
-			const { getLoggingLevels, getBlockTemplateLoggingThreshold } =
-				select( STORE_KEY );
+	const { loggingLevels, threshold, isLoading } = useSelect( ( select ) => {
+		const { getLoggingLevels, getBlockTemplateLoggingThreshold } =
+			select( store );
 
-			const retrievedLoggingLevels = getLoggingLevels();
-			const retrievedThreshold = getBlockTemplateLoggingThreshold();
-			return {
-				loggingLevels: retrievedLoggingLevels,
-				threshold: retrievedThreshold,
-				isLoading: ! retrievedLoggingLevels || ! retrievedThreshold,
-			};
-		}
-	);
+		const retrievedLoggingLevels = getLoggingLevels();
+		const retrievedThreshold = getBlockTemplateLoggingThreshold();
+		return {
+			loggingLevels: retrievedLoggingLevels,
+			threshold: retrievedThreshold,
+			isLoading: ! retrievedLoggingLevels || ! retrievedThreshold,
+		};
+	}, [] );
 
-	const { updateCommandParams } = useDispatch( STORE_KEY );
+	const { updateCommandParams } = useDispatch( store );
 
 	function onThresholdChange( selectedThreshold: string ) {
 		updateCommandParams(

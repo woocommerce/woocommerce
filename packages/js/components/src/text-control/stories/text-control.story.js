@@ -24,6 +24,6 @@ const Example = () => {
 export const Basic = () => <Example />;
 
 export default {
-	title: 'WooCommerce Admin/components/TextControl',
+	title: 'Components/TextControl',
 	component: TextControl,
 };

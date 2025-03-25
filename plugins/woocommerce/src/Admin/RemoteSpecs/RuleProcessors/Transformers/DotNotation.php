@@ -24,7 +24,7 @@ class DotNotation implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdclass $arguments = null, $default_value = null ) {
+	public function transform( $value, ?stdclass $arguments = null, $default_value = null ) {
 		if ( is_object( $value ) ) {
 			// if the value is an object, convert it to an array.
 			$value = json_decode( wp_json_encode( $value ), true );
@@ -69,7 +69,7 @@ class DotNotation implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function validate( stdClass $arguments = null ) {
+	public function validate( ?stdClass $arguments = null ) {
 		if ( ! isset( $arguments->path ) ) {
 			return false;
 		}

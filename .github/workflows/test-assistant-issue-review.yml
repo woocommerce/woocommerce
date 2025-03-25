@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   send-slack-notification-when-issue-contains-team-solaris-label:
     if: "${{ github.event.label.name == 'team: Solaris' }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Wait 2 minutes for other labelling jobs to finish
         run: sleep 2m

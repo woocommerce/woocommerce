@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { Slot, Fill, TabPanel } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 
@@ -12,31 +12,41 @@ import { createOrderedChildren } from '../../utils';
 
 export type ProductFillLocationType = { name: string; order?: number };
 
+type TabPanelProps = React.ComponentProps< typeof TabPanel > & {
+	order: number;
+	name: string;
+};
+
+type FillProps = Record< string, unknown >;
+
 type WooProductTabItemProps = {
 	id: string;
 	pluginId: string;
-	tabProps:
-		| TabPanel.Tab
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		| ( ( fillProps: Record< string, any > | undefined ) => TabPanel.Tab );
+	tabProps: TabPanelProps | ( ( fillProps: FillProps ) => TabPanelProps );
 	templates?: Array< ProductFillLocationType >;
+	children: ReactNode[];
 };
 
 type WooProductFieldSlotProps = {
 	template: string;
 	children: (
-		tabs: TabPanel.Tab[],
-		tabChildren: Record< string, ReactNode >
-	) => ReactElement | null;
-};
+		tabs: TabPanelProps[],
+		tabChildren: Record< string, ReactNode[] >
+	) => ReactElement[] | null;
+	fillProps: FillProps;
+} & WooProductTabItemProps;
 
 const DEFAULT_TAB_ORDER = 20;
 
-export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
-	Slot: React.VFC<
-		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
-	>;
-} = ( { children, tabProps, templates } ) => {
+type WooProductTabItemComponent = React.FC< WooProductFieldSlotProps > & {
+	Slot: React.FC< WooProductFieldSlotProps >;
+};
+
+export const WooProductTabItem: WooProductTabItemComponent = ( {
+	children,
+	tabProps,
+	templates,
+} ) => {
 	if ( ! templates ) {
 		// eslint-disable-next-line no-console
 		console.warn( 'WooProductTabItem fill is missing templates property.' );
@@ -49,8 +59,8 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 					name={ `woocommerce_product_tab_${ templateData.name }` }
 					key={ templateData.name }
 				>
-					{ ( fillProps: Fill.Props ) => {
-						return createOrderedChildren< Fill.Props >(
+					{ ( fillProps ) => {
+						return createOrderedChildren(
 							children,
 							templateData.order || DEFAULT_TAB_ORDER,
 							{},
@@ -74,8 +84,18 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 		fillProps={ fillProps }
 	>
 		{ ( fills ) => {
+			// @ts-expect-error Slot fill is not typed
 			const tabData = fills.reduce(
-				( { childrenMap, tabs }, fill ) => {
+				(
+					{
+						childrenMap,
+						tabs,
+					}: {
+						childrenMap: Record< string, ReactElement >;
+						tabs: TabPanelProps[];
+					},
+					fill: Array< React.ReactElement >
+				) => {
 					const props: WooProductTabItemProps & { order: number } =
 						fill[ 0 ].props;
 					if ( props && props.tabProps ) {
@@ -96,12 +116,14 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 				},
 				{ childrenMap: {}, tabs: [] } as {
 					childrenMap: Record< string, ReactElement >;
-					tabs: Array< TabPanel.Tab & { order: number } >;
+					tabs: TabPanelProps[];
 				}
 			);
-			const orderedTabs = tabData.tabs.sort( ( a, b ) => {
-				return a.order - b.order;
-			} );
+			const orderedTabs = tabData.tabs.sort(
+				( a: TabPanelProps, b: TabPanelProps ) => {
+					return a.order - b.order;
+				}
+			);
 
 			return children( orderedTabs, tabData.childrenMap );
 		} }

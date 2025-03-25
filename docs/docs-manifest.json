@@ -3,12 +3,14 @@
     {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
-      "hash": "30f0a75b508a1dd7dd3c2f322daa0a4fb7bafee0856ccf9f3ffd1ce0bf8d3422",
+      "hash": "f6c49a9bd5838c85a648be084ff5d65326f3394b5c7927a65dd7f0c8bf073c5e",
       "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/README.md",
       "id": "65f434b31529b2793f7f7adcadfec487c797bdd2",
       "links": {
+        "getting-started/developer-tools.md": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862",
         "extension-development/building-your-first-extension.md": "278c2822fe06f1ab72499a757ef0c4981cfbffb5",
-        "extension-development/how-to-design-a-simple-extension.md": "375f7e18a2e656e662d3189041caeb9c80e7c9e3"
+        "extension-development/how-to-design-a-simple-extension.md": "375f7e18a2e656e662d3189041caeb9c80e7c9e3",
+        "contributing-docs/style-guide.md": "5020907d57ae845a6477a36f59ec8c2f5f7b4b01"
       }
     }
   ],
@@ -23,18 +25,24 @@
           "menu_title": "Theming for Woo Blocks",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/theming-woo-blocks.md",
-          "hash": "cec80a34a38b7286be676a35624e2e441f5ccbb1aa318def6afe56a5a2bb6558",
+          "hash": "ffd64cc65f0f570cd32cfbb5a78ff87391c68e9a7122617d8d689772b58379f2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/theming-woo-blocks.md",
-          "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
+          "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6",
+          "links": {
+            "../building-a-woo-store/block-references.md": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
+          }
         },
         {
           "post_title": "CSS styling for themes",
           "menu_title": "CSS Styling for Themes",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/css-styling.md",
-          "hash": "fe209b833c972e17a30b5b17d079f97c9d9ddfa5e8d6af2127ed4d87c469cd06",
+          "hash": "005ee2cc0471c9213c99ee2ccf48853eebd8a5073feb915a0ff21056fed76746",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/css-styling.md",
-          "id": "55b3452119141753ee1eaeee5f8d471ab362945b"
+          "id": "55b3452119141753ee1eaeee5f8d471ab362945b",
+          "links": {
+            "../../plugins/woocommerce/client/blocks/docs/contributors/coding-guidelines.md": "0c96d913674b73e535c91471ad39276545723b57"
+          }
         },
         {
           "post_title": "Cart and checkout blocks theming",
@@ -74,7 +82,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "8f0edfe9aa2bb36103f78f38aa61b871d0c5dfa5d76e4cb6f762c5b7648405f8",
+          "hash": "2c9248ef789ef0bcf178500ef9b9792736e823bd73d222a512a80ecbbbf6cfbe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -100,9 +108,35 @@
           "menu_title": "Slot and Fill",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "hash": "a232ca3d53f10857170113f6dc5b37ac7ae629e852629bac015a8d3c2cd1bbc4",
+          "hash": "80451d27bcc912da1fceb99bdf054f27cb8d2e4c9189cd7bb2b5f5cedf8a9fd9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "id": "e388101586765dd9aca752d66d667d74951a1504"
+          "id": "e388101586765dd9aca752d66d667d74951a1504",
+          "links": {
+            "./available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+          }
+        },
+        {
+          "post_title": "Cart and Checkout - Removing checkout fields",
+          "menu_title": "Removing checkout fields",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/removing-checkout-fields.md",
+          "hash": "6eaeb0393487dd1007367a5f2d3984420c085c6ae26dda04c4e08ee33ac6faf6",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/removing-checkout-fields.md",
+          "id": "030247059754260bce6285cfb352a4a733f1f677"
+        },
+        {
+          "post_title": "Cart and Checkout - Overview of data flow between client and server",
+          "menu_title": "Data flow overview",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/overview-of-data-flow.md",
+          "hash": "26acb354552d747ae8249547c8df7d640cf719a6c6c3e4eccbc97fce29c87bad",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/overview-of-data-flow.md",
+          "id": "d2d8cf26967438f16815b129da855324be7a7ef8",
+          "links": {
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md": "f0f7c1486ad86dc0c46b8f85588bd1ef1386c8fd",
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-custom-fields.md": "fba50e6ac461e18590b331446c3488d171cb8fdc",
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md": "557b63b486de93afd69d1eb15b79ebd442f3672d"
+          }
         },
         {
           "post_title": "Cart and Checkout - Handling scripts, styles, and data",
@@ -123,6 +157,35 @@
           "id": "092e66dac8f44d08799ba1d2411d757fd53c9e00"
         },
         {
+          "post_title": "Cart and Checkout - Frequently Asked Questions",
+          "menu_title": "Frequently Asked Questions",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/faq.md",
+          "hash": "032aa13db15d3dcf91e77fbc2a8d65934008d65d0676dc38fde6e33387582643",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/faq.md",
+          "id": "041787aca25af363a5eff3e710bd669cc8aebc4b",
+          "links": {
+            "./slot-fills.md": "e388101586765dd9aca752d66d667d74951a1504",
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md": "557b63b486de93afd69d1eb15b79ebd442f3672d",
+            "./removing-checkout-fields.md": "030247059754260bce6285cfb352a4a733f1f677"
+          }
+        },
+        {
+          "post_title": "Cart and Checkout - Extensibility getting started guide",
+          "menu_title": "Extensibility - Getting started",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/extensibility-getting-started.md",
+          "hash": "5d3406dcba644f134ce972425bdc05011420fdf69d3998547728418e195180cd",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/extensibility-getting-started.md",
+          "id": "7a379c2d6d96f15fe234a707d19ebdc20f8e9dd3",
+          "links": {
+            "../../plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md": "128716c563e163805d3b8ac4473f80ceebcaba3e",
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/": "d255d1735820bd5268f86601f80e4ace015d143b",
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/hook-alternatives.md": "0316ea1803658554031fbf0799996403ebb4ce83",
+            "../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api": "f19c11d5db482c95272f85ef6e1913680726e17f"
+          }
+        },
+        {
           "post_title": "Cart and Checkout - DOM events",
           "menu_title": "DOM Events",
           "tags": "reference",
@@ -136,23 +199,28 @@
           "menu_title": "Available Slots",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md",
-          "hash": "444d9892cb6552c8394ecdf81816952987b59bc79fa53f3083c3d14a89d1e961",
+          "hash": "1c348fc963eefca97c162f365bf8b896d9c09ac3568c35ca58eee85a2249217e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md",
-          "id": "c7ac16eee5540b06b6db928f5d03282ff177e84e"
+          "id": "c7ac16eee5540b06b6db928f5d03282ff177e84e",
+          "links": {
+            "../../plugins/woocommerce/client/blocks/packages/checkout/slot/README.md": "f6b0b5f923e2ed9f7556d2aadbf900b6d31945f7",
+            "./slot-fills.md": "e388101586765dd9aca752d66d667d74951a1504",
+            "../../plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md": "7ed9c2c2708d7960aa35ad3ba9e0e069f1addb83"
+          }
         },
         {
           "post_title": "Cart and Checkout - Additional checkout fields",
           "menu_title": "Additional Checkout Fields",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md",
-          "hash": "79d03c2dbe66ff1bea1e40e58b83f304006b1ff52ffc22de6328d136a559cb84",
+          "hash": "3755ad8ba54e31678db6e275e566f97599e90e0a5ee7e67bb7b48a6a9a8ef076",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md",
           "id": "cb5dd8d59043a4e53929121b45da7b33b1661ab8"
         }
       ],
       "categories": [
         {
-          "content": "\nThis document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md) page.\n\n## Cart Line Items filters\n\nThe following [Cart Line Items filters](./cart-line-items.md) are available:\n\n-   `cartItemClass`\n-   `cartItemPrice`\n-   `itemName`\n-   `saleBadgePriceFormat`\n-   `showRemoveItemLink`\n-   `subtotalPriceFormat`\n\nThe following screenshot shows which parts the individual filters affect:\n\n![Cart Line Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-13.12.33.png)\n\n## Order Summary Items filters\n\nThe following [Order Summary Items filters](./order-summary-items.md) are available:\n\n-   `cartItemClass`\n-   `cartItemPrice`\n-   `itemName`\n-   `subtotalPriceFormat`\n\nThe following screenshot shows which parts the individual filters affect:\n\n![Order Summary Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-16.29.45.png)\n\n## Totals Footer Item filter\n\nThe following [Totals Footer Item filter](./totals-footer-item.md) is available:\n\n-   `totalLabel`\n-   `totalValue`\n\n## Checkout and place order button filters\n\nThe following [Checkout and place order button filters](./checkout-and-place-order-button.md) are available:\n\n-   `proceedToCheckoutButtonLabel`\n-   `proceedToCheckoutButtonLink`\n-   `placeOrderButtonLabel`\n\n## Coupon filters\n\nThe following [Coupon filters](./coupons.md) are available:\n\n-   `coupons`\n-   `showApplyCouponNotice`\n-   `showRemoveCouponNotice`\n\n## Additional Cart and Checkout inner block types filter\n\nThe following [Additional Cart and Checkout inner block types filter](./additional-cart-checkout-inner-block-types.md) is available:\n\n-   `additionalCartCheckoutInnerBlockTypes`\n\n## Combined filters\n\nFilters can also be combined. The following example shows how to combine some of the available filters.\n\n```tsx\nconst { registerCheckoutFilters } = window.wc.blocksCheckout;\n\nconst isOrderSummaryContext = ( args ) => args?.context === 'summary';\n\nconst modifyCartItemClass = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn 'my-custom-class';\n\t}\n\treturn defaultValue;\n};\n\nconst modifyCartItemPrice = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn '&lt;price/&gt; for all items';\n\t}\n\treturn defaultValue;\n};\n\nconst modifyItemName = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn `${ defaultValue }`;\n\t}\n\treturn defaultValue;\n};\n\nconst modifySubtotalPriceFormat = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn '&lt;price/&gt; per item';\n\t}\n\treturn defaultValue;\n};\n\nregisterCheckoutFilters( 'example-extension', {\n\tcartItemClass: modifyCartItemClass,\n\tcartItemPrice: modifyCartItemPrice,\n\titemName: modifyItemName,\n\tsubtotalPriceFormat: modifySubtotalPriceFormat,\n} );\n```\n\n## Troubleshooting\n\nIf you are logged in to the store as an administrator, you should be shown an error like this if your filter is not\nworking correctly. The error will also be shown in your console.\n\n![Troubleshooting](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-30-at-10.52.53.png)\n\n\n",
+          "content": "\nThis document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](../../../plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md) page.\n\n## Cart Line Items filters\n\nThe following [Cart Line Items filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-cart-line-items/) are available:\n\n-   `cartItemClass`\n-   `cartItemPrice`\n-   `itemName`\n-   `saleBadgePriceFormat`\n-   `showRemoveItemLink`\n-   `subtotalPriceFormat`\n\nThe following screenshot shows which parts the individual filters affect:\n\n![Cart Line Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-13.12.33.png)\n\n## Order Summary Items filters\n\nThe following [Order Summary Items filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-order-summary-items/) are available:\n\n-   `cartItemClass`\n-   `cartItemPrice`\n-   `itemName`\n-   `subtotalPriceFormat`\n\nThe following screenshot shows which parts the individual filters affect:\n\n![Order Summary Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-16.29.45.png)\n\n## Totals Footer Item filter\n\nThe following [Totals Footer Item filter](https://developer.woocommerce.com/docs/cart-and-checkout-filters-totals-footer-item/) is available:\n\n-   `totalLabel`\n-   `totalValue`\n\n## Checkout and place order button filters\n\nThe following [Checkout and place order button filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-checkout-and-place-order-button/) are available:\n\n-   `proceedToCheckoutButtonLabel`\n-   `proceedToCheckoutButtonLink`\n-   `placeOrderButtonLabel`\n\n## Coupon filters\n\nThe following [Coupon filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-coupons/) are available:\n\n-   `coupons`\n-   `showApplyCouponNotice`\n-   `showRemoveCouponNotice`\n\n## Additional Cart and Checkout inner block types filter\n\nThe following [Additional Cart and Checkout inner block types filter](https://developer.woocommerce.com/docs/cart-and-checkout-filters-inner-block-types/) is available:\n\n-   `additionalCartCheckoutInnerBlockTypes`\n\n## Combined filters\n\nFilters can also be combined. The following example shows how to combine some of the available filters.\n\n```tsx\nconst { registerCheckoutFilters } = window.wc.blocksCheckout;\n\nconst isOrderSummaryContext = ( args ) => args?.context === 'summary';\n\nconst modifyCartItemClass = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn 'my-custom-class';\n\t}\n\treturn defaultValue;\n};\n\nconst modifyCartItemPrice = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn '&lt;price/&gt; for all items';\n\t}\n\treturn defaultValue;\n};\n\nconst modifyItemName = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn `${ defaultValue }`;\n\t}\n\treturn defaultValue;\n};\n\nconst modifySubtotalPriceFormat = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn '&lt;price/&gt; per item';\n\t}\n\treturn defaultValue;\n};\n\nregisterCheckoutFilters( 'example-extension', {\n\tcartItemClass: modifyCartItemClass,\n\tcartItemPrice: modifyCartItemPrice,\n\titemName: modifyItemName,\n\tsubtotalPriceFormat: modifySubtotalPriceFormat,\n} );\n```\n\n## Troubleshooting\n\nIf you are logged in to the store as an administrator, you should be shown an error like this if your filter is not\nworking correctly. The error will also be shown in your console.\n\n![Troubleshooting](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-30-at-10.52.53.png)\n",
           "category_slug": "cart-and-checkout-available-filters",
           "category_title": "Available Filters",
           "posts": [
@@ -161,54 +229,72 @@
               "menu_title": "Totals Footer Item",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "hash": "6cf668422809b036dca7c1996ae907497a38631dd5bfb7e67d6bf3620425e411",
+              "hash": "548edd70e3a3c4ee7b35d56191bd8cdbb42ca4ec2f68ad21b19e49300c564433",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "id": "90a9b8df374082f1713866a58b810303adb4d3da"
+              "id": "90a9b8df374082f1713866a58b810303adb4d3da",
+              "links": {
+                "../available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+              }
             },
             {
               "post_title": "Cart and Checkout Filters - Order summary items",
               "menu_title": "Order Summary Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
-              "hash": "1796f53f3d67dd6b47fe8d7f67cbd69bddcaa6416bb5a0cc1a0fc99f42ea9d10",
+              "hash": "21056453b5e6a2e25a8c0545e7f3014f6483936203692863bcb3d06a1963c419",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
-              "id": "78eb3b135f82a3624a49979e3e93334295abd060"
+              "id": "78eb3b135f82a3624a49979e3e93334295abd060",
+              "links": {
+                "../available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+              }
             },
             {
               "post_title": "Cart and Checkout Filters - Coupons",
               "menu_title": "Coupons",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/coupons.md",
-              "hash": "9ce61079d75f991137c771f044812c385db165256723a814ed44ba9caf297f13",
+              "hash": "c860ad4efe70bf7ef4447c82d05af4099d1f1483e411cb313b788397bf083d37",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/coupons.md",
-              "id": "5a022617f3d0267c9b771374f28970e779a6e99d"
+              "id": "5a022617f3d0267c9b771374f28970e779a6e99d",
+              "links": {
+                "../available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+              }
             },
             {
               "post_title": "Cart and Checkout Filters - Checkout and place order button",
               "menu_title": "Checkout and Place Order Button",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
-              "hash": "9ef672160e407cebef3b163414834a6f6f67cd7d677aa399a4312883e0827131",
+              "hash": "485ba5799e3fe2236e18ff4dc310ee9126a2c0ad06ae7cea0aec9ab0cef5d9d3",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
-              "id": "c97ca710c2e8107bf90915e038a34c8a1016c63a"
+              "id": "c97ca710c2e8107bf90915e038a34c8a1016c63a",
+              "links": {
+                "../available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+              }
             },
             {
               "post_title": "Cart and Checkout Filters - Cart line items",
               "menu_title": "Cart Line Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "hash": "f83254846b98a94f5c895f4a0a6719b281cba81884edb45e413a644967d28f73",
+              "hash": "c03170d19a4eea81fa6fd5d29cc22160e27e24e28edbba67c481fbc23947319e",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2"
+              "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2",
+              "links": {
+                "../available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+              }
             },
             {
               "post_title": "Cart and Checkout Filters - Inner block types",
               "menu_title": "Inner Block Types",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
-              "hash": "7f8f59cf376c801b6c2870af356fac28f403c890d1652039f302e244159ee7db",
+              "hash": "7b04454d705d7ff896df4fa53195b8b6cafdab85eeba667c78d004d26093a289",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
-              "id": "3167c9602b1bd3b206226a0d4415944a5f647495"
+              "id": "3167c9602b1bd3b206226a0d4415944a5f647495",
+              "links": {
+                "../available-filters/README.md": "4d56fe70f40a64b52b2970d487e5f0527f7234fb"
+              }
             }
           ],
           "categories": []
@@ -223,10 +309,11 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "50086a6f4c20ad6b3cd293f2a304263beafdc67be724de5c203fac0b237b9efc",
+              "hash": "7f5226a48549be8129b374f35ba93da35639ccda9a3d9d81583b3e2b8825663a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
+                "../../../plugins/woocommerce/client/blocks/assets/js/types/type-defs/payment-method-interface.ts": "5834ce177e13b88f738377653d39e8990098873d",
                 "./checkout-flow-and-events.md": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
                 "../../payments/payment-gateway-api.md": "b337203996650b567f91c70306e1010d6f1ae552"
               }
@@ -236,10 +323,11 @@
               "menu_title": "Filtering Payment Methods",
               "tags": "how-to",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/filtering-payment-methods.md",
-              "hash": "eec74b9116b1c0b76fdd9e50810e5f08467aec90ee62486409ca204be21dc3e4",
+              "hash": "261d122faeecfd9a45f168947b89b9ff799cff59f3bf6e56dd1f0a872c6de2e2",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/filtering-payment-methods.md",
               "id": "5c9ff65767116f51e9ec4de26794e6e4e743ffa3",
               "links": {
+                "../../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md": "f0f7c1486ad86dc0c46b8f85588bd1ef1386c8fd",
                 "./payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420"
               }
             },
@@ -248,11 +336,13 @@
               "menu_title": "Checkout Flow and Events",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
-              "hash": "dcc4af69b2614b0722431f81a312558bf3c5fa349021849d241bf896e02813a7",
+              "hash": "8756336725b9c410435ec333e6656c7720138605d1fb8af73f024901237391bc",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
               "id": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
               "links": {
-                "./payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420"
+                "../../../plugins/woocommerce/client/blocks/docs/internal-developers/block-client-apis/checkout/checkout-api.md": "80f904d6304fd0d6a4cd2801f7538c1f107dd692",
+                "./payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
+                "../../../plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts": "3c6a510e51535612783e2ba7429b345eee706b53"
               }
             }
           ],
@@ -268,9 +358,24 @@
               "menu_title": "Legacy Hooks",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "hash": "be4cf6862932c6696568b210e5f6ae4bd5313dacfb66724e23fab830baeb94e1",
+              "hash": "9e8de2f062f3147a8744bb2dea4d47e47c9ad85e5b42c53bcf712c178bb44fba",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "id": "5264fa45d393327b2c9cffb038c4d3670879d911"
+              "id": "5264fa45d393327b2c9cffb038c4d3670879d911",
+              "links": {
+                "../../extensibility-in-blocks/README.md": "ef684d3345f67690b37179cd879a40072f5c6f80"
+              }
+            },
+            {
+              "post_title": "Cart and Checkout - Hook support and common extensibility paths",
+              "menu_title": "Hook alternatives",
+              "tags": "reference",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/hook-alternatives.md",
+              "hash": "301543dc37afe54fd78f32ef13046a270a35125d225512b1cc533840604fbc66",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/hook-alternatives.md",
+              "id": "8eed024a999bde3db20e86556b9dd0efaba814bd",
+              "links": {
+                "../../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/hook-alternatives.md": "0316ea1803658554031fbf0799996403ebb4ce83"
+              }
             }
           ],
           "categories": []
@@ -278,7 +383,7 @@
       ]
     },
     {
-      "content": "\nAccess a collection of useful code snippets to customize and enhance your WooCommerce store's functionality.\n",
+      "content": "\n# Using the Code Snippets Plugin for WooCommerce Customizations\n\n## What is a Code Snippet?  \n\nCustomizing WooCommerce functionality often requires adding code snippets to modify behavior, enhance features, or integrate with third-party tools. Instead of editing theme files or the `functions.php` file directly, we recommend using the **Code Snippets** plugin from the WordPress.org repository. This approach ensures a safer, more manageable, and more organized way to add custom code to your WooCommerce store.  \n\n## Why Use the Code Snippets Plugin?  \n\nEditing your theme’s `functions.php` file or adding custom code directly to WooCommerce files can lead to several issues:  \n\n- **Loss of Custom Code on Theme Updates:** When you update your theme, modifications made in `functions.php` are lost.  \n- **Potential for Errors and Site Breakage:** A single syntax error can make your website inaccessible.  \n- **Difficult Debugging:** Managing multiple customizations in a single `functions.php` file can become unorganized.  \n\nThe **Code Snippets** plugin addresses these issues by allowing you to:  \n\n- Add, activate, and deactivate snippets without modifying core files.  \n- Organize custom snippets with descriptions and tags.  \n- Avoid losing changes when updating your theme or WooCommerce.  \n- Debug and test code safely before deploying to a live site.  \n\n## How to Install the Code Snippets Plugin  \n\n1. Log in to your WordPress admin dashboard.  \n2. Navigate to **Plugins > Add New**.  \n3. Search for **\"Code Snippets\"** in the search bar.  \n4. Click **Install Now** on the \"Code Snippets\" plugin by **Code Snippets Pro**.  \n5. After installation, click **Activate**.  \n\n## Adding Custom WooCommerce Snippets  \n\nOnce the plugin is installed and activated, follow these steps to add a WooCommerce customization:  \n\n1. Navigate to **Snippets** in your WordPress dashboard.  \n2. Click **Add New**.  \n3. Give your snippet a descriptive title.  \n4. Enter your WooCommerce-specific PHP code in the code editor.  \n5. Select **Only run in administration area** or **Run everywhere**, depending on your needs.  \n6. Click **Save Changes and Activate**.  \n\n## Example: Add a Custom Message to the WooCommerce Checkout Page  \n\n```php\nadd_action('woocommerce_before_checkout_form', function() {\n    echo '<p style=\"color: red; font-weight: bold;\">Reminder: Ensure your shipping address is correct before placing your order.</p>';\n});\n``` \n\n## Managing and Troubleshooting Snippets  \n\n- **Deactivating Snippets:** If a snippet causes issues, simply deactivate it from the Code Snippets interface without affecting the rest of your site.  \n- **Error Handling:** The plugin detects fatal errors and automatically deactivates problematic snippets.  \n- **Backup and Export:** You can export your snippets for backup or transfer to another site.  \n\n## Next Steps  \n\nFor more advanced customizations, refer to the [WooCommerce Developer Documentation](https://developer.woocommerce.com/) to build blocks, extensions, and more!  \n\n",
       "category_slug": "code-snippets",
       "category_title": "Code Snippets",
       "posts": [
@@ -312,7 +417,7 @@
           "post_title": "Unhook and remove WooCommerce emails",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/unhook--remove-woocommerce-emails.md",
-          "hash": "9b10cc18f64970b1c919dc1b320497e66444befcae6733d2dc7c8ec07b564e6d",
+          "hash": "5b9f2fb44c59e59c053c1c8162157b9c888e73c01d6317d604e00468cffbdb69",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/unhook--remove-woocommerce-emails.md",
           "id": "0fdfe3b483ae74a9e5dc1fc21b80814462222ec3"
         },
@@ -326,21 +431,20 @@
           "id": "78d5b5a20ce6471b74f809386eff41fffe2d1adb"
         },
         {
-          "post_title": "Shipping Method API",
-          "menu_title": "Shipping method API",
-          "tags": "shipping, API",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/shipping_method_api.md",
-          "hash": "bd7cbc361fe94acaa40fbc5befa8d14f302705a9d700dd7d7e78a482b003fe0b",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/shipping_method_api.md",
-          "id": "a419b97e5594918a015c61227ad9226c509eb314"
-        },
-        {
           "post_title": "Rename a country",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/rename-a-country.md",
-          "hash": "80086f76587535c16e79d987ba00544766b167fe33fd435544c8b80683c5f946",
+          "hash": "99b7f04c99c387db63a0729da47a0f7f0e752b0e09e2aa10d99ae72e80645dde",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/rename-a-country.md",
           "id": "67a49394f2e8ad0f8f81333207679be770bc8038"
+        },
+        {
+          "post_title": "Override loop template and show quantities next to add to cart buttons",
+          "tags": "code-snippet",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/override-loop-template-show-quantities-next-add-cart.md",
+          "hash": "74e65b25a438b44a6707e0b86dc569d63006535b917ca54a8a3955f82cb5eb52",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/override-loop-template-show-quantities-next-add-cart.md",
+          "id": "db325d34a3bd0be528afbd5ad5f3ebd7de8e1168"
         },
         {
           "post_title": "Change number of related products displayed",
@@ -364,9 +468,13 @@
           "menu_title": "Add link to logged data",
           "tags": "code-snippets",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/link-to-logged-data.md",
-          "hash": "4e51c120a6ea7b14c0e43f11e8eb1b785e4447fbe2b997f5789f10b57c485137",
+          "hash": "4f77310efa5acad4d350d58b9e0a9b360ed4c6def69ff6d4c52c5d59965ca4b7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/link-to-logged-data.md",
-          "id": "34da337f79be5ce857024f541a99d302174ca37d"
+          "id": "34da337f79be5ce857024f541a99d302174ca37d",
+          "links": {
+            "../extension-development/logging.md": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c",
+            "../extension-development/settings-api.md": "ed56b97b9de350074a302373ebaaa5dcce727e8b"
+          }
         },
         {
           "post_title": "Advanced settings and customization for legacy Local Pickup",
@@ -381,7 +489,7 @@
           "menu_title": "Free shipping customizations",
           "tags": "code-snippets",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/free_shipping_customization.md",
-          "hash": "1711cff54da5c39385d06ff8d8e0a055d3d25f68ee4855d93fefa940c8ffc916",
+          "hash": "953c5d719a7325818ded53124a09c2bf6480bfe1a536beb12dedcc8dc83574a8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/free_shipping_customization.md",
           "id": "cac6f1ccd661588e9a5fa7405643e9c6d4da388e"
         },
@@ -390,9 +498,12 @@
           "menu_title": "Displaying custom fields in theme",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/displaying_custom_fields_in_your_theme_or_site.md",
-          "hash": "013acf9daaef92daf49e49315b2c0eba730b96adb8078eaab1146db4afc5270b",
+          "hash": "a98f7e6a8d51c7317473ea6c15a1a9bb983f3e78fe39601a8999ac403da70d1a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/displaying_custom_fields_in_your_theme_or_site.md",
-          "id": "3e3fd004afda355cf9dbb05f0967523d6d0da1ce"
+          "id": "3e3fd004afda355cf9dbb05f0967523d6d0da1ce",
+          "links": {
+            "./_media/custom-field-value.png": "5cb89aed1378d83bb33df02266a61e83f0e274d1"
+          }
         },
         {
           "post_title": "Disabling Marketplace Suggestions Programmatically",
@@ -406,9 +517,12 @@
           "post_title": "Customizing checkout fields using actions and filters",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/customising-checkout-fields.md",
-          "hash": "ce63f640d5b91d85c3bbb80128d8a19e9c00d1c0e252abd4f958e29dcc1e60ce",
+          "hash": "85f7cb4d88b3e10930ad655de01e6d1c23454f24f2daa70e253c41b3b8f84332",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/customising-checkout-fields.md",
-          "id": "83097d3b7414557fc80dcf9f8f1a708bbdcdd884"
+          "id": "83097d3b7414557fc80dcf9f8f1a708bbdcdd884",
+          "links": {
+            "../cart-and-checkout-blocks/additional-checkout-fields.md": "cb5dd8d59043a4e53929121b45da7b33b1661ab8"
+          }
         },
         {
           "post_title": "Code snippets for configuring special tax scenarios",
@@ -432,7 +546,7 @@
           "post_title": "Change a currency symbol",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/change-a-currency-symbol.md",
-          "hash": "1e25d4cf42f3b5907befc8d3b6d3999ca31c2f97b9512eadb749935685d1a7d6",
+          "hash": "8fb3d6d4bb58519e266be61285dd5d88b74f1f0254686177d3d9d2cb3c6b2968",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/change-a-currency-symbol.md",
           "id": "35ff98a542ad0b092aa44a049c6015cd43ed5857"
         },
@@ -440,7 +554,7 @@
           "post_title": "Add a message above the login / register form",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/before-login--register-form.md",
-          "hash": "dd3d61cd1f99d459956167041718e6a25693901a810d4bde47613d5ea2595ca3",
+          "hash": "9c8232c090961db22c78f7645c25cecfca1606e91f818c213f5e71c8bc4fbcc2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/before-login--register-form.md",
           "id": "26ea2036f16952c8c965f2ab38ab214e421aa615"
         },
@@ -448,7 +562,7 @@
           "post_title": "Adjust the quantity input values",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/adjust-quantity-input-values.md",
-          "hash": "2dce454ba4247b8ef604cf0f4dd42c6d9eedfc02115b7add4551c47e7c242c71",
+          "hash": "d4c34bc279ce07a3ed9b91a19a53b634f12eac73e10122139e7eca72bcab4b24",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/adjust-quantity-input-values.md",
           "id": "e4d92076cbd872380edb6beb1ff944f749d2d0e1"
         },
@@ -456,7 +570,7 @@
           "post_title": "Add or modify states",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-or-modify-states.md",
-          "hash": "0f58428d8db1c7bc3e118362c25d129985a0a17957938d4003e64d4a56ea929b",
+          "hash": "362b2369e9f6ee013a65eee647cb0c2258183041ce479fc9290ca007e11a7db2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-or-modify-states.md",
           "id": "59ff38edfc09669967a06dd1dd3e6fb967422367"
         },
@@ -465,7 +579,7 @@
           "menu_title": "Add currencies and symbols",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-a-currency-symbol.md",
-          "hash": "f91b76a0ebe65b6095157e904435c563b477be639a70795890656a29871cea76",
+          "hash": "6225c913d0b17b0ddc41f5f1d8f8ef3fbe7a9ab7ac6ae48535dfa46e7af3d0a4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-a-currency-symbol.md",
           "id": "1c031c2af4a1461253e798daa3304baa89a83979"
         },
@@ -474,7 +588,7 @@
           "menu_title": "Add a country",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-a-country.md",
-          "hash": "2b5488637e3ecad6113abea73f26fab79e953d84b7e034d4aa71767f6b7338a6",
+          "hash": "93d1f72ebd6c7557da5609c6dad37e58aca0599dad1b1a2e65311e59d2a5b3c3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-a-country.md",
           "id": "3f20affcf41e51989b0a7408aefe32b95d1da073"
         }
@@ -482,7 +596,7 @@
       "categories": []
     },
     {
-      "content": "\nInterested in joining the Woo contributor community? The links in this doc summarize and direct you to the order of operations you will need to make your first contribution. If you are a seasoned WooCommerce developer, feel free to skip ahead and utilize the template links, or the reference docs and guides below.\n\n## Contributing to WooCommerce Core\n\nThe WooCommerce core plugin code can be found in our [monorepo](https://github.com/woocommerce/woocommerce). Here you can contribute to: \n\n- [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)\n- [WooCommerce Admin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin)\n- [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks) \n\n### Code of Conduct\n\nContributing to an open source project requires cooperation amongst individuals and organizations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.\n\n### Contributor Guidelines\n\nOur [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) layout the first steps to contributing.\n\n- [Prerequisites and developer tools to get started](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#getting-started)\n- [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)\n- [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) \n\n### Templates, Bug Reports, and Feature Requests\n\n- [Pull Request template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/PULL_REQUEST_TEMPLATE.md)\n- [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)\n- [Bug Report template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/1-bug-report.yml)\n- [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)\n- [Feature requests](https://woocommerce.com/feature-requests/woocommerce/)\n\n### Security\n\nSecurity and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.\n\nPlease report any vulnerabilities or security issues by reading through Woo's security policy [here](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md).\n\n\n\n\n\n",
+      "content": "\nInterested in joining the Woo contributor community? The links in this doc summarize and direct you to the order of operations you will need to make your first contribution. If you are a seasoned WooCommerce developer, feel free to skip ahead and utilize the template links, or the reference docs and guides below.\n\n## Contributing to WooCommerce Core\n\nThe WooCommerce core plugin code can be found in our [monorepo](https://github.com/woocommerce/woocommerce). Here you can contribute to: \n\n- [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)\n- [WooCommerce Blocks](../../plugins/woocommerce/client/blocks) \n\n### Code of Conduct\n\nContributing to an open source project requires cooperation amongst individuals and organizations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.\n\n### Contributor Guidelines\n\nOur [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) layout the first steps to contributing.\n\n- [Prerequisites and developer tools to get started](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#getting-started)\n- [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)\n- [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) \n\n### Templates, Bug Reports, and Feature Requests\n\n- [Pull Request template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/PULL_REQUEST_TEMPLATE.md)\n- [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)\n- [Bug Report template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/1-bug-report.yml)\n- [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)\n- [Feature requests](https://woocommerce.com/feature-requests/woocommerce/)\n\n### Security\n\nSecurity and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.\n\nPlease report any vulnerabilities or security issues by reading through Woo's security policy [here](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md).\n",
       "category_slug": "contributing",
       "category_title": "Contribute to Woo",
       "posts": [
@@ -491,7 +605,7 @@
           "menu_title": "WooCommerce Git flow",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/woocommerce-git-flow.md",
-          "hash": "aefe3ba553a618ace6b52fbfaff276893ac955fe9b204214f3718e95911b5d15",
+          "hash": "731f34d81c44ff0baea6d06e41ebbb6bfc448a5112196317333255669ca84ec9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/woocommerce-git-flow.md",
           "id": "9e5c2da0c341b88f32483ec2435740cd16d48676"
         },
@@ -587,7 +701,7 @@
           "post_title": "Technical Documentation Style Guide",
           "menu_title": "Style Guide",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/style-guide.md",
-          "hash": "1f7b619b73e05f0e607aa8959f598254b7af9adb5375f25df668a104eeadba5e",
+          "hash": "00ebb98b3d8c2d31b9fc3d63a7f1a4f9c64f226c0dfeb420218b21a446d06d98",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/style-guide.md",
           "id": "5020907d57ae845a6477a36f59ec8c2f5f7b4b01"
         },
@@ -627,7 +741,23 @@
       "categories": []
     },
     {
-      "content": "\n\nThese documents are all dealing with extensibility in the various WooCommerce Blocks.\n\n## Imports and dependency extraction\n\nThe documentation in this section will use window globals in code examples, for example:\n\n```js\nconst { registerCheckoutFilters } = window.wc.blocksCheckout;\n```\n\nHowever, if you're using `@woocommerce/dependency-extraction-webpack-plugin` for enhanced dependency management you can instead use ES module syntax:\n\n```js\nimport { registerCheckoutFilters } from '@woocommerce/blocks-checkout';\n```\n\nSee <https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin> for more information.\n\n## Hooks (actions and filters)\n\n| Document                      | Description                                             |\n| ----------------------------- | ------------------------------------------------------- |\n| [Actions](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/hooks/actions.md) | Documentation covering action hooks on the server side. |\n| [Filters](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/hooks/filters.md) | Documentation covering filter hooks on the server side. |\n| [Migrated Hooks](/docs/cart-and-checkout-legacy-hooks/) | Documentation covering the migrated WooCommerce core hooks. |\n\n## REST API\n\n| Document                                                                                       | Description                                                         |\n| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |\n| [Exposing your data in the Store API.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)                 | Explains how you can add additional data to Store API endpoints.    |\n| [Available endpoints to extend with ExtendSchema](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/available-endpoints-to-extend.md) | A list of all available endpoints to extend.                        |\n| [Available Formatters](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)                               | Available `Formatters` to format data for use in the Store API.     |\n| [Updating the cart with the Store API](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)              | Update the server-side cart following an action from the front-end. |\n\n## Checkout Payment Methods\n\n| Document                                                                               | Description                                                                                                 |\n| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |\n| [Checkout Flow and Events](/docs/cart-and-checkout-checkout-flow-and-events/)     | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |\n| [Payment Method Integration](/docs/cart-and-checkout-payment-method-integration-for-the-checkout-block/) | Information about implementing payment methods.                                                             |\n| [Filtering Payment Methods](/docs/cart-and-checkout-filtering-payment-methods-in-the-checkout-block/)   | Information about filtering the payment methods available in the Checkout Block.                            |\n\n## Checkout Block\n\nIn addition to the reference material below, [please see the `block-checkout` package documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/README.md) which is used to extend checkout with Filters, Slot Fills, and Inner Blocks.\n\n| Document                                                                                         | Description                                                                                                       |\n|--------------------------------------------------------------------------------------------------| ----------------------------------------------------------------------------------------------------------------- |\n| [How the Checkout Block processes an order](/docs/cart-and-checkout-how-the-checkout-block-processes-an-order/) | The detailed inner workings of the Checkout Flow.                                                                 |\n| [IntegrationInterface](/docs/cart-and-checkout-handling-scripts-styles-and-data/)                                | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |\n| [Available Filters](/docs/category/cart-and-checkout-blocks/available-filters/)                                       | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |\n| [Slots and Fills](/docs/cart-and-checkout-slot-and-fill/)                                                | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.                       |\n| [Available Slot Fills](/docs/cart-and-checkout-available-slots/)                                 | Available Slots that you can use and their positions in Cart and Checkout.                                        |\n| [DOM Events](/docs/cart-and-checkout-dom-events/)                                                     | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |\n| [Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md)                          | The filter registry allows callbacks to be registered to manipulate certain values.                               |\n| [Additional Checkout Fields](/docs/cart-and-checkout-additional-checkout-fields/)                     | The filter registry allows callbacks to be registered to manipulate certain values.                               |\n",
+      "content": "\nThis section provides documentation about the email preview system in WooCommerce\n",
+      "category_slug": "emails",
+      "category_title": "Emails",
+      "posts": [
+        {
+          "post_title": "Email Preview Integration",
+          "menu_title": "Email Preview Integration",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-preview.md",
+          "hash": "6d3fe596cb0b40babdbe14dd035bf374fbe696bd5a64b6c2c608a29c18e733e5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-preview.md",
+          "id": "b84b4684c6a48a280d57969773134698bc04401a"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nThese documents are all dealing with extensibility in the various WooCommerce Blocks.\n\n## Imports and dependency extraction\n\nThe documentation in this section will use window globals in code examples, for example:\n\n```js\nconst { registerCheckoutFilters } = window.wc.blocksCheckout;\n```\n\nHowever, if you're using `@woocommerce/dependency-extraction-webpack-plugin` for enhanced dependency management you can instead use ES module syntax:\n\n```js\nimport { registerCheckoutFilters } from '@woocommerce/blocks-checkout';\n```\n\nSee <https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin> for more information.\n\n## Hooks (actions and filters)\n\n| Document                                                                                                                                               | Description                                                 |\n| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |\n| [Actions](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/actions.md)  | Documentation covering action hooks on the server side.     |\n| [Filters](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md) | Documentation covering filter hooks on the server side.     |\n| [Migrated Hooks](https://developer.woocommerce.com/docs/cart-and-checkout-legacy-hooks/)                                                               | Documentation covering the migrated WooCommerce core hooks. |\n\n## REST API\n\n| Document                                                                                                                                                                                                                | Description                                                         |\n| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |\n| [Exposing your data in the Store API.](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)                 | Explains how you can add additional data to Store API endpoints.    |\n| [Available endpoints to extend with ExtendSchema](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/available-endpoints-to-extend.md) | A list of all available endpoints to extend.                        |\n| [Available Formatters](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)                               | Available `Formatters` to format data for use in the Store API.     |\n| [Updating the cart with the Store API](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)              | Update the server-side cart following an action from the front-end. |\n\n## Checkout Payment Methods\n\n| Document                                                                                                                                  | Description                                                                                                 |\n| ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |\n| [Checkout Flow and Events](https://developer.woocommerce.com/docs/cart-and-checkout-checkout-flow-and-events/)                            | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |\n| [Payment Method Integration](https://developer.woocommerce.com/docs/cart-and-checkout-payment-method-integration-for-the-checkout-block/) | Information about implementing payment methods.                                                             |\n| [Filtering Payment Methods](https://developer.woocommerce.com/docs/cart-and-checkout-filtering-payment-methods-in-the-checkout-block/)    | Information about filtering the payment methods available in the Checkout Block.                            |\n\n## Checkout Block\n\nIn addition to the reference material below, [please see the `block-checkout` package documentation](../../plugins/woocommerce/client/blocks/packages/checkout/README.md) which is used to extend checkout with Filters, Slot Fills, and Inner Blocks.\n\n| Document                                                                                                                                         | Description                                                                                                       |\n| ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |\n| [How the Checkout Block processes an order](https://developer.woocommerce.com/docs/cart-and-checkout-how-the-checkout-block-processes-an-order/) | The detailed inner workings of the Checkout Flow.                                                                 |\n| [IntegrationInterface](https://developer.woocommerce.com/docs/cart-and-checkout-handling-scripts-styles-and-data/)                               | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |\n| [Available Filters](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/available-filters/)                                 | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |\n| [Slots and Fills](https://developer.woocommerce.com/docs/cart-and-checkout-slot-and-fill/)                                                       | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.                       |\n| [Available Slot Fills](https://developer.woocommerce.com/docs/cart-and-checkout-available-slots/)                                                | Available Slots that you can use and their positions in Cart and Checkout.                                        |\n| [DOM Events](https://developer.woocommerce.com/docs/cart-and-checkout-dom-events/)                                                               | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |\n| [Filter Registry](../../plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md)  | The filter registry allows callbacks to be registered to manipulate certain values.                               |\n| [Additional Checkout Fields](https://developer.woocommerce.com/docs/cart-and-checkout-additional-checkout-fields/)                               | The filter registry allows callbacks to be registered to manipulate certain values.                               |\n",
       "category_slug": "extensibility-in-blocks",
       "category_title": "Extensibility in Blocks",
       "posts": [],
@@ -701,7 +831,7 @@
           "menu_title": "Creating custom settings",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/implementing-settings.md",
-          "hash": "5cab83a84bb7eb11090bac244754fdae1f8aef1030850d12c29c09054c50bc61",
+          "hash": "4fcbf84bc9c3ee55359f3471b86e15c73a20dcb3eeb59616f51707e6af9d8ae3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/implementing-settings.md",
           "id": "58bcbd3a0cd3b3e5fe738c3bb625cf9b7747c99a"
         },
@@ -728,7 +858,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "f53a89603209f12124eff5d21b3abb3edd2f8d07d6819522100c8e0e03c5d5e6",
+          "hash": "b91ddd5c7535716f03dee5e650001eb3e1f63fcdf54c73e41f320041793ffc0d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93"
         },
@@ -745,7 +875,7 @@
           "post_title": "WooCommerce extension development best practices",
           "menu_title": "Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-development-best-practices.md",
-          "hash": "e70da25a57254820d094df736e79974d345deee234dcd2e56897d1feb76700d4",
+          "hash": "e834979b88a8cad198b2dbf0e1d0a59d3b1d3ffee424325b0aeb5ba83782659b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-development-best-practices.md",
           "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12",
           "links": {
@@ -824,7 +954,7 @@
           "menu_title": "Build your first extension",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-          "hash": "b875dda72e3d4b26a06969f76abc1d99e55137d85ba22aa1671915625de851da",
+          "hash": "aa3d4af8edf0186a13f713c1e8682db832719c84fd0165faa84a06138afca951",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
@@ -842,7 +972,7 @@
           "menu_title": "Add actions and filters",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-actions-and-filters.md",
-          "hash": "ac6b6db9a4bc92d13c71b9d7d81614df4e4cd80120875e5f274238af062a8744",
+          "hash": "a63cdca549fc21d304b1d8f99c82ef63b82c2ebca45f75e6288478e9eaea557d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-actions-and-filters.md",
           "id": "6f461e2f0ca9195097b36f987ee6c0212a65e8ab"
         },
@@ -851,9 +981,12 @@
           "menu_title": "Add a section to a settings tab",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
-          "hash": "400124b03f0d2f53736012100d2be87e77a7bc9c72a5c6af143f62d84321b09d",
+          "hash": "4a6239626d9d680599245a426ac541ccda0b85324bbb2b6880d2a63649f3cd65",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
-          "id": "a88144dff894408f31a80c96dcee3bd5126ecd28"
+          "id": "a88144dff894408f31a80c96dcee3bd5126ecd28",
+          "links": {
+            "./settings-api.md": "ed56b97b9de350074a302373ebaaa5dcce727e8b"
+          }
         }
       ],
       "categories": []
@@ -902,7 +1035,7 @@
           "menu_title": "Developer tools",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "ef24e32109d66f96a990fea7a5eb32f9e0b98ae7ca766dcae12244449956997b",
+          "hash": "28233fa43d15cde53cb615459276777989ba25815011081443588f9d09670bc3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
         },
@@ -995,6 +1128,19 @@
           "hash": "f35b7458ea38f7c95f56888c76f139059bf38661991d7f0c37fbdd860786f5fc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/localization-translation/translating-woocommerce.md",
           "id": "017b9f80a086d119f8bac193c9b4d87d1efff67d"
+        },
+        {
+          "post_title": "Updating Countries and Subdivisions",
+          "menu_title": "Countries and Subdivisions",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/localization-translation/countries-and-subdivisions.md",
+          "hash": "22938768e8f494d233a0f69a3332efa5e6acc6bcc83d6ae897788f628008cbae",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/localization-translation/countries-and-subdivisions.md",
+          "id": "385b95e7f5ca43eeb33472f883765e3b931b2f76",
+          "links": {
+            "../code-snippets/add-a-country.md": "3f20affcf41e51989b0a7408aefe32b95d1da073",
+            "../code-snippets/add-or-modify-states.md": "59ff38edfc09669967a06dd1dd3e6fb967422367"
+          }
         }
       ],
       "categories": []
@@ -1009,7 +1155,7 @@
           "menu_title": "Payment Token API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-token-api.md",
-          "hash": "ee6753e946e6533dff62a26ece1911442080de12d449c4d5d28fe1e68adc72b7",
+          "hash": "ebbf30a95471cc877a6c5f7c0a9e454e1c875c14dc0e630203b8e27b8eec198a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-token-api.md",
           "id": "5f345b53875981703d4b80e8d04eae2daafe4c81"
         },
@@ -1026,9 +1172,12 @@
           "menu_title": "Payment Gateway API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-gateway-api.md",
-          "hash": "f199d04a262bac32d1e22eb3f8410d5c30f10fa86cbb303d4149363a44dc3562",
+          "hash": "581e12563987918af732bf8a2df7277ba5bec513e944d2c8729ed6a8f6e2b3d0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-gateway-api.md",
-          "id": "b337203996650b567f91c70306e1010d6f1ae552"
+          "id": "b337203996650b567f91c70306e1010d6f1ae552",
+          "links": {
+            "../cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420"
+          }
         }
       ],
       "categories": []
@@ -1069,9 +1218,12 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "1f376130cf31aabd077c48e70cb518a7f635bfd904dc9c82dfc29a3b6913afd4",
+          "hash": "28d657d2cddda050db677a6633d1732970d79891e0031b38cc9b02b582234e4e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
-          "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
+          "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece",
+          "links": {
+            "../../plugins/woocommerce/client/blocks/assets/js/blocks/product-collection/collections/": "08c26aaec93b1fe79c756f9908ade7012df5f2d1"
+          }
         },
         {
           "post_title": "DOM Events sent from product collection block",
@@ -1086,7 +1238,7 @@
       "categories": []
     },
     {
-      "content": "\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n",
+      "content": "\n**Important:** WooCommerce is shifting focus to work on a new beta of the Product Editor Experience, v3. [Read more on our Developer Blog](https://developer.woocommerce.com/2024/11/06/whats-next-in-the-product-editor/).\n\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n",
       "category_slug": "product-editor",
       "category_title": "Product Editor",
       "posts": [
@@ -1094,7 +1246,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "bbf230f9f13bc2404096f5b5b2f7394ba5ab391d78e5efa9627342f5b33be7dd",
+          "hash": "1b7e414d622a78e3303a419af99dea6c106634e1bf1f0b40d1f64857eadf1fd8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1136,7 +1288,7 @@
             {
               "post_title": "Extending the product form with custom fields",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/how-to-guides/custom-field-tutorial.md",
-              "hash": "dfa00ed71af6eda1f539684657d5c880850ececea4c07bd11e89a605fab77ec7",
+              "hash": "75a6f3c40384262c44c3c4ae71fdf7f26e6c7c5561c5b0f88661e1f6d63fc2a2",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/how-to-guides/custom-field-tutorial.md",
               "id": "fed80efbb225df9054fadd6e1fc45c2cd03e7f99"
             }
@@ -1154,7 +1306,7 @@
           "post_title": "Writing high quality testing instructions",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
-          "hash": "51fb384f8b1dfcb82fdbad6db08145b2c51dba6227529b8b54e2a281fc4b8ef7",
+          "hash": "5624992fc77063d7ce9a1aee00103f7a67d3acd8147a0f4ec0d4f159d0ac4cad",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
@@ -1419,7 +1571,7 @@
           "menu_title": "Shipping method API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/shipping/shipping-method-api.md",
-          "hash": "40bf33d540692608fccec48e9a6cc08e51c510c894c32414723c75cc2d2dc3a8",
+          "hash": "04c1caa84990bea8b00032a645456d19cc9da1aa9e171755f03b0b136dcd1492",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/shipping/shipping-method-api.md",
           "id": "70270a01c8f1f2b630c809c0b9611940e99293a9",
           "links": {
@@ -1430,7 +1582,14 @@
       "categories": []
     },
     {
-      "content": "\nProperly setting up your test environment and writing tests when contributing to WooCommerce core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woocommerce.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woocommerce.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
+      "content": "\n**The Store API provides public Rest API endpoints for the development of customer-facing cart, checkout, and product functionality. It follows many of the patterns used in the [WordPress REST API](https://developer.wordpress.org/rest-api/key-concepts/).**\n\n In contrast to the WooCommerce REST API, the Store API is unauthenticated and does not provide access to sensitive store data or other customer information.\n\nPlease see the [Store API Documentation on GitHub](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/StoreApi/README.md) for more information.\n",
+      "category_slug": "store-api",
+      "category_title": "Store API",
+      "posts": [],
+      "categories": []
+    },
+    {
+      "content": "\nProperly setting up your test environment and writing tests when contributing to WooCommerce core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woocommerce.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woocommerce.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api-core-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
       "category_slug": "testing",
       "category_title": "Testing",
       "posts": [
@@ -1438,7 +1597,7 @@
           "post_title": "Beta Testing",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/testing/beta-testing.md",
-          "hash": "09be54c71d8805df451263a1cddd12d744b2b1d81f669fb539bd2f14cfdefeeb",
+          "hash": "fefc443d305a81703e63e812fab3ec5ccc8521893dd96031b40f78f7449b269b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/testing/beta-testing.md",
           "id": "01f266904647aad0d44b5687fb5f143560dabc67"
         }
@@ -1446,7 +1605,7 @@
       "categories": []
     },
     {
-      "content": "\nLearn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.\n\nFor blocks themes, see our [block theme documentation](/docs/category/block-theme-development).\n",
+      "content": "\nLearn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.\n\nFor blocks themes, see our [block theme documentation](../block-theme-development/README.md).\n",
       "category_slug": "theme-development",
       "category_title": "Classic Theme Development",
       "posts": [
@@ -1470,28 +1629,35 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "932567a5d398a8624fbb0bf64bd7a913902fe3c4f4933fc434ea2a7915085d45",
+          "hash": "15032a714679dcd7677c6d8a5456ec68fcd5b6d546537b9bdc8f788b02cead62",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
-          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e",
+          "links": {
+            "../block-theme-development/theming-woo-blocks.md": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
+          }
         },
         {
           "post_title": "How to set up and use a child theme",
           "menu_title": "Set up and use a child theme",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "hash": "e343a623970fb22db7e109e0623d877ba42d5938885dde99a5701fa42bf7d197",
+          "hash": "7323bec1e33861f2c829bf6fcfaa8785492ef0e26ce0e4237d5c5aca2433dd36",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "id": "00b6916595cbde7766f080260a9ea26f53f3271c"
+          "id": "00b6916595cbde7766f080260a9ea26f53f3271c",
+          "links": {
+            "../block-theme-development/theming-woo-blocks.md": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
+          }
         },
         {
           "post_title": "Image sizing for theme developers",
           "menu_title": "Image sizing",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/image-sizes.md",
-          "hash": "94d30b875d0c26b88ebd040a686f802f974f89997a30954fc5bb448de57aefdc",
+          "hash": "32f6a87356b84c0d464bc43787dc186036d8f39ff33f648d494c1f0bde726fde",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/image-sizes.md",
           "id": "3f5301ac3040d38bc449b440733da6a466209df3",
           "links": {
+            "../block-theme-development/theming-woo-blocks.md": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6",
             "./thumbnail-image-regeneration.md": "733e1b16276d64f128ba0e337ca68ec3de0bf68f"
           }
         },
@@ -1500,7 +1666,7 @@
           "menu_title": "Fix outdated templates",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
-          "hash": "1b57eba543bb25708fbc4d4ff5802385d06ff2df6f2486f77e6924cb1d44b8d1",
+          "hash": "6ae1db55359ff5ce357f249d24d5a7ef8708b20d54b4f6ec185b4216a35d645e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
           "id": "1fa09bbc2137a65288cc1576c1053224db7187ed"
         },
@@ -1517,15 +1683,18 @@
           "post_title": "Classic theme development handbook",
           "menu_title": "Classic theme development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/classic-theme-developer-handbook.md",
-          "hash": "0a8c8178ad4a83cd3d44f931cc37635e8f8cf26a53f0ee1bc1a0e6a7ca117ece",
+          "hash": "9412e945748544612970da03520eb85d96707ae5bd7e838d2d92e8539ebe7f74",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/classic-theme-developer-handbook.md",
-          "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4"
+          "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4",
+          "links": {
+            "../block-theme-development/theming-woo-blocks.md": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
+          }
         }
       ],
       "categories": []
     },
     {
-      "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woocommerce.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
+      "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woocommerce.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n-   [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n-   [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n-   [WooCommerce Component Library](https://woocommerce.github.io/woocommerce/)\n\n## Component Library - Storybook\n\n> Storybook is an open source tool for developing UI components in isolation for React, React Native and more. It makes building stunning UIs organized and efficient.\n\nThe WooCommerce repository also includes [Storybook](https://storybook.js.org/) integration that allows testing and developing in a WooCommerce-agnostic context. This is very helpful for developing reusable components and trying generic JavaScript modules without any backend dependency.\n\nYou can launch Storybook by running `pnpm --filter=@woocommerce/storybook watch:build` locally. It will open in your browser automatically.\n\nYou can also test Storybook for the current `trunk` branch on GitHub Pages: [https://woocommerce.github.io/woocommerce](https://woocommerce.github.io/woocommerce)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
       "posts": [
@@ -1632,7 +1801,7 @@
           "post_title": "User Experience Guidelines - Payment Button Size and Anatomy",
           "menu_title": "Payment Button Size",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-size.md",
-          "hash": "b9165eb27a79bb696d7f0fcea1ef8a36f56ffd01501447f4c266c95f515a8ee1",
+          "hash": "0be63cb8f44339510f92b6ce2cd9c39b751f2d468e49a34fbd73a548f1f79c6d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-size.md",
           "id": "0920df1611e1b1b3e2f33c810a8f8e8ae09dd67c"
         },
@@ -1640,7 +1809,7 @@
           "post_title": "User Experience Guidelines - Payment Button Layout",
           "menu_title": "Payment Button Layout",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
-          "hash": "bc518454d8552c5da08d9635799c578d730341b115f7f8a63e9123628242c772",
+          "hash": "662daf80937372a1b8848a58e38417a5ab69c0c0f4fe55a59509d74494561af2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
           "id": "96caecc340794e5c80af271e5cc844e0b3d80a04"
         }
@@ -1794,7 +1963,7 @@
           "menu_title": "Commands",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
-          "hash": "17bbb18fd0ad0523a5b864f74acbec64c853ae7b42ecd7e6d9dbce1fbe2669aa",
+          "hash": "46fbe6fcda6f8b79d031fc47618031f7c2aa15a8c999b8960f7558fdab6e5ba4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
           "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
         },
@@ -1823,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "8cd07dec61c2ddf169022adc3616e0ba4141d685689b83ca2d45e42ff6ca3583"
+  "hash": "0d47b9e67327ccda193449f48ec83d434513d5872bf0cda226a414368216b435"
 }

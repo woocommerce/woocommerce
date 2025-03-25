@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Importer.
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * Class WC_Product_CSV_Importer_Test
  */
@@ -28,11 +31,11 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$csv_file = dirname( __FILE__ ) . '/sample.csv';
 		$raw_data = array(
 			array(
-				'type'      => 'variable',
+				'type'      => ProductType::VARIABLE,
 				'published' => -1,
 			),
 			array(
-				'type'      => 'variation',
+				'type'      => ProductType::VARIATION,
 				'published' => -1,
 			),
 		);
@@ -45,20 +48,20 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$variable  = $expand_data->invoke(
 			$importer,
 			array(
-				'type'      => array( 'variable' ),
+				'type'      => array( ProductType::VARIABLE ),
 				'published' => -1,
 			)
 		);
 		$variation = $expand_data->invoke(
 			$importer,
 			array(
-				'type'      => array( 'variation' ),
+				'type'      => array( ProductType::VARIATION ),
 				'published' => -1,
 			)
 		);
 
-		$this->assertEquals( 'draft', $variable['status'] );
-		$this->assertEquals( 'publish', $variation['status'] );
+		$this->assertEquals( ProductStatus::DRAFT, $variable['status'] );
+		$this->assertEquals( ProductStatus::PUBLISH, $variation['status'] );
 	}
 
 	/**

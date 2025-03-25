@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Support woocommerce_settings_start hook in new, unreleased Settings
+

@@ -1,11 +1,14 @@
 /**
+ * External dependencies
+ */
+import { parseAdminUrl } from '@woocommerce/navigation';
+import { captureException } from '@woocommerce/remote-logging';
+
+/**
  * Internal dependencies
  */
+import { getAdminSetting } from '~/utils/admin-settings';
 import { DEFAULT_LOGO_WIDTH } from './assembler-hub/sidebar/constants';
-
-export function sendMessageToParent( message ) {
-	window.parent.postMessage( message, '*' );
-}
 
 export function isIframe( windowObject ) {
 	return (
@@ -17,7 +20,10 @@ export function isIframe( windowObject ) {
 }
 
 export function editorIsLoaded() {
-	window.parent.postMessage( { type: 'iframe-loaded' }, '*' );
+	window.parent.postMessage(
+		{ type: 'iframe-loaded' },
+		getAdminSetting( 'homeUrl' )
+	);
 }
 
 export function onIframeLoad( callback ) {
@@ -42,16 +48,51 @@ export function onBackButtonClicked( callback ) {
  * @return {() => void} Remove listener function
  */
 export function attachParentListeners() {
-	const listener = ( event ) => {
-		if ( event.data.type === 'navigate' ) {
-			window.location.href = event.data.url;
+	const allowedOrigins = [ getAdminSetting( 'homeUrl' ) ];
+
+	function handleMessage( event ) {
+		// Validate the origin.
+		if ( ! allowedOrigins.includes( event.origin ) ) {
+			// Blocked message from untrusted origin: event.origin.
+			return;
 		}
-	};
 
-	window.addEventListener( 'message', listener, false );
+		// Validate the structure of event.data.
+		if (
+			! event.data ||
+			typeof event.data.type !== 'string' ||
+			typeof event.data.url !== 'string'
+		) {
+			// Invalid message structure: event.data.
+			return;
+		}
 
-	return () => {
-		window.removeEventListener( 'message', listener, false );
+		// Only allow the 'navigate' type.
+		if ( event.data.type === 'navigate' ) {
+			// Validate the URL format.
+			try {
+				const url = parseAdminUrl( event.data.url );
+				// Further restrict navigation to trusted domains.
+				if (
+					! allowedOrigins.some( ( origin ) => url.origin === origin )
+				) {
+					throw new Error(
+						`Blocked navigation to untrusted URL: ${ url.href }`
+					);
+				}
+
+				window.location.href = url.href;
+			} catch ( error ) {
+				// Invalid URL: event.data.url.
+				captureException( error );
+			}
+		}
+	}
+
+	window.addEventListener( 'message', handleMessage, false );
+
+	return function removeListener() {
+		window.removeEventListener( 'message', handleMessage, false );
 	};
 }
 
@@ -62,10 +103,18 @@ export function attachParentListeners() {
  * @param {*} url
  */
 export function navigateOrParent( windowObject, url ) {
-	if ( isIframe( windowObject ) ) {
-		windowObject.parent.postMessage( { type: 'navigate', url }, '*' );
-	} else {
-		windowObject.location.href = url;
+	try {
+		if ( isIframe( windowObject ) ) {
+			windowObject.parent.postMessage(
+				{ type: 'navigate', url },
+				getAdminSetting( 'homeUrl' )
+			);
+		} else {
+			const fullUrl = parseAdminUrl( url );
+			windowObject.location.href = fullUrl.href;
+		}
+	} catch ( error ) {
+		captureException( error );
 	}
 }
 

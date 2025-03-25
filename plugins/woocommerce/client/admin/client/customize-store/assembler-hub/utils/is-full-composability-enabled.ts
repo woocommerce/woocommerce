@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	BlockPopover,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/block-editor';
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { BlockPopover } from '@wordpress/block-editor';
 
 const isPatternToolkitFullComposabilityFeatureFlagEnabled = () => {
 	// @ts-expect-error temp fix

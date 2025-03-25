@@ -9,7 +9,7 @@ import { createElement } from '@wordpress/element';
 import Rating from '..';
 
 export default {
-	title: 'WooCommerce Admin/components/Rating',
+	title: 'Components/Rating',
 	component: Rating,
 	args: {
 		rating: 4.5,

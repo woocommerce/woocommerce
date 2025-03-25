@@ -19,7 +19,10 @@ export const Card: React.FC< TaxChildProps > = () => {
 		<PartnerCard
 			name={ __( 'WooCommerce Tax', 'woocommerce' ) }
 			logo={ logo }
-			description={ __( 'Best for new stores', 'woocommerce' ) }
+			description={ __(
+				'WooCommerce Tax, recommended for new stores',
+				'woocommerce'
+			) }
 			benefits={ [
 				__( 'Real-time sales tax calculation', 'woocommerce' ),
 				interpolateComponents( {

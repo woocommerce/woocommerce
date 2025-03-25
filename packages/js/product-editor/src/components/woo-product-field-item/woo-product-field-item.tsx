@@ -24,6 +24,7 @@ type WooProductFieldItemProps = {
 	id: string;
 	sections: ProductFillLocationType[];
 	pluginId: string;
+	children: ReactNode;
 };
 
 type WooProductFieldSlotProps = {
@@ -58,12 +59,11 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
-			{ ( fillProps: Fill.Props ) =>
+			{ ( fillProps ) =>
 				createOrderedChildren<
-					Fill.Props &
-						SlotContextHelpersType & {
-							sectionName: string;
-						},
+					SlotContextHelpersType & {
+						sectionName: string;
+					},
 					{ _id: string }
 				>(
 					children,
@@ -81,7 +81,10 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 };
 
 export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
+	Slot: React.FC<
+		Omit< React.ComponentProps< typeof Slot >, 'name' > &
+			WooProductFieldSlotProps
+	>;
 } = ( { children, sections, id } ) => {
 	return (
 		<>
@@ -116,6 +119,7 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 				}
 
 				return Children.map(
+					// @ts-expect-error The type definitions for Slot are incorrect.
 					sortFillsByOrder( filterRegisteredFills( fills ) )?.props
 						.children,
 					( child ) => (

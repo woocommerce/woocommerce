@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Update a product's stock amount.
@@ -41,7 +42,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$data_store            = WC_Data_Store::load( 'product' );
 
 		// Fire actions to let 3rd parties know the stock is about to be changed.
-		if ( $product_with_stock->is_type( 'variation' ) ) {
+		if ( $product_with_stock->is_type( ProductType::VARIATION ) ) {
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_variation_before_set_stock', $product_with_stock );
@@ -63,7 +64,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		}
 
 		// Fire actions to let 3rd parties know the stock changed.
-		if ( $product_with_stock->is_type( 'variation' ) ) {
+		if ( $product_with_stock->is_type( ProductType::VARIATION ) ) {
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
@@ -489,6 +490,21 @@ add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order',
 add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11 );
 
 /**
+ * Release coupons used for another order.
+ *
+ * @since 9.5.2
+ * @param \WC_Order|int $order Order ID or instance.
+ * @param bool          $save Save the order after releasing coupons.
+ */
+function wc_release_coupons_for_order( $order, bool $save = true ) {
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
+
+	if ( $order ) {
+		$order->get_data_store()->release_held_coupons( $order, $save );
+	}
+}
+
+/**
  * Return low stock amount to determine if notification needs to be sent
  *
  * Since 5.2.0, this function no longer redirects from variation to its parent product.
@@ -503,7 +519,7 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11
 function wc_get_low_stock_amount( WC_Product $product ) {
 	$low_stock_amount = $product->get_low_stock_amount();
 
-	if ( '' === $low_stock_amount && $product->is_type( 'variation' ) ) {
+	if ( '' === $low_stock_amount && $product->is_type( ProductType::VARIATION ) ) {
 		$product          = wc_get_product( $product->get_parent_id() );
 		$low_stock_amount = $product->get_low_stock_amount();
 	}

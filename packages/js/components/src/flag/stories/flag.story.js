@@ -21,6 +21,6 @@ export const Examples = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/Flag',
+	title: 'Components/Flag',
 	component: Flag,
 };

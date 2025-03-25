@@ -1,0 +1,175 @@
+.wc-block-components-form {
+	counter-reset: checkout-step;
+}
+
+.wc-block-components-form .wc-block-components-checkout-step {
+	position: relative;
+	border: none;
+	padding: 0;
+	background: none;
+	margin: 0 0 $gap-largest 0;
+
+	.is-mobile &,
+	.is-small & {
+		padding-left: 0;
+		margin-bottom: $gap-larger;
+
+		// The below CSS rules are to show a separator between Checkout steps on mobile.
+		// This media query is required because on themes where the Checkout block is rendered alongside something else,
+		// e.g. Storefront using the "Default Template" (which has a sidebar) the checkout block can get the `.is-small`
+		// class, but the screen itself is larger than 400px.
+		@include breakpoint( "<600px" ) {
+			padding-top: $gap-larger;
+
+			// Remove padding from the first checkout step. First of type is required here as the first-child is the express payment methods block.
+			&:first-of-type {
+				padding-top: 0;
+			}
+
+			&::after {
+				position: absolute;
+				content: "";
+				// Required because the box shadows are offset by 1px down so we need to move the element up by 1px.
+				bottom: calc(1px - $gap-larger);
+				width: 100%;
+				height: 1px;
+				opacity: 0.11;
+				background: currentColor;
+				// This box-shadow rule creates two visible shadows:
+				// - One 50vw to the left of the element.
+				// - Another 50vw to the right
+				// Both shadows are sharp (no blur) and use the current color of the element.
+				// Its purpose is to add a full-width divider between checkout sections which is otherwise impossible as
+				// the parent element has padding.
+				box-shadow: -50vw 0 0 0 currentColor, 50vw 0 0 0 currentColor;
+			}
+		}
+	}
+}
+
+.wc-block-components-checkout-step--disabled {
+	opacity: 0.6;
+}
+
+.wc-block-components-checkout-step__container {
+	position: relative;
+
+	textarea {
+		font-style: inherit;
+		font-weight: inherit;
+	}
+}
+
+.wc-block-components-checkout-step__content > * {
+	margin-bottom: $gap;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+.wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
+	margin-bottom: 0;
+}
+.wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
+	margin-top: em($gap-smaller);
+}
+.wc-block-components-checkout-step__heading {
+	margin: 0 0 $gap-smaller;
+	position: relative;
+
+	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step & {
+		margin-top: 0;
+	}
+
+}
+
+.wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
+	margin-top: 0;
+}
+
+.wc-block-components-checkout-step__title {
+	margin: 0 $gap-small 0 0;
+}
+
+.wc-block-components-checkout-step__heading-content {
+	@include font-size(smaller);
+
+	a {
+		font-weight: bold;
+		color: inherit;
+	}
+}
+
+.wc-block-checkout__shipping-option .wc-block-components-checkout-step__content,
+.wc-block-checkout__payment-method .wc-block-components-checkout-step__content {
+	padding-top: $gap-smaller;
+}
+
+.wc-block-components-checkout-step__description {
+	@include font-size(small);
+	line-height: 1.2;
+	margin: 0 0 $gap;
+}
+
+.wc-block-checkout__form--with-step-numbers {
+	.wc-block-components-checkout-step--with-step-number {
+		padding: 0 0 0 $gap-larger;
+
+		.wc-block-components-checkout-step__title::before {
+			@include reset-box();
+			background: transparent;
+			counter-increment: checkout-step;
+			content: "\00a0" counter(checkout-step) ".";
+			content: "\00a0" counter(checkout-step) "." / "";
+			position: absolute;
+			left: -$gap-large;
+			top: 0;
+			text-align: center;
+			transform: translateX(-50%);
+			white-space: nowrap;
+
+			.is-mobile &,
+			.is-small & {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0" / "";
+			}
+		}
+
+		.wc-block-components-checkout-step__container::after {
+			content: "";
+			height: 100%;
+			border-left: 1px solid $universal-border-light;
+			position: absolute;
+			left: -$gap-large;
+			top: 0;
+		}
+
+		.is-mobile &,
+		.is-small & {
+			.wc-block-components-checkout-step__title::before {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0" / "";
+			}
+
+			.wc-block-components-checkout-step__container::after {
+				content: unset;
+			}
+		}
+	}
+}
+
+.editor-styles-wrapper {
+	.wp-block h4.wc-block-components-checkout-step__title {
+		@include font-size(regular);
+		line-height: 24px;
+		margin: 0 $gap-small 0 0;
+	}
+}

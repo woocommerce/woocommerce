@@ -7,7 +7,7 @@ import { differenceWith } from 'lodash';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '~/marketing/data/constants';
+import { store as marketingStore } from '~/marketing/data';
 import { useRecommendedChannels } from '~/marketing/hooks';
 import { RecommendedPlugin } from '~/marketing/types';
 
@@ -50,11 +50,11 @@ export const useRecommendedPluginsWithoutChannels =
 			data: dataRecommendedPlugins,
 		} = useSelect( ( select ) => {
 			const { getRecommendedPlugins, hasFinishedResolution } =
-				select( STORE_KEY );
+				select( marketingStore );
 
 			return {
 				loading: ! hasFinishedResolution( selector, [ category ] ),
-				data: getRecommendedPlugins< RecommendedPlugin[] >( category ),
+				data: getRecommendedPlugins( category ) as RecommendedPlugin[],
 			};
 		}, [] );
 
@@ -64,7 +64,7 @@ export const useRecommendedPluginsWithoutChannels =
 		} = useRecommendedChannels();
 
 		const { invalidateResolution, installAndActivateRecommendedPlugin } =
-			useDispatch( STORE_KEY );
+			useDispatch( marketingStore );
 
 		const isInitializing =
 			( loadingRecommendedPlugins && ! dataRecommendedPlugins.length ) ||

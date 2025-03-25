@@ -21,46 +21,25 @@ final class ProductFilterActive extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$filter_params = $block->context['filterParams'] ?? array();
+		if ( ! isset( $block->context['activeFilters'] ) ) {
+			return $content;
+		}
 
-		/**
-		 * Filters the active filter data provided by filter blocks.
-		 *
-		 * $data = array(
-		 *     <id> => array(
-		 *         'type' => string,
-		 *         'items' => array(
-		 *             array(
-		 *                 'title' => string,
-		 *                 'attributes' => array(
-		 *                     <key> => string
-		 *                 )
-		 *             )
-		 *         )
-		 *     ),
-		 * );
-		 *
-		 * @since 11.7.0
-		 *
-		 * @param array $data   The active filters data
-		 * @param array $params The query param parsed from the URL.
-		 * @return array Active filters data.
-		 */
-		$active_filters = apply_filters( 'collection_active_filters_data', array(), $filter_params );
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
-		$context = array(
-			'hasSelectedFilters' => ! empty( $active_filters ) ?? false,
-		);
+		$active_filters = $block->context['activeFilters'];
 
 		$filter_context = array(
-			'items' => $active_filters,
+			'items'  => $active_filters,
+			'parent' => $this->get_full_block_name(),
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-key'          => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wc-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-bind--hidden' => '!context.hasSelectedFilters',
+			'data-wp-interactive'  => $this->get_full_block_name(),
+			'data-wp-key'          => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-bind--hidden' => '!state.hasSelectedFilters',
+			/* translators:  {{label}} is the label of the active filter item. */
+			'data-wp-context'      => wp_json_encode( array( 'removeLabelTemplate' => __( 'Remove filter: {{label}}', 'woocommerce' ) ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 		);
 
 		if ( empty( $active_filters ) ) {
@@ -87,6 +66,17 @@ final class ProductFilterActive extends AbstractBlock {
 	 * @return null
 	 */
 	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
 		return null;
 	}
 }

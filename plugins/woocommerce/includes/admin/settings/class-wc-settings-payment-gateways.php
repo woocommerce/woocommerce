@@ -253,12 +253,27 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							$active_plugins     = PluginsHelper::get_active_plugin_slugs();
 
 							if ( $wcpay_setup ) {
-								$link_text = __( 'Discover additional payment providers', 'woocommerce' );
 								$filter_by = 'category_additional';
 							} else {
-								$link_text = __( 'Discover other payment providers', 'woocommerce' );
 								$filter_by = 'category_other';
 							}
+
+							$marketplace_cta_allowed_html = array(
+								'a' => array(
+									'href'  => array(),
+									'id'    => array(),
+									'style' => array(),
+								),
+							);
+
+							$marketplace_cta = sprintf(
+								wp_kses(
+									/* translators: %s: URL to WooCommerce marketplace */
+									__( 'Visit the <a href="%s" id="settings-other-payment-methods" style="text-decoration: underline;">Official WooCommerce Marketplace</a> to find additional payment providers.', 'woocommerce' ),
+									$marketplace_cta_allowed_html
+								),
+								esc_url( admin_url( 'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways' ) )
+							);
 
 							$plugin_suggestions = array_filter(
 								$plugin_suggestions,
@@ -272,16 +287,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 							$columns_count = count( $columns );
 
-							$external_link_icon = '<svg style="margin-left: 4px" class="gridicon gridicons-external needs-offset" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M19 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6v2H5v12h12v-6h2zM13 3v2h4.586l-7.793 7.793 1.414 1.414L19 6.414V11h2V3h-8z"></path></g></svg>';
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
-							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
-							echo "<a id='settings-other-payment-methods' href='https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
-							// phpcs:ignore
-							echo $link_text;
-							// phpcs:ignore
-							echo $external_link_icon;
-							echo '</a>';
+							echo "<td style='font-size: 13px; border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
+							echo '<span style="margin-right: 10px;">';
+							echo wp_kses( $marketplace_cta, $marketplace_cta_allowed_html );
+							echo '</span>';
 							if ( count( $plugin_suggestions ) ) {
 								foreach ( $plugin_suggestions as $plugin_suggestion ) {
 									$alt = str_replace( '.png', '', basename( $plugin_suggestion->image_72x72 ) );

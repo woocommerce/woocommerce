@@ -79,33 +79,33 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
+				'title'             => __( 'Account creation', 'woocommerce' ),
+				'desc'              => __( 'After checkout (recommended)', 'woocommerce' ),
+				'desc_tip'          => sprintf(
+					/* Translators: %1$s and %2$s are opening and closing <a> tags respectively. */
+					__( 'Customers can create an account after their order is placed. Customize messaging %1$shere%2$s.', 'woocommerce' ),
+					'<a target="_blank" class="delayed-account-creation-customize-link" href="' . esc_url( admin_url( 'site-editor.php?postId=woocommerce%2Fwoocommerce%2F%2Forder-confirmation&postType=wp_template&canvas=edit' ) ) . '">',
+					'</a>'
+				),
+				'id'                => 'woocommerce_enable_delayed_account_creation',
+				'default'           => 'no',
+				'type'              => 'checkbox',
+				'checkboxgroup'     => 'start',
+				'autoload'          => false,
+				'custom_attributes' => array(
+					'disabled-tooltip' => __( 'Enable guest checkout to use this feature.', 'woocommerce' ),
+				),
+				'legend'            => __( 'Allow customers to create an account', 'woocommerce' ),
+			),
+			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'During checkout', 'woocommerce' ),
 				'desc_tip'      => __( 'Customers can create an account before placing their order.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
 				'default'       => 'no',
 				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'legend'        => __( 'Allow customers to create an account', 'woocommerce' ),
+				'checkboxgroup' => '',
 				'autoload'      => false,
-			),
-			array(
-				'title'             => __( 'Account creation', 'woocommerce' ),
-				'desc'              => __( 'After checkout (recommended)', 'woocommerce' ),
-				'desc_tip'          => sprintf(
-					/* Translators: %1$s and %2$s are opening and closing <a> tags respectively. */
-					__( 'Customers can create an account after their order is placed. Customize messaging %1$shere%2$s.', 'woocommerce' ),
-					'<a href="' . esc_url( admin_url( 'site-editor.php?postId=woocommerce%2Fwoocommerce%2F%2Forder-confirmation&postType=wp_template&canvas=edit' ) ) . '">',
-					'</a>'
-				),
-				'id'                => 'woocommerce_enable_delayed_account_creation',
-				'default'           => 'no',
-				'type'              => 'checkbox',
-				'checkboxgroup'     => '',
-				'autoload'          => false,
-				'custom_attributes' => array(
-					'disabled-tooltip' => __( 'Enable guest checkout to use this feature.', 'woocommerce' ),
-				),
 			),
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
@@ -254,6 +254,18 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'    => false,
 			),
 			array(
+				'title'       => __( 'Retain refunded orders', 'woocommerce' ),
+				'desc_tip'    => __( 'Retain refunded orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
+				'id'          => 'woocommerce_anonymize_refunded_orders',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => array(
+					'number' => '',
+					'unit'   => 'months',
+				),
+				'autoload'    => false,
+			),
+			array(
 				'title'       => __( 'Retain completed orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
 				'id'          => 'woocommerce_anonymize_completed_orders',
@@ -271,8 +283,18 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 		);
 
-		// Feature requires a block theme.
+		// Feature requires a block theme. Re-order settings if not using a block theme.
 		if ( ! wc_current_theme_is_fse_theme() ) {
+			$account_settings = array_map(
+				function ( $setting ) {
+					if ( 'woocommerce_enable_signup_and_login_from_checkout' === $setting['id'] ) {
+						$setting['checkboxgroup'] = 'start';
+						$setting['legend']        = __( 'Allow customers to create an account', 'woocommerce' );
+					}
+					return $setting;
+				},
+				$account_settings
+			);
 			$account_settings = array_filter(
 				$account_settings,
 				function ( $setting ) {
@@ -335,43 +357,55 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 		parent::output();
 
 		// The following code toggles disabled state on the account options based on other values.
-		?>
-		<script type="text/javascript">
-			document.addEventListener('DOMContentLoaded', function() {
-				// Move tooltips to label element. This is not possible through the settings field API so this is a workaround
-				// until said API is refactored.
-				document.querySelectorAll('input[disabled-tooltip]').forEach(function(element) {
-					const label = element.closest('label');
-					label.setAttribute('disabled-tooltip', element.getAttribute('disabled-tooltip'));
+		wc_enqueue_js(
+			'
+			// Move tooltips to label element. This is not possible through the settings field API so this is a workaround
+			// until said API is refactored.
+			document.querySelectorAll("input[disabled-tooltip]").forEach(function(element) {
+				const label = element.closest("label");
+				label.setAttribute("disabled-tooltip", element.getAttribute("disabled-tooltip"));
+			});
+
+			// This handles settings that are enabled/disabled based on other settings.
+			const checkboxes = [
+				document.getElementById("woocommerce_enable_signup_and_login_from_checkout"),
+				document.getElementById("woocommerce_enable_myaccount_registration"),
+				document.getElementById("woocommerce_enable_delayed_account_creation"),
+				document.getElementById("woocommerce_enable_signup_from_checkout_for_subscriptions")
+			];
+			const inputs = [
+				document.getElementById("woocommerce_registration_generate_username"),
+				document.getElementById("woocommerce_registration_generate_password")
+			];
+			checkboxes.forEach(cb => cb && cb.addEventListener("change", function() {
+				const isChecked = checkboxes.some(cb => cb && cb.checked);
+				inputs.forEach(input => {
+					if ( ! input ) {
+						return;
+					}
+					input.disabled = !isChecked;
 				});
+			}));
+			checkboxes[0].dispatchEvent(new Event("change")); // Initial state
 
-				// This handles settings that are enabled/disabled based on other settings.
-				const checkboxes = [
-					document.getElementById("woocommerce_enable_signup_and_login_from_checkout"),
-					document.getElementById("woocommerce_enable_myaccount_registration"),
-					document.getElementById("woocommerce_enable_delayed_account_creation"),
-					document.getElementById("woocommerce_enable_signup_from_checkout_for_subscriptions")
-				];
-				const inputs = [
-					document.getElementById("woocommerce_registration_generate_username"),
-					document.getElementById("woocommerce_registration_generate_password")
-				];
-				checkboxes.forEach(cb => cb && cb.addEventListener('change', function() {
-					const isChecked = checkboxes.some(cb => cb && cb.checked);
-					inputs.forEach(input => {
-						if ( ! input ) {
-							return;
-						}
-						input.disabled = !isChecked;
-					});
-				}));
-				checkboxes[0].dispatchEvent(new Event('change')); // Initial state
+			// Tracks for customize link.
+			if ( typeof window?.wcTracks?.recordEvent === "function" ) {
+				document.querySelector("a.delayed-account-creation-customize-link").addEventListener("click", function() {
+					window.wcTracks.recordEvent("delayed_account_creation_customize_link_clicked");
+				});
+			}
+		'
+		);
 
+		// If the checkout block is not default, delayed account creation is always disabled. Otherwise its based on other settings.
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			wc_enqueue_js(
+				'
 				// Guest checkout should toggle off some options.
 				const guestCheckout = document.getElementById("woocommerce_enable_guest_checkout");
 
 				if ( guestCheckout ) {
-					guestCheckout.addEventListener('change', function() {
+					guestCheckout.addEventListener("change", function() {
 						const isChecked = this.checked;
 						const input = document.getElementById("woocommerce_enable_delayed_account_creation");
 						if ( ! input ) {
@@ -379,11 +413,11 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 						}
 						input.disabled = !isChecked;
 					});
-					guestCheckout.dispatchEvent(new Event('change')); // Initial state
+					guestCheckout.dispatchEvent(new Event("change")); // Initial state
 				}
-			});
-		</script>
-		<?php
+			'
+			);
+		}
 	}
 }
 

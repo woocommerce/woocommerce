@@ -3,8 +3,6 @@
  */
 import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-// @ts-expect-error No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { store as coreStore } from '@wordpress/core-data';
 
 /**
@@ -50,10 +48,9 @@ export const FontFamiliesLoader = ( {
 		return {
 			// @ts-expect-error No types for this exist yet.
 			site: select( coreStore ).getSite(),
-			// @ts-expect-error No types for this exist yet.
 			currentTheme: select( coreStore ).getCurrentTheme(),
 		};
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if ( ! Array.isArray( fontFamilies ) || ! site ) {

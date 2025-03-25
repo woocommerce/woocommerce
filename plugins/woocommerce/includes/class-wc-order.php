@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -2179,6 +2180,31 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the total shipping tax refunded.
+	 *
+	 * @since  9.9.0
+	 * @return float
+	 */
+	public function get_total_shipping_tax_refunded() {
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_tax_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_shipping_tax_refunded = 0;
+
+		if ( method_exists( $this->data_store, 'get_total_shipping_tax_refunded' ) ) {
+			$total_shipping_tax_refunded = $this->data_store->get_total_shipping_tax_refunded( $this );
+		}
+
+		wp_cache_set( $cache_key, $total_shipping_tax_refunded, $this->cache_group );
+
+		return $total_shipping_tax_refunded;
+	}
+
+	/**
 	 * Get the total shipping refunded.
 	 *
 	 * @since  2.4
@@ -2356,6 +2382,7 @@ class WC_Order extends WC_Abstract_Order {
 			}
 
 			$total_rows['payment_method'] = array(
+				'type'  => 'payment_method',
 				'label' => __( 'Payment method:', 'woocommerce' ),
 				'value' => $value,
 			);
@@ -2379,6 +2406,7 @@ class WC_Order extends WC_Abstract_Order {
 				}
 
 				$total_rows[ 'refund_' . $id ] = array(
+					'type'  => 'refund',
 					'label' => __( 'Refund', 'woocommerce' ) . ':',
 					'value' => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ) . $reason,
 				);
@@ -2396,14 +2424,21 @@ class WC_Order extends WC_Abstract_Order {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 		$total_rows  = array();
 
+		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+
 		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );
-		$this->add_order_item_totals_payment_method_row( $total_rows, $tax_display );
+		if ( ! $email_improvements_enabled ) {
+			$this->add_order_item_totals_payment_method_row( $total_rows, $tax_display );
+		}
 		$this->add_order_item_totals_refund_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
+		if ( $email_improvements_enabled ) {
+			$this->add_order_item_totals_payment_method_row( $total_rows, $tax_display );
+		}
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}

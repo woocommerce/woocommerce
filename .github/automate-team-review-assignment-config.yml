@@ -25,17 +25,9 @@ when:
         - flux
   - author:
       teamIs:
-        - proton
+        - solaris
       ignore:
         nameIs:
     assign:
       teams:
-        - proton
-  - author:
-      teamIs:
-        - mailpoet
-      ignore:
-        nameIs:
-    assign:
-      teams:
-        - mailpoet
+        - solaris
