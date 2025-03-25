@@ -52,7 +52,7 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
-		complete?: {
+		finish?: {
 			type?: string;
 			href?: string;
 		};

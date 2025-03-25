@@ -119,7 +119,7 @@ export default function PaymentMethodsSelection() {
 					<Button
 						className="components-button is-primary"
 						onClick={ () => {
-							const href = currentStep?.actions?.complete?.href;
+							const href = currentStep?.actions?.finish?.href;
 							if ( href ) {
 								apiFetch( {
 									url: href,
