@@ -25,7 +25,7 @@ import strings from '../strings';
 const BusinessDetails: React.FC = () => {
 	const { data, setData } = useMOXContext();
 	const { currentStep } = useOnboardingContext();
-	const countries = getAvailableCountries();
+	const countries = getAvailableCountries( currentStep?.context?.fields?.available_countries || {} );
 	const businessTypes = getBusinessTypes( currentStep?.context?.fields?.business_types || [] );
 	const mccsFlatList = getMccsFlatList( ( currentStep?.context?.fields?.mccs_display_tree ?? [] ) as MccsDisplayTreeItem[] );
 

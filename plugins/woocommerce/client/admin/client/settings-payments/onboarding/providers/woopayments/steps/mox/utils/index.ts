@@ -29,8 +29,10 @@ export const fromDotNotation = (
 const hasUndefinedValues = ( obj: Record< string, any > ): boolean =>
 	Object.values( obj ).some( ( value ) => value === undefined );
 
-export const getAvailableCountries = (): Country[] =>
-	Object.entries( wcpaySettings?.connect.availableCountries || [] )
+export const getAvailableCountries = (
+	countries: Record< string, string >
+): Country[] =>
+	Object.entries( countries || [] )
 		.map( ( [ key, name ] ) => ( { key, name, types: [] } ) )
 		.sort( ( a, b ) => a.name.localeCompare( b.name ) );
 
