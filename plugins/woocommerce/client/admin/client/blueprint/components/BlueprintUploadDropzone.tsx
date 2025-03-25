@@ -301,7 +301,7 @@ export const fileUploadMachine = setup( {
 					};
 				},
 				onDone: {
-					target: 'idle',
+					target: 'importSuccess',
 					actions: assign( {
 						error: ( { event } ) => {
 							if (
@@ -336,7 +336,9 @@ export const fileUploadMachine = setup( {
 				},
 			},
 		},
-		importSuccess: {},
+		importSuccess: {
+			always: 'idle',
+		},
 	},
 	on: {
 		DISMISS_FILE_UPLOAD: {
