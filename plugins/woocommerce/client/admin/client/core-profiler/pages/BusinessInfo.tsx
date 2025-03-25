@@ -7,11 +7,16 @@ import {
 	TextControl,
 	Spinner,
 	CheckboxControl,
+	Notice,
 } from '@wordpress/components';
 import { FormInputValidation } from '@automattic/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
-import { useEffect, useState } from '@wordpress/element';
+import {
+	useEffect,
+	useState,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { z } from 'zod';
 import clsx from 'clsx';
@@ -282,20 +287,56 @@ export const BusinessInfo = ( {
 							setStoreCountry( countryStateOption );
 						} }
 						geolocatedLocation={ geolocatedLocation }
-						onRetry={ () => {
-							sendEvent( {
-								type: 'RETRY_PRE_BUSINESS_INFO',
-							} );
-						} }
-						onSkip={ () => {
-							sendEvent( {
-								type: 'SKIP_BUSINESS_INFO_STEP',
-							} );
-						} }
 						onGeolocationOverruledChange={ ( overruled ) => {
 							setGeolocationOverruled( overruled );
 						} }
 					/>
+					{ countries.length === 0 && (
+						<Notice
+							className="woocommerce-profiler-select-control__country-error"
+							isDismissible={ false }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'RETRY_PRE_BUSINESS_INFO',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+									skipButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'SKIP_BUSINESS_INFO_STEP',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'Skip this step',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
 					{
 						<>
 							<TextControl

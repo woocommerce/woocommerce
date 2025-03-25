@@ -326,6 +326,11 @@
 			margin-bottom: 12px;
 			max-width: 404px;
 		}
+
+		.woocommerce-profiler-select-control__country-error {
+			max-width: 400px;
+			margin: auto auto 12px auto;
+		}
 	}
 }
 
@@ -625,34 +630,33 @@
 	}
 }
 
-.woocommerce-geolocation-country-select {
-	.woocommerce-profiler-select-control__country-error {
-		background: #fce2e4;
-		padding: $gap-small;
-		font-size: 13px;
-		font-style: normal;
-		font-weight: 400;
-		line-height: 24px;
-		color: $gray-900;
-		margin: 12px 0;
+.woocommerce-profiler-select-control__country-error {
+	background: #fce2e4;
+	padding: $gap-small;
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 24px;
+	color: $gray-900;
 
-		.components-notice__content {
-			margin: 0;
-		}
-
-		.components-button {
-			padding: 0;
-			height: initial;
-			min-width: 24px;
-			min-height: 24px;
-
-			svg {
-				width: 16px;
-				fill: $gray-900;
-			}
-		}
+	.components-notice__content {
+		margin: 0;
 	}
 
+	.components-button {
+		padding: 0;
+		height: initial;
+		min-width: 24px;
+		min-height: 24px;
+
+		svg {
+			width: 16px;
+			fill: $gray-900;
+		}
+	}
+}
+
+.woocommerce-geolocation-country-select {
 	.woocommerce-profiler-select-control__country-spacer {
 		margin: auto auto 12px auto;
 	}

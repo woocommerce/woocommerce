@@ -437,7 +437,10 @@ const assignStoreLocation = assign( {
 		context,
 	}: {
 		context: CoreProfilerStateMachineContext;
-		event: BusinessLocationEvent;
+		event: Extract<
+			BusinessInfoEvent,
+			{ type: 'BUSINESS_INFO_COMPLETED' }
+		>;
 	} ) => {
 		return {
 			...context.businessInfo,
@@ -1318,6 +1321,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									input: { step: 'skip-guided-setup' },
 								} ),
 							],
+						},
+						RETRY_COUNTRIES_LIST: {
+							actions: [ 'reloadPage' ],
 						},
 					},
 					entry: [

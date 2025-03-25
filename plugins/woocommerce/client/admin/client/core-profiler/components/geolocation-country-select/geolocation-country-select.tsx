@@ -25,8 +25,6 @@ type Props = {
 	label: string;
 	placeholder: string;
 	onChange: ( country: CountryStateOption ) => void;
-	onRetry: () => void;
-	onSkip: () => void;
 	onGeolocationOverruledChange?: ( overruled: boolean ) => void;
 };
 
@@ -37,8 +35,6 @@ export const GeolocationCountrySelect = ( {
 	label,
 	placeholder,
 	onChange,
-	onRetry,
-	onSkip,
 	onGeolocationOverruledChange,
 }: Props ) => {
 	const [ selectedCountry, setSelectedCountry ] =
@@ -103,33 +99,6 @@ export const GeolocationCountrySelect = ( {
 				virtualItemHeight={ 40 }
 				virtualListHeight={ 40 * 9 }
 			/>
-
-			{ countries.length === 0 && (
-				<Notice
-					className="woocommerce-profiler-select-control__country-error"
-					isDismissible={ false }
-					status="error"
-				>
-					{ createInterpolateElement(
-						__(
-							'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
-							'woocommerce'
-						),
-						{
-							retryButton: (
-								<Button onClick={ onRetry } variant="tertiary">
-									{ __( 'Please try again', 'woocommerce' ) }
-								</Button>
-							),
-							skipButton: (
-								<Button onClick={ onSkip } variant="tertiary">
-									{ __( 'Skip this step', 'woocommerce' ) }
-								</Button>
-							),
-						}
-					) }
-				</Notice>
-			) }
 
 			<div className="woocommerce-profiler-select-control__country-spacer" />
 

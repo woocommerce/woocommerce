@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { Button, Notice } from '@wordpress/components';
+import { useState, createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -61,13 +61,56 @@ export const BusinessLocation = ( {
 					onChange={ ( countryStateOption ) => {
 						setStoreCountry( countryStateOption );
 					} }
-					onRetry={ () => {
-						// Retry geolocation
-					} }
-					onSkip={ () => {
-						// Skip geolocation
-					} }
 				/>
+				{ context.countries.length === 0 && (
+					<Notice
+						className="woocommerce-profiler-select-control__country-error"
+						isDismissible={ false }
+						status="error"
+					>
+						{ createInterpolateElement(
+							__(
+								'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+								'woocommerce'
+							),
+							{
+								retryButton: (
+									<Button
+										onClick={ () => {
+											sendEvent( {
+												type: 'RETRY_COUNTRIES_LIST',
+											} );
+										} }
+										variant="tertiary"
+									>
+										{ __(
+											'Please try again',
+											'woocommerce'
+										) }
+									</Button>
+								),
+								skipButton: (
+									<Button
+										onClick={ () => {
+											sendEvent( {
+												type: 'BUSINESS_LOCATION_COMPLETED',
+												payload: {
+													storeLocation: 'US:CA',
+												},
+											} );
+										} }
+										variant="tertiary"
+									>
+										{ __(
+											'Skip this step',
+											'woocommerce'
+										) }
+									</Button>
+								),
+							}
+						) }
+					</Notice>
+				) }
 				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">
 					<Button
 						className="woocommerce-profiler-button"
