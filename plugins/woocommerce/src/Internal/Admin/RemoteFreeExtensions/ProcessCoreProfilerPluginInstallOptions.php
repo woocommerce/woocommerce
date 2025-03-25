@@ -129,9 +129,10 @@ class ProcessCoreProfilerPluginInstallOptions {
 			}
 		}
 
-		$autoload = null;
+		$allowed_autoload_values = array( 'yes', 'no', true, false );
+		$autoload                = null;
 
-		if ( isset( $options->autoload ) && ( 'yes' === $options->autoload || 'no' === $options->autoload ) ) {
+		if ( isset( $options->autoload ) && in_array( $options->autoload, $allowed_autoload_values, true ) ) {
 			$autoload = $options->autoload;
 		}
 
