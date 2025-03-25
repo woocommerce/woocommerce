@@ -11,8 +11,8 @@
 	"version": "0.6.0",
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
-		"@babel/preset-react": "7.23.3",
-		"@babel/preset-typescript": "7.23.3",
+		"@babel/preset-react": "7.25.7",
+		"@babel/preset-typescript": "7.25.7",
 		"@svgr/webpack": "^8.1.0",
 		"@testing-library/dom": "9.3.3",
 		"@testing-library/jest-dom": "^6.x.x",

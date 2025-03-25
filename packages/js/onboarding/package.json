@@ -70,7 +70,7 @@
 		"string-similarity": "4.0.4"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@testing-library/react": "^16.x.x",
 		"@types/jest": "27.5.x",
 		"@types/react": "18.3.x",
