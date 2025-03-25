@@ -7,6 +7,7 @@ import React from 'react';
  * Internal dependencies
  */
 import { useMOXContext } from '../data/mox-context';
+import { useOnboardingContext } from '../../../data/onboarding-context';
 import { Item } from '../../../components/custom-select-control';
 import { OnboardingFields, BusinessType } from '../types';
 import { OnboardingGroupedSelectField, OnboardingSelectField } from '../components/form';
@@ -15,6 +16,7 @@ import {
 	getBusinessTypes,
 	getMccsFlatList,
 } from '../utils';
+import { MccsDisplayTreeItem } from '../types'; 
 import strings from '../strings';
 
 /**
@@ -22,9 +24,10 @@ import strings from '../strings';
  */
 const BusinessDetails: React.FC = () => {
 	const { data, setData } = useMOXContext();
+	const { currentStep } = useOnboardingContext();
 	const countries = getAvailableCountries();
-	const businessTypes = getBusinessTypes();
-	const mccsFlatList = getMccsFlatList();
+	const businessTypes = getBusinessTypes( currentStep?.context?.fields?.business_types || [] );
+	const mccsFlatList = getMccsFlatList( ( currentStep?.context?.fields?.mccs_display_tree ?? [] ) as MccsDisplayTreeItem[] );
 
 	const selectedCountry = businessTypes.find( ( country ) => {
 		// Special case for Puerto Rico as it's considered a separate country in Core, but the business country should be US.

@@ -18,6 +18,7 @@ import EmbeddedKyc from './steps/embedded-kyc';
 import { Stepper } from './components/stepper';
 import Step from './components/step';
 import { getMccFromIndustry } from './utils';
+import { MccsDisplayTreeItem } from './types'; 
 import './style.scss';
 
 export const MOXStep: React.FC = () => {
@@ -25,7 +26,7 @@ export const MOXStep: React.FC = () => {
 
     const initialData = {
         business_name: 'Test', // To-Do: Replace with wcSettings?.siteTitle,
-        mcc: getMccFromIndustry(),
+        mcc: getMccFromIndustry( ( currentStep?.context?.fields?.mccs_display_tree ?? [] ) as MccsDisplayTreeItem[] ),
         site: 'https://wcpay.test', // To-Do: Replace with URL
         country: 'US', // To-Do: Replace with country from WooCommerce settings
     };

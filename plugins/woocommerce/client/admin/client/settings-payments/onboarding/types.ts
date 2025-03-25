@@ -3,6 +3,7 @@
  */
 import { type ReactNode } from 'react';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
+import { Country, MccsDisplayTreeItem } from './providers/woopayments/steps/mox/types'; // To-do: Maybe move to @woocommerce/data
 
 /**
  * Props for the Onboarding Modal component.
@@ -60,6 +61,11 @@ export interface WooPaymentsProviderOnboardingStep {
 	content?: ReactNode;
 	context?: {
 		payment_methods: RecommendedPaymentMethod[];
+		fields: {
+			business_types: Country[],
+			industry_to_mcc: Record< string, string >,
+			mccs_display_tree: MccsDisplayTreeItem,
+		}
 	};
 }
 

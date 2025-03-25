@@ -18,15 +18,14 @@ export interface PoEligibleResponse {
 }
 
 export interface PoEligibleData {
-	business: {
+	location: string;
+	self_assessment: {
 		country: string;
 		type: string;
 		mcc: string;
-	};
-	store: {
 		annual_revenue: string;
 		go_live_timeframe: string;
-	};
+	}
 }
 
 export interface Country {

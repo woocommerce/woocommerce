@@ -7,11 +7,12 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { NAMESPACE } from '../data/constants';
+import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import { ListItem } from '../../../components/grouped-select-control';
 import businessTypeDescriptionStrings from '../translations/descriptions';
 import {
 	Country,
+	MccsDisplayTreeItem,
 	OnboardingFields,
 	PoEligibleData,
 	PoEligibleResponse,
@@ -33,9 +34,9 @@ export const getAvailableCountries = (): Country[] =>
 		.map( ( [ key, name ] ) => ( { key, name, types: [] } ) )
 		.sort( ( a, b ) => a.name.localeCompare( b.name ) );
 
-export const getBusinessTypes = (): Country[] => {
-	const data = wcpaySettings?.onboardingFieldsData?.business_types;
-
+export const getBusinessTypes = (
+	data: Country[]
+): Country[] => {
 	return (
 		( data || [] )
 			.map( ( country ) => ( {
@@ -60,7 +61,7 @@ export const getBusinessTypes = (): Country[] => {
  */
 export const finalizeOnboarding = async ( urlSource: string ) => {
 	return await apiFetch< FinalizeOnboardingResponse >( {
-		path: `${ NAMESPACE }/onboarding/kyc/finalize`,
+		path: `${ WC_ADMIN_NAMESPACE }/onboarding/kyc/finalize`,
 		method: 'POST',
 		data: {
 			source: urlSource,
@@ -91,19 +92,18 @@ export const isPoEligible = async (
 	}
 
 	const eligibilityData: PoEligibleData = {
-		business: {
+		location: onboardingFields.country as string,
+		self_assessment: {
 			country: onboardingFields.country as string,
 			type: onboardingFields.business_type as string,
 			mcc: onboardingFields.mcc as string,
-		},
-		store: {
 			annual_revenue: onboardingFields.annual_revenue as string,
 			go_live_timeframe: onboardingFields.go_live_timeframe as string,
-		},
+		}
 	};
 
 	const response: PoEligibleResponse = await apiFetch( {
-		path: `${ NAMESPACE }/onboarding/router/po_eligible`,
+		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/check/po_eligible`,
 		method: 'POST',
 		data: eligibilityData,
 	} );
@@ -116,20 +116,21 @@ export const isPoEligible = async (
  *
  * @return {string | undefined} The MCC code for the selected industry. Will return undefined if no industry is selected.
  */
-export const getMccFromIndustry = (): string | undefined => {
+export const getMccFromIndustry = (
+	industryToMcc: MccsDisplayTreeItem[]
+): MccsDisplayTreeItem | undefined => {
 	const industry = wcSettings.admin?.onboarding?.profile?.industry?.[ 0 ];
 	if ( ! industry ) {
 		return undefined;
 	}
 
-	const industryToMcc =
-		wcpaySettings?.onboardingFieldsData?.industry_to_mcc || {};
-
 	return industryToMcc[ industry ];
 };
 
-export const getMccsFlatList = (): ListItem[] => {
-	const data = wcpaySettings?.onboardingFieldsData?.mccs_display_tree;
+export const getMccsFlatList = (
+	industryToMcc: MccsDisplayTreeItem[]
+): ListItem[] => {
+	const data = industryToMcc;
 
 	// Right now we support only two levels (top-level groups and items in those groups).
 	// For safety, we will discard anything else like top-level items or sub-groups.
