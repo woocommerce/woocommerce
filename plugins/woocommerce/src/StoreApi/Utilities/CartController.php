@@ -823,7 +823,7 @@ class CartController {
 		$cart = $this->get_cart_instance();
 		return [
 			'line_items' => $cart->get_cart_hash(),
-			'shipping'   => md5( wp_json_encode( $cart->shipping_methods ) ),
+			'shipping'   => md5( wp_json_encode( [ $cart->shipping_methods, wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
 			'fees'       => md5( wp_json_encode( $cart->get_fees() ) ),
 			'coupons'    => md5( wp_json_encode( $cart->get_applied_coupons() ) ),
 			'taxes'      => md5( wp_json_encode( $cart->get_taxes() ) ),
@@ -965,7 +965,7 @@ class CartController {
 		$applied_coupons = $this->get_cart_coupons();
 		$coupon          = new \WC_Coupon( $coupon_code );
 
-		if ( $coupon->get_code() !== $coupon_code ) {
+		if ( ! wc_is_same_coupon( $coupon->get_code(), $coupon_code ) ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(

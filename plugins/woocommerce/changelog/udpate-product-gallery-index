@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Product Gallery: remove custom registration mechanism impacting Editor's performance

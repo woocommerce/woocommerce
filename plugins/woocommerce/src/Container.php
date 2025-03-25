@@ -106,9 +106,10 @@ final class Container {
 	 * Finds an entry of the container by its identifier and returns it.
 	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @template T
+	 * @param string|class-string<T> $id Identifier of the entry to look for.
 	 *
-	 * @return mixed Resolved entry.
+	 * @return T Resolved entry.
 	 *
 	 * @throws NotFoundExceptionInterface No entry was found for the supplied identifier (only when using ExtendedContainer).
 	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
@@ -126,7 +127,7 @@ final class Container {
 	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
 	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @param class-string $id Identifier of the entry to look for.
 	 *
 	 * @return bool
 	 */
@@ -137,7 +138,7 @@ final class Container {
 	/**
 	 * The list of service provider classes to register.
 	 *
-	 * @var string[]
+	 * @return array<int,class-string>
 	 */
 	private function get_service_providers(): array {
 		return array(

@@ -14,6 +14,7 @@ import { STORE_KEY as CHECKOUT_STORE_KEY } from './constants';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
 import { processErrorResponse } from '../utils';
 import { CheckoutPutData } from './types';
+import { validateAdditionalFields } from './utils';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
@@ -100,6 +101,13 @@ const updateCheckoutData = (): void => {
 
 	if ( Object.keys( changedFields ).length > 0 ) {
 		requestData.additional_fields = changedFields;
+	}
+
+	// Validate additional fields before proceeding
+	if ( ! validateAdditionalFields( changedFields ) ) {
+		localState.doingPush = false;
+		localState.checkoutData = newCheckoutData;
+		return;
 	}
 
 	if ( newCheckoutData.orderNotes !== localState.checkoutData.orderNotes ) {
