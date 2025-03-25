@@ -8896,7 +8896,7 @@ body.woocommerce_page_wc-settings {
 		}
 
 		.subsubsub {
-			margin: 24px 30px 0;
+			margin: 0 0 30px;
 			li {
 				color: #2271b1;
 				&:first-child a{
@@ -8906,9 +8906,15 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
-	#mainform > *:not(nav) {
-		margin: 24px 30px 0;
+	.settings-content {
+		padding: 0 30px;
+		margin-top: 24px;
+		background: #f0f0f1;
 	}
+
+	// #mainform > *:not(nav):not(table) {
+	// 	margin: 24px 30px 0;
+	// }
 
 	.wrap {
 		padding: 0;
