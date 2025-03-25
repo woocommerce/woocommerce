@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix loading email preview when email is registered with different than class name
