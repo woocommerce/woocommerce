@@ -37,7 +37,7 @@ import {
 	setIsCustomerDataDirty,
 	setTriggerStoreSyncEvent,
 } from './utils';
-
+import { isEditor } from '../utils';
 interface CartThunkArgs {
 	select: CurriedSelectorsOf< typeof cartStore >;
 	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
@@ -426,6 +426,7 @@ let abortController: AbortController | null = null;
 export const selectShippingRate =
 	( rateId: string, packageId: number | null = null ) =>
 	async ( { dispatch, select }: CartThunkArgs ) => {
+
 		const selectedShippingRate = select
 			.getShippingRates()
 			.find(
@@ -438,6 +439,10 @@ export const selectShippingRate =
 			);
 
 		if ( selectedShippingRate?.rate_id === rateId ) {
+			return;
+		}
+
+		if ( isEditor() ) {
 			return;
 		}
 
