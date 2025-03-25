@@ -45,7 +45,10 @@ test.describe( 'Shopper → Shipping', () => {
 		await shippingUtils.enableShippingCostsRequireAddress();
 	} );
 
-	test.beforeEach( async ( { admin } ) => {
+	test.beforeEach( async ( { admin, requestUtils } ) => {
+		await requestUtils.deactivatePlugin(
+			'woocommerce-blocks-test-helper'
+		);
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
 		await admin.page
 			.getByLabel( 'Default customer location' )
@@ -115,16 +118,7 @@ test.describe( 'Shopper → Shipping', () => {
 	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees shipping rates and pickup options - rates are selected default', async ( {
 		localPickupUtils,
 		frontendUtils,
-		page,
 	} ) => {
-		await page.goto(
-			'/?disable_third_party_local_pickup_method_registration'
-		);
-		await expect(
-			page.getByText(
-				'Third party local pickup method registration disabled.'
-			)
-		).toBeVisible();
 		await localPickupUtils.enableLocalPickup();
 		await localPickupUtils.addPickupLocation( {
 			location: {
@@ -268,16 +262,7 @@ test.describe( 'Shopper → Shipping', () => {
 		frontendUtils,
 		checkoutPageObject,
 		shippingUtils,
-		page,
 	} ) => {
-		await page.goto(
-			'/?disable_third_party_local_pickup_method_registration'
-		);
-		await expect(
-			page.getByText(
-				'Third party local pickup method registration disabled.'
-			)
-		).toBeVisible();
 		await localPickupUtils.disableLocalPickup();
 		await shippingUtils.disableShippingCostsRequireAddress();
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
@@ -351,17 +336,7 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		admin,
 		frontendUtils,
-		page,
 	} ) => {
-		await page.goto(
-			'/?disable_third_party_local_pickup_method_registration'
-		);
-		await expect(
-			page.getByText(
-				'Third party local pickup method registration disabled.'
-			)
-		).toBeVisible();
-
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
 		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
@@ -433,16 +408,7 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		admin,
 		frontendUtils,
-		page,
 	} ) => {
-		await page.goto(
-			'/?disable_third_party_local_pickup_method_registration'
-		);
-		await expect(
-			page.getByText(
-				'Third party local pickup method registration disabled.'
-			)
-		).toBeVisible();
 
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
@@ -492,18 +458,8 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		frontendUtils,
 		shippingUtils,
-		page,
 		checkoutPageObject,
 	} ) => {
-		await page.goto(
-			'/?disable_third_party_local_pickup_method_registration'
-		);
-		await expect(
-			page.getByText(
-				'Third party local pickup method registration disabled.'
-			)
-		).toBeVisible();
-
 		await localPickupUtils.disableLocalPickup();
 		await shippingUtils.enableShippingCostsRequireAddress();
 
@@ -598,18 +554,8 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		admin,
 		frontendUtils,
-		page,
 		shippingUtils,
 	} ) => {
-		await page.goto(
-			'/?disable_third_party_local_pickup_method_registration'
-		);
-		await expect(
-			page.getByText(
-				'Third party local pickup method registration disabled.'
-			)
-		).toBeVisible();
-
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
 		const acceptDialog = ( dialog: Dialog ) => dialog.accept();
