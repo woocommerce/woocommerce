@@ -91,7 +91,8 @@ export { useUser } from './user/use-user';
 
 // Export utils
 export { getVisibleTasks } from './onboarding/utils';
-export { getLeaderboard, searchItemsByString } from './items/utils';
+export { searchItemsByString } from './items/utils';
+export { getLeaderboard } from './items/store-aware-utils';
 export {
 	getFilterQuery,
 	getSummaryNumbers,
