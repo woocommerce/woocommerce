@@ -128,12 +128,17 @@ class ProcessCoreProfilerPluginInstallOptions {
 				return;
 			}
 		}
+		$map_autoload_values = array(
+			'yes' => true,
+			'no'  => false,
+			true  => true,
+			false => false,
+		);
 
-		$allowed_autoload_values = array( 'yes', 'no', true, false );
-		$autoload                = null;
+		$autoload = null;
 
-		if ( isset( $options->autoload ) && in_array( $options->autoload, $allowed_autoload_values, true ) ) {
-			$autoload = $options->autoload;
+		if ( isset( $options->autoload ) && array_key_exists( $options->autoload, $map_autoload_values ) ) {
+			$autoload = $map_autoload_values[ $options->autoload ];
 		}
 
 		$this->add_option( $install_option->name, $install_option->value, $autoload );
