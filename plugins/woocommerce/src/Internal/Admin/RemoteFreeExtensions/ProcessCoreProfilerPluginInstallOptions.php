@@ -146,8 +146,8 @@ class ProcessCoreProfilerPluginInstallOptions {
 			$this->logger && $this->logger->error( 'Disallowed option: ' . $name );
 			return;
 		}
-		// phpcs:ignore WordPress.WP.DeprecatedParameters.Add_optionParam3Found
-		add_option( $name, $value, $autoload );
+
+		add_option( $name, $value, '', $autoload );
 	}
 
 	/**
