@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Handle and display any errors that occur while refreshing WooCommerce.com subscriptions list
+
