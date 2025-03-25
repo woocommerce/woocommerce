@@ -272,15 +272,6 @@ class OrderController {
 						array_values( $coupon_errors )[0],
 					);
 				}
-
-				throw new RouteException(
-					$error_code,
-					$error_message,
-					409,
-					array(
-						'removed_coupons' => $coupon_errors,
-					)
-				);
 			} else {
 				if ( $use_order_data ) {
 					$error_message = sprintf(
@@ -289,22 +280,15 @@ class OrderController {
 						implode( '", "', array_keys( $coupon_errors ) )
 					);
 				} else {
-					sprintf(
+					$error_message = sprintf(
 						/* translators: %s Coupon codes. */
 						__( 'Invalid coupons were removed from the cart: "%s"', 'woocommerce' ),
 						implode( '", "', array_keys( $coupon_errors ) )
 					);
 				}
-
-				throw new RouteException(
-					$error_code,
-					$error_message,
-					409,
-					array(
-						'removed_coupons' => $coupon_errors,
-					)
-				);
 			}
+
+			throw new RouteException( $error_code, $error_message, 409, array( 'removed_coupons' => $coupon_errors ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 	}
 
