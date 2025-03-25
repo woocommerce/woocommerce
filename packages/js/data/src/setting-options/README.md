@@ -85,8 +85,6 @@ Directly saves multiple settings to the server without requiring them to be edit
 
 ## Selectors
 
-All selectors that return settings or setting values accept an optional `options` parameter with the following properties:
-- `includeEdits`: Whether to include edits in the returned value (default: `true`)
 
 ### `getGroups( state )`
 
