@@ -86,8 +86,8 @@ class Init {
 			$style_name,
 			WCAdminAssets::get_url( $style_path_name . '/style', 'css' ),
 			// Manually set dependencies for now, because the asset file is not being generated correctly.
-			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php.
-			array( 'wp-components' ), // isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),.
+			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php. Should be: `isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),`.
+			array( 'wp-components' ), 
 			WCAdminAssets::get_file_version( 'css', $style_assets['version'] ),
 		);
 
