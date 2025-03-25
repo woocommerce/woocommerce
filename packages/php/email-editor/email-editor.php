@@ -16,4 +16,8 @@
  * Requires PHP: 7.4
  */
 
-require_once __DIR__ . '/vendor/autoload.php';
+$autoload_entry_point = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $autoload_entry_point ) ) {
+	require_once $autoload_entry_point;
+}
+// When the package is distributed as part of WooCommerce core, it will provide autoloading of necessary dependencies.
