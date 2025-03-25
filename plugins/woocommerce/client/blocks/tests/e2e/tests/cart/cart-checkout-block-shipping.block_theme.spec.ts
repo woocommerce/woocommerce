@@ -45,8 +45,7 @@ test.describe( 'Shopper → Shipping', () => {
 		await shippingUtils.enableShippingCostsRequireAddress();
 	} );
 
-	test.beforeEach( async ( { admin, requestUtils } ) => {
-		await requestUtils.deactivatePlugin( 'woocommerce-blocks-test-helper' );
+	test.beforeEach( async ( { admin } ) => {
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=general' );
 		await admin.page
 			.getByLabel( 'Default customer location' )
