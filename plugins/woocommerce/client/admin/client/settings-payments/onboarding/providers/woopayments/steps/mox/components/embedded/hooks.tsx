@@ -7,8 +7,8 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { AccountSession } from './types';
-import { NAMESPACE } from '../../data/constants';
+import { AccountKycResult } from './types';
+import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import { OnboardingFields } from '../../types';
 import { fromDotNotation } from '../../utils';
 
@@ -21,13 +21,12 @@ import { fromDotNotation } from '../../utils';
 export const createKycAccountSession = async (
 	data: OnboardingFields,
 	isPoEligible: boolean
-): Promise< AccountSession > => {
-	return await apiFetch< AccountSession >( {
-		path: addQueryArgs( `${ NAMESPACE }/onboarding/kyc/session`, {
+): Promise< AccountKycResult > => {
+	return await apiFetch< AccountKycResult >( {
+		path: addQueryArgs( `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/session/start`, {
 			self_assessment: fromDotNotation( data ),
-			capabilities: '', // To-Do: Replace with capabilities from the endpoint.
 			progressive: isPoEligible,
 		} ),
-		method: 'GET',
+		method: 'POST',
 	} );
 };

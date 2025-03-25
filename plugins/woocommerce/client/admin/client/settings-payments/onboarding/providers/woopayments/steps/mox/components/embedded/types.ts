@@ -3,6 +3,14 @@
  */
 
 /**
+ * Account KYC session result.
+ */
+
+export interface AccountKycResult {
+	session: AccountSession;
+}
+
+/**
  * Account session.
  */
 export interface AccountSession {

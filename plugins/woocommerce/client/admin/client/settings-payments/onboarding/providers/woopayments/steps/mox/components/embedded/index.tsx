@@ -20,7 +20,6 @@ import { createKycAccountSession } from './hooks';
 import appearance from './appearance';
 import { OnboardingFields } from '../../types';
 import BannerNotice from '../../../../components/banner-notice';
-import { AccountSession } from './types';
 import { trackRedirected } from '../../utils/tracking';
 
 interface EmbeddedComponentProps {
@@ -61,9 +60,7 @@ const useInitializeStripe = (
 	useEffect( () => {
 		const initializeStripe = async () => {
 			try {
-				let session: AccountSession;
-
-				session = await createKycAccountSession(
+				const accountSession = await createKycAccountSession(
 					onboardingData,
 					isPoEligible
 				);
@@ -71,7 +68,7 @@ const useInitializeStripe = (
 				// Track the embedded component redirection event.
 				trackRedirected( isPoEligible, true );
 
-				const { clientSecret, publishableKey } = session;
+				const { clientSecret, publishableKey } = accountSession.session;
 
 				if ( ! publishableKey ) {
 					throw new Error(
@@ -86,7 +83,7 @@ const useInitializeStripe = (
 						overlays: 'drawer',
 						...appearance,
 					},
-					locale: session.locale.replace( '_', '-' ),
+					locale: accountSession.session.locale.replace( '_', '-' ),
 				} );
 
 				setStripeConnectInstance( instance );
