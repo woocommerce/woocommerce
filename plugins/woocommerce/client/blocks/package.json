@@ -163,7 +163,7 @@
 		"@wordpress/block-library": "wp-6.6",
 		"@wordpress/blocks": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
-		"@wordpress/components": "19.17.0",
+		"@wordpress/components": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data-controls": "2.2.7",
 		"@wordpress/date": "4.44.0",
