@@ -85,14 +85,10 @@ export const Edit = withProductDataContext(
 				resizeObserver.observe( scrollableElement.parentElement );
 			}
 
-			// Initial check
-			const overflow = checkOverflow( scrollableElement );
-			setOverflowState( overflow );
-
 			return () => {
 				resizeObserver.disconnect();
 			};
-		}, [ thumbnailSize ] ); // Re-run when thumbnailSize changes as it affects layout
+		}, [ thumbnailSize ] );
 
 		const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
 		const className = clsx(
