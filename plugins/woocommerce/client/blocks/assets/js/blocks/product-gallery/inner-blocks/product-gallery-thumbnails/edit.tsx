@@ -130,6 +130,7 @@ export const Edit = withProductDataContext(
 												className="wc-block-product-gallery-thumbnails__thumbnail__image"
 												src={ src }
 												alt={ alt }
+												loading="lazy"
 											/>
 										</div>
 									);
