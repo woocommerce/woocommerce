@@ -359,7 +359,6 @@ export function* resetLaunchYourStore() {
 }
 
 export function* loadTemplateVersion( params ) {
-	console.log( 'loadTemplateVersion', params );
 	if ( ! params || ! params.template_name || ! params.version ) {
 		yield updateMessage(
 			'Load Template Version',
