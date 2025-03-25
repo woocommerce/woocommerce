@@ -39,7 +39,7 @@ class ProductGallery extends AbstractBlock {
 			$src          = $image['src'];
 			$srcset       = $image['srcset'];
 			$sizes        = $image['sizes'];
-			$images_html .= "<img tabindex='0' data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}'/>";
+			$images_html .= "<img tabindex='0' data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='lazy' decoding='async' />";
 		}
 		ob_start();
 		?>
@@ -125,16 +125,22 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'         => $image_src_data,
-						'isDialogOpen'      => false,
-						'disableLeft'       => true,
-						'disableRight'      => false,
-						'isDragging'        => false,
-						'touchStartX'       => 0,
-						'touchCurrentX'     => 0,
-						'productId'         => $product_id,
-						'selectedImageId'   => $initial_image_id,
-						'userHasInteracted' => false,
+						'imageData'          => $image_src_data,
+						'isDialogOpen'       => false,
+						'disableLeft'        => true,
+						'disableRight'       => false,
+						'isDragging'         => false,
+						'touchStartX'        => 0,
+						'touchCurrentX'      => 0,
+						'productId'          => $product_id,
+						'selectedImageId'    => $initial_image_id,
+						'userHasInteracted'  => false,
+						'thumbnailsOverflow' => [
+							'top'    => false,
+							'bottom' => false,
+							'left'   => false,
+							'right'  => false,
+						],
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)

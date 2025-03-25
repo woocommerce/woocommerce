@@ -7,9 +7,7 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import {
-	SidebarItemProps,
-} from '~/settings-payments/onboarding/types';
+import { SidebarItemProps } from '~/settings-payments/onboarding/types';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 /**

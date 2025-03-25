@@ -76,7 +76,10 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 
 		test( 'filters the list of products by selecting an attribute', async ( {
 			page,
+			wpCoreVersion,
 		} ) => {
+			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+
 			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
@@ -92,7 +95,10 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
+			wpCoreVersion,
 		} ) => {
+			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+
 			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
@@ -110,7 +116,10 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
+			wpCoreVersion,
 		} ) => {
+			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+
 			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
@@ -130,7 +139,10 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
+			wpCoreVersion,
 		} ) => {
+			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+
 			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );

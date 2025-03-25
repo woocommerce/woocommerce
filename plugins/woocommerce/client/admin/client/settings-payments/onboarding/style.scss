@@ -4,8 +4,6 @@
 	.components-modal__content {
 		padding: 0;
 		margin: 0;
-		height: 100vh;
-		max-height: 100vh;
 		display: flex;
 		flex-direction: column;
 		margin-top: 0;
@@ -47,7 +45,7 @@
 				font-style: normal;
 				line-height: 20px;
 				padding: $gap-smallest $gap-smaller;
-				background-color: white;
+				background-color: $white;
 				border-radius: 2px;
 				display: none;
 
@@ -60,7 +58,7 @@
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				padding: $gap-large $gap-large 0px;
+				padding: $gap-large $gap-large 0;
 			}
 		}
 
@@ -80,22 +78,22 @@
 				color: #757575;
 				margin-bottom: 4px;
 				cursor: default;
-	
+
 				&.is-active {
 					background-color: #e0e0e0;
 					color: #1e1e1e;
-	
+
 					&-icon {
 						color: #1e1e1e;
 					}
 				}
-	
+
 				&.is-completed {
 					&-icon {
 						color: #00a32a;
 					}
 				}
-	
+
 				&-icon {
 					width: 20px;
 					height: 20px;
@@ -105,7 +103,7 @@
 					font-size: 16px;
 					color: #949494;
 				}
-	
+
 				&-label {
 					flex: 1;
 				}
@@ -138,14 +136,11 @@
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
+		overflow-x: hidden;
 		min-height: 0; // Important for Firefox
 		margin: $gap;
-		background-color: white;
+		background-color: $white;
 		border-radius: $gap-smaller;
-
-		@media (max-width: 768px) {
-			padding: 0 $gap;
-		}
 	}
 
 	&__step {
@@ -164,5 +159,6 @@
 
 	@media (max-width: 768px) {
 		border-radius: 0;
+		min-height: 100vh;
 	}
 }

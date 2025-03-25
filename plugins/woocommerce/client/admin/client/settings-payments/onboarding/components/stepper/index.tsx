@@ -7,9 +7,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import SidebarItem from './sidebar-item';
-import {
-	WooPaymentsProviderOnboardingStep,
-} from '~/settings-payments/onboarding/types';
+import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 
 /**
  * Stepper component that renders only the active step from its children

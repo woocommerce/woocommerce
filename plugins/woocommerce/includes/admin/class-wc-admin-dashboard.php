@@ -137,7 +137,29 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$version = Constants::get_constant( 'WC_VERSION' );
 
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'flot' ), $version, true );
+			wp_enqueue_script( 'wc-status-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-status-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
 
+			wp_localize_script(
+				'wc-status-widget-async',
+				'wc_status_widget_params',
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'security' => wp_create_nonce( 'wc-status-widget' ),
+				)
+			);
+
+			// Display loading placeholder.
+			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
+			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '</div>';
+			echo '<div id="wc-status-widget-content" style="display:none;"></div>';
+		}
+
+		/**
+		 * Generate the actual status widget content.
+		 * This contains the original content of the status_widget() method.
+		 */
+		public function status_widget_content() {
 			//phpcs:ignore
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
 

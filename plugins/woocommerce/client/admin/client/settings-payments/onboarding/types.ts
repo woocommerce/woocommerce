@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
+import { type RecommendedPaymentMethod } from '@woocommerce/data';
 
 /**
  * Props for the Onboarding Modal component.
@@ -42,8 +43,24 @@ export interface WooPaymentsProviderOnboardingStep {
 	order: number;
 	status?: 'completed' | 'incomplete';
 	dependencies?: string[];
-	actions?: string[];
+	actions?: {
+		save?: {
+			type?: string;
+			href?: string;
+		};
+		start?: {
+			type?: string;
+			href?: string;
+		};
+		finish?: {
+			type?: string;
+			href?: string;
+		};
+	};
 	content?: ReactNode;
+	context?: {
+		payment_methods: RecommendedPaymentMethod[];
+	};
 }
 
 /**

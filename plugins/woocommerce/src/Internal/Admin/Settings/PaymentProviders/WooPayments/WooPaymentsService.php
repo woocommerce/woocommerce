@@ -126,9 +126,9 @@ class WooPaymentsService {
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
 				),
-				'complete' => array(
+				'finish' => array(
 					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/complete' ),
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
 				),
 			),
 			'context'        => array(

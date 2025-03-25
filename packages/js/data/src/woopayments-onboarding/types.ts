@@ -3,8 +3,10 @@ export interface StepContent {
 	label: string;
 	path: string;
 	order: number;
-	status: 'completed' | 'incomplete';
+	status: 'completed' | 'started' | 'not_started';
 	dependencies: string[];
+	actions: Record< string, unknown >;
+	context: object;
 }
 
 export interface OnboardingState {

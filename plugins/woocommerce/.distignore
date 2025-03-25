@@ -18,7 +18,6 @@
 /packages/email-editor/tasks
 /e2e/
 babel.config.js
-blocks.ini
 composer.*
 contributors.html
 docker-compose.yaml

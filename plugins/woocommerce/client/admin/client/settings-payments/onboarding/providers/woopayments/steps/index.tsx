@@ -10,6 +10,7 @@ import { useOnboardingContext } from '../data/onboarding-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import WooPaymentsStepHeader from '../components/header';
 import MOXStep from './mox';
+import PaymentMethodsSelection from './payment-methods-selection';
 
 /**
  * Step Components
@@ -51,7 +52,6 @@ export const JetpackStep = () => {
 				</div>
 			</div>
 		</>
-		
 	);
 };
 
@@ -95,35 +95,35 @@ export const FrontendStep = () => {
 
 export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
-		id: 'welcome',
+		id: 'payment_methods',
 		order: 1,
 		type: 'backend',
-		label: 'Welcome to WooPayments',
-		content: <WelcomeStep />,
+		label: 'Choose your payment methods',
+		content: <PaymentMethodsSelection />,
 	},
 	{
-		id: 'jetpack',
+		id: 'wpcom_connection',
 		order: 2,
 		type: 'backend',
-		label: 'Connect with Jetpack',
-		content: <JetpackStep />,
+		label: 'Connect with WordPress.com',
+		content: <WelcomeStep />,
+		dependencies: [ 'payment_methods' ],
 	},
 	{
-		id: 'congratulations',
+		id: 'test_account',
 		order: 3,
-		type: 'frontend',
-		label: 'Congratulations',
-		path: '/woopayments/onboarding/congratulations',
-		dependencies: [ 'jetpack', 'welcome' ],
-		content: <FrontendStep />,
+		type: 'backend',
+		label: 'Test account',
+		dependencies: [ 'wpcom_connection' ],
+		content: <OtherStep />,
 	},
 	{
-		id: 'mox',
+		id: 'business_verification',
 		order: 4,
 		type: 'backend',
 		label: 'Activate Payments',
 		path: '/woopayments/onboarding/mox',
-		dependencies: [ 'jetpack', 'welcome' ],
+		dependencies: [ 'test_account' ],
 		content: <MOXStep />,
 	},
 	{
