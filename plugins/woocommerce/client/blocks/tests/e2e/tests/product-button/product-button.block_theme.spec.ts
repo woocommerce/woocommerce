@@ -41,7 +41,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			.locator( '[data-product_id]' )
 			.getAttribute( 'data-product_id' );
 
-		const productNameLocator = page.locator( `li.post-${ productId } h3` );
+		const productNameLocator = page.locator( `li.post-${ productId } h2` );
 		await expect( productNameLocator ).not.toBeEmpty();
 
 		const productName =
@@ -78,7 +78,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		const productId = await button.getAttribute( 'data-product_id' );
 
-		const productNameLocator = page.locator( `li.post-${ productId } h3` );
+		const productNameLocator = page.locator( `li.post-${ productId } h2` );
 		await expect( productNameLocator ).not.toBeEmpty();
 
 		const productName =
