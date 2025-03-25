@@ -174,7 +174,6 @@ class CustomerNewAccount extends \WC_Email {
 			$this->template_block_content,
 			array(
 				'user_login'       => $this->user_login,
-				'blogname'         => $this->get_blogname(),
 				'set_password_url' => $this->set_password_url,
 				'sent_to_admin'    => false,
 				'plain_text'       => false,

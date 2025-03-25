@@ -62,17 +62,17 @@ class WCTransactionalEmailPostsGenerator {
 			return true;
 		}
 
-		$this->init_default_templates();
+		$this->init_default_transactional_emails();
 		$this->generate_initial_email_templates();
 	}
 
 	/**
-	 * Initialize the default templates.
+	 * Initialize the default WooCommerce Transactional Emails.
 	 *
 	 * This function initializes the default templates for the core transactional emails.
 	 * It fetches all the emails from WooCommerce and filters them to include only the core transactional emails.
 	 */
-	public function init_default_templates() {
+	public function init_default_transactional_emails() {
 		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
 
 		$wc_emails = \WC_Emails::instance();
@@ -115,17 +115,14 @@ class WCTransactionalEmailPostsGenerator {
 		try {
 			$template_html = wc_get_template_html(
 				$template_name,
-				array(
-					'order'         => $email->object,
-					'sent_to_admin' => true,
-					'plain_text'    => false,
-					'email'         => $email,
-				)
+				array()
 			);
 		} catch ( \Exception $e ) {
 			$template_html = '';
 		}
 
+		// wc_get_template_html does not throw an error when the template is not found.
+		// We need to check if the template is not found by checking the template_html content.
 		$has_template_error =
 			StringUtil::contains( $template_html, 'No such file or directory', false ) ||
 			StringUtil::contains( $template_html, 'Failed to open stream', false ) ||

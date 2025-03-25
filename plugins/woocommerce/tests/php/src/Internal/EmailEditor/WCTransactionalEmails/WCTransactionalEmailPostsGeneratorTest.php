@@ -85,7 +85,7 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 		$email      = $this->createMock( \WC_Email::class );
 		$email->id  = $email_type;
 
-		$this->email_generator->init_default_templates();
+		$this->email_generator->init_default_transactional_emails();
 		$this->template_manager->delete_email_template( $email_type );
 		$post_id = $this->email_generator->generate_email_template_if_not_exists( $email_type );
 
@@ -99,7 +99,7 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 	public function testGenerateEmailTemplatesGeneratesMultipleTemplates(): void {
 		$templates_to_generate = array( 'customer_new_account', 'customer_completed_order' );
 
-		$this->email_generator->init_default_templates();
+		$this->email_generator->init_default_transactional_emails();
 		foreach ( $templates_to_generate as $email_type ) {
 			// Delete the email template association if it exists.
 			$this->template_manager->delete_email_template( $email_type );
@@ -118,7 +118,7 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 	public function testGenerateEmailTemplatesReturnsFalseWhenNoTemplatesAreGenerated(): void {
 		$templates_to_generate = array( 'invalid_email_type' );
 
-		$this->email_generator->init_default_templates();
+		$this->email_generator->init_default_transactional_emails();
 		$result = $this->email_generator->generate_email_templates( $templates_to_generate );
 
 		$this->assertFalse( $result );

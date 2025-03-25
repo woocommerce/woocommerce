@@ -640,7 +640,6 @@ class WC_Email extends WC_Settings_API {
 				'sent_to_admin' => false,
 				'plain_text'    => false,
 				'email'         => $this,
-				'blogname'      => $this->get_blogname(),
 			)
 		);
 	}

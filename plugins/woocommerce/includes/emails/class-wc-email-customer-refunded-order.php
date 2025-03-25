@@ -260,7 +260,6 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'order'          => $this->object,
 					'refund'         => $this->refund,
 					'partial_refund' => $this->partial_refund,
-					'blogname'       => $this->get_blogname(),
 					'sent_to_admin'  => false,
 					'plain_text'     => false,
 					'email'          => $this,
