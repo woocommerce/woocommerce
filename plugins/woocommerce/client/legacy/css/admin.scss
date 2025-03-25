@@ -2811,10 +2811,6 @@ ul.wc_coupon_list_block {
 		border: 0 none;
 		float: none;
 	}
-
-	.select2-container {
-		margin: 8px;
-	}
 }
 
 #side-sortables #woocommerce-order-downloads {
@@ -8890,13 +8886,17 @@ body.woocommerce_page_wc-settings {
 	}
 
 	#mainform {
+		nav {
+			margin: 0 -30px 24px -30px;
+		}
+		padding: 0 30px;
 		background: #f0f0f1;
 		h2 {
 			margin: 0;
 		}
 
 		.subsubsub {
-			margin: 0 0 30px;
+			margin-bottom: 24px;
 			li {
 				color: #2271b1;
 				&:first-child a{
@@ -8905,16 +8905,6 @@ body.woocommerce_page_wc-settings {
 			}
 		}
 	}
-
-	.settings-content {
-		padding: 0 30px;
-		margin-top: 24px;
-		background: #f0f0f1;
-	}
-
-	// #mainform > *:not(nav):not(table) {
-	// 	margin: 24px 30px 0;
-	// }
 
 	.wrap {
 		padding: 0;
