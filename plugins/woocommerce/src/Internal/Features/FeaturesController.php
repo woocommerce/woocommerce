@@ -389,26 +389,26 @@ class FeaturesController {
 					'woocommerce'
 				),
 
-					/*
-					 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-					 * but as this feature doesn't affect all extensions, and the rollout is fairly short,
-					 * we'll skip the compatibility check by marking this as legacy. This is a workaround until
-					 * we can implement a more sophisticated compatibility checking system.
-					 *
-					 * @see https://github.com/woocommerce/woocommerce/issues/39147
-					 * @see https://github.com/woocommerce/woocommerce/issues/55540
-					 */
-					'is_legacy'       => true,
-					'is_experimental' => false,
+				/*
+				 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				 * but as this feature doesn't affect all extensions, and the rollout is fairly short,
+				 * we'll skip the compatibility check by marking this as legacy. This is a workaround until
+				 * we can implement a more sophisticated compatibility checking system.
+				 *
+				 * @see https://github.com/woocommerce/woocommerce/issues/39147
+				 * @see https://github.com/woocommerce/woocommerce/issues/55540
+				 */
+				'is_legacy'       => true,
+				'is_experimental' => false,
+			),
+			'blueprint'                          => array(
+				'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
+				'description'        => __(
+					'Enable blueprint to import and export settings in bulk',
+					'woocommerce'
 				),
-				'blueprint'                          => array(
-					'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
-					'description'        => __(
-						'Enable blueprint to import and export settings in bulk',
-						'woocommerce'
-					),
-					'enabled_by_default' => true,
-					'disable_ui'         => false,
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
