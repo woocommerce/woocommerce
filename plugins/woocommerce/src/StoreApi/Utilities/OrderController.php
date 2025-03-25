@@ -233,6 +233,8 @@ class OrderController {
 		if ( $coupon_errors ) {
 			// Remove all coupons that were not valid.
 			if ( $use_order_data ) {
+				$error_code = 'woocommerce_rest_order_coupon_errors';
+
 				foreach ( $coupon_errors as $coupon_code => $message ) {
 					$order->remove_coupon( $coupon_code );
 				}
@@ -240,6 +242,8 @@ class OrderController {
 				// Recalculate totals.
 				$order->calculate_totals();
 			} else {
+				$error_code = 'woocommerce_rest_cart_coupon_errors';
+
 				foreach ( $coupon_errors as $coupon_code => $message ) {
 					wc()->cart->remove_coupon( $coupon_code );
 				}
@@ -253,27 +257,48 @@ class OrderController {
 
 			// Return exception so customer can review before payment.
 			if ( 1 === count( $coupon_errors ) ) {
-				throw new RouteException(
-					'woocommerce_rest_cart_coupon_errors',
-					sprintf(
+				if ( $use_order_data ) {
+					$error_message = sprintf(
+						/* translators: %1$s Coupon codes, %2$s Reason */
+						__( '"%1$s" was removed from the order. %2$s', 'woocommerce' ),
+						array_keys( $coupon_errors )[0],
+						array_values( $coupon_errors )[0],
+					);
+				} else {
+					$error_message = sprintf(
 						/* translators: %1$s Coupon codes, %2$s Reason */
 						__( '"%1$s" was removed from the cart. %2$s', 'woocommerce' ),
 						array_keys( $coupon_errors )[0],
 						array_values( $coupon_errors )[0],
-					),
+					);
+				}
+
+				throw new RouteException(
+					$error_code,
+					$error_message,
 					409,
 					array(
 						'removed_coupons' => $coupon_errors,
 					)
 				);
 			} else {
-				throw new RouteException(
-					'woocommerce_rest_cart_coupon_errors',
+				if ( $use_order_data ) {
+					$error_message = sprintf(
+						/* translators: %s Coupon codes. */
+						__( 'Invalid coupons were removed from the order: "%s"', 'woocommerce' ),
+						implode( '", "', array_keys( $coupon_errors ) )
+					);
+				} else {
 					sprintf(
 						/* translators: %s Coupon codes. */
 						__( 'Invalid coupons were removed from the cart: "%s"', 'woocommerce' ),
 						implode( '", "', array_keys( $coupon_errors ) )
-					),
+					);
+				}
+
+				throw new RouteException(
+					$error_code,
+					$error_message,
 					409,
 					array(
 						'removed_coupons' => $coupon_errors,

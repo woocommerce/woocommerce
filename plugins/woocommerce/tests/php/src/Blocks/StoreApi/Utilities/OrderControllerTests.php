@@ -107,6 +107,28 @@ class OrderControllerTests extends TestCase {
 	}
 
 	/**
+	 * test_validate_existing_order_before_payment_invalid_coupons.
+	 */
+	public function test_validate_existing_order_before_payment_invalid_coupons() {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 409 );
+		$this->expectExceptionMessage( '"fake-coupon" was removed from the order. Please enter a valid email at checkout to use coupon code "fake-coupon".' );
+
+		$order  = WC_Helper_Order::create_order();
+		$coupon = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
+		$order->add_coupon( $coupon->get_code() );
+		$order->save();
+		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
+
+		$class = new OrderController();
+		try {
+			$class->validate_existing_order_before_payment( $order );
+		} finally {
+			$this->assertEmpty( $order->get_coupon_codes() );
+		}
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_email.
 	 */
 	public function test_validate_order_before_payment_invalid_email() {
