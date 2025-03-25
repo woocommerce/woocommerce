@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Do not write metadata to the db for unsaved HPOS orders.

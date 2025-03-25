@@ -81,8 +81,8 @@
 		"react-router-dom": "~6.3.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/core": "7.25.7",
+		"@babel/runtime": "7.25.7",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/react": "^16.x.x",
@@ -95,7 +95,6 @@
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__block-library": "2.6.1",
 		"@types/wordpress__blocks": "11.0.7",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__data": "6.0.2",
 		"@types/wordpress__date": "3.3.2",
 		"@types/wordpress__edit-post": "7.5.4",
