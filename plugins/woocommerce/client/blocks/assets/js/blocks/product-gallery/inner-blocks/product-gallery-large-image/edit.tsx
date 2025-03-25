@@ -6,7 +6,6 @@ import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import type { ReactElement } from 'react';
-import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -50,10 +49,8 @@ export const Edit = withProductDataContext( (): ReactElement => {
 	);
 
 	const blockProps = useBlockProps( {
-		className: clsx(
-			'wc-block-product-gallery-large-image',
-			'wc-block-editor-product-gallery-large-image'
-		),
+		className:
+			'wc-block-product-gallery-large-image wc-block-editor-product-gallery-large-image',
 	} );
 
 	return (
