@@ -78,8 +78,8 @@ import { useXStateInspect } from '~/xstate';
 import { useComponentFromXStateService } from '~/utils/xstate/useComponentFromService';
 import {
 	CoreProfilerEvents,
-	BusinessLocationEvent,
 	UserProfileEvent,
+	BusinessLocationEvent,
 	BusinessInfoEvent,
 	IntroOptInEvent,
 	PluginsInstallationRequestedEvent,
@@ -438,8 +438,8 @@ const assignStoreLocation = assign( {
 	}: {
 		context: CoreProfilerStateMachineContext;
 		event: Extract<
-			BusinessInfoEvent,
-			{ type: 'BUSINESS_INFO_COMPLETED' }
+			BusinessLocationEvent,
+			{ type: 'BUSINESS_LOCATION_COMPLETED' }
 		>;
 	} ) => {
 		return {
