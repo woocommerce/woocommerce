@@ -129,7 +129,13 @@ class ProcessCoreProfilerPluginInstallOptions {
 			}
 		}
 
-		$this->add_option( $install_option->name, $install_option->value, $options->autoload ? 'yes' : null );
+		$autoload = null;
+
+		if ( isset( $options->autoload ) && ( 'yes' === $options->autoload || 'no' === $options->autoload ) ) {
+			$autoload = $options->autoload;
+		}
+
+		$this->add_option( $install_option->name, $install_option->value, $autoload );
 	}
 
 	/**
