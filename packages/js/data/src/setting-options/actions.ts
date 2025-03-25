@@ -237,8 +237,7 @@ export const saveEditedSettingsGroup =
 				if (
 					'error' in result &&
 					result.error &&
-					typeof result.error === 'object' &&
-					'code' in result.error
+					typeof result.error === 'object'
 				) {
 					// If the result has an error, collect it
 					errors.push( {
