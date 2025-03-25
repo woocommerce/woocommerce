@@ -312,15 +312,6 @@
 		},
 		{
 			"dependencies": [
-				"@types/wordpress__components"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^19.10.5"
-		},
-		{
-			"dependencies": [
 				"classnames"
 			],
 			"packages": [
@@ -486,7 +477,6 @@
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@automattic/color-studio",
-				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"config",
 				"eslint",

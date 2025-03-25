@@ -923,6 +923,13 @@ class WooPaymentsService {
 			throw new Exception( esc_html__( 'Failed to get onboarding fields data.', 'woocommerce' ) );
 		}
 
-		return $response['data'];
+		$fields = $response['data'];
+
+		// If there is no available_countries entry, add it.
+		if ( ! isset( $fields['available_countries'] ) && is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
+			$fields['available_countries'] = \WC_Payments_Utils::supported_countries();
+		}
+
+		return $fields;
 	}
 }

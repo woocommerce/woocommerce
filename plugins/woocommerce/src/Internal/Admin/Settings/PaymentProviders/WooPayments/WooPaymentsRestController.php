@@ -70,7 +70,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -92,7 +92,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -119,7 +119,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -140,7 +140,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -161,7 +161,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -189,7 +189,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -209,12 +209,39 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_check_po_eligible' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
-						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+						'location'        => array(
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'self_assessment' => array(
+							'description' => __( 'Self assessment data for the business and store. Used only if there is no stored self assessment data.', 'woocommerce' ),
+							'type'        => 'object',
+							'required'    => false,
+							'properties'  => array(
+								'country'           => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
+								),
+								'business_type'     => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The business type ID as received in the fields context.', 'woocommerce' ),
+								),
+								'mcc'               => array(
+									'type'        => array( 'integer', 'string' ),
+									'description' => esc_html__( 'The merchant category code. It can be either a numeric MCC code or an ID as received in the fields context.', 'woocommerce' ),
+								),
+								'annual_revenue'    => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The annual revenue range ID as received in the fields context.', 'woocommerce' ),
+								),
+								'go_live_timeframe' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The go live timeframe ID as received in the fields context.', 'woocommerce' ),
+								),
+							),
 						),
 					),
 				),
@@ -231,7 +258,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location'    => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -264,7 +291,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
