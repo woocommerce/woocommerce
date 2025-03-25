@@ -98,33 +98,6 @@ class WooContentProcessor {
 	 * @return string
 	 */
 	private function capture_woo_content( \WC_Email $wc_email ): string {
-		// Store the existing header and footer callbacks.
-		global $wp_filter;
-		$original_header_filters = isset( $wp_filter['woocommerce_email_header'] ) ? clone $wp_filter['woocommerce_email_header'] : null;
-		$original_footer_filters = isset( $wp_filter['woocommerce_email_footer'] ) ? clone $wp_filter['woocommerce_email_footer'] : null;
-
-		// Remove header and footer filters because we want to get only the main content.
-		remove_all_filters( 'woocommerce_email_header' );
-		remove_all_filters( 'woocommerce_email_footer' );
-
-		$woo_content = $wc_email->get_block_editor_email_template_content();
-
-		// Restore the original header and footer filters.
-		if ( $original_header_filters ) {
-			foreach ( $original_header_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_header', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-		if ( $original_footer_filters ) {
-			foreach ( $original_footer_filters->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $filter ) {
-					add_filter( 'woocommerce_email_footer', $filter['function'], $priority, $filter['accepted_args'] );
-				}
-			}
-		}
-
-		return $woo_content;
+		return $wc_email->get_block_editor_email_template_content();
 	}
 }

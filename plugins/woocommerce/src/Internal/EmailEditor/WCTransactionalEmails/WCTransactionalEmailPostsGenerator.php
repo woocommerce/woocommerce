@@ -133,12 +133,7 @@ class WCTransactionalEmailPostsGenerator {
 			$default_template_name = 'emails/block/default-block-content.php';
 			$template_html         = wc_get_template_html(
 				$default_template_name,
-				array(
-					'order'         => $email->object,
-					'sent_to_admin' => true,
-					'plain_text'    => false,
-					'email'         => $email,
-				)
+				array()
 			);
 		}
 
