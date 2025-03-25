@@ -1621,19 +1621,19 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				throw new Exception( sprintf( __( 'HTTP %d received from API', 'woocommerce' ), $code ) );
+				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
-				throw new Exception( __( 'Invalid response from WooCommerce.com', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned invalid response.', 'woocommerce' ) );
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
 			return $data;
 		} catch ( Exception $e ) {
 			self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
-			throw new Exception( __( 'There was an error getting product usage notice rules.', 'woocommerce' ) );
+			throw $e;
 		}
 	}
 
@@ -1749,19 +1749,19 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				throw new Exception( sprintf( __( 'HTTP %d received from API', 'woocommerce' ), $code ) );
+				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
-				throw new Exception( __( 'Invalid response from WooCommerce.com', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned invalid response.', 'woocommerce' ) );
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
 			return $data;
 		} catch ( Exception $e ) {
 			self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
-			throw new Exception( __( 'There was an error getting your subscriptions.', 'woocommerce' ) );
+			throw $e;
 		}
 	}
 
