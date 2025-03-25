@@ -1,6 +1,6 @@
 import { SimpleProduct } from '@woocommerce/api';
 import { Factory } from 'fishery';
-import crypto from 'crypto';
+import { randomUUID as v4 } from 'crypto';
 
 /**
  * Creates a new factory for creating models.
@@ -10,7 +10,7 @@ import crypto from 'crypto';
  */
 export function simpleProductFactory( httpClient ) {
 	const repository = SimpleProduct.restRepository( httpClient );
-	const defaultProductName = `Simple product ${ crypto.randomUUID() }`;
+	const defaultProductName = `Simple product ${ v4() }`;
 	const defaultRegularPrice = '10.99';
 
 	return Factory.define( ( { params, onCreate } ) => {
