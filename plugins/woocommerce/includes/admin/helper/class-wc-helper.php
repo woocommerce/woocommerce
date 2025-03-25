@@ -1801,7 +1801,11 @@ class WC_Helper {
 	 */
 	public static function get_subscription_list_data() {
 		// First, connected subscriptions.
-		$subscriptions = self::get_subscriptions();
+		try {
+			$subscriptions = self::get_subscriptions();
+		} catch ( Exception $e ) {
+			$subscriptions = [];
+		}
 
 		// Then, installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();
