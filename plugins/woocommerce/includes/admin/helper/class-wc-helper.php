@@ -1030,7 +1030,6 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
-
 	}
 
 	/**
@@ -1338,7 +1337,7 @@ class WC_Helper {
 					}
 				);
 			} catch ( Exception $e ) {
-				$installed_subscriptions = [];
+				$installed_subscriptions = array();
 			}
 		}
 
@@ -1370,7 +1369,7 @@ class WC_Helper {
 					}
 				);
 			} catch ( Exception $e ) {
-				$unconnected_subscriptions = [];
+				$unconnected_subscriptions = array();
 			}
 		}
 
@@ -1621,6 +1620,7 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
+				// translators: %d: HTTP status code
 				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
 			}
 
@@ -1749,6 +1749,7 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
+				// translators: %d: HTTP status code
 				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
 			}
 
@@ -1804,7 +1805,7 @@ class WC_Helper {
 		try {
 			$subscriptions = self::get_subscriptions();
 		} catch ( Exception $e ) {
-			$subscriptions = [];
+			$subscriptions = array();
 		}
 
 		// Then, installed plugins and themes, with or without an active subscription.

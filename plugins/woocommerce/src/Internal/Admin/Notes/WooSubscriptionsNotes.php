@@ -158,9 +158,8 @@ class WooSubscriptionsNotes {
 			try {
 				$subscriptions = \WC_Helper::get_subscriptions();
 			} catch ( \Exception $e ) {
-				$subscriptions = [];
+				$subscriptions = array();
 			}
-
 
 			foreach ( (array) $subscriptions as $subscription ) {
 				if ( in_array( $site_id, $subscription['connections'], true ) ) {
@@ -402,7 +401,7 @@ class WooSubscriptionsNotes {
 		try {
 			$subscriptions = \WC_Helper::get_subscriptions();
 		} catch ( \Exception $e ) {
-			$subscriptions = [];
+			$subscriptions = array();
 		}
 		$active_product_ids = $this->get_subscription_active_product_ids();
 

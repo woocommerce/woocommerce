@@ -412,7 +412,7 @@ class WC_Helper_Updater {
 		try {
 			$subscriptions = WC_Helper::get_subscriptions();
 		} catch ( Exception $e ) {
-			$subscriptions = [];
+			$subscriptions = array();
 		}
 		foreach ( $subscriptions as $subscription ) {
 			$payload[ $subscription['product_id'] ] = array(
@@ -451,7 +451,7 @@ class WC_Helper_Updater {
 		try {
 			$subscriptions = WC_Helper::get_subscriptions();
 		} catch ( Exception $e ) {
-			$subscriptions = [];
+			$subscriptions = array();
 		}
 
 		foreach ( $subscriptions as $subscription ) {

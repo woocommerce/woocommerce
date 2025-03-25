@@ -51,7 +51,7 @@ class WC_CLI_COM_Command {
 		try {
 			$data = WC_Helper::get_subscriptions();
 		} catch ( Exception $e ) {
-			$data = [];
+			$data = array();
 		}
 
 		$data = array_values( $data );
