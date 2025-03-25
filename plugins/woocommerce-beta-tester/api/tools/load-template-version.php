@@ -90,7 +90,7 @@ function get_predefined_templates() {
 }
 
 /**
- * Load a template version for testing.
+ * Load a template from a specific version.
  *
  * @param WP_REST_Request $request Request data.
  * @return WP_REST_Response|WP_Error Response object or error.
@@ -123,12 +123,12 @@ function tools_load_template_version( $request ) {
 		);
 	}
 
-	// Remove template changes.
+	// Remove any customizations
 	$template = get_block_template( "woocommerce/woocommerce//{$template_name}", 'wp_template' );
 	if ( $template && isset( $template->wp_id ) ) {
 		$delete_result = wp_delete_post( $template->wp_id, true );
 		if ( false === $delete_result ) {
-			return new \WP_REST_Response( 
+			return new \WP_REST_Response(
 				array(
 					'success' => false,
 					'message' => "Failed to delete the {$template_name} template.",
@@ -165,22 +165,15 @@ function tools_load_template_version( $request ) {
 		);
 	}
 
-
-	// Set template metadata
+	// Set template metadata and taxonomy terms
 	update_post_meta( $template_id, 'theme', 'woocommerce/woocommerce' );
-
-	// Add template type taxonomy term
 	wp_set_object_terms( $template_id, 'wp_template', 'wp_template_type' );
-
-	// Also add the wp_theme taxonomy to properly associate with woocommerce theme
 	wp_set_object_terms( $template_id, 'woocommerce/woocommerce', 'wp_theme' );
-
-	$result_message = "Created new custom template for '{$template_name}' using version {$version}.";
 
 	return new \WP_REST_Response(
 		array(
 			'success' => true,
-			'message' => $result_message,
+			'message' => "Created new custom template for '{$template_name}' using version {$version}.",
 		),
 		200
 	);
@@ -217,9 +210,8 @@ function tools_get_available_versions( $request ) {
 	}
 
 	$versions = array_keys( $templates[ $template_name ]['versions'] );
-
-	// Sort versions in descending order
-	rsort( $versions );
+	// Sort versions in ascending order
+	sort( $versions );
 
 	return new \WP_REST_Response( $versions, 200 );
 }
