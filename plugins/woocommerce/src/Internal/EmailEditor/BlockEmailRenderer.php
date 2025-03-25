@@ -8,7 +8,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer as EmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Renderer\Blocks\WooContent;
-
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 /**
  * Class responsible for rendering block-based emails.
  */
@@ -39,12 +39,20 @@ class BlockEmailRenderer {
 	private $woo_content_processor;
 
 	/**
+	 * WooCommerce Email Template Manager instance.
+	 *
+	 * @var WCTransactionalEmailPostsManager
+	 */
+	private $template_manager;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$editor_container   = Email_Editor_Container::container();
-		$this->renderer     = $editor_container->get( EmailRenderer::class );
-		$this->personalizer = $editor_container->get( Personalizer::class );
+		$editor_container       = Email_Editor_Container::container();
+		$this->renderer         = $editor_container->get( EmailRenderer::class );
+		$this->personalizer     = $editor_container->get( Personalizer::class );
+		$this->template_manager = WCTransactionalEmailPostsManager::get_instance();
 	}
 
 	/**
@@ -99,7 +107,7 @@ class BlockEmailRenderer {
 			$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en' );
 			$personalized_email  = $this->personalizer->personalize_content( $rendered_email_data['html'] );
 			$rendered_email      = str_replace( self::WOO_EMAIL_CONTENT_PLACEHOLDER, $woo_content, $personalized_email );
-			add_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ), 10, 2 );
+			add_filter( 'woocommerce_email_styles', array( $this->woo_content_processor, 'prepare_css' ), 10, 2 );
 			return $rendered_email;
 		} catch ( \Exception $e ) {
 			wc_caught_exception( $e, __METHOD__, array( $email_post, $woo_content, $wc_email ) );
@@ -109,25 +117,12 @@ class BlockEmailRenderer {
 
 	/**
 	 * Get the email post for a given WC_Email.
-	 * Temporarily using the email ID as the post title for storing the association.
 	 *
 	 * @param \WC_Email $email WooCommerce email.
 	 * @return \WP_Post|null
 	 */
 	private function get_email_post_by_wc_email( \WC_Email $email ): ?\WP_Post {
-		$args = array(
-			'post_type'      => Integration::EMAIL_POST_TYPE,
-			'name'           => $email->id,
-			'post_status'    => 'draft', // Temporarily use draft status we will change it to publish or custom active later.
-			'posts_per_page' => 1,
-		);
-
-		$posts = get_posts( $args );
-		if ( empty( $posts ) ) {
-			return null;
-		}
-
-		return $posts[0];
+		return $this->template_manager->get_email_post( $email->id );
 	}
 
 	/**
@@ -141,22 +136,7 @@ class BlockEmailRenderer {
 		$context['recipient_email'] = $wc_email->get_recipient();
 		$context['order']           = $wc_email->object instanceof \WC_Order ? $wc_email->object : null;
 		$context['wp_user']         = $wc_email->object instanceof \WP_User ? $wc_email->object : null;
+		$context['wc_email']        = $wc_email;
 		return $context;
-	}
-
-	/**
-	 * Filter CSS for the email.
-	 * The CSS was from email editor was already inlined.
-	 * The method hookes to woocommerce_email_styles and removes CSS rules that we don't want to apply to the email.
-	 *
-	 * @param string $css CSS.
-	 * @return string
-	 */
-	public function prepare_css( string $css ): string {
-		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
-		// Remove color and font-family declarations from WooCommerce CSS.
-		$css = preg_replace( '/color\s*:\s*[^;]+;/', '', $css );
-		$css = preg_replace( '/font-family\s*:\s*[^;]+;/', '', $css );
-		return $css;
 	}
 }

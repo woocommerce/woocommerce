@@ -3,6 +3,9 @@
  */
 import type { TemplateArray } from '@wordpress/blocks';
 
+/**
+ * Template definition for Grouped Product Item Template in the Add to Cart form.
+ */
 export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 	[
 		'woocommerce/add-to-cart-with-options-grouped-product-selector-item',
@@ -52,17 +55,34 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 						},
 					],
 					[
-						'woocommerce/product-price',
+						'core/group',
 						{
-							isDescendentOfSingleProductBlock: true,
-							fontSize: 'medium',
-							textAlign: 'right',
+							layout: {
+								type: 'flex',
+								orientation: 'vertical',
+							},
 							style: {
-								typography: {
-									fontWeight: 400,
+								spacing: {
+									blockGap: '0',
 								},
 							},
 						},
+						[
+							[
+								'woocommerce/product-price',
+								{
+									isDescendentOfSingleProductBlock: true,
+									fontSize: 'medium',
+									textAlign: 'right',
+									style: {
+										typography: {
+											fontWeight: 400,
+										},
+									},
+								},
+							],
+							[ 'woocommerce/product-stock-indicator' ],
+						],
 					],
 				],
 			],

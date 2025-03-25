@@ -115,13 +115,14 @@ const test = base.extend<
 	},
 	{
 		requestUtils: RequestUtils;
+		wpCoreVersion: number;
 	}
 >( {
-	admin: async ( { page, pageUtils, editor }, use ) => {
-		await use( new Admin( { page, pageUtils, editor } ) );
+	admin: async ( { page, pageUtils, editor, wpCoreVersion }, use ) => {
+		await use( new Admin( { page, pageUtils, editor, wpCoreVersion } ) );
 	},
-	editor: async ( { page }, use ) => {
-		await use( new Editor( { page } ) );
+	editor: async ( { page, wpCoreVersion }, use ) => {
+		await use( new Editor( { page, wpCoreVersion } ) );
 	},
 	page: async ( { page }, use ) => {
 		page.on( 'console', observeConsoleLogging );
@@ -167,6 +168,25 @@ const test = base.extend<
 			await use( requestUtils );
 		},
 		{ scope: 'worker', auto: true },
+	],
+	wpCoreVersion: [
+		async ( {}, use ) => {
+			const output = await wpCLI( 'core version' );
+			const version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
+
+			// We can parse this as a float because WP never updates the minor
+			// version over x.9.x. E.g., after 6.9.x, it will be 7.0.x.
+			const parsedVersion = Number.parseFloat( version );
+
+			if ( Number.isNaN( parsedVersion ) ) {
+				throw new Error(
+					`Failed to parse WordPress version: ${ version }`
+				);
+			}
+
+			await use( parsedVersion );
+		},
+		{ scope: 'worker' },
 	],
 } );
 

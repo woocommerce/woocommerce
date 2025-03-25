@@ -47,6 +47,7 @@ const LocalPickupSelector = ( {
 			render={ <div /> }
 			role="radio"
 			onClick={ onClick }
+			aria-checked={ checked === 'pickup' }
 			className={ clsx( 'wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'pickup',
@@ -133,6 +134,7 @@ const ShippingSelector = ( {
 			render={ <div /> }
 			role="radio"
 			onClick={ onClick }
+			aria-checked={ checked === 'shipping' }
 			className={ clsx( 'wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'shipping',

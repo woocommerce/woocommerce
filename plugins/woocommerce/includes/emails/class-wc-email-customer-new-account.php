@@ -168,6 +168,26 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		}
 
 		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'user_login'         => $this->user_login,
+					'user_pass'          => $this->user_pass,
+					'password_generated' => $this->password_generated,
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
+					'set_password_url'   => $this->set_password_url,
+				)
+			);
+		}
+
+		/**
 		 * Default content to show below main email content.
 		 *
 		 * @since 3.7.0
@@ -179,9 +199,9 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 
 		/**
 		 * Generate set password URL link for a new user.
-		 * 
+		 *
 		 * See also Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount and wp_new_user_notification.
-		 * 
+		 *
 		 * @since 6.0.0
 		 * @return string
 		 */
@@ -195,7 +215,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 				// Something went wrong while getting the key for new password URL, send customer to the generic password reset.
 				return wc_get_account_endpoint_url( 'lost-password' );
 			}
-		} 
+		}
 	}
 
 endif;
