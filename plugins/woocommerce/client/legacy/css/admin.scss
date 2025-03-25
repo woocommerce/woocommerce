@@ -8942,7 +8942,8 @@ body.woocommerce_page_wc-settings {
 			color: #070707;
 		}
 
-		.nav-tab:hover:not(.nav-tab-active) {
+		.nav-tab:hover,
+		.nav-tab:focus {
 			color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 		}
 	}
