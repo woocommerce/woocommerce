@@ -99,9 +99,17 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				icon: <Icon icon={ edit } />,
 				supportsBulk: false,
 				callback: ( items: EmailType[] ) => {
-					window.location.href = `/wp-admin/post.php?post=${ items[ 0 ].post_id }&action=edit`;
+					const email = items[ 0 ];
+					if ( email.post_id ) {
+						window.location.href = `/wp-admin/post.php?post=${ encodeURIComponent(
+							email.post_id
+						) }&action=edit`;
+					} else {
+						window.location.href = `/wp-admin/admin.php?page=wc-settings&tab=email&section=wc_email_${ encodeURIComponent(
+							email.id
+						) }`;
+					}
 				},
-				isEligible: ( item: EmailType ) => !! item.post_id,
 				isPrimary: true,
 			},
 			{
