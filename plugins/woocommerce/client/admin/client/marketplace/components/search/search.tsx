@@ -5,12 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// eslint-disable-next-line @woocommerce/dependency-group
 import { SearchControl } from '@wordpress/components';
-// The @ts-ignore is needed because the SearchControl types are not exported from the @wordpress/components package,
-// even though the component itself is. This is likely due to an older version of the package being used.
 
 /**
  * Internal dependencies
