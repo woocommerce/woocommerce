@@ -56,7 +56,7 @@ class OrderControllerTests extends TestCase {
 		$this->expectExceptionCode( 409 );
 		$this->expectExceptionMessage( '"fake-coupon" was removed from the cart. Please enter a valid email at checkout to use coupon code "fake-coupon".' );
 
-		$order = WC_Helper_Order::create_order();
+		$order  = WC_Helper_Order::create_order();
 		$coupon = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
 		$order->add_coupon( $coupon->get_code() );
 		$order->save();
@@ -99,7 +99,7 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 
 		/** @var \WC_Order_Item_Product $item */
-		$item = reset($order->get_items() );
+		$item = reset( $order->get_items() );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
 
 		WC()->cart->add_to_cart( $item->get_product()->get_id() );

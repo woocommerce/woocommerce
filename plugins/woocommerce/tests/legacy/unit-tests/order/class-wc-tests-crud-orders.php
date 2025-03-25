@@ -861,7 +861,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	public function test_needs_shipping() {
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'wc_get_shipping_method_count' => function ( $include_legacy = false, $enabled_only = false ) {
+				'wc_get_shipping_method_count' => function () {
 					return 1;
 				},
 			)
