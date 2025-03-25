@@ -53,7 +53,6 @@ bin/languages
 bin/eslint-plugin-woocommerce/node_modules/
 woocommerce-gutenberg-products-block.zip
 storybook-static/
-blocks.ini
 /wp-content/
 /.wp-env.override.json
 /eslint_report.json
