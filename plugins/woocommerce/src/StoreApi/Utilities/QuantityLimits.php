@@ -161,7 +161,7 @@ final class QuantityLimits {
 		/**
 		 * Filters the quantity validation for a cart item being updated via the Store API.
 		 *
-		 * @since 8.7.1
+		 * @since 9.9.0
 		 *
 		 * @param \WP_Error|true $valid True if the new quantity is valid, \WP_Error otherwise.
 		 * @param integer $quantity Quantity to validate.
