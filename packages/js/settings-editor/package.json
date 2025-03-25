@@ -64,7 +64,6 @@
 		"@woocommerce/navigation": "workspace:*",
 		"@wordpress/plugins": "wp-6.6",
 		"@wordpress/preferences": "wp-6.6",
-		"@wordpress/private-apis": "^1.6.0",
 		"@wordpress/router": "1.11.0",
 		"@wordpress/url": "wp-6.6",
 		"clsx": "^2.1.1",
