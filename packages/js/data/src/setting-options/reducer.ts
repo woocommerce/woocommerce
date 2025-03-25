@@ -40,38 +40,42 @@ const reducer = (
 		case TYPES.RECEIVE_SETTINGS: {
 			const settings = { ...state.settings };
 			const edits = { ...state.edits };
+			const errors = { ...state.errors };
 			const groupSettings = ensureGroupExists< {
 				[ settingId: string ]: Setting;
 			} >( settings, action.groupId );
 
-			// Remove edits for successfully updated settings
 			action.settings.forEach( ( setting ) => {
+				// Update settings
 				groupSettings[ setting.id ] = setting;
-
-				if ( edits[ action.groupId ] ) {
-					const groupEdits = edits[ action.groupId ];
-					if ( groupEdits && setting.id in groupEdits ) {
-						delete groupEdits[ setting.id ];
+				// Clean up edits and errors
+				[ edits, errors ].forEach( ( obj ) => {
+					if ( obj[ action.groupId ] ) {
+						const groupObj = obj[ action.groupId ];
+						if ( groupObj && setting.id in groupObj ) {
+							delete groupObj[ setting.id ];
+						}
 					}
-				}
+				} );
 			} );
 
-			// Remove edits for the group if it's empty
-			if (
-				edits[ action.groupId ] &&
-				Object.keys( edits[ action.groupId ] || {} ).length === 0
-			) {
-				delete edits[ action.groupId ];
-			}
+			// Reset empty groups
+			[ edits, errors ].forEach( ( obj ) => {
+				const group = obj[ action.groupId ];
+				if ( group && Object.keys( group || {} ).length === 0 ) {
+					delete obj[ action.groupId ];
+				}
+			} );
 
 			return {
 				...state,
 				settings,
 				edits,
+				errors,
 			};
 		}
 
-		case TYPES.UPDATE_SETTING: {
+		case TYPES.EDIT_SETTING: {
 			const edits = { ...state.edits };
 			const groupEdits = ensureGroupExists< {
 				[ settingId: string ]: SettingValue;
@@ -84,7 +88,7 @@ const reducer = (
 			};
 		}
 
-		case TYPES.UPDATE_SETTINGS: {
+		case TYPES.EDIT_SETTINGS: {
 			const edits = { ...state.edits };
 			const groupEdits = ensureGroupExists< {
 				[ settingId: string ]: SettingValue;
@@ -125,9 +129,7 @@ const reducer = (
 			} >( errors, action.groupId );
 
 			if ( action.settingId === null ) {
-				Object.keys( groupErrors ).forEach( ( settingId ) => {
-					groupErrors[ settingId ] = action.error;
-				} );
+				groupErrors.all = action.error;
 			} else {
 				groupErrors[ action.settingId ] = action.error;
 			}
@@ -138,7 +140,7 @@ const reducer = (
 			};
 		}
 
-		case TYPES.REVERT_SETTING: {
+		case TYPES.REVERT_EDITED_SETTING: {
 			const edits = { ...state.edits };
 			if ( edits[ action.groupId ] ) {
 				const groupEdits = edits[ action.groupId ];
@@ -157,7 +159,7 @@ const reducer = (
 			};
 		}
 
-		case TYPES.REVERT_GROUP: {
+		case TYPES.REVERT_EDITED_SETTINGS_GROUP: {
 			const edits = { ...state.edits };
 			delete edits[ action.groupId ];
 

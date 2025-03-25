@@ -32,13 +32,13 @@ Receives and stores settings groups.
 
 Receives and stores settings for a specific group.
 
-### `editSetting( groupId: string, settingId: string, value: SettingValue, options?: { save?: boolean } )`
+### `editSetting( groupId: string, settingId: string, value: SettingValue )`
 
-Updates a single setting value. If `options.save` is true, the setting will be immediately saved to the server.
+Updates a single setting value in the store state without saving to the server.
 
-### `editSettings( groupId: string, updates: SettingUpdate[] | SettingsUpdateObject, options?: { save?: boolean } )`
+### `editSettings( groupId: string, updates: SettingUpdate[] | SettingsUpdateObject )`
 
-Updates multiple settings at once. If `options.save` is true, the settings will be immediately saved to the server. Accepts either:
+Updates multiple settings at once in the store state without saving to the server. Accepts either:
 
 - An array of `{ id, value }` objects
 - An object with setting IDs as keys and values as values
@@ -51,11 +51,11 @@ Sets the saving state for a group or specific setting.
 
 Sets the error state for a group or specific setting.
 
-### `revertSetting( groupId: string, settingId: string )`
+### `revertEditedSetting( groupId: string, settingId: string )`
 
 Reverts changes for a specific setting.
 
-### `revertGroup( groupId: string )`
+### `revertEditedSettingsGroup( groupId: string )`
 
 Reverts all changes in a settings group.
 
@@ -65,7 +65,18 @@ Saves all edited settings in a settings group to the server.
 
 ### `saveEditedSetting( groupId: string, settingId: string )`
 
-Saves edited setting to the server.
+Saves a specific edited setting to the server.
+
+### `saveSetting( groupId: string, settingId: string, value: SettingValue )`
+
+Directly saves a setting value to the server without requiring it to be edited first.
+
+### `saveSettingsGroup( groupId: string, updates: SettingUpdate[] | SettingsUpdateObject )`
+
+Directly saves multiple settings to the server without requiring them to be edited first. Accepts either:
+
+- An array of `{ id, value }` objects
+- An object with setting IDs as keys and values as values
 
 ## Selectors
 
@@ -89,7 +100,7 @@ Returns a specific setting.
 
 Returns the current value of a specific setting. This selector will trigger the `getSetting` resolver if the setting is not in the state.
 
-### `hasEdits( state, groupId )`
+### `hasEditsForGroup( state, groupId )`
 
 Returns whether a group has unsaved changes.
 

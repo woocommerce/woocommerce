@@ -89,7 +89,7 @@ describe( 'setting-options reducer', () => {
 	describe( 'UPDATE_SETTING', () => {
 		it( 'should update a single setting edit', () => {
 			const newState = reducer( state, {
-				type: TYPES.UPDATE_SETTING,
+				type: TYPES.EDIT_SETTING,
 				groupId: testGroup.id,
 				settingId: testSetting.id,
 				value: 'new-value',
@@ -109,7 +109,7 @@ describe( 'setting-options reducer', () => {
 			];
 
 			const newState = reducer( state, {
-				type: TYPES.UPDATE_SETTINGS,
+				type: TYPES.EDIT_SETTINGS,
 				groupId: testGroup.id,
 				updates,
 			} );
@@ -153,8 +153,7 @@ describe( 'setting-options reducer', () => {
 		it( 'should set error for a group', () => {
 			state.errors = {
 				[ testGroup.id ]: {
-					'setting-1': { message: 'Old error' },
-					'setting-2': { message: 'Old error' },
+					all: { message: 'Old error' },
 				},
 			};
 
@@ -166,8 +165,7 @@ describe( 'setting-options reducer', () => {
 			} );
 
 			expect( newState.errors[ testGroup.id ] ).toEqual( {
-				'setting-1': error,
-				'setting-2': error,
+				all: error,
 			} );
 		} );
 
@@ -185,7 +183,7 @@ describe( 'setting-options reducer', () => {
 		} );
 	} );
 
-	describe( 'REVERT_SETTING', () => {
+	describe( 'REVERT_EDITED_SETTING', () => {
 		it( 'should remove edit for a setting', () => {
 			state.edits = {
 				[ testGroup.id ]: {
@@ -195,7 +193,7 @@ describe( 'setting-options reducer', () => {
 			};
 
 			const newState = reducer( state, {
-				type: TYPES.REVERT_SETTING,
+				type: TYPES.REVERT_EDITED_SETTING,
 				groupId: testGroup.id,
 				settingId: testSetting.id,
 			} );
@@ -213,7 +211,7 @@ describe( 'setting-options reducer', () => {
 			};
 
 			const newState = reducer( state, {
-				type: TYPES.REVERT_SETTING,
+				type: TYPES.REVERT_EDITED_SETTING,
 				groupId: testGroup.id,
 				settingId: testSetting.id,
 			} );
@@ -222,7 +220,7 @@ describe( 'setting-options reducer', () => {
 		} );
 	} );
 
-	describe( 'REVERT_GROUP', () => {
+	describe( 'REVERT_EDITED_SETTINGS_GROUP', () => {
 		it( 'should remove all edits for a group', () => {
 			state.edits = {
 				[ testGroup.id ]: {
@@ -235,7 +233,7 @@ describe( 'setting-options reducer', () => {
 			};
 
 			const newState = reducer( state, {
-				type: TYPES.REVERT_GROUP,
+				type: TYPES.REVERT_EDITED_SETTINGS_GROUP,
 				groupId: testGroup.id,
 			} );
 

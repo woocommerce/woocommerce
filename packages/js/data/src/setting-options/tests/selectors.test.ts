@@ -322,25 +322,25 @@ describe( 'setting-options selectors', () => {
 		} );
 	} );
 
-	describe( 'hasEdits', () => {
+	describe( 'hasEditsForGroup', () => {
 		it( 'should return true if group has edits', () => {
 			state.edits = {
 				[ testGroup.id ]: { [ testSetting.id ]: 'edited-value' },
 			};
 
-			const result = selectors.hasEdits( state, testGroup.id );
+			const result = selectors.hasEditsForGroup( state, testGroup.id );
 			expect( result ).toBe( true );
 		} );
 
 		it( 'should return false if group has no edits', () => {
-			const result = selectors.hasEdits( state, testGroup.id );
+			const result = selectors.hasEditsForGroup( state, testGroup.id );
 			expect( result ).toBe( false );
 		} );
 
 		it( 'should return false if group has empty edits object', () => {
 			state.edits = { [ testGroup.id ]: {} };
 
-			const result = selectors.hasEdits( state, testGroup.id );
+			const result = selectors.hasEditsForGroup( state, testGroup.id );
 			expect( result ).toBe( false );
 		} );
 	} );

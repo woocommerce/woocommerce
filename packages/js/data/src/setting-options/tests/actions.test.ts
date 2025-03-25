@@ -123,7 +123,7 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'revertSetting', () => {
+	describe( 'revertEditedSetting', () => {
 		it( 'should remove setting from edits state', () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
@@ -134,7 +134,9 @@ describe( 'setting-options actions', () => {
 				.editSetting( groupId, settingId, 'new-value' );
 
 			// Then revert it
-			registry.dispatch( STORE_NAME ).revertSetting( groupId, settingId );
+			registry
+				.dispatch( STORE_NAME )
+				.revertEditedSetting( groupId, settingId );
 
 			expect(
 				store.getState().edits[ groupId ]?.[ settingId ]
@@ -149,7 +151,9 @@ describe( 'setting-options actions', () => {
 				.dispatch( STORE_NAME )
 				.editSetting( groupId, settingId, 'new-value' );
 
-			registry.dispatch( STORE_NAME ).revertSetting( groupId, settingId );
+			registry
+				.dispatch( STORE_NAME )
+				.revertEditedSetting( groupId, settingId );
 
 			expect( store.getState().edits[ groupId ] ).toBeUndefined();
 		} );
@@ -164,7 +168,7 @@ describe( 'setting-options actions', () => {
 
 			registry
 				.dispatch( STORE_NAME )
-				.revertSetting( groupId, 'setting1' );
+				.revertEditedSetting( groupId, 'setting1' );
 
 			expect( store.getState().edits[ groupId ] ).toEqual( {
 				setting2: 'value2',
@@ -172,7 +176,7 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'revertGroup', () => {
+	describe( 'revertEditedSettingsGroup', () => {
 		it( 'should remove all edits for a group', () => {
 			const groupId = 'test-group';
 
@@ -181,7 +185,9 @@ describe( 'setting-options actions', () => {
 				{ id: 'setting2', value: 'value2' },
 			] );
 
-			registry.dispatch( STORE_NAME ).revertGroup( groupId );
+			registry
+				.dispatch( STORE_NAME )
+				.revertEditedSettingsGroup( groupId );
 
 			expect( store.getState().edits[ groupId ] ).toBeUndefined();
 		} );
@@ -201,7 +207,9 @@ describe( 'setting-options actions', () => {
 					{ id: 'setting2', value: 'value2' },
 				] );
 
-			registry.dispatch( STORE_NAME ).revertGroup( group1Id );
+			registry
+				.dispatch( STORE_NAME )
+				.revertEditedSettingsGroup( group1Id );
 
 			expect( store.getState().edits[ group1Id ] ).toBeUndefined();
 			expect( store.getState().edits[ group2Id ] ).toEqual( {
@@ -432,8 +440,8 @@ describe( 'setting-options actions', () => {
 		} );
 	} );
 
-	describe( 'editSetting with save', () => {
-		it( 'should update and save setting in one call', async () => {
+	describe( 'saveSetting', () => {
+		it( 'should save setting and update state on success', async () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
 			const value = 'new-value';
@@ -449,79 +457,67 @@ describe( 'setting-options actions', () => {
 
 			await registry
 				.dispatch( STORE_NAME )
-				.editSetting( groupId, settingId, value, { save: true } );
+				.saveSetting( groupId, settingId, value );
 
-			// Verify API call was made
+			// Verify API call
 			expect( apiFetch ).toHaveBeenCalledWith( {
 				path: expect.stringContaining( `${ groupId }/${ settingId }` ),
 				method: 'PUT',
 				data: { value },
 			} );
 
-			// Verify state updates after save
+			// Verify state updates
 			expect(
 				store.getState().settings[ groupId ]?.[ settingId ]
 			).toEqual( mockResult );
 			expect(
-				store.getState().edits[ groupId ]?.[ settingId ]
-			).toBeUndefined();
-			expect(
 				store.getState().isSaving.settings[ groupId ]?.[ settingId ]
 			).toBe( false );
+			expect(
+				store.getState().errors[ groupId ]?.[ settingId ]
+			).toBeUndefined();
 		} );
 
-		it( 'should handle errors when updating and saving', async () => {
+		it( 'should handle errors when saving setting', async () => {
 			const groupId = 'test-group';
 			const settingId = 'test-setting';
 			const value = 'new-value';
-			const error = createTestError( 'API Error' );
+			const mockError = createTestError();
 
 			// Mock API error
-			( apiFetch as unknown as jest.Mock ).mockRejectedValue( error );
+			( apiFetch as unknown as jest.Mock ).mockRejectedValue( mockError );
 
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.editSetting( groupId, settingId, value, { save: true } )
-			).rejects.toThrow( error );
+					.saveSetting( groupId, settingId, value )
+			).rejects.toEqual( mockError );
 
-			// Verify the setting was updated in edits state despite the error
-			expect( store.getState().edits[ groupId ]?.[ settingId ] ).toBe(
-				value
-			);
-
-			// Verify error state
-			expect( store.getState().errors[ groupId ]?.[ settingId ] ).toBe(
-				error
-			);
+			// Verify state updates
 			expect(
 				store.getState().isSaving.settings[ groupId ]?.[ settingId ]
 			).toBe( false );
+			expect( store.getState().errors[ groupId ]?.[ settingId ] ).toBe(
+				mockError
+			);
 		} );
 	} );
 
-	describe( 'editSettings with save', () => {
-		it( 'should update and save multiple settings in one call', async () => {
+	describe( 'saveSettingsGroup', () => {
+		it( 'should save multiple settings and update state on success', async () => {
 			const groupId = 'test-group';
-			const mockResults = {
-				update: [
-					createTestSetting( {
-						id: 'setting1',
-						value: 'value1',
-						label: 'Setting 1',
-					} ),
-					createTestSetting( {
-						id: 'setting2',
-						value: 'value2',
-						label: 'Setting 2',
-					} ),
-				],
-			};
-
 			const updates = [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			];
+			const mockResults = {
+				update: updates.map( ( update ) =>
+					createTestSetting( {
+						id: update.id,
+						value: update.value,
+					} )
+				),
+			};
 
 			// Mock API response
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
@@ -530,51 +526,87 @@ describe( 'setting-options actions', () => {
 
 			await registry
 				.dispatch( STORE_NAME )
-				.editSettings( groupId, updates, { save: true } );
+				.saveSettingsGroup( groupId, updates );
 
-			// Verify API call was made
+			// Verify API call
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: expect.stringContaining( groupId ),
+				path: expect.stringContaining( `${ groupId }/batch` ),
 				method: 'POST',
-				data: {
-					update: updates,
-				},
+				data: { update: updates },
 			} );
 
-			// Verify state updates after save
-			expect( store.getState().settings[ groupId ] ).toEqual( {
-				setting1: mockResults.update[ 0 ],
-				setting2: mockResults.update[ 1 ],
+			// Verify state updates
+			updates.forEach( ( update ) => {
+				expect(
+					store.getState().settings[ groupId ]?.[ update.id ]
+				).toEqual(
+					expect.objectContaining( {
+						id: update.id,
+						value: update.value,
+					} )
+				);
 			} );
-			expect( store.getState().edits[ groupId ] ).toBeUndefined();
 			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
+			expect( store.getState().errors[ groupId ]?.null ).toBeUndefined();
 		} );
 
-		it( 'should handle partial success when updating and saving multiple settings', async () => {
+		it( 'should handle object format for updates', async () => {
 			const groupId = 'test-group';
+			const updates = {
+				setting1: 'value1',
+				setting2: 'value2',
+			};
+			const expectedUpdates = [
+				{ id: 'setting1', value: 'value1' },
+				{ id: 'setting2', value: 'value2' },
+			];
+			const mockResults = {
+				update: expectedUpdates.map( ( update ) =>
+					createTestSetting( {
+						id: update.id,
+						value: update.value,
+					} )
+				),
+			};
+
+			// Mock API response
+			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
+				mockResults
+			);
+
+			await registry
+				.dispatch( STORE_NAME )
+				.saveSettingsGroup( groupId, updates );
+
+			// Verify API call used correct format
+			expect( apiFetch ).toHaveBeenCalledWith( {
+				path: expect.stringContaining( `${ groupId }/batch` ),
+				method: 'POST',
+				data: { update: expectedUpdates },
+			} );
+		} );
+
+		it( 'should handle partial failures in batch update', async () => {
+			const groupId = 'test-group';
+			const updates = [
+				{ id: 'setting1', value: 'value1' },
+				{ id: 'setting2', value: 'value2' },
+			];
+			const mockError: APIError = {
+				code: 'invalid_value',
+				message: 'Invalid value',
+			};
 			const mockResults = {
 				update: [
 					createTestSetting( {
 						id: 'setting1',
 						value: 'value1',
-						label: 'Setting 1',
 					} ),
-					{
-						id: 'setting2',
-						error: {
-							code: 'invalid_value',
-							message: 'Invalid value',
-						},
-					},
+					{ id: 'setting2', error: mockError },
 				],
 			};
 
-			const updates = [
-				{ id: 'setting1', value: 'value1' },
-				{ id: 'setting2', value: 'invalid' },
-			];
-
-			// Mock API response
+			// Mock API response with partial success
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResults
 			);
@@ -582,51 +614,42 @@ describe( 'setting-options actions', () => {
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.editSettings( groupId, updates, { save: true } )
+					.saveSettingsGroup( groupId, updates )
 			).rejects.toThrow( 'Failed to update some settings' );
 
-			// Verify settings were updated in edits state
-			expect( store.getState().edits[ groupId ] ).toEqual( {
-				setting2: 'invalid',
-			} );
-
-			// Verify successful update
+			// Verify successful update was processed
 			expect( store.getState().settings[ groupId ]?.setting1 ).toEqual(
-				mockResults.update[ 0 ]
+				expect.objectContaining( {
+					id: 'setting1',
+					value: 'value1',
+				} )
 			);
 
-			// Verify error state
+			// Verify error was set for failed setting
 			expect( store.getState().errors[ groupId ]?.setting2 ).toEqual(
-				( mockResults.update[ 1 ] as { error: APIError } ).error
+				mockError
 			);
-			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
 		} );
 
-		it( 'should handle complete failure when updating and saving multiple settings', async () => {
+		it( 'should handle complete failure in batch update', async () => {
 			const groupId = 'test-group';
-			const error = createTestError( 'Network Error' );
 			const updates = [
 				{ id: 'setting1', value: 'value1' },
 				{ id: 'setting2', value: 'value2' },
 			];
+			const mockError = createTestError();
 
 			// Mock API error
-			( apiFetch as unknown as jest.Mock ).mockRejectedValue( error );
+			( apiFetch as unknown as jest.Mock ).mockRejectedValue( mockError );
 
 			await expect(
 				registry
 					.dispatch( STORE_NAME )
-					.editSettings( groupId, updates, { save: true } )
-			).rejects.toThrow( error );
-
-			// Verify settings were updated in edits state despite the error
-			expect( store.getState().edits[ groupId ] ).toEqual( {
-				setting1: 'value1',
-				setting2: 'value2',
-			} );
+					.saveSettingsGroup( groupId, updates )
+			).rejects.toEqual( mockError );
 
 			// Verify error state
-			expect( store.getState().errors[ groupId ] ).toBeTruthy();
+			expect( store.getState().errors[ groupId ].all ).toBe( mockError );
 			expect( store.getState().isSaving.groups[ groupId ] ).toBe( false );
 		} );
 	} );

@@ -147,9 +147,9 @@ export type SettingsState = {
 };
 
 /**
- * Represents an update to a setting
+ * Represents an edit to a setting
  */
-export type SettingUpdate = {
+export type SettingEdit = {
 	id: string;
 	value: SettingValue;
 };
@@ -157,4 +157,4 @@ export type SettingUpdate = {
 /**
  * Represents an object of setting IDs and their values
  */
-export type SettingsUpdateObject = Record< string, SettingValue >;
+export type SettingsEditObject = Record< string, SettingEdit >;

@@ -15,8 +15,8 @@ import type {
 	SettingsGroup,
 	APIError,
 	BatchSettingsError,
-	SettingUpdate,
-	SettingsUpdateObject,
+	SettingEdit,
+	SettingsEditObject,
 } from './types';
 import { NAMESPACE } from '../constants';
 import { store } from './';
@@ -54,84 +54,47 @@ export const receiveSettings = ( groupId: string, settings: Setting[] ) => ( {
 } );
 
 /**
- * Action creator for updating a setting.
+ * Updates a single setting value.
  *
- * @param groupId   - The group ID.
- * @param settingId - The setting ID.
- * @param value     - The value to update the setting to.
- * @return The action object.
- */
-const createUpdateSettingAction = (
-	groupId: string,
-	settingId: string,
-	value: SettingValue
-) => ( {
-	type: TYPES.UPDATE_SETTING,
-	groupId,
-	settingId,
-	value,
-} );
-
-/**
- * Updates a single setting value. If save is true, the setting will be immediately saved.
- *
- * @param groupId      - The settings group ID
- * @param settingId    - The setting ID
- * @param value        - The new setting value
- * @param options      - Options object
- * @param options.save - Whether to immediately save the setting (default: false)
+ * @param groupId   - The settings group ID
+ * @param settingId - The setting ID
+ * @param value     - The new setting value
  */
 export function editSetting(
 	groupId: string,
 	settingId: string,
-	value: SettingValue,
-	{ save = false }: { save?: boolean } = {}
+	value: SettingValue
 ) {
-	return async ( { dispatch }: ThunkArgs ) => {
-		dispatch( createUpdateSettingAction( groupId, settingId, value ) );
-
-		if ( save ) {
-			return dispatch.saveEditedSetting( groupId, settingId );
-		}
+	return {
+		type: TYPES.EDIT_SETTING,
+		groupId,
+		settingId,
+		value,
 	};
 }
 
 /**
- * Internal action creator for array format
- */
-const editSettingsArray = ( groupId: string, updates: SettingUpdate[] ) => ( {
-	type: TYPES.UPDATE_SETTINGS,
-	groupId,
-	updates,
-} );
-
-/**
- * Updates multiple settings at once. If save is true, the settings will be immediately saved.
+ * Updates multiple settings at once.
  *
- * @param groupId      - The settings group ID
- * @param updates      - Array of setting updates or object with setting IDs as keys and values as values
- * @param options      - Options object
- * @param options.save - Whether to immediately save the settings (default: false)
+ * @param groupId - The settings group ID
+ * @param updates - Array of setting updates or object with setting IDs as keys and values as values
  */
 export function editSettings(
 	groupId: string,
-	updates: SettingUpdate[] | SettingsUpdateObject,
-	{ save = false }: { save?: boolean } = {}
+	updates: SettingEdit[] | SettingsEditObject
 ) {
-	return async ( { dispatch }: ThunkArgs ) => {
-		// Convert object format to array format if needed
-		const updatesArray = Array.isArray( updates )
-			? updates
-			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
-					id,
-					value,
-			  } ) );
+	// Convert object format to array format if needed
+	const updatesArray = Array.isArray( updates )
+		? updates
+		: Object.entries( updates ).map( ( [ id, value ] ) => ( {
+				id,
+				value,
+		  } ) );
 
-		dispatch( editSettingsArray( groupId, updatesArray ) );
-
-		if ( save ) {
-			return dispatch.saveEditedSettingsGroup( groupId );
-		}
+	return {
+		type: TYPES.EDIT_SETTINGS,
+		groupId,
+		updates: updatesArray,
 	};
 }
 
@@ -180,8 +143,8 @@ export const setError = (
  * @param settingId - The setting ID.
  * @return The action object.
  */
-export const revertSetting = ( groupId: string, settingId: string ) => ( {
-	type: TYPES.REVERT_SETTING,
+export const revertEditedSetting = ( groupId: string, settingId: string ) => ( {
+	type: TYPES.REVERT_EDITED_SETTING,
 	groupId,
 	settingId,
 } );
@@ -192,13 +155,145 @@ export const revertSetting = ( groupId: string, settingId: string ) => ( {
  * @param groupId - The group ID.
  * @return The action object.
  */
-export const revertGroup = ( groupId: string ) => ( {
-	type: TYPES.REVERT_GROUP,
+export const revertEditedSettingsGroup = ( groupId: string ) => ( {
+	type: TYPES.REVERT_EDITED_SETTINGS_GROUP,
 	groupId,
 } );
 
 /**
- * Action creator for saving a settings group.
+ * Internal helper to save a single setting.
+ */
+const saveSettingRequest = async (
+	groupId: string,
+	settingId: string,
+	value: SettingValue,
+	dispatch: ActionDispatchersForThunk
+): Promise< Setting > => {
+	dispatch( setSaving( groupId, settingId, true ) );
+
+	try {
+		const result = await apiFetch< Setting >( {
+			path: `${ NAMESPACE }/settings/${ groupId }/${ settingId }`,
+			method: 'PUT',
+			data: { value },
+		} );
+
+		dispatch( receiveSettings( groupId, [ result ] ) );
+		return result;
+	} catch ( error ) {
+		dispatch( setError( groupId, settingId, error ) );
+		throw error;
+	} finally {
+		dispatch( setSaving( groupId, settingId, false ) );
+	}
+};
+
+/**
+ * Internal helper to save multiple settings.
+ */
+const saveSettingsGroupRequest = async (
+	groupId: string,
+	updates: SettingEdit[],
+	dispatch: ActionDispatchersForThunk
+) => {
+	dispatch( setSaving( groupId, null, true ) );
+
+	try {
+		const results = await apiFetch< {
+			update: ( Setting | { id: string; error: APIError } )[];
+		} >( {
+			path: `${ NAMESPACE }/settings/${ groupId }/batch`,
+			method: 'POST',
+			data: { update: updates },
+		} );
+
+		// Handle individual setting errors in a 200 response
+		const successfulUpdates: Setting[] = [];
+		const errors: Array< { id: string; error: APIError } > = [];
+
+		results.update.forEach( ( result ) => {
+			if (
+				'error' in result &&
+				result.error &&
+				typeof result.error === 'object'
+			) {
+				// If the result has an error, collect it
+				errors.push( {
+					id: result.id,
+					error: result.error,
+				} );
+				dispatch( setError( groupId, result.id, result.error ) );
+			} else {
+				// If no error, add to successful updates
+				successfulUpdates.push( result as Setting );
+			}
+		} );
+
+		// Only update settings that were successfully changed
+		if ( successfulUpdates.length > 0 ) {
+			dispatch( receiveSettings( groupId, successfulUpdates ) );
+		}
+
+		// If there were any errors, throw an error with details
+		if ( errors.length > 0 ) {
+			const error = new Error(
+				'Failed to update some settings'
+			) as BatchSettingsError;
+			error.settingErrors = errors;
+			throw error;
+		}
+
+		return results;
+	} catch ( error ) {
+		const partialError = error instanceof Error && 'settingErrors' in error;
+
+		// All settings failed to update, set the error for the entire group
+		if ( ! partialError ) {
+			dispatch( setError( groupId, null, error ) );
+		}
+
+		throw error;
+	} finally {
+		dispatch( setSaving( groupId, null, false ) );
+	}
+};
+
+/**
+ * Saves multiple settings at once for a group.
+ *
+ * @param groupId - The settings group ID
+ * @param updates - Array of setting updates or object with setting IDs as keys and values as values
+ * @return The action object.
+ */
+export const saveSettingsGroup =
+	( groupId: string, updates: SettingEdit[] | SettingsEditObject ) =>
+	async ( { dispatch }: ThunkArgs ) => {
+		const updatesArray = Array.isArray( updates )
+			? updates
+			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
+					id,
+					value,
+			  } ) );
+
+		return saveSettingsGroupRequest( groupId, updatesArray, dispatch );
+	};
+
+/**
+ * Saves a single setting.
+ *
+ * @param groupId   - The group ID
+ * @param settingId - The setting ID
+ * @param value     - The value to save
+ * @return The action object
+ */
+export const saveSetting =
+	( groupId: string, settingId: string, value: SettingValue ) =>
+	async ( { dispatch }: ThunkArgs ) => {
+		return saveSettingRequest( groupId, settingId, value, dispatch );
+	};
+
+/**
+ * Action creator for saving edited settings in a group.
  *
  * @param groupId - The group ID.
  * @return The action object.
@@ -206,8 +301,6 @@ export const revertGroup = ( groupId: string ) => ( {
 export const saveEditedSettingsGroup =
 	( groupId: string ) =>
 	async ( { select, dispatch }: ThunkArgs ) => {
-		dispatch( setSaving( groupId, null, true ) );
-
 		const editedSettings = select
 			.getEditedSettingIds( groupId )
 			.map( ( settingId: string ) => ( {
@@ -220,69 +313,11 @@ export const saveEditedSettingsGroup =
 			return;
 		}
 
-		try {
-			const results = await apiFetch< {
-				update: ( Setting | { id: string; error: APIError } )[];
-			} >( {
-				path: `${ NAMESPACE }/settings/${ groupId }/batch`,
-				method: 'POST',
-				data: { update: editedSettings },
-			} );
-
-			// Handle individual setting errors in a 200 response
-			const successfulUpdates: Setting[] = [];
-			const errors: Array< { id: string; error: APIError } > = [];
-
-			results.update.forEach( ( result ) => {
-				if (
-					'error' in result &&
-					result.error &&
-					typeof result.error === 'object'
-				) {
-					// If the result has an error, collect it
-					errors.push( {
-						id: result.id,
-						error: result.error,
-					} );
-					dispatch( setError( groupId, result.id, result.error ) );
-				} else {
-					// If no error, add to successful updates
-					successfulUpdates.push( result as Setting );
-				}
-			} );
-
-			// Only update settings that were successfully changed
-			if ( successfulUpdates.length > 0 ) {
-				dispatch( receiveSettings( groupId, successfulUpdates ) );
-			}
-
-			// If there were any errors, throw an error with details
-			if ( errors.length > 0 ) {
-				const error = new Error(
-					'Failed to update some settings'
-				) as BatchSettingsError;
-				error.settingErrors = errors;
-				throw error;
-			}
-
-			return results;
-		} catch ( error ) {
-			const partialError =
-				error instanceof Error && 'settingErrors' in error;
-
-			// Only set the error for the entire group if all settings failed to update
-			if ( ! partialError ) {
-				dispatch( setError( groupId, null, error ) );
-			}
-
-			throw error;
-		} finally {
-			dispatch( setSaving( groupId, null, false ) );
-		}
+		return saveSettingsGroupRequest( groupId, editedSettings, dispatch );
 	};
 
 /**
- * Action creator for saving a setting.
+ * Action creator for saving an edited setting.
  *
  * @param groupId   - The group ID.
  * @param settingId - The setting ID.
@@ -298,23 +333,7 @@ export const saveEditedSetting =
 		}
 
 		const value = select.getSettingValue( groupId, settingId );
-		dispatch( setSaving( groupId, settingId, true ) );
-
-		try {
-			const result = await apiFetch< Setting >( {
-				path: `${ NAMESPACE }/settings/${ groupId }/${ settingId }`,
-				method: 'PUT',
-				data: { value },
-			} );
-
-			dispatch( receiveSettings( groupId, [ result ] ) );
-			return result;
-		} catch ( error ) {
-			dispatch( setError( groupId, settingId, error ) );
-			throw error;
-		} finally {
-			dispatch( setSaving( groupId, settingId, false ) );
-		}
+		return saveSettingRequest( groupId, settingId, value, dispatch );
 	};
 
 // Return type of all action creators
@@ -323,10 +342,10 @@ export type Actions = ReturnType<
 	| typeof receiveSettings
 	| typeof setSaving
 	| typeof setError
-	| typeof revertSetting
-	| typeof revertGroup
-	| typeof createUpdateSettingAction
-	| typeof editSettingsArray
+	| typeof revertEditedSetting
+	| typeof revertEditedSettingsGroup
+	| typeof editSetting
+	| typeof editSettings
 >;
 
 export type ActionDispatchersForThunk = {
@@ -334,11 +353,13 @@ export type ActionDispatchersForThunk = {
 	receiveSettings: typeof receiveSettings;
 	setSaving: typeof setSaving;
 	setError: typeof setError;
-	revertSetting: typeof revertSetting;
-	revertGroup: typeof revertGroup;
+	revertEditedSetting: typeof revertEditedSetting;
+	revertEditedSettingsGroup: typeof revertEditedSettingsGroup;
 	editSetting: typeof editSetting;
 	editSettings: typeof editSettings;
 	saveEditedSetting: typeof saveEditedSetting;
 	saveEditedSettingsGroup: typeof saveEditedSettingsGroup;
+	saveSetting: typeof saveSetting;
+	saveSettingsGroup: typeof saveSettingsGroup;
 	< T = Record< string, unknown > >( args: T ): void;
 };

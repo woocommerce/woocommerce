@@ -240,7 +240,10 @@ export const getSettingError = (
  * @param {SettingsState} state   - The current state of the settings.
  * @param {string}        groupId - The ID of the group to check.
  */
-export const hasEdits = ( state: SettingsState, groupId: string ): boolean => {
+export const hasEditsForGroup = (
+	state: SettingsState,
+	groupId: string
+): boolean => {
 	const groupEdits = state.edits[ groupId ];
 	return !! groupEdits && Object.keys( groupEdits ).length > 0;
 };
