@@ -15,6 +15,18 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  */
 class OrderControllerTests extends TestCase {
 	/**
+	 * test_validate_existing_order_before_payment_valid_data.
+	 */
+	public function test_validate_existing_order_before_payment_valid_data() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		$class = new OrderController();
+		$this->assertNull( $class->validate_existing_order_before_payment( $order ) );
+	}
+
+	/**
 	 * test_validate_selected_shipping_methods_throws
 	 */
 	public function test_validate_selected_shipping_methods_throws() {
@@ -40,12 +52,34 @@ class OrderControllerTests extends TestCase {
 		$registered_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
 		$valid_method       = array_shift( $registered_methods );
 
-		// By running this method we assert that it doesn't error because if it does this test will fail.
-		$class->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) );
-		$class->validate_selected_shipping_methods( false, array( 'free-shipping' ) );
-		// The above methods throw Exception on error, but this is classed as a risky test because there are no
-		// assertions. Assert true to work around this warning.
-		$this->assertTrue( true );
+		$this->assertNull( $class->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
+		$this->assertNull( $class->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
+	}
+
+	/**
+	 * test_validate_order_before_payment_invalid_coupon_usage_limit.
+	 */
+	public function test_validate_order_before_payment_invalid_coupon_usage_limit() {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 409 );
+		$this->expectExceptionMessage( '"limited-coupon" was removed from the cart. Coupon usage limit has been reached.' );
+
+		$order = WC_Helper_Order::create_order();
+
+		// Create a coupon with usage limit of 1 and mark it as used
+		$coupon = CouponHelper::create_coupon( 'limited-coupon', 'publish', array(
+			'usage_limit_per_user' => 1,
+		));
+		$coupon->increase_usage_count( $order->get_billing_email() );
+		$order->apply_coupon( $coupon );
+		$order->save();
+
+		$class = new OrderController();
+		try {
+			$class->validate_order_before_payment( $order );
+		} finally {
+			$this->assertEmpty( $order->get_coupon_codes() );
+		}
 	}
 
 	/**
@@ -123,5 +157,73 @@ class OrderControllerTests extends TestCase {
 		// There is no need to update the cart here, we just check the order.
 		$class = new OrderController();
 		$class->validate_existing_order_before_payment( $order );
+	}
+
+	/**
+	 * test_validate_order_before_payment_invalid_billing_country.
+	 */
+	public function test_validate_order_before_payment_invalid_billing_country() {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 400 );
+		$this->expectExceptionMessage( 'Sorry, we do not allow orders from the provided country (Invalid)' );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'Invalid' );
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		$class = new OrderController();
+		$class->validate_order_before_payment( $order );
+	}
+
+	/**
+	 * test_validate_order_before_payment_missing_required_billing_fields.
+	 */
+	public function test_validate_order_before_payment_missing_required_billing_fields() {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 400 );
+		$this->expectExceptionMessage( 'There was a problem with the provided billing address: First name is required, Last name is required' );
+
+		$order = WC_Helper_Order::create_order();
+		// Clear required billing fields
+		$order->set_billing_first_name( '' );
+		$order->set_billing_last_name( '' );
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		$class = new OrderController();
+		$class->validate_order_before_payment( $order );
+	}
+
+	/**
+	 * test_validate_order_before_payment_valid_coupon.
+	 */
+	public function test_validate_order_before_payment_valid_coupon() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+
+		// Create a coupon without restrictions
+		$coupon = CouponHelper::create_coupon( 'valid-coupon' );
+		$order->apply_coupon( $coupon );
+		$order->save();
+
+		$class = new OrderController();
+		$class->validate_order_before_payment( $order );
+		$this->assertEquals( array( 'valid-coupon' ), $order->get_coupon_codes() );
+	}
+
+	/**
+	 * Helper method to set shipping address on an order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	private function set_shipping_address( \WC_Order $order ) {
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_first_name( 'John' );
+		$order->set_shipping_last_name( 'Doe' );
+		$order->set_shipping_address_1( '123 Test St' );
+		$order->set_shipping_city( 'Test City' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_postcode( '12345' );
 	}
 }
