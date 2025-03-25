@@ -174,7 +174,6 @@ test.beforeAll( async ( { browser, restApi } ) => {
 			}
 		)
 		.catch( ( error ) => {
-			console.log( 'Caught' );
 			throw new Error(
 				`Something went wrong when resetting 'Excluded statuses' to default values.\n${ JSON.stringify(
 					error,
