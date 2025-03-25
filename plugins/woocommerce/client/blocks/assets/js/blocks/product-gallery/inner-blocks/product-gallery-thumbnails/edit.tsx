@@ -19,7 +19,18 @@ import { checkOverflow } from '../../utils';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
 const MAX_THUMBNAILS = 10;
-const prepareProductImages = ( productImages: ProductResponseImageItem[] ) => {
+
+/**
+ * Prepares product images for display in the gallery thumbnails.
+ * Limits the number of images to MAX_THUMBNAILS - no need to load more in editor.
+ * Also, extracts src and alt properties from the image object.
+ *
+ * @param {ProductResponseImageItem[]} productImages - Array of product images from the API response.
+ * @return {{ src: string | undefined; alt: string | undefined }[]} Array of prepared image objects containing src and alt properties.
+ */
+const prepareProductImages = (
+	productImages: ProductResponseImageItem[]
+): { src: string | undefined; alt: string | undefined }[] => {
 	return productImages.slice( 0, MAX_THUMBNAILS ).map( ( image ) => {
 		return {
 			src: image?.src,
