@@ -63,11 +63,10 @@ export const getBusinessTypes = (
  */
 export const finalizeOnboarding = async ( urlSource: string ) => {
 	return await apiFetch< FinalizeOnboardingResponse >( {
-		path: `${ WC_ADMIN_NAMESPACE }/onboarding/kyc/finalize`,
+		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/session/finish`,
 		method: 'POST',
 		data: {
 			source: urlSource,
-			from: 'WCPAY_ONBOARDING_WIZARD',
 		},
 	} );
 };
