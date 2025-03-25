@@ -251,7 +251,8 @@ class WCTransactionalEmailPostsGenerator {
 			'post_type'    => Integration::EMAIL_POST_TYPE,
 			'post_status'  => $email_enabled ? 'publish' : 'draft',
 			'post_name'    => $email_type,
-			'post_title'   => $email_data->title,
+			'post_title'   => $email_data->get_title(),
+			'post_excerpt' => $email_data->get_description(),
 			'post_content' => $this->get_email_template( $email_data ),
 			'meta_input'   => array(
 				Integration::WC_EMAIL_TYPE_ID_POST_META_KEY => $email_type,
