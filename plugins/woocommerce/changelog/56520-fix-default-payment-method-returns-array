@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a Array to string conversion PHP Warning where saved payment methods are sometimes saved as the wrong type.
