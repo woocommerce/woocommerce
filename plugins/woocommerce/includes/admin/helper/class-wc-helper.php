@@ -1330,12 +1330,16 @@ class WC_Helper {
 				return $installed_subscriptions;
 			}
 
-			$installed_subscriptions = array_filter(
-				self::get_subscriptions(),
-				function ( $subscription ) use ( $site_id ) {
-					return in_array( $site_id, $subscription['connections'], true );
-				}
-			);
+			try {
+				$installed_subscriptions = array_filter(
+					self::get_subscriptions(),
+					function ( $subscription ) use ( $site_id ) {
+						return in_array( $site_id, $subscription['connections'], true );
+					}
+				);
+			} catch ( Exception $e ) {
+				$installed_subscriptions = [];
+			}
 		}
 
 		return $installed_subscriptions;
@@ -1358,12 +1362,16 @@ class WC_Helper {
 				return $unconnected_subscriptions;
 			}
 
-			$unconnected_subscriptions = array_filter(
-				self::get_subscriptions(),
-				function ( $subscription ) use ( $site_id ) {
-					return empty( $subscription['connections'] );
-				}
-			);
+			try {
+				$unconnected_subscriptions = array_filter(
+					self::get_subscriptions(),
+					function ( $subscription ) use ( $site_id ) {
+						return empty( $subscription['connections'] );
+					}
+				);
+			} catch ( Exception $e ) {
+				$unconnected_subscriptions = [];
+			}
 		}
 
 		return $unconnected_subscriptions;
@@ -1406,7 +1414,12 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	private static function _get_subscriptions_from_product_id( $product_id, $single = true ) {
-		$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
+		try {
+			$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
+		} catch ( Exception $e ) {
+			return false;
+		}
+
 		if ( ! empty( $subscriptions ) ) {
 			return $single ? array_shift( $subscriptions ) : $subscriptions;
 		}
@@ -1612,7 +1625,7 @@ class WC_Helper {
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
-			if ( empty( $data ) || ! is_array( $data ) ) {
+			if ( ! is_array( $data ) ) {
 				throw new Exception( __( 'Invalid response from WooCommerce.com', 'woocommerce' ) );
 			}
 
@@ -1740,7 +1753,7 @@ class WC_Helper {
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
-			if ( empty( $data ) || ! is_array( $data ) ) {
+			if ( ! is_array( $data ) ) {
 				throw new Exception( __( 'Invalid response from WooCommerce.com', 'woocommerce' ) );
 			}
 
@@ -1759,10 +1772,14 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	public static function get_subscription( $product_key ) {
-		$subscriptions = wp_list_filter(
-			self::get_subscriptions(),
-			array( 'product_key' => $product_key )
-		);
+		try {
+			$subscriptions = wp_list_filter(
+				self::get_subscriptions(),
+				array( 'product_key' => $product_key )
+			);
+		} catch ( Exception $e ) {
+			return false;
+		}
 
 		if ( empty( $subscriptions ) ) {
 			return false;
