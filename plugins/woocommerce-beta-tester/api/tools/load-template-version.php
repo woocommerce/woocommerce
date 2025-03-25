@@ -54,8 +54,8 @@ function get_predefined_templates() {
 	$templates_dir = dirname( __FILE__ ) . '/templates/';
 	$templates = array(
 		'coming-soon' => array(
-			'display_name' => 'Coming Soon',
-			'post_title' => 'Coming Soon Page',
+			'display_name' => 'Coming soon',
+			'post_title' => 'Page: Coming soon',
 			'post_excerpt' => 'Let your shoppers know your site or part of your site is under construction.',
 			'versions'     => array(),
 		),
