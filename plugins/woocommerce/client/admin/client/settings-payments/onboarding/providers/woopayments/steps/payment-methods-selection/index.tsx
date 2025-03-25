@@ -12,7 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
-import './payment-methods-selection.scss';
+import './style.scss';
 
 export default function PaymentMethodsSelection() {
 	const { currentStep, navigateToNextStep } = useOnboardingContext();
