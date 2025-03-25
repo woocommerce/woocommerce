@@ -132,11 +132,11 @@ class ProcessCoreProfilerPluginInstallOptions {
 		$autoload = null;
 
 		if ( isset( $options->autoload ) ) {
-			if ( $options->autoload === 'yes' ) {
+			if ( 'yes' === $options->autoload ) {
 				$autoload = true;
-			} elseif ( $options->autoload === 'no' ) {
+			} elseif ( 'no' === $options->autoload ) {
 				$autoload = false;
-			} elseif ( $options->autoload === true || $options->autoload === false ) {
+			} elseif ( true === $options->autoload || false === $options->autoload ) {
 				$autoload = $options->autoload;
 			}
 		}
