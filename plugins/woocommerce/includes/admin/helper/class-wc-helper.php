@@ -1020,21 +1020,17 @@ class WC_Helper {
 	 * @throws Exception If there is an error refreshing subscriptions.
 	 */
 	public static function refresh_helper_subscriptions() {
-		try {
-			/**
-			 * Fires when Helper subscriptions are refreshed.
-			 *
-			 * @since 8.3.0
-			 */
-			do_action( 'woocommerce_helper_subscriptions_refresh' );
-			self::_flush_authentication_cache();
-			self::_flush_subscriptions_cache();
-			self::_flush_updates_cache();
-			self::flush_product_usage_notice_rules_cache();
-		} catch ( Exception $e ) {
-			self::log( 'Error refreshing subscriptions: ' . $e->getMessage(), 'error' );
-			throw new Exception( __( 'There was an error refreshing your subscriptions.', 'woocommerce' ) );
-		}
+		/**
+		 * Fires when Helper subscriptions are refreshed.
+		 *
+		 * @since 8.3.0
+		 */
+		do_action( 'woocommerce_helper_subscriptions_refresh' );
+		self::_flush_authentication_cache();
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
+
 	}
 
 	/**
