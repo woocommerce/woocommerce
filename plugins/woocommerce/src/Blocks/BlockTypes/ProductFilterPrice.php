@@ -145,20 +145,26 @@ final class ProductFilterPrice extends AbstractBlock {
 			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context' => wp_json_encode(
 				array(
-					'activeLabelTemplates' => array(
-						/* translators: {{min}} and {{max}} are the formatted minimum and maximum prices respectively. */
-						'minAndMax' => __( 'Price: {{min}} - {{max}}', 'woocommerce' ),
-						/* translators: {{max}} is the formatted maximum price. */
-						'maxOnly'   => __( 'Price: Up to {{max}}', 'woocommerce' ),
-						/* translators: {{min}} is the formatted minimum price. */
-						'minOnly'   => __( 'Price: From {{min}}', 'woocommerce' ),
-					),
 					'filterType'           => 'price',
 					'minRange'             => $min_range,
 					'maxRange'             => $max_range,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
+		);
+
+		wp_interactivity_config(
+			'woocommerce/product-filters',
+			array(
+				'activeLabelTemplates' => array(
+					/* translators: {{min}} and {{max}} are the formatted minimum and maximum prices respectively. */
+					'minAndMax' => __( 'Price: {{min}} - {{max}}', 'woocommerce' ),
+					/* translators: {{max}} is the formatted maximum price. */
+					'maxOnly'   => __( 'Price: Up to {{max}}', 'woocommerce' ),
+					/* translators: {{min}} is the formatted minimum price. */
+					'minOnly'   => __( 'Price: From {{min}}', 'woocommerce' ),
+				),
+			)
 		);
 
 		wp_interactivity_state(

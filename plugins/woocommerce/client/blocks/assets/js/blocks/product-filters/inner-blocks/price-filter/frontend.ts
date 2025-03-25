@@ -10,7 +10,7 @@ import * as iAPI from '@wordpress/interactivity';
 import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils';
 
-const { store, getContext, getServerContext } = iAPI;
+const { store, getContext, getServerContext, getConfig } = iAPI;
 
 function inRange( value: number, min: number, max: number ) {
 	return value >= min && value <= max;
@@ -19,7 +19,6 @@ function inRange( value: number, min: number, max: number ) {
 export type ProductFilterPriceContext = {
 	minRange: number;
 	maxRange: number;
-	activeLabelTemplates: Record< string, string >;
 };
 
 const productFilterPriceStore = {
@@ -68,6 +67,7 @@ const productFilterPriceStore = {
 	actions: {
 		getActivePriceAndLabel( min: number, max: number ) {
 			const context = getContext< ProductFilterPriceContext >();
+			const { activeLabelTemplates } = getConfig();
 			if (
 				min &&
 				min > context.minRange &&
@@ -76,7 +76,7 @@ const productFilterPriceStore = {
 			)
 				return {
 					activeValue: `${ min }|${ max }`,
-					activeLabel: context.activeLabelTemplates.minAndMax
+					activeLabel: activeLabelTemplates.minAndMax
 						.replace(
 							'{{min}}',
 							formatPrice( min, getCurrency( { minorUnit: 0 } ) )
@@ -90,7 +90,7 @@ const productFilterPriceStore = {
 			if ( min && min > context.minRange ) {
 				return {
 					activeValue: `${ min }|`,
-					activeLabel: context.activeLabelTemplates.minOnly.replace(
+					activeLabel: activeLabelTemplates.minOnly.replace(
 						'{{min}}',
 						formatPrice( min, getCurrency( { minorUnit: 0 } ) )
 					),
@@ -100,7 +100,7 @@ const productFilterPriceStore = {
 			if ( max && max < context.maxRange ) {
 				return {
 					activeValue: `|${ max }`,
-					activeLabel: context.activeLabelTemplates.maxOnly.replace(
+					activeLabel: activeLabelTemplates.maxOnly.replace(
 						'{{max}}',
 						formatPrice( max, getCurrency( { minorUnit: 0 } ) )
 					),

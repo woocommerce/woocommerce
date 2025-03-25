@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
@@ -13,15 +13,14 @@ import type {
 } from '../../frontend';
 
 type ActiveFiltersContext = {
-	removeLabelTemplate: string;
 	item: ActiveFilterItem;
 };
 
 const activeFiltersStore = {
 	state: {
 		get removeActiveFilterLabel() {
-			const { item, removeLabelTemplate } =
-				getContext< ActiveFiltersContext >();
+			const { item } = getContext< ActiveFiltersContext >();
+			const { removeLabelTemplate } = getConfig();
 			return removeLabelTemplate.replace( '{{label}}', item.activeLabel );
 		},
 		get hasActiveFilters() {
