@@ -156,7 +156,7 @@ final class ProductFilterPrice extends AbstractBlock {
 		wp_interactivity_config(
 			'woocommerce/product-filters',
 			array(
-				'activeLabelTemplates' => array(
+				'activePriceLabelTemplates' => array(
 					/* translators: {{min}} and {{max}} are the formatted minimum and maximum prices respectively. */
 					'minAndMax' => __( 'Price: {{min}} - {{max}}', 'woocommerce' ),
 					/* translators: {{max}} is the formatted maximum price. */

@@ -67,7 +67,7 @@ const productFilterPriceStore = {
 	actions: {
 		getActivePriceAndLabel( min: number, max: number ) {
 			const context = getContext< ProductFilterPriceContext >();
-			const { activeLabelTemplates } = getConfig();
+			const { activePriceLabelTemplates } = getConfig();
 			if (
 				min &&
 				min > context.minRange &&
@@ -76,7 +76,7 @@ const productFilterPriceStore = {
 			)
 				return {
 					activeValue: `${ min }|${ max }`,
-					activeLabel: activeLabelTemplates.minAndMax
+					activeLabel: activePriceLabelTemplates.minAndMax
 						.replace(
 							'{{min}}',
 							formatPrice( min, getCurrency( { minorUnit: 0 } ) )
@@ -90,7 +90,7 @@ const productFilterPriceStore = {
 			if ( min && min > context.minRange ) {
 				return {
 					activeValue: `${ min }|`,
-					activeLabel: activeLabelTemplates.minOnly.replace(
+					activeLabel: activePriceLabelTemplates.minOnly.replace(
 						'{{min}}',
 						formatPrice( min, getCurrency( { minorUnit: 0 } ) )
 					),
@@ -100,7 +100,7 @@ const productFilterPriceStore = {
 			if ( max && max < context.maxRange ) {
 				return {
 					activeValue: `|${ max }`,
-					activeLabel: activeLabelTemplates.maxOnly.replace(
+					activeLabel: activePriceLabelTemplates.maxOnly.replace(
 						'{{max}}',
 						formatPrice( max, getCurrency( { minorUnit: 0 } ) )
 					),
