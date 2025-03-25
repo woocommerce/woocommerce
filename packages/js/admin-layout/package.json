@@ -58,7 +58,6 @@
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x",
-		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
