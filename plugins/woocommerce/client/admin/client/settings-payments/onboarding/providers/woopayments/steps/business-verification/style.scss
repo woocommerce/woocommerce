@@ -64,6 +64,12 @@ $gutenberg-blueberry-focus: #1d35b4;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+
+			@media screen and ( max-width: $break-xlarge ) {
+				width: 100%;
+				padding: 0 $gap;
+				margin: $gap auto 0;
+			}
 		}
 
 		&__heading {
@@ -73,6 +79,11 @@ $gutenberg-blueberry-focus: #1d35b4;
 			font-family: "SF Pro Display", $default-font;
 			color: $gray-900;
 			text-align: center;
+
+			@media screen and ( max-width: $break-mobile ) {
+				text-align: left;
+				text-wrap: auto;
+			}
 		}
 
 		&__subheading {
@@ -84,19 +95,14 @@ $gutenberg-blueberry-focus: #1d35b4;
 			color: $gray-700;
 			margin: $gap-small 0 $gap-largest;
 
-			@media screen and ( max-width: $break-small ) {
-				text-wrap: balance;
+			@media screen and ( max-width: $break-mobile ) {
+				text-align: left;
 			}
 		}
 
 		&__content {
 			max-width: 615px;
 			width: 100%;
-
-			@media screen and ( max-width: $break-mobile ) {
-				width: 100%;
-				padding: 0 $gap;
-			}
 		}
 
 		&__cta {

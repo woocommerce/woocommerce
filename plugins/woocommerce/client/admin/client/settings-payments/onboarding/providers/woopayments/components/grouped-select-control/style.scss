@@ -31,7 +31,7 @@
 		}
 
 		@media screen and ( max-width: 782px ) {
-			font-size: 16px;
+			font-size: 13px;
 		}
 	}
 
@@ -99,9 +99,5 @@
 	& &__search,
 	&__list {
 		font-size: 13px;
-
-		@media screen and ( max-width: 782px ) {
-			font-size: 16px;
-		}
 	}
 }
