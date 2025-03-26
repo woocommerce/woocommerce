@@ -3,7 +3,6 @@
  */
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
-import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import type { ReactElement } from 'react';
 
@@ -30,7 +29,7 @@ const ProductImage = ( { image }: { image: { src: string; alt: string } } ) => {
 	);
 };
 
-export const Edit = withProductDataContext( (): ReactElement => {
+export const Edit = (): ReactElement => {
 	const productContext = useProductDataContext();
 	const firstImage = productContext?.product?.images?.[ 0 ];
 	const image = {
@@ -59,4 +58,4 @@ export const Edit = withProductDataContext( (): ReactElement => {
 			<div { ...innerBlocksProps } />
 		</div>
 	);
-} );
+};

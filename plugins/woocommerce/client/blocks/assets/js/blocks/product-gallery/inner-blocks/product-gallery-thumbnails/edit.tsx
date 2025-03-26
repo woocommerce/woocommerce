@@ -5,7 +5,6 @@ import clsx from 'clsx';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { useRef, useState, useEffect } from '@wordpress/element';
 import type { ProductResponseImageItem } from '@woocommerce/types';
@@ -38,108 +37,104 @@ const prepareProductImages = (
 		};
 	} );
 };
-export const Edit = withProductDataContext(
-	( {
-		attributes,
-		setAttributes,
-	}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
-		const { thumbnailSize } = attributes;
+export const Edit = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
+	const { thumbnailSize } = attributes;
 
-		const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
-		const productContext = useProductDataContext();
-		const product = productContext?.product;
+	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
+	const productContext = useProductDataContext();
+	const product = productContext?.product;
 
-		// If the product is not loaded, the default product object is returned.
-		// That's why we're checking if product id is truthy as by default it's 0.
-		const isProductContext = Boolean( product?.id );
-		const productThumbnails = isProductContext
-			? prepareProductImages( product?.images )
-			: Array( MAX_THUMBNAILS ).fill( {
-					src: placeholderSrc,
-					alt: '',
-			  } );
+	// If the product is not loaded, the default product object is returned.
+	// That's why we're checking if product id is truthy as by default it's 0.
+	const isProductContext = Boolean( product?.id );
+	const productThumbnails = isProductContext
+		? prepareProductImages( product?.images )
+		: Array( MAX_THUMBNAILS ).fill( {
+				src: placeholderSrc,
+				alt: '',
+		  } );
 
-		const renderThumbnails = productThumbnails.length > 1;
+	const renderThumbnails = productThumbnails.length > 1;
 
-		const scrollableRef = useRef< HTMLDivElement >( null );
-		const [ overflowState, setOverflowState ] = useState( {
-			bottom: false,
-			right: false,
+	const scrollableRef = useRef< HTMLDivElement >( null );
+	const [ overflowState, setOverflowState ] = useState( {
+		bottom: false,
+		right: false,
+	} );
+
+	useEffect( () => {
+		const scrollableElement = scrollableRef.current;
+		if ( ! scrollableElement ) {
+			return;
+		}
+
+		// Create a ResizeObserver to watch for layout changes
+		const resizeObserver = new ResizeObserver( () => {
+			const overflow = checkOverflow( scrollableElement );
+			setOverflowState( overflow );
 		} );
 
-		useEffect( () => {
-			const scrollableElement = scrollableRef.current;
-			if ( ! scrollableElement ) {
-				return;
-			}
+		// Observe both the scrollable element and its parent for size changes
+		resizeObserver.observe( scrollableElement );
+		if ( scrollableElement.parentElement ) {
+			resizeObserver.observe( scrollableElement.parentElement );
+		}
 
-			// Create a ResizeObserver to watch for layout changes
-			const resizeObserver = new ResizeObserver( () => {
-				const overflow = checkOverflow( scrollableElement );
-				setOverflowState( overflow );
-			} );
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [ thumbnailSize ] );
 
-			// Observe both the scrollable element and its parent for size changes
-			resizeObserver.observe( scrollableElement );
-			if ( scrollableElement.parentElement ) {
-				resizeObserver.observe( scrollableElement.parentElement );
-			}
+	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
+	const className = clsx(
+		'wc-block-product-gallery-thumbnails',
+		`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
+		{
+			'wc-block-product-gallery-thumbnails--overflow-right':
+				overflowState.right,
+			'wc-block-product-gallery-thumbnails--overflow-bottom':
+				overflowState.bottom,
+		}
+	);
+	const blockProps = useBlockProps( { className } );
 
-			return () => {
-				resizeObserver.disconnect();
-			};
-		}, [ thumbnailSize ] );
-
-		const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
-		const className = clsx(
-			'wc-block-product-gallery-thumbnails',
-			`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
-			{
-				'wc-block-product-gallery-thumbnails--overflow-right':
-					overflowState.right,
-				'wc-block-product-gallery-thumbnails--overflow-bottom':
-					overflowState.bottom,
-			}
-		);
-		const blockProps = useBlockProps( { className } );
-
-		return (
-			<>
-				<InspectorControls>
-					<PanelBody>
-						<ProductGalleryThumbnailsBlockSettings
-							attributes={ attributes }
-							setAttributes={ setAttributes }
-						/>
-					</PanelBody>
-				</InspectorControls>
-				{ renderThumbnails && (
-					<div { ...blockProps }>
-						<div
-							ref={ scrollableRef }
-							className="wc-block-product-gallery-thumbnails__scrollable"
-						>
-							{ productThumbnails.map(
-								( { src, alt }, index ) => {
-									return (
-										<div
-											className="wc-block-product-gallery-thumbnails__thumbnail"
-											key={ index }
-										>
-											<img
-												className="wc-block-product-gallery-thumbnails__thumbnail__image"
-												src={ src }
-												alt={ alt }
-												loading="lazy"
-											/>
-										</div>
-									);
-								}
-							) }
-						</div>
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody>
+					<ProductGalleryThumbnailsBlockSettings
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			{ renderThumbnails && (
+				<div { ...blockProps }>
+					<div
+						ref={ scrollableRef }
+						className="wc-block-product-gallery-thumbnails__scrollable"
+					>
+						{ productThumbnails.map( ( { src, alt }, index ) => {
+							return (
+								<div
+									className="wc-block-product-gallery-thumbnails__thumbnail"
+									key={ index }
+								>
+									<img
+										className="wc-block-product-gallery-thumbnails__thumbnail__image"
+										src={ src }
+										alt={ alt }
+										loading="lazy"
+									/>
+								</div>
+							);
+						} ) }
 					</div>
-				) }
-			</>
-		);
-	}
-);
+				</div>
+			) }
+		</>
+	);
+};
