@@ -1223,7 +1223,7 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<?php wc_back_header( esc_html( $this->get_title() ), esc_html( __( 'Return to emails', 'woocommerce' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=email' ) ) ); ?>
+		<?php wc_back_header( $this->get_title(), __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>
 
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 
