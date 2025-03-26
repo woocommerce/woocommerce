@@ -18,6 +18,7 @@ import {
 } from '../utils';
 import { MccsDisplayTreeItem } from '../types'; 
 import strings from '../strings';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Contains business and store details KYC logic.
@@ -68,6 +69,20 @@ const BusinessDetails: React.FC = () => {
 		} )
 	);
 
+	const updateBusinessVerificaitonData = ( data: OnboardingFields ) => {
+		const href = currentStep?.actions?.save?.href;
+		// Send POST request to the href with the Business Verification state
+		if ( href ) {
+			apiFetch( {
+				url: href,
+				method: 'POST',
+				data: {
+					self_assessment: data,
+				},
+			} );
+		}
+	}
+
 	const handleTiedChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
@@ -81,7 +96,22 @@ const BusinessDetails: React.FC = () => {
 			newData = { ...newData, business_type: undefined };
 		}
 		setData( newData );
+		updateBusinessVerificaitonData( newData );
 	};
+
+	const updateDataOnChange = (
+		name: keyof OnboardingFields,
+		selectedItem?: Item | null
+	) => {
+		setData( { [ name ]: selectedItem?.key } );
+
+		const newData: OnboardingFields = {
+			...data,
+			[ name ]: selectedItem?.key,
+		};
+
+		updateBusinessVerificaitonData( newData );		
+	}
 
 	return (
 		<>
@@ -127,6 +157,7 @@ const BusinessDetails: React.FC = () => {
 						<OnboardingGroupedSelectField
 							name="mcc"
 							options={ mccsFlatList }
+							onChange={ updateDataOnChange }
 							searchable
 						/>
 					</span>
@@ -140,10 +171,12 @@ const BusinessDetails: React.FC = () => {
 						<OnboardingSelectField
 							name="annual_revenue"
 							options={ annualRevenues }
+							onChange={ updateDataOnChange }
 						/>
 						<OnboardingSelectField
 							name="go_live_timeframe"
 							options={ goLiveTimeframes }
+							onChange={ updateDataOnChange }
 						/>
 						<span className={ 'woopayments-onboarding__tos' }>
 							{ strings.tos }
