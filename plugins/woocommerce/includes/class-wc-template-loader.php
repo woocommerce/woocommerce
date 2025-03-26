@@ -529,11 +529,15 @@ class WC_Template_Loader {
 	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
 	 *
 	 * @since 3.3.0
-	 * @param string $title Existing title.
-	 * @param int    $id ID of the post being filtered.
+	 * @param string   $title Existing title.
+	 * @param int|null $id ID of the post being filtered.
 	 * @return string
 	 */
-	public static function unsupported_theme_title_filter( $title, $id ) {
+	public static function unsupported_theme_title_filter( $title, $id = null ) {
+		if ( is_null( $id ) ) {
+			return $title;
+		}
+
 		if ( self::$theme_support || ! $id !== self::$shop_page_id ) {
 			return $title;
 		}
