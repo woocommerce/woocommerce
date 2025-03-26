@@ -48,10 +48,13 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	 * @param WP_Block $block    The block object.
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
-		// Enqueue the wc-ajax-add-to-cart script when the Classic Template block is rendered.
-		wp_enqueue_script( 'wc-ajax-add-to-cart' );
-
 		parent::enqueue_assets( $attributes, $content, $block );
+
+		$product = wc_get_product( get_the_ID() );
+
+		if ( is_product() && $product instanceof \WC_Product && $product->is_purchasable() && $product->is_in_stock() && ! in_array( $product->get_type(), array( 'external', 'grouped' ), true ) ) {
+			wp_enqueue_script( 'wc-ajax-add-to-cart' );
+		}
 	}
 
 	/**

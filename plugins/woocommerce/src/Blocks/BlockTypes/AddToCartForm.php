@@ -45,14 +45,14 @@ class AddToCartForm extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
-		if ( 'stepper' !== $attributes['quantitySelectorStyle'] ) {
-			return;
-		}
-
-		// Enqueue the wc-ajax-add-to-cart script when the Add to Cart Form block is rendered.
-		wp_enqueue_script( 'wc-ajax-add-to-cart' );
-
 		parent::enqueue_assets( $attributes, $content, $block );
+
+		$post_id = $block->context['postId'];
+		$product = wc_get_product( $post_id );
+
+		if ( $product instanceof \WC_Product && $product->is_purchasable() && $product->is_in_stock() && ! in_array( $product->get_type(), array( 'external', 'grouped' ), true ) ) {
+			wp_enqueue_script( 'wc-ajax-add-to-cart' );
+		}
 	}
 
 	/**
