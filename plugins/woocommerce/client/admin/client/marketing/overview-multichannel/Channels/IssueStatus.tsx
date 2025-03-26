@@ -17,9 +17,7 @@ type IssueStatusPropsType = {
 
 const issueStatusClassName = 'woocommerce-marketing-issue-status';
 
-export const IssueStatus: React.FC< IssueStatusPropsType > = ( {
-	registeredChannel,
-} ) => {
+export const IssueStatus = ( { registeredChannel }: IssueStatusPropsType ) => {
 	if ( registeredChannel.issueType === 'error' ) {
 		return (
 			<div

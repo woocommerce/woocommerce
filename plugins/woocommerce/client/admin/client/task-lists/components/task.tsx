@@ -20,7 +20,7 @@ export type TaskProps = {
 	task: TaskType;
 };
 
-export const Task: React.FC< TaskProps > = ( { query, task } ) => {
+export const Task = ( { query, task }: TaskProps ) => {
 	const id = query.task || '';
 	if ( ! id ) {
 		// eslint-disable-next-line no-console

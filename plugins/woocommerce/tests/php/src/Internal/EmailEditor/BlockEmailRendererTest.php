@@ -10,7 +10,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Package;
-
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 /**
  * Tests for the BlockEmailRenderer class.
  */
@@ -62,6 +62,8 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		WCTransactionalEmailPostsManager::get_instance()->save_email_template_post_id( 'test_email', $this->email_post->ID );
+
 		$this->block_email_renderer = wc_get_container()->get( BlockEmailRenderer::class );
 	}
 
@@ -77,6 +79,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
 		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
 		$wc_mail_mock->method( 'get_content_html' )->willReturn( $test_woo_content );
+		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( $test_woo_content );
 
 		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
 

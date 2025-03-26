@@ -66,7 +66,7 @@ const mockUploadMedia = async ( { filesList, onFileChange } ) => {
 	onFileChange( images );
 };
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
 
 	return (
@@ -86,7 +86,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const DisabledDropZone: React.FC = () => {
+export const DisabledDropZone = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
 
 	return (
@@ -107,7 +107,7 @@ export const DisabledDropZone: React.FC = () => {
 	);
 };
 
-export const MaxUploadFileSize: React.FC = () => {
+export const MaxUploadFileSize = () => {
 	const [ error, setError ] = useState< string | null >( null );
 
 	return (
@@ -129,7 +129,7 @@ export const MaxUploadFileSize: React.FC = () => {
 	);
 };
 
-export const ButtonWithOnlyIcon: React.FC = () => {
+export const ButtonWithOnlyIcon = () => {
 	const [ error, setError ] = useState< string | null >( null );
 
 	return (

@@ -16,13 +16,13 @@ type InboxNoteActionProps = {
  * Renders a secondary button that can also be a link. If href is provided it will
  * automatically open it in a new tab/window.
  */
-export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
+export const InboxNoteActionButton = ( {
 	label,
 	onClick,
 	href,
 	preventBusyState,
 	variant = 'link',
-} ) => {
+}: InboxNoteActionProps ) => {
 	const [ inAction, setInAction ] = useState( false );
 
 	const handleActionClick: React.MouseEventHandler<

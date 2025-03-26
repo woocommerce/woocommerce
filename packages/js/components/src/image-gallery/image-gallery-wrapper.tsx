@@ -19,14 +19,14 @@ export type ImageGalleryWrapperProps = {
 	updateOrderedChildren?: ( items: ImageGalleryChild[] ) => void;
 };
 
-export const ImageGalleryWrapper: React.FC< ImageGalleryWrapperProps > = ( {
+export const ImageGalleryWrapper = ( {
 	children,
 	allowDragging = true,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	updateOrderedChildren = () => null,
-} ) => {
+}: ImageGalleryWrapperProps ) => {
 	if ( allowDragging ) {
 		return (
 			<Sortable
