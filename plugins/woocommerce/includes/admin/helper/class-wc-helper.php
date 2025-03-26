@@ -1615,18 +1615,23 @@ class WC_Helper {
 			);
 
 			if ( is_wp_error( $request ) ) {
+				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+
 				throw new Exception( $request->get_error_message() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				// translators: %d: HTTP status code.
-				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
+				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+
+				throw new Exception( self::get_message_for_response_code( $code ) );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
-				throw new Exception( __( 'WooCommerce.com API returned invalid response.', 'woocommerce' ) );
+				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
@@ -1744,18 +1749,23 @@ class WC_Helper {
 			);
 
 			if ( is_wp_error( $request ) ) {
+				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+
 				throw new Exception( $request->get_error_message() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				// translators: %d: HTTP status code.
-				throw new Exception( sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code ) );
+				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+
+				throw new Exception( self::get_message_for_response_code( $code ) );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
-				throw new Exception( __( 'WooCommerce.com API returned invalid response.', 'woocommerce' ) );
+				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
@@ -2698,6 +2708,17 @@ class WC_Helper {
 		}
 
 		return $subscription;
+	}
+
+	protected static function get_message_for_response_code( int $code ): string {
+		if ( 429 === $code ) {
+			return __( 'You have exceeded the request limit. Please try again after a few minutes.', 'woocommerce' );
+		} elseif ( 403 === $code ) {
+			return __( 'Authentication failed. Please try again after a few minutes. If the issue persists, disconnect your store from WooCommerce.com and reconnect.', 'woocommerce' );
+		}
+
+		// translators: %d: HTTP status code.
+		return sprintf( __( 'WooCommerce.com API returned HTTP status code %d.', 'woocommerce' ), $code );
 	}
 }
 
