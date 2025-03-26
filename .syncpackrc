@@ -27,7 +27,6 @@
 				"@bartekbp/*",
 				"@storybook/*",
 				"@testing-library/*",
-				"@types/*",
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
@@ -63,7 +62,6 @@
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
 				"@wordpress/wordcount",
-				"babel*",
 				"eslint*",
 				"postcss*",
 				"webpack*"
@@ -96,6 +94,16 @@
 				"@babel/runtime"
 			],
 			"pinVersion": "7.25.7",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
+			"dependencies": [
+				"babel-plugin-transform-react-remove-prop-types"
+			],
+			"pinVersion": "0.4.24",
 			"packages": [
 				"**"
 			]
@@ -417,7 +425,7 @@
 				"@woocommerce/block-library",
 				"@woocommerce/storybook"
 			],
-			"pinVersion": "29.7.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"label": "Testing related dependencies: React 17",
