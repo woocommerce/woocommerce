@@ -426,7 +426,6 @@ let abortController: AbortController | null = null;
 export const selectShippingRate =
 	( rateId: string, packageId: number | null = null ) =>
 	async ( { dispatch, select }: CartThunkArgs ) => {
-
 		const selectedShippingRate = select
 			.getShippingRates()
 			.find(
