@@ -283,6 +283,13 @@ class WC_Install {
 			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
 		),
+		'10.3.0' => array(
+			'wc_update_1030_blockified_product_grid_block',
+		),
+		'11.2.0' => array(
+			'wc_update_1120_rename_checkout_template',
+			'wc_update_1120_rename_cart_template',
+		),
 	);
 
 	/**
