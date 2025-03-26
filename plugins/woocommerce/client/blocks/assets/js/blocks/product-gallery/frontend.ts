@@ -207,15 +207,7 @@ const productGallery = {
 			if ( event ) {
 				event.stopPropagation();
 			}
-			const context = getContext();
-			console.log(
-				'Next clicked - Product ID:',
-				context.productId,
-				'Selected Image ID:',
-				context.selectedImageId
-			);
 			const { imageData, selectedImageId } = getContext();
-			console.log( 'selectNextImage', imageData, selectedImageId );
 			const allImageIds = imageData?.image_ids || [];
 			const selectedImageNumber = getSelectedImageNumber(
 				allImageIds,
