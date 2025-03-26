@@ -8,7 +8,7 @@ export type OnboardingFields = {
 	country?: string;
 	business_type?: string;
 	'company.structure'?: string;
-	mcc?: MccsDisplayTreeItem | undefined;
+	mcc?: string;
 	annual_revenue?: string;
 	go_live_timeframe?: string;
 };

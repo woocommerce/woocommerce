@@ -24,7 +24,7 @@ export const BusinessVerificationStep: React.FC = () => {
 		business_name: 'Test', // To-Do: Replace with wcSettings?.siteTitle,
 		mcc: getMccFromIndustry(
 			( currentStep?.context?.fields?.mccs_display_tree ??
-				[] ) as MccsDisplayTreeItem[]
+				[] ) as string[]
 		),
 		site: 'https://wcpay.test', // To-Do: Replace with URL
 		country: 'US', // To-Do: Replace with country from WooCommerce settings

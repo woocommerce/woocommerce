@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { forwardRef } from 'react';
+import React, { ComponentProps, forwardRef } from 'react';
 import { TextControl } from '@wordpress/components';
 import clsx from 'clsx';
 
@@ -21,7 +21,7 @@ interface CommonProps {
 	error?: string;
 }
 
-export type TextFieldProps = TextControl.Props & CommonProps;
+export type TextFieldProps = ComponentProps<typeof TextControl> & CommonProps;
 export type SelectFieldProps< ItemType > = SelectControlProps< ItemType > &
 	CommonProps;
 export type GroupedSelectFieldProps< ItemType > =

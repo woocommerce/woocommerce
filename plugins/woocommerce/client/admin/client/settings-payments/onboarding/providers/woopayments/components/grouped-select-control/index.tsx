@@ -80,7 +80,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		stateReducer: ( state, { changes, type } ) => {
 			if (
 				searchable &&
-				type === useSelect.stateChangeTypes.MenuKeyDownCharacter
+				type === useSelect.stateChangeTypes.ToggleButtonKeyDownArrowDown
 			) {
 				return state;
 			}

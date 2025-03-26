@@ -6,12 +6,12 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useEffect, renderToString } from '@wordpress/element';
 import { speak } from '@wordpress/a11y';
 import clsx from 'clsx';
-import { Icon, Button } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { check, info } from '@wordpress/icons';
 import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import NoticeIcon from 'gridicons/dist/notice';
@@ -67,13 +67,6 @@ interface Props {
 	 */
 	status?: Status;
 	/**
-	 * Whether to display the default icon based on status or the icon to display.
-	 * Supported values are: boolean, JSX.Element and `undefined`.
-	 *
-	 * @default undefined
-	 */
-	icon?: boolean | JSX.Element;
-	/**
 	 * Whether the notice should be dismissible or not.
 	 *
 	 * @default true
@@ -100,7 +93,7 @@ interface Props {
 	actions?: ReadonlyArray< {
 		label: string;
 		className?: string;
-		variant?: Button.Props[ 'variant' ];
+		variant?: ComponentProps< typeof Button >[ 'variant' ];
 		url?: string;
 		urlTarget?: string;
 		onClick?: React.MouseEventHandler< HTMLAnchorElement >;
@@ -114,7 +107,6 @@ interface Props {
 }
 
 const BannerNotice: React.FC< Props > = ( {
-	icon,
 	children,
 	actions = [],
 	className,
@@ -123,8 +115,6 @@ const BannerNotice: React.FC< Props > = ( {
 	onRemove,
 } ) => {
 	useSpokenMessage( status, children );
-
-	const iconToDisplay = icon === true ? statusIconMap[ status ] : icon;
 
 	const classes = clsx(
 		className,
@@ -136,12 +126,6 @@ const BannerNotice: React.FC< Props > = ( {
 
 	return (
 		<div className={ classes }>
-			{ iconToDisplay && (
-				<Icon
-					icon={ iconToDisplay }
-					className="woopayments-banner-notice__icon"
-				/>
-			) }
 			<div className="woopayments-banner-notice__content">
 				{ children }
 				{ actions.length > 0 && (
@@ -185,7 +169,7 @@ const BannerNotice: React.FC< Props > = ( {
 			{ isDismissible && (
 				<Button
 					className="woopayments-banner-notice__dismiss"
-					icon={ CloseIcon }
+					icon={ <CloseIcon /> }
 					label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ handleRemove }
 					showTooltip={ false }
