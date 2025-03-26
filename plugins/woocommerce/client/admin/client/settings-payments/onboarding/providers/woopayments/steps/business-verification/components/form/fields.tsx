@@ -24,23 +24,21 @@ interface CommonProps {
 export type TextFieldProps = TextControl.Props & CommonProps;
 export type SelectFieldProps< ItemType > = SelectControlProps< ItemType > &
 	CommonProps;
-export type GroupedSelectFieldProps< ItemType > = GroupedSelectControlProps<
-	ItemType
-> &
-	CommonProps;
+export type GroupedSelectFieldProps< ItemType > =
+	GroupedSelectControlProps< ItemType > & CommonProps;
 
 /**
  * Creates a field component decorating a control to display validation errors.
  *
  * @param Control Control component to render.
- * @param props Control props plus common field props – {error?: string}.
- * @param ref Optional React reference.
- * @return Form field.
+ * @param props   Control props plus common field props – {error?: string}.
+ * @param ref     Optional React reference.
+ * @return        Form field.
  */
 const makeField = (
 	Control: React.ElementType,
-	props: CommonProps & Record< any, any >,
-	ref?: React.Ref< any >
+	props: CommonProps & Record< any, any >, // eslint-disable-line @typescript-eslint/no-explicit-any
+	ref?: React.Ref< HTMLInputElement >
 ) => {
 	const { error, ...rest } = props;
 	if ( ! error ) return <Control { ...rest } ref={ ref } />;

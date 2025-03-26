@@ -11,13 +11,13 @@
 
 @keyframes SpinnerAnimationRotation {
 	0% {
-		transform: scaleX( -1 ) rotateZ( 0deg );
+		transform: scaleX(-1) rotateZ(0deg);
 	}
 	50% {
-		transform: scaleX( -1 ) rotateZ( -180deg );
+		transform: scaleX(-1) rotateZ(-180deg);
 	}
 	100% {
-		transform: scaleX( -1 ) rotateZ( -360deg );
+		transform: scaleX(-1) rotateZ(-360deg);
 	}
 }
 

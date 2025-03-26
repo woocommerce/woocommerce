@@ -8,7 +8,7 @@ export type OnboardingFields = {
 	country?: string;
 	business_type?: string;
 	'company.structure'?: string;
-	mcc?: string;
+	mcc?: MccsDisplayTreeItem | undefined;
 	annual_revenue?: string;
 	go_live_timeframe?: string;
 };
@@ -25,7 +25,7 @@ export interface PoEligibleData {
 		mcc: string;
 		annual_revenue: string;
 		go_live_timeframe: string;
-	}
+	};
 }
 
 export interface Country {

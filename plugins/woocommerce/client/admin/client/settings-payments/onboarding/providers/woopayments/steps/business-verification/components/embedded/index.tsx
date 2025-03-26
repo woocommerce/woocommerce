@@ -38,7 +38,6 @@ interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
 /**
  * Hook to initialize Stripe Connect.
  *
- * @param isOnboarding - Whether this is an onboarding flow.
  * @param onboardingData - Data required for onboarding.
  * @param isPoEligible - Whether the user is eligible for progressive onboarding.
  *
@@ -48,10 +47,8 @@ const useInitializeStripe = (
 	onboardingData: OnboardingFields,
 	isPoEligible: boolean
 ) => {
-	const [
-		stripeConnectInstance,
-		setStripeConnectInstance,
-	] = useState< StripeConnectInstance | null >( null );
+	const [ stripeConnectInstance, setStripeConnectInstance ] =
+		useState< StripeConnectInstance | null >( null );
 	const [ initializationError, setInitializationError ] = useState<
 		string | null
 	>( null );
@@ -102,6 +99,7 @@ const useInitializeStripe = (
 	return { stripeConnectInstance, initializationError, loading };
 };
 
+/* eslint-disable jsdoc/check-param-names */
 /**
  * Embedded Stripe Account Onboarding Component.
  *
@@ -115,7 +113,9 @@ const useInitializeStripe = (
  *
  * @return Rendered Account Onboarding component.
  */
-export const EmbeddedAccountOnboarding: React.FC< EmbeddedAccountOnboardingProps > = ( {
+export const EmbeddedAccountOnboarding: React.FC<
+	EmbeddedAccountOnboardingProps
+> = ( {
 	onboardingData,
 	onExit,
 	onLoaderStart,

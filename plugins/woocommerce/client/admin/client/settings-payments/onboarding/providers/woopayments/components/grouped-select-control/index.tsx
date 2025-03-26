@@ -1,5 +1,5 @@
 /**
- * External Dependencies
+ * External dependencies
  */
 import React, { useRef, useState } from 'react';
 import { check, chevronDown, chevronUp, Icon } from '@wordpress/icons';
@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, UseSelectState } from 'downshift';
 
 /**
- * Internal Dependencies
+ * Internal dependencies
  */
 import './style.scss';
 
@@ -113,7 +113,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 	}: React.ChangeEvent< HTMLInputElement > ) => {
 		if ( ! previousStateRef.current ) {
 			previousStateRef.current = {
-				visibleItems: visibleItems,
+				visibleItems,
 			};
 		}
 
@@ -145,11 +145,13 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		className: 'components-grouped-select-control__list',
 		'aria-hidden': ! isOpen,
 		onFocus: () => searchRef.current?.focus(),
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onBlur: ( event: any ) => {
 			if ( event.relatedTarget === searchRef.current ) {
 				event.nativeEvent.preventDownshiftDefault = true;
 			}
 		},
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onKeyDown: ( event: any ) => {
 			if ( event.code === 'Space' ) {
 				event.nativeEvent.preventDownshiftDefault = true;
@@ -164,6 +166,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 				className
 			) }
 		>
+			{ /* eslint-disable-next-line jsx-a11y/label-has-associated-control */ }
 			<label
 				{ ...getLabelProps( {
 					className: 'components-grouped-select-control__label',
@@ -200,10 +203,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 								value={ searchText }
 								onChange={ handleSearch }
 								tabIndex={ -1 }
-								placeholder={ __(
-									'Search…',
-									'woocommerce'
-								) }
+								placeholder={ __( 'Search…', 'woocommerce' ) }
 							/>
 						) }
 						<div className="components-grouped-select-control__list-container">

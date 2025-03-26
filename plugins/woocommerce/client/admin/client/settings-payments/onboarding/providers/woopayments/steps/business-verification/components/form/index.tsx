@@ -30,7 +30,9 @@ type OnboardingFormProps = {
 	children: React.ReactNode;
 };
 
-export const OnboardingForm: React.FC<OnboardingFormProps> = ( { children } ) => {
+export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
+	children,
+} ) => {
 	const { errors, touched, setTouched } = useBusinessVerificationContext();
 	const { currentStep, nextStep } = useStepperContext();
 
@@ -75,7 +77,7 @@ export const OnboardingTextField: React.FC< OnboardingTextFieldProps > = (
 
 	return (
 		<TextField
-			ref={ inputRef as any }
+			ref={ inputRef as React.RefObject< HTMLInputElement > }
 			label={ strings.fields[ name ] }
 			value={ data[ name ] || '' }
 			onChange={ ( value: string ) => {

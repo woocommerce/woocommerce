@@ -6,9 +6,7 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { useStepperContext } from '../stepper';
 import { OnboardingSteps } from '../../types';
-import { useTrackAbandoned } from '../../utils/tracking';
 import strings from '../../strings';
 
 interface Props {
@@ -18,14 +16,6 @@ interface Props {
 }
 
 const Step: React.FC< Props > = ( { name, children, showHeading = true } ) => {
-	const { trackAbandoned } = useTrackAbandoned();
-
-	const { exit } = useStepperContext();
-	const handleExit = () => {
-		trackAbandoned( 'exit' );
-		exit();
-	};
-
 	return (
 		<>
 			<div className="stepper__wrapper">

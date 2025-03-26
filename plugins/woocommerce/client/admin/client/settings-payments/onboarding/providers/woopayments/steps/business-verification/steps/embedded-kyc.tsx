@@ -8,9 +8,7 @@ import { LoadError } from '@stripe/connect-js';
 /**
  * Internal dependencies
  */
-import {
-	useOnboardingContext,
-} from '../../../data/onboarding-context';
+import { useOnboardingContext } from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
@@ -92,8 +90,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 							{
 								label: 'Learn more',
 								variant: 'primary',
-								url:
-									'https://woocommerce.com/document/woopayments/startup-guide/#requirements',
+								url: 'https://woocommerce.com/document/woopayments/startup-guide/#requirements',
 								urlTarget: '_blank',
 							},
 							{

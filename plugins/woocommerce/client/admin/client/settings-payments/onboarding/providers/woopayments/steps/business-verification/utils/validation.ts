@@ -22,13 +22,8 @@ const isValid = ( name: keyof OnboardingFields, value?: string ): boolean => {
 // TS is smart enough to infer the return type here.
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useValidation = ( name: keyof OnboardingFields ) => {
-	const {
-		data,
-		errors,
-		setErrors,
-		touched,
-		setTouched,
-	} = useBusinessVerificationContext();
+	const { data, errors, setErrors, touched, setTouched } =
+		useBusinessVerificationContext();
 
 	const validate = ( value: string | undefined = data[ name ] ) => {
 		if ( ! touched[ name ] ) setTouched( { [ name ]: true } );

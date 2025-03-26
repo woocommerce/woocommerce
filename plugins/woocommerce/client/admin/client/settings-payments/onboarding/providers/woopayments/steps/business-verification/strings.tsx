@@ -25,10 +25,7 @@ export default {
 			),
 		},
 		store: {
-			heading: __(
-				'Please share a few more details',
-				'woocommerce'
-			),
+			heading: __( 'Please share a few more details', 'woocommerce' ),
 			subheading: __(
 				'This info will help us speed up the set up process.',
 				'woocommerce'
@@ -43,10 +40,7 @@ export default {
 				'This will take place in a secure environment through our partner. Once your business details are verified, you’ll be redirected back to your store dashboard.',
 				'woocommerce'
 			),
-			cta: __(
-				'Finish your verification process',
-				'woocommerce'
-			),
+			cta: __( 'Finish your verification process', 'woocommerce' ),
 		},
 		embedded: {
 			heading: __(
@@ -60,10 +54,7 @@ export default {
 		},
 	},
 	fields: {
-		country: __(
-			'Where is your business located?',
-			'woocommerce'
-		),
+		country: __( 'Where is your business located?', 'woocommerce' ),
 		business_type: __(
 			'What type of legal entity is your business?',
 			'woocommerce'
@@ -88,22 +79,13 @@ export default {
 	errors: {
 		generic: __( 'Please provide a response', 'woocommerce' ),
 		country: __( 'Please provide a country', 'woocommerce' ),
-		business_type: __(
-			'Please provide a business type',
-			'woocommerce'
-		),
-		mcc: __(
-			'Please provide a type of goods or services',
-			'woocommerce'
-		),
+		business_type: __( 'Please provide a business type', 'woocommerce' ),
+		mcc: __( 'Please provide a type of goods or services', 'woocommerce' ),
 	},
 	placeholders: {
 		generic: __( 'Select an option', 'woocommerce' ),
 		country: __( 'Select a country', 'woocommerce' ),
-		annual_revenue: __(
-			'Select your annual revenue',
-			'woocommerce'
-		),
+		annual_revenue: __( 'Select your annual revenue', 'woocommerce' ),
 		go_live_timeframe: __( 'Select a timeline', 'woocommerce' ),
 	},
 	annualRevenues: {
@@ -122,8 +104,8 @@ export default {
 	},
 	tos: interpolateComponents( {
 		mixedString: sprintf(
+			/* translators: %1$s: WooPayments, %2$s: WooPay  */
 			__(
-				/* translators: %1$s: WooPayments, %2$s: WooPay  */
 				'By using %1$s, you agree to be bound by our {{tosLink}}Terms of Service{{/tosLink}} (including {{merchantTermsLink}}%2$s merchant terms{{/merchantTermsLink}}) and acknowledge that you have read our {{privacyPolicyLink}}Privacy Policy{{/privacyPolicyLink}}.',
 				'woocommerce'
 			),

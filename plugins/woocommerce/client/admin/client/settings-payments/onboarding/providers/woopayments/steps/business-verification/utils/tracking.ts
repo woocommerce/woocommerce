@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useEffect } from 'react';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import { useEffect } from 'react';
 import { useStepperContext } from '../components/stepper';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { OnboardingFields } from '../types';
-import { recordEvent } from '@woocommerce/tracks';
 
 const trackedSteps: Set< string > = new Set();
 let startTime: number;
@@ -65,13 +65,13 @@ export const trackRedirected = (
  * Track a change in the embedded onboarding step.
  *
  * @param step The current step in the embedded onboarding flow. See:
- * https://docs.stripe.com/connect/supported-embedded-components/account-onboarding#step-values
+ *             https://docs.stripe.com/connect/supported-embedded-components/account-onboarding#step-values
  */
 export const trackEmbeddedStepChange = ( step: string ): void => {
 	const urlParams = new URLSearchParams( window.location.search );
 
 	recordEvent( 'wcpay_onboarding_flow_embedded_step_change', {
-		step: step,
+		step,
 		elapsed: elapsed( startTime ),
 		source:
 			urlParams.get( 'source' )?.replace( /[^\w-]+/g, '' ) || 'unknown',

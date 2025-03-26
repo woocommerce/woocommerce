@@ -7,7 +7,6 @@
  * External dependencies
  */
 import React from 'react';
-
 import { __ } from '@wordpress/i18n';
 import { useEffect, renderToString } from '@wordpress/element';
 import { speak } from '@wordpress/a11y';
@@ -19,7 +18,7 @@ import NoticeIcon from 'gridicons/dist/notice';
 import CloseIcon from 'gridicons/dist/cross-small';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import './style.scss';
 
@@ -27,7 +26,7 @@ const statusIconMap = {
 	success: check,
 	error: NoticeIcon,
 	warning: NoticeOutlineIcon,
-	info: info,
+	info,
 };
 
 type Status = keyof typeof statusIconMap;
@@ -169,7 +168,7 @@ const BannerNotice: React.FC< Props > = ( {
 								return (
 									<Button
 										key={ index }
-										href={ url }
+										href={ url as string }
 										variant={ computedVariant }
 										onClick={ url ? undefined : onClick }
 										className={ buttonCustomClasses }
@@ -187,10 +186,7 @@ const BannerNotice: React.FC< Props > = ( {
 				<Button
 					className="woopayments-banner-notice__dismiss"
 					icon={ CloseIcon }
-					label={ __(
-						'Dismiss this notice',
-						'woocommerce'
-					) }
+					label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ handleRemove }
 					showTooltip={ false }
 				/>

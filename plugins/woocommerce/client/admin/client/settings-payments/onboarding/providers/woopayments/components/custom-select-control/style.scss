@@ -24,8 +24,7 @@
 		}
 	}
 
-	.components-custom-select-control__item
-		.components-custom-select-control__item-icon {
+	.components-custom-select-control__item .components-custom-select-control__item-icon {
 		margin-left: auto;
 	}
 
@@ -64,7 +63,7 @@
 		}
 	}
 
-	.components-custom-select-control__menu[aria-hidden='true'] {
+	.components-custom-select-control__menu[aria-hidden="true"] {
 		display: none;
 	}
 

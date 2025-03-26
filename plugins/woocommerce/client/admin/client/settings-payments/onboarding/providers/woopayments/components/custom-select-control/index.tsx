@@ -7,7 +7,7 @@
  */
 
 /**
- * External Dependencies
+ * External dependencies
  */
 import React from 'react';
 import { Button } from '@wordpress/components';
@@ -18,7 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useSelect, UseSelectState } from 'downshift';
 
 /**
- * Internal Dependencies
+ * Internal dependencies
  */
 import './style.scss';
 
@@ -47,8 +47,8 @@ const itemToString = ( item: { name?: string } | null ) => item?.name || '';
 // key up/down, you can still switch between
 // options with the menu closed.
 const stateReducer = (
-	{ selectedItem }: any,
-	{ type, changes, props: { items } }: any
+	{ selectedItem }: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+	{ type, changes, props: { items } }: any // eslint-disable-line @typescript-eslint/no-explicit-any
 ) => {
 	switch ( type ) {
 		case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowDown:
@@ -117,22 +117,27 @@ function CustomSelectControl< ItemType extends Item >( {
 		}
 
 		if ( ! itemString ) {
-			return __( 'No selection' );
+			return __( 'No selection', 'woocommerce' );
 		}
 
-		// translators: %s: The selected option.
-		return sprintf( __( 'Currently selected: %s' ), itemString );
+		return sprintf(
+			/* translators: %s: The selected option. */
+			__( 'Currently selected: %s', 'woocommerce' ),
+			itemString
+		);
 	}
 
 	const menuProps = getMenuProps( {
 		className: 'components-custom-select-control__menu',
 		'aria-hidden': ! isOpen,
-	} );
+	} ) as Record< string, any >; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 	const onKeyDownHandler = useCallback(
 		( e: React.KeyboardEvent ) => {
 			e.stopPropagation();
-			( menuProps as { onKeyDown?: ( e: React.KeyboardEvent ) => void } )?.onKeyDown?.( e );
+			(
+				menuProps as { onKeyDown?: ( e: React.KeyboardEvent ) => void }
+			 )?.onKeyDown?.( e );
 		},
 		[ menuProps ]
 	);

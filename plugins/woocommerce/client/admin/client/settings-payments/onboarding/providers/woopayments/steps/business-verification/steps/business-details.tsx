@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -9,16 +10,17 @@ import React from 'react';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { useOnboardingContext } from '../../../data/onboarding-context';
 import { Item } from '../../../components/custom-select-control';
-import { OnboardingFields, BusinessType } from '../types';
-import { OnboardingGroupedSelectField, OnboardingSelectField } from '../components/form';
+import { OnboardingFields, BusinessType, MccsDisplayTreeItem } from '../types';
+import {
+	OnboardingGroupedSelectField,
+	OnboardingSelectField,
+} from '../components/form';
 import {
 	getAvailableCountries,
 	getBusinessTypes,
 	getMccsFlatList,
 } from '../utils';
-import { MccsDisplayTreeItem } from '../types'; 
 import strings from '../strings';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Contains business and store details KYC logic.
@@ -26,9 +28,16 @@ import apiFetch from '@wordpress/api-fetch';
 const BusinessDetails: React.FC = () => {
 	const { data, setData } = useBusinessVerificationContext();
 	const { currentStep } = useOnboardingContext();
-	const countries = getAvailableCountries( currentStep?.context?.fields?.available_countries || {} );
-	const businessTypes = getBusinessTypes( currentStep?.context?.fields?.business_types || [] );
-	const mccsFlatList = getMccsFlatList( ( currentStep?.context?.fields?.mccs_display_tree ?? [] ) as MccsDisplayTreeItem[] );
+	const countries = getAvailableCountries(
+		currentStep?.context?.fields?.available_countries || {}
+	);
+	const businessTypes = getBusinessTypes(
+		currentStep?.context?.fields?.business_types || []
+	);
+	const mccsFlatList = getMccsFlatList(
+		( currentStep?.context?.fields?.mccs_display_tree ??
+			[] ) as MccsDisplayTreeItem[]
+	);
 
 	const selectedCountry = businessTypes.find( ( country ) => {
 		// Special case for Puerto Rico as it's considered a separate country in Core, but the business country should be US.
@@ -69,7 +78,9 @@ const BusinessDetails: React.FC = () => {
 		} )
 	);
 
-	const updateBusinessVerificaitonData = ( data: OnboardingFields ) => {
+	const updateBusinessVerificaitonData = (
+		selfAssessmentData: OnboardingFields
+	) => {
 		const href = currentStep?.actions?.save?.href;
 		// Send POST request to the href with the Business Verification state
 		if ( href ) {
@@ -77,11 +88,11 @@ const BusinessDetails: React.FC = () => {
 				url: href,
 				method: 'POST',
 				data: {
-					self_assessment: data,
+					self_assessment: selfAssessmentData,
 				},
 			} );
 		}
-	}
+	};
 
 	const handleTiedChange = (
 		name: keyof OnboardingFields,
@@ -110,8 +121,8 @@ const BusinessDetails: React.FC = () => {
 			[ name ]: selectedItem?.key,
 		};
 
-		updateBusinessVerificaitonData( newData );		
-	}
+		updateBusinessVerificaitonData( newData );
+	};
 
 	return (
 		<>

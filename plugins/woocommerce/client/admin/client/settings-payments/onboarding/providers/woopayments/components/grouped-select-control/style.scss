@@ -62,7 +62,7 @@
 		display: flex;
 		flex-direction: column;
 
-		&[aria-hidden='true'] {
+		&[aria-hidden="true"] {
 			display: none;
 		}
 		&-container {

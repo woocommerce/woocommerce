@@ -3,11 +3,11 @@
  */
 import { set, toPairs } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
+import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import { ListItem } from '../../../components/grouped-select-control';
 import businessTypeDescriptionStrings from '../translations/descriptions';
 import {
@@ -23,10 +23,10 @@ export const fromDotNotation = (
 	record: Record< string, unknown >
 ): Record< string, unknown > =>
 	toPairs( record ).reduce( ( result, [ key, value ] ) => {
-		return value != null ? set( result, key, value ) : result;
+		return value !== null ? set( result, key, value ) : result;
 	}, {} );
 
-const hasUndefinedValues = ( obj: Record< string, any > ): boolean =>
+const hasUndefinedValues = ( obj: Record< string, unknown > ): boolean =>
 	Object.values( obj ).some( ( value ) => value === undefined );
 
 export const getAvailableCountries = (
@@ -36,9 +36,7 @@ export const getAvailableCountries = (
 		.map( ( [ key, name ] ) => ( { key, name, types: [] } ) )
 		.sort( ( a, b ) => a.name.localeCompare( b.name ) );
 
-export const getBusinessTypes = (
-	data: Country[]
-): Country[] => {
+export const getBusinessTypes = ( data: Country[] ): Country[] => {
 	return (
 		( data || [] )
 			.map( ( country ) => ( {
@@ -100,7 +98,7 @@ export const isPoEligible = async (
 			mcc: onboardingFields.mcc as string,
 			annual_revenue: onboardingFields.annual_revenue as string,
 			go_live_timeframe: onboardingFields.go_live_timeframe as string,
-		}
+		},
 	};
 
 	const response: PoEligibleResponse = await apiFetch( {
@@ -148,18 +146,14 @@ export const getMccsFlatList = (
 
 	return normalizedData.reduce( ( acc, group ): ListItem[] => {
 		const groupItems =
-			group.items?.map(
-				( item ): ListItem => {
-					return {
-						key: item.id,
-						name: item.title,
-						group: group.id,
-						context: item?.keywords
-							? item.keywords.join( ' ' )
-							: '',
-					};
-				}
-			) || [];
+			group.items?.map( ( item ): ListItem => {
+				return {
+					key: item.id,
+					name: item.title,
+					group: group.id,
+					context: item?.keywords ? item.keywords.join( ' ' ) : '',
+				};
+			} ) || [];
 
 		return [
 			...acc,
