@@ -4,7 +4,10 @@
 import apiFetch from '@wordpress/api-fetch';
 import type { createRegistry } from '@wordpress/data';
 import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
-import type createLocksActions from '@wordpress/core-data/build-types/locks/actions';
+import type CreateLocksActions from '@wordpress/core-data/build-types/locks/actions';
+// @ts-expect-error WP core data doesn't explicitly export the actions
+// eslint-disable-next-line @woocommerce/dependency-group
+import createLocksActions from '@wordpress/core-data/build/locks/actions';
 
 /**
  * Internal dependencies
@@ -410,6 +413,14 @@ export const saveEditedSetting =
 		return saveSettingRequest( groupId, settingId, value, dispatch );
 	};
 
+const lockActions = createLocksActions() as ReturnType<
+	typeof CreateLocksActions
+>;
+export const __unstableAcquireStoreLock =
+	lockActions.__unstableAcquireStoreLock;
+export const __unstableReleaseStoreLock =
+	lockActions.__unstableReleaseStoreLock;
+
 // Return type of all action creators
 export type Actions = ReturnType<
 	| typeof receiveGroups
@@ -436,4 +447,4 @@ export type ActionDispatchersForThunk = {
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
 	< T = Record< string, unknown > >( args: T ): void;
-} & ReturnType< typeof createLocksActions >;
+} & ReturnType< typeof CreateLocksActions >;
