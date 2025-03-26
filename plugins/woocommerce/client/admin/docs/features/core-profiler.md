@@ -157,11 +157,11 @@ This is used to update `woocommerce_onboarding_profile`.
 
 This is used to update the store's currency and measurement units, which can be found under WooCommerce → Settings → General → Currency Options and WooCommerce → Settings → Products → Measurements.
 
-- `dispatch( settingOptionsStore ).updateSetting( 'general', 'woocommerce_default_country', countryCode, { save: true } )`
+- `dispatch( settingOptionsStore ).saveSetting( 'general', 'woocommerce_default_country', countryCode )`
 
 This is used to update the store's country.
 
-- `dispatch( settingOptionsStore ).updateSetting( 'advanced', 'woocommerce_allow_tracking', optInDataSharing, { save: true } )`
+- `dispatch( settingOptionsStore ).saveSetting( 'advanced', 'woocommerce_allow_tracking', optInDataSharing )`
 
 This is used to update the user's preference for usage tracking.
 

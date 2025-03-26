@@ -409,11 +409,10 @@ const updateTrackingOption = fromPromise(
 		} );
 
 		const trackingValue = input.optInDataSharing ? 'yes' : 'no';
-		dispatch( settingOptionsStore ).updateSetting(
+		dispatch( settingOptionsStore ).saveSetting(
 			'advanced',
 			'woocommerce_allow_tracking',
-			trackingValue,
-			{ save: true }
+			trackingValue
 		);
 	}
 );
@@ -433,11 +432,10 @@ const updateOnboardingProfileOption = fromPromise(
 );
 
 const updateBusinessLocation = ( countryAndState: string ) => {
-	return dispatch( settingOptionsStore ).updateSetting(
+	return dispatch( settingOptionsStore ).saveSetting(
 		'general',
 		'woocommerce_default_country',
-		countryAndState,
-		{ save: true }
+		countryAndState
 	);
 };
 
@@ -499,11 +497,10 @@ const updateBusinessInfo = fromPromise(
 			dispatch( coreStore ).saveEntityRecord( 'root', 'site', {
 				title: input.payload.storeName,
 			} ),
-			dispatch( settingOptionsStore ).updateSetting(
+			dispatch( settingOptionsStore ).saveSetting(
 				'general',
 				'woocommerce_default_country',
-				input.payload.storeLocation,
-				{ save: true }
+				input.payload.storeLocation
 			),
 		] );
 	}
