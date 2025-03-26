@@ -239,11 +239,6 @@ class WCAdminAssets {
 	 * Loads the required scripts on the correct pages.
 	 */
 	public function enqueue_assets() {
-		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true );
-			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
-		}
-		
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
@@ -252,6 +247,11 @@ class WCAdminAssets {
 		wp_enqueue_style( WC_ADMIN_APP );
 		wp_enqueue_style( 'wc-material-icons' );
 		wp_enqueue_style( 'wc-onboarding' );
+
+		if ( PageController::is_settings_page() ) {
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true );
+			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
+		}
 
 		// Preload our assets.
 		$this->output_header_preload_tags();
