@@ -40,7 +40,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			page: params.page || 1,
 			per_page: params.per_page || perPageRef.current,
 			order: params.order || 'asc',
-			orderby: (params.orderby || 'menu_order') as 'date' | 'id' | 'include' | 'title' | 'slug' | 'menu_order',
+			orderby: ( params.orderby || 'menu_order' ) as
+				| 'date'
+				| 'id'
+				| 'include'
+				| 'title'
+				| 'slug'
+				| 'menu_order',
 			attributes: params.attributes || [],
 		} as const;
 
