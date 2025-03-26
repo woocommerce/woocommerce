@@ -21,7 +21,7 @@ import { Save } from './save';
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
-	// Product Title is not expected to be available anywhere than in All Products.
+	// Product Title is not expected to be available anywhere other than in All Products.
 	// Everywhere else we use core/post-title variation.
 	ancestor: [ 'woocommerce/all-products' ],
 	title,
