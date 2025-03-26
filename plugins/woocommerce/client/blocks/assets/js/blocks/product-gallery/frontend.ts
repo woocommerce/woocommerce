@@ -24,7 +24,12 @@ const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
 } );
 
 /**
- * Scrolls an image into view.
+ * Scrolls the image into view for the main image.
+ *
+ * We use getElement to get the current element that triggered the action
+ * to find the closest gallery container and scroll the image into view.
+ * This is necessary because if you have two galleries on the same page with the same image IDs,
+ * then we could trigger the wrong gallery's image into view.
  *
  * @param {string} imageId - The ID of the image to scroll into view.
  */
@@ -32,9 +37,26 @@ const scrollImageIntoView = ( imageId: number ) => {
 	if ( ! imageId ) {
 		return;
 	}
-	const imageElement = document.querySelector(
+
+	// Get the current element that triggered the action
+	const element = getElement()?.ref as HTMLElement;
+	if ( ! element ) {
+		return;
+	}
+
+	// Find the closest gallery container
+	const galleryContainer = element.closest(
+		'.wp-block-woocommerce-product-gallery'
+	);
+
+	if ( ! galleryContainer ) {
+		return;
+	}
+
+	const imageElement = galleryContainer.querySelector(
 		`.wp-block-woocommerce-product-gallery-large-image img[data-image-id="${ imageId }"]`
 	);
+
 	if ( imageElement ) {
 		imageElement.scrollIntoView( {
 			behavior: 'smooth',
@@ -184,8 +206,15 @@ const productGallery = {
 			if ( event ) {
 				event.stopPropagation();
 			}
-
+			const context = getContext();
+			console.log(
+				'Next clicked - Product ID:',
+				context.productId,
+				'Selected Image ID:',
+				context.selectedImageId
+			);
 			const { imageData, selectedImageId } = getContext();
+			console.log( 'selectNextImage', imageData, selectedImageId );
 			const allImageIds = imageData?.image_ids || [];
 			const selectedImageNumber = getSelectedImageNumber(
 				allImageIds,
