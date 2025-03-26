@@ -36,7 +36,7 @@ class FilterData {
 	 * @return object
 	 */
 	public function get_filtered_price( array $query_vars ) {
-		$pre_filter_counts = $this->pre_get_filter_counts( 'price', $query_vars, );
+		$pre_filter_counts = $this->pre_get_filter_data( 'price', $query_vars, );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -92,7 +92,7 @@ class FilterData {
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( array $query_vars, array $statuses ) {
-		$pre_filter_counts = $this->pre_get_filter_counts( 'stock', $query_vars );
+		$pre_filter_counts = $this->pre_get_filter_data( 'stock', $query_vars );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -154,7 +154,7 @@ class FilterData {
 	 * @return array rating=>count pairs.
 	 */
 	public function get_rating_counts( array $query_vars ) {
-		$pre_filter_counts = $this->pre_get_filter_counts( 'rating', $query_vars );
+		$pre_filter_counts = $this->pre_get_filter_data( 'rating', $query_vars );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -214,7 +214,7 @@ class FilterData {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( array $query_vars, string $attribute_to_count ) {
-		$pre_filter_counts = $this->pre_get_filter_counts( 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
+		$pre_filter_counts = $this->pre_get_filter_data( 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -270,13 +270,13 @@ class FilterData {
 	}
 
 	/**
-	 * Get the offload filter counts.
+	 * Get the offload filter data.
 	 *
 	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
 	 * @param array  $query_vars  The query arguments to calculate the filter data.
 	 * @param array  $extra       Some filter types require extra arguments for calculation, like attribute.
 	 */
-	private function pre_get_filter_counts( string $filter_type, array $query_vars, array $extra = array() ) {
+	private function pre_get_filter_data( string $filter_type, array $query_vars, array $extra = array() ) {
 		/**
 		 * Allows offloading the filter data to external services like Elasticsearch.
 		 *
