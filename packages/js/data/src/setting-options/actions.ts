@@ -4,6 +4,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import type { createRegistry } from '@wordpress/data';
 import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
+import type createLocksActions from '@wordpress/core-data/build-types/locks/actions';
 
 /**
  * Internal dependencies
@@ -20,7 +21,7 @@ import type {
 	SettingsState,
 } from './types';
 import { NAMESPACE } from '../constants';
-import { store } from './';
+import { store, STORE_NAME } from './';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
 
@@ -224,6 +225,12 @@ const saveSettingRequest = async (
 	value: SettingValue,
 	dispatch: ActionDispatchersForThunk
 ): Promise< Setting > => {
+	const lock = await dispatch.__unstableAcquireStoreLock(
+		STORE_NAME,
+		[ 'settings', groupId, settingId ],
+		{ exclusive: true }
+	);
+
 	dispatch( setSaving( groupId, settingId, true ) );
 
 	try {
@@ -240,6 +247,7 @@ const saveSettingRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, settingId, false ) );
+		dispatch.__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -251,6 +259,12 @@ const saveSettingsGroupRequest = async (
 	updates: SettingEdit[],
 	dispatch: ActionDispatchersForThunk
 ) => {
+	const lock = await dispatch.__unstableAcquireStoreLock(
+		STORE_NAME,
+		[ 'settings', groupId ],
+		{ exclusive: true }
+	);
+
 	dispatch( setSaving( groupId, null, true ) );
 
 	try {
@@ -310,6 +324,7 @@ const saveSettingsGroupRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, null, false ) );
+		dispatch.__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -421,4 +436,4 @@ export type ActionDispatchersForThunk = {
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
 	< T = Record< string, unknown > >( args: T ): void;
-};
+} & ReturnType< typeof createLocksActions >;

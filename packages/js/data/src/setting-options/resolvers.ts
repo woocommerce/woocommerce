@@ -10,6 +10,7 @@ import { receiveGroups, receiveSettings, setError } from './actions';
 import type { Setting, SettingsGroup } from './types';
 import type { ThunkArgs } from './actions';
 import { NAMESPACE } from '../constants';
+import { STORE_NAME } from './';
 
 /**
  * Resolver for the getGroups selector. Fetches all available settings groups.
@@ -35,6 +36,12 @@ export const getGroups =
 export const getSettings =
 	( groupId: string ) =>
 	async ( { dispatch }: ThunkArgs ) => {
+		const lock = await dispatch.__unstableAcquireStoreLock(
+			STORE_NAME,
+			[ 'settings', groupId ],
+			{ exclusive: false }
+		);
+
 		try {
 			const settings: Setting[] = await apiFetch( {
 				path: `${ NAMESPACE }/settings/${ groupId }`,
@@ -53,6 +60,8 @@ export const getSettings =
 				)
 			);
 			throw error;
+		} finally {
+			dispatch.__unstableReleaseStoreLock( lock );
 		}
 	};
 
@@ -62,6 +71,12 @@ export const getSettings =
 export const getSetting =
 	( groupId: string, settingId: string ) =>
 	async ( { dispatch }: ThunkArgs ) => {
+		const lock = await dispatch.__unstableAcquireStoreLock(
+			STORE_NAME,
+			[ 'settings', groupId, settingId ],
+			{ exclusive: false }
+		);
+
 		try {
 			const setting: Setting = await apiFetch( {
 				path: `${ NAMESPACE }/settings/${ groupId }/${ settingId }`,
@@ -80,6 +95,8 @@ export const getSetting =
 				)
 			);
 			throw error;
+		} finally {
+			dispatch.__unstableReleaseStoreLock( lock );
 		}
 	};
 
