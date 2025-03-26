@@ -41,7 +41,6 @@ class Init {
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_settings_editor_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_settings_editor_styles' ) );
-		add_action( 'woocommerce_navigation_is_connected_page', array( $this, 'disable_embed_if_woocommerce_settings_page' ) );
 	}
 
 	/**
@@ -52,20 +51,6 @@ class Init {
 	public function is_settings_page() {
 		$screen = get_current_screen();
 		return $screen && 'woocommerce_page_wc-settings' === $screen->id;
-	}
-
-	/**
-	 * Turn off the embed page if the current page is the WooCommerce settings page.
-	 *
-	 * @param bool $is_connected_page Whether the current page is a connected page.
-	 * @return bool
-	 */
-	public function disable_embed_if_woocommerce_settings_page( $is_connected_page ) {
-		if ( self::get_instance()->is_settings_page() ) {
-			return false;
-		}
-
-		return $is_connected_page;
 	}
 
 	/**

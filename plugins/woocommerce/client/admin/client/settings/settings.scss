@@ -12,6 +12,10 @@ body.woocommerce_page_wc-settings {
 		display: none;
 	}
 
+	#wpbody {
+		margin-top: 0;
+	}
+
 	#wc-settings-page {
 		// Because this uses negative margins, we have to compensate for the height.
 		margin-top: -32px;

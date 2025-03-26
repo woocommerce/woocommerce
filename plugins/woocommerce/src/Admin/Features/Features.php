@@ -313,16 +313,17 @@ class Features {
 	 * Loads the required scripts on the correct pages.
 	 */
 	public static function load_scripts() {
-		$is_on_settings_page_with_feature_enabled = self::is_enabled( 'settings' ) && get_current_screen()->id === 'woocommerce_page_wc-settings';
-
-		if ( PageController::is_admin_or_embed_page() || $is_on_settings_page_with_feature_enabled ) {
-			$features         = self::get_features();
-			$enabled_features = array();
-			foreach ( $features as $key ) {
-				$enabled_features[ $key ] = self::is_enabled( $key );
-			}
-			wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features ), 'before' );
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
 		}
+
+		$features         = self::get_features();
+		$enabled_features = array();
+		foreach ( $features as $key ) {
+			$enabled_features[ $key ] = self::is_enabled( $key );
+		}
+		wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features ), 'before' );
+
 	}
 
 
