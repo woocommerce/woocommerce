@@ -32,7 +32,7 @@ export type TaskListProps = TaskListType & {
 	cesHeader?: boolean;
 };
 
-export const TaskList: React.FC< TaskListProps > = ( {
+export const TaskList = ( {
 	id,
 	eventPrefix,
 	tasks,
@@ -41,7 +41,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isExpandable = false,
 	displayProgressHeader = false,
 	query,
-} ) => {
+}: TaskListProps ) => {
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( onboardingStore );
 

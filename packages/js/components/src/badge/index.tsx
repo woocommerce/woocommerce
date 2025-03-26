@@ -7,11 +7,7 @@ export type BadgeProps = {
 	count: number;
 } & React.HTMLAttributes< HTMLSpanElement >;
 
-export const Badge: React.FC< BadgeProps > = ( {
-	count,
-	className = '',
-	...props
-}: BadgeProps ) => {
+export const Badge = ( { count, className = '', ...props }: BadgeProps ) => {
 	return (
 		<span className={ `woocommerce-badge ${ className }` } { ...props }>
 			{ count }

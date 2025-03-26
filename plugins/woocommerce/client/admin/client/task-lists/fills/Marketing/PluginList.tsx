@@ -18,13 +18,13 @@ export type PluginListProps = {
 	title?: string;
 };
 
-export const PluginList: React.FC< PluginListProps > = ( {
+export const PluginList = ( {
 	currentPlugin,
 	installAndActivate = () => {},
 	onManage = () => {},
 	plugins = [],
 	title,
-} ) => {
+}: PluginListProps ) => {
 	return (
 		<div className="woocommerce-plugin-list">
 			{ title && (
