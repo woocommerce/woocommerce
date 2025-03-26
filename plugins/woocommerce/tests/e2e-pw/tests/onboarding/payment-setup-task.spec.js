@@ -47,6 +47,12 @@ const test = baseTest.extend( {
 			value: initialDefaultCountry.data.value,
 		} );
 		await wcAdminApi.put( 'options', initialTaskListHiddenState.data );
+
+		// Make sure the new Payments settings page feature is not enabled.
+		await wcAdminApi.put( 'options', {
+			'woocommerce_feature_reactify-classic-payments-settings_enabled':
+				'no',
+		} );
 	},
 } );
 

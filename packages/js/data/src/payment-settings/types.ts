@@ -150,6 +150,7 @@ export type SuggestedPaymentExtension = {
 	tags: string[];
 	plugin: PluginData;
 	links: PaymentGatewayLink[];
+	_links?: Record< string, LinkData >;
 };
 
 export type SuggestedPaymentExtensionCategory = {

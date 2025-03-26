@@ -28,10 +28,7 @@ import { registerSettingsEmailPreviewFill } from '../../settings-email/settings-
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
 
 const renderPaymentsSettings = () => {
-	if (
-		! window.wcAdminFeatures ||
-		window.wcAdminFeatures[ 'reactify-classic-payments-settings' ] !== true
-	) {
+	if ( ! isFeatureEnabled( 'reactify-classic-payments-settings' ) ) {
 		// Render the payment settings components only if the feature flag is enabled.
 		return;
 	}
