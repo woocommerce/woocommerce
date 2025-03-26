@@ -7,11 +7,12 @@
 
 		elements.forEach( ( element ) => {
 			const name = element.getAttribute( 'name' );
-			let value = element.value;
 
 			if ( ! name ) {
 				return;
 			}
+
+			let value = element.value;
 
 			if ( element.type === 'checkbox' ) {
 				value = element.checked ? value : '';
