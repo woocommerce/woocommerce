@@ -37,6 +37,11 @@ class WooPayments extends PaymentGateway {
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
 
+		// If the WooPayments installed version is less than 9.2.0, we can't use the in-context onboarding flows.
+		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, '9.2.0', '<' ) ) {
+			return $details;
+		}
+
 		// Switch the onboarding type to native in-context.
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE_IN_CONTEXT;
 
