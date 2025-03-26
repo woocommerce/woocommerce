@@ -1,9 +1,3 @@
-/**
- * This is an interim solution for handling AJAX add-to-cart functionality,
- * allowing features like the mini-cart drawer to open when products are added.
- * This will eventually be replaced by the blockified Add to Cart implementation
- * tracked in https://github.com/woocommerce/woocommerce/issues/53014
- */
 ( function () {
 	function getFormData( form ) {
 		const formData = [];
