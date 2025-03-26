@@ -30,14 +30,12 @@ type CreateAttributeTermModalProps = {
 	onCreated?: ( newAttribute: ProductAttributeTerm ) => void;
 };
 
-export const CreateAttributeTermModal: React.FC<
-	CreateAttributeTermModalProps
-> = ( {
+export const CreateAttributeTermModal = ( {
 	initialAttributeTermName,
 	attributeId,
 	onCancel = () => {},
 	onCreated = () => {},
-} ) => {
+}: CreateAttributeTermModalProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCreating, setIsCreating ] = useState( false );
 	const { createProductAttributeTerm } = useDispatch(

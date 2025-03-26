@@ -13,7 +13,7 @@ type PostTileProps = {
 	post: Post;
 };
 
-export const PostTile: React.FC< PostTileProps > = ( { post } ) => {
+export const PostTile = ( { post }: PostTileProps ) => {
 	return (
 		<a
 			className="woocommerce-marketing-learn-marketing-card__post"
