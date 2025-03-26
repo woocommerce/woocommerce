@@ -3,7 +3,6 @@
  */
 import { createElement, Component } from '@wordpress/element';
 import { noop } from 'lodash';
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 /**
@@ -45,113 +44,73 @@ type SearchType =
 	| 'variations'
 	| 'custom';
 
-type Props = {
-	type: SearchType;
+type State = {
+	options: Option[];
+};
+
+export type SearchProps = {
+	/**
+	 * Render additional options in the autocompleter to allow free text entering depending on the type.
+	 */
 	allowFreeTextSearch?: boolean;
+	/**
+	 * Class name applied to parent div.
+	 */
 	className?: string;
-	onChange?: ( value: Option | OptionCompletionValue[] ) => void;
+	/**
+	 * Function called when selected results change, passed result list.
+	 */
+	onChange?( value: Option | OptionCompletionValue[] ): unknown;
+	/**
+	 * The object type to be used in searching.
+	 */
+	type: SearchType;
+	/**
+	 * The custom autocompleter to be used in searching when type is 'custom'
+	 */
 	autocompleter?: AutoCompleter;
+	/**
+	 * A placeholder for the search input.
+	 */
 	placeholder?: string;
+	/**
+	 * An array of objects describing selected values or optionally a string for a single value.
+	 * If the label of the selected value is omitted, the Tag of that value will not
+	 * be rendered inside the search box.
+	 */
 	selected?:
 		| string
 		| Array< {
 				key: string;
 				label: string;
 		  } >;
+	/**
+	 * Render tags inside input, otherwise render below input.
+	 */
 	inlineTags?: boolean;
+	/**
+	 * Render a 'Clear' button next to the input box to remove its contents.
+	 */
 	showClearButton?: boolean;
+	/**
+	 * Render results list positioned statically instead of absolutely.
+	 */
 	staticResults?: boolean;
+	/**
+	 * Whether the control is disabled or not.
+	 */
 	disabled?: boolean;
+	/**
+	 * Allow multiple option selections.
+	 */
 	multiple?: boolean;
-};
-
-type State = {
-	options: Option[];
 };
 
 /**
  * A search box which autocompletes results while typing, allowing for the user to select an existing object
  * (product, order, customer, etc). Currently only products are supported.
  */
-export class Search extends Component< Props, State > {
-	static propTypes = {
-		/**
-		 * Render additional options in the autocompleter to allow free text entering depending on the type.
-		 */
-		allowFreeTextSearch: PropTypes.bool,
-		/**
-		 * Class name applied to parent div.
-		 */
-		className: PropTypes.string,
-		/**
-		 * Function called when selected results change, passed result list.
-		 */
-		onChange: PropTypes.func,
-		/**
-		 * The object type to be used in searching.
-		 */
-		type: PropTypes.oneOf( [
-			'attributes',
-			'categories',
-			'countries',
-			'coupons',
-			'customers',
-			'downloadIps',
-			'emails',
-			'orders',
-			'products',
-			'taxes',
-			'usernames',
-			'variableProducts',
-			'variations',
-			'custom',
-		] ).isRequired,
-		/**
-		 * The custom autocompleter to be used in searching when type is 'custom'
-		 */
-		autocompleter: PropTypes.object,
-		/**
-		 * A placeholder for the search input.
-		 */
-		placeholder: PropTypes.string,
-		/**
-		 * An array of objects describing selected values or optionally a string for a single value.
-		 * If the label of the selected value is omitted, the Tag of that value will not
-		 * be rendered inside the search box.
-		 */
-		selected: PropTypes.oneOfType( [
-			PropTypes.string,
-			PropTypes.arrayOf(
-				PropTypes.shape( {
-					key: PropTypes.oneOfType( [
-						PropTypes.number,
-						PropTypes.string,
-					] ).isRequired,
-					label: PropTypes.string,
-				} )
-			),
-		] ),
-		/**
-		 * Render tags inside input, otherwise render below input.
-		 */
-		inlineTags: PropTypes.bool,
-		/**
-		 * Render a 'Clear' button next to the input box to remove its contents.
-		 */
-		showClearButton: PropTypes.bool,
-		/**
-		 * Render results list positioned statically instead of absolutely.
-		 */
-		staticResults: PropTypes.bool,
-		/**
-		 * Whether the control is disabled or not.
-		 */
-		disabled: PropTypes.bool,
-		/**
-		 * Allow multiple option selections.
-		 */
-		multiple: PropTypes.bool,
-	};
+export class Search extends Component< SearchProps, State > {
 	static defaultProps = {
 		allowFreeTextSearch: false,
 		onChange: noop,
@@ -163,7 +122,7 @@ export class Search extends Component< Props, State > {
 		multiple: true,
 	};
 
-	constructor( props: Props ) {
+	constructor( props: SearchProps ) {
 		super( props );
 		this.state = {
 			options: [],
