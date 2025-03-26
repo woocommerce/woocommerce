@@ -516,23 +516,20 @@ export class CheckoutPage {
 		return await this.isShippingRateSelected( shippingName, shippingPrice );
 	}
 
-	async verifyOrderConfirmationDetails(
-		currentPage: Page,
-		toBeVisible = true
-	) {
-		const statusSection = currentPage.locator(
+	async verifyOrderConfirmationDetails( toBeVisible = true ) {
+		const statusSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-status"]'
 		);
-		const summarySection = currentPage.locator(
+		const summarySection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-summary"]'
 		);
-		const totalsSection = currentPage.locator(
+		const totalsSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-totals"]'
 		);
-		const shippingAddressSection = currentPage.locator(
+		const shippingAddressSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-shipping-address"]'
 		);
-		const billingAddressSection = currentPage.locator(
+		const billingAddressSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-billing-address"]'
 		);
 
@@ -556,19 +553,19 @@ export class CheckoutPage {
 
 			// Confirm order data are visible and correct
 			await expect(
-				currentPage.getByText(
+				this.page.getByText(
 					'Thank you. Your order has been received.'
 				)
 			).toBeVisible();
-			await expect( currentPage.getByText( email ) ).toBeVisible();
+			await expect( summarySection.getByText( email ) ).toBeVisible();
 			await expect(
-				currentPage.getByText( FREE_SHIPPING_NAME )
+				this.page.getByText( FREE_SHIPPING_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
+				this.page.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage
+				this.page
 					.locator(
 						'table.wc-block-order-confirmation-totals__table '
 					)
@@ -577,14 +574,14 @@ export class CheckoutPage {
 					} )
 			).toBeVisible();
 			await expect(
-				currentPage
+				this.page
 					.getByText(
 						`${ firstname } ${ lastname }${ addressfirstline }${ addresssecondline }${ city }, NY ${ postcode }${ phone }`
 					)
 					.first()
 			).toBeVisible();
 			await expect(
-				currentPage
+				this.page
 					.getByText(
 						`${ firstname } ${ lastname }${ addressfirstline }${ addresssecondline }${ city }, NY ${ postcode }${ phone }`
 					)
