@@ -4,7 +4,6 @@
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { describe } from 'node:test';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -166,16 +165,24 @@ test.beforeAll( async ( { browser, restApi } ) => {
 		} );
 
 	// Reset Analytics Settings to their default values.
+	// Reset 'Excluded statuses' to default values.
 	await restApi
 		.post(
-			'wc-analytics/settings/wc_admins/woocommerce_excluded_report_order_statuses',
+			'wc-analytics/settings/wc_admin/woocommerce_excluded_report_order_statuses',
 			{
 				value: [ 'pending', 'cancelled', 'failed' ],
 			}
 		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( [
+				'pending',
+				'cancelled',
+				'failed',
+			] );
+		} )
 		.catch( ( error ) => {
 			throw new Error(
-				`Something went wrong when resetting 'Excluded statuses' to default values.\n${ JSON.stringify(
+				`Error occurred while resetting 'Excluded statuses' to defaults.\n${ JSON.stringify(
 					error,
 					null,
 					2
@@ -183,13 +190,53 @@ test.beforeAll( async ( { browser, restApi } ) => {
 			);
 		} );
 
-	// TODO implement the same strategy as above.
-	// await wcAdminApi.put( 'options', {
-	// 	woocommerce_actionable_order_statuses: [ 'processing', 'on-hold' ],
-	// } );
-	// await wcAdminApi.put( 'options', {
-	// 	woocommerce_default_date_range: 'period=month&compare=previous_year',
-	// } );
+	// Reset 'Actionable statuses' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_actionable_order_statuses',
+			{
+				value: [ 'processing', 'on-hold' ],
+			}
+		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( [
+				'processing',
+				'on-hold',
+			] );
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Actionable statuses' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
+	// Reset 'Default date range' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_default_date_range',
+			{
+				value: 'period=month&compare=previous_year',
+			}
+		)
+		.then( ( response ) => {
+			// '&' is encoded as '&amp;' in the response.
+			expect( response.data.value ).toEqual(
+				'period=month&amp;compare=previous_year'
+			);
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Default date range' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
 
 	// process the Action Scheduler tasks
 	setupPage = await browser.newPage();
@@ -648,8 +695,7 @@ test(
 	}
 );
 
-// TODO remove .only()
-test.only(
+test(
 	'analytics settings',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
