@@ -115,7 +115,7 @@ export type MarketingProps = {
 	onComplete: ( option?: { redirectPath: string } ) => void;
 };
 
-const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
+const Marketing = ( { onComplete }: MarketingProps ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);

@@ -55,19 +55,14 @@ class ProductFilterPriceSlider extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
-		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
-
 		$show_input_fields = isset( $attributes['showInputFields'] ) ? $attributes['showInputFields'] : false;
 		$inline_input      = isset( $attributes['inlineInput'] ) ? $attributes['inlineInput'] : false;
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'               => esc_attr( $classes ),
-				'style'               => esc_attr( $style ),
-				'data-wp-interactive' => $this->get_full_block_name(),
-				'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
-
+				'class'       => esc_attr( $classes ),
+				'style'       => esc_attr( $style ),
+				'data-wp-key' => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			)
 		);
 
@@ -81,6 +76,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$__high      = 100 * ( $max_price - $min_range ) / ( $max_range - $min_range );
 		$range_style = "--low: $__low%; --high: $__high%";
 
+		wp_interactivity_state(
+			'woocommerce/product-filters',
+			array(
+				'rangeStyle' => $range_style,
+			)
+		);
+
 		ob_start();
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
@@ -90,20 +92,17 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						<input
 							class="min"
 							type="text"
-							data-wp-bind--value="woocommerce/product-filter-price::state.formattedMinPrice"
+							data-wp-bind--value="state.formattedMinPrice"
 							data-wp-on--focus="actions.selectInputContent"
-							data-wp-on--input="actions.debounceSetPrice"
-							data-wp-on--change--set-price="woocommerce/product-filter-price::actions.setMinPrice"
-							data-wp-on--change--navigate="woocommerce/product-filters::actions.navigate"
+							data-wp-on--input="actions.debounceSetMinPrice"
 							aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
-						<span data-wp-text="woocommerce/product-filter-price::state.formattedMinPrice"><?php echo wp_kses_post( $formatted_min_price ); ?></span>
+						<span data-wp-text="state.formattedMinPrice"></span>
 					<?php endif; ?>
 				</div>
 				<div
 					class="wc-block-product-filter-price-slider__range"
-					style="<?php echo esc_attr( $range_style ); ?>"
 					data-wp-bind--style="state.rangeStyle"
 				>
 					<div class="range-bar"></div>
@@ -112,14 +111,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						class="min"
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
-						data-wp-bind--value="woocommerce/product-filter-price::state.minPrice"
-						data-wp-bind--min="woocommerce/product-filter-price::context.minRange"
-						data-wp-bind--max="woocommerce/product-filter-price::context.maxRange"
-						data-wp-on--input--update-price="woocommerce/product-filter-price::actions.setMinPrice"
-						data-wp-on--input--limit-range="actions.limitRange"
-						data-wp-on--mouseup="woocommerce/product-filters::actions.navigate"
-						data-wp-on--keyup="woocommerce/product-filters::actions.navigate"
-						data-wp-on--touchend="woocommerce/product-filters::actions.navigate"
+						data-wp-bind--value="state.minPrice"
+						data-wp-bind--min="context.minRange"
+						data-wp-bind--max="context.maxRange"
+						data-wp-on--input="actions.setMinPrice"
+						data-wp-on--mouseup="actions.navigate"
+						data-wp-on--keyup="actions.navigate"
+						data-wp-on--touchend="actions.navigate"
 						aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 					/>
 					<input
@@ -127,14 +125,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						class="max"
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
-						data-wp-bind--value="woocommerce/product-filter-price::state.maxPrice"
-						data-wp-bind--min="woocommerce/product-filter-price::context.minRange"
-						data-wp-bind--max="woocommerce/product-filter-price::context.maxRange"
-						data-wp-on--input--update-price="woocommerce/product-filter-price::actions.setMaxPrice"
-						data-wp-on--input--limit-range="actions.limitRange"
-						data-wp-on--mouseup="woocommerce/product-filters::actions.navigate"
-						data-wp-on--keyup="woocommerce/product-filters::actions.navigate"
-						data-wp-on--touchend="woocommerce/product-filters::actions.navigate"
+						data-wp-bind--value="state.maxPrice"
+						data-wp-bind--min="context.minRange"
+						data-wp-bind--max="context.maxRange"
+						data-wp-on--input="actions.setMaxPrice"
+						data-wp-on--mouseup="actions.navigate"
+						data-wp-on--keyup="actions.navigate"
+						data-wp-on--touchend="actions.navigate"
 						aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 					/>
 				</div>
@@ -143,15 +140,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						<input
 							class="max"
 							type="text"
-							data-wp-bind--value="woocommerce/product-filter-price::state.formattedMaxPrice"
+							data-wp-bind--value="state.formattedMaxPrice"
 							data-wp-on--focus="actions.selectInputContent"
-							data-wp-on--input="actions.debounceSetPrice"
-							data-wp-on--change--set-price="woocommerce/product-filter-price::actions.setMaxPrice"
-							data-wp-on--change--navigate="woocommerce/product-filters::actions.navigate"
+							data-wp-on--input="actions.debounceSetMaxPrice"
 							aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
-					<span data-wp-text="woocommerce/product-filter-price::state.formattedMaxPrice"><?php echo wp_kses_post( $formatted_max_price ); ?></span>
+					<span data-wp-text="state.formattedMaxPrice"></span>
 					<?php endif; ?>
 				</div>
 			</div>

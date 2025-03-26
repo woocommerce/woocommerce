@@ -34,12 +34,12 @@ export type SetupStepProps = {
 	pluginsToActivate: string[];
 };
 
-export const Setup: React.FC< SetupProps > = ( {
+export const Setup = ( {
 	isPending,
 	onDisable,
 	onAutomate,
 	onManual,
-} ) => {
+}: SetupProps ) => {
 	const [ pluginsToActivate, setPluginsToActivate ] = useState< string[] >(
 		[]
 	);
