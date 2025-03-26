@@ -27,7 +27,7 @@ import { useEntityId } from '@wordpress/core-data';
  */
 import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../../constants';
 
-export const VariableProductTour: React.FC = () => {
+export const VariableProductTour = () => {
 	const [ isTourOpen, setIsTourOpen ] = useState( false );
 	const productId = useEntityId( 'postType', 'product' );
 	const prevTotalCount = useRef< undefined | number >();

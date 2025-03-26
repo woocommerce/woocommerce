@@ -34,7 +34,7 @@ export type ImageGalleryToolbarProps = {
 	MediaUploadComponent: MediaUploadComponentType;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
+export const ImageGalleryToolbar = ( {
 	childIndex,
 	allowDragging = true,
 	moveItem,

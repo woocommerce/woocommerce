@@ -24,12 +24,12 @@ type ResetStylesControlProps = {
 	autoSyncInput: HTMLInputElement;
 };
 
-export const ResetStylesControl: React.FC< ResetStylesControlProps > = ( {
+export const ResetStylesControl = ( {
 	defaultColors,
 	hasThemeJson,
 	autoSync,
 	autoSyncInput,
-} ) => {
+}: ResetStylesControlProps ) => {
 	const [ isResetShown, setIsResetShown ] = useState(
 		areColorsChanged( defaultColors )
 	);

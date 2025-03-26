@@ -21,13 +21,13 @@ export type ListProps = {
 	animation?: ListAnimation;
 } & React.HTMLAttributes< HTMLElement >;
 
-export const ExperimentalList: React.FC< ListProps > = ( {
+export const ExperimentalList = ( {
 	children,
 	listType,
 	animation = 'none',
 	// Allow passing any other property overrides that are legal on an HTML element
 	...otherProps
-} ) => {
+}: ListProps ) => {
 	return (
 		<TransitionGroup
 			component={ listType || 'ul' }

@@ -11,9 +11,9 @@ export type ChipsContext = {
 	showAll: boolean;
 };
 
-store( 'woocommerce/product-filter-chips', {
+store( 'woocommerce/product-filters', {
 	actions: {
-		showAllItems: () => {
+		showAllChips: () => {
 			const context = getContext< ChipsContext >();
 			context.showAll = true;
 		},

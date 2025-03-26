@@ -28,13 +28,13 @@ type TooltipProps = {
 	className?: string;
 };
 
-export const Tooltip: React.FC< TooltipProps > = ( {
+export const Tooltip = ( {
 	children = <Icon icon={ help } />,
 	className = '',
 	helperText = __( 'Help', 'woocommerce' ),
 	position = 'top center',
 	text,
-} ) => {
+}: TooltipProps ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
 	const uniqueIdentifier = useInstanceId(

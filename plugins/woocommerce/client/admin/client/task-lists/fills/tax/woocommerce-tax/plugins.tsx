@@ -21,12 +21,12 @@ const isWcConnectOptions = (
 	[ key: string ]: unknown;
 } => typeof wcConnectOptions === 'object' && wcConnectOptions !== null;
 
-export const Plugins: React.FC< SetupStepProps > = ( {
+export const Plugins = ( {
 	nextStep,
 	onDisable,
 	onManual,
 	pluginsToActivate,
-} ) => {
+}: SetupStepProps ) => {
 	const { updateOptions } = useDispatch( optionsStore );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select( optionsStore );
