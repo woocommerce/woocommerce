@@ -27,10 +27,11 @@ class ImportActivatePlugin implements StepProcessor {
 		$plugin_path = $schema->pluginPath;
 
 		$activate = $this->wp_activate_plugin($plugin_path);
-		if ( $activate ) {
-			$result->add_info( "Activated {$plugin_path}." );
-		} else {
+
+		if ( $this->is_wp_error( $activate ) ) {
 			$result->add_error( "Unable to activate {$plugin_path}." );
+		} else {
+			$result->add_info( "Activated {$plugin_path}." );
 		}
 
 		return $result;
