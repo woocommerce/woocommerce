@@ -2,10 +2,22 @@
  * External dependencies
  */
 import { createElement, useState } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import { Button, Modal } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import classnames from 'classnames';
+
+export type FeedbackModalProps = {
+	onSubmit: () => void;
+	title: string;
+	description?: string;
+	onModalClose?: () => void;
+	onCancel?: () => void;
+	children?: JSX.Element;
+	isSubmitButtonDisabled?: boolean;
+	submitButtonLabel?: string;
+	cancelButtonLabel?: string;
+	className?: string;
+};
 
 /**
  * Provides a modal requesting customer feedback.
@@ -24,7 +36,7 @@ import classnames from 'classnames';
  * @param {Function} props.children               Children to be rendered.
  * @param {string}   props.className              Class name to add to the modal.
  */
-function FeedbackModal( {
+export function FeedbackModal( {
 	onSubmit,
 	title,
 	description,
@@ -35,18 +47,7 @@ function FeedbackModal( {
 	submitButtonLabel,
 	cancelButtonLabel,
 	className,
-}: {
-	onSubmit: () => void;
-	title: string;
-	description?: string;
-	onModalClose?: () => void;
-	onCancel?: () => void;
-	children?: JSX.Element;
-	isSubmitButtonDisabled?: boolean;
-	submitButtonLabel?: string;
-	cancelButtonLabel?: string;
-	className?: string;
-} ): JSX.Element | null {
+}: FeedbackModalProps ): JSX.Element | null {
 	const [ isOpen, setOpen ] = useState( true );
 
 	const closeModal = () => {
@@ -100,15 +101,3 @@ function FeedbackModal( {
 		</Modal>
 	);
 }
-
-FeedbackModal.propTypes = {
-	onSubmit: PropTypes.func.isRequired,
-	title: PropTypes.string,
-	description: PropTypes.string,
-	onModalClose: PropTypes.func,
-	isSubmitButtonDisabled: PropTypes.bool,
-	submitButtonLabel: PropTypes.string,
-	cancelButtonLabel: PropTypes.string,
-};
-
-export { FeedbackModal };
