@@ -45,7 +45,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 		}
 	}, [ continueKyc, data ] );
 
-	const handleStepChange = ( step: string ) => {
+	const handleStepChange = () => {
 		// To-Do: Track step change.
 	};
 

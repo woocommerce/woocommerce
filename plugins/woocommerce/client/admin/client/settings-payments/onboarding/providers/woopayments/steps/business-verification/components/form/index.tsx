@@ -4,7 +4,6 @@
 import React from 'react';
 import { Button } from '@wordpress/components';
 import { isEmpty, mapValues } from 'lodash';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -48,7 +47,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 				'business',
 				currentStep?.actions?.save?.href ?? undefined,
 				currentStep?.context?.sub_steps ?? {}
-			)
+			);
 
 			return nextStep();
 		}

@@ -118,7 +118,8 @@ export const isPoEligible = async (
 export const getMccFromIndustry = (
 	industryToMcc: string[]
 ): string | undefined => {
-	const industry = window.wcSettings.admin?.onboarding?.profile?.industry?.[ 0 ];
+	const industry =
+		window.wcSettings.admin?.onboarding?.profile?.industry?.[ 0 ];
 	if ( ! industry ) {
 		return undefined;
 	}
@@ -170,9 +171,12 @@ export const getMccsFlatList = (
 export const completeSubStep = (
 	name: string,
 	href: string | undefined,
-	data: Record< string, {
-		status: string;
-	} >
+	data: Record<
+		string,
+		{
+			status: string;
+		}
+	>
 ) => {
 	// Send POST request to the href with the Business Verification completed status
 	if ( href ) {
@@ -182,11 +186,11 @@ export const completeSubStep = (
 			data: {
 				sub_steps: {
 					...data,
-					[name]: {
+					[ name ]: {
 						status: 'completed',
 					},
 				},
 			},
 		} );
 	}
-}
+};

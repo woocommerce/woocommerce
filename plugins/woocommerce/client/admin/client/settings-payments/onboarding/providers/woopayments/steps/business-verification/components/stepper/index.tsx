@@ -30,7 +30,10 @@ const useContextValue = ( {
 	);
 
 	// If the current step is completed, move to the next step
-	if ( currentModalStep?.context?.sub_steps[ currentStep ]?.status === 'completed' ) {
+	if (
+		currentModalStep?.context?.sub_steps[ currentStep ]?.status ===
+		'completed'
+	) {
 		const index = keys.indexOf( currentStep );
 		const next = keys[ index + 1 ];
 		setCurrentStep( next );

@@ -21,7 +21,7 @@ interface CommonProps {
 	error?: string;
 }
 
-export type TextFieldProps = ComponentProps<typeof TextControl> & CommonProps;
+export type TextFieldProps = ComponentProps< typeof TextControl > & CommonProps;
 export type SelectFieldProps< ItemType > = SelectControlProps< ItemType > &
 	CommonProps;
 export type GroupedSelectFieldProps< ItemType > =
