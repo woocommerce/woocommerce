@@ -2459,7 +2459,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Returns true if the order contains items that need shipping.
 	 *
-	 * @since 9.8.0
+	 * @since 9.9.0
 	 * @return bool
 	 */
 	public function needs_shipping() {
@@ -2478,7 +2478,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		/**
 		 * Filter to modify the needs shipping value for a given order.
 		 *
-		 * @since 9.8.0
+		 * @since 9.9.0
 		 *
 		 * @param bool $needs_shipping The value originally calculated.
 		 * @param WC_Abstract_Order $order The order for which the value is calculated.
