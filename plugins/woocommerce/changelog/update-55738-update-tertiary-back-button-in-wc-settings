@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Use wc_back_header function for tertiary+ level pages in WooCommerce settings.
