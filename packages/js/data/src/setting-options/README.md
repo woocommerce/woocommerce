@@ -9,21 +9,19 @@ import { useSelect } from '@wordpress/data';
 import { store as settingOptionsStore } from '@woocommerce/data';
 
 function MySettingsComponent() {
-  const settings = useSelect((select) => {
-    const { getSettings } = select(settingOptionsStore);
-    // Get settings without edits
-    const editedSettings = getSettings('general');
-    // Get settings with edits
-    const originalSettings = getSettings('general', { includeEdits: true });
-    
-    return { editedSettings, originalSettings };
-  }, []);
+	const settings = useSelect( ( select ) => {
+		const { getSettings } = select( settingOptionsStore );
 
-  return (
-    <div>
-      {/* Use your settings here */}
-    </div>
-  );
+		// Get settings without edits
+		const originalSettings = getSettings( 'general' );
+
+		// Get settings with edits
+		const editedSettings = getSettings( 'general', { includeEdits: true } );
+
+		return { originalSettings, editedSettings };
+	}, [] );
+
+	return <div>{ /* Use your settings here */ }</div>;
 }
 ```
 
