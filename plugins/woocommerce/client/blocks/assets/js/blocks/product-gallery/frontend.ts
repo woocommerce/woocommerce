@@ -40,6 +40,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 
 	// Get the current element that triggered the action
 	const element = getElement()?.ref as HTMLElement;
+
 	if ( ! element ) {
 		return;
 	}
