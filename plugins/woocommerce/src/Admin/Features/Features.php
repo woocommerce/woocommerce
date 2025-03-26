@@ -323,7 +323,6 @@ class Features {
 			$enabled_features[ $key ] = self::is_enabled( $key );
 		}
 		wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features ), 'before' );
-
 	}
 
 
