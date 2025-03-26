@@ -29,12 +29,12 @@ export type TaskListItemProps = {
 	};
 };
 
-export const TaskListItem: React.FC< TaskListItemProps > = ( {
+export const TaskListItem = ( {
 	isExpandable = false,
 	isExpanded = false,
 	setExpandedTask,
 	task,
-} ) => {
+}: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { layoutString } = useLayoutContext();
 

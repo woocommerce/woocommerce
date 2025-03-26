@@ -1,100 +1,77 @@
 /**
  * External dependencies
  */
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import {
+	store,
+	getContext,
+	getElement,
+	withScope,
+} from '@wordpress/interactivity';
 import type { HTMLElementEvent } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import {
+import type { ProductFiltersStore } from '../../frontend';
+import type {
 	ProductFilterPriceContext,
 	ProductFilterPriceStore,
 } from '../price-filter/frontend';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DebouncedFunction< T extends ( ...args: any[] ) => any > = ( (
-	...args: Parameters< T >
-) => void ) & { flush: () => void };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const debounce = < T extends ( ...args: any[] ) => any >(
-	func: T,
-	wait: number,
-	immediate?: boolean
-): DebouncedFunction< T > => {
-	let timeout: ReturnType< typeof setTimeout > | null;
-	let latestArgs: Parameters< T > | null = null;
-
-	const debounced = ( ( ...args: Parameters< T > ) => {
-		latestArgs = args;
-		if ( timeout ) clearTimeout( timeout );
-		timeout = setTimeout( () => {
-			timeout = null;
-			if ( ! immediate && latestArgs ) func( ...latestArgs );
-		}, wait );
-		if ( immediate && ! timeout ) func( ...args );
-	} ) as DebouncedFunction< T >;
-
-	debounced.flush = () => {
-		if ( timeout && latestArgs ) {
-			func( ...latestArgs );
-			clearTimeout( timeout );
-			timeout = null;
-		}
+function debounceWithScope< Args extends unknown[] >(
+	func: ( ...args: Args ) => void,
+	timeout = 300
+) {
+	let timer: ReturnType< typeof setTimeout > | null;
+	return function ( this: unknown, ...args: Args ) {
+		if ( timer ) clearTimeout( timer );
+		timer = setTimeout(
+			withScope( () => {
+				func.apply( this, args );
+			} ),
+			timeout
+		);
 	};
+}
 
-	return debounced;
-};
-
-store( 'woocommerce/product-filter-price-slider', {
+const productFilterPriceSliderStore = {
 	state: {
 		rangeStyle: () => {
-			const { minRange, maxRange } =
-				getContext< ProductFilterPriceContext >(
-					'woocommerce/product-filter-price'
-				);
-			const productFilterPriceStore = store< ProductFilterPriceStore >(
-				'woocommerce/product-filter-price'
-			);
-			const { minPrice, maxPrice } = productFilterPriceStore.state;
-
+			const context = getContext< ProductFilterPriceContext >();
 			return `--low: ${
-				( 100 * ( minPrice - minRange ) ) / ( maxRange - minRange )
+				( 100 * ( state.minPrice - context.minRange ) ) /
+				( context.maxRange - context.minRange )
 			}%; --high: ${
-				( 100 * ( maxPrice - minRange ) ) / ( maxRange - minRange )
+				( 100 * ( state.maxPrice - context.minRange ) ) /
+				( context.maxRange - context.minRange )
 			}%;`;
 		},
 	},
 	actions: {
 		selectInputContent: () => {
 			const element = getElement();
-			if ( element && element.ref ) {
+			if ( element?.ref instanceof HTMLInputElement ) {
 				element.ref.select();
 			}
 		},
-		debounceSetPrice: debounce(
+		debounceSetMinPrice: debounceWithScope(
 			( e: HTMLElementEvent< HTMLInputElement > ) => {
-				e.target.dispatchEvent( new Event( 'change' ) );
+				actions.setMinPrice( e );
+				actions.navigate();
 			},
 			1000
 		),
-		limitRange: ( e: HTMLElementEvent< HTMLInputElement > ) => {
-			const productFilterPriceStore = store< ProductFilterPriceStore >(
-				'woocommerce/product-filter-price'
-			);
-			const { minPrice, maxPrice } = productFilterPriceStore.state;
-			if ( e.target.classList.contains( 'min' ) ) {
-				e.target.value = Math.min(
-					parseInt( e.target.value, 10 ),
-					maxPrice - 1
-				).toString();
-			} else {
-				e.target.value = Math.max(
-					parseInt( e.target.value, 10 ),
-					minPrice + 1
-				).toString();
-			}
-		},
+		debounceSetMaxPrice: debounceWithScope(
+			( e: HTMLElementEvent< HTMLInputElement > ) => {
+				actions.setMaxPrice( e );
+				actions.navigate();
+			},
+			1000
+		),
 	},
-} );
+};
+const { state, actions } = store<
+	ProductFiltersStore &
+		ProductFilterPriceStore &
+		typeof productFilterPriceSliderStore
+>( 'woocommerce/product-filters', productFilterPriceSliderStore );

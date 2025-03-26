@@ -19,16 +19,14 @@ interface MobileAppLoginStepperPageProps {
 	sendMagicLinkStatus: SendMagicLinkStates;
 }
 
-export const MobileAppLoginStepperPage: React.FC<
-	MobileAppLoginStepperPageProps
-> = ( {
+export const MobileAppLoginStepperPage = ( {
 	appInstalledClicked,
 	isJetpackPluginInstalled,
 	wordpressAccountEmailAddress,
 	completeInstallationHandler,
 	sendMagicLinkHandler,
 	sendMagicLinkStatus,
-} ) => (
+}: MobileAppLoginStepperPageProps ) => (
 	<ModalContentLayoutWithTitle>
 		<div className="modal-subheader">
 			<h3>

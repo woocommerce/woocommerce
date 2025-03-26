@@ -31,7 +31,6 @@
 		"@octokit/types": "^9.3.2",
 		"@slack/web-api": "^6.10.0",
 		"@types/cli-table": "^0.3.4",
-		"@types/uuid": "^9.0.7",
 		"chalk": "^4.1.2",
 		"cli-table": "^0.3.11",
 		"commander": "^10.0.1",
@@ -47,8 +46,7 @@
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
 		"semver": "^7.5.4",
-		"simple-git": "^3.21.0",
-		"uuid": "^9.0.1"
+		"simple-git": "^3.21.0"
 	},
 	"devDependencies": {
 		"@types/jest": "27.5.x",

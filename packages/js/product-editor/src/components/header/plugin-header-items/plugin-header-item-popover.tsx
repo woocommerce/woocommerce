@@ -15,9 +15,11 @@ import PinnedItems from '@wordpress/interface/build-module/components/pinned-ite
 import { HEADER_PINNED_ITEMS_SCOPE } from '../../../constants';
 import { PluginHeaderItemPopoverProps } from './types';
 
-export const PluginHeaderItemPopover: React.FC<
-	PluginHeaderItemPopoverProps
-> = ( { children, label, icon } ) => {
+export const PluginHeaderItemPopover = ( {
+	children,
+	label,
+	icon,
+}: PluginHeaderItemPopoverProps ) => {
 	const [ isVisible, setVisible ] = useState( false );
 
 	const childrenToRender =

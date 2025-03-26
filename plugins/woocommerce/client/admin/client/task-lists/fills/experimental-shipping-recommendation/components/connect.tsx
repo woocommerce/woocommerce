@@ -12,7 +12,7 @@ type ConnectProps = {
 	onConnect?: () => void;
 };
 
-export const Connect: React.FC< ConnectProps > = ( { onConnect } ) => {
+export const Connect = ( { onConnect }: ConnectProps ) => {
 	return (
 		// @ts-expect-error TODO: convert ConnectForm to TypeScript
 		<ConnectForm
