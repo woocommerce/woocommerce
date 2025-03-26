@@ -10,7 +10,7 @@ import { createElement } from '@wordpress/element';
 import { FormSection } from '../';
 import Pill from '../../pill';
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	return (
 		<FormSection
 			title="My form section"
@@ -44,7 +44,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const CustomElements: React.FC = () => {
+export const CustomElements = () => {
 	return (
 		<FormSection
 			title={

@@ -12,12 +12,12 @@ import PinnedItems from '@wordpress/interface/build-module/components/pinned-ite
 import { HEADER_PINNED_ITEMS_SCOPE } from '../../../constants';
 import { PluginHeaderItemModalProps } from './types';
 
-export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
+export const PluginHeaderItemModal = ( {
 	children,
 	label,
 	icon,
 	title,
-} ) => {
+}: PluginHeaderItemModalProps ) => {
 	const [ isOpen, setOpen ] = useState( false );
 	const childrenToRender =
 		typeof children === 'function'

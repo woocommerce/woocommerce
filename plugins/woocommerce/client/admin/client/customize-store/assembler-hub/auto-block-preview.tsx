@@ -59,7 +59,7 @@ interface BlockListWithRenderAppender
 	renderAppender?: RenderAppenderType;
 }
 // This is used to avoid rendering the block list if the sizes change.
-let MemoizedBlockList: React.FC< BlockListWithRenderAppender >;
+let MemoizedBlockList: React.ComponentType< BlockListWithRenderAppender >;
 
 const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 const MAX_HEIGHT = 2000;

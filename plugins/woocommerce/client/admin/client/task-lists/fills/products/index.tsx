@@ -42,10 +42,13 @@ const getOnboardingProductType = (): string[] => {
 	);
 };
 
-const ViewControlButton: React.FC< {
+const ViewControlButton = ( {
+	isExpanded,
+	onClick,
+}: {
 	isExpanded: boolean;
 	onClick: () => void;
-} > = ( { isExpanded, onClick } ) => (
+} ) => (
 	<Button
 		className="woocommerce-task-products__button-view-less-product-types"
 		onClick={ onClick }

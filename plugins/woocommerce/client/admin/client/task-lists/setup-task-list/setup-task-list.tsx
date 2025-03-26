@@ -44,7 +44,7 @@ export type TaskListProps = TaskListType & {
 	cesHeader?: boolean;
 };
 
-export const SetupTaskList: React.FC< TaskListProps > = ( {
+export const SetupTaskList = ( {
 	query,
 	id,
 	eventName,
@@ -54,7 +54,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	displayProgressHeader,
 	cesHeader = true,
-} ) => {
+}: TaskListProps ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( onboardingStore );

@@ -160,7 +160,11 @@ const Blueprint = () => {
 						) }
 					/>
 					<span className="blueprint-settings-export-group-item-count">
-						{ group.items.length }
+						{
+							Object.values( checkedState[ group.id ] ).filter(
+								( checked ) => checked
+							).length
+						}
 					</span>
 
 					<CollapsibleContent
