@@ -29,7 +29,7 @@ const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
  * We use getElement to get the current element that triggered the action
  * to find the closest gallery container and scroll the image into view.
  * This is necessary because if you have two galleries on the same page with the same image IDs,
- * then we could trigger the wrong gallery's image into view.
+ * then we need to query the image in the correct gallery to avoid scrolling the wrong image into view.
  *
  * @param {string} imageId - The ID of the image to scroll into view.
  */
