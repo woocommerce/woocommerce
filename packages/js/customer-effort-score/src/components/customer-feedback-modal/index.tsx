@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, useState } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import {
 	Button,
 	Modal,
@@ -12,48 +11,7 @@ import {
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Provides a modal requesting customer feedback.
- *
- * A label is displayed in the modal asking the customer to score the
- * difficulty completing a task. A group of radio buttons, styled with
- * emoji facial expressions, are used to provide a score between 1 and 5.
- *
- * A low score triggers a comments field to appear.
- *
- * Upon completion, the score and comments is sent to a callback function.
- *
- * @param {Object}   props                         Component props.
- * @param {Function} props.recordScoreCallback     Function to call when the results are sent.
- * @param {string}   props.title                   Title displayed in the modal.
- * @param {string}   props.description             Description displayed in the modal.
- * @param {boolean}  props.showDescription         Show description in the modal.
- * @param {string}   props.firstQuestion           The first survey question.
- * @param {string}   [props.secondQuestion]        An optional second survey question.
- * @param {string}   props.defaultScore            Default score.
- * @param {Function} props.onCloseModal            Callback for when user closes modal by clicking cancel.
- * @param {Function} props.customOptions           List of custom score options, contains label and value.
- * @param {Function} props.shouldShowComments      A function to determine whether or not the comments field shown be shown.
- * @param {Function} props.getExtraFieldsToBeShown Function that returns the extra fields to be shown.
- * @param {Function} props.validateExtraFields     Function that validates the extra fields.
- */
-function CustomerFeedbackModal( {
-	recordScoreCallback,
-	title = __( 'Please share your feedback', 'woocommerce' ),
-	description,
-	showDescription = true,
-	firstQuestion,
-	secondQuestion,
-	defaultScore = NaN,
-	onCloseModal,
-	customOptions,
-	shouldShowComments = ( firstQuestionScore, secondQuestionScore ) =>
-		[ firstQuestionScore, secondQuestionScore ].some(
-			( score ) => score === 1 || score === 2
-		),
-	getExtraFieldsToBeShown,
-	validateExtraFields,
-}: {
+export type CustomerFeedbackModalProps = {
 	recordScoreCallback: (
 		score: number,
 		secondScore: number,
@@ -80,7 +38,50 @@ function CustomerFeedbackModal( {
 	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
 		[ key: string ]: string;
 	};
-} ): JSX.Element | null {
+};
+
+/**
+ * Provides a modal requesting customer feedback.
+ *
+ * A label is displayed in the modal asking the customer to score the
+ * difficulty completing a task. A group of radio buttons, styled with
+ * emoji facial expressions, are used to provide a score between 1 and 5.
+ *
+ * A low score triggers a comments field to appear.
+ *
+ * Upon completion, the score and comments is sent to a callback function.
+ *
+ * @param {Object}   props                         Component props.
+ * @param {Function} props.recordScoreCallback     Function to call when the results are sent.
+ * @param {string}   props.title                   Title displayed in the modal.
+ * @param {string}   props.description             Description displayed in the modal.
+ * @param {boolean}  props.showDescription         Show description in the modal.
+ * @param {string}   props.firstQuestion           The first survey question.
+ * @param {string}   [props.secondQuestion]        An optional second survey question.
+ * @param {string}   props.defaultScore            Default score.
+ * @param {Function} props.onCloseModal            Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.customOptions           List of custom score options, contains label and value.
+ * @param {Function} props.shouldShowComments      A function to determine whether or not the comments field shown be shown.
+ * @param {Function} props.getExtraFieldsToBeShown Function that returns the extra fields to be shown.
+ * @param {Function} props.validateExtraFields     Function that validates the extra fields.
+ */
+export function CustomerFeedbackModal( {
+	recordScoreCallback,
+	title = __( 'Please share your feedback', 'woocommerce' ),
+	description,
+	showDescription = true,
+	firstQuestion,
+	secondQuestion,
+	defaultScore = NaN,
+	onCloseModal,
+	customOptions,
+	shouldShowComments = ( firstQuestionScore, secondQuestionScore ) =>
+		[ firstQuestionScore, secondQuestionScore ].some(
+			( score ) => score === 1 || score === 2
+		),
+	getExtraFieldsToBeShown,
+	validateExtraFields,
+}: CustomerFeedbackModalProps ): JSX.Element | null {
 	const options =
 		customOptions && customOptions.length > 0
 			? customOptions
@@ -305,16 +306,3 @@ function CustomerFeedbackModal( {
 		</Modal>
 	);
 }
-
-CustomerFeedbackModal.propTypes = {
-	recordScoreCallback: PropTypes.func.isRequired,
-	title: PropTypes.string,
-	firstQuestion: PropTypes.string.isRequired,
-	secondQuestion: PropTypes.string,
-	defaultScore: PropTypes.number,
-	onCloseModal: PropTypes.func,
-	getExtraFieldsToBeShown: PropTypes.func,
-	validateExtraFields: PropTypes.func,
-};
-
-export { CustomerFeedbackModal };
