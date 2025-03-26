@@ -166,3 +166,27 @@ export const getMccsFlatList = (
 		];
 	}, [] as ListItem[] );
 };
+
+export const completeSubStep = (
+	name: string,
+	href: string | undefined,
+	data: Record< string, {
+		status: string;
+	} >
+) => {
+	// Send POST request to the href with the Business Verification completed status
+	if ( href ) {
+		apiFetch( {
+			url: href,
+			method: 'POST',
+			data: {
+				sub_steps: {
+					...data,
+					[name]: {
+						status: 'completed',
+					},
+				},
+			},
+		} );
+	}
+}

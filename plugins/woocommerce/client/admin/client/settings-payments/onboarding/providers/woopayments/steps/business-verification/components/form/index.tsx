@@ -4,10 +4,12 @@
 import React from 'react';
 import { Button } from '@wordpress/components';
 import { isEmpty, mapValues } from 'lodash';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
+import { useOnboardingContext } from '../../../../data/onboarding-context';
 import { useStepperContext } from '../stepper';
 import { Item as SelectItem } from '../../../../components/custom-select-control';
 import { ListItem as GroupedSelectItem } from '../../../../components/grouped-select-control';
@@ -21,6 +23,7 @@ import {
 } from './fields';
 import { useBusinessVerificationContext } from '../../data/business-verification-context';
 import { OnboardingFields } from '../../types';
+import { completeSubStep } from '../../utils';
 import { useValidation } from '../../utils/validation';
 import strings from '../../strings';
 import './style.scss';
@@ -33,11 +36,20 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 	children,
 } ) => {
 	const { errors, touched, setTouched } = useBusinessVerificationContext();
-	const { currentStep, nextStep } = useStepperContext();
+	const { currentStep } = useOnboardingContext();
+	const { nextStep } = useStepperContext();
 
 	const handleContinue = () => {
 		if ( isEmpty( errors ) ) {
-			// To-Do: Add tracking for each step completion
+			// To-Do: Add tracking for the KYC step completion.
+
+			// Complete business sub step.
+			completeSubStep(
+				'business',
+				currentStep?.actions?.save?.href ?? undefined,
+				currentStep?.context?.sub_steps ?? {}
+			)
+
 			return nextStep();
 		}
 		setTouched( mapValues( touched, () => true ) );

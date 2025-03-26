@@ -75,6 +75,9 @@ export interface WooPaymentsProviderOnboardingStep {
 			available_countries: Record< string, string >;
 		};
 		self_assessment: Record< string, string >;
+		sub_steps: Record< string, { 
+			status: 'completed' | 'not_started' | 'started'; 
+		} >;
 	};
 }
 
