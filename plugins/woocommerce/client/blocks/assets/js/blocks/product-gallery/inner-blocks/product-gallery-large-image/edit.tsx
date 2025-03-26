@@ -4,7 +4,6 @@
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useProductDataContext } from '@woocommerce/shared-context';
-import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies
@@ -29,7 +28,7 @@ const ProductImage = ( { image }: { image: { src: string; alt: string } } ) => {
 	);
 };
 
-export const Edit = (): ReactElement => {
+export const Edit = () => {
 	const productContext = useProductDataContext();
 	const firstImage = productContext?.product?.images?.[ 0 ];
 	const image = {
