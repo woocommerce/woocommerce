@@ -389,9 +389,19 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-add-to-cart' );
 		}
 
-		if ( ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) ) {
-			global $product;
-			if ( $product->is_purchasable() && ! in_array( $product->get_type(), array( 'external', 'grouped' ), true ) ) {
+		if (
+			! wp_is_block_theme() &&
+			is_product() &&
+			'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' )
+		) {
+			$product = wc_get_product( get_the_ID() );
+
+			if (
+				$product instanceof \WC_Product &&
+				$product->is_purchasable() &&
+				$product->is_in_stock() &&
+				! in_array( $product->get_type(), array( 'external', 'grouped' ), true )
+			) {
 				self::enqueue_script( 'wc-ajax-add-to-cart' );
 			}
 		}
