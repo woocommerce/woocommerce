@@ -121,20 +121,18 @@ final class ProductFilterAttribute extends AbstractBlock {
 			if ( empty( $params[ "filter_{$product_attribute}" ] ) ) {
 				continue;
 			}
-			$terms           = explode( ',', $params[ "filter_{$product_attribute}" ] );
-			$attribute_label = wc_attribute_label( "pa_{$product_attribute}" );
+			$terms                = explode( ',', $params[ "filter_{$product_attribute}" ] );
+			$attribute_label      = wc_attribute_label( "pa_{$product_attribute}" );
+			$attribute_query_type = $params[ "query_type_{$product_attribute}" ] ?? 'or';
 
 			// Get attribute term by slug.
 			foreach ( $terms as $term ) {
 				$term_object = get_term_by( 'slug', $term, "pa_{$product_attribute}" );
 				$items[]     = array(
-					'type'      => 'attribute',
-					'value'     => $term,
-					'label'     => $attribute_label . ': ' . $term_object->name,
-					'attribute' => array(
-						'slug'      => $product_attribute,
-						'queryType' => 'or',
-					),
+					'type'               => 'attribute/' . $product_attribute,
+					'value'              => $term,
+					'activeLabel'        => "$attribute_label: $term_object->name",
+					'attributeQueryType' => $attribute_query_type,
 				);
 			}
 		}
@@ -160,8 +158,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 		if ( is_admin() || wp_doing_ajax() || empty( $block_attributes['attributeId'] ) ) {
 			return '';
 		}
-
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
 		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
@@ -191,48 +187,44 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$selected_terms = array_filter( explode( ',', $filter_params[ $filter_param_key ] ) );
 		}
 
-		$filter_context = array();
+		$filter_context = array(
+			'showCounts' => $block_attributes['showCounts'] ?? false,
+			'items'      => array(),
+		);
 
 		if ( ! empty( $attribute_counts ) ) {
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 					return array(
-						'label'     => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
-						'ariaLabel' => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
-						'value'     => $term['slug'],
-						'selected'  => in_array( $term['slug'], $selected_terms, true ),
-						'type'      => 'attribute',
-						'data'      => $term,
+						'label'              => $term['name'],
+						'ariaLabel'          => $term['name'],
+						'value'              => $term['slug'],
+						'selected'           => in_array( $term['slug'], $selected_terms, true ),
+						'count'              => $term['count'],
+						'type'               => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+						'attributeQueryType' => $block_attributes['queryType'],
 					);
 				},
 				$attribute_terms
 			);
 
-			$filter_context = array(
-				'items'  => $attribute_options,
-				'parent' => $this->get_full_block_name(),
-			);
+			$filter_context['items'] = $attribute_options;
 		}
 
-		$context = array(
-			'attributeSlug'       => str_replace( 'pa_', '', $product_attribute->slug ),
-			'queryType'           => $block_attributes['queryType'],
-			'selectType'          => 'multiple',
-			'hasFilterOptions'    => ! empty( $filter_context ),
-			/* translators: {{label}} is the product attribute filter item label. */
-			'activeLabelTemplate' => "{$product_attribute->name}: {{label}}",
-		);
-
 		$wrapper_attributes = array(
-			'data-wp-interactive'  => $this->get_full_block_name(),
-			'data-wp-key'          => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
-			'data-wp-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wp-bind--hidden' => '!context.hasFilterOptions',
+			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context' => wp_json_encode(
+				array(
+					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
+					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
 		);
 
-		if ( empty( $filter_context ) ) {
+		if ( empty( $filter_context['items'] ) ) {
 			$wrapper_attributes['hidden'] = true;
 		}
 

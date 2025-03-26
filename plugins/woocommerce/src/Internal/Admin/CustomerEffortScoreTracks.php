@@ -350,7 +350,7 @@ class CustomerEffortScoreTracks {
 			array(
 				'action'         => self::PRODUCT_ADD_PUBLISH_ACTION_NAME,
 				'title'          => __(
-					'How easy was it to add a product?',
+					'🎉 Congrats on adding your first product!',
 					'woocommerce'
 				),
 				'firstQuestion'  => __(

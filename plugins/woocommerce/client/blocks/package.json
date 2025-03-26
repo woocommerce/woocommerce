@@ -104,12 +104,12 @@
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
-		"@babel/cli": "7.23.0",
-		"@babel/core": "7.23.2",
-		"@babel/plugin-syntax-jsx": "7.22.5",
+		"@babel/cli": "7.25.7",
+		"@babel/core": "7.25.7",
+		"@babel/plugin-syntax-jsx": "7.25.7",
 		"@babel/polyfill": "7.12.1",
-		"@babel/preset-react": "7.23.3",
-		"@babel/preset-typescript": "7.23.3",
+		"@babel/preset-react": "7.25.7",
+		"@babel/preset-typescript": "7.25.7",
 		"@bartekbp/typescript-checkstyle": "5.0.0",
 		"@playwright/test": "^1.50.1",
 		"@storybook/addon-a11y": "7.5.2",
@@ -144,7 +144,6 @@
 		"@types/wordpress__block-library": "2.6.3",
 		"@types/wordpress__blocks": "11.0.9",
 		"@types/wordpress__components": "^23.0.10",
-		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.2",
 		"@types/wordpress__data-controls": "2.2.0",
 		"@types/wordpress__editor": "^13.6.7",
@@ -164,8 +163,8 @@
 		"@wordpress/block-library": "wp-6.6",
 		"@wordpress/blocks": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
-		"@wordpress/components": "19.17.0",
-		"@wordpress/core-data": "5.5.0",
+		"@wordpress/components": "wp-6.6",
+		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data-controls": "2.2.7",
 		"@wordpress/date": "4.44.0",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
@@ -202,7 +201,6 @@
 		"circular-dependency-plugin": "5.2.2",
 		"copy-webpack-plugin": "11.0.0",
 		"core-js": "3.25.0",
-		"create-file-webpack": "1.0.2",
 		"cross-env": "7.0.3",
 		"css-loader": "^6.8.1",
 		"cssnano": "5.1.12",
@@ -278,7 +276,7 @@
 		"@wordpress/notices": "5.15.1",
 		"@wordpress/plugins": "4.10.0",
 		"@wordpress/primitives": "4.11.0",
-		"@wordpress/server-side-render": "3.10.0",
+		"@wordpress/server-side-render": "wp-6.6",
 		"@wordpress/style-engine": "^1.30.0",
 		"@wordpress/url": "3.13.0",
 		"@wordpress/wordcount": "3.47.0",
@@ -331,8 +329,7 @@
 		]
 	},
 	"files": [
-		"build",
-		"blocks.ini"
+		"build"
 	],
 	"config": {
 		"ci": {
@@ -390,8 +387,7 @@
 				"packages"
 			],
 			"output": [
-				"build",
-				"blocks.ini"
+				"build"
 			],
 			"dependencies": [
 				"dependencyOutputs"

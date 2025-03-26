@@ -34,12 +34,12 @@
 		"fishery": "^1.4.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "7.12.8",
-		"@babel/core": "7.12.9",
-		"@babel/plugin-transform-react-jsx": "^7.23.4",
-		"@babel/plugin-transform-runtime": "^7.23.4",
+		"@babel/cli": "7.25.7",
+		"@babel/core": "7.25.7",
+		"@babel/plugin-transform-react-jsx": "7.25.7",
+		"@babel/plugin-transform-runtime": "7.25.7",
 		"@babel/polyfill": "7.12.1",
-		"@babel/preset-env": "^7.23.5",
+		"@babel/preset-env": "7.25.7",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"@woocommerce/e2e-environment": "workspace:*",

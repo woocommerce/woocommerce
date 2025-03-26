@@ -11,17 +11,14 @@
 	"textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ],
 	"attributes": {
-		"numberOfThumbnails": {
-			"type": "number",
-			"default": 3
+		"thumbnailSize": {
+			"type": "string",
+			"default": "33%"
 		}
 	},
 	"supports": {
 		"spacing": {
-			"margin": true,
-			"__experimentalDefaultControls": {
-				"margin": true
-			}
+			"margin": true
 		}
 	}
 }

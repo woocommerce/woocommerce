@@ -121,10 +121,12 @@ class PaymentsController {
 	public function add_menu() {
 		global $menu;
 
-		// The WooPayments plugin must not be active.
-		// When active, WooPayments will own the Payments menu item since it is the native Woo payments solution.
-		if ( $this->is_woopayments_active() ) {
+		// When WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
+		if ( $this->is_woopayments_account_onboarded() ) {
 			return;
+		} else {
+			// Otherwise, remove Payments menu item linking to the connect page to avoid Payments menu item duplication.
+			remove_menu_page( 'wc-admin&path=/payments/connect' );
 		}
 
 		$menu_title = esc_html__( 'Payments', 'woocommerce' );
@@ -306,11 +308,26 @@ class PaymentsController {
 	}
 
 	/**
-	 * Check if the WooPayments plugin is active.
+	 * Check if the WooPayments account is onboarded.
 	 *
 	 * @return boolean
 	 */
-	private function is_woopayments_active(): bool {
-		return class_exists( '\WC_Payments' );
+	private function is_woopayments_account_onboarded(): bool {
+		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
+		if ( ! class_exists( '\WC_Payments' ) ) {
+			return false;
+		}
+
+		$account_data = get_option( 'wcpay_account_data', array() );
+		if ( empty( $account_data['data']['account_id'] ) ) {
+			return false;
+		}
+
+		if ( empty( $account_data['data']['details_submitted'] ) ) {
+			return false;
+		}
+		// We consider the store to have WooPayments account connected if account data in the WooPayments account cache
+		// contains details_submitted = true entry. This implies that WooPayments was connected.
+		return $account_data['data']['details_submitted'];
 	}
 }

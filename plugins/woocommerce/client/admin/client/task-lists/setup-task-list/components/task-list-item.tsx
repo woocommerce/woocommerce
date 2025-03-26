@@ -18,13 +18,13 @@ export type TaskListItemProps = {
 	trackClick: () => void;
 };
 
-export const TaskListItem: React.FC< TaskListItemProps > = ( {
+export const TaskListItem = ( {
 	task,
 	activeTaskId,
 	taskIndex,
 	goToTask,
 	trackClick,
-} ) => {
+}: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { dismissTask, undoDismissTask } = useDispatch( onboardingStore );
 
