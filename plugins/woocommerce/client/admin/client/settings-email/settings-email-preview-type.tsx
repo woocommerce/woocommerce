@@ -15,11 +15,11 @@ type EmailPreviewTypeProps = {
 	setEmailType: ( emailType: string ) => void;
 };
 
-export const EmailPreviewType: React.FC< EmailPreviewTypeProps > = ( {
+export const EmailPreviewType = ( {
 	emailTypes,
 	emailType,
 	setEmailType,
-} ) => {
+}: EmailPreviewTypeProps ) => {
 	return (
 		<div className="wc-settings-email-preview-type wc-settings-prevent-change-event">
 			<SelectControl

@@ -14,9 +14,11 @@ import { useLayoutContext } from '@woocommerce/admin-layout';
 import './woocommerce-shipping-item.scss';
 import WooIcon from './woo-icon.svg';
 
-const WooCommerceShippingItem: React.FC< {
+const WooCommerceShippingItem = ( {
+	isPluginInstalled,
+}: {
 	isPluginInstalled: boolean | undefined;
-} > = ( { isPluginInstalled } ) => {
+} ) => {
 	const { layoutString } = useLayoutContext();
 
 	const handleSetupClick = () => {

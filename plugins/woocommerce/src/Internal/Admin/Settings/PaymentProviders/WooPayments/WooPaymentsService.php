@@ -208,6 +208,7 @@ class WooPaymentsService {
 			'errors'         => array(),
 			'context'        => array(
 				'fields'          => $this->get_onboarding_kyc_fields(),
+				'sub_steps'       => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps' ),
 				'self_assessment' => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' ),
 			),
 		);
@@ -260,41 +261,28 @@ class WooPaymentsService {
 				}
 				break;
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
-				if ( ! $this->has_account() ) {
-					return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
-				}
-
 				// A valid, fully onboarded account that is a test account marks this step as complete.
 				if ( $this->has_valid_account() && $this->has_test_account() ) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
 				break;
 			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
-				// If no account or the current account is a test account,
-				// then we didn't start the live account business verification.
-				if ( ! $this->has_account() || $this->has_test_account() ) {
-					return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
-				}
-
 				// If the current account is fully onboarded and is not a test account,
 				// we consider the business verification step as completed.
-				if ( $this->has_valid_account() ) {
+				if ( $this->has_valid_account() && ! $this->has_test_account() ) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
 				break;
 		}
 
-		// Second, try to determine the status of the onboarding step based on the saved data.
-		$nox_profile = get_option( self::NOX_PROFILE_OPTION_KEY, array() );
-		if ( ! empty( $nox_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'] ) ) {
-			// We take a waterfall approach, where completed supersedes started.
-			$step_statuses = $nox_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'];
-			if ( ! empty( $step_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
-				return self::ONBOARDING_STEP_STATUS_COMPLETED;
-			}
-			if ( ! empty( $step_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-				return self::ONBOARDING_STEP_STATUS_STARTED;
-			}
+		// Second, try to determine the status of the onboarding step based on the step's stored data.
+		$step_statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		// We take a waterfall approach, where completed supersedes started.
+		if ( ! empty( $step_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
+			return self::ONBOARDING_STEP_STATUS_COMPLETED;
+		}
+		if ( ! empty( $step_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
+			return self::ONBOARDING_STEP_STATUS_STARTED;
 		}
 
 		// Finally, we default to not started.
@@ -310,7 +298,7 @@ class WooPaymentsService {
 	 * @param bool   $overwrite Whether to overwrite the step status if it is already started and update the timestamp.
 	 *
 	 * @return bool Whether the onboarding step was marked as started.
-	 * @throws Exception If the given onboarding step ID is invalid.
+	 * @throws Exception If the given onboarding step ID is invalid or step requirements are not met.
 	 */
 	public function set_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
 		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
@@ -322,20 +310,16 @@ class WooPaymentsService {
 			throw new Exception( 'Onboarding step can no be started because requirements are not met.' );
 		}
 
-		$step_details = $this->get_nox_profile_onboarding_step( $step_id, $location );
-		if ( empty( $step_details['statuses'] ) ) {
-			$step_details['statuses'] = array();
-		}
-
-		if ( ! $overwrite && ! empty( $step_details['statuses'][ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		if ( ! $overwrite && ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
 			return true;
 		}
 
 		// Mark the step as started and record the timestamp.
-		$step_details['statuses'][ self::ONBOARDING_STEP_STATUS_STARTED ] = time();
+		$statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] = time();
 
 		// Store the updated step data.
-		return $this->save_nox_profile_onboarding_step( $step_id, $location, $step_details );
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
 	}
 
 	/**
@@ -359,20 +343,16 @@ class WooPaymentsService {
 			throw new Exception( 'Onboarding step requirements are not met.' );
 		}
 
-		$step_details = $this->get_nox_profile_onboarding_step( $step_id, $location );
-		if ( empty( $step_details['statuses'] ) ) {
-			$step_details['statuses'] = array();
-		}
-
-		if ( ! $overwrite && ! empty( $step_details['statuses'][ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		if ( ! $overwrite && ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
 			return true;
 		}
 
 		// Mark the step as completed and record the timestamp.
-		$step_details['statuses'][ self::ONBOARDING_STEP_STATUS_COMPLETED ] = time();
+		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = time();
 
 		// Store the updated step data.
-		return $this->save_nox_profile_onboarding_step( $step_id, $location, $step_details );
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
 	}
 
 	/**
@@ -391,26 +371,31 @@ class WooPaymentsService {
 			throw new Exception( 'Invalid onboarding step ID.' );
 		}
 
+		// Validate the received step data.
+		// If we didn't receive any known data for the step, we consider it an invalid save operation.
+		if ( ! $this->is_valid_onboarding_step_data( $step_id, $request_data ) ) {
+			throw new Exception( 'Invalid onboarding step data.' );
+		}
+
 		$step_details = $this->get_nox_profile_onboarding_step( $step_id, $location );
 		if ( empty( $step_details['data'] ) ) {
 			$step_details['data'] = array();
 		}
 
-		// We support save for only certain steps, each with its own data structure.
+		// Extract the data for the step.
 		switch ( $step_id ) {
 			case self::ONBOARDING_STEP_PAYMENT_METHODS:
-				if ( ! isset( $request_data['payment_methods'] ) || ! is_array( $request_data['payment_methods'] ) ) {
-					throw new Exception( 'Invalid onboarding step data.' );
+				if ( isset( $request_data['payment_methods'] ) ) {
+					$step_details['data']['payment_methods'] = $request_data['payment_methods'];
 				}
-
-				$step_details['data']['payment_methods'] = $request_data['payment_methods'];
 				break;
 			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
-				if ( ! isset( $request_data['self_assessment'] ) || ! is_array( $request_data['self_assessment'] ) ) {
-					throw new Exception( 'Invalid onboarding step data.' );
+				if ( isset( $request_data['self_assessment'] ) ) {
+					$step_details['data']['self_assessment'] = $request_data['self_assessment'];
 				}
-
-				$step_details['data']['self_assessment'] = $request_data['self_assessment'];
+				if ( isset( $request_data['sub_steps'] ) ) {
+					$step_details['data']['sub_steps'] = $request_data['sub_steps'];
+				}
 				break;
 			default:
 				throw new Exception( 'Invalid onboarding step ID.' );
@@ -418,6 +403,52 @@ class WooPaymentsService {
 
 		// Store the updated step data.
 		return $this->save_nox_profile_onboarding_step( $step_id, $location, $step_details );
+	}
+
+	/**
+	 * Check if the given onboarding step data is valid.
+	 *
+	 * If we didn't receive any known data for the step, we consider it invalid.
+	 *
+	 * @param string $step_id      The ID of the onboarding step.
+	 * @param array  $request_data The entire data received in the request.
+	 *
+	 * @return bool Whether the given onboarding step data is valid.
+	 */
+	public function is_valid_onboarding_step_data( string $step_id, array $request_data ): bool {
+		switch ( $step_id ) {
+			case self::ONBOARDING_STEP_PAYMENT_METHODS:
+				// Check that we have at least one piece of data.
+				if ( ! isset( $request_data['payment_methods'] ) ) {
+					return false;
+				}
+
+				// Check that the data is in the expected format.
+				if ( ! is_array( $request_data['payment_methods'] ) ) {
+					return false;
+				}
+				break;
+			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+				// Check that we have at least one piece of data.
+				if ( ! isset( $request_data['self_assessment'] ) &&
+					! isset( $request_data['sub_steps'] ) ) {
+					return false;
+				}
+
+				// Check that the data is in the expected format.
+				if ( isset( $request_data['self_assessment'] ) && ! is_array( $request_data['self_assessment'] ) ) {
+					return false;
+				}
+				if ( isset( $request_data['sub_steps'] ) && ! is_array( $request_data['sub_steps'] ) ) {
+					return false;
+				}
+				break;
+			default:
+				// If we don't know how to validate the data, we assume it is valid.
+				return true;
+		}
+
+		return true;
 	}
 
 	/**
@@ -790,9 +821,10 @@ class WooPaymentsService {
 	 * @param string $entry         The entry to get from the step `data`.
 	 * @param mixed  $default_value The default value to return if the entry is not found.
 	 *
-	 * @return mixed The entry from the NOX profile step details. If the entry is not found, the default value is returned.
+	 * @return mixed The entry value from the NOX profile stored step data.
+	 *               If the entry is not found, the default value is returned.
 	 */
-	private function get_nox_profile_onboarding_step_data_entry( string $step_id, string $location, string $entry, $default_value = array() ): array {
+	private function get_nox_profile_onboarding_step_data_entry( string $step_id, string $location, string $entry, $default_value = false ) {
 		$step_details_data = $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'data' );
 
 		if ( ! isset( $step_details_data[ $entry ] ) ) {
@@ -809,11 +841,11 @@ class WooPaymentsService {
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
 	 * @param string $entry    The entry key under which to save in the step `data`.
-	 * @param array  $data     The data to save.
+	 * @param mixed  $data     The value to save.
 	 *
 	 * @return bool Whether the onboarding step data was saved.
 	 */
-	private function save_nox_profile_onboarding_step_data_entry( string $step_id, string $location, string $entry, array $data ): bool {
+	private function save_nox_profile_onboarding_step_data_entry( string $step_id, string $location, string $entry, $data ): bool {
 		$step_details_data = $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'data' );
 
 		// Update the stored step data.

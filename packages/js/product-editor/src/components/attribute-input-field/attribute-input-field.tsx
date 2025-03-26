@@ -21,7 +21,7 @@ import {
 	UseComboboxGetMenuPropsOptions,
 } from './types';
 
-export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
+export const AttributeInputField = ( {
 	value = null,
 	items = [],
 	isLoading,
@@ -31,7 +31,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	disabled,
 	disabledAttributeMessage,
 	createNewAttributesAsGlobal = false,
-} ) => {
+}: AttributeInputFieldProps ) => {
 	const getFilteredItems = (
 		allItems: AttributeInputFieldItemProps[],
 		inputValue: string

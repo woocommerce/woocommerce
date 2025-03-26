@@ -45,9 +45,7 @@ const validateLocationForm = ( values: FormValues ) => {
 	return errors;
 };
 
-export const StoreLocation: React.FC< {
-	nextStep: () => void;
-} > = ( { nextStep } ) => {
+export const StoreLocation = ( { nextStep }: { nextStep: () => void } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 	const { generalSettings, isResolving, isUpdating } = useSelect(

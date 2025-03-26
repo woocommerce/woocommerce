@@ -32,12 +32,13 @@ export const EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME =
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooCYSSecondaryButton: React.FC< {
+export const WooCYSSecondaryButton = ( {
+	children,
+	order = 1,
+}: {
 	children?: React.ReactNode;
 	order?: number;
-} > & {
-	Slot: React.FC< React.ComponentProps< typeof Slot > >;
-} = ( { children, order = 1 } ) => {
+} ) => {
 	return (
 		<Fill
 			name={
@@ -51,7 +52,11 @@ export const WooCYSSecondaryButton: React.FC< {
 	);
 };
 
-WooCYSSecondaryButton.Slot = ( { fillProps } ) => (
+WooCYSSecondaryButton.Slot = ( {
+	fillProps,
+}: {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => (
 	<Slot
 		name={
 			EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME
