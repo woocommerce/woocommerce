@@ -13,7 +13,6 @@ import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { finalizeOnboarding, isPoEligible } from '../utils';
-import { trackEmbeddedStepChange } from '../utils/tracking';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
 
 interface Props {
@@ -47,7 +46,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	}, [ continueKyc, data ] );
 
 	const handleStepChange = ( step: string ) => {
-		trackEmbeddedStepChange( step );
+		// To-Do: Track step change.
 	};
 
 	const handleOnExit = async () => {

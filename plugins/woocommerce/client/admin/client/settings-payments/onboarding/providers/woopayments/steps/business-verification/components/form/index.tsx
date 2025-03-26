@@ -22,7 +22,6 @@ import {
 import { useBusinessVerificationContext } from '../../data/business-verification-context';
 import { OnboardingFields } from '../../types';
 import { useValidation } from '../../utils/validation';
-import { trackStepCompleted } from '../../utils/tracking';
 import strings from '../../strings';
 import './style.scss';
 
@@ -38,7 +37,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 
 	const handleContinue = () => {
 		if ( isEmpty( errors ) ) {
-			trackStepCompleted( currentStep );
+			// To-Do: Add tracking for each step completion
 			return nextStep();
 		}
 		setTouched( mapValues( touched, () => true ) );

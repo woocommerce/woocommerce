@@ -20,7 +20,6 @@ import { createKycAccountSession } from './hooks';
 import appearance from './appearance';
 import { OnboardingFields } from '../../types';
 import BannerNotice from '../../../../components/banner-notice';
-import { trackRedirected } from '../../utils/tracking';
 
 interface EmbeddedComponentProps {
 	onLoaderStart?: ( { elementTagName }: LoaderStart ) => void;
@@ -62,8 +61,7 @@ const useInitializeStripe = (
 					isPoEligible
 				);
 
-				// Track the embedded component redirection event.
-				trackRedirected( isPoEligible, true );
+				// To-Do: Track the embedded component redirection event.
 
 				const { clientSecret, publishableKey } = accountSession.session;
 
