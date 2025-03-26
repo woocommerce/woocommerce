@@ -118,7 +118,7 @@ export const isPoEligible = async (
 export const getMccFromIndustry = (
 	industryToMcc: MccsDisplayTreeItem[]
 ): MccsDisplayTreeItem | undefined => {
-	const industry = wcSettings.admin?.onboarding?.profile?.industry?.[ 0 ];
+	const industry = window.wcSettings.admin?.onboarding?.profile?.industry?.[ 0 ];
 	if ( ! industry ) {
 		return undefined;
 	}

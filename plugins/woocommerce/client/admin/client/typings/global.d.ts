@@ -38,6 +38,11 @@ declare global {
 				currentUserId: number;
 				blueprint_upload_nonce?: string;
 				blueprint_max_step_size_bytes?: number;
+				onboarding?: {
+					profile?: {
+						industry?: number[]
+					}
+				}
 			};
 		};
 		wcAdminFeatures: {
