@@ -13,6 +13,9 @@ import * as actions from '../actions';
 import reducer from '../reducer';
 import type { SettingsState } from '../types';
 import { Setting, SettingsGroup } from '../types';
+// @ts-expect-error WP core data doesn't explicitly export the actions
+// eslint-disable-next-line @woocommerce/dependency-group
+import createLocksActions from '@wordpress/core-data/build/locks/actions';
 
 /**
  * Creates a fresh registry and store for testing.
@@ -34,7 +37,10 @@ export const createTestRegistryAndStore = () => {
 
 	const store = registry.registerStore( STORE_NAME, {
 		reducer,
-		actions,
+		actions: {
+			...actions,
+			...createLocksActions(),
+		},
 		controls,
 		selectors,
 		initialState, // Pass initial state to ensure fresh state each time

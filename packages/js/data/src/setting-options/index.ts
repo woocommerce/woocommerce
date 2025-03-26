@@ -6,6 +6,7 @@ import { controls } from '@wordpress/data-controls';
 // @ts-expect-error WP core data doesn't explicitly export the actions
 // eslint-disable-next-line @woocommerce/dependency-group
 import createLocksActions from '@wordpress/core-data/build/locks/actions';
+
 /**
  * Internal dependencies
  */
