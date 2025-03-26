@@ -13,7 +13,7 @@ import {
 } from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
-import { useMOXContext } from '../data/mox-context';
+import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { finalizeOnboarding, isPoEligible } from '../utils';
 import { trackEmbeddedStepChange } from '../utils/tracking';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
@@ -27,7 +27,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	continueKyc = false,
 	collectPayoutRequirements = false,
 } ) => {
-	const { data } = useMOXContext();
+	const { data } = useBusinessVerificationContext();
 	const { navigateToNextStep } = useOnboardingContext();
 	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
 	const [ isEligible, setIsEligible ] = useState< boolean | null >( null );

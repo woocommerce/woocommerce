@@ -7,7 +7,7 @@ import { useEffect } from 'react';
  * Internal dependencies
  */
 import strings from '../strings';
-import { useMOXContext } from '../data/mox-context';
+import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { OnboardingFields } from '../types';
 
 const isValid = ( name: keyof OnboardingFields, value?: string ): boolean => {
@@ -28,7 +28,7 @@ export const useValidation = ( name: keyof OnboardingFields ) => {
 		setErrors,
 		touched,
 		setTouched,
-	} = useMOXContext();
+	} = useBusinessVerificationContext();
 
 	const validate = ( value: string | undefined = data[ name ] ) => {
 		if ( ! touched[ name ] ) setTouched( { [ name ]: true } );

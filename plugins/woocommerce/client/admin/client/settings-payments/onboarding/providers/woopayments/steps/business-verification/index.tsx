@@ -11,7 +11,7 @@ import {
 	useOnboardingContext,
 } from '../../data/onboarding-context';
 import WooPaymentsStepHeader from '../../components/header';
-import { MOXContextProvider } from './data/mox-context';
+import { BusinessVerificationContextProvider } from './data/business-verification-context';
 import { OnboardingForm } from './components/form';
 import BusinessDetails from './steps/business-details';
 import EmbeddedKyc from './steps/embedded-kyc';
@@ -21,7 +21,7 @@ import { getMccFromIndustry } from './utils';
 import { MccsDisplayTreeItem } from './types'; 
 import './style.scss';
 
-export const MOXStep: React.FC = () => {
+export const BusinessVerificationStep: React.FC = () => {
 	const { currentStep } = useOnboardingContext();
 
     const initialData = {
@@ -38,8 +38,8 @@ export const MOXStep: React.FC = () => {
 		<>
 			<WooPaymentsStepHeader onClose={ () => {} } />
 
-            <div className="settings-payments-onboarding-modal__step-mox-content">
-                <MOXContextProvider initialData={ initialData }>
+            <div className="settings-payments-onboarding-modal__step-business-verification-content">
+                <BusinessVerificationContextProvider initialData={ initialData }>
                     <Stepper onStepChange={ handleStepChange } onExit={ () => {} }>
                         <Step name="business">
                             <OnboardingForm>
@@ -50,10 +50,10 @@ export const MOXStep: React.FC = () => {
                             <EmbeddedKyc />
                         </Step>
                     </Stepper>
-                </MOXContextProvider>
+                </BusinessVerificationContextProvider>
             </div>
 		</>
 	);
 };
 
-export default MOXStep;
+export default BusinessVerificationStep;

@@ -3,7 +3,7 @@
  */
 import { type ReactNode } from 'react';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
-import { Country, MccsDisplayTreeItem } from './providers/woopayments/steps/mox/types'; // To-do: Maybe move to @woocommerce/data
+import { Country, MccsDisplayTreeItem } from './providers/woopayments/steps/business-verification/types'; // To-do: Maybe move to @woocommerce/data
 
 /**
  * Props for the Onboarding Modal component.

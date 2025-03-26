@@ -6,7 +6,7 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { useMOXContext } from '../data/mox-context';
+import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { useOnboardingContext } from '../../../data/onboarding-context';
 import { Item } from '../../../components/custom-select-control';
 import { OnboardingFields, BusinessType } from '../types';
@@ -24,7 +24,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Contains business and store details KYC logic.
  */
 const BusinessDetails: React.FC = () => {
-	const { data, setData } = useMOXContext();
+	const { data, setData } = useBusinessVerificationContext();
 	const { currentStep } = useOnboardingContext();
 	const countries = getAvailableCountries( currentStep?.context?.fields?.available_countries || {} );
 	const businessTypes = getBusinessTypes( currentStep?.context?.fields?.business_types || [] );

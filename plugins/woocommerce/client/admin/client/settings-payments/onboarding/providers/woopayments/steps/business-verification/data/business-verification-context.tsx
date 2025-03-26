@@ -9,7 +9,7 @@ import { isNil, omitBy } from 'lodash';
  */
 import { OnboardingFields } from '../types';
 
-const useMOXContextValue = ( initialState = {} as OnboardingFields ) => {
+const useBusinessVerificationContextValue = ( initialState = {} as OnboardingFields ) => {
 	const [ data, setData ] = useState( initialState );
 	const [ errors, setErrors ] = useState( {} as OnboardingFields );
 	const [ touched, setTouched ] = useState( {} as OnboardingFields );
@@ -27,26 +27,26 @@ const useMOXContextValue = ( initialState = {} as OnboardingFields ) => {
 	};
 };
 
-type MOXContextValue = ReturnType< typeof useMOXContextValue >;
+type BusinessVerificationContextValue = ReturnType< typeof useBusinessVerificationContextValue >;
 
-const MOXContext = createContext< MOXContextValue | null >( null );
+const BusinessVerificationContext = createContext< BusinessVerificationContextValue | null >( null );
 
-export const MOXContextProvider: React.FC< {
+export const BusinessVerificationContextProvider: React.FC< {
 	initialData?: OnboardingFields;
 	children: React.ReactNode;
 } > = ( { children, initialData } ) => {
 	return (
-		<MOXContext.Provider value={ useMOXContextValue( initialData ) }>
+		<BusinessVerificationContext.Provider value={ useBusinessVerificationContextValue( initialData ) }>
 			{ children }
-		</MOXContext.Provider>
+		</BusinessVerificationContext.Provider>
 	);
 };
 
-export const useMOXContext = (): MOXContextValue => {
-	const context = useContext( MOXContext );
+export const useBusinessVerificationContext = (): BusinessVerificationContextValue => {
+	const context = useContext( BusinessVerificationContext );
 	if ( ! context ) {
 		throw new Error(
-			'useMOXContext() must be used within <MOXContextProvider>'
+			'useBusinessVerificationContext() must be used within <BusinessVerificationContextProvider>'
 		);
 	}
 	return context;

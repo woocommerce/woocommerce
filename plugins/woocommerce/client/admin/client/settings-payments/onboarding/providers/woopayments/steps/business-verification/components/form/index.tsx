@@ -8,7 +8,7 @@ import { isEmpty, mapValues } from 'lodash';
 /**
  * Internal dependencies
  */
-import { useStepperContext } from '../../components/stepper';
+import { useStepperContext } from '../stepper';
 import { Item as SelectItem } from '../../../../components/custom-select-control';
 import { ListItem as GroupedSelectItem } from '../../../../components/grouped-select-control';
 import {
@@ -19,7 +19,7 @@ import {
 	TextField,
 	TextFieldProps,
 } from './fields';
-import { useMOXContext } from '../../data/mox-context';
+import { useBusinessVerificationContext } from '../../data/business-verification-context';
 import { OnboardingFields } from '../../types';
 import { useValidation } from '../../utils/validation';
 import { trackStepCompleted } from '../../utils/tracking';
@@ -31,7 +31,7 @@ type OnboardingFormProps = {
 };
 
 export const OnboardingForm: React.FC<OnboardingFormProps> = ( { children } ) => {
-	const { errors, touched, setTouched } = useMOXContext();
+	const { errors, touched, setTouched } = useBusinessVerificationContext();
 	const { currentStep, nextStep } = useStepperContext();
 
 	const handleContinue = () => {
@@ -69,7 +69,7 @@ export const OnboardingTextField: React.FC< OnboardingTextFieldProps > = (
 	props
 ) => {
 	const { name } = props;
-	const { data, setData, touched } = useMOXContext();
+	const { data, setData, touched } = useBusinessVerificationContext();
 	const { validate, error } = useValidation( name );
 	const inputRef = React.useRef< HTMLInputElement >( null );
 
@@ -108,7 +108,7 @@ export const OnboardingSelectField = < ItemType extends SelectItem >( {
 	...rest
 }: OnboardingSelectFieldProps< ItemType > ): JSX.Element => {
 	const { name } = rest;
-	const { data, setData } = useMOXContext();
+	const { data, setData } = useBusinessVerificationContext();
 	const { validate, error } = useValidation( name );
 
 	return (
@@ -149,7 +149,7 @@ export const OnboardingGroupedSelectField = <
 	...rest
 }: OnboardingGroupedSelectFieldProps< ListItemType > ): JSX.Element => {
 	const { name } = rest;
-	const { data, setData } = useMOXContext();
+	const { data, setData } = useBusinessVerificationContext();
 	const { validate, error } = useValidation( name );
 
 	return (
