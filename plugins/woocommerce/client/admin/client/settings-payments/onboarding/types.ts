@@ -66,7 +66,8 @@ export interface WooPaymentsProviderOnboardingStep {
 			industry_to_mcc: Record< string, string >,
 			mccs_display_tree: MccsDisplayTreeItem,
 			available_countries: Record< string, string >,
-		}
+		},
+		self_assessment: Record< string, string >,
 	};
 }
 

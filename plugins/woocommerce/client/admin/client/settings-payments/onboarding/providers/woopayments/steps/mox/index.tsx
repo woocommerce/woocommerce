@@ -29,6 +29,7 @@ export const MOXStep: React.FC = () => {
         mcc: getMccFromIndustry( ( currentStep?.context?.fields?.mccs_display_tree ?? [] ) as MccsDisplayTreeItem[] ),
         site: 'https://wcpay.test', // To-Do: Replace with URL
         country: 'US', // To-Do: Replace with country from WooCommerce settings
+        ...currentStep?.context?.self_assessment ?? {},
     };
 
     const handleStepChange = () => window.scroll( 0, 0 );
