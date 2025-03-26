@@ -7,14 +7,18 @@ import { registerProductBlockType } from '@woocommerce/atomic-utils';
  * Internal dependencies
  */
 import metadata from './block.json';
-import { ProductGalleryBlockSettings } from './settings';
+import { Edit } from './edit';
+import { Save } from './save';
+import icon from './icon';
 import './style.scss';
 import './inner-blocks/product-gallery-large-image-next-previous';
 import './inner-blocks/product-gallery-thumbnails';
 
 const blockConfig = {
 	...metadata,
-	...ProductGalleryBlockSettings,
+	icon,
+	edit: Edit,
+	save: Save,
 };
 
 registerProductBlockType( blockConfig, {

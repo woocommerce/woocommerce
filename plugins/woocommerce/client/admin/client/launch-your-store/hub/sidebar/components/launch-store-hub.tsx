@@ -33,9 +33,7 @@ import { SidebarContainer } from './sidebar-container';
 import { taskCompleteIcon } from './icons';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
-export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
-	props
-) => {
+export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 	const {
 		context: {
 			tasklist,

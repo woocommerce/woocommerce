@@ -62,7 +62,7 @@ type AttributeForm = {
  */
 const attributeSortCriteria = { order_by: 'name' };
 
-export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
+export const NewAttributeModal = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
 	notice,
@@ -90,7 +90,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	termsAutoSelection,
 	defaultVisibility = false,
 	defaultSearch,
-} ) => {
+}: NewAttributeModalProps ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
 			const attributeRow = document.querySelector(

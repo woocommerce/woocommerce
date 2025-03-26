@@ -18,6 +18,20 @@ defined( 'ABSPATH' ) || exit;
 class WC_Comments {
 
 	/**
+	 * The cache group to use for comment counts.
+	 *
+	 * @var string
+	 */
+	private const COMMENT_COUNT_CACHE_GROUP = 'wc_comment_counts';
+
+	/**
+	 * The cache key to use for pending product reviews counts.
+	 *
+	 * @var string
+	 */
+	private const PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY = 'woocommerce_product_reviews_pending_count';
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
@@ -38,15 +52,23 @@ class WC_Comments {
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
 
-		// Exclude product reviews.
-		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 1 );
+		// Secure potential remaining Action Logs.
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_action_log_comments' ), 10, 2 );
+		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_action_log_comments_from_feed_where' ) );
+
+		// Exclude product reviews from general comments.
+		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 2 );
 
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
 		// Delete comments count cache whenever there is a new comment or a comment status changes.
-		add_action( 'wp_insert_comment', array( __CLASS__, 'delete_comments_count_cache' ) );
-		add_action( 'wp_set_comment_status', array( __CLASS__, 'delete_comments_count_cache' ) );
+		add_action( 'wp_insert_comment', array( __CLASS__, 'increment_comments_count_cache_on_wp_insert_comment' ), 10, 2 );
+		add_action( 'transition_comment_status', array( __CLASS__, 'update_comments_count_cache_on_comment_status_change' ), 10, 3 );
+
+		// Count product reviews that pending moderation.
+		add_action( 'wp_insert_comment', array( __CLASS__, 'maybe_bump_products_reviews_pending_moderation_counter' ), 10, 2 );
+		add_action( 'transition_comment_status', array( __CLASS__, 'maybe_adjust_products_reviews_pending_moderation_counter' ), 10, 3 );
 
 		// Support avatars for `review` comment type.
 		add_filter( 'get_avatar_comment_types', array( __CLASS__, 'add_avatar_for_review_comment_type' ) );
@@ -92,7 +114,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function exclude_order_comments( $clauses ) {
-		$clauses['where'] .= ( $clauses['where'] ? ' AND ' : '' ) . " comment_type != 'order_note' ";
+		$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . " comment_type != 'order_note' ";
 		return $clauses;
 	}
 
@@ -113,7 +135,7 @@ class WC_Comments {
 	 * @return string
 	 */
 	public static function exclude_order_comments_from_feed_where( $where ) {
-		return $where . ( $where ? ' AND ' : '' ) . " comment_type != 'order_note' ";
+		return $where . ( trim( $where ) ? ' AND ' : '' ) . " comment_type != 'order_note' ";
 	}
 
 	/**
@@ -124,7 +146,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function exclude_webhook_comments( $clauses ) {
-		$clauses['where'] .= ( $clauses['where'] ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
+		$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
 		return $clauses;
 	}
 
@@ -139,14 +161,31 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS.
+	 * Exclude action_log comments from queries and RSS.
 	 *
 	 * @since  2.1
 	 * @param  string $where The WHERE clause of the query.
 	 * @return string
 	 */
-	public static function exclude_webhook_comments_from_feed_where( $where ) {
-		return $where . ( $where ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
+	public static function exclude_action_log_comments_from_feed_where( $where ) {
+		return $where . ( trim( $where ) ? ' AND ' : '' ) . " comment_type != 'action_log' ";
+	}
+
+	/**
+	 * Exclude action_log comments from queries.
+	 *
+	 * @param array            $clauses       A compacted array of comment query clauses.
+	 * @param WP_Comment_Query $comment_query The WP_Comment_Query being filtered.
+	 *
+	 * @return array
+	 * @since  9.9
+	 */
+	public static function exclude_action_log_comments( $clauses, $comment_query ) {
+		if ( 'action_log' !== $comment_query->query_vars['type'] ) {
+			$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . " comment_type != 'action_log' ";
+		}
+
+		return $clauses;
 	}
 
 	/**
@@ -216,79 +255,184 @@ class WC_Comments {
 	}
 
 	/**
+	 * Callback for 'wp_insert_comment' to delete the comment count cache if the comment is included in the count.
+	 *
+	 * @param int        $comment_id The comment ID.
+	 * @param WP_Comment $comment    Comment object.
+	 *
+	 * @return void
+	 */
+	public static function increment_comments_count_cache_on_wp_insert_comment( $comment_id, $comment ) {
+		if ( ! self::is_comment_excluded_from_wp_comment_counts( $comment ) ) {
+			$comment_status = wp_get_comment_status( $comment );
+			if ( false !== $comment_status ) {
+				wp_cache_incr( 'wc_count_comments_' . $comment_status, 1, self::COMMENT_COUNT_CACHE_GROUP );
+			}
+		}
+	}
+
+	/**
+	 * Callback for 'comment_status_change' to delete the comment count cache if the comment is included in the count.
+	 *
+	 * @param int|string $new_status The new comment status.
+	 * @param int|string $old_status The old comment status.
+	 * @param WP_Comment $comment    Comment object.
+	 *
+	 * @return void
+	 */
+	public static function update_comments_count_cache_on_comment_status_change( $new_status, $old_status, $comment ) {
+		if ( ! self::is_comment_excluded_from_wp_comment_counts( $comment ) ) {
+			wp_cache_incr( 'wc_count_comments_' . $new_status, 1, self::COMMENT_COUNT_CACHE_GROUP );
+			wp_cache_decr( 'wc_count_comments_' . $old_status, 1, self::COMMENT_COUNT_CACHE_GROUP );
+		}
+	}
+
+	/**
+	 * Determines whether the given comment should be included in the core WP comment counts that are displayed in the
+	 * WordPress admin.
+	 *
+	 * @param WP_Comment $comment Comment object.
+	 *
+	 * @return bool
+	 */
+	private static function is_comment_excluded_from_wp_comment_counts( $comment ) {
+		return in_array( $comment->comment_type, array( 'action_log', 'order_note', 'webhook_delivery' ), true )
+			|| get_post_type( $comment->comment_post_ID ) === 'product';
+	}
+
+	/**
 	 * Delete comments count cache whenever there is
 	 * new comment or the status of a comment changes. Cache
 	 * will be regenerated next time WC_Comments::wp_count_comments()
 	 * is called.
 	 */
 	public static function delete_comments_count_cache() {
-		delete_transient( 'wc_count_comments' );
+		$comment_status_keys = array(
+			'wc_count_comments_approved',
+			'wc_count_comments_unapproved',
+			'wc_count_comments_spam',
+			'wc_count_comments_trash',
+			'wc_count_comments_post-trashed',
+		);
+		wp_cache_delete_multiple( $comment_status_keys, self::COMMENT_COUNT_CACHE_GROUP );
+	}
+
+	/**
+	 * Fetches (and populates if needed) the counter.
+	 *
+	 * @return int
+	 */
+	public static function get_products_reviews_pending_moderation_counter(): int {
+		$count = wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP );
+		if ( false === $count ) {
+			$count = (int) get_comments(
+				array(
+					'type__in'  => array( 'review', 'comment' ),
+					'status'    => '0',
+					'post_type' => 'product',
+					'count'     => true,
+				)
+			);
+			wp_cache_set( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, $count, self::COMMENT_COUNT_CACHE_GROUP, DAY_IN_SECONDS );
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Handles `wp_insert_comment` hook processing and actualizes the counter.
+	 *
+	 * @param int         $comment_id Comment ID.
+	 * @param \WP_Comment $comment    Comment object.
+	 * @return void
+	 */
+	public static function maybe_bump_products_reviews_pending_moderation_counter( $comment_id, $comment ): void {
+		$needs_bump = '0' === $comment->comment_approved;
+		if ( $needs_bump && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
+			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
+			if ( $is_product ) {
+				wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
+			}
+		}
+	}
+
+	/**
+	 * Handles `transition_comment_status` hook processing and actualizes the counter.
+	 *
+	 * @param int|string  $new_status New status.
+	 * @param int|string  $old_status Old status.
+	 * @param \WP_Comment $comment    Comment object.
+	 * @return void
+	 */
+	public static function maybe_adjust_products_reviews_pending_moderation_counter( $new_status, $old_status, $comment ): void {
+		$needs_adjustments = 'unapproved' === $new_status || 'unapproved' === $old_status;
+		if ( $needs_adjustments && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
+			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
+			if ( $is_product ) {
+				if ( '0' === $comment->comment_approved ) {
+					wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
+				} else {
+					wp_cache_decr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
+				}
+			}
+		}
 	}
 
 	/**
 	 * Remove order notes, webhook delivery logs, and product reviews from wp_count_comments().
 	 *
-	 * @since  2.2
-	 * @param  object $stats   Comment stats.
-	 * @param  int    $post_id Post ID.
+	 * @param array|object $stats   Comment stats.
+	 * @param int          $post_id Post ID.
+	 *
 	 * @return object
+	 * @since  2.2
 	 */
 	public static function wp_count_comments( $stats, $post_id ) {
-		global $wpdb;
-
-		if ( 0 === $post_id ) {
-			$stats = get_transient( 'wc_count_comments' );
-
-			if ( ! $stats ) {
-				$stats = array(
-					'total_comments' => 0,
-					'all'            => 0,
-				);
-
-				$count = $wpdb->get_results(
-					"
-					SELECT comment_approved, COUNT(*) AS num_comments
-					FROM {$wpdb->comments}
-					LEFT JOIN {$wpdb->posts} ON comment_post_ID = {$wpdb->posts}.ID
-					WHERE comment_type NOT IN ('action_log', 'order_note', 'webhook_delivery') AND {$wpdb->posts}.post_type NOT IN ('product')
-					GROUP BY comment_approved
-					",
-					ARRAY_A
-				);
-
-				$approved = array(
-					'0'            => 'moderated',
-					'1'            => 'approved',
-					'spam'         => 'spam',
-					'trash'        => 'trash',
-					'post-trashed' => 'post-trashed',
-				);
-
-				foreach ( (array) $count as $row ) {
-					// Don't count post-trashed toward totals.
-					if ( ! in_array( $row['comment_approved'], array( 'post-trashed', 'trash', 'spam' ), true ) ) {
-						$stats['all']            += $row['num_comments'];
-						$stats['total_comments'] += $row['num_comments'];
-					} elseif ( ! in_array( $row['comment_approved'], array( 'post-trashed', 'trash' ), true ) ) {
-						$stats['total_comments'] += $row['num_comments'];
-					}
-					if ( isset( $approved[ $row['comment_approved'] ] ) ) {
-						$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
-					}
-				}
-
-				foreach ( $approved as $key ) {
-					if ( empty( $stats[ $key ] ) ) {
-						$stats[ $key ] = 0;
-					}
-				}
-
-				$stats = (object) $stats;
-				set_transient( 'wc_count_comments', $stats );
-			}
+		if ( 0 !== $post_id || ! empty( $stats ) ) {
+			// If $stats isn't empty, another plugin may have already made changes to the values that we can't account for, so we don't attempt to modify it.
+			return $stats;
 		}
 
-		return $stats;
+		$comment_counts = array();
+
+		// WordPress is inconsistent in the names it uses for approved/unapproved comment statuses, so we need to remap the names.
+		$stat_key_to_comment_query_status_mapping = array(
+			'approved'     => 'approve',
+			'moderated'    => 'hold',
+			'spam'         => 'spam',
+			'trash'        => 'trash',
+			'post-trashed' => 'post-trashed',
+		);
+
+		$comment_query_status_to_comment_status_mapping = array(
+			'approve'      => 'approved',
+			'hold'         => 'unapproved',
+			'spam'         => 'spam',
+			'trash'        => 'trash',
+			'post-trashed' => 'post-trashed',
+		);
+
+		$args = array(
+			'count'                     => true,
+			'update_comment_meta_cache' => false,
+			'orderby'                   => 'none',
+		);
+
+		foreach ( $stat_key_to_comment_query_status_mapping as $stat_key => $query_status ) {
+			// For simplicity, the cache key is by the comment status returned by wp_get_comment_status() and used by wp_transition_comment_status().
+			$cache_key = 'wc_count_comments_' . $comment_query_status_to_comment_status_mapping[ $query_status ];
+			$count     = wp_cache_get( $cache_key, self::COMMENT_COUNT_CACHE_GROUP );
+			if ( false === $count ) {
+				$count = (int) get_comments( array_merge( $args, array( 'status' => $query_status ) ) );
+				wp_cache_set( $cache_key, $count, self::COMMENT_COUNT_CACHE_GROUP, 3 * DAY_IN_SECONDS );
+			}
+			$comment_counts[ $stat_key ] = (int) $count;
+		}
+
+		$comment_counts['all']            = $comment_counts['approved'] + $comment_counts['moderated'];
+		$comment_counts['total_comments'] = $comment_counts['all'] + $comment_counts['spam'];
+
+		return (object) $comment_counts;
 	}
 
 	/**

@@ -20,9 +20,11 @@ if ( window.getUserSetting ) {
 const CATEGORY_POPULAR_TAB_ID = 'pop';
 const CATEGORY_ALL_TAB_ID = 'all';
 
-const CategoryMetabox: React.FC< {
+const CategoryMetabox = ( {
+	initialSelected,
+}: {
 	initialSelected: CategoryTerm[];
-} > = ( { initialSelected } ) => {
+} ) => {
 	const [ selected, setSelected ] = useState( initialSelected );
 	const allCategoryListRef = useRef< { resetInitialValues: () => void } >(
 		null

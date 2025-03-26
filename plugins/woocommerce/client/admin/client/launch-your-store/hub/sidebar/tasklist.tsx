@@ -113,10 +113,13 @@ export function taskClickedAction( event: {
 	}
 }
 
-export const CompletedTaskItem: React.FC< {
+export const CompletedTaskItem = ( {
+	task,
+	classNames,
+}: {
 	task: TaskType;
 	classNames?: string;
-} > = ( { task, classNames } ) => (
+} ) => (
 	<SidebarNavigationItem
 		className={ clsx( task.id, 'is-complete', classNames ) }
 		icon={ taskCompleteIcon }
@@ -126,11 +129,15 @@ export const CompletedTaskItem: React.FC< {
 	</SidebarNavigationItem>
 );
 
-export const IncompleteTaskItem: React.FC< {
+export const IncompleteTaskItem = ( {
+	task,
+	classNames,
+	onClick,
+}: {
 	task: TaskType;
 	classNames?: string;
 	onClick: () => void;
-} > = ( { task, classNames, onClick } ) => (
+} ) => (
 	<SidebarNavigationItem
 		className={ clsx( task.id, classNames ) }
 		icon={ taskIcons[ task.id ] }

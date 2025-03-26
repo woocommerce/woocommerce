@@ -62,8 +62,8 @@
 		"react-router-dom": "~6.3.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/core": "7.25.7",
+		"@babel/runtime": "7.25.7",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/react": "^16.x.x",
@@ -74,11 +74,10 @@
 		"@types/jest": "27.5.x",
 		"@types/react": "18.3.x",
 		"@types/testing-library__jest-dom": "^5.14.9",
-		"@types/wordpress__core-data": "2.4.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.6",
+		"@wordpress/browserslist-config": "next",
 		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",

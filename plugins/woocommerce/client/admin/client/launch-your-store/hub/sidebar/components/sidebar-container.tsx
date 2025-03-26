@@ -9,11 +9,8 @@ import { chevronRight, chevronLeft } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
 import {
-	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
-	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
-	// @ts-ignore No types for this exist yet.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import React from 'react';

@@ -28,28 +28,65 @@ function isParamsEqual(
 	return true;
 }
 
-export type ActiveFilter = {
+function selectFilter() {
+	const context = getContext< ProductFiltersContext >();
+	const newActiveFilter = {
+		value: context.item.value,
+		type: context.item.type,
+		attributeQueryType: context.item.attributeQueryType,
+		activeLabel: context.activeLabelTemplate.replace(
+			'{{label}}',
+			context.item.ariaLabel
+		),
+	};
+	const newActiveFilters = context.activeFilters.filter(
+		( activeFilter ) =>
+			! (
+				activeFilter.value === newActiveFilter.value &&
+				activeFilter.type === newActiveFilter.type
+			)
+	);
+
+	newActiveFilters.push( newActiveFilter );
+
+	context.activeFilters = newActiveFilters;
+}
+function unselectFilter() {
+	const { item } = getContext< ProductFiltersContext >();
+	actions.removeActiveFiltersBy(
+		( activeFilter ) =>
+			activeFilter.type === item.type && activeFilter.value === item.value
+	);
+}
+
+type FilterItem = {
 	label: string;
-	type: 'attribute' | 'price' | 'rating' | 'status';
-	value: string | null;
-	attribute?: {
-		slug: string;
-		queryType: 'and' | 'or';
-	};
-	price?: {
-		min: number | null;
-		max: number | null;
-	};
+	ariaLabel: string;
+	value: string;
+	selected: boolean;
+	count: number;
+	type: string;
+	attributeQueryType?: 'and' | 'or' | undefined;
+};
+
+export type ActiveFilterItem = Pick<
+	FilterItem,
+	'type' | 'value' | 'attributeQueryType'
+> & {
+	activeLabel: string;
 };
 
 export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
 	params: Record< string, string >;
 	originalParams: Record< string, string >;
-	activeFilters: ActiveFilter[];
+	activeFilters: ActiveFilterItem[];
+	item: FilterItem;
+	activeLabelTemplate: string;
+	filterType: string;
 };
 
-const productFiltersStore = store( 'woocommerce/product-filters', {
+const productFiltersStore = {
 	state: {
 		get params() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
@@ -66,11 +103,10 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 
 				if ( ! value ) return;
 
-				if ( type === 'price' && 'price' in filter ) {
-					if ( filter.price.min )
-						params.min_price = filter.price.min.toString();
-					if ( filter.price.max )
-						params.max_price = filter.price.max.toString();
+				if ( type === 'price' ) {
+					const [ min, max ] = value.split( '|' );
+					if ( min ) params.min_price = min;
+					if ( max ) params.max_price = max;
 				}
 
 				if ( type === 'status' ) {
@@ -81,10 +117,11 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 					addParam( `rating_filter`, value );
 				}
 
-				if ( type === 'attribute' && 'attribute' in filter ) {
-					addParam( `filter_${ filter.attribute.slug }`, value );
-					params[ `query_type_${ filter.attribute.slug }` ] =
-						filter.attribute.queryType;
+				if ( type.includes( 'attribute' ) ) {
+					const [ , slug ] = type.split( '/' );
+					addParam( `filter_${ slug }`, value );
+					params[ `query_type_${ slug }` ] =
+						filter.attributeQueryType || 'or';
 				}
 			} );
 			return params;
@@ -94,14 +131,22 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 			return activeFilters
 				.filter( ( item ) => !! item.value )
 				.sort( ( a, b ) => {
-					return a.label
+					return a.activeLabel
 						.toLowerCase()
-						.localeCompare( b.label.toLowerCase() );
+						.localeCompare( b.activeLabel.toLowerCase() );
 				} )
 				.map( ( item ) => ( {
 					...item,
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
+		},
+		get isFilterSelected() {
+			const { activeFilters, item } =
+				getContext< ProductFiltersContext >();
+			return activeFilters.some(
+				( filter ) =>
+					filter.type === item.type && filter.value === item.value
+			);
 		},
 	},
 	actions: {
@@ -127,52 +172,32 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
 			if ( context.isOverlayOpened && event.key === 'Escape' ) {
-				productFiltersStore.actions.closeOverlay();
+				actions.closeOverlay();
 			}
 		},
-		setActiveFilter: ( activeFilter: ActiveFilter ) => {
-			const { value, type } = activeFilter;
-			const context = getContext< ProductFiltersContext >();
-			const newActiveFilters = context.activeFilters.filter(
-				( item ) => ! ( item.value === value && item.type === type )
-			);
-
-			newActiveFilters.push( activeFilter );
-
-			context.activeFilters = newActiveFilters;
-		},
 		removeActiveFiltersBy: (
-			callback: ( item: ActiveFilter ) => boolean
+			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
 			const context = getContext< ProductFiltersContext >();
 			context.activeFilters = context.activeFilters.filter(
 				( item ) => ! callback( item )
 			);
 		},
-		removeActiveFiltersByType: ( type: ActiveFilter[ 'type' ] ) => {
-			productFiltersStore.actions.removeActiveFiltersBy(
-				( item ) => item.type === type
-			);
+		toggleFilter: () => {
+			if ( state.isFilterSelected ) {
+				unselectFilter();
+			} else {
+				selectFilter();
+			}
+			actions.navigate();
 		},
-		removeActiveFilter: (
-			type: ActiveFilter[ 'type' ],
-			value: ActiveFilter[ 'value' ]
-		) => {
-			productFiltersStore.actions.removeActiveFiltersBy(
-				( item ) => item.type === type && item.value === value
-			);
-		},
-		*navigate() {
+		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
+		*navigate(): Generator {
 			const { originalParams } = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 
-			if (
-				isParamsEqual(
-					productFiltersStore.state.params,
-					originalParams
-				)
-			) {
+			if ( isParamsEqual( state.params, originalParams ) ) {
 				return;
 			}
 
@@ -184,11 +209,8 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 				searchParams.delete( key );
 			}
 
-			for ( const key in productFiltersStore.state.params ) {
-				searchParams.set(
-					key,
-					productFiltersStore.state.params[ key ]
-				);
+			for ( const key in state.params ) {
+				searchParams.set( key, state.params[ key ] );
 			}
 
 			const isBlockTheme = getSetting( 'isBlockTheme' );
@@ -205,11 +227,10 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 				return ( window.location.href = url.href );
 			}
 
-			const { actions } = yield import(
-				'@wordpress/interactivity-router'
-			);
+			const routerModule: typeof import('@wordpress/interactivity-router') =
+				yield import( '@wordpress/interactivity-router' );
 
-			yield actions.navigate( url.href );
+			yield routerModule.actions.navigate( url.href );
 		},
 	},
 	callbacks: {
@@ -222,6 +243,11 @@ const productFiltersStore = store( 'woocommerce/product-filters', {
 			}
 		},
 	},
-} );
+};
 
 export type ProductFiltersStore = typeof productFiltersStore;
+
+const { state, actions } = store< ProductFiltersStore >(
+	'woocommerce/product-filters',
+	productFiltersStore
+);

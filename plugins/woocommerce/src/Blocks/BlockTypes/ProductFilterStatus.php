@@ -85,10 +85,10 @@ final class ProductFilterStatus extends AbstractBlock {
 
 		foreach ( $active_statuses as $status ) {
 			$items[] = array(
-				'type'  => 'status',
-				'value' => $status,
+				'type'        => 'status',
+				'value'       => $status,
 				// translators: %s: status.
-				'label' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
+				'activeLabel' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
 			);
 		}
 
@@ -122,8 +122,6 @@ final class ProductFilterStatus extends AbstractBlock {
 			return '';
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$stock_status_data       = $this->get_stock_status_counts( $block );
 		$stock_statuses          = wc_get_product_stock_status_options();
 		$filter_params           = $block->context['filterParams'] ?? array();
@@ -132,35 +130,33 @@ final class ProductFilterStatus extends AbstractBlock {
 
 		$filter_options = array_map(
 			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
-				$label = $stock_statuses[ $item['status'] ] . ( $attributes['showCounts'] ? ' (' . $item['count'] . ')' : '' );
 				return array(
-					'label'     => $label,
-					'ariaLabel' => $label,
+					'label'     => $stock_statuses[ $item['status'] ],
+					'ariaLabel' => $stock_statuses[ $item['status'] ],
 					'value'     => $item['status'],
 					'selected'  => in_array( $item['status'], $selected_stock_statuses, true ),
+					'count'     => $item['count'],
 					'type'      => 'status',
-					'data'      => $item,
 				);
 			},
 			$stock_status_data
 		);
 
 		$filter_context = array(
-			'items'  => array_values( $filter_options ),
-			'parent' => $this->get_full_block_name(),
+			'items'      => array_values( $filter_options ),
+			'showCounts' => $attributes['showCounts'] ?? false,
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-interactive'  => $this->get_full_block_name(),
-			'data-wp-context'      => wp_json_encode(
+			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context' => wp_json_encode(
 				array(
-					'hasFilterOptions'    => ! empty( $filter_options ),
 					/* translators: {{label}} is the status filter item label. */
 					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
+					'filterType'          => 'status',
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'data-wp-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( empty( $filter_options ) ) {
