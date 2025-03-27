@@ -227,7 +227,7 @@
 		"url-loader": "^1.1.2",
 		"webpack": "5.97.x",
 		"webpack-bundle-analyzer": "4.9.x",
-		"webpack-cli": "^4.10.0",
+		"webpack-cli": "5.1.x",
 		"webpack-dev-server": "^4.15.1",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-rtl-plugin": "2.0.x",

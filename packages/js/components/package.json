@@ -170,7 +170,7 @@
 		"typescript": "5.7.x",
 		"uuid": "^9.0.1",
 		"webpack": "5.97.x",
-		"webpack-cli": "^3.3.12",
+		"webpack-cli": "5.1.x",
 		"wireit": "0.14.10"
 	},
 	"config": {

@@ -168,6 +168,15 @@
 		},
 		{
 			"dependencies": [
+				"webpack-cli"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.1.x"
+		},
+		{
+			"dependencies": [
 				"fork-ts-checker-webpack-plugin"
 			],
 			"packages": [
