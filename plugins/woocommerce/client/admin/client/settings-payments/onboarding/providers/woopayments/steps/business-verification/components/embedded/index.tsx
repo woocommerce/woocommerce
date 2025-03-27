@@ -20,6 +20,7 @@ import { createKycAccountSession } from './hooks';
 import appearance from './appearance';
 import { OnboardingFields } from '../../types';
 import BannerNotice from '../../../../components/banner-notice';
+import { useOnboardingContext } from '../../../../data/onboarding-context';
 
 interface EmbeddedComponentProps {
 	onLoaderStart?: ( { elementTagName }: LoaderStart ) => void;
@@ -48,6 +49,7 @@ const useInitializeStripe = (
 ) => {
 	const [ stripeConnectInstance, setStripeConnectInstance ] =
 		useState< StripeConnectInstance | null >( null );
+	const { currentStep } = useOnboardingContext();
 	const [ initializationError, setInitializationError ] = useState<
 		string | null
 	>( null );
@@ -58,6 +60,7 @@ const useInitializeStripe = (
 			try {
 				const accountSession = await createKycAccountSession(
 					onboardingData,
+					currentStep?.actions?.kyc_session?.href ?? '',
 					isPoEligible
 				);
 

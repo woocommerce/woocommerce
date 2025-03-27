@@ -66,6 +66,14 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		kyc_session?: {
+			type?: string;
+			href?: string;
+		},
+		kyc_session_finish?: {
+			type?: string;
+			href?: string;
+		};
 	};
 	content?: ReactNode;
 	context?: {

@@ -20,11 +20,12 @@ import { fromDotNotation } from '../../utils';
  */
 export const createKycAccountSession = async (
 	data: OnboardingFields,
+	apiURL: string,
 	isPoEligible: boolean
 ): Promise< AccountKycResult > => {
 	return await apiFetch< AccountKycResult >( {
 		path: addQueryArgs(
-			`${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/kyc_session`,
+			apiURL,
 			{
 				self_assessment: fromDotNotation( data ),
 				progressive: isPoEligible,
