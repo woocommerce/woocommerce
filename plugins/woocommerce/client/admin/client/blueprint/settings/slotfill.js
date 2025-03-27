@@ -10,7 +10,7 @@ import {
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, createInterpolateElement } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
 import { settings, plugins, layout } from '@wordpress/icons';
@@ -23,6 +23,7 @@ import { BlueprintUploadDropzone } from '../components/BlueprintUploadDropzone';
 import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-blueprint-settings-slotfill';
 
 const icons = {
 	plugins,
@@ -222,7 +223,10 @@ const BlueprintSlotfill = () => {
 };
 
 export const registerBlueprintSlotfill = () => {
-	registerPlugin( 'woocommerce-admin-blueprint-settings-slotfill', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-blueprint-settings',
 		render: BlueprintSlotfill,
 	} );

@@ -222,7 +222,7 @@
 			"packages": [
 				"@woocommerce/product-editor",
 				"@woocommerce/settings-editor",
-				"@woocommerce/admin-library",
+				"@woocommerce/admin-library"
 			],
 			"isIgnored": true
 		},
@@ -480,6 +480,15 @@
 				"**"
 			],
 			"pinVersion": "^2.5.7"
+		},
+		{
+			"dependencies": [
+				"@automattic/site-admin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",
