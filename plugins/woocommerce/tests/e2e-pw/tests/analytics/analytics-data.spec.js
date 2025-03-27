@@ -164,6 +164,80 @@ test.beforeAll( async ( { browser, restApi } ) => {
 			orderIds = response.data.create.map( ( order ) => order.id );
 		} );
 
+	// Reset Analytics Settings to their default values.
+	// Reset 'Excluded statuses' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_excluded_report_order_statuses',
+			{
+				value: [ 'pending', 'cancelled', 'failed' ],
+			}
+		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( [
+				'pending',
+				'cancelled',
+				'failed',
+			] );
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Excluded statuses' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
+	// Reset 'Actionable statuses' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_actionable_order_statuses',
+			{
+				value: [ 'processing', 'on-hold' ],
+			}
+		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( [
+				'processing',
+				'on-hold',
+			] );
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Actionable statuses' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
+	// Reset 'Default date range' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_default_date_range',
+			{
+				value: 'period=month&compare=previous_year',
+			}
+		)
+		.then( ( response ) => {
+			// '&' is encoded as '&amp;' in the response.
+			expect( response.data.value ).toEqual(
+				'period=month&amp;compare=previous_year'
+			);
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Default date range' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
 	// process the Action Scheduler tasks
 	setupPage = await browser.newPage();
 	// eslint-disable-next-line playwright/no-wait-for-timeout
