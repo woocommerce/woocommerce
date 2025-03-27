@@ -195,12 +195,30 @@
 		},
 		{
 			"dependencies": [
+				"css-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "6.2.x"
+		},
+		{
+			"dependencies": [
 				"fork-ts-checker-webpack-plugin"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "9.0.x"
+		},
+		{
+			"dependencies": [
+				"terser-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.3.x"
 		},
 		{
 			"dependencies": [
@@ -246,6 +264,15 @@
 				"**"
 			],
 			"pinVersion": "1.0.x"
+		},
+		{
+			"dependencies": [
+				"moment-timezone-data-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "1.5.x"
 		},
 		{
 			"dependencies": [

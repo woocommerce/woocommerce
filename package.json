@@ -42,7 +42,7 @@
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "13.0.x",
 		"core-js": "^3.34.0",
-		"css-loader": "^6.8.1",
+		"css-loader": "6.2.x",
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",
 		"jest": "27.5.x",

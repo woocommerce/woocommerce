@@ -39,7 +39,7 @@
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "wp-6.6",
 		"@wordpress/postcss-plugins-preset": "wp-6.6",
-		"css-loader": "^3.6.0",
+		"css-loader": "6.2.x",
 		"fork-ts-checker-webpack-plugin": "9.0.x",
 		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "^2.7.6",

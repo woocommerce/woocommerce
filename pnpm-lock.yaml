@@ -76,8 +76,8 @@ importers:
         specifier: ^3.34.0
         version: 3.34.0
       css-loader:
-        specifier: ^6.8.1
-        version: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1(@swc/core@1.3.100))
       glob:
         specifier: ^10.3.10
         version: 10.3.10
@@ -228,8 +228,8 @@ importers:
         specifier: ^7.6.0
         version: 7.6.0
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -358,8 +358,8 @@ importers:
         specifier: 13.0.x
         version: 13.0.0(webpack@5.97.1)
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -562,8 +562,8 @@ importers:
         specifier: 13.0.x
         version: 13.0.0(webpack@5.97.1)
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -872,8 +872,8 @@ importers:
         specifier: ^7.6.0
         version: 7.6.0
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -1127,8 +1127,8 @@ importers:
         specifier: ^7.6.0
         version: 7.6.0
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -1958,8 +1958,8 @@ importers:
         specifier: ^7.6.0
         version: 7.6.0
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -2183,8 +2183,8 @@ importers:
         specifier: 13.0.x
         version: 13.0.0(webpack@5.97.1)
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -2313,8 +2313,8 @@ importers:
         specifier: wp-6.6
         version: 5.0.1(postcss@8.4.49)
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1(@swc/core@1.3.100))
       fork-ts-checker-webpack-plugin:
         specifier: 9.0.x
         version: 9.0.2(typescript@5.7.2)(webpack@5.97.1)
@@ -2633,8 +2633,8 @@ importers:
         specifier: ^7.6.0
         version: 7.6.0
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -2895,8 +2895,8 @@ importers:
         specifier: 13.0.x
         version: 13.0.0(webpack@5.97.1)
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -3191,8 +3191,8 @@ importers:
         specifier: 13.0.x
         version: 13.0.0(webpack@5.97.1)
       css-loader:
-        specifier: ^3.6.0
-        version: 3.6.0(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -4123,8 +4123,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       css-loader:
-        specifier: ^6.8.1
-        version: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -4174,7 +4174,7 @@ importers:
         specifier: ^0.5.43
         version: 0.5.43
       moment-timezone-data-webpack-plugin:
-        specifier: ^1.5.1
+        specifier: 1.5.x
         version: 1.5.1(moment-timezone@0.5.43)(webpack@5.97.1)
       node-watch:
         specifier: ^0.7.4
@@ -4707,8 +4707,8 @@ importers:
         specifier: 7.0.3
         version: 7.0.3
       css-loader:
-        specifier: ^6.8.1
-        version: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+        specifier: 6.2.x
+        version: 6.2.0(webpack@5.97.1)
       cssnano:
         specifier: 5.1.12
         version: 5.1.12(postcss@8.4.32)
@@ -4842,7 +4842,7 @@ importers:
         specifier: ^14.16.1
         version: 14.16.1
       terser-webpack-plugin:
-        specifier: 5.3.11
+        specifier: 5.3.x
         version: 5.3.11(@swc/core@1.3.100)(esbuild@0.18.20)(webpack@5.97.1)
       typescript:
         specifier: 5.7.x
@@ -14483,6 +14483,12 @@ packages:
     engines: {node: '>= 8.9.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
+
+  css-loader@6.2.0:
+    resolution: {integrity: sha512-/rvHfYRjIpymZblf49w8jYcRo2y9gj6rV8UroHGmBxKrIyGLokpycyKzp9OkitvqT29ZSpzJ0Ic7SpnJX3sC8g==}
+    engines: {node: '>= 12.13.0'}
+    peerDependencies:
+      webpack: ^5.0.0
 
   css-loader@6.8.1:
     resolution: {integrity: sha512-xDAXtEVGlD0gJ07iclwWVkLoZOpEvAWaSyf6W18S2pOC//K8+qUDIx8IIT3D+HjnmkJPQeesOPv5aiUaJsCM2g==}
@@ -28873,10 +28879,7 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - utf-8-validate
 
   '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))':
     dependencies:
@@ -31617,7 +31620,7 @@ snapshots:
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
       constants-browserify: 1.0.0
-      css-loader: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+      css-loader: 6.8.1(webpack@5.97.1)
       es-module-lexer: 1.4.1
       express: 4.18.2
       fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.7.2)(webpack@5.97.1)
@@ -39522,7 +39525,7 @@ snapshots:
       clean-webpack-plugin: 3.0.0(webpack@5.97.1)
       copy-webpack-plugin: 10.2.4(webpack@5.97.1)
       cross-spawn: 5.1.0
-      css-loader: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+      css-loader: 6.2.0(webpack@5.97.1(@swc/core@1.3.100))
       cssnano: 6.1.2(postcss@8.4.32)
       cwd: 0.10.0
       dir-glob: 3.0.1
@@ -39614,7 +39617,7 @@ snapshots:
       clean-webpack-plugin: 3.0.0(webpack@5.97.1)
       copy-webpack-plugin: 10.2.4(webpack@5.97.1)
       cross-spawn: 5.1.0
-      css-loader: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+      css-loader: 6.8.1(webpack@5.97.1)
       cssnano: 6.1.2(postcss@8.4.32)
       cwd: 0.10.0
       dir-glob: 3.0.1
@@ -39706,7 +39709,7 @@ snapshots:
       clean-webpack-plugin: 3.0.0(webpack@5.97.1)
       copy-webpack-plugin: 10.2.4(webpack@5.97.1)
       cross-spawn: 5.1.0
-      css-loader: 6.8.1(webpack@5.97.1(@swc/core@1.3.100))
+      css-loader: 6.8.1(webpack@5.97.1)
       cssnano: 6.1.2(postcss@8.4.32)
       cwd: 0.10.0
       dir-glob: 3.0.1
@@ -42846,22 +42849,29 @@ snapshots:
       semver: 6.3.1
       webpack: 4.47.0(webpack-cli@5.1.4)
 
-  css-loader@3.6.0(webpack@5.97.1(@swc/core@1.3.100)):
+  css-loader@6.2.0(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
-      camelcase: 5.3.1
-      cssesc: 3.0.0
-      icss-utils: 4.1.1
-      loader-utils: 1.4.2
-      normalize-path: 3.0.0
-      postcss: 7.0.39
-      postcss-modules-extract-imports: 2.0.0
-      postcss-modules-local-by-default: 3.0.3
-      postcss-modules-scope: 2.2.0
-      postcss-modules-values: 3.0.0
+      icss-utils: 5.1.0(postcss@8.4.32)
+      postcss: 8.4.32
+      postcss-modules-extract-imports: 3.0.0(postcss@8.4.32)
+      postcss-modules-local-by-default: 4.0.3(postcss@8.4.32)
+      postcss-modules-scope: 3.0.0(postcss@8.4.32)
+      postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
-      schema-utils: 2.7.1
-      semver: 6.3.1
+      semver: 7.6.3
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+
+  css-loader@6.2.0(webpack@5.97.1):
+    dependencies:
+      icss-utils: 5.1.0(postcss@8.4.32)
+      postcss: 8.4.32
+      postcss-modules-extract-imports: 3.0.0(postcss@8.4.32)
+      postcss-modules-local-by-default: 4.0.3(postcss@8.4.32)
+      postcss-modules-scope: 3.0.0(postcss@8.4.32)
+      postcss-modules-values: 4.0.0(postcss@8.4.32)
+      postcss-value-parser: 4.2.0
+      semver: 7.6.3
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
   css-loader@6.8.1(webpack@5.89.0):
     dependencies:
@@ -42887,7 +42897,7 @@ snapshots:
       semver: 7.6.3
       webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)
 
-  css-loader@6.8.1(webpack@5.97.1(@swc/core@1.3.100)):
+  css-loader@6.8.1(webpack@5.97.1):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.32)
       postcss: 8.4.32
@@ -52985,7 +52995,7 @@ snapshots:
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.32)
       postcss: 8.4.32
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
 
   postcss-modules-scope@2.2.0:
@@ -52996,7 +53006,7 @@ snapshots:
   postcss-modules-scope@3.0.0(postcss@8.4.32):
     dependencies:
       postcss: 8.4.32
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-modules-values@3.0.0:
     dependencies:
