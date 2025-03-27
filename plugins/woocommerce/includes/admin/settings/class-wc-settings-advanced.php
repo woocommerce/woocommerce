@@ -491,7 +491,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Output the settings.
 	 */
 	public function output() {
-		global $current_section;
+		global $current_section, $hide_save_button;
+
+		if ( 'blueprint' === $current_section ) {
+			$hide_save_button = true;
+		}
 
 		if ( 'webhooks' === $current_section ) {
 			WC_Admin_Webhooks::page_output();
