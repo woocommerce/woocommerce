@@ -255,7 +255,7 @@ class PageController {
 	 */
 	public function get_current_screen_id() {
 		// Return early if this is a REST API request.
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		if ( wp_is_serving_rest_request() ) {
 			return apply_filters( 'woocommerce_navigation_current_screen_id', false, null );
 		}
 		
