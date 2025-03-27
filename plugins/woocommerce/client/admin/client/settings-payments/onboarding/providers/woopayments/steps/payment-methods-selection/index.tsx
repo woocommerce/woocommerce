@@ -2,10 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Icon } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { close } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -50,14 +51,21 @@ export default function PaymentMethodsSelection() {
 		<>
 			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
 				<div className="woocommerce-layout__header-wrapper">
-					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
-						<span className="woocommerce-settings-payments-header__title">
+					<div className="woocommerce-layout__header-title-and-close">
+						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align woocommerce-settings-payments-header__title">
 							{ __(
 								'Choose your payment methods',
 								'woocommerce'
 							) }
-						</span>
-					</h1>
+						</h1>
+						<Button
+							className="settings-payments-onboarding-modal__header--close"
+							onClick={ () => {} }
+						>
+							<Icon icon={ close } />
+						</Button>
+					</div>
+
 					<div className="woocommerce-settings-payments-header__description">
 						{ __(
 							"Select which payment methods you'd like to offer to your shoppers. You can update these at any time.",
