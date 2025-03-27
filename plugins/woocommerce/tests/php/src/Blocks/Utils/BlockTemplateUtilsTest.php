@@ -377,7 +377,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	public function update_plugin(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 		update_option( Options::WC_BLOCK_VERSION, 1 );
-		wc_update_1030_blockified_product_grid_block();
+		wc_update_790_blockified_product_grid_block();
 	}
 
 	/**

@@ -2604,6 +2604,13 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 }
 
 /**
+ * Set a flag to indicate whether the blockified Product Grid Block should be used as a template.
+ */
+function wc_update_790_blockified_product_grid_block() {
+	update_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+}
+
+/**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
  * @return bool Whether there are pending migration records.
@@ -2648,6 +2655,44 @@ LIMIT 250
 	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
 
 	return ! empty( $has_pending );
+}
+
+/**
+ * Rename the checkout template to page-checkout.
+ */
+function wc_update_830_rename_checkout_template() {
+	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
+
+	if ( $template && ! empty( $template->wp_id ) ) {
+		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
+			define( 'WP_POST_REVISIONS', false );
+		}
+		wp_update_post(
+			array(
+				'ID'        => $template->wp_id,
+				'post_name' => 'page-checkout',
+			)
+		);
+	}
+}
+
+/**
+ * Rename the cart template to page-cart.
+ */
+function wc_update_830_rename_cart_template() {
+	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
+
+	if ( $template && ! empty( $template->wp_id) ) {
+		if ( ! defined('WP_POST_REVISIONS' ) ) {
+			define( 'WP_POST_REVISIONS', false );
+		}
+		wp_update_post(
+			array(
+				'ID'        => $template->wp_id,
+				'post_name' => 'page-cart',
+			)
+		);
+	}
 }
 
 /**
@@ -3028,49 +3073,4 @@ function wc_update_990_remove_email_notes() {
 		),
 		array( '%s' )
 	);
-}
-
-/**
- * Set a flag to indicate whether the blockified Product Grid Block should be used as a template.
- */
-function wc_update_1030_blockified_product_grid_block() {
-	update_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
-}
-
-/**
- * Rename the checkout template to page-checkout.
- */
-function wc_update_1120_rename_checkout_template() {
-	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
-
-	if ( $template && ! empty( $template->wp_id ) ) {
-		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
-			define( 'WP_POST_REVISIONS', false );
-		}
-		wp_update_post(
-			array(
-				'ID'        => $template->wp_id,
-				'post_name' => 'page-checkout',
-			)
-		);
-	}
-}
-
-/**
- * Rename the cart template to page-cart.
- */
-function wc_update_1120_rename_cart_template() {
-	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
-
-	if ( $template && ! empty( $template->wp_id ) ) {
-		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
-			define( 'WP_POST_REVISIONS', false );
-		}
-		wp_update_post(
-			array(
-				'ID'        => $template->wp_id,
-				'post_name' => 'page-cart',
-			)
-		);
-	}
 }
