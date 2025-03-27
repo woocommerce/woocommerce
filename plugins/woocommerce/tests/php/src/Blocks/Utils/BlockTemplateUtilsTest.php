@@ -370,6 +370,16 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Runs the migration that happen after a plugin update
+	 *
+	 * @return void
+	 */
+	public function update_plugin(): void {
+		update_option( Options::WC_BLOCK_VERSION, 1 );
+		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+	}
+
+	/**
 	 * Creates a post with a theme term.
 	 *
 	 * @param array  $post Post data.
