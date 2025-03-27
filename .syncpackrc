@@ -22,9 +22,7 @@
 		},
 		{
 			"dependencies": [
-				"@actions/*",
 				"@automattic/*",
-				"@bartekbp/*",
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
@@ -63,8 +61,7 @@
 				"@wordpress/url",
 				"@wordpress/wordcount",
 				"eslint*",
-				"postcss*",
-				"webpack*"
+				"postcss*"
 			],
 			"packages": [
 				"@woocommerce/block-library"
