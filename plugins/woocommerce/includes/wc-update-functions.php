@@ -35,8 +35,8 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use Automattic\WooCommerce\Internal\Admin\Options;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Options as BlockOptions;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Update file paths for 2.0
@@ -3034,7 +3034,7 @@ function wc_update_990_remove_email_notes() {
  * Set a flag to indicate whether the blockified Product Grid Block should be used as a template.
  */
 function wc_update_1030_blockified_product_grid_block() {
-	update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+	update_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
 }
 
 /**
