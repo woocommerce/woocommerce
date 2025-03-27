@@ -176,7 +176,7 @@
 		"autoprefixer": "^10.4.16",
 		"await-exec": "^0.1.2",
 		"babel-jest": "27.5.x",
-		"babel-loader": "^8.3.0",
+		"babel-loader": "9.2.x",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"chalk": "^4.1.2",
 		"comment-parser": "^1.4.1",
@@ -227,7 +227,7 @@
 		"webpack": "5.97.x",
 		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "5.1.x",
-		"webpack-dev-server": "^4.15.1",
+		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-rtl-plugin": "2.0.x",
 		"wireit": "0.14.10"

@@ -64,8 +64,8 @@ importers:
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
       babel-loader:
-        specifier: ^8.3.0
-        version: 8.3.0(@babel/core@7.25.7)(webpack@5.97.1)
+        specifier: 9.2.x
+        version: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -4099,8 +4099,8 @@ importers:
         specifier: 27.5.x
         version: 27.5.1(@babel/core@7.25.7)
       babel-loader:
-        specifier: ^8.3.0
-        version: 8.3.0(@babel/core@7.25.7)(webpack@5.97.1)
+        specifier: 9.2.x
+        version: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
       babel-plugin-transform-react-remove-prop-types:
         specifier: 0.4.24
         version: 0.4.24
@@ -4252,7 +4252,7 @@ importers:
         specifier: 5.1.x
         version: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1)(webpack@5.97.1)
       webpack-dev-server:
-        specifier: ^4.15.1
+        specifier: 4.15.x
         version: 4.15.1(debug@4.3.4)(webpack-cli@5.1.4)(webpack@5.97.1)
       webpack-fix-style-only-entries:
         specifier: ^0.6.1
@@ -13137,13 +13137,6 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0
       webpack: '>=2'
-
-  babel-loader@9.1.3:
-    resolution: {integrity: sha512-xG3ST4DglodGf8qSwv0MdeWLhrDsw/32QMdTO5T1ZIp9gQur0HkCyFs7Awskr10JKXFXwpAhiCuYX5oGXnRGbw==}
-    engines: {node: '>= 14.15.0'}
-    peerDependencies:
-      '@babel/core': ^7.12.0
-      webpack: '>=5'
 
   babel-loader@9.2.1:
     resolution: {integrity: sha512-fqe8naHt46e0yIdkjUZYqddSXfej3AHajX+CSO5X7oy0EmPc6o5Xh+RClNoHjnieWz9AW4kZxW9yyFMhVB1QLA==}
@@ -25606,18 +25599,6 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.15.0:
-    resolution: {integrity: sha512-H/Z3H55mrcrgjFwI+5jKavgXvwQLtfPCUEp6pi35VhoB0pfcHnSoyuTzkBEZpzq49g1193CUEwIvmsjcotenYw==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
@@ -31582,7 +31563,7 @@ snapshots:
       '@swc/core': 1.3.100
       '@types/node': 18.19.3
       '@types/semver': 7.5.6
-      babel-loader: 9.1.3(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20))
+      babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20))
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
       cjs-module-lexer: 1.2.3
@@ -31632,7 +31613,7 @@ snapshots:
       '@swc/core': 1.3.100
       '@types/node': 18.19.3
       '@types/semver': 7.5.6
-      babel-loader: 9.1.3(@babel/core@7.25.7)(webpack@5.97.1)
+      babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
       constants-browserify: 1.0.0
@@ -39534,7 +39515,7 @@ snapshots:
       '@wordpress/stylelint-config': 22.7.0(postcss@8.4.32)(stylelint@14.16.1)
       adm-zip: 0.5.10
       babel-jest: 29.7.0(@babel/core@7.25.7)
-      babel-loader: 8.3.0(@babel/core@7.25.7)(webpack@5.97.1)
+      babel-loader: 8.3.0(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
       browserslist: 4.24.2
       chalk: 4.1.2
       check-node-version: 4.2.1
@@ -39626,7 +39607,7 @@ snapshots:
       '@wordpress/stylelint-config': 21.36.0(postcss@8.4.32)(stylelint@16.11.0(typescript@5.7.2))
       adm-zip: 0.5.10
       babel-jest: 29.7.0(@babel/core@7.25.7)
-      babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1)
+      babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
       browserslist: 4.24.2
       chalk: 4.1.2
       check-node-version: 4.2.1
@@ -39718,7 +39699,7 @@ snapshots:
       '@wordpress/stylelint-config': 21.36.0(postcss@8.4.32)(stylelint@16.11.0(typescript@5.7.2))
       adm-zip: 0.5.10
       babel-jest: 29.7.0(@babel/core@7.25.7)
-      babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1)
+      babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
       browserslist: 4.24.2
       chalk: 4.1.2
       check-node-version: 4.2.1
@@ -41037,7 +41018,7 @@ snapshots:
       schema-utils: 2.7.1
       webpack: 5.89.0(@swc/core@1.3.100)(uglify-js@3.17.4)(webpack-cli@4.10.0)
 
-  babel-loader@8.3.0(@babel/core@7.25.7)(webpack@5.97.1):
+  babel-loader@8.3.0(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
       '@babel/core': 7.25.7
       find-cache-dir: 3.3.2
@@ -41055,25 +41036,18 @@ snapshots:
       schema-utils: 2.7.1
       webpack: 5.89.0(@swc/core@1.3.100)(uglify-js@3.17.4)(webpack-cli@4.10.0)
 
-  babel-loader@9.1.3(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)):
+  babel-loader@9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)):
     dependencies:
       '@babel/core': 7.25.7
       find-cache-dir: 4.0.0
       schema-utils: 4.3.0
       webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)
 
-  babel-loader@9.1.3(@babel/core@7.25.7)(webpack@5.97.1):
+  babel-loader@9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
       '@babel/core': 7.25.7
       find-cache-dir: 4.0.0
       schema-utils: 4.3.0
-      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
-
-  babel-loader@9.2.1(@babel/core@7.25.7)(webpack@5.97.1):
-    dependencies:
-      '@babel/core': 7.25.7
-      find-cache-dir: 4.0.0
-      schema-utils: 4.2.0
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
 
   babel-plugin-add-react-displayname@0.0.5: {}
@@ -58053,7 +58027,7 @@ snapshots:
       memfs: 3.5.3
       mime-types: 2.1.35
       range-parser: 1.2.1
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)
     optional: true
 
@@ -58063,7 +58037,7 @@ snapshots:
       memfs: 3.5.3
       mime-types: 2.1.35
       range-parser: 1.2.1
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
   webpack-dev-middleware@6.1.1(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)):
@@ -58097,9 +58071,9 @@ snapshots:
       '@types/ws': 8.5.10
       ansi-html-community: 0.0.8
       bonjour-service: 1.1.1
-      chokidar: 3.5.3
+      chokidar: 3.6.0
       colorette: 2.0.20
-      compression: 1.7.4
+      compression: 1.7.5
       connect-history-api-fallback: 2.0.0
       default-gateway: 6.0.3
       express: 4.18.2
@@ -58111,13 +58085,13 @@ snapshots:
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       selfsigned: 2.4.1
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 5.3.3(webpack@5.97.1)
-      ws: 8.15.0
+      ws: 8.18.0
     optionalDependencies:
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1)(webpack@5.97.1)
@@ -58138,9 +58112,9 @@ snapshots:
       '@types/ws': 8.5.10
       ansi-html-community: 0.0.8
       bonjour-service: 1.1.1
-      chokidar: 3.5.3
+      chokidar: 3.6.0
       colorette: 2.0.20
-      compression: 1.7.4
+      compression: 1.7.5
       connect-history-api-fallback: 2.0.0
       default-gateway: 6.0.3
       express: 4.18.2
@@ -58152,13 +58126,13 @@ snapshots:
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       selfsigned: 2.4.1
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 5.3.3(webpack@5.97.1)
-      ws: 8.15.0
+      ws: 8.18.0
     optionalDependencies:
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100))
@@ -58179,9 +58153,9 @@ snapshots:
       '@types/ws': 8.5.10
       ansi-html-community: 0.0.8
       bonjour-service: 1.1.1
-      chokidar: 3.5.3
+      chokidar: 3.6.0
       colorette: 2.0.20
-      compression: 1.7.4
+      compression: 1.7.5
       connect-history-api-fallback: 2.0.0
       default-gateway: 6.0.3
       express: 4.18.2
@@ -58193,13 +58167,13 @@ snapshots:
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       selfsigned: 2.4.1
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 5.3.3(webpack@5.97.1)
-      ws: 8.15.0
+      ws: 8.18.0
     optionalDependencies:
       webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1)(webpack@5.97.1)
@@ -58220,9 +58194,9 @@ snapshots:
       '@types/ws': 8.5.10
       ansi-html-community: 0.0.8
       bonjour-service: 1.1.1
-      chokidar: 3.5.3
+      chokidar: 3.6.0
       colorette: 2.0.20
-      compression: 1.7.4
+      compression: 1.7.5
       connect-history-api-fallback: 2.0.0
       default-gateway: 6.0.3
       express: 4.18.2
@@ -58234,13 +58208,13 @@ snapshots:
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       selfsigned: 2.4.1
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 5.3.3(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20))
-      ws: 8.15.0
+      ws: 8.18.0
     optionalDependencies:
       webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)
     transitivePeerDependencies:
@@ -58787,8 +58761,6 @@ snapshots:
   ws@7.5.10: {}
 
   ws@7.5.9: {}
-
-  ws@8.15.0: {}
 
   ws@8.18.0: {}
 
