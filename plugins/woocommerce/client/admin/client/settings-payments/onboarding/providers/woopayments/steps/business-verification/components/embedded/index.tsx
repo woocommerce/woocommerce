@@ -38,7 +38,7 @@ interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
  * Hook to initialize Stripe Connect.
  *
  * @param onboardingData - Data required for onboarding.
- * @param isPoEligible - Whether the user is eligible for progressive onboarding.
+ * @param isPoEligible   - Whether the user is eligible for progressive onboarding.
  *
  * @return Returns stripeConnectInstance, error, and loading state.
  */
@@ -101,13 +101,13 @@ const useInitializeStripe = (
 /**
  * Embedded Stripe Account Onboarding Component.
  *
- * @param onboardingData - Data required for onboarding.
- * @param onExit - Callback function when the onboarding flow is exited.
- * @param onLoaderStart - Callback function when the onboarding loader starts.
- * @param onLoadError - Callback function when the onboarding load error occurs.
- * @param [onStepChange] - Callback function when the onboarding step changes.
+ * @param onboardingData                    - Data required for onboarding.
+ * @param onExit                            - Callback function when the onboarding flow is exited.
+ * @param onLoaderStart                     - Callback function when the onboarding loader starts.
+ * @param onLoadError                       - Callback function when the onboarding load error occurs.
+ * @param [onStepChange]                    - Callback function when the onboarding step changes.
  * @param [collectPayoutRequirements=false] - Whether to collect payout requirements.
- * @param [isPoEligible=false] - Whether the user is eligible for progressive onboarding.
+ * @param [isPoEligible=false]              - Whether the user is eligible for progressive onboarding.
  *
  * @return Rendered Account Onboarding component.
  */
