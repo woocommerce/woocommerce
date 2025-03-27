@@ -129,7 +129,7 @@ test.describe( 'registerProductBlockType registers', () => {
 		} );
 	} );
 
-	test( 'blocks are registered and visible in the templates data views', async ( {
+	test( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
 		admin,
 		editor,
 		page,
