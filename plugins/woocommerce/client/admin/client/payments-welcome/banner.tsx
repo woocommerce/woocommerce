@@ -21,7 +21,7 @@ interface Props {
 	handleSetup: () => void;
 }
 
-const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
+const Banner = ( { isSubmitted, handleSetup }: Props ) => {
 	const { first_name } = getAdminSetting( 'currentUserData', {} );
 	const { description, cta_label, tc_url } = getAdminSetting(
 		'wcpayWelcomePageIncentive'

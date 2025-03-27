@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Reset analytics settings to defaults as a setup step in analytics-data.spec.js.

@@ -361,7 +361,7 @@ class BlockTemplateUtilsDuplicated {
 		$use_blockified_templates = wc_string_to_bool( get_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE ) );
 
 		if ( false === $use_blockified_templates ) {
-			return function_exists( 'wc_current_theme_is_fse_theme' ) && wc_current_theme_is_fse_theme();
+			return wp_is_block_theme();
 		}
 
 		return $use_blockified_templates;

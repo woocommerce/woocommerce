@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Include dependencies.
  */
 if ( ! class_exists( 'WC_Product_Importer', false ) ) {
-	include_once dirname( __FILE__ ) . '/abstract-wc-product-importer.php';
+	include_once __DIR__ . '/abstract-wc-product-importer.php';
 }
 
 if ( ! class_exists( 'WC_Product_CSV_Importer_Controller', false ) ) {
@@ -40,12 +41,21 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected $parsing_raw_data_index = 0;
 
 	/**
+	 * Is the Cost of Goods Sold feature enabled?
+	 *
+	 * @var bool
+	 */
+	private $cogs_is_enabled = false;
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
 	 * @param array  $params Arguments for the parser.
 	 */
 	public function __construct( $file, $params = array() ) {
+		$this->cogs_is_enabled = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
+
 		$default_args = array(
 			'start_pos'        => 0, // File pointer start.
 			'end_pos'          => -1, // File pointer end.
@@ -67,7 +77,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// Import mappings for CSV data.
-		include_once dirname( dirname( __FILE__ ) ) . '/admin/importers/mappings/mappings.php';
+		include_once dirname( __DIR__ ) . '/admin/importers/mappings/mappings.php';
 
 		$this->read_file();
 	}
@@ -732,6 +742,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the Cost of Goods Sold field.
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return float|null
+	 */
+	public function parse_cogs_field( $value ) {
+		return '' === $value ? null : (float) wc_format_decimal( $value );
+	}
+
+	/**
 	 * Deprecated get formatting callback method.
 	 *
 	 * @deprecated 4.3.0
@@ -791,6 +812,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'product_url'       => 'esc_url_raw',
 			'menu_order'        => 'intval',
 			'tax_status'        => array( $this, 'parse_tax_status_field' ),
+			'cogs_value'        => array( $this, 'parse_cogs_field' ),
 		);
 
 		/**
@@ -924,6 +946,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( isset( $data['tag_ids_spaces'] ) ) {
 			$data['tag_ids'] = $data['tag_ids_spaces'];
 			unset( $data['tag_ids_spaces'] );
+		}
+
+		if ( ! $this->cogs_is_enabled ) {
+			unset( $data['cogs_value'] );
 		}
 
 		// Handle special column names which span multiple columns.
@@ -1183,15 +1209,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data['failed'][] = $result;
 			} elseif ( $result['updated'] ) {
 				$data['updated'][] = $result['id'];
-			} else {
-				if ( $result['is_variation'] ) {
+			} elseif ( $result['is_variation'] ) {
 					$data['imported_variations'][] = $result['id'];
-				} else {
-					$data['imported'][] = $result['id'];
-				}
+			} else {
+				$data['imported'][] = $result['id'];
 			}
 
-			$index ++;
+			++$index;
 
 			if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
 				$this->file_position = $this->file_positions[ $index ];

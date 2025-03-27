@@ -1,72 +1,51 @@
 /**
  * External dependencies
  */
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
  */
-import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
+import type {
+	ActiveFilterItem,
+	ProductFiltersContext,
+	ProductFiltersStore,
+} from '../../frontend';
 
-type ProductFilterActiveContext = {
-	removeLabelTemplate: string;
+type ActiveFiltersContext = {
+	item: ActiveFilterItem;
 };
 
-const productFilterActiveStore = store( 'woocommerce/product-filter-active', {
+const activeFiltersStore = {
 	state: {
-		get items() {
-			const context = getContext< ProductFilterActiveContext >();
-			const productFiltersStore = store< ProductFiltersStore >(
-				'woocommerce/product-filters'
-			);
-
-			return productFiltersStore.state.activeFilters.map( ( item ) => ( {
-				...item,
-				removeLabel: context.removeLabelTemplate.replace(
-					'{{label}}',
-					item.label
-				),
-			} ) );
+		get removeActiveFilterLabel() {
+			const { item } = getContext< ActiveFiltersContext >();
+			const { removeLabelTemplate } = getConfig();
+			return removeLabelTemplate.replace( '{{label}}', item.activeLabel );
 		},
-		get hasSelectedFilters() {
-			const productFiltersStore = store< ProductFiltersStore >(
-				'woocommerce/product-filters'
-			);
-			return productFiltersStore.state.activeFilters.length > 0;
+		get hasActiveFilters() {
+			const { activeFilters } = getContext< ProductFiltersContext >();
+			return activeFilters.length > 0;
 		},
 	},
 	actions: {
-		removeFilter: () => {
-			const { attributes } = getElement();
-			let filterItem = attributes[ 'data-filter-item' ];
-
-			if ( typeof filterItem === 'string' )
-				filterItem = JSON.parse( filterItem );
-
-			const { type, value } = filterItem;
-
-			if ( ! type || ! value ) return;
-
-			const productFiltersStore = store< ProductFiltersStore >(
-				'woocommerce/product-filters'
-			);
-
-			productFiltersStore.actions.removeActiveFilter( type, value );
-
-			productFiltersStore.actions.navigate();
+		removeAllActiveFilters: () => {
+			const context = getContext< ProductFiltersContext >();
+			context.activeFilters = [];
+			actions.navigate();
 		},
-		clearFilters: () => {
-			const productFiltersContext = getContext< ProductFiltersContext >(
-				'woocommerce/product-filters'
+		removeActiveFilter: () => {
+			const { item } = getContext< ActiveFiltersContext >();
+			actions.removeActiveFiltersBy(
+				( filter ) =>
+					filter.value === item.value && filter.type === item.type
 			);
-			productFiltersContext.activeFilters = [];
-
-			const productFiltersStore = store< ProductFiltersStore >(
-				'woocommerce/product-filters'
-			);
-			productFiltersStore.actions.navigate();
+			actions.navigate();
 		},
 	},
-} );
+};
 
-export type ProductFilterActiveStore = typeof productFilterActiveStore;
+const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
+	'woocommerce/product-filters',
+	activeFiltersStore
+);

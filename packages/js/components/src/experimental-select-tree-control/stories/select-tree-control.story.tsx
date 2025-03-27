@@ -51,7 +51,7 @@ const filterItems = ( items: Item[], searchValue ) => {
 	return filteredItems;
 };
 
-export const MultipleSelectTree: React.FC = () => {
+export const MultipleSelectTree = () => {
 	const [ value, setValue ] = React.useState( '' );
 	const [ selected, setSelected ] = React.useState< Item[] >( [] );
 
@@ -97,7 +97,7 @@ export const MultipleSelectTree: React.FC = () => {
 	);
 };
 
-export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
+export const SingleWithinModalUsingBodyDropdownPlacement = () => {
 	const [ isOpen, setOpen ] = useState( true );
 	const [ value, setValue ] = useState( '' );
 	const [ selected, setSelected ] = useState< Item[] >( [] );
@@ -163,7 +163,7 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 	);
 };
 
-export const SingleSelectTree: React.FC = () => {
+export const SingleSelectTree = () => {
 	const [ value, setValue ] = React.useState( '' );
 	const [ selected, setSelected ] = React.useState< Item | undefined >();
 

@@ -33,7 +33,7 @@ class ClassicTemplatesCompatibility {
 	 * Initialization method.
 	 */
 	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
-		if ( ! wc_current_theme_is_fse_theme() ) {
+		if ( ! wp_is_block_theme() ) {
 			add_action( 'template_redirect', array( $this, 'set_classic_template_data' ) );
 			// We need to set this data on the widgets screen so the filters render previews.
 			add_action( 'load-widgets.php', array( $this, 'set_filterable_product_data' ) );

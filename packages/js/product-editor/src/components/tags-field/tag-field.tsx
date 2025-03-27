@@ -51,14 +51,14 @@ export function mapFromTreeItemsToTags(
 	return tags.map( mapFromTreeItemToTag );
 }
 
-export const TagField: React.FC< TagFieldProps > = ( {
+export const TagField = ( {
 	id,
 	isVisible = false,
 	label,
 	placeholder,
 	value = [],
 	onChange,
-} ) => {
+}: TagFieldProps ) => {
 	const { tagsSelectList, searchTags } = useTagSearch();
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isCreating, setIsCreating ] = useState( false );

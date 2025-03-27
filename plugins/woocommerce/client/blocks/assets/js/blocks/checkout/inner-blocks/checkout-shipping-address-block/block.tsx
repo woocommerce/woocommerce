@@ -53,7 +53,19 @@ const Block = (): JSX.Element => {
 			delete syncValues.company;
 		}
 
-		setBillingAddress( syncValues );
+		// Only sync if any values are different
+		const needsSync =
+			Object.keys( syncValues ).length !==
+				Object.keys( billingAddress ).length ||
+			! Object.keys( syncValues ).every(
+				( key ) =>
+					syncValues[ key as keyof BillingAddress ] ===
+					billingAddress[ key as keyof BillingAddress ]
+			);
+
+		if ( needsSync ) {
+			setBillingAddress( syncValues );
+		}
 	};
 
 	const clearBillingAddress = ( address: BillingAddress ) => {
