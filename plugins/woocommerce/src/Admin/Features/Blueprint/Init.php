@@ -217,7 +217,7 @@ class Init {
 				'id'          => 'themes',
 				'description' => __( 'It includes all the installed themes.', 'woocommerce' ),
 				'label'       => __( 'Themes', 'woocommerce' ),
-				'icon'        => 'brush',
+				'icon'        => 'layout',
 				'items'       => $this->get_themes_for_export_group(),
 			),
 		);

@@ -57,7 +57,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 
 		// Confirm Order Confirmation Block sections are visible when logged in
 		// order data are visible and correct
-		await pageObject.verifyOrderConfirmationDetails( page );
+		await pageObject.verifyOrderConfirmationDetails();
 
 		// Store order received URL to use later
 		const orderReceivedURL = page.url();
@@ -88,7 +88,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 			)
 		).toBeVisible();
 		// Confirm order details are not visible
-		await pageObject.verifyOrderConfirmationDetails( page, false );
+		await pageObject.verifyOrderConfirmationDetails( false );
 
 		// Access page without order ID or key (test visibility of default message)
 		await page.goto( '/checkout/order-received' );
@@ -99,7 +99,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 			)
 		).toBeVisible();
 		// Confirm order details are not visible
-		await pageObject.verifyOrderConfirmationDetails( page, false );
+		await pageObject.verifyOrderConfirmationDetails( false );
 
 		await test.step( 'Logout the user and revisit the order received page to verify that details are displayed when woocommerce_order_received_verify_known_shoppers is disabled', async () => {
 			await requestUtils.activatePlugin(
@@ -115,7 +115,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 				page.getByRole( 'button', { name: 'Log in' } )
 			).toBeVisible();
 			await page.goto( orderReceivedURL );
-			await pageObject.verifyOrderConfirmationDetails( page );
+			await pageObject.verifyOrderConfirmationDetails();
 		} );
 	} );
 } );
@@ -261,10 +261,14 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 		await pageObject.fillInCheckoutWithTestData();
 		await pageObject.placeOrder();
 		await expect(
-			pageObject.page.getByRole( 'heading', { name: 'Shipping address' } )
+			pageObject.page.getByRole( 'heading', {
+				name: 'Shipping address',
+			} )
 		).toBeHidden();
 		await expect(
-			pageObject.page.getByRole( 'heading', { name: 'Billing address' } )
+			pageObject.page.getByRole( 'heading', {
+				name: 'Billing address',
+			} )
 		).toBeVisible();
 	} );
 } );

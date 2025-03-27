@@ -100,7 +100,7 @@ export const ShippingRecommendationsList = ( {
 	</DismissableList>
 );
 
-const ShippingRecommendations: React.FC = () => {
+const ShippingRecommendations = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
 	const activePlugins = useSelect(

@@ -13,6 +13,11 @@ import {
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 test.describe( 'Template customization', () => {
+	test.skip(
+		( { wpCoreVersion } ) => wpCoreVersion <= 6.6,
+		'Skipping on WP 6.6 and below'
+	);
+
 	CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;

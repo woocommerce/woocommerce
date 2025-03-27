@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Extract query loop product context validation into reusable hook.

@@ -34,7 +34,7 @@ const sampleItems: DefaultItemType[] = [
 	{ value: 'banana', label: 'Banana' },
 ];
 
-export const Single: React.FC = () => {
+export const Single = () => {
 	const [ selected, setSelected ] = useState<
 		SelectedType< DefaultItemType >
 	>( sampleItems[ 1 ] );
@@ -53,7 +53,7 @@ export const Single: React.FC = () => {
 	);
 };
 
-export const Multiple: React.FC = () => {
+export const Multiple = () => {
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [
 		sampleItems[ 0 ],
 		sampleItems[ 2 ],
@@ -78,7 +78,7 @@ export const Multiple: React.FC = () => {
 	);
 };
 
-export const ExternalTags: React.FC = () => {
+export const ExternalTags = () => {
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
 
 	return (
@@ -101,7 +101,7 @@ export const ExternalTags: React.FC = () => {
 	);
 };
 
-export const FuzzyMatching: React.FC = () => {
+export const FuzzyMatching = () => {
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
 
 	const getFilteredItems = (
@@ -136,7 +136,7 @@ export const FuzzyMatching: React.FC = () => {
 	);
 };
 
-export const Async: React.FC = () => {
+export const Async = () => {
 	const [ selectedItem, setSelectedItem ] =
 		useState< DefaultItemType | null >( null );
 	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
@@ -211,7 +211,7 @@ export const Async: React.FC = () => {
 	);
 };
 
-export const AsyncWithoutListeningFilterEvents: React.FC = () => {
+export const AsyncWithoutListeningFilterEvents = () => {
 	const [ selectedItem, setSelectedItem ] =
 		useState< DefaultItemType | null >( null );
 	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
@@ -286,7 +286,7 @@ export const AsyncWithoutListeningFilterEvents: React.FC = () => {
 	);
 };
 
-export const CustomRender: React.FC = () => {
+export const CustomRender = () => {
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [
 		sampleItems[ 0 ],
 	] );
@@ -434,7 +434,7 @@ const customItems: CustomItemType[] = [
 	},
 ];
 
-export const CustomItemType: React.FC = () => {
+export const CustomItemType = () => {
 	const [ selected, setSelected ] = useState<
 		SelectedType< Array< CustomItemType > >
 	>( [] );
@@ -464,7 +464,7 @@ export const CustomItemType: React.FC = () => {
 	);
 };
 
-export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
+export const SingleWithinModalUsingBodyDropdownPlacement = () => {
 	const [ isOpen, setOpen ] = useState( true );
 	const [ selected, setSelected ] =
 		useState< SelectedType< DefaultItemType > >();
@@ -503,7 +503,7 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 	);
 };
 
-export const DefaultSuffix: React.FC = () => {
+export const DefaultSuffix = () => {
 	const [ selected, setSelected ] = useState<
 		SelectedType< DefaultItemType >
 	>( sampleItems[ 1 ] );
@@ -519,7 +519,7 @@ export const DefaultSuffix: React.FC = () => {
 	);
 };
 
-export const CustomSuffixIcon: React.FC = () => {
+export const CustomSuffixIcon = () => {
 	const [ selected, setSelected ] = useState<
 		SelectedType< DefaultItemType >
 	>( sampleItems[ 1 ] );
@@ -536,7 +536,7 @@ export const CustomSuffixIcon: React.FC = () => {
 	);
 };
 
-export const NoSuffix: React.FC = () => {
+export const NoSuffix = () => {
 	const [ selected, setSelected ] = useState<
 		SelectedType< DefaultItemType >
 	>( sampleItems[ 1 ] );
@@ -553,7 +553,7 @@ export const NoSuffix: React.FC = () => {
 	);
 };
 
-export const CustomSuffix: React.FC = () => {
+export const CustomSuffix = () => {
 	const [ selected, setSelected ] = useState<
 		SelectedType< DefaultItemType >
 	>( sampleItems[ 1 ] );
@@ -574,7 +574,7 @@ export const CustomSuffix: React.FC = () => {
 	);
 };
 
-export const ToggleButton: React.FC = () => {
+export const ToggleButton = () => {
 	const [ selected, setSelected ] =
 		useState< SelectedType< DefaultItemType > >();
 

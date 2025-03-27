@@ -14,9 +14,10 @@ import { useSelect } from '@wordpress/data';
  */
 import { TaxChildProps } from '../utils';
 
-export const Configure: React.FC<
-	Pick< TaxChildProps, 'isPending' | 'onManual' >
-> = ( { isPending, onManual } ) => {
+export const Configure = ( {
+	isPending,
+	onManual,
+}: Pick< TaxChildProps, 'isPending' | 'onManual' > ) => {
 	const { generalSettings } = useSelect( ( select ) => {
 		const { getSettings } = select( settingsStore );
 

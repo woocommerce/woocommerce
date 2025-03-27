@@ -34,6 +34,7 @@
 		"access": "public"
 	},
 	"dependencies": {
+		"@automattic/site-admin": "^0.0.1",
 		"@types/lodash": "^4.14.202",
 		"@types/prop-types": "^15.7.11",
 		"@types/wordpress__blocks": "11.0.7",
@@ -41,6 +42,7 @@
 		"@woocommerce/settings": "1.0.0",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.6",
+		"@wordpress/base-styles": "wp-6.6",
 		"@wordpress/components": "wp-6.6",
 		"@wordpress/compose": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",
@@ -48,7 +50,6 @@
 		"@wordpress/date": "wp-6.6",
 		"@wordpress/deprecated": "wp-6.6",
 		"@wordpress/edit-post": "wp-6.6",
-		"@wordpress/edit-site": "6.10.0",
 		"@wordpress/editor": "wp-6.6",
 		"@wordpress/element": "wp-6.6",
 		"@wordpress/hooks": "wp-6.6",
@@ -63,7 +64,6 @@
 		"@woocommerce/navigation": "workspace:*",
 		"@wordpress/plugins": "wp-6.6",
 		"@wordpress/preferences": "wp-6.6",
-		"@wordpress/private-apis": "^1.6.0",
 		"@wordpress/router": "1.11.0",
 		"@wordpress/url": "wp-6.6",
 		"clsx": "^2.1.1",
@@ -72,8 +72,8 @@
 		"react-router-dom": "~6.3.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/core": "7.25.7",
+		"@babel/runtime": "7.25.7",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
@@ -91,7 +91,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/block-editor": "wp-6.6",
-		"@wordpress/browserslist-config": "wp-6.6",
+		"@wordpress/browserslist-config": "next",
 		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",

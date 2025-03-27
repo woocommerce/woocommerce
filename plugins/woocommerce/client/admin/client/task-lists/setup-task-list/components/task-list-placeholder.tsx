@@ -15,9 +15,7 @@ type TasksPlaceholderProps = {
 	};
 };
 
-export const TaskListPlaceholder: React.FC< TasksPlaceholderProps > = (
-	props
-) => {
+export const TaskListPlaceholder = ( props: TasksPlaceholderProps ) => {
 	const { numTasks = 5 } = props;
 
 	return (

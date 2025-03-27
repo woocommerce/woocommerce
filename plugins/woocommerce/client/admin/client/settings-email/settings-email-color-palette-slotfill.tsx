@@ -28,12 +28,12 @@ type EmailColorPaletteFillProps = {
 	autoSyncInput: HTMLInputElement;
 };
 
-const EmailColorPaletteFill: React.FC< EmailColorPaletteFillProps > = ( {
+const EmailColorPaletteFill = ( {
 	defaultColors,
 	hasThemeJson,
 	autoSync,
 	autoSyncInput,
-} ) => {
+}: EmailColorPaletteFillProps ) => {
 	return (
 		<Fill>
 			<ResetStylesControl
