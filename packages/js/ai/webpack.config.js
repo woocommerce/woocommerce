@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+const WebpackRTLPlugin = require( '@automattic/webpack-rtl-plugin' );
 
 /**
  * Internal dependencies
