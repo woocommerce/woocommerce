@@ -204,6 +204,15 @@
 		},
 		{
 			"dependencies": [
+				"webpack-bundle-analyzer"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.9.x"
+		},
+		{
+			"dependencies": [
 				"github-label-sync"
 			],
 			"packages": [

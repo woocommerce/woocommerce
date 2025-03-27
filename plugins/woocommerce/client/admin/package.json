@@ -226,7 +226,7 @@
 		"typescript": "5.7.x",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.89.0",
-		"webpack-bundle-analyzer": "^3.9.0",
+		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "^4.10.0",
 		"webpack-dev-server": "^4.15.1",
 		"webpack-fix-style-only-entries": "^0.6.1",
