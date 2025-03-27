@@ -19,17 +19,16 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, getAdminLink } from '@woocommerce/settings';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
-import {
-	COMING_SOON_PAGE_EDITOR_LINK,
-	SITE_VISIBILITY_DOC_LINK,
-} from '../constants';
+import { SITE_VISIBILITY_DOC_LINK } from '../constants';
 import { ConfirmationModal } from './components/confirmation-modal';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
@@ -49,6 +48,21 @@ const SiteVisibility = () => {
 	);
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
+
+	const { isFetching: isFetchingComingSoonTemplateId, comingSoonTemplateId } =
+		useSelect( ( select ) => {
+			return {
+				isFetching: ! select( coreStore ).hasFinishedResolution(
+					'getDefaultTemplateId',
+					[ { slug: 'coming-soon' } ]
+				),
+				comingSoonTemplateId: select( coreStore ).getDefaultTemplateId(
+					{
+						slug: 'coming-soon',
+					}
+				),
+			};
+		}, [] );
 
 	useEffect( () => {
 		const saveButton = document.getElementsByClassName(
@@ -163,7 +177,8 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ getSetting( 'currentThemeIsFSETheme' )
+					{ ! isFetchingComingSoonTemplateId &&
+					getSetting( 'currentThemeIsFSETheme' )
 						? createInterpolateElement(
 								__(
 									'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
@@ -172,7 +187,9 @@ const SiteVisibility = () => {
 								{
 									a: createElement( 'a', {
 										target: '_blank',
-										href: COMING_SOON_PAGE_EDITOR_LINK,
+										href: getAdminLink(
+											`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
+										),
 									} ),
 								}
 						  )
