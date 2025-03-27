@@ -43,7 +43,6 @@
 				"@wordpress/interactivity-router",
 				"@wordpress/is-shallow-equal",
 				"@wordpress/notices",
-				"@wordpress/plugins",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/postcss-themes",
 				"@wordpress/prettier-config",
