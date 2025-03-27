@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Importers
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -79,6 +81,10 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'Button text'                             => 'button_text',
 		'Position'                                => 'menu_order',
 	);
+
+	if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+		$new_mappings['Cost of goods'] = 'cogs_value';
+	}
 
 	return array_merge( $mappings, $new_mappings );
 }

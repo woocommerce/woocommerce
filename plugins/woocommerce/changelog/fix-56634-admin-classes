@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Avoid initializing block pattern PHP classes unnecessarily in the frontend

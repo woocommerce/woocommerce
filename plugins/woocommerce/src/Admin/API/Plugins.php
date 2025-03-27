@@ -241,6 +241,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function install_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
+		$source  = ! empty( $request['source'] ) ? $request['source'] : null;
 
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
@@ -258,7 +259,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$data = PluginsHelper::install_plugins( $plugins );
+		$data = PluginsHelper::install_plugins( $plugins, null, $source );
 
 		// Gather some plugin details for each installed plugin.
 		$plugin_details = array();
@@ -439,6 +440,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce' ), 404 );
 		}
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
 		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
 

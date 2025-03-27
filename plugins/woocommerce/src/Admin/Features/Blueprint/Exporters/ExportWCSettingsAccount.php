@@ -44,7 +44,7 @@ class ExportWCSettingsAccount extends ExportWCSettings {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'It includes all settings in WooCommerce | Settings | Account and Privacy.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | Account and Privacy.', 'woocommerce' );
 	}
 
 	/**

@@ -3,8 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
 use WooCommerce\Admin\Experimental_Abtest;
 
@@ -27,12 +27,9 @@ class PaymentsController {
 	 * Register hooks.
 	 */
 	public function register() {
-		// Filter the feature config to allow the experiment to have effect.
-		// Use a priority of 9 to ensure that the filter runs before the user-set feature values
-		// are applied by the WC Beta Tester plugin.
-		// This way we allow users to control the feature flag via the WC Beta Tester plugin and disregard the experiment.
-		// @see plugins/woocommerce-beta-tester/plugin.php.
-		add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'filter_feature_config_experiment' ), 9 );
+		add_action( 'woocommerce_register_feature_definitions', array( $this,
+			'adjust_feature_default_enablement_by_experiment'
+		) );
 
 		// Because we gate the hooking based on a feature flag,
 		// we need to delay the registration until the 'woocommerce_init' hook.
@@ -41,53 +38,46 @@ class PaymentsController {
 	}
 
 	/**
-	 * Filter the feature flags list to modify the new Payments Settings page feature based on the experiment.
+	 * Adjust the new Payments Settings page feature default enablement based on the experiment.
 	 *
-	 * @param array $features The feature flags list.
+	 * @param FeaturesController $features_controller The features controller instance.
 	 *
-	 * @return array The updated feature flags list.
+	 * @return void
 	 */
-	public function filter_feature_config_experiment( $features ) {
-		// If the feature flag is not present or has been disabled, don't do anything.
-		if ( empty( $features['reactify-classic-payments-settings'] ) ) {
-			return $features;
+	public function adjust_feature_default_enablement_by_experiment( FeaturesController $features_controller ) {
+		// If the feature is disabled (or doesn't exist), don't do anything.
+		if ( ! $features_controller->feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			return;
 		}
 
-		// Transient key to handle the experiment failure.
+		// We only want to adjust the default feature value.
+		// If the feature value is already set in the DB, don't do anything.
+		$option_name = $features_controller->feature_enable_option_name( 'reactify-classic-payments-settings' );
+		if ( get_option( $option_name ) !== false ) {
+			return;
+		}
+
+		// Transient key to handle the experiment group assignment failure.
 		$transient_key = 'wc_experiment_failure_woocommerce_payment_settings_2025_v2';
 
-		// Try to get cached result first.
-		$cached_result = get_transient( $transient_key );
-
-		// If we have a cache entry that indicates an error, disable the feature.
-		if ( 'error' === $cached_result ) {
-			return array_merge(
-				$features,
-				array(
-					'reactify-classic-payments-settings' => false,
-				)
-			);
+		// If we failed to determine the experiment group assignment in the previous hour, don't do anything.
+		if ( 'error' === get_transient( $transient_key ) ) {
+			return;
 		}
 
 		try {
 			$in_treatment = Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_2025_v2' );
 		} catch ( \Exception $e ) {
-			// If the experiment fails, set a transient to avoid repeated failures and set the flag to false.
-			$in_treatment = false;
+			// If the experiment group assignment fails, set a transient to avoid repeated fetches and
+			// consider the user not in the treatment group.
 			set_transient( $transient_key, 'error', HOUR_IN_SECONDS );
+			$in_treatment = false;
 		}
 
-		// If the feature flag is enabled, but the user is NOT in the experiment treatment group, disable the feature.
+		// If the user is NOT in the experiment treatment group disable the feature.
 		if ( ! $in_treatment ) {
-			return array_merge(
-				$features,
-				array(
-					'reactify-classic-payments-settings' => false,
-				)
-			);
+			$features_controller->change_feature_enable( 'reactify-classic-payments-settings', false );
 		}
-
-		return $features;
 	}
 
 	/**
@@ -95,7 +85,7 @@ class PaymentsController {
 	 */
 	public function delayed_register() {
 		// Don't do anything if the feature is not enabled.
-		if ( ! Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
 			return;
 		}
 
@@ -178,10 +168,10 @@ class PaymentsController {
 		}
 
 		// Add the business location country to the settings.
-		if ( ! isset( $settings[ Payments::USER_PAYMENTS_NOX_PROFILE_KEY ] ) ) {
-			$settings[ Payments::USER_PAYMENTS_NOX_PROFILE_KEY ] = array();
+		if ( ! isset( $settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ] ) ) {
+			$settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ] = array();
 		}
-		$settings[ Payments::USER_PAYMENTS_NOX_PROFILE_KEY ]['business_country_code'] = $this->payments->get_country();
+		$settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ]['business_country_code'] = $this->payments->get_country();
 
 		return $settings;
 	}

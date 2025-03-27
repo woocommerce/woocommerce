@@ -30,7 +30,7 @@ type PaymentMethodListItemProps = {
 };
 
 /**
- * A component that renders a recommened payment method as a list item.
+ * A component that renders a recommended payment method as a list item.
  * Displays the payment method's icon, title, description, and a toggle control to enable or disable it.
  */
 export const PaymentMethodListItem = ( {

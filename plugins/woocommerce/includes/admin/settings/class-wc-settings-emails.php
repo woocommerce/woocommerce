@@ -415,7 +415,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	public function get_custom_fonts() {
 		$custom_fonts = array();
-		if ( wc_current_theme_is_fse_theme() && class_exists( 'WP_Font_Face_Resolver' ) ) {
+		if ( wp_is_block_theme() && class_exists( 'WP_Font_Face_Resolver' ) ) {
 			$theme_fonts = WP_Font_Face_Resolver::get_fonts_from_theme_json();
 			if ( count( $theme_fonts ) > 0 ) {
 				foreach ( $theme_fonts as $font ) {
@@ -606,10 +606,10 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$this->delete_transient_email_settings();
 		$emails      = WC()->mailer()->get_emails();
 		$email_types = array();
-		foreach ( $emails as $type => $email ) {
+		foreach ( $emails as $email ) {
 			$email_types[] = array(
 				'label' => $email->get_title(),
-				'value' => $type,
+				'value' => get_class( $email ),
 			);
 		}
 		?>
@@ -787,7 +787,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	public function email_color_palette( $value ) {
 		$default_colors = EmailColors::get_default_colors();
-		$auto_sync = get_option( EmailStyleSync::AUTO_SYNC_OPTION, 'no' );
+		$auto_sync      = get_option( EmailStyleSync::AUTO_SYNC_OPTION, 'no' );
 
 		?>
 		<hr class="wc-settings-email-color-palette-separator" />

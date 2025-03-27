@@ -126,7 +126,7 @@ class Bootstrap {
 			function () {
 				$is_store_api_request = wc()->is_store_api_request();
 
-				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+				if ( ! $is_store_api_request && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
 				}
@@ -163,13 +163,19 @@ class Bootstrap {
 		if ( ! $is_store_api_request ) {
 			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
 			// regular rest requests to maintain compatibility with the store editor.
-			$this->container->get( AIPatterns::class );
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
-			$this->container->get( PTKPatternsStore::class );
-			$this->container->get( TemplateOptions::class )->init();
+
+			if ( is_admin() || $is_rest ) {
+				$this->container->get( AIPatterns::class );
+				$this->container->get( PTKPatternsStore::class );
+			}
+
+			if ( is_admin() ) {
+				$this->container->get( TemplateOptions::class )->init();
+			}
 		}
 
 		$this->container->get( QueryFilters::class )->init();

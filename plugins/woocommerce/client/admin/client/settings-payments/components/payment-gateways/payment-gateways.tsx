@@ -34,7 +34,8 @@ interface PaymentGatewaysProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	acceptIncentive: ( id: string ) => void;
 	shouldHighlightIncentive: boolean;

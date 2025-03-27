@@ -7,10 +7,10 @@ namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * WooPayments Promotion engine.
@@ -22,7 +22,7 @@ class Init extends RemoteSpecsEngine {
 	public function __construct() {
 		// If the React-based Payments settings page is enabled, we don't need the old WooPayments promotion system,
 		// as we will show the WooPayments suggestion with the new system.
-		if ( Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
 			return;
 		}
 
@@ -85,11 +85,12 @@ class Init extends RemoteSpecsEngine {
 	public static function set_gateway_top_of_list( $ordering ) {
 		$ordering = (array) $ordering;
 		$id       = WCPaymentGatewayPreInstallWCPayPromotion::GATEWAY_ID;
-		// Only tweak the ordering if the list hasn't been reordered with WooCommerce Payments in it already.
+		// Only tweak the ordering if the list hasn't been reordered with WooPayments in it already.
 		if ( ! isset( $ordering[ $id ] ) || ! is_numeric( $ordering[ $id ] ) ) {
-			$is_empty        = empty( $ordering ) || ( count( $ordering ) === 1 && $ordering[0] === false );
-			$ordering[ $id ] = $is_empty ? 0 : ( min( $ordering ) - 1 );
+			$is_empty        = empty( $ordering ) || ( count( $ordering ) === 1 && in_array( $ordering[0], array( false, '' ) ) );
+			$ordering[ $id ] = $is_empty ? 0 : ( min( array_map( 'intval', $ordering ) ) - 1 );
 		}
+
 		return $ordering;
 	}
 
