@@ -25,7 +25,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	collectPayoutRequirements = false,
 } ) => {
 	const { data } = useBusinessVerificationContext();
-	const { navigateToNextStep } = useOnboardingContext();
+	const { currentStep, navigateToNextStep } = useOnboardingContext();
 	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
 	const [ isEligible, setIsEligible ] = useState< boolean | null >( null );
 	const [ loading, setLoading ] = useState( true );
@@ -69,16 +69,6 @@ const EmbeddedKyc: React.FC< Props > = ( {
 
 	return (
 		<>
-			{ loading && (
-				<div className="embedded-kyc-loader-wrapper padded">
-					<StripeSpinner />
-				</div>
-			) }
-			{ finalizingAccount && (
-				<div className="embedded-kyc-loader-wrapper">
-					<StripeSpinner />
-				</div>
-			) }
 			{ loadError &&
 				( loadError.error.type === 'invalid_request_error' ? (
 					<BannerNotice
@@ -95,7 +85,9 @@ const EmbeddedKyc: React.FC< Props > = ( {
 							{
 								label: 'Cancel',
 								variant: 'link',
-								url: '', // To-Do: Reaplce with cancel URL
+								url:
+									currentStep?.actions?.kyc_fallback?.href ??
+									'',
 							},
 						] }
 					>
@@ -113,6 +105,16 @@ const EmbeddedKyc: React.FC< Props > = ( {
 						{ loadError.error.message }
 					</BannerNotice>
 				) ) }
+			{ loading && (
+				<div className="embedded-kyc-loader-wrapper padded">
+					<StripeSpinner />
+				</div>
+			) }
+			{ finalizingAccount && (
+				<div className="embedded-kyc-loader-wrapper">
+					<StripeSpinner />
+				</div>
+			) }
 			{
 				// Only render the embedded onboarding component once the PO eligibility has been determined.
 				isEligible !== null && (

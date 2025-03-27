@@ -62,6 +62,10 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		kyc_fallback?: {
+			type?: string;
+			href?: string;
+		};
 	};
 	content?: ReactNode;
 	context?: {
