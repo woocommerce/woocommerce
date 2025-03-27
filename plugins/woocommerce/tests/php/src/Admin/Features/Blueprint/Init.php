@@ -104,7 +104,7 @@ class InitTest extends MockeryTestCase {
 		$expected = array(
 			array(
 				'id'          => 'settings',
-				'description' => 'It includes all the items featured in WooCommerce | Settings.',
+				'description' => 'Includes all the items featured in WooCommerce | Settings.',
 				'label'       => 'WooCommerce Settings',
 				'icon'        => 'settings',
 				'items'       => array(
@@ -118,14 +118,14 @@ class InitTest extends MockeryTestCase {
 			),
 			array(
 				'id'          => 'plugins',
-				'description' => 'It includes all the installed plugins and extensions.',
+				'description' => 'Includes all the installed plugins and extensions.',
 				'label'       => 'Plugins and extensions',
 				'icon'        => 'plugins',
 				'items'       => $mock_plugins,
 			),
 			array(
 				'id'          => 'themes',
-				'description' => 'It includes all the installed themes.',
+				'description' => 'Includes all the installed themes.',
 				'label'       => 'Themes',
 				'icon'        => 'layout',
 				'items'       => $mock_themes,
