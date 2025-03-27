@@ -13,13 +13,13 @@ import { Tooltip } from '../../../tooltip';
 type ToggleFieldProps = BaseProductFieldProps< boolean > & {
 	tooltip?: string;
 };
-const ToggleField: React.FC< ToggleFieldProps > = ( {
+const ToggleField = ( {
 	label,
 	value,
 	onChange,
 	tooltip,
 	disabled = false,
-} ) => {
+}: ToggleFieldProps ) => {
 	return (
 		<ToggleControl
 			label={
@@ -30,8 +30,6 @@ const ToggleField: React.FC< ToggleFieldProps > = ( {
 			}
 			checked={ value }
 			onChange={ onChange }
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore disabled prop exists
 			disabled={ disabled }
 		/>
 	);

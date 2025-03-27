@@ -167,6 +167,24 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 				? __( 'Thanks again! If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
 				: __( 'Thanks for reading.', 'woocommerce' );
 		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'customer_note' => $this->customer_note,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
 	}
 
 endif;
