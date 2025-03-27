@@ -30,6 +30,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	const [ isEligible, setIsEligible ] = useState< boolean | null >( null );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
+	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
 
 	// Fetch whether the account is eligible for progressive onboarding
 	useEffect( () => {
@@ -60,9 +61,11 @@ const EmbeddedKyc: React.FC< Props > = ( {
 
 			if ( response.success ) {
 				navigateToNextStep();
+			} else {
+				window.location.href = fallbackUrl;
 			}
 		} catch ( error ) {
-			// To-Do: Handle error.
+			window.location.href = fallbackUrl;
 		}
 	};
 
@@ -88,9 +91,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 							{
 								label: 'Cancel',
 								variant: 'link',
-								url:
-									currentStep?.actions?.kyc_fallback?.href ??
-									'',
+								url: fallbackUrl,
 							},
 						] }
 					>
