@@ -15,7 +15,6 @@ import EmbeddedKyc from './steps/embedded-kyc';
 import { Stepper } from './components/stepper';
 import Step from './components/step';
 import { getMccFromIndustry } from './utils';
-import { MccsDisplayTreeItem } from './types';
 import './style.scss';
 export const BusinessVerificationStep: React.FC = () => {
 	const { currentStep } = useOnboardingContext();
@@ -34,7 +33,7 @@ export const BusinessVerificationStep: React.FC = () => {
 	const handleStepChange = () => window.scroll( 0, 0 );
 
 	return (
-		<>
+		<div className="settings-payments-onboarding-modal__step-business-verification">
 			<WooPaymentsStepHeader onClose={ () => {} } />
 			<div className="settings-payments-onboarding-modal__step-business-verification-content">
 				<BusinessVerificationContextProvider
@@ -55,7 +54,7 @@ export const BusinessVerificationStep: React.FC = () => {
 					</Stepper>
 				</BusinessVerificationContextProvider>
 			</div>
-		</>
+		</div>
 	);
 };
 
