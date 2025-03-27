@@ -349,5 +349,30 @@
 			$underObservation.on( 'change', changeAgent );
 			changeAgent();
 		} );
+
+		(function () {
+			const activeTab = document.querySelector('.nav-tab-active');
+			if (!activeTab || window.innerWidth >= 500) return;
+
+			const parent = activeTab.parentElement;
+			if (!parent || parent.scrollWidth <= parent.clientWidth) return;
+
+			const tabLeft = activeTab.offsetLeft;
+			const tabRight = tabLeft + activeTab.offsetWidth;
+			const scrollLeft = parent.scrollLeft;
+			const visibleLeft = scrollLeft;
+			const visibleRight = scrollLeft + parent.clientWidth;
+
+			const isOutOfView = tabLeft < visibleLeft || tabRight > visibleRight;
+
+			if (isOutOfView) {
+				const offset = tabLeft - parent.clientWidth / 2 + activeTab.offsetWidth / 2;
+				parent.scrollTo({
+					left: offset,
+					behavior: 'auto'
+				});
+			}
+		})();
+
 	} );
 } )( jQuery, woocommerce_settings_params, wp );
