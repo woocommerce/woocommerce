@@ -2682,8 +2682,8 @@ function wc_update_830_rename_checkout_template() {
 function wc_update_830_rename_cart_template() {
 	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
 
-	if ( $template && ! empty( $template->wp_id) ) {
-		if ( ! defined('WP_POST_REVISIONS' ) ) {
+	if ( $template && ! empty( $template->wp_id ) ) {
+		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
 			define( 'WP_POST_REVISIONS', false );
 		}
 		wp_update_post(
