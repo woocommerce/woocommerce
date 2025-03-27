@@ -75,8 +75,11 @@ class ImportInstallPluginTest extends TestCase {
 		$schema->pluginData = (object)[
 			'slug' => $pluginSlug,
 			'resource' => 'wordpress.org/plugins',
-			'options' => (object)['activate' => true]
 		];
+
+		$schema->options = (object) array(
+			'activate' => true,
+		);
 
 		$resourceStorage = Mockery::mock(ResourceStorages::class);
 		$resourceStorage->shouldReceive('is_supported_resource')

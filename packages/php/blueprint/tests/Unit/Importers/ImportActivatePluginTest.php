@@ -62,7 +62,7 @@ class ImportActivatePluginTest extends TestCase {
 		// Mock the activate_plugin_by_slug method
 		$importActivatePlugin->shouldReceive('wp_activate_plugin')
 		                     ->with($pluginPath)
-		                     ->andReturn(false);
+		                     ->andReturn(new \WP_Error('error', 'Error message'));
 
 		// Execute the process method
 		$result = $importActivatePlugin->process($schema);
