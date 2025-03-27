@@ -14,7 +14,7 @@ import {
 	useEffect,
 	useRef,
 } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';
@@ -33,6 +33,7 @@ import {
 import { ConfirmationModal } from './components/confirmation-modal';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-site-visibility-settings-slotfill';
 
 const SiteVisibility = () => {
 	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
@@ -308,7 +309,11 @@ const SiteVisibilitySlotFill = () => {
 };
 
 export const registerSiteVisibilitySlotFill = () => {
-	registerPlugin( 'woocommerce-admin-site-visibility-settings-slotfill', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-site-visibility-settings',
 		render: SiteVisibilitySlotFill,
 	} );

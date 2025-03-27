@@ -27,7 +27,6 @@
 				"@bartekbp/*",
 				"@storybook/*",
 				"@testing-library/*",
-				"@types/*",
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
@@ -63,7 +62,6 @@
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
 				"@wordpress/wordcount",
-				"babel*",
 				"eslint*",
 				"postcss*",
 				"webpack*"
@@ -96,6 +94,16 @@
 				"@babel/runtime"
 			],
 			"pinVersion": "7.25.7",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
+			"dependencies": [
+				"babel-plugin-transform-react-remove-prop-types"
+			],
+			"pinVersion": "0.4.24",
 			"packages": [
 				"**"
 			]
@@ -214,7 +222,7 @@
 			"packages": [
 				"@woocommerce/product-editor",
 				"@woocommerce/settings-editor",
-				"@woocommerce/admin-library",
+				"@woocommerce/admin-library"
 			],
 			"isIgnored": true
 		},
@@ -309,15 +317,6 @@
 				"**"
 			],
 			"pinVersion": "wp-6.6"
-		},
-		{
-			"dependencies": [
-				"@types/wordpress__components"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^19.10.5"
 		},
 		{
 			"dependencies": [
@@ -426,7 +425,7 @@
 				"@woocommerce/block-library",
 				"@woocommerce/storybook"
 			],
-			"pinVersion": "29.7.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"label": "Testing related dependencies: React 17",
@@ -483,10 +482,18 @@
 			"pinVersion": "^2.5.7"
 		},
 		{
+			"dependencies": [
+				"@automattic/site-admin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.1"
+		},
+		{
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@automattic/color-studio",
-				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"config",
 				"eslint",

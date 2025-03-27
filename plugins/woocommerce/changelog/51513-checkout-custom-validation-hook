@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds a hook for custom checkout validation after the standard validations (email, coupons, etc) have passed. Allows developers to add their own checkout validation logic conditionally.

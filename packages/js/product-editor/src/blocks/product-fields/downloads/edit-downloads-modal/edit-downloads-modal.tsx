@@ -28,13 +28,13 @@ export interface Image {
 	alt: string;
 }
 
-export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
+export const EditDownloadsModal = ( {
 	downloadableItem,
 	onCancel,
 	onChange,
 	onRemove,
 	onSave,
-} ) => {
+}: EditDownloadsModalProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCopingToClipboard, setIsCopingToClipboard ] =
 		useState< boolean >( false );

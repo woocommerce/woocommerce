@@ -35,14 +35,20 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		params: GetVariationsRequest,
 		invalidateResolutionBeforeRequest = false
 	) {
-		const requestParams: GetVariationsRequest = {
-			page: 1,
-			per_page: perPageRef.current,
-			order: 'asc',
-			orderby: 'menu_order',
-			attributes: [],
-			...params,
-		};
+		const requestParams = {
+			product_id: params.product_id,
+			page: params.page || 1,
+			per_page: params.per_page || perPageRef.current,
+			order: params.order || 'asc',
+			orderby: ( params.orderby || 'menu_order' ) as
+				| 'date'
+				| 'id'
+				| 'include'
+				| 'title'
+				| 'slug'
+				| 'menu_order',
+			attributes: params.attributes || [],
+		} as const;
 
 		try {
 			const { invalidateResolution } = dispatch(
@@ -64,10 +70,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			setIsLoading( true );
 			setGetVariationsError( undefined );
 
-			// @ts-expect-error TODO react-18-upgrade: requestParams type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 			const data = await getProductVariations( requestParams );
-
-			// @ts-expect-error TODO react-18-upgrade: requestParams type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 			const total = await getProductVariationsTotalCount( requestParams );
 
 			setVariations( data );

@@ -11,7 +11,7 @@ import { Edit } from './edit';
 import { Save } from './save';
 import icon from './icon';
 import './style.scss';
-import './inner-blocks/product-gallery-large-image-next-previous';
+import './inner-blocks/product-gallery-next-previous-buttons';
 import './inner-blocks/product-gallery-thumbnails';
 
 const blockConfig = {

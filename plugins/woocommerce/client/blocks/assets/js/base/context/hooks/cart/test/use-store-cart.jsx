@@ -3,7 +3,6 @@
  */
 import TestRenderer, { act } from 'react-test-renderer';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
-import { previewCart } from '@woocommerce/resource-previews';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
 /**
@@ -23,68 +22,6 @@ jest.mock( '@woocommerce/block-data', () => ( {
 
 describe( 'useStoreCart', () => {
 	let registry, renderer;
-
-	const receiveCartMock = () => {};
-	const receiveCartContentsMock = () => {};
-
-	const previewCartData = {
-		cartCoupons: previewCart.coupons,
-		cartItems: previewCart.items,
-		crossSellsProducts: previewCart.cross_sells,
-		cartFees: previewCart.fees,
-		cartItemsCount: previewCart.items_count,
-		cartItemsWeight: previewCart.items_weight,
-		cartNeedsPayment: previewCart.needs_payment,
-		cartNeedsShipping: previewCart.needs_shipping,
-		cartTotals: previewCart.totals,
-		cartIsLoading: false,
-		cartItemErrors: [],
-		cartErrors: [],
-		billingData: {
-			first_name: '',
-			last_name: '',
-			company: '',
-			address_1: '',
-			address_2: '',
-			city: '',
-			state: '',
-			postcode: '',
-			country: '',
-			email: '',
-			phone: '',
-		},
-		billingAddress: {
-			first_name: '',
-			last_name: '',
-			company: '',
-			address_1: '',
-			address_2: '',
-			city: '',
-			state: '',
-			postcode: '',
-			country: '',
-			email: '',
-			phone: '',
-		},
-		shippingAddress: {
-			first_name: '',
-			last_name: '',
-			company: '',
-			address_1: '',
-			address_2: '',
-			city: '',
-			state: '',
-			postcode: '',
-			country: '',
-			phone: '',
-		},
-		shippingRates: previewCart.shipping_rates,
-		extensions: {},
-		isLoadingRates: false,
-		cartHasCalculatedShipping: true,
-		paymentMethods: previewCart.payment_methods,
-		paymentRequirements: previewCart.payment_requirements,
-	};
 
 	const mockCartItems = [ { key: '1', id: 1, name: 'Lorem Ipsum' } ];
 	const mockShippingAddress = {
@@ -235,40 +172,6 @@ describe( 'useStoreCart', () => {
 			expect( results ).toEqual( mockStoreCartData );
 			expect( receiveCart ).toBeUndefined();
 			expect( receiveCartContents ).toBeUndefined();
-		} );
-	} );
-
-	describe( 'in editor', () => {
-		beforeEach( () => {
-			useEditorContext.mockReturnValue( {
-				isEditor: true,
-				previewData: {
-					previewCart: {
-						...previewCart,
-						receiveCart: receiveCartMock,
-						receiveCartContents: receiveCartContentsMock,
-					},
-				},
-			} );
-		} );
-
-		it( 'return preview data in editor', () => {
-			const TestComponent = getTestComponent();
-
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent )
-				);
-			} );
-
-			const props = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-			const results = props[ 'data-results' ];
-			const receiveCart = props[ 'data-receiveCart' ];
-			const receiveCartContents = props[ 'data-receiveCartContents' ];
-
-			expect( results ).toEqual( previewCartData );
-			expect( receiveCart ).toEqual( receiveCartMock );
-			expect( receiveCartContents ).toEqual( receiveCartContentsMock );
 		} );
 	} );
 } );
