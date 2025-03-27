@@ -226,7 +226,7 @@
 		"lint-staged": "13.2.0",
 		"lodash": "4.17.21",
 		"markdown-it": "13.0.1",
-		"mini-css-extract-plugin": "2.7.6",
+		"mini-css-extract-plugin": "2.7.x",
 		"postcss": "8.4.32",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.0",

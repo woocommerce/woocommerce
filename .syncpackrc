@@ -249,6 +249,15 @@
 		},
 		{
 			"dependencies": [
+				"mini-css-extract-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.7.x"
+		},
+		{
+			"dependencies": [
 				"webpack-remove-empty-scripts"
 			],
 			"packages": [

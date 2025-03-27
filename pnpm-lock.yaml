@@ -370,7 +370,7 @@ importers:
         specifier: 27.5.x
         version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       mini-css-extract-plugin:
-        specifier: ^2.7.6
+        specifier: 2.7.x
         version: 2.7.6(webpack@5.97.1(@swc/core@1.3.100))
       postcss:
         specifier: ^8.4.32
@@ -2322,7 +2322,7 @@ importers:
         specifier: ^0.0.7
         version: 0.0.7
       mini-css-extract-plugin:
-        specifier: ^2.7.6
+        specifier: 2.7.x
         version: 2.7.6(webpack@5.97.1(@swc/core@1.3.100))
       postcss-loader:
         specifier: ^4.3.0
@@ -2907,7 +2907,7 @@ importers:
         specifier: 27.5.x
         version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       mini-css-extract-plugin:
-        specifier: ^2.7.6
+        specifier: 2.7.x
         version: 2.7.6(webpack@5.97.1(@swc/core@1.3.100))
       postcss:
         specifier: ^8.4.32
@@ -3203,7 +3203,7 @@ importers:
         specifier: 27.5.x
         version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       mini-css-extract-plugin:
-        specifier: ^2.7.6
+        specifier: 2.7.x
         version: 2.7.6(webpack@5.97.1(@swc/core@1.3.100))
       postcss:
         specifier: ^8.4.32
@@ -4165,7 +4165,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       mini-css-extract-plugin:
-        specifier: ^2.7.6
+        specifier: 2.7.x
         version: 2.7.6(webpack@5.97.1(@swc/core@1.3.100))
       moment:
         specifier: ^2.29.4
@@ -4788,7 +4788,7 @@ importers:
         specifier: 13.0.1
         version: 13.0.1
       mini-css-extract-plugin:
-        specifier: 2.7.6
+        specifier: 2.7.x
         version: 2.7.6(webpack@5.97.1(@swc/core@1.3.100))
       postcss:
         specifier: 8.4.32
@@ -28662,7 +28662,9 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -28876,9 +28878,12 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
-  '@jest/test-sequencer@26.6.3':
+  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -28886,7 +28891,11 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   '@jest/test-sequencer@27.5.1':
     dependencies:
@@ -39363,7 +39372,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -39442,7 +39451,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -47700,7 +47709,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jest-circus@26.6.3:
+  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@babel/traverse': 7.25.9
       '@jest/environment': 26.6.2
@@ -47724,7 +47733,11 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   jest-circus@27.5.1:
     dependencies:
@@ -48007,7 +48020,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@babel/core': 7.25.7
-      '@jest/test-sequencer': 26.6.3
+      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.25.7)
       chalk: 4.1.2
@@ -48620,7 +48633,9 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:
@@ -51266,12 +51281,12 @@ snapshots:
 
   mini-css-extract-plugin@2.7.6(webpack@5.89.0):
     dependencies:
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       webpack: 5.89.0(@swc/core@1.3.100)(uglify-js@3.17.4)(webpack-cli@4.10.0)
 
   mini-css-extract-plugin@2.7.6(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
