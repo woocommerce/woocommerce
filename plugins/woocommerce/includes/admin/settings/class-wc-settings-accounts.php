@@ -284,7 +284,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 		);
 
 		// Feature requires a block theme. Re-order settings if not using a block theme.
-		if ( ! wc_current_theme_is_fse_theme() ) {
+		if ( ! wp_is_block_theme() ) {
 			$account_settings = array_map(
 				function ( $setting ) {
 					if ( 'woocommerce_enable_signup_and_login_from_checkout' === $setting['id'] ) {

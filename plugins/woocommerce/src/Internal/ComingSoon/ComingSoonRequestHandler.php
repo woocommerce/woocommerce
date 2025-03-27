@@ -58,7 +58,7 @@ class ComingSoonRequestHandler {
 	 */
 	public function possibly_init_block_templates() {
 		// No need to initialize block templates since we've already initialized them in the Block Bootstrap.
-		if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
+		if ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) {
 			return;
 		}
 
@@ -83,7 +83,7 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Set a short cache duration to prevents ddos attacks.
 		header( 'Cache-Control: max-age=60' );
 
-		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_fse_theme         = wp_is_block_theme();
 		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 		add_theme_support( 'block-templates' );
 
