@@ -46,7 +46,7 @@
 		"postcss-loader": "^4.3.0",
 		"sass-loader": "^10.5.0",
 		"webpack-remove-empty-scripts": "^0.7.3",
-		"webpack-rtl-plugin": "^2.0.0"
+		"webpack-rtl-plugin": "2.0.x"
 	},
 	"private": true,
 	"devDependencies": {

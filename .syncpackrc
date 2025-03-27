@@ -22,7 +22,7 @@
 		},
 		{
 			"dependencies": [
-				"@automattic/*",
+				"@automattic/color-studio",
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
@@ -183,6 +183,15 @@
 				"**"
 			],
 			"pinVersion": "2.1.x"
+		},
+		{
+			"dependencies": [
+				"webpack-rtl-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.0.x"
 		},
 		{
 			"dependencies": [

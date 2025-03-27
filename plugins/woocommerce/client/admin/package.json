@@ -230,7 +230,7 @@
 		"webpack-cli": "^4.10.0",
 		"webpack-dev-server": "^4.15.1",
 		"webpack-fix-style-only-entries": "^0.6.1",
-		"webpack-rtl-plugin": "^2.0.0",
+		"webpack-rtl-plugin": "2.0.x",
 		"wireit": "0.14.10"
 	},
 	"peerDependencies": {

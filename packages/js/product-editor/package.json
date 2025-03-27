@@ -127,7 +127,7 @@
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
 		"webpack-remove-empty-scripts": "^0.7.3",
-		"webpack-rtl-plugin": "^2.0.0",
+		"webpack-rtl-plugin": "2.0.x",
 		"wireit": "0.14.10"
 	},
 	"scripts": {
