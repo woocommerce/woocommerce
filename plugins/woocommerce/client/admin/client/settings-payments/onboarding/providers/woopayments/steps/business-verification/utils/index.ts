@@ -61,7 +61,7 @@ export const getBusinessTypes = ( data: Country[] ): Country[] => {
  */
 export const finalizeOnboarding = async ( urlSource: string ) => {
 	return await apiFetch< FinalizeOnboardingResponse >( {
-		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/session/finish`,
+		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/kyc_session/finish`,
 		method: 'POST',
 		data: {
 			source: urlSource,

@@ -24,7 +24,7 @@ export const createKycAccountSession = async (
 ): Promise< AccountKycResult > => {
 	return await apiFetch< AccountKycResult >( {
 		path: addQueryArgs(
-			`${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/session/start`,
+			`${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/kyc_session`,
 			{
 				self_assessment: fromDotNotation( data ),
 				progressive: isPoEligible,
