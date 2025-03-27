@@ -8,6 +8,7 @@ import {
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import { withProductDataContext } from '@woocommerce/shared-hocs';
 
 /**
  * Internal dependencies
@@ -87,33 +88,35 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	],
 ];
 
-export const Edit = ( {
-	attributes,
-	setAttributes,
-}: BlockEditProps< ProductGalleryBlockAttributes > ) => {
-	const blockProps = useBlockProps( {
-		className: 'wc-block-product-gallery',
-	} );
+export const Edit = withProductDataContext(
+	( {
+		attributes,
+		setAttributes,
+	}: BlockEditProps< ProductGalleryBlockAttributes > ) => {
+		const blockProps = useBlockProps( {
+			className: 'wc-block-product-gallery',
+		} );
 
-	return (
-		<div { ...blockProps }>
-			<InspectorControls>
-				<ProductGalleryBlockSettings
-					attributes={ attributes }
-					setAttributes={ setAttributes }
+		return (
+			<div { ...blockProps }>
+				<InspectorControls>
+					<ProductGalleryBlockSettings
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+					/>
+				</InspectorControls>
+				<InnerBlocks
+					allowedBlocks={ [
+						'woocommerce/product-gallery-large-image',
+						'woocommerce/product-gallery-thumbnails',
+					] }
+					templateLock={ false }
+					template={ TEMPLATE }
 				/>
-			</InspectorControls>
-			<InnerBlocks
-				allowedBlocks={ [
-					'woocommerce/product-gallery-large-image',
-					'woocommerce/product-gallery-thumbnails',
-				] }
-				templateLock={ false }
-				template={ TEMPLATE }
-			/>
-		</div>
-	);
-};
+			</div>
+		);
+	}
+);
 
 export const Save = () => {
 	const blockProps = useBlockProps.save();

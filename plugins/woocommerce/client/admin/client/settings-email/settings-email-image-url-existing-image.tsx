@@ -16,11 +16,11 @@ type ExistingImageProps = {
 	imageUrl: string;
 };
 
-export const ExistingImage: React.FC< ExistingImageProps > = ( {
+export const ExistingImage = ( {
 	inputId,
 	imageUrl,
 	setImageUrl,
-} ) => {
+}: ExistingImageProps ) => {
 	const [ backgroundColor, setBackgroundColor ] = useState( 'transparent' );
 
 	useEffect( () => {

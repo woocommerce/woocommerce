@@ -5,19 +5,18 @@ import { __ } from '@wordpress/i18n';
 import {
 	Button,
 	TextControl,
-	Notice,
 	Spinner,
 	CheckboxControl,
+	Notice,
 } from '@wordpress/components';
 import { FormInputValidation } from '@automattic/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
-	createInterpolateElement,
 	useEffect,
 	useState,
+	createInterpolateElement,
 } from '@wordpress/element';
-import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
 import { z } from 'zod';
 import clsx from 'clsx';
@@ -30,6 +29,7 @@ import { BusinessInfoEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
+import { GeolocationCountrySelect } from '../components/geolocation-country-select/geolocation-country-select';
 
 /** These are some store names that are known to be set by default and not likely to be used as actual names */
 export const POSSIBLY_DEFAULT_STORE_NAMES = [
@@ -153,30 +153,6 @@ export const BusinessInfo = ( {
 		}
 	}, [ businessInfo.location, countries, isStoreCountrySet ] );
 
-	const [ geolocationMatch, setGeolocationMatch ] = useState( {
-		key: '',
-		label: '',
-	} );
-
-	useEffect( () => {
-		if ( geolocatedLocation ) {
-			const foundCountryOption = findCountryOption(
-				countries,
-				geolocatedLocation
-			);
-			if ( foundCountryOption ) {
-				setGeolocationMatch( foundCountryOption );
-				if ( ! isStoreCountrySet ) {
-					setStoreCountry( foundCountryOption );
-				}
-			}
-		}
-	}, [ countries, isStoreCountrySet, geolocatedLocation ] );
-
-	const geolocationOverruled =
-		geolocatedLocation &&
-		getCountry( storeCountry.key ) !== getCountry( geolocationMatch.key );
-
 	const [ industry, setIndustry ] = useState<
 		IndustryChoiceOption | undefined
 	>(
@@ -196,9 +172,6 @@ export const BusinessInfo = ( {
 				'im_just_starting_my_business'
 		];
 
-	const [ dismissedGeolocationNotice, setDismissedGeolocationNotice ] =
-		useState( false );
-
 	const [ hasSubmitted, setHasSubmitted ] = useState( false );
 
 	const [ isEmailInvalid, setIsEmailInvalid ] = useState( false );
@@ -212,6 +185,7 @@ export const BusinessInfo = ( {
 	);
 
 	const [ doValidate, setDoValidate ] = useState( false );
+	const [ geolocationOverruled, setGeolocationOverruled ] = useState( false );
 
 	useEffect( () => {
 		if ( doValidate ) {
@@ -304,35 +278,18 @@ export const BusinessInfo = ( {
 							{ '*' }
 						</span>
 					</p>
-					<SelectControl
-						className="woocommerce-profiler-select-control__country"
-						instanceId={ 2 }
+					<GeolocationCountrySelect
+						label={ selectCountryLabel }
 						placeholder={ selectCountryLabel }
-						label={
-							storeCountry.key === '' ? selectCountryLabel : ''
-						}
-						getSearchExpression={ ( query: string ) => {
-							return new RegExp(
-								'(^' + query + '| — (' + query + '))',
-								'i'
-							);
+						countries={ countries }
+						initialValue={ storeCountry }
+						onChange={ ( countryStateOption ) => {
+							setStoreCountry( countryStateOption );
 						} }
-						options={ countries }
-						excludeSelectedOptions={ false }
-						help={ <Icon icon={ chevronDown } /> }
-						onChange={ ( results ) => {
-							if ( Array.isArray( results ) && results.length ) {
-								setStoreCountry(
-									results[ 0 ] as CountryStateOption
-								);
-							}
+						geolocatedLocation={ geolocatedLocation }
+						onGeolocationOverruledChange={ ( overruled ) => {
+							setGeolocationOverruled( overruled );
 						} }
-						selected={ storeCountry ? [ storeCountry ] : [] }
-						showAllOnFocus
-						isSearchable
-						virtualScroll={ true }
-						virtualItemHeight={ 40 }
-						virtualListHeight={ 40 * 9 }
 					/>
 					{ countries.length === 0 && (
 						<Notice
@@ -371,76 +328,13 @@ export const BusinessInfo = ( {
 											variant="tertiary"
 										>
 											{ __(
-												'skip this step',
+												'Skip this step',
 												'woocommerce'
 											) }
 										</Button>
 									),
 								}
 							) }
-						</Notice>
-					) }
-					{ /* woocommerce-profiler-select-control__country-spacer exists purely because the select-control above has an unremovable and unstyleable div and that's preventing margin collapse */ }
-					<div className="woocommerce-profiler-select-control__country-spacer" />
-					{ geolocationOverruled && ! dismissedGeolocationNotice && (
-						<Notice
-							className="woocommerce-profiler-geolocation-notice"
-							onRemove={ () =>
-								setDismissedGeolocationNotice( true )
-							}
-							status="warning"
-						>
-							<p>
-								{ createInterpolateElement(
-									__(
-										// translators: first tag is filled with the country name detected by geolocation, second tag is the country name selected by the user
-										'It looks like you’re located in <geolocatedCountry></geolocatedCountry>. Are you sure you want to create a store in <selectedCountry></selectedCountry>?',
-										'woocommerce'
-									),
-									{
-										geolocatedCountry: (
-											<Button
-												className="geolocation-notice-geolocated-country"
-												variant="link"
-												onClick={ () =>
-													setStoreCountry(
-														geolocationMatch
-													)
-												}
-											>
-												{
-													geolocatedLocation?.country_long
-												}
-											</Button>
-										),
-										selectedCountry: (
-											<span className="geolocation-notice-selected-country">
-												{ storeCountry.label }
-											</span>
-										),
-									}
-								) }
-							</p>
-							<p>
-								{ __(
-									'Setting up your store in the wrong country may lead to the following issues: ',
-									'woocommerce'
-								) }
-							</p>
-							<ul className="woocommerce-profiler-geolocation-notice__list">
-								<li>
-									{ __(
-										'Tax and duty obligations',
-										'woocommerce'
-									) }
-								</li>
-								<li>
-									{ __( 'Payment issues', 'woocommerce' ) }
-								</li>
-								<li>
-									{ __( 'Shipping issues', 'woocommerce' ) }
-								</li>
-							</ul>
 						</Notice>
 					) }
 					{

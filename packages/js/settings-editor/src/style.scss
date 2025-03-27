@@ -1,7 +1,18 @@
+// Import WordPress base styles first
+@import "@wordpress/base-styles/variables";
+@import "@wordpress/base-styles/mixins";
+
 @import "~@wordpress/dataviews/build-style/style.css";
 
+// Import site-admin component styles
+@import "@automattic/site-admin/src/components/sidebar/style.scss";
+@import "@automattic/site-admin/src/components/sidebar-button/style.scss";
+@import "@automattic/site-admin/src/components/sidebar-navigation-item/style.scss";
+@import "@automattic/site-admin/src/components/sidebar-navigation-screen/style.scss";
+@import "@automattic/site-admin/src/components/site-icon/style.scss";
+
 .woocommerce-settings-header {
-	&.edit-site-page-header.woocommerce-settings-header--has-tabs {
+	&.woocommerce-site-page-header.woocommerce-settings-header--has-tabs {
 		border-bottom: none;
 	}
 }
@@ -14,13 +25,13 @@
 	}
 }
 
-#wc-settings-page .edit-site-layout__area {
+#wc-settings-page .woocommerce-site-layout__area {
 	overflow: scroll;
 }
 
 .components-tab-panel__tabs {
 	position: sticky;
-	top: 72px; // For now
+	top: 60px; // For now
 	background-color: #fff;
 }
 

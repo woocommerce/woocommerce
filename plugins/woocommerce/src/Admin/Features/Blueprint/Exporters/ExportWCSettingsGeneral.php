@@ -44,7 +44,7 @@ class ExportWCSettingsGeneral extends ExportWCSettings {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'It includes all settings in WooCommerce | Settings | General.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | General.', 'woocommerce' );
 	}
 
 	/**

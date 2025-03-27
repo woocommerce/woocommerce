@@ -8,6 +8,9 @@
 	],
 	"moduleDirectories": [ "node_modules" ],
 	"moduleNameMapper": {
+		"@wordpress/private-apis": "<rootDir>/node_modules/@wordpress/private-apis",
+		"@wordpress/core-data": "<rootDir>/node_modules/@wordpress/core-data",
+		"@wordpress/components": "<rootDir>/node_modules/@wordpress/components",
 		"@woocommerce/atomic-blocks": "assets/js/atomic/blocks",
 		"@woocommerce/atomic-utils": "assets/js/atomic/utils",
 		"@woocommerce/icons": "assets/js/icons",

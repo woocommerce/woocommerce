@@ -8853,8 +8853,22 @@ html:has(#status-table-templates){
 }
 
 body.woocommerce_page_wc-settings {
-	#wpbody-content, #wpcontent {
+	.woocommerce-layout {
+		.woocommerce-store-alerts {
+			margin-top: 5px;
+		}
+	}
+	
+	#wpcontent {
 		background: #f0f0f1;
+	}
+	#wpbody-content {
+		background: #fff;
+		padding-bottom: 0px;
+	}
+
+	p.submit {
+		margin-bottom: 0;
 	}
 
 	.woocommerce-layout__primary {
@@ -8875,17 +8889,14 @@ body.woocommerce_page_wc-settings {
 		padding: 0;
 	}
 
-	.settings-content {
-		padding: 0 30px;
+	#mainform {
 		background: #f0f0f1;
-		margin-top: 24px;
-
 		h2 {
 			margin: 0;
 		}
 
 		.subsubsub {
-			margin: 0 0 24px 0;
+			margin: 24px 30px 0;
 			li {
 				color: #2271b1;
 				&:first-child a{
@@ -8893,6 +8904,10 @@ body.woocommerce_page_wc-settings {
 				}
 			}
 		}
+	}
+
+	#mainform > *:not(nav) {
+		margin: 24px 30px 0;
 	}
 
 	.wrap {
@@ -8927,8 +8942,13 @@ body.woocommerce_page_wc-settings {
 		border-bottom: 1px solid #EBEBEB;
 
 		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
-			border-bottom: 2px solid #3858E9;
+			border-bottom: 2px solid var(--wp-admin-theme-color, #3858e9);
 			color: #070707;
+		}
+
+		.nav-tab:hover,
+		.nav-tab:focus {
+			color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 		}
 	}
 }
