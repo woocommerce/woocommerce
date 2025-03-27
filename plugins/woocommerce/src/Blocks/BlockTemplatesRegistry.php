@@ -64,7 +64,7 @@ class BlockTemplatesRegistry {
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
 				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
+			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
 				if ( count( $product_types ) > 0 ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );

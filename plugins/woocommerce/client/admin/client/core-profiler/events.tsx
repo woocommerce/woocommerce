@@ -61,12 +61,16 @@ export type BusinessInfoEvent =
 			type: 'SKIP_BUSINESS_INFO_STEP';
 	  };
 
-export type BusinessLocationEvent = {
-	type: 'BUSINESS_LOCATION_COMPLETED';
-	payload: {
-		storeLocation: CountryStateOption[ 'key' ];
-	};
-};
+export type BusinessLocationEvent =
+	| {
+			type: 'BUSINESS_LOCATION_COMPLETED';
+			payload: {
+				storeLocation: CountryStateOption[ 'key' ];
+			};
+	  }
+	| {
+			type: 'RETRY_COUNTRIES_LIST';
+	  };
 
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
