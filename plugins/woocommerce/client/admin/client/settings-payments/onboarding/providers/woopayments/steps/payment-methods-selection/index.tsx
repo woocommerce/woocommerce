@@ -12,6 +12,11 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
+import {
+	combineRequestMethods,
+	combinePaymentMethodsState,
+	decouplePaymentMethodsState,
+} from '~/settings-payments/utils';
 import './style.scss';
 
 export default function PaymentMethodsSelection() {
@@ -37,8 +42,9 @@ export default function PaymentMethodsSelection() {
 		}
 	}, [ currentStep?.context?.payment_methods ] );
 
-	const recommendedPaymentMethods =
-		currentStep?.context?.payment_methods ?? [];
+	const recommendedPaymentMethods = currentStep?.context?.payment_methods
+		? combineRequestMethods( currentStep?.context?.payment_methods )
+		: [];
 
 	return (
 		<>
@@ -66,9 +72,9 @@ export default function PaymentMethodsSelection() {
 								( method: RecommendedPaymentMethod ) => (
 									<PaymentMethodListItem
 										method={ method }
-										paymentMethodsState={
+										paymentMethodsState={ combinePaymentMethodsState(
 											paymentMethodsState
-										}
+										) }
 										setPaymentMethodsState={ ( state ) => {
 											// Update the local state
 											setPaymentMethodsState( state );
@@ -83,7 +89,10 @@ export default function PaymentMethodsSelection() {
 													url: href,
 													method: 'POST',
 													data: {
-														payment_methods: state,
+														payment_methods:
+															decouplePaymentMethodsState(
+																state
+															),
 													},
 												} );
 											}
