@@ -101,7 +101,6 @@
 		"react-transition-group": "^4.4.5",
 		"react-visibility-sensor": "^5.1.1",
 		"redux": "^4.2.1",
-		"tracks": "^0.5.8",
 		"xstate": "4.37.1",
 		"xstate5": "npm:xstate@^5.13.1",
 		"zod": "^3.22.4"
