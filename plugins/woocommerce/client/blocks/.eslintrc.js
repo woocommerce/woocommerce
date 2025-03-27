@@ -147,6 +147,7 @@ const coreModules = [
 	'@wordpress/hooks',
 	'@wordpress/keycodes',
 	'@wordpress/url',
+	'@wordpress/wordcount',
 	'@woocommerce/blocks-test-utils',
 	'@woocommerce/e2e-utils',
 	'babel-jest',
