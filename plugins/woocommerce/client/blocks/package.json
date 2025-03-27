@@ -247,7 +247,7 @@
 		"terser-webpack-plugin": "5.3.11",
 		"typescript": "5.7.x",
 		"utility-types": "3.10.0",
-		"webpack": "5.91.0",
+		"webpack": "5.97.x",
 		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "5.1.4",
 		"wireit": "0.14.10",

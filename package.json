@@ -60,7 +60,7 @@
 		"syncpack": "^10.9.3",
 		"typescript": "5.7.x",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.89.0"
+		"webpack": "5.97.x"
 	},
 	"dependencies": {
 		"@babel/core": "7.25.7",

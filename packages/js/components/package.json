@@ -169,7 +169,7 @@
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"uuid": "^9.0.1",
-		"webpack": "^5.89.0",
+		"webpack": "5.97.x",
 		"webpack-cli": "^3.3.12",
 		"wireit": "0.14.10"
 	},

@@ -225,7 +225,7 @@
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.89.0",
+		"webpack": "5.97.x",
 		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "^4.10.0",
 		"webpack-dev-server": "^4.15.1",

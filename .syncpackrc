@@ -159,6 +159,15 @@
 		},
 		{
 			"dependencies": [
+				"webpack"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.97.x"
+		},
+		{
+			"dependencies": [
 				"fork-ts-checker-webpack-plugin"
 			],
 			"packages": [
