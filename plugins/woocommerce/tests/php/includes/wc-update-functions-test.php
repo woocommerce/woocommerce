@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\WooCommerce\Blocks\Options as BlockOptions;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+
 /**
  * Class WC_Core_Functions_Test
  */
@@ -160,5 +163,98 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_920_add_wc_hooked_blocks_version_option();
 
 		$this->assertEquals( null, get_option( 'woocommerce_hooked_blocks_version', null ) );
+	}
+
+	/**
+	 * Test that wc_update_790_blockified_product_grid_block sets the option value to false.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_790_blockified_product_grid_block() {
+		delete_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_790_blockified_product_grid_block();
+
+		$this->assertEquals( 'no', get_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE ) );
+	}
+
+	/**
+	 * Test that wc_update_830_rename_checkout_template renames the checkout template.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_830_rename_checkout_template() {
+		// Create a mock template object
+		$template        = new stdClass();
+		$template->wp_id = 123;
+
+		add_filter( 'pre_get_block_template', function ( $pre, $id, $template_type ) use ( $template ) {
+			if ( BlockTemplateUtils::PLUGIN_SLUG . '//checkout' === $id && 'wp_template' === $template_type ) {
+				return $template;
+			}
+			return $pre;
+		});
+
+		// Mock wp_update_post to verify it's called with the correct parameters
+		$wp_update_post_called = false;
+		$wp_update_post_args   = array();
+		add_filter( 'wp_update_post_data', function ( $data, $post_args ) use ( &$wp_update_post_called, &$wp_update_post_args ) {
+			$wp_update_post_called = true;
+			$wp_update_post_args = $post_args;
+			return $data;
+		});
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_830_rename_checkout_template();
+
+		$this->assertTrue( $wp_update_post_called );
+		$this->assertEquals( 123, $wp_update_post_args[ 'ID' ] );
+		$this->assertEquals( 'page-checkout', $wp_update_post_args[ 'post_name' ] );
+
+		// Clean up
+		remove_all_filters( 'pre_get_block_template' );
+		remove_all_filters( 'wp_update_post_data' );
+	}
+
+	/**
+	 * Test that wc_update_830_rename_cart_template renames the cart template.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_830_rename_cart_template() {
+		// Create a mock template object
+		$template        = new stdClass();
+		$template->wp_id = 456;
+
+		add_filter( 'pre_get_block_template', function ( $pre, $id, $template_type ) use ( $template ) {
+			if ( BlockTemplateUtils::PLUGIN_SLUG . '//cart' === $id && 'wp_template' === $template_type ) {
+				return $template;
+			}
+			return $pre;
+		});
+
+		// Mock wp_update_post to verify it's called with the correct parameters
+		$wp_update_post_called = false;
+		$wp_update_post_args   = array();
+		add_filter( 'wp_update_post_data', function ( $data, $post_args ) use ( &$wp_update_post_called, &$wp_update_post_args ) {
+			$wp_update_post_called = true;
+			$wp_update_post_args = $post_args;
+			return $data;
+		});
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_830_rename_cart_template();
+
+		$this->assertTrue( $wp_update_post_called );
+		$this->assertEquals( 456, $wp_update_post_args[ 'ID' ] );
+		$this->assertEquals( 'page-cart', $wp_update_post_args[ 'post_name' ] );
+
+		// Clean up
+		remove_all_filters( 'pre_get_block_template' );
+		remove_all_filters( 'wp_update_post_data' );
 	}
 }
