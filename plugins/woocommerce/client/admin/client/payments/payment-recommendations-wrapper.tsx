@@ -16,11 +16,11 @@ const PaymentRecommendationsChunk = lazy(
 		)
 );
 
-export const PaymentRecommendations: React.FC< EmbeddedBodyProps > = ( {
+export const PaymentRecommendations = ( {
 	page,
 	tab,
 	section,
-} ) => {
+}: EmbeddedBodyProps ) => {
 	if (
 		page === 'wc-settings' &&
 		tab === 'checkout' &&

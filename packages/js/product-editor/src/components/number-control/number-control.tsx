@@ -49,7 +49,7 @@ export type NumberProps = {
 const MEDIUM_DELAY = 500;
 const SHORT_DELAY = 100;
 
-export const NumberControl: React.FC< NumberProps > = forwardRef(
+export const NumberControl = forwardRef(
 	(
 		{
 			id,

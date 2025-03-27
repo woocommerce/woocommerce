@@ -476,14 +476,7 @@ class Reviews {
 	 * @return string Empty string if there are no pending reviews, or bubble HTML if there are.
 	 */
 	protected function get_pending_count_bubble(): string {
-		$count = (int) get_comments(
-			array(
-				'type__in'  => array( 'review', 'comment' ),
-				'status'    => '0',
-				'post_type' => 'product',
-				'count'     => true,
-			)
-		);
+		$count = \WC_Comments::get_products_reviews_pending_moderation_counter();
 
 		/**
 		 * Provides an opportunity to alter the pending comment count used within

@@ -16,13 +16,6 @@ const Edit = () => {
 						type: 'flex',
 						verticalAlignment: 'stretched',
 					},
-					style: {
-						spacing: {
-							margin: {
-								top: 'var:preset|spacing|10',
-							},
-						},
-					},
 				},
 				[
 					[

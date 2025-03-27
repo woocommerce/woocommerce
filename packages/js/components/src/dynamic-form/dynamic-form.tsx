@@ -49,14 +49,14 @@ const getInitialConfigValues = ( fields: Field[] ) =>
 		{}
 	);
 
-export const DynamicForm: React.FC< DynamicFormProps > = ( {
+export const DynamicForm = ( {
 	fields: baseFields = [],
 	isBusy = false,
 	onSubmit = () => {},
 	onChange = () => {},
 	validate = () => ( {} ),
 	submitLabel = __( 'Proceed', 'woocommerce' ),
-} ) => {
+}: DynamicFormProps ) => {
 	// Support accepting fields in the format provided by the API (object), but transform to Array
 	const fields =
 		baseFields instanceof Array ? baseFields : Object.values( baseFields );
