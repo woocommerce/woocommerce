@@ -259,6 +259,8 @@ class PageController {
 			/**
 			 * Filter the current screen ID for REST API requests.
 			 *
+			 * @since 3.9.0
+			 *
 			 * @param string|boolean $screen_id The screen id or false if not identified.
 			 * @param WP_Screen      $current_screen The current WP_Screen.
 			 */
