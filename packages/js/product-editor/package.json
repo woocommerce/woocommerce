@@ -81,7 +81,6 @@
 		"react-router-dom": "~6.3.0"
 	},
 	"devDependencies": {
-		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"@babel/core": "7.25.7",
 		"@babel/runtime": "7.25.7",
 		"@testing-library/jest-dom": "^6.x.x",
@@ -128,6 +127,7 @@
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
 		"webpack-remove-empty-scripts": "^0.7.3",
+		"webpack-rtl-plugin": "^2.0.0",
 		"wireit": "0.14.10"
 	},
 	"scripts": {
