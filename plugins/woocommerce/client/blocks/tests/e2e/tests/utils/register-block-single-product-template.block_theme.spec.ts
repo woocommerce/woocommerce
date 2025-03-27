@@ -131,7 +131,6 @@ test.describe( 'registerProductBlockType registers', () => {
 
 	test( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
 		admin,
-		editor,
 		page,
 	} ) => {
 		const productBlockTypes = [
