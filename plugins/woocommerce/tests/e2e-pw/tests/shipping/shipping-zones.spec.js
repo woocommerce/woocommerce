@@ -89,8 +89,8 @@ async function checkShippingRateInCart( page, product, checks ) {
 		},
 	},
 	{
-		name: `Canada with Flat rate ${ rand() }`,
-		zone: 'Canada',
+		name: `Alberta Canada with Flat rate ${ rand() }`,
+		zone: 'Alberta, Canada',
 		postCode: '',
 		method: 'Flat rate',
 		cost: '15.00',
