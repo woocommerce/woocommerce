@@ -186,6 +186,15 @@
 		},
 		{
 			"dependencies": [
+				"circular-dependency-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.2.x"
+		},
+		{
+			"dependencies": [
 				"webpack-rtl-plugin"
 			],
 			"packages": [
