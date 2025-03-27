@@ -481,7 +481,9 @@ jQuery( function ( $ ) {
 				.attr( 'disabled', 'disabled' );
 		}
 
-		if ( 'undefined' === $(el).attr( 'data-taxonomy' ) || false === $(el).attr( 'data-taxonomy' ) || '' === $(el).attr( 'data-taxonomy' ) ) {
+		if ( 'undefined' === $(el).attr( 'data-taxonomy' ) ||
+			false === $(el).attr( 'data-taxonomy' ) ||
+			'' === $(el).attr( 'data-taxonomy' ) ) {
 			add_placeholder_to_attribute_values_field( $(el) );
 
 			$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
@@ -544,9 +546,11 @@ jQuery( function ( $ ) {
 		var $used_for_variations_checkbox = $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' );
 
 		if ( $used_for_variations_checkbox.length && $used_for_variations_checkbox.is( ':checked' ) ) {
-			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_used_for_variations_placeholder );
+			$attributeListItem.find( 'textarea' )
+				.attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_used_for_variations_placeholder );
 		} else {
-			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_default_placeholder );
+			$attributeListItem.find( 'textarea' )
+				.attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_default_placeholder );
 		}
 	}
 
@@ -1266,7 +1270,8 @@ jQuery( function ( $ ) {
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
-	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
+	const tooltipMarkup =
+		`<span class="woocommerce-help-tip" tabindex="0" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
 	const tooltipData = {
 		attribute: 'data-tip',
 		content: woocommerce_admin_meta_boxes.i18n_product_image_tip,

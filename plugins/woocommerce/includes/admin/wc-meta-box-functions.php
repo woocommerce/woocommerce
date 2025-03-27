@@ -89,6 +89,7 @@ function woocommerce_wp_text_input( $field, ?WC_Data $data = null ) {
 
 	if ( ! is_null( $description ) ) {
 		$hidden_class = true === ( $field['description_hidden'] ?? false ) ? ' hidden' : '';
+		//phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '<span class="description' . $hidden_class . '">' . wp_kses_post( $description ) . '</span>';
 	}
 
