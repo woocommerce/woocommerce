@@ -166,7 +166,6 @@
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
-		"@wordpress/custom-templated-path-webpack-plugin": "^2.13.0",
 		"@wordpress/jest-preset-default": "^8.5.2",
 		"@wordpress/postcss-plugins-preset": "^1.6.0",
 		"@wordpress/postcss-themes": "^1.0.5",

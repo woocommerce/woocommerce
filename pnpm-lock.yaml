@@ -4068,9 +4068,6 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.13.1-next.a9f418477.0
-      '@wordpress/custom-templated-path-webpack-plugin':
-        specifier: ^2.13.0
-        version: 2.13.0(webpack@5.97.1)
       '@wordpress/jest-preset-default':
         specifier: ^8.5.2
         version: 8.5.2(@babel/core@7.25.7)(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -11211,13 +11208,6 @@ packages:
     resolution: {integrity: sha512-YL0oryTKIqr7+mXc3LZko/gA6hhfpfxLf6co1CQqiacjKdp29IWXY09Hg7lAODylVejBq31h71dUjgG8trjlxw==}
     engines: {node: '>=20.10.0', npm: '>=10.2.3'}
     hasBin: true
-
-  '@wordpress/custom-templated-path-webpack-plugin@2.13.0':
-    resolution: {integrity: sha512-vVay5UnW9ayinCmbwvb6YudehXM7xIPkoN1itFOXrSQzXBCAETVQTF2uY48d6rOWc1ncTR1hCf/dlmdQxHh56A==}
-    engines: {node: '>=12'}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-    peerDependencies:
-      webpack: ^4.0.0
 
   '@wordpress/data-controls@1.21.3':
     resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
@@ -29844,6 +29834,25 @@ snapshots:
       webpack-dev-server: 4.15.1(debug@4.3.4)(webpack-cli@5.1.4)(webpack@5.97.1)
       webpack-hot-middleware: 2.25.4
 
+  '@pmmmwh/react-refresh-webpack-plugin@0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100)))(webpack-hot-middleware@2.25.4)(webpack@5.97.1(@swc/core@1.3.100))':
+    dependencies:
+      ansi-html-community: 0.0.8
+      common-path-prefix: 3.0.0
+      core-js-pure: 3.34.0
+      error-stack-parser: 2.1.4
+      find-up: 5.0.0
+      html-entities: 2.4.0
+      loader-utils: 2.0.4
+      react-refresh: 0.14.2
+      schema-utils: 3.3.0
+      source-map: 0.7.4
+      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+    optionalDependencies:
+      '@types/webpack': 4.41.38
+      type-fest: 3.13.1
+      webpack-dev-server: 4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100))
+      webpack-hot-middleware: 2.25.4
+
   '@pmmmwh/react-refresh-webpack-plugin@0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)))(webpack-hot-middleware@2.25.4)(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20))':
     dependencies:
       ansi-html-community: 0.0.8
@@ -29861,25 +29870,6 @@ snapshots:
       '@types/webpack': 4.41.38
       type-fest: 3.13.1
       webpack-dev-server: 4.15.1(webpack@5.97.1(@swc/core@1.3.100)(esbuild@0.18.20))
-      webpack-hot-middleware: 2.25.4
-
-  '@pmmmwh/react-refresh-webpack-plugin@0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1)(webpack-hot-middleware@2.25.4)(webpack@5.97.1)':
-    dependencies:
-      ansi-html-community: 0.0.8
-      common-path-prefix: 3.0.0
-      core-js-pure: 3.34.0
-      error-stack-parser: 2.1.4
-      find-up: 5.0.0
-      html-entities: 2.4.0
-      loader-utils: 2.0.4
-      react-refresh: 0.14.2
-      schema-utils: 3.3.0
-      source-map: 0.7.4
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
-    optionalDependencies:
-      '@types/webpack': 4.41.38
-      type-fest: 3.13.1
-      webpack-dev-server: 4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100))
       webpack-hot-middleware: 2.25.4
 
   '@polka/url@1.0.0-next.24': {}
@@ -35287,7 +35277,7 @@ snapshots:
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100))
     optionalDependencies:
-      webpack-dev-server: 4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100))
+      webpack-dev-server: 4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100))
 
   '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack-dev-server@4.15.1)(webpack@5.97.1)':
     dependencies:
@@ -37069,11 +37059,6 @@ snapshots:
       npm-package-arg: 8.1.5
       rimraf: 3.0.2
       write-pkg: 4.0.0
-
-  '@wordpress/custom-templated-path-webpack-plugin@2.13.0(webpack@5.97.1)':
-    dependencies:
-      escape-string-regexp: 1.0.5
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
 
   '@wordpress/data-controls@1.21.3(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -39535,7 +39520,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.50.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1)(webpack-hot-middleware@2.25.4)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100)))(webpack-hot-middleware@2.25.4)(webpack@5.97.1(@swc/core@1.3.100))
       '@svgr/webpack': 8.1.0(typescript@5.7.2)
       '@wordpress/babel-preset-default': 8.13.0
       '@wordpress/browserslist-config': 6.0.1
@@ -39593,7 +39578,7 @@ snapshots:
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
       webpack-bundle-analyzer: 4.9.1
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100))
-      webpack-dev-server: 4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100))
+      webpack-dev-server: 4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100))
     transitivePeerDependencies:
       - '@swc/core'
       - '@types/eslint'
@@ -39627,7 +39612,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.50.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1)(webpack-hot-middleware@2.25.4)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100)))(webpack-hot-middleware@2.25.4)(webpack@5.97.1(@swc/core@1.3.100))
       '@svgr/webpack': 8.1.0(typescript@5.7.2)
       '@wordpress/babel-preset-default': 8.13.0
       '@wordpress/browserslist-config': 6.0.1
@@ -39719,7 +39704,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.50.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1)(webpack-hot-middleware@2.25.4)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.2)(type-fest@3.13.1)(webpack-dev-server@4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100)))(webpack-hot-middleware@2.25.4)(webpack@5.97.1(@swc/core@1.3.100))
       '@svgr/webpack': 8.1.0(typescript@5.7.2)
       '@wordpress/babel-preset-default': 8.13.0
       '@wordpress/browserslist-config': 6.0.1
@@ -39778,7 +39763,7 @@ snapshots:
       webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
       webpack-bundle-analyzer: 4.10.2
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@4.15.1)(webpack@5.97.1)
-      webpack-dev-server: 4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100))
+      webpack-dev-server: 4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100))
     transitivePeerDependencies:
       - '@swc/core'
       - '@types/node'
@@ -57975,7 +57960,7 @@ snapshots:
       webpack-merge: 5.10.0
     optionalDependencies:
       webpack-bundle-analyzer: 4.10.2
-      webpack-dev-server: 4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100))
+      webpack-dev-server: 4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100))
 
   webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
@@ -57995,7 +57980,7 @@ snapshots:
       webpack-merge: 5.10.0
     optionalDependencies:
       webpack-bundle-analyzer: 4.9.1
-      webpack-dev-server: 4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100))
+      webpack-dev-server: 4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100))
 
   webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1)(webpack@5.97.1):
     dependencies:
@@ -58142,7 +58127,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  webpack-dev-server@4.15.1(webpack-cli@5.1.4)(webpack@5.97.1(@swc/core@1.3.100)):
+  webpack-dev-server@4.15.1(webpack-cli@5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.3.100)))(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
       '@types/bonjour': 3.5.13
       '@types/connect-history-api-fallback': 1.5.4
