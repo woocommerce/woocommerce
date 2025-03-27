@@ -22,6 +22,7 @@ class WooPaymentsService {
 	const ONBOARDING_STEP_WPCOM_CONNECTION      = 'wpcom_connection';
 	const ONBOARDING_STEP_TEST_ACCOUNT          = 'test_account';
 	const ONBOARDING_STEP_BUSINESS_VERIFICATION = 'business_verification';
+	const ONBOARDING_STEP_FINISH                = 'finish';
 
 	const ONBOARDING_STEP_STATUS_NOT_STARTED = 'not_started';
 	const ONBOARDING_STEP_STATUS_STARTED     = 'started';
@@ -246,6 +247,20 @@ class WooPaymentsService {
 		}
 
 		$details[] = $business_verification_step_details;
+
+		// Add the finish onboarding step details.
+		$finish_step_details = array(
+			'id'             => self::ONBOARDING_STEP_FINISH,
+			'path'           => trailingslashit( self::ONBOARDING_PATH_BASE ) . self::ONBOARDING_STEP_FINISH,
+			'required_steps' => $this->get_onboarding_step_required_steps( self::ONBOARDING_STEP_FINISH ),
+			'status'         => $this->get_onboarding_step_status( self::ONBOARDING_STEP_FINISH, $location ),
+			'errors'         => array(),
+			'context'        => array(
+				'overview_page_url' => $this->get_overview_page_url(),
+			),
+		);
+
+		$details[] = $finish_step_details;
 
 		return $details;
 	}
