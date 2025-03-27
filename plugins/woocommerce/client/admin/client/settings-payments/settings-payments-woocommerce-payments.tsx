@@ -3,7 +3,7 @@
  */
 import './settings-payments-woocommerce-payments.scss';
 
-export const SettingsPaymentsWooCommercePayments: React.FC = () => {
+export const SettingsPaymentsWooCommercePayments = () => {
 	return (
 		<div className="settings-payments-woocommerce-payments__container">
 			<h1>WooCommerce Payments Settings</h1>

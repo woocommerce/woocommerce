@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update @wordpress/components and @wordpress/server-side-render dependencies in block package.

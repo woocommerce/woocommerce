@@ -25,7 +25,7 @@ registry.register( coreDataStore );
 // @ts-ignore No types for this exist yet.
 registry.register( blockEditorStore );
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	return (
 		<RegistryProvider value={ registry }>
 			<RichTextEditor blocks={ [] } onChange={ () => null } />
@@ -33,7 +33,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const MultipleEditors: React.FC = () => {
+export const MultipleEditors = () => {
 	return (
 		<RegistryProvider value={ registry }>
 			<RichTextEditor blocks={ [] } onChange={ () => null } />
