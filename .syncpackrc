@@ -213,15 +213,6 @@
 		},
 		{
 			"dependencies": [
-				"terser-webpack-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.3.x"
-		},
-		{
-			"dependencies": [
 				"copy-webpack-plugin"
 			],
 			"packages": [
