@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	store,
-	getContext,
-	getElement,
-	withScope,
-} from '@wordpress/interactivity';
+import * as iAPI from '@wordpress/interactivity';
 import type { HTMLElementEvent } from '@woocommerce/types';
 
 /**
@@ -17,6 +12,8 @@ import type {
 	ProductFilterPriceContext,
 	ProductFilterPriceStore,
 } from '../price-filter/frontend';
+
+const { store, getContext, getElement, withScope, getServerContext } = iAPI;
 
 function debounceWithScope< Args extends unknown[] >(
 	func: ( ...args: Args ) => void,
@@ -37,13 +34,15 @@ function debounceWithScope< Args extends unknown[] >(
 const productFilterPriceSliderStore = {
 	state: {
 		rangeStyle: () => {
-			const context = getContext< ProductFilterPriceContext >();
+			const { minRange, maxRange } = getServerContext
+				? getServerContext< ProductFilterPriceContext >()
+				: getContext< ProductFilterPriceContext >();
 			return `--low: ${
-				( 100 * ( state.minPrice - context.minRange ) ) /
-				( context.maxRange - context.minRange )
+				( 100 * ( state.minPrice - minRange ) ) /
+				( maxRange - minRange )
 			}%; --high: ${
-				( 100 * ( state.maxPrice - context.minRange ) ) /
-				( context.maxRange - context.minRange )
+				( 100 * ( state.maxPrice - minRange ) ) /
+				( maxRange - minRange )
 			}%;`;
 		},
 	},
