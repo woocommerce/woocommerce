@@ -67,7 +67,7 @@ class Bootstrap {
 	 */
 	public function __construct( Container $container ) {
 		$this->container = $container;
-		$this->package   = $container->get(Package::class);
+		$this->package   = $container->get( Package::class );
 
 		$this->init();
 		/**
