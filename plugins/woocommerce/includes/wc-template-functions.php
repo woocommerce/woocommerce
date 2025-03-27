@@ -356,7 +356,7 @@ function wc_body_class( $classes ) {
 		}
 	}
 
-	if ( wc_current_theme_is_fse_theme() ) {
+	if ( wp_is_block_theme() ) {
 
 		$classes[] = 'woocommerce-uses-block-theme';
 
@@ -2104,6 +2104,10 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 			);
 		}
 
+		if ( ! ( $product instanceof WC_Product ) ) {
+			return $tabs;
+		}
+
 		// Additional information tab - shows attributes.
 
 		/**
@@ -2113,7 +2117,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		 *
 		 * @since 2.0.14
 		 */
-		if ( ( $product instanceof WC_Product ) && ( $product->has_attributes() || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ) ) ) {
+		if ( $product->has_attributes() || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional information', 'woocommerce' ),
 				'priority' => 20,
@@ -4289,7 +4293,7 @@ add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 
  */
 function wc_set_hooked_blocks_version() {
 	// Only set the version if the current theme is a block theme.
-	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+	if ( ! wp_is_block_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
 		return;
 	}
 
@@ -4332,7 +4336,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 	$enable_store_notice_in_classic_theme_option = 'woocommerce_enable_store_notice_in_classic_theme';
 	$is_store_notice_active_option               = 'woocommerce_demo_store';
 
-	if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() ) {
+	if ( ! $old_theme->is_block_theme() && wp_is_block_theme() ) {
 		/*
 		 * When switching from a classic theme to a block theme, check if the store notice is active,
 		 * if it is, disable it but set an option to re-enable it when switching back to a classic theme.
@@ -4341,7 +4345,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 			update_option( $is_store_notice_active_option, wc_bool_to_string( false ) );
 			add_option( $enable_store_notice_in_classic_theme_option, wc_bool_to_string( true ) );
 		}
-	} elseif ( $old_theme->is_block_theme() && ! wc_current_theme_is_fse_theme() ) {
+	} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
 		/*
 		 * When switching from a block theme to a clasic theme, check if we have set the option to
 		 * re-enable the store notice. If so, re-enable it.
@@ -4370,7 +4374,7 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 	$option_value = get_option( $option_name, false );
 
 	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
-	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
+	if ( ! $old_theme->is_block_theme() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
 		add_option( $option_name, WC()->version );
 	}
 }

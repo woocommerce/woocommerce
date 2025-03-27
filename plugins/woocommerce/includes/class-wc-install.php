@@ -280,6 +280,7 @@ class WC_Install {
 		'9.9.0' => array(
 			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
 			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
+			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
 		),
 	);
@@ -1786,7 +1787,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	product_id bigint(20) unsigned NOT NULL,
 	variation_id bigint(20) unsigned NOT NULL,
 	customer_id bigint(20) unsigned NULL,
-	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_created datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	product_qty int(11) NOT NULL,
 	product_net_revenue double DEFAULT 0 NOT NULL,
 	product_gross_revenue double DEFAULT 0 NOT NULL,
@@ -1798,7 +1799,8 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),
-	KEY date_created (date_created)
+	KEY date_created (date_created),
+	KEY customer_product_date (customer_id, product_id, date_created)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_id bigint(20) unsigned NOT NULL,

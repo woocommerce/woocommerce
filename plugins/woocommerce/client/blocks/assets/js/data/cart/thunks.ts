@@ -37,7 +37,7 @@ import {
 	setIsCustomerDataDirty,
 	setTriggerStoreSyncEvent,
 } from './utils';
-
+import { isEditor } from '../utils';
 interface CartThunkArgs {
 	select: CurriedSelectorsOf< typeof cartStore >;
 	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
@@ -438,6 +438,10 @@ export const selectShippingRate =
 			);
 
 		if ( selectedShippingRate?.rate_id === rateId ) {
+			return;
+		}
+
+		if ( isEditor() ) {
 			return;
 		}
 

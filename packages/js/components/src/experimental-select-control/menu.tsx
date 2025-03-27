@@ -109,7 +109,7 @@ export const Menu = ( {
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
 
-export const MenuSlot: React.FC = () =>
+export const MenuSlot = () =>
 	createPortal(
 		<div aria-live="off">
 			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }

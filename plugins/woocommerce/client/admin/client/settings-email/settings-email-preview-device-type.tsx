@@ -19,9 +19,10 @@ type EmailPreviewDeviceTypeProps = {
 	setDeviceType: ( deviceType: string ) => void;
 };
 
-export const EmailPreviewDeviceType: React.FC<
-	EmailPreviewDeviceTypeProps
-> = ( { deviceType, setDeviceType } ) => {
+export const EmailPreviewDeviceType = ( {
+	deviceType,
+	setDeviceType,
+}: EmailPreviewDeviceTypeProps ) => {
 	const isDesktop = deviceType === DEVICE_TYPE_DESKTOP;
 	const isMobile = deviceType === DEVICE_TYPE_MOBILE;
 	const setDesktop = () => setDeviceType( DEVICE_TYPE_DESKTOP );

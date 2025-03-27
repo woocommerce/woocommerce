@@ -924,7 +924,7 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
-		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'] );
+		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'], home_url() );
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
@@ -1636,6 +1636,48 @@ class WC_Helper {
 		return isset( $data['success'] ) && true === $data['success'];
 	}
 
+	/**
+	 * Get details of the current WooCommerce.com connection.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function fetch_helper_connection_info() {
+		$cache_key = '_woocommerce_helper_connection_data';
+		$data      = get_transient( $cache_key );
+		if ( false !== $data ) {
+			return $data;
+		}
+
+		$request = WC_Helper_API::get(
+			'connection-info',
+			array(
+				'authenticated' => true,
+			)
+		);
+
+		$status = wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $status ) {
+			return new WP_Error(
+				'invalid_response',
+				'Invalid response from WooCommerce.com',
+				array( 'status' => $status )
+			);
+		}
+
+		$connection_data = json_decode( wp_remote_retrieve_body( $request ), true );
+
+		$url = $connection_data['url'] ?? '';
+
+		if ( ! empty( $url ) ) {
+			$auth        = WC_Helper_Options::get( 'auth' );
+			$auth['url'] = $url;
+			WC_Helper_Options::update( 'auth', $auth );
+			set_transient( $cache_key, $connection_data, 15 * MINUTE_IN_SECONDS );
+		}
+
+		return $connection_data;
+	}
+
 
 	/**
 	 * Get the connected user's subscriptions.
@@ -2282,6 +2324,13 @@ class WC_Helper {
 	}
 
 	/**
+	 * Flush connection data cache.
+	 */
+	public static function flush_connection_data_cache() {
+		delete_transient( '_woocommerce_helper_connection_data' );
+	}
+
+	/**
 	 * Flush auth cache.
 	 */
 	public static function _flush_authentication_cache() {
@@ -2386,6 +2435,7 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
+		self::flush_connection_data_cache();
 	}
 
 	/**
@@ -2442,7 +2492,7 @@ class WC_Helper {
 			return new WP_Error( 'connect-with-password-invalid-response', $message );
 		}
 
-		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'] );
+		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'], home_url() );
 	}
 
 	/**
@@ -2451,16 +2501,18 @@ class WC_Helper {
 	 * @param string $access_token The access token.
 	 * @param string $access_token_secret The secret access token.
 	 * @param int    $site_id The site id returned by the API.
+	 * @param string $home_url Home url of the site.
 	 *
 	 * @return void
 	 */
-	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id ): void {
+	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id, string $home_url ): void {
 		WC_Helper_Options::update(
 			'auth',
 			array(
 				'access_token'        => $access_token,
 				'access_token_secret' => $access_token_secret,
 				'site_id'             => $site_id,
+				'url'                 => $home_url,
 				'user_id'             => get_current_user_id(),
 				'updated'             => time(),
 			)

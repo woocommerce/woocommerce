@@ -68,6 +68,12 @@ export class CheckoutPage {
 			contact: {},
 		}
 	) {
+		await this.page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.or( this.page.getByRole( 'group', { name: 'Billing address' } ) )
+			.first()
+			.waitFor( { state: 'visible' } );
+
 		const isShippingOpen = await this.page
 			.getByRole( 'group', {
 				name: 'Shipping address',
@@ -211,19 +217,10 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
-		await this.page
-			.waitForRequest(
-				( request ) => {
-					return request.url().includes( 'batch' );
-				},
-				{ timeout: 3000 }
-			)
-			.catch( () => {
-				// Do nothing. This is just in case there's a debounced request
-				// still to be made, e.g. from checking "Can a truck fit down
-				// your road?" field.
-			} );
 		await this.waitForCheckoutToFinishUpdating();
+		await expect(
+			this.page.getByText( 'Place Order', { exact: true } )
+		).toBeEnabled();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
@@ -307,22 +304,6 @@ export class CheckoutPage {
 		if ( await editButton.isVisible() ) {
 			await editButton.click();
 		}
-	}
-
-	async waitForCustomerDataUpdate() {
-		// Wait for data to start updating.
-		await this.page.waitForFunction( () => {
-			return !! window.wp.data
-				.select( 'wc/store/cart' )
-				.isCustomerDataUpdating();
-		} );
-
-		// Wait for data to finish updating
-		await this.page.waitForFunction( () => {
-			return ! window.wp.data
-				.select( 'wc/store/cart' )
-				.isCustomerDataUpdating();
-		} );
 	}
 
 	async editShippingDetails() {
@@ -535,23 +516,20 @@ export class CheckoutPage {
 		return await this.isShippingRateSelected( shippingName, shippingPrice );
 	}
 
-	async verifyOrderConfirmationDetails(
-		currentPage: Page,
-		toBeVisible = true
-	) {
-		const statusSection = currentPage.locator(
+	async verifyOrderConfirmationDetails( toBeVisible = true ) {
+		const statusSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-status"]'
 		);
-		const summarySection = currentPage.locator(
+		const summarySection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-summary"]'
 		);
-		const totalsSection = currentPage.locator(
+		const totalsSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-totals"]'
 		);
-		const shippingAddressSection = currentPage.locator(
+		const shippingAddressSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-shipping-address"]'
 		);
-		const billingAddressSection = currentPage.locator(
+		const billingAddressSection = this.page.locator(
 			'[data-block-name="woocommerce/order-confirmation-billing-address"]'
 		);
 
@@ -575,19 +553,19 @@ export class CheckoutPage {
 
 			// Confirm order data are visible and correct
 			await expect(
-				currentPage.getByText(
+				this.page.getByText(
 					'Thank you. Your order has been received.'
 				)
 			).toBeVisible();
-			await expect( currentPage.getByText( email ) ).toBeVisible();
+			await expect( summarySection.getByText( email ) ).toBeVisible();
 			await expect(
-				currentPage.getByText( FREE_SHIPPING_NAME )
+				this.page.getByText( FREE_SHIPPING_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
+				this.page.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage
+				this.page
 					.locator(
 						'table.wc-block-order-confirmation-totals__table '
 					)
@@ -596,14 +574,14 @@ export class CheckoutPage {
 					} )
 			).toBeVisible();
 			await expect(
-				currentPage
+				this.page
 					.getByText(
 						`${ firstname } ${ lastname }${ addressfirstline }${ addresssecondline }${ city }, NY ${ postcode }${ phone }`
 					)
 					.first()
 			).toBeVisible();
 			await expect(
-				currentPage
+				this.page
 					.getByText(
 						`${ firstname } ${ lastname }${ addressfirstline }${ addresssecondline }${ city }, NY ${ postcode }${ phone }`
 					)

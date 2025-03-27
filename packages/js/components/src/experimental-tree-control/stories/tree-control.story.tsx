@@ -30,7 +30,7 @@ const listItems: Item[] = [
 	{ value: '3', label: 'Other' },
 ];
 
-export const SimpleTree: React.FC = () => {
+export const SimpleTree = () => {
 	return (
 		<BaseControl label="Simple tree" id="simple-tree">
 			<TreeControl id="simple-tree" items={ listItems } />
@@ -48,7 +48,7 @@ function shouldItemBeExpanded( item: LinkedTree, filter: string ) {
 	} );
 }
 
-export const ExpandOnFilter: React.FC = () => {
+export const ExpandOnFilter = () => {
 	const [ filter, setFilter ] = useState( '' );
 
 	return (
@@ -67,7 +67,7 @@ export const ExpandOnFilter: React.FC = () => {
 	);
 };
 
-export const CustomItemLabel: React.FC = () => {
+export const CustomItemLabel = () => {
 	function renderCustomItemLabel( item: LinkedTree ) {
 		return (
 			<div style={ { display: 'flex', gap: 8 } }>
@@ -121,7 +121,7 @@ function getItemLabel( item: LinkedTree, text: string ) {
 	);
 }
 
-export const CustomItemLabelOnSearch: React.FC = () => {
+export const CustomItemLabelOnSearch = () => {
 	const [ text, setText ] = useState( '' );
 
 	return (
@@ -145,7 +145,7 @@ export const CustomItemLabelOnSearch: React.FC = () => {
 	);
 };
 
-export const SelectionSingle: React.FC = () => {
+export const SelectionSingle = () => {
 	const [ selected, setSelected ] = useState( listItems[ 1 ] );
 
 	return (
@@ -164,7 +164,7 @@ export const SelectionSingle: React.FC = () => {
 	);
 };
 
-export const SelectionMultiple: React.FC = () => {
+export const SelectionMultiple = () => {
 	const [ selected, setSelected ] = useState( [
 		listItems[ 0 ],
 		listItems[ 1 ],
@@ -226,7 +226,7 @@ function getFirstMatchingItem(
 	return false;
 }
 
-export const HighlightFirstMatchingItem: React.FC = () => {
+export const HighlightFirstMatchingItem = () => {
 	const [ text, setText ] = useState( '' );
 	const memo = useRef< Record< string, string > >( {} );
 

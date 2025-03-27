@@ -51,9 +51,7 @@ interface customError extends Error {
 
 let uniqueId = 0;
 
-export const AttributeTermInputField: React.FC<
-	AttributeTermInputFieldProps
-> = ( {
+export const AttributeTermInputField = ( {
 	value = [],
 	onChange,
 	placeholder,
@@ -62,7 +60,7 @@ export const AttributeTermInputField: React.FC<
 	label = '',
 	autoCreateOnSelect = true,
 	readOnlyWhenClosed = false,
-} ) => {
+}: AttributeTermInputFieldProps ) => {
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
 	);

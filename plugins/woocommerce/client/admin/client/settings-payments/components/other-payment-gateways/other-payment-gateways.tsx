@@ -17,6 +17,7 @@ import { useDebounce } from '@wordpress/compose';
  */
 import { GridItemPlaceholder } from '~/settings-payments/components/grid-item-placeholder';
 import { OfficialBadge } from '../official-badge';
+import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
 
 interface OtherPaymentGatewaysProps {
 	/**
@@ -37,7 +38,8 @@ interface OtherPaymentGatewaysProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	/**
 	 * Indicates whether the suggestions are still being fetched.
@@ -230,6 +232,13 @@ export const OtherPaymentGateways = ( {
 										<div className="other-payment-gateways__content__grid-item__content">
 											<span className="other-payment-gateways__content__grid-item__content__title">
 												{ extension.title }
+												{ extension?._incentive && (
+													<IncentiveStatusBadge
+														incentive={
+															extension._incentive
+														}
+													/>
+												) }
 												{ /* All payment extension suggestions are official. */ }
 												<OfficialBadge variant="expanded" />
 											</span>
@@ -246,7 +255,17 @@ export const OtherPaymentGateways = ( {
 															extension.id,
 															extension.plugin
 																.slug,
-															null // Suggested gateways won't have an onboarding URL.
+															null, // Suggested gateways won't have an onboarding URL.
+															// Only provide the attach link if not already installed.
+															extension.plugin
+																.status ===
+																'not_installed'
+																? extension
+																		._links
+																		?.attach
+																		?.href ??
+																		null
+																: null
 														)
 													}
 													isBusy={

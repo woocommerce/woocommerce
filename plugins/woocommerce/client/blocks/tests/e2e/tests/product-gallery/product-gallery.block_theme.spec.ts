@@ -478,12 +478,13 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Switch to the Index template.
 		await page.getByLabel( 'Open Navigation' ).click();
-		await page.getByRole( 'button', { name: 'Index' } ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).first().click();
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.first()
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(

@@ -2740,7 +2740,7 @@ function wc_update_910_add_launch_your_store_tour_option() {
  * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
  */
 function wc_update_920_add_wc_hooked_blocks_version_option() {
-	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+	if ( ! wp_is_block_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
 		return;
 	}
 
@@ -3005,6 +3005,13 @@ function wc_update_980_remove_order_attribution_install_banner_dismissed_option(
 }
 
 /**
+ * Remove the transient wc_count_comments as this has migrated to use cache.
+ */
+function wc_update_990_remove_wc_count_comments_transient() {
+	delete_transient( 'wc_count_comments' );
+}
+
+/**
  * Remove all notes of type 'email' from wp_wc_admin_notes table.
  *
  * @return void
@@ -3015,7 +3022,7 @@ function wc_update_990_remove_email_notes() {
 	$wpdb->delete(
 		$wpdb->prefix . 'wc_admin_notes',
 		array(
-			'type' => 'email'
+			'type' => 'email',
 		),
 		array( '%s' )
 	);

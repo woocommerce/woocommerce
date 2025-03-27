@@ -16,8 +16,6 @@ import { EllipsisMenuWrapper as EllipsisMenu } from '~/settings-payments/compone
 import {
 	isWooPayments,
 	hasIncentive,
-	isActionIncentive,
-	isIncentiveDismissedInContext,
 	isWooPayEligible,
 } from '~/settings-payments/utils';
 import { DefaultDragHandle } from '~/settings-payments/components/sortable';
@@ -40,7 +38,8 @@ type PaymentExtensionSuggestionListItemProps = {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	/**
 	 * Indicates whether the plugin is already installed.
@@ -50,6 +49,10 @@ type PaymentExtensionSuggestionListItemProps = {
 	 * Callback function to handle accepting an incentive. Receives the incentive ID as a parameter.
 	 */
 	acceptIncentive: ( id: string ) => void;
+	/**
+	 * Indicates whether the incentive should be highlighted.
+	 */
+	shouldHighlightIncentive: boolean;
 };
 
 /**
@@ -63,16 +66,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 	setupPlugin,
 	pluginInstalled,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	...props
 }: PaymentExtensionSuggestionListItemProps ) => {
 	const incentive = hasIncentive( extension ) ? extension._incentive : null;
-	const shouldHighlightIncentive =
-		hasIncentive( extension ) &&
-		( ! isActionIncentive( extension._incentive ) ||
-			isIncentiveDismissedInContext(
-				extension._incentive,
-				'wc_settings_payments__banner'
-			) );
 
 	// Determine the CTA button label based on the extension state.
 	let ctaButtonLabel = __( 'Install', 'woocommerce' );
@@ -86,7 +83,9 @@ export const PaymentExtensionSuggestionListItem = ( {
 		<div
 			id={ extension.id }
 			className={ `transitions-disabled woocommerce-list__item woocommerce-list__item-enter-done ${
-				shouldHighlightIncentive ? `has-incentive` : ''
+				hasIncentive( extension ) && shouldHighlightIncentive
+					? `has-incentive`
+					: ''
 			}` }
 			{ ...props }
 		>
@@ -152,7 +151,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 									extension.id,
 									extension.plugin.slug,
 									extension.onboarding?._links.onboard.href ??
-										null
+										null,
+									pluginInstalled
+										? null
+										: extension._links?.attach?.href ?? null
 								);
 							} }
 							isBusy={ installingPlugin === extension.id }

@@ -25,13 +25,13 @@ const redirectToStripeTaxSettings = () => {
 	);
 };
 
-export const Card: React.FC< TaxChildProps > = ( {
+export const Card = ( {
 	task: {
 		additionalData: { stripeTaxActivated } = {
 			stripeTaxActivated: false,
 		},
 	},
-} ) => {
+}: TaxChildProps ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	return (

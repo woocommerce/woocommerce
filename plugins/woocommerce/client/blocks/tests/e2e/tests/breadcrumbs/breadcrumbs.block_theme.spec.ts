@@ -14,11 +14,16 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 	} ) => {
 		await admin.createNewPost();
+
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( _error ) {
+			// noop
+		}
+
 		await expect(
-			editor.insertBlock( { name: blockData.slug } )
-		).rejects.toThrow(
-			new RegExp( `Block type '${ blockData.slug }' is not registered.` )
-		);
+			await editor.getBlockByName( blockData.slug )
+		).toBeHidden();
 	} );
 
 	test( 'block can be inserted in the Site Editor', async ( {

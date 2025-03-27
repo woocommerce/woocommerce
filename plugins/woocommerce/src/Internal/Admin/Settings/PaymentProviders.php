@@ -398,6 +398,77 @@ class PaymentProviders {
 	}
 
 	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * Attachment is a broad concept that can mean different things depending on the suggestion.
+	 * Currently, we use it to record the extension installation. This is why we expect to receive
+	 * instructions to record attachment when the extension is installed.
+	 *
+	 * @param string $id The ID of the payment extension suggestion to attach.
+	 *
+	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
+	 * @throws Exception If the suggestion ID is invalid.
+	 */
+	public function attach_extension_suggestion( string $id ): bool {
+		// We may receive a suggestion ID that is actually an order map ID used in the settings page providers list.
+		// Extract the suggestion ID from the order map ID.
+		if ( $this->is_suggestion_order_map_id( $id ) ) {
+			$id = $this->get_suggestion_id_from_order_map_id( $id );
+		}
+
+		$suggestion = $this->get_extension_suggestion_by_id( $id );
+		if ( is_null( $suggestion ) ) {
+			throw new Exception( esc_html__( 'Invalid suggestion ID.', 'woocommerce' ) );
+		}
+
+		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY, array() );
+		if ( empty( $payments_nox_profile ) ) {
+			$payments_nox_profile = array();
+		} else {
+			$payments_nox_profile = maybe_unserialize( $payments_nox_profile );
+		}
+
+		// Check if it is already marked as attached.
+		if ( ! empty( $payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] ) ) {
+			return true;
+		}
+
+		// Mark the suggestion as attached.
+		if ( empty( $payments_nox_profile['suggestions'] ) ) {
+			$payments_nox_profile['suggestions'] = array();
+		}
+		if ( empty( $payments_nox_profile['suggestions'][ $id ] ) ) {
+			$payments_nox_profile['suggestions'][ $id ] = array();
+		}
+		if ( empty( $payments_nox_profile['suggestions'][ $id ]['attached'] ) ) {
+			$payments_nox_profile['suggestions'][ $id ]['attached'] = array();
+		}
+		$payments_nox_profile['suggestions'][ $id ]['attached']['timestamp'] = time();
+
+		// Store the modified profile data.
+		$result = update_option( Payments::PAYMENTS_NOX_PROFILE_KEY, $payments_nox_profile, false );
+		// Since we already check if the suggestion is already attached, we should not get a false result
+		// for trying to update with the same value.
+		// False means the update failed and the suggestion is not marked as attached.
+		if ( false === $result ) {
+			return false;
+		}
+
+		// Handle custom attachment logic per-provider.
+		switch ( $id ) {
+			case ExtensionSuggestions::PAYPAL_FULL_STACK:
+			case ExtensionSuggestions::PAYPAL_WALLET:
+				// Set an option to inform the extension.
+				update_option( 'woocommerce_paypal_branded', 'payments_settings', false );
+				break;
+			default:
+				break;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Hide a payment extension suggestion.
 	 *
 	 * @param string $id The ID of the payment extension suggestion to hide.
@@ -417,7 +488,7 @@ class PaymentProviders {
 			throw new Exception( esc_html__( 'Invalid suggestion ID.', 'woocommerce' ) );
 		}
 
-		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		if ( empty( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
 		} else {
@@ -437,7 +508,7 @@ class PaymentProviders {
 			'timestamp' => time(),
 		);
 
-		$result = update_user_meta( get_current_user_id(), Payments::USER_PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+		$result = update_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
 		// Since we already check if the suggestion is already hidden, we should not get a false result
 		// for trying to update with the same value. False means the update failed and the suggestion is not hidden.
 		if ( false === $result ) {
@@ -815,27 +886,36 @@ class PaymentProviders {
 					ExtensionSuggestions::AMAZON_PAY,
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
-					ExtensionSuggestions::COINBASE,
-					ExtensionSuggestions::AUTHORIZE_NET,
-					ExtensionSuggestions::BOLT,
-					ExtensionSuggestions::BANK_OF_AMERICA,
-					ExtensionSuggestions::DEPAY,
-					ExtensionSuggestions::ELAVON,
-					ExtensionSuggestions::EWAY,
-					ExtensionSuggestions::FORTISPAY,
-					ExtensionSuggestions::GO_CARDLESS,
-					ExtensionSuggestions::NEXI,
-					ExtensionSuggestions::PAYPAL_ZETTLE,
-					ExtensionSuggestions::RAPYD,
+					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
+					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
+					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
+					ExtensionSuggestions::DEPAY, // We don't have suggestion details yet.
+					ExtensionSuggestions::ELAVON, // We don't have suggestion details yet.
+					ExtensionSuggestions::EWAY, // We don't have suggestion details yet.
+					ExtensionSuggestions::FORTISPAY, // We don't have suggestion details yet.
+					ExtensionSuggestions::NEXI, // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_ZETTLE, // We don't have suggestion details yet.
+					ExtensionSuggestions::RAPYD, // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
 				),
 				true
 			) ) {
-				$gateway_details['title']       = $suggestion['title'];
-				$gateway_details['description'] = $suggestion['description'];
+				if ( ! empty( $suggestion['title'] ) ) {
+					$gateway_details['title'] = $suggestion['title'];
+				}
+
+				if ( ! empty( $suggestion['description'] ) ) {
+					$gateway_details['description'] = $suggestion['description'];
+				}
 			}
 
-			$gateway_details['icon']  = $suggestion['icon'];
-			$gateway_details['image'] = $suggestion['image'];
+			if ( ! empty( $suggestion['icon'] ) ) {
+				$gateway_details['icon'] = $suggestion['icon'];
+			}
+
+			if ( ! empty( $suggestion['image'] ) ) {
+				$gateway_details['image'] = $suggestion['image'];
+			}
 
 			if ( empty( $gateway_details['links'] ) ) {
 				$gateway_details['links'] = $suggestion['links'];
@@ -969,7 +1049,7 @@ class PaymentProviders {
 	 * @return bool True if the extension suggestion is hidden, false otherwise.
 	 */
 	private function is_payment_extension_suggestion_hidden( array $extension ): bool {
-		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
 		if ( empty( $user_payments_nox_profile ) ) {
 			return false;
 		}

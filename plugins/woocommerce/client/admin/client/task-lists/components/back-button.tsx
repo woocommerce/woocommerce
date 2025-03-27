@@ -17,7 +17,7 @@ export type BackButtonProps = {
 	title: string;
 };
 
-export const BackButton: React.FC< BackButtonProps > = ( { title } ) => {
+export const BackButton = ( { title }: BackButtonProps ) => {
 	const homeText = __( 'WooCommerce Home', 'woocommerce' );
 
 	const navigateHome = () => {

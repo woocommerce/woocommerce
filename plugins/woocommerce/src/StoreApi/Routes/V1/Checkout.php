@@ -115,6 +115,7 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this, 'get_response' ],
+				'validate_callback'   => [ $this, 'validate_callback' ],
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
@@ -358,9 +359,7 @@ class Checkout extends AbstractCartRoute {
 		/**
 		 * Persist additional fields, order notes and payment method for order.
 		 */
-		$this->persist_additional_fields_for_order( $request );
-		$this->persist_order_notes_for_order( $request );
-		$this->persist_payment_method_for_order( $request );
+		$this->update_order_from_request( $request );
 
 		if ( $request->get_param( '__experimental_calc_totals' ) ) {
 			/**
@@ -769,9 +768,10 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways      = WC()->payment_gateways->get_available_payment_gateways();
-		$request_payment_method  = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-		$requires_payment_method = $this->order->needs_payment();
+		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
+		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
+		// For PUT requests, the order never requires payment, only POST does.
+		$requires_payment_method = $this->order->needs_payment() && 'POST' === $request->get_method();
 
 		if ( empty( $request_payment_method ) ) {
 			if ( $requires_payment_method ) {
@@ -872,30 +872,6 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Persists order notes from the request to the order.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	private function persist_order_notes_for_order( \WP_REST_Request $request ) {
-		if ( isset( $request['order_notes'] ) ) {
-			$this->order->set_customer_note( sanitize_text_field( wp_unslash( $request['order_notes'] ) ) );
-		}
-	}
-
-	/**
-	 * Persists the chosen payment method to the order.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	private function persist_payment_method_for_order( \WP_REST_Request $request ) {
-		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		if ( isset( $request['payment_method'] ) && in_array( $request['payment_method'], array_keys( $available_gateways ), true ) ) {
-			WC()->session->set( 'chosen_payment_method', sanitize_text_field( wp_unslash( $request['payment_method'] ) ) );
-			$this->order->set_payment_method( sanitize_text_field( wp_unslash( $request['payment_method'] ) ) );
-		}
 	}
 
 	/**

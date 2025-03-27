@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Payments {
 
-	const USER_PAYMENTS_NOX_PROFILE_KEY = 'woocommerce_payments_nox_profile';
+	const PAYMENTS_NOX_PROFILE_KEY = 'woocommerce_payments_nox_profile';
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
@@ -188,7 +188,7 @@ class Payments {
 	 *                If the user didn't set a location, the WC base location country code is used.
 	 */
 	public function get_country(): string {
-		$user_nox_meta = get_user_meta( get_current_user_id(), self::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
 			return $user_nox_meta['business_country_code'];
 		}
@@ -202,7 +202,7 @@ class Payments {
 	 * @param string $location The country code. This should be a ISO 3166-1 alpha-2 country code.
 	 */
 	public function set_country( string $location ): bool {
-		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 
 		if ( empty( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
@@ -211,7 +211,7 @@ class Payments {
 		}
 		$user_payments_nox_profile['business_country_code'] = $location;
 
-		return false !== update_user_meta( get_current_user_id(), self::USER_PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+		return false !== update_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
 	}
 
 	/**
@@ -223,6 +223,20 @@ class Payments {
 	 */
 	public function update_payment_providers_order_map( array $order_map ): bool {
 		return $this->providers->update_payment_providers_order_map( $order_map );
+	}
+
+	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * This is only an internal recording of attachment. No actual extension installation or activation happens.
+	 *
+	 * @param string $id The ID of the payment extension suggestion to hide.
+	 *
+	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
+	 * @throws Exception If the suggestion ID is invalid.
+	 */
+	public function attach_payment_extension_suggestion( string $id ): bool {
+		return $this->providers->attach_extension_suggestion( $id );
 	}
 
 	/**
