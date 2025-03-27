@@ -126,7 +126,7 @@ class Bootstrap {
 			function () {
 				$is_store_api_request = wc()->is_store_api_request();
 
-				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+				if ( ! $is_store_api_request && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
 				}

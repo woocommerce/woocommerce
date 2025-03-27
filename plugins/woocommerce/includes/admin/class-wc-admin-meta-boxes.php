@@ -168,7 +168,6 @@ class WC_Admin_Meta_Boxes {
 				'advanced' => '',
 			)
 		);
-
 	}
 
 	/**
@@ -283,7 +282,7 @@ class WC_Admin_Meta_Boxes {
 	 * @return string[] Templates array excluding block-based templates.
 	 */
 	public function remove_block_templates( $templates ) {
-		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() ) {
+		if ( count( $templates ) === 0 || ! wp_is_block_theme() ) {
 			return $templates;
 		}
 

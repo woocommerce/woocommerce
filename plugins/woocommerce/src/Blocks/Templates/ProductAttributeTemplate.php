@@ -82,7 +82,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 */
 	public function update_taxonomy_template_hierarchy( $templates ) {
 		$queried_object = get_queried_object();
-		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wc_current_theme_is_fse_theme() ) {
+		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wp_is_block_theme() ) {
 			array_splice( $templates, count( $templates ) - 1, 0, self::SLUG );
 		}
 
