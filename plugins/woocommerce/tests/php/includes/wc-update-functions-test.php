@@ -187,7 +187,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_update_830_rename_checkout_template() {
-		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
+		// Get the current template and update the name back to 'checkout'
+		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//page-checkout', 'wp_template' );
 
 		if ( $template && ! empty( $template->wp_id ) ) {
 			wp_update_post(
@@ -221,7 +222,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_update_830_rename_cart_template() {
-		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
+		// Get the current template and update the name back 'cart'
+		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//page-cart', 'wp_template' );
 
 		if ( $template && ! empty( $template->wp_id ) ) {
 			wp_update_post(
