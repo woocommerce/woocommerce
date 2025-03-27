@@ -134,6 +134,64 @@ describe( 'setting-options selectors', () => {
 				'setting-1': setting1,
 			} );
 		} );
+
+		it( 'should return memoized value when nothing changes', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+
+			const result1 = selectors.getSettings( state, testGroup.id );
+			const result2 = selectors.getSettings( state, testGroup.id );
+			expect( result1 ).toBe( result2 );
+		} );
+
+		it( 'should return new value when settings change', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+
+			const result1 = selectors.getSettings( state, testGroup.id );
+
+			// Update a setting
+			state = {
+				...state,
+				settings: {
+					...state.settings,
+					[ testGroup.id ]: {
+						[ testSetting.id ]: {
+							...testSetting,
+							value: 'new-value',
+						},
+					},
+				},
+			};
+
+			const result2 = selectors.getSettings( state, testGroup.id );
+			expect( result1 ).not.toBe( result2 );
+			expect( result2[ testSetting.id ].value ).toBe( 'new-value' );
+		} );
+
+		it( 'should return new value when includeEdits option changes', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+			state.edits = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: 'edited-value',
+				},
+			};
+
+			const result1 = selectors.getSettings( state, testGroup.id, {
+				includeEdits: false,
+			} );
+			const result2 = selectors.getSettings( state, testGroup.id, {
+				includeEdits: true,
+			} );
+
+			expect( result1 ).not.toBe( result2 );
+			expect( result1[ testSetting.id ].value ).toBe( testSetting.value );
+			expect( result2[ testSetting.id ].value ).toBe( 'edited-value' );
+		} );
 	} );
 
 	describe( 'getSetting', () => {
@@ -206,6 +264,86 @@ describe( 'setting-options selectors', () => {
 				testSetting.id
 			);
 			expect( result ).toEqual( testSetting );
+		} );
+
+		it( 'should return memoized value when nothing changes', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+
+			const result1 = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id
+			);
+			const result2 = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id
+			);
+			expect( result1 ).toBe( result2 );
+		} );
+
+		it( 'should return new value when setting changes', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+
+			const result1 = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id
+			);
+
+			// Update the setting
+			state = {
+				...state,
+				settings: {
+					...state.settings,
+					[ testGroup.id ]: {
+						[ testSetting.id ]: {
+							...testSetting,
+							value: 'new-value',
+						},
+					},
+				},
+			};
+
+			const result2 = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id
+			);
+			expect( result1 ).not.toBe( result2 );
+			expect( result2?.value ).toBe( 'new-value' );
+		} );
+
+		it( 'should return new value when includeEdits option changes', () => {
+			state.settings = {
+				[ testGroup.id ]: { [ testSetting.id ]: testSetting },
+			};
+			state.edits = {
+				[ testGroup.id ]: {
+					[ testSetting.id ]: 'edited-value',
+				},
+			};
+
+			const result1 = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id,
+				{ includeEdits: false }
+			);
+			const result2 = selectors.getSetting(
+				state,
+				testGroup.id,
+				testSetting.id,
+				{ includeEdits: true }
+			);
+
+			expect( result1 ).not.toBe( result2 );
+			expect( result1?.value ).toBe( testSetting.value );
+			expect( result2?.value ).toBe( 'edited-value' );
 		} );
 	} );
 

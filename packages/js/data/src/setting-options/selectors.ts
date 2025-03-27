@@ -99,10 +99,11 @@ export const getSettings = createSelector(
 	(
 		state: SettingsState,
 		groupId: string,
-		options: SelectorOptions = {}
+		options: SelectorOptions = { includeEdits: false }
 	) => [
 		state.settings[ groupId ],
-		options.includeEdits === false ? null : state.edits[ groupId ],
+		state.edits[ groupId ],
+		options.includeEdits,
 	]
 );
 
@@ -152,10 +153,11 @@ export const getSetting = createSelector(
 		state: SettingsState,
 		groupId: string,
 		settingId: string,
-		options: SelectorOptions = {}
+		options: SelectorOptions = { includeEdits: false }
 	) => [
-		state.settings[ groupId ],
-		options.includeEdits === false ? null : state.edits[ groupId ],
+		state.settings[ groupId ]?.[ settingId ],
+		state.edits[ groupId ]?.[ settingId ],
+		options.includeEdits,
 	]
 );
 
