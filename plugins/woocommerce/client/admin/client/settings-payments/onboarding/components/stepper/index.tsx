@@ -40,7 +40,8 @@ export default function Stepper( {
 
 	if ( ! activeStep ) return null;
 
-	const activeStepIndex = steps.findIndex( ( step ) => step.id === active ) + 1;
+	const activeStepIndex =
+		steps.findIndex( ( step ) => step.id === active ) + 1;
 
 	// Renders only the active step based on the current step ID.
 	return (
@@ -66,7 +67,10 @@ export default function Stepper( {
 							<SidebarItem
 								key={ step.id }
 								label={ step.label }
-								isCompleted={ step.status === 'completed' || activeStepIndex === steps.length }
+								isCompleted={
+									step.status === 'completed' ||
+									activeStepIndex === steps.length
+								}
 								isActive={ step.id === active }
 							/>
 						) ) }

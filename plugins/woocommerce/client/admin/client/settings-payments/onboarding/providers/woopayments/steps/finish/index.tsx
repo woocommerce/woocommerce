@@ -5,13 +5,10 @@ import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 
-
 /**
  * Internal dependencies
  */
-import {
-	useOnboardingContext,
-} from '../../data/onboarding-context';
+import { useOnboardingContext } from '../../data/onboarding-context';
 import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
 
@@ -24,7 +21,10 @@ export const FinishStep: React.FC = () => {
 			<div className="settings-payments-onboarding-modal__step--content">
 				<div className="settings-payments-onboarding-modal__step--content-finish">
 					<h1 className="settings-payments-onboarding-modal__step--content-finish-title">
-						{ __( 'You’re ready to accept payments!', 'woocommerce' ) }
+						{ __(
+							'You’re ready to accept payments!',
+							'woocommerce'
+						) }
 					</h1>
 					<p className="settings-payments-onboarding-modal__step--content-finish-description">
 						{ __(
@@ -36,14 +36,17 @@ export const FinishStep: React.FC = () => {
 						variant="primary"
 						className="settings-payments-onboarding-modal__step--content-finish-primary-button"
 						onClick={ () => {
-							window.location.href = currentStep?.context?.overview_page_url ?? '';
+							window.location.href =
+								currentStep?.context?.overview_page_url ?? '';
 						} }
 					>
 						{ __( 'Go to Payments Overview', 'woocommerce' ) }
 					</Button>
 					<div className="divider">
 						<span className="divider-line"></span>
-						<span className="divider-text">{ __( 'OR', 'woocommerce' ) }</span>
+						<span className="divider-text">
+							{ __( 'OR', 'woocommerce' ) }
+						</span>
 						<span className="divider-line"></span>
 					</div>
 					<Button
