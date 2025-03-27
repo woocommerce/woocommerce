@@ -60,6 +60,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	content?: ReactNode;
 	context?: {
 		payment_methods: RecommendedPaymentMethod[];
+		overview_page_url?: string;
 	};
 }
 
