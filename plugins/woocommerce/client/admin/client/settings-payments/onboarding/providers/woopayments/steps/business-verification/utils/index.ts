@@ -206,3 +206,17 @@ export const isPreKYCComplete = ( data: OnboardingFields ): boolean => {
 
 	return requiredFields.every( ( field ) => Boolean( data[ field ] ) );
 };
+
+export const getComingSoonShareKey = () => {
+	const {
+		woocommerce_share_key: shareKey,
+		woocommerce_coming_soon: comingSoon,
+		woocommerce_private_link: privateLink,
+	} = window.wcSettings?.admin?.siteVisibilitySettings || {};
+
+	if ( comingSoon !== 'yes' || privateLink === 'no' ) {
+		return '';
+	}
+
+	return shareKey ? '?woo-share=' + shareKey : '';
+};

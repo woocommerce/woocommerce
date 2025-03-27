@@ -29,8 +29,6 @@ export interface SidebarItemProps {
 	isActive?: boolean;
 }
 
-// To-do: Move WooPayments related types to a separate file.
-
 /**
  * Props for the WooPayments onboarding modal.
  */
