@@ -742,7 +742,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse the Cost of Godds Sold field.
+	 * Parse the Cost of Goods Sold field.
 	 *
 	 * @param string $value Field value.
 	 *
