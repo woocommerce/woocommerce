@@ -40,7 +40,7 @@ export interface StepperProps {
 /**
  * A stepper component to indicate progress in a set number of steps.
  */
-export const Stepper: React.FC< StepperProps > = ( {
+export const Stepper = ( {
 	className,
 	currentStep,
 	steps,

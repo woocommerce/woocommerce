@@ -30,11 +30,11 @@ type CustomerFeedbackSimpleProps = {
  * @param {string}      props.label           Question to ask the customer.
  * @param {number|null} [props.selectedValue] The default selected value.
  */
-const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
+const CustomerFeedbackSimple = ( {
 	onSelect,
 	label,
 	selectedValue,
-} ) => {
+}: CustomerFeedbackSimpleProps ) => {
 	const options = [
 		{
 			tooltip: __( 'Very difficult', 'woocommerce' ),

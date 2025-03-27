@@ -31,7 +31,7 @@ const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
 );
 
-const PaymentRecommendations: React.FC = () => {
+const PaymentRecommendations = () => {
 	const [ installingPlugin, setInstallingPlugin ] = useState< string | null >(
 		null
 	);

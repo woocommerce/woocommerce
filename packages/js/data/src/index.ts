@@ -73,6 +73,8 @@ export { store as paymentGatewaysStore } from './payment-gateways';
 export { store as importStore } from './import';
 export { store as experimentalProductFormStore } from './product-form';
 export { store as paymentSettingsStore } from './payment-settings';
+export { store as reportsStore } from './reports';
+export { store as itemsStore } from './items';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
@@ -90,7 +92,8 @@ export { useUser } from './user/use-user';
 
 // Export utils
 export { getVisibleTasks } from './onboarding/utils';
-export { getLeaderboard, searchItemsByString } from './items/utils';
+export { searchItemsByString } from './items/utils';
+export { getLeaderboard } from './items/store-aware-utils';
 export {
 	getFilterQuery,
 	getSummaryNumbers,

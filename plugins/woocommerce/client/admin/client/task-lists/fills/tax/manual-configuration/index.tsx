@@ -18,12 +18,12 @@ export type ManualConfigurationProps = {
 	onManual: () => void;
 };
 
-export const ManualConfiguration: React.FC< ManualConfigurationProps > = ( {
+export const ManualConfiguration = ( {
 	isPending,
 	onDisable,
 	onAutomate,
 	onManual,
-} ) => {
+}: ManualConfigurationProps ) => {
 	const [ stepIndex, setStepIndex ] = useState( 0 );
 
 	const nextStep = () => {
