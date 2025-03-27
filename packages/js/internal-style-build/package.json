@@ -45,7 +45,7 @@
 		"mini-css-extract-plugin": "^2.7.6",
 		"postcss-loader": "^4.3.0",
 		"sass-loader": "^10.5.0",
-		"webpack-remove-empty-scripts": "^0.7.3",
+		"webpack-remove-empty-scripts": "1.0.x",
 		"webpack-rtl-plugin": "2.0.x"
 	},
 	"private": true,

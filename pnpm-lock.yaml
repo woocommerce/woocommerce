@@ -2331,8 +2331,8 @@ importers:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0(@swc/core@1.3.100))
       webpack-remove-empty-scripts:
-        specifier: ^0.7.3
-        version: 0.7.3(webpack@5.89.0(@swc/core@1.3.100))
+        specifier: 1.0.x
+        version: 1.0.4(webpack@5.89.0(@swc/core@1.3.100))
       webpack-rtl-plugin:
         specifier: 2.0.x
         version: 2.0.0
@@ -2943,8 +2943,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       webpack-remove-empty-scripts:
-        specifier: ^0.7.3
-        version: 0.7.3(webpack@5.89.0)
+        specifier: 1.0.x
+        version: 1.0.4(webpack@5.89.0)
       webpack-rtl-plugin:
         specifier: 2.0.x
         version: 2.0.0
@@ -3236,8 +3236,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.91.0)
       webpack-remove-empty-scripts:
-        specifier: ^0.7.3
-        version: 0.7.3(webpack@5.91.0)
+        specifier: 1.0.x
+        version: 1.0.4(webpack@5.91.0)
       webpack-rtl-plugin:
         specifier: 2.0.x
         version: 2.0.0
@@ -12839,8 +12839,8 @@ packages:
   ansicolors@0.3.2:
     resolution: {integrity: sha512-QXu7BPrP29VllRxH8GwB7x5iX5qWKAAMLqKQGWTeLWVlNHNOpVMJ91dsxQAIWXpjuW5wqvxu3Jd/nRjrJ+0pqg==}
 
-  ansis@1.5.6:
-    resolution: {integrity: sha512-vKn0k5V0oiaOClcUMNDFb7DvI3+asAozhg1wI8bLkYxV0lhfPtIuwjUa1wG9/YaUY/KwO9U2B7m0FMqzn/jXUQ==}
+  ansis@1.5.2:
+    resolution: {integrity: sha512-T3vUABrcgSj/HXv27P+A/JxGk5b/ydx0JjN3lgjBTC2iZUFxQGjh43zCzLSbU4C1QTgmx9oaPeWNJFM+auI8qw==}
     engines: {node: '>=12.13'}
 
   anymatch@2.0.0:
@@ -25388,8 +25388,8 @@ packages:
     resolution: {integrity: sha512-+4zXKdx7UnO+1jaN4l2lHVD+mFvnlZQP/6ljaJVb4SZiwIKeUnrT5l0gkT8z+n4hKpC+jpOv6O9R+gLtag7pSA==}
     engines: {node: '>=10.0.0'}
 
-  webpack-remove-empty-scripts@0.7.3:
-    resolution: {integrity: sha512-yipqb25A0qtH7X9vKt6yihwyYkTtSlRiDdBb2QsyrkqGM3hpfAcfOO1lYDef9HQUNm3s8ojmorbNg32XXX6FYg==}
+  webpack-remove-empty-scripts@1.0.4:
+    resolution: {integrity: sha512-W/Vd94oNXMsQam+W9G+aAzGgFlX1aItcJpkG3byuHGDaxyK3H17oD/b5RcqS/ZHzStIKepksdLDznejDhDUs+Q==}
     engines: {node: '>=12.14'}
     peerDependencies:
       webpack: '>=5.32.0'
@@ -29038,7 +29038,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))':
+  '@jest/test-sequencer@26.6.3':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -29046,11 +29046,7 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   '@jest/test-sequencer@27.5.1':
     dependencies:
@@ -39723,7 +39719,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
+      jest-circus: 26.6.3
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -39802,7 +39798,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
+      jest-circus: 26.6.3
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -40862,7 +40858,7 @@ snapshots:
 
   ansicolors@0.3.2: {}
 
-  ansis@1.5.6: {}
+  ansis@1.5.2: {}
 
   anymatch@2.0.0:
     dependencies:
@@ -48243,7 +48239,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
+  jest-circus@26.6.3:
     dependencies:
       '@babel/traverse': 7.25.9
       '@jest/environment': 26.6.2
@@ -48267,11 +48263,7 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   jest-circus@27.5.1:
     dependencies:
@@ -48554,7 +48546,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@babel/core': 7.25.7
-      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
+      '@jest/test-sequencer': 26.6.3
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.25.7)
       chalk: 4.1.2
@@ -59160,19 +59152,19 @@ snapshots:
       flat: 5.0.2
       wildcard: 2.0.1
 
-  webpack-remove-empty-scripts@0.7.3(webpack@5.89.0(@swc/core@1.3.100)):
+  webpack-remove-empty-scripts@1.0.4(webpack@5.89.0(@swc/core@1.3.100)):
     dependencies:
-      ansis: 1.5.6
+      ansis: 1.5.2
       webpack: 5.89.0(@swc/core@1.3.100)
 
-  webpack-remove-empty-scripts@0.7.3(webpack@5.89.0):
+  webpack-remove-empty-scripts@1.0.4(webpack@5.89.0):
     dependencies:
-      ansis: 1.5.6
+      ansis: 1.5.2
       webpack: 5.89.0(@swc/core@1.3.100)(webpack-cli@3.3.12)
 
-  webpack-remove-empty-scripts@0.7.3(webpack@5.91.0):
+  webpack-remove-empty-scripts@1.0.4(webpack@5.91.0):
     dependencies:
-      ansis: 1.5.6
+      ansis: 1.5.2
       webpack: 5.91.0(@swc/core@1.3.100)(webpack-cli@3.3.12)
 
   webpack-rtl-plugin@2.0.0:

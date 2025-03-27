@@ -195,6 +195,15 @@
 		},
 		{
 			"dependencies": [
+				"webpack-remove-empty-scripts"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "1.0.x"
+		},
+		{
+			"dependencies": [
 				"github-label-sync"
 			],
 			"packages": [
