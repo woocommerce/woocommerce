@@ -191,7 +191,7 @@ class Init {
 		return array(
 			array(
 				'id'          => 'settings',
-				'description' => __( 'It includes all the items featured in WooCommerce | Settings.', 'woocommerce' ),
+				'description' => __( 'Includes all the items featured in WooCommerce | Settings.', 'woocommerce' ),
 				'label'       => __( 'WooCommerce Settings', 'woocommerce' ),
 				'icon'        => 'settings',
 				'items'       => array_map(
@@ -208,14 +208,14 @@ class Init {
 			),
 			array(
 				'id'          => 'plugins',
-				'description' => __( 'It includes all the installed plugins and extensions.', 'woocommerce' ),
+				'description' => __( 'Includes all the installed plugins and extensions.', 'woocommerce' ),
 				'label'       => __( 'Plugins and extensions', 'woocommerce' ),
 				'icon'        => 'plugins',
 				'items'       => $this->get_plugins_for_export_group(),
 			),
 			array(
 				'id'          => 'themes',
-				'description' => __( 'It includes all the installed themes.', 'woocommerce' ),
+				'description' => __( 'Includes all the installed themes.', 'woocommerce' ),
 				'label'       => __( 'Themes', 'woocommerce' ),
 				'icon'        => 'layout',
 				'items'       => $this->get_themes_for_export_group(),

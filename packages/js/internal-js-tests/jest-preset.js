@@ -19,6 +19,27 @@ const transformModules = {
 	},
 };
 
+/**
+ * To ensure consistency in the test environment, all test files should use the same instance of the WP packages from the project's node_modules. This prevents potential conflicts with different versions of the packages. For example, a specific version of @wordpress/private-apis is defined in the package.json, but different instances can be used due to sub-dependencies having specific versions, which can cause issues.
+ *
+ * This approach aligns the test environment more closely with production, where the same version of the WP packages is used.
+ *
+ * Add additional mappings for other WP packages that are used in the project if needed.
+ */
+const mapWpModules = [
+	'@wordpress/private-apis',
+	'@wordpress/core-data',
+	'@wordpress/components',
+];
+const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
+	try {
+		acc[ module ] = require.resolve( module );
+	} catch ( error ) {
+		// If the module is not found, no need to add it to the mapper.
+	}
+	return acc;
+}, {} );
+
 module.exports = {
 	moduleNameMapper: {
 		tinymce: path.resolve( __dirname, 'build/mocks/tinymce' ),
@@ -44,6 +65,7 @@ module.exports = {
 		'lib0/webcrypto': require.resolve( 'lib0/webcrypto' ), // use the CJS entry point so that it uses the node:crypto API as jsdom doesn't have a crypto API
 		uuid: require.resolve( 'uuid' ),
 		memize: require.resolve( 'memize' ),
+		...wpModulesMapper,
 	},
 	restoreMocks: true,
 	setupFiles: [

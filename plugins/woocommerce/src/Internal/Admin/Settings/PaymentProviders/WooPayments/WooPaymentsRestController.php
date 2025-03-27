@@ -195,6 +195,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
+						'source'   => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 				),
 			),
@@ -250,11 +256,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/session/start',
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_session_start' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_kyc_session_init' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location'    => array(
@@ -283,11 +289,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/session/finish',
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_session_finish' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_kyc_session_finish' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
@@ -506,7 +512,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		try {
-			$result = $this->woopayments->onboarding_test_account_init( $location );
+			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -559,13 +565,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Handle the onboarding business verification step session start action.
+	 * Handle the onboarding business verification step KYC session initialization action.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_Error|WP_REST_Response The response.
 	 */
-	protected function handle_onboarding_business_verification_session_start( WP_REST_Request $request ) {
+	protected function handle_onboarding_business_verification_kyc_session_init( WP_REST_Request $request ) {
 		$progressive = (bool) $request->get_param( 'progressive' );
 
 		// If we receive self assessment data with the request, we will use it.
@@ -592,13 +598,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Handle the onboarding business verification step session finish action.
+	 * Handle the onboarding business verification step KYC session finish action.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_Error|WP_REST_Response The response.
 	 */
-	protected function handle_onboarding_business_verification_session_finish( WP_REST_Request $request ) {
+	protected function handle_onboarding_business_verification_kyc_session_finish( WP_REST_Request $request ) {
 		$location = $request->get_param( 'location' );
 		if ( empty( $location ) ) {
 			// Fall back to the providers country if no location is provided.
@@ -885,7 +891,21 @@ class WooPaymentsRestController extends RestApiControllerBase {
 								),
 								'kyc_session' => array(
 									'type'        => 'object',
-									'description' => esc_html__( 'Action to start a KYC session.', 'woocommerce' ),
+									'description' => esc_html__( 'Action to create or resume an embedded KYC session.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'kyc_session_finish' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to finish an embedded KYC session.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'kyc_fallback' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to use as a fallback when dealing with errors with the embedded KYC.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
