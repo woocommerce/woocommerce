@@ -127,9 +127,9 @@ class PayPal extends PaymentGateway {
 			}
 
 			// Backwards compatibility with pre 3.0.0 (deprecated).
-			if ($container->has( 'onboarding.environment' ) &&
+			if ( $container->has( 'onboarding.environment' ) &&
 				defined( '\WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX' ) ) {
-				$environment = $container->get( 'onboarding.environment' );
+				$environment         = $container->get( 'onboarding.environment' );
 				$current_environment = $environment->current_environment();
 
 				return \WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX === $current_environment;
@@ -152,14 +152,14 @@ class PayPal extends PaymentGateway {
 
 			$container = \WooCommerce\PayPalCommerce\PPCP::container();
 
-			if ($container->has( 'settings.connection-state' )) {
+			if ( $container->has( 'settings.connection-state' ) ) {
 				$state = $container->get( 'settings.connection-state' );
 
 				return $state->is_connected();
 			}
 
 			// Backwards compatibility with pre 3.0.0 (deprecated).
-			if ($container->has( 'onboarding.state' ) &&
+			if ( $container->has( 'onboarding.state' ) &&
 				defined( '\WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED' ) ) {
 				$state = $container->get( 'onboarding.state' );
 
