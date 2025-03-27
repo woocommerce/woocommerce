@@ -534,11 +534,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function unsupported_theme_title_filter( $title, $id = null ) {
-		if ( is_null( $id ) ) {
-			return $title;
-		}
-
-		if ( self::$theme_support || ! $id !== self::$shop_page_id ) {
+		if ( is_null( $id ) || self::$theme_support || ! $id !== self::$shop_page_id ) {
 			return $title;
 		}
 
