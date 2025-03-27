@@ -70,7 +70,7 @@ class ExportWCTaxRates implements StepExporter, HasAlias {
 	 * @return string Description text.
 	 */
 	public function get_description(): string {
-		return __( 'It includes all settings in WooCommerce | Settings | Tax.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | Tax.', 'woocommerce' );
 	}
 
 	/**

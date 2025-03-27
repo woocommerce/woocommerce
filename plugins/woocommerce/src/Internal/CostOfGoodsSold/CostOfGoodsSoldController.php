@@ -146,4 +146,16 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 			)
 		);
 	}
+
+	/**
+	 * Get the tooltip text for the COGS value field in the product editor.
+	 *
+	 * @param bool $for_variable_products True to get the value for variable products, false for other types of products.
+	 * @return string The string to use as tooltip (translated but not escaped).
+	 */
+	public function get_general_cost_edit_field_tooltip( bool $for_variable_products ) {
+		return $for_variable_products ?
+			__( 'Add the amount it costs you to buy or make this product. This will be applied as the default value for variations.', 'woocommerce' ) :
+			__( 'Add the amount it costs you to buy or make this product.', 'woocommerce' );
+	}
 }

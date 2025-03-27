@@ -4,11 +4,19 @@
 import { createElement, createContext, useState } from '@wordpress/element';
 
 const initialData = window.wcSettings?.admin?.settingsData;
+const initialSettingsScripts = window.wcSettings?.admin?.settingsScripts;
 
 const SettingsDataContext = createContext< {
 	settingsData: SettingsData;
 	setSettingsData: ( settingsData: SettingsData ) => void;
-} >( { settingsData: initialData, setSettingsData: () => {} } );
+	settingsScripts: Record< string, string[] >;
+	setSettingsScripts: ( settingsScripts: Record< string, string[] > ) => void;
+} >( {
+	settingsData: initialData,
+	setSettingsData: () => {},
+	settingsScripts: {},
+	setSettingsScripts: () => {},
+} );
 
 const SettingsDataProvider = ( {
 	children,
@@ -16,10 +24,18 @@ const SettingsDataProvider = ( {
 	children: React.ReactNode;
 } ) => {
 	const [ settingsData, setSettingsData ] = useState( initialData );
+	const [ settingsScripts, setSettingsScripts ] = useState(
+		initialSettingsScripts
+	);
 
 	return (
 		<SettingsDataContext.Provider
-			value={ { settingsData, setSettingsData } }
+			value={ {
+				settingsData,
+				setSettingsData,
+				settingsScripts,
+				setSettingsScripts,
+			} }
 		>
 			{ children }
 		</SettingsDataContext.Provider>

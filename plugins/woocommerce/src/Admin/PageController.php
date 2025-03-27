@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\Features;
+
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -589,5 +591,12 @@ class PageController {
 	 */
 	public static function is_embed_page() {
 		return wc_admin_is_connected_page();
+	}
+
+	/**
+	 * Returns true if we are on a modern settings page.
+	 */
+	public static function is_modern_settings_page() {
+		return self::is_settings_page() && Features::is_enabled( 'settings' );
 	}
 }
