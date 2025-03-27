@@ -56,7 +56,7 @@ export const getBusinessTypes = ( data: Country[] ): Country[] => {
 
 /**
  * Make an API request to finalize the onboarding process.
- *
+ * @param apiUrl    The API URL.
  * @param urlSource The source URL.
  */
 export const finalizeOnboarding = async (

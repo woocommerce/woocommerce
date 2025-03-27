@@ -3,7 +3,6 @@
  */
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -24,13 +23,10 @@ export const createKycAccountSession = async (
 	isPoEligible: boolean
 ): Promise< AccountKycResult > => {
 	return await apiFetch< AccountKycResult >( {
-		path: addQueryArgs(
-			apiURL,
-			{
-				self_assessment: fromDotNotation( data ),
-				progressive: isPoEligible,
-			}
-		),
+		path: addQueryArgs( apiURL, {
+			self_assessment: fromDotNotation( data ),
+			progressive: isPoEligible,
+		} ),
 		method: 'POST',
 	} );
 };
