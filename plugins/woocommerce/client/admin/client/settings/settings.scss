@@ -12,8 +12,20 @@ body.woocommerce_page_wc-settings {
 		display: none;
 	}
 
+	#wc-settings-page #mainform {
+		background: initial;
+	}
+
 	#wpbody {
 		margin-top: 0;
+
+		@media (max-width: 782px) {
+			margin-top: -14px;
+		}
+
+		@media (max-width: 600px) {
+			margin-top: 32px;
+		}
 	}
 
 	#wc-settings-page {
