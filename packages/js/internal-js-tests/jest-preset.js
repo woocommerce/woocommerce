@@ -33,7 +33,8 @@ const mapWpModules = [
 ];
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
-		acc[ module ] = require.resolve( module );
+		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
+		acc[ `^${ module }$` ] = require.resolve( module );
 	} catch ( error ) {
 		// If the module is not found, no need to add it to the mapper.
 	}
