@@ -32,7 +32,8 @@ class WooPaymentsService {
 
 	const NOX_PROFILE_OPTION_KEY = 'woocommerce_woopayments_nox_profile';
 
-	const TRACKING_FROM = 'WCADMIN_PAYMENT_SETTINGS';
+	const FROM_PAYMENT_SETTINGS          = 'WCADMIN_PAYMENT_SETTINGS';
+	const FROM_NOX_IN_CONTEXT_ONBOARDING = 'WCADMIN_NOX_IN_CONTEXT_ONBOARDING';
 
 	/**
 	 * The WooPayments provider instance.
@@ -216,19 +217,27 @@ class WooPaymentsService {
 		// If the step is not completed, we need to add the actions.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $business_verification_step_details['status'] ) {
 			$business_verification_step_details['actions'] = array(
-				'start'         => array(
+				'start'                => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/start' ),
 				),
-				'save'          => array(
+				'save'                 => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/save' ),
 				),
-				'session_start' => array(
+				'kyc_session'          => array(
 					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/session/start' ),
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session' ),
 				),
-				'finish'        => array(
+				'kyc_session_finish'   => array(
+					'type' => self::ACTION_TYPE_REST,
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish' ),
+				),
+				'kyc_fallback' => array(
+					'type' => self::ACTION_TYPE_REDIRECT,
+					'href' => $this->get_onboarding_kyc_fallback_url(),
+				),
+				'finish'               => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
 				),
@@ -511,11 +520,13 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $source   Optional. The source for the KYC session.
+	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array|\WP_Error The result of the test account initialization.
 	 * @throws Exception If there was an error initializing the test account.
 	 */
-	public function onboarding_test_account_init( string $location ) {
+	public function onboarding_test_account_init( string $location, string $source = '' ) {
 		// Nothing to do if we already have a valid test account.
 		if ( $this->has_account() && $this->has_test_account() ) {
 			return array(
@@ -550,8 +561,8 @@ class WooPaymentsService {
 			'/wc/v3/payments/onboarding/test_account/init',
 			array(
 				'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
-				'source'       => ! empty( $tracking_source ) ? $tracking_source : self::TRACKING_FROM,
-				'from'         => self::TRACKING_FROM,
+				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT_ONBOARDING,
+				'from'         => self::FROM_NOX_IN_CONTEXT_ONBOARDING,
 			)
 		);
 
@@ -664,21 +675,21 @@ class WooPaymentsService {
 	/**
 	 * Finish the onboarding KYC account session.
 	 *
-	 * @param string $location        The location for which we are onboarding.
-	 *                                This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $tracking_source Optional. The tracking source for the KYC session.
-	 *                                If not provided, it will identify the source as the WC Admin Payments settings.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $source   Optional. The source for the KYC session.
+	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
 	 * @throws Exception If the KYC session could not be finished or there was an error.
 	 */
-	public function finish_onboarding_kyc_session( string $location, string $tracking_source = '' ): array {
+	public function finish_onboarding_kyc_session( string $location, string $source = '' ): array {
 		// Call the WooPayments API to finalize the KYC session.
 		$response = Utils::rest_endpoint_post_request(
 			'/wc/v3/payments/onboarding/kyc/finalize',
 			array(
-				'source' => ! empty( $tracking_source ) ? $tracking_source : self::TRACKING_FROM,
-				'from'   => self::TRACKING_FROM,
+				'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
+				'from'   => self::FROM_NOX_IN_CONTEXT_ONBOARDING,
 			)
 		);
 
@@ -994,5 +1005,20 @@ class WooPaymentsService {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * Get the fallback URL for the embedded KYC flow.
+	 *
+	 * @return string The fallback URL for the embedded KYC flow.
+	 */
+	private function get_onboarding_kyc_fallback_url(): string {
+		if ( class_exists( '\WC_Payments_Account' ) && is_callable( '\WC_Payments_Account::get_connect_url' ) ) {
+			$connect_url = \WC_Payments_Account::get_connect_url( self::FROM_NOX_IN_CONTEXT_ONBOARDING );
+		} else {
+			$connect_url = $this->provider->get_onboarding_url( $this->get_payment_gateway(), Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE ) );
+		}
+
+		return $connect_url;
 	}
 }
