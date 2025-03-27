@@ -23,8 +23,6 @@ const entries = {
 		'./assets/js/blocks/product-filters/frontend.ts',
 	'woocommerce/product-filter-active':
 		'./assets/js/blocks/product-filters/inner-blocks/active-filters/frontend.ts',
-	'woocommerce/product-filter-attribute':
-		'./assets/js/blocks/product-filters/inner-blocks/attribute-filter/frontend.ts',
 	'woocommerce/product-filter-checkbox-list':
 		'./assets/js/blocks/product-filters/inner-blocks/checkbox-list/frontend.ts',
 	'woocommerce/product-filter-chips':
@@ -33,12 +31,6 @@ const entries = {
 		'./assets/js/blocks/product-filters/inner-blocks/price-filter/frontend.ts',
 	'woocommerce/product-filter-price-slider':
 		'./assets/js/blocks/product-filters/inner-blocks/price-slider/frontend.ts',
-	'woocommerce/product-filter-rating':
-		'./assets/js/blocks/product-filters/inner-blocks/rating-filter/frontend.ts',
-	'woocommerce/product-filter-removable-chips':
-		'./assets/js/blocks/product-filters/inner-blocks/removable-chips/frontend.ts',
-	'woocommerce/product-filter-status':
-		'./assets/js/blocks/product-filters/inner-blocks/status-filter/frontend.ts',
 	'woocommerce/accordion-group':
 		'./assets/js/blocks/accordion/accordion-group/frontend.js',
 	'woocommerce/add-to-cart-form':
@@ -51,6 +43,8 @@ const entries = {
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 	'woocommerce/add-to-cart-with-options-variation-selector':
 		'./assets/js/blocks/add-to-cart-with-options/variation-selector/frontend.ts',
+	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options':
+		'./assets/js/blocks/add-to-cart-with-options/variation-selector/attribute-options/frontend.ts',
 
 	// Other
 	'@woocommerce/stores/woocommerce/cart':

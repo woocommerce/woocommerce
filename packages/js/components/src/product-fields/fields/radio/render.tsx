@@ -15,12 +15,12 @@ type RadioFieldProps = BaseProductFieldProps< string > & {
 		value: string;
 	}[];
 };
-const RadioField: React.FC< RadioFieldProps > = ( {
+const RadioField = ( {
 	label,
 	value,
 	onChange,
 	options = [],
-} ) => {
+}: RadioFieldProps ) => {
 	return (
 		<RadioControl
 			label={ label }

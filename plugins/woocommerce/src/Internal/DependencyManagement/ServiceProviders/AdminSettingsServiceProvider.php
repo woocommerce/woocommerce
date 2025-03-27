@@ -4,6 +4,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
@@ -23,6 +25,9 @@ class AdminSettingsServiceProvider extends AbstractInterfaceServiceProvider {
 		Payments::class,
 		PaymentsController::class,
 		PaymentProviders::class,
+		// Provider-specific.
+		WooPaymentsRestController::class,
+		WooPaymentsService::class,
 	);
 
 	/**
@@ -37,5 +42,10 @@ class AdminSettingsServiceProvider extends AbstractInterfaceServiceProvider {
 			->addArgument( Payments::class );
 		$this->share_with_implements_tags( PaymentsRestController::class )
 			->addArgument( Payments::class );
+
+		// Provider-specific.
+		$this->share( WooPaymentsService::class );
+		$this->share_with_implements_tags( WooPaymentsRestController::class )
+			->addArguments( array( Payments::class, WooPaymentsService::class ) );
 	}
 }

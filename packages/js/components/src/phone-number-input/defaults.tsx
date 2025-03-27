@@ -9,10 +9,7 @@ import { Icon, chevronDown } from '@wordpress/icons';
  */
 import { Country } from './utils';
 
-const Flag: React.FC< { alpha2: string; src: string } > = ( {
-	alpha2,
-	src,
-} ) => (
+const Flag = ( { alpha2, src }: { alpha2: string; src: string } ) => (
 	<img
 		alt={ `${ alpha2 } flag` }
 		src={ src }

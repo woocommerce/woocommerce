@@ -18,7 +18,7 @@ import { ShippingRecommendationsList } from './shipping-recommendations';
 import './shipping-recommendations.scss';
 import { ShippingTour } from '../guided-tours/shipping-tour';
 
-const ShippingRecommendations: React.FC = () => {
+const ShippingRecommendations = () => {
 	const {
 		activePlugins,
 		installedPlugins,

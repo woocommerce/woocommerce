@@ -823,7 +823,7 @@ class CartController {
 		$cart = $this->get_cart_instance();
 		return [
 			'line_items' => $cart->get_cart_hash(),
-			'shipping'   => md5( wp_json_encode( $cart->shipping_methods ) ),
+			'shipping'   => md5( wp_json_encode( [ $cart->shipping_methods, wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
 			'fees'       => md5( wp_json_encode( $cart->get_fees() ) ),
 			'coupons'    => md5( wp_json_encode( $cart->get_applied_coupons() ) ),
 			'taxes'      => md5( wp_json_encode( $cart->get_taxes() ) ),

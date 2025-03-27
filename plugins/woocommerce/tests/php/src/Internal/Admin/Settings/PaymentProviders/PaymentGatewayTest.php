@@ -183,6 +183,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'icon'        => '',
 						),
 					),
+					'type'                        => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
 				),
 			),
 			$gateway_details

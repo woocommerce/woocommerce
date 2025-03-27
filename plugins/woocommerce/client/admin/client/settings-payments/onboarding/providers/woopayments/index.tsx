@@ -4,16 +4,14 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
 import Modal from '~/settings-payments/onboarding/components/modal';
 import WooPaymentsOnboarding from './components/onboarding';
 import { WooPaymentsModalProps } from '~/settings-payments/onboarding/types';
-import {
-	OnboardingProvider,
-} from './data/onboarding-context';
+import { OnboardingProvider } from './data/onboarding-context';
 import '~/settings-payments/onboarding/style.scss';
 
 /**

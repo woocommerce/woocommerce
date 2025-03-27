@@ -12,6 +12,7 @@
 	border-radius: 2px;
 	font-size: 0.875em;
 	cursor: pointer;
+	color: var(--wc-product-filter-chips-text, currentColor);
 
 	.has-chip-text-color & {
 		color: var(--wc-product-filter-chips-text);
@@ -36,6 +37,12 @@
 	.has-selected-chip-border-color & {
 		border-color: var(--wc-product-filter-chips-selected-border);
 	}
+}
+
+:where(.wc-block-product-filter-chips__label) {
+	display: inline-flex;
+	align-items: center;
+	gap: $gap-smallest;
 }
 
 :where(

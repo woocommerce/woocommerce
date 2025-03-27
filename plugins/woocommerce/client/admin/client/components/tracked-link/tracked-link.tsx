@@ -35,7 +35,7 @@ interface TrackedLinkProps {
 /**
  * A component that renders a link with tracking capabilities.
  */
-export const TrackedLink: React.FC< TrackedLinkProps > = ( {
+export const TrackedLink = ( {
 	textProps,
 	message,
 	eventName = '',
@@ -43,7 +43,7 @@ export const TrackedLink: React.FC< TrackedLinkProps > = ( {
 	targetUrl,
 	linkType = 'wc-admin',
 	onClickCallback,
-} ) => (
+}: TrackedLinkProps ) => (
 	<Text { ...textProps }>
 		{ interpolateComponents( {
 			mixedString: message,

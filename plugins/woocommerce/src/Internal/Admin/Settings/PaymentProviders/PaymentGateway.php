@@ -19,6 +19,17 @@ defined( 'ABSPATH' ) || exit;
  */
 class PaymentGateway {
 
+	// This is the default onboarding type for all gateways.
+	// It means that the payment extension will handle the onboarding.
+	const ONBOARDING_TYPE_EXTERNAL = 'external';
+
+	// This is the onboarding type for gateways that have a WooCommerce-tailored onboarding flow.
+	// This might mean just having the payment methods select step in the WooCommerce settings.
+	const ONBOARDING_TYPE_NATIVE = 'native';
+
+	// This is the onboarding type for gateways that have a WooCommerce in-context onboarding flow.
+	const ONBOARDING_TYPE_NATIVE_IN_CONTEXT = 'native_in_context';
+
 	/**
 	 * Extract the payment gateway provider details from the object.
 	 *
@@ -56,6 +67,7 @@ class PaymentGateway {
 				),
 			),
 			'onboarding'  => array(
+				'type'                        => self::ONBOARDING_TYPE_EXTERNAL,
 				'state'                       => array(
 					'started'   => $this->is_onboarding_started( $gateway ),
 					'completed' => $this->is_onboarding_completed( $gateway ),
@@ -349,7 +361,7 @@ class PaymentGateway {
 			return $payment_gateway->get_settings_url();
 		}
 
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $payment_gateway->id ) );
+		return Utils::wc_payments_settings_url( null, array( 'section', strtolower( $payment_gateway->id ) ) );
 	}
 
 	/**

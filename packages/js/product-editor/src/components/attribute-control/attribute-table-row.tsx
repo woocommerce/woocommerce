@@ -93,7 +93,7 @@ const tokenItemToString = (
 const INITIAL_MAX_TOKENS_TO_SHOW = 20;
 const MAX_TERMS_TO_LOAD = 100;
 
-export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
+export const AttributeTableRow = ( {
 	index,
 	attribute,
 	attributePlaceholder,
@@ -102,16 +102,13 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	attributes,
 	onNewAttributeAdd,
 	onAttributeSelect,
-
 	termPlaceholder,
 	onTermsSelect,
-
 	termsAutoSelection,
-
 	clearButtonDisabled,
 	removeLabel,
 	onRemove,
-} ) => {
+}: AttributeTableRowProps ) => {
 	const attributeId = attribute ? attribute.id : undefined;
 	const { createProductAttributeTerm } = useDispatch(
 		experimentalProductAttributeTermsStore

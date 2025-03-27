@@ -19,7 +19,7 @@ export function* getOnboardingSteps() {
 
 	try {
 		const response: OnboardingStepsResponse = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/settings/payments/onboarding-steps`,
+			path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`,
 		} );
 
 		yield getOnboardingStepsSuccess( response.steps );

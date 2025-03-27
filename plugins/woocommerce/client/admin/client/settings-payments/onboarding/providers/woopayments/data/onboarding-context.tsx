@@ -20,7 +20,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
  */
 import {
 	WooPaymentsProviderOnboardingStep,
-	OnboardingContextType
+	OnboardingContextType,
 } from '~/settings-payments/onboarding/types';
 import { steps as woopaymentsSteps } from '../steps';
 
@@ -117,7 +117,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 	// Find the first incomplete step with completed dependencies
 	const currentStep = allSteps.find(
 		( step ) =>
-			step.status === 'incomplete' &&
+			step.status !== 'completed' &&
 			areStepDependenciesCompleted( step, allSteps )
 	);
 
@@ -127,23 +127,34 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 		);
 		if ( currentStepIndex !== -1 ) {
 			// Mark current step as completed
-			if ( currentStep?.status === 'incomplete' ) {
+			if ( currentStep?.status !== 'completed' ) {
 				// Change step completion status in allSteps
 				setAllSteps(
 					allSteps.map( ( step ) =>
-						step.id === currentStep.id
+						step.id === currentStep?.id
 							? { ...step, status: 'completed' as const }
 							: step
 					)
 				);
 			}
 
-			const nextStep = allSteps[ currentStepIndex + 1 ];
+			// Find the next step that is not completed and has completed dependencies
+			const nextStep = allSteps.find(
+				( step ) =>
+					step.status !== 'completed' &&
+					areStepDependenciesCompleted( step, allSteps )
+			);
+
 			if ( nextStep ) {
 				navigateToStep( nextStep.id );
 			}
 		}
-	}, [ currentStep, allSteps, navigateToStep ] );
+	}, [
+		currentStep,
+		allSteps,
+		navigateToStep,
+		areStepDependenciesCompleted,
+	] );
 
 	const refreshOnboardingSteps = useCallback( () => {
 		invalidateResolutionForStoreSelector( 'getOnboardingSteps' );
@@ -170,10 +181,11 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 				);
 
 				return Object.assign( {}, step, {
-					status: backendStep?.status || 'incomplete',
+					status: backendStep?.status || 'not_started',
 					dependencies: backendStep?.dependencies || [],
 					path: backendStep?.path,
-					// Maybe actions too
+					context: backendStep?.context,
+					actions: backendStep?.actions,
 				} );
 			}
 
@@ -192,7 +204,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 							mapWooPaymentsSteps
 						)
 							? ( 'completed' as const )
-							: ( 'incomplete' as const ),
+							: ( 'not_started' as const ),
 					};
 				}
 				return step;

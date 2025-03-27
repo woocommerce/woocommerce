@@ -10,9 +10,7 @@ import { useEffect } from 'react';
  * Internal dependencies
  */
 import Stepper from '~/settings-payments/onboarding/components/stepper';
-import {
-	useOnboardingContext,
-} from '../../data/onboarding-context';
+import { useOnboardingContext } from '../../data/onboarding-context';
 
 /**
  * WooPaymentsOnboarding component for the WooPayments onboarding modal.
@@ -25,7 +23,10 @@ export default function WooPaymentsOnboarding(): React.ReactNode {
 
 	// Forces navigation to the current step only if the URL does not already match.
 	useEffect( () => {
-		if ( currentStep && location.pathname !== ( currentStep?.path ?? '' ) ) {
+		if (
+			currentStep &&
+			location.pathname !== ( currentStep?.path ?? '' )
+		) {
 			navigateToStep( currentStep.id );
 		}
 	}, [ currentStep, navigateToStep, location.pathname ] );
