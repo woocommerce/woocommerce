@@ -79,7 +79,7 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"concurrently": "^7.6.0",
-		"copy-webpack-plugin": "^9.1.0",
+		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",

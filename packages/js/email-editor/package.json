@@ -109,7 +109,7 @@
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "wp-6.6",
 		"@wordpress/stylelint-config": "^21.36.0",
-		"copy-webpack-plugin": "^10.2.4",
+		"copy-webpack-plugin": "13.0.x",
 		"prettier": "npm:wp-prettier@^3.0.3",
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",

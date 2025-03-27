@@ -168,6 +168,24 @@
 		},
 		{
 			"dependencies": [
+				"copy-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "13.0.x"
+		},
+		{
+			"dependencies": [
+				"progress-bar-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.1.x"
+		},
+		{
+			"dependencies": [
 				"github-label-sync"
 			],
 			"packages": [
