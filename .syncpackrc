@@ -33,7 +33,6 @@
 				"@wordpress/data-controls",
 				"@wordpress/date",
 				"@wordpress/editor",
-				"@wordpress/deprecated",
 				"@wordpress/dom",
 				"@wordpress/dom-ready",
 				"@wordpress/element",
@@ -54,7 +53,6 @@
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
-				"@wordpress/wordcount",
 				"eslint*",
 				"postcss*"
 			],
