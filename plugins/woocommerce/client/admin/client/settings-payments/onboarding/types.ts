@@ -56,6 +56,10 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		auth?: {
+			type?: string;
+			href?: string;
+		};
 	};
 	content?: ReactNode;
 	context?: {

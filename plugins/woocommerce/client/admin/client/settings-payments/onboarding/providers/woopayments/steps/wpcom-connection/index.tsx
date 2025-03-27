@@ -18,8 +18,6 @@ import './style.scss';
 export const JetpackStep: React.FC = () => {
 	const { currentStep } = useOnboardingContext();
 
-	const connectionLink = 'http://woocommerce.com'; // Retrieve the URL from currentStep.
-
 	return (
 		<>
 			<WooPaymentsStepHeader onClose={ () => {} } />
@@ -39,7 +37,7 @@ export const JetpackStep: React.FC = () => {
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
 						onClick={ () => {
 							// TODO: Implement Jetpack connection logic
-							window.location.href = connectionLink;
+							window.location.href = currentStep?.actions?.auth?.href ?? '';
 						} }
 					>
 						{ __( 'Connect', 'woocommerce' ) }

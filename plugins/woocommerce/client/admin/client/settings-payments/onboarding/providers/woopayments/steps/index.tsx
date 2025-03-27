@@ -9,7 +9,7 @@ import React from 'react';
 import { useOnboardingContext } from '../data/onboarding-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import WooPaymentsStepHeader from '../components/header';
-import WordPressComStep from './wpcom';
+import WordPressComStep from './wpcom-connection';
 import PaymentMethodsSelection from './payment-methods-selection';
 
 /**
@@ -85,7 +85,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		order: 2,
 		type: 'backend',
 		label: 'Connect with WordPress.com',
-		content: <WelcomeStep />,
+		content: <WordPressComStep />,
 		dependencies: [ 'payment_methods' ],
 	},
 	{
