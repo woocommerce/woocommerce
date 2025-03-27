@@ -15,6 +15,7 @@ import { fromDotNotation } from '../../utils';
  * Make an API request to create an KYC account session.
  *
  * @param data         The form data.
+ * @param apiURL       The API URL.
  * @param isPoEligible Whether the user is eligible for a PO account.
  */
 export const createKycAccountSession = async (
