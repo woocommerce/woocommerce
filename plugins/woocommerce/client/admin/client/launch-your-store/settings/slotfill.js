@@ -49,20 +49,11 @@ const SiteVisibility = () => {
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
 
-	const { isFetching: isFetchingComingSoonTemplateId, comingSoonTemplateId } =
-		useSelect( ( select ) => {
-			return {
-				isFetching: ! select( coreStore ).hasFinishedResolution(
-					'getDefaultTemplateId',
-					[ { slug: 'coming-soon' } ]
-				),
-				comingSoonTemplateId: select( coreStore ).getDefaultTemplateId(
-					{
-						slug: 'coming-soon',
-					}
-				),
-			};
-		}, [] );
+	const comingSoonTemplateId = useSelect( ( select ) => {
+		return select( coreStore ).getDefaultTemplateId( {
+			slug: 'coming-soon',
+		} );
+	}, [] );
 
 	useEffect( () => {
 		const saveButton = document.getElementsByClassName(
@@ -177,7 +168,7 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ ! isFetchingComingSoonTemplateId &&
+					{ comingSoonTemplateId &&
 					getSetting( 'currentThemeIsFSETheme' )
 						? createInterpolateElement(
 								__(
