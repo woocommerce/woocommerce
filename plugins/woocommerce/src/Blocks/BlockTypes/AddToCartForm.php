@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
@@ -50,8 +51,15 @@ class AddToCartForm extends AbstractBlock {
 		$post_id = $block->context['postId'];
 		$product = wc_get_product( $post_id );
 
-		if ( $product instanceof \WC_Product && $product->is_purchasable() && $product->is_in_stock() && ! in_array( $product->get_type(), array( 'external', 'grouped' ), true ) ) {
-			wp_enqueue_script( 'wc-single-add-to-cart' );
+		if ( is_product() ) {
+			$product = wc_get_product( get_the_ID() );
+
+			if ( $product instanceof \WC_Product ) {
+				$is_not_purchasable = ProductType::SIMPLE === $product->get_type() && ( ! $product->is_purchasable() || ! $product->is_in_stock() );
+				if ( ! in_array( $product->get_type(), [ ProductType::EXTERNAL, ProductType::GROUPED ], true ) && ! $is_not_purchasable ) {
+					wp_enqueue_script( 'wc-single-add-to-cart' );
+				}
+			}
 		}
 	}
 

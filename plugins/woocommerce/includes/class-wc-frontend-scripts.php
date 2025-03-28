@@ -10,6 +10,7 @@
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\ProductType;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -396,13 +397,11 @@ class WC_Frontend_Scripts {
 		) {
 			$product = wc_get_product( get_the_ID() );
 
-			if (
-				$product instanceof \WC_Product &&
-				$product->is_purchasable() &&
-				$product->is_in_stock() &&
-				! in_array( $product->get_type(), array( 'external', 'grouped' ), true )
-			) {
-				self::enqueue_script( 'wc-single-add-to-cart' );
+			if ( $product instanceof \WC_Product ) {
+				$is_not_purchasable = ProductType::SIMPLE === $product->get_type() && ( ! $product->is_purchasable() || ! $product->is_in_stock() );
+				if ( ! in_array( $product->get_type(), array( ProductType::EXTERNAL, ProductType::GROUPED ), true ) && ! $is_not_purchasable ) {
+					self::enqueue_script( 'wc-single-add-to-cart' );
+				}
 			}
 		}
 		if ( is_cart() ) {

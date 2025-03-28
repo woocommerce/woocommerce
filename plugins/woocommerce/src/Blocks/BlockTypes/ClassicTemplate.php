@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 use WC_Shortcode_Checkout;
 use WC_Frontend_Scripts;
 
@@ -50,10 +51,15 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
 
-		$product = wc_get_product( get_the_ID() );
+		if ( is_product() ) {
+			$product = wc_get_product( get_the_ID() );
 
-		if ( is_product() && $product instanceof \WC_Product && $product->is_purchasable() && $product->is_in_stock() && ! in_array( $product->get_type(), array( 'external', 'grouped' ), true ) ) {
-			wp_enqueue_script( 'wc-single-add-to-cart' );
+			if ( $product instanceof \WC_Product ) {
+				$is_not_purchasable = ProductType::SIMPLE === $product->get_type() && ( ! $product->is_purchasable() || ! $product->is_in_stock() );
+				if ( ! in_array( $product->get_type(), [ ProductType::EXTERNAL, ProductType::GROUPED ], true ) && ! $is_not_purchasable ) {
+					wp_enqueue_script( 'wc-single-add-to-cart' );
+				}
+			}
 		}
 	}
 
