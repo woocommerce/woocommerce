@@ -66,14 +66,11 @@ const productFilterPriceStore = {
 	},
 	actions: {
 		getActivePriceAndLabel( min: number, max: number ) {
-			const context = getContext< ProductFilterPriceContext >();
+			const { minRange, maxRange } = getServerContext
+				? getServerContext< ProductFilterPriceContext >()
+				: getContext< ProductFilterPriceContext >();
 			const { activePriceLabelTemplates } = getConfig();
-			if (
-				min &&
-				min > context.minRange &&
-				max &&
-				max < context.maxRange
-			)
+			if ( min && min > minRange && max && max < maxRange )
 				return {
 					activeValue: `${ min }|${ max }`,
 					activeLabel: activePriceLabelTemplates.minAndMax
@@ -87,7 +84,7 @@ const productFilterPriceStore = {
 						),
 				};
 
-			if ( min && min > context.minRange ) {
+			if ( min && min > minRange ) {
 				return {
 					activeValue: `${ min }|`,
 					activeLabel: activePriceLabelTemplates.minOnly.replace(
@@ -97,7 +94,7 @@ const productFilterPriceStore = {
 				};
 			}
 
-			if ( max && max < context.maxRange ) {
+			if ( max && max < maxRange ) {
 				return {
 					activeValue: `|${ max }`,
 					activeLabel: activePriceLabelTemplates.maxOnly.replace(
@@ -116,6 +113,9 @@ const productFilterPriceStore = {
 			const context = getContext<
 				ProductFilterPriceContext & ProductFiltersContext
 			>();
+			const { minRange, maxRange } = getServerContext
+				? getServerContext< ProductFilterPriceContext >()
+				: getContext< ProductFilterPriceContext >();
 			const price: Record< string, number > = {
 				min: state.minPrice,
 				max: state.maxPrice,
@@ -124,7 +124,7 @@ const productFilterPriceStore = {
 			if (
 				type === 'min' &&
 				value &&
-				inRange( value, context.minRange, context.maxRange ) &&
+				inRange( value, minRange, maxRange ) &&
 				value < state.maxPrice
 			) {
 				price.min = value;
@@ -133,14 +133,14 @@ const productFilterPriceStore = {
 			if (
 				type === 'max' &&
 				value &&
-				inRange( value, context.minRange, context.maxRange ) &&
+				inRange( value, minRange, maxRange ) &&
 				value > state.minPrice
 			) {
 				price.max = value;
 			}
 
-			if ( price.min === context.minRange ) price.min = 0;
-			if ( price.max === context.maxRange ) price.max = 0;
+			if ( price.min === minRange ) price.min = 0;
+			if ( price.max === maxRange ) price.max = 0;
 
 			context.activeFilters = context.activeFilters.filter(
 				( item ) => item.type !== 'price'

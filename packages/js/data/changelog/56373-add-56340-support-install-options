@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Added support for `install_options` property in the extensions feed.

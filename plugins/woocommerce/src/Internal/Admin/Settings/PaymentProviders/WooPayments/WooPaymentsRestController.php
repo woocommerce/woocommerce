@@ -921,6 +921,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
+			'context' => array(
+				'type'        => 'object',
+				'description' => esc_html__( 'Various contextual data for the onboarding process to use.', 'woocommerce' ),
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 		);
 
 		return $schema;

@@ -75,6 +75,9 @@ export { store as importStore } from './import';
 export { store as experimentalProductFormStore } from './product-form';
 export { store as paymentSettingsStore } from './payment-settings';
 export { store as woopaymentsOnboardingStore } from './woopayments-onboarding';
+export { store as reportsStore } from './reports';
+export { store as itemsStore } from './items';
+export { store as experimentalSettingOptionsStore } from './setting-options';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
@@ -92,7 +95,8 @@ export { useUser } from './user/use-user';
 
 // Export utils
 export { getVisibleTasks } from './onboarding/utils';
-export { getLeaderboard, searchItemsByString } from './items/utils';
+export { searchItemsByString } from './items/utils';
+export { getLeaderboard } from './items/store-aware-utils';
 export {
 	getFilterQuery,
 	getSummaryNumbers,
@@ -164,6 +168,13 @@ export { ProductTag, Query } from './product-tags/types';
 export { WCUser } from './user/types';
 export { UserPreferences } from './user/types';
 export type { StepContent as WooPaymentsOnboardingStepContent } from './woopayments-onboarding/types';
+export {
+	Setting,
+	SettingsGroup,
+	SettingValue,
+	SettingType,
+} from './setting-options/types';
+
 /**
  * Internal dependencies
  */

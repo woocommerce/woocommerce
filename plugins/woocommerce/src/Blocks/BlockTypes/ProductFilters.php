@@ -35,7 +35,7 @@ class ProductFilters extends AbstractBlock {
 		global $pagenow;
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
 		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
 		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
@@ -91,9 +91,8 @@ class ProductFilters extends AbstractBlock {
 			''
 		);
 		$interactivity_context = array(
-			'params'         => $filter_params,
-			'originalParams' => $filter_params,
-			'activeFilters'  => $active_filters,
+			'params'        => $filter_params,
+			'activeFilters' => $active_filters,
 		);
 
 		$classes = '';
