@@ -219,7 +219,6 @@
 		"rtlcss": "^2.6.2",
 		"sass": "^1.69.5",
 		"sass-loader": "^10.5.0",
-		"style-loader": "^0.23.1",
 		"stylelint": "^14.16.1",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
