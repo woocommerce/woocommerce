@@ -212,6 +212,15 @@
 		},
 		{
 			"dependencies": [
+				"raw-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.0.x"
+		},
+		{
+			"dependencies": [
 				"fork-ts-checker-webpack-plugin"
 			],
 			"packages": [
