@@ -265,6 +265,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$object->set_slug( '' );
 			}
 
+			// Cost needs to be set explicitly because null is a legal value
+			// but set_props doesn't support nulls.
+			if ( array_key_exists( 'cogs_value', $data ) ) {
+				$object->set_cogs_value( $data['cogs_value'] );
+				unset( $data['cogs_value'] );
+			}
+
 			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
 
 			if ( is_wp_error( $result ) ) {
@@ -814,5 +821,4 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		return $value;
 	}
-
 }

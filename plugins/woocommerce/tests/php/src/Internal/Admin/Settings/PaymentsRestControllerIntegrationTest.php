@@ -941,7 +941,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertContains( PaymentExtensionSuggestions::WOOPAYMENTS, array_column( $other_suggestions, 'id' ) );
 
 		// Delete the user meta.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 
 		// Act.
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
@@ -1092,11 +1092,11 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Assert that the incentive is in the WooPayments suggestion with the right dismissals list.
 		$suggestion = $data['providers'][3];
 		$this->assertArrayHasKey( '_incentive', $suggestion );
-		$this->assertContains( $context, $suggestion['_incentive']['_dismissals'] );
+		$this->assertEquals( $context, $suggestion['_incentive']['_dismissals'][0]['context'] );
 		// Assert that the incentive is in the WooPayments gateway with the right dismissals list.
 		$gateway = $data['providers'][4];
 		$this->assertArrayHasKey( '_incentive', $gateway );
-		$this->assertContains( $context, $gateway['_incentive']['_dismissals'] );
+		$this->assertEquals( $context, $gateway['_incentive']['_dismissals'][0]['context'] );
 
 		// Clean up.
 		remove_filter( 'user_has_cap', $filter_callback );

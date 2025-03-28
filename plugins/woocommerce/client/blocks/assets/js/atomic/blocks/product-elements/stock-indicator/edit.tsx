@@ -13,11 +13,8 @@ import { useProductDataContext } from '@woocommerce/shared-context';
  */
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
-import {
-	BLOCK_TITLE as label,
-	BLOCK_ICON as icon,
-	BLOCK_DESCRIPTION as description,
-} from './constants';
+import { BLOCK_ICON as icon } from './constants';
+import metadata from './block.json';
 import type { BlockAttributes } from './types';
 
 const Edit = ( {
@@ -63,7 +60,11 @@ const StockIndicatorEdit: React.FC<
 	if ( product.id === 0 ) {
 		return <Edit { ...props } />;
 	}
-	return withProductSelector( { icon, label, description } )( Edit )( props );
+	return withProductSelector( {
+		icon,
+		label: metadata.title,
+		description: metadata.description,
+	} )( Edit )( props );
 };
 
 export default StockIndicatorEdit;

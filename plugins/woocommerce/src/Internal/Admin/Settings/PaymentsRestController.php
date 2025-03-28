@@ -131,6 +131,18 @@ class PaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/suggestion/(?P<id>[\w\d\-]+)/attach',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'attach_payment_extension_suggestion' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/suggestion/(?P<id>[\w\d\-]+)/hide',
 			array(
 				array(
@@ -249,6 +261,25 @@ class PaymentsRestController extends RestApiControllerBase {
 		$order_map = $request->get_param( 'order_map' );
 
 		$result = $this->payments->update_payment_providers_order_map( $order_map );
+
+		return rest_ensure_response( array( 'success' => $result ) );
+	}
+
+	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	protected function attach_payment_extension_suggestion( WP_REST_Request $request ) {
+		$suggestion_id = $request->get_param( 'id' );
+
+		try {
+			$result = $this->payments->attach_payment_extension_suggestion( $suggestion_id );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_payment_extension_suggestion_error', $e->getMessage(), array( 'status' => 400 ) );
+		}
 
 		return rest_ensure_response( array( 'success' => $result ) );
 	}
@@ -485,12 +516,15 @@ class PaymentsRestController extends RestApiControllerBase {
 				$providers[ $key ]['_links'] = array();
 			}
 
-			// If this is a suggestion, add a link to hide it.
+			// If this is a suggestion, add dedicated links.
 			if ( ! empty( $provider['_type'] ) &&
 				PaymentProviders::TYPE_SUGGESTION === $provider['_type'] &&
 				! empty( $provider['_suggestion_id'] )
-				) {
-				$providers[ $key ]['_links']['hide'] = array(
+			) {
+				$providers[ $key ]['_links']['attach'] = array(
+					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/attach', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),
+				);
+				$providers[ $key ]['_links']['hide']   = array(
 					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/hide', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),
 				);
 			}
@@ -896,115 +930,27 @@ class PaymentsRestController extends RestApiControllerBase {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'_incentive'     => array(
-					'type'        => 'object',
-					'description' => esc_html__( 'The active incentive for the provider.', 'woocommerce' ),
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => array(
-						'id'                => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The incentive unique ID. This ID needs to be used for incentive dismissals.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'promo_id'          => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The incentive promo ID. This ID need to be fed into the onboarding flow.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'title'             => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The incentive title. It can contain stylistic HTML.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'description'       => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The incentive description. It can contain stylistic HTML.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'short_description' => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The short description of the incentive. It can contain stylistic HTML.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'cta_label'         => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The call to action label for the incentive.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'tc_url'            => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The URL to the terms and conditions for the incentive.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'badge'             => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The badge label for the incentive.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'_dismissals'       => array(
-							'type'        => 'array',
-							'description' => esc_html__( 'The dismissals list for the incentive. The `all` entry means the incentive was dismissed for all contexts.', 'woocommerce' ),
-							'uniqueItems' => true,
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'items'       => array(
-								'type'        => 'string',
-								'description' => esc_html__( 'Context ID in which the incentive was dismissed.', 'woocommerce' ),
-								'readonly'    => true,
-							),
-						),
-						'_links'            => array(
-							'type'       => 'object',
-							'context'    => array( 'view', 'edit' ),
-							'readonly'   => true,
-							'properties' => array(
-								'dismiss' => array(
-									'type'        => 'object',
-									'description' => esc_html__( 'The link to dismiss the incentive.', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-									'properties'  => array(
-										'href' => array(
-											'type'        => 'string',
-											'description' => esc_html__( 'The URL to dismiss the incentive.', 'woocommerce' ),
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-									),
-								),
-								'onboard' => array(
-									'type'        => 'object',
-									'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-									'properties'  => array(
-										'href' => array(
-											'type'        => 'string',
-											'description' => esc_html__( 'The URL to start/continue onboarding for the payment gateway.', 'woocommerce' ),
-											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
-										),
-									),
-								),
-							),
-						),
-					),
-				),
+				'_incentive'     => $this->get_schema_for_incentive(),
 				'_links'         => array(
 					'type'       => 'object',
 					'context'    => array( 'view', 'edit' ),
 					'readonly'   => true,
 					'properties' => array(
-						'hide' => array(
+						'attach' => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to mark the suggestion as attached. This should be called when an extension is installed.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to attach the suggestion.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'hide'   => array(
 							'type'        => 'object',
 							'description' => esc_html__( 'The link to hide the suggestion.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -1129,6 +1075,7 @@ class PaymentsRestController extends RestApiControllerBase {
 						),
 					),
 				),
+				'_incentive'  => $this->get_schema_for_incentive(),
 				'tags'        => array(
 					'description' => esc_html__( 'The tags associated with the suggestion.', 'woocommerce' ),
 					'type'        => 'array',
@@ -1146,6 +1093,127 @@ class PaymentsRestController extends RestApiControllerBase {
 					'description' => esc_html__( 'The category of the suggestion.', 'woocommerce' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get the schema for an incentive.
+	 *
+	 * @return array The incentive schema.
+	 */
+	private function get_schema_for_incentive(): array {
+		return array(
+			'type'        => 'object',
+			'description' => esc_html__( 'The active incentive for the provider.', 'woocommerce' ),
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+			'properties'  => array(
+				'id'                => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The incentive unique ID. This ID needs to be used for incentive dismissals.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'promo_id'          => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The incentive promo ID. This ID need to be fed into the onboarding flow.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'title'             => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The incentive title. It can contain stylistic HTML.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'description'       => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The incentive description. It can contain stylistic HTML.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'short_description' => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The short description of the incentive. It can contain stylistic HTML.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'cta_label'         => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The call to action label for the incentive.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'tc_url'            => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The URL to the terms and conditions for the incentive.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'badge'             => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The badge label for the incentive.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'_dismissals'       => array(
+					'type'        => 'array',
+					'description' => esc_html__( 'The dismissals list for the incentive. Each dismissal entry includes a context and a timestamp. The `all` entry means the incentive was dismissed for all contexts.', 'woocommerce' ),
+					'uniqueItems' => true,
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'context'   => array(
+								'type'        => 'string',
+								'description' => esc_html__( 'Context ID in which the incentive was dismissed.', 'woocommerce' ),
+								'readonly'    => true,
+							),
+							'timestamp' => array(
+								'type'        => 'integer',
+								'description' => esc_html__( 'Unix timestamp representing when the incentive was dismissed.', 'woocommerce' ),
+								'readonly'    => true,
+							),
+						),
+					),
+				),
+				'_links'            => array(
+					'type'       => 'object',
+					'context'    => array( 'view', 'edit' ),
+					'readonly'   => true,
+					'properties' => array(
+						'dismiss' => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to dismiss the incentive.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to dismiss the incentive.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'onboard' => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to start/continue onboarding for the payment gateway.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+					),
 				),
 			),
 		);

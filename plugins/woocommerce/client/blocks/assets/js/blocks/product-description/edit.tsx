@@ -9,7 +9,6 @@ import {
 	useHasRecursion,
 	Warning,
 	__experimentalUseBlockPreview as useBlockPreview,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { parse } from '@wordpress/blocks';
 import {
@@ -19,6 +18,12 @@ import {
 } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
+import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
+
+/**
+ * Internal dependencies
+ */
+import { ProductDescriptionEditProps } from './types';
 
 /**
  * Returns whether the current user can edit the given entity.
@@ -173,47 +178,22 @@ function RecursionError() {
 	);
 }
 
-/**
- * Check if block is inside a Query Loop with non-product post type
- *
- * @param {string} clientId The block's client ID
- * @param {string} postType The current post type
- * @return {boolean} Whether the block is in an invalid Query Loop context
- */
-const useIsInvalidQueryLoopContext = ( clientId: string, postType: string ) => {
-	const { getBlockParentsByBlockName } = useSelect( blockEditorStore );
-	const blockParents = useMemo( () => {
-		return getBlockParentsByBlockName( clientId, 'core/post-template' );
-	}, [ getBlockParentsByBlockName, clientId ] );
-
-	return blockParents.length > 0 && postType !== 'product';
-};
-
 export default function ProductDescriptionEdit( {
 	context,
 	__unstableLayoutClassNames: layoutClassNames,
 	__unstableParentLayout: parentLayout,
 	clientId,
-} ) {
+}: ProductDescriptionEditProps ) {
 	const { postId: contextPostId, postType: contextPostType } = context;
 	const hasAlreadyRendered = useHasRecursion( contextPostId );
-
-	const blockProps = useBlockProps();
-	const isInvalidQueryLoopContext = useIsInvalidQueryLoopContext(
-		clientId,
-		contextPostType
-	);
-	if ( isInvalidQueryLoopContext ) {
-		return (
-			<div { ...blockProps }>
-				<Warning>
-					{ __(
-						'The Product Description block requires a product context. When used in a Query Loop, the Query Loop must be configured to display products.',
-						'woocommerce'
-					) }
-				</Warning>
-			</div>
-		);
+	const { hasInvalidContext, warningElement } =
+		useQueryLoopProductContextValidation( {
+			clientId,
+			postType: contextPostType,
+			blockName: __( 'Product Description', 'woocommerce' ),
+		} );
+	if ( hasInvalidContext ) {
+		return warningElement;
 	}
 
 	if ( contextPostId && contextPostType && hasAlreadyRendered ) {

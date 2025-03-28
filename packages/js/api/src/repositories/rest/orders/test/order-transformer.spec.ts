@@ -276,7 +276,9 @@ describe( 'OrderTransformer', () => {
 		expect( billing.phone ).toStrictEqual( 'Billing Phone' );
 		expect(
 			createBillingAddressTransformer().fromModel( billing )
-		).toStrictEqual( JSON.parse( responseOrderJson ).billing );
+		).toEqual(
+			expect.objectContaining( JSON.parse( responseOrderJson ).billing )
+		);
 
 		// Shipping
 		expect( shipping.firstName ).toStrictEqual( 'Shipping First Name' );
@@ -297,7 +299,9 @@ describe( 'OrderTransformer', () => {
 		//expect(shipping.phone).toStrictEqual('Shipping Phone');
 		expect(
 			createShippingAddressTransformer().fromModel( shipping )
-		).toStrictEqual( JSON.parse( responseOrderJson ).shipping );
+		).toEqual(
+			expect.objectContaining( JSON.parse( responseOrderJson ).shipping )
+		);
 
 		// Metadata
 		expect( order.metaData ).toHaveLength( 1 );

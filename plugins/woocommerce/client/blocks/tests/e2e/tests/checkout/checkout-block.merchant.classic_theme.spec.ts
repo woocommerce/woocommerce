@@ -16,7 +16,7 @@ test.describe( 'Merchant → Checkout', () => {
 			await admin.visitWidgetEditor();
 			await editor.openGlobalBlockInserter();
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( 'woocommerce/checkout' );
 			const checkoutButton = editor.page.getByRole( 'option', {
 				name: 'Checkout',

@@ -22,6 +22,10 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		await editor.insertBlock( {
 			name: 'woocommerce/product-gallery',
 		} );
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 	} );
 
 	test( 'renders as expected', async ( { page, editor } ) => {
@@ -43,23 +47,20 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 					)`
 				)
 			).toBeVisible();
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/v-neck-t-shirt/' );
+			await page.goto( '/product/hoodie/' );
+
 			const productGalleryBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery"]'
 			);
 
-			await expect(
-				productGalleryBlock.locator(
-					'[data-block-name="woocommerce/product-gallery-thumbnails"]'
-				)
-			).toBeVisible();
+			const thumbnailsContainer = productGalleryBlock.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
+
+			await expect( thumbnailsContainer ).toBeVisible();
 
 			await expect(
 				productGalleryBlock.locator(
@@ -68,39 +69,165 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 					)`
 				)
 			).toBeVisible();
-		} );
-	} );
 
-	test.describe( 'settings', () => {
-		test( 'rounds the number of thumbnails to integer', async ( {
-			page,
-			editor,
-		} ) => {
-			const thumbnailsBlock =
-				editor.canvas.getByLabel( 'Block: Thumbnails' );
-
-			await editor.selectBlocks( thumbnailsBlock );
-
-			await editor.openDocumentSettingsSidebar();
-			const numberOfThumbnailInput = page
-				.getByLabel( 'Editor settings' )
-				.getByRole( 'spinbutton', {
-					name: 'Number of Thumbnails',
-				} );
-
-			await numberOfThumbnailInput.fill( '4.2' );
-			await page.keyboard.press( 'Enter' );
-
-			const numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+			const thumbnailsCount = thumbnailsContainer.locator(
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
-			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 4 );
+			await expect( thumbnailsCount ).toHaveCount( 4 );
+		} );
+	} );
 
-			await numberOfThumbnailInput.fill( '4.7' );
-			await page.keyboard.press( 'Enter' );
+	test( 'thumbnail size settings work correctly', async ( {
+		page,
+		editor,
+	} ) => {
+		await test.step( 'in editor', async () => {
+			const largeImageBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-large-image"]'
+			);
+			const thumbnailsBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-thumbnails"]'
+			);
+			const thumbnailsSizeInput = page.getByLabel( 'Thumbnail Size' );
 
-			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );
+			// Open block settings
+			await thumbnailsBlock.click();
+			await editor.openDocumentSettingsSidebar();
+
+			await expect( thumbnailsSizeInput ).toHaveValue( '33' );
+			await expect( async () => {
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
+
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.33,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			await expect( async () => {
+				// Set size to 10%
+				await thumbnailsSizeInput.fill( '10' );
+
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
+
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.1,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+		} );
+
+		await test.step( 'in frontend', async () => {
+			await page.goto( '/product/hoodie/' );
+
+			const thumbnailsBlock = page.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
+			const largeImageBlock = page.locator(
+				'[data-block-name="woocommerce/product-gallery-large-image"]'
+			);
+
+			await expect( async () => {
+				await page.reload();
+
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
+
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.1,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+		} );
+	} );
+
+	test( 'thumbnails are scrollable and last thumbnail is reachable', async ( {
+		page,
+		editor,
+	} ) => {
+		await test.step( 'in editor', async () => {
+			const largeImageBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-large-image"]'
+			);
+			const thumbnailsBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery-thumbnails"]'
+			);
+			const thumbnailsSizeInput = page.getByLabel( 'Thumbnail Size' );
+
+			// Open block settings
+			await thumbnailsBlock.click();
+			await editor.openDocumentSettingsSidebar();
+
+			await expect( thumbnailsSizeInput ).toHaveValue( '33' );
+			await expect( async () => {
+				// Set size to 10%
+				await thumbnailsSizeInput.fill( '50' );
+
+				const largeImageBox = await largeImageBlock.boundingBox();
+				const thumbnailsBox = await thumbnailsBlock.boundingBox();
+				const largeImageWidth = largeImageBox?.width ?? 0;
+				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
+
+				expect( thumbnailsWidth ).toBeCloseTo(
+					largeImageWidth * 0.5,
+					0
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+		} );
+
+		await test.step( 'in frontend', async () => {
+			await page.goto( '/product/hoodie/' );
+
+			const thumbnailsContainer = page.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
+
+			const scrollableContainer = page.locator(
+				'.wc-block-product-gallery-thumbnails__scrollable'
+			);
+
+			const thumbnails = scrollableContainer.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
+
+			// Get the last thumbnail
+			const lastThumbnail = thumbnails.last();
+
+			await expect( async () => {
+				await page.reload();
+				// Check if overflow classes are present initially
+				await expect( thumbnailsContainer ).toHaveClass(
+					/wc-block-product-gallery-thumbnails--overflow-bottom/
+				);
+
+				// Scroll to the last thumbnail
+				await lastThumbnail.scrollIntoViewIfNeeded();
+
+				// Verify the last thumbnail is visible
+				await expect( lastThumbnail ).toBeVisible();
+
+				// After scrolling to the end, the bottom overflow should be gone
+				await expect( thumbnailsContainer ).not.toHaveClass(
+					/wc-block-product-gallery-thumbnails--overflow-bottom/
+				);
+			} ).toPass( { timeout: 3_000 } );
 		} );
 	} );
 } );

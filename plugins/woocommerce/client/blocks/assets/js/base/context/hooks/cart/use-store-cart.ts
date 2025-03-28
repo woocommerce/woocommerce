@@ -23,7 +23,6 @@ import { useSelect } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type {
 	StoreCart,
-	CartResponse,
 	CartResponseTotals,
 	CartResponseFeeItem,
 	CartResponseBillingAddress,
@@ -36,7 +35,6 @@ import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import { useEditorContext } from '../../providers/editor-context';
 import { useStoreCartEventListeners } from './use-store-cart-event-listeners';
 
 declare module '@wordpress/html-entities' {
@@ -140,11 +138,6 @@ export const useStoreCart = (
 	options: { shouldSelect: boolean } = { shouldSelect: true }
 ): StoreCart => {
 	const { shouldSelect } = options;
-	const { isEditor, previewData } = useEditorContext();
-	const previewCart = previewData?.previewCart as unknown as CartResponse & {
-		receiveCart?: ( cart: CartResponse ) => void;
-		receiveCartContents?: ( cart: CartResponse ) => void;
-	};
 	const currentResults = useRef();
 	const billingAddressRef = useRef( defaultBillingAddress );
 	const shippingAddressRef = useRef( defaultShippingAddress );
@@ -156,35 +149,6 @@ export const useStoreCart = (
 		( select, { dispatch } ) => {
 			if ( ! shouldSelect ) {
 				return defaultCartData;
-			}
-
-			if ( isEditor ) {
-				return {
-					...defaultCartData,
-					cartCoupons: previewCart.coupons,
-					cartItems: previewCart.items,
-					crossSellsProducts: previewCart.cross_sells,
-					cartFees: previewCart.fees,
-					cartItemsCount: previewCart.items_count,
-					cartItemsWeight: previewCart.items_weight,
-					cartNeedsPayment: previewCart.needs_payment,
-					cartNeedsShipping: previewCart.needs_shipping,
-					cartTotals: previewCart.totals,
-					shippingRates: previewCart.shipping_rates,
-					cartHasCalculatedShipping:
-						previewCart.has_calculated_shipping,
-					paymentMethods: previewCart.payment_methods,
-					paymentRequirements: previewCart.payment_requirements,
-					cartIsLoading: false,
-					receiveCart:
-						typeof previewCart?.receiveCart === 'function'
-							? previewCart.receiveCart
-							: () => undefined,
-					receiveCartContents:
-						typeof previewCart?.receiveCartContents === 'function'
-							? previewCart.receiveCartContents
-							: () => undefined,
-				};
 			}
 
 			const store = select( cartStore );
@@ -265,7 +229,7 @@ export const useStoreCart = (
 				receiveCartContents,
 			};
 		},
-		[ shouldSelect, isEditor ]
+		[ shouldSelect ]
 	);
 
 	if (

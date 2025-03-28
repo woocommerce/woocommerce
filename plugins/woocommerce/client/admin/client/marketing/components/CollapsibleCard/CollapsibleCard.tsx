@@ -28,13 +28,13 @@ type CollapsibleCardProps = {
 	initialCollapsed?: boolean;
 };
 
-const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
+const CollapsibleCard = ( {
 	header,
 	children,
 	className,
 	footer,
 	initialCollapsed = false,
-} ) => {
+}: CollapsibleCardProps ) => {
 	const [ collapsed, setCollapsed ] = useState( initialCollapsed );
 
 	const handleClick = () => {

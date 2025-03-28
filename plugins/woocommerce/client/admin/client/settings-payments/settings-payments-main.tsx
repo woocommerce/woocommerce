@@ -32,6 +32,8 @@ import {
 	isSwitchIncentive,
 	isWooPayments,
 	getWooPaymentsTestDriveAccountLink,
+	isIncentiveDismissedEarlierThanTimestamp,
+	isActionIncentive,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -50,7 +52,8 @@ export const SettingsPaymentsMain = () => {
 		PaymentProvider[] | null
 	>( null );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
-	const { updateProviderOrdering } = useDispatch( paymentSettingsStore );
+	const { updateProviderOrdering, attachPaymentExtensionSuggestion } =
+		useDispatch( paymentSettingsStore );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const [
 		postSandboxAccountSetupModalVisible,
@@ -193,6 +196,7 @@ export const SettingsPaymentsMain = () => {
 	// Determine what type of incentive surface to display.
 	let showModalIncentive = false;
 	let showBannerIncentive = false;
+	let shouldHighlightIncentive = false;
 	if ( incentiveProvider && incentive ) {
 		if ( isSwitchIncentive( incentive ) ) {
 			if (
@@ -208,15 +212,35 @@ export const SettingsPaymentsMain = () => {
 					'wc_settings_payments__banner'
 				)
 			) {
-				showBannerIncentive = true;
+				const referenceTimestamp = new Date();
+				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
+				// If the merchant dismissed the switcher incentive modal more than 30 days ago,
+				// show the banner instead of just highlighting the incentive.
+				// @see its server brother in plugins/woocommerce/src/Internal/Admin/Settings/PaymentsController::store_has_providers_with_incentive()
+				// for the admin menu red dot notice logic.
+				if (
+					isIncentiveDismissedEarlierThanTimestamp(
+						incentive,
+						'wc_settings_payments__modal',
+						referenceTimestamp.getTime()
+					)
+				) {
+					showBannerIncentive = true;
+				} else {
+					shouldHighlightIncentive = true;
+				}
 			}
-		} else if (
-			! isIncentiveDismissedInContext(
-				incentive,
-				'wc_settings_payments__banner'
-			)
-		) {
-			showBannerIncentive = true;
+		} else if ( isActionIncentive( incentive ) ) {
+			if (
+				! isIncentiveDismissedInContext(
+					incentive,
+					'wc_settings_payments__banner'
+				)
+			) {
+				showBannerIncentive = true;
+			} else {
+				shouldHighlightIncentive = true;
+			}
 		}
 	}
 
@@ -267,7 +291,12 @@ export const SettingsPaymentsMain = () => {
 	}, [ suggestions, providers, isFetching ] );
 
 	const setupPlugin = useCallback(
-		( id: string, slug: string, onboardingUrl: string | null ) => {
+		(
+			id: string,
+			slug: string,
+			onboardingUrl: string | null,
+			attachUrl: string | null
+		) => {
 			if ( installingPlugin ) {
 				return;
 			}
@@ -284,6 +313,10 @@ export const SettingsPaymentsMain = () => {
 			} );
 			installAndActivatePlugins( [ slug ] )
 				.then( async ( response ) => {
+					if ( attachUrl ) {
+						attachPaymentExtensionSuggestion( attachUrl );
+					}
+
 					createNoticesFromResponse( response );
 					invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
@@ -440,6 +473,7 @@ export const SettingsPaymentsMain = () => {
 					installingPlugin={ installingPlugin }
 					setupPlugin={ setupPlugin }
 					acceptIncentive={ acceptIncentive }
+					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ handleOrderingUpdate }
 					isFetching={ isFetching }
 					businessRegistrationCountry={ storeCountry }

@@ -147,8 +147,12 @@ trait CheckoutTrait {
 	 */
 	private function update_order_from_request( \WP_REST_Request $request ) {
 		$this->order->set_customer_note( wc_sanitize_textarea( $request['customer_note'] ) ?? '' );
-		$this->order->set_payment_method( $this->get_request_payment_method_id( $request ) );
-		$this->order->set_payment_method_title( $this->get_request_payment_method_title( $request ) );
+		$payment_method = $this->get_request_payment_method( $request );
+		if ( null !== $payment_method ) {
+			WC()->session->set( 'chosen_payment_method', $payment_method->id );
+			$this->order->set_payment_method( $payment_method->id );
+			$this->order->set_payment_method_title( $payment_method->title );
+		}
 		$this->persist_additional_fields_for_order( $request );
 
 		wc_do_deprecated_action(
@@ -210,9 +214,13 @@ trait CheckoutTrait {
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( 'order' );
-			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
+			$additional_fields_order   = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
+			$additional_fields_contact = $this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object );
+			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
 		} else {
-			$additional_fields = $this->additional_fields_controller->get_fields_for_location( 'order' );
+			$additional_fields_order   = $this->additional_fields_controller->get_fields_for_location( 'order' );
+			$additional_fields_contact = $this->additional_fields_controller->get_fields_for_location( 'contact' );
+			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
 		}
 
 		$field_values = (array) $request['additional_fields'] ?? [];

@@ -35,10 +35,7 @@ class EmailColors {
 			$body_text_color_default   = '#1e1e1e';
 			$footer_text_color_default = '#787c82';
 
-			if ( function_exists( 'wc_current_theme_is_fse_theme' ) 
-				&& wc_current_theme_is_fse_theme() 
-				&& function_exists( 'wp_get_global_styles' ) 
-			) {
+			if ( wp_is_block_theme() && function_exists( 'wp_get_global_styles' ) ) {
 				$global_styles             = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
 				$base_color_global         = ! empty( $global_styles['elements']['button']['color']['background'] )
 					? sanitize_hex_color( $global_styles['elements']['button']['color']['background'] ) : '';

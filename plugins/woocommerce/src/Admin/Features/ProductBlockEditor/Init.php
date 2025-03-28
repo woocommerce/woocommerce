@@ -161,7 +161,7 @@ class Init {
 			return;
 		}
 		wp_enqueue_style( 'wc-product-editor' );
-		wp_enqueue_style( 'wp-edit-blocks' );
+		wp_enqueue_style( 'wp-editor' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_editor();
 		/**

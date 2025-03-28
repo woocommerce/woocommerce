@@ -501,35 +501,67 @@ window.wpNavMenuUrlUpdate = function ( query ) {
 	);
 };
 
+// Cache custom SVG menu items to prevent repeated DOM queries. This is necessary to remove event handlers when the route changes in window.wpNavMenuClassChange.
+const customSVGMenuItems = [];
+const getCustomSVGMenuItems = () => {
+	// Get all menu items with SVG backgrounds
+	// See: https://github.com/WordPress/wordpress-develop/blob/22bebd7de6681c673933953aab8c08802e7e3d4a/src/js/_enqueues/wp/svg-painter.js#L140-L148
+	const menuItems = window.jQuery(
+		'#adminmenu .wp-menu-image, #wpadminbar .ab-item'
+	);
+	menuItems.each( function () {
+		const $this = window.jQuery( this ),
+			bgImage = $this.css( 'background-image' );
+
+		if (
+			bgImage &&
+			bgImage.indexOf( 'data:image/svg+xml;base64' ) !== -1
+		) {
+			customSVGMenuItems.push( $this.parent().parent() );
+		}
+	} );
+};
+
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
 window.wpNavMenuClassChange = function ( page, url ) {
-	const wpNavMenu = document.querySelector( '#adminmenu' );
-	Array.from( wpNavMenu.getElementsByClassName( 'current' ) ).forEach(
-		function ( item ) {
-			item.classList.remove( 'current' );
-		}
-	);
+	if ( customSVGMenuItems.length === 0 ) {
+		getCustomSVGMenuItems();
+	}
 
-	const submenu = Array.from(
-		wpNavMenu.querySelectorAll( '.wp-has-current-submenu' )
+	const wpNavMenu = document.querySelector( '#adminmenu' );
+
+	// 1. Remove all current states
+	const currentItems = Array.from(
+		wpNavMenu.getElementsByClassName( 'current' )
 	);
-	submenu.forEach( function ( element ) {
-		element.classList.remove( 'wp-has-current-submenu' );
-		element.classList.remove( 'wp-menu-open' );
-		element.classList.remove( 'selected' );
-		element.classList.add( 'wp-not-current-submenu' );
-		element.classList.add( 'menu-top' );
+	currentItems.forEach( ( item ) => {
+		item.classList.remove( 'current' );
 	} );
 
+	const submenuItems = Array.from(
+		wpNavMenu.querySelectorAll( '.wp-has-current-submenu' )
+	);
+	submenuItems.forEach( function ( element ) {
+		element.classList.remove(
+			'wp-has-current-submenu',
+			'selected',
+			'wp-menu-open'
+		);
+		element.classList.add( 'wp-not-current-submenu' );
+	} );
+
+	// 2. Get current page URL and item selector
 	const pageUrl =
 		url === '/'
 			? 'admin.php?page=wc-admin'
 			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
+
 	let currentItemsSelector =
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
 
+	// 3. Handle parent paths with proper hierarchy
 	const parentPath = page.navArgs?.parentPath;
 	if ( parentPath ) {
 		const parentPageUrl =
@@ -540,22 +572,63 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		currentItemsSelector += `, li > a[href*="${ parentPageUrl }"]`;
 	}
 
-	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
-
-	Array.from( currentItems ).forEach( function ( item ) {
+	// 4. Set current menu item to active
+	const newCurrentItems = Array.from(
+		wpNavMenu.querySelectorAll( currentItemsSelector )
+	);
+	newCurrentItems.forEach( ( item ) => {
 		item.parentElement.classList.add( 'current' );
 	} );
 
+	// 5. Handle explicit menu opening
 	if ( page.wpOpenMenu ) {
-		const currentMenu = wpNavMenu.querySelector( '#' + page.wpOpenMenu );
+		const currentMenu = wpNavMenu.querySelector( `#${ page.wpOpenMenu }` );
 		if ( currentMenu ) {
+			// Reset the margin-top immediately so menu can open smoothly without jumping
+			const allSubmenus = wpNavMenu.querySelectorAll( '.wp-submenu' );
+			allSubmenus.forEach( ( submenu ) => {
+				submenu.style.marginTop = ''; // Reset margin-top
+			} );
+
 			currentMenu.classList.remove( 'wp-not-current-submenu' );
-			currentMenu.classList.add( 'wp-has-current-submenu' );
-			currentMenu.classList.add( 'wp-menu-open' );
-			currentMenu.classList.add( 'current' );
+			currentMenu.classList.add(
+				'wp-has-current-submenu',
+				'wp-menu-open',
+				'current'
+			);
 		}
 	}
 
+	// 6. Attempt to re-color SVG icons used in the admin menu or the toolbar
+	if ( window.wp && window.wp.svgPainter ) {
+		// Detach SVG painting event handlers from menu items to prevent the active state from being reset on hover. For more information, see: https://github.com/WordPress/wordpress-develop/blob/22bebd7de6681c673933953aab8c08802e7e3d4a/src/js/_enqueues/wp/svg-painter.js#L162C4-L170C10
+		customSVGMenuItems.forEach( ( $menuItem ) => {
+			const events =
+				window.jQuery._data( $menuItem[ 0 ], 'events' ) || {};
+
+			if ( events.mouseover ) {
+				events.mouseover.forEach( ( event ) => {
+					if ( event.handler.toString().includes( 'paintElement' ) ) {
+						$menuItem.off( 'mouseenter', event.handler );
+					}
+				} );
+			}
+
+			if ( events.mouseout ) {
+				events.mouseout.forEach( ( event ) => {
+					if ( event.handler.toString().includes( 'paintElement' ) ) {
+						$menuItem.off( 'mouseleave', event.handler );
+					}
+				} );
+			}
+		} );
+
+		window.wp.svgPainter.paint();
+	}
+
+	// 7. Close responsive menu if open
 	const wpWrap = document.querySelector( '#wpwrap' );
-	wpWrap.classList.remove( 'wp-responsive-open' );
+	if ( wpWrap && wpWrap.classList.contains( 'wp-responsive-open' ) ) {
+		wpWrap.classList.remove( 'wp-responsive-open' );
+	}
 };

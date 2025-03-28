@@ -14,11 +14,11 @@ import { experimentalProductTagsStore } from '@woocommerce/data';
 import { TRACKS_SOURCE } from '../../constants';
 import { CreateTagModalProps } from './types';
 
-export const CreateTagModal: React.FC< CreateTagModalProps > = ( {
+export const CreateTagModal = ( {
 	initialTagName,
 	onCancel,
 	onCreate,
-} ) => {
+}: CreateTagModalProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCreating, setIsCreating ] = useState( false );
 	const { createProductTag, invalidateResolutionForStoreSelector } =

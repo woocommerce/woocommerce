@@ -177,9 +177,12 @@ class EmailPreview {
 		$object           = null;
 
 		if ( in_array( $email_type, self::USER_OBJECT_EMAILS, true ) ) {
-			$object                  = new WP_User( 0 );
-			$this->email->user_email = 'user_preview@example.com';
-			$this->email->user_login = 'user_preview';
+			$object                        = new WP_User( 0 );
+			$this->email->user_email       = 'user_preview@example.com';
+			$this->email->user_login       = 'user_preview';
+			$this->email->reset_key        = 'reset_key';
+			$this->email->user_id          = 0;
+			$this->email->set_password_url = 'https://example.com/set-password';
 			$this->email->set_object( $object );
 		} else {
 			$object = $this->get_dummy_order();
@@ -204,6 +207,15 @@ class EmailPreview {
 		 * @since 9.6.0
 		 */
 		$this->email = apply_filters( 'woocommerce_prepare_email_for_preview', $this->email );
+	}
+
+	/**
+	 * Get the email object.
+	 *
+	 * @return WC_Email
+	 */
+	public function get_email() {
+		return $this->email;
 	}
 
 	/**
@@ -438,7 +450,7 @@ class EmailPreview {
 	/**
 	 * Set up filters for email preview.
 	 */
-	private function set_up_filters() {
+	public function set_up_filters() {
 		// Always show shipping address in the preview email.
 		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		// Email templates fetch product from the database to show additional information, which are not
@@ -455,7 +467,7 @@ class EmailPreview {
 	/**
 	 * Clean up filters after email preview.
 	 */
-	private function clean_up_filters() {
+	public function clean_up_filters() {
 		remove_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		remove_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10 );
 		remove_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );

@@ -32,6 +32,7 @@ export default function HeaderAccountModal(
 			focusOnMount={ true }
 			className="woocommerce-marketplace__header-account-modal"
 			style={ { borderRadius: 4 } }
+			size="medium"
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>
 			<p className="woocommerce-marketplace__header-account-modal-text">

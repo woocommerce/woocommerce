@@ -210,9 +210,11 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 	);
 };
 
-export const ShippingTour: React.FC< {
+export const ShippingTour = ( {
+	showShippingRecommendationsStep,
+}: {
 	showShippingRecommendationsStep: boolean;
-} > = ( { showShippingRecommendationsStep } ) => {
+} ) => {
 	const { updateOptions } = useDispatch( optionsStore );
 	const { show: showTour, isUspsDhlEligible } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );

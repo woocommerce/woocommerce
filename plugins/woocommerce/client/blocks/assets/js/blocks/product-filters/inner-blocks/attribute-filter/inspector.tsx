@@ -105,7 +105,7 @@ export const Inspector = ( {
 						) }
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody title={ __( 'Display', 'woocommerce' ) }>
 					<SelectControl
 						label={ __( 'Sort order', 'woocommerce' ) }
 						value={ sortOrder }
@@ -162,10 +162,6 @@ export const Inspector = ( {
 							value="and"
 						/>
 					</ToggleGroupControl>
-				</PanelBody>
-			</InspectorControls>
-			<InspectorControls group="styles">
-				<PanelBody title={ __( 'Display', 'woocommerce' ) }>
 					<ToggleGroupControl
 						value={ displayStyle }
 						isBlock
