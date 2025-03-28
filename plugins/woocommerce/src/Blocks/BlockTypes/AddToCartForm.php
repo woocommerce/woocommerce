@@ -51,7 +51,7 @@ class AddToCartForm extends AbstractBlock {
 		$product = wc_get_product( $post_id );
 
 		if ( $product instanceof \WC_Product && $product->is_purchasable() && $product->is_in_stock() && ! in_array( $product->get_type(), array( 'external', 'grouped' ), true ) ) {
-			wp_enqueue_script( 'wc-ajax-add-to-cart' );
+			wp_enqueue_script( 'wc-single-add-to-cart' );
 		}
 	}
 

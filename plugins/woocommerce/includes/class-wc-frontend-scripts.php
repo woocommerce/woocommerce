@@ -254,8 +254,8 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
-			'wc-ajax-add-to-cart'        => array(
-				'src'     => self::get_asset_url( 'assets/js/frontend/ajax-add-to-cart' . $suffix . '.js' ),
+			'wc-single-add-to-cart'      => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/single-add-to-cart' . $suffix . '.js' ),
 				'deps'    => array(),
 				'version' => $version,
 			),
@@ -402,7 +402,7 @@ class WC_Frontend_Scripts {
 				$product->is_in_stock() &&
 				! in_array( $product->get_type(), array( 'external', 'grouped' ), true )
 			) {
-				self::enqueue_script( 'wc-ajax-add-to-cart' );
+				self::enqueue_script( 'wc-single-add-to-cart' );
 			}
 		}
 		if ( is_cart() ) {
