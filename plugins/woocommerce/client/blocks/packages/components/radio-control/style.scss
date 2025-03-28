@@ -203,7 +203,7 @@
 .wc-block-components-radio-control {
 	.wc-block-components-radio-control__input {
 		appearance: none;
-		background: #fff;
+		background: $input-background-light;
 		border: 1px solid $universal-border-medium;
 		border-radius: 50%;
 		display: inline-block;
@@ -244,7 +244,7 @@
 		}
 
 		.has-dark-controls & {
-			border-color: $controls-border-dark;
+			border-color: $input-border-dark;
 			background-color: $input-background-dark;
 
 			&:checked {
