@@ -49,7 +49,7 @@ class AddToCartForm extends AbstractBlock {
 		$post_id = $block->context['postId'];
 		$product = wc_get_product( $post_id );
 
-		if ( is_product() ) {
+		if ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) {
 			$product = wc_get_product( get_the_ID() );
 
 			if ( $product instanceof \WC_Product ) {
