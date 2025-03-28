@@ -3369,7 +3369,8 @@ CREATE TABLE $meta_table (
 		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
 
 		$should_save =
-			$order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
+			$order->get_id() > 0
+			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 
 		/**

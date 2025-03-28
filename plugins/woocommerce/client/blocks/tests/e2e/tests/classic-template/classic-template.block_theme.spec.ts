@@ -230,6 +230,7 @@ test.describe( `${ blockData.name } Block `, () => {
 	test( `is still available after resetting a modified WC template`, async ( {
 		admin,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
@@ -271,9 +272,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		const editButton = editor.page.getByRole( 'menuitem', {
 			name: 'Edit',
 		} );
-
-		// Keep WP v6.7 compatibility.
-		if ( await editButton.isHidden() ) {
+		if ( wpCoreVersion >= 6.8 ) {
 			await actionsButton.click();
 		}
 

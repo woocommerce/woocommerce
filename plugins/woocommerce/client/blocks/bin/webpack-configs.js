@@ -9,7 +9,6 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
-const CreateFileWebpack = require( 'create-file-webpack' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
@@ -126,15 +125,6 @@ const getCoreConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Core',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
-			new CreateFileWebpack( {
-				path: './',
-				// file name
-				fileName: 'blocks.ini',
-				// content of the file
-				content: `
-woocommerce_blocks_env = ${ NODE_ENV }
-`.trim(),
-			} ),
 		],
 		optimization: {
 			...sharedOptimizationConfig,

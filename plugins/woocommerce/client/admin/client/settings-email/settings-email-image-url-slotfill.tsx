@@ -20,10 +20,10 @@ type EmailImageUrlFillProps = {
 	initImageUrl: string;
 };
 
-const EmailImageUrlFill: React.FC< EmailImageUrlFillProps > = ( {
+const EmailImageUrlFill = ( {
 	inputId,
 	initImageUrl,
-} ) => {
+}: EmailImageUrlFillProps ) => {
 	const [ imageUrl, setImageUrl ] = useState< string >( initImageUrl );
 	const hasImage = imageUrl !== '';
 	return (

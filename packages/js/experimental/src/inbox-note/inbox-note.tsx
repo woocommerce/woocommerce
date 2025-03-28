@@ -58,14 +58,14 @@ type InboxNoteProps = {
 	className?: string;
 };
 
-const InboxNoteCard: React.FC< InboxNoteProps > = ( {
+const InboxNoteCard = ( {
 	note,
 	onDismiss,
 	onNoteActionClick,
 	onBodyLinkClick,
 	onNoteVisible,
 	className,
-} ) => {
+}: InboxNoteProps ) => {
 	const [ clickedActionText, setClickedActionText ] = useState( false );
 	const { ref } = useInView( {
 		triggerOnce: true,

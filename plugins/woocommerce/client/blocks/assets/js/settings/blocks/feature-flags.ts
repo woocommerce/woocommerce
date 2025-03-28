@@ -9,7 +9,8 @@ import { getSetting } from '@woocommerce/settings';
 import { WcBlocksConfig } from './constants';
 
 /**
- * Checks if experimental blocks are enabled.
+ * Checks if experimental blocks are enabled. Do not use to conditionally register blocks,
+ * use BlockTypesController to conditionally register blocks.
  *
  * @return {boolean} True if this experimental blocks are enabled.
  */

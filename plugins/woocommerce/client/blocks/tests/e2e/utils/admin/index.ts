@@ -1,9 +1,33 @@
 /**
  * External dependencies
  */
-import { Admin as CoreAdmin } from '@wordpress/e2e-test-utils-playwright';
+import { Page } from '@playwright/test';
+import {
+	Admin as CoreAdmin,
+	PageUtils,
+	Editor,
+} from '@wordpress/e2e-test-utils-playwright';
+
+type AdminConstructorProps = {
+	page: Page;
+	pageUtils: PageUtils;
+	editor: Editor;
+	wpCoreVersion: number;
+};
 
 export class Admin extends CoreAdmin {
+	wpCoreVersion: number;
+
+	constructor( {
+		page,
+		pageUtils,
+		editor,
+		wpCoreVersion,
+	}: AdminConstructorProps ) {
+		super( { page, pageUtils, editor } );
+		this.wpCoreVersion = wpCoreVersion;
+	}
+
 	async visitWidgetEditor() {
 		await this.page.goto( '/wp-admin/widgets.php' );
 		await this.page
@@ -15,18 +39,22 @@ export class Admin extends CoreAdmin {
 	async createNewPattern( name: string, synced = true ) {
 		await this.page.goto( '/wp-admin/site-editor.php?postType=wp_block' );
 		await this.page.getByRole( 'button', { name: 'Patterns' } ).click();
+
 		await this.page
-			.getByLabel( 'Add Pattern' )
-			// Keep WP v6.7 compatibility.
-			.or( this.page.getByLabel( 'Add New Pattern' ) )
-			.click();
-		await this.page
-			.getByRole( 'menuitem', { name: 'Add Pattern' } )
-			// Keep WP v6.7 compatibility.
-			.or(
-				this.page.getByRole( 'menuitem', { name: 'Add New Pattern' } )
+			.getByLabel(
+				this.wpCoreVersion >= 6.8 ? 'Add Pattern' : 'Add New Pattern'
 			)
 			.click();
+
+		await this.page
+			.getByRole( 'menuitem', {
+				name:
+					this.wpCoreVersion >= 6.8
+						? 'Add Pattern'
+						: 'Add New Pattern',
+			} )
+			.click();
+
 		await this.page.getByLabel( 'Name' ).fill( name );
 
 		if ( ! synced ) {

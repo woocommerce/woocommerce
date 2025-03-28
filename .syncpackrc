@@ -27,7 +27,6 @@
 				"@bartekbp/*",
 				"@storybook/*",
 				"@testing-library/*",
-				"@types/*",
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
@@ -63,7 +62,6 @@
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
 				"@wordpress/wordcount",
-				"babel*",
 				"eslint*",
 				"postcss*",
 				"webpack*"
@@ -83,37 +81,29 @@
 			]
 		},
 		{
+			"label": "Babel dependencies, must be aligned with versions in @wordpress/babel-preset-default package",
 			"dependencies": [
-				"@babel/preset-env"
-			],
-			"pinVersion": "^7.23.5",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@babel/preset-react"
-			],
-			"pinVersion": "7.23.3",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
-				"@babel/preset-typescript"
-			],
-			"pinVersion": "7.23.3",
-			"packages": [
-				"**"
-			]
-		},
-		{
-			"dependencies": [
+				"@babel/core",
+				"@babel/cli",
+				"@babel/plugin-syntax-jsx",
+				"@babel/plugin-transform-react-jsx",
+				"@babel/plugin-transform-runtime",
+				"@babel/preset-env",
+				"@babel/preset-react",
+				"@babel/preset-typescript",
 				"@babel/runtime"
 			],
-			"pinVersion": "^7.23.5",
+			"pinVersion": "7.25.7",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
+			"dependencies": [
+				"babel-plugin-transform-react-remove-prop-types"
+			],
+			"pinVersion": "0.4.24",
 			"packages": [
 				"**"
 			]
@@ -232,7 +222,7 @@
 			"packages": [
 				"@woocommerce/product-editor",
 				"@woocommerce/settings-editor",
-				"@woocommerce/admin-library",
+				"@woocommerce/admin-library"
 			],
 			"isIgnored": true
 		},
@@ -327,15 +317,6 @@
 				"**"
 			],
 			"pinVersion": "wp-6.6"
-		},
-		{
-			"dependencies": [
-				"@types/wordpress__components"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^19.10.5"
 		},
 		{
 			"dependencies": [
@@ -444,7 +425,7 @@
 				"@woocommerce/block-library",
 				"@woocommerce/storybook"
 			],
-			"pinVersion": "29.7.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"label": "Testing related dependencies: React 17",
@@ -501,10 +482,18 @@
 			"pinVersion": "^2.5.7"
 		},
 		{
+			"dependencies": [
+				"@automattic/site-admin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.1"
+		},
+		{
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@automattic/color-studio",
-				"@types/wordpress__components",
 				"@typescript-eslint/**",
 				"config",
 				"eslint",

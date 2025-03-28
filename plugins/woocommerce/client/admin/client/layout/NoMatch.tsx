@@ -12,7 +12,7 @@ import { Spinner } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import { WooHeaderPageTitle } from '@woocommerce/admin-layout';
 
-const NoMatch: React.FC = () => {
+const NoMatch = () => {
 	const [ isDelaying, setIsDelaying ] = useState( true );
 
 	/*

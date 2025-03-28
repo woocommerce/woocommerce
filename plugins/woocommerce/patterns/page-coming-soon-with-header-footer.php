@@ -20,7 +20,7 @@ $body_font_family    = $fonts['body'];
 <div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-store-only">
 
 <?php
-if ( wc_current_theme_is_fse_theme() ) {
+if ( wp_is_block_theme() ) {
 	echo '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->';
 }
 ?>
@@ -48,7 +48,7 @@ if ( wc_current_theme_is_fse_theme() ) {
 <!-- /wp:group -->
 
 <?php
-if ( wc_current_theme_is_fse_theme() ) {
+if ( wp_is_block_theme() ) {
 	echo '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
 }
 ?>

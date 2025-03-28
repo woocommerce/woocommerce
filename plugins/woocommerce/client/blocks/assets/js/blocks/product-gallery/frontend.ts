@@ -6,13 +6,13 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
-	getConfig,
 } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
  */
 import type { ProductGalleryContext } from './types';
+import { checkOverflow } from './utils';
 
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
@@ -24,7 +24,12 @@ const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
 } );
 
 /**
- * Scrolls an image into view.
+ * Scrolls the image into view for the main image.
+ *
+ * We use getElement to get the current element that triggered the action
+ * to find the closest gallery container and scroll the image into view.
+ * This is necessary because if you have two galleries on the same page with the same image IDs,
+ * then we need to query the image in the correct gallery to avoid scrolling the wrong image into view.
  *
  * @param {string} imageId - The ID of the image to scroll into view.
  */
@@ -32,9 +37,27 @@ const scrollImageIntoView = ( imageId: number ) => {
 	if ( ! imageId ) {
 		return;
 	}
-	const imageElement = document.querySelector(
+
+	// Get the current element that triggered the action
+	const element = getElement()?.ref as HTMLElement;
+
+	if ( ! element ) {
+		return;
+	}
+
+	// Find the closest gallery container
+	const galleryContainer = element.closest(
+		'.wp-block-woocommerce-product-gallery'
+	);
+
+	if ( ! galleryContainer ) {
+		return;
+	}
+
+	const imageElement = galleryContainer.querySelector(
 		`.wp-block-woocommerce-product-gallery-large-image img[data-image-id="${ imageId }"]`
 	);
+
 	if ( imageElement ) {
 		imageElement.scrollIntoView( {
 			behavior: 'smooth',
@@ -120,8 +143,6 @@ const productGallery = {
 
 			return processedImageData;
 		},
-		// TODO: This is a temporary solution to display the view all thumbnail.
-		// Will eventually be replaced by a slider where processedImageData can be used directly.
 		/**
 		 * The subset of processedImageData that is displayed in the thumbnails block.
 		 *
@@ -129,11 +150,11 @@ const productGallery = {
 		 */
 		get thumbnails() {
 			const { imageData } = getContext();
-			const { numberOfThumbnails } = getConfig();
 			const allImageIds = imageData?.image_ids || [];
-			return allImageIds
-				.slice( 0, numberOfThumbnails ) // Get only the visible thumbnails
-				.map( ( imageId ) => imageData?.images[ imageId ] ); // Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
+			// Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
+			return allImageIds.map(
+				( imageId ) => imageData?.images[ imageId ]
+			);
 		},
 	},
 	actions: {
@@ -186,7 +207,6 @@ const productGallery = {
 			if ( event ) {
 				event.stopPropagation();
 			}
-
 			const { imageData, selectedImageId } = getContext();
 			const allImageIds = imageData?.image_ids || [];
 			const selectedImageNumber = getSelectedImageNumber(
@@ -233,18 +253,6 @@ const productGallery = {
 
 			if ( event.code === 'ArrowLeft' ) {
 				actions.selectPreviousImage();
-			}
-		},
-		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
-			) {
-				if ( event.code === 'Space' ) {
-					event.preventDefault();
-				}
-				actions.openDialog();
 			}
 		},
 		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
@@ -319,18 +327,15 @@ const productGallery = {
 			context.touchStartX = 0;
 			context.touchCurrentX = 0;
 		},
-		// TODO: This is a temporary solution to display the view all thumbnail.
-		// Will eventually be replaced by a slider.
-		displayViewAll: () => {
-			const { numberOfThumbnails } = getConfig();
-			const allImages = state.processedImageData;
-			if ( allImages.length <= numberOfThumbnails ) {
-				return false;
+		onScroll: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
 			}
 			const context = getContext();
-			const thumbnails = state.thumbnails;
-			const lastThumbnail = thumbnails[ thumbnails.length - 1 ];
-			return context.image.id === lastThumbnail.id;
+			const overflowState = checkOverflow( scrollableElement );
+
+			context.thumbnailsOverflow = overflowState;
 		},
 	},
 	callbacks: {
@@ -429,10 +434,8 @@ const productGallery = {
 	},
 };
 
-const { state, actions } = store(
-	'woocommerce/product-gallery',
-	productGallery,
-	{ lock: true }
-);
+const { actions } = store( 'woocommerce/product-gallery', productGallery, {
+	lock: true,
+} );
 
 export type Store = typeof productGallery;

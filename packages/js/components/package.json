@@ -67,7 +67,6 @@
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__block-library": "2.6.1",
 		"@types/wordpress__blocks": "11.0.7",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__rich-text": "3.4.6",
 		"@woocommerce/csv-export": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
@@ -131,8 +130,8 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
+		"@babel/core": "7.25.7",
+		"@babel/runtime": "7.25.7",
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/addon-docs": "7.6.19",
 		"@storybook/addon-links": "7.6.19",
@@ -147,7 +146,6 @@
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/uuid": "^8.3.4",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__data": "6.0.0",
 		"@types/wordpress__media-utils": "3.0.0",
 		"@types/wordpress__viewport": "2.5.4",

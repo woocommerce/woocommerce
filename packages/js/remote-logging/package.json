@@ -58,7 +58,7 @@
 		"tracekit": "^0.4.6"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@types/debug": "^4.1.12",
 		"@types/jest": "27.5.x",
 		"@types/node": "20.x.x",

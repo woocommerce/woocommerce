@@ -4,7 +4,7 @@
 import { InnerBlockTemplate } from '@wordpress/blocks';
 
 const TEMPLATE: InnerBlockTemplate[] = [
-	[ 'core/comments-title' ],
+	[ 'woocommerce/product-reviews-title' ],
 	[
 		'core/comment-template',
 		{},
@@ -33,10 +33,24 @@ const TEMPLATE: InnerBlockTemplate[] = [
 						{},
 						[
 							[
-								'core/comment-author-name',
+								'core/group',
 								{
-									fontSize: 'small',
+									tagName: 'div',
+									layout: {
+										type: 'flex',
+										flexWrap: 'nowrap',
+										justifyContent: 'space-between',
+									},
 								},
+								[
+									[
+										'core/comment-author-name',
+										{
+											fontSize: 'small',
+										},
+									],
+									[ 'woocommerce/product-review-rating' ],
+								],
 							],
 							[
 								'core/group',

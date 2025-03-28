@@ -44,6 +44,10 @@ class CartCheckoutUtils {
 		// If the is_page check returned false, check the page contents for a cart block or shortcode.
 		global $post;
 
+		if ( null === $post ) {
+			return null;
+		}
+
 		if ( $post instanceof \WP_Post ) {
 			return wc_post_content_has_shortcode( 'cart' === $page_type ? 'woocommerce_cart' : 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', $page_type, $post->post_content );
 		}
@@ -139,7 +143,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC cart page is using the Cart block.
 	 */
 	public static function is_cart_block_default() {
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
@@ -158,7 +162,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC checkout page is using the Checkout block.
 	 */
 	public static function is_checkout_block_default() {
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
@@ -303,7 +307,7 @@ class CartCheckoutUtils {
 
 		$block = str_replace( 'woocommerce/', '', $block );
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'page-' . $block ) );
 			foreach ( $templates_from_db as $template ) {
 				if ( ! has_block( 'woocommerce/page-content-wrapper', $template->content ) ) {
