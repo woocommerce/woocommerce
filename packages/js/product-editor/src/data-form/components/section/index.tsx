@@ -13,26 +13,13 @@ import { DataForm } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import { SectionHeader } from '../../../components/section-header';
+import { useDataFormProductFields } from '../use-data-form-product-fields';
 
 type ProductSectionProps = {
 	sectionTemplate: Template;
 	postType: string;
 	productId: number;
 };
-
-/**
- * @todo: This is a temporary solution to get the fields for the DataForm.
- * We need to move this into a hook with a useMemo or something as we did have to generate some of this on the fly.
- * For example, label comes from the sectionTemplate. Also things like the id which matches the product key comes from the config as well.
- * You can see an example here: https://github.com/woocommerce/woocommerce/blob/89068601d334953e2904ecf56f528fc271c7b9ec/plugins/woocommerce/src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php#L192
- */
-const fields = [
-	{
-		id: 'name',
-		type: 'text',
-		label: 'Title',
-	},
-];
 
 export function ProductSection( {
 	sectionTemplate,
@@ -45,6 +32,7 @@ export function ProductSection( {
 		blockGap: string;
 	};
 
+	const fields = useDataFormProductFields( sectionTemplate[ 2 ] );
 	const { editEntityRecord } = useDispatch( coreDataStore );
 	const { record, hasFinishedResolution } = useSelect(
 		( select ) => {
