@@ -215,7 +215,7 @@
 		"github-label-sync": "^2.3.1",
 		"glob": "^10.3.10",
 		"handlebars": "^4.7.8",
-		"ignore-loader": "0.1.2",
+		"ignore-loader": "0.1.x",
 		"jest": "29.5.x",
 		"jest-circus": "29.5.x",
 		"jest-environment-puppeteer": "6.1.1",

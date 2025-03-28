@@ -203,6 +203,15 @@
 		},
 		{
 			"dependencies": [
+				"ignore-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.1.x"
+		},
+		{
+			"dependencies": [
 				"fork-ts-checker-webpack-plugin"
 			],
 			"packages": [
