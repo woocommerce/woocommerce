@@ -18,6 +18,7 @@ import { Textarea } from '../../form-controls/textarea';
 import { Color } from '../../form-controls/color';
 import { Select } from '../../form-controls/select';
 import { Radio } from '../../form-controls/radio';
+import { SingleSelectPage } from '../../form-controls/single-select-page';
 
 export type DataItem = Record< string, BaseSettingsField[ 'value' ] >;
 
@@ -156,6 +157,18 @@ export const transformToField = (
 					} )
 				),
 				Edit: ( props ) => <Select { ...props } help={ help } />,
+			};
+		}
+		case 'single_select_page': {
+			const { label, help } = getLabelAndHelp( setting );
+
+			return {
+				id: setting.id,
+				type: 'text',
+				label,
+				Edit: ( props ) => (
+					<SingleSelectPage { ...props } help={ help } />
+				),
 			};
 		}
 		case 'textarea': {
