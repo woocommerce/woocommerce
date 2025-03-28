@@ -78,11 +78,23 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$product_type = $product->get_type();
 
-		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+		$slug = $product_type . '-product-add-to-cart-with-options';
+
+		/**
+		 * Filter to declare product type's cart block template is supported.
+		 * 
+		 * @since x.x.x
+		 * @param boolean $supports Is the type supported
+		 * @param string $product_type The product type 
+		 */
+		$template_path = apply_filters( 'woocommerce_' . $product_type . '_add_to_cart_block_template_part', Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html', $product_type );
+
+		if ( file_exists( $template_path ) ) {
+
 			$template_part_contents = '';
-			$slug                   = $product_type . '-product-add-to-cart-with-options';
 			// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $slug ), 'wp_template_part' );
+
 			if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
 				$template_slug_to_load = $templates_from_db[0]->theme;
 			} else {
@@ -96,7 +108,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			if ( '' === $template_part_contents ) {
-				$template_part_contents = file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				$template_part_contents = file_get_contents( $template_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
 			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
