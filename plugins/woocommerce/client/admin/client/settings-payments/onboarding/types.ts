@@ -59,7 +59,8 @@ export interface WooPaymentsProviderOnboardingStep {
 	};
 	content?: ReactNode;
 	context?: {
-		payment_methods: RecommendedPaymentMethod[];
+		recommended_pms: RecommendedPaymentMethod[];
+		pms_state: Record< string, boolean >;
 	};
 }
 
