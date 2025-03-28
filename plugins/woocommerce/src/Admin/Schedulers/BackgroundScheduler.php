@@ -17,8 +17,10 @@ class BackgroundScheduler {
 
 	/**
 	 * Initialize the background scheduler.
+	 *
+	 * @internal
 	 */
-	public function init() {
+	final public function init() {
 		add_action( 'admin_init', array( $this, 'schedule_background_actions' ) );
 	}
 
