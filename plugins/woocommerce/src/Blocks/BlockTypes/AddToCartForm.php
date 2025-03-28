@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
- * CatalogSorting class.
+ * AddToCartForm class.
  */
 class AddToCartForm extends AbstractBlock {
 
