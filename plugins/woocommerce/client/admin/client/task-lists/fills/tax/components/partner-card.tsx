@@ -9,17 +9,7 @@ import { Button } from '@wordpress/components';
 import { Bullet } from './bullet';
 import './partner-card.scss';
 
-export const PartnerCard: React.FC< {
-	name: string;
-	logo: string;
-	description: string;
-	benefits: ( string | JSX.Element )[];
-	terms: string | JSX.Element;
-	children?: React.ReactNode;
-	actionText?: string;
-	onClick: () => void;
-	isBusy?: boolean;
-} > = ( {
+export const PartnerCard = ( {
 	name,
 	logo,
 	description,
@@ -29,6 +19,16 @@ export const PartnerCard: React.FC< {
 	onClick,
 	isBusy,
 	children,
+}: {
+	name: string;
+	logo: string;
+	description: string;
+	benefits: ( string | JSX.Element )[];
+	terms: string | JSX.Element;
+	children?: React.ReactNode;
+	actionText?: string;
+	onClick: () => void;
+	isBusy?: boolean;
 } ) => {
 	return (
 		<div className="woocommerce-tax-partner-card">

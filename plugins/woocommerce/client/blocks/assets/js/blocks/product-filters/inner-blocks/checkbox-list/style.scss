@@ -72,8 +72,11 @@
 	color: var(--wc-product-filter-checkbox-list-option-element-selected, currentColor);
 }
 
-:where(.wc-block-product-filter-checkbox-list__text) {
+:where(.wc-block-product-filter-checkbox-list__text-wrapper) {
 	font-size: 0.875em;
+	display: inline-flex;
+	align-items: center;
+	gap: $gap-smallest;
 }
 
 :where(.wc-block-product-filter-checkbox-list__show-more) {

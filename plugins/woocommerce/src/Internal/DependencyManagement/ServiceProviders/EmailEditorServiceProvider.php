@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
+
 /**
  * Service provider for the EmailEditor namespace.
  */
@@ -29,6 +31,7 @@ class EmailEditorServiceProvider extends AbstractInterfaceServiceProvider {
 		TemplatesController::class,
 		WooContentProcessor::class,
 		BlockEmailRenderer::class,
+		WCTransactionalEmails::class,
 	);
 
 	/**
@@ -42,5 +45,6 @@ class EmailEditorServiceProvider extends AbstractInterfaceServiceProvider {
 		$this->share( TemplatesController::class );
 		$this->share( WooContentProcessor::class );
 		$this->share( BlockEmailRenderer::class )->addArgument( WooContentProcessor::class );
+		$this->share( WCTransactionalEmails::class );
 	}
 }

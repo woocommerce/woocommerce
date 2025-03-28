@@ -142,6 +142,10 @@ const webpackConfig = {
 							! isProduction &&
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
+							isProduction &&
+								require.resolve(
+									'babel-plugin-transform-react-remove-prop-types'
+								),
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,

@@ -143,10 +143,19 @@ class WC_Helper_Subscriptions_API {
 	 * as JSON.
 	 */
 	public static function refresh() {
-		WC_Helper::refresh_helper_subscriptions();
-		WC_Helper::get_subscriptions();
-		WC_Helper::get_product_usage_notice_rules();
-		self::get_subscriptions();
+		try {
+			WC_Helper::refresh_helper_subscriptions();
+			WC_Helper::get_subscriptions();
+			WC_Helper::get_product_usage_notice_rules();
+			self::get_subscriptions();
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage(),
+				),
+				400
+			);
+		}
 	}
 
 	/**

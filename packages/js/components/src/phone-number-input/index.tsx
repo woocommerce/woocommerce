@@ -80,7 +80,7 @@ const { countries, countryCodes } = parseData( data );
 /**
  * An international phone number input with a country code select and a phone textfield which supports numbers, spaces and hyphens. And returns the full number as it is, in E.164 format, and the selected country alpha2.
  */
-const PhoneNumberInput: React.FC< Props > = ( {
+const PhoneNumberInput = ( {
 	value,
 	onChange,
 	id,
@@ -88,7 +88,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 	selectedRender = defaultSelectedRender,
 	itemRender = defaultItemRender,
 	arrowRender = defaultArrowRender,
-} ) => {
+}: Props ) => {
 	const menuRef = useRef< HTMLButtonElement >( null );
 	const inputRef = useRef< HTMLInputElement >( null );
 

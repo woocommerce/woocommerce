@@ -13,13 +13,13 @@ import { Tooltip } from '../../../tooltip';
 type ToggleFieldProps = BaseProductFieldProps< boolean > & {
 	tooltip?: string;
 };
-const ToggleField: React.FC< ToggleFieldProps > = ( {
+const ToggleField = ( {
 	label,
 	value,
 	onChange,
 	tooltip,
 	disabled = false,
-} ) => {
+}: ToggleFieldProps ) => {
 	return (
 		<ToggleControl
 			label={

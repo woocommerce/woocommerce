@@ -67,6 +67,6 @@ class ExportWCTaskOptions implements StepExporter, HasAlias {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'It includes the task configurations for WooCommerce.', 'woocommerce' );
+		return __( 'Includes the task configurations for WooCommerce.', 'woocommerce' );
 	}
 }
