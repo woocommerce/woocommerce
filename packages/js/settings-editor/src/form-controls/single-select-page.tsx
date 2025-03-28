@@ -57,7 +57,6 @@ export const SingleSelectPage = ( {
 	className,
 }: SingleSelectPageEditProps ) => {
 	const { pages, isLoading } = usePages();
-
 	const { id } = field;
 
 	// DataForm will automatically use the id as the label if no label is provided so we conditionally set the label to undefined if it matches the id to avoid displaying it.
@@ -72,6 +71,7 @@ export const SingleSelectPage = ( {
 		);
 
 	const value = field.getValue( { item: data } ) ?? '';
+
 	const onChangeControl = useCallback(
 		( newValue: string ) =>
 			onChange( {
@@ -80,13 +80,14 @@ export const SingleSelectPage = ( {
 		[ id, onChange ]
 	);
 
-	const elements = useMemo(
+	const options = useMemo(
 		() => [
 			{
 				label: isLoading
 					? __( 'Loading…', 'woocommerce' )
 					: __( 'Select a page…', 'woocommerce' ),
 				value: '',
+				disabled: true,
 			},
 			...( pages ?? [] ).map( ( page ) => ( {
 				value: page.id.toString(),
@@ -104,7 +105,7 @@ export const SingleSelectPage = ( {
 			label={ label }
 			value={ value }
 			help={ help }
-			options={ elements }
+			options={ options }
 			onChange={ onChangeControl }
 			__next40pxDefaultSize
 			__nextHasNoMarginBottom
