@@ -254,6 +254,19 @@ class PageController {
 	 * @return string Current screen ID.
 	 */
 	public function get_current_screen_id() {
+		// Return early if this is a REST API request.
+		if ( wp_is_serving_rest_request() ) {
+			/**
+			 * Filter the current screen ID for REST API requests.
+			 *
+			 * @since 3.9.0
+			 *
+			 * @param string|boolean $screen_id The screen id or false if not identified.
+			 * @param WP_Screen      $current_screen The current WP_Screen.
+			 */
+			return apply_filters( 'woocommerce_navigation_current_screen_id', false, null );
+		}
+
 		$current_screen = get_current_screen();
 		if ( ! $current_screen ) {
 			// Filter documentation below.

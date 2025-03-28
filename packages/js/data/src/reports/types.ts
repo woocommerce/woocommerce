@@ -6,7 +6,7 @@ import { getReportTableQuery, getRequestQuery } from './utils';
 export type ReportItemsEndpoint =
 	| 'customers'
 	| 'products'
-	| 'varitations'
+	| 'variations'
 	| 'orders'
 	| 'categories'
 	| 'taxes'
