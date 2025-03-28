@@ -36,7 +36,6 @@ export const JetpackStep: React.FC = () => {
 						variant="primary"
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
 						onClick={ () => {
-							// TODO: Implement Jetpack connection logic
 							window.location.href = currentStep?.actions?.auth?.href ?? '';
 						} }
 					>
