@@ -673,7 +673,7 @@ class WC_Admin_Notices {
 			 */
 			$notice_dismissed = apply_filters(
 				'woocommerce_hide_email_sender_options_notice',
-				get_user_meta( get_current_user_id(), 'dismissed_email_sender_options_notice', true )
+				get_user_meta( get_current_user_id(), 'dismissed_woocommerce_email_sender_options_notice', true )
 			);
 
 			if ( ! $notice_dismissed ) {

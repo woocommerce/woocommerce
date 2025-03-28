@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Email sender options.
+ * Admin View: Notice - WooCommerce Email sender options.
  *
  * @package WooCommerce\Admin\Notices
  */
@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 ?>
 <div id="message" class="updated woocommerce-message">
-	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'email_sender_options' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
+	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'woocommerce_email_sender_options' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
 
 	<p>
 	<?php
