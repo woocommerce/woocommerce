@@ -51,7 +51,11 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
 
-		if ( is_product() && 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) ) {
+		if (
+			is_product() &&
+			'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) &&
+			'yes' !== get_option( 'woocommerce_cart_redirect_after_add' )
+		) {
 			$product = wc_get_product( get_the_ID() );
 
 			if ( $product instanceof \WC_Product ) {

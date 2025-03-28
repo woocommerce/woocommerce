@@ -393,7 +393,8 @@ class WC_Frontend_Scripts {
 		if (
 			! wp_is_block_theme() &&
 			is_product() &&
-			'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' )
+			'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) &&
+			'yes' !== get_option( 'woocommerce_cart_redirect_after_add' )
 		) {
 			$product = wc_get_product( get_the_ID() );
 
