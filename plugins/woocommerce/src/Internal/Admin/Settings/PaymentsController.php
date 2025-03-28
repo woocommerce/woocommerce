@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
@@ -42,6 +43,9 @@ class PaymentsController {
 	 * @return void
 	 */
 	public function adjust_feature_default_enablement_by_experiment( FeaturesController $features_controller ) {
+		// Needed for CLI and unit tests.
+		FeaturePlugin::instance()->init();
+
 		// If the feature is disabled (or doesn't exist), don't do anything.
 		if ( ! $features_controller->feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
 			return;
