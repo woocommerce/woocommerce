@@ -6,7 +6,7 @@ import { screen, render, renderHook } from '@testing-library/react';
 import { addAction, applyFilters, didFilter } from '@wordpress/hooks';
 /* eslint-disable @woocommerce/dependency-group */
 // @ts-ignore No types for this exist yet.
-import { privateApis } from '@wordpress/router';
+import { useLocation } from '@automattic/site-admin';
 /* eslint-enable @woocommerce/dependency-group */
 
 /**
@@ -22,14 +22,8 @@ jest.mock( '@wordpress/hooks', () => ( {
 	didFilter: jest.fn(),
 } ) );
 
-jest.mock( '@wordpress/router', () => ( {
-	privateApis: {
-		useLocation: jest.fn(),
-	},
-} ) );
-
-jest.mock( '@wordpress/edit-site/build-module/lock-unlock', () => ( {
-	unlock: jest.fn( ( apis ) => apis ),
+jest.mock( '@automattic/site-admin', () => ( {
+	useLocation: jest.fn(),
 } ) );
 
 jest.mock( '../components/sidebar', () => ( {
@@ -82,6 +76,7 @@ describe( 'route.tsx', () => {
 		window.wcSettings = {
 			admin: {
 				settingsData: mockSettingsPages,
+				settingsScripts: {},
 			},
 		};
 
@@ -90,12 +85,8 @@ describe( 'route.tsx', () => {
 		} );
 
 		// Mock default location
-		(
-			privateApis as {
-				useLocation: jest.Mock;
-			}
-		 ).useLocation.mockReturnValue( {
-			params: { tab: 'general' },
+		( useLocation as jest.Mock ).mockReturnValue( {
+			query: { tab: 'general' },
 		} );
 	} );
 
@@ -117,12 +108,8 @@ describe( 'route.tsx', () => {
 
 		it( 'should return not found route for non-existent pages', () => {
 			// Mock location for non-existent page
-			(
-				privateApis as {
-					useLocation: jest.Mock;
-				}
-			 ).useLocation.mockReturnValue( {
-				params: { tab: 'non-existent' },
+			( useLocation as jest.Mock ).mockReturnValue( {
+				query: { tab: 'non-existent' },
 			} );
 
 			const { result } = renderHook( () => useActiveRoute() );
@@ -134,12 +121,8 @@ describe( 'route.tsx', () => {
 		} );
 
 		it( 'should return modern route for modern pages', () => {
-			(
-				privateApis as {
-					useLocation: jest.Mock;
-				}
-			 ).useLocation.mockReturnValue( {
-				params: { tab: 'modern' },
+			( useLocation as jest.Mock ).mockReturnValue( {
+				query: { tab: 'modern' },
 			} );
 
 			// Mock a modern page

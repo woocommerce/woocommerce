@@ -41,7 +41,8 @@ interface PaymentGatewayListProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	/**
 	 * Callback to handle accepting an incentive. Receives the incentive ID as a parameter.

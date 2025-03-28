@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add support for the Cost of Goods Sold value in product CSV import/export

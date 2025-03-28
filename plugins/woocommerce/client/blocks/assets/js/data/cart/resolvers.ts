@@ -3,6 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { CartResponse } from '@woocommerce/types';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -10,6 +11,7 @@ import { CartResponse } from '@woocommerce/types';
 import { CART_API_ERROR } from './constants';
 import type { CartDispatchFromMap, CartResolveSelectFromMap } from './index';
 import { setTriggerStoreSyncEvent } from './utils';
+import { isEditor } from '../utils';
 
 /**
  * Resolver for retrieving all cart data.
@@ -17,6 +19,11 @@ import { setTriggerStoreSyncEvent } from './utils';
 export const getCartData =
 	() =>
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		if ( isEditor() ) {
+			dispatch.receiveCart( previewCart );
+			return;
+		}
+
 		const response = await apiFetch< Response >( {
 			path: '/wc/store/v1/cart',
 			method: 'GET',
