@@ -138,15 +138,16 @@ test.describe( 'registerProductBlockType registers', () => {
 			'woocommerce/product-rating',
 		];
 
-		await admin.visitSiteEditor( {
-			postType: 'wp_template',
-		} );
+		await admin.visitAdminPage(
+			'site-editor.php?postType=wp_template&activeView=WooCommerce'
+		);
 
 		const singleProductTemplate = page.getByRole( 'button', {
 			name: 'Single Product',
 		} );
 
 		await expect( singleProductTemplate ).toBeVisible();
+
 		const iframe = page.frameLocator(
 			'button[aria-label="Single Product"] iframe[title="Editor canvas"]'
 		);
