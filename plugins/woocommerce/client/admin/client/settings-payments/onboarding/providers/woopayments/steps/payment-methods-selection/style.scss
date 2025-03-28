@@ -132,9 +132,7 @@
 	border-bottom: none !important;
 
 	@media screen and (max-width: $break-medium) {
-		height: calc(
-			100% - 100px
-		); // Account for small screen content being longer on the page.
+		height: calc(100% - 100px); // Account for small screen content being longer on the page.
 		margin-top: $gap-larger;
 	}
 
