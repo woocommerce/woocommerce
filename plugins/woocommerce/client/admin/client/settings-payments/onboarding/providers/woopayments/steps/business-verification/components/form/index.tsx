@@ -22,7 +22,7 @@ import {
 } from './fields';
 import { useBusinessVerificationContext } from '../../data/business-verification-context';
 import { OnboardingFields } from '../../types';
-import { completeSubStep, isPreKYCComplete } from '../../utils';
+import { completeSubStep, isPreKycComplete } from '../../utils';
 import { useValidation } from '../../utils/validation';
 import strings from '../../strings';
 import './style.scss';
@@ -40,7 +40,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 	const { nextStep } = useStepperContext();
 
 	const handleContinue = () => {
-		if ( isEmpty( errors ) && isPreKYCComplete( data ) ) {
+		if ( isEmpty( errors ) && isPreKycComplete( data ) ) {
 			// To-Do: Add tracking for the KYC step completion.
 
 			// Complete business sub step.
