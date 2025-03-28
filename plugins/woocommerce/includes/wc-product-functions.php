@@ -8,8 +8,6 @@
  * @version 3.0.0
  */
 
-declare(strict_types=1);
-
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
