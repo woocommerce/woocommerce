@@ -187,7 +187,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 
 		echo '<div class="wp-block-group">';
 
-		echo sprintf(
+		printf(
 			'<%1$s %2$s>%3$s</%1$s>',
 			'h1',
 			get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
