@@ -7,23 +7,23 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { OnboardingStepsResponse } from './types';
+import { OnboardingDataResponse } from './types';
 import {
-	getOnboardingStepsRequest,
-	getOnboardingStepsSuccess,
-	getOnboardingStepsError,
+	getOnboardingDataRequest,
+	getOnboardingDataSuccess,
+	getOnboardingDataError,
 } from './actions';
 
-export function* getOnboardingSteps() {
-	yield getOnboardingStepsRequest();
+export function* getOnboardingData() {
+	yield getOnboardingDataRequest();
 
 	try {
-		const response: OnboardingStepsResponse = yield apiFetch( {
+		const response: OnboardingDataResponse = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`,
 		} );
 
-		yield getOnboardingStepsSuccess( response.steps );
+		yield getOnboardingDataSuccess( response );
 	} catch ( e ) {
-		yield getOnboardingStepsError( e );
+		yield getOnboardingDataError( e );
 	}
 }

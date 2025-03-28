@@ -11,10 +11,12 @@ export interface StepContent {
 
 export interface OnboardingState {
 	steps: StepContent[];
+	context: object;
 	isFetching: boolean;
 	errors: Record< string, unknown >;
 }
 
-export type OnboardingStepsResponse = {
+export type OnboardingDataResponse = {
 	steps: StepContent[];
+	context: object;
 };
