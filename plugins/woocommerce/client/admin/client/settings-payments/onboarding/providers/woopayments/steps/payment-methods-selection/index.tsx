@@ -17,6 +17,7 @@ import {
 	combineRequestMethods,
 	combinePaymentMethodsState,
 	decouplePaymentMethodsState,
+	shouldRenderPaymentMethod,
 } from '~/settings-payments/utils';
 import './style.scss';
 
@@ -117,8 +118,11 @@ export default function PaymentMethodsSelection() {
 									/* translators: %s: number of disabled payment methods */
 									__( 'Show more (%s)', 'woocommerce' ),
 									recommendedPaymentMethods?.filter(
-										( pm: RecommendedPaymentMethod ) =>
-											pm.enabled === false
+										( method ) =>
+											! shouldRenderPaymentMethod(
+												method,
+												paymentMethodsState[ method.id ]
+											)
 									).length ?? 0
 								) }
 							</Button>

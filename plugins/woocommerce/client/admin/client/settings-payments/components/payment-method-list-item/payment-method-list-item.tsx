@@ -9,6 +9,7 @@ import { ToggleControl } from '@wordpress/components';
  * Internal dependencies
  */
 import sanitizeHTML from '~/lib/sanitize-html';
+import { shouldRenderPaymentMethod } from '~/settings-payments/utils';
 
 type PaymentMethodListItemProps = {
 	/**
@@ -44,9 +45,8 @@ export const PaymentMethodListItem = ( {
 	// If the category is primary, render the method regardless of the state.
 	// If the category is secondary, render the method if the list is expanded or the method is enabled.
 	const shouldRender =
-		method.category === 'primary'
-			? true
-			: ( isExpanded || paymentMethodsState[ method.id ] ) ?? false;
+		shouldRenderPaymentMethod( method, paymentMethodsState[ method.id ] ) ||
+		isExpanded;
 
 	if ( ! shouldRender ) {
 		return null;

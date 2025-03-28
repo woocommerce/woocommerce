@@ -272,3 +272,17 @@ export const decouplePaymentMethodsState = (
 		return acc;
 	}, {} as Record< string, boolean > );
 };
+
+/**
+ * Checks whether a payment method should be rendered.
+ */
+export const shouldRenderPaymentMethod = (
+	method: RecommendedPaymentMethod,
+	method_enabled: boolean
+) => {
+	if ( method.category === 'primary' ) {
+		return true;
+	}
+
+	return method_enabled ?? false;
+};
