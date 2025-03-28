@@ -33,8 +33,8 @@ class WooPaymentsService {
 
 	const NOX_PROFILE_OPTION_KEY = 'woocommerce_woopayments_nox_profile';
 
-	const FROM_PAYMENT_SETTINGS          = 'WCADMIN_PAYMENT_SETTINGS';
-	const FROM_NOX_IN_CONTEXT_ONBOARDING = 'WCADMIN_NOX_IN_CONTEXT_ONBOARDING';
+	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
+	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
 
 	/**
 	 * The WooPayments provider instance.
@@ -69,13 +69,18 @@ class WooPaymentsService {
 		}
 
 		return array(
-			'state' => array(
+			'state'   => array(
 				'started'   => $this->provider->is_onboarding_started( $this->get_payment_gateway() ),
 				'completed' => $this->provider->is_onboarding_completed( $this->get_payment_gateway() ),
 				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
 				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
 			),
-			'steps' => $this->get_onboarding_steps_details( $location, trailingslashit( $rest_path ) . 'step' ),
+			'steps'   => $this->get_onboarding_steps_details( $location, trailingslashit( $rest_path ) . 'step' ),
+			'context' => array(
+				'urls' => array(
+					'overview_page' => $this->get_overview_page_url(),
+				),
+			),
 		);
 	}
 
@@ -120,11 +125,11 @@ class WooPaymentsService {
 			'status'         => $this->get_onboarding_step_status( self::ONBOARDING_STEP_PAYMENT_METHODS, $location ),
 			'errors'         => array(),
 			'actions'        => array(
-				'start'    => array(
+				'start'  => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
 				),
-				'save'     => array(
+				'save'   => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
 				),
@@ -134,7 +139,8 @@ class WooPaymentsService {
 				),
 			),
 			'context'        => array(
-				'payment_methods' => $this->get_onboarding_payment_methods( $location ),
+				'recommended_pms' => $this->get_onboarding_recommended_payment_methods( $location ),
+				'pms_state'       => $this->get_onboarding_payment_methods_state( $location ),
 			),
 		);
 
@@ -212,7 +218,6 @@ class WooPaymentsService {
 				'fields'            => $this->get_onboarding_kyc_fields(),
 				'sub_steps'         => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps' ),
 				'self_assessment'   => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' ),
-				'overview_page_url' => $this->get_overview_page_url(),
 			),
 		);
 
@@ -501,35 +506,56 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the payment methods details for onboarding.
+	 * Get the recommended payment methods details for onboarding.
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
 	 *
-	 * @return array The onboarding payment methods details.
+	 * @return array The recommended payment methods details.
 	 */
-	public function get_onboarding_payment_methods( string $location ): array {
+	public function get_onboarding_recommended_payment_methods( string $location ): array {
+		return $this->provider->get_recommended_payment_methods( $this->get_payment_gateway(), $location );
+	}
+	/**
+	 * Get the payment methods state for onboarding.
+	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The onboarding payment methods state.
+	 */
+	public function get_onboarding_payment_methods_state( string $location ): array {
 		// First, get the recommended payment methods details from the provider.
-		$payment_methods = $this->provider->get_recommended_payment_methods( $this->get_payment_gateway(), $location );
+		// We will use their enablement state as the default.
+		// Note: The list is validated and standardized by the provider, so we don't need to do it here.
+		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
 
 		// Grab the stored payment methods state
 		// (a key-value array of payment method IDs and if they should be automatically enabled or not).
 		$step_pms_data = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' );
-		foreach ( $payment_methods as $key => $payment_method ) {
-			// Force enable and skip required payment methods since these should always be enabled.
-			if ( ! empty( $payment_method['required'] ) ) {
-				$payment_methods[ $key ]['enabled'] = true;
+
+		$payment_methods_state = array();
+		foreach ( $recommended_pms as $recommended_pm ) {
+			$pm_id = $recommended_pm['id'];
+
+			// Start with the recommended enabled state.
+			$payment_methods_state[ $pm_id ] = $recommended_pm['enabled'];
+
+			// Force enable if required.
+			if ( $recommended_pm['required'] ) {
+				$payment_methods_state[ $pm_id ] = true;
 				continue;
 			}
 
-			// Go through the recommended payment methods and overwrite their enabled status with the stored one.
-			if ( isset( $step_pms_data[ $payment_method['id'] ] ) ) {
-				$payment_methods[ $key ]['enabled'] = wc_string_to_bool( $step_pms_data[ $payment_method['id'] ] );
+			// Check the stored state, if any.
+			if ( isset( $step_pms_data[ $pm_id ] ) ) {
+				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
 			}
 		}
 
-		return $payment_methods;
+		return $payment_methods_state;
 	}
+
 
 	/**
 	 * Initialize the test account for onboarding.
@@ -577,8 +603,8 @@ class WooPaymentsService {
 			'/wc/v3/payments/onboarding/test_account/init',
 			array(
 				'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
-				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT_ONBOARDING,
-				'from'         => self::FROM_NOX_IN_CONTEXT_ONBOARDING,
+				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
+				'from'         => self::FROM_NOX_IN_CONTEXT,
 			)
 		);
 
@@ -705,7 +731,7 @@ class WooPaymentsService {
 			'/wc/v3/payments/onboarding/kyc/finalize',
 			array(
 				'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
-				'from'   => self::FROM_NOX_IN_CONTEXT_ONBOARDING,
+				'from'   => self::FROM_NOX_IN_CONTEXT,
 			)
 		);
 
@@ -1030,7 +1056,7 @@ class WooPaymentsService {
 	 */
 	private function get_onboarding_kyc_fallback_url(): string {
 		if ( class_exists( '\WC_Payments_Account' ) && is_callable( '\WC_Payments_Account::get_connect_url' ) ) {
-			return \WC_Payments_Account::get_connect_url( self::FROM_NOX_IN_CONTEXT_ONBOARDING );
+			return \WC_Payments_Account::get_connect_url( self::FROM_NOX_IN_CONTEXT );
 		}
 
 		// Fall back to the provider onboarding URL.
@@ -1046,7 +1072,7 @@ class WooPaymentsService {
 		if ( class_exists( '\WC_Payments_Account' ) && is_callable( '\WC_Payments_Account::get_overview_page_url' ) ) {
 			return add_query_arg(
 				array(
-					'from' => self::FROM_NOX_IN_CONTEXT_ONBOARDING,
+					'from' => self::FROM_NOX_IN_CONTEXT,
 				),
 				\WC_Payments_Account::get_overview_page_url()
 			);
@@ -1057,7 +1083,7 @@ class WooPaymentsService {
 			array(
 				'page' => 'wc-admin',
 				'path' => '/payments/overview',
-				'from' => self::FROM_NOX_IN_CONTEXT_ONBOARDING,
+				'from' => self::FROM_NOX_IN_CONTEXT,
 			),
 			admin_url( 'admin.php' )
 		);
