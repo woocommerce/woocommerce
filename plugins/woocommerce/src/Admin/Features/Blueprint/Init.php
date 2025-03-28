@@ -55,18 +55,6 @@ class Init {
 		);
 
 		add_filter( 'wooblueprint_exporters', array( $this, 'add_woo_exporters' ) );
-
-		// Add a filter to hide the save button on the blueprint settings page.
-		add_action(
-			'woocommerce_settings_advanced',
-			function () {
-				global $hide_save_button;
-				$page_id = PageController::get_instance()->get_current_screen_id();
-				if ( 'woocommerce_page_wc-settings-advanced-blueprint' === $page_id ) {
-					$hide_save_button = true;
-				}
-			}
-		);
 	}
 
 	/**
@@ -191,7 +179,7 @@ class Init {
 		return array(
 			array(
 				'id'          => 'settings',
-				'description' => __( 'It includes all the items featured in WooCommerce | Settings.', 'woocommerce' ),
+				'description' => __( 'Includes all the items featured in WooCommerce | Settings.', 'woocommerce' ),
 				'label'       => __( 'WooCommerce Settings', 'woocommerce' ),
 				'icon'        => 'settings',
 				'items'       => array_map(
@@ -208,14 +196,14 @@ class Init {
 			),
 			array(
 				'id'          => 'plugins',
-				'description' => __( 'It includes all the installed plugins and extensions.', 'woocommerce' ),
+				'description' => __( 'Includes all the installed plugins and extensions.', 'woocommerce' ),
 				'label'       => __( 'Plugins and extensions', 'woocommerce' ),
 				'icon'        => 'plugins',
 				'items'       => $this->get_plugins_for_export_group(),
 			),
 			array(
 				'id'          => 'themes',
-				'description' => __( 'It includes all the installed themes.', 'woocommerce' ),
+				'description' => __( 'Includes all the installed themes.', 'woocommerce' ),
 				'label'       => __( 'Themes', 'woocommerce' ),
 				'icon'        => 'layout',
 				'items'       => $this->get_themes_for_export_group(),
