@@ -30,6 +30,11 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	border-radius: $universal-border-radius;
 	border: 2px solid transparent;
 	background-color: transparent;
+	color: $input-text-light;
+
+	.has-dark-controls & {
+		color: $input-text-dark;
+	}
 
 	&:hover,
 	&:focus-within {

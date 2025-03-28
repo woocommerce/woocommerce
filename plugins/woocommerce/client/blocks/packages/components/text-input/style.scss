@@ -58,11 +58,11 @@
 		min-height: 0;
 		height: 3.125em;
 		background-color: $input-background-light;
-		color: $input-text-active;
+		color: $input-text-light;
 
 		&:focus {
 			background-color: $input-background-light;
-			color: $input-text-active;
+			color: $input-text-light;
 			border: 1.5px solid currentColor;
 		}
 

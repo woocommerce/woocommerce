@@ -15,9 +15,9 @@
 
 	&:focus {
 		background-color: $input-background-light;
-		color: $input-text-active;
+		color: $input-text-light;
 		outline: 0;
-		box-shadow: 0 0 0 1px $input-text-active;
+		box-shadow: 0 0 0 1px $input-text-light;
 	}
 
 	.has-dark-controls & {
