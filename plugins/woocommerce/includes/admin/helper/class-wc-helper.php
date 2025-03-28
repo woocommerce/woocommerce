@@ -2710,6 +2710,12 @@ class WC_Helper {
 		return $subscription;
 	}
 
+	/**
+	 * Gets a user-friendly error message based on the HTTP response code.
+	 *
+	 * @param int $code The HTTP response code.
+	 * @return string The user-friendly error message.
+	 */
 	protected static function get_message_for_response_code( int $code ): string {
 		if ( 429 === $code ) {
 			return __( 'You have exceeded the request limit. Please try again after a few minutes.', 'woocommerce' );
