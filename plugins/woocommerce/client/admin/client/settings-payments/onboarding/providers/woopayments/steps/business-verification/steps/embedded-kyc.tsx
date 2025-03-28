@@ -56,7 +56,6 @@ const EmbeddedKyc: React.FC< Props > = ( {
 		try {
 			const response = await finalizeOnboarding(
 				currentStep?.actions?.kyc_session_finish?.href ?? '',
-				'NOX' // To-Do: Replace with the correct source.
 			);
 
 			if ( response.success ) {

@@ -62,14 +62,11 @@ export const getBusinessTypes = ( data: Country[] ): Country[] => {
  */
 export const finalizeOnboarding = async (
 	apiUrl: string,
-	urlSource: string
 ) => {
 	return await apiFetch< FinalizeOnboardingResponse >( {
 		path: apiUrl,
 		method: 'POST',
-		data: {
-			source: urlSource,
-		},
+		data: {},
 	} );
 };
 
