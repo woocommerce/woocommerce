@@ -158,20 +158,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					 * @since 1.5.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
-				} elseif ( ProductType::EXTERNAL === $product_type ) {
-					/**
-					 * Hook: woocommerce_before_add_to_cart_button.
-					 *
-					 * @since 1.5.0
-					 */
-					do_action( 'woocommerce_before_add_to_cart_button' );
-				} elseif ( ProductType::GROUPED === $product_type ) {
-					/**
-					 * Hook: woocommerce_before_add_to_cart_button.
-					 *
-					 * @since 1.5.0
-					 */
-					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_variations_form.
@@ -179,6 +165,13 @@ class AddToCartWithOptions extends AbstractBlock {
 					 * @since 2.4.0
 					 */
 					do_action( 'woocommerce_before_variations_form' );
+				} else {
+					/**
+					 * Hook: woocommerce_before_add_to_cart_button.
+					 *
+					 * @since 1.5.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_button' );
 				}
 				$hooks_before = ob_get_clean();
 
@@ -196,20 +189,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					 * @since 1.5.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
-				} elseif ( ProductType::EXTERNAL === $product_type ) {
-					/**
-					 * Hook: woocommerce_after_add_to_cart_button.
-					 *
-					 * @since 1.5.0
-					 */
-					do_action( 'woocommerce_after_add_to_cart_button' );
-				} elseif ( ProductType::GROUPED === $product_type ) {
-					/**
-					 * Hook: woocommerce_after_add_to_cart_button.
-					 *
-					 * @since 1.5.0
-					 */
-					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_variations_form.
@@ -217,7 +196,15 @@ class AddToCartWithOptions extends AbstractBlock {
 					 * @since 2.4.0
 					 */
 					do_action( 'woocommerce_after_variations_form' );
+				} else {
+					/**
+					 * Hook: woocommerce_after_add_to_cart_button.
+					 *
+					 * @since 1.5.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_button' );
 				}
+				
 				$hooks_after = ob_get_clean();
 			}
 
