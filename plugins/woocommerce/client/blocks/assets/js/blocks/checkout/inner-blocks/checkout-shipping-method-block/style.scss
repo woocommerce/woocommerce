@@ -40,18 +40,32 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	&.wc-block-checkout__shipping-method-option--selected {
 		border: 2px solid currentColor;
 		background: $input-background-light;
+
+		.has-dark-controls & {
+			background: $input-background-dark;
+		}
 	}
+}
+
+.wc-block-checkout__shipping-method-option-title-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	flex-wrap: nowrap;
+	gap: $gap-smallest;
 }
 
 .wc-block-checkout__shipping-method-option-icon {
 	fill: currentColor;
-	margin: 0 $gap-smallest;
+	flex-shrink: 0;
+	vertical-align: middle;
 }
 
 .wc-block-checkout__shipping-method-option-title {
 	@include reset-typography();
 	@include font-size(regular, 1rem);
 	font-weight: bold;
+	line-height: 28px; // Match the icon size
 }
 
 .wc-block-checkout__shipping-method-option-price {
