@@ -32,6 +32,6 @@ class BackgroundSchedulerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_background_scheduler_initializes_hooks() {
 		$this->background_scheduler->init();
-		$this->assertTrue( as_has_scheduled_action( BackgroundScheduler::BACKGROUND_HOOK_NAME ) );
+		$this->assertTrue( as_has_scheduled_action( BackgroundScheduler::HOOK_NAME ) );
 	}
-} 
+}
