@@ -168,8 +168,7 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ comingSoonTemplateId &&
-					getSetting( 'currentThemeIsFSETheme' )
+					{ getSetting( 'currentThemeIsFSETheme' )
 						? createInterpolateElement(
 								__(
 									'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
@@ -178,9 +177,11 @@ const SiteVisibility = () => {
 								{
 									a: createElement( 'a', {
 										target: '_blank',
-										href: getAdminLink(
-											`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
-										),
+										href: comingSoonTemplateId
+											? getAdminLink(
+													`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
+											  )
+											: getAdminLink( 'site-editor.php' ),
 									} ),
 								}
 						  )
