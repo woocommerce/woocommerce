@@ -52,8 +52,7 @@
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
-				"eslint*",
-				"postcss*"
+				"eslint*"
 			],
 			"packages": [
 				"@woocommerce/block-library"
@@ -467,7 +466,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^4.3.0"
+			"pinVersion": "4.3.x"
 		},
 		{
 			"dependencies": [
@@ -476,7 +475,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.4.32"
+			"pinVersion": "8.4.x"
 		},
 		{
 			"dependencies": [
@@ -494,7 +493,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^10.5.0"
+			"pinVersion": "10.5.x"
 		},
 		{
 			"dependencies": [
@@ -620,10 +619,7 @@
 				"@automattic/color-studio",
 				"@typescript-eslint/**",
 				"config",
-				"eslint",
-				"node",
-				"postcss",
-				"postcss-loader"
+				"eslint"
 			],
 			"packages": [
 				"**"

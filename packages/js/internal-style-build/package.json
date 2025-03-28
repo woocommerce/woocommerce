@@ -43,8 +43,8 @@
 		"fork-ts-checker-webpack-plugin": "9.0.x",
 		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "2.9.x",
-		"postcss-loader": "^4.3.0",
-		"sass-loader": "^10.5.0",
+		"postcss-loader": "4.3.x",
+		"sass-loader": "10.5.x",
 		"webpack-remove-empty-scripts": "1.0.x",
 		"webpack-rtl-plugin": "2.0.x"
 	},
