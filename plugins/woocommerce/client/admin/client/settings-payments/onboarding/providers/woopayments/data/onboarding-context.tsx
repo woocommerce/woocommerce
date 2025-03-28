@@ -31,6 +31,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	steps: [],
 	isLoading: true,
 	currentStep: undefined,
+	context: {},
 	navigateToStep: () => undefined,
 	navigateToNextStep: () => undefined,
 	getStepByKey: () => undefined,
@@ -60,9 +61,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 	// Initial data fetch from store
 	const { storeData, isStoreLoading } = useSelect(
 		( select ) => ( {
-			storeData: select(
-				woopaymentsOnboardingStore
-			).getOnboardingData(),
+			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(),
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),

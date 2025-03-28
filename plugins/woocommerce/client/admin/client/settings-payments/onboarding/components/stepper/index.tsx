@@ -40,6 +40,9 @@ export default function Stepper( {
 
 	if ( ! activeStep ) return null;
 
+	const activeStepIndex =
+		steps.findIndex( ( step ) => step.id === active ) + 1;
+
 	// Renders only the active step based on the current step ID.
 	return (
 		<>
@@ -54,9 +57,7 @@ export default function Stepper( {
 							{ sprintf(
 								/* translators: %1$s: current step number, %2$s: total number of steps */
 								__( 'Step %1$s of %2$s', 'woocommerce' ),
-								steps.findIndex(
-									( step ) => step.id === active
-								) + 1,
+								activeStepIndex,
 								steps.length
 							) }
 						</div>
@@ -66,7 +67,10 @@ export default function Stepper( {
 							<SidebarItem
 								key={ step.id }
 								label={ step.label }
-								isCompleted={ step.status === 'completed' }
+								isCompleted={
+									step.status === 'completed' ||
+									activeStepIndex === steps.length
+								}
 								isActive={ step.id === active }
 							/>
 						) ) }

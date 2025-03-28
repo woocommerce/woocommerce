@@ -61,6 +61,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	context?: {
 		recommended_pms: RecommendedPaymentMethod[];
 		pms_state: Record< string, boolean >;
+		overview_page_url?: string;
 	};
 }
 
@@ -69,7 +70,11 @@ export interface WooPaymentsProviderOnboardingStep {
  */
 export interface OnboardingContextType {
 	steps: WooPaymentsProviderOnboardingStep[];
-	context: object;
+	context: {
+		urls?: {
+			overview_page?: string;
+		};
+	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
