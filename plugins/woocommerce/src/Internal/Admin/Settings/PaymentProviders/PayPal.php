@@ -117,22 +117,25 @@ class PayPal extends PaymentGateway {
 	private function is_paypal_in_sandbox_mode(): ?bool {
 		if ( class_exists( '\WooCommerce\PayPalCommerce\PPCP' ) &&
 			is_callable( '\WooCommerce\PayPalCommerce\PPCP::container' ) ) {
+			try {
+				$container = \WooCommerce\PayPalCommerce\PPCP::container();
 
-			$container = \WooCommerce\PayPalCommerce\PPCP::container();
+				if ( $container->has( 'settings.connection-state' ) ) {
+					$state = $container->get( 'settings.connection-state' );
 
-			if ( $container->has( 'settings.connection-state' ) ) {
-				$state = $container->get( 'settings.connection-state' );
+					return $state->is_sandbox();
+				}
 
-				return $state->is_sandbox();
-			}
+				// Backwards compatibility with pre 3.0.0 (deprecated).
+				if ( $container->has( 'onboarding.environment' ) &&
+					defined( '\WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX' ) ) {
+					$environment         = $container->get( 'onboarding.environment' );
+					$current_environment = $environment->current_environment();
 
-			// Backwards compatibility with pre 3.0.0 (deprecated).
-			if ( $container->has( 'onboarding.environment' ) &&
-				defined( '\WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX' ) ) {
-				$environment         = $container->get( 'onboarding.environment' );
-				$current_environment = $environment->current_environment();
-
-				return \WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX === $current_environment;
+					return \WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX === $current_environment;
+				}
+			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Ignore any exceptions.
 			}
 		}
 
@@ -149,21 +152,24 @@ class PayPal extends PaymentGateway {
 	private function is_paypal_onboarded(): ?bool {
 		if ( class_exists( '\WooCommerce\PayPalCommerce\PPCP' ) &&
 			is_callable( '\WooCommerce\PayPalCommerce\PPCP::container' ) ) {
+			try {
+				$container = \WooCommerce\PayPalCommerce\PPCP::container();
 
-			$container = \WooCommerce\PayPalCommerce\PPCP::container();
+				if ( $container->has( 'settings.connection-state' ) ) {
+					$state = $container->get( 'settings.connection-state' );
 
-			if ( $container->has( 'settings.connection-state' ) ) {
-				$state = $container->get( 'settings.connection-state' );
+					return $state->is_connected();
+				}
 
-				return $state->is_connected();
-			}
+				// Backwards compatibility with pre 3.0.0 (deprecated).
+				if ( $container->has( 'onboarding.state' ) &&
+					defined( '\WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED' ) ) {
+					$state = $container->get( 'onboarding.state' );
 
-			// Backwards compatibility with pre 3.0.0 (deprecated).
-			if ( $container->has( 'onboarding.state' ) &&
-				defined( '\WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED' ) ) {
-				$state = $container->get( 'onboarding.state' );
-
-				return $state->current_state() >= \WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED;
+					return $state->current_state() >= \WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED;
+				}
+			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Ignore any exceptions.
 			}
 		}
 
