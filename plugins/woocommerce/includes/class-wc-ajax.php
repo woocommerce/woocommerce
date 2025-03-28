@@ -480,40 +480,59 @@ class WC_AJAX {
 			return;
 		}
 
-		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
-		$product           = wc_get_product( $product_id );
-		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'] ) );
-		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
-		$product_status    = get_post_status( $product_id );
-		$variation_id      = 0;
-		$variation         = array();
-
-		if ( $product && ProductType::VARIATION === $product->get_type() ) {
-			$variation_id = $product_id;
-			$product_id   = $product->get_parent_id();
-			$variation    = $product->get_variation_attributes();
+		$products_to_add = array();
+		// Check if product_id and quantity are arrays.
+		if ( is_array( $_POST['product_id'] ) ) {
+			// For each product_id, add the quantity to the products_to_add array.
+			foreach ( $_POST['product_id'] as $index => $product_id ) {
+				$products_to_add[] = array(
+					'product_id' => apply_filters( 'woocommerce_add_to_cart_product_id', absint( $product_id ) ),
+					'quantity'   => empty( $_POST['quantity'][ $index ] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'][ $index ] ) ),
+				);
+			}
+		} else {
+			$products_to_add[] = array(
+				'product_id' => apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) ),
+				'quantity'   => empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'] ) ),
+			);
 		}
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && ProductStatus::PUBLISH === $product_status ) {
+		foreach ( $products_to_add as $product_to_add ) {
+			$product_id = $product_to_add['product_id'];
+			$quantity   = $product_to_add['quantity'];
 
-			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+			$product           = wc_get_product( $product_id );
+			$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+			$product_status    = get_post_status( $product_id );
+			$variation_id      = 0;
+			$variation         = array();
 
-			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
-				wc_add_to_cart_message( array( $product_id => $quantity ), true );
+			if ( $product && ProductType::VARIATION === $product->get_type() ) {
+				$variation_id = $product_id;
+				$product_id   = $product->get_parent_id();
+				$variation    = $product->get_variation_attributes();
 			}
 
-			self::get_refreshed_fragments();
+			if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && ProductStatus::PUBLISH === $product_status ) {
+				do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
-		} else {
+				if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+					wc_add_to_cart_message( array( $product_id => $quantity ), true );
+				}
+			} else {
+				// If there was an error adding to the cart, redirect to the product page to show any errors.
+				$data = array(
+					'error'       => true,
+					'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
+				);
 
-			// If there was an error adding to the cart, redirect to the product page to show any errors.
-			$data = array(
-				'error'       => true,
-				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
-			);
+				wp_send_json( $data );
 
-			wp_send_json( $data );
+				return;
+			}
 		}
+
+		self::get_refreshed_fragments();
 		// phpcs:enable
 	}
 

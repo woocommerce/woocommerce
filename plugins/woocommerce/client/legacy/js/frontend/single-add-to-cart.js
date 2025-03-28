@@ -60,6 +60,43 @@
 		triggerEvent( document.body, 'wc_fragments_loaded' );
 	}
 
+	function updateGroupedProductButtonState( form ) {
+		const button = form.querySelector( '.single_add_to_cart_button' );
+		if ( ! button ) return;
+
+		let hasQuantity = false;
+		form.querySelectorAll( 'input[name^="quantity"]' ).forEach(
+			( input ) => {
+				if ( input.type === 'checkbox' && ! input.checked ) {
+					return;
+				}
+
+				if ( input.value > 0 ) {
+					hasQuantity = true;
+				}
+			}
+		);
+
+		if ( ! hasQuantity ) {
+			button.classList.add( 'disabled' );
+		} else {
+			button.classList.remove( 'disabled' );
+		}
+	}
+
+	function handleButtonState( button, state ) {
+		if ( state === 'loading' ) {
+			button.classList.add( 'loading' );
+			button.classList.remove( 'added' );
+		} else if ( state === 'added' ) {
+			button.classList.remove( 'loading' );
+			button.classList.add( 'added' );
+		} else if ( state === 'error' ) {
+			button.classList.remove( 'loading' );
+			button.classList.remove( 'added' );
+		}
+	}
+
 	async function addToCart( formData, button ) {
 		const formDataObject = new URLSearchParams();
 		formData.forEach( ( item ) => {
@@ -92,6 +129,8 @@
 				throw new Error( 'Invalid JSON response from server' );
 			}
 
+			handleButtonState( button, 'added' );
+
 			if ( data.error && data.product_url ) {
 				window.location = data.product_url;
 				return;
@@ -105,8 +144,43 @@
 
 			return data;
 		} catch ( error ) {
+			handleButtonState( button, 'error' );
 			console.error( error );
 		}
+	}
+
+	function handleGroupedProduct( form, button ) {
+		const quantities = {};
+		let hasQuantity = false;
+		form.querySelectorAll( 'input[name^="quantity"]' ).forEach(
+			( input ) => {
+				if ( input.type === 'checkbox' && ! input.checked ) {
+					return;
+				}
+				quantities[ input.name ] = input.value;
+				if ( input.value > 0 ) {
+					hasQuantity = true;
+				}
+			}
+		);
+
+		if ( ! hasQuantity ) {
+			return false;
+		}
+
+		handleButtonState( button, 'loading' );
+		triggerEvent( document.body, 'adding_to_cart', [ button, quantities ] );
+
+		const formData = [];
+		Object.entries( quantities ).forEach( ( [ name, value ] ) => {
+			if ( value > 0 ) {
+				const productId = name.match( /\[(\d+)\]/ )[ 1 ];
+				formData.push( { name: 'product_id[]', value: productId } );
+				formData.push( { name: 'quantity[]', value: value } );
+			}
+		} );
+
+		return addToCart( formData, button );
 	}
 
 	function handleRegularProduct( form, button ) {
@@ -121,10 +195,23 @@
 			}
 		} );
 
+		handleButtonState( button, 'loading' );
 		triggerEvent( document.body, 'adding_to_cart', [ button, formData ] );
 
 		return addToCart( formData, button );
 	}
+
+	document.querySelectorAll( 'form.grouped_form' ).forEach( ( form ) => {
+		updateGroupedProductButtonState( form );
+
+		form.querySelectorAll( 'input[name^="quantity"]' ).forEach(
+			( input ) => {
+				input.addEventListener( 'change', () => {
+					updateGroupedProductButtonState( form );
+				} );
+			}
+		);
+	} );
 
 	document.addEventListener( 'click', function ( e ) {
 		const button = e.target.closest(
@@ -137,7 +224,11 @@
 		const form = button.closest( 'form.cart' );
 		if ( ! form ) return;
 
-		handleRegularProduct( form, button );
+		if ( form.classList.contains( 'grouped_form' ) ) {
+			handleGroupedProduct( form, button );
+		} else {
+			handleRegularProduct( form, button );
+		}
 
 		return false;
 	} );

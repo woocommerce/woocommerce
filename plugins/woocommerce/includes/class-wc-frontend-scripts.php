@@ -400,7 +400,7 @@ class WC_Frontend_Scripts {
 
 			if ( $product instanceof \WC_Product ) {
 				$is_not_purchasable = ProductType::SIMPLE === $product->get_type() && ( ! $product->is_purchasable() || ! $product->is_in_stock() );
-				if ( ! in_array( $product->get_type(), array( ProductType::EXTERNAL, ProductType::GROUPED ), true ) && ! $is_not_purchasable ) {
+				if ( ProductType::EXTERNAL !== $product->get_type() && ! $is_not_purchasable ) {
 					self::enqueue_script( 'wc-single-add-to-cart' );
 				}
 			}
