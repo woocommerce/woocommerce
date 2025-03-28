@@ -324,7 +324,7 @@ class Utils {
 
 		$query_string = '';
 		if ( ! empty( $query ) ) {
-			$query_string = http_build_query( $query );
+			$query_string = '&' . http_build_query( $query );
 		}
 
 		return admin_url( 'admin.php?page=wc-settings&tab=checkout' . $path . $query_string );

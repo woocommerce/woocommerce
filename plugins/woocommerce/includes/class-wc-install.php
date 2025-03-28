@@ -237,8 +237,15 @@ class WC_Install {
 		'7.7.0' => array(
 			'wc_update_770_remove_multichannel_marketing_feature_options',
 		),
+		'7.9.0' => array(
+			'wc_update_790_blockified_product_grid_block',
+		),
 		'8.1.0' => array(
 			'wc_update_810_migrate_transactional_metadata_for_hpos',
+		),
+		'8.3.0' => array(
+			'wc_update_830_rename_checkout_template',
+			'wc_update_830_rename_cart_template',
 		),
 		'8.6.0' => array(
 			'wc_update_860_remove_recommended_marketing_plugins_transient',

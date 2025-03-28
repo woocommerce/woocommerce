@@ -38,7 +38,8 @@ interface OtherPaymentGatewaysProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	/**
 	 * Indicates whether the suggestions are still being fetched.
@@ -254,7 +255,17 @@ export const OtherPaymentGateways = ( {
 															extension.id,
 															extension.plugin
 																.slug,
-															null // Suggested gateways won't have an onboarding URL.
+															null, // Suggested gateways won't have an onboarding URL.
+															// Only provide the attach link if not already installed.
+															extension.plugin
+																.status ===
+																'not_installed'
+																? extension
+																		._links
+																		?.attach
+																		?.href ??
+																		null
+																: null
 														)
 													}
 													isBusy={

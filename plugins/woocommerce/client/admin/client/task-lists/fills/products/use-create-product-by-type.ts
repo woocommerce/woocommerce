@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useDispatch } from '@wordpress/data';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { itemsStore } from '@woocommerce/data';
 import { navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { loadExperimentAssignment } from '@woocommerce/explat';
@@ -19,7 +19,7 @@ const EXPERIMENT_NAME =
 	'woocommerce_product_creation_experience_pricing_to_general_202406';
 
 export const useCreateProductByType = () => {
-	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
+	const { createProductFromTemplate } = useDispatch( itemsStore );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 
 	const getProductEditPageLink = async ( type: ProductTypeKey ) => {
