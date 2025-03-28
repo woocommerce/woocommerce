@@ -45,6 +45,21 @@
 		element.dispatchEvent( event );
 	}
 
+	function updateFragments( fragments ) {
+		if ( ! fragments ) {
+			return;
+		}
+		Object.entries( fragments ).forEach( ( [ key, value ] ) => {
+			const element = document.querySelector( key );
+			if ( ! element ) return;
+
+			element.insertAdjacentHTML( 'afterend', value );
+			element.remove();
+		} );
+
+		triggerEvent( document.body, 'wc_fragments_loaded' );
+	}
+
 	async function addToCart( formData, button ) {
 		const formDataObject = new URLSearchParams();
 		formData.forEach( ( item ) => {
@@ -85,6 +100,8 @@
 			triggerEvent( document.body, 'added_to_cart', {
 				detail: [ data.fragments, data.cart_hash, button ],
 			} );
+
+			updateFragments( data.fragments );
 
 			return data;
 		} catch ( error ) {
