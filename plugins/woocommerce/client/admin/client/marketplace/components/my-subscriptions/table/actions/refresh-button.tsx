@@ -46,16 +46,7 @@ export function RefreshButton() {
 						),
 						error.data.message
 					),
-					NoticeStatus.Error,
-					{
-						actions: [
-							{
-								label: __( 'Try again', 'woocommerce' ),
-								onClick: refresh,
-								url: '',
-							},
-						],
-					}
+					NoticeStatus.Error
 				);
 			} )
 			.finally( () => {
