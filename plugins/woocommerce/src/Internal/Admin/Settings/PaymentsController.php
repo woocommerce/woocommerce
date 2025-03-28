@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
+use WooCommerce\Admin\Experimental_Abtest;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -62,7 +63,7 @@ class PaymentsController {
 		}
 
 		try {
-			$in_treatment = \WooCommerce\Admin\Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_2025_v2' );
+			$in_treatment = Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_2025_v2' );
 		} catch ( \Exception $e ) {
 			// If the experiment group assignment fails, set a transient to avoid repeated fetches and
 			// consider the user not in the treatment group.
