@@ -60,7 +60,7 @@ export type RecommendedPaymentMethod = {
 	_order: number;
 	title: string;
 	description: string;
-	category: 'primary' | 'secondary';
+	category?: 'primary' | 'secondary';
 	icon: string;
 	enabled: boolean;
 	extraTitle: string;

@@ -88,7 +88,6 @@ export const providersStub: PaymentProvider[] = [
 			recommended_payment_methods: [
 				{
 					id: 'card',
-					category: 'primary',
 					_order: 1,
 					title: 'Card',
 					description: 'Card payments.',
@@ -101,7 +100,6 @@ export const providersStub: PaymentProvider[] = [
 				},
 				{
 					id: 'woopay',
-					category: 'primary',
 					_order: 2,
 					title: 'WooPay',
 					description: 'WooPay checkout.',
