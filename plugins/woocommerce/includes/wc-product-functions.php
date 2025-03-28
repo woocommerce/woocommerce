@@ -1097,7 +1097,7 @@ function wc_get_product_backorder_options() {
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(), $related_by = array() ) {
-
+	$limit          = is_numeric( $limit ) ? (int) $limit : 5;
 	$product_id     = absint( $product_id );
 	$limit          = $limit >= -1 ? $limit : 5;
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
