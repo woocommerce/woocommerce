@@ -27,24 +27,17 @@ export default function PaymentMethodsSelection() {
 		[ key: string ]: boolean;
 	} >( {} );
 
-	useEffect( () => {
-		if ( currentStep?.context?.payment_methods ) {
-			const paymentMethods = currentStep?.context?.payment_methods.reduce(
-				(
-					acc: Record< string, boolean >,
-					method: RecommendedPaymentMethod
-				) => {
-					acc[ method.id ] = method.enabled;
-					return acc;
-				},
-				{}
-			);
-			setPaymentMethodsState( paymentMethods );
-		}
-	}, [ currentStep?.context?.payment_methods ] );
+	const contextPaymentMethodsState = currentStep?.context?.pms_state;
+	const contextPaymentMethods = currentStep?.context?.recommended_pms;
 
-	const recommendedPaymentMethods = currentStep?.context?.payment_methods
-		? combineRequestMethods( currentStep?.context?.payment_methods )
+	useEffect( () => {
+		if ( contextPaymentMethodsState ) {
+			setPaymentMethodsState( contextPaymentMethodsState );
+		}
+	}, [ contextPaymentMethodsState ] );
+
+	const recommendedPaymentMethods = contextPaymentMethods
+		? combineRequestMethods( contextPaymentMethods )
 		: [];
 
 	return (
