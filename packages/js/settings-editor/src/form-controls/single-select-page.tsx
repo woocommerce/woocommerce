@@ -82,13 +82,6 @@ export const SingleSelectPage = ( {
 
 	const elements = useMemo(
 		() => [
-			/*
-			 * Value can be undefined when:
-			 *
-			 * - the field is not required
-			 * - in bulk editing
-			 *
-			 */
 			{
 				label: isLoading
 					? __( 'Loading…', 'woocommerce' )
