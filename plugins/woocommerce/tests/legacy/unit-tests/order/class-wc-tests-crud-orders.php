@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Meta
@@ -852,6 +853,52 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$this->assertTrue( $object->has_shipping_method( 'flat_rate_shipping' ) );
+	}
+
+	/**
+	 * Test: needs_shipping
+	 */
+	public function test_needs_shipping() {
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_shipping_method_count' => function () {
+					return 1;
+				},
+			)
+		);
+
+		$object = new WC_Order();
+		$object->save();
+
+		$this->assertFalse( $object->needs_shipping() );
+
+		$virtual_product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$virtual_item    = new WC_Order_Item_Product();
+		$virtual_item->set_props(
+			array(
+				'product'  => $virtual_product,
+				'quantity' => 1,
+				'total'    => 100,
+			)
+		);
+		$object->add_item( $virtual_item );
+		$object->save();
+
+		$this->assertFalse( $object->needs_shipping() );
+
+		$physical_product = WC_Helper_Product::create_simple_product();
+		$item             = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $physical_product,
+				'quantity' => 1,
+				'total'    => 100,
+			)
+		);
+		$object->add_item( $item );
+		$object->save();
+
+		$this->assertTrue( $object->needs_shipping() );
 	}
 
 	/**
