@@ -31,6 +31,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	steps: [],
 	isLoading: true,
 	currentStep: undefined,
+	context: {},
 	navigateToStep: () => undefined,
 	navigateToNextStep: () => undefined,
 	getStepByKey: () => undefined,
@@ -58,14 +59,12 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 	);
 
 	// Initial data fetch from store
-	const { storeSteps, isStoreLoading } = useSelect(
+	const { storeData, isStoreLoading } = useSelect(
 		( select ) => ( {
-			storeSteps: select(
-				woopaymentsOnboardingStore
-			).getOnboardingSteps(),
+			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(),
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
-			).isOnboardingStepsRequestPending(),
+			).isOnboardingDataRequestPending(),
 		} ),
 		[]
 	);
@@ -157,7 +156,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 	] );
 
 	const refreshOnboardingSteps = useCallback( () => {
-		invalidateResolutionForStoreSelector( 'getOnboardingSteps' );
+		invalidateResolutionForStoreSelector( 'getOnboardingData' );
 	}, [ invalidateResolutionForStoreSelector ] );
 
 	/**
@@ -165,11 +164,11 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 	 */
 	// Update local state when store data changes
 	useEffect( () => {
-		if ( ! isStoreLoading && storeSteps.length > 0 ) {
-			setStateStoreSteps( storeSteps );
+		if ( ! isStoreLoading && storeData.steps.length > 0 ) {
+			setStateStoreSteps( storeData.steps );
 			setIsStateStoreLoading( false );
 		}
-	}, [ storeSteps, isStoreLoading ] );
+	}, [ storeData, isStoreLoading ] );
 
 	// Update all steps when stateStoreSteps changes
 	useEffect( () => {
@@ -220,6 +219,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 		<OnboardingContext.Provider
 			value={ {
 				steps: allSteps,
+				context: storeData.context,
 				isLoading: isStateStoreLoading,
 				currentStep,
 				navigateToStep,

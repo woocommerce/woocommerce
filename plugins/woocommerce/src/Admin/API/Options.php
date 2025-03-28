@@ -235,7 +235,8 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_show_lys_tour',
 			'woocommerce_remote_variant_assignment',
 			'woocommerce_gateway_order',
-			'woocommerce_woopayments_nox_profile', // This is temporary.
+			'woocommerce_woopayments_nox_profile',
+			'woocommerce_feature_reactify-classic-payments-settings_enabled',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',

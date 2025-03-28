@@ -1,23 +1,23 @@
 /**
  * Internal dependencies
  */
-import { OnboardingState, StepContent } from './types';
+import { OnboardingState } from './types';
 import { WPDataSelector, WPDataSelectors } from '../types';
 
-export const getOnboardingSteps = ( state: OnboardingState ): StepContent[] =>
-	state.steps;
+export const getOnboardingData = ( state: OnboardingState ): OnboardingState =>
+	state;
 
-export const isOnboardingStepsRequestPending = (
+export const isOnboardingDataRequestPending = (
 	state: OnboardingState
 ): boolean => state.isFetching;
 
-export const getOnboardingStepsError = ( state: OnboardingState ): unknown =>
-	state.errors.getOnboardingSteps;
+export const getOnboardingDataError = ( state: OnboardingState ): unknown =>
+	state.errors.getOnboardingData;
 
 export type WooPaymentsOnboardingSelectors = {
-	getOnboardingSteps: WPDataSelector< typeof getOnboardingSteps >;
-	isOnboardingStepsRequestPending: WPDataSelector<
-		typeof isOnboardingStepsRequestPending
+	getOnboardingData: WPDataSelector< typeof getOnboardingData >;
+	isOnboardingDataRequestPending: WPDataSelector<
+		typeof isOnboardingDataRequestPending
 	>;
-	getOnboardingStepsError: WPDataSelector< typeof getOnboardingStepsError >;
+	getOnboardingDataError: WPDataSelector< typeof getOnboardingDataError >;
 } & WPDataSelectors;

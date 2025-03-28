@@ -146,7 +146,7 @@ const Blueprint = () => {
 			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
 			<p className="blueprint-settings-export-intro">
 				{ __(
-					'Choose what you want to include, and export it as a .zip file.',
+					'Choose what you want to include, and export it as a .json file.',
 					'woocommerce'
 				) }
 			</p>

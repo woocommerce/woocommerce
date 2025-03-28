@@ -11,6 +11,7 @@ import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboardin
 import WooPaymentsStepHeader from '../components/header';
 import BusinessVerificationStep from './business-verification';
 import PaymentMethodsSelection from './payment-methods-selection';
+import FinishStep from './finish';
 
 /**
  * Step Components
@@ -133,5 +134,13 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		label: 'Payment methods',
 		dependencies: [ 'congratulations' ],
 		content: <OtherStep />,
+	},
+	{
+		id: 'finish',
+		order: 5,
+		type: 'backend',
+		label: 'Submit for verification',
+		dependencies: [ 'business_verification' ],
+		content: <FinishStep />,
 	},
 ];
