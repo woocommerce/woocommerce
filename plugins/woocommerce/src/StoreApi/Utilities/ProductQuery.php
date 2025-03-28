@@ -339,7 +339,7 @@ class ProductQuery {
 
 		$last_modified = $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" );
 
-		return $last_modified ? strtotime( $last_modified ) : 0;
+		return $last_modified ? strtotime( $last_modified ) : null;
 	}
 
 	/**
