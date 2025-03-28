@@ -69,7 +69,11 @@ export interface WooPaymentsProviderOnboardingStep {
  */
 export interface OnboardingContextType {
 	steps: WooPaymentsProviderOnboardingStep[];
-	context: object;
+	context: {
+		urls: {
+			overview_page: string;
+		};
+	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;

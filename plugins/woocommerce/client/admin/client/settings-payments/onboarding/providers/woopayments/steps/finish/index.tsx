@@ -13,7 +13,7 @@ import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
 
 export const FinishStep: React.FC = () => {
-	const { currentStep } = useOnboardingContext();
+	const { context } = useOnboardingContext();
 
 	return (
 		<>
@@ -37,7 +37,7 @@ export const FinishStep: React.FC = () => {
 						className="settings-payments-onboarding-modal__step--content-finish-primary-button"
 						onClick={ () => {
 							window.location.href =
-								currentStep?.context?.overview_page_url ?? '';
+								context?.urls?.overview_page ?? '';
 						} }
 					>
 						{ __( 'Go to Payments Overview', 'woocommerce' ) }
