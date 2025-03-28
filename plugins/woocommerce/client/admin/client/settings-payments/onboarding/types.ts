@@ -70,8 +70,8 @@ export interface WooPaymentsProviderOnboardingStep {
 export interface OnboardingContextType {
 	steps: WooPaymentsProviderOnboardingStep[];
 	context: {
-		urls: {
-			overview_page: string;
+		urls?: {
+			overview_page?: string;
 		};
 	};
 	isLoading: boolean;

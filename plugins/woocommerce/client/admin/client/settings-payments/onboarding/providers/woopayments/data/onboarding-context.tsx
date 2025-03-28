@@ -31,6 +31,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	steps: [],
 	isLoading: true,
 	currentStep: undefined,
+	context: {},
 	navigateToStep: () => undefined,
 	navigateToNextStep: () => undefined,
 	getStepByKey: () => undefined,
