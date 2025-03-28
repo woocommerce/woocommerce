@@ -40,8 +40,15 @@ export const PaymentMethodListItem = ( {
 	isExpanded,
 	...props
 }: PaymentMethodListItemProps ) => {
-	// Do not render if the method is disabled and the list is not expanded.
-	if ( ! method.enabled && ! isExpanded ) {
+	// Rendering logic
+	// If the category is primary, render the method regardless of the state.
+	// If the category is secondary, render the method if the list is expanded or the method is enabled.
+	const shouldRender =
+		method.category === 'primary'
+			? true
+			: ( isExpanded || paymentMethodsState[ method.id ] ) ?? false;
+
+	if ( ! shouldRender ) {
 		return null;
 	}
 
