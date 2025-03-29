@@ -22,7 +22,8 @@ import {
 import './style.scss';
 
 export default function PaymentMethodsSelection() {
-	const { currentStep, navigateToNextStep } = useOnboardingContext();
+	const { currentStep, navigateToNextStep, closeModal } =
+		useOnboardingContext();
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
 		[ key: string ]: boolean;
@@ -54,7 +55,7 @@ export default function PaymentMethodsSelection() {
 						</h1>
 						<Button
 							className="settings-payments-onboarding-modal__header--close"
-							onClick={ () => {} }
+							onClick={ closeModal }
 						>
 							<Icon icon={ close } />
 						</Button>
