@@ -83,4 +83,5 @@ export interface OnboardingContextType {
 		stepKey: string
 	) => WooPaymentsProviderOnboardingStep | undefined;
 	refreshOnboardingSteps: () => void;
+	closeModal: () => void;
 }

@@ -222,11 +222,21 @@ class WooPaymentsService {
 			'status'         => $this->get_onboarding_step_status( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ),
 			'errors'         => array(),
 			'context'        => array(
-				'fields'            => $this->get_onboarding_kyc_fields(),
+				'fields'            => array(),
 				'sub_steps'         => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps' ),
 				'self_assessment'   => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' ),
 			),
 		);
+
+		// Try to get the pre-KYC fields.
+		try {
+			$business_verification_step_details['context']['fields'] = $this->get_onboarding_kyc_fields();
+		} catch ( Exception $e ) {
+			$business_verification_step_details['errors'][] = array(
+				'code'    => 'fields_error',
+				'message' => $e->getMessage(),
+			);
+		}
 
 		// If the step is not completed, we need to add the actions.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $business_verification_step_details['status'] ) {
@@ -1038,7 +1048,7 @@ class WooPaymentsService {
 		$response = Utils::rest_endpoint_get_request( '/wc/v3/payments/onboarding/fields' );
 
 		if ( is_wp_error( $response ) ) {
-			throw new Exception( esc_html( $response->get_error_message() ), esc_attr( $response->get_error_code() ) );
+			throw new Exception( esc_html( $response->get_error_message() ) );
 		}
 
 		if ( ! is_array( $response ) || ! isset( $response['data'] ) ) {
