@@ -459,11 +459,10 @@ class FeaturesController {
 			'block_email_editor'                 => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'        => __(
-					'Enable the block-based email editor for transactional emails',
+					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
 					'woocommerce'
 				),
 				'enabled_by_default' => false,
-				'disable_ui'         => true,
 			),
 		);
 
