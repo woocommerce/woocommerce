@@ -36,13 +36,15 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	navigateToNextStep: () => undefined,
 	getStepByKey: () => undefined,
 	refreshOnboardingSteps: () => undefined,
+	closeModal: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
 
-export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
-	children,
-} ) => {
+export const OnboardingProvider: React.FC< {
+	children: React.ReactNode;
+	closeModal: () => void;
+} > = ( { children, closeModal } ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -226,6 +228,7 @@ export const OnboardingProvider: React.FC< { children: React.ReactNode } > = ( {
 				navigateToNextStep,
 				getStepByKey,
 				refreshOnboardingSteps,
+				closeModal,
 			} }
 		>
 			{ children }
