@@ -102,48 +102,8 @@ export const useTransactionalEmails = (
 	const endIndex = startIndex + view.perPage;
 	const renderedEmails = filteredEmails.slice( startIndex, endIndex );
 
-	const updateEmailEnabledStatus = useCallback(
-		async ( emailId: string, value: boolean ) => {
-			const enabled = value ? 'yes' : 'no';
-			const settingsGroup = `email_${ emailId }`;
-			// The email settings has to be stored in DB complete.
-			// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
-			if (
-				! select( settingsStore ).hasFinishedResolution(
-					'getSettings',
-					[ settingsGroup ]
-				)
-			) {
-				await select( settingsStore ).getSettings( settingsGroup );
-				await new Promise( ( resolve ) => {
-					const unsubscribe = subscribe( () => {
-						const finished = select(
-							settingsStore
-						).hasFinishedResolution( 'getSettings', [
-							settingsGroup,
-						] );
-						if ( finished ) {
-							unsubscribe();
-							resolve( true );
-						}
-					} );
-				} );
-			}
-
-			// Now we can fetch the old settings and update the settings
-			const currentSettings = await select( settingsStore ).getSettings(
-				settingsGroup
-			);
-			const updatedSettings = { ...currentSettings } as {
-				[ key: string ]: { [ key: string ]: unknown };
-			};
-			updatedSettings[ settingsGroup ].enabled = enabled;
-			await updateAndPersistSettingsForGroup(
-				settingsGroup,
-				updatedSettings
-			);
-
-			// Apply change in local state to update UI
+	const updateEmailEnabledStatusInState = useCallback(
+		( emailId: string, value: boolean ) => {
 			const updatedEmailTypesData = [ ...emailTypesData ];
 			const emailIndex = updatedEmailTypesData.findIndex(
 				( email ) => email.id === emailId
@@ -151,6 +111,62 @@ export const useTransactionalEmails = (
 			if ( emailIndex !== -1 ) {
 				updatedEmailTypesData[ emailIndex ].enabled = value;
 				setEmailTypesData( updatedEmailTypesData );
+			}
+		},
+		[ emailTypesData ]
+	);
+	const updateEmailEnabledStatus = useCallback(
+		async ( emailId: string, value: boolean ) => {
+			// Optimistic update of local state to update UI
+			updateEmailEnabledStatusInState( emailId, value );
+
+			try {
+				// Store the new status via API
+				const enabled = value ? 'yes' : 'no';
+				const settingsGroup = `email_${ emailId }`;
+
+				// The email settings has to be stored in DB complete.
+				// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
+				if (
+					! select( settingsStore ).hasFinishedResolution(
+						'getSettings',
+						[ settingsGroup ]
+					)
+				) {
+					await select( settingsStore ).getSettings( settingsGroup );
+					await new Promise( ( resolve ) => {
+						const unsubscribe = subscribe( () => {
+							const finished = select(
+								settingsStore
+							).hasFinishedResolution( 'getSettings', [
+								settingsGroup,
+							] );
+							if ( finished ) {
+								unsubscribe();
+								resolve( true );
+							}
+						} );
+					} );
+				}
+
+				// Now we can fetch the old settings and update the settings
+				const currentSettings = await select(
+					settingsStore
+				).getSettings( settingsGroup );
+				const updatedSettings = { ...currentSettings } as {
+					[ key: string ]: { [ key: string ]: unknown };
+				};
+				updatedSettings[ settingsGroup ].enabled = enabled;
+				await updateAndPersistSettingsForGroup(
+					settingsGroup,
+					updatedSettings
+				);
+			} catch ( error ) {
+				// Switch the UI status back on error
+				updateEmailEnabledStatusInState( emailId, ! value );
+				// Log error to help with debugging email status update failures
+				// eslint-disable-next-line no-console
+				console.error( error );
 			}
 		},
 		[ emailTypesData, updateAndPersistSettingsForGroup ]
