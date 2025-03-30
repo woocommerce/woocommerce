@@ -12,7 +12,7 @@ import { useOnboardingContext } from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
-import { finalizeOnboarding, isPoEligible } from '../utils';
+import { finalizeOnboarding, isPoEligible } from '../utils/actions';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
 
 interface Props {

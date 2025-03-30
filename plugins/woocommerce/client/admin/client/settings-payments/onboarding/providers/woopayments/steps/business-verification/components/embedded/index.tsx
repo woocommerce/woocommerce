@@ -16,7 +16,7 @@ import {
 /**
  * Internal dependencies
  */
-import { createKycAccountSession } from './hooks';
+import { createKycAccountSession } from '../../utils/actions';
 import appearance from './appearance';
 import { OnboardingFields } from '../../types';
 import BannerNotice from '../../../../components/banner-notice';

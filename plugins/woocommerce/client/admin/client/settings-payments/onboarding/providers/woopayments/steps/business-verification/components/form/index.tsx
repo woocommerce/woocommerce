@@ -22,7 +22,8 @@ import {
 } from './fields';
 import { useBusinessVerificationContext } from '../../data/business-verification-context';
 import { OnboardingFields } from '../../types';
-import { completeSubStep, isPreKycComplete } from '../../utils';
+import { isPreKycComplete } from '../../utils';
+import { completeSubStep } from '../../utils/actions';
 import { useValidation } from '../../utils/validation';
 import strings from '../../strings';
 import './style.scss';

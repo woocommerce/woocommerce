@@ -55,6 +55,9 @@ export interface MccsDisplayTreeItem {
 	keywords?: string[];
 }
 
+/**
+ * Account session.
+ */
 export interface AccountKycSession {
 	clientSecret: string;
 	expiresAt: number;
@@ -65,6 +68,16 @@ export interface AccountKycSession {
 	locale: string;
 }
 
+/**
+ * Account KYC session result.
+ */
+export interface AccountKycResult {
+	session: AccountKycSession;
+}
+
+/**
+ * Finalize onboarding response.
+ */
 export interface FinalizeOnboardingResponse {
 	success: boolean;
 	params: Record< string, string >;

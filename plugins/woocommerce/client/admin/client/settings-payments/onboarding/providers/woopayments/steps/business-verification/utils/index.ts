@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { set, toPairs } from 'lodash';
-import apiFetch from '@wordpress/api-fetch';
-import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -14,9 +12,6 @@ import {
 	Country,
 	MccsDisplayTreeItem,
 	OnboardingFields,
-	PoEligibleData,
-	PoEligibleResponse,
-	FinalizeOnboardingResponse,
 } from '../types';
 
 export const fromDotNotation = (
@@ -25,9 +20,6 @@ export const fromDotNotation = (
 	toPairs( record ).reduce( ( result, [ key, value ] ) => {
 		return value !== null ? set( result, key, value ) : result;
 	}, {} );
-
-const hasUndefinedValues = ( obj: Record< string, unknown > ): boolean =>
-	Object.values( obj ).some( ( value ) => value === undefined );
 
 export const getAvailableCountries = (
 	countries: Record< string, string >
@@ -54,62 +46,8 @@ export const getBusinessTypes = ( data: Country[] ): Country[] => {
 	);
 };
 
-/**
- * Make an API request to finalize the onboarding process.
- *
- * @param apiUrl    The API URL.
- * @param urlSource The source URL.
- */
-export const finalizeOnboarding = async (
-	apiUrl: string,
-) => {
-	return await apiFetch< FinalizeOnboardingResponse >( {
-		path: apiUrl,
-		method: 'POST',
-		data: {},
-	} );
-};
-
-/**
- * Make an API request to determine if the user is eligible for a PO account.
- *
- * @param onboardingFields The form data, used to determine eligibility.
- */
-export const isPoEligible = async (
-	onboardingFields: OnboardingFields
-): Promise< boolean > => {
-	// Check if any required property is undefined
-	if (
-		hasUndefinedValues( {
-			country: onboardingFields.country,
-			business_type: onboardingFields.business_type,
-			mcc: onboardingFields.mcc,
-			annual_revenue: onboardingFields.annual_revenue,
-			go_live_timeframe: onboardingFields.go_live_timeframe,
-		} )
-	) {
-		return false;
-	}
-
-	const eligibilityData: PoEligibleData = {
-		location: onboardingFields.country as string,
-		self_assessment: {
-			country: onboardingFields.country as string,
-			type: onboardingFields.business_type as string,
-			mcc: onboardingFields.mcc as string,
-			annual_revenue: onboardingFields.annual_revenue as string,
-			go_live_timeframe: onboardingFields.go_live_timeframe as string,
-		},
-	};
-
-	const response: PoEligibleResponse = await apiFetch( {
-		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/check/po_eligible`,
-		method: 'POST',
-		data: eligibilityData,
-	} );
-
-	return response.result === 'eligible';
-};
+export const hasUndefinedValues = ( obj: Record< string, unknown > ): boolean =>
+	Object.values( obj ).some( ( value ) => value === undefined );
 
 /**
  * Get the MCC code for the selected industry.
@@ -169,34 +107,7 @@ export const getMccsFlatList = (
 	}, [] as ListItem[] );
 };
 
-export const completeSubStep = (
-	name: string,
-	href: string | undefined,
-	data: Record<
-		string,
-		{
-			status: string;
-		}
-	>
-) => {
-	// Send POST request to the href with the Business Verification completed status
-	if ( href ) {
-		apiFetch( {
-			url: href,
-			method: 'POST',
-			data: {
-				sub_steps: {
-					...data,
-					[ name ]: {
-						status: 'completed',
-					},
-				},
-			},
-		} );
-	}
-};
-
-export const isPreKYCComplete = ( data: OnboardingFields ): boolean => {
+export const isPreKycComplete = ( data: OnboardingFields ): boolean => {
 	const requiredFields: ( keyof OnboardingFields )[] = [
 		'business_type',
 		'country',
