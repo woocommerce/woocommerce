@@ -16,13 +16,13 @@ const SidebarExtensionComponent = applyFilters(
 	RichTextWithButton
 ) as () => JSX.Element;
 
-export function DetailsPanel() {
+export function SettingsPanel() {
 	return (
 		<PanelBody
-			title={ __( 'Details', 'woocommerce' ) }
+			title={ __( 'Settings', 'woocommerce' ) }
 			className="woocommerce-email-editor__settings-panel"
 			onToggle={ ( data ) =>
-				recordEvent( 'details_panel_body_toggle', { opened: data } )
+				recordEvent( 'settings_panel_body_toggle', { opened: data } )
 			}
 		>
 			<>{ <SidebarExtensionComponent /> }</>
