@@ -653,7 +653,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		}
 		?>
 		<div
-			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event"
+			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event woocommerce-email-listing-listview"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 		></div>
 		<div>
