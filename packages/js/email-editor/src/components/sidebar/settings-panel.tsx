@@ -10,6 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { recordEvent } from '../../events';
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
+import { TemplateSelection } from './template-selection';
 
 const SidebarExtensionComponent = applyFilters(
 	'woocommerce_email_editor_setting_sidebar_extension_component',
@@ -25,7 +26,10 @@ export function SettingsPanel() {
 				recordEvent( 'settings_panel_body_toggle', { opened: data } )
 			}
 		>
-			<>{ <SidebarExtensionComponent /> }</>
+			<>
+				<TemplateSelection />
+				{ <SidebarExtensionComponent /> }
+			</>
 		</PanelBody>
 	);
 }
