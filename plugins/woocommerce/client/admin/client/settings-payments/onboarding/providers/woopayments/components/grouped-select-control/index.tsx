@@ -179,7 +179,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 					type: 'button',
 					className: clsx(
 						'components-text-control__input components-grouped-select-control__button',
-						{ placeholder: ! selectedItem?.name  }
+						{ placeholder: ! selectedItem?.name }
 					),
 					name,
 				} ) }

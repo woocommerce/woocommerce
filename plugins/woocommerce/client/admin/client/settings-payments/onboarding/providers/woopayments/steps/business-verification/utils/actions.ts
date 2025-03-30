@@ -12,8 +12,8 @@ import {
 	OnboardingFields,
 	PoEligibleData,
 	PoEligibleResponse,
-    FinalizeOnboardingResponse,
-    AccountKycResult,
+	FinalizeOnboardingResponse,
+	AccountKycResult,
 } from '../types';
 import { hasUndefinedValues, fromDotNotation } from './';
 
@@ -23,56 +23,52 @@ import { hasUndefinedValues, fromDotNotation } from './';
  * @param onboardingFields The form data, used to determine eligibility.
  */
 export const isPoEligible = async (
-    onboardingFields: OnboardingFields
+	onboardingFields: OnboardingFields
 ): Promise< boolean > => {
-    // Check if any required property is undefined
-    if (
-        hasUndefinedValues( {
-            country: onboardingFields.country,
-            business_type: onboardingFields.business_type,
-            mcc: onboardingFields.mcc,
-            annual_revenue: onboardingFields.annual_revenue,
-            go_live_timeframe: onboardingFields.go_live_timeframe,
-        } )
-    ) {
-        return false;
-    }
+	// Check if any required property is undefined
+	if (
+		hasUndefinedValues( {
+			country: onboardingFields.country,
+			business_type: onboardingFields.business_type,
+			mcc: onboardingFields.mcc,
+			annual_revenue: onboardingFields.annual_revenue,
+			go_live_timeframe: onboardingFields.go_live_timeframe,
+		} )
+	) {
+		return false;
+	}
 
-    const eligibilityData: PoEligibleData = {
-        location: onboardingFields.country as string,
-        self_assessment: {
-            country: onboardingFields.country as string,
-            type: onboardingFields.business_type as string,
-            mcc: onboardingFields.mcc as string,
-            annual_revenue: onboardingFields.annual_revenue as string,
-            go_live_timeframe: onboardingFields.go_live_timeframe as string,
-        },
-    };
+	const eligibilityData: PoEligibleData = {
+		location: onboardingFields.country as string,
+		self_assessment: {
+			country: onboardingFields.country as string,
+			type: onboardingFields.business_type as string,
+			mcc: onboardingFields.mcc as string,
+			annual_revenue: onboardingFields.annual_revenue as string,
+			go_live_timeframe: onboardingFields.go_live_timeframe as string,
+		},
+	};
 
-    const response: PoEligibleResponse = await apiFetch( {
-        path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/check/po_eligible`,
-        method: 'POST',
-        data: eligibilityData,
-    } );
+	const response: PoEligibleResponse = await apiFetch( {
+		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/step/business_verification/check/po_eligible`,
+		method: 'POST',
+		data: eligibilityData,
+	} );
 
-    return response.result === 'eligible';
+	return response.result === 'eligible';
 };
-
 
 /**
  * Make an API request to finalize the onboarding process.
  *
- * @param apiUrl    The API URL.
- * @param urlSource The source URL.
+ * @param apiUrl The API URL.
  */
-export const finalizeOnboarding = async (
-    apiUrl: string,
-) => {
-    return await apiFetch< FinalizeOnboardingResponse >( {
-        path: apiUrl,
-        method: 'POST',
-        data: {},
-    } );
+export const finalizeOnboarding = async ( apiUrl: string ) => {
+	return await apiFetch< FinalizeOnboardingResponse >( {
+		path: apiUrl,
+		method: 'POST',
+		data: {},
+	} );
 };
 
 /**
@@ -112,20 +108,20 @@ export const completeSubStep = (
 /**
  * Make an API request to create an KYC account session.
  *
- * @param data         The form data.
- * @param apiURL       The API URL.
- * @param isPoEligible Whether the user is eligible for a PO account.
+ * @param data       The form data.
+ * @param apiURL     The API URL.
+ * @param poEligible Whether the user is eligible for a PO account.
  */
 export const createKycAccountSession = async (
-    data: OnboardingFields,
-    apiURL: string,
-    isPoEligible: boolean
+	data: OnboardingFields,
+	apiURL: string,
+	poEligible: boolean
 ): Promise< AccountKycResult > => {
-    return await apiFetch< AccountKycResult >( {
-        path: addQueryArgs( apiURL, {
-            self_assessment: fromDotNotation( data ),
-            progressive: isPoEligible,
-        } ),
-        method: 'POST',
-    } );
+	return await apiFetch< AccountKycResult >( {
+		path: addQueryArgs( apiURL, {
+			self_assessment: fromDotNotation( data ),
+			progressive: poEligible,
+		} ),
+		method: 'POST',
+	} );
 };

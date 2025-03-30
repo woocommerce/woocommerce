@@ -55,7 +55,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 
 		try {
 			const response = await finalizeOnboarding(
-				currentStep?.actions?.kyc_session_finish?.href ?? '',
+				currentStep?.actions?.kyc_session_finish?.href ?? ''
 			);
 
 			if ( response.success ) {

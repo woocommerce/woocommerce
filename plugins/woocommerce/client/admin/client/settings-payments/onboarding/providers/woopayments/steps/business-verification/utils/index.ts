@@ -8,11 +8,7 @@ import { set, toPairs } from 'lodash';
  */
 import { ListItem } from '../../../components/grouped-select-control';
 import businessTypeDescriptionStrings from '../translations/descriptions';
-import {
-	Country,
-	MccsDisplayTreeItem,
-	OnboardingFields,
-} from '../types';
+import { Country, MccsDisplayTreeItem, OnboardingFields } from '../types';
 
 export const fromDotNotation = (
 	record: Record< string, unknown >
