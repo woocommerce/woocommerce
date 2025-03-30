@@ -3,7 +3,8 @@
 $gutenberg-blueberry: #3858e9;
 $gutenberg-blueberry-focus: #1d35b4;
 
-.settings-payments-onboarding-modal__step#business_verification {
+// Adjust styles for the #business_verification step to prevent vertical overflow.
+#business_verification.settings-payments-onboarding-modal__step {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
