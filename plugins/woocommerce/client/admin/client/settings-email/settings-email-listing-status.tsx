@@ -7,19 +7,19 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { drafts, scheduled, published } from '@wordpress/icons';
+import { scheduled, published, cancelCircleFilled } from '@wordpress/icons';
 import { __experimentalHStack as HStack, Icon } from '@wordpress/components';
 
 export const EMAIL_STATUSES = [
 	{
 		value: 'enabled',
-		label: __( 'Active', 'woocommerce' ),
+		label: __( 'Enabled', 'woocommerce' ),
 		icon: published,
 	},
 	{
 		value: 'disabled',
-		label: __( 'Draft', 'woocommerce' ),
-		icon: drafts,
+		label: __( 'Disabled', 'woocommerce' ),
+		icon: cancelCircleFilled,
 	},
 	{
 		value: 'manual',
