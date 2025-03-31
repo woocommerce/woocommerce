@@ -12,7 +12,6 @@ import type { Field, FormField } from '@wordpress/dataviews';
 import { SettingsGroup } from '../../components/settings-group';
 import { CustomView } from '../../components/custom-view';
 import { InfoView } from '../../components/info-view';
-
 import { Checkbox } from '../../form-controls/checkbox';
 import { Input } from '../../form-controls/input';
 import { Textarea } from '../../form-controls/textarea';
