@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
+use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,6 +36,13 @@ class Integration {
 	 * @var Dependency_Check
 	 */
 	private Dependency_Check $dependency_check;
+
+	/**
+	 * The template API controller instance.
+	 *
+	 * @var TemplateApiController
+	 */
+	private TemplateApiController $template_api_controller;
 
 	/**
 	 * Constructor.
@@ -62,6 +71,7 @@ class Integration {
 	 */
 	public function initialize() {
 		$this->init_hooks();
+		$this->extend_template_post_api();
 		$this->register_hooks();
 	}
 
@@ -75,7 +85,8 @@ class Integration {
 		$container->get( PersonalizationTagManager::class );
 		$container->get( BlockEmailRenderer::class );
 		$container->get( WCTransactionalEmails::class );
-		$this->editor_page_renderer = $container->get( PageRenderer::class );
+		$this->editor_page_renderer    = $container->get( PageRenderer::class );
+		$this->template_api_controller = $container->get( TemplateApiController::class );
 	}
 
 	/**
@@ -168,5 +179,20 @@ class Integration {
 		}
 
 		WCTransactionalEmailPostsManager::get_instance()->delete_email_template( $email_type );
+	}
+
+	/**
+	 * Extend the post API for the wp_template post type to add and save the woocommerce_data field.
+	 */
+	public function extend_template_post_api(): void {
+		register_rest_field(
+			'wp_template',
+			'woocommerce_data',
+			array(
+				'get_callback'    => array( $this->template_api_controller, 'get_template_data' ),
+				'update_callback' => array( $this->template_api_controller, 'save_template_data' ),
+				'schema'          => $this->template_api_controller->get_template_data_schema(),
+			)
+		);
 	}
 }
