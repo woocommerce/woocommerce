@@ -36,7 +36,20 @@ class FilterData {
 	 * @return object
 	 */
 	public function get_filtered_price( array $query_vars ) {
-		$pre_filter_counts = $this->pre_get_filter_data( 'price', $query_vars, );
+		/**
+		 * Allows offloading the filter data to external services like Elasticsearch.
+		 *
+		 * @hook woocommerce_pre_product_filter_data
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param mixed  $results      The results for current query.
+		 * @param string $filter_type  The type of filter. Accepts price|stock|rating|attribute.
+		 * @param array  $query_vars   The query arguments to calculate the filter data.
+		 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
+		 * @return mixed The filtered results or null to continue with default processing.
+		 */
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'price', $query_vars, array() );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -92,7 +105,10 @@ class FilterData {
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( array $query_vars, array $statuses ) {
-		$pre_filter_counts = $this->pre_get_filter_data( 'stock', $query_vars );
+		/**
+		 * Filter the data. @see get_filtered_price() for full documentation.
+		 */
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'stock', $query_vars, array() );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -154,7 +170,10 @@ class FilterData {
 	 * @return array rating=>count pairs.
 	 */
 	public function get_rating_counts( array $query_vars ) {
-		$pre_filter_counts = $this->pre_get_filter_data( 'rating', $query_vars );
+		/**
+		 * Filter the data. @see get_filtered_price() for full documentation.
+		 */
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'rating', $query_vars, array() );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -214,7 +233,10 @@ class FilterData {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( array $query_vars, string $attribute_to_count ) {
-		$pre_filter_counts = $this->pre_get_filter_data( 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
+		/**
+		 * Filter the data. @see get_filtered_price() for full documentation.
+		 */
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -267,29 +289,6 @@ class FilterData {
 		$this->set_cache( $transient_key, $results );
 
 		return $results;
-	}
-
-	/**
-	 * Get the offload filter data.
-	 *
-	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-	 * @param array  $query_vars  The query arguments to calculate the filter data.
-	 * @param array  $extra       Some filter types require extra arguments for calculation, like attribute.
-	 */
-	private function pre_get_filter_data( string $filter_type, array $query_vars, array $extra = array() ) {
-		/**
-		 * Allows offloading the filter data to external services like Elasticsearch.
-		 *
-		 * @hook woocommerce_pre_product_filter_data
-		 *
-		 * @since 9.9.0
-		 *
-		 * @param mixed $results      The results for current query.
-		 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-		 * @param array $query_vars   The query arguments to calculate the filter data.
-		 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
-		 */
-		return apply_filters( 'woocommerce_pre_product_filter_data', null, $filter_type, $query_vars, $extra );
 	}
 
 	/**
