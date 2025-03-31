@@ -1,0 +1,53 @@
+{
+	"name": "woocommerce/product-sku",
+	"version": "1.0.0",
+	"title": "Product SKU",
+	"description": "Displays the SKU of a product.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": {
+			"type": "number",
+			"default": 0
+		},
+		"isDescendentOfQueryLoop": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendantOfAllProducts": {
+			"type": "boolean",
+			"default": false
+		},
+		"showProductSelector": {
+			"type": "boolean",
+			"default": false
+		},
+		"prefix": {
+			"type": "string",
+			"default": "SKU:"
+		},
+		"suffix": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"usesContext": [ "query", "queryId", "postId" ],
+	"ancestor": [
+		"woocommerce/product-meta",
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

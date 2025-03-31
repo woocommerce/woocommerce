@@ -133,6 +133,9 @@ test( 'Merchant can resend order details to customer', async ( {
 		.locator( 'li#actions > select' )
 		.selectOption( 'send_order_details' );
 	await page.locator( 'button.wc-reload' ).click();
+	await expect(
+		page.locator( '#message' ).filter( { hasText: 'Order updated' } )
+	).toBeVisible();
 
 	await expectEmail(
 		page,

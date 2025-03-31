@@ -515,17 +515,12 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
  * Check if the current theme is a block theme.
  *
  * @since 6.0.0
+ * @deprecated 9.9.0 Use wp_is_block_theme() instead.
  * @return bool
  */
 function wc_current_theme_is_fse_theme() {
-	if ( function_exists( 'wp_is_block_theme' ) ) {
-		return (bool) wp_is_block_theme();
-	}
-	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
-		return (bool) gutenberg_is_fse_theme();
-	}
-
-	return false;
+	wc_deprecated_function( __FUNCTION__, '9.9.0', 'wp_is_block_theme' );
+	return wp_is_block_theme();
 }
 
 /**
@@ -535,7 +530,7 @@ function wc_current_theme_is_fse_theme() {
  * @return bool
  */
 function wc_current_theme_supports_woocommerce_or_fse() {
-	return (bool) current_theme_supports( 'woocommerce' ) || wc_current_theme_is_fse_theme();
+	return (bool) current_theme_supports( 'woocommerce' ) || wp_is_block_theme();
 }
 
 /**
@@ -549,7 +544,7 @@ function wc_current_theme_supports_woocommerce_or_fse() {
  * @return string
  */
 function wc_wp_theme_get_element_class_name( $element ) {
-	if ( wc_current_theme_is_fse_theme() && function_exists( 'wp_theme_get_element_class_name' ) ) {
+	if ( wp_is_block_theme() && function_exists( 'wp_theme_get_element_class_name' ) ) {
 		return wp_theme_get_element_class_name( $element );
 	}
 
@@ -570,7 +565,7 @@ function wc_wp_theme_get_element_class_name( $element ) {
  */
 function wc_block_theme_has_styles_for_element( $element ) {
 	if (
-		! wc_current_theme_is_fse_theme() ||
+		! wp_is_block_theme() ||
 		wc_wp_theme_get_element_class_name( $element ) === ''
 	) {
 		return false;
