@@ -243,8 +243,11 @@ class WCAdminAssets {
 			return;
 		}
 
-		wp_enqueue_script( WC_ADMIN_APP );
-		wp_enqueue_style( WC_ADMIN_APP );
+		if ( ! PageController::is_modern_settings_page() ) {
+			wp_enqueue_script( WC_ADMIN_APP );
+			wp_enqueue_style( WC_ADMIN_APP );
+		}
+
 		wp_enqueue_style( 'wc-material-icons' );
 		wp_enqueue_style( 'wc-onboarding' );
 

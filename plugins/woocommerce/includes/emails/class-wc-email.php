@@ -266,6 +266,13 @@ class WC_Email extends WC_Settings_API {
 	public $block_email_editor_enabled;
 
 	/**
+	 * Block content template path.
+	 *
+	 * @var string
+	 */
+	public $template_block_content = 'emails/block/general-block-email.php';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -618,6 +625,23 @@ class WC_Email extends WC_Settings_API {
 			$email_type = $transient ? $transient : $email_type;
 		}
 		return $email_type && class_exists( 'DOMDocument' ) ? $email_type : 'plain';
+	}
+
+	/**
+	 * Get block editor email template content.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		return wc_get_template_html(
+			$this->template_block_content,
+			array(
+				'order'         => $this->object,
+				'sent_to_admin' => false,
+				'plain_text'    => false,
+				'email'         => $this,
+			)
+		);
 	}
 
 	/**

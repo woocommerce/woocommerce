@@ -513,7 +513,7 @@ final class BlockTypesController {
 		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
+			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
 				$block_types[] = 'AddToCartWithOptions';
 				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
 				$block_types[] = 'AddToCartWithOptionsVariationSelector';

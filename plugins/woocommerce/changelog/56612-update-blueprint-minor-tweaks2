@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Blueprint: updated item count dynamic and reset the uploader after successful import

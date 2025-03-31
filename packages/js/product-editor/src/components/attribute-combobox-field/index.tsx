@@ -89,9 +89,7 @@ function ComboboxControlOption(
 	return <div className="item-wrapper">{ item.label }</div>;
 }
 
-const AttributesComboboxControl: React.FC<
-	AttributesComboboxControlComponent
-> = ( {
+const AttributesComboboxControl = ( {
 	label,
 	help,
 	current = null,
@@ -100,7 +98,7 @@ const AttributesComboboxControl: React.FC<
 	isLoading = false,
 	onAddNew,
 	onChange,
-} ) => {
+}: AttributesComboboxControlComponent ) => {
 	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
 		useState< ComboboxControlOption >( createNewAttributeOptionDefault );
 

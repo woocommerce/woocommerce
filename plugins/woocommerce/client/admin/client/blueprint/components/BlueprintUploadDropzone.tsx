@@ -336,7 +336,9 @@ export const fileUploadMachine = setup( {
 				},
 			},
 		},
-		importSuccess: {},
+		importSuccess: {
+			always: 'idle',
+		},
 	},
 	on: {
 		DISMISS_FILE_UPLOAD: {

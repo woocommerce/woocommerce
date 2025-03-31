@@ -75,7 +75,6 @@
 		"@types/jest": "27.5.x",
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__data": "6.0.0",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",

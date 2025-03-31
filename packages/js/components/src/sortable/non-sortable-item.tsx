@@ -7,9 +7,7 @@ type NonSortableItemProps = {
 	children: JSX.Element;
 };
 
-export const NonSortableItem: React.FC< NonSortableItemProps > = ( {
-	children,
-} ) => {
+export const NonSortableItem = ( { children }: NonSortableItemProps ) => {
 	if ( children === null ) {
 		return children;
 	}

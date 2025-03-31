@@ -98,6 +98,38 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that no Add to Cart button is displayed for out of stock products and not purchasable products.
+	 *
+	 * Verifies that:
+	 * 1. Add to Cart button is hidden for not purchasable simple products
+	 * 2. Add to Cart button is visible for in-stock purchasable products
+	 * 3. Add to Cart button is hidden and stock indicator shows for out of stock products
+	 *
+	 * @covers AddToCartWithOptions::render
+	 */
+	public function test_out_of_stock_product() {
+		global $product;
+		$product    = new \WC_Product_Simple();
+		$product_id = $product->save();
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringNotContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button is not visible for not purchasable simple products.' );
+
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button is visible for purchasable in stock products.' );
+
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringNotContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button is not visible for out of stock products.' );
+		$this->assertStringContainsString( 'Out of stock', $markup, 'The stock indicator is visible for out of stock products.' );
+	}
+
+	/**
 	 * Tests that the  woocommerce_<product_type>_add_to_cart hooks are rendered when rendering the block.
 	 */
 	public function test_product_type_add_to_cart_hooks_are_rendered() {

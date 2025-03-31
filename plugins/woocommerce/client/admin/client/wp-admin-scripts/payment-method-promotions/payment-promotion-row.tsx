@@ -44,12 +44,12 @@ type PaymentPromotionRowProps = {
 	subTitleContent?: string;
 };
 
-export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
+export const PaymentPromotionRow = ( {
 	paymentMethod,
 	title,
 	subTitleContent,
 	columns,
-} ) => {
+}: PaymentPromotionRowProps ) => {
 	const { gatewayId, pluginSlug, url } = paymentMethod;
 	const [ installing, setInstalling ] = useState( false );
 	const [ isVisible, setIsVisible ] = useState( true );

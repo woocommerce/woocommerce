@@ -6,7 +6,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { mkdirSync } from 'fs';
 import { simpleGit, TaskOptions } from 'simple-git';
-import { v4 } from 'uuid';
+import { randomUUID as v4 } from 'crypto';
 import { mkdir, rm } from 'fs/promises';
 import { URL } from 'node:url';
 

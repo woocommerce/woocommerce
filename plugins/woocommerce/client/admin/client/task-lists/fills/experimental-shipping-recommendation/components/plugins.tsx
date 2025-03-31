@@ -25,10 +25,7 @@ type Props = {
 	pluginsToActivate: string[];
 };
 
-export const Plugins: React.FC< Props > = ( {
-	nextStep,
-	pluginsToActivate,
-} ) => {
+export const Plugins = ( { nextStep, pluginsToActivate }: Props ) => {
 	const { updateOptions } = useDispatch( optionsStore );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select( optionsStore );
