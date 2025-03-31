@@ -12,8 +12,8 @@ import type { DataFormControlProps } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import type { DataFormItem } from '../../types';
-import { sanitizeHTML } from '../../utils';
+import type { DataFormItem } from '../types';
+import { sanitizeHTML } from '../utils';
 
 // https://github.com/woocommerce/woocommerce/blob/83a090f70d1f7b07325d9df9bd03fe2f753d4fd4/plugins/woocommerce/includes/admin/class-wc-admin-settings.php#L626-L636
 const PAGE_QUERY_ARGS = {
