@@ -448,6 +448,7 @@
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api",
+					"onlyForDependencies": [],
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
