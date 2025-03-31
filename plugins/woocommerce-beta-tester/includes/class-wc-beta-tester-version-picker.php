@@ -176,6 +176,9 @@ class WC_Beta_Tester_Version_Picker {
 			<div class="wcbt-content-wrap">
 				<h1><?php esc_html_e( 'Available WooCommerce Releases', 'woocommerce-beta-tester' ); ?></h1>
 				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/tools.php' ) ); ?>">
+					<div class="wcbt-submit-wrap">
+						<a href="#wcbt-modal-version-switch-confirm" class="button-primary" id="wcbt-modal-version-switch-confirm"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>
+					</div>
 					<div class="wcbt-versions-wrap">
 						<?php echo $this->get_versions_html( $channel ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
