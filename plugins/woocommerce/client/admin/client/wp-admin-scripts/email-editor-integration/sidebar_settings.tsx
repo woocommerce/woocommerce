@@ -5,11 +5,15 @@ import { select, dispatch } from '@wordpress/data';
 import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
 import { NAME_SPACE } from './constants';
+
+const previewTextMaxLength = 150;
+const previewTextRecommendedLength = 80;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -42,6 +46,8 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 		);
 	};
 
+	const previewTextLength = woocommerce_email_data?.preheader?.length ?? 0;
+
 	return (
 		<>
 			<br />
@@ -55,11 +61,30 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 
 			<br />
 			<RichTextWithButton
-				attributeName="heading"
-				attributeValue={ woocommerce_email_data.heading }
+				attributeName="preheader"
+				attributeValue={ woocommerce_email_data.preheader }
 				updateProperty={ updateWooMailProperty }
-				label={ __( 'Heading', 'woocommerce' ) }
-				placeholder={ woocommerce_email_data.default_heading}
+				label={ __( 'Preview text', 'woocommerce' ) }
+				help={
+					<span
+						className={ clsx(
+							'woocommerce-settings-panel__preview-text-length',
+							{
+								'woocommerce-settings-panel__preview-text-length-warning':
+									previewTextLength >
+									previewTextRecommendedLength,
+								'woocommerce-settings-panel__preview-text-length-error':
+									previewTextLength > previewTextMaxLength,
+							}
+						) }
+					>
+						{ previewTextLength }/{ previewTextMaxLength }
+					</span>
+				}
+				placeholder={ __(
+					'Shown as a preview in the inbox, next to the subject line.',
+					'woocommerce'
+				) }
 			/>
 		</>
 	);

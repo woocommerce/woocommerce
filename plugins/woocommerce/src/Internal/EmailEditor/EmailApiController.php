@@ -15,7 +15,11 @@ defined( 'ABSPATH' ) || exit;
  * @internal
  */
 class EmailApiController {
-	/** @var \WC_Email[] */
+	/**
+	 * A list of WooCommerce emails.
+	 *
+	 * @var \WC_Email[]
+	 */
 	private array $emails;
 
 	/**
@@ -40,10 +44,9 @@ class EmailApiController {
 		$email = $this->get_email_by_type( $email_type );
 
 		return array(
-			'subject' => $post_option['subject'] ?? null,
-			'heading' => $post_option['heading'] ?? null,
+			'subject'         => $post_option['subject'] ?? null,
+			'preheader'       => $post_option['preheader'] ?? null,
 			'default_subject' => $email->get_default_subject(),
-			'default_heading' => $email->get_default_heading(),
 		);
 	}
 
@@ -54,7 +57,7 @@ class EmailApiController {
 	 * @param \WP_Post $post - WP_Post object.
 	 */
 	public function save_email_data( array $data, \WP_Post $post ): void {
-		if ( ! array_key_exists( 'subject', $data ) && ! array_key_exists( 'heading', $data ) ) {
+		if ( ! array_key_exists( 'subject', $data ) && ! array_key_exists( 'preheader', $data ) ) {
 			return;
 		}
 		$email_type  = get_post_meta( $post->ID, Integration::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
@@ -63,8 +66,8 @@ class EmailApiController {
 		if ( array_key_exists( 'subject', $data ) ) {
 			$post_option['subject'] = $data['subject'];
 		}
-		if ( array_key_exists( 'heading', $data ) ) {
-			$post_option['heading'] = $data['heading'];
+		if ( array_key_exists( 'preheader', $data ) ) {
+			$post_option['preheader'] = $data['preheader'];
 		}
 		update_option( $option_name, $post_option );
 	}
@@ -80,7 +83,6 @@ class EmailApiController {
 				'subject'         => Builder::string()->nullable(),
 				'preheader'       => Builder::string()->nullable(),
 				'default_subject' => Builder::string(),
-				'default_heading' => Builder::string(),
 			)
 		)->to_array();
 	}
@@ -91,7 +93,7 @@ class EmailApiController {
 	 * @param string $id - The email ID.
 	 * @return \WC_Email|null - The email object or null if not found.
 	 */
-	private function get_email_by_type(string $id ): ?WC_Email {
+	private function get_email_by_type( string $id ): ?WC_Email {
 		foreach ( $this->emails as $email ) {
 			if ( $email->id === $id ) {
 				return $email;

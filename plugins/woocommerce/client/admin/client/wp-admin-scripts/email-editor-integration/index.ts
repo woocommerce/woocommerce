@@ -15,6 +15,8 @@ import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
 
+import './style.scss';
+
 // The type is copied from the email-editor package.
 // When the type was imported from the email-editor package, the build failed due to more than 50 type errors.
 type EmailContentValidationRule = {
