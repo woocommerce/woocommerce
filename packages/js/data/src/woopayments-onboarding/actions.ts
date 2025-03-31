@@ -1,29 +1,30 @@
 /**
  * Internal dependencies
  */
-import { StepContent } from './types';
+import { OnboardingDataResponse } from './types';
 
-export function getOnboardingStepsRequest() {
+export function getOnboardingDataRequest() {
 	return {
-		type: 'GET_WOOPAYMENTS_ONBOARDING_STEPS_REQUEST' as const,
+		type: 'GET_WOOPAYMENTS_ONBOARDING_DATA_REQUEST' as const,
 	};
 }
 
-export function getOnboardingStepsSuccess( steps: StepContent[] ) {
+export function getOnboardingDataSuccess( data: OnboardingDataResponse ) {
 	return {
-		type: 'GET_WOOPAYMENTS_ONBOARDING_STEPS_SUCCESS' as const,
-		steps,
+		type: 'GET_WOOPAYMENTS_ONBOARDING_DATA_SUCCESS' as const,
+		steps: data.steps,
+		context: data.context,
 	};
 }
 
-export function getOnboardingStepsError( error: unknown ) {
+export function getOnboardingDataError( error: unknown ) {
 	return {
-		type: 'GET_WOOPAYMENTS_ONBOARDING_STEPS_ERROR' as const,
+		type: 'GET_WOOPAYMENTS_ONBOARDING_DATA_ERROR' as const,
 		error,
 	};
 }
 
 export type Action =
-	| ReturnType< typeof getOnboardingStepsRequest >
-	| ReturnType< typeof getOnboardingStepsSuccess >
-	| ReturnType< typeof getOnboardingStepsError >;
+	| ReturnType< typeof getOnboardingDataRequest >
+	| ReturnType< typeof getOnboardingDataSuccess >
+	| ReturnType< typeof getOnboardingDataError >;

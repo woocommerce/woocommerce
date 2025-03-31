@@ -64,6 +64,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	content?: ReactNode;
 	context?: {
 		payment_methods: RecommendedPaymentMethod[];
+		overview_page_url?: string;
 	};
 }
 
@@ -72,6 +73,11 @@ export interface WooPaymentsProviderOnboardingStep {
  */
 export interface OnboardingContextType {
 	steps: WooPaymentsProviderOnboardingStep[];
+	context: {
+		urls?: {
+			overview_page?: string;
+		};
+	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
@@ -80,4 +86,5 @@ export interface OnboardingContextType {
 		stepKey: string
 	) => WooPaymentsProviderOnboardingStep | undefined;
 	refreshOnboardingSteps: () => void;
+	closeModal: () => void;
 }
