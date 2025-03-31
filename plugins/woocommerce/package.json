@@ -109,7 +109,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.1 WP: latest",
+					"name": "PHP: 8.2 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -128,14 +128,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1",
+							"phpVersion": "8.2",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.8-wp-latest"
+						"php-unit-php-8.2-wp-latest"
 					]
 				},
 				{
