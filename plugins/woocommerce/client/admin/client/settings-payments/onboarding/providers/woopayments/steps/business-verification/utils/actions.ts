@@ -118,7 +118,7 @@ export const createKycAccountSession = async (
 	poEligible: boolean
 ): Promise< AccountKycResult > => {
 	return await apiFetch< AccountKycResult >( {
-		path: addQueryArgs( apiURL, {
+		url: addQueryArgs( apiURL, {
 			self_assessment: fromDotNotation( data ),
 			progressive: poEligible,
 		} ),
