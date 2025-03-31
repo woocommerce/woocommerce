@@ -243,4 +243,39 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'wp_count_posts', $supply_post_count );
 	}
+
+	/**
+	 * Tests that database updates are scheduled automatically (or not) depending on whether auto-updates are enabled.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *           [null]
+	 *
+	 * @since 9.9.0
+	 *
+	 * @param bool|null $auto_update Whether to enable auto-updates (TRUE) or not. NULL means use the defaults.
+	 */
+	public function test_db_auto_updates( ?bool $auto_update = null ): void {
+		$options = array( 'woocommerce_db_version', 'woocommerce_version' );
+
+		if ( ! is_null( $auto_update ) ) {
+			add_filter( 'woocommerce_enable_auto_update_db', fn() => $auto_update );
+		}
+
+		foreach ( $options as $option_name ) {
+			update_option( $option_name, '9.4.0' );
+		}
+
+		// Trigger version check.
+		\WC_Install::check_version();
+
+		// Did we schedule anything automatically?
+		$update_scheduled = ! is_null( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
+
+		if ( $auto_update || is_null( $auto_update ) ) {
+			$this->assertTrue( $update_scheduled );
+		} else {
+			$this->assertFalse( $update_scheduled );
+		}
+	}
 }
