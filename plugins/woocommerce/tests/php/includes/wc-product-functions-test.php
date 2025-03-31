@@ -271,6 +271,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// Test that we got related products (limited to 2).
 		$this->assertCount( 2, $related_products );
 
+		$related_products_numeric = wc_get_related_products( $main_product->get_id(), '2' );
+		$this->assertCount( 2, $related_products_numeric );
+
 		// Test with a larger limit to get all related products.
 		$all_related_products = wc_get_related_products( $main_product->get_id(), 10 );
 		$this->assertCount( 3, $all_related_products );
