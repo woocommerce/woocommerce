@@ -57,8 +57,7 @@ export function EmailTypeInfo() {
 		},
 		[]
 	);
-	const [ templates ] =
-		usePreviewTemplates( 'swap' );
+	const [ templates ] = usePreviewTemplates( 'swap' );
 
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
 		useState( false );
@@ -84,14 +83,18 @@ export function EmailTypeInfo() {
 									{ __( 'Template', 'woocommerce' ) }
 								</FlexItem>
 								<FlexItem>
-									{ !((templates?.length > 1) || canUpdateTemplates) &&
-										<b>{ template?.title }</b>
-									}
-									{ ((templates?.length > 1) || canUpdateTemplates) && (
+									{ ! (
+										templates?.length > 1 ||
+										canUpdateTemplates
+									) && <b>{ template?.title }</b> }
+									{ ( templates?.length > 1 ||
+										canUpdateTemplates ) && (
 										<DropdownMenu
 											icon={ null }
 											text={ template?.title }
-											toggleProps={ { variant: 'tertiary' } }
+											toggleProps={ {
+												variant: 'tertiary',
+											} }
 											label={ __(
 												'Template actions',
 												'woocommerce'
