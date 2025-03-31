@@ -27,7 +27,8 @@ export default function WooPaymentsModal( {
 	const location = useLocation();
 	const history = getHistory();
 	const wooPaymentsOnboardingPath = '/woopayments/onboarding';
-	const isJetpackReturn = getQueryArg( window.location.href, 'wpcom_connection_return' ) || false;
+	const isJetpackReturn =
+		getQueryArg( window.location.href, 'wpcom_connection_return' ) || false;
 	const { createErrorNotice } = dispatch( 'core/notices' );
 
 	// Open modal when on an onboarding route
@@ -36,23 +37,18 @@ export default function WooPaymentsModal( {
 			location.pathname.startsWith( wooPaymentsOnboardingPath ) &&
 			! isOpen &&
 			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
-			( ! hasWPComConnection && ! isJetpackReturn )
+			! hasWPComConnection &&
+			! isJetpackReturn
 		) {
 			setIsOpen( true );
 		}
 
 		// Trigger a snackbar error notification when the user aborts the WPCom connection process.
 		if ( ! hasWPComConnection && isJetpackReturn ) {
-			createErrorNotice(
-				__(
-					'Setup was cancelled!',
-					'woocommerce'
-				),
-				{
-					type: 'snackbar',
-					explicitDismiss: false,
-				}
-			);
+			createErrorNotice( __( 'Setup was cancelled!', 'woocommerce' ), {
+				type: 'snackbar',
+				explicitDismiss: false,
+			} );
 		}
 	}, [ location, isOpen, setIsOpen, isJetpackReturn, hasWPComConnection ] );
 

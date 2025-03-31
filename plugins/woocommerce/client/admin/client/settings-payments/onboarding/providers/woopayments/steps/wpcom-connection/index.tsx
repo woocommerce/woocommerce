@@ -5,13 +5,10 @@ import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 
-
 /**
  * Internal dependencies
  */
-import {
-	useOnboardingContext,
-} from '../../data/onboarding-context';
+import { useOnboardingContext } from '../../data/onboarding-context';
 import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
 
@@ -36,7 +33,8 @@ export const JetpackStep: React.FC = () => {
 						variant="primary"
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
 						onClick={ () => {
-							window.location.href = currentStep?.actions?.auth?.href ?? '';
+							window.location.href =
+								currentStep?.actions?.auth?.href ?? '';
 						} }
 					>
 						{ __( 'Connect', 'woocommerce' ) }
