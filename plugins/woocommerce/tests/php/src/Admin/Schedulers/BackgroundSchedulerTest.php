@@ -31,7 +31,7 @@ class BackgroundSchedulerTest extends \WC_Unit_Test_Case {
 	 * Test that the background scheduler initializes hooks.
 	 */
 	public function test_background_scheduler_initializes_hooks() {
-		$this->background_scheduler->init();
+		$this->background_scheduler->schedule_background_actions();
 		$this->assertTrue( as_has_scheduled_action( BackgroundScheduler::HOOK_NAME ) );
 	}
 }
