@@ -54,11 +54,13 @@ class Features {
 	 * Constructor.
 	 */
 	public function __construct() {
+
+		$this->register_internal_class_aliases();
+
 		if ( ! self::should_load_features() ) {
 			return;
 		}
 
-		$this->register_internal_class_aliases();
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_load_beta_features_modal' ) );
@@ -112,10 +114,6 @@ class Features {
 	 * @return string|null
 	 */
 	public static function get_feature_class( $feature ) {
-		if ( ! self::should_load_features() ) {
-			return null;
-		}
-
 		$feature       = str_replace( '-', '', ucwords( strtolower( $feature ), '-' ) );
 		$feature_class = 'Automattic\\WooCommerce\\Admin\\Features\\' . $feature;
 
