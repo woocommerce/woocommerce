@@ -1,18 +1,19 @@
 /**
  * External dependencies
  */
-import { SelectControl } from '@wordpress/components';
+import { Button, SelectControl, Spinner } from '@wordpress/components';
 import { createElement, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { store as coreDataStore, Page } from '@wordpress/core-data';
+import { close } from '@wordpress/icons';
 import type { DataFormControlProps } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
-import type { DataFormItem } from '../types';
-import { sanitizeHTML } from '../utils';
+import type { DataFormItem } from '../../types';
+import { sanitizeHTML } from '../../utils';
 
 // https://github.com/woocommerce/woocommerce/blob/83a090f70d1f7b07325d9df9bd03fe2f753d4fd4/plugins/woocommerce/includes/admin/class-wc-admin-settings.php#L626-L636
 const PAGE_QUERY_ARGS = {
@@ -28,17 +29,15 @@ const usePages = () => {
 		const { getEntityRecords, hasFinishedResolution } =
 			select( coreDataStore );
 
+		const args: [ string, string, typeof PAGE_QUERY_ARGS ] = [
+			'postType',
+			'page',
+			PAGE_QUERY_ARGS,
+		];
+
 		return {
-			pages: getEntityRecords(
-				'postType',
-				'page',
-				PAGE_QUERY_ARGS
-			) as Page[],
-			isLoading: ! hasFinishedResolution( 'getEntityRecords', [
-				'postType',
-				'page',
-				PAGE_QUERY_ARGS,
-			] ),
+			pages: getEntityRecords( ...args ) as Page[],
+			isLoading: ! hasFinishedResolution( 'getEntityRecords', args ),
 		};
 	}, [] );
 };
@@ -48,7 +47,7 @@ type SingleSelectPageEditProps = DataFormControlProps< DataFormItem > & {
 	className?: string;
 };
 
-export const SingleSelectPage = ( {
+export const SingleSelectPageEdit = ( {
 	data,
 	field,
 	onChange,
@@ -97,10 +96,29 @@ export const SingleSelectPage = ( {
 		[ isLoading, pages ]
 	);
 
+	const getSuffix = () => {
+		if ( isLoading ) {
+			return <Spinner />;
+		}
+
+		if ( value ) {
+			return (
+				<Button
+					icon={ close }
+					iconSize={ 16 }
+					size="compact"
+					onClick={ () => onChangeControl( '' ) }
+				/>
+			);
+		}
+
+		return null;
+	};
+
 	return (
 		<SelectControl
 			className={ className }
-			disabled={ isLoading }
+			suffix={ getSuffix() }
 			id={ id }
 			label={ label }
 			value={ value }
