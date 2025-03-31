@@ -7,7 +7,6 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import {
 	CheckboxControl,
 	TextareaControl,
@@ -18,20 +17,7 @@ import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
-/**
- * Provides a modal requesting customer feedback.
- *
- *
- * @param {Object}   props                     Component props.
- * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {Function} props.onCloseModal        Function to call when user closes the modal by clicking the X.
- * @param {Function} props.onSkipFeedback      Function to call when user skips sending feedback.
- */
-function ProductMVPFeedbackModal( {
-	recordScoreCallback,
-	onCloseModal,
-	onSkipFeedback,
-}: {
+export type ProductMVPFeedbackModalProps = {
 	recordScoreCallback: (
 		checked: string[],
 		comments: string,
@@ -39,7 +25,21 @@ function ProductMVPFeedbackModal( {
 	) => void;
 	onCloseModal?: () => void;
 	onSkipFeedback?: () => void;
-} ): JSX.Element | null {
+};
+
+/**
+ * Provides a modal requesting customer feedback.
+ *
+ * @param {Object}   props                     Component props.
+ * @param {Function} props.recordScoreCallback Function to call when the results are sent.
+ * @param {Function} props.onCloseModal        Function to call when user closes the modal by clicking the X.
+ * @param {Function} props.onSkipFeedback      Function to call when user skips sending feedback.
+ */
+export function ProductMVPFeedbackModal( {
+	recordScoreCallback,
+	onCloseModal,
+	onSkipFeedback,
+}: ProductMVPFeedbackModalProps ) {
 	const [ missingFeatures, setMissingFeatures ] = useState( false );
 	const [ missingPlugins, setMissingPlugins ] = useState( false );
 	const [ difficultToUse, setDifficultToUse ] = useState( false );
@@ -182,10 +182,3 @@ function ProductMVPFeedbackModal( {
 		</FeedbackModal>
 	);
 }
-
-ProductMVPFeedbackModal.propTypes = {
-	recordScoreCallback: PropTypes.func.isRequired,
-	onCloseModal: PropTypes.func,
-};
-
-export { ProductMVPFeedbackModal };
