@@ -31,8 +31,14 @@ type FieldDefinition = [
 	}
 ];
 
+/**
+ * Get the property key for a field definition
+ * @param field - The field definition
+ * @return The key for the field
+ */
 function getFieldKey( field: FieldDefinition ): string {
 	const attributes = field[ 1 ];
+	// We support the block binding structure.
 	if (
 		attributes.metadata?.bindings?.value?.source ===
 			'woocommerce/entity-product' &&
@@ -60,18 +66,11 @@ export function useDataFormProductFields(
 	return useMemo( () => {
 		return fields.map( ( [ fieldName, params ] ) => {
 			const getFieldDefinition = getProductField( fieldName );
-			console.log( fieldName, getFieldDefinition );
 			// Convert the field definition to a DataForm field format
 			const field: Field< Product > = {
 				...getFieldDefinition,
 				id: getFieldKey( [ fieldName, params ] ),
 			};
-
-			// Note: In practice, you'd want to:
-			// 1. Have a mapping of fieldNames to their respective Edit components
-			// 2. Or use React.lazy with dynamic imports for code splitting
-			// Example with React.lazy:
-			// field.Edit = React.lazy(() => import(`../../blocks/${fieldName}/edit`));
 
 			return field;
 		} );

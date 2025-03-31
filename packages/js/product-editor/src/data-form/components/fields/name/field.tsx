@@ -110,6 +110,7 @@ export function NameBlockEdit( {
 		'product_name'
 	) as string;
 
+	// @todo: This relies on attribute settings from the block information, we need to find a way to get this into the DataForm.
 	// useEffect( () => {
 	// 	if ( field.attributes.autoFocus ) {
 	// 		selectBlock( clientId );
