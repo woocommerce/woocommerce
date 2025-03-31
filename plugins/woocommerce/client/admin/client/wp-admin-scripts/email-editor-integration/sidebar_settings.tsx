@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { select, dispatch } from '@wordpress/data';
+import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
@@ -12,9 +14,32 @@ import { NAME_SPACE } from './constants';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const SidebarSettings = ( { RichTextWithButton } ) => {
+	const [ woocommerce_email_data ] = useEntityProp(
+		'postType',
+		'woo_email',
+		'woocommerce_data'
+	);
+
 	const updateWooMailProperty = ( name: string, value: string ) => {
-		console.log(name);
-		console.log(value);
+		const editedPost = select( coreDataStore ).getEditedEntityRecord(
+			'postType',
+			'woo_email',
+			window.WooCommerceEmailEditor.current_post_id
+		);
+
+		// @ts-expect-error Property 'mailpoet_data' does not exist on type 'Updatable<Attachment<any>>'.
+		const woocommerce_data = editedPost?.woocommerce_data || {};
+		void dispatch( coreDataStore ).editEntityRecord(
+			'postType',
+			'woo_email',
+			window.WooCommerceEmailEditor.current_post_id,
+			{
+				woocommerce_data: {
+					...woocommerce_data,
+					[ name ]: value,
+				},
+			},
+		);
 	};
 
 	return (
@@ -22,7 +47,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 			<br />
 			<RichTextWithButton
 				attributeName="subject"
-				attributeValue="Subject"
+				attributeValue={ woocommerce_email_data.subject }
 				updateProperty={ updateWooMailProperty }
 				label={ __( 'Subject', 'woocommerce' ) }
 				placeholder={ __(
@@ -33,10 +58,10 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 
 			<br />
 			<RichTextWithButton
-				attributeName="preheader"
-				attributeValue="Preheader"
+				attributeName="heading"
+				attributeValue={ woocommerce_email_data.heading }
 				updateProperty={ updateWooMailProperty }
-				label={ __( 'Preheader', 'woocommerce' ) }
+				label={ __( 'Heading', 'woocommerce' ) }
 				placeholder={ __(
 					'Eg. The summer sale is here!',
 					'woocommerce'
