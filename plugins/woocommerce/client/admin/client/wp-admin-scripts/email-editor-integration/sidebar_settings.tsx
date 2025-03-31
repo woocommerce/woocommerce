@@ -50,10 +50,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 				attributeValue={ woocommerce_email_data.subject }
 				updateProperty={ updateWooMailProperty }
 				label={ __( 'Subject', 'woocommerce' ) }
-				placeholder={ __(
-					'Eg. The summer sale is here!',
-					'woocommerce'
-				) }
+				placeholder={ woocommerce_email_data.default_subject }
 			/>
 
 			<br />
@@ -62,10 +59,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 				attributeValue={ woocommerce_email_data.heading }
 				updateProperty={ updateWooMailProperty }
 				label={ __( 'Heading', 'woocommerce' ) }
-				placeholder={ __(
-					'Eg. The summer sale is here!',
-					'woocommerce'
-				) }
+				placeholder={ woocommerce_email_data.default_heading}
 			/>
 		</>
 	);

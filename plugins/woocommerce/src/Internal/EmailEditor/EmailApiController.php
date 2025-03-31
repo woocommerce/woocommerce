@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
+use WC_Email;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,6 +15,18 @@ defined( 'ABSPATH' ) || exit;
  * @internal
  */
 class EmailApiController {
+	/** @var \WC_Email[] */
+	private array $emails;
+
+	/**
+	 * Initialize the controller.
+	 *
+	 * @internal
+	 */
+	final public function init(): void {
+		$this->emails = WC()->mailer()->get_emails();
+	}
+
 	/**
 	 * Returns the data from wp_options table for the given post.
 	 *
@@ -24,9 +37,13 @@ class EmailApiController {
 		$email_type  = get_post_meta( $post_data['id'], Integration::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
 		$post_option = get_option( "woocommerce_{$email_type}_settings" );
 
+		$email = $this->get_email_by_type( $email_type );
+
 		return array(
 			'subject' => $post_option['subject'] ?? null,
 			'heading' => $post_option['heading'] ?? null,
+			'default_subject' => $email->get_default_subject(),
+			'default_heading' => $email->get_default_heading(),
 		);
 	}
 
@@ -62,7 +79,24 @@ class EmailApiController {
 			array(
 				'subject'         => Builder::string()->nullable(),
 				'preheader'       => Builder::string()->nullable(),
+				'default_subject' => Builder::string(),
+				'default_heading' => Builder::string(),
 			)
 		)->to_array();
+	}
+
+	/**
+	 * Get the email object by ID.
+	 *
+	 * @param string $id - The email ID.
+	 * @return \WC_Email|null - The email object or null if not found.
+	 */
+	private function get_email_by_type(string $id ): ?WC_Email {
+		foreach ( $this->emails as $email ) {
+			if ( $email->id === $id ) {
+				return $email;
+			}
+		}
+		return null;
 	}
 }
