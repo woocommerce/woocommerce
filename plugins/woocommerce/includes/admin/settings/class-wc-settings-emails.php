@@ -32,7 +32,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$this->id    = 'email';
 		$this->label = __( 'Emails', 'woocommerce' );
 
-		add_action( 'admin_notices', array( $this, 'display_email_sender_options_notice' ) );
 		add_action( 'woocommerce_admin_field_email_notification', array( $this, 'email_notification_setting' ) );
 		add_action( 'woocommerce_admin_field_email_notification_block_emails', array( $this, 'email_notification_setting_block_emails' ) );
 		add_action( 'woocommerce_admin_field_email_preview', array( $this, 'email_preview' ) );
@@ -912,17 +911,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				update_option( 'woocommerce_email_improvements_last_disabled_at', $current_date );
 			}
 		}
-	}
-
-	/**
-	 * Display the email sender options notice about moving the sender options to the email template editor.
-	 */
-	public function display_email_sender_options_notice() {
-		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
-			WC_Admin_Notices::add_notice( 'email_sender_options' );
-			return;
-		}
-		WC_Admin_Notices::remove_notice( 'email_sender_options' );
 	}
 }
 
