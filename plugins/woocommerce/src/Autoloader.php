@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Autoloader clazz.
+ * Autoloader clazss.
  *
  * @since 3.7.0
  */
