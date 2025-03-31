@@ -105,8 +105,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 							email.post_id
 						) }&action=edit`;
 					} else {
-						window.location.href = `/wp-admin/admin.php?page=wc-settings&tab=email&section=wc_email_${ encodeURIComponent(
-							email.id
+						window.location.href = `/wp-admin/admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
+							email.email_key
 						) }`;
 					}
 				},

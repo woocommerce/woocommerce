@@ -636,11 +636,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		);
 		$emails      = WC()->mailer()->get_emails();
 		$email_types = array();
-		foreach ( $emails as $email ) {
+		foreach ( $emails as $email_key => $email ) {
 			$email_types[] = array(
 				'title'       => $email->get_title(),
 				'description' => $email->get_description(),
 				'id'          => $email->id,
+				'email_key'   => strtolower( $email_key ),
 				'post_id'     => $email->get_email_template_post_id(),
 				'enabled'     => $email->is_enabled(),
 				'manual'      => $email->is_manual(),
