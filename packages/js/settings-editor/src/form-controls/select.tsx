@@ -12,7 +12,6 @@ import type { DataFormControlProps } from '@wordpress/dataviews';
 import type { DataFormItem } from '../types';
 
 type SelectProps = DataFormControlProps< DataFormItem > & {
-	hideLabelFromVision?: boolean;
 	help?: React.ReactNode;
 };
 
