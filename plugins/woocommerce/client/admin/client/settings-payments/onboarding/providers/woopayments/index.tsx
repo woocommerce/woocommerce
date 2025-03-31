@@ -37,8 +37,7 @@ export default function WooPaymentsModal( {
 			location.pathname.startsWith( wooPaymentsOnboardingPath ) &&
 			! isOpen &&
 			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
-			! hasWPComConnection &&
-			! isJetpackReturn
+			! ( ! hasWPComConnection && isJetpackReturn )
 		) {
 			setIsOpen( true );
 		}
