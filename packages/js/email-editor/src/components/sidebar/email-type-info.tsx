@@ -59,7 +59,6 @@ export function EmailTypeInfo() {
 	);
 	const [ templates ] =
 		usePreviewTemplates( 'swap' );
-	console.log( 'templates', templates );
 
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
 		useState( false );
@@ -85,67 +84,72 @@ export function EmailTypeInfo() {
 									{ __( 'Template', 'woocommerce' ) }
 								</FlexItem>
 								<FlexItem>
-									<DropdownMenu
-										icon={ null }
-										text={ template?.title }
-										toggleProps={ { variant: 'tertiary' } }
-										label={ __(
-											'Template actions',
-											'woocommerce'
-										) }
-										onToggle={ ( isOpen ) =>
-											recordEvent(
-												'sidebar_template_actions_clicked',
-												{
-													currentTemplate:
-														template?.title,
-													isOpen,
-												}
-											)
-										}
-									>
-										{ ( { onClose } ) => (
-											<>
-												{ canUpdateTemplates && (
-													<MenuItem
-														onClick={ () => {
-															recordEvent(
-																'sidebar_template_actions_edit_template_clicked'
-															);
-															setEditTemplateModalOpen(
-																true
-															);
-															onClose();
-														} }
-													>
-														{ __(
-															'Edit template',
-															'woocommerce'
-														) }
-													</MenuItem>
-												) }
+									{ !((templates?.length > 1) || canUpdateTemplates) &&
+										<b>{ template?.title }</b>
+									}
+									{ ((templates?.length > 1) || canUpdateTemplates) && (
+										<DropdownMenu
+											icon={ null }
+											text={ template?.title }
+											toggleProps={ { variant: 'tertiary' } }
+											label={ __(
+												'Template actions',
+												'woocommerce'
+											) }
+											onToggle={ ( isOpen ) =>
+												recordEvent(
+													'sidebar_template_actions_clicked',
+													{
+														currentTemplate:
+															template?.title,
+														isOpen,
+													}
+												)
+											}
+										>
+											{ ( { onClose } ) => (
+												<>
+													{ canUpdateTemplates && (
+														<MenuItem
+															onClick={ () => {
+																recordEvent(
+																	'sidebar_template_actions_edit_template_clicked'
+																);
+																setEditTemplateModalOpen(
+																	true
+																);
+																onClose();
+															} }
+														>
+															{ __(
+																'Edit template',
+																'woocommerce'
+															) }
+														</MenuItem>
+													) }
 
-												{ templates?.length > 1 && (
-													<MenuItem
-														onClick={ () => {
-															recordEvent(
-																'sidebar_template_actions_swap_template_clicked'
-															);
-															setSelectTemplateModalOpen(
-																true
-															);
-															onClose();
-														} }
-													>
-														{ __(
-															'Swap template',
-															'woocommerce'
-														) }
-													</MenuItem>
-												) }
-											</>
-										) }
-									</DropdownMenu>
+													{ templates?.length > 1 && (
+														<MenuItem
+															onClick={ () => {
+																recordEvent(
+																	'sidebar_template_actions_swap_template_clicked'
+																);
+																setSelectTemplateModalOpen(
+																	true
+																);
+																onClose();
+															} }
+														>
+															{ __(
+																'Swap template',
+																'woocommerce'
+															) }
+														</MenuItem>
+													) }
+												</>
+											) }
+										</DropdownMenu>
+									) }
 								</FlexItem>
 							</Flex>
 						</PanelRow>
