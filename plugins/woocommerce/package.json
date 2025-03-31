@@ -116,6 +116,9 @@
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-php-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -145,6 +148,9 @@
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-php-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -172,6 +178,9 @@
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-php-config"
 					],
 					"optional": true,
 					"changes": [
