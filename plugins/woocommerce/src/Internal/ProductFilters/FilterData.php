@@ -92,6 +92,20 @@ class FilterData {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$results = $wpdb->get_row( $price_filter_sql );
 
+		/**
+		 * Filters the product filter data before it is returned.
+		 *
+		 * @hook woocommerce_product_filter_data
+		 * @since 9.9.0
+		 *
+		 * @param mixed  $results      The results for current query.
+		 * @param string $filter_type  The type of filter. Accepts price|stock|rating|attribute.
+		 * @param array  $query_vars   The query arguments to calculate the filter data.
+		 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
+		 * @return mixed The filtered results
+		 */
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'price', $query_vars, array() );
+
 		$this->set_cache( $transient_key, $results );
 
 		return $results;
@@ -158,6 +172,11 @@ class FilterData {
 			$stock_status_counts[ $status ] = $result->status_count;
 		}
 
+		/**
+		 * Filter the results. @see get_filtered_price() for full documentation.
+		 */
+		$stock_status_counts = apply_filters( 'woocommerce_product_filter_data', $stock_status_counts, 'stock', $query_vars, array() );
+
 		$this->set_cache( $transient_key, $stock_status_counts );
 
 		return $stock_status_counts;
@@ -219,6 +238,11 @@ class FilterData {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$results = $wpdb->get_results( $rating_count_sql );
 		$results = array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
+
+		/**
+		 * Filter the results. @see get_filtered_price() for full documentation.
+		 */
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'rating', $query_vars, array() );
 
 		$this->set_cache( $transient_key, $results );
 
@@ -285,6 +309,11 @@ class FilterData {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$results = $wpdb->get_results( $attribute_count_sql );
 		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+
+		/**
+		 * Filter the results. @see get_filtered_price() for full documentation.
+		 */
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
 
 		$this->set_cache( $transient_key, $results );
 
