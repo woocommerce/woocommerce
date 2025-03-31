@@ -17,7 +17,7 @@ import Step from './components/step';
 import { getMccFromIndustry, getComingSoonShareKey } from './utils';
 import './style.scss';
 export const BusinessVerificationStep: React.FC = () => {
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, closeModal } = useOnboardingContext();
 
 	const initialData = {
 		business_name: window.wcSettings?.siteTitle,
@@ -40,7 +40,7 @@ export const BusinessVerificationStep: React.FC = () => {
 
 	return (
 		<div className="settings-payments-onboarding-modal__step-business-verification">
-			<WooPaymentsStepHeader onClose={ () => {} } />
+			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step-business-verification-content">
 				<BusinessVerificationContextProvider
 					initialData={ initialData }
