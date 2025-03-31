@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Email\EmailColors;
 use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -634,15 +635,16 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://wordpress.org/plugins/wp-mail-logging/',
 			'https://woocommerce.com/document/email-faq'
 		);
-		$emails      = WC()->mailer()->get_emails();
-		$email_types = array();
+		$email_post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$emails             = WC()->mailer()->get_emails();
+		$email_types        = array();
 		foreach ( $emails as $email_key => $email ) {
 			$email_types[] = array(
 				'title'       => $email->get_title(),
 				'description' => $email->get_description(),
 				'id'          => $email->id,
 				'email_key'   => strtolower( $email_key ),
-				'post_id'     => $email->get_email_template_post_id(),
+				'post_id'     => $email_post_manager->get_email_template_post_id( $email->id ),
 				'enabled'     => $email->is_enabled(),
 				'manual'      => $email->is_manual(),
 				'recipients'  => array(
