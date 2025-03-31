@@ -23,6 +23,7 @@ import { storeName } from '../../store';
 import { EditTemplateModal } from './edit-template-modal';
 import { SelectTemplateModal } from '../template-select';
 import { recordEvent } from '../../events';
+import { usePreviewTemplates } from '../../hooks';
 
 const TypeInfoIcon = applyFilters(
 	'woocommerce_email_editor_sidebar_email_type_info_icon',
@@ -56,6 +57,9 @@ export function EmailTypeInfo() {
 		},
 		[]
 	);
+	const [ templates ] =
+		usePreviewTemplates( 'swap' );
+	console.log( 'templates', templates );
 
 	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
 		useState( false );
@@ -121,22 +125,24 @@ export function EmailTypeInfo() {
 													</MenuItem>
 												) }
 
-												<MenuItem
-													onClick={ () => {
-														recordEvent(
-															'sidebar_template_actions_swap_template_clicked'
-														);
-														setSelectTemplateModalOpen(
-															true
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Swap template',
-														'woocommerce'
-													) }
-												</MenuItem>
+												{ templates?.length > 1 && (
+													<MenuItem
+														onClick={ () => {
+															recordEvent(
+																'sidebar_template_actions_swap_template_clicked'
+															);
+															setSelectTemplateModalOpen(
+																true
+															);
+															onClose();
+														} }
+													>
+														{ __(
+															'Swap template',
+															'woocommerce'
+														) }
+													</MenuItem>
+												) }
 											</>
 										) }
 									</DropdownMenu>
