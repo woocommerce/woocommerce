@@ -39,7 +39,7 @@ export function ProductMVPFeedbackModal( {
 	recordScoreCallback,
 	onCloseModal,
 	onSkipFeedback,
-}: ProductMVPFeedbackModalProps ): JSX.Element | null {
+}: ProductMVPFeedbackModalProps ) {
 	const [ missingFeatures, setMissingFeatures ] = useState( false );
 	const [ missingPlugins, setMissingPlugins ] = useState( false );
 	const [ difficultToUse, setDifficultToUse ] = useState( false );
