@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 
+use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
@@ -36,6 +37,20 @@ class WooPayments extends PaymentGateway {
 	 */
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
+
+		// Add WPCOM/Jetpack connection details to the onboarding state.
+		$wpcom_connection_manager       = new WPCOM_Connection_Manager( 'woocommerce' );
+		$is_connected                   = $wpcom_connection_manager->is_connected();
+		$has_connected_owner            = $wpcom_connection_manager->has_connected_owner();
+		$details['onboarding']['state'] = array_merge(
+			$details['onboarding']['state'],
+			array(
+				'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
+				'wpcom_is_store_connected'     => $is_connected,
+				'wpcom_has_connected_owner'    => $has_connected_owner,
+				'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
+			)
+		);
 
 		// If the WooPayments installed version is less than 9.2.0, we can't use the in-context onboarding flows.
 		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, '9.2.0', '<' ) ) {

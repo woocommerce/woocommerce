@@ -331,7 +331,7 @@ class Utils {
 	}
 
 	/**
-	 * Check if the store is properly connected to WPCOM (aka has a Jetpack connection).
+	 * Check if the store is properly connected to WPCOM (aka has a working Jetpack connection).
 	 *
 	 * @return bool
 	 */
