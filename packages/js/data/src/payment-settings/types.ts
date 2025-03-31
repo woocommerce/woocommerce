@@ -71,6 +71,7 @@ export type PaymentProviderOnboardingState = {
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
+	wpcom_has_working_connection?: boolean;
 };
 
 // General payment provider type.

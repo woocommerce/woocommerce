@@ -29,6 +29,7 @@ export interface SidebarItemProps {
 export interface WooPaymentsModalProps {
 	isOpen: boolean;
 	setIsOpen: ( isOpen: boolean ) => void;
+	hasWPComConnection: boolean;
 }
 
 /**
