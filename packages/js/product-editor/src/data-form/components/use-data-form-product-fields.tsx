@@ -13,6 +13,7 @@ import { getProductField } from './fields';
 
 /**
  * Get the property key for a field definition
+ *
  * @param field - The field definition
  * @return The key for the field
  */

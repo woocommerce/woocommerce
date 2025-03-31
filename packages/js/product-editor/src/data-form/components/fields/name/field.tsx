@@ -26,10 +26,9 @@ import { useValidation } from '../../../../contexts/validation-context';
 import { useProductEdits } from '../../../../hooks/use-product-edits';
 import { AUTO_DRAFT_NAME, getPermalinkParts } from '../../../../utils';
 
-/**
- * @todo: This is a temporary solution and close to a copy of the block name field.
- * We need refactor this to use this Edit in the current block name field.
- */
+// @todo: This is a temporary solution and close to a copy of the block name field.
+// We need refactor this to use this Edit in the current block name field.
+
 export function NameBlockEdit( {
 	data,
 	onChange,
