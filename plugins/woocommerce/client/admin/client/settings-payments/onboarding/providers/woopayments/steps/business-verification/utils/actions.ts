@@ -65,7 +65,7 @@ export const isPoEligible = async (
  */
 export const finalizeOnboarding = async ( apiUrl: string ) => {
 	return await apiFetch< FinalizeOnboardingResponse >( {
-		path: apiUrl,
+		url: apiUrl,
 		method: 'POST',
 		data: {},
 	} );
