@@ -4,8 +4,6 @@
 import { createElement, useMemo } from '@wordpress/element';
 import { Template } from '@wordpress/blocks';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
-// @ts-expect-error missing types.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { privateApis as componentsPrivateApis } from '@wordpress/components';
 
 /**

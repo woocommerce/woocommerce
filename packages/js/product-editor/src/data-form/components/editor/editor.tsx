@@ -54,9 +54,11 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 							productType={ postType }
 							selectedTab={ selectedTab }
 						/>
+						{ /* @ts-expect-error Type definitions are missing */ }
 						{ layoutTemplate?.blockTemplates && (
 							<ProductTabs
 								sectionTemplate={
+									// @ts-expect-error Type definitions are missing
 									layoutTemplate?.blockTemplates
 								}
 								postType={ postType }

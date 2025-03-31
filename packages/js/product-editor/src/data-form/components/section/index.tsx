@@ -43,7 +43,9 @@ export function ProductSection( {
 
 			const args = [ 'postType', postType, productId ];
 			return {
+				// @ts-expect-error Type definitions are missing
 				record: getEditedEntityRecord( ...args ) as Product,
+				// @ts-expect-error Type definitions are missing
 				hasFinishedResolution: hasFinished(
 					'getEditedEntityRecord',
 					args
@@ -63,7 +65,7 @@ export function ProductSection( {
 		return {
 			type: 'regular' as const,
 			fields: sectionTemplate[ 2 ]
-				.filter(
+				?.filter(
 					( field ) => field[ 0 ] === 'woocommerce/product-name-field'
 				)
 				.map( () => 'name' ),
@@ -87,7 +89,6 @@ export function ProductSection( {
 			<div className={ nestedClassNames }>
 				{ hasFinishedResolution && (
 					<DataForm
-						// @ts-expect-error fields is not typed
 						fields={ fields }
 						form={ form }
 						onChange={ onChange }

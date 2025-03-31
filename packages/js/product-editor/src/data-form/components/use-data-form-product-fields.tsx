@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useMemo } from '@wordpress/element';
+import { Template, TemplateArray } from '@wordpress/blocks';
 import { Field } from '@wordpress/dataviews';
 import { Product } from '@woocommerce/data';
 
@@ -10,34 +11,13 @@ import { Product } from '@woocommerce/data';
  */
 import { getProductField } from './fields';
 
-type FieldDefinition = [
-	string,
-	{
-		type?: string;
-		label?: string;
-		description?: string;
-		property?: string;
-		metadata?: {
-			bindings?: {
-				value?: {
-					source?: string;
-					args?: {
-						prop?: string;
-					};
-				};
-			};
-		};
-		[ key: string ]: unknown;
-	}
-];
-
 /**
  * Get the property key for a field definition
  * @param field - The field definition
  * @return The key for the field
  */
-function getFieldKey( field: FieldDefinition ): string {
-	const attributes = field[ 1 ];
+function getFieldKey( field: Template ): string {
+	const attributes = field[ 1 ] || {};
 	// We support the block binding structure.
 	if (
 		attributes.metadata?.bindings?.value?.source ===
@@ -61,7 +41,7 @@ function getFieldKey( field: FieldDefinition ): string {
  * @return Array of DataForm compatible field objects
  */
 export function useDataFormProductFields(
-	fields: FieldDefinition[] = []
+	fields: TemplateArray = []
 ): Field< Product >[] {
 	return useMemo( () => {
 		return fields.map( ( [ fieldName, params ] ) => {
