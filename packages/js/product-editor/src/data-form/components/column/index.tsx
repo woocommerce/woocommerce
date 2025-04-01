@@ -56,9 +56,15 @@ export function ProductColumn( {
 			fields: columnTemplate[ 2 ]
 				?.filter(
 					( field ) =>
-						field[ 0 ] === 'woocommerce/product-regular-price-field'
+						field[ 0 ] ===
+							'woocommerce/product-regular-price-field' ||
+						field[ 0 ] === 'woocommerce/product-sale-price-field'
 				)
-				.map( () => 'regular_price' ),
+				.map( ( field ) =>
+					field[ 0 ] === 'woocommerce/product-regular-price-field'
+						? 'regular_price'
+						: 'woocommerce/product-sale-price-field'
+				),
 		};
 	}, [ columnTemplate ] );
 
@@ -69,7 +75,7 @@ export function ProductColumn( {
 	// Basic container for a column, styling might be needed later
 	// The flex: 1 assumes columns should share space equally by default
 	return (
-		<div style={ { flex: 1 } }>
+		<div style={ { flex: 1, marginTop: '16px' } }>
 			{ hasFinishedResolution && (
 				<DataForm
 					fields={ fields }
