@@ -14,7 +14,7 @@ import { DataForm } from '@wordpress/dataviews';
  */
 import { SectionHeader } from '../../../components/section-header';
 import { useDataFormProductFields } from '../use-data-form-product-fields';
-
+import { ProductColumns } from '../columns';
 type ProductSectionProps = {
 	sectionTemplate: Template;
 	postType: string;
@@ -56,6 +56,7 @@ export function ProductSection( {
 	);
 
 	const nestedClassNames = classNames(
+		'woocommerce-product-block-editor',
 		'wp-block-woocommerce-product-section-header__content',
 		`wp-block-woocommerce-product-section-header__content--block-gap-${ blockGap }`
 	);
@@ -87,14 +88,32 @@ export function ProductSection( {
 			) }
 
 			<div className={ nestedClassNames }>
-				{ hasFinishedResolution && (
-					<DataForm
-						fields={ fields }
-						form={ form }
-						onChange={ onChange }
-						data={ record }
-					/>
-				) }
+				{ hasFinishedResolution &&
+					sectionTemplate[ 2 ]?.map( ( field ) => {
+						if ( field[ 0 ] === 'core/columns' ) {
+							return (
+								<ProductColumns
+									key={ field[ 1 ]?._templateBlockId }
+									columnsTemplate={ field }
+									postType={ postType }
+									productId={ productId }
+								/>
+							);
+						} else if (
+							field[ 0 ] === 'woocommerce/product-name-field'
+						) {
+							return (
+								<DataForm
+									key={ field[ 1 ]?._templateBlockId }
+									fields={ fields }
+									form={ form }
+									onChange={ onChange }
+									data={ record }
+								/>
+							);
+						}
+						return null;
+					} ) }
 				<p>
 					Render DataForm with { sectionTemplate[ 2 ]?.length } fields
 				</p>
