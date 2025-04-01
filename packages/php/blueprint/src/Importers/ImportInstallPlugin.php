@@ -52,7 +52,13 @@ class ImportInstallPlugin implements StepProcessor {
 		$installed_plugins = $this->get_installed_plugins_paths();
 
 		// phpcs:ignore
-		$plugin = $schema->pluginZipFile;
+		$plugin = $schema->pluginData;
+
+		// We only support CorePluginReference at the moment.
+		if ( 'wordpress.org/plugins' !== $plugin->resource ) {
+			$result->add_info( "Skipped installing a plugin. Unsupported resource type. Only 'wordpress.org/plugins' is supported at the moment." );
+			return $result;
+		}
 
 		if ( isset( $installed_plugins[ $plugin->slug ] ) ) {
 			$result->add_info( "Skipped installing {$plugin->slug}. It is already installed." );
@@ -72,7 +78,7 @@ class ImportInstallPlugin implements StepProcessor {
 		$install = $this->install( $downloaded_path );
 		$install && $result->add_info( "Installed {$plugin->slug}." );
 
-		if ( isset( $plugin->options, $plugin->options->activate ) && true === $plugin->options->activate ) {
+		if ( isset( $schema->options, $schema->options->activate ) && true === $schema->options->activate ) {
 			$activate = $this->activate( $plugin->slug );
 
 			if ( $activate instanceof \WP_Error ) {

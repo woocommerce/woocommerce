@@ -132,7 +132,7 @@ class WC_Beta_Tester_Version_Picker {
 		// The nonce is validated upstream.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['switched'] ) ) {
-			/* translators: %s: WooCoomerce version  */
+			/* translators: %s: WooCommerce version  */
 			$versions_html .= '<div class="notice notice-success"><p>' . sprintf( esc_html__( 'Successfully switched version to %s.', 'woocommerce-beta-tester' ), esc_html( sanitize_text_field( wp_unslash( $_GET['switched'] ) ) ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
