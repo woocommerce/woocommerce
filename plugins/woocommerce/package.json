@@ -445,7 +445,7 @@
 					}
 				},
 				{
-					"name": "Core API tests (HPOS:on)",
+					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api",
 					"optional": false,
@@ -472,7 +472,7 @@
 					"events": [
 						"pull_request",
 						"push",
-						"core-api-hpos-enabled"
+						"core-api"
 					],
 					"report": {
 						"resultsBlobName": "core-api-report",
