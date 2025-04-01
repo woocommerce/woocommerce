@@ -148,14 +148,13 @@ test.describe( 'registerProductBlockType registers', () => {
 
 		await expect( singleProductTemplate ).toBeVisible();
 
-		const iframe = page.frameLocator(
-			'button[aria-label="Single Product"] iframe[title="Editor canvas"]'
+		const previewCanvas = singleProductTemplate.frameLocator(
+			'iframe[title="Editor canvas"]'
 		);
-
 		for ( const blockType of productBlockTypes ) {
-			const block = iframe?.locator( `[data-type="${ blockType }"]` );
-			// We are not using toBeVisible() because it never scrolls the block into view.
-			// Presumably because its in a locked iframe.
+			const block = previewCanvas.locator(
+				`[data-type="${ blockType }"]`
+			);
 			await expect( block.first() ).toBeAttached();
 		}
 	} );
