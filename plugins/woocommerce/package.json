@@ -463,7 +463,9 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -497,7 +499,9 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
 					"events": [
 						"pull_request",
 						"push",
@@ -587,7 +591,8 @@
 						"templates/**/*.html"
 					],
 					"onlyForDependencies": [
-						"@woocommerce/block-library"
+						"@woocommerce/block-library",
+						"@woocommerce/e2e-utils"
 					],
 					"testEnv": {
 						"start": "env:start:blocks"
