@@ -17,6 +17,10 @@ body.wc-block-product-gallery-modal-open {
 		border: 0;
 		outline: 0;
 		box-shadow: none;
+
+		&:focus {
+			outline: 2px solid;
+		}
 	}
 
 	img {
