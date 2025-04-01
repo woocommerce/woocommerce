@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Get order item directly from order instead of database in `woocommerce_ajax_order_item` filter
+Reload order when adding an item via `add_order_item` ajax request before generating HTML fragments
