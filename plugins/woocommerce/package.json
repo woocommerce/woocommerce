@@ -445,20 +445,17 @@
 					}
 				},
 				{
-					"name": "Core API tests",
+					"name": "Core API tests (HPOS:on)",
 					"testType": "api",
 					"command": "test:api",
-					"onlyForDependencies": [],
 					"optional": false,
 					"changes": [
-						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
 						"i18n/**/*.php",
 						"includes/**/*.php",
-						"patterns/**/*.php",
 						"src/**/*.php",
-						"templates/**/*.php",
+						"tests/e2e-pw/bin/**",
 						"tests/e2e-pw/tests/api-tests/**",
 						"tests/e2e-pw/*.js",
 						"tests/e2e-pw/*.sh",
@@ -466,13 +463,14 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:test"
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"core-api"
+						"core-api-hpos-enabled"
 					],
 					"report": {
 						"resultsBlobName": "core-api-report",
@@ -481,25 +479,27 @@
 					}
 				},
 				{
-					"name": "Core API tests - HPOS disabled",
+					"name": "Core API tests (HPOS:off)",
 					"testType": "api",
 					"command": "test:api:hpos",
 					"optional": false,
 					"changes": [
-						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
 						"i18n/**/*.php",
-						"patterns/**/*.php",
+						"includes/**/*.php",
 						"src/**/*.php",
-						"templates/**/*.php",
 						"tests/e2e-pw/bin/**",
+						"tests/e2e-pw/tests/api-tests/**",
+						"tests/e2e-pw/*.js",
+						"tests/e2e-pw/*.sh",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
 					],
+					"onlyForDependencies": [],
 					"events": [
+						"pull_request",
 						"push",
 						"core-api-hpos-disabled"
 					],
@@ -536,7 +536,6 @@
 					"command": "test:metrics:ci",
 					"optional": false,
 					"changes": [
-						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
@@ -582,9 +581,10 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"src/Blocks/**",
-						"templates/**",
-						"patterns/**"
+						"patterns/**/*.php",
+						"src/Blocks/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
