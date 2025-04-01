@@ -463,9 +463,7 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
-					"onlyForDependencies": [
-						"@woocommerce/e2e-utils-playwright"
-					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -499,9 +497,7 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
-					"onlyForDependencies": [
-						"@woocommerce/e2e-utils-playwright"
-					],
+					"onlyForDependencies": [],
 					"events": [
 						"pull_request",
 						"push",
