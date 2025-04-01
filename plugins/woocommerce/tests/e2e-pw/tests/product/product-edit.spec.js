@@ -293,8 +293,13 @@ test(
 				const expectedRegularPrice = product.regular_price;
 
 				await expect
-					.soft( await page.locator( 'ins' ).count() )
-					.toBe( 0 );
+					.soft(
+						page
+							.locator( '.wc-block-components-product-price' )
+							.first()
+							.locator( 'ins' )
+					)
+					.toHaveCount( 0 );
 
 				await expect
 					.soft( page.locator( 'bdi' ).first() )
