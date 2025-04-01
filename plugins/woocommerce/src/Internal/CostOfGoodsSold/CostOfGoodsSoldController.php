@@ -22,7 +22,6 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 	 * Register hooks.
 	 */
 	public function register() {
-		add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'add_debug_tools_entry' ), 999, 1 );
 	}
 
