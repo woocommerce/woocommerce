@@ -586,7 +586,9 @@
 						"templates/**",
 						"patterns/**"
 					],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
 					"testEnv": {
 						"start": "env:start:blocks"
 					},
