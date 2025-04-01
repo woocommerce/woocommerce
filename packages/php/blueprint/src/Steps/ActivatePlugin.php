@@ -16,12 +16,20 @@ class ActivatePlugin extends Step {
 	private string $plugin_name;
 
 	/**
+	 * The path to the plugin file relative to the plugins directory.
+	 * @var string  The path to the plugin file relative to the plugins directory.
+	 */
+	private string $plugin_path;
+
+	/**
 	 * ActivatePlugin constructor.
 	 *
+	 * @param string $plugin_path Path to the plugin file relative to the plugins directory.
 	 * @param string $plugin_name The name of the plugin to be activated.
 	 */
-	public function __construct( $plugin_name ) {
+	public function __construct( $plugin_path, $plugin_name = '' ) {
 		$this->plugin_name = $plugin_name;
+		$this->plugin_path = $plugin_path;
 	}
 
 	/**
@@ -50,8 +58,11 @@ class ActivatePlugin extends Step {
 				'pluginName' => array(
 					'type' => 'string',
 				),
+				'pluginPath' => array(
+					'type' => 'string',
+				),
 			),
-			'required'   => array( 'step', 'pluginName' ),
+			'required'   => array( 'step', 'pluginPath' ),
 		);
 	}
 
@@ -61,9 +72,15 @@ class ActivatePlugin extends Step {
 	 * @return array Array of data to be encoded as JSON.
 	 */
 	public function prepare_json_array(): array {
-		return array(
+		$data = array(
 			'step'       => static::get_step_name(),
-			'pluginName' => $this->plugin_name,
+			'pluginPath' => $this->plugin_path,
 		);
+
+		if ( ! empty( $this->plugin_name ) ) {
+			$data['pluginName'] = $this->plugin_name;
+		}
+
+		return $data;
 	}
 }
