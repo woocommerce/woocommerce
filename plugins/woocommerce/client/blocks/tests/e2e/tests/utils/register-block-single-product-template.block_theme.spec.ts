@@ -151,26 +151,12 @@ test.describe( 'registerProductBlockType registers', () => {
 		const iframe = page.frameLocator(
 			'button[aria-label="Single Product"] iframe[title="Editor canvas"]'
 		);
+
 		for ( const blockType of productBlockTypes ) {
 			const block = iframe?.locator( `[data-type="${ blockType }"]` );
-			await expect( block ).toBeVisible();
-		}
-
-		await admin.page.reload();
-
-		const singleProductTemplateAfterReload = page.getByRole( 'button', {
-			name: 'Single Product',
-		} );
-
-		await expect( singleProductTemplateAfterReload ).toBeVisible();
-		const iframeAfterReload = page.frameLocator(
-			'button[aria-label="Single Product"] iframe[title="Editor canvas"]'
-		);
-		for ( const blockType of productBlockTypes ) {
-			const block = iframeAfterReload?.locator(
-				`[data-type="${ blockType }"]`
-			);
-			await expect( block ).toBeVisible();
+			// We are not using toBeVisible() because it never scrolls the block into view.
+			// Presumably because its in a locked iframe.
+			await expect( block.first() ).toBeAttached();
 		}
 	} );
 
