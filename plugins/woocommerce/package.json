@@ -587,8 +587,7 @@
 						"templates/**/*.html"
 					],
 					"onlyForDependencies": [
-						"@woocommerce/block-library",
-						"@woocommerce/e2e-utils"
+						"@woocommerce/block-library"
 					],
 					"testEnv": {
 						"start": "env:start:blocks"
