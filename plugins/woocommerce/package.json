@@ -547,6 +547,11 @@
 						"tests/metrics/**",
 						".wp-env.json"
 					],
+					"onlyForDependencies": [
+						"@woocommerce/admin-library",
+						"@woocommerce/block-library",
+						"@woocommerce/classic-assets"
+					],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -581,6 +586,7 @@
 						"templates/**",
 						"patterns/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks"
 					},
@@ -718,6 +724,7 @@
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/env": "10.17.0",
 		"@wordpress/scripts": "30.6.0",
@@ -754,8 +761,7 @@
 	"dependencies": {
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
-		"@woocommerce/classic-assets": "workspace:*",
-		"@wordpress/browserslist-config": "next"
+		"@woocommerce/classic-assets": "workspace:*"
 	},
 	"nodemonConfig": {
 		"delay": 2500,
