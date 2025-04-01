@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Feature plugin main class.
@@ -196,6 +197,7 @@ class FeaturePlugin {
 	 */
 	protected function hooks() {
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ), 0 );
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_reactify_settings_payments' ), 20 );
 
 		Loader::get_instance();
 		WCAdminAssets::get_instance();
@@ -215,6 +217,19 @@ class FeaturePlugin {
 		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
+		return $features;
+	}
+
+	/**
+	 * Enable the Reactify settings payments feature if the feature is enabled.
+	 *
+	 * @param array $features Array of feature slugs.
+	 */
+	public function enable_reactify_settings_payments( $features ) {
+		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			$features[] = 'reactify-classic-payments-settings';
+		}
+
 		return $features;
 	}
 
