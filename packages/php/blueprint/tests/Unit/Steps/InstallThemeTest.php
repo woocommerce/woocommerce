@@ -19,7 +19,7 @@ class InstallThemeTest extends TestCase {
 
 		$expected_array = array(
 			'step'         => 'installTheme',
-			'themeZipFile' => array(
+			'themeData' => array(
 				'resource' => $resource,
 				'slug'     => $slug,
 			),
@@ -47,17 +47,16 @@ class InstallThemeTest extends TestCase {
 					'type' => 'string',
 					'enum' => array( 'installTheme' ),
 				),
-				'themeZipFile' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
-					),
-					'required'   => array( 'resource', 'slug' ),
+				'themeData' => array(
+					"anyOf" => [
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/VFSReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/LiteralReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/CorePluginReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/CoreThemeReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/UrlReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/GitDirectoryReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/DirectoryLiteralReference.php",
+					]
 				),
 				'options'      => array(
 					'type'       => 'object',
@@ -68,7 +67,7 @@ class InstallThemeTest extends TestCase {
 					),
 				),
 			),
-			'required'   => array( 'step', 'themeZipFile' ),
+			'required'   => array( 'step', 'themeData' ),
 		);
 
 		$this->assertEquals( $expected_schema, InstallTheme::get_schema() );

@@ -109,13 +109,14 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.1 WP: latest",
+					"name": "PHP: 8.2 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -127,14 +128,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1",
+							"phpVersion": "8.2",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.8-wp-latest"
+						"php-unit-php-8.2-wp-latest"
 					]
 				},
 				{
@@ -145,6 +146,7 @@
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -173,6 +175,7 @@
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [],
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
@@ -445,6 +448,7 @@
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api",
+					"onlyForDependencies": [],
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -736,8 +740,6 @@
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
 		"typescript": "5.7.x",
-		"webpack": "5.70.0",
-		"webpack-cli": "3.3.12",
 		"wireit": "0.14.10",
 		"wp-textdomain": "1.0.1"
 	},

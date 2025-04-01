@@ -31,6 +31,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$this->id    = 'email';
 		$this->label = __( 'Emails', 'woocommerce' );
 
+		add_action( 'admin_notices', array( $this, 'display_email_sender_options_notice' ) );
 		add_action( 'woocommerce_admin_field_email_notification', array( $this, 'email_notification_setting' ) );
 		add_action( 'woocommerce_admin_field_email_preview', array( $this, 'email_preview' ) );
 		add_action( 'woocommerce_admin_field_email_image_url', array( $this, 'email_image_url' ) );
@@ -277,6 +278,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$body_text_color_setting_in_palette   = $reorder_colors ? $body_text_color_setting : null;
 		$footer_text_color_setting_in_palette = $reorder_colors ? $footer_text_color_setting : null;
 
+		$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
+
 		$settings =
 			array(
 				array(
@@ -298,39 +301,51 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_recipient_options',
 				),
-
+			);
+		// Email sender options is available in the new email editor.
+		// If the feature flag is disabled, we show the email sender options.
+		if ( ! $block_email_editor_enabled ) {
+			$settings = array_merge(
+				$settings,
 				array(
-					'title' => __( 'Email sender options', 'woocommerce' ),
-					'type'  => 'title',
-					'desc'  => __( "Set the name and email address you'd like your outgoing emails to use.", 'woocommerce' ),
-					'id'    => 'email_options',
-				),
-
-				array(
-					'title'    => __( '"From" name', 'woocommerce' ),
-					'desc'     => '',
-					'id'       => 'woocommerce_email_from_name',
-					'type'     => 'text',
-					'css'      => 'min-width:400px;',
-					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
-					'autoload' => false,
-					'desc_tip' => true,
-				),
-
-				array(
-					'title'             => __( '"From" address', 'woocommerce' ),
-					'desc'              => '',
-					'id'                => 'woocommerce_email_from_address',
-					'type'              => 'email',
-					'custom_attributes' => array(
-						'multiple' => 'multiple',
+					array(
+						'title' => __( 'Email sender options', 'woocommerce' ),
+						'type'  => 'title',
+						'desc'  => __( "Set the name and email address you'd like your outgoing emails to use.", 'woocommerce' ),
+						'id'    => 'email_options',
 					),
-					'css'               => 'min-width:400px;',
-					'default'           => get_option( 'admin_email' ),
-					'autoload'          => false,
-					'desc_tip'          => true,
-				),
 
+					array(
+						'title'    => __( '"From" name', 'woocommerce' ),
+						'desc'     => '',
+						'id'       => 'woocommerce_email_from_name',
+						'type'     => 'text',
+						'css'      => 'min-width:400px;',
+						'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
+						'autoload' => false,
+						'desc_tip' => true,
+					),
+
+					array(
+						'title'             => __( '"From" address', 'woocommerce' ),
+						'desc'              => '',
+						'id'                => 'woocommerce_email_from_address',
+						'type'              => 'email',
+						'custom_attributes' => array(
+							'multiple' => 'multiple',
+						),
+						'css'               => 'min-width:400px;',
+						'default'           => get_option( 'admin_email' ),
+						'autoload'          => false,
+						'desc_tip'          => true,
+					),
+				)
+			);
+		}
+
+		$settings = array_merge(
+			$settings,
+			array(
 				array(
 					'type' => 'sectionend',
 					'id'   => 'email_options',
@@ -402,7 +417,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				$color_palette_section_end,
 
 				array( 'type' => 'email_preview' ),
-			);
+			)
+		);
 
 		// Remove empty elements that depend on the email_improvements feature flag.
 		$settings = array_filter( $settings );
@@ -846,6 +862,17 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				update_option( 'woocommerce_email_improvements_last_disabled_at', $current_date );
 			}
 		}
+	}
+
+	/**
+	 * Display the email sender options notice about moving the sender options to the email template editor.
+	 */
+	public function display_email_sender_options_notice() {
+		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
+			WC_Admin_Notices::add_notice( 'email_sender_options' );
+			return;
+		}
+		WC_Admin_Notices::remove_notice( 'email_sender_options' );
 	}
 }
 
