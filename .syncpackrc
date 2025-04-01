@@ -22,26 +22,19 @@
 		},
 		{
 			"dependencies": [
-				"@actions/*",
-				"@automattic/*",
-				"@bartekbp/*",
+				"@automattic/color-studio",
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
 				"@wordpress/api-fetch",
 				"@wordpress/autop",
 				"@wordpress/base-styles",
-				"@wordpress/components",
 				"@wordpress/compose",
-				"@wordpress/core-data",
 				"@wordpress/data-controls",
 				"@wordpress/date",
 				"@wordpress/editor",
-				"@wordpress/deprecated",
 				"@wordpress/dom",
 				"@wordpress/dom-ready",
-				"@wordpress/e2e-test-utils",
-				"@wordpress/e2e-tests",
 				"@wordpress/element",
 				"@wordpress/html-entities",
 				"@wordpress/i18n",
@@ -50,21 +43,16 @@
 				"@wordpress/interactivity-router",
 				"@wordpress/is-shallow-equal",
 				"@wordpress/notices",
-				"@wordpress/plugins",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/postcss-themes",
 				"@wordpress/prettier-config",
 				"@wordpress/primitives",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
-				"@wordpress/server-side-render",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
-				"@wordpress/wordcount",
-				"eslint*",
-				"postcss*",
-				"webpack*"
+				"eslint*"
 			],
 			"packages": [
 				"@woocommerce/block-library"
@@ -169,12 +157,147 @@
 		},
 		{
 			"dependencies": [
+				"webpack"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.97.x"
+		},
+		{
+			"dependencies": [
+				"webpack-cli"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.1.x"
+		},
+		{
+			"dependencies": [
+				"webpack-dev-server"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.15.x"
+		},
+		{
+			"dependencies": [
+				"babel-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "9.2.x"
+		},
+		{
+			"dependencies": [
+				"css-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "6.11.x"
+		},
+		{
+			"dependencies": [
+				"ignore-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.1.x"
+		},
+		{
+			"dependencies": [
+				"raw-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.0.x"
+		},
+		{
+			"dependencies": [
 				"fork-ts-checker-webpack-plugin"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "9.0.x"
+		},
+		{
+			"dependencies": [
+				"copy-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "13.0.x"
+		},
+		{
+			"dependencies": [
+				"progress-bar-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.1.x"
+		},
+		{
+			"dependencies": [
+				"circular-dependency-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.2.x"
+		},
+		{
+			"dependencies": [
+				"webpack-rtl-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.0.x"
+		},
+		{
+			"dependencies": [
+				"mini-css-extract-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.9.x"
+		},
+		{
+			"dependencies": [
+				"webpack-remove-empty-scripts"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "1.0.x"
+		},
+		{
+			"dependencies": [
+				"moment-timezone-data-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "1.5.x"
+		},
+		{
+			"dependencies": [
+				"webpack-bundle-analyzer"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.9.x"
 		},
 		{
 			"dependencies": [
@@ -343,7 +466,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^4.3.0"
+			"pinVersion": "4.3.x"
 		},
 		{
 			"dependencies": [
@@ -352,7 +475,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.4.32"
+			"pinVersion": "8.4.x"
 		},
 		{
 			"dependencies": [
@@ -370,7 +493,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^10.5.0"
+			"pinVersion": "10.5.x"
 		},
 		{
 			"dependencies": [
@@ -496,10 +619,7 @@
 				"@automattic/color-studio",
 				"@typescript-eslint/**",
 				"config",
-				"eslint",
-				"node",
-				"postcss",
-				"postcss-loader"
+				"eslint"
 			],
 			"packages": [
 				"**"

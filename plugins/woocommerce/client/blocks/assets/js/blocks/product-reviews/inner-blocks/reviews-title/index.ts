@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import { title as icon } from '@wordpress/icons';
 
 /**
@@ -12,10 +11,8 @@ import metadata from './block.json';
 import edit from './edit';
 import './style.scss';
 
-if ( isExperimentalBlocksEnabled() ) {
-	// @ts-expect-error metadata is not typed.
-	registerBlockType( metadata, {
-		edit,
-		icon,
-	} );
-}
+// @ts-expect-error metadata is not typed.
+registerBlockType( metadata, {
+	edit,
+	icon,
+} );

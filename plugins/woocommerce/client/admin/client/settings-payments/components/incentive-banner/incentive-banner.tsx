@@ -53,7 +53,8 @@ interface IncentiveBannerProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 }
 
@@ -102,7 +103,14 @@ export const IncentiveBanner = ( {
 		onAccept( incentive.promo_id );
 		onDismiss( incentive._links.dismiss.href, context ); // We also dismiss the incentive when it is accepted.
 		setIsSubmitted( true );
-		setupPlugin( provider.id, provider.plugin.slug, onboardingUrl );
+		setupPlugin(
+			provider.id,
+			provider.plugin.slug,
+			onboardingUrl,
+			provider.plugin.status === 'not_installed'
+				? provider._links?.attach?.href ?? null
+				: null
+		);
 		setIsBusy( false );
 	};
 

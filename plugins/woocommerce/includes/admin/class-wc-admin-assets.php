@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -449,6 +450,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_attributes_used_for_variations_placeholder' => sprintf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), esc_attr( WC_DELIMITER ) )
 				);
 
+				$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
+				if( $cogs_controller->feature_is_enabled() ) {
+					$params['cogs_value_tooltip_simple_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip( false ) );
+					$params['cogs_value_tooltip_variable_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip( true ) );
+				}
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
 			}
 
