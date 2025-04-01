@@ -3462,9 +3462,6 @@ importers:
       '@woocommerce/classic-assets':
         specifier: workspace:*
         version: link:client/legacy
-      '@wordpress/browserslist-config':
-        specifier: next
-        version: 6.13.1-next.a9f418477.0
     devDependencies:
       '@babel/cli':
         specifier: 7.25.7
@@ -3499,6 +3496,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
+      '@wordpress/browserslist-config':
+        specifier: next
+        version: 6.13.1-next.a9f418477.0
       '@wordpress/e2e-test-utils-playwright':
         specifier: wp-6.8
         version: 1.19.1(@playwright/test@1.50.1)
@@ -28643,7 +28643,9 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -28845,7 +28847,9 @@ snapshots:
       jest-runner: 24.9.0
       jest-runtime: 24.9.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/test-sequencer@25.5.4':
     dependencies:
@@ -34578,6 +34582,23 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)':
+    dependencies:
+      '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/scope-manager': 4.33.0
+      debug: 4.4.0
+      eslint: 8.55.0
+      functional-red-black-tree: 1.0.1
+      ignore: 5.3.0
+      regexpp: 3.2.0
+      semver: 7.6.3
+      tsutils: 3.21.0(typescript@5.7.2)
+    optionalDependencies:
+      typescript: 5.7.2
+    transitivePeerDependencies:
+      - supports-color
+
   '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
@@ -38027,7 +38048,7 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.25.7)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.25.7)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
@@ -44427,7 +44448,7 @@ snapshots:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
