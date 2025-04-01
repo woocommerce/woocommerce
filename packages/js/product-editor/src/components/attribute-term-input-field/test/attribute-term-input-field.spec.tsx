@@ -9,8 +9,7 @@ import { ProductAttributeTerm } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AttributeTermInputField } from '../attribute-term-input-field'; // see below explanation for the skip
-/* eslint-disable react/jsx-no-undef */
+import { AttributeTermInputField } from '../attribute-term-input-field';
 
 jest.mock( '@wordpress/core-data', () => ( {
 	registerStore: jest.fn(),
@@ -80,84 +79,7 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-// Not used - TODO: Remove?
-// const attributeList: ProductAttribute[] = [
-// 	{
-// 		id: 15,
-// 		name: 'Automotive',
-// 		position: 0,
-// 		visible: true,
-// 		variation: false,
-// 		options: [ 'test' ],
-// 	},
-// 	{
-// 		id: 1,
-// 		name: 'Color',
-// 		position: 2,
-// 		visible: true,
-// 		variation: true,
-// 		options: [
-// 			'Beige',
-// 			'black',
-// 			'Blue',
-// 			'brown',
-// 			'Gray',
-// 			'Green',
-// 			'mint',
-// 			'orange',
-// 			'pink',
-// 			'Red',
-// 			'white',
-// 			'Yellow',
-// 		],
-// 	},
-// ];
-
-// const attributeTermList: ProductAttributeTerm[] = [
-// 	{
-// 		id: 23,
-// 		name: 'XXS',
-// 		slug: 'xxs',
-// 		description: '',
-// 		menu_order: 1,
-// 		count: 1,
-// 	},
-// 	{
-// 		id: 22,
-// 		name: 'XS',
-// 		slug: 'xs',
-// 		description: '',
-// 		menu_order: 2,
-// 		count: 1,
-// 	},
-// 	{
-// 		id: 17,
-// 		name: 'S',
-// 		slug: 's',
-// 		description: '',
-// 		menu_order: 3,
-// 		count: 1,
-// 	},
-// 	{
-// 		id: 18,
-// 		name: 'M',
-// 		slug: 'm',
-// 		description: '',
-// 		menu_order: 4,
-// 		count: 1,
-// 	},
-// 	{
-// 		id: 19,
-// 		name: 'L',
-// 		slug: 'l',
-// 		description: '',
-// 		menu_order: 5,
-// 		count: 1,
-// 	},
-// ];
-
-// TODO: react-18-upgrade - not sure why there's an error where it's calling require("@wordpress/core-data") and erroring with "Cannot unlock an undefined object."
-describe.skip( 'AttributeTermInputField', () => {
+describe( 'AttributeTermInputField', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
@@ -207,7 +129,6 @@ describe.skip( 'AttributeTermInputField', () => {
 				/>
 			);
 		} );
-		// debug();
 		await waitFor( () => {
 			expect( screen.queryByText( 'spinner' ) ).toBeInTheDocument();
 		} );

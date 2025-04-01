@@ -108,6 +108,7 @@ const PriceSliderEdit = ( {
 								showInputFields: ! showInputFields,
 							} )
 						}
+						__nextHasNoMarginBottom
 					/>
 
 					{ showInputFields && (
@@ -117,6 +118,7 @@ const PriceSliderEdit = ( {
 							onChange={ () =>
 								setAttributes( { inlineInput: ! inlineInput } )
 							}
+							__nextHasNoMarginBottom
 						/>
 					) }
 				</PanelBody>

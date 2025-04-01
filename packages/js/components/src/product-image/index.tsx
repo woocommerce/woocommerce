@@ -12,6 +12,7 @@ import { placeholderWhiteBackground as placeholder } from './placeholder';
 
 type Image = {
 	src?: string;
+	alt?: string;
 };
 
 type ProductImageProps = {

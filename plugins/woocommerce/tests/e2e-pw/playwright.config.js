@@ -80,7 +80,7 @@ export const setupProjects = [
 
 export default defineConfig( {
 	timeout: 120 * 1000,
-	expect: { timeout: 20 * 1000 },
+	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
 	outputDir: TESTS_RESULTS_PATH,
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
@@ -98,8 +98,8 @@ export default defineConfig( {
 				? 'retain-on-first-failure'
 				: 'off',
 		video: 'retain-on-failure',
-		actionTimeout: 20 * 1000,
-		navigationTimeout: 20 * 1000,
+		actionTimeout: CI ? 20 * 1000 : 10 * 1000,
+		navigationTimeout: CI ? 20 * 1000 : 10 * 1000,
 		channel: 'chrome',
 		...devices[ 'Desktop Chrome' ],
 	},

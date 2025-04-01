@@ -9,49 +9,39 @@ const glob = require( 'glob' );
 // path should be defined in the `customDir` property. The scripts below will
 // take care of looking for `index.js`, `frontend.js` and `*.scss` files in each
 // block directory.
-//
-// If a block is experimental, it should be marked with the `isExperimental`
-// property.
-// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
-// when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
 	'add-to-cart-form': {
 		customDir: 'product-elements/add-to-cart-form',
 	},
-	'add-to-cart-with-options': {
-		isExperimental: true,
-	},
+	'add-to-cart-with-options': {},
 	'add-to-cart-with-options-quantity-selector': {
 		customDir: 'add-to-cart-with-options/quantity-selector',
-		isExperimental: true,
 	},
 	'add-to-cart-with-options-variation-selector': {
 		customDir: 'add-to-cart-with-options/variation-selector',
-		isExperimental: true,
 	},
 	'add-to-cart-with-options-variation-selector-item': {
 		customDir:
 			'add-to-cart-with-options/variation-selector/attribute-item-template',
-		isExperimental: true,
 	},
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
-		isExperimental: true,
 	},
 	'add-to-cart-with-options-variation-selector-attribute-options': {
 		customDir:
 			'add-to-cart-with-options/variation-selector/attribute-options',
-		isExperimental: true,
 	},
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
-		isExperimental: true,
 	},
 	'add-to-cart-with-options-grouped-product-selector-item': {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-template',
-		isExperimental: true,
+	},
+	'add-to-cart-with-options-grouped-product-selector-item-cta': {
+		customDir:
+			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
 	},
 	'all-products': {
 		customDir: 'products/all-products',
@@ -62,8 +52,10 @@ const blocks = {
 	'attribute-filter': {},
 	breadcrumbs: {},
 	'blockified-product-details': {
-		isExperimental: true,
 		customDir: 'product-details',
+	},
+	'product-description': {
+		customDir: 'product-description',
 	},
 	'catalog-sorting': {},
 	'coming-soon': {},
@@ -98,9 +90,6 @@ const blocks = {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
 	},
-	'product-gallery-pager': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
-	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
 	},
@@ -126,48 +115,36 @@ const blocks = {
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},
-	'product-filters': {
-		isExperimental: true,
-	},
+	'product-filters': {},
 	'product-filter-status': {
-		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/status-filter',
 	},
 	'product-filter-price': {
 		customDir: 'product-filters/inner-blocks/price-filter',
-		isExperimental: true,
 	},
 	'product-filter-attribute': {
 		customDir: 'product-filters/inner-blocks/attribute-filter',
-		isExperimental: true,
 	},
 	'product-filter-rating': {
 		customDir: 'product-filters/inner-blocks/rating-filter',
-		isExperimental: true,
 	},
 	'product-filter-active': {
 		customDir: 'product-filters/inner-blocks/active-filters',
-		isExperimental: true,
 	},
 	'product-filter-removable-chips': {
 		customDir: 'product-filters/inner-blocks/removable-chips',
-		isExperimental: true,
 	},
 	'product-filter-clear-button': {
 		customDir: 'product-filters/inner-blocks/clear-button',
-		isExperimental: true,
 	},
 	'product-filter-checkbox-list': {
 		customDir: 'product-filters/inner-blocks/checkbox-list',
-		isExperimental: true,
 	},
 	'product-filter-chips': {
 		customDir: 'product-filters/inner-blocks/chips',
-		isExperimental: true,
 	},
 	'product-filter-price-slider': {
 		customDir: 'product-filters/inner-blocks/price-slider',
-		isExperimental: true,
 	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
@@ -210,6 +187,16 @@ const blocks = {
 	},
 	'order-confirmation-create-account': {
 		customDir: 'order-confirmation/create-account',
+	},
+	'blockified-product-reviews': {
+		customDir: 'product-reviews',
+	},
+	'product-review-rating': {
+		customDir: 'product-reviews/inner-blocks/review-rating',
+		isExperimental: true,
+	},
+	'product-reviews-title': {
+		customDir: 'product-reviews/inner-blocks/reviews-title',
 		isExperimental: true,
 	},
 };
@@ -252,7 +239,8 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
-						relativePath
+						relativePath,
+					{ dotRelative: true }
 				);
 				if ( filePaths.length > 0 ) {
 					return [ blockCode, filePaths ];
@@ -284,6 +272,7 @@ const frontendScriptModuleBlocksToSkip = [
 	'add-to-cart-with-options',
 	'add-to-cart-with-options-quantity-selector',
 	'add-to-cart-with-options-variation-selector',
+	'add-to-cart-with-options-variation-selector-attribute-options',
 	'add-to-cart-with-options-grouped-product-selector',
 	'add-to-cart-with-options-grouped-product-selector-item',
 	'accordion-group',
@@ -302,7 +291,9 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 const entries = {
 	styling: {
 		// Packages styles
-		'packages-style': glob.sync( './packages/**/index.{t,j}s' ),
+		'packages-style': glob.sync( './packages/**/index.{t,j}s', {
+			dotRelative: true,
+		} ),
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',

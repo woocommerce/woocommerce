@@ -93,7 +93,7 @@ class PaymentUtils {
 		$saved_payment_methods = self::get_saved_payment_methods();
 		// A saved payment method exists, set as default.
 		if ( $saved_payment_methods && ! empty( $saved_payment_methods['default'] ) ) {
-			return $saved_payment_methods['default'];
+			return $saved_payment_methods['default']['method']['gateway'] ?? '';
 		}
 
 		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );

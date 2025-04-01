@@ -11,8 +11,8 @@
 	"version": "0.6.0",
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
-		"@babel/preset-react": "7.23.3",
-		"@babel/preset-typescript": "7.23.3",
+		"@babel/preset-react": "7.25.7",
+		"@babel/preset-typescript": "7.25.7",
 		"@svgr/webpack": "^8.1.0",
 		"@testing-library/dom": "9.3.3",
 		"@testing-library/jest-dom": "^6.x.x",
@@ -23,7 +23,6 @@
 		"@types/jquery": "^3.5.29",
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
-		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/data": "wp-6.6",
@@ -72,7 +71,7 @@
 		"@emotion/react": "^11.11.1",
 		"@types/prop-types": "^15.7.11",
 		"@types/react-outside-click-handler": "^1.3.3",
-		"@woocommerce/ai": "workspace:0.1.0-beta.0",
+		"@woocommerce/ai": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.6",
@@ -106,6 +105,35 @@
 		"*.scss": [
 			"npm run lint:css:fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint:lang:js",
+				"changes": [
+					"src/**/*.{js,ts,tsx,scss}",
+					"tests/**/*.{js,ts,tsx,scss}"
+				]
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:unit",
+					"changes": [
+						".wp-env.json",
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,ts,tsx,scss}",
+						"tests/**/*.{js,ts,tsx,scss}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
 	},
 	"wireit": {
 		"build:project:wp-scripts": {

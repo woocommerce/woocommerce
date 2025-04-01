@@ -1752,7 +1752,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array( wc_format_coupon_code( $coupon_code ), $this->applied_coupons, true ) : count( $this->applied_coupons ) > 0;
+		return $coupon_code ? in_array(
+			wc_strtolower( wc_format_coupon_code( $coupon_code ) ),
+			array_map(
+				function ( $code ) {
+					return wc_strtolower( wc_format_coupon_code( $code ) );
+				},
+				$this->applied_coupons
+			),
+			true
+		) : count( $this->applied_coupons ) > 0;
 	}
 
 	/**
@@ -1774,7 +1783,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$the_coupon = new WC_Coupon( $coupon_code );
 
 		// Prevent adding coupons by post ID.
-		if ( $the_coupon->get_code() !== $coupon_code ) {
+		if ( ! wc_is_same_coupon( $the_coupon->get_code(), $coupon_code ) ) {
 			$the_coupon->set_code( $coupon_code );
 			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
 			return false;
@@ -1916,7 +1925,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search( $coupon_code, array_map( 'wc_format_coupon_code', $this->get_applied_coupons() ), true );
+		$position    = array_search(
+			wc_strtolower( $coupon_code ),
+			array_map(
+				function ( $code ) {
+					return wc_strtolower( wc_format_coupon_code( $code ) );
+				},
+				$this->get_applied_coupons()
+			),
+			true
+		);
 
 		if ( false !== $position ) {
 			unset( $this->applied_coupons[ $position ] );

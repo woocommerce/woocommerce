@@ -8,121 +8,21 @@ import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
-import { createBlocksCartPage, BLOCKS_CART_PAGE } from '../../utils/pages';
+import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
+import { checkCartContent } from '../../utils/cart';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
 import { WC_API_PATH } from '../../utils/api-client';
 
-const cartPages = [ { name: 'classic cart', slug: 'cart' }, BLOCKS_CART_PAGE ];
+const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
-/* region helpers */
-function isBlocksCart( page ) {
-	return page.url().includes( BLOCKS_CART_PAGE.slug );
+function isClassicCart( page ) {
+	return page.url().includes( CLASSIC_CART_PAGE.slug );
 }
-
-function formatAmount( amount ) {
-	return parseFloat( amount ).toLocaleString( 'en-US', {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	} );
-}
-
-async function checkCartContentInClassicCart(
-	page,
-	products,
-	tax,
-	expectedTotal
-) {
-	for ( const product of products ) {
-		const row = await page
-			.locator( 'tr.cart_item' )
-			.filter( { hasText: product.data.name } );
-
-		await expect( row ).toHaveCount( 1 );
-		await expect( row.getByLabel( 'Product quantity' ) ).toHaveValue(
-			product.qty.toString()
-		);
-
-		await expect( row.locator( 'td.product-price' ) ).toHaveText(
-			`$${ formatAmount( product.data.price ) }`
-		);
-	}
-
-	const totalRow = page.locator( '.cart_totals tr.order-total' );
-
-	await expect( totalRow.locator( 'td' ) ).toHaveText(
-		`$${ formatAmount( expectedTotal ) }`
-	);
-}
-
-async function checkCartContentInBlocksCart(
-	page,
-	products,
-	tax,
-	expectedTotal
-) {
-	for ( const product of products ) {
-		const row = await page
-			.locator( 'tr.wc-block-cart-items__row' )
-			.filter( { hasText: product.data.name } );
-
-		await expect( row ).toHaveCount( 1 );
-		await expect(
-			row.getByRole( 'spinbutton', { name: 'Quantity' } )
-		).toHaveValue( product.qty.toString() );
-
-		const expectedItemTotal = formatAmount(
-			parseFloat( product.data.price ) * product.qty
-		);
-		await expect(
-			row.locator( 'td.wc-block-cart-item__total' )
-		).toHaveText( `$${ expectedItemTotal }` );
-	}
-
-	await expect(
-		page.locator( '.wc-block-components-totals-item__value' ).last()
-	).toHaveText( `$${ formatAmount( expectedTotal ) }` );
-}
-
-async function checkCartContent( slug, page, products, tax ) {
-	if ( products.length === 0 ) {
-		await expect(
-			page.locator( 'main' ).getByText( 'Your cart is currently empty' )
-		).toBeVisible();
-		return;
-	}
-
-	const expectedTotal = products.reduce( ( total, product ) => {
-		return (
-			total +
-			parseFloat( product.data.price ) *
-				product.qty *
-				( 1 + parseFloat( tax.rate ) / 100 )
-		);
-	}, 0 );
-
-	if ( isBlocksCart( page ) ) {
-		await checkCartContentInBlocksCart(
-			page,
-			products,
-			tax,
-			expectedTotal
-		);
-	} else {
-		await checkCartContentInClassicCart(
-			page,
-			products,
-			tax,
-			expectedTotal
-		);
-	}
-}
-
-/* endregion */
 
 /* region fixtures */
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
-		await createBlocksCartPage( page.context().browser() );
+		await createClassicCartPage();
 
 		const calcTaxesState = await updateIfNeeded(
 			`general/woocommerce_calc_taxes`,
@@ -224,19 +124,19 @@ const test = baseTest.extend( {
 /* region tests */
 cartPages.forEach( ( { name, slug } ) => {
 	test(
-		`check ${ name }`,
+		`can add and remove products, increase quantity and proceed to checkout - ${ name }`,
 		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 		async ( { page, products, tax } ) => {
 			await test.step( 'empty cart is displayed', async () => {
 				page.goto( slug );
-				await checkCartContent( slug, page, [], tax );
+				await checkCartContent( isClassicCart( page ), page, [], tax );
 			} );
 
 			await test.step( 'one product in cart is displayed', async () => {
 				await addAProductToCart( page, products[ 0 ].id, 2 );
 				await page.goto( slug );
 				await checkCartContent(
-					slug,
+					isClassicCart( page ),
 					page,
 					[ { data: products[ 0 ], qty: 2 } ],
 					tax
@@ -245,16 +145,16 @@ cartPages.forEach( ( { name, slug } ) => {
 
 			await test.step( 'can increase quantity', async () => {
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( isBlocksCart( page ) ) {
+				if ( isClassicCart( page ) ) {
+					await page.locator( 'input.qty' ).fill( '3' );
+					await page.locator( 'button[name="update_cart"]' ).click();
+				} else {
 					await page
 						.getByRole( 'spinbutton', { name: 'Quantity of ' } )
 						.fill( '3' );
-				} else {
-					await page.locator( 'input.qty' ).fill( '3' );
-					await page.locator( 'button[name="update_cart"]' ).click();
 				}
 				await checkCartContent(
-					slug,
+					isClassicCart( page ),
 					page,
 					[ { data: products[ 0 ], qty: 3 } ],
 					tax
@@ -265,7 +165,7 @@ cartPages.forEach( ( { name, slug } ) => {
 				await addAProductToCart( page, products[ 1 ].id, 1 );
 				await page.goto( slug );
 				await checkCartContent(
-					slug,
+					isClassicCart( page ),
 					page,
 					[
 						{ data: products[ 0 ], qty: 3 },
@@ -284,7 +184,7 @@ cartPages.forEach( ( { name, slug } ) => {
 				).toBeVisible();
 				await page.goBack();
 				await checkCartContent(
-					slug,
+					isClassicCart( page ),
 					page,
 					[
 						{ data: products[ 0 ], qty: 3 },
@@ -310,12 +210,13 @@ cartPages.forEach( ( { name, slug } ) => {
 					.click();
 
 				await checkCartContent(
-					slug,
+					isClassicCart( page ),
 					page,
 					[ { data: products[ 1 ], qty: 1 } ],
 					tax
 				);
 			} );
+
 			await test.step( 'can remove the last product', async () => {
 				await page
 					.getByRole( 'button', {
@@ -331,7 +232,7 @@ cartPages.forEach( ( { name, slug } ) => {
 					)
 					.click();
 
-				await checkCartContent( slug, page, [], tax );
+				await checkCartContent( isClassicCart( page ), page, [], tax );
 			} );
 		}
 	);

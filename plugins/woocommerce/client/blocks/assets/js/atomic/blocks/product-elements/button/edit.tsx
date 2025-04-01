@@ -99,6 +99,7 @@ const Edit = ( {
 				<Disabled>
 					<Block
 						{ ...{ ...attributes, ...context } }
+						blockClientId={ blockProps?.id }
 						className={ clsx( attributes.className, {
 							[ `has-custom-width wp-block-button__width-${ width }` ]:
 								width,

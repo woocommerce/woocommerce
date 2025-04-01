@@ -93,6 +93,7 @@ export interface ProductResponseItem {
 		minimum: number;
 		maximum: number;
 		multiple_of: number;
+		single_text: string;
 	};
 	slug: string;
 	grouped_products: Array< number >;

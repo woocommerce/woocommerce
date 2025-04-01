@@ -3,7 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
-const permalink = '/cart';
 const templatePath = 'woocommerce/woocommerce//page-cart';
 const templateType = 'wp_template';
 
@@ -43,14 +42,6 @@ test.describe( 'Test the cart template', () => {
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Cart")' ).first()
-		).toBeVisible();
-	} );
-
-	test( 'Admin bar edit site link opens site editor', async ( { admin } ) => {
-		await admin.page.goto( permalink );
-		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
-		await expect(
-			admin.editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
 	} );
 } );

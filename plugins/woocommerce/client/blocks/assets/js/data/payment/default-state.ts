@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import type { EmptyObjectType, PaymentResult } from '@woocommerce/types';
+import type {
+	EmptyObjectType,
+	PaymentResult,
+	GlobalPaymentMethod,
+} from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import {
 	PlainPaymentMethods,
@@ -12,32 +16,28 @@ import {
  * Internal dependencies
  */
 import { SavedPaymentMethod } from './types';
+import { isEditor } from '../utils';
 import { STATUS as PAYMENT_STATUS } from './constants';
 import { checkoutData } from '../checkout/constants';
 
-const defaultPaymentMethod = checkoutData?.payment_method as
-	| SavedPaymentMethod
-	| string;
+const globalPaymentMethods = getSetting< GlobalPaymentMethod[] >(
+	'globalPaymentMethods'
+);
+
+const savedPaymentMethods = getSetting<
+	Record< string, SavedPaymentMethod[] > | EmptyObjectType
+>( 'customerPaymentMethods', {} );
+
+const defaultPaymentMethod = isEditor()
+	? globalPaymentMethods[ 0 ].id
+	: checkoutData?.payment_method;
 
 function getDefaultPaymentMethod() {
 	if ( ! defaultPaymentMethod ) {
 		return '';
 	}
 
-	// defaultPaymentMethod is a string if a regular payment method is set.
-	if ( typeof defaultPaymentMethod === 'string' ) {
-		return defaultPaymentMethod;
-	}
-
-	// defaultPaymentMethod is a SavedPaymentMethod object if a saved payment method is returned.
-	if (
-		defaultPaymentMethod?.method?.gateway &&
-		defaultPaymentMethod?.tokenId
-	) {
-		return defaultPaymentMethod.method.gateway;
-	}
-
-	return '';
+	return defaultPaymentMethod;
 }
 
 /**
@@ -46,14 +46,28 @@ function getDefaultPaymentMethod() {
  * as a token stored in `wcSettings`.
  */
 function getDefaultPaymentMethodData() {
-	if ( ! defaultPaymentMethod || typeof defaultPaymentMethod === 'string' ) {
+	if ( ! defaultPaymentMethod ) {
 		return {};
 	}
 
-	const token = defaultPaymentMethod.tokenId.toString();
-	const slug = defaultPaymentMethod.method.gateway;
-	const savedTokenKey = `wc-${ slug }-payment-token`;
-	return { token, payment_method: slug, [ savedTokenKey ]: token };
+	// Check if default payment method exists in saved payment methods
+	const flatSavedPaymentMethods = Object.keys( savedPaymentMethods ).flatMap(
+		( type ) => savedPaymentMethods[ type ]
+	);
+	const savedPaymentMethod = flatSavedPaymentMethods.find(
+		( method ) => method.method.gateway === defaultPaymentMethod
+	);
+
+	// If a saved payment method is found that matches the default payment method,
+	// use it.
+	if ( savedPaymentMethod ) {
+		const token = savedPaymentMethod.tokenId.toString();
+		const slug = savedPaymentMethod.method.gateway;
+		const savedTokenKey = `wc-${ slug }-payment-token`;
+		return { token, payment_method: slug, [ savedTokenKey ]: token };
+	}
+
+	return {};
 }
 
 export interface PaymentState {

@@ -17,7 +17,7 @@ test.describe( 'Merchant → Cart', () => {
 
 			await editor.openGlobalBlockInserter();
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( 'woocommerce/cart' );
 			const cartButton = editor.page.getByRole( 'option', {
 				name: 'Cart',

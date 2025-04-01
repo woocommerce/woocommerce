@@ -355,10 +355,10 @@ final class AssetsController {
 	 */
 	public function skip_boost_minification_for_cart_checkout( $do_concat, $handle ) {
 		$boost_is_outdated = defined( 'JETPACK_BOOST_VERSION' ) && version_compare( JETPACK_BOOST_VERSION, '3.4.2', '<' );
-		$scripts_to_ignore = [
+		$scripts_to_ignore = array(
 			'wc-cart-checkout-vendors',
 			'wc-cart-checkout-base',
-		];
+		);
 
 		return $boost_is_outdated && in_array( $handle, $scripts_to_ignore, true ) ? false : $do_concat;
 	}

@@ -237,8 +237,15 @@ class WC_Install {
 		'7.7.0' => array(
 			'wc_update_770_remove_multichannel_marketing_feature_options',
 		),
+		'7.9.0' => array(
+			'wc_update_790_blockified_product_grid_block',
+		),
 		'8.1.0' => array(
 			'wc_update_810_migrate_transactional_metadata_for_hpos',
+		),
+		'8.3.0' => array(
+			'wc_update_830_rename_checkout_template',
+			'wc_update_830_rename_cart_template',
 		),
 		'8.6.0' => array(
 			'wc_update_860_remove_recommended_marketing_plugins_transient',
@@ -280,6 +287,8 @@ class WC_Install {
 		'9.9.0' => array(
 			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
 			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
+			'wc_update_990_remove_wc_count_comments_transient',
+			'wc_update_990_remove_email_notes',
 		),
 	);
 
@@ -394,8 +403,9 @@ class WC_Install {
 	 */
 	public static function wc_admin_db_update_notice() {
 		if (
-			WC()->is_wc_admin_active() &&
-			false !== get_option( 'woocommerce_admin_install_timestamp' )
+			WC()->is_wc_admin_active()
+			&& false !== get_option( 'woocommerce_admin_install_timestamp' )
+			&& ! self::is_db_auto_update_enabled()
 		) {
 			new WC_Notes_Run_Db_Update();
 		}
@@ -462,6 +472,7 @@ class WC_Install {
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
+			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
 			WC_Admin_Notices::add_notice( 'update', true );
 
@@ -670,6 +681,23 @@ class WC_Install {
 	}
 
 	/**
+	 * Is DB auto-update enabled? This controls whether database updates are applied without prompting the admin.
+	 * This is the default behavior since 9.9.0 and can be overridden via filter 'woocommerce_enable_auto_update_db'.
+	 *
+	 * @since 9.9.0
+	 *
+	 * @return bool TRUE if database auto-updates are enabled. FALSE otherwise.
+	 */
+	public static function is_db_auto_update_enabled(): bool {
+		/**
+		 * Allow WooCommerce to auto-update without prompting the user.
+		 *
+		 * @since 3.2.0
+		 */
+		return (bool) apply_filters( 'woocommerce_enable_auto_update_db', true );
+	}
+
+	/**
 	 * See if we need to set redirect transients for activation or not.
 	 *
 	 * @since 4.6.0
@@ -692,7 +720,8 @@ class WC_Install {
 			 *
 			 * @since 3.2.0
 			 */
-			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
+			if ( self::is_db_auto_update_enabled() ) {
+				wc_get_logger()->info( 'Automatic database update triggered.', array( 'source' => 'wc-updater' ) );
 				self::update();
 			} else {
 				WC_Admin_Notices::add_notice( 'update', true );
@@ -735,13 +764,40 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$loop               = 0;
+		$current_wc_version = WC()->version;
+		$scheduled_time     = time();
 
+		wc_get_logger()->info(
+			sprintf( 'Scheduling database updates (from %s to %s)...', $current_db_version, $current_wc_version ),
+			array( 'source' => 'wc-updater' )
+		);
+
+		if ( self::is_db_auto_update_enabled() ) {
+			/**
+			 * Filters the delay in seconds to apply to the scheduling of database updates when automatic updates are
+			 * enabled.
+			 *
+			 * @since 9.9.0
+			 *
+			 * @param int $delay Delay to add (in seconds). Default is 0 (updates will run as soon as possible).
+			 */
+			$scheduled_time_delay = absint( apply_filters( 'woocommerce_db_update_schedule_delay', 0 ) );
+
+			if ( $scheduled_time_delay > 0 ) {
+				wc_get_logger()->info(
+					sprintf( '  Updates will begin running in approximately %s.', human_time_diff( 0, $scheduled_time_delay ) ),
+					array( 'source' => 'wc-updater' )
+				);
+				$scheduled_time += $scheduled_time_delay;
+			}
+		}
+
+		$loop = 0;
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
 					WC()->queue()->schedule_single(
-						time() + $loop,
+						$scheduled_time + $loop,
 						'woocommerce_run_update_callback',
 						array(
 							'update_callback' => $update_callback,
@@ -750,15 +806,19 @@ class WC_Install {
 					);
 					++$loop;
 				}
+
+				wc_get_logger()->info(
+					sprintf( '  Updates from version %s scheduled.', $version ),
+					array( 'source' => 'wc-updater' )
+				);
 			}
 		}
 
 		// After the callbacks finish, update the db version to the current WC version.
-		$current_wc_version = WC()->version;
 		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
 			WC()->queue()->schedule_single(
-				time() + $loop,
+				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(
 					'version' => $current_wc_version,
@@ -766,6 +826,8 @@ class WC_Install {
 				'woocommerce-db-updates'
 			);
 		}
+
+		wc_get_logger()->info( 'Database updates scheduled.', array( 'source' => 'wc-updater' ) );
 	}
 
 	/**
@@ -1785,7 +1847,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	product_id bigint(20) unsigned NOT NULL,
 	variation_id bigint(20) unsigned NOT NULL,
 	customer_id bigint(20) unsigned NULL,
-	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_created datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	product_qty int(11) NOT NULL,
 	product_net_revenue double DEFAULT 0 NOT NULL,
 	product_gross_revenue double DEFAULT 0 NOT NULL,
@@ -1797,7 +1859,8 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),
-	KEY date_created (date_created)
+	KEY date_created (date_created),
+	KEY customer_product_date (customer_id, product_id, date_created)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_id bigint(20) unsigned NOT NULL,

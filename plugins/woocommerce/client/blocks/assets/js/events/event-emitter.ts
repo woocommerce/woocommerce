@@ -11,7 +11,7 @@ import {
 
 export type EventListener = (
 	data: unknown
-) => Promise< ObserverResponse | true > | ObserverResponse | true;
+) => Promise< ObserverResponse | boolean > | ObserverResponse | boolean;
 
 export type EventListenerRegistrationFunction = (
 	listener: EventListener,

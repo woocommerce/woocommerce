@@ -11,10 +11,9 @@ import {
 /**
  * Internal dependencies
  */
-import { tags, test, expect, request } from '../../fixtures/fixtures';
+import { tags, test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { admin } from '../../test-data/data';
-import { WC_API_PATH } from '../../utils/api-client';
+import { WC_API_PATH, WP_API_PATH } from '../../utils/api-client';
 import { fillPageTitle } from '../../utils/editor';
 
 const pageTitle = 'Product Showcase';
@@ -46,14 +45,6 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { restApi } ) => {
-			// make sure the attribute term page is visible in the shop
-			await restApi.put(
-				`${ WC_API_PATH }/settings/products/woocommerce_attribute_lookup_enabled`,
-				{
-					value: 'yes',
-				}
-			);
-
 			// add product tags
 			await restApi
 				.post( `${ WC_API_PATH }/products/tags`, {
@@ -162,7 +153,7 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL, restApi } ) => {
+		test.afterAll( async ( { restApi } ) => {
 			await restApi.post( `${ WC_API_PATH }/products/batch`, {
 				delete: [ product1Id, product2Id, product3Id ],
 			} );
@@ -172,32 +163,21 @@ test.describe(
 			await restApi.post( `${ WC_API_PATH }/products/attributes/batch`, {
 				delete: [ attributeId ],
 			} );
-			await restApi.put(
-				`${ WC_API_PATH }/settings/products/woocommerce_attribute_lookup_enabled`,
-				{
-					value: 'no',
-				}
-			);
-			const base64auth = Buffer.from(
-				`${ admin.username }:${ admin.password }`
-			).toString( 'base64' );
-			const wpApi = await request.newContext( {
-				baseURL: `${ baseURL }/wp-json/wp/v2/`,
-				extraHTTPHeaders: {
-					Authorization: `Basic ${ base64auth }`,
-				},
-			} );
-			let response = await wpApi.get( `pages` );
-			const allPages = await response.json();
-			await allPages.forEach( async ( page ) => {
+
+			const pages = await restApi.get( `${ WP_API_PATH }/pages` );
+
+			for ( const page of pages.data ) {
 				if ( page.title.rendered === pageTitle ) {
-					response = await wpApi.delete( `pages/${ page.id }`, {
-						data: {
-							force: true,
-						},
-					} );
+					await restApi.delete(
+						`${ WP_API_PATH }/pages/${ page.id }`,
+						{
+							data: {
+								force: true,
+							},
+						}
+					);
 				}
-			} );
+			}
 		} );
 
 		test( 'should see shop catalog with all its products', async ( {
@@ -233,7 +213,7 @@ test.describe(
 		test( 'should see and sort tags page with all the products', async ( {
 			page,
 		} ) => {
-			await page.goto( 'shop/' );
+			await page.goto( 'shop/?orderby=date' );
 			await page.locator( `text=${ simpleProductName } 1` ).click();
 			await page.getByRole( 'link', { name: productTagName1 } ).click();
 			await expect(
@@ -253,14 +233,28 @@ test.describe(
 			page,
 		} ) => {
 			// the api setting for enabling attribute term page doesn't apply for some reason
-			// but I could see it as checked/enabled in the settings
-			// workaround for the change to take effect is to just save the settings.
-			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
-			// Modify a random unrelated settings so we can save the form.
-			await page
-				.locator( '#woocommerce_allowed_countries' )
-				.selectOption( 'all' );
-			await page.locator( 'text=Save changes' ).click();
+			// workaround for the change to take effect is to just update via the settings ui.
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=products&section=advanced'
+			);
+
+			const attributeLookupCheckbox = page.locator(
+				'#woocommerce_attribute_lookup_enabled'
+			);
+			await expect( attributeLookupCheckbox ).toBeVisible();
+
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( ! ( await attributeLookupCheckbox.isChecked() ) ) {
+				await attributeLookupCheckbox.click();
+				await page.locator( 'text=Save changes' ).click();
+				await expect(
+					page
+						.locator( '#message' )
+						.getByText( 'Your settings have been saved' )
+				).toBeVisible();
+			}
+
+			await expect( attributeLookupCheckbox ).toBeChecked();
 
 			const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 			await page.goto( `product/${ slug }` );

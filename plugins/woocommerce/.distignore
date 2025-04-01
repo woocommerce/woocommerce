@@ -15,10 +15,11 @@
 /vendor/*/*/tests
 /packages/*/tests
 /packages/*/changelog
+/packages/*/node_modules
+/packages/*/vendor
 /packages/email-editor/tasks
 /e2e/
 babel.config.js
-blocks.ini
 composer.*
 contributors.html
 docker-compose.yaml

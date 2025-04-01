@@ -3,6 +3,7 @@
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContent } from '../../utils/cart';
 
 test.describe(
 	'Cart > Redirect to cart from shop',
@@ -60,8 +61,19 @@ test.describe(
 				.click();
 
 			await expect( page ).toHaveURL( /.*\/cart/ );
-			await expect( page.locator( 'td.product-name' ) ).toContainText(
-				productName
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: productName,
+							price: '17.99',
+						},
+						qty: 1,
+					},
+				],
+				0
 			);
 		} );
 
@@ -74,8 +86,19 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
 			await expect( page ).toHaveURL( /.*\/cart/ );
-			await expect( page.locator( 'td.product-name' ) ).toContainText(
-				productName
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: productName,
+							price: '17.99',
+						},
+						qty: 1,
+					},
+				],
+				0
 			);
 		} );
 	}

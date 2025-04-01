@@ -15,7 +15,7 @@ export enum innerBlockAreas {
 	SHIPPING_METHOD = 'woocommerce/checkout-shipping-method-block',
 	SHIPPING_METHODS = 'woocommerce/checkout-shipping-methods-block',
 	PICKUP_LOCATION = 'woocommerce/checkout-pickup-options-block',
-	PAYMENT_METHODS = 'woocommerce/checkout-payment-methods-block',
+	PAYMENT_METHODS = 'woocommerce/checkout-payment-block',
 	CART = 'woocommerce/cart',
 	EMPTY_CART = 'woocommerce/empty-cart-block',
 	FILLED_CART = 'woocommerce/filled-cart-block',

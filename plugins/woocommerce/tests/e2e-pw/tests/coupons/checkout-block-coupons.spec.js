@@ -1,19 +1,12 @@
 /**
  * External dependencies
  */
-import {
-	addAProductToCart,
-	insertBlockByShortcut,
-	publishPage,
-	goToPageEditor,
-} from '@woocommerce/e2e-utils-playwright';
+import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { WC_API_PATH } from '../../utils/api-client';
-import { fillPageTitle } from '../../utils/editor';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { random } from '../../utils/helpers';
 
@@ -45,22 +38,9 @@ const customerBilling = {
 let productId, orderId, limitedCouponId;
 
 const test = baseTest.extend( {
-	storageState: ADMIN_STATE_PATH,
-	testPageTitlePrefix: 'Checkout Block',
-	page: async ( { context, page, testPage }, use ) => {
-		await goToPageEditor( { page } );
-		await fillPageTitle( page, testPage.title );
-		await insertBlockByShortcut( page, 'Checkout' );
-		await publishPage( page, testPage.title );
-
-		await context.clearCookies();
-
+	page: async ( { page }, use ) => {
 		await addAProductToCart( page, productId );
-		await page.goto( testPage.slug );
-		await expect(
-			page.getByRole( 'heading', { name: testPage.title } )
-		).toBeVisible();
-
+		await page.goto( 'checkout/' );
 		await use( page );
 	},
 } );

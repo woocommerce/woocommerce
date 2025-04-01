@@ -84,6 +84,7 @@ class PageRenderer {
 		// Load the email editor integration script.
 		// The JS file is located in plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/index.ts.
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'email-editor-integration', true );
+		WCAdminAssets::register_style( 'email-editor-integration', 'style', true );
 
 		$email_editor_assets_path = WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/';
 		$email_editor_assets_url  = WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/';
@@ -121,14 +122,20 @@ class PageRenderer {
 		$current_user_email = wp_get_current_user()->user_email;
 
 		// Fetch all email types from WooCommerce including those added by other plugins.
-		$wc_emails = \WC_Emails::instance();
+		$wc_emails   = \WC_Emails::instance();
 		$email_types = $wc_emails->get_emails();
-		$email_types = array_values( array_map( function( $email ) {
-			return array(
-				'value' => $email->id,
-				'label' => $email->title,
-			);
-		}, $email_types ) );
+		$email_types = array_values(
+			array_map(
+				function ( $email ) {
+					return array(
+						'value' => $email->id,
+						'label' => $email->title,
+						'id'    => get_class( $email ),
+					);
+				},
+				$email_types
+			)
+		);
 
 		wp_localize_script(
 			'woocommerce_email_editor',
@@ -144,7 +151,8 @@ class PageRenderer {
 					'listings' => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
 					'send'     => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
 				),
-				'email_types' => $email_types,
+				'email_types'           => $email_types,
+				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
 			)
 		);
 	}
@@ -161,9 +169,9 @@ class PageRenderer {
 		$routes             = array(
 			"/wp/v2/{$email_post_type}/" . intval( $post->ID ) . '?context=edit',
 			"/wp/v2/types/{$email_post_type}?context=edit",
-			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=edit', // Global email styles.
+			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=view', // Global email styles.
 			'/wp/v2/block-patterns/patterns',
-			'/wp/v2/templates?context=edit',
+			'/wp/v2/templates?context=view',
 			'/wp/v2/block-patterns/categories',
 			'/wp/v2/settings',
 			'/wp/v2/types?context=view',

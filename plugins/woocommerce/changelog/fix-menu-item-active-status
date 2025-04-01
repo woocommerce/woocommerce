@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix menu icon active state when navigating between wc-admin pages

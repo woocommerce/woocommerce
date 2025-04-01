@@ -5,19 +5,59 @@
  */
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockType } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { wooContentBlock } from './woo_content_placeholder_block';
+import { wooContentPlaceholderBlock } from './blocks/woo-email-content';
 import { NAME_SPACE } from './constants';
-import { modifySidebar } from './sidebar_extension';
+import { modifyTemplateSidebar } from './templates';
 
-addFilter(
-	'woocommerce_email_editor_send_button_label',
-	NAME_SPACE,
-	() => 'Save WooCommerce email template' // This is a temporary label to confirm the integration works, it will be updated in the future.
+// The type is copied from the email-editor package.
+// When the type was imported from the email-editor package, the build failed due to more than 50 type errors.
+type EmailContentValidationRule = {
+	id: string;
+	testContent: ( emailContent: string ) => boolean;
+	message: string;
+	actions: [];
+};
+
+addFilter( 'woocommerce_email_editor_send_button_label', NAME_SPACE, () =>
+	__( 'Save email', 'woocommerce' )
 );
 
-registerBlockType( 'woo/email-content', wooContentBlock );
-modifySidebar();
+// Add email validation rule
+addFilter(
+	'woocommerce_email_editor_content_validation_rules',
+	NAME_SPACE,
+	( rules: EmailContentValidationRule[] ) => {
+		const emailValidationRule: EmailContentValidationRule = {
+			id: 'sender-email-validation',
+			testContent: () => {
+				const input = document.querySelector< HTMLInputElement >(
+					'input[name="from_email"]'
+				);
+				const email = input?.value;
+				if ( ! email ) return false;
+
+				return ! email || ! input?.checkValidity();
+			},
+			message: __(
+				'The "from" email address is invalid. Please enter a valid email address that will appear as the sender in outgoing WooCommerce emails.',
+				'woocommerce'
+			),
+			actions: [],
+		};
+		return [ ...( rules || [] ), emailValidationRule ];
+	}
+);
+
+addFilter(
+	'woocommerce_email_editor_check_sending_method_configuration_link',
+	NAME_SPACE,
+	() => 'https://woocommerce.com/document/email-faq/'
+);
+
+registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
+modifyTemplateSidebar();

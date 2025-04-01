@@ -24,15 +24,12 @@ test.describe( 'Merchant → Mini Cart', () => {
 	} );
 
 	test.describe( 'in widget editor', () => {
-		test( 'can be inserted in a widget area', async ( {
-			admin,
-			editor,
-		} ) => {
+		test( 'can be inserted only once', async ( { admin, editor } ) => {
 			await admin.visitWidgetEditor();
 			await editor.openGlobalBlockInserter();
 
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
 			const miniCartButton = editor.page.getByRole( 'option', {
@@ -47,25 +44,14 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await expect(
 				await editor.getBlockByName( blockData.slug )
 			).toBeVisible();
-		} );
-		test( 'can only be inserted once', async ( {
-			page,
-			admin,
-			editor,
-		} ) => {
-			await admin.visitWidgetEditor();
+
 			await editor.openGlobalBlockInserter();
 
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
-			const miniCartButton = page.getByRole( 'option', {
-				name: blockData.name,
-				exact: true,
-			} );
-
-			await expect( miniCartButton ).toBeHidden();
+			await expect( miniCartButton ).toBeDisabled();
 		} );
 	} );
 } );

@@ -3,10 +3,10 @@
  */
 import { getSetting } from '@woocommerce/settings';
 
-export type ProductTypeProps = {
-	slug: string;
-	label: string;
-};
+/**
+ * Internal dependencies
+ */
+import type { ProductTypeProps } from '../shared/stores/product-type-template-state';
 
 const productTypes = getSetting< Record< string, string > >(
 	'productTypes',

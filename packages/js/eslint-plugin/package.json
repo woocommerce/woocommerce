@@ -47,7 +47,7 @@
 		"lint:lang:js": "eslint ./rules ./configs"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"jest-cli": "27.5.x",

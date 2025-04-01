@@ -242,43 +242,6 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test.describe( 'with pager', () => {
-		test( 'pager should change when clicking on a next button or thumbnail', async ( {
-			pageObject,
-			editor,
-			page,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			const pagerBlock = await pageObject.getPagerBlock( {
-				page: 'frontend',
-			} );
-
-			await expect( pagerBlock ).toHaveText( '1/4' );
-
-			const nextButton = page.getByRole( 'button', {
-				name: 'Next image',
-			} );
-			await nextButton.click();
-
-			await expect( pagerBlock ).toHaveText( '2/4' );
-
-			const thumbnailsLocator = await pageObject.getThumbnailsBlock( {
-				page: 'frontend',
-			} );
-			const firstThumbnail = thumbnailsLocator.locator( 'img' ).nth( 0 );
-			await firstThumbnail.click();
-
-			await expect( pagerBlock ).toHaveText( '1/4' );
-		} );
-	} );
-
 	test.describe( 'within pop-up', () => {
 		test( 'should display the same selected image when the pop-up is opened', async ( {
 			page,
@@ -515,12 +478,13 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Switch to the Index template.
 		await page.getByLabel( 'Open Navigation' ).click();
-		await page.getByRole( 'button', { name: 'Index' } ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).first().click();
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.first()
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(

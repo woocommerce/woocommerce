@@ -131,7 +131,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 						<img
 							class="<?php echo esc_attr( $base_classes ); ?>"
 							data-wp-bind--src="context.image.src"
-							data-wp-bind--srcset="context.image.src_set"
+							data-wp-bind--srcset="context.image.srcset"
 							data-wp-bind--sizes="context.image.sizes"
 							data-wp-bind--data-image-id="context.image.id"
 							data-wp-bind--tabindex="context.image.tabIndex"
@@ -140,6 +140,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 							data-wp-on--touchstart="actions.onTouchStart"
 							data-wp-on--touchmove="actions.onTouchMove"
 							data-wp-on--touchend="actions.onTouchEnd"
+							loading="lazy"
 							alt=""
 						/>
 					</li>

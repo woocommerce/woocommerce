@@ -22,6 +22,12 @@
 			justify-content: space-between;
 		}
 	}
+
+	&.is-horizontal {
+		.wc-block-product-filter-removable-chips__items {
+			width: 100%;
+		}
+	}
 }
 
 .wc-block-product-filter-removable-chips__items {

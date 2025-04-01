@@ -33,19 +33,14 @@ export const getGroupName = (
 		: VARIATION_ACTIONS_SLOT_NAME;
 };
 
-export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
-	Slot: React.FC<
-		Omit< React.ComponentProps< typeof Slot >, 'name' > &
-			VariationQuickUpdateSlotProps
-	>;
-} = ( {
+export const VariationQuickUpdateMenuItem = ( {
 	children,
 	order = DEFAULT_ORDER,
 	group = TOP_LEVEL_MENU,
 	supportsMultipleSelection,
 	onClick = () => {},
 	...props
-} ) => {
+}: MenuItemProps ) => {
 	const createFill = ( updateType: string ) => (
 		<Fill
 			key={ updateType }
@@ -88,6 +83,8 @@ VariationQuickUpdateMenuItem.Slot = ( {
 	onClose,
 	selection,
 	supportsMultipleSelection,
+}: VariationQuickUpdateSlotProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
 } ) => {
 	return (
 		<Slot

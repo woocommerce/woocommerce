@@ -7,6 +7,14 @@
 	"description": "Display a product's description, attributes, and reviews",
 	"category": "woocommerce",
 	"textdomain": "woocommerce",
+	"ancestor": [
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
+	"supports": {
+		"align": [ "wide", "full" ]
+	},
 	"attributes": {},
-	"usesContext": [ "query", "queryId", "postId" ]
+	"usesContext": [ "query", "queryId", "postId", "postType" ]
 }

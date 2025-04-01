@@ -18,7 +18,7 @@ import {
  */
 import ToolbarProductTypeGroup from '../components/toolbar-type-product-selector-group';
 import { DowngradeNotice } from '../components/downgrade-notice';
-import useProductTypeSelector from '../hooks/use-product-type-selector';
+import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
 import '../edit.scss';

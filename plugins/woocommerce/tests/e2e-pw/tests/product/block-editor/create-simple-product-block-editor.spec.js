@@ -9,6 +9,7 @@ import { insertBlock } from '@woocommerce/e2e-utils-playwright';
 import { test } from '../../../fixtures/block-editor-fixtures';
 import { clickOnTab } from '../../../utils/simple-products';
 import { tags, expect } from '../../../fixtures/fixtures';
+import { checkCartContent } from '../../../utils/cart';
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -491,19 +492,27 @@ test.describe( 'General tab', { tag: [ tags.GUTENBERG ] }, () => {
 		test( 'can a shopper add the simple product to the cart', async ( {
 			page,
 		} ) => {
+			await page.context().clearCookies();
+
 			await page.goto( `?post_type=product&p=${ productId }` );
 
 			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
-			await expect(
-				page.locator( 'td[data-title=Product]' ).first()
-			).toContainText( productData.name );
-			await page
-				.locator( `a.remove[data-product_id='${ productId }']` )
-				.click();
-			await expect(
-				page.locator( `a.remove[data-product_id='${ productId }']` )
-			).toBeHidden();
+
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: productData.name,
+							price: productData.salePrice,
+						},
+						qty: 1,
+					},
+				],
+				0
+			);
 		} );
 	} );
 } );
