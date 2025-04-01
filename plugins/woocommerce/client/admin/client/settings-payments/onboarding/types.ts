@@ -5,6 +5,14 @@ import { type ReactNode } from 'react';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
 
 /**
+ * Internal dependencies
+ */
+import {
+	Country,
+	MccsDisplayTreeItem,
+} from './providers/woopayments/steps/business-verification/types'; // To-do: Maybe move to @woocommerce/data
+
+/**
  * Props for the Onboarding Modal component.
  */
 export interface OnboardingModalProps {
@@ -20,8 +28,6 @@ export interface SidebarItemProps {
 	isCompleted?: boolean;
 	isActive?: boolean;
 }
-
-// To-do: Move WooPayments related types to a separate file.
 
 /**
  * Props for the WooPayments onboarding modal.
@@ -57,7 +63,19 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
-		auth?: {
+		kyc_fallback?: {
+			type?: string;
+			href?: string;
+		};
+		kyc_session?: {
+			type?: string;
+			href?: string;
+		};
+		kyc_session_finish?: {
+			type?: string;
+			href?: string;
+		};
+    auth?: {
 			type?: string;
 			href?: string;
 		};
@@ -65,7 +83,19 @@ export interface WooPaymentsProviderOnboardingStep {
 	content?: ReactNode;
 	context?: {
 		payment_methods: RecommendedPaymentMethod[];
-		overview_page_url?: string;
+		fields: {
+			business_types: Country[];
+			industry_to_mcc: Record< string, string >;
+			mccs_display_tree: MccsDisplayTreeItem;
+			available_countries: Record< string, string >;
+		};
+		self_assessment: Record< string, string >;
+		sub_steps: Record<
+			string,
+			{
+				status: 'completed' | 'not_started' | 'started';
+			}
+		>;
 	};
 }
 

@@ -711,13 +711,13 @@ class WooPaymentsService {
 		$account_session = Utils::rest_endpoint_get_request(
 			'/wc/v3/payments/onboarding/kyc/session',
 			array(
-				'progressive'     => $progressive,
+				'progressive'     => $progressive ? 'true' : 'false',
 				'self_assessment' => $self_assessment,
 			)
 		);
 
 		if ( is_wp_error( $account_session ) ) {
-			throw new Exception( esc_html( $account_session->get_error_message() ), esc_attr( $account_session->get_error_code() ) );
+			throw new Exception( esc_html( $account_session->get_error_message() ), intval( esc_attr( $account_session->get_error_code() ) ) );
 		}
 
 		if ( ! is_array( $account_session ) ) {
