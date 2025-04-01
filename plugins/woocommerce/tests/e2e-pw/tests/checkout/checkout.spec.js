@@ -197,12 +197,12 @@ const test = baseTest.extend( {
 		await resetValue( 'general/woocommerce_calc_taxes', calcTaxesState );
 
 		await resetValue(
-			'general/woocommerce_enable_checkout_login_reminder',
+			'account/woocommerce_enable_checkout_login_reminder',
 			loginAtCheckoutState
 		);
 
 		await resetValue(
-			'general/woocommerce_enable_signup_and_login_from_checkout',
+			'account/woocommerce_enable_signup_and_login_from_checkout',
 			signUpAtCheckoutState
 		);
 
@@ -477,7 +477,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				address_1: faker.location.streetAddress(),
 				city: faker.location.city(),
 				postcode: faker.location.zipCode( '#####' ),
-				phone: faker.phone.number(),
+				phone: faker.phone.number( { style: 'international' } ),
 				email: faker.internet.email(),
 			};
 

@@ -1,0 +1,4 @@
+Significance: major
+Type: enhancement
+
+Perform database updates automatically by default.
