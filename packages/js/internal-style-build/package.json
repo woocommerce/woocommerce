@@ -39,14 +39,14 @@
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "wp-6.6",
 		"@wordpress/postcss-plugins-preset": "wp-6.6",
-		"css-loader": "^3.6.0",
+		"css-loader": "6.11.x",
 		"fork-ts-checker-webpack-plugin": "9.0.x",
 		"json2php": "^0.0.7",
-		"mini-css-extract-plugin": "^2.7.6",
-		"postcss-loader": "^4.3.0",
-		"sass-loader": "^10.5.0",
-		"webpack-remove-empty-scripts": "^0.7.3",
-		"webpack-rtl-plugin": "^2.0.0"
+		"mini-css-extract-plugin": "2.9.x",
+		"postcss-loader": "4.3.x",
+		"sass-loader": "10.5.x",
+		"webpack-remove-empty-scripts": "1.0.x",
+		"webpack-rtl-plugin": "2.0.x"
 	},
 	"private": true,
 	"devDependencies": {
@@ -58,7 +58,7 @@
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "^5.89.0",
+		"webpack": "5.97.x",
 		"wireit": "0.14.10"
 	},
 	"config": {
