@@ -47,7 +47,7 @@ type SingleSelectPageEditProps = DataFormControlProps< DataFormItem > & {
 	className?: string;
 };
 
-export const SingleSelectPageEdit = ( {
+export const SingleSelectPage = ( {
 	data,
 	field,
 	onChange,
