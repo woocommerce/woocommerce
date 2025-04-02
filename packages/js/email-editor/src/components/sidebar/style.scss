@@ -15,4 +15,10 @@
 		box-shadow: none;
 		outline: none;
 	}
+
+	// Because we use complementary area component from the WP interface package the is visible an unwanted close icon.
+	// This style hides it.
+	.interface-complementary-area-header__small {
+		display: none;
+	}
 }
