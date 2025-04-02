@@ -2,9 +2,11 @@
  * External dependencies
  */
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { useLocation } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-
+import { getQueryArg } from '@wordpress/url';
+import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
@@ -20,20 +22,34 @@ import '~/settings-payments/onboarding/style.scss';
 export default function WooPaymentsModal( {
 	isOpen,
 	setIsOpen,
+	hasWPComConnection,
 }: WooPaymentsModalProps ): React.ReactNode {
 	const location = useLocation();
 	const history = getHistory();
 	const wooPaymentsOnboardingPath = '/woopayments/onboarding';
+	const isJetpackReturn =
+		getQueryArg( window.location.href, 'wpcom_connection_return' ) || false;
+	const { createErrorNotice } = dispatch( 'core/notices' );
 
 	// Open modal when on an onboarding route
 	React.useEffect( () => {
 		if (
 			location.pathname.startsWith( wooPaymentsOnboardingPath ) &&
-			! isOpen
+			! isOpen &&
+			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
+			! ( ! hasWPComConnection && isJetpackReturn )
 		) {
 			setIsOpen( true );
 		}
-	}, [ location, isOpen, setIsOpen ] );
+
+		// Trigger a snackbar error notification when the user aborts the WPCom connection process.
+		if ( ! hasWPComConnection && isJetpackReturn ) {
+			createErrorNotice( __( 'Setup was cancelled!', 'woocommerce' ), {
+				type: 'snackbar',
+				explicitDismiss: false,
+			} );
+		}
+	}, [ location, isOpen, setIsOpen, isJetpackReturn, hasWPComConnection ] );
 
 	// If the modal is open, without an onboarding route, add an onboarding route
 	React.useEffect( () => {

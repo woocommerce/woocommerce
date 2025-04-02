@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
+use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
@@ -36,6 +37,13 @@ class WooPaymentsService {
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
 
 	/**
+	 * The WPCOM connection manager instance.
+	 *
+	 * @var WPCOM_Connection_Manager
+	 */
+	private WPCOM_Connection_Manager $wpcom_connection_manager;
+
+	/**
 	 * The WooPayments provider instance.
 	 *
 	 * @var PaymentProviders\WooPayments
@@ -48,6 +56,8 @@ class WooPaymentsService {
 	 * @internal
 	 */
 	final public function init(): void {
+		$this->wpcom_connection_manager = new WPCOM_Connection_Manager( 'woocommerce' );
+
 		$this->provider = new PaymentProviders\WooPayments();
 	}
 
@@ -150,6 +160,9 @@ class WooPaymentsService {
 			'required_steps' => $this->get_onboarding_step_required_steps( self::ONBOARDING_STEP_WPCOM_CONNECTION ),
 			'status'         => $this->get_onboarding_step_status( self::ONBOARDING_STEP_WPCOM_CONNECTION, $location ),
 			'errors'         => array(),
+			'context'        => array(
+				'connection_state' => $this->get_wpcom_connection_state(),
+			),
 		);
 
 		// If the WPCOM connection is already set up, we don't need to add anything more.
@@ -165,7 +178,7 @@ class WooPaymentsService {
 			// Try to generate the authorization URL.
 			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
 			if ( ! $wpcom_connection['success'] ) {
-				$wpcom_step_details['errors'] = $wpcom_connection['errors'];
+				$wpcom_step_details['errors'] = array_values( $wpcom_connection['errors'] );
 			}
 			$wpcom_step_details['actions'] = array(
 				'start' => array(
@@ -698,13 +711,13 @@ class WooPaymentsService {
 		$account_session = Utils::rest_endpoint_get_request(
 			'/wc/v3/payments/onboarding/kyc/session',
 			array(
-				'progressive'     => $progressive,
+				'progressive'     => $progressive ? 'true' : 'false',
 				'self_assessment' => $self_assessment,
 			)
 		);
 
 		if ( is_wp_error( $account_session ) ) {
-			throw new Exception( esc_html( $account_session->get_error_message() ), esc_attr( $account_session->get_error_code() ) );
+			throw new Exception( esc_html( $account_session->get_error_message() ), intval( esc_attr( $account_session->get_error_code() ) ) );
 		}
 
 		if ( ! is_array( $account_session ) ) {
@@ -980,6 +993,23 @@ class WooPaymentsService {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get the store's WPCOM (Jetpack) connection state.
+	 *
+	 * @return array The WPCOM connection state.
+	 */
+	private function get_wpcom_connection_state(): array {
+		$is_connected        = $this->wpcom_connection_manager->is_connected();
+		$has_connected_owner = $this->wpcom_connection_manager->has_connected_owner();
+
+		return array(
+			'has_working_connection' => $is_connected && $has_connected_owner,
+			'is_store_connected'     => $is_connected,
+			'has_connected_owner'    => $has_connected_owner,
+			'is_connection_owner'    => $has_connected_owner && $this->wpcom_connection_manager->is_connection_owner(),
+		);
 	}
 
 	/**

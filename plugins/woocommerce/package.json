@@ -750,6 +750,8 @@
 		"ie 9"
 	],
 	"dependencies": {
+		"@stripe/connect-js": "^3.3.21",
+		"@stripe/react-connect-js": "^3.3.21",
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
