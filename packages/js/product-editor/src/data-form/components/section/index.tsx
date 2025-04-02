@@ -57,7 +57,7 @@ export function ProductSection( {
 	);
 
 	const nestedClassNames = classNames(
-		'woocommerce-product-block-editor',
+		'woocommerce-product-editor',
 		'wp-block-woocommerce-product-section-header__content',
 		`wp-block-woocommerce-product-section-header__content--block-gap-${ blockGap }`
 	);

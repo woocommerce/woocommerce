@@ -1,145 +1,18 @@
 /**
  * External dependencies
  */
-import { LegacyRef } from 'react';
 import { __ } from '@wordpress/i18n';
-import { createElement, useRef, useState } from '@wordpress/element';
-import {
-	BaseControl,
-	SlotFillProvider,
-	TextareaControl,
-} from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
-import classNames from 'classnames';
+import { createElement, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
-import {
-	BlockControls,
-	BlockEditorProvider,
-	ObserveTyping,
-	RichText,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockTools,
-	store as blockEditorStore,
-} from '@wordpress/block-editor';
+import { BaseControl, TextareaControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { RTLToolbarButton } from '../../../../blocks/generic/text-area/toolbar/toolbar-button-rtl';
-import { useClearSelectedBlockOnBlur } from '../../../../hooks/use-clear-selected-block-on-blur';
-import AlignmentToolbarButton from '../../../../blocks/generic/text-area/toolbar/toolbar-button-alignment';
 import { Label } from '../../../../components/label/label';
 import { ProductDataFormControlProps } from '../types';
 import { TextAreaBlockEditAttributes } from '../../../../blocks/generic/text-area/types';
-
-function RichTextEditor( {
-	contentId,
-	label,
-	value,
-	onChange,
-	id,
-	allowedFormats,
-	placeholder,
-	required,
-	disabled,
-	defaultAlign,
-	defaultDirection,
-}: {
-	contentId: string;
-	label: string;
-	value: string;
-	onChange: ( value: Record< string, any > ) => void;
-	id: string;
-	allowedFormats?: string[];
-	placeholder?: string;
-	required?: boolean;
-	disabled?: boolean;
-	defaultAlign?: TextAreaBlockEditAttributes[ 'align' ];
-	defaultDirection?: 'ltr' | 'rtl';
-} ) {
-	const { selectBlock } = useDispatch( blockEditorStore );
-	const [ align, setAlignment ] = useState( defaultAlign ?? 'left' );
-	const [ direction, changeDirection ] = useState( defaultDirection );
-	const blockControlsBlockProps = { group: 'block' };
-	const richTextRef = useRef< HTMLParagraphElement >( null );
-	// This is a workaround to hide the toolbar when the block is blurred.
-	// This is a temporary solution until using Gutenberg 18 with the
-	// fix from https://github.com/WordPress/gutenberg/pull/59800
-	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
-	const labelId = contentId.toString() + '__label';
-
-	const showToolbar = () => {
-		selectBlock( contentId );
-	};
-
-	function focusRichText() {
-		richTextRef.current?.focus();
-	}
-
-	return (
-		<div>
-			<BlockTools>
-				<ObserveTyping>
-					<BlockControls { ...blockControlsBlockProps }>
-						<AlignmentToolbarButton
-							align={ align }
-							setAlignment={ setAlignment }
-						/>
-
-						<RTLToolbarButton
-							direction={ direction }
-							onChange={ changeDirection }
-						/>
-					</BlockControls>
-					<BaseControl
-						id={ contentId.toString() }
-						label={
-							<Label
-								label={ label || '' }
-								labelId={ labelId }
-								required={ false }
-								note={ '' }
-								tooltip={ '' }
-								onClick={ focusRichText }
-							/>
-						}
-						help={ '' }
-					>
-						<RichText
-							ref={ richTextRef as unknown as LegacyRef< 'p' > }
-							id={ contentId.toString() }
-							aria-labelledby={ labelId }
-							identifier="content"
-							tagName="p"
-							value={ value || '' }
-							onChange={ ( nextValue ) => {
-								onChange( {
-									[ id ]: nextValue,
-								} );
-							} }
-							data-empty={ Boolean( value ) }
-							className={ classNames(
-								'components-summary-control',
-								{
-									[ `has-text-align-${ align }` ]: align,
-								}
-							) }
-							allowedFormats={ allowedFormats }
-							placeholder={ placeholder }
-							required={ required }
-							aria-required={ required }
-							readOnly={ disabled }
-							onBlur={ hideToolbar }
-							onFocus={ showToolbar }
-							inlineToolbar={ true }
-						/>
-					</BaseControl>
-				</ObserveTyping>
-			</BlockTools>
-		</div>
-	);
-}
+import RichTextEditor from './rich-text';
 
 export function TextAreaBlockEdit( {
 	data,
@@ -209,32 +82,19 @@ export function TextAreaBlockEdit( {
 
 	return (
 		<div>
-			<SlotFillProvider>
-				<BlockEditorProvider
-					useSubRegistry={ true }
-					settings={ {
-						bodyPlaceholder: '',
-						hasFixedToolbar: false,
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore This property was recently added in the block editor data store.
-						__experimentalClearBlockSelection: false,
-					} }
-				>
-					<RichTextEditor
-						contentId={ contentId }
-						label={ label }
-						value={ value }
-						onChange={ onChange }
-						id={ id }
-						allowedFormats={ allowedFormats }
-						placeholder={ placeholder }
-						required={ required }
-						disabled={ disabled }
-						defaultAlign={ align }
-						defaultDirection={ direction }
-					/>
-				</BlockEditorProvider>
-			</SlotFillProvider>
+			<RichTextEditor
+				contentId={ contentId }
+				label={ label }
+				value={ value }
+				onChange={ onChange }
+				id={ id }
+				allowedFormats={ allowedFormats }
+				placeholder={ placeholder }
+				required={ required }
+				disabled={ disabled }
+				defaultAlign={ align }
+				defaultDirection={ direction }
+			/>
 		</div>
 	);
 }

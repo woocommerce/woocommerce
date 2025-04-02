@@ -33,7 +33,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 		navigateTo( { url: getNewPath( { tab: tabId } ) } );
 	}, [] );
 
-	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+	const updatedLayoutContext = useExtendLayout( 'product-editor' );
 
 	const { layoutTemplate } = useLayoutTemplate( 'simple-product' );
 
