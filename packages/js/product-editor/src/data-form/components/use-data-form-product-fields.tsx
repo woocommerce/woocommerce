@@ -28,6 +28,8 @@ function getFieldKey( field: Template ): string {
 		attributes.metadata?.bindings?.value?.args?.prop
 	) {
 		return attributes.metadata?.bindings?.value?.args?.prop;
+	} else if ( attributes.property ) {
+		return attributes.property;
 	} else if ( attributes.name ) {
 		return attributes.name;
 	}
