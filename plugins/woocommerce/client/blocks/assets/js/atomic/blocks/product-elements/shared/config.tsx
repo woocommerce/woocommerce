@@ -26,9 +26,6 @@ const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 		),
 	},
 	apiVersion: 3,
-	supports: {
-		html: false,
-	},
 	ancestor: [
 		'woocommerce/all-products',
 		'woocommerce/single-product',

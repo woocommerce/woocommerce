@@ -3,10 +3,11 @@
 	"version": "1.0.0",
 	"title": "Filter Block",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": false
+		},
 		"inserter": false
 	},
 	"attributes": {
