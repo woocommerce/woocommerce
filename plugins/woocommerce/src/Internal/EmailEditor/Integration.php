@@ -119,7 +119,12 @@ class Integration {
 					'search_items'  => __( 'Search Woo Emails', 'woocommerce' ),
 				),
 				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
-				'supports' => array( 'title', 'editor' ),
+				'supports' => array(
+					'title',
+					'editor' => array(
+						'default-mode' => 'template-locked',
+					),
+				),
 			),
 		);
 		return $post_types;

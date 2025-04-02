@@ -1095,6 +1095,25 @@ function wc_get_product_backorder_options() {
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(), $related_by = array() ) {
+	// Log an error if the limit is not an integer since this is what we expect.
+	// However this is not a problem and we can continue.
+	if ( ! is_int( $limit ) ) {
+		wc_get_logger()->error(
+			sprintf(
+				'Invalid limit type passed to wc_get_related_products. Expected integer, got %s with value: %s',
+				gettype( $limit ),
+				wp_json_encode( $limit )
+			),
+			array( 'source' => 'wc_get_related_products' )
+		);
+	}
+
+	// If the limit is not numeric, set it to null.
+	$limit = is_numeric( $limit ) ? (int) $limit : null;
+
+	if ( null === $limit ) {
+		return array();
+	}
 
 	$product_id     = absint( $product_id );
 	$limit          = $limit >= -1 ? $limit : 5;
