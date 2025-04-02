@@ -52,7 +52,7 @@ jobs:
         with:
           filters: |
             needs-code-validation:
-              - '!((**/*.md)|(**/changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|(**/readme.txt))'
+              - '!((**/*.md)|(docs/docs-manifest.json)|(**/changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|(**/readme.txt))'
             needs-changelog-validation:
               - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
