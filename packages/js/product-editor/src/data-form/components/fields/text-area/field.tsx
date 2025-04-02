@@ -3,15 +3,15 @@
  */
 import { LegacyRef } from 'react';
 import { __ } from '@wordpress/i18n';
-import { createElement, useRef, useState, useEffect } from '@wordpress/element';
-import { BaseControl, SlotFillProvider } from '@wordpress/components';
-import { DataFormControlProps } from '@wordpress/dataviews';
+import { createElement, useRef, useState } from '@wordpress/element';
+import {
+	BaseControl,
+	SlotFillProvider,
+	TextareaControl,
+} from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import classNames from 'classnames';
-import { Product } from '@woocommerce/data';
-import { registerCoreBlocks } from '@wordpress/block-library';
 import { useInstanceId } from '@wordpress/compose';
-import { __experimentalRichTextEditor as GutenbergRichTextEditor } from '@woocommerce/components';
 import {
 	BlockControls,
 	BlockEditorProvider,
@@ -20,11 +20,7 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockTools,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockContextProvider,
 	store as blockEditorStore,
-	useBlockProps,
 } from '@wordpress/block-editor';
 
 /**
@@ -34,29 +30,37 @@ import { RTLToolbarButton } from '../../../../blocks/generic/text-area/toolbar/t
 import { useClearSelectedBlockOnBlur } from '../../../../hooks/use-clear-selected-block-on-blur';
 import AlignmentToolbarButton from '../../../../blocks/generic/text-area/toolbar/toolbar-button-alignment';
 import { Label } from '../../../../components/label/label';
+import { ProductDataFormControlProps } from '../types';
+import { TextAreaBlockEditAttributes } from '../../../../blocks/generic/text-area/types';
 
-registerCoreBlocks();
 function RichTextEditor( {
 	contentId,
 	label,
 	value,
 	onChange,
 	id,
+	allowedFormats,
+	placeholder,
+	required,
+	disabled,
+	defaultAlign,
+	defaultDirection,
 }: {
 	contentId: string;
 	label: string;
 	value: string;
 	onChange: ( value: Record< string, any > ) => void;
 	id: string;
+	allowedFormats?: string[];
+	placeholder?: string;
+	required?: boolean;
+	disabled?: boolean;
+	defaultAlign?: TextAreaBlockEditAttributes[ 'align' ];
+	defaultDirection?: 'ltr' | 'rtl';
 } ) {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	const blockProps = useBlockProps( { clientId: contentId } );
 	const { selectBlock } = useDispatch( blockEditorStore );
-	const [ align, setAlignment ] = useState< 'left' | 'right' >( 'left' );
-	const [ direction, changeDirection ] = useState<
-		'ltr' | 'rtl' | undefined
-	>( undefined );
+	const [ align, setAlignment ] = useState( defaultAlign ?? 'left' );
+	const [ direction, changeDirection ] = useState( defaultDirection );
 	const blockControlsBlockProps = { group: 'block' };
 	const richTextRef = useRef< HTMLParagraphElement >( null );
 	// This is a workaround to hide the toolbar when the block is blurred.
@@ -67,7 +71,6 @@ function RichTextEditor( {
 
 	const showToolbar = () => {
 		selectBlock( contentId );
-		console.log( 'showToolbar' );
 	};
 
 	function focusRichText() {
@@ -75,7 +78,7 @@ function RichTextEditor( {
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<BlockTools>
 				<ObserveTyping>
 					<BlockControls { ...blockControlsBlockProps }>
@@ -122,26 +125,12 @@ function RichTextEditor( {
 									[ `has-text-align-${ align }` ]: align,
 								}
 							) }
-							allowedFormats={ [
-								'core/bold',
-								'core/code',
-								'core/italic',
-								'core/link',
-								'core/strikethrough',
-								'core/underline',
-								'core/text-color',
-								'core/subscript',
-								'core/superscript',
-								'core/unknown',
-							] }
-							placeholder={ __(
-								'Enter description here',
-								'woocommerce'
-							) }
-							required={ false }
-							aria-required={ false }
-							readOnly={ false }
-							// onBlur={ hideToolbar }
+							allowedFormats={ allowedFormats }
+							placeholder={ placeholder }
+							required={ required }
+							aria-required={ required }
+							readOnly={ disabled }
+							onBlur={ hideToolbar }
 							onFocus={ showToolbar }
 							inlineToolbar={ true }
 						/>
@@ -156,49 +145,95 @@ export function TextAreaBlockEdit( {
 	data,
 	onChange,
 	field,
-}: DataFormControlProps< Product > ) {
+	attributes,
+}: ProductDataFormControlProps<
+	TextAreaBlockEditAttributes & { note?: string; tooltip?: string }
+> ) {
 	const { id, label } = field;
+	const {
+		placeholder,
+		help,
+		required,
+		note,
+		tooltip,
+		disabled = false,
+		align,
+		allowedFormats,
+		direction,
+		mode = 'rich-text',
+	} = attributes || {};
 	const value = field.getValue( { item: data } ) ?? '';
+	const textAreaRef = useRef< HTMLTextAreaElement >( null );
 	const contentId = useInstanceId(
 		TextAreaBlockEdit,
 		'wp-block-woocommerce-product-content-field__content'
 	);
-	useEffect( () => {
-		registerCoreBlocks();
-	}, [] );
+	const labelId = contentId.toString() + '__label';
+
+	function focusTextArea() {
+		textAreaRef.current?.focus();
+	}
+
+	if ( mode === 'plain-text' ) {
+		return (
+			<BaseControl
+				id={ contentId.toString() }
+				label={
+					<Label
+						label={ label || '' }
+						labelId={ labelId }
+						required={ required }
+						note={ note }
+						tooltip={ tooltip }
+						onClick={ focusTextArea }
+					/>
+				}
+				help={ help }
+			>
+				<TextareaControl
+					ref={ textAreaRef }
+					aria-labelledby={ labelId }
+					value={ value || '' }
+					onChange={ ( nextValue: string ) => {
+						onChange( {
+							[ id ]: nextValue,
+						} );
+					} }
+					placeholder={ placeholder }
+					required={ required }
+					disabled={ disabled }
+				/>
+			</BaseControl>
+		);
+	}
 
 	return (
 		<div>
 			<SlotFillProvider>
-				<BlockContextProvider>
-					<BlockEditorProvider
-						useSubRegistry={ true }
-						value={ [
-							{
-								clientId: contentId,
-								attributes: {
-									content: value,
-								},
-								innerBlocks: [],
-							},
-						] }
-						settings={ {
-							bodyPlaceholder: '',
-							hasFixedToolbar: false,
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore This property was recently added in the block editor data store.
-							__experimentalClearBlockSelection: false,
-						} }
-					>
-						<RichTextEditor
-							contentId={ contentId }
-							label={ label }
-							value={ value }
-							onChange={ onChange }
-							id={ id }
-						/>
-					</BlockEditorProvider>
-				</BlockContextProvider>
+				<BlockEditorProvider
+					useSubRegistry={ true }
+					settings={ {
+						bodyPlaceholder: '',
+						hasFixedToolbar: false,
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore This property was recently added in the block editor data store.
+						__experimentalClearBlockSelection: false,
+					} }
+				>
+					<RichTextEditor
+						contentId={ contentId }
+						label={ label }
+						value={ value }
+						onChange={ onChange }
+						id={ id }
+						allowedFormats={ allowedFormats }
+						placeholder={ placeholder }
+						required={ required }
+						disabled={ disabled }
+						defaultAlign={ align }
+						defaultDirection={ direction }
+					/>
+				</BlockEditorProvider>
 			</SlotFillProvider>
 		</div>
 	);

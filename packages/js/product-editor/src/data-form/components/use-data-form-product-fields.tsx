@@ -1,15 +1,17 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
+import type { ComponentType } from 'react';
+import { useMemo, createElement } from '@wordpress/element';
 import { Template, TemplateArray } from '@wordpress/blocks';
-import { Field } from '@wordpress/dataviews';
+import { Field, DataFormControlProps } from '@wordpress/dataviews';
 import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { getProductField } from './fields';
+import { ProductDataFormControlProps } from './fields/types';
 
 /**
  * Get the property key for a field definition
@@ -42,6 +44,17 @@ type ColumnGroup = {
 	content: Template;
 };
 
+function addAttributesToEdit(
+	Edit: string | ComponentType< ProductDataFormControlProps >,
+	attributes: Record< string, unknown >
+): string | ComponentType< DataFormControlProps< Product > > {
+	if ( typeof Edit === 'string' ) {
+		return Edit;
+	}
+	return function EditWithAttributes( props ) {
+		return <Edit { ...props } attributes={ attributes } />;
+	};
+}
 /**
  * Hook that transforms field definitions into DataForm compatible field objects,
  * grouping fields that appear before and after column blocks.
@@ -67,7 +80,7 @@ export function useDataFormProductFields(
 		};
 
 		fields.forEach( ( field ) => {
-			const [ fieldName ] = field;
+			const [ fieldName, params ] = field;
 
 			// If this is a columns block
 			if ( fieldName === 'core/columns' ) {
@@ -78,10 +91,17 @@ export function useDataFormProductFields(
 				} );
 			} else {
 				// Convert regular field
-				const getFieldDefinition = getProductField( fieldName );
+				const fieldDefinition = getProductField( fieldName );
 				const convertedField: Field< Product > = {
-					...getFieldDefinition,
-					id: getFieldKey( field ),
+					...fieldDefinition,
+					Edit:
+						fieldDefinition?.Edit && params
+							? addAttributesToEdit(
+									fieldDefinition.Edit,
+									params
+							  )
+							: fieldDefinition?.Edit,
+					id: getFieldKey( [ fieldName, params ] ),
 				};
 				currentFields.push( convertedField );
 			}
