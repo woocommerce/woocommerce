@@ -19,7 +19,7 @@ class InstallPluginTest extends TestCase {
 
 		$expected_array = array(
 			'step'          => 'installPlugin',
-			'pluginZipFile' => array(
+			'pluginData' => array(
 				'resource' => $resource,
 				'slug'     => $slug,
 			),
@@ -47,17 +47,16 @@ class InstallPluginTest extends TestCase {
 					'type' => 'string',
 					'enum' => array( 'installPlugin' ),
 				),
-				'pluginZipFile' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
-					),
-					'required'   => array( 'resource', 'slug' ),
+				'pluginData' => array(
+					"anyOf" => [
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/VFSReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/LiteralReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/CorePluginReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/CoreThemeReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/UrlReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/GitDirectoryReference.php",
+						require __DIR__ . "/../../../src/Steps/schemas/definitions/DirectoryLiteralReference.php",
+					]
 				),
 				'options'       => array(
 					'type'       => 'object',
@@ -68,7 +67,7 @@ class InstallPluginTest extends TestCase {
 					),
 				),
 			),
-			'required'   => array( 'step', 'pluginZipFile' ),
+			'required'   => array( 'step', 'pluginData' ),
 		);
 
 		$this->assertEquals( $expected_schema, InstallPlugin::get_schema() );

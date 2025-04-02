@@ -148,8 +148,8 @@ class PageRenderer {
 				'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 				'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
 				'urls'                  => array(
-					'listings' => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
-					'send'     => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
+					'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+					'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 				),
 				'email_types'           => $email_types,
 				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),

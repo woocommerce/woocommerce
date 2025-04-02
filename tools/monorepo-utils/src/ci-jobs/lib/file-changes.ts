@@ -23,25 +23,30 @@ export interface ProjectFileChanges {
  */
 function getProjectPaths( graph: ProjectNode ): { [ name: string ]: string } {
 	const projectPaths: { [ name: string ]: string } = {};
+	const pathSorted: Array< [ name: string, path: string, depth: number ] > =
+		[];
 
 	const queue = [ graph ];
 	const visited: { [ name: string ]: boolean } = {};
 	while ( queue.length > 0 ) {
 		const node = queue.shift();
-		if ( ! node ) {
+		if ( ! node || visited[ node.name ] ) {
 			continue;
 		}
 
-		if ( visited[ node.name ] ) {
-			continue;
-		}
-
-		projectPaths[ node.name ] = node.path;
-
+		pathSorted.push( [
+			node.name,
+			node.path,
+			node.path.split( '/' ).length,
+		] );
 		visited[ node.name ] = true;
-
 		queue.push( ...node.dependencies );
 	}
+
+	pathSorted.sort( ( a, b ) => b[ 2 ] - a[ 2 ] );
+	pathSorted.forEach(
+		( entry ) => ( projectPaths[ entry[ 0 ] ] = entry[ 1 ] )
+	);
 
 	return projectPaths;
 }
@@ -61,7 +66,7 @@ function getChangedFilesForProject(
 
 	// Find all of the files that have changed in the project.
 	for ( const filePath of changedFiles ) {
-		if ( ! filePath.startsWith( projectPath ) ) {
+		if ( ! filePath.startsWith( projectPath + '/' ) ) {
 			continue;
 		}
 
@@ -117,7 +122,9 @@ export function getFileChanges(
 
 		const projectChanges = getChangedFilesForProject(
 			projectPaths[ projectName ],
-			changedFilePaths
+			changedFilePaths.filter(
+				( filePath ) => ! ownedFilePaths.includes( filePath )
+			)
 		);
 		if ( projectChanges.length === 0 ) {
 			continue;
