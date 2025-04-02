@@ -233,7 +233,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		}
 
 		if ( ! empty( $address['phone'] ) ) {
-			$address['phone'] = wc_sanitize_phone_number( $address['phone'] );
+			// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
+			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
 
 			if ( ! \WC_Validation::is_phone( $address['phone'] ) ) {
 				$errors->add(

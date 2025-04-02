@@ -109,13 +109,14 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.1 WP: latest",
+					"name": "PHP: 8.2 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -127,14 +128,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1",
+							"phpVersion": "8.2",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.8-wp-latest"
+						"php-unit-php-8.2-wp-latest"
 					]
 				},
 				{
@@ -145,6 +146,7 @@
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
+					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -166,14 +168,14 @@
 					]
 				},
 				{
-					"name": "PHP WP: nightly",
+					"name": "PHP WP: prerelease",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
 					],
-					"optional": true,
+					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -185,7 +187,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"wpVersion": "nightly"
+							"wpVersion": "prerelease"
 						}
 					},
 					"events": [
@@ -447,14 +449,12 @@
 					"command": "test:api",
 					"optional": false,
 					"changes": [
-						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
 						"i18n/**/*.php",
 						"includes/**/*.php",
-						"patterns/**/*.php",
 						"src/**/*.php",
-						"templates/**/*.php",
+						"tests/e2e-pw/bin/**",
 						"tests/e2e-pw/tests/api-tests/**",
 						"tests/e2e-pw/*.js",
 						"tests/e2e-pw/*.sh",
@@ -462,6 +462,7 @@
 						"woocommerce.php",
 						"uninstall.php"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:test"
 					},
@@ -477,24 +478,25 @@
 					}
 				},
 				{
-					"name": "Core API tests - HPOS disabled",
+					"name": "Core API tests (HPOS:off)",
 					"testType": "api",
 					"command": "test:api:hpos",
 					"optional": false,
 					"changes": [
-						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
 						"i18n/**/*.php",
-						"patterns/**/*.php",
+						"includes/**/*.php",
 						"src/**/*.php",
-						"templates/**/*.php",
 						"tests/e2e-pw/bin/**",
+						"tests/e2e-pw/tests/api-tests/**",
+						"tests/e2e-pw/*.js",
+						"tests/e2e-pw/*.sh",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
 					],
+					"onlyForDependencies": [],
 					"events": [
 						"push",
 						"core-api-hpos-disabled"
@@ -532,7 +534,6 @@
 					"command": "test:metrics:ci",
 					"optional": false,
 					"changes": [
-						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
@@ -542,6 +543,11 @@
 						"templates/**/*.html",
 						"tests/metrics/**",
 						".wp-env.json"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/admin-library",
+						"@woocommerce/block-library",
+						"@woocommerce/classic-assets"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -573,9 +579,13 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"src/Blocks/**",
-						"templates/**",
-						"patterns/**"
+						"patterns/**/*.php",
+						"src/Blocks/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
 					],
 					"testEnv": {
 						"start": "env:start:blocks"
@@ -714,6 +724,7 @@
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/env": "10.17.0",
 		"@wordpress/scripts": "30.6.0",
@@ -736,8 +747,6 @@
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
 		"typescript": "5.7.x",
-		"webpack": "5.70.0",
-		"webpack-cli": "3.3.12",
 		"wireit": "0.14.10",
 		"wp-textdomain": "1.0.1"
 	},
@@ -752,8 +761,7 @@
 	"dependencies": {
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
-		"@woocommerce/classic-assets": "workspace:*",
-		"@wordpress/browserslist-config": "next"
+		"@woocommerce/classic-assets": "workspace:*"
 	},
 	"nodemonConfig": {
 		"delay": 2500,

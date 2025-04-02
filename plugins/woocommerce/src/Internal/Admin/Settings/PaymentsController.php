@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
@@ -27,10 +28,6 @@ class PaymentsController {
 	 * Register hooks.
 	 */
 	public function register() {
-		add_action( 'woocommerce_register_feature_definitions', array( $this,
-			'adjust_feature_default_enablement_by_experiment'
-		) );
-
 		// Because we gate the hooking based on a feature flag,
 		// we need to delay the registration until the 'woocommerce_init' hook.
 		// Otherwise, we end up in an infinite loop.
@@ -39,12 +36,16 @@ class PaymentsController {
 
 	/**
 	 * Adjust the new Payments Settings page feature default enablement based on the experiment.
+	 * This is invoked from within FeaturesController.
 	 *
 	 * @param FeaturesController $features_controller The features controller instance.
 	 *
 	 * @return void
 	 */
 	public function adjust_feature_default_enablement_by_experiment( FeaturesController $features_controller ) {
+		// Needed for CLI and unit tests.
+		FeaturePlugin::instance()->init();
+
 		// If the feature is disabled (or doesn't exist), don't do anything.
 		if ( ! $features_controller->feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
 			return;

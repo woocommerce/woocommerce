@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Features;
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -43,6 +44,16 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			11,
 			1
 		);
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+		$dummy_feature_registerer = new class() {
+			public function add_feature_definition( $features_controller ) {
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+		$container = wc_get_container();
+		$container->replace( CustomOrdersTableController::class, $dummy_feature_registerer );
+		$container->replace( CostOfGoodsSoldController::class, $dummy_feature_registerer );
 
 		$this->sut = new FeaturesController();
 		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
