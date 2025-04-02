@@ -9,15 +9,15 @@ import type { Field, FormField } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { CustomView } from '../../components/custom-view';
 import { SettingsGroup } from '../../components/settings-group';
-import { getCheckboxEdit } from '../../components/checkbox-edit';
-import { getInputEdit } from '../../components/inputEdit';
-import { getTextareaEdit } from '../../components/textareaEdit';
-import { getColorEdit } from '../../components/colorEdit';
-import { getSelectEdit } from '../../components/selectEdit';
-import { getRadioEdit } from '../../components/radioEdit';
-import { InfoView } from '../../components/infoView';
+import { CustomView } from '../../components/custom-view';
+import { InfoView } from '../../components/info-view';
+import { Checkbox } from '../../form-controls/checkbox';
+import { Input } from '../../form-controls/input';
+import { Textarea } from '../../form-controls/textarea';
+import { Color } from '../../form-controls/color';
+import { Select } from '../../form-controls/select';
+import { Radio } from '../../form-controls/radio';
 
 export type DataItem = Record< string, BaseSettingsField[ 'value' ] >;
 
@@ -105,7 +105,7 @@ export const transformToField = (
 					id: subSetting.id,
 					type: 'text',
 					label,
-					Edit: getCheckboxEdit( help ),
+					Edit: ( props ) => <Checkbox { ...props } help={ help } />,
 				};
 			} );
 
@@ -115,7 +115,7 @@ export const transformToField = (
 				id: setting.id,
 				type: 'text',
 				label,
-				Edit: getCheckboxEdit( help ),
+				Edit: ( props ) => <Checkbox { ...props } help={ help } />,
 			};
 		}
 		case 'text':
@@ -137,7 +137,9 @@ export const transformToField = (
 				type: 'text',
 				label,
 				placeholder: setting.placeholder,
-				Edit: getInputEdit( setting.type, help ),
+				Edit: ( props ) => (
+					<Input { ...props } type={ setting.type } help={ help } />
+				),
 			};
 		}
 		case 'select': {
@@ -153,7 +155,7 @@ export const transformToField = (
 						value,
 					} )
 				),
-				Edit: getSelectEdit( help ),
+				Edit: ( props ) => <Select { ...props } help={ help } />,
 			};
 		}
 		case 'textarea': {
@@ -164,7 +166,7 @@ export const transformToField = (
 				type: 'text',
 				placeholder: setting.placeholder,
 				label,
-				Edit: getTextareaEdit( help ),
+				Edit: ( props ) => <Textarea { ...props } help={ help } />,
 			};
 		}
 
@@ -181,7 +183,7 @@ export const transformToField = (
 						value,
 					} )
 				),
-				Edit: getRadioEdit( help ),
+				Edit: ( props ) => <Radio { ...props } help={ help } />,
 			};
 		}
 
@@ -190,7 +192,7 @@ export const transformToField = (
 				id: setting.id,
 				type: 'text',
 				label: setting.desc,
-				Edit: getColorEdit,
+				Edit: Color,
 			};
 
 		case 'info':

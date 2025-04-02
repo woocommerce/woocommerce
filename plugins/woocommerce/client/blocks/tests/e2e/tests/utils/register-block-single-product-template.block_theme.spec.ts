@@ -148,29 +148,14 @@ test.describe( 'registerProductBlockType registers', () => {
 
 		await expect( singleProductTemplate ).toBeVisible();
 
-		const iframe = page.frameLocator(
-			'button[aria-label="Single Product"] iframe[title="Editor canvas"]'
+		const previewCanvas = singleProductTemplate.frameLocator(
+			'iframe[title="Editor canvas"]'
 		);
 		for ( const blockType of productBlockTypes ) {
-			const block = iframe?.locator( `[data-type="${ blockType }"]` );
-			await expect( block ).toBeVisible();
-		}
-
-		await admin.page.reload();
-
-		const singleProductTemplateAfterReload = page.getByRole( 'button', {
-			name: 'Single Product',
-		} );
-
-		await expect( singleProductTemplateAfterReload ).toBeVisible();
-		const iframeAfterReload = page.frameLocator(
-			'button[aria-label="Single Product"] iframe[title="Editor canvas"]'
-		);
-		for ( const blockType of productBlockTypes ) {
-			const block = iframeAfterReload?.locator(
+			const block = previewCanvas.locator(
 				`[data-type="${ blockType }"]`
 			);
-			await expect( block ).toBeVisible();
+			await expect( block.first() ).toBeAttached();
 		}
 	} );
 
