@@ -122,7 +122,7 @@ class FilterData {
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
-		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'stock', $query_vars, array() );
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'stock', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -175,7 +175,7 @@ class FilterData {
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
 		 */
-		$stock_status_counts = apply_filters( 'woocommerce_product_filter_data', $stock_status_counts, 'stock', $query_vars, array() );
+		$stock_status_counts = apply_filters( 'woocommerce_product_filter_data', $stock_status_counts, 'stock', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->set_cache( $transient_key, $stock_status_counts );
 
@@ -192,7 +192,7 @@ class FilterData {
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
-		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'rating', $query_vars, array() );
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'rating', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -242,7 +242,7 @@ class FilterData {
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
 		 */
-		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'rating', $query_vars, array() );
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'rating', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->set_cache( $transient_key, $results );
 
@@ -260,7 +260,7 @@ class FilterData {
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
-		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( isset( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
@@ -313,7 +313,7 @@ class FilterData {
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
 		 */
-		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->set_cache( $transient_key, $results );
 
