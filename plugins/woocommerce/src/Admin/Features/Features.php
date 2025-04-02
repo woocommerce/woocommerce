@@ -344,7 +344,10 @@ class Features {
 		}
 
 		// Add the Reactify settings payments class if the feature is enabled.
-		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+		if (
+			FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) &&
+			! in_array( 'woocommerce-feature-enabled-reactify-classic-payments-settings', $classes, true )
+		) {
 			$classes[] = 'woocommerce-feature-enabled-reactify-classic-payments-settings';
 		}
 
