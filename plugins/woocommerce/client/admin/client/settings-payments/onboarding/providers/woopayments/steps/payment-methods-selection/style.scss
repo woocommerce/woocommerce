@@ -137,7 +137,8 @@
 	}
 
 	.woocommerce-layout__header-wrapper {
-		padding: $gap-large 1.5 * $gap-large;
+		// This is the padding for the header. Controlling each side to adapt to the content.
+		padding: $gap-large / 2 $gap-large $gap-large $gap-large * 1.5;
 		border-bottom: 1px solid $gray-200;
 		flex-shrink: 0;
 		background: $white;
