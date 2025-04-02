@@ -50,11 +50,11 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 					'get_rates'          => function ( $tax_class, $customer ) use ( &$customer_passed_to_get_rates ) {
 						$customer_passed_to_get_rates = $customer;
 					},
-					'get_base_tax_rates' => function ( $tax_class ) use ( &$get_base_rates_invoked ) {
+					'get_base_tax_rates' => function () use ( &$get_base_rates_invoked ) {
 						$get_base_rates_invoked = true;
 						return 0;
 					},
-					'calc_tax'           => function ( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
+					'calc_tax'           => function () {
 						return array( 0 );
 					},
 				),
