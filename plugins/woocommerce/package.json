@@ -168,7 +168,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: nightly",
+					"name": "PHP WP: prerelease",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -176,7 +176,6 @@
 						"--testsuite=wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
-					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -188,7 +187,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"wpVersion": "nightly"
+							"wpVersion": "prerelease"
 						}
 					},
 					"events": [

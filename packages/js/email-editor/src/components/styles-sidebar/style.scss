@@ -4,10 +4,10 @@
 	height: 100%;
 
 	.components-panel,
+	.components-navigator,
 	.components-navigator-provider,
 	.components-navigator-screen {
 		height: 100%;
-		overflow: hidden;
 	}
 
 	.components-navigator-screen {
@@ -51,5 +51,10 @@
 		margin-bottom: 16px;
 		min-height: 100px;
 		overflow: hidden;
+	}
+	// Because we use complementary area component from the WP interface package the is visible an unwanted close icon.
+	// This style hides it.
+	.interface-complementary-area-header__small {
+		display: none;
 	}
 }
