@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, TextareaControl } from '@wordpress/components';

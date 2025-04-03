@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, useEffect } from '@wordpress/element';
 import { SlotFillProvider } from '@wordpress/components';
+import { unregisterBlockType } from '@wordpress/blocks';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -17,13 +17,12 @@ import {
  */
 import { TextAreaBlockEditAttributes } from '../../../../blocks/generic/text-area/types';
 import { init as initTextArea } from '../../../../blocks/generic/text-area';
-import { unregisterBlockType } from '@wordpress/blocks';
 
 export type RichTextEditorProps = {
 	contentId: string;
 	label: string;
 	value: string;
-	onChange: ( value: Record< string, any > ) => void;
+	onChange: ( value: Record< string, unknown > ) => void;
 	id: string;
 	allowedFormats?: string[];
 	placeholder?: string;
