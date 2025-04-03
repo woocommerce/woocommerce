@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Exception;
@@ -10,6 +11,7 @@ use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
  * OrderController class.
@@ -373,9 +375,9 @@ class OrderController {
 		$shipping_country = $order->get_shipping_country();
 
 		if ( $needs_shipping ) {
-			$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
-			$selected_shipping_rates  = ShippingUtil::get_selected_shipping_rates_from_packages( WC()->shipping()->get_packages() );
-			$is_local_pickup_selected = ArrayUtils::array_all(
+			$local_pickup_method_ids                      = LocalPickupUtils::get_local_pickup_method_ids();
+			$selected_shipping_rates                      = ShippingUtil::get_selected_shipping_rates_from_packages( WC()->shipping()->get_packages() );
+			$selected_shipping_rates_are_all_local_pickup = ArrayUtil::array_all(
 				$selected_shipping_rates,
 				function ( $rate ) use ( $local_pickup_method_ids ) {
 					return in_array( $rate->get_method_id(), $local_pickup_method_ids, true );
@@ -383,7 +385,7 @@ class OrderController {
 			);
 
 			// If only local pickup is selected, we don't need to validate the shipping country.
-			if ( ! $is_local_pickup_selected && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
+			if ( ! $selected_shipping_rates_are_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
 				throw new RouteException(
 					'woocommerce_rest_invalid_address_country',
 					sprintf(
