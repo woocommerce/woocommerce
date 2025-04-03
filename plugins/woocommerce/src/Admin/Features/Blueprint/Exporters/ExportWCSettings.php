@@ -11,9 +11,9 @@ use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 /**
- * Class ExportWCSettingsGeneral
+ * Class ExportWCSettings
  *
- * This class exports WooCommerce settings and implements the StepExporter and HasAlias interfaces.
+ * This abstract class provides the functionality for exporting WooCommerce settings on a specific page.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */
