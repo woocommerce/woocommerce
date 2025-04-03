@@ -154,7 +154,7 @@ jobs:
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ubuntu-latest
-    needs: 'project-jobs'
+    needs: [ 'project-jobs', 'validate-changelog' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
