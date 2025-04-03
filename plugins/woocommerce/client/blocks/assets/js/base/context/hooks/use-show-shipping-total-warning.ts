@@ -53,7 +53,7 @@ export const useShowShippingTotalWarning = () => {
 		if ( hasMismatch && ! isShowingNotice ) {
 			createInfoNotice(
 				__(
-					'Totals will be recalculated when a valid shipping option is selected.',
+					'Totals will be recalculated when a valid shipping method is selected.',
 					'woocommerce'
 				),
 				{
