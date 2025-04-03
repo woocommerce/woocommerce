@@ -100,7 +100,7 @@ const Image = ( {
 };
 
 type Props = BlockAttributes &
-	HTMLAttributes< HTMLDivElement > & { style: Record< string, unknown > };
+	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
