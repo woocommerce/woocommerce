@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { type ReactNode } from 'react';
-import { type RecommendedPaymentMethod } from '@woocommerce/data';
+import {
+	type RecommendedPaymentMethod,
+	type PaymentProvider,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -35,7 +38,7 @@ export interface SidebarItemProps {
 export interface WooPaymentsModalProps {
 	isOpen: boolean;
 	setIsOpen: ( isOpen: boolean ) => void;
-	hasWPComConnection: boolean;
+	providerData: PaymentProvider;
 }
 
 /**

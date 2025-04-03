@@ -94,29 +94,27 @@ export const CompleteSetupButton = ( {
 
 		if ( onboardingType === 'native_in_context' ) {
 			setOnboardingModalOpen( true );
-		} else {
-			if ( ! accountConnected || ! onboardingStarted ) {
-				if ( gatewayHasRecommendedPaymentMethods ) {
-					const history = getHistory();
-					history.push( getNewPath( {}, '/payment-methods' ) );
-				} else {
-					// Redirect to the gateway's onboarding URL if it needs setup.
-					window.location.href = onboardingHref;
-					return;
-				}
-			} else if (
-				accountConnected &&
-				onboardingStarted &&
-				! onboardingCompleted
-			) {
+		} else if ( ! accountConnected || ! onboardingStarted ) {
+			if ( gatewayHasRecommendedPaymentMethods ) {
+				const history = getHistory();
+				history.push( getNewPath( {}, '/payment-methods' ) );
+			} else {
 				// Redirect to the gateway's onboarding URL if it needs setup.
 				window.location.href = onboardingHref;
 				return;
-			} else {
-				// Redirect to the gateway's settings URL if the account is already connected.
-				window.location.href = settingsHref;
-				return;
 			}
+		} else if (
+			accountConnected &&
+			onboardingStarted &&
+			! onboardingCompleted
+		) {
+			// Redirect to the gateway's onboarding URL if it needs setup.
+			window.location.href = onboardingHref;
+			return;
+		} else {
+			// Redirect to the gateway's settings URL if the account is already connected.
+			window.location.href = settingsHref;
+			return;
 		}
 
 		setIsUpdating( false );

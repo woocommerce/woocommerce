@@ -79,6 +79,8 @@ export const SettingsPaymentsMethods = ( {
 		}
 	}, [ isFetching ] );
 
+	console.log( paymentMethods );
+
 	return (
 		<div className="settings-payments-methods__container">
 			{ isFetching ? (

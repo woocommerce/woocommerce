@@ -22,14 +22,16 @@ import '~/settings-payments/onboarding/style.scss';
 export default function WooPaymentsModal( {
 	isOpen,
 	setIsOpen,
-	hasWPComConnection,
+	providerData,
 }: WooPaymentsModalProps ): React.ReactNode {
 	const location = useLocation();
 	const history = getHistory();
 	const wooPaymentsOnboardingPath = '/woopayments/onboarding';
+	const { createErrorNotice } = dispatch( 'core/notices' );
 	const isJetpackReturn =
 		getQueryArg( window.location.href, 'wpcom_connection_return' ) || false;
-	const { createErrorNotice } = dispatch( 'core/notices' );
+	const hasWPComConnection =
+		providerData?.onboarding?.state?.wpcom_has_working_connection || false;
 
 	// Open modal when on an onboarding route
 	React.useEffect( () => {

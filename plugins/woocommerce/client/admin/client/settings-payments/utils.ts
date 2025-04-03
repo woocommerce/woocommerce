@@ -159,10 +159,8 @@ export const providersContainWooPaymentsNeedsSetup = (
 	providers: PaymentProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
-	return (
-		wooPayments?.state?.needs_setup || false
-	);
-}
+	return wooPayments?.state?.needs_setup || false;
+};
 
 /**
  * Return the WooPayments gateway if it exists in the providers list.

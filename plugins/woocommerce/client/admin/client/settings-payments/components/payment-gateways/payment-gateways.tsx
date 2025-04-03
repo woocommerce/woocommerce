@@ -43,6 +43,7 @@ interface PaymentGatewaysProps {
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -61,6 +62,7 @@ export const PaymentGateways = ( {
 	isFetching,
 	businessRegistrationCountry,
 	setBusinessRegistrationCountry,
+	setIsOnboardingModalOpen,
 }: PaymentGatewaysProps ) => {
 	const { invalidateResolution } = useDispatch( paymentSettingsStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
@@ -218,6 +220,7 @@ export const PaymentGateways = ( {
 					acceptIncentive={ acceptIncentive }
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
+					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 			) }
 		</div>
