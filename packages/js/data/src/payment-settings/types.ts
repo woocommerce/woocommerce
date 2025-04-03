@@ -96,7 +96,7 @@ export type PaymentProvider = {
 			onboard: LinkData;
 		};
 		recommended_payment_methods?: RecommendedPaymentMethod[];
-		type: string;
+		type?: string;
 	};
 	tags?: string[];
 	_suggestion_id?: string;
