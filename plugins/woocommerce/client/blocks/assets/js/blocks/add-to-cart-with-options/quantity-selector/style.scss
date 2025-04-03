@@ -14,7 +14,7 @@
 
 		&::after {
 			border-radius: $universal-border-radius;
-			border: 1px solid $universal-border-light;
+			border: 1px solid currentColor;
 			bottom: 0;
 			content: "";
 			left: 0;
