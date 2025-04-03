@@ -35,14 +35,41 @@ test.describe( 'Add Product Task', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.beforeAll( async ( { restApi } ) => {
+		const productIds = [];
+
+		// Set business choice to "I'm just starting my business"
 		await restApi.post( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
 			skipped: true,
+			business_choice: 'im_just_starting_my_business',
 		} );
-		const products = await restApi.get(
-			`${ WC_API_PATH }/products?per_page=50`
-		);
+
+		// Get all products
+		await restApi
+			.get( `${ WC_API_PATH }/products`, {
+				_fields: 'id',
+				per_page: 100,
+				status: 'any', // excludes trashed products
+			} )
+			.then( ( response ) => {
+				const ids = response.data.map( ( { id } ) => id );
+				productIds.push( ...ids );
+			} );
+
+		// Get all products in trash separately.
+		await restApi
+			.get( `${ WC_API_PATH }/products`, {
+				_fields: 'id',
+				per_page: 100,
+				status: 'trash',
+			} )
+			.then( ( response ) => {
+				const ids = response.data.map( ( { id } ) => id );
+				productIds.push( ...ids );
+			} );
+
+		// Delete all products
 		await restApi.post( `${ WC_API_PATH }/products/batch`, {
-			delete: products.data.map( ( product ) => product.id ),
+			delete: productIds,
 		} );
 	} );
 
