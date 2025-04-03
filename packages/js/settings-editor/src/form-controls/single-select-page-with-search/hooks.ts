@@ -1,83 +1,50 @@
 /**
  * External dependencies
  */
-import { useCallback, useState, useMemo } from '@wordpress/element';
-import { resolveSelect, useSelect } from '@wordpress/data';
+import { useMemo } from '@wordpress/element';
 import { store as coreDataStore, Page } from '@wordpress/core-data';
-import { useAsyncFilter } from '@woocommerce/components';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import type { PageItem } from './types';
 import { formatPageToItem } from './utils';
 
-type UsePageSearchReturn = {
-	searchedItems: PageItem[];
-	isFetching: boolean;
-} & Pick<
-	ReturnType< typeof useAsyncFilter< PageItem > >,
-	'onInputChange' | 'getFilteredItems'
->;
-
 /**
- * The useItemSearch hook is used to search for page items.
+ * The useItems hook is used to get all page items.
  *
- * @param selectedItem - The selected item.
- * @param exclude      - The items to exclude from the search results.
- * @return The searched items and a boolean indicating if the items are loading.
+ * @param exclude - The items to exclude from the search results.
+ * @return The page items and a boolean indicating if the items are loading.
  */
-export const useItemSearch = (
-	selectedItem: PageItem | null,
-	exclude?: string[]
-): UsePageSearchReturn => {
-	const [ searchedItems, setSearchedItems ] = useState< PageItem[] >( [] );
-
-	const handleFilter = useCallback(
-		async ( search?: string ) => {
-			if (
-				! search ||
-				search.trim() === '' ||
-				// When the selected item is the same as the search term, don't call the API to avoid unnecessary requests.
-				search === selectedItem?.label
-			) {
-				return [];
-			}
-
-			const records = ( await resolveSelect(
-				coreDataStore
-			).getEntityRecords( 'postType', 'page', {
-				search,
-				exclude,
+export const useItems = ( exclude?: string[] ) => {
+	return useSelect(
+		( select ) => {
+			const query = {
 				status: [ 'publish', 'private', 'draft' ],
-			} ) ) as Page[];
+				...( exclude ? { exclude } : {} ),
+			};
 
-			return records?.map( formatPageToItem ) || [];
+			const args: [ 'postType', 'page', { status: string[] } ] = [
+				'postType',
+				'page',
+				query,
+			];
+
+			const allPages =
+				( select( coreDataStore ).getEntityRecords(
+					...args
+				) as Page[] ) || null;
+
+			return {
+				items: allPages?.map( formatPageToItem ) || [],
+				isFetching: ! select( coreDataStore ).hasFinishedResolution(
+					'getEntityRecords',
+					args
+				),
+			};
 		},
-		[ exclude, selectedItem ]
+		[ exclude ]
 	);
-
-	const onFilterStart = useCallback( () => {
-		setSearchedItems( [] );
-	}, [] );
-
-	const onFilterEnd = useCallback( ( items: PageItem[] ) => {
-		setSearchedItems( items );
-	}, [] );
-
-	const { isFetching, onInputChange, getFilteredItems } =
-		useAsyncFilter< PageItem >( {
-			filter: handleFilter,
-			onFilterStart,
-			onFilterEnd,
-		} );
-
-	return {
-		searchedItems,
-		isFetching,
-		onInputChange,
-		getFilteredItems,
-	};
 };
 
 /**

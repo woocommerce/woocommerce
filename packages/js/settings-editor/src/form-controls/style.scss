@@ -5,3 +5,8 @@
 	padding: $grid-unit;
 	height: $grid-unit-60 + 2px;
 }
+
+.woocommerce-experimental-select-control__popover-menu-container,
+.woocommerce-experimental-select-control__menu-item {
+	cursor: pointer;
+}

@@ -24,7 +24,7 @@ import type { DataFormItem } from '../../types';
 import type { PageItem } from './types';
 import { sanitizeHTML } from '../../utils';
 import { Suffix } from './suffix';
-import { useItemSearch, useSelectedItem } from './hooks';
+import { useItems, useSelectedItem } from './hooks';
 
 type SingleSelectPageWithSearchEditProps =
 	DataFormControlProps< DataFormItem > & {
@@ -57,8 +57,7 @@ export const SingleSelectPageWithSearch = ( {
 	const { selectedItem, isLoading } = useSelectedItem( value );
 	const [ isFocused, setIsFocused ] = useState( false );
 
-	const { searchedItems, isFetching, onInputChange, getFilteredItems } =
-		useItemSearch( selectedItem, exclude );
+	const { items: allItems, isFetching } = useItems( exclude );
 
 	const handleSelect = useCallback(
 		( item: PageItem | null ) => {
@@ -87,6 +86,7 @@ export const SingleSelectPageWithSearch = ( {
 		>
 			<input type="hidden" id={ id } value={ value } />
 			<SelectControl< PageItem >
+				__experimentalOpenMenuOnFocus
 				className={ className }
 				placeholder={
 					isLoading
@@ -97,8 +97,13 @@ export const SingleSelectPageWithSearch = ( {
 				// The select control input does not require an id since its value represents the label (which displays the page title to the user). A hidden input with the actual id is provided above, ensuring that the value is saved correctly.
 				inputProps={ {
 					id: undefined,
+					'aria-readonly': true,
+					'aria-label': __(
+						'Use up and down arrow keys to navigate',
+						'woocommerce'
+					),
 				} }
-				items={ searchedItems }
+				items={ allItems }
 				selected={ isFocused ? null : selectedItem }
 				onSelect={ handleSelect }
 				onFocus={ () => setIsFocused( true ) }
@@ -112,8 +117,6 @@ export const SingleSelectPageWithSearch = ( {
 						onRemove={ () => handleSelect( null ) }
 					/>
 				}
-				onInputChange={ onInputChange }
-				getFilteredItems={ getFilteredItems }
 			>
 				{ ( {
 					items,
