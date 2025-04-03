@@ -21,9 +21,9 @@ import { Save } from './save';
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
-	// Product Title is not expected to be available in Product Collection
-	// nor Products (Beta). They use core/post-title variation.
-	ancestor: [ 'woocommerce/all-products', 'woocommerce/single-product' ],
+	// Product Title is not expected to be available anywhere other than in All Products.
+	// Everywhere else we use core/post-title variation.
+	ancestor: [ 'woocommerce/all-products' ],
 	title,
 	description,
 	icon: { src: icon },
@@ -31,7 +31,10 @@ const blockConfig: BlockConfiguration = {
 	edit,
 	save: Save,
 	supports: {
-		...sharedConfig.supports,
+		html: false,
+		interactivity: {
+			clientNavigation: false,
+		},
 		typography: {
 			fontSize: true,
 			lineHeight: true,

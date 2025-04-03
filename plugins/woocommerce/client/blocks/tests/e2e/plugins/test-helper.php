@@ -97,6 +97,10 @@ function register_third_party_local_pickup_method() {
 	 */
 	function woo_collection_shipping_init() {
 
+		if ( 'yes' !== get_option( 'woocommerce_enable_third_party_local_pickup_method_registration' ) ) {
+			return;
+		}
+
 		/**
 		 * Custom Local Pickup method.
 		 */
@@ -186,7 +190,25 @@ function register_third_party_local_pickup_method() {
 	}
 	add_filter( 'woocommerce_shipping_methods', 'add_woo_collection_shipping' );
 }
+
 register_third_party_local_pickup_method();
+
+/**
+ * Define URL endpoints for setting an option to determine if the third party local pickup method is registered.
+ */
+function woocommerce_enable_third_party_local_pickup_method_registration() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET['enable_third_party_local_pickup_method_registration'] ) ) {
+		update_option( 'woocommerce_enable_third_party_local_pickup_method_registration', 'yes' );
+		exit( 'Third party local pickup method registration enabled.' );
+	}
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET['disable_third_party_local_pickup_method_registration'] ) ) {
+		delete_option( 'woocommerce_enable_third_party_local_pickup_method_registration' );
+		exit( 'Third party local pickup method registration disabled.' );
+	}
+}
+add_action( 'init', 'woocommerce_enable_third_party_local_pickup_method_registration' );
 
 /**
  * Define URL endpoint for setting up third party local pickup method.

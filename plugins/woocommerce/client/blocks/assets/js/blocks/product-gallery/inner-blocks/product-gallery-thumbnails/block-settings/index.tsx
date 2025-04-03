@@ -2,37 +2,54 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { RangeControl } from '@wordpress/components';
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - Ignoring because `__experimentalUnitControl` is not yet in the type definitions.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis, @woocommerce/dependency-group
+	__experimentalUnitControl as UnitControl,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import type { ProductGalleryThumbnailsSettingsProps } from '../types';
 
+const minValue = 10;
+const maxValue = 50;
+const defaultValue = 33;
+
 export const ProductGalleryThumbnailsBlockSettings = ( {
 	attributes,
 	setAttributes,
 }: ProductGalleryThumbnailsSettingsProps ) => {
-	const maxNumberOfThumbnails = 8;
-	const minNumberOfThumbnails = 3;
-	const { numberOfThumbnails } = attributes;
+	const { thumbnailSize } = attributes;
 
 	return (
-		<RangeControl
-			label={ __( 'Number of Thumbnails', 'woocommerce' ) }
-			value={ numberOfThumbnails }
-			onChange={ ( value: number ) =>
+		<UnitControl
+			label={ __( 'Thumbnail Size', 'woocommerce' ) }
+			value={ thumbnailSize }
+			onChange={ ( value: string | undefined ) => {
+				const numberValue = Number(
+					value?.replace( '%', '' ) || defaultValue
+				);
+				const validated = Math.min(
+					Math.max( numberValue, minValue ),
+					maxValue
+				);
 				setAttributes( {
-					numberOfThumbnails: Math.round( value ),
-				} )
-			}
+					thumbnailSize: validated + '%',
+				} );
+			} }
+			units={ [ { value: '%', label: '%' } ] }
+			min={ minValue }
+			max={ maxValue }
+			step={ 1 }
+			size="default"
+			__next36pxDefaultSize
 			help={ __(
-				'Choose how many thumbnails (3-8) will display. If more images exist, a “View all” button will display.',
+				'Choose the size of each thumbnail in respect to the product image. If thumbnails container size gets bigger than the product image, thumbnails will turn to slider.',
 				'woocommerce'
 			) }
-			max={ maxNumberOfThumbnails }
-			min={ minNumberOfThumbnails }
-			step={ 1 }
 		/>
 	);
 };

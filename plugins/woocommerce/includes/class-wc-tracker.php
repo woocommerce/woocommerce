@@ -252,7 +252,7 @@ class WC_Tracker {
 		$theme_data           = wp_get_theme();
 		$theme_child_theme    = wc_bool_to_string( is_child_theme() );
 		$theme_wc_support     = wc_bool_to_string( current_theme_supports( 'woocommerce' ) );
-		$theme_is_block_theme = wc_bool_to_string( wc_current_theme_is_fse_theme() );
+		$theme_is_block_theme = wc_bool_to_string( wp_is_block_theme() );
 
 		return array(
 			'name'        => $theme_data->Name, // @phpcs:ignore
@@ -1188,7 +1188,7 @@ class WC_Tracker {
 	 */
 	private static function get_mini_cart_info() {
 		$mini_cart_block_name = 'woocommerce/mini-cart';
-		$mini_cart_block_data = wc_current_theme_is_fse_theme() ? BlocksUtil::get_block_from_template_part( $mini_cart_block_name, 'header' ) : BlocksUtil::get_blocks_from_widget_area( $mini_cart_block_name );
+		$mini_cart_block_data = wp_is_block_theme() ? BlocksUtil::get_block_from_template_part( $mini_cart_block_name, 'header' ) : BlocksUtil::get_blocks_from_widget_area( $mini_cart_block_name );
 		return array(
 			'mini_cart_used'             => empty( $mini_cart_block_data[0] ) ? 'No' : 'Yes',
 			'mini_cart_block_attributes' => empty( $mini_cart_block_data[0] ) ? array() : $mini_cart_block_data[0]['attrs'],

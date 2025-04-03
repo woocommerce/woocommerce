@@ -9,7 +9,6 @@ import { Icon, starFilled } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import edit from './edit';
-import { supports } from './support';
 
 registerBlockType( metadata, {
 	apiVersion: 3,
@@ -21,6 +20,5 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	supports,
 	edit,
 } );

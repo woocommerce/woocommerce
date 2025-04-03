@@ -36,6 +36,16 @@ function register_helper_api() {
 	);
 
 	register_rest_route(
+		'e2e-options',
+		'/delete',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'api_delete_option',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
 		'e2e-environment',
 		'/info',
 		array(
@@ -118,6 +128,28 @@ function api_update_option( WP_REST_Request $request ) {
 	}
 
 	return new WP_REST_Response( 'Update option FAILED: ' . $option_name . ' => ' . $option_value, 400 );
+}
+
+/**
+ * Delete a WordPress option.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response
+ */
+function api_delete_option( WP_REST_Request $request ) {
+	$option_name  = sanitize_text_field( $request['option_name'] );
+
+	$option_exists = get_option( $option_name, null );
+
+	if ( null === $option_exists ) {
+		return new WP_REST_Response( 'Option ' . $option_name . ' does not exist.', 200 );
+	}
+
+	if ( delete_option( $option_name ) ) {
+		return new WP_REST_Response( 'Delete option SUCCESS: ' . $option_name, 200 );
+	}
+
+	return new WP_REST_Response( 'Delete option FAILED: ' . $option_name, 400 );
 }
 
 /**

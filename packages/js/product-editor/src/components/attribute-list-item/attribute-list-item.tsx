@@ -31,7 +31,7 @@ const NOT_FILTERABLE_CUSTOM_ATTR_TEXT = __(
 	'woocommerce'
 );
 
-export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
+export const AttributeListItem = ( {
 	attribute,
 	editLabel = __( 'Edit', 'woocommerce' ),
 	removeLabel = __( 'Remove attribute', 'woocommerce' ),
@@ -39,7 +39,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 	onDragEnd,
 	onEditClick,
 	onRemoveClick,
-} ) => {
+}: AttributeListItemProps ) => {
 	return (
 		<ListItem
 			className="woocommerce-attribute-list-item"

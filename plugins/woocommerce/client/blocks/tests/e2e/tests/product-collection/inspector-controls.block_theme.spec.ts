@@ -543,7 +543,10 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			pageObject,
 			editor,
 			page,
+			wpCoreVersion,
 		} ) => {
+			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );
@@ -599,7 +602,10 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			pageObject,
 			editor,
 			page,
+			wpCoreVersion,
 		} ) => {
+			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );

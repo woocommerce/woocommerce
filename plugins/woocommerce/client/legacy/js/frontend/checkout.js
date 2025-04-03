@@ -537,11 +537,11 @@ jQuery( function( $ ) {
 					success:	function( result ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
-						
+
 						$( '.checkout-inline-error-message' ).remove();
 
 						try {
-							if ( 'success' === result.result && 
+							if ( 'success' === result.result &&
 								$form.triggerHandler( 'checkout_place_order_success', [ result, wc_checkout_form ] ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
@@ -651,9 +651,12 @@ jQuery( function( $ ) {
 					errorMessage.className = 'checkout-inline-error-message';
 					errorMessage.textContent = msg;
 
-					$formRow.appendChild( errorMessage );
-					$field.setAttribute( 'aria-describedby', descriptionId );
-					$field.setAttribute( 'aria-invalid', 'true' );
+					if ( $formRow && errorMessage.textContent.length > 0 ) {
+						$formRow.append( errorMessage );
+					}
+
+					$field.attr( 'aria-describedby', descriptionId );
+					$field.attr( 'aria-invalid', 'true' );
 				}
 			} );
 		},
@@ -693,13 +696,13 @@ jQuery( function( $ ) {
 			if ( $target.length === 0 ) {
 				return;
 			}
-	
+
 			var msg = $( $.parseHTML( html_element ) ).text().trim();
 
 			if ( msg === '' ) {
 				return;
 			}
-				
+
 			$target.find( '#coupon_code' )
 				.focus()
 				.addClass( 'has-error' )

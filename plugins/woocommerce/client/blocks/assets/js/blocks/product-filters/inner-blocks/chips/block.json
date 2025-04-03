@@ -18,7 +18,8 @@
 		"interactivity": true
 	},
 	"usesContext": [
-		"filterData"
+		"filterData",
+		"showCounts"
 	],
 	"attributes": {
 		"chipText":{

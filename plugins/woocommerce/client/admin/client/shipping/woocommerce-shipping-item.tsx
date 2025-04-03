@@ -14,10 +14,13 @@ import { getAdminLink } from '@woocommerce/settings';
 import './woocommerce-shipping-item.scss';
 import WooIcon from './woo-icon.svg';
 
-const WoocommerceShippingItem: React.FC< {
+const WoocommerceShippingItem = ( {
+	onSetupClick,
+	pluginsBeingSetup,
+}: {
 	pluginsBeingSetup: Array< string >;
 	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
-} > = ( { onSetupClick, pluginsBeingSetup } ) => {
+} ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const isSiteConnectedToJetpack = useSelect(

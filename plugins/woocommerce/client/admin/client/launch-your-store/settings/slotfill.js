@@ -14,25 +14,25 @@ import {
 	useEffect,
 	useRef,
 } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, getAdminLink } from '@woocommerce/settings';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
-import {
-	COMING_SOON_PAGE_EDITOR_LINK,
-	SITE_VISIBILITY_DOC_LINK,
-} from '../constants';
+import { SITE_VISIBILITY_DOC_LINK } from '../constants';
 import { ConfirmationModal } from './components/confirmation-modal';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-site-visibility-settings-slotfill';
 
 const SiteVisibility = () => {
 	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
@@ -49,6 +49,12 @@ const SiteVisibility = () => {
 	);
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
+
+	const comingSoonTemplateId = useSelect( ( select ) => {
+		return select( coreStore ).getDefaultTemplateId( {
+			slug: 'coming-soon',
+		} );
+	}, [] );
 
 	useEffect( () => {
 		const saveButton = document.getElementsByClassName(
@@ -172,7 +178,11 @@ const SiteVisibility = () => {
 								{
 									a: createElement( 'a', {
 										target: '_blank',
-										href: COMING_SOON_PAGE_EDITOR_LINK,
+										href: comingSoonTemplateId
+											? getAdminLink(
+													`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
+											  )
+											: getAdminLink( 'site-editor.php' ),
 									} ),
 								}
 						  )
@@ -308,7 +318,11 @@ const SiteVisibilitySlotFill = () => {
 };
 
 export const registerSiteVisibilitySlotFill = () => {
-	registerPlugin( 'woocommerce-admin-site-visibility-settings-slotfill', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-site-visibility-settings',
 		render: SiteVisibilitySlotFill,
 	} );

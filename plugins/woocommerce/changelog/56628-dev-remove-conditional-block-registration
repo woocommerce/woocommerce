@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove conditional registration of blocks via `isExperimentalBlocksEnabled`
