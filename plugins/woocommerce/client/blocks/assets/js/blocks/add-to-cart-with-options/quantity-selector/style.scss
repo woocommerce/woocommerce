@@ -8,6 +8,35 @@
 		font-size: var(--wp--preset--font-size--small);
 		padding: 0.9rem 1.1rem;
 	}
+
+	.quantity {
+		position: relative;
+
+		&::after {
+			border-radius: $universal-border-radius;
+			border: 1px solid $universal-border-light;
+			bottom: 0;
+			content: "";
+			left: 0;
+			pointer-events: none;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+
+		input[type="number"].input-text.qty.text {
+			background-color: transparent;
+			color: currentColor;
+			border: 0;
+			box-shadow: none;
+			
+			&:focus {
+				border-radius: $universal-border-radius;
+				box-shadow: inset 0 0 1px 1px currentColor;
+				outline: none;
+			}
+		}
+	}
 }
 
 // Stepper CSS
@@ -15,7 +44,6 @@
 	.wc-block-components-quantity-selector {
 		display: inline-flex;
 		width: unset;
-		background-color: #fff;
 		margin-right: 0.5em;
 		margin-bottom: 0;
 
@@ -26,6 +54,7 @@
 		input[type="number"].input-text.qty.text {
 			-moz-appearance: textfield;
 			border: unset;
+			background-color: transparent;
 			text-align: center;
 			order: 1;
 			margin: 0;
@@ -37,6 +66,10 @@
 			padding: 0.9rem 0;
 			margin-right: unset;
 			font-size: var(--wp--preset--font-size--small);
+
+			&:focus {
+				border-radius: unset;
+			}
 		}
 
 		input[type="number"]::-webkit-inner-spin-button,
