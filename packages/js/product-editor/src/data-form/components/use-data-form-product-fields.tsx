@@ -96,6 +96,7 @@ export function useDataFormProductFields(
 				const fieldDefinition = getProductField( fieldName );
 				const convertedField: Field< Product > = {
 					...fieldDefinition,
+					label: params?.label || fieldDefinition?.label,
 					Edit:
 						fieldDefinition?.Edit && params
 							? addAttributesToEdit(

@@ -68,7 +68,7 @@ export function ProductSection( {
 	};
 
 	return (
-		<SectionTagName>
+		<SectionTagName className="woocommerce-product-section">
 			{ title && (
 				<SectionHeader
 					description={ description }
@@ -106,14 +106,6 @@ export function ProductSection( {
 							/>
 						);
 					} ) }
-				<p>
-					Render DataForm with { sectionTemplate[ 2 ]?.length } fields
-				</p>
-				<ul>
-					{ sectionTemplate[ 2 ]?.map( ( field ) => (
-						<li key={ field[ 0 ] }>{ field[ 0 ] }</li>
-					) ) }
-				</ul>
 			</div>
 		</SectionTagName>
 	);

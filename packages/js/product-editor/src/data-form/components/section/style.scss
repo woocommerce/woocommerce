@@ -1,0 +1,13 @@
+.woocommerce-product-section {
+	margin: calc(3 * $gap) 0 0;
+	padding: 0 0 calc(3 * $gap);
+	border-bottom: 1px solid #ddd;
+
+	&:first-child {
+		margin-top: calc(4 * $gap);
+	}
+
+	&:last-child {
+		border-bottom: none;
+	}
+}
