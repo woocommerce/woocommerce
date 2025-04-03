@@ -49,7 +49,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
 		id: 'finish',
 		order: 5,
-		type: 'backend',
+		type: 'frontend',
 		label: 'Submit for verification',
 		dependencies: [ 'business_verification' ],
 		content: <FinishStep />,
