@@ -42,7 +42,6 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		order: 4,
 		type: 'backend',
 		label: 'Activate Payments',
-		path: '/woopayments/onboarding/vusiness_verification',
 		dependencies: [ 'test_account' ],
 		content: <BusinessVerificationStep />,
 	},

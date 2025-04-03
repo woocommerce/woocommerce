@@ -135,6 +135,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'status' => PaymentProviders::EXTENSION_ACTIVE,
 				),
 				'onboarding'  => array(
+					'type'                        => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
 					'state'                       => array(
 						'started'   => true,
 						'completed' => true,
@@ -183,7 +184,6 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'icon'        => '',
 						),
 					),
-					'type'                        => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
 				),
 			),
 			$gateway_details
