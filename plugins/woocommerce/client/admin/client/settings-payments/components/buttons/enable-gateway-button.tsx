@@ -60,7 +60,7 @@ interface EnableGatewayButtonProps {
 	/**
 	 * Function to set the onboarding modal open.
 	 */
-	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	setOnboardingModalOpen?: ( isOnboardingModalOpen: boolean ) => void;
 	/**
 	 * The onboarding type for the gateway.
 	 */
@@ -145,7 +145,10 @@ export const EnableGatewayButton = ( {
 						recordEvent( 'settings_payments_provider_enable', {
 							provider_id: gatewayId,
 						} );
-						if ( onboardingType === 'native_in_context' ) {
+						if (
+							onboardingType === 'native_in_context' &&
+							setOnboardingModalOpen
+						) {
 							setOnboardingModalOpen( true );
 						} else if ( gatewayHasRecommendedPaymentMethods ) {
 							// Redirect to the recommended payment methods page if available, or the onboarding URL.
