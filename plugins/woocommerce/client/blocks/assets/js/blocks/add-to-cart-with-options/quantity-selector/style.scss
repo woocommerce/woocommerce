@@ -15,6 +15,7 @@
 		&::after {
 			border-radius: $universal-border-radius;
 			border: 1px solid currentColor;
+			opacity: 0.3;
 			bottom: 0;
 			content: "";
 			left: 0;
