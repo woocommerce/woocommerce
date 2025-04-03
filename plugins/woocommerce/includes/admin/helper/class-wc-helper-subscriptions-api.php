@@ -156,6 +156,8 @@ class WC_Helper_Subscriptions_API {
 				400
 			);
 		}
+
+		WC_Helper::fetch_helper_connection_info();
 	}
 
 	/**
