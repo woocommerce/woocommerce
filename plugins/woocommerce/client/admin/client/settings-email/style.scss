@@ -1,3 +1,32 @@
+@import "@wordpress/dataviews/build-style/style.css";
+
+#wc_settings_email_listing_slotfill {
+	.dataviews-wrapper {
+		background-color: $white;
+	}
+	.woocommerce-email-listing-description {
+		display: inline-block;
+		margin-top: 4px;
+		color: $gray-700;
+		font-size: 12px;
+		font-weight: 400;
+		white-space: wrap;
+	}
+	.woocommerce-email-listing-status {
+		svg {
+			fill: currentColor;
+			margin-right: $grid-unit-05;
+		}
+	}
+	.woocommerce-email-listing-recipients {
+		white-space: wrap;
+	}
+}
+
+.woocommerce-email-listing-recipients-tooltip {
+	text-align: left;
+}
+
 $wc-setting-email-preview-gap: 16px;
 $wc-setting-email-width: 634px;
 

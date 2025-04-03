@@ -20,6 +20,7 @@ jest.mock( '@wordpress/hooks', () => ( {
 	removeAction: jest.fn(),
 	applyFilters: jest.fn(),
 	didFilter: jest.fn(),
+	addFilter: jest.fn(),
 } ) );
 
 jest.mock( '@automattic/site-admin', () => ( {

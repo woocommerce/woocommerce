@@ -4,7 +4,6 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
@@ -13,7 +12,7 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 /**
  * Class ExportWCTaskOptions
  *
- * This class exports WooCommerce task options and implements the StepExporter and HasAlias interfaces.
+ * This class exports WooCommerce task options.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */

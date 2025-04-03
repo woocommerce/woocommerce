@@ -55,7 +55,7 @@ class InstallTheme extends Step {
 	public function prepare_json_array(): array {
 		return array(
 			'step'         => static::get_step_name(),
-			'themeZipFile' => array(
+			'themeData' => array(
 				'resource' => $this->resource,
 				'slug'     => $this->slug,
 			),
@@ -77,17 +77,16 @@ class InstallTheme extends Step {
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
-				'themeZipFile' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
-					),
-					'required'   => array( 'resource', 'slug' ),
+				'themeData' => array(
+					"anyOf" => [
+						require __DIR__ . "/schemas/definitions/VFSReference.php",
+						require __DIR__ . "/schemas/definitions/LiteralReference.php",
+						require __DIR__ . "/schemas/definitions/CorePluginReference.php",
+						require __DIR__ . "/schemas/definitions/CoreThemeReference.php",
+						require __DIR__ . "/schemas/definitions/UrlReference.php",
+						require __DIR__ . "/schemas/definitions/GitDirectoryReference.php",
+						require __DIR__ . "/schemas/definitions/DirectoryLiteralReference.php",
+					]
 				),
 				'options'      => array(
 					'type'       => 'object',
@@ -98,7 +97,7 @@ class InstallTheme extends Step {
 					),
 				),
 			),
-			'required'   => array( 'step', 'themeZipFile' ),
+			'required'   => array( 'step', 'themeData' ),
 		);
 	}
 

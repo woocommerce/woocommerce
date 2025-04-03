@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Blueprint\Util;
 /**
  * Class ExportWCTaxRates
  *
- * This class exports WooCommerce tax rates and implements the StepExporter interface.
+ * This class exports WooCommerce tax rates.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */

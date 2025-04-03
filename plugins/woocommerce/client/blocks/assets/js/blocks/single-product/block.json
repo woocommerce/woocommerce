@@ -5,14 +5,12 @@
 	"title": "Single Product",
 	"description": "Display a single product.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"align": [
-			"wide",
-			"full"
-		]
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": [ "wide", "full" ]
 	},
 	"attributes": {
 		"isPreview": {
@@ -25,7 +23,7 @@
 	},
 	"example": {
 		"attributes": {
-  			"isPreview": true
+			"isPreview": true
 		}
 	},
 	"usesContext": [ "postId", "postType", "queryId" ],
