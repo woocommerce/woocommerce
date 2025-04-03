@@ -477,7 +477,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				address_1: faker.location.streetAddress(),
 				city: faker.location.city(),
 				postcode: faker.location.zipCode( '#####' ),
-				phone: faker.phone.number(),
+				phone: faker.phone.number( { style: 'international' } ),
 				email: faker.internet.email(),
 			};
 

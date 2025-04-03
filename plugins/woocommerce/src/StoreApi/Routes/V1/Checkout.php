@@ -175,6 +175,18 @@ class Checkout extends AbstractCartRoute {
 				wc_release_stock_for_order( $this->order );
 				wc_release_coupons_for_order( $this->order );
 			}
+
+			if ( $request->get_method() === \WP_REST_Server::CREATABLE ) {
+				// Step logs the exception. If nothing abnormal occurred during the place order POST request, flow the log is removed.
+				wc_log_order_step(
+					'[Store API #FAIL] Placing Order failed',
+					array(
+						'status' => $response->get_status(),
+						'data'   => $response->get_data(),
+					),
+					true
+				);
+			}
 		}
 
 		return $this->add_response_headers( $response );
@@ -405,6 +417,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		wc_log_order_step( '[Store API #1] Place Order flow initiated', null, false, true );
+
 		/**
 		 * Ensure required permissions based on store settings are valid to place the order.
 		 */
@@ -420,6 +434,7 @@ class Checkout extends AbstractCartRoute {
 		 * Validate that the cart is not empty.
 		 */
 		$this->cart_controller->validate_cart_not_empty();
+		wc_log_order_step( '[Store API #2] Cart validated' );
 
 		/**
 		 * Validate items and fix violations before the order is processed.
@@ -431,18 +446,23 @@ class Checkout extends AbstractCartRoute {
 		 * uses the up-to-date customer address.
 		 */
 		$this->update_customer_from_request( $request );
+		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
+		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
 		$this->update_order_from_request( $request );
+		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );
+		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
+		wc_log_order_step( '[Store API #7] Validated order data', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Hold coupons for the order as soon as the draft order is created.
@@ -486,6 +506,7 @@ class Checkout extends AbstractCartRoute {
 				esc_html( $e->getCode() )
 			);
 		}
+		wc_log_order_step( '[Store API #8] Reserved stock for order', array( 'order_object' => $this->order ) );
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -535,6 +556,16 @@ class Checkout extends AbstractCartRoute {
 		} else {
 			$this->process_without_payment( $request, $payment_result );
 		}
+
+		wc_log_order_step(
+			'[Store API #9] Order processed',
+			array(
+				'order_object'           => $this->order,
+				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
+				'payment_status'         => $payment_result->status,
+			),
+			true
+		);
 
 		return $this->prepare_item_for_response(
 			(object) [
@@ -611,8 +642,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
+
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
 		}
 
 		wc_do_deprecated_action(
@@ -665,6 +699,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
+		wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
 	}
 
 	/**
@@ -745,6 +780,7 @@ class Checkout extends AbstractCartRoute {
 					$this->update_customer_address_field( $customer, $key, $value, $context_data['group'] );
 				}
 			}
+			wc_log_order_step( '[Store API #3::update_customer_from_request] Persisted ' . $context . ' fields' );
 		}
 
 		/**
@@ -837,10 +873,13 @@ class Checkout extends AbstractCartRoute {
 
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
+			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+
 		}
 
 		// Persist customer address data to account.
 		$this->order_controller->sync_customer_data_with_order( $this->order );
+		wc_log_order_step( '[Store API #6::process_customer] Synced customer data from order', array( 'customer_id' => $this->order->get_customer_id() ) );
 	}
 
 	/**

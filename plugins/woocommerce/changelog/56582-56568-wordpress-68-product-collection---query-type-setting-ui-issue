@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix: Product Collection -  ensures that the query type indicator is displayed correctly in the Query Loop block.
