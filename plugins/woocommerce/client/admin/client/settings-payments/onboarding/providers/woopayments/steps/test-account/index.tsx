@@ -97,8 +97,13 @@ const TestAccountStep = () => {
 						( response as StepCheckResponse )?.status ===
 						'completed'
 					) {
-						// Refresh the onboarding steps to get the latest status.
-						setTestAccountCreationSuccess( true );
+						// Set the progress to 100%.
+						setTestDriveLoaderProgress( 100 );
+
+						// Set the test account creation success to true after some time to avoid UI re-rendering rapidly.
+						setTimeout( () => {
+							setTestAccountCreationSuccess( true );
+						}, 1000 );
 					}
 				} );
 			};
