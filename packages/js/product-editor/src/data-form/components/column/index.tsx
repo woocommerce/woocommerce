@@ -26,7 +26,7 @@ export function ProductColumn( {
 }: ProductColumnProps ) {
 	const innerBlocks = columnTemplate[ 2 ] || [];
 	const { editEntityRecord } = useDispatch( coreDataStore );
-	const fields = useDataFormProductFields( innerBlocks );
+	const fieldGroups = useDataFormProductFields( innerBlocks );
 
 	const { record, hasFinishedResolution } = useSelect(
 		( select ) => {
@@ -49,24 +49,19 @@ export function ProductColumn( {
 		[ postType, productId ]
 	);
 
+	const flattenedFieldGroups = useMemo( () => {
+		return fieldGroups.flatMap( ( group ) =>
+			group.type === 'fields' ? group.content : []
+		);
+	}, [ fieldGroups ] );
+
 	// Convert the fields to DataForm compatible format
 	const form = useMemo( () => {
 		return {
 			type: 'regular' as const,
-			fields: columnTemplate[ 2 ]
-				?.filter(
-					( field ) =>
-						field[ 0 ] ===
-							'woocommerce/product-regular-price-field' ||
-						field[ 0 ] === 'woocommerce/product-sale-price-field'
-				)
-				.map( ( field ) =>
-					field[ 0 ] === 'woocommerce/product-regular-price-field'
-						? 'regular_price'
-						: 'woocommerce/product-sale-price-field'
-				),
+			fields: flattenedFieldGroups.map( ( field ) => field.id ),
 		};
-	}, [ columnTemplate ] );
+	}, [ flattenedFieldGroups ] );
 
 	const onChange = ( edits: Partial< Product > ) => {
 		editEntityRecord( 'postType', postType, productId, edits );
@@ -78,7 +73,7 @@ export function ProductColumn( {
 		<div style={ { flex: 1, marginTop: '16px' } }>
 			{ hasFinishedResolution && (
 				<DataForm
-					fields={ fields }
+					fields={ flattenedFieldGroups }
 					form={ form }
 					data={ record }
 					onChange={ onChange }

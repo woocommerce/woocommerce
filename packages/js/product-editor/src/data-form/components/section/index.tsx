@@ -32,7 +32,7 @@ export function ProductSection( {
 		blockGap: string;
 	};
 
-	const fields = useDataFormProductFields( sectionTemplate[ 2 ] );
+	const fieldGroups = useDataFormProductFields( sectionTemplate[ 2 ] );
 	const { editEntityRecord } = useDispatch( coreDataStore );
 	const { record, hasFinishedResolution } = useSelect(
 		( select ) => {
@@ -78,66 +78,31 @@ export function ProductSection( {
 
 			<div className={ nestedClassNames }>
 				{ hasFinishedResolution &&
-					sectionTemplate[ 2 ]?.map( ( field ) => {
-						if ( field[ 0 ] === 'core/columns' ) {
+					fieldGroups.map( ( group ) => {
+						if ( group.type === 'fields' ) {
+							const form = {
+								type: 'regular' as const,
+								fields: group.content.map(
+									( field ) => field.id
+								),
+							};
+							return (
+								<DataForm
+									fields={ group.content }
+									form={ form }
+									onChange={ onChange }
+									data={ record }
+								/>
+							);
+						} else {
 							return (
 								<ProductColumns
-									key={ field[ 1 ]?._templateBlockId }
-									columnsTemplate={ field }
+									columnsTemplate={ group.content }
 									postType={ postType }
 									productId={ productId }
 								/>
 							);
-						} else if (
-							field[ 0 ] === 'woocommerce/product-name-field'
-						) {
-							const form = {
-								type: 'regular' as const,
-								fields: sectionTemplate[ 2 ]
-									?.filter(
-										( field1 ) =>
-											field1[ 0 ] ===
-											'woocommerce/product-name-field'
-									)
-									.map( () => 'name' ),
-							};
-							return (
-								<DataForm
-									key={ field[ 1 ]?._templateBlockId }
-									fields={ fields }
-									form={ form }
-									onChange={ onChange }
-									data={ record }
-								/>
-							);
-						} else if (
-							field[ 0 ] ===
-							'woocommerce/product-schedule-sale-fields'
-						) {
-							const form = {
-								type: 'regular' as const,
-								fields: sectionTemplate[ 2 ]
-									?.filter(
-										( field2 ) =>
-											field2[ 0 ] ===
-											'woocommerce/product-schedule-sale-fields'
-									)
-									.map(
-										() =>
-											'woocommerce/product-schedule-sale-fields'
-									),
-							};
-							return (
-								<DataForm
-									key={ field[ 1 ]?._templateBlockId }
-									fields={ fields }
-									form={ form }
-									onChange={ onChange }
-									data={ record }
-								/>
-							);
 						}
-						return null;
 					} ) }
 				<p>
 					Render DataForm with { sectionTemplate[ 2 ]?.length } fields
