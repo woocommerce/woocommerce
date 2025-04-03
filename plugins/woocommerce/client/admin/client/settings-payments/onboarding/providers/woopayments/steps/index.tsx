@@ -12,6 +12,7 @@ import WooPaymentsStepHeader from '../components/header';
 import WordPressComStep from './wpcom-connection';
 import BusinessVerificationStep from './business-verification';
 import PaymentMethodsSelection from './payment-methods-selection';
+import TestAccountStep from './test-account';
 import FinishStep from './finish';
 
 /**
@@ -94,9 +95,9 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'test_account',
 		order: 3,
 		type: 'backend',
-		label: 'Test account',
+		label: 'Ready to test payments',
 		dependencies: [ 'wpcom_connection' ],
-		content: <OtherStep />,
+		content: <TestAccountStep />,
 	},
 	{
 		id: 'business_verification',
@@ -105,14 +106,6 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		label: 'Activate Payments',
 		dependencies: [ 'test_account' ],
 		content: <BusinessVerificationStep />,
-	},
-	{
-		id: 'final',
-		order: 5,
-		type: 'backend',
-		label: 'Payment methods',
-		dependencies: [ 'congratulations' ],
-		content: <OtherStep />,
 	},
 	{
 		id: 'finish',

@@ -479,7 +479,7 @@ class WooPaymentsService {
 		$response = $this->proxy->call_static(
 			Utils::class,
 			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/test_account/init',
+			'/wc/v3/payments/onboarding/test_drive_account/init',
 			array(
 				'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
 				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
