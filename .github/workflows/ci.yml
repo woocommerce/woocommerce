@@ -154,8 +154,17 @@ jobs:
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ubuntu-latest
-    needs: 'project-jobs'
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs: [ 'project-jobs', 'validate-changelog' ]
+    # Complex conditions part:
+    # -- all test types will run for PRs with code changes or on other events
+    # -- performance tests in draft PRs will not run until it semi-ready (failing changelog validation as indication of WIP)
+    if: >
+      ${{
+          !cancelled() &&
+          needs.project-jobs.outputs.test-jobs != '[]' &&
+          ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && 
+          ( github.event_name != 'pull_request' || github.event.pull_request.draft == false || matrix.testType != 'performance' || needs.validate-changelog.result != 'failure' ) 
+      }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
