@@ -8,30 +8,30 @@ To see available commands run `pnpm utils slack-test-report --help` from the pro
 
 ## Command Options
 
-    - `-c, --conclusion <conclusion>` (Required): Test run conclusion. Expected one of: success, failure, skipped, cancelled
-    - `-r, --report-name <reportName>`: The name of the report (e.g., "post-merge tests", "daily e2e tests")
-    - `-u, --username <username>`: The Slack username (default: "Github reporter")
-    - `-n, --pr-number <prNumber>`: The PR number to include in the message (for pull_request events)
-    - `-t, --pr-title <prTitle>`: The PR title to include in the message (for pull_request events)
-    - `-m, --commit-message <commitMessage>`: The commit message
-    - `--config <configPath>`: Path to a JSON config file containing notification rules or settings
+-    `-c, --conclusion <conclusion>` (Required): Test run conclusion. Expected one of: success, failure, skipped, cancelled
+-    `-r, --report-name <reportName>`: The name of the report (e.g., "post-merge tests", "daily e2e tests")
+-    `-u, --username <username>`: The Slack username (default: "Github reporter")
+-    `-n, --pr-number <prNumber>`: The PR number to include in the message (for pull_request events)
+-    `-t, --pr-title <prTitle>`: The PR title to include in the message (for pull_request events)
+-    `-m, --commit-message <commitMessage>`: The commit message
+-    `--config <configPath>`: Path to a JSON config file containing notification rules or settings
 
 ## Environment Variables
 
 The following environment variables are required:
 
-    - `SLACK_TOKEN`: Slack API token for sending messages
-    - `DEFAULT_CHECKS_CHANNEL`: Default Slack channel ID for notifications
-    - `GITHUB_SHA`: Git commit SHA
-    - `GITHUB_ACTOR`: GitHub username of the person who triggered the action
-    - `GITHUB_TRIGGERING_ACTOR`: GitHub username of the person who triggered the workflow
-    - `GITHUB_EVENT_NAME`: Name of the GitHub event that triggered the workflow
-    - `GITHUB_RUN_ID`: Unique identifier of the workflow run
-    - `GITHUB_RUN_ATTEMPT`: Attempt number of the workflow run
-    - `GITHUB_SERVER_URL`: GitHub server URL
-    - `GITHUB_REPOSITORY`: Repository name with owner
-    - `GITHUB_REF_TYPE`: The type of ref that triggered the workflow
-    - `GITHUB_REF_NAME`: The branch or tag name that triggered the workflow
+-    `SLACK_TOKEN`: Slack API token for sending messages
+-    `DEFAULT_CHECKS_CHANNEL`: Default Slack channel ID for notifications
+-    `GITHUB_SHA`: Git commit SHA
+-    `GITHUB_ACTOR`: GitHub username of the person who triggered the action
+-    `GITHUB_TRIGGERING_ACTOR`: GitHub username of the person who triggered the workflow
+-    `GITHUB_EVENT_NAME`: Name of the GitHub event that triggered the workflow
+-    `GITHUB_RUN_ID`: Unique identifier of the workflow run
+-    `GITHUB_RUN_ATTEMPT`: Attempt number of the workflow run
+-    `GITHUB_SERVER_URL`: GitHub server URL
+-    `GITHUB_REPOSITORY`: Repository name with owner
+-    `GITHUB_REF_TYPE`: The type of ref that triggered the workflow
+-    `GITHUB_REF_NAME`: The branch or tag name that triggered the workflow
 
 ## Configuration File
 
@@ -59,12 +59,12 @@ When you need more complex routing logic (e.g., sending different types of test 
 
 ### Configuration Options
 
-    - `defaultChannel`: Environment variable name for the default Slack channel
-    - `routes`: Array of routing rules with the following properties:
-        - `checkType`: (Optional) Type of check to match (e.g., "release-checks", "daily-checks")
-        - `refName`: (Optional) Git reference pattern to match (supports glob patterns)
-        - `channels`: Array of environment variable names for Slack channel IDs
-        - `excludeDefaultChannel`: (Optional) If true, skips sending to the default channel for matching rules
+-    `defaultChannel`: Environment variable name for the default Slack channel
+-    `routes`: Array of routing rules with the following properties:
+-    `checkType`: (Optional) Type of check to match (e.g., "release-checks", "daily-checks")
+-    `refName`: (Optional) Git reference pattern to match (supports glob patterns)
+-    `channels`: Array of environment variable names for Slack channel IDs
+-    `excludeDefaultChannel`: (Optional) If true, skips sending to the default channel for matching rules
 
 At least one of `checkType` or `refName` must be specified in each route.
 
@@ -72,21 +72,15 @@ At least one of `checkType` or `refName` must be specified in each route.
 
 The tool sends messages with the following information:
 
-    - Test result status (success/failure)
-    - Report name (if provided)
-    - Context information based on the event type:
-        - For pull requests: PR number, title, and actor
-        - For pushes/workflow runs: Branch/tag name, commit SHA, and commit message
-        - For scheduled events: Branch name and event type
-    - Run details: Run ID, attempt number, and triggering actor
-    - Action buttons linking to:
-        - GitHub workflow run
-        - Pull request (for PR events)
-        - Commit (for push events)
+-    Test result status (success/failure)
+-    Report name (if provided)
+-    Context information based on the event type
+-    Run details: Run ID, attempt number, and triggering actor
+-    Action buttons for more information
 
 ## Examples
 
-1. Send a failure report for a pull request:
+Send a failure report for a pull request:
 
 ```bash
 pnpm utils slack-test-report \
@@ -97,7 +91,7 @@ pnpm utils slack-test-report \
   -m "Fix e2e tests"
 ```
 
-2. Send a failure report with custom routing:
+Send a failure report with custom routing:
 
 ```bash
 pnpm utils slack-test-report \
