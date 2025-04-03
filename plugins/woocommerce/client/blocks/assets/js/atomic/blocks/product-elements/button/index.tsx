@@ -4,7 +4,6 @@
  */
 import { Icon, button } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
