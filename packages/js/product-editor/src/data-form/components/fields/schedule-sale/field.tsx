@@ -86,12 +86,7 @@ export function ScheduleSaleFieldEdit( {
 			setDateOnSaleFromGmt( '' );
 			setDateOnSaleToGmt( '' );
 		}
-	}, [
-		hasEdit,
-		isSalePriceGreaterThanZero,
-		setDateOnSaleFromGmt,
-		setDateOnSaleToGmt,
-	] );
+	}, [ isSalePriceGreaterThanZero ] );
 
 	// Automatically show date fields if `from` or `to` dates have
 	// any value.
