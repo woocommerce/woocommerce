@@ -508,10 +508,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
-		// Mark the step as started, if not already.
-		$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-
 		try {
+			// Mark the step as started, if not already.
+			$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
 			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
@@ -760,7 +760,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			'type'    => 'object',
 		);
 		$schema['properties'] = array(
-			'state' => array(
+			'state'   => array(
 				'type'        => 'object',
 				'description' => esc_html__( 'The general state of the onboarding process.', 'woocommerce' ),
 				'context'     => array( 'view', 'edit' ),
@@ -792,7 +792,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
-			'steps' => array(
+			'steps'   => array(
 				'type'        => 'array',
 				'description' => esc_html__( 'The onboarding steps.', 'woocommerce' ),
 				'context'     => array( 'view', 'edit' ),
@@ -847,49 +847,49 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
-								'start'       => array(
+								'start'              => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to signal the step start.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'save'        => array(
+								'save'               => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to save step information in the database.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'check'       => array(
+								'check'              => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to check the step status.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'finish'      => array(
+								'finish'             => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to signal the step completion.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'auth'        => array(
+								'auth'               => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to authorize the WPCOM connection.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'init'        => array(
+								'init'               => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to initialize a test account.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'kyc_session' => array(
+								'kyc_session'        => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to create or resume an embedded KYC session.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
@@ -903,7 +903,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'kyc_fallback' => array(
+								'kyc_fallback'       => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to use as a fallback when dealing with errors with the embedded KYC.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),

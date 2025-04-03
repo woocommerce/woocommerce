@@ -235,9 +235,9 @@ class WooPaymentsService {
 			'status'         => $this->get_onboarding_step_status( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ),
 			'errors'         => array(),
 			'context'        => array(
-				'fields'            => array(),
-				'sub_steps'         => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps' ),
-				'self_assessment'   => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' ),
+				'fields'          => array(),
+				'sub_steps'       => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps' ),
+				'self_assessment' => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' ),
 			),
 		);
 
@@ -254,27 +254,27 @@ class WooPaymentsService {
 		// If the step is not completed, we need to add the actions.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $business_verification_step_details['status'] ) {
 			$business_verification_step_details['actions'] = array(
-				'start'                => array(
+				'start'              => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/start' ),
 				),
-				'save'                 => array(
+				'save'               => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/save' ),
 				),
-				'kyc_session'          => array(
+				'kyc_session'        => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session' ),
 				),
-				'kyc_session_finish'   => array(
+				'kyc_session_finish' => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish' ),
 				),
-				'kyc_fallback' => array(
+				'kyc_fallback'       => array(
 					'type' => self::ACTION_TYPE_REDIRECT,
 					'href' => $this->get_onboarding_kyc_fallback_url(),
 				),
-				'finish'               => array(
+				'finish'             => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
 				),
@@ -616,7 +616,7 @@ class WooPaymentsService {
 
 		// Call the WooPayments API to initialize the test account.
 		$response = Utils::rest_endpoint_post_request(
-			'/wc/v3/payments/onboarding/test_account/init',
+			'/wc/v3/payments/onboarding/test_drive_account/init',
 			array(
 				'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
 				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,

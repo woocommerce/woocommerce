@@ -51,7 +51,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	label: string;
 	path?: string;
 	order: number;
-	status?: 'completed' | 'incomplete';
+	status?: 'not_started' | 'in_progress' | 'completed';
 	dependencies?: string[];
 	actions?: {
 		save?: {
@@ -63,6 +63,14 @@ export interface WooPaymentsProviderOnboardingStep {
 			href?: string;
 		};
 		finish?: {
+			type?: string;
+			href?: string;
+		};
+		init?: {
+			type?: string;
+			href?: string;
+		};
+		check?: {
 			type?: string;
 			href?: string;
 		};
@@ -102,6 +110,7 @@ export interface WooPaymentsProviderOnboardingStep {
 			}
 		>;
 	};
+	errors?: string[];
 }
 
 /**
