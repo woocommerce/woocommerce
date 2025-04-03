@@ -263,7 +263,7 @@ class WooPaymentsService {
 		}
 
 		// Mark the step as started and record the timestamp.
-		$statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] = time();
+		$statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] = $this->proxy->call_function( 'time' );
 
 		// Store the updated step data.
 		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
@@ -296,7 +296,7 @@ class WooPaymentsService {
 		}
 
 		// Mark the step as completed and record the timestamp.
-		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = time();
+		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = $this->proxy->call_function( 'time' );
 
 		// Store the updated step data.
 		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );

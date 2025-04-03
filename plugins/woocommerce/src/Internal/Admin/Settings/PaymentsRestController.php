@@ -795,7 +795,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'type'        => 'object',
 					'description' => esc_html__( 'Onboarding-related details for the provider.', 'woocommerce' ),
 					'properties'  => array(
-						'type' 					       => array(
+						'type'                        => array(
 							'type'        => 'string',
 							'description' => esc_html__( 'The type of onboarding process the provider supports.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
