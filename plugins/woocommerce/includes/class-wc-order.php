@@ -1691,6 +1691,13 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
+		/**
+		 * Filter to hide the shipping address for an order.
+		 *
+		 * @param array    $hide The shipping methods to hide the shipping address for.
+		 * @param WC_Order $this The order object.
+		 * @since 2.7.0
+		 */
 		$hide          = apply_filters( 'woocommerce_order_hide_shipping_address', LocalPickupUtils::get_local_pickup_method_ids(), $this );
 		$needs_address = false;
 
