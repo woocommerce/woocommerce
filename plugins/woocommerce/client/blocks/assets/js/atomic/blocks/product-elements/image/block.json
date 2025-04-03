@@ -37,6 +37,10 @@
 			"margin": true,
 			"padding": true
 		},
+		"dimensions": {
+			"aspectRatio": true,
+			"__experimentalSkipSerialization": true
+		},
 		"__experimentalSelector": ".wc-block-components-product-image"
 	},
 	"ancestor": [
