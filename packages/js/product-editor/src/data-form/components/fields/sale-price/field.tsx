@@ -24,7 +24,6 @@ export function SalePriceBlockEdit( {
 }: DataFormControlProps< Product > ) {
 	const salePrice = data.sale_price;
 	const regularPrice = data.regular_price;
-	const isRequired = true;
 	const label = __( 'Sale Price', 'woocommerce' );
 
 	// const { label, help, tooltip, disabled } = attributes;

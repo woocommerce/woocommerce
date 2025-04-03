@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, useMemo } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { Template } from '@wordpress/blocks';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -15,6 +15,7 @@ import { DataForm } from '@wordpress/dataviews';
 import { SectionHeader } from '../../../components/section-header';
 import { useDataFormProductFields } from '../use-data-form-product-fields';
 import { ProductColumns } from '../columns';
+
 type ProductSectionProps = {
 	sectionTemplate: Template;
 	postType: string;
@@ -32,7 +33,7 @@ export function ProductSection( {
 		blockGap: string;
 	};
 
-	const fields = useDataFormProductFields( sectionTemplate[ 2 ] );
+	const fieldGroups = useDataFormProductFields( sectionTemplate[ 2 ] );
 	const { editEntityRecord } = useDispatch( coreDataStore );
 	const { record, hasFinishedResolution } = useSelect(
 		( select ) => {
@@ -62,17 +63,6 @@ export function ProductSection( {
 	);
 	const SectionTagName = title ? 'fieldset' : 'div';
 
-	const form = useMemo( () => {
-		return {
-			type: 'regular' as const,
-			fields: sectionTemplate[ 2 ]
-				?.filter(
-					( field ) => field[ 0 ] === 'woocommerce/product-name-field'
-				)
-				.map( () => 'name' ),
-		};
-	}, [ sectionTemplate ] );
-
 	const onChange = ( edits: Partial< Product > ) => {
 		editEntityRecord( 'postType', postType, productId, edits );
 	};
@@ -89,30 +79,32 @@ export function ProductSection( {
 
 			<div className={ nestedClassNames }>
 				{ hasFinishedResolution &&
-					sectionTemplate[ 2 ]?.map( ( field ) => {
-						if ( field[ 0 ] === 'core/columns' ) {
-							return (
-								<ProductColumns
-									key={ field[ 1 ]?._templateBlockId }
-									columnsTemplate={ field }
-									postType={ postType }
-									productId={ productId }
-								/>
-							);
-						} else if (
-							field[ 0 ] === 'woocommerce/product-name-field'
-						) {
+					fieldGroups.map( ( group, index ) => {
+						if ( group.type === 'fields' ) {
+							const form = {
+								type: 'regular' as const,
+								fields: group.content.map(
+									( field ) => field.id
+								),
+							};
 							return (
 								<DataForm
-									key={ field[ 1 ]?._templateBlockId }
-									fields={ fields }
+									key={ index }
+									fields={ group.content }
 									form={ form }
 									onChange={ onChange }
 									data={ record }
 								/>
 							);
 						}
-						return null;
+						return (
+							<ProductColumns
+								key={ index }
+								columnsTemplate={ group.content }
+								postType={ postType }
+								productId={ productId }
+							/>
+						);
 					} ) }
 				<p>
 					Render DataForm with { sectionTemplate[ 2 ]?.length } fields

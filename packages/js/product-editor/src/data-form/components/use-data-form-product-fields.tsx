@@ -32,28 +32,64 @@ function getFieldKey( field: Template ): string {
 	return field[ 0 ];
 }
 
+type FieldGroup = {
+	type: 'fields';
+	content: Field< Product >[];
+};
+
+type ColumnGroup = {
+	type: 'column';
+	content: Template;
+};
+
 /**
- * Hook that transforms field definitions into DataForm compatible field objects.
- * Each field definition is an array where:
- * - First item is the field name (matching a block definition)
- * - Second item is an object with field parameters
+ * Hook that transforms field definitions into DataForm compatible field objects,
+ * grouping fields that appear before and after column blocks.
  *
  * @param fields - Array of field definitions
- * @return Array of DataForm compatible field objects
+ * @return Array of grouped fields and columns
  */
 export function useDataFormProductFields(
 	fields: TemplateArray = []
-): Field< Product >[] {
+): ( FieldGroup | ColumnGroup )[] {
 	return useMemo( () => {
-		return fields.map( ( [ fieldName, params ] ) => {
-			const getFieldDefinition = getProductField( fieldName );
-			// Convert the field definition to a DataForm field format
-			const field: Field< Product > = {
-				...getFieldDefinition,
-				id: getFieldKey( [ fieldName, params ] ),
-			};
+		const result: ( FieldGroup | ColumnGroup )[] = [];
+		let currentFields: Field< Product >[] = [];
 
-			return field;
+		const flushCurrentFields = () => {
+			if ( currentFields.length > 0 ) {
+				result.push( {
+					type: 'fields',
+					content: currentFields,
+				} );
+				currentFields = [];
+			}
+		};
+
+		fields.forEach( ( field ) => {
+			const [ fieldName ] = field;
+
+			// If this is a columns block
+			if ( fieldName === 'core/columns' ) {
+				flushCurrentFields();
+				result.push( {
+					type: 'column',
+					content: field,
+				} );
+			} else {
+				// Convert regular field
+				const getFieldDefinition = getProductField( fieldName );
+				const convertedField: Field< Product > = {
+					...getFieldDefinition,
+					id: getFieldKey( field ),
+				};
+				currentFields.push( convertedField );
+			}
 		} );
+
+		// Don't forget remaining fields
+		flushCurrentFields();
+
+		return result;
 	}, [ fields ] );
 }

@@ -1,0 +1,11 @@
+.woocommerce-product-form__schedule-sale-field {
+	&-dates {
+		display: flex;
+		gap: $gap-large;
+		margin-top: $gap-large;
+	}
+
+	&-date {
+		flex: 1;
+	}
+}
