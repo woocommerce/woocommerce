@@ -9,6 +9,9 @@ import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles 
  */
 
 export const supports = {
+	interactivity: {
+		clientNavigation: true,
+	},
 	html: false,
 	__experimentalBorder: {
 		radius: true,

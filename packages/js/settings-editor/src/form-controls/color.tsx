@@ -8,13 +8,11 @@ import { ColorPicker } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import type { DataFormItem } from '../../types';
+import type { DataFormItem } from '../types';
 
-export const getColorEdit = ( {
-	field,
-	onChange,
-	data,
-}: DataFormControlProps< DataFormItem > ) => {
+type ColorProps = DataFormControlProps< DataFormItem >;
+
+export const Color = ( { field, onChange, data }: ColorProps ) => {
 	const { id, getValue, label } = field;
 	const value = getValue( { item: data } );
 

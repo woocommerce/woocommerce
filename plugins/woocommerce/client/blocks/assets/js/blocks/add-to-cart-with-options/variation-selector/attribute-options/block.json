@@ -19,7 +19,8 @@
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"supports": {
-		"inserter": false
+		"inserter": false,
+		"interactivity": true
 	},
 	"usesContext": [
 		"woocommerce/attributeId",

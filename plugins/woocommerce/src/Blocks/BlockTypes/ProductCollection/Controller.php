@@ -124,12 +124,25 @@ class Controller extends AbstractBlock {
 		$unsupported_blocks = array(
 			'core/post-content',
 			'woocommerce/mini-cart',
-			'woocommerce/featured-product',
+			'woocommerce/product-search',
+			'woocommerce/product-title',
+			// Classic wrapper blocks.
+			'woocommerce/classic-shortcode',
+			'woocommerce/legacy-template',
+			// Legacy filter blocks.
 			'woocommerce/active-filters',
 			'woocommerce/price-filter',
 			'woocommerce/stock-filter',
 			'woocommerce/attribute-filter',
 			'woocommerce/rating-filter',
+			// Deprecated product grid blocks.
+			'woocommerce/handpicked-products',
+			'woocommerce/product-best-sellers',
+			'woocommerce/product-category',
+			'woocommerce/product-new',
+			'woocommerce/product-on-sale',
+			'woocommerce/product-tag',
+			'woocommerce/product-top-rated',
 		);
 
 		if ( in_array( $block_name, $unsupported_blocks, true ) ) {
