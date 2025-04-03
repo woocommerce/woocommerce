@@ -19,7 +19,8 @@
 			"allowJustification": false,
 			"allowOrientation": false,
 			"allowInheriting": false
-		}
+		},
+		"interactivity": true
 	},
 	"ancestor": [ "woocommerce/product-gallery-large-image" ]
 }

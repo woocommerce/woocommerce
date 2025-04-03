@@ -11,10 +11,11 @@
 			"default": false
 		}
 	},
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": true,
 		"spacing": {
 			"margin": true
