@@ -76,33 +76,42 @@ const countryData = getSetting< Record< string, CountryData > >(
 	{}
 );
 
-// Previously we had separate ALLOWED_COUNTRIES and SHIPPING_COUNTRIES (as well as states), however, this lead to problems
-// when syncing values between billing and shipping if some countries were not available for shipping or vice versa. To get
-// around this, we combine countries available for billing and/or shipping so all are available for selection. Invalid
-// combinations are validated on post.
-const availableCountries = Object.keys( countryData ).filter(
-	( countryCode ) => {
-		return (
-			countryData[ countryCode ].allowBilling === true ||
-			countryData[ countryCode ].allowShipping === true
-		);
-	}
+export const ALLOWED_COUNTRIES = Object.fromEntries(
+	Object.keys( countryData )
+		.filter( ( countryCode ) => {
+			return countryData[ countryCode ].allowBilling === true;
+		} )
+		.map( ( countryCode ) => {
+			return [ countryCode, countries[ countryCode ] || '' ];
+		} )
 );
 
-export const COUNTRIES = Object.fromEntries(
-	availableCountries.map( ( countryCode ) => {
-		return [ countryCode, countries[ countryCode ] || '' ];
-	} )
+export const SHIPPING_COUNTRIES = Object.fromEntries(
+	Object.keys( countryData )
+		.filter( ( countryCode ) => {
+			return countryData[ countryCode ].allowShipping === true;
+		} )
+		.map( ( countryCode ) => {
+			return [ countryCode, countries[ countryCode ] || '' ];
+		} )
 );
+
+// Previously we used ALLOWED_COUNTRIES and SHIPPING_COUNTRIES, however, this lead to problems when syncing values
+// between billing and shipping if some countries were not available for shipping or vice versa. To get around this,
+// we combine countries available for billing and/or shipping so all are available for selection.
+export const COUNTRIES = {
+	...ALLOWED_COUNTRIES,
+	...SHIPPING_COUNTRIES,
+};
 
 export const STATES = Object.fromEntries(
-	availableCountries.map( ( countryCode ) => {
+	Object.keys( COUNTRIES ).map( ( countryCode ) => {
 		return [ countryCode, countryData[ countryCode ].states || {} ];
 	} )
 );
 
 export const COUNTRY_LOCALE = Object.fromEntries(
-	Object.keys( countryData ).map( ( countryCode ) => {
+	Object.keys( COUNTRIES ).map( ( countryCode ) => {
 		return [ countryCode, countryData[ countryCode ].locale || {} ];
 	} )
 );
