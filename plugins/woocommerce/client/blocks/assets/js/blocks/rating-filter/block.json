@@ -4,10 +4,11 @@
 	"title": "Filter by Rating Controls",
 	"description": "Enable customers to filter the product grid by rating.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": false
+		},
 		"html": false,
 		"multiple": false,
 		"color": {

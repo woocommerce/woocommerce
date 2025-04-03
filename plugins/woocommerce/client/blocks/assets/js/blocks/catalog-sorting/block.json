@@ -4,10 +4,11 @@
 	"title": "Catalog Sorting",
 	"description": "Enable customers to change the sorting order of the products.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"color": {
 			"text": true,
 			"background": false

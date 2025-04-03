@@ -6,6 +6,9 @@
 	"description": "Display related products.",
 	"category": "woocommerce",
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": true,
 		"reusable": false,
 		"inserter": false

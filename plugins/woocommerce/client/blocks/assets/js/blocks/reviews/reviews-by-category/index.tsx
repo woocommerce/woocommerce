@@ -34,6 +34,9 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 		'woocommerce'
 	),
 	supports: {
+		interactivity: {
+			clientNavigation: true,
+		},
 		html: false,
 		color: {
 			background: false,
