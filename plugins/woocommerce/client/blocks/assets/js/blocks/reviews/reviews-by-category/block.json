@@ -10,6 +10,9 @@
 	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"color": {
 			"background": false
 		},
