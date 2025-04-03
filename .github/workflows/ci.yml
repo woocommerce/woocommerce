@@ -66,7 +66,7 @@ jobs:
     # which projects have changed and what kind of change occurred. This lets us build the
     # matrices that we can use to run CI tasks only on the projects that need them.
     name: 'Build Project Jobs'
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) }}
+    if: ${{ !cancelled() }}
     needs: 'identify-jobs-to-run'
     runs-on: ubuntu-latest
     outputs:
