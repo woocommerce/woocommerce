@@ -38,6 +38,9 @@ class WooPayments extends PaymentGateway {
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
 
+		// Switch the onboarding type to native.
+		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
+
 		// Add WPCOM/Jetpack connection details to the onboarding state.
 		$wpcom_connection_manager       = new WPCOM_Connection_Manager( 'woocommerce' );
 		$is_connected                   = $wpcom_connection_manager->is_connected();
