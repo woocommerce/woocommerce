@@ -97,7 +97,7 @@ const SettingsPaymentsMain = () => {
 
 	useEffect( () => {
 		if ( location.pathname === '' ) {
-			hideWooCommerceNavTab( 'block' );
+			hideWooCommerceNavTab( 'flex' );
 		}
 	}, [ location ] );
 	return (
