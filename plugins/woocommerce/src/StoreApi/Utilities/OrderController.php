@@ -390,12 +390,12 @@ class OrderController {
 					'woocommerce_rest_invalid_address_country',
 					sprintf(
 						/* translators: %s country code. */
-						__( 'Sorry, we do not ship orders to the provided country (%s)', 'woocommerce' ),
-						$shipping_country
+						esc_html__( 'Sorry, we do not ship orders to the provided country (%s)', 'woocommerce' ),
+						esc_html( $shipping_country )
 					),
 					400,
 					array(
-						'allowed_countries' => array_keys( wc()->countries->get_shipping_countries() ),
+						'allowed_countries' => array_map( 'esc_html', array_keys( wc()->countries->get_shipping_countries() ) ),
 					)
 				);
 			}
@@ -406,12 +406,12 @@ class OrderController {
 				'woocommerce_rest_invalid_address_country',
 				sprintf(
 					/* translators: %s country code. */
-					__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
-					$billing_country
+					esc_html__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
+					esc_html( $billing_country )
 				),
 				400,
 				array(
-					'allowed_countries' => array_keys( wc()->countries->get_allowed_countries() ),
+					'allowed_countries' => array_map( 'esc_html', array_keys( wc()->countries->get_allowed_countries() ) ),
 				)
 			);
 		}
@@ -438,12 +438,12 @@ class OrderController {
 				'woocommerce_rest_invalid_address',
 				sprintf(
 					/* translators: %s Address type. */
-					__( 'There was a problem with the provided %s:', 'woocommerce' ) . ' ' . implode( ', ', $error_messages ),
-					'shipping' === $code ? __( 'shipping address', 'woocommerce' ) : __( 'billing address', 'woocommerce' )
+					esc_html__( 'There was a problem with the provided %s:', 'woocommerce' ) . ' ' . esc_html( implode( ', ', $error_messages ) ),
+					'shipping' === $code ? esc_html__( 'shipping address', 'woocommerce' ) : esc_html__( 'billing address', 'woocommerce' )
 				),
 				400,
 				array(
-					'errors' => $errors_by_code,
+					'errors' => $errors_by_code, // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				)
 			);
 		}
