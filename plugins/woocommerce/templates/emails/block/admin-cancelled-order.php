@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:heading -->
 <h2>
 <?php
-/* translators: %s: order number */
+/* translators: %s: order number ... */
 printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
 ?>
 </h2>
