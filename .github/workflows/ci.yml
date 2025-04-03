@@ -164,7 +164,7 @@ jobs:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
       - name: 'Terminate early performance jobs for WIP draft PRs'
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true || matrix.testType == 'performance' || needs.validate-changelog.result == 'failure' }}
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true && matrix.testType == 'performance' && needs.validate-changelog.result == 'failure' }}
         run: |
           echo 'Aborting the job execution: failing changelog validation treated as WIP draft PR.'
           exit 1
