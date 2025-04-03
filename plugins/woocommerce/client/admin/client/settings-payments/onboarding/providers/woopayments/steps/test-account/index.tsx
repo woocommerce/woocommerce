@@ -72,7 +72,10 @@ const TestAccountStep = () => {
 	};
 
 	useEffect( () => {
-		if ( currentStep?.status === 'not_started' ) {
+		if (
+			currentStep?.status === 'not_started' &&
+			! testAccountCreationSuccess
+		) {
 			// Send a request to the server to start the test account setup.
 			apiFetch( {
 				url: currentStep?.actions?.init?.href,
@@ -114,6 +117,7 @@ const TestAccountStep = () => {
 		currentStep?.actions?.init?.href,
 		currentStep?.actions?.check?.href,
 		retryCounter,
+		testAccountCreationSuccess,
 	] );
 
 	if ( testAccountCreationSuccess ) {
