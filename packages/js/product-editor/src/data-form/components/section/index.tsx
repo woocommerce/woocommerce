@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, useMemo } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { Template } from '@wordpress/blocks';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -15,6 +15,7 @@ import { DataForm } from '@wordpress/dataviews';
 import { SectionHeader } from '../../../components/section-header';
 import { useDataFormProductFields } from '../use-data-form-product-fields';
 import { ProductColumns } from '../columns';
+
 type ProductSectionProps = {
 	sectionTemplate: Template;
 	postType: string;
@@ -78,7 +79,7 @@ export function ProductSection( {
 
 			<div className={ nestedClassNames }>
 				{ hasFinishedResolution &&
-					fieldGroups.map( ( group ) => {
+					fieldGroups.map( ( group, index ) => {
 						if ( group.type === 'fields' ) {
 							const form = {
 								type: 'regular' as const,
@@ -88,21 +89,22 @@ export function ProductSection( {
 							};
 							return (
 								<DataForm
+									key={ index }
 									fields={ group.content }
 									form={ form }
 									onChange={ onChange }
 									data={ record }
 								/>
 							);
-						} else {
-							return (
-								<ProductColumns
-									columnsTemplate={ group.content }
-									postType={ postType }
-									productId={ productId }
-								/>
-							);
 						}
+						return (
+							<ProductColumns
+								key={ index }
+								columnsTemplate={ group.content }
+								postType={ postType }
+								productId={ productId }
+							/>
+						);
 					} ) }
 				<p>
 					Render DataForm with { sectionTemplate[ 2 ]?.length } fields
