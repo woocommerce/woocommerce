@@ -120,9 +120,15 @@ class Tax extends Task {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- We will replace this with a formal system by WC 9.6 so lets not advertise it yet.
 			$third_party_complete = apply_filters( 'woocommerce_admin_third_party_tax_setup_complete', false );
 
+			/**
+			 * Ideally we would check against `wc_tax_enabled()` instead of `false !== get_option( 'woocommerce_no_sales_tax' )`,
+			 * however, tax is disabled by default making this task complete by default if we use it.  If we change taxes
+			 * to be enabled by default in the future, this can be updated to check against `wc_tax_enabled()` which is
+			 * more accurate for this evaluation.
+			 */
 			$this->is_complete_result = $is_wc_connect_taxes_enabled ||
 				$third_party_complete ||
-				! wc_tax_enabled() ||
+				false !== get_option( 'woocommerce_no_sales_tax' ) ||
 				$this->has_existing_tax_rates();
 		}
 
