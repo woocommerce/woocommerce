@@ -55,7 +55,7 @@ interface CompleteSetupButtonProps {
 	/**
 	 * The onboarding type for the gateway.
 	 */
-	onboardingType: string;
+	onboardingType?: string;
 }
 
 /**
