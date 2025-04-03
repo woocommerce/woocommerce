@@ -14,6 +14,9 @@
 		"core/post-template"
 	],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": [ "wide", "full" ],
 		"html": false,
 		"layout": true,

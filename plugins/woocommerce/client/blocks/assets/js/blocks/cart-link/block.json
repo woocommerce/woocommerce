@@ -8,6 +8,9 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"html": false,
 		"multiple": false,
 		"typography": {

@@ -215,9 +215,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = add_query_arg( 'section', 'offline', $return_url );
 		}
 
-		echo '<h2>' . esc_html( $this->get_method_title() );
-		wc_back_link( __( 'Return to payments', 'woocommerce' ), $return_url );
-		echo '</h2>';
+		wc_back_header( $this->get_method_title(), __( 'Return to payments', 'woocommerce' ), $return_url );
+
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();
 	}
