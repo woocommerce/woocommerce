@@ -15,47 +15,50 @@
 		}
 	},
 	"supports": {
-			"align": [ "wide", "full" ],
-			"html": false,
-			"color": {
-				"gradients": true,
-				"heading": true,
-				"link": true,
-				"__experimentalDefaultControls": {
-					"background": true,
-					"text": true,
-					"link": true
-				}
-			},
-			"spacing": {
-				"margin": true,
-				"padding": true
-			},
-			"typography": {
-				"fontSize": true,
-				"lineHeight": true,
-				"__experimentalFontFamily": true,
-				"__experimentalFontWeight": true,
-				"__experimentalFontStyle": true,
-				"__experimentalTextTransform": true,
-				"__experimentalTextDecoration": true,
-				"__experimentalLetterSpacing": true,
-				"__experimentalDefaultControls": {
-					"fontSize": true
-				}
-			},
-			"__experimentalBorder": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": [ "wide", "full" ],
+		"html": false,
+		"color": {
+			"gradients": true,
+			"heading": true,
+			"link": true,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true,
+				"link": true
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"__experimentalBorder": {
+			"radius": true,
+			"color": true,
+			"width": true,
+			"style": true,
+			"__experimentalDefaultControls": {
 				"radius": true,
 				"color": true,
 				"width": true,
-				"style": true,
-				"__experimentalDefaultControls": {
-					"radius": true,
-					"color": true,
-					"width": true,
-					"style": true
-				}
+				"style": true
 			}
+		}
 	},
 	"usesContext": [ "postId", "postType" ],
 	"ancestor": [

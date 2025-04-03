@@ -162,8 +162,18 @@ class ProductImage extends AbstractBlock {
 		if ( ! empty( $attributes['scale'] ) ) {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
+
+		// Keep this aspect ratio for backward compatibility.
 		if ( ! empty( $attributes['aspectRatio'] ) ) {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['style']['dimensions']['aspectRatio'] );
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) {
+			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
 
 		$image_id = $product->get_image_id();
