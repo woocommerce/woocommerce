@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { type ShippingAddress } from '@woocommerce/settings';
 import { select, dispatch } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
