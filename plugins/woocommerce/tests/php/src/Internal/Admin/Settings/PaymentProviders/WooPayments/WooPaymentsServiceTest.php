@@ -60,6 +60,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * The current time in seconds.
+	 *
+	 * Use it instead of $this->current_time to avoid using the real time in tests.
+	 *
+	 * @var int
+	 */
+	protected int $current_time;
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -67,6 +76,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
+
+		$this->current_time = 1234567890;
 
 		$this->mock_providers = $this->getMockBuilder( PaymentProviders::class )
 									->disableOriginalConstructor()
@@ -106,8 +117,21 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'is_callable' => function () {
+				// Mock the $this->current_time.
+				'time'         => function () {
+					return $this->current_time;
+				},
+				// Everything is callable by default.
+				'is_callable'  => function () {
 					return true;
+				},
+				'class_exists' => function ( $class_to_check ) {
+					// By default, the WooPayments extension is mocked as active.
+					if ( '\WC_Payments' === $class_to_check ) {
+						return true;
+					}
+
+					return false;
 				},
 			),
 		);
@@ -153,6 +177,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$location = 'US';
 
 		// Arrange.
+		// Mock the extension as not active.
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
@@ -179,18 +204,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$location = 'US';
 
 		// Arrange.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
-						return true;
-					}
-
-					return false;
-				},
-			)
-		);
-
 		$expected_state = array(
 			'started'   => true,
 			'completed' => false,
@@ -275,14 +288,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
-						return true;
-					}
-
-					return false;
-				},
-				'get_option'   => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
 						return $stored_profile;
 					}
@@ -588,6 +594,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provider_get_onboarding_details_steps(): array {
+		$current_time = 1234567890;
+
 		$default_recommended_pms = array(
 			array(
 				'id'       => 'card',
@@ -655,22 +663,22 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
 						),
 					),
 				),
@@ -692,26 +700,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -733,26 +741,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -778,26 +786,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -823,18 +831,18 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 					// Nothing about the WPCOM connection.
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION       => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -894,7 +902,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 				),
@@ -925,7 +933,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 				),
@@ -945,8 +953,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -977,7 +985,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 				),
@@ -1013,8 +1021,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -1049,7 +1057,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 				),
@@ -1084,8 +1092,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -1120,8 +1128,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -1156,13 +1164,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 				),
@@ -1199,14 +1207,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -1241,13 +1249,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
 				),
@@ -1282,13 +1290,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 				),
@@ -1323,13 +1331,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
 						'statuses' => array(
-							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time(),
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
 						),
 					),
 				),
@@ -1409,14 +1417,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
-						return true;
-					}
-
-					return false;
-				},
-				'get_option'   => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
 						return $stored_profile;
 					}
@@ -1473,6 +1474,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provider_get_onboarding_step_status(): array {
+		$current_time = 1234567890;
+
 		return array(
 			'payment_methods - clean slate'       => array(
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
@@ -1492,7 +1495,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1508,7 +1511,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1524,8 +1527,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1583,7 +1586,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1599,7 +1602,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1615,7 +1618,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(), // This will be ignored.
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time, // This will be ignored.
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1631,7 +1634,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1647,7 +1650,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1663,8 +1666,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1680,8 +1683,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1697,8 +1700,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1798,7 +1801,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1814,7 +1817,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1830,7 +1833,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1846,7 +1849,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1862,7 +1865,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1878,7 +1881,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the stored status since we can be in progress with switch to live.
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1894,7 +1897,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1910,7 +1913,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1926,7 +1929,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1942,7 +1945,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1958,7 +1961,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1974,7 +1977,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1990,7 +1993,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2006,8 +2009,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2023,8 +2026,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the completed stored status since we can be in progress with switch to live.
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2040,8 +2043,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2057,8 +2060,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2074,8 +2077,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2091,8 +2094,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2108,8 +2111,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2125,8 +2128,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2142,8 +2145,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2159,8 +2162,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2288,7 +2291,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2304,7 +2307,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2320,7 +2323,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2336,7 +2339,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2352,7 +2355,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2368,7 +2371,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2384,7 +2387,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2400,7 +2403,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2416,7 +2419,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2432,7 +2435,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2448,7 +2451,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2464,7 +2467,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2480,7 +2483,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2496,7 +2499,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2512,7 +2515,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2528,7 +2531,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2544,7 +2547,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2560,7 +2563,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2576,7 +2579,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2592,7 +2595,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2608,8 +2611,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2625,8 +2628,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2642,8 +2645,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2659,8 +2662,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2676,8 +2679,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2693,8 +2696,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2710,8 +2713,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -2727,8 +2730,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2744,8 +2747,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2761,8 +2764,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 10,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -2825,7 +2828,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange.
 		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
-		$timestamp              = time() - 100;
+		$timestamp              = $this->current_time - 100;
 		$stored_profile         = array(
 			'onboarding' => array(
 				$location => array(
@@ -2884,7 +2887,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange.
 		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
-		$timestamp              = time() - 100;
+		$timestamp              = $this->current_time - 100;
 		$stored_profile         = array(
 			'onboarding' => array(
 				$location => array(
@@ -2980,7 +2983,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 		$this->assertNotEquals( array(), $updated_stored_profile );
 		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
-		$this->assertSame( time(), $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
+		$this->assertSame( $this->current_time, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
 	}
 
 	/**
@@ -3031,7 +3034,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange.
 		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
-		$timestamp              = time() - 100;
+		$timestamp              = $this->current_time - 100;
 		$stored_profile         = array(
 			'onboarding' => array(
 				$location => array(
@@ -3090,7 +3093,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange.
 		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
-		$timestamp              = time() - 100;
+		$timestamp              = $this->current_time - 100;
 		$stored_profile         = array(
 			'onboarding' => array(
 				$location => array(
@@ -3186,7 +3189,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 		$this->assertNotEquals( array(), $updated_stored_profile );
 		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
-		$this->assertSame( time(), $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
+		$this->assertSame( $this->current_time, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
 	}
 
 	/**
@@ -3382,7 +3385,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'steps' => array(
 						$step_id => array(
 							'statuses' => array(
-								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 100,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 100,
 							),
 							'data'     => array(
 								'some_data' => 'some_value',
@@ -3398,7 +3401,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'steps' => array(
 						$step_id => array(
 							'statuses' => array(
-								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 100,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 100,
 							),
 							'data'     => array(
 								'some_data'       => 'some_value',
@@ -3507,7 +3510,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'steps' => array(
 						$step_id => array(
 							'statuses' => array(
-								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => time() - 100,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 100,
 							),
 						),
 					),
@@ -3609,7 +3612,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
-						if ( '/wc/v3/payments/onboarding/test_account/init' === $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
 								'success' => true,
@@ -3673,7 +3676,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
-						if ( '/wc/v3/payments/onboarding/test_account/init' === $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
 								'success' => true,
@@ -3747,7 +3750,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
-						if ( '/wc/v3/payments/onboarding/test_account/init' === $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
 								'success' => true,
@@ -3857,7 +3860,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
-						if ( '/wc/v3/payments/onboarding/test_account/init' === $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return new WP_Error( $expected_error['code'], $expected_error['message'] );
 						}
@@ -3931,7 +3934,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
-						if ( '/wc/v3/payments/onboarding/test_account/init' === $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
 								'success' => false,
@@ -3974,7 +3977,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange the NOX profile.
 		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
-		$started_timestamp       = time() - 100;
+		$started_timestamp       = $this->current_time - 100;
 		$stored_profile          = array(
 			'onboarding' => array(
 				$location => array(
@@ -4025,7 +4028,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
-						if ( '/wc/v3/payments/onboarding/test_account/init' === $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
 						}
@@ -4061,7 +4064,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'statuses' => array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $started_timestamp,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
 				),
 				'data'     => array(
 					'in_progress' => false,
@@ -4459,7 +4462,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 		$expected_response = array(
 			'clientSecret'   => 'secret',
-			'expiresAt'      => time() + 1000,
+			'expiresAt'      => $this->current_time + 1000,
 			'accountId'      => 'id',
 			'isLive'         => false,
 			'accountCreated' => false,
@@ -4546,7 +4549,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 		$expected_response = array(
 			'clientSecret'   => 'secret',
-			'expiresAt'      => time() + 1000,
+			'expiresAt'      => $this->current_time + 1000,
 			'accountId'      => 'id',
 			'isLive'         => false,
 			'accountCreated' => false,
@@ -4673,7 +4676,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn( true );
 
 		// Arrange the NOX profile.
-		$started_timestamp       = time() - 100;
+		$started_timestamp       = $this->current_time - 100;
 		$stored_profile          = array(
 			'onboarding' => array(
 				$location => array(
@@ -4754,7 +4757,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'statuses' => array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $started_timestamp,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => time(),
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
 				),
 			),
 			$updated_stored_profiles[0]['onboarding'][ $location ]['steps'][ $step_id ]
