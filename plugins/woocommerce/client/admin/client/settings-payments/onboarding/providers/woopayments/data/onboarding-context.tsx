@@ -174,25 +174,38 @@ export const OnboardingProvider: React.FC< {
 
 	// Update all steps when stateStoreSteps changes
 	useEffect( () => {
-		const mapWooPaymentsSteps = woopaymentsSteps.map( ( step ) => {
-			// If step type is backend, add the status, path and dependencies from the store
-			if ( step.type === 'backend' ) {
-				const backendStep = stateStoreSteps.find(
-					( s ) => s.id === step.id
-				);
+		const mapWooPaymentsSteps = woopaymentsSteps
+			// First, filter out steps that are not returned from the API.
+			// This is to avoid showing steps that are not useful to the user.
+			.filter( ( step ) => {
+				if ( step.type === 'backend' ) {
+					return (
+						stateStoreSteps.findIndex(
+							( s ) => s.id === step.id
+						) !== -1
+					);
+				}
+				return true;
+			} )
+			.map( ( step ) => {
+				// If step type is backend, add the status, path and dependencies from the store
+				if ( step.type === 'backend' ) {
+					const backendStep = stateStoreSteps.find(
+						( s ) => s.id === step.id
+					);
 
-				return Object.assign( {}, step, {
-					status: backendStep?.status || 'not_started',
-					dependencies: backendStep?.dependencies || [],
-					path: backendStep?.path,
-					context: backendStep?.context,
-					actions: backendStep?.actions,
-				} );
-			}
+					return Object.assign( {}, step, {
+						status: backendStep?.status || 'not_started',
+						dependencies: backendStep?.dependencies || [],
+						path: backendStep?.path,
+						context: backendStep?.context,
+						actions: backendStep?.actions,
+					} );
+				}
 
-			// For frontend steps, create a base step object first
-			return Object.assign( {}, step );
-		} );
+				// For frontend steps, create a base step object first
+				return Object.assign( {}, step );
+			} );
 
 		// Now determine dependencies status in a second pass to avoid stale data
 		const stepsWithDependenciesResolved = mapWooPaymentsSteps.map(
