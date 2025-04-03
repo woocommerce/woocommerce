@@ -154,7 +154,7 @@ jobs:
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ubuntu-latest
-    needs: [ 'project-jobs', 'validate-changelog' ]
+    needs: 'project-jobs'
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
@@ -163,14 +163,6 @@ jobs:
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
-      - name: 'Bail out performance jobs for WIP draft PRs.'
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true && matrix.testType == 'performance' && needs.validate-changelog.result == 'failure' }}
-        run: |
-          echo 'Aborting the job execution: failing changelog validation indicated WIP draft PRs.'
-          echo 'As soon as the PR is ready review or the changelog validation passes, tho job will run normally.'
-          echo 'This is temporary solution, as we need yet to split jobs UT, E2E and performance tests in separate groups.'
-          exit 1
-
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
 
