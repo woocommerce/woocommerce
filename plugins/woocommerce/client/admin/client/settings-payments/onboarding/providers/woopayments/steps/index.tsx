@@ -6,74 +6,12 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { useOnboardingContext } from '../data/onboarding-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
-import WooPaymentsStepHeader from '../components/header';
 import WordPressComStep from './wpcom-connection';
 import BusinessVerificationStep from './business-verification';
 import PaymentMethodsSelection from './payment-methods-selection';
 import TestAccountStep from './test-account';
 import FinishStep from './finish';
-
-/**
- * Step Components
- */
-export const WelcomeStep = () => {
-	const { navigateToNextStep, refreshOnboardingSteps } =
-		useOnboardingContext();
-	return (
-		<>
-			<WooPaymentsStepHeader onClose={ () => {} } />
-			<div className="settings-payments-onboarding-modal__step--content">
-				Welcome Step Content
-				<button onClick={ () => navigateToNextStep() }>
-					Next (Front-end only)
-				</button>
-				<button onClick={ () => refreshOnboardingSteps() }>
-					Refresh redux store
-				</button>
-			</div>
-		</>
-	);
-};
-
-export const OtherStep = () => {
-	const { navigateToNextStep, refreshOnboardingSteps } =
-		useOnboardingContext();
-	return (
-		<>
-			<WooPaymentsStepHeader onClose={ () => {} } />
-			<div className="settings-payments-onboarding-modal__step--content">
-				Other Step Content
-				<button onClick={ () => navigateToNextStep() }>
-					Next (Front-end only)
-				</button>
-				<button onClick={ () => refreshOnboardingSteps() }>
-					Refresh redux store
-				</button>
-			</div>
-		</>
-	);
-};
-
-export const FrontendStep = () => {
-	const { navigateToNextStep, refreshOnboardingSteps } =
-		useOnboardingContext();
-	return (
-		<>
-			<WooPaymentsStepHeader onClose={ () => {} } />
-			<div className="settings-payments-onboarding-modal__step--content">
-				Frontend Step Content
-				<button onClick={ () => navigateToNextStep() }>
-					Next (Front-end only)
-				</button>
-				<button onClick={ () => refreshOnboardingSteps() }>
-					Refresh redux store
-				</button>
-			</div>
-		</>
-	);
-};
 
 export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
@@ -110,7 +48,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
 		id: 'finish',
 		order: 5,
-		type: 'backend',
+		type: 'frontend',
 		label: 'Submit for verification',
 		dependencies: [ 'business_verification' ],
 		content: <FinishStep />,

@@ -517,10 +517,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
 		return rest_ensure_response(
 			array_merge(
 				array(
@@ -639,7 +635,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * General permissions check for Payments settings REST API endpoint.
+	 * General permissions check for WooPayments settings REST API endpoint.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
 	 *

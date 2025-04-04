@@ -4,6 +4,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\Jetpack\Connection\Manager;
+use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
+use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -331,17 +333,6 @@ class Utils {
 	}
 
 	/**
-	 * Check if the store is properly connected to WPCOM (aka has a working Jetpack connection).
-	 *
-	 * @return bool
-	 */
-	public static function store_has_wpcom_connection(): bool {
-		$jetpack_connection_manager = new Manager( 'woocommerce' );
-
-		return $jetpack_connection_manager->is_connected() && $jetpack_connection_manager->has_connected_owner();
-	}
-
-	/**
 	 * Get data from a WooCommerce API endpoint.
 	 *
 	 * @param string $endpoint Endpoint.
@@ -419,5 +410,43 @@ class Utils {
 
 		// If the response is 200, return the data.
 		return $response_data;
+	}
+
+	/**
+	 * Get the details to authorize a connection to WordPress.com.
+	 *
+	 * The most important part of the result is the URL to redirect to for authorization.
+	 *
+	 * @param string $return_url The URL to redirect to after the connection is authorized.
+	 *
+	 * @return array {
+	 *               'success' => bool Whether the request was successful.
+	 *               'errors' => array An array of error messages, if any.
+	 *               'color_scheme' => string The color scheme to use for the authorization page.
+	 *               'url' => string The URL to redirect to for authorization.
+	 * }
+	 */
+	public static function get_wpcom_connection_authorization( string $return_url ): array {
+		$plugin_onboarding = new OnboardingPlugins();
+
+		$request = new WP_REST_Request();
+		$request->set_param( 'redirect_url', $return_url );
+		$result = $plugin_onboarding->get_jetpack_authorization_url( $request );
+
+		if ( ! empty( $result['url'] ) ) {
+			$result['url'] = add_query_arg(
+				array(
+					// We use the new WooDNA value.
+					'from'         => 'woocommerce-onboarding',
+					// We inform Calypso that this is a WooPayments onboarding flow.
+					'plugin_name'  => 'woocommerce-payments',
+					// Use the current user's WP admin color scheme.
+					'color_scheme' => $result['color_scheme'],
+				),
+				$result['url']
+			);
+		}
+
+		return $result;
 	}
 }

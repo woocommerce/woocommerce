@@ -13,7 +13,6 @@ use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
