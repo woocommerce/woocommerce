@@ -123,8 +123,8 @@ class Controller extends AbstractBlock {
 		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
 		// Client side navigation can be true in two states:
 		// - supports.interactivity === true;
-		// - supports.interactivity.clientNavigation === true;
-		$supports_interactivity = isset( $block_type->supports['interactivity'] ) && true === $block_type->supports['interactivity'];
+		// - supports.interactivity.clientNavigation === true; .
+		$supports_interactivity     = isset( $block_type->supports['interactivity'] ) && true === $block_type->supports['interactivity'];
 		$supports_client_navigation = isset( $block_type->supports['interactivity']['clientNavigation'] ) && true === $block_type->supports['interactivity']['clientNavigation'];
 
 		return $supports_interactivity || $supports_client_navigation;
