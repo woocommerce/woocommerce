@@ -10,7 +10,6 @@ import { isEmptyObject } from '@woocommerce/types';
  */
 import sharedConfig from '../shared/config';
 import edit from './edit';
-import { supports } from './supports';
 import { BLOCK_ICON as icon } from './constants';
 import metadata from './block.json';
 import './upgrade';
@@ -37,7 +36,6 @@ const blockConfig = {
 	...metadata,
 	...sharedConfig,
 	icon: { src: icon },
-	supports,
 	deprecated,
 	edit,
 };

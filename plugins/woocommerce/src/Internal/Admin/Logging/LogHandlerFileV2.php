@@ -168,10 +168,11 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	 * Delete all logs from a specific source.
 	 *
 	 * @param string $source The source of the log entries.
+	 * @param bool   $quiet  Whether to suppress the deletion message.
 	 *
 	 * @return int The number of files that were deleted.
 	 */
-	public function clear( string $source ): int {
+	public function clear( string $source, bool $quiet = false ): int {
 		$source = File::sanitize_source( $source );
 
 		$files = $this->file_controller->get_files(
@@ -191,7 +192,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 
 		$deleted = $this->file_controller->delete_files( $file_ids );
 
-		if ( $deleted > 0 ) {
+		if ( $deleted > 0 && ! $quiet ) {
 			$this->handle(
 				time(),
 				'info',
