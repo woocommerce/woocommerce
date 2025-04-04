@@ -14,7 +14,6 @@ import Modal from '~/settings-payments/onboarding/components/modal';
 import WooPaymentsOnboarding from './components/onboarding';
 import { WooPaymentsModalProps } from '~/settings-payments/onboarding/types';
 import { OnboardingProvider } from './data/onboarding-context';
-import '~/settings-payments/onboarding/style.scss';
 
 /**
  * Modal component for WooPayments onboarding
