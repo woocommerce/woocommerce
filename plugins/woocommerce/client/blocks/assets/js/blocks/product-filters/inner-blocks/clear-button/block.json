@@ -1,7 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-clear-button",
-
 	"title": "Clear filters",
 	"description": "Allows shoppers to clear active filters.",
 	"category": "woocommerce",

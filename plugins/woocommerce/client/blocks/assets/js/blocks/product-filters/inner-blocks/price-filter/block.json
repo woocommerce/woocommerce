@@ -1,7 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-price",
-
 	"title": "Price",
 	"description": "Let shoppers filter products by choosing a price range.",
 	"category": "woocommerce",
