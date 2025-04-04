@@ -42,7 +42,7 @@ export default {
 
 const Template: StoryFn = ( args ) => <Label { ...args } />;
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< LabelProps > = Template.bind( {} );
 Default.args = {
 	label: 'I am a label',
 	screenReaderLabel: 'I am a screen reader label',
