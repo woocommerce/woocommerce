@@ -97,6 +97,40 @@
 		}
 	}
 
+	function updateButtonText( button, quantities ) {
+		let quantity = null;
+
+		if ( button.value ) {
+			// Simple products.
+			quantity = quantities[ button.value ];
+		} else {
+			// Variable products.
+			const input = button.parentElement.querySelector(
+				'input[name="variation_id"]'
+			);
+			if ( input ) {
+				const variationId = input.value;
+				if ( variationId ) {
+					quantity = quantities[ variationId ];
+				}
+			}
+
+			// @todo we need to reset the button text after switching the variation.
+		}
+
+		if ( quantity ) {
+			button.textContent =
+				wc_single_add_to_cart_params.i18n_items_in_cart.replace(
+					'%d',
+					quantity
+				);
+		} else {
+			// Grouped products.
+			button.textContent =
+				wc_single_add_to_cart_params.i18n_added_to_cart;
+		}
+	}
+
 	async function addToCart( formData, button ) {
 		const formDataObject = new URLSearchParams();
 		formData.forEach( ( item ) => {
@@ -139,6 +173,8 @@
 			triggerEvent( document.body, 'added_to_cart', {
 				detail: [ data.fragments, data.cart_hash, button ],
 			} );
+
+			updateButtonText( button, data.quantities );
 
 			updateFragments( data.fragments );
 

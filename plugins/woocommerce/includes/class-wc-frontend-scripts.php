@@ -623,6 +623,12 @@ class WC_Frontend_Scripts {
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
 				);
 				break;
+			case 'wc-single-add-to-cart':
+				$params = array(
+					'i18n_added_to_cart' => esc_attr__( 'Added to cart', 'woocommerce' ),
+					'i18n_items_in_cart' => esc_attr__( '%d in cart', 'woocommerce' ),
+				);
+				break;
 			case 'wc-add-to-cart-variation':
 				// We also need the wp.template for this script :).
 				wc_get_template( 'single-product/add-to-cart/variation.php' );
