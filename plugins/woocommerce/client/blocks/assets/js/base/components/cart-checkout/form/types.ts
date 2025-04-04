@@ -2,12 +2,12 @@
  * External dependencies
  */
 import type {
+	FormFields,
 	AddressFormValues,
 	FormType,
 	AddressForm,
 	ContactFormValues,
 	OrderFormValues,
-	KeyedParsedFormFields,
 } from '@woocommerce/settings';
 
 /**
@@ -25,7 +25,7 @@ export interface FormProps<
 	// aria-describedby attribute to add to the input.
 	ariaDescribedBy?: string;
 	// Array of fields in form.
-	fields: KeyedParsedFormFields;
+	fields: ( keyof FormFields )[];
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
 	onChange: ( newValue: T ) => void;
 	// Values for fields.

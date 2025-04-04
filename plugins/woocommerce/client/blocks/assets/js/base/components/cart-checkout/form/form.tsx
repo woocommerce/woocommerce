@@ -9,6 +9,7 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
+import { useCheckoutAddress } from '@woocommerce/base-context';
 import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import { validationStore } from '@woocommerce/block-data';
 import {
@@ -37,6 +38,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 import { Select } from '../../select';
 import AddressLineFields from './address-line-fields';
 import { FormProps } from './types';
+import { useFormFields } from './use-form-fields';
 import { useFormValidation } from './use-form-validation';
 import {
 	createCheckboxFieldProps,
@@ -62,12 +64,23 @@ const Form = <
 }: FormProps< T > ): JSX.Element => {
 	const instanceId = useInstanceId( Form );
 	const isFirstRender = useRef( true );
+	const { defaultFields } = useCheckoutAddress(); // We read from here because `useCheckoutAddress` can adapt to being in the editor or frontend.
+	// Track incoming props.
+	const currentFields = useShallowEqual( fields );
 	const currentCountry = useShallowEqual< string >(
 		'country' in values ? values.country : ''
 	);
 
+	// Prepare address form fields by combining fields from the locale and default fields.
+	const formFields = useFormFields(
+		currentFields,
+		defaultFields,
+		addressType,
+		currentCountry
+	);
+
 	// Store previous fields to track changes.
-	const previousFormFields = usePrevious( fields );
+	const previousFormFields = usePrevious( formFields );
 	const previousIsEditing = usePrevious( isEditing );
 	const previousValues = usePrevious( values );
 
@@ -76,7 +89,10 @@ const Form = <
 		Record< string, ValidatedTextInputHandle | null >
 	>( {} );
 
-	const { errors, previousErrors } = useFormValidation( fields, addressType );
+	const { errors, previousErrors } = useFormValidation(
+		formFields,
+		addressType
+	);
 
 	useEffect( () => {
 		Object.entries( errors ).forEach( ( [ key, error ] ) => {
@@ -125,7 +141,7 @@ const Form = <
 			inputsRef.current &&
 			previousIsEditing !== isEditing
 		) {
-			const firstField = fields.find(
+			const firstField = formFields.find(
 				( field ) => field.hidden === false
 			);
 
@@ -153,17 +169,24 @@ const Form = <
 		return () => {
 			clearTimeout( timeoutId );
 		};
-	}, [ isEditing, fields, id, instanceId, addressType, previousIsEditing ] );
+	}, [
+		isEditing,
+		formFields,
+		id,
+		instanceId,
+		addressType,
+		previousIsEditing,
+	] );
 
 	// Clear values for hidden fields when fields change.
 	useEffect( () => {
-		if ( fastDeepEqual( previousFormFields, fields ) ) {
+		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
 		}
 		const newValues = {
 			...values,
 			...Object.fromEntries(
-				fields
+				formFields
 					.filter( ( field ) => field.hidden )
 					.map( ( field ) => [ field.key, '' ] )
 			),
@@ -171,12 +194,12 @@ const Form = <
 		if ( ! isShallowEqual( values, newValues ) ) {
 			onChange( newValues );
 		}
-	}, [ onChange, fields, previousFormFields, values ] );
+	}, [ onChange, formFields, previousFormFields, values ] );
 
 	// Maybe validate country and state when other fields change so user is notified that they're required.
 	useEffect( () => {
 		if (
-			fastDeepEqual( previousFormFields, fields ) &&
+			fastDeepEqual( previousFormFields, formFields ) &&
 			fastDeepEqual( previousValues, values )
 		) {
 			return;
@@ -185,19 +208,25 @@ const Form = <
 			validateCountry( addressType, values );
 		}
 		if ( 'state' in values ) {
-			const stateField = fields.find( ( f ) => f.key === 'state' );
+			const stateField = formFields.find( ( f ) => f.key === 'state' );
 
 			if ( stateField ) {
 				validateState( addressType, values, stateField );
 			}
 		}
-	}, [ values, previousValues, addressType, fields, previousFormFields ] );
+	}, [
+		values,
+		previousValues,
+		addressType,
+		formFields,
+		previousFormFields,
+	] );
 
 	id = id || `${ instanceId }`;
 
 	return (
 		<div id={ id } className="wc-block-components-address-form">
-			{ fields.map( ( field ) => {
+			{ formFields.map( ( field ) => {
 				if ( !! field.hidden ) {
 					return null;
 				}
@@ -250,12 +279,12 @@ const Form = <
 				if ( field.key === 'address_1' && 'address_1' in values ) {
 					const address1 = getFieldData< 'address_1' >(
 						'address_1',
-						fields,
+						formFields,
 						values
 					);
 					const address2 = getFieldData< 'address_2' >(
 						'address_2',
-						fields,
+						formFields,
 						values
 					);
 
