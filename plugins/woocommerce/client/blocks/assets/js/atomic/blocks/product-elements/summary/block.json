@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-summary",
-	"version": "1.0.0",
 	"icon": "page",
 	"title": "Product Summary",
 	"description": "Display a short description about a product.",
