@@ -13,22 +13,22 @@
   - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - team: solaris
+  - team: flux
 
 "packages/js/e2e-utils/**/*":
-  - team: solaris
+  - team: flux
 
 "packages/js/e2e-environment/**/*":
-  - team: solaris
+  - team: flux
 
 "packages/js/api-core-tests/**/*":
-  - team: solaris
+  - team: flux
 
 "packages/js/e2e-core-tests/**/*":
-  - team: solaris
+  - team: flux
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: solaris
+  - team: flux
 
 "packages/js/components/**/*":
   - team: woo-fse

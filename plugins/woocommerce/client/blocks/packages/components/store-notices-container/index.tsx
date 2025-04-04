@@ -4,9 +4,10 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { paymentStore, storeNoticesStore } from '@woocommerce/block-data';
 import { getNoticeContexts } from '@woocommerce/base-utils';
-import type { Notice } from '@wordpress/notices';
+import type { WPNotice } from '@wordpress/notices/build-types/store/selectors';
 import { useMemo, useEffect } from '@wordpress/element';
 import type { NoticeType } from '@woocommerce/types';
+import { store as noticesStore } from '@wordpress/notices';
 
 /**
  * Internal dependencies
@@ -16,7 +17,10 @@ import StoreNotices from './store-notices';
 import SnackbarNotices from './snackbar-notices';
 import type { StoreNoticesContainerProps } from './types';
 
-const formatNotices = ( notices: Notice[], context: string ): NoticeType[] => {
+const formatNotices = (
+	notices: WPNotice[],
+	context: string
+): NoticeType[] => {
 	return notices.map( ( notice ) => ( {
 		...notice,
 		context,
@@ -36,7 +40,8 @@ const StoreNoticesContainer = ( {
 				select( paymentStore ).isExpressPaymentMethodActive(),
 			registeredContainers:
 				select( storeNoticesStore ).getRegisteredContainers(),
-		} )
+		} ),
+		[]
 	);
 	const contexts = useMemo< string[] >(
 		() => ( Array.isArray( context ) ? context : [ context ] ),
@@ -53,27 +58,37 @@ const StoreNoticesContainer = ( {
 
 	// Get notices from the current context and any sub-contexts and append the name of the context to the notice
 	// objects for later reference.
-	const notices = useSelect< NoticeType[] >( ( select ) => {
-		const { getNotices } = select( 'core/notices' );
+	const notices =
+		useSelect(
+			( select ) => {
+				const getNotices = select( noticesStore ).getNotices;
 
-		return [
-			...unregisteredSubContexts.flatMap( ( subContext: string ) =>
-				formatNotices( getNotices( subContext ), subContext )
-			),
-			...contexts.flatMap( ( subContext: string ) =>
-				formatNotices(
-					getNotices( subContext ).concat( additionalNotices ),
-					subContext
-				)
-			),
-		].filter( Boolean ) as NoticeType[];
-	} );
+				return [
+					...unregisteredSubContexts.flatMap(
+						( subContext: string ) =>
+							formatNotices(
+								getNotices( subContext ),
+								subContext
+							)
+					),
+					...contexts.flatMap( ( subContext: string ) =>
+						formatNotices(
+							getNotices( subContext ).concat(
+								additionalNotices as WPNotice[]
+							),
+							subContext
+						)
+					),
+				].filter( Boolean ) as NoticeType[];
+			},
+			[ contexts, unregisteredSubContexts, additionalNotices ]
+		) || [];
 
 	// Register the container context with the parent.
 	useEffect( () => {
-		contexts.map( ( _context ) => registerContainer( _context ) );
+		contexts.forEach( ( _context ) => registerContainer( _context ) );
 		return () => {
-			contexts.map( ( _context ) => unregisterContainer( _context ) );
+			contexts.forEach( ( _context ) => unregisterContainer( _context ) );
 		};
 	}, [ contexts, registerContainer, unregisterContainer ] );
 
@@ -86,13 +101,13 @@ const StoreNoticesContainer = ( {
 			<StoreNotices
 				className={ className }
 				notices={ notices.filter(
-					( notice ) => notice.type === 'default'
+					( notice: NoticeType ) => notice.type === 'default'
 				) }
 			/>
 			<SnackbarNotices
 				className={ className }
 				notices={ notices.filter(
-					( notice ) => notice.type === 'snackbar'
+					( notice: NoticeType ) => notice.type === 'snackbar'
 				) }
 			/>
 		</>

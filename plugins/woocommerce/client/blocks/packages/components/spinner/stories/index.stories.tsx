@@ -15,6 +15,6 @@ export default {
 
 const Template: StoryFn = () => <Spinner />;
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn = Template.bind( {} );
 Default.args = {};
 Default.parameters = { controls: { hideNoControlsWarning: true } };
