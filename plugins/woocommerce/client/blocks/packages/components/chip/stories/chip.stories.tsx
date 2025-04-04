@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 
 /**
  * Internal dependencies
@@ -28,9 +28,9 @@ export default {
 	},
 } as Meta< ChipProps >;
 
-const Template: Story< ChipProps > = ( args ) => <Chip { ...args } />;
+const Template: StoryFn< ChipProps > = ( args ) => <Chip { ...args } />;
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< ChipProps > = Template.bind( {} );
 Default.args = {
 	element: 'li',
 	text: 'Take me to the casino!',

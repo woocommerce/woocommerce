@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 
 /**
@@ -25,7 +25,7 @@ export default {
 
 type StorybookSubtotalProps = SubtotalProps & { total_items: string };
 
-const Template: Story< StorybookSubtotalProps > = ( args ) => {
+const Template: StoryFn< StorybookSubtotalProps > = ( args ) => {
 	const totalItems = args.total_items;
 	const values = {
 		total_items: totalItems,
@@ -37,7 +37,7 @@ const Template: Story< StorybookSubtotalProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< StorybookSubtotalProps > = Template.bind( {} );
 Default.args = {
 	currency: currencies.USD,
 	total_items: '1000',
