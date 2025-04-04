@@ -9,7 +9,7 @@
 			]
 		},
 		{
-			"checkType": "daily-checks*",
+			"checkType": "nightly-checks*",
 			"channels": [
 				"DAILY_CHECKS_CHANNEL"
 			]

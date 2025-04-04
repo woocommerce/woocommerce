@@ -36,8 +36,7 @@
 	}
 }
 
-span.wc-block-product-filter-checkbox-list__input-wrapper
-:where(.wc-block-product-filter-checkbox-list__input) {
+input.wc-block-product-filter-checkbox-list__input {
 	appearance: none;
 	border-radius: 2px;
 	border: 1px solid var(--wc-product-filter-checkbox-list-option-element-border, transparent);
