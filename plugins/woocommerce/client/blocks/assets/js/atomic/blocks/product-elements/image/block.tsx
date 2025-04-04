@@ -14,6 +14,7 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
+import { isString, objectHasProp } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -98,7 +99,8 @@ const Image = ( {
 	);
 };
 
-type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+type Props = BlockAttributes &
+	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
@@ -111,6 +113,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		width,
 		scale,
 		aspectRatio,
+		style,
 		...restProps
 	} = props;
 	const styleProps = useStyleProps( props );
@@ -154,9 +157,6 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		},
 	};
 
-	// Remove parent block custom styles from sale badge.
-	delete restProps.style;
-
 	return (
 		<div
 			className={ clsx(
@@ -184,7 +184,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					width={ width }
 					height={ height }
 					scale={ scale }
-					aspectRatio={ aspectRatio }
+					aspectRatio={
+						objectHasProp( style, 'dimensions' ) &&
+						objectHasProp( style.dimensions, 'aspectRatio' ) &&
+						isString( style.dimensions.aspectRatio )
+							? style.dimensions.aspectRatio
+							: aspectRatio
+					}
 				/>
 			</ParentComponent>
 		</div>

@@ -11,6 +11,9 @@
 	"usesContext": [ "queryId", "query" ],
 	"ancestor": [ "woocommerce/product-collection" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": true,
 		"reusable": false,
 		"html": false,
