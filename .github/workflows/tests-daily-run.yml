@@ -1,7 +1,5 @@
-name: 'Daily tests run'
+name: 'Daily checks run'
 on:
-  schedule:
-    - cron: '25 3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,5 +8,5 @@ jobs:
     if: github.repository == 'woocommerce/woocommerce'
     uses: ./.github/workflows/ci.yml
     with:
-      trigger: 'daily-checks'
+      trigger: 'nightly-checks'
     secrets: inherit
