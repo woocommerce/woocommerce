@@ -1514,7 +1514,7 @@ Display a grid of products currently on sale.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
--	**Attributes:** alignButtons, columns, rows
+-	**Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, isPreview, orderby, rows, stockStatus
 
 ## Product Results Count - woocommerce/product-results-count
 
@@ -1625,6 +1625,39 @@ Enable customers to filter the product grid by rating.
 -   **Parent:** 
 -	**Supports:** color (background, button, text), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 -	**Attributes:** className, displayStyle, isPreview, selectType, showCounts, showFilterButton
+
+## All Reviews - woocommerce/all-reviews
+
+Show a list of all product reviews.
+
+-	**Name:** woocommerce/all-reviews
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
+-	**Attributes:** 
+
+## Reviews by Category - woocommerce/reviews-by-category
+
+Show product reviews from specific categories.
+
+-	**Name:** woocommerce/reviews-by-category
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
+-	**Attributes:** 
+
+## Reviews by Product - woocommerce/reviews-by-product
+
+Display reviews for your products.
+
+-	**Name:** woocommerce/reviews-by-product
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
+-	**Attributes:** 
 
 ## Single Product - woocommerce/single-product
 

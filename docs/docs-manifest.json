@@ -82,7 +82,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "da60d3155af52fc4522ce73e08836bc41b5f4f6d7a2f89e5a204906724c218b5",
+          "hash": "77d24931792bde134f3b42c4b16f034097ffdc6a64f60532df453c4c790d8061",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -1992,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "c714d79fa54f0a39cf68ad7ea5b0f813d654da2c2b4baac86c449da30dc1f82f"
+  "hash": "872391af173645c6b6f2c00fc68b9fd729b3fec858582d07216230948fdfde44"
 }

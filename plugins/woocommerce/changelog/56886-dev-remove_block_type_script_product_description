@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Ensure that Product Description block does not attempt to load assets it does not have.

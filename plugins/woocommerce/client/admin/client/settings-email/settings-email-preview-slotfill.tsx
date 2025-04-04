@@ -78,7 +78,9 @@ const EmailPreviewFill = ( {
 
 	return (
 		<Fill>
-			{ ! isWide && <h2>{ __( 'Email preview', 'woocommerce' ) }</h2> }
+			{ ! isWide && ! isSingleEmail && (
+				<h2>{ __( 'Email preview', 'woocommerce' ) }</h2>
+			) }
 			<div
 				className={ `wc-settings-email-preview-container ${
 					isWide ? 'wc-settings-email-preview-container-floating' : ''
