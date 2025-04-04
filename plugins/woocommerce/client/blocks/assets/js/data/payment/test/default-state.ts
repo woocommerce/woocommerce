@@ -7,6 +7,7 @@ import type { GlobalPaymentMethod } from '@woocommerce/types';
  * Internal dependencies
  */
 import type { PaymentState } from '../default-state';
+import { SavedPaymentMethod } from '../types';
 
 // Helper function to get a fresh instance of defaultPaymentState for each test
 const getDefaultPaymentStateWithMocks = ( {
@@ -19,7 +20,7 @@ const getDefaultPaymentStateWithMocks = ( {
 }: {
 	isEditorMode?: boolean;
 	checkoutData?: { payment_method: string };
-	customerPaymentMethods?: Record< string, any >;
+	customerPaymentMethods?: Record< string, SavedPaymentMethod[] >;
 	globalPaymentMethods?: GlobalPaymentMethod[];
 } = {} ): PaymentState => {
 	let state: PaymentState | undefined;
@@ -50,6 +51,7 @@ const getDefaultPaymentStateWithMocks = ( {
 		} ) );
 
 		// Get a fresh copy of the state
+		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Cloning using structuredClone is not supported in jsdom and Object.assign won't work as the state contains objects that need to be reset too. This is a clean way to get a fresh copy of the state.
 		state = require( '../default-state' ).defaultPaymentState;
 	} );
 
@@ -130,13 +132,26 @@ describe( 'defaultPaymentState', () => {
 			} );
 
 			it( 'should be empty when default payment method does not match saved methods', () => {
-				const mockSavedPaymentMethods = {
+				const mockSavedPaymentMethods: Record<
+					string,
+					SavedPaymentMethod[]
+				> = {
 					cc: [
 						{
 							method: {
 								gateway: 'stripe',
+								brand: 'visa',
+								last4: '1234',
 							},
-							tokenId: '123',
+							tokenId: 123,
+							is_default: true,
+							expires: '10/99',
+							actions: {
+								default: {
+									name: 'Delete',
+									url: 'https://example.com',
+								},
+							},
 						},
 					],
 				};
@@ -149,7 +164,10 @@ describe( 'defaultPaymentState', () => {
 			} );
 
 			it( 'should be equal to the payment method data for the default payment method', () => {
-				const customerPaymentMethods = {
+				const customerPaymentMethods: Record<
+					string,
+					SavedPaymentMethod[]
+				> = {
 					cc: [
 						{
 							method: {
@@ -157,8 +175,15 @@ describe( 'defaultPaymentState', () => {
 								brand: 'visa',
 								last4: '1234',
 							},
-							tokenId: '123',
+							tokenId: 123,
 							is_default: true,
+							expires: '10/99',
+							actions: {
+								default: {
+									name: 'Delete',
+									url: 'https://example.com',
+								},
+							},
 						},
 					],
 				};
@@ -177,13 +202,26 @@ describe( 'defaultPaymentState', () => {
 
 		describe( 'Saved payment methods', () => {
 			it( 'should handle saved payment methods correctly', () => {
-				const mockSavedPaymentMethods = {
+				const mockSavedPaymentMethods: Record<
+					string,
+					SavedPaymentMethod[]
+				> = {
 					cc: [
 						{
 							method: {
 								gateway: 'stripe',
+								brand: 'visa',
+								last4: '1234',
 							},
-							tokenId: '123',
+							tokenId: 123,
+							is_default: true,
+							expires: '10/99',
+							actions: {
+								default: {
+									name: 'Delete',
+									url: 'https://example.com',
+								},
+							},
 						},
 					],
 				};
