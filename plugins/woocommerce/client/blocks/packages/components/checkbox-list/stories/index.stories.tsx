@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
 
 /**
@@ -83,7 +83,7 @@ export default {
 	},
 } as Meta< CheckboxListProps >;
 
-const Template: Story< CheckboxListProps > = ( args ) => {
+const Template: StoryFn< CheckboxListProps > = ( args ) => {
 	const [ { checked, onChange: argsOnChange }, updateArgs ] = useArgs();
 	const onChange = ( checkedOption: string ) => {
 		argsOnChange( checkedOption );
@@ -102,7 +102,7 @@ const Template: Story< CheckboxListProps > = ( args ) => {
 	return <CheckboxList { ...args } onChange={ onChange } />;
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< CheckboxListProps > = Template.bind( {} );
 Default.args = {
 	options: [
 		{ label: '🍏 Apple', value: 'apple' },
