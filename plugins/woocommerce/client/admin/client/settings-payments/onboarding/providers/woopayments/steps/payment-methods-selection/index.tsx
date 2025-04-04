@@ -43,7 +43,7 @@ export default function PaymentMethodsSelection() {
 		: [];
 
 	return (
-		<>
+		<div className="settings-payments-onboarding-modal__step--content">
 			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
 				<div className="woocommerce-layout__header-wrapper">
 					<div className="woocommerce-layout__header-title-and-close">
@@ -151,6 +151,6 @@ export default function PaymentMethodsSelection() {
 					</Button>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
