@@ -55,6 +55,12 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			return null;
 		}
 
+		$featured_image_id = $product->get_image_id();
+
+		if( $featured_image_id && count( $product_gallery) === 1 && (int) $product_gallery[0] === (int) $featured_image_id ) {
+			return null;
+		}
+
 		$prev_button = $this->get_button( 'previous' );
 		$p           = new \WP_HTML_Tag_Processor( $prev_button );
 
