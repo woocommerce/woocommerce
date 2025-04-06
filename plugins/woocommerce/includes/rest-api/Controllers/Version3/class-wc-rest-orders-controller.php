@@ -333,6 +333,16 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 		}
 
+		if ( ! empty( $request['created_via'] ) ) {
+		    $created_via = array_map( 'trim', explode( ',', $request['created_via'] ) );
+
+		    $args['meta_query'][] = array(
+		        'key'     => '_created_via',
+		        'value'   => $created_via,
+		        'compare' => 'IN',
+		    );
+		}
+
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
