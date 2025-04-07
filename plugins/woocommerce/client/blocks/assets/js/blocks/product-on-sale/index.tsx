@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, percent } from '@wordpress/icons';
 /**
@@ -12,10 +11,9 @@ import './editor.scss';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
+import metadata from './block.json';
 
-registerBlockType( 'woocommerce/product-on-sale', {
-	title: __( 'On Sale Products', 'woocommerce' ),
-	apiVersion: 3,
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
@@ -24,30 +22,9 @@ registerBlockType( 'woocommerce/product-on-sale', {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __(
-		'Display a grid of products currently on sale.',
-		'woocommerce'
-	),
-	supports: {
-		interactivity: {
-			clientNavigation: false,
-		},
-		align: [ 'wide', 'full' ],
-		html: false,
-		inserter: false,
-	},
 	attributes: {
 		...sharedAttributes,
-
-		/**
-		 * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
-		 */
-		orderby: {
-			type: 'string',
-			default: 'date',
-		},
+		...metadata.attributes,
 	},
 	transforms: {
 		from: [
