@@ -149,7 +149,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'title'    => __( 'Logo width (px)', 'woocommerce' ),
 				'id'       => 'woocommerce_email_header_image_width',
 				'desc_tip' => '',
-				'default'  => 120,
+				'default'  => '120',
 				'type'     => 'number',
 			);
 			$header_alignment           = array(
