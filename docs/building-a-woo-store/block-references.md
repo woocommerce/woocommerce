@@ -1516,6 +1516,17 @@ Display a grid of your newest products.
 -	**Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 -	**Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, editMode, isPreview, orderby, rows, stockStatus
 
+## On Sale Products - woocommerce/product-on-sale
+
+Display a grid of products currently on sale.
+
+-	**Name:** woocommerce/product-on-sale
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+-	**Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, isPreview, orderby, rows, stockStatus
+
 ## Product Results Count - woocommerce/product-results-count
 
 Display the number of products on the archive page or search result page.

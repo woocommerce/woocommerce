@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/classic-shortcode",
-	"version": "1.0.0",
 	"title": "Classic Shortcode",
 	"description": "Renders classic WooCommerce shortcodes.",
 	"category": "woocommerce",
