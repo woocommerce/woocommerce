@@ -1,13 +1,10 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-checkbox-list",
-	"version": "1.0.0",
 	"title": "List",
 	"description": "Display a list of filter options.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [
@@ -20,9 +17,7 @@
 		},
 		"interactivity": true
 	},
-	"usesContext": [
-		"filterData"
-	],
+	"usesContext": [ "filterData" ],
 	"attributes": {
 		"optionElementBorder": {
 			"type": "string",

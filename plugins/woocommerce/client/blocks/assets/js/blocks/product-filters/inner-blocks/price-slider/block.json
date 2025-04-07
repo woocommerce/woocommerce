@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-filter-price-slider",
-	"version": "1.0.0",
 	"title": "Price Slider",
 	"description": "A slider helps shopper choose a price range.",
 	"category": "woocommerce",

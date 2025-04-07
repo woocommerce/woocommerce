@@ -1634,7 +1634,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_header_image_width',
 						label: 'Logo width (px)',
 						type: 'number',
-						default: 120,
+						default: '120',
 						value: expect.anything(), // value could be number or string depending on environment
 					} ),
 				] )

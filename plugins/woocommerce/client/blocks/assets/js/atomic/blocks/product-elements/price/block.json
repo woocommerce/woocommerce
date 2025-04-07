@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-price",
-	"version": "1.0.0",
 	"title": "Product Price",
 	"description": "Display the price of a product.",
 	"category": "woocommerce-product-elements",

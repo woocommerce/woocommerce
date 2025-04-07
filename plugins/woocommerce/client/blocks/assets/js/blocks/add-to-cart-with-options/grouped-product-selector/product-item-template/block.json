@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector-item",
-	"version": "1.0.0",
 	"title": "Grouped Product Selector Item Template (Experimental)",
 	"description": "A list item template that represents a child product within the Grouped Product Selector block.",
 	"category": "woocommerce-product-elements",
