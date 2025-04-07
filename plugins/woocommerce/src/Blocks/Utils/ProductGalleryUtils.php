@@ -132,14 +132,14 @@ class ProductGalleryUtils {
 		// Main product featured image.
 		$featured_image_id = $product->get_image_id();
 
-		if( $featured_image_id ) {
+		if ( $featured_image_id ) {
 			$product_image_ids[] = $featured_image_id;
 		}
 
 		// All other product gallery images.
 		$product_gallery_image_ids = $product->get_gallery_image_ids();
 
-		if( ! empty( $product_gallery_image_ids ) ) {
+		if ( ! empty( $product_gallery_image_ids ) ) {
 			// We don't want to show the same image twice, so we have to remove the featured image from the gallery if it's there.
 			$product_image_ids = array_unique( array_merge( $product_image_ids, $product_gallery_image_ids ) );
 		}
