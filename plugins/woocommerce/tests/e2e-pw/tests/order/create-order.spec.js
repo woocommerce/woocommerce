@@ -420,6 +420,10 @@ test.describe(
 			customer,
 			order,
 		} ) => {
+			expect(
+				parseInt( process.env.GITHUB_RUN_ATTEMPT, 10 ) % 2 === 0
+			).toBeTruthy();
+
 			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 			order.id = await getOrderIdFromPage( page );
 
