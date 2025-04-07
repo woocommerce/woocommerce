@@ -22,36 +22,6 @@ class ProductRatingCounter extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get block supports. Shared with the frontend.
-	 * IMPORTANT: If you change anything here, make sure to update the JS file too.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color'                  =>
-				array(
-					'text'                            => true,
-					'background'                      => false,
-					'link'                            => false,
-					'__experimentalSkipSerialization' => true,
-				),
-			'typography'             =>
-				array(
-					'fontSize'                        => true,
-					'__experimentalSkipSerialization' => true,
-				),
-			'spacing'                =>
-				array(
-					'margin'                          => true,
-					'padding'                         => true,
-					'__experimentalSkipSerialization' => true,
-				),
-			'__experimentalSelector' => '.wc-block-components-product-rating-counter',
-		);
-	}
-
-	/**
 	 * Get the block's attributes.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
