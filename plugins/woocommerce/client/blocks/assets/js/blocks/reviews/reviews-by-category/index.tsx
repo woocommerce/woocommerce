@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, commentContent } from '@wordpress/icons';
 
@@ -12,13 +11,11 @@ import { Edit } from './edit';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
 import { example } from '../example.js';
-
+import metadata from './block.json';
 /**
  * Register and run the "Reviews by category" block.
  */
-registerBlockType( 'woocommerce/reviews-by-category', {
-	apiVersion: 3,
-	title: __( 'Reviews by Category', 'woocommerce' ),
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
@@ -26,24 +23,6 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
-	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __(
-		'Show product reviews from specific categories.',
-		'woocommerce'
-	),
-	supports: {
-		interactivity: {
-			clientNavigation: true,
-		},
-		html: false,
-		color: {
-			background: false,
-		},
-		typography: {
-			fontSize: true,
-		},
 	},
 	example: {
 		...example,

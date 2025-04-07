@@ -36,7 +36,7 @@ const TotalsItemValue = ( {
 	return Number.isFinite( value ) ? (
 		<FormattedMonetaryAmount
 			className="wc-block-components-totals-item__value"
-			currency={ currency || {} }
+			currency={ currency || undefined }
 			value={ value as number }
 		/>
 	) : null;
