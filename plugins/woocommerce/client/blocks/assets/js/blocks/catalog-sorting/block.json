@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/catalog-sorting",
-	"version": "1.0.0",
 	"title": "Catalog Sorting",
 	"description": "Enable customers to change the sorting order of the products.",
 	"category": "woocommerce",

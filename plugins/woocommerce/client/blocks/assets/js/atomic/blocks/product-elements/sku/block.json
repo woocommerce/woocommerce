@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-sku",
-	"version": "1.0.0",
 	"title": "Product SKU",
 	"description": "Displays the SKU of a product.",
 	"category": "woocommerce-product-elements",
