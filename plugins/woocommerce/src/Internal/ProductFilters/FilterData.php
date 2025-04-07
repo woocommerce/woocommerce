@@ -338,7 +338,7 @@ class FilterData {
 	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
 		return sprintf(
 			'wc_%s_%s',
-			CacheController::TRANSIENT_GROUP,
+			CacheController::CACHE_GROUP,
 			md5(
 				wp_json_encode(
 					array(
@@ -362,7 +362,7 @@ class FilterData {
 		}
 
 		$cache             = get_transient( $key );
-		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
+		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 
 		if ( empty( $cache['version'] ) ||
 			! is_array( $cache['value'] ) ||
@@ -388,7 +388,7 @@ class FilterData {
 			return false;
 		}
 
-		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
+		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 		$transient_value   = array(
 			'version' => $transient_version,
 			'value'   => $value,
@@ -409,7 +409,7 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( $product_query_sql ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::TRANSIENT_GROUP ) . md5( $product_query_sql );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( $product_query_sql );
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {
@@ -431,5 +431,4 @@ class FilterData {
 
 		return $results;
 	}
-
 }
