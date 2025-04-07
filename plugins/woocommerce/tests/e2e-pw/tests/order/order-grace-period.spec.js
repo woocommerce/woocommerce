@@ -58,10 +58,6 @@ test( 'guest shopper can verify their email address after the grace period', asy
 	page,
 	order,
 } ) => {
-	expect(
-		parseInt( process.env.GITHUB_RUN_ATTEMPT, 10 ) % 2 === 0
-	).toBeTruthy();
-
 	await test.step( 'navigate to order confirmation page', async () => {
 		await page.goto(
 			`checkout/order-received/${ order.id }/?key=${ order.order_key }`
