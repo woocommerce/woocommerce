@@ -265,8 +265,9 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			// Assign customer
 			await page.locator( '#select2-customer_user-container' ).click();
 			await page
-				.getByRole( 'combobox' )
-				.nth( 4 )
+				.locator(
+					'input[role="combobox"][aria-owns="select2-customer_user-results"]'
+				)
 				.pressSequentially( username );
 			await page.waitForSelector( 'li.select2-results__option' );
 			await page.locator( 'li.select2-results__option' ).click();
@@ -323,8 +324,9 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			// Assign customer
 			await page.locator( '#select2-customer_user-container' ).click();
 			await page
-				.getByRole( 'combobox' )
-				.nth( 4 )
+				.locator(
+					'input[role="combobox"][aria-owns="select2-customer_user-results"]'
+				)
 				.pressSequentially( username );
 			await page.waitForSelector( 'li.select2-results__option' );
 			await page.locator( 'li.select2-results__option' ).click();

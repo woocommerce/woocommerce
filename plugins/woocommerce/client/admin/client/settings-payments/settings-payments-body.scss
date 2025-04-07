@@ -5,9 +5,9 @@ html {
 }
 
 /* Use this carefully as in changes the body background to white. Include it only in components, otherwise white background will be all over the pages. */
-body.woocommerce-feature-enabled-reactify-classic-payments-settings,
-body.woocommerce-feature-enabled-reactify-classic-payments-settings .settings-content,
-body.woocommerce-feature-enabled-reactify-classic-payments-settings #wpbody-content,
-body.woocommerce-feature-enabled-reactify-classic-payments-settings #wpcontent {
-	background: #fff;
+body.woocommerce-feature-enabled-reactify-classic-payments-settings {
+	#mainform,
+	#wpcontent {
+		background: #fff;
+	}
 }

@@ -113,11 +113,6 @@ declare module '@wordpress/notices' {
 		type: WPNotice[ 'type' ];
 	};
 
-	// We don't want to use the types from @types/wordpress__notices but the package
-	// is installed anyway as a subdependency of @types/wordpress__components
-	// The ignore comment is needed to allow overriding the store
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	export const store: { name: 'core/notices' } & StoreDescriptor< {
 		reducer: () => unknown;
 		actions: {

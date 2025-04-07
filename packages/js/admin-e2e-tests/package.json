@@ -55,7 +55,7 @@
 		"puppeteer": "^2.0.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@types/config": "0.0.41",
 		"@types/expect-puppeteer": "^4.4.7",
 		"@types/puppeteer": "^5.4.7",

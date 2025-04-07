@@ -18,11 +18,18 @@ defined( 'ABSPATH' ) || exit;
 class WC_Comments {
 
 	/**
-	 * Cache Group
+	 * The cache group to use for comment counts.
 	 *
-	 * @var string COMMENT_COUNT_CACHE_GROUP The cache group to use for comment counts.
+	 * @var string
 	 */
 	private const COMMENT_COUNT_CACHE_GROUP = 'wc_comment_counts';
+
+	/**
+	 * The cache key to use for pending product reviews counts.
+	 *
+	 * @var string
+	 */
+	private const PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY = 'woocommerce_product_reviews_pending_count';
 
 	/**
 	 * Hook in methods.
@@ -58,6 +65,10 @@ class WC_Comments {
 		// Delete comments count cache whenever there is a new comment or a comment status changes.
 		add_action( 'wp_insert_comment', array( __CLASS__, 'increment_comments_count_cache_on_wp_insert_comment' ), 10, 2 );
 		add_action( 'transition_comment_status', array( __CLASS__, 'update_comments_count_cache_on_comment_status_change' ), 10, 3 );
+
+		// Count product reviews that pending moderation.
+		add_action( 'wp_insert_comment', array( __CLASS__, 'maybe_bump_products_reviews_pending_moderation_counter' ), 10, 2 );
+		add_action( 'transition_comment_status', array( __CLASS__, 'maybe_adjust_products_reviews_pending_moderation_counter' ), 10, 3 );
 
 		// Support avatars for `review` comment type.
 		add_filter( 'get_avatar_comment_types', array( __CLASS__, 'add_avatar_for_review_comment_type' ) );
@@ -304,6 +315,67 @@ class WC_Comments {
 			'wc_count_comments_post-trashed',
 		);
 		wp_cache_delete_multiple( $comment_status_keys, self::COMMENT_COUNT_CACHE_GROUP );
+	}
+
+	/**
+	 * Fetches (and populates if needed) the counter.
+	 *
+	 * @return int
+	 */
+	public static function get_products_reviews_pending_moderation_counter(): int {
+		$count = wp_cache_get( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, self::COMMENT_COUNT_CACHE_GROUP );
+		if ( false === $count ) {
+			$count = (int) get_comments(
+				array(
+					'type__in'  => array( 'review', 'comment' ),
+					'status'    => '0',
+					'post_type' => 'product',
+					'count'     => true,
+				)
+			);
+			wp_cache_set( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, $count, self::COMMENT_COUNT_CACHE_GROUP, DAY_IN_SECONDS );
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Handles `wp_insert_comment` hook processing and actualizes the counter.
+	 *
+	 * @param int         $comment_id Comment ID.
+	 * @param \WP_Comment $comment    Comment object.
+	 * @return void
+	 */
+	public static function maybe_bump_products_reviews_pending_moderation_counter( $comment_id, $comment ): void {
+		$needs_bump = '0' === $comment->comment_approved;
+		if ( $needs_bump && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
+			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
+			if ( $is_product ) {
+				wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
+			}
+		}
+	}
+
+	/**
+	 * Handles `transition_comment_status` hook processing and actualizes the counter.
+	 *
+	 * @param int|string  $new_status New status.
+	 * @param int|string  $old_status Old status.
+	 * @param \WP_Comment $comment    Comment object.
+	 * @return void
+	 */
+	public static function maybe_adjust_products_reviews_pending_moderation_counter( $new_status, $old_status, $comment ): void {
+		$needs_adjustments = 'unapproved' === $new_status || 'unapproved' === $old_status;
+		if ( $needs_adjustments && in_array( $comment->comment_type, array( 'review', 'comment', '' ), true ) ) {
+			$is_product = 'product' === get_post_type( $comment->comment_post_ID );
+			if ( $is_product ) {
+				if ( '0' === $comment->comment_approved ) {
+					wp_cache_incr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
+				} else {
+					wp_cache_decr( self::PRODUCT_REVIEWS_PENDING_COUNT_CACHE_KEY, 1, self::COMMENT_COUNT_CACHE_GROUP );
+				}
+			}
+		}
 	}
 
 	/**

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Interactivity\Store;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * ProductButton class.
@@ -53,7 +54,7 @@ class ProductButton extends AbstractBlock {
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			add_action(
 				'wp_enqueue_scripts',
 				array( $this, 'dequeue_add_to_cart_scripts' )
@@ -92,6 +93,14 @@ class ProductButton extends AbstractBlock {
 		if ( $post instanceof \WC_Product ) {
 			$product = $post;
 		} elseif ( ! $product instanceof \WC_Product ) {
+			return '';
+		}
+
+		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
+
+		if ( $is_descendent_of_add_to_cart_form && ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() ) ) {
+			$product = $previous_product;
+
 			return '';
 		}
 
@@ -155,8 +164,7 @@ class ProductButton extends AbstractBlock {
 		*/
 		$quantity_to_add = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
 
-		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
-		$add_to_cart_text                  = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
+		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
 		if ( $is_descendent_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
 			$add_to_cart_text = $product->single_add_to_cart_text();
 		}

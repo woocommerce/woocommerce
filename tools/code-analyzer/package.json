@@ -19,12 +19,10 @@
 		"@commander-js/extra-typings": "^10.0.3",
 		"@oclif/core": "^2.15.0",
 		"@tsconfig/node16": "^1.0.4",
-		"@types/uuid": "^8.3.4",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"commander": "^9.5.0",
 		"dotenv": "^10.0.0",
-		"simple-git": "^3.21.0",
-		"uuid": "^9.0.1"
+		"simple-git": "^3.21.0"
 	},
 	"devDependencies": {
 		"@types/jest": "27.5.x",

@@ -59,7 +59,8 @@ interface IncentiveModalProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 }
 
@@ -114,12 +115,19 @@ export const IncentiveModal = ( {
 			display_context: context,
 		} );
 
-		// Accept the incentive and setup the plugin.
+		// Accept the incentive and set up the plugin.
 		setIsBusy( true );
 		onAccept( incentive.promo_id );
 		onDismiss( incentive._links.dismiss.href, context ); // We also dismiss the incentive when it is accepted.
 		handleClose(); // Close the modal.
-		setupPlugin( provider.id, provider.plugin.slug, onboardingUrl );
+		setupPlugin(
+			provider.id,
+			provider.plugin.slug,
+			onboardingUrl,
+			provider.plugin.status === 'not_installed'
+				? provider._links?.attach?.href ?? null
+				: null
+		);
 		setIsBusy( false );
 	};
 

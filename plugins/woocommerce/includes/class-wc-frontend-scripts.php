@@ -89,7 +89,7 @@ class WC_Frontend_Scripts {
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
-				'woocommerce-blocktheme'  => wc_current_theme_is_fse_theme() ? array(
+				'woocommerce-blocktheme'  => wp_is_block_theme() ? array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
 					'deps'    => '',
 					'version' => $version,

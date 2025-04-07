@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Allow WooPayments to take over Payments menu item only if WooPayments is fully onboarded.

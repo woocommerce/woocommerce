@@ -52,6 +52,16 @@ jQuery( function ( $ ) {
 				'.wc_input_variations_price',
 				this.maybe_enable_button_to_add_price_to_variations
 			);
+			$( document.body ).on(
+				'input',
+				'.variation-cost-field',
+				this.show_or_hide_cost_description
+			);
+			$( document ).on(
+				'click',
+				'a.switch-to-general-tab',
+				this.switch_to_general_tab
+			);
 		},
 
 		create_variations: function ( event ) {
@@ -183,6 +193,28 @@ jQuery( function ( $ ) {
 			} else {
 				$( '.add_variations_price_button' ).prop( 'disabled', false );
 			}
+		},
+
+		/**
+		 * Show or hide the description under the cost field when its value changes
+		 */
+		show_or_hide_cost_description: function ( e ) {
+			const target = $( e.currentTarget );
+			if( target.find( 'input' ).val() === '' ) {
+				target.find( '.description' ).show();
+			}
+			else {
+				target.find( '.description' ).hide();
+			}
+		},
+
+		/**
+		 * Switch to the "General" tab
+		 */
+		switch_to_general_tab: function ( e ) {
+			e.preventDefault();
+			$( '.product_data_tabs .general_tab a' ).trigger( 'click' );
+			return false;
 		},
 
 		/**

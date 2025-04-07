@@ -19,9 +19,9 @@ class ImportInstallPluginTest extends TestCase {
 		$pluginSlug = 'already-installed-plugin';
 
 		$schema = Mockery::mock();
-		$schema->pluginZipFile = (object)[
+		$schema->pluginData = (object)[
 			'slug' => $pluginSlug,
-			'resource' => 'valid-resource'
+			'resource' => 'wordpress.org/plugins'
 		];
 
 		$resourceStorage = Mockery::mock(ResourceStorages::class);
@@ -46,7 +46,7 @@ class ImportInstallPluginTest extends TestCase {
 		$pluginSlug = 'invalid-resource-plugin';
 
 		$schema = Mockery::mock();
-		$schema->pluginZipFile = (object)[
+		$schema->pluginData = (object)[
 			'slug' => $pluginSlug,
 			'resource' => 'invalid-resource'
 		];
@@ -63,28 +63,30 @@ class ImportInstallPluginTest extends TestCase {
 		$result = $importInstallPlugin->process($schema);
 
 		$this->assertInstanceOf(StepProcessorResult::class, $result);
-		$this->assertFalse($result->is_success());
-		$messages = $result->get_messages('error');
+		$messages = $result->get_messages('info');
 		$this->assertCount(1, $messages);
-		$this->assertEquals("Invalid resource type for {$pluginSlug}.", $messages[0]['message']);
+		$this->assertEquals("Skipped installing a plugin. Unsupported resource type. Only 'wordpress.org/plugins' is supported at the moment.", $messages[0]['message']);
 	}
 
 	public function test_process_successful_installation_and_activation() {
 		$pluginSlug = 'sample-plugin';
 
 		$schema = Mockery::mock();
-		$schema->pluginZipFile = (object)[
+		$schema->pluginData = (object)[
 			'slug' => $pluginSlug,
-			'resource' => 'valid-resource',
-			'options' => (object)['activate' => true]
+			'resource' => 'wordpress.org/plugins',
 		];
+
+		$schema->options = (object) array(
+			'activate' => true,
+		);
 
 		$resourceStorage = Mockery::mock(ResourceStorages::class);
 		$resourceStorage->shouldReceive('is_supported_resource')
-		                ->with('valid-resource')
+		                ->with('wordpress.org/plugins')
 		                ->andReturn(true);
 		$resourceStorage->shouldReceive('download')
-		                ->with($pluginSlug, 'valid-resource')
+		                ->with($pluginSlug, 'wordpress.org/plugins')
 		                ->andReturn('/path/to/plugin.zip');
 
 		$importInstallPlugin = Mockery::mock(ImportInstallPlugin::class, [$resourceStorage])

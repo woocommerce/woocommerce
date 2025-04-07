@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed tax inconsistencies on the order-edit screen when adjusting product quantity.

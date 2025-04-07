@@ -284,8 +284,6 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
-		$content = trim( $content );
-
 		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
@@ -296,10 +294,9 @@ final class BlockTypesController {
 		$processor = new \WP_HTML_Tag_Processor( $content );
 
 		if (
-			false === $processor->next_token() ||
-			'DIV' !== $processor->get_token_name() ||
-			$processor->is_tag_closer()
+			false === $processor->next_tag() || $processor->is_tag_closer()
 		) {
+
 			return $content;
 		}
 
@@ -513,7 +510,7 @@ final class BlockTypesController {
 		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
+			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
 				$block_types[] = 'AddToCartWithOptions';
 				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
 				$block_types[] = 'AddToCartWithOptionsVariationSelector';
@@ -533,6 +530,8 @@ final class BlockTypesController {
 			$block_types[] = 'ProductDescription';
 			$block_types[] = 'ProductAttributes';
 			$block_types[] = 'Reviews\ProductReviews';
+			$block_types[] = 'Reviews\ProductReviewRating';
+			$block_types[] = 'Reviews\ProductReviewsTitle';
 		}
 
 		/**

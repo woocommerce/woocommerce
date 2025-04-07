@@ -5,6 +5,9 @@
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 export const supports = {
+	interactivity: {
+		clientNavigation: true,
+	},
 	color: {
 		text: true,
 		background: false,
