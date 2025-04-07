@@ -77,10 +77,12 @@ class FilterData {
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
+		$product_ids = $this->get_cached_product_ids( $query->request );
+
 		$price_filter_sql = "
 		SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
 		FROM {$wpdb->wc_product_meta_lookup}
-		WHERE product_id IN ( {$query->request} )
+		WHERE product_id IN ( {$product_ids} )
 		";
 
 		/**
@@ -148,6 +150,8 @@ class FilterData {
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
+		$product_ids = $this->get_cached_product_ids( $query->request );
+
 		global $wpdb;
 		$stock_status_counts = array();
 
@@ -158,7 +162,7 @@ class FilterData {
 				INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
 				AND postmeta.meta_key = '_stock_status'
 				AND postmeta.meta_value = '" . esc_sql( $status ) . "'
-				WHERE posts.ID IN ( {$query->request} )
+				WHERE posts.ID IN ( {$product_ids} )
 			";
 
 			/**
@@ -220,10 +224,12 @@ class FilterData {
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
+		$product_ids = $this->get_cached_product_ids( $query->request );
+
 		$rating_count_sql = "
 			SELECT COUNT( DISTINCT product_id ) as product_count, ROUND( average_rating, 0 ) as rounded_average_rating
 			FROM {$wpdb->wc_product_meta_lookup}
-			WHERE product_id IN ( {$query->request} )
+			WHERE product_id IN ( {$product_ids} )
 			AND average_rating > 0
 			GROUP BY rounded_average_rating
 			ORDER BY rounded_average_rating DESC
@@ -288,6 +294,8 @@ class FilterData {
 		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
+		$product_ids = $this->get_cached_product_ids( $query->request );
+
 		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';
 		$attribute_count_sql     = "
 			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
@@ -295,7 +303,7 @@ class FilterData {
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-			WHERE posts.ID IN ( {$query->request} )
+			WHERE posts.ID IN ( {$product_ids} )
 			{$attributes_to_count_sql}
 			GROUP BY terms.term_id
 		";
@@ -390,4 +398,38 @@ class FilterData {
 
 		return $result;
 	}
+
+	/**
+	 * Get cached product IDs from a SQL query.
+	 *
+	 * Executes the product query and returns a comma-separated string of product IDs.
+	 * Results are cached to avoid repeated database queries.
+	 *
+	 * @param string $product_query_sql SQL query to get product IDs.
+	 * @return string Comma-separated list of product IDs.
+	 */
+	private function get_cached_product_ids( $product_query_sql ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::TRANSIENT_GROUP ) . md5( $product_query_sql );
+		$cache     = wp_cache_get( $cache_key );
+
+		if ( $cache ) {
+			return $cache;
+		}
+
+		global $wpdb;
+
+		// The query is already prepared by WP_Query.
+		$results = $wpdb->get_results( $product_query_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( ! $results ) {
+			$results = array();
+		}
+
+		$results = implode( ',', array_column( $results, 'ID' ) );
+
+		wp_cache_set( $cache_key, $results );
+
+		return $results;
+	}
+
 }
