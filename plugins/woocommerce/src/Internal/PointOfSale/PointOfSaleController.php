@@ -12,6 +12,13 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class PointOfSaleController implements RegisterHooksInterface {
 
     /**
+     * The feature key for Point of Sale.
+     *
+     * @var string
+     */
+    private const FEATURE_KEY = 'point_of_sale';
+
+    /**
      * The FeaturesController instance.
      *
      * @var FeaturesController
@@ -25,9 +32,6 @@ class PointOfSaleController implements RegisterHooksInterface {
         if ( ! $this->feature_is_enabled() ) {
             return;
         }
-
-        // Add hooks here when feature is enabled
-        add_action( 'admin_init', array( $this, 'init_pos_settings' ) );
     }
 
     /**
@@ -38,7 +42,6 @@ class PointOfSaleController implements RegisterHooksInterface {
 	 */
 	final public function init( FeaturesController $features_controller ) {
 		$this->features_controller = $features_controller;
-        // $this->add_feature_definition( $features_controller );
 	}
 
 	/**
@@ -47,7 +50,7 @@ class PointOfSaleController implements RegisterHooksInterface {
 	 * @return bool True if the feature is enabled, false otherwise.
 	 */
 	public function feature_is_enabled(): bool {
-		return $this->features_controller->feature_is_enabled( 'point_of_sale' );
+		return $this->features_controller->feature_is_enabled( self::FEATURE_KEY );
 	}
 
     /**
@@ -67,16 +70,9 @@ class PointOfSaleController implements RegisterHooksInterface {
 		);
 
 		$features_controller->add_feature_definition(
-			'point_of_sale',
+			self::FEATURE_KEY,
 			__( 'Point of Sale', 'woocommerce' ),
 			$definition
 		);
 	}
-
-    /**
-     * Initialize POS settings.
-     */
-    public function init_pos_settings() {
-        // Add settings initialization here when needed
-    }
 }

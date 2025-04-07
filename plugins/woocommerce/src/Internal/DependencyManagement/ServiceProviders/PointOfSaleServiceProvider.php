@@ -26,4 +26,4 @@ class PointOfSaleServiceProvider extends AbstractInterfaceServiceProvider {
 	public function register() {
 		$this->share_with_implements_tags( PointOfSaleController::class )->addArgument( FeaturesController::class );
 	}
-} 
+}
