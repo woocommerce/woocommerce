@@ -81,14 +81,14 @@
   - team: ghidorah
 
 "plugins/woocommerce/**/*":
-  - team: proton
+  - team: flux
 
 "plugins/woocommerce/templates/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce/templates/emails/**/*":
-  - team: proton
+  - team: flux
 
 "plugins/woocommerce/src/Admin/**/*":
   - team: woo-fse
