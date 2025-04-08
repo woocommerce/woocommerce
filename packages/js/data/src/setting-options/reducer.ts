@@ -5,6 +5,9 @@ import { TYPES } from './action-types';
 import type { Actions } from './actions';
 import type { SettingsState, Setting, SettingValue } from './types';
 
+/**
+ * The default state for the settings options store.
+ */
 export const DEFAULT_STATE: SettingsState = {
 	groups: [],
 	settings: {},

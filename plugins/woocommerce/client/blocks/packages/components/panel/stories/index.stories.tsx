@@ -91,7 +91,7 @@ const Template: StoryFn< PanelProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< PanelProps > = Template.bind( {} );
 Default.args = {
 	title: (
 		<div style={ { paddingBottom: '.375em', marginBottom: '.375em' } }>
@@ -102,7 +102,7 @@ Default.args = {
 	initialOpen: false,
 };
 
-export const InitialOpen = Template.bind( {} );
+export const InitialOpen: StoryFn< PanelProps > = Template.bind( {} );
 InitialOpen.args = {
 	title: (
 		<div style={ { paddingBottom: '.375em', marginBottom: '.375em' } }>

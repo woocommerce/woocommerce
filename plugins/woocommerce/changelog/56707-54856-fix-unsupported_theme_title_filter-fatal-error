@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix fatal error when calling "unsupported_theme_title_filter" with only one parameter.

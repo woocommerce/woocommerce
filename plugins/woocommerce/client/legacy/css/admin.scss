@@ -5065,6 +5065,19 @@ img.help_tip {
 		}
 	}
 
+	.wc-admin-header {
+		small {
+			margin-right: 0.5em;
+		}
+		a {
+			color: #1d2327;
+			text-decoration: none;
+		}
+		a:hover {
+			color: var(--wp-admin-theme-color, #3858e9);
+		}
+	}
+
 	#template div {
 		margin: 0;
 
@@ -8858,7 +8871,7 @@ body.woocommerce_page_wc-settings {
 			margin-top: 5px;
 		}
 	}
-	
+
 	#wpcontent {
 		background: #f0f0f1;
 	}
