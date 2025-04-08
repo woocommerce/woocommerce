@@ -3,6 +3,7 @@
 	"icon": "page",
 	"title": "Product Summary",
 	"description": "Display a short description about a product.",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"productId": {
 			"type": "number",
@@ -69,6 +70,12 @@
 		},
 		"__experimentalSelector": ".wc-block-components-product-summary"
 	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
