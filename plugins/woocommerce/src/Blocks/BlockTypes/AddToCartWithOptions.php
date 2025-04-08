@@ -151,8 +151,9 @@ class AddToCartWithOptions extends AbstractBlock {
 			* @param boolean.
 			*/
 			$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+			$is_not_purchasable_single_product = ProductType::SIMPLE === $product_type && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
 
-			if ( ! $is_disabled_compatibility_layer ) {
+			if ( ! $is_disabled_compatibility_layer && ! $is_not_purchasable_single_product ) {
 				ob_start();
 				if ( ProductType::SIMPLE === $product_type ) {
 					/**

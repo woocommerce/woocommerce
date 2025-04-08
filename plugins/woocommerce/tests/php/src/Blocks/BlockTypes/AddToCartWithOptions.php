@@ -137,6 +137,13 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		global $product;
 		$product = new \WC_Product_Simple();
+		$product_id = $product->save();
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringNotContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart with Options doesn\'t render the contents from the hook if the product is not purchasable.' );
+
+		remove_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
+
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
