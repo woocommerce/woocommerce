@@ -432,9 +432,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$params['created_via'] = array(
 		    'description'       => __( 'Limit result set to orders created via specific sources (e.g. checkout, admin).', 'woocommerce' ),
-		    'type'              => 'string',
+		    'type'              => 'array',
+		    'items'             => array(
+				'type' => 'string'
+			),
 		    'validate_callback' => 'rest_validate_request_arg',
-		    'sanitize_callback' => 'sanitize_text_field',
+		    'sanitize_callback' => 'wp_parse_list',
 		);
 
 		return $params;
