@@ -89,7 +89,7 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$initial_count = OrderUtil::get_count_for_type( 'shop_order' );
 		$order_data    = array(
 			'status'        => OrderStatus::COMPLETED,
-			'customer_id'   => $customer_id,
+			'customer_id'   => 1,
 			'customer_note' => '',
 			'total'         => '',
 		);
