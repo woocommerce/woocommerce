@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Monorepo: fix OOM when building core zip-file in some environments
+Monorepo: partially fix OOM errors when building core zip-file in some environments
