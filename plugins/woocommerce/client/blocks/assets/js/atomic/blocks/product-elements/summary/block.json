@@ -4,6 +4,7 @@
 	"icon": "page",
 	"title": "Product Summary",
 	"description": "Display a short description about a product.",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"productId": {
 			"type": "number",

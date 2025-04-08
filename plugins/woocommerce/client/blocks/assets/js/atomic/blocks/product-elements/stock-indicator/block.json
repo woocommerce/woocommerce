@@ -4,6 +4,7 @@
 	"icon": "info",
 	"title": "Product Stock Indicator",
 	"description": "Display product stock status.",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"isDescendentOfQueryLoop": {
 			"type": "boolean",
