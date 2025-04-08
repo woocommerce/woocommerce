@@ -198,9 +198,9 @@ test(
 				.selectOption( 'Edit' );
 			await page.locator( '#doaction' ).click();
 
-			await expect(
-				await page.locator( '#bulk-titles-list li' ).count()
-			).toEqual( products.length );
+			await expect( page.locator( '#bulk-titles-list li' ) ).toHaveCount(
+				products.length
+			);
 		} );
 
 		await test.step( 'update the sale price', async () => {
@@ -229,14 +229,17 @@ test(
 					( 1 - salePriceDecrease / 100 )
 				).toFixed( 2 );
 
-				await expect
-					.soft(
-						await page
-							.locator( 'ins' )
-							.getByText( `$${ expectedSalePrice }` )
-							.count()
-					)
-					.toBeGreaterThan( 0 );
+				const productPriceLocator = page
+					.locator( `[data-block-name="woocommerce/product-price"]` )
+					.first();
+
+				await expect( productPriceLocator ).toContainText(
+					'$' + expectedRegularPrice
+				);
+
+				await expect( productPriceLocator ).toContainText(
+					'$' + expectedSalePrice
+				);
 			}
 		} );
 
@@ -263,15 +266,13 @@ test(
 			for ( const product of products ) {
 				await page.goto( `product/${ product.slug }` );
 
-				const expectedRegularPrice = product.regular_price;
+				const productPriceLocator = page
+					.locator( `[data-block-name="woocommerce/product-price"]` )
+					.first();
 
-				await expect
-					.soft( await page.locator( 'ins' ).count() )
-					.toBe( 0 );
-
-				await expect
-					.soft( page.locator( 'bdi' ).first() )
-					.toContainText( expectedRegularPrice );
+				await expect( productPriceLocator ).toHaveText(
+					'$' + product.regular_price
+				);
 			}
 		} );
 	}

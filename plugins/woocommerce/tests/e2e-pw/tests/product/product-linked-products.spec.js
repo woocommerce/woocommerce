@@ -223,7 +223,10 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
-				await page.getByRole( 'link', { name: 'View cart' } ).click();
+				await page
+					.getByRole( 'link', { name: 'View cart' } )
+					.first()
+					.click();
 
 				// check for cross-sells
 				const sectionLocator = page.locator( 'div' ).filter( {
@@ -278,7 +281,10 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
-				await page.getByRole( 'link', { name: 'View cart' } ).click();
+				await page
+					.getByRole( 'link', { name: 'View cart' } )
+					.first()
+					.click();
 
 				// check for cross-sells
 				await expect(
