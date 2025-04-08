@@ -122,6 +122,8 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 	 * Test that count works when status change hook is triggered on multiple status changes.
 	 */
 	public function test_count_on_multiple_status_changes() {
+		$initial_count = OrderUtil::get_count_for_type( 'shop_order' );
+
 		$order = new WC_Order();
 		$order->set_status( OrderInternalStatus::COMPLETED );
 		$order->set_status( OrderInternalStatus::CANCELLED );
