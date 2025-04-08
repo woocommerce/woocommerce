@@ -205,7 +205,7 @@
 						"start": "env:test"
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					]
 				},
@@ -268,7 +268,7 @@
 					],
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-gutenberg"
 					],
@@ -299,7 +299,7 @@
 					],
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-gutenberg"
 					],
@@ -325,7 +325,7 @@
 					],
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-hpos-disabled"
 					],
@@ -363,7 +363,7 @@
 					},
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-php-8.1"
 					],
@@ -398,7 +398,7 @@
 					},
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-wp-latest-1"
 					],
@@ -433,7 +433,7 @@
 					},
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-wp-pre-release"
 					],
@@ -594,7 +594,6 @@
 						"pull_request",
 						"push",
 						"release-checks",
-						"nightly-checks",
 						"blocks-e2e"
 					],
 					"report": {
@@ -631,7 +630,7 @@
 						}
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
@@ -665,7 +664,7 @@
 						}
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-latest-1"
 					],

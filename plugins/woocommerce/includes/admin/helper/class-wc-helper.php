@@ -26,6 +26,8 @@ class WC_Helper {
 	 */
 	public static $log;
 
+	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
+
 	/**
 	 * Get an absolute path to the requested helper view.
 	 *
@@ -68,6 +70,7 @@ class WC_Helper {
 		include_once __DIR__ . '/class-wc-helper-options.php';
 		include_once __DIR__ . '/class-wc-helper-api.php';
 		include_once __DIR__ . '/class-wc-woo-update-manager-plugin.php';
+		include_once __DIR__ . '/class-wc-woo-helper-connection.php';
 		include_once __DIR__ . '/class-wc-helper-updater.php';
 		include_once __DIR__ . '/class-wc-plugin-api-updater.php';
 		include_once __DIR__ . '/class-wc-helper-compat.php';
@@ -1667,13 +1670,21 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get cached connection data
+	 *
+	 * @return array|bool cached connection data or false connection data is not cached.
+	 */
+	public static function get_cached_connection_data() {
+		return get_transient( self::CACHE_KEY_CONNECTION_DATA );
+	}
+
+	/**
 	 * Get details of the current WooCommerce.com connection.
 	 *
 	 * @return array|WP_Error
 	 */
 	public static function fetch_helper_connection_info() {
-		$cache_key = '_woocommerce_helper_connection_data';
-		$data      = get_transient( $cache_key );
+		$data = self::get_cached_connection_data();
 		if ( false !== $data ) {
 			return $data;
 		}
@@ -1682,6 +1693,7 @@ class WC_Helper {
 			'connection-info',
 			array(
 				'authenticated' => true,
+				'query_string'  => '?url=' . rawurlencode( home_url() ),
 			)
 		);
 
@@ -1702,7 +1714,7 @@ class WC_Helper {
 			$auth        = WC_Helper_Options::get( 'auth' );
 			$auth['url'] = $url;
 			WC_Helper_Options::update( 'auth', $auth );
-			set_transient( $cache_key, $connection_data, 15 * MINUTE_IN_SECONDS );
+			set_transient( self::CACHE_KEY_CONNECTION_DATA, $connection_data, 1 * HOUR_IN_SECONDS );
 		}
 
 		return $connection_data;

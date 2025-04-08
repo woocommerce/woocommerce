@@ -1,13 +1,10 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-chips",
-	"version": "1.0.0",
 	"title": "Chips",
 	"description": "Display filter options as chips.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [
@@ -17,45 +14,42 @@
 	"supports": {
 		"interactivity": true
 	},
-	"usesContext": [
-		"filterData",
-		"showCounts"
-	],
+	"usesContext": [ "filterData", "showCounts" ],
 	"attributes": {
-		"chipText":{
+		"chipText": {
 			"type": "string"
 		},
-		"customChipText":{
+		"customChipText": {
 			"type": "string"
 		},
-		"chipBackground":{
+		"chipBackground": {
 			"type": "string"
 		},
-		"customChipBackground":{
+		"customChipBackground": {
 			"type": "string"
 		},
-		"chipBorder":{
+		"chipBorder": {
 			"type": "string"
 		},
-		"customChipBorder":{
+		"customChipBorder": {
 			"type": "string"
 		},
-		"selectedChipText":{
+		"selectedChipText": {
 			"type": "string"
 		},
-		"customSelectedChipText":{
+		"customSelectedChipText": {
 			"type": "string"
 		},
-		"selectedChipBackground":{
+		"selectedChipBackground": {
 			"type": "string"
 		},
-		"customSelectedChipBackground":{
+		"customSelectedChipBackground": {
 			"type": "string"
 		},
-		"selectedChipBorder":{
+		"selectedChipBorder": {
 			"type": "string"
 		},
-		"customSelectedChipBorder":{
+		"customSelectedChipBorder": {
 			"type": "string"
 		}
 	}

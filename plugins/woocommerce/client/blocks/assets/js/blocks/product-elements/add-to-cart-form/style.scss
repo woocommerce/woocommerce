@@ -139,3 +139,14 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 		width: 3.631em;
 	}
 }
+
+// Express payment button spacing
+:where(.wp-block-woocommerce-add-to-cart-form > * + *) {
+	margin-top: 12px;
+	padding: 0 4px;
+}
+
+// WooCommerce Payments has its own spacing already.
+:where(.wp-block-woocommerce-add-to-cart-form .wcpay-express-checkout-wrapper) {
+	padding: 0;
+}
