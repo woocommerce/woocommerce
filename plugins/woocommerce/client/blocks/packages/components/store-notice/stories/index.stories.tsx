@@ -60,7 +60,7 @@ const Template: StoryFn< NoticeBannerProps > = ( { children, ...args } ) => {
 	return <StoreNotice { ...args }>{ children }</StoreNotice>;
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< NoticeBannerProps > = Template.bind( {} );
 Default.args = {
 	children: 'This is a default notice',
 	status: 'default',
@@ -68,35 +68,35 @@ Default.args = {
 	politeness: 'polite',
 };
 
-export const Error = Template.bind( {} );
+export const Error: StoryFn< NoticeBannerProps > = Template.bind( {} );
 Error.args = {
 	children: 'This is an error notice',
 	status: 'error',
 	politeness: 'assertive',
 };
 
-export const Warning = Template.bind( {} );
+export const Warning: StoryFn< NoticeBannerProps > = Template.bind( {} );
 Warning.args = {
 	children: 'This is a warning notice',
 	status: 'warning',
 	politeness: 'polite',
 };
 
-export const Info = Template.bind( {} );
+export const Info: StoryFn< NoticeBannerProps > = Template.bind( {} );
 Info.args = {
 	children: 'This is an informational notice',
 	status: 'info',
 	politeness: 'polite',
 };
 
-export const Success = Template.bind( {} );
+export const Success: StoryFn< NoticeBannerProps > = Template.bind( {} );
 Success.args = {
 	children: 'This is a success notice',
 	status: 'success',
 	politeness: 'polite',
 };
 
-export const ErrorSummary = Template.bind( {} );
+export const ErrorSummary: StoryFn< NoticeBannerProps > = Template.bind( {} );
 ErrorSummary.args = {
 	summary: 'Please fix the following errors',
 	children: (

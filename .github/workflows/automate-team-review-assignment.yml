@@ -66,7 +66,7 @@ jobs:
               core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
 
         - name: Assign reviewers for a community PR
-          if: ${{ steps.check.outputs.contributor == 'yes' }}
+          if: ${{ steps.check.outputs.contributor == 'yes' && github.event.pull_request.draft == false }}
           uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
           with:
               config: '.github/project-community-pr-assigner.yml'

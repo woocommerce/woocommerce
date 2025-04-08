@@ -11,7 +11,7 @@ import Title from '../title';
 
 interface StepHeadingProps {
 	title: string;
-	stepHeadingContent?: JSX.Element;
+	stepHeadingContent?: JSX.Element | undefined;
 }
 
 const StepHeading = ( { title, stepHeadingContent }: StepHeadingProps ) => (
