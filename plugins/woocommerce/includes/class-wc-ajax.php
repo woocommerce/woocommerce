@@ -47,11 +47,27 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Set the 'wc-ajax' argument in $wp_query.
+	 */
+	private static function set_wc_ajax_argument_in_query() {
+		global $wp_query;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['wc-ajax'] ) && empty( $wp_query->get( 'wc-ajax' ) ) ) {
+			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
 	 * Set WC AJAX constant and headers.
 	 */
 	public static function define_ajax() {
+		global $wp_query;
+
 		// phpcs:disable
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
+		self::set_wc_ajax_argument_in_query();
+		if ( ! empty( $wp_query->get( 'wc-ajax' ) ) ) {
 			wc_maybe_define_constant( 'DOING_AJAX', true );
 			wc_maybe_define_constant( 'WC_DOING_AJAX', true );
 			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
@@ -88,9 +104,7 @@ class WC_AJAX {
 		global $wp_query;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
-			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
-		}
+		self::set_wc_ajax_argument_in_query();
 
 		$action = $wp_query->get( 'wc-ajax' );
 
