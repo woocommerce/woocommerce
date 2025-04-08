@@ -29,5 +29,6 @@ class CacheController implements RegisterHooksInterface {
 	 */
 	public function clear_filter_data_cache() {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
+		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
 }
