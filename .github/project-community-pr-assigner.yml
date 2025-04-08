@@ -32,7 +32,6 @@
 
 "packages/js/components/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/csv-export/**/*":
   - team: woo-fse
@@ -42,11 +41,9 @@
 
 "packages/js/customer-effort-score/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/data/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/date/**/*":
   - team: woo-fse
@@ -62,7 +59,6 @@
 
 "packages/js/explat/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/navigation/**/*":
   - team: woo-fse
@@ -71,14 +67,13 @@
   - team: woo-fse
 
 "packages/js/onboarding/**/*":
-  - team: ghidorah
+  - team: woo-fse
 
 "packages/js/product-editor/**/*":
   - team: woo-fse
 
 "packages/js/tracks/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/**/*":
   - team: flux
@@ -92,7 +87,6 @@
 
 "plugins/woocommerce/src/Admin/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/src/Blocks/**/*":
   - team: rubik
@@ -100,7 +94,6 @@
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/src/StoreApi/**/*":
   - team: rubik
@@ -108,14 +101,14 @@
 
 "plugins/woocommerce/client/admin/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/client/blocks/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: ghidorah
+  - team: woo-fse
+  - team: flux
 
 "tools/**/*":
   - team: flux
