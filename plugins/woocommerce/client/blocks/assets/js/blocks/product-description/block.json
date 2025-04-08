@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-description",
-	"version": "1.0.0",
 	"title": "Product Description",
 	"description": "Displays the description of the product.",
 	"category": "woocommerce",

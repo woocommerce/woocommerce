@@ -459,11 +459,20 @@ class FeaturesController {
 			'block_email_editor'                 => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'        => __(
-					'Enable the block-based email editor for transactional emails',
+					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
 					'woocommerce'
 				),
+
+				/*
+				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
+				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+				* feature.
+				*
+				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+				*/
+				'is_legacy'          => true,
 				'enabled_by_default' => false,
-				'disable_ui'         => true,
 			),
 		);
 
