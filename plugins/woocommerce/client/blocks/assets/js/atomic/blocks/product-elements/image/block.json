@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-image",
-	"version": "1.0.0",
 	"title": "Product Image",
 	"description": "Display the main product image.",
 	"category": "woocommerce-product-elements",

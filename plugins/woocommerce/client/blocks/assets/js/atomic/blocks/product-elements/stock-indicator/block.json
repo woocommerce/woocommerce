@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-stock-indicator",
-	"version": "1.0.0",
 	"icon": "info",
 	"title": "Product Stock Indicator",
 	"description": "Display product stock status.",

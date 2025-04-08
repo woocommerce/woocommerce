@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-rating",
-	"version": "1.0.0",
 	"icon": "info",
 	"title": "Product Rating",
 	"description": "Display the average rating of a product.",
