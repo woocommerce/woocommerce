@@ -129,6 +129,36 @@ test.describe( 'registerProductBlockType registers', () => {
 		} );
 	} );
 
+	test( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
+		admin,
+		page,
+	} ) => {
+		const productBlockTypes = [
+			'woocommerce/product-price',
+			'woocommerce/product-rating',
+		];
+
+		await admin.visitAdminPage(
+			'site-editor.php?postType=wp_template&activeView=WooCommerce'
+		);
+
+		const singleProductTemplate = page.getByRole( 'button', {
+			name: 'Single Product',
+		} );
+
+		await expect( singleProductTemplate ).toBeVisible();
+
+		const previewCanvas = singleProductTemplate.frameLocator(
+			'iframe[title="Editor canvas"]'
+		);
+		for ( const blockType of productBlockTypes ) {
+			const block = previewCanvas.locator(
+				`[data-type="${ blockType }"]`
+			);
+			await expect( block.first() ).toBeAttached();
+		}
+	} );
+
 	test( 'block unavailable on posts, e.g. Product Details', async ( {
 		admin,
 		editor,

@@ -39,11 +39,11 @@ const wpMenuWidth = document.getElementById( 'adminmenu' )?.clientWidth || 160;
 // Calculation: WP menu + email settings + email preview + padding
 const FLOATING_PREVIEW_WIDTH_LIMIT = wpMenuWidth + 666 + 684 + 40;
 
-const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
+const EmailPreviewFill = ( {
 	emailTypes,
 	previewUrl,
 	settingsIds,
-} ) => {
+}: EmailPreviewFillProps ) => {
 	const [ deviceType, setDeviceType ] =
 		useState< string >( DEVICE_TYPE_DESKTOP );
 	const isSingleEmail = emailTypes.length === 1;
@@ -78,7 +78,9 @@ const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
 
 	return (
 		<Fill>
-			{ ! isWide && <h2>{ __( 'Email preview', 'woocommerce' ) }</h2> }
+			{ ! isWide && ! isSingleEmail && (
+				<h2>{ __( 'Email preview', 'woocommerce' ) }</h2>
+			) }
 			<div
 				className={ `wc-settings-email-preview-container ${
 					isWide ? 'wc-settings-email-preview-container-floating' : ''

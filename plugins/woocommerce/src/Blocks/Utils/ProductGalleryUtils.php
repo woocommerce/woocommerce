@@ -127,35 +127,39 @@ class ProductGalleryUtils {
 	 * @return array An array of unique image IDs for the product gallery.
 	 */
 	public static function get_product_gallery_image_ids( $product, $max_number_of_visible_images = 8, $only_visible = false ) {
+		$product_image_ids = array();
+
 		// Main product featured image.
 		$featured_image_id = $product->get_image_id();
+
+		if ( $featured_image_id ) {
+			$product_image_ids[] = $featured_image_id;
+		}
+
 		// All other product gallery images.
 		$product_gallery_image_ids = $product->get_gallery_image_ids();
 
-		// If the Product image is not set, we need to set it to a placeholder image.
-		if ( '' === $featured_image_id ) {
-			$featured_image_id = '0';
+		if ( ! empty( $product_gallery_image_ids ) ) {
+			// We don't want to show the same image twice, so we have to remove the featured image from the gallery if it's there.
+			$product_image_ids = array_unique( array_merge( $product_image_ids, $product_gallery_image_ids ) );
 		}
 
-		// We don't want to show the same image twice, so we have to remove the featured image from the gallery if it's there.
-		$unique_image_ids = array_unique(
-			array_merge(
-				array( $featured_image_id ),
-				$product_gallery_image_ids
-			)
-		);
-
-		foreach ( $unique_image_ids as $key => $image_id ) {
-			$unique_image_ids[ $key ] = strval( $image_id );
+		// If the Product image is not set and there are no gallery images, we need to set it to a placeholder image.
+		if ( ! $featured_image_id && empty( $product_gallery_image_ids ) ) {
+			$product_image_ids[] = '0';
 		}
 
-		if ( count( $unique_image_ids ) > $max_number_of_visible_images && $only_visible ) {
-			$unique_image_ids = array_slice( $unique_image_ids, 0, $max_number_of_visible_images );
+		foreach ( $product_image_ids as $key => $image_id ) {
+			$product_image_ids[ $key ] = strval( $image_id );
+		}
+
+		if ( count( $product_image_ids ) > $max_number_of_visible_images && $only_visible ) {
+			$product_image_ids = array_slice( $product_image_ids, 0, $max_number_of_visible_images );
 		}
 
 		// Reindex array.
-		$unique_image_ids = array_values( $unique_image_ids );
+		$product_image_ids = array_values( $product_image_ids );
 
-		return $unique_image_ids;
+		return $product_image_ids;
 	}
 }

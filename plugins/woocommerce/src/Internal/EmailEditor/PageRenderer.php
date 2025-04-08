@@ -84,6 +84,7 @@ class PageRenderer {
 		// Load the email editor integration script.
 		// The JS file is located in plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/index.ts.
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'email-editor-integration', true );
+		WCAdminAssets::register_style( 'email-editor-integration', 'style', true );
 
 		$email_editor_assets_path = WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/';
 		$email_editor_assets_url  = WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/';
@@ -147,8 +148,8 @@ class PageRenderer {
 				'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 				'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
 				'urls'                  => array(
-					'listings' => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
-					'send'     => admin_url( 'edit.php?post_type=' . Integration::EMAIL_POST_TYPE ),
+					'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+					'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 				),
 				'email_types'           => $email_types,
 				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),

@@ -9,6 +9,9 @@ import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles 
  */
 
 export const supports = {
+	interactivity: {
+		clientNavigation: true,
+	},
 	html: false,
 	__experimentalBorder: {
 		radius: true,
@@ -25,4 +28,8 @@ export const supports = {
 		},
 	} ),
 	__experimentalSelector: '.wc-block-components-product-image',
+	dimensions: {
+		aspectRatio: true,
+		__experimentalSkipSerialization: true,
+	},
 };

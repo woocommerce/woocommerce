@@ -29,7 +29,7 @@ export type TaskListsProps = {
 	context?: string;
 };
 
-export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
+export const TaskLists = ( { query }: TaskListsProps ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( onboardingStore );
 

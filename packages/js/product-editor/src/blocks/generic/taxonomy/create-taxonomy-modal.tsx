@@ -35,7 +35,7 @@ type CreateTaxonomyModalProps = {
 	onCreate: ( taxonomy: Taxonomy ) => void;
 };
 
-export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
+export const CreateTaxonomyModal = ( {
 	onCancel,
 	onCreate,
 	initialName,
@@ -44,7 +44,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	dialogNameHelpText,
 	parentTaxonomyText,
 	title,
-} ) => {
+}: CreateTaxonomyModalProps ) => {
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
 		useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );

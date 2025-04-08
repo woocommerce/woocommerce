@@ -338,7 +338,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 					<div class="wp-block-woocommerce-product-meta">
 						<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 						<div class="wp-block-group">
-							<!-- wp:woocommerce/product-sku {"isDescendentOfSingleProductTemplate":true} /-->
+							<!-- wp:woocommerce/product-sku /-->
 
 							<!-- wp:post-terms {"term":"product_cat","prefix":"Category: "} /-->
 

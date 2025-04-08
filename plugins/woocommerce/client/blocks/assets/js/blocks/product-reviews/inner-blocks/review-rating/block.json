@@ -14,6 +14,9 @@
 		}
 	},
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"color": {
 			"gradients": true,
 			"__experimentalDefaultControls": {

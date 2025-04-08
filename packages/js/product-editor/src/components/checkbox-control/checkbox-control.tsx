@@ -22,7 +22,7 @@ export type CheckboxProps = {
 	disabled?: boolean;
 };
 
-export const Checkbox: React.FC< CheckboxProps > = ( {
+export const Checkbox = ( {
 	value,
 	label,
 	onChange,

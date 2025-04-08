@@ -3,14 +3,8 @@
  */
 import { createElement, Fragment } from '@wordpress/element';
 import { TabPanel } from '@wordpress/components';
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-/* eslint-disable @woocommerce/dependency-group */
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-import { getQueryArgs } from '@wordpress/url';
-/* eslint-enable @woocommerce/dependency-group */
-
-const { useHistory, useLocation } = unlock( routerPrivateApis );
+import { addQueryArgs } from '@wordpress/url';
+import { useHistory, useLocation } from '@automattic/site-admin';
 
 export const SectionTabs = ( {
 	children,
@@ -24,36 +18,30 @@ export const SectionTabs = ( {
 	} >;
 	activeSection?: string;
 } ) => {
-	const history = useHistory();
-	const {
-		params: { postType, page },
-	} = useLocation();
+	const { navigate } = useHistory();
+	const { query } = useLocation();
+	const { tab, section } = query || {};
 
 	if ( tabs.length <= 1 ) {
 		return <div>{ children }</div>;
 	}
 
 	const onSelect = ( tabName: string ) => {
-		const currentArgs = getQueryArgs( window.location.href );
-
-		if ( currentArgs.section === tabName ) {
+		if ( section === tabName ) {
 			return;
 		}
 
-		const params =
+		const queryArgs =
 			tabName === 'default'
 				? {
-						page,
-						postType,
-						tab: currentArgs.tab,
+						tab,
 				  }
 				: {
-						page,
-						postType,
-						tab: currentArgs.tab,
+						tab,
 						section: tabName,
 				  };
-		history.push( params );
+
+		navigate( addQueryArgs( 'wc-settings', queryArgs ) );
 	};
 
 	return (

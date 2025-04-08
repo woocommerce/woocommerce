@@ -26,12 +26,12 @@ function sanitizeSlugName( slug: string | undefined ): string {
 	return slug && slug.startsWith( 'pa_' ) ? slug.substring( 3 ) : '';
 }
 
-export const MenuAttributeList: React.FC< MenuAttributeListProps > = ( {
+export const MenuAttributeList = ( {
 	disabledAttributeMessage = '',
 	renderItems,
 	highlightedIndex,
 	getItemProps,
-} ) => {
+}: MenuAttributeListProps ) => {
 	if ( renderItems.length > 0 ) {
 		return (
 			<Fragment>

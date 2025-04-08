@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
 
 /**
@@ -95,7 +95,7 @@ export default {
 	},
 } as Meta< FormattedMonetaryAmountProps >;
 
-const Template: Story< FormattedMonetaryAmountProps > = ( args ) => {
+const Template: StoryFn< FormattedMonetaryAmountProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
 	const onValueChange = ( unit: number ) => {
@@ -107,7 +107,9 @@ const Template: Story< FormattedMonetaryAmountProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< FormattedMonetaryAmountProps > = Template.bind(
+	{}
+);
 Default.args = {
 	currency: {
 		minorUnit: 2,
