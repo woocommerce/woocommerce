@@ -136,7 +136,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
 
 		global $product;
-		$product = new \WC_Product_Simple();
+		$product    = new \WC_Product_Simple();
 		$product_id = $product->save();
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
