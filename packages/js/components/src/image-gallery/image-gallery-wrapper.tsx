@@ -15,18 +15,18 @@ export type ImageGalleryWrapperProps = {
 	allowDragging?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLLIElement >;
+	onDragOver?: DragEventHandler< HTMLDivElement >;
 	updateOrderedChildren?: ( items: ImageGalleryChild[] ) => void;
 };
 
-export const ImageGalleryWrapper: React.FC< ImageGalleryWrapperProps > = ( {
+export const ImageGalleryWrapper = ( {
 	children,
 	allowDragging = true,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	updateOrderedChildren = () => null,
-} ) => {
+}: ImageGalleryWrapperProps ) => {
 	if ( allowDragging ) {
 		return (
 			<Sortable

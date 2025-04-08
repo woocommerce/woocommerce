@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Expose Dropdown's placement prop to the EllipsisMenu

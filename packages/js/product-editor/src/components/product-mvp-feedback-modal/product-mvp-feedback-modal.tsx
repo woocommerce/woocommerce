@@ -7,7 +7,6 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import {
 	CheckboxControl,
 	TextareaControl,
@@ -18,25 +17,29 @@ import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
-/**
- * Provides a modal requesting customer feedback.
- *
- *
- * @param {Object}   props                     Component props.
- * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
- */
-function ProductMVPFeedbackModal( {
-	recordScoreCallback,
-	onCloseModal,
-}: {
+export type ProductMVPFeedbackModalProps = {
 	recordScoreCallback: (
 		checked: string[],
 		comments: string,
 		email: string
 	) => void;
 	onCloseModal?: () => void;
-} ): JSX.Element | null {
+	onSkipFeedback?: () => void;
+};
+
+/**
+ * Provides a modal requesting customer feedback.
+ *
+ * @param {Object}   props                     Component props.
+ * @param {Function} props.recordScoreCallback Function to call when the results are sent.
+ * @param {Function} props.onCloseModal        Function to call when user closes the modal by clicking the X.
+ * @param {Function} props.onSkipFeedback      Function to call when user skips sending feedback.
+ */
+export function ProductMVPFeedbackModal( {
+	recordScoreCallback,
+	onCloseModal,
+	onSkipFeedback,
+}: ProductMVPFeedbackModalProps ) {
 	const [ missingFeatures, setMissingFeatures ] = useState( false );
 	const [ missingPlugins, setMissingPlugins ] = useState( false );
 	const [ difficultToUse, setDifficultToUse ] = useState( false );
@@ -101,10 +104,11 @@ function ProductMVPFeedbackModal( {
 	return (
 		<FeedbackModal
 			title={ __(
-				'Thanks for trying out the new product form!',
+				'Thanks for trying out the new product editor!',
 				'woocommerce'
 			) }
 			onSubmit={ onSendFeedback }
+			onCancel={ onSkipFeedback }
 			onModalClose={ onCloseModal }
 			isSubmitButtonDisabled={ ! checked.length }
 			submitButtonLabel={ __( 'Send', 'woocommerce' ) }
@@ -122,7 +126,7 @@ function ProductMVPFeedbackModal( {
 				<fieldset className="woocommerce-product-mvp-feedback-modal__reason">
 					<legend>
 						{ __(
-							'What made you turn off the new product form?',
+							'What made you turn off the new product editor?',
 							'woocommerce'
 						) }
 					</legend>
@@ -168,7 +172,6 @@ function ProductMVPFeedbackModal( {
 						) }
 						value={ email }
 						onChange={ ( value: string ) => setEmail( value ) }
-						rows={ 5 }
 						help={ __(
 							'In case you want to participate in further discussion and future user research.',
 							'woocommerce'
@@ -179,10 +182,3 @@ function ProductMVPFeedbackModal( {
 		</FeedbackModal>
 	);
 }
-
-ProductMVPFeedbackModal.propTypes = {
-	recordScoreCallback: PropTypes.func.isRequired,
-	onCloseModal: PropTypes.func,
-};
-
-export { ProductMVPFeedbackModal };

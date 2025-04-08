@@ -19,12 +19,6 @@ import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
 
-type SelectorOptions = {
-	resourceName: string;
-	pluralResourceName: string;
-	namespace: string;
-};
-
 export const getItemCreateError = (
 	state: ResourceState,
 	query: ItemQuery
@@ -80,9 +74,11 @@ export const getItems = createSelector(
 			return null;
 		}
 
-		if ( query && query._fields ) {
+		if ( query && typeof query._fields !== 'undefined' ) {
+			const fields = query._fields;
+
 			return ids.map( ( id: IdType ) => {
-				return query._fields.reduce(
+				return fields.reduce(
 					( item: Partial< Item >, field: string ) => {
 						return {
 							...item,
@@ -159,7 +155,11 @@ export const createSelectors = ( {
 	resourceName,
 	pluralResourceName,
 	namespace,
-}: SelectorOptions ) => {
+}: {
+	resourceName: string;
+	pluralResourceName: string;
+	namespace: string;
+} ) => {
 	const hasFinishedRequest = (
 		state: ResourceState,
 		action: string,

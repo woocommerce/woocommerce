@@ -10,14 +10,19 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see https://docs.woocommerce.com/document/template-structure/
+ * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 3.7.0
+ * @version 9.8.0
  */
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
 /**
  * Executes the e-mail header.
@@ -26,25 +31,49 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<?php /* translators: %s: Customer first name */ ?>
-<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
-
+<?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
+<p>
+<?php
+if ( ! empty( $order->get_billing_first_name() ) ) {
+	/* translators: %s: Customer first name */
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
+} else {
+	printf( esc_html__( 'Hi,', 'woocommerce' ) );
+}
+?>
+</p>
 <?php if ( $order->needs_payment() ) { ?>
 	<p>
 	<?php
-	printf(
-		wp_kses(
+	if ( $order->has_status( OrderStatus::FAILED ) ) {
+		printf(
+			wp_kses(
 			/* translators: %1$s Site title, %2$s Order pay link */
-			__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
-			array(
-				'a' => array(
-					'href' => array(),
-				),
-			)
-		),
-		esc_html( get_bloginfo( 'name', 'display' ) ),
-		'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
-	);
+				__( 'Sorry, your order on %1$s was unsuccessful. Your order details are below, with a link to try your payment again: %2$s', 'woocommerce' ),
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
+			esc_html( get_bloginfo( 'name', 'display' ) ),
+			'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
+		);
+	} else {
+		printf(
+			wp_kses(
+			/* translators: %1$s Site title, %2$s Order pay link */
+				__( 'An order has been created for you on %1$s. Your order details are below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
+			esc_html( get_bloginfo( 'name', 'display' ) ),
+			'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
+		);
+	}
 	?>
 	</p>
 
@@ -57,6 +86,10 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	</p>
 	<?php
 }
+?>
+<?php echo $email_improvements_enabled ? '</div>' : ''; ?>
+
+<?php
 
 /**
  * Hook for the woocommerce_email_order_details.
@@ -87,7 +120,9 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
+	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content">' : '';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
 /**

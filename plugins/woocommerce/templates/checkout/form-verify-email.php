@@ -10,7 +10,7 @@
  * the new files to your theme to maintain compatibility. We try to do this as little as possible, but it does happen.
  * When this occurs the version of the template file will be bumped and the readme will list any important changes.
  *
- * @see     https://docs.woocommerce.com/document/template-structure/
+ * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 7.9.0
  *
@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<form name="checkout" method="post" class="woocommerce-form woocommerce-verify-email" action="<?php echo esc_url( $verify_url ); ?>" enctype="multipart/form-data">
+<form name="checkout" method="post" class="woocommerce-form woocommerce-verify-email" action="<?php echo esc_url( $verify_url ); ?>">
 
 	<?php
 	wp_nonce_field( 'wc_verify_email', 'check_submission' );

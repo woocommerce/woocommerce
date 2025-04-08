@@ -35,21 +35,19 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 
 - Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/).
 - Run our build process described in the document on [how to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
-- Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=woocommerce run lint:php:changes:branch`.
+- Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes:branch`.
 - Whenever possible, please fix pre-existing code standards errors in code that you change.
 - Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E tests. You can check the following guides for this purpose:
-  - [Writing unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md#guide-for-writing-unit-tests).
-  - [Writing API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests).
-  - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests).
+    - [Writing unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md#guide-for-writing-unit-tests).
+    - [Writing API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests).
+    - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests).
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
 - Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.
 - Push the changes to your fork and submit a pull request on the trunk branch of the WooCommerce repository.
 - Make sure to write good and detailed commit messages (see [this post](https://chris.beams.io/posts/git-commit/) for more on this) and follow all the applicable sections of the pull request template.
-- Please create a change file for your changes by running `pnpm --filter=<project> changelog add`. For example, a change file for the WooCommerce Core project would be added by running `pnpm --filter=woocommerce changelog add`. 
+- Please create a change file for your changes by running `pnpm --filter=<project> changelog add`. For example, a change file for the WooCommerce Core project would be added by running `pnpm --filter=@woocommerce/plugin-woocommerce changelog add`. 
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team. 
-
-If you are contributing code to our (Javascript-driven) Gutenberg blocks, please note that they are developed in their [own repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block) and have their [own issue tracker](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues).
 
 ## Feature Requests 🚀
 

@@ -67,10 +67,6 @@ const MenuItem = ( {
 		}
 	};
 
-	const onFocusFormToggle = () => {
-		container?.current?.focus();
-	};
-
 	if ( isCheckbox ) {
 		return (
 			<div
@@ -82,14 +78,11 @@ const MenuItem = ( {
 				onClick={ onClick }
 				className="woocommerce-ellipsis-menu__item"
 			>
-				{ /* id props is actuall an optional prop. It looks like DefinitelyTyped has out-of-date types*/ }
-				{ /* @ts-expect-error: Suprressing `id` is required prop error.  */ }
 				<BaseControl className="components-toggle-control">
 					<FormToggle
 						aria-hidden="true"
 						checked={ checked }
 						onChange={ onInvoke }
-						onFocus={ onFocusFormToggle }
 						onClick={ ( e ) => e.stopPropagation() }
 						tabIndex={ -1 }
 					/>

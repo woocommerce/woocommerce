@@ -1,4 +1,8 @@
-# WooCommerce grammar, punctuation and capitalization guide
+---
+post_title: WooCommerce grammar, punctuation and capitalization guide
+menu_title: Grammar, punctuation and capitalization
+tags: reference
+---
 
 Following grammar, punctuation and style guidelines helps keep our presentation consistent. Users have a better experience if they know what to expect and where to find the information they need.
 
@@ -40,17 +44,17 @@ Cases when we capitalize:
 - Documentation headings (h2): Use sentence case (not title case) for docs titles and subheadings. 
 - Product names: Every word except prepositions and conjunctions.
 - Sentences: First word.
-- Unordered/Bulleted lists – First word of each entry.
+- Unordered/Bulleted lists - First word of each entry.
 
 Cases when we use lower case:
 
-- “ecommerce” (not “eCommerce”)
-- email address — info@woocommerce.com
-- website URL — developer.woocommerce.com
+- "ecommerce" (not "eCommerce")
+- email address - `info@woocommerce.com`
+- website URL - `developer.woocommerce.com`
 
 ### Contractions
 
-Use with discretion. Contractions, such as I’m and there’s, give writing an informal and conversational feel, but may be inappropriate if content is being translated. For example, sometimes the not in don’t is ignored by online translators.
+Use with discretion. Contractions, such as I'm and there's, give writing an informal and conversational feel, but may be inappropriate if content is being translated. For example, sometimes the not in don't is ignored by online translators.
 
 ### Emoji
 
@@ -97,7 +101,7 @@ Spell out fractions: one-fourth
 
 #### Percent
 
-Spell out the word ‘percent.’ Don’t use % symbol unless space is limited, e.g., for use on social media.
+Spell out the word 'percent.' Don't use % symbol unless space is limited, e.g., for use on social media.
 
 #### Phone numbers
 
@@ -124,7 +128,7 @@ Use numbers and am or pm with a space and without periods.
 - 7:00 am
 - 7:30 pm
 
-Use a hyphen between times to indicate a time period in am or pm. Use ‘to’ if the time period spans am and pm.
+Use a hyphen between times to indicate a time period in am or pm. Use 'to' if the time period spans am and pm.
 
 - 7:00-9:00 am and 7:00 am to 10:30 pm
 
@@ -148,20 +152,20 @@ Abbreviate decades
 
 #### Ampersands
 
-Ampersands need only be used when part of an official company/brand name. Should not be substituted for ‘and.’
+Ampersands need only be used when part of an official company/brand name. Should not be substituted for 'and.'
 
-- Ben & Jerry’s
+- Ben & Jerry's
 - Andre, Timo, and Donny went to a football game at Camp Nou.
 
 #### Apostrophes
 
-An apostrophe makes a word possessive. If a word already ends in s and is singular, add an ‘s. If a word ends in s and is plural, add an apostrophe.
+An apostrophe makes a word possessive. If a word already ends in s and is singular, add an 's. If a word ends in s and is plural, add an apostrophe.
 
-- A teammate borrowed Sam’s bike.
-- A teammate borrowed Chris’s bike.
-- Employees hid the office managers’ pens.
+- A teammate borrowed Sam's bike.
+- A teammate borrowed Chris's bike.
+- Employees hid the office managers' pens.
 
-These are possessives: FAQ’s questions, HE’s weekly rotation. These are plural: FAQs and HEs.
+These are possessives: FAQ's questions, HE's weekly rotation. These are plural: FAQs and HEs.
 
 #### Colons
 
@@ -179,21 +183,21 @@ Use common sense for other cases. Read the sentence out loud, and use a comma wh
 
 #### Dashes and hyphens
 
-Use a hyphen – without spaces on either side to link words, or indicate a span or range.
+Use a hyphen - without spaces on either side to link words, or indicate a span or range.
 
 - first-time user
 - Monday-Friday
 
-Use an em dash — without spaces on either side to indicate an aside.
+Use an em dash - without spaces on either side to indicate an aside.
 
-Use a true em dash, not hyphens – or –.
+Use a true em dash, not hyphens.
 
-- Multivariate testing—just one of our new Pro features—can help you grow your business.
-- Austin thought Brad was the donut thief, but he was wrong—it was Lain.
+- Multivariate testing-just one of our new Pro features-can help you grow your business.
+- Austin thought Brad was the donut thief, but he was wrong-it was Lain.
 
 #### Ellipses
 
-Ellipses … can be used to indicate an indefinite ending to a sentence or to show words are omitted when used in brackets […] Use rarely.
+Ellipses ... can be used to indicate an indefinite ending to a sentence or to show words are omitted when used in brackets [...] Use rarely.
 
 #### Exclamation points
 
@@ -211,7 +215,7 @@ Periods should be:
 
 Examples
 
-- Jake said, “I had the best day ever.”
+- Jake said, "I had the best day ever."
 - She went to the supermarket (and to the nail salon).
 - My mom loves pizza and beer. (Beer needs to be cold and dark.)
 
@@ -221,12 +225,12 @@ Question marks follow the same placement convention explained in Periods.
 
 #### Quotation marks
 
-Periods and commas go within quotation marks. Question marks within quotes follow logic—if the question mark is part of the quotation, it goes within. If you’re asking a question that ends with a quote, it goes outside the quote.
+Periods and commas go within quotation marks. Question marks within quotes follow logic - if the question mark is part of the quotation, it goes within. If you're asking a question that ends with a quote, it goes outside the quote.
 
 Use single quotation marks for quotes within quotes.
 
-- Who sings, “All These Things That I’ve Done”?
-- Brandon Flowers of The Killers said, “I was inspired and on a roll when I wrote, ‘I got soul, but I’m not a soldier.’”
+- Who sings, "All These Things That I've Done"?
+- Brandon Flowers of The Killers said, "I was inspired and on a roll when I wrote, 'I got soul, but I'm not a soldier.'"
 
 #### Semicolons
 
@@ -240,11 +244,10 @@ Semicolons can be used to join two related phrases.
 
 Use brand identity names and products as written on official websites.
 
-- Nestlé
 - Pull&Bear
 - UE Boom
 
-Refer to a company or product as ‘it (not ‘they’).
+Refer to a company or product as 'it' (not 'they').
 
 - WooCommerce is, and not WooCommerce are.
 
@@ -274,13 +277,13 @@ Capitalize job titles, the names of teams, and departments.
 
 #### Pronouns
 
-Use he/him/his and she/her/her as appropriate. Don’t use “one” as a pronoun. Use they/them/their if gender is unknown or when referring to a group.
+Use he/him/his and she/her/her as appropriate. Don't use "one" as a pronoun. Use they/them/their if gender is unknown or when referring to a group.
 
 #### Quotations
 
 Use present tense when quoting someone.
 
-- “I love that WooCommerce is free and flexible,” says Brent Jamison.
+- "I love that WooCommerce is free and flexible," says Brent Jamison.
 
 #### Schools
 
@@ -291,15 +294,15 @@ The first time you mention a school, college, or university in a piece of writin
 
 #### States, cities, and countries
 
-Spell out all city and state names. Don’t abbreviate city names.
+Spell out all city and state names. Don't abbreviate city names.
 
 On first mention, write out United States. For further mentions, use U.S. The same applies to other countries or federations with a common abbreviation, such as European Union (EU) and United Kingdom (UK).
 
 #### URLs and websites
 
-Capitalize the names of websites and web publications. Don’t italicize.
+Capitalize the names of websites and web publications. Don't italicize.
 
-Avoid writing out URLs; omit `http://www` when it’s necessary.
+Avoid writing out URLs; omit `http://www` when it's necessary.
 
 ### Slang and jargon
 

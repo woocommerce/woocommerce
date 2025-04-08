@@ -1,0 +1,73 @@
+$element-spacing: 13px;
+$banner-height: 56px;
+
+// This class is a hack, added conditionally when displaying the app banner, it
+// can be refactored away when the activity panel goes away.
+.woocommerce-layout__show-app-banner {
+	@include breakpoint( "<782px" ) {
+		.woocommerce-layout__header-wrapper {
+			padding-top: $banner-height;
+		}
+	}
+}
+
+.woocommerce-mobile-app-banner {
+	background-color: $woocommerce-brand-purple;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	display: flex;
+	height: $banner-height;
+	align-items: center;
+	padding: 0 6px 0 4px;
+
+	@include breakpoint( ">400px" ) {
+		padding: 0 $element-spacing 0 10px;
+	}
+
+	@include breakpoint( ">782px" ) {
+		display: none;
+	}
+
+	.gridicon {
+		fill: $white;
+		margin-right: 10px;
+	}
+
+	.components-button.is-secondary {
+		margin-left: auto;
+		color: $white;
+		box-shadow: inset 0 0 0 1px $white;
+
+		&:hover,
+		&:active {
+			color: $white;
+			box-shadow: inset 0 0 0 1px $white;
+			background: none;
+		}
+	}
+
+	.woocommerce-mobile-app-banner__description {
+		color: $white;
+		margin-left: 8px;
+
+		@include breakpoint( ">400px" ) {
+			margin-left: $element-spacing;
+		}
+
+		.woocommerce-mobile-app-banner__description__text {
+			&:first-child {
+				font-weight: bold;
+			}
+
+			margin: 0;
+			font-size: 10px;
+
+			@include breakpoint( ">400px" ) {
+				margin-left: 13px;
+				font-size: 13px;
+			}
+		}
+	}
+}

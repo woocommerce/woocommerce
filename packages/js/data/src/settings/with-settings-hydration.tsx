@@ -8,11 +8,14 @@ import { createElement, useRef, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
 import { Settings } from './types';
 
 export const withSettingsHydration = ( group: string, settings: Settings ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent<
+		React.ComponentType< Record< string, unknown > >,
+		React.ComponentType< Record< string, unknown > >
+	>(
 		( OriginalComponent ) => ( props ) => {
 			const settingsRef = useRef( settings );
 
@@ -21,11 +24,11 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 				finishResolution,
 				updateSettingsForGroup,
 				clearIsDirty,
-			} = useDispatch( STORE_NAME );
+			} = useDispatch( store );
 			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
 				( select ) => {
 					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
+						select( store );
 					return {
 						isResolvingGroup: isResolving( 'getSettings', [
 							group,

@@ -8,7 +8,7 @@ import fs from 'fs';
  */
 import { scanForHookChanges } from '../hook-changes';
 
-describe( 'scanForHookChages', () => {
+describe( 'scanForHookChanges', () => {
 	it( 'should return a Map with multiple entries in patches with multiple hook changes for the same file.', async () => {
 		// load the text file as a string variable
 		const content = fs.readFileSync(

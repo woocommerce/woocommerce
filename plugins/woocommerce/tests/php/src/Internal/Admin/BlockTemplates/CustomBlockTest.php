@@ -37,18 +37,25 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			[
 				'test-block-name',
-				[],
+				[
+					'_templateBlockId'    => 'test-block-name-1',
+					'_templateBlockOrder' => 10000,
+				],
 				[
 					[
 						'custom-inner-block',
 						[
-							'title' => 'a',
+							'title'               => 'a',
+							'_templateBlockId'    => 'custom-inner-block-1',
+							'_templateBlockOrder' => 10000,
 						],
 					],
 					[
 						'custom-inner-block',
 						[
-							'title' => 'b',
+							'title'               => 'b',
+							'_templateBlockId'    => 'custom-inner-block-2',
+							'_templateBlockOrder' => 10000,
 						],
 					],
 				],
@@ -72,12 +79,17 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			[
 				'test-block-name',
-				[],
+				[
+					'_templateBlockId'    => 'test-block-name-1',
+					'_templateBlockOrder' => 10000,
+				],
 				[
 					[
 						'custom-inner-block',
 						[
-							'title' => 'b',
+							'title'               => 'b',
+							'_templateBlockId'    => 'custom-inner-block-2',
+							'_templateBlockOrder' => 10000,
 						],
 					],
 				],

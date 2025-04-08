@@ -51,10 +51,14 @@
 		$( '.colorpick' )
 			.iris( {
 				change: function ( event, ui ) {
-					$( this )
+					const $this = $( this );
+					$this
 						.parent()
 						.find( '.colorpickpreview' )
 						.css( { backgroundColor: ui.color.toString() } );
+					setTimeout( function () {
+						$this.trigger( 'change' );
+					} );
 				},
 				hide: true,
 				border: true,
@@ -85,22 +89,33 @@
 				}
 			} );
 
+		$( '.iris-square-value' ).on( 'click', function ( event ) {
+			event.preventDefault();
+		} );
+
+		$( '.colorpickpreview' ).on( 'click', function ( event ) {
+			event.stopPropagation();
+			$( this ).next( '.colorpick' ).click();
+		} );
+
 		$( 'body' ).on( 'click', function () {
 			$( '.iris-picker' ).hide();
 		} );
 
 		// Edit prompt
-		$( function () {
+		function editPrompt () {
 			var changed = false;
-			let $check_column = $( '.wp-list-table .check-column' );
+			let $prevent_change_elements = $( '.wp-list-table .check-column, .wc-settings-prevent-change-event' );
 
-			$( 'input, textarea, select, checkbox' ).on( 'change', function (
+			$( 'input, textarea, select, checkbox' ).on( 'change input', function (
 				event
 			) {
-				// Toggling WP List Table checkboxes should not trigger navigation warnings.
+				// Prevent change event on specific elements, that don't change the form. E.g.:
+				// - WP List Table checkboxes that only (un)select rows
+				// - Changing email type in email preview
 				if (
-					$check_column.length &&
-					$check_column.has( event.target )
+					$prevent_change_elements.length &&
+					$prevent_change_elements.has( event.target ).length
 				) {
 					return;
 				}
@@ -110,6 +125,14 @@
 						return params.i18n_nav_warning;
 					};
 					changed = true;
+					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+				}
+			} );
+
+			$( '.iris-picker' ).on( 'click', function () {
+				if ( ! changed ) {
+					changed = true;
+					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
 				}
 			} );
 
@@ -119,7 +142,34 @@
 					window.onbeforeunload = '';
 				}
 			);
+		}
+
+		$( editPrompt );
+
+		const nodeListContainsFormElements = ( nodes ) => {
+			if ( ! nodes.length	) {
+				return false;
+			}
+			return Array.from( nodes ).some( ( element ) => {
+				return $( element ).find( 'input, textarea, select, checkbox' ).length;
+			} );
+		}
+
+		const form = document.querySelector( '#mainform' );
+		const observer = new MutationObserver( ( mutationsList ) => {
+			for ( const mutation of mutationsList ) {
+				if ( mutation.type === 'childList' ) {
+					if ( nodeListContainsFormElements( mutation.addedNodes ) ) {
+						editPrompt();
+						$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+					} else if ( nodeListContainsFormElements( mutation.removedNodes ) ) {
+						$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+					}
+				}
+			}
 		} );
+
+		observer.observe( form, { childList: true, subtree: true } );
 
 		// Sorting
 		$( 'table.wc_gateways tbody, table.wc_shipping tbody' ).sortable( {
@@ -140,7 +190,7 @@
 			},
 			stop: function ( event, ui ) {
 				ui.item.removeAttr( 'style' );
-				ui.item.trigger( 'updateMoveButtons' );
+				ui.item.trigger( 'updateMoveButtons', { isInitialLoad: false } );
 			},
 		} );
 
@@ -192,12 +242,12 @@
 				}
 
 				moveBtn.trigger( 'focus' ); // Re-focus after the container was moved.
-				moveBtn.closest( 'table' ).trigger( 'updateMoveButtons' );
+				moveBtn.closest( 'table' ).trigger( 'updateMoveButtons', { isInitialLoad: false } );
 			} );
 
 		$( '.wc-item-reorder-nav' )
 			.closest( 'table' )
-			.on( 'updateMoveButtons', function () {
+			.on( 'updateMoveButtons', function ( event, data ) {
 				var table = $( this ),
 					lastRow = $( this ).find( 'tbody tr:last' ),
 					firstRow = $( this ).find( 'tbody tr:first' );
@@ -214,11 +264,14 @@
 					.find( '.wc-item-reorder-nav .wc-move-down' )
 					.addClass( 'wc-move-disabled' )
 					.attr( { tabindex: '-1', 'aria-hidden': 'true' } );
+				if ( ! data.isInitialLoad ) {
+					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+				}
 			} );
 
 		$( '.wc-item-reorder-nav' )
 			.closest( 'table' )
-			.trigger( 'updateMoveButtons' );
+			.trigger( 'updateMoveButtons', { isInitialLoad: true } );
 
 		$( '.submit button' ).on( 'click', function () {
 			if (
@@ -261,5 +314,109 @@
 				available_payment_methods: payment_methods,
 			} );
 		} );
+
+		$( '.woocommerce-save-button.components-button' ).on( 'click', function ( e ) {
+			if ( ! $( this ).attr( 'disabled' ) ) {
+				$( this ).addClass( 'is-busy' );
+			}
+		} );
+
+		/**
+		 * Support conditionally displaying a settings field description when another element
+		 * is set to a specific value.
+		 *
+		 * This logic is subject to change, and is not intended for use by other plugins.
+		 * Note that we can't avoid jQuery here, because of our current dependence on Select2
+		 * for various controls.
+		 */
+		document.querySelectorAll( 'body.woocommerce_page_wc-settings #mainform .conditional.description' ).forEach( description => {
+			const $underObservation = $( description.dataset.dependsOn );
+			const showIfEquals      = description.dataset.showIfEquals;
+
+			if ( undefined === showIfEquals || $underObservation.length === 0 ) {
+				return;
+			}
+
+			/**
+			 * Set visibility of the description element according to whether its value
+			 * matches that of showIfEquals.
+			 */
+			const changeAgent = () => {
+				description.style.visibility = $underObservation.val() === showIfEquals ? 'visible' : 'hidden';
+			};
+
+			// Monitor future changes, and take action based on the current state.
+			$underObservation.on( 'change', changeAgent );
+			changeAgent();
+		} );
+
+		// Ensures the active tab is visible and centered on small screens if it's out of view in a scrollable tab list.
+		function settings_scroll_to_active_tab() {
+			const body = document.body;
+			if (
+				! body.classList.contains('mobile') ||
+				! body.classList.contains('woocommerce_page_wc-settings')
+			) {
+				return;
+			}
+			// Select the currently active tab
+			const activeTab = document.querySelector( '.nav-tab-active' );
+
+			// Exit if there's no active tab or screen is wider than 500px (desktop)
+			if ( ! activeTab || window.innerWidth >= 500 ) {
+				return;
+			}
+
+			// Get the parent element, assumed to be the scrollable container
+			const parent = activeTab.parentElement;
+
+			// Exit if no parent or if scrolling isn't needed (content fits)
+			if ( ! parent || parent.scrollWidth <= parent.clientWidth ) {
+				return;
+			}
+
+			// Get the position of the active tab relative to its parent
+			const tabLeft = activeTab.offsetLeft;
+			const tabRight = tabLeft + activeTab.offsetWidth;
+			const scrollLeft = parent.scrollLeft;
+			const visibleLeft = scrollLeft;
+			const visibleRight = scrollLeft + parent.clientWidth;
+			const isOutOfView = tabLeft < visibleLeft || tabRight > visibleRight;
+
+			// If it’s out of view, scroll the parent so the tab is centered
+			if ( isOutOfView ) {
+				const offset = tabLeft - parent.clientWidth / 2 + activeTab.offsetWidth / 2;
+					parent.scrollTo( {
+					left: offset,
+					behavior: 'auto' // Instant scroll (no animation)
+				} );
+			}
+		}
+
+		// Some legacy setting pages have tables that span beyond the set width of its parents
+		// causing layout issues.
+		// Fixe the width of the nav tab wrapper to match the window width on mobile.
+		function settings_fix_nav_width() {
+			const body = document.body;
+			if (
+				! body.classList.contains('mobile') ||
+				! body.classList.contains('woocommerce_page_wc-settings')
+			) {
+				return;
+			}
+			const navWrapper = document.getElementsByClassName('nav-tab-wrapper');
+			if ( ! navWrapper.length ) {
+				return;
+			}
+
+			const navWrapperWidth = navWrapper[0].offsetWidth;
+			if ( navWrapperWidth !== window.innerWidth) {
+				navWrapper[0].style.width = window.innerWidth + 'px';
+			}
+		}
+
+		settings_scroll_to_active_tab();
+		settings_fix_nav_width();
+
 	} );
 } )( jQuery, woocommerce_settings_params, wp );

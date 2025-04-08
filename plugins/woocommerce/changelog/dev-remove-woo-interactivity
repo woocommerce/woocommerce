@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove `@woocommerce/interactivity`. Migrate remaining blocks to `@wordpress/interactivity`

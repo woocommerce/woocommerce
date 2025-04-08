@@ -20,7 +20,7 @@
 			$save_button       = $( ':input[name="save"]' ),
 			$pagination        = $( '#rates-pagination, #rates-bottom-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
-			$submit            = $( '.submit .button-primary[type=submit]' ),
+			$submit            = $( '.woocommerce-save-button[type=submit]' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes: {},
 				setRateAttribute: function( rateID, attribute, value ) {
@@ -72,9 +72,13 @@
 							opacity: 0.6
 						}
 					});
+					if ( ! $submit.attr( 'disabled' ) ) {
+						$submit.addClass( 'is-busy' );
+					}
 				},
 				unblock: function() {
 					$( '.wc_tax_rates' ).unblock();
+					$submit.removeClass( 'is-busy' );
 				},
 				save: function() {
 					var self = this;
@@ -141,16 +145,11 @@
 						paged_rates = _.toArray( rates ).slice( first_index, last_index ),
 						view        = this;
 
-					// Blank out the contents.
-					this.$el.empty();
-
 					if ( paged_rates.length ) {
 						// Populate $tbody with the current page of results.
-						$.each( paged_rates, function( id, rowData ) {
-							view.$el.append( view.rowTemplate( rowData ) );
-						} );
+						this.el.innerHTML = paged_rates.map( rowData => view.rowTemplate( rowData ) ).join( '' );
 					} else {
-						view.$el.append( rowTemplateEmpty() );
+						this.el.innerHTML = rowTemplateEmpty();
 					}
 
 					// Initialize autocomplete for countries.
@@ -292,6 +291,7 @@
 					var $target  = $( event.currentTarget );
 
 					event.preventDefault();
+					event.stopPropagation();
 					event.data.view.page = $target.data( 'goto' ) ? $target.data( 'goto' ) : $target.val();
 					event.data.view.render();
 					event.data.view.updateUrl();

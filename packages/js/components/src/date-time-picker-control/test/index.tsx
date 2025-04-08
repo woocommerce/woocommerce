@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, waitFor, fireEvent } from '@testing-library/react';
+import { render, waitFor, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate } from '@wordpress/date';
 import { createElement, Fragment } from '@wordpress/element';
@@ -103,7 +103,6 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
-			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default24HourDateTimeFormat, dateTime )
 		);
 	} );
@@ -123,7 +122,6 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe(
 			formatDate(
 				default24HourDateTimeFormat,
-				// @ts-expect-error TODO - fix this type error with moment
 				moment.utc( ambiguousISODateTimeString ).local()
 			)
 		);
@@ -144,7 +142,6 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe(
 			formatDate(
 				default24HourDateTimeFormat,
-				// @ts-expect-error TODO - fix this type error with moment
 				moment.utc( unambiguousISODateTimeString ).local()
 			)
 		);
@@ -162,7 +159,6 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
-			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default12HourDateTimeFormat, dateTime )
 		);
 	} );
@@ -179,7 +175,6 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		// @ts-expect-error TODO - fix this type error with moment
 		expect( input?.value ).toBe( formatDate( dateTimeFormat, dateTime ) );
 	} );
 
@@ -203,7 +198,6 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
-			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default24HourDateTimeFormat, updatedDateTime )
 		);
 	} );
@@ -216,9 +210,7 @@ describe( 'DateTimePickerControl', () => {
 		userEvent.click( input! );
 
 		await waitFor( () =>
-			expect(
-				container.querySelector( '.components-dropdown__content' )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( 'Calendar' ) ).toBeInTheDocument()
 		);
 	} );
 
@@ -231,7 +223,7 @@ describe( 'DateTimePickerControl', () => {
 
 		await waitFor( () =>
 			expect(
-				container.querySelector( '.components-dropdown__content' )
+				screen.queryByLabelText( 'Calendar' )
 			).not.toBeInTheDocument()
 		);
 	} );
@@ -243,11 +235,10 @@ describe( 'DateTimePickerControl', () => {
 
 		userEvent.click( input! );
 
-		await waitFor( () =>
-			expect(
-				container.querySelector( '.components-datetime' )
-			).toBeInTheDocument()
-		);
+		await waitFor( () => {
+			expect( screen.getByText( 'Time' ) ).toBeInTheDocument();
+			expect( screen.getByText( 'Date' ) ).toBeInTheDocument();
+		} );
 	} );
 
 	it( 'should set the picker to 12 hour mode', async () => {
@@ -258,12 +249,11 @@ describe( 'DateTimePickerControl', () => {
 		const input = container.querySelector( 'input' );
 
 		userEvent.click( input! );
-
 		await waitFor( () =>
 			expect(
-				container.querySelector(
-					'.components-datetime__time-pm-button'
-				)
+				screen.getByLabelText( 'Hours', {
+					selector: 'input[inputmode="numeric"][max="12"][min="1"]',
+				} )
 			).toBeInTheDocument()
 		);
 	} );
@@ -278,12 +268,8 @@ describe( 'DateTimePickerControl', () => {
 		userEvent.click( input! );
 
 		await waitFor( () => {
-			expect(
-				container.querySelector( '.components-datetime' )
-			).not.toBeInTheDocument();
-			expect(
-				container.querySelector( '.components-datetime__date' )
-			).toBeInTheDocument();
+			expect( screen.queryByText( 'Time' ) ).not.toBeInTheDocument();
+			expect( screen.getByLabelText( 'Calendar' ) ).toBeInTheDocument();
 		} );
 	} );
 
@@ -508,9 +494,16 @@ describe( 'DateTimePickerControl', () => {
 
 		let count = 0;
 
-		const Container: React.FC< { children?: React.ReactNode } > = ( {
-			children,
-		} ) => {
+		const Container = (
+            {
+                children
+            }: {
+                children?: ( props: {
+                    className: string;
+                    onChange: () => void;
+                } ) => React.ReactNode;
+            }
+        ) => {
 			function getChildren() {
 				if ( typeof children === 'function' ) {
 					return children( {

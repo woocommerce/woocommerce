@@ -1,0 +1,100 @@
+.woocommerce-admin-page:not(.woocommerce-embed-page) #klarna-banner,
+#klarna-kp-banner {
+	display: none;
+}
+
+.woocommerce-dashboard__columns {
+	display: grid;
+	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(50% - #{math.div($gap-large, 2)});
+	grid-column-gap: $gap-large;
+
+	// Auto-position fix for IE11.
+	> div {
+		@include set-grid-item-position( 2, 14 );
+	}
+
+	@include breakpoint( "<960px" ) {
+		grid-template-columns: 100%;
+
+		> div {
+			@include set-grid-item-position( 1, 14 );
+		}
+	}
+}
+
+.woocommerce-dashboard__widget {
+	display: flex;
+	align-items: center;
+	text-align: center;
+}
+
+.woocommerce-dashboard__widget-item {
+	flex: 1;
+}
+
+.woocommerce-dashboard-section__add-more {
+	margin: 0 auto;
+	width: 84px;
+	padding: 0 $gap-large $gap-large;
+
+	.components-popover__content {
+		padding: 0 $gap $gap-smaller;
+	}
+
+	> button svg {
+		fill: $gray-700;
+	}
+}
+
+.woocommerce-dashboard-section__add-more-choices {
+	display: flex;
+	justify-content: center;
+}
+
+.woocommerce-dashboard-section__add-more-btn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: $gap;
+	margin: $gap-smaller;
+
+	&.components-button {
+		height: auto;
+	}
+
+	.store-performance__icon {
+		transform: rotate(-45deg);
+	}
+}
+
+.woocommerce-dashboard-section__add-more-btn-title {
+	color: $gray-700;
+	padding-top: 8px;
+}
+
+.woocommerce-dashboard-section-controls {
+	border-top: $border-width solid $gray-100;
+	padding-top: $gap-smaller;
+
+	.icon-control {
+		margin: 0 $gap-smaller 0 0;
+		vertical-align: bottom;
+		fill: $gray-700;
+	}
+
+	.woocommerce-ellipsis-menu__item {
+		padding-bottom: 10px;
+	}
+}
+
+.components-card .woocommerce-ellipsis-menu__toggle {
+	padding: 0;
+}
+
+.components-modal__frame.woocommerce-cart-modal .components-modal__content {
+	margin-top: 6rem;
+
+	@include breakpoint( "<600px" ) {
+		margin-top: 7rem;
+	}
+}

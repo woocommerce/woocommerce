@@ -146,8 +146,8 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		if ( false !== $handle ) {
 
 			$header = fgetcsv( $handle, 0, $this->delimiter );
-
-			if ( 10 === count( $header ) ) {
+			$count  = is_countable( $header ) ? count( $header ) : 0;
+			if ( 10 === $count ) {
 
 				$row = fgetcsv( $handle, 0, $this->delimiter );
 

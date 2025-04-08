@@ -16,7 +16,6 @@ import {
 import { closeSmall } from '@wordpress/icons';
 import { Pill } from '@woocommerce/components';
 import { useCustomerEffortScoreModal } from '@woocommerce/customer-effort-score';
-import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -27,17 +26,17 @@ import { useFeedbackBar } from '../../hooks/use-feedback-bar';
 import { isValidEmail } from '../../utils';
 
 export type FeedbackBarProps = {
-	product: Partial< Product >;
+	productType?: string;
 };
 
-export function FeedbackBar( { product }: FeedbackBarProps ) {
+export function FeedbackBar( { productType }: FeedbackBarProps ) {
 	const { hideFeedbackBar, shouldShowFeedbackBar } = useFeedbackBar();
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useCustomerEffortScoreModal();
 
 	const getProductTracksProps = () => {
 		const tracksProps = {
-			product_type: product.type,
+			product_type: productType,
 		};
 
 		return tracksProps;
@@ -53,7 +52,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				action: PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 				showDescription: false,
 				title: __(
-					'What do you think of the new product form?',
+					'What do you think of the new product editor?',
 					'woocommerce'
 				),
 				firstQuestion: __(
@@ -61,7 +60,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					'woocommerce'
 				),
 				secondQuestion: __(
-					'Product form is easy to use',
+					'Product editor is easy to use',
 					'woocommerce'
 				),
 				onsubmitLabel: __(
@@ -204,7 +203,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					<div className="woocommerce-product-mvp-ces-footer__message">
 						{ createInterpolateElement(
 							__(
-								'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+								'How is your experience with the new product editor? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
 								'woocommerce'
 							),
 							{

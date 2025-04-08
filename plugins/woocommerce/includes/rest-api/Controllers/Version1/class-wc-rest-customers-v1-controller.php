@@ -139,6 +139,24 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Returns list of allowed roles for the REST API.
+	 *
+	 * @return array $roles Allowed roles to be updated via the REST API.
+	 */
+	private function allowed_roles(): array {
+		/**
+		 * Filter the allowed roles for the REST API.
+		 *
+		 * Danger: Make sure that the roles listed here cannot manage the shop.
+		 *
+		 * @param array $roles Array of allowed roles.
+		 *
+		 * @since 9.5.2
+		 */
+		return apply_filters( 'woocommerce_rest_customer_allowed_roles', array( 'customer', 'subscriber' ) );
+	}
+
+	/**
 	 * Check if a given request has access create customers.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -183,6 +201,30 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
+		$allowed_roles = $this->allowed_roles();
+
+		$customer = new WC_Customer( $id );
+
+		if ( $customer && ! in_array( $customer->get_role(), $allowed_roles, true ) ) {
+			// Check against existing props to be compatible with clients that will send the entire user object. Password shouldn't be sent anyway.
+			$non_editable_props = array( 'email', 'password' );
+			$customer_prop      = array( 'email' => $customer->get_email() );
+			foreach ( $non_editable_props as $prop ) {
+				if ( isset( $request[ $prop ] ) && ( 'password' === $prop || $request[ $prop ] !== $customer_prop[ $prop ] ) ) {
+					return new WP_Error(
+						'woocommerce_rest_cannot_edit',
+						sprintf(
+							/* translators: 1s: name of the property (email, role), 2: Role of the user (administrator, customer). */
+							__( 'Sorry, %1$s cannot be updated via this endpoint for a user with role %2$s.', 'woocommerce' ),
+							$prop,
+							$customer->get_role()
+						),
+						array( 'status' => rest_authorization_required_code() )
+					);
+				}
+			}
+		}
+
 		return true;
 	}
 
@@ -198,6 +240,22 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 
 		if ( ! wc_rest_check_user_permissions( 'delete', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		$allowed_roles = $this->allowed_roles();
+		$customer      = new WC_Customer( $id );
+
+		if ( ! in_array( $customer->get_role(), $allowed_roles, true ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_delete',
+				sprintf(
+					/* translators: 1: Role of the user (administrator, customer), 2: comma separated list of allowed roles. egs customer, subscriber */
+					__( 'Sorry, users with %1$s role cannot be deleted via this endpoint. Allowed roles: %2$s', 'woocommerce' ),
+					$customer->get_role(),
+					implode( ', ', $allowed_roles )
+				),
+				array( 'status' => rest_authorization_required_code() )
+			);
 		}
 
 		return true;

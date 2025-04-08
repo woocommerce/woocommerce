@@ -8,6 +8,7 @@
 	},
 	"require-dev": {
 		"league/container": "3.3.5",
+		"mobiledetect/mobiledetectlib": "^3.74",
 		"psr/container": "^1.1"
 	},
 	"config": {
@@ -29,6 +30,7 @@
 			"dep_directory": "/packages/",
 			"packages": [
 				"league/container",
+				"mobiledetect/mobiledetectlib",
 				"psr/container"
 			],
 			"excluded_packages": [

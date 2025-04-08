@@ -1,7 +1,9 @@
-# Theme Design and Development at Woo
+---
+category_title: Classic Theme Development 
+category_slug: theme-development
+post_title: Classic theme development
+---
 
-## Classic Themes
+Learn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.
 
-## Block Themes
-
-* [Marketplace Guidelines](marketplace-guidelines.md)
+For blocks themes, see our [block theme documentation](../block-theme-development/README.md).

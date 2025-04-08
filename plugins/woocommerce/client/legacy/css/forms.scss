@@ -1,0 +1,223 @@
+.woocommerce {
+	/**
+	 * Generic forms styles used in places such as my account and the shortcode based checkout.
+	 */
+	form .form-row {
+		padding: 3px;
+		margin: 0 0 6px;
+
+		[placeholder]:focus::-webkit-input-placeholder {
+			transition: opacity 0.5s 0.5s ease;
+			opacity: 0;
+		}
+
+		label {
+			line-height: 2;
+
+			&.hidden {
+				visibility: hidden;
+		  	}
+
+			&.inline {
+				display: inline;
+			}
+		}
+
+		.woocommerce-input-wrapper .description {
+			background: #1e85be;
+			color: #fff;
+			border-radius: 3px;
+			padding: 1em;
+			margin: 0.5em 0 0;
+			clear: both;
+			display: none;
+			position: relative;
+
+			a {
+				color: #fff;
+				text-decoration: underline;
+				border: 0;
+				box-shadow: none;
+			}
+
+			&::before {
+				left: 50%;
+				top: 0%;
+				margin-top: -4px;
+				transform: translateX(-50%) rotate(180deg);
+				content: "";
+				position: absolute;
+				border-width: 4px 6px 0 6px;
+				border-style: solid;
+				border-color: #1e85be transparent transparent transparent;
+				z-index: 100;
+				display: block;
+			}
+		}
+
+		.input-checkbox {
+			display: inline;
+			margin: -2px 8px 0 0;
+			text-align: center;
+			vertical-align: middle;
+		}
+
+		.input-text,
+		select {
+			font-family: inherit;
+			font-weight: normal;
+			letter-spacing: normal;
+			padding: .5em;
+			display: block;
+			background-color: var(--wc-form-color-background, #fff);
+			border: var(--wc-form-border-width) solid var(--wc-form-border-color);
+			border-radius: var(--wc-form-border-radius);
+			color: var(--wc-form-color-text, #000);
+			box-sizing: border-box;
+			width: 100%;
+			margin: 0;
+			line-height: normal;
+			height: auto;
+
+			&:focus {
+				border-color: currentColor;
+			}
+		}
+
+		select {
+			cursor: pointer;
+			/* We hide the default chevron because it cannot be directly modified. Instead, we add a custom chevron using a background image. */
+			appearance: none;
+			padding-right: 3em;
+			background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=);
+			background-repeat: no-repeat;
+			background-size: 16px;
+			background-position: calc(100% - 0.5em) 50%;
+		}
+
+		textarea {
+			height: 4em;
+			line-height: 1.5;
+			box-shadow: none;
+		}
+
+		.required {
+			color: var(--wc-red);
+			font-weight: 700;
+			border: 0 !important;
+			text-decoration: none;
+			visibility: hidden; // Only show optional by default.
+		}
+
+		.optional {
+			visibility: visible;
+		}
+
+		&.woocommerce-invalid {
+			label {
+				color: var(--wc-red);
+			}
+			input.input-text,
+			select {
+				border-color: var(--wc-red);
+			}
+			.select2-container:not(.select2-container--open) .select2-selection {
+				border-color: var(--wc-red);
+			}
+		}
+
+		&.woocommerce-validated {
+			input.input-text,
+			select {
+				border-color: var(--wc-green);
+			}
+			.select2-container:not(.select2-container--open) .select2-selection {
+				border-color: var(--wc-green);
+			}
+		}
+
+		::-webkit-input-placeholder {
+			line-height: normal;
+		}
+
+		:-moz-placeholder {
+			line-height: normal;
+		}
+
+		:-ms-input-placeholder {
+			line-height: normal;
+		}
+	}
+}
+
+.select2-container {
+	width: 100%;
+
+	.select2-selection--single {
+		height: auto;
+
+		.select2-selection__rendered {
+			padding: 0.5em;
+			line-height: normal;
+			box-sizing: border-box;
+			color: var(--wc-form-color-text, #444);
+			font-weight: normal;
+		}
+
+		.select2-selection__placeholder {
+			color: #999;
+		}
+
+		.select2-selection__arrow {
+			position: absolute;
+			top: 2px;
+			right: 0.5em;
+			height: 100%;
+			width: 16px;
+
+			b {
+				border: none;
+				display: block;
+				background:
+					url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=)
+					no-repeat;
+				background-size: 16px;
+				width: 16px;
+				height: 16px;
+				position: absolute;
+				top: 50%;
+				left: 0;
+				margin: -8px 0 0;
+			}
+		}
+	}
+
+	.select2-selection,
+	.select2-dropdown {
+		background-color: var(--wc-form-color-background, #fff);
+		border: var(--wc-form-border-width, 1px) solid var(--wc-form-border-color, #aaa);
+		border-radius: var(--wc-form-border-radius, 4px);
+	}
+
+	&.select2-container--open .select2-dropdown--above {
+		border-bottom: none;
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	&.select2-container--open .select2-dropdown--below {
+		border-top: none;
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
+}
+
+.select2-results__options {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.select2-results__option {
+	margin: 0;
+}

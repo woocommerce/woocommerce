@@ -10,10 +10,12 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see         https://docs.woocommerce.com/document/template-structure/
+ * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     3.0.0
+ * @version     9.7.0
  */
+
+use Automattic\WooCommerce\Enums\ProductType;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,7 +27,7 @@ global $product;
 
 	<?php do_action( 'woocommerce_product_meta_start' ); ?>
 
-	<?php if ( wc_product_sku_enabled() && ( $product->get_sku() || $product->is_type( 'variable' ) ) ) : ?>
+	<?php if ( wc_product_sku_enabled() && ( $product->get_sku() || $product->is_type( ProductType::VARIABLE ) ) ) : ?>
 
 		<span class="sku_wrapper"><?php esc_html_e( 'SKU:', 'woocommerce' ); ?> <span class="sku"><?php echo ( $sku = $product->get_sku() ) ? $sku : esc_html__( 'N/A', 'woocommerce' ); ?></span></span>
 

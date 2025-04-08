@@ -4,11 +4,11 @@ Woo AI is a WooCommerce plugin that utilizes the power of artificial intelligenc
 
 ## Getting Started
 
-Please refer to [the Getting Started section of the WooCommerce Core `README.md`](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prequisites and setup described there.
+Please refer to [the Getting Started section of the WooCommerce Core `README.md`](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prerequisites and setup described there.
 
 ## Plugin Development Environments
 
-The plugin makes use of [the `@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/). 
+The plugin makes use of [the `@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
 This supplies convenient commands for creating, destroying, cleaning, and testing WordPress environments.
 
 ```bash
@@ -28,24 +28,24 @@ To enable Live(Hot) Reload when code is changed, run the following commands:
 
 ```text
 pnpm install
-pnpm run start
+pnpm start
 ```
 
 To build the /woo-ai/ plugin directory (when loading the plugin via symlink), run:
 
 ```text
 pnpm install
-pnpm run build
+pnpm build
 ```
 
 To build the plugin ZIP file, run:
 
 ```text
 pnpm install
-pnpm run build:zip
+pnpm build:zip
 ```
 
-See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
+See [wp-scripts](https://github.com/WordPress/gutenberg/tree/trunk/packages/scripts) for more usage information.
 
 ## License
 

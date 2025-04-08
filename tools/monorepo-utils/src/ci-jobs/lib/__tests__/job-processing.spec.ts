@@ -1,0 +1,1583 @@
+/**
+ * Internal dependencies
+ */
+import { JobType, testTypes } from '../config';
+import { createJobsForChanges, getShardedJobs } from '../job-processing';
+import { parseTestEnvConfig } from '../test-environment';
+
+jest.mock( '../test-environment' );
+
+describe( 'Job Processing', () => {
+	describe( 'createJobsForChanges', () => {
+		it( 'should do nothing with no CI configs', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					dependencies: [],
+				},
+				{},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger lint job for single node', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should replace vars in lint command', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <baseRef>',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: '',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint test-base-ref',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should throw when invalid var to replace in lint command', () => {
+			const promise = createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <invalid>',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( promise ).rejects.toThrow();
+		} );
+
+		it( 'should not trigger a lint job that has already been created', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+								jobCreated: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should not trigger lint job for single node with no changes', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger lint job for project graph', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Lint,
+										changes: [ /test-a.js$/ ],
+										command: 'test-lint-a',
+										events: [],
+									},
+								],
+							},
+							dependencies: [],
+						},
+						{
+							name: 'test-b',
+							path: 'test-b',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Lint,
+										changes: [ /test-b.js$/ ],
+										command: 'test-lint-b',
+										events: [],
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					test: [ 'test.js' ],
+					'test-a': [ 'test-ignored.js' ],
+					'test-b': [ 'test-b.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 2 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint',
+			} );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test-b',
+				projectPath: 'test-b',
+				command: 'test-lint-b',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger lint job for project graph with empty config parent', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Lint,
+										changes: [ /test-a.js$/ ],
+										command: 'test-lint-a',
+										events: [],
+									},
+								],
+							},
+							dependencies: [],
+						},
+						{
+							name: 'test-b',
+							path: 'test-b',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Lint,
+										changes: [ /test-b.js$/ ],
+										command: 'test-lint-b',
+										events: [],
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					test: [ 'test.js' ],
+					'test-a': [ 'test-a.js' ],
+					'test-b': [ 'test-b.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 2 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test-a',
+				projectPath: 'test-a',
+				command: 'test-lint-a',
+			} );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test-b',
+				projectPath: 'test-b',
+				command: 'test-lint-b',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger test job for single node', async () => {
+			const testType = 'unit';
+
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								shardingArguments: [],
+								events: [],
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should replace vars in test command', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd <baseRef>',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: '',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd test-base-ref',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should not trigger a test job that has already been created', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								jobCreated: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should not trigger test job for single node with no changes', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger test job for project graph', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-b.js$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [],
+						},
+						{
+							name: 'test-b',
+							path: 'test-b',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default B',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-b.js$/ ],
+										command: 'test-cmd-b',
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					test: [ 'test.js' ],
+					'test-a': [ 'test-ignored.js' ],
+					'test-b': [ 'test-b.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-b',
+				projectPath: 'test-b',
+				name: 'Default B',
+				command: 'test-cmd-b',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it.each( testTypes )(
+			'should trigger %s test job for single node',
+			async ( testType ) => {
+				const jobs = await createJobsForChanges(
+					{
+						name: 'test',
+						path: 'test',
+						ciConfig: {
+							jobs: [
+								{
+									type: JobType.Test,
+									testType,
+									name: 'Default',
+									shardingArguments: [],
+									events: [],
+									changes: [ /test.js$/ ],
+									command: 'test-cmd',
+								},
+							],
+						},
+						dependencies: [],
+					},
+					{
+						test: [ 'test.js' ],
+					},
+					{}
+				);
+
+				expect( jobs.lint ).toHaveLength( 0 );
+				expect( jobs.test ).toHaveLength( 1 );
+				expect( jobs.test ).toContainEqual( {
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+					testType,
+				} );
+			}
+		);
+
+		it( 'should trigger test job for dependent without changes', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-a.js$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'test-a.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-a',
+				projectPath: 'test-a',
+				name: 'Default A',
+				command: 'test-cmd-a',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should trigger test job for dependent of dependent without changes', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-a.js$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [
+								{
+									name: 'test-a-1',
+									path: 'test-a-1',
+									ciConfig: {
+										jobs: [
+											{
+												type: JobType.Test,
+												testType: 'unit',
+												name: 'Default A-1',
+												shardingArguments: [],
+												events: [],
+												changes: [ /test-a-1.js$/ ],
+												command: 'test-cmd-a-1',
+											},
+										],
+									},
+									dependencies: [],
+								},
+							],
+						},
+					],
+				},
+				{
+					'test-a-1': [ 'test-a-1.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 3 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-a',
+				projectPath: 'test-a',
+				name: 'Default A',
+				command: 'test-cmd-a',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-a-1',
+				projectPath: 'test-a-1',
+				name: 'Default A-1',
+				command: 'test-cmd-a-1',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should not trigger test job for ignored dependency', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								onlyForDependencies: [ 'test-a' ],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-a.js$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [],
+						},
+						{
+							name: 'test-b',
+							path: 'test-b',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default B',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-b.js$/ ],
+										command: 'test-cmd-b',
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-b': [ 'test-b.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-b',
+				projectPath: 'test-b',
+				name: 'Default B',
+				command: 'test-cmd-b',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should not trigger test job if all dependencies are ignored', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								onlyForDependencies: [],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-a.js$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [],
+						},
+						{
+							name: 'test-b',
+							path: 'test-b',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default B',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-b.js$/ ],
+										command: 'test-cmd-b',
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-b': [ 'test-b.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-b',
+				projectPath: 'test-b',
+				name: 'Default B',
+				command: 'test-cmd-b',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should trigger test job if the listed dependency is changed', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								onlyForDependencies: [ 'test-a' ],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType: 'unit',
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /test-a.js$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'test-a.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test-a',
+				projectPath: 'test-a',
+				name: 'Default A',
+				command: 'test-cmd-a',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should trigger test job for single node and parse test environment config', async () => {
+			const testType = 'unit';
+			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
+				WP_ENV_CORE: 'https://wordpress.org/latest.zip',
+			} );
+
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								testEnv: {
+									start: 'test-start <baseRef>',
+									config: {
+										wpVersion: 'latest',
+									},
+								},
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: '',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: true,
+					start: 'test-start test-base-ref',
+					envVars: {
+						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
+					},
+				},
+				testType: 'unit',
+			} );
+		} );
+
+		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				true,
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint',
+			} );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType: 'unit',
+			} );
+		} );
+
+		it( 'should trigger sharded test jobs for single node', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						testType: 'unit',
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						testType: 'unit',
+					},
+				] )
+			);
+		} );
+
+		it( 'should trigger job with event configured but no event cli argument', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						testType: 'unit',
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						testType: 'unit',
+					},
+				] )
+			);
+		} );
+
+		it( 'should trigger job with event configured and matching event cli argument', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{ commandVars: { baseRef: 'test-base-ref', event: 'push' } }
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						testType: 'unit',
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						testType: 'unit',
+					},
+				] )
+			);
+		} );
+
+		it( 'should not trigger job with event configured but not matching event cli argument', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'pull_request',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should create non-optional lint job', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <baseRef>',
+								events: [],
+								optional: false,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'foo',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint test-base-ref',
+				optional: false,
+				report: undefined,
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should create optional test job', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd <baseRef>',
+								optional: true,
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'foo',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd test-base-ref',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				optional: true,
+				report: undefined,
+				testType: 'unit',
+			} );
+		} );
+	} );
+
+	describe( 'getShardedJobs', () => {
+		it( 'should create sharded jobs', async () => {
+			const jobs = getShardedJobs(
+				{
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+					optional: false,
+					testType: 'e2e',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				},
+				{
+					type: JobType.Test,
+					testType: 'e2e',
+					name: 'Default',
+					shardingArguments: [ '--shard-arg-1', '--shard-arg-2' ],
+					events: [],
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				}
+			);
+
+			expect( jobs ).toHaveLength( 2 );
+			expect( jobs ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard-arg-1',
+						shardNumber: 1,
+						optional: false,
+						testType: 'e2e',
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard-arg-2',
+						shardNumber: 2,
+						optional: false,
+						testType: 'e2e',
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
+						},
+					},
+				] )
+			);
+		} );
+
+		it.each( [ [ [] ], [ [ '--sharding=1/1' ] ] ] )(
+			'should not create sharded jobs for shards',
+			async ( shardingArguments ) => {
+				const jobs = getShardedJobs(
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default',
+						command: 'test-cmd',
+						shardNumber: 0,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+						optional: false,
+						testType: 'e2e',
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
+						},
+					},
+					{
+						type: JobType.Test,
+						testType: 'e2e',
+						name: 'Default',
+						shardingArguments,
+						events: [],
+						changes: [ /test.js$/ ],
+						command: 'test-cmd',
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
+						},
+					}
+				);
+
+				expect( jobs ).toHaveLength( 1 );
+				expect( jobs ).toContainEqual( {
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					optional: false,
+					testType: 'e2e',
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				} );
+			}
+		);
+	} );
+} );

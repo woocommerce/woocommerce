@@ -343,7 +343,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 								$index = 0;
 								foreach ( $chart_data as $data ) {
 									$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
-									$width  = $this->barwidth / sizeof( $chart_data );
+									$width  = $this->barwidth / count( $chart_data );
 									$offset = ( $width * $index );
 									$series = $data['data'];
 

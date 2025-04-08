@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correcting directory and filename casing to address bug with PHP autoloader.

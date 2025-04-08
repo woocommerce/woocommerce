@@ -1,10 +1,15 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
+
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil as ArrayUtilAlias;
+use WC_Data_Store;
 
 if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
 	require_once dirname( __FILE__, 5 ) . '/includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller-tests.php';
@@ -22,6 +27,8 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
@@ -41,6 +48,8 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 
 		parent::tearDown();
 	}

@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { Form, FormContextType } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import userEvent from '@testing-library/user-event';
+import { Form } from '@woocommerce/components';
 import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { TagField } from '../tag-field';
-import { ProductTagNode } from '../use-tag-search';
+import { ProductTagNodeProps } from '../types';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
@@ -33,24 +33,32 @@ describe( 'TagField', () => {
 
 	it( 'should render a dropdown select control', () => {
 		const { queryByText, queryByPlaceholderText } = render(
-			<Form initialValues={ { tags: [] } }>
-				{ ( { getInputProps }: FormContextType< Product > ) => (
+			<Form< {
+				tags: ProductTagNodeProps[];
+			} >
+				initialValues={ { tags: [] } }
+			>
+				{ ( { getInputProps } ) => (
 					<TagField
 						id="tag-field"
+						isVisible={ true }
 						label="Tags"
 						placeholder="Search or create tag…"
-						{ ...getInputProps< ProductTagNode[] >( 'tags' ) }
+						{ ...getInputProps( 'tags' ) }
 					/>
 				) }
 			</Form>
 		);
-		queryByPlaceholderText( 'Search or create tag…' )?.focus();
+		const searchInput = queryByPlaceholderText( 'Search or create tag…' );
+		userEvent.click( searchInput! );
 		expect( queryByText( 'Create new' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should pass in the selected tags as select control items', () => {
 		const { queryAllByText, queryByPlaceholderText } = render(
-			<Form
+			<Form< {
+				tags: ProductTagNodeProps[];
+			} >
 				initialValues={ {
 					tags: [
 						{ id: 2, name: 'Test' },
@@ -58,12 +66,13 @@ describe( 'TagField', () => {
 					],
 				} }
 			>
-				{ ( { getInputProps }: FormContextType< Product > ) => (
+				{ ( { getInputProps } ) => (
 					<TagField
 						id="another-tag-field"
+						isVisible={ true }
 						label="Tags"
 						placeholder="Search or create tag…"
-						{ ...getInputProps< ProductTagNode[] >( 'tags' ) }
+						{ ...getInputProps( 'tags' ) }
 					/>
 				) }
 			</Form>

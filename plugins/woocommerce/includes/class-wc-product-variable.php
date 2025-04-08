@@ -8,6 +8,9 @@
  * @package WooCommerce\Classes\Products
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -42,7 +45,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_type() {
-		return 'variable';
+		return ProductType::VARIABLE;
 	}
 
 	/*
@@ -53,6 +56,8 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Get the aria-describedby description for the add to cart button.
+	 * Note that this is to provide the description, not the describedby attribute
+	 * itself.
 	 *
 	 * @return string
 	 */
@@ -525,7 +530,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function child_is_on_backorder() {
-		return $this->data_store->child_has_stock_status( $this, 'onbackorder' );
+		return $this->data_store->child_has_stock_status( $this, ProductStockStatus::ON_BACKORDER );
 	}
 
 	/**
@@ -599,7 +604,7 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Sync a variable product with it's children. These sync functions sync
+	 * Sync a variable product with its children. These sync functions sync
 	 * upwards (from child to parent) when the variation is saved.
 	 *
 	 * @param WC_Product|int $product Product object or ID for which you wish to sync.

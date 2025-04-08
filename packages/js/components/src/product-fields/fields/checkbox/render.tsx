@@ -11,16 +11,12 @@ import { BaseProductFieldProps } from '../types';
 
 type CheckboxFieldProps = BaseProductFieldProps< boolean >;
 
-const CheckboxField: React.FC< CheckboxFieldProps > = ( {
-	label,
-	value,
-	onChange,
-} ) => {
+const CheckboxField = ( { label, value, onChange }: CheckboxFieldProps ) => {
 	return (
 		<CheckboxControl
 			label={ label }
 			onChange={ onChange }
-			selected={ value }
+			checked={ value }
 		/>
 	);
 };

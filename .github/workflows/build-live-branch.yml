@@ -3,6 +3,20 @@ on:
     push:
         branches:
             - trunk
+        paths-ignore:
+            - 'docs/**'
+            - 'packages/php/**'
+            - 'tools/**'
+            - '**/changelog/**'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
+            - '**/tests/**'
+            - '**/*.md'
+            - '.husky/**'
+            - '.cursor/**'
+            - '.github/**'
+            - '!.github/workflows/build-live-branch.yml'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,25 +27,23 @@ permissions: {}
 jobs:
     build:
         if: github.repository_owner == 'woocommerce' && github.actor != 'github-actions[bot]'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Get current version
               id: version
-              uses: actions/github-script@v6.3.3
-              with:
-                  script:
-                      const { getVersion } = require( './.github/workflows/scripts/get-plugin-version' );
-                      const version = await getVersion( 'woocommerce' );
-                      core.setOutput( 'version', version );
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  build: false
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Prepare plugin zips
               id: prepare
@@ -39,7 +51,7 @@ jobs:
                   CURRENT_VERSION: ${{ steps.version.outputs.version }}
               run: |
 
-                  # Current version must compare greather than any previously used current version for this PR.
+                  # Current version must compare greater than any previously used current version for this PR.
                   # Assume GH run IDs are monotonic.
                   VERSUFFIX="${GITHUB_RUN_ID}-g$(git rev-parse --short HEAD)"
 
@@ -49,16 +61,10 @@ jobs:
                   echo "$CURRENT_VERSION" > "$GITHUB_WORKSPACE/plugins/woocommerce/version.txt"
 
                   cd "$GITHUB_WORKSPACE/plugins/woocommerce"
-                  bash bin/build-zip.sh
+                  PLUGIN_SLUG='woocommerce-dev' bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
-                  cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
-                  cd "$GITHUB_WORKSPACE/zips"
-                  unzip woocommerce.zip
-                  rm woocommerce.zip
-                  mv woocommerce woocommerce-dev
-                  zip -q -r "woocommerce-dev.zip" "woocommerce-dev/"
-                  rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
+                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce-dev.zip" "$GITHUB_WORKSPACE/zips/woocommerce-dev.zip"
 
                   # Plugin data is passed as a JSON object.
                   PLUGIN_DATA="{}"          
@@ -66,7 +72,7 @@ jobs:
                   echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
 
             - name: Create plugins artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins

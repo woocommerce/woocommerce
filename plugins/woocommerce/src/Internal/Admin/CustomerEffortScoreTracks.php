@@ -350,7 +350,7 @@ class CustomerEffortScoreTracks {
 			array(
 				'action'         => self::PRODUCT_ADD_PUBLISH_ACTION_NAME,
 				'title'          => __(
-					'How easy was it to add a product?',
+					'🎉 Congrats on adding your first product!',
 					'woocommerce'
 				),
 				'firstQuestion'  => __(
@@ -453,10 +453,13 @@ class CustomerEffortScoreTracks {
 			return;
 		}
 
-		$queue           = get_option(
+		$queue = get_option(
 			self::CES_TRACKS_QUEUE_OPTION_NAME,
 			array()
 		);
+
+		$queue = is_array( $queue ) ? $queue : array();
+
 		$remaining_items = array_filter(
 			$queue,
 			function ( $item ) use ( $clear_ces_tracks_queue_for_page ) {

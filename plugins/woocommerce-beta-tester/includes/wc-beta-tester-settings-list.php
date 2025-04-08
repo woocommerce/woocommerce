@@ -105,6 +105,7 @@ function wc_beta_tester_setting_list() {
 		'woocommerce_ship_to_countries',
 		'woocommerce_ship_to_destination',
 		'woocommerce_shipping_cost_requires_address',
+		'woocommerce_shipping_hide_rates_when_free',
 		'woocommerce_shipping_debug_mode',
 		'woocommerce_shipping_tax_class',
 		'woocommerce_shop_page_display',

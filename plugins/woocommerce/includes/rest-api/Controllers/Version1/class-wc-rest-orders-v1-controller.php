@@ -10,8 +10,9 @@
  * @since    3.0.0
  */
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Utilities\{ ArrayUtil, NumberUtil, StringUtil };
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -268,7 +269,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$shipping_taxes = $shipping_item->get_taxes();
 
 			if ( ! empty( $shipping_taxes['total'] ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes['total'] ), $dp );
+				$total_tax = NumberUtil::array_sum( $shipping_taxes['total'] );
+
+				$shipping_line['total_tax'] = wc_format_decimal( $total_tax, $dp );
 
 				foreach ( $shipping_taxes['total'] as $tax_rate_id => $tax ) {
 					$shipping_line['taxes'][] = array(
@@ -287,7 +290,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				'id'         => $fee_item_id,
 				'name'       => $fee_item['name'],
 				'tax_class'  => ! empty( $fee_item['tax_class'] ) ? $fee_item['tax_class'] : '',
-				'tax_status' => 'taxable',
+				'tax_status' => ProductTaxStatus::TAXABLE,
 				'total'      => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
 				'total_tax'  => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
 				'taxes'      => array(),
@@ -321,9 +324,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
 			$coupon_line = array(
 				'id'           => $coupon_item_id,
-				'code'         => $coupon_item['name'],
-				'discount'     => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
-				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $dp ),
+				'code'         => $coupon_item->get_name(),
+				'discount'     => wc_format_decimal( $coupon_item->get_discount(), $dp ),
+				'discount_tax' => wc_format_decimal( $coupon_item->get_discount_tax(), $dp ),
 			);
 
 			$data['coupon_lines'][] = $coupon_line;
@@ -983,7 +986,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				'status' => array(
 					'description' => __( 'Order status.', 'woocommerce' ),
 					'type'        => 'string',
-					'default'     => 'pending',
+					'default'     => OrderStatus::PENDING,
 					'enum'        => $this->get_order_statuses(),
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1531,7 +1534,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 								'description' => __( 'Tax status of fee.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
-								'enum'        => array( 'taxable', 'none' ),
+								'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::NONE ),
 							),
 							'total' => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),

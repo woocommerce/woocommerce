@@ -263,13 +263,19 @@ class WC_Regenerate_Images {
 	private static function get_full_size_image_dimensions( $attachment_id ) {
 		$imagedata = wp_get_attachment_metadata( $attachment_id );
 
-		if ( ! $imagedata ) {
+		if ( ! is_array( $imagedata ) ) {
 			return array();
 		}
 
 		if ( ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
 			$imagedata['height'] = $imagedata['sizes']['full']['height'];
 			$imagedata['width']  = $imagedata['sizes']['full']['width'];
+		}
+
+		// The result of the earlier wp_get_attachment_metadata call is filterable, so we may not have height or
+		// width data at this point.
+		if ( ! isset( $imagedata['height'] ) || ! isset( $imagedata['width'] ) ) {
+			return array();
 		}
 
 		return array(

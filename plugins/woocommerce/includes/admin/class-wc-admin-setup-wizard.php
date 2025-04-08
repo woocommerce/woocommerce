@@ -1401,7 +1401,7 @@ class WC_Admin_Setup_Wizard {
 		) . '</p>';
 
 		return array(
-			'stripe'          => array(
+			'stripe'              => array(
 				'name'        => __( 'WooCommerce Stripe Gateway', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => $stripe_description,
@@ -1426,7 +1426,7 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
-			'ppec_paypal'     => array(
+			'ppec_paypal'         => array(
 				'name'        => __( 'WooCommerce PayPal Checkout Gateway', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => $paypal_checkout_description,
@@ -1452,7 +1452,7 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
-			'paypal'          => array(
+			WC_Gateway_Paypal::ID => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
@@ -1466,7 +1466,7 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
-			'klarna_checkout' => array(
+			'klarna_checkout'     => array(
 				'name'        => __( 'Klarna Checkout for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_checkout_description,
 				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
@@ -1474,7 +1474,7 @@ class WC_Admin_Setup_Wizard {
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-checkout-for-woocommerce',
 			),
-			'klarna_payments' => array(
+			'klarna_payments'     => array(
 				'name'        => __( 'Klarna Payments for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_payments_description,
 				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
@@ -1482,7 +1482,7 @@ class WC_Admin_Setup_Wizard {
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-payments-for-woocommerce',
 			),
-			'square'          => array(
+			'square'              => array(
 				'name'        => __( 'WooCommerce Square', 'woocommerce' ),
 				'description' => $square_description,
 				'image'       => WC()->plugin_url() . '/assets/images/square-black.png',
@@ -1490,7 +1490,7 @@ class WC_Admin_Setup_Wizard {
 				'enabled'     => false,
 				'repo-slug'   => 'woocommerce-square',
 			),
-			'eway'            => array(
+			'eway'                => array(
 				'name'        => __( 'WooCommerce eWAY Gateway', 'woocommerce' ),
 				'description' => __( 'The eWAY extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/eway-logo.jpg',
@@ -1498,7 +1498,7 @@ class WC_Admin_Setup_Wizard {
 				'class'       => 'eway-logo',
 				'repo-slug'   => 'woocommerce-gateway-eway',
 			),
-			'payfast'         => array(
+			'payfast'             => array(
 				'name'        => __( 'WooCommerce PayFast Gateway', 'woocommerce' ),
 				'description' => __( 'The PayFast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs.', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/payfast.png',
@@ -1528,7 +1528,7 @@ class WC_Admin_Setup_Wizard {
 		$can_paypal  = $this->is_paypal_supported_currency( $currency );
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return $can_paypal ? array( 'paypal' => $gateways['paypal'] ) : array();
+			return $can_paypal ? array( WC_Gateway_Paypal::ID => $gateways[ WC_Gateway_Paypal::ID ] ) : array();
 		}
 
 		$klarna_or_square = false;
@@ -1589,19 +1589,19 @@ class WC_Admin_Setup_Wizard {
 	public function get_wizard_manual_payment_gateways() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
 		$gateways = array(
-			'cheque' => array(
+			WC_Gateway_Cheque::ID => array(
 				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept a check as method of payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			'bacs'   => array(
+			WC_Gateway_BACS::ID   => array(
 				'name'        => __( 'Bank transfer (BACS) payments', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			'cod'    => array(
+			WC_Gateway_COD::ID    => array(
 				'name'        => __( 'Cash on delivery', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
@@ -1890,9 +1890,13 @@ class WC_Admin_Setup_Wizard {
 					$this->display_recommended_item( array(
 						'type'        => 'storefront_theme',
 						'title'       => __( 'Storefront Theme', 'woocommerce' ),
-						'description' => sprintf( __(
-								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woocommerce.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.', 'woocommerce' ),
-								$theme_name
+						'description' => sprintf(
+							/* translators: %s: theme name. */
+							__(
+								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woocommerce.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.',
+								'woocommerce'
+							),
+							$theme_name
 						),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-storefront-icon.svg',
 						'img_alt'     => __( 'Storefront icon', 'woocommerce' ),
@@ -2216,9 +2220,9 @@ class WC_Admin_Setup_Wizard {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install', true );
 
-		$user_email   = $this->get_current_user_email();
-		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
-		$help_text    = sprintf(
+		$user_email = $this->get_current_user_email();
+		$docs_url   = 'https://woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
+		$help_text  = sprintf(
 			/* translators: %1$s: link to docs */
 			__( 'Visit WooCommerce.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$docs_url

@@ -5,19 +5,17 @@ import {
 	createElement,
 	StrictMode,
 	Fragment,
+	useCallback,
 	useState,
 } from '@wordpress/element';
-import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
 } from '@woocommerce/admin-layout';
-import {
-	EditorSettings,
-	EditorBlockListSettings,
-} from '@wordpress/block-editor';
-import { Popover, SlotFillProvider } from '@wordpress/components';
-import { Product } from '@woocommerce/data';
+import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+import { Popover } from '@wordpress/components';
+import InterfaceSkeleton from '@wordpress/interface/build-module/components/interface-skeleton';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -26,77 +24,88 @@ import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
 
 /**
  * Internal dependencies
  */
-import { Footer } from '../footer';
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
+import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { ValidationProvider } from '../../contexts/validation-context';
+import { EditorProps } from './types';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
+import { PrepublishPanel } from '../prepublish-panel/prepublish-panel';
 
-export type ProductEditorSettings = Partial<
-	EditorSettings & EditorBlockListSettings
->;
+export function Editor( { productId, postType = 'product' }: EditorProps ) {
+	const [ isEditorLoading, setIsEditorLoading ] = useState( true );
 
-type EditorProps = {
-	product: Product;
-	settings: ProductEditorSettings | undefined;
-};
+	const query = getQuery() as Record< string, string >;
+	const selectedTab = query.tab || null;
 
-export function Editor( { product, settings }: EditorProps ) {
-	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
+	const setSelectedTab = useCallback( ( tabId: string ) => {
+		navigateTo( { url: getNewPath( { tab: tabId } ) } );
+	}, [] );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+
+	// Check if the prepublish sidebar is open from the store.
+	const isPrepublishPanelOpen = useSelect( ( select ) => {
+		return select( wooProductEditorUiStore ).isPrepublishPanelOpen();
+	}, [] );
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
 			<StrictMode>
 				<EntityProvider
 					kind="postType"
-					type="product"
-					id={ product.id }
+					type={ postType }
+					id={ productId }
 				>
 					<ShortcutProvider>
-						<FullscreenMode isActive={ false } />
-						<SlotFillProvider>
-							<ValidationProvider initialValue={ product }>
+						<ValidationProvider
+							postType={ postType }
+							productId={ productId }
+						>
+							<EditorLoadingContext.Provider
+								value={ isEditorLoading }
+							>
 								<InterfaceSkeleton
 									header={
 										<Header
 											onTabSelect={ setSelectedTab }
+											productType={ postType }
+											selectedTab={ selectedTab }
 										/>
 									}
 									content={
 										<>
 											<BlockEditor
-												settings={ settings }
-												product={ product }
+												postType={ postType }
+												productId={ productId }
 												context={ {
 													selectedTab,
-													postType: 'product',
-													postId: product.id,
+													postType,
+													postId: productId,
 												} }
+												setIsEditorLoading={
+													setIsEditorLoading
+												}
 											/>
-											{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-											<PluginArea scope="woocommerce-product-block-editor" />
 										</>
 									}
+									actions={
+										isPrepublishPanelOpen && (
+											<PrepublishPanel
+												productType={ postType }
+											/>
+										)
+									}
 								/>
-
-								<Popover.Slot />
-							</ValidationProvider>
-						</SlotFillProvider>
+							</EditorLoadingContext.Provider>
+							{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
+							<Popover.Slot />
+						</ValidationProvider>
 					</ShortcutProvider>
-					{ /* We put Footer here instead of in InterfaceSkeleton because Footer uses
-					WooFooterItem to actually render in the WooFooterItem.Slot defined by
-					WooCommerce Admin. And, we need to put it outside of the SlotFillProvider
-					we create in this component. */ }
-					<Footer product={ product } />
 				</EntityProvider>
 			</StrictMode>
 		</LayoutContextProvider>

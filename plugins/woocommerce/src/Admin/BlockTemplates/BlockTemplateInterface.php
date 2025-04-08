@@ -33,4 +33,11 @@ interface BlockTemplateInterface extends ContainerInterface {
 	 * @return string
 	 */
 	public function generate_block_id( string $id_base ): string;
+
+	/**
+	 * Get the template as JSON like array.
+	 *
+	 * @return array The JSON.
+	 */
+	public function to_json(): array;
 }

@@ -6,6 +6,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -189,7 +191,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		$all_labels = wc_get_attribute_taxonomy_labels();
 		$label      = isset( $all_labels[ $slug ] ) ? $all_labels[ $slug ] : $slug;
 	} elseif ( $product ) {
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$product = wc_get_product( $product->get_parent_id() );
 		}
 		$attributes = array();
@@ -632,6 +634,16 @@ function wc_update_attribute( $id, $args ) {
 	$attribute = wc_get_attribute( $id );
 
 	$args['id'] = $attribute ? $attribute->id : 0;
+
+	// When updating an existing attribute, populate any undefined args with the existing value.
+	// This prevents those values from being reset to their respective defaults.
+	if ( $args['id'] ) {
+		$args['has_archives'] = $args['has_archives'] ?? $attribute->has_archives;
+		$args['name']         = $args['name'] ?? $attribute->name;
+		$args['order_by']     = $args['order_by'] ?? $attribute->order_by;
+		$args['slug']         = $args['slug'] ?? $attribute->slug;
+		$args['type']         = $args['type'] ?? $attribute->type;
+	}
 
 	if ( $args['id'] && empty( $args['name'] ) ) {
 		$args['name'] = $attribute->name;

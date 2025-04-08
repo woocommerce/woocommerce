@@ -1,0 +1,90 @@
+import { Canvas, Meta, ArgTypes } from '@storybook/blocks';
+
+import * as SnackbarListStories from '../stories/index.stories.tsx';
+import * as SnackbarStories from '../stories/snackbar.stories.tsx';
+
+<Meta name="Docs" of={ SnackbarListStories } />
+
+# SnackbarList
+
+A temporary informational UI element displayed at the bottom of store pages.
+
+<Canvas
+	of={ SnackbarListStories.Default }
+	layout="padded"
+	className={ 'force-canvas-height' }
+/>
+
+## Design Guidelines
+
+The Snackbar is a temporary informational UI element displayed at the bottom of store pages. WooCommerce blocks, themes, and plugins all use snackbar notices to indicate the result of a successful action. For example, adding something to the cart.
+
+Snackbar notices work in the same way as the NoticeBanner component, and support the same statuses and styles.
+
+### Default Snackbars
+
+By default, notices are grey and used for less important messaging.
+
+<Canvas of={ SnackbarStories.Default } />
+
+### Informational Snackbars
+
+Blue notices with an info icon are used for general information for buyers, but do not require action.
+
+<Canvas of={ SnackbarStories.Info } />
+
+### Error Snackbars
+
+Red notices with an alert icon are used to show that an error has occurred and that the user needs to take action.
+
+<Canvas of={ SnackbarStories.Error } />
+
+### Success Snackbars
+
+Green notices with a success icon are used to show an action was successful.
+
+<Canvas of={ SnackbarStories.Success } />
+
+### Warning Snackbars
+
+Yellow notices with an alert icon are used to show that the user may need to take action, or needs to be aware of something important.
+
+<Canvas of={ SnackbarStories.Warning } />
+
+## Development Guidelines
+
+The component consuming `SnackbarList` is responsible for managing the notices state. The `SnackbarList` component will automatically remove notices from the list when they are dismissed by the user using the provided `onRemove` callback, and also when the notice times out after 10000ms.
+
+### Props
+
+<ArgTypes />
+
+### NoticeType
+
+Each notice can be provided with the following args.
+
+-   The `id` (required) prop is used to identify the notice and should be unique.
+-   The `content` (required) prop is the content to display in the notice.
+-   The `status` prop is used to determine the color of the notice and the icon. Acceptable values are 'success', 'error', 'info', 'warning', and 'default'.
+-   The `isDismissible` prop determines whether the notice can be dismissed by the user.
+-   The `spokenMessage` prop is used to change the spoken message for assistive technology. If not provided, the `content` prop will be used as the spoken message.
+
+### Usage example
+
+To display snackbar notices, pass an array of `notices` to the `SnackbarList` component:
+
+```jsx
+import { SnackbarList } from '@woocommerce/base-components';
+
+const notices = [
+	{
+        id: '1',
+        content: 'This is a snackbar notice.',
+        status: 'default',
+        isDismissible: true,
+        spokenMessage: "Hello snackbar!"
+    }
+];
+
+<SnackbarList notices={ notices }>;
+```

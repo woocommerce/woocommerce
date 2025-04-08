@@ -8,6 +8,8 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -29,18 +31,18 @@ class WC_Product_Factory {
 			return false;
 		}
 
-		$product_type = $this->get_product_type( $product_id );
+		$product_type = self::get_product_type( $product_id );
 
 		// Backwards compatibility.
 		if ( ! empty( $deprecated ) ) {
 			wc_deprecated_argument( 'args', '3.0', 'Passing args to the product factory is deprecated. If you need to force a type, construct the product class directly.' );
 
 			if ( isset( $deprecated['product_type'] ) ) {
-				$product_type = $this->get_classname_from_product_type( $deprecated['product_type'] );
+				$product_type = self::get_classname_from_product_type( $deprecated['product_type'] );
 			}
 		}
 
-		$classname = $this->get_product_classname( $product_id, $product_type );
+		$classname = self::get_product_classname( $product_id, $product_type );
 
 		try {
 			return new $classname( $product_id, $deprecated );
@@ -58,7 +60,17 @@ class WC_Product_Factory {
 	 * @return string
 	 */
 	public static function get_product_classname( $product_id, $product_type ) {
-		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, 'variation' === $product_type ? 'product_variation' : 'product', $product_id );
+		/**
+		 * Filter the product class name.
+		 *
+		 * @param string $classname   Classname.
+		 * @param string $product_type Product type.
+		 * @param string $context     Context.
+		 * @param int    $product_id  Product ID.
+		 *
+		 * @since 3.0.0
+		 */
+		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, ProductType::VARIATION === $product_type ? 'product_variation' : 'product', $product_id );
 
 		if ( ! $classname || ! class_exists( $classname ) ) {
 			$classname = 'WC_Product_Simple';

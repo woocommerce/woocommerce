@@ -6,6 +6,10 @@
  * @version 3.1.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -104,53 +108,60 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
 		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 
+		$default_columns = array(
+			'id'                 => __( 'ID', 'woocommerce' ),
+			'type'               => __( 'Type', 'woocommerce' ),
+			'sku'                => __( 'SKU', 'woocommerce' ),
+			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'name'               => __( 'Name', 'woocommerce' ),
+			'published'          => __( 'Published', 'woocommerce' ),
+			'featured'           => __( 'Is featured?', 'woocommerce' ),
+			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
+			'short_description'  => __( 'Short description', 'woocommerce' ),
+			'description'        => __( 'Description', 'woocommerce' ),
+			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
+			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
+			'tax_status'         => __( 'Tax status', 'woocommerce' ),
+			'tax_class'          => __( 'Tax class', 'woocommerce' ),
+			'stock_status'       => __( 'In stock?', 'woocommerce' ),
+			'stock'              => __( 'Stock', 'woocommerce' ),
+			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
+			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
+			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
+			/* translators: %s: weight */
+			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ),
+			/* translators: %s: length */
+			'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ),
+			/* translators: %s: width */
+			'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ),
+			/* translators: %s: Height */
+			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ),
+			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
+			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
+			'sale_price'         => __( 'Sale price', 'woocommerce' ),
+			'regular_price'      => __( 'Regular price', 'woocommerce' ),
+			'category_ids'       => __( 'Categories', 'woocommerce' ),
+			'tag_ids'            => __( 'Tags', 'woocommerce' ),
+			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
+			'images'             => __( 'Images', 'woocommerce' ),
+			'download_limit'     => __( 'Download limit', 'woocommerce' ),
+			'download_expiry'    => __( 'Download expiry days', 'woocommerce' ),
+			'parent_id'          => __( 'Parent', 'woocommerce' ),
+			'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
+			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
+			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'product_url'        => __( 'External URL', 'woocommerce' ),
+			'button_text'        => __( 'Button text', 'woocommerce' ),
+			'menu_order'         => __( 'Position', 'woocommerce' ),
+		);
+
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+			$default_columns['cogs_value'] = __( 'Cost of goods', 'woocommerce' );
+		}
+
 		return apply_filters(
 			"woocommerce_product_export_{$this->export_type}_default_columns",
-			array(
-				'id'                 => __( 'ID', 'woocommerce' ),
-				'type'               => __( 'Type', 'woocommerce' ),
-				'sku'                => __( 'SKU', 'woocommerce' ),
-				'name'               => __( 'Name', 'woocommerce' ),
-				'published'          => __( 'Published', 'woocommerce' ),
-				'featured'           => __( 'Is featured?', 'woocommerce' ),
-				'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
-				'short_description'  => __( 'Short description', 'woocommerce' ),
-				'description'        => __( 'Description', 'woocommerce' ),
-				'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
-				'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
-				'tax_status'         => __( 'Tax status', 'woocommerce' ),
-				'tax_class'          => __( 'Tax class', 'woocommerce' ),
-				'stock_status'       => __( 'In stock?', 'woocommerce' ),
-				'stock'              => __( 'Stock', 'woocommerce' ),
-				'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
-				'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
-				'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
-				/* translators: %s: weight */
-				'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ),
-				/* translators: %s: length */
-				'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ),
-				/* translators: %s: width */
-				'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ),
-				/* translators: %s: Height */
-				'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ),
-				'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
-				'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
-				'sale_price'         => __( 'Sale price', 'woocommerce' ),
-				'regular_price'      => __( 'Regular price', 'woocommerce' ),
-				'category_ids'       => __( 'Categories', 'woocommerce' ),
-				'tag_ids'            => __( 'Tags', 'woocommerce' ),
-				'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
-				'images'             => __( 'Images', 'woocommerce' ),
-				'download_limit'     => __( 'Download limit', 'woocommerce' ),
-				'download_expiry'    => __( 'Download expiry days', 'woocommerce' ),
-				'parent_id'          => __( 'Parent', 'woocommerce' ),
-				'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
-				'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
-				'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
-				'product_url'        => __( 'External URL', 'woocommerce' ),
-				'button_text'        => __( 'Button text', 'woocommerce' ),
-				'menu_order'         => __( 'Position', 'woocommerce' ),
-			)
+			$default_columns
 		);
 	}
 
@@ -161,7 +172,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function prepare_data_to_export() {
 		$args = array(
-			'status'   => array( 'private', 'publish', 'draft', 'future', 'pending' ),
+			'status'   => array( ProductStatus::PRIVATE, ProductStatus::PUBLISH, ProductStatus::DRAFT, ProductStatus::FUTURE, ProductStatus::PENDING ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
@@ -183,7 +194,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		foreach ( $products->products as $product ) {
 			// Check if the category is set, this means we need to fetch variations separately as they are not tied to a category.
-			if ( ! empty( $args['category'] ) && $product->is_type( 'variable' ) ) {
+			if ( ! empty( $args['category'] ) && $product->is_type( ProductType::VARIABLE ) ) {
 				$variable_products[] = $product->get_id();
 			}
 
@@ -196,7 +207,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				$products = wc_get_products(
 					array(
 						'parent' => $parent_id,
-						'type'   => array( 'variation' ),
+						'type'   => array( ProductType::VARIATION ),
 						'return' => 'objects',
 						'limit'  => -1,
 					)
@@ -262,7 +273,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		 * @since 3.1.0
 		 *
 		 * @param array                   $row         An associative array with the data of a single row in the CSV file.
-		 * @param WC_Product              $product     The product object correspnding to the current row.
+		 * @param WC_Product              $product     The product object corresponding to the current row.
 		 * @param WC_Product_CSV_Exporter $exporter    The instance of the CSV exporter.
 		 */
 		return apply_filters( 'woocommerce_product_export_row_data', $row, $product, $this );
@@ -278,15 +289,15 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	protected function get_column_value_published( $product ) {
 		$statuses = array(
-			'draft'   => -1,
-			'private' => 0,
-			'publish' => 1,
+			ProductStatus::DRAFT   => -1,
+			ProductStatus::PRIVATE => 0,
+			ProductStatus::PUBLISH => 1,
 		);
 
 		// Fix display for variations when parent product is a draft.
-		if ( 'variation' === $product->get_type() ) {
+		if ( ProductType::VARIATION === $product->get_type() ) {
 			$parent = $product->get_parent_data();
-			$status = 'draft' === $parent['status'] ? $parent['status'] : $product->get_status( 'edit' );
+			$status = ProductStatus::DRAFT === $parent['status'] ? $parent['status'] : $product->get_status( 'edit' );
 		} else {
 			$status = $product->get_status( 'edit' );
 		}
@@ -453,7 +464,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @return string
 	 */
 	protected function get_column_value_grouped_products( $product ) {
-		if ( 'grouped' !== $product->get_type() ) {
+		if ( ProductType::GROUPED !== $product->get_type() ) {
 			return '';
 		}
 
@@ -506,7 +517,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$manage_stock   = $product->get_manage_stock( 'edit' );
 		$stock_quantity = $product->get_stock_quantity( 'edit' );
 
-		if ( $product->is_type( 'variation' ) && 'parent' === $manage_stock ) {
+		if ( $product->is_type( ProductType::VARIATION ) && 'parent' === $manage_stock ) {
 			return 'parent';
 		} elseif ( $manage_stock ) {
 			return $stock_quantity;
@@ -526,11 +537,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected function get_column_value_stock_status( $product ) {
 		$status = $product->get_stock_status( 'edit' );
 
-		if ( 'onbackorder' === $status ) {
+		if ( ProductStockStatus::ON_BACKORDER === $status ) {
 			return 'backorder';
 		}
 
-		return 'instock' === $status ? 1 : 0;
+		return ProductStockStatus::IN_STOCK === $status ? 1 : 0;
 	}
 
 	/**
@@ -625,7 +636,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					$row[ 'downloads:id' . $i ]                 = $download->get_id();
 					$row[ 'downloads:name' . $i ]               = $download->get_name();
 					$row[ 'downloads:url' . $i ]                = $download->get_file();
-					$i++;
+					++$i;
 				}
 			}
 		}
@@ -690,7 +701,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$row[ 'attributes:visible' . $i ] = '';
 					}
 
-					if ( $product->is_type( 'variable' ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
+					if ( $product->is_type( ProductType::VARIABLE ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
 						/* translators: %s: attribute number */
 						$this->column_names[ 'attributes:default' . $i ] = sprintf( __( 'Attribute %d default', 'woocommerce' ), $i );
 						$default_value                                   = $default_attributes[ sanitize_title( $attribute_name ) ];
@@ -702,7 +713,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 							$row[ 'attributes:default' . $i ] = $default_value;
 						}
 					}
-					$i++;
+					++$i;
 				}
 			}
 		}
@@ -740,7 +751,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					/* translators: %s: meta data name */
 					$this->column_names[ $column_key ] = sprintf( __( 'Meta: %s', 'woocommerce' ), $meta->key );
 					$row[ $column_key ]                = $meta_value;
-					$i ++;
+					++$i;
 				}
 			}
 		}

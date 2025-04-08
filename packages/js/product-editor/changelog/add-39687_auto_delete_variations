@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new option in attributes control for a delete confirmation modal instead of the window.alert.

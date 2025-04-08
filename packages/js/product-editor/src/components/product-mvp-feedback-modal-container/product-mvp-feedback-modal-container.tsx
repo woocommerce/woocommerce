@@ -14,19 +14,22 @@ import { Product } from '@woocommerce/data';
  */
 import { ProductMVPFeedbackModal } from '../product-mvp-feedback-modal';
 
-export const ProductMVPFeedbackModalContainer: React.FC< {
+export const ProductMVPFeedbackModalContainer = ( {
+	productId: _productId,
+}: {
 	productId?: number;
-} > = ( { productId: _productId } ) => {
+} ) => {
 	const { values } = useFormContext< Product >();
 	const { hideProductMVPFeedbackModal } = useDispatch( STORE_KEY );
 	const { isProductMVPModalVisible } = useSelect( ( select ) => {
 		const { isProductMVPFeedbackModalVisible } = select( STORE_KEY );
 		return {
+			// @ts-expect-error Selector is not typed
 			isProductMVPModalVisible: isProductMVPFeedbackModalVisible(),
 		};
-	} );
+	}, [] );
 
-	const productId = _productId ?? values.id;
+	const productId = _productId ?? values?.id;
 
 	const { _feature_nonce } = getSetting< { _feature_nonce: string } >(
 		'admin',
@@ -58,9 +61,18 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 
 	const onCloseModal = () => {
 		recordEvent( 'product_mvp_feedback', {
-			action: 'disable',
+			action: 'cancel',
 			checked: '',
 			comments: '',
+		} );
+		hideProductMVPFeedbackModal();
+	};
+
+	const onSkipFeedback = () => {
+		recordEvent( 'product_mvp_feedback', {
+			action: 'disable',
+			checked: '',
+			comments: 'Feedback skipped',
 		} );
 		hideProductMVPFeedbackModal();
 		window.location.href = classicEditorUrl;
@@ -74,6 +86,7 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 		<ProductMVPFeedbackModal
 			recordScoreCallback={ recordScore }
 			onCloseModal={ onCloseModal }
+			onSkipFeedback={ onSkipFeedback }
 		/>
 	);
 };

@@ -1,0 +1,34 @@
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":16,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true}} -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+	<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} /-->
+
+	<!-- wp:post-title {"textAlign":"center","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+
+	<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+
+	<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+	<!-- /wp:woocommerce/product-template -->
+
+	<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
+	<!-- wp:query-pagination-previous /-->
+
+	<!-- wp:query-pagination-numbers /-->
+
+	<!-- wp:query-pagination-next /-->
+	<!-- /wp:query-pagination -->
+
+	<!-- wp:woocommerce/product-collection-no-results -->
+	<!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
+	<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"medium"} -->
+		<p class="has-medium-font-size"><strong>No results found</strong></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph -->
+		<p>You can try <a class="wc-link-clear-any-filters" href="#">clearing any filters</a> or head to our <a
+				class="wc-link-stores-home" href="#">store's home</a></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
+	<!-- /wp:woocommerce/product-collection-no-results -->
+</div>
+<!-- /wp:woocommerce/product-collection -->

@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Fix misspelling in CRUD reducer

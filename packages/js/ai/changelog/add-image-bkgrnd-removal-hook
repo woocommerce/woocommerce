@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add useBackgroundRemoval hook for image background removal API requests.

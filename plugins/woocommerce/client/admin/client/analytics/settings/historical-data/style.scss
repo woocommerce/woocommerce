@@ -1,0 +1,113 @@
+.woocommerce-settings-historical-data__columns {
+	display: grid;
+	grid-column-gap: $gap-large;
+	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(50% - #{math.div($gap-large, 2)});
+
+	.woocommerce-settings-historical-data__column {
+		align-self: end;
+		margin-top: $gap-small;
+		// Auto-position fix for IE11.
+		@include set-grid-item-position( 2, 2 );
+	}
+
+	@include breakpoint( "<960px" ) {
+		grid-template-columns: 100%;
+
+		.woocommerce-settings-historical-data__column {
+			@include set-grid-item-position( 1, 2 );
+		}
+	}
+
+	.components-base-control__label,
+	.woocommerce-settings-historical-data__column-label {
+		margin-bottom: $gap-small;
+	}
+
+	.components-select-control__input {
+		height: 38px;
+		padding: 8px 2px;
+	}
+
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
+}
+
+.woocommerce-settings-historical-data__skip-checkbox {
+	margin-top: $gap-large;
+
+	> .components-base-control__field {
+		margin-bottom: 0;
+
+		> .components-checkbox-control__label {
+			display: inline-block;
+			margin-bottom: 0;
+			width: auto;
+		}
+	}
+}
+
+.woocommerce-settings-historical-data__progress-label {
+	display: inline-block;
+	font-weight: bold;
+	margin-bottom: $gap-small;
+	margin-top: $gap-large;
+
+	& + & {
+		margin-left: 0.25em;
+	}
+}
+
+.woocommerce-settings-historical-data__progress-bar {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	border: 0;
+	height: 8px;
+	width: 100%;
+
+	// Firefox
+	& {
+		background-color: #c4c4c4;
+	}
+
+	&::-moz-progress-bar {
+		background-color: #0085ba;
+	}
+
+	// Chrome
+	&::-webkit-progress-bar {
+		background-color: #c4c4c4;
+	}
+
+	&::-webkit-progress-value {
+		background-color: #0085ba;
+	}
+}
+
+.woocommerce-settings-historical-data__status {
+	display: block;
+	font-weight: bold;
+	margin-top: $gap-large;
+
+	> .components-spinner {
+		float: none;
+		height: 12px;
+		margin-left: 6px;
+		margin-right: 6px;
+		width: 12px;
+
+		&::before {
+			left: 2px;
+			height: 3px;
+			top: 2px;
+			transform-origin: 4px 4px;
+			width: 3px;
+		}
+	}
+}
+
+.woocommerce-settings-historical-data__actions {
+	align-items: center;
+	display: flex;
+}

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update linked product search to use GB Combobox for easier async usage.

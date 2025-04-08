@@ -10,7 +10,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Post types Class.
@@ -108,6 +110,7 @@ class WC_Post_Types {
 						'not_found'             => __( 'No categories found', 'woocommerce' ),
 						'item_link'             => __( 'Product Category Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product category.', 'woocommerce' ),
+						'template_name'         => _x( 'Products by Category', 'Template name', 'woocommerce' ),
 					),
 					'show_in_rest'          => true,
 					'show_ui'               => true,
@@ -153,6 +156,7 @@ class WC_Post_Types {
 						'not_found'                  => __( 'No tags found', 'woocommerce' ),
 						'item_link'                  => __( 'Product Tag Link', 'woocommerce' ),
 						'item_link_description'      => __( 'A link to a product tag.', 'woocommerce' ),
+						'template_name'              => _x( 'Products by Tag', 'Template name', 'woocommerce' ),
 					),
 					'show_in_rest'          => true,
 					'show_ui'               => true,
@@ -369,6 +373,73 @@ class WC_Post_Types {
 			)
 		);
 
+		// Register the product form post type wne the feature is enabled.
+		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
+			register_post_type(
+				'product_form',
+				/**
+				 * Allow developers to customize the product form post type registration arguments.
+				 *
+				 * @since 9.1.0
+				 * @param array $args The default post type registration arguments.
+				 */
+				apply_filters(
+					'woocommerce_register_post_type_product_form',
+					array(
+						'labels'
+						=> array(
+							'name'                  => __( 'Product Forms', 'woocommerce' ),
+							'singular_name'         => __( 'Product Form', 'woocommerce' ),
+							'all_items'             => __( 'All Product Form', 'woocommerce' ),
+							'menu_name'             => _x( 'Product Forms', 'Admin menu name', 'woocommerce' ),
+							'add_new'               => __( 'Add New', 'woocommerce' ),
+							'add_new_item'          => __( 'Add new product form', 'woocommerce' ),
+							'edit'                  => __( 'Edit', 'woocommerce' ),
+							'edit_item'             => __( 'Edit product form', 'woocommerce' ),
+							'new_item'              => __( 'New product form', 'woocommerce' ),
+							'view_item'             => __( 'View product form', 'woocommerce' ),
+							'view_items'            => __( 'View product forms', 'woocommerce' ),
+							'search_items'          => __( 'Search product forms', 'woocommerce' ),
+							'not_found'             => __( 'No product forms found', 'woocommerce' ),
+							'not_found_in_trash'    => __( 'No product forms found in trash', 'woocommerce' ),
+							'parent'                => __( 'Parent product form', 'woocommerce' ),
+							'featured_image'        => __( 'Product form image', 'woocommerce' ),
+							'set_featured_image'    => __( 'Set product form image', 'woocommerce' ),
+							'remove_featured_image' => __( 'Remove product form image', 'woocommerce' ),
+							'use_featured_image'    => __( 'Use as product form image', 'woocommerce' ),
+							'insert_into_item'      => __( 'Insert into product form', 'woocommerce' ),
+							'uploaded_to_this_item' => __( 'Uploaded to this product form', 'woocommerce' ),
+							'filter_items_list'     => __( 'Filter product forms', 'woocommerce' ),
+							'items_list_navigation' => __( 'Product forms navigation', 'woocommerce' ),
+							'items_list'            => __( 'Product forms list', 'woocommerce' ),
+							'item_link'             => __( 'Product form Link', 'woocommerce' ),
+							'item_link_description' => __( 'A link to a product form.', 'woocommerce' ),
+						),
+						'description'         => __( 'This is where you can set up product forms for various product types in your dashboard.', 'woocommerce' ),
+						'public'              => true,
+						'menu_icon'           => 'dashicons-forms',
+						'capability_type'     => 'product',
+						'map_meta_cap'        => true,
+						'publicly_queryable'  => true,
+						'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
+						'rewrite'             => $permalinks['product_rewrite_slug'] ? array(
+							'slug'       => $permalinks['product_rewrite_slug'],
+							'with_front' => false,
+							'feeds'      => true,
+						) : false,
+						'query_var'           => true,
+						'supports'            => $supports,
+						'has_archive'         => $has_archive,
+						'show_in_rest'        => true,
+						'show_ui'             => true,
+						'show_in_menu'        => true,
+						'exclude_from_search' => true,
+						'show_in_nav_menus'   => false,
+					)
+				)
+			);
+		}
+
 		register_post_type(
 			'product_variation',
 			apply_filters(
@@ -435,7 +506,6 @@ class WC_Post_Types {
 					'public'                           => false,
 					'hierarchical'                     => false,
 					'supports'                         => false,
-					'exclude_from_orders_screen'       => false,
 					'add_order_meta_boxes'             => false,
 					'exclude_from_order_count'         => true,
 					'exclude_from_order_views'         => false,
@@ -561,7 +631,7 @@ class WC_Post_Types {
 		$order_statuses = apply_filters(
 			'woocommerce_register_shop_order_post_statuses',
 			array(
-				'wc-pending'    => array(
+				OrderInternalStatus::PENDING    => array(
 					'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
@@ -570,7 +640,7 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Pending payment <span class="count">(%s)</span>', 'Pending payment <span class="count">(%s)</span>', 'woocommerce' ),
 				),
-				'wc-processing' => array(
+				OrderInternalStatus::PROCESSING => array(
 					'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
@@ -579,7 +649,7 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' ),
 				),
-				'wc-on-hold'    => array(
+				OrderInternalStatus::ON_HOLD    => array(
 					'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
@@ -588,7 +658,7 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'On hold <span class="count">(%s)</span>', 'On hold <span class="count">(%s)</span>', 'woocommerce' ),
 				),
-				'wc-completed'  => array(
+				OrderInternalStatus::COMPLETED  => array(
 					'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
@@ -597,7 +667,7 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' ),
 				),
-				'wc-cancelled'  => array(
+				OrderInternalStatus::CANCELLED  => array(
 					'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
@@ -606,7 +676,7 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce' ),
 				),
-				'wc-refunded'   => array(
+				OrderInternalStatus::REFUNDED   => array(
 					'label'                     => _x( 'Refunded', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
@@ -615,7 +685,7 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Refunded <span class="count">(%s)</span>', 'Refunded <span class="count">(%s)</span>', 'woocommerce' ),
 				),
-				'wc-failed'     => array(
+				OrderInternalStatus::FAILED     => array(
 					'label'                     => _x( 'Failed', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,

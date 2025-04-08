@@ -13,11 +13,13 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->reset_legacy_proxy_mocks();
+
 		WC()->session = null;
 		$wc_payment_gateways = WC_Payment_Gateways::instance();
 		$wc_payment_gateways->init();
 		foreach ( $wc_payment_gateways->payment_gateways() as $name => $gateway ) {
-			if ( in_array( $name, array( 'cod', 'bacs' ) ) ) {
+			if ( in_array( $name, array( WC_Gateway_COD::ID, WC_Gateway_BACS::ID ), true ) ) {
 				$gateway->enabled = 'yes';
 			}
 		}
@@ -39,10 +41,10 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 		wp_set_current_user( 1 );
 
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$gateways['bacs']->chosen = false;
-		WC()->session->set( 'chosen_payment_method', 'bacs' );
+		$gateways[ WC_Gateway_BACS::ID ]->chosen = false;
+		WC()->session->set( 'chosen_payment_method', WC_Gateway_BACS::ID );
 		WC()->payment_gateways()->set_current_gateway( $gateways );
-		$this->assertTrue( $gateways['bacs']->chosen );
+		$this->assertTrue( $gateways[ WC_Gateway_BACS::ID ]->chosen );
 	}
 
 	/**
@@ -55,5 +57,4 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->set_current_gateway( $gateways );
 		$this->assertTrue( $current_gateway->chosen );
 	}
-
 }

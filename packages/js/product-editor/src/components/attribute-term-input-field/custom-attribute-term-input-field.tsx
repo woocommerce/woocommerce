@@ -30,9 +30,13 @@ function isNewTermItem(
 	return item !== null && typeof item === 'object' && !! item.label;
 }
 
-export const CustomAttributeTermInputField: React.FC<
-	CustomAttributeTermInputFieldProps
-> = ( { value = [], onChange, placeholder, disabled, label } ) => {
+export const CustomAttributeTermInputField = ( {
+	value = [],
+	onChange,
+	placeholder,
+	disabled,
+	label,
+}: CustomAttributeTermInputFieldProps ) => {
 	const [ listItems, setListItems ] =
 		useState< Array< string | NewTermItem > >( value );
 
@@ -149,19 +153,9 @@ export const CustomAttributeTermInputField: React.FC<
 												checked={ value.includes(
 													item
 												) }
+												// @ts-expect-error The label prop can be a string, however, the final consumer of this prop accepts ReactNode.
 												label={
-													<span
-														style={ {
-															fontWeight:
-																value.includes(
-																	item
-																)
-																	? 'bold'
-																	: 'normal',
-														} }
-													>
-														{ item }
-													</span>
+													<span> { item } </span>
 												}
 											/>
 										) }

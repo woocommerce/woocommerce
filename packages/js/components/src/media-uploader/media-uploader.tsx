@@ -3,20 +3,27 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, DropZone, FormFileUpload } from '@wordpress/components';
-import { createElement } from 'react';
+import { Fragment, createElement } from 'react';
 import {
 	MediaItem,
 	MediaUpload,
 	uploadMedia as wpUploadMedia,
 	UploadMediaOptions,
-	UploadMediaErrorCode,
 } from '@wordpress/media-utils';
 
+/**
+ * Internal dependencies
+ */
+import { ErrorType } from './types';
+
 const DEFAULT_ALLOWED_MEDIA_TYPES = [ 'image' ];
+
+export type MediaUploaderErrorCallback = ( error: ErrorType ) => void;
 
 type MediaUploaderProps = {
 	allowedMediaTypes?: string[];
 	buttonText?: string;
+	buttonProps?: React.ComponentProps< typeof Button >;
 	hasDropZone?: boolean;
 	icon?: JSX.Element;
 	label?: string | JSX.Element;
@@ -25,49 +32,53 @@ type MediaUploaderProps = {
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
 	multipleSelect?: boolean | string;
+	value?: number | number[];
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
 	) => void;
-	onError?: ( error: {
-		code: UploadMediaErrorCode;
-		message: string;
-		file: File;
-	} ) => void;
+	onError?: MediaUploaderErrorCallback;
 	onMediaGalleryOpen?: () => void;
-	onUpload?: ( files: MediaItem[] ) => void;
-	onFileUploadChange?: ( files: MediaItem[] ) => void;
+	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
+	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
+	additionalData?: Record< string, unknown >;
 };
 
 export const MediaUploader = ( {
 	allowedMediaTypes = DEFAULT_ALLOWED_MEDIA_TYPES,
 	buttonText = __( 'Choose images', 'woocommerce' ),
+	buttonProps,
 	hasDropZone = true,
 	label = __( 'Drag images here or click to upload', 'woocommerce' ),
 	maxUploadFileSize = 10000000,
 	MediaUploadComponent = MediaUpload,
 	multipleSelect = false,
+	value,
 	onError = () => null,
 	onFileUploadChange = () => null,
 	onMediaGalleryOpen = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
+	additionalData,
 }: MediaUploaderProps ) => {
-	const getFormFileUploadAcceptedFiles = () =>
-		allowedMediaTypes.map( ( type ) => `${ type }/*` );
+	const multiple = Boolean( multipleSelect );
 
 	return (
 		<FormFileUpload
-			accept={ getFormFileUploadAcceptedFiles().toString() }
-			multiple={ true }
+			accept={ allowedMediaTypes.toString() }
+			multiple={ multiple }
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
+					allowedTypes: allowedMediaTypes,
 					filesList: currentTarget.files as FileList,
-					onError,
-					onFileChange: onFileUploadChange,
 					maxUploadFileSize,
+					onError,
+					onFileChange( files ) {
+						onFileUploadChange( multiple ? files : files[ 0 ] );
+					},
+					additionalData,
 				} );
 			} }
 			render={ ( { openFileDialog } ) => (
@@ -80,9 +91,8 @@ export const MediaUploader = ( {
 						event: React.MouseEvent< HTMLDivElement, MouseEvent >
 					) => {
 						const { target } = event;
-						if (
-							( target as HTMLButtonElement )?.type !== 'button'
-						) {
+						// is the click on the button from MediaUploadComponent or on the div?
+						if ( ! ( target as HTMLElement ).closest( 'button' ) ) {
 							openFileDialog();
 						}
 					} }
@@ -94,31 +104,43 @@ export const MediaUploader = ( {
 						</div>
 
 						<MediaUploadComponent
+							value={ value }
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
 							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
-							render={ ( { open } ) => (
-								<Button
-									variant="secondary"
-									onClick={ () => {
-										onMediaGalleryOpen();
-										open();
-									} }
-								>
-									{ buttonText }
-								</Button>
-							) }
+							render={ ( { open } ) =>
+								buttonText || buttonProps ? (
+									<Button
+										variant="secondary"
+										onClick={ () => {
+											onMediaGalleryOpen();
+											open();
+										} }
+										{ ...buttonProps }
+									>
+										{ buttonText }
+									</Button>
+								) : (
+									<Fragment />
+								)
+							}
 						/>
 
 						{ hasDropZone && (
 							<DropZone
-								onFilesDrop={ ( files ) =>
+								onFilesDrop={ ( droppedFiles ) =>
 									uploadMedia( {
-										filesList: files,
-										onError,
-										onFileChange: onUpload,
+										allowedTypes: allowedMediaTypes,
+										filesList: droppedFiles,
 										maxUploadFileSize,
+										onError,
+										onFileChange( files ) {
+											onUpload(
+												multiple ? files : files[ 0 ]
+											);
+										},
+										additionalData,
 									} )
 								}
 							/>

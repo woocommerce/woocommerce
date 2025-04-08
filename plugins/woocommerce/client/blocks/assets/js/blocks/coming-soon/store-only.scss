@@ -1,0 +1,5 @@
+body:has(.woocommerce-coming-soon-store-only) {
+	.woocommerce-breadcrumb {
+		display: none;
+	}
+}

@@ -1,11 +1,24 @@
 <?php
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Tests relating to the WC_Abstract_Product class.
  */
 class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
+	use CogsAwareUnitTestSuiteTrait;
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->disable_cogs_feature();
+		remove_all_filters( 'woocommerce_get_cogs_total_value' );
+	}
+
 	/**
 	 * @var int
 	 */
@@ -113,8 +126,8 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_addition_of_invalid_product_downloads_by_shop_manager() {
 		wp_set_current_user( $this->shop_manager_user );
-		$downloads        = $this->product->get_downloads();
-		$downloads[]      = array(
+		$downloads   = $this->product->get_downloads();
+		$downloads[] = array(
 			'id'   => '',
 			'file' => 'https://also.not.yet.added/file.pdf',
 			'name' => 'Another file',
@@ -162,5 +175,167 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 			$this->product->get_downloads(),
 			'If a shop manager attempts to change an existing downloadable file to a valid path (that is covered by an approved directory rule) that is okay.'
 		);
+	}
+
+	/**
+	 * @testDox By default, product is not on sale.
+	 */
+	public function test_on_sale() {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertFalse( $product->is_on_sale() );
+		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is on sale when sale price is set and less than regular price, even without a sale schedule.
+	 */
+	public function test_on_sale_sale_price_is_set() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$this->assertTrue( $product->is_on_sale() );
+		$this->assertEquals( 5, $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is on sale when schedule is set and current date is within schedule.
+	 */
+	public function test_on_sale_scheduled() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertTrue( $product->is_on_sale() );
+		$this->assertEquals( 5, $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is not on sale when past schedule is set.
+	 */
+	public function test_on_sale_past_schedule() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS * 2 ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertFalse( $product->is_on_sale() );
+		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is not on sale when future schedule is set.
+	 */
+	public function test_on_sale_future_schedule() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS * 2 ) );
+		$product->save();
+
+		$this->assertFalse( $product->is_on_sale() );
+		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value can be set and retrieved when the COGS feature is enabled.
+	 */
+	public function test_cogs_value_with_feature_enabled() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertEquals( 0, $product->get_cogs_value() );
+		$this->assertEquals( 0, $product->get_cogs_effective_value() );
+		$this->assertEquals( 0, $product->get_cogs_total_value() );
+
+		$product->set_cogs_value( 12.34 );
+
+		$this->assertEquals( 12.34, $product->get_cogs_value() );
+		$this->assertEquals( 12.34, $product->get_cogs_effective_value() );
+		$this->assertEquals( 12.34, $product->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value can't be set and retrieved when the COGS feature is disabled.
+	 */
+	public function test_cogs_value_with_cogs_disabled() {
+		$error_message = '';
+		$count         = 0;
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_doing_it_wrong' => function ( $function_name, $message ) use ( &$error_message, &$count ) {
+					$error_message = $message;
+					$count++;},
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertEquals( 0, $product->get_cogs_value() );
+		$this->assertMatchesRegularExpression( '/The Cost of Goods sold feature is disabled, thus the method called will do nothing and will return dummy data/', $error_message );
+
+		$this->assertEquals( 0, $product->get_cogs_effective_value() );
+		$this->assertEquals( 0, $product->get_cogs_total_value() );
+
+		$product->set_cogs_value( 12.34 );
+
+		$this->assertEquals( 0, $product->get_cogs_value() );
+		$this->assertEquals( 0, $product->get_cogs_effective_value() );
+		$this->assertEquals( 0, $product->get_cogs_total_value() );
+
+		$this->assertEquals( 7, $count );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value for a product is null by default.
+	 */
+	public function test_cogs_value_defaults_to_null() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product_Simple();
+		$this->assertNull( $product->get_cogs_value() );
+	}
+
+	/**
+	 * @testdox The total Cost of Goods Sold value van be modified using the woocommerce_get_cogs_total_value filter.
+	 */
+	public function test_cogs_total_value_can_be_altered_via_filter() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 12.34 );
+
+		add_filter( 'woocommerce_get_product_cogs_total_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
+
+		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value for a product can be set to zero, but it will be actually set to null.
+	 */
+	public function test_cogs_can_be_set_to_zero_but_reads_back_as_null() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 0 );
+
+		$this->assertNull( $product->get_cogs_value() );
+	}
+
+	/**
+	 * @testdox The "zero Cost of Goods Sold value is converted to null" behavior can be modified in derived classes.
+	 */
+	public function test_adjust_cogs_value_before_set() {
+		$this->enable_cogs_feature();
+
+		// phpcs:disable Squiz.Commenting
+		$product = new class() extends WC_Product {
+			protected function adjust_cogs_value_before_set( ?float $value ): ?float {
+				return $value * 10;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$product->set_cogs_value( 12.34 );
+		$this->assertEquals( 123.4, $product->get_cogs_value() );
 	}
 }

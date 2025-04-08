@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
+use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\Init as MarketingRecommendationsInit;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -78,6 +79,19 @@ class Marketing extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/misc-recommendations',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_misc_recommendations' ),
+					'permission_callback' => array( $this, 'get_recommended_plugins_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -103,16 +117,9 @@ class Marketing extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_recommended_plugins( $request ) {
-		/**
-		 * MarketingSpecs class.
-		 *
-		 * @var MarketingSpecs $marketing_specs
-		 */
-		$marketing_specs = wc_get_container()->get( MarketingSpecs::class );
-
 		// Default to marketing category (if no category set).
 		$category      = ( ! empty( $request->get_param( 'category' ) ) ) ? $request->get_param( 'category' ) : 'marketing';
-		$all_plugins   = $marketing_specs->get_recommended_plugins();
+		$all_plugins   = MarketingRecommendationsInit::get_recommended_plugins();
 		$valid_plugins = [];
 		$per_page      = $request->get_param( 'per_page' );
 
@@ -146,5 +153,20 @@ class Marketing extends \WC_REST_Data_Controller {
 
 		$category = $request->get_param( 'category' );
 		return rest_ensure_response( $marketing_specs->get_knowledge_base_posts( $category ) );
+	}
+
+	/**
+	 * Return misc recommendations.
+	 *
+	 * @param \WP_REST_Request $request Request data.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return \WP_Error|\WP_REST_Response
+	 */
+	public function get_misc_recommendations( $request ) {
+		$misc_recommendations = MarketingRecommendationsInit::get_misc_recommendations();
+
+		return rest_ensure_response( $misc_recommendations );
 	}
 }

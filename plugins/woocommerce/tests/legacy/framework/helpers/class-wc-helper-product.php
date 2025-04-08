@@ -5,12 +5,23 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * Class WC_Helper_Product.
  *
  * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Product {
+
+	/**
+	 * Counter to insert unique SKU for concurrent tests.
+	 * The starting value ensures no conflicts between existing generators.
+	 *
+	 * @var int $sku_counter
+	 */
+	private static $sku_counter = 0;
 
 	/**
 	 * Delete a product.
@@ -39,14 +50,16 @@ class WC_Helper_Product {
 				'name'          => 'Dummy Product',
 				'regular_price' => 10,
 				'price'         => 10,
-				'sku'           => 'DUMMY SKU',
+				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
-				'tax_status'    => 'taxable',
+				'tax_status'    => ProductTaxStatus::TAXABLE,
 				'downloadable'  => false,
 				'virtual'       => false,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 				'weight'        => '1.1',
 			);
+
+		++self::$sku_counter;
 
 		$product->set_props( array_merge( $default_props, $props ) );
 
@@ -76,10 +89,10 @@ class WC_Helper_Product {
 				'regular_price' => 10,
 				'price'         => 10,
 				'manage_stock'  => false,
-				'tax_status'    => 'taxable',
+				'tax_status'    => ProductTaxStatus::TAXABLE,
 				'downloadable'  => true,
 				'virtual'       => false,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 			)
 		);
 
@@ -106,7 +119,7 @@ class WC_Helper_Product {
 				'name'          => 'Dummy External Product',
 				'regular_price' => 10,
 				'sku'           => 'DUMMY EXTERNAL SKU',
-				'product_url'   => 'http://woocommerce.com',
+				'product_url'   => 'https://woocommerce.com',
 				'button_text'   => 'Buy external product',
 			)
 		);

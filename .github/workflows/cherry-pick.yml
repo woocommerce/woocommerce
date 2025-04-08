@@ -1,9 +1,7 @@
 name: Cherry Pick Tool
 on:
     issues:
-        types: [milestoned, labeled]
-    pull_request:
-        types: [closed]
+        types: [milestoned]
     workflow_dispatch:
         inputs:
             release_branch:
@@ -35,15 +33,31 @@ permissions: {}
 jobs:
     verify:
         name: Verify
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         outputs:
             run: ${{ steps.check.outputs.run }}
         steps:
+            - name: Fetch Pull Request Details
+              if: github.event.issue.pull_request
+              id: fetch_pr_details
+              uses: actions/github-script@v6
+              with:
+                script: |
+                  const issue = context.payload.issue;
+                  const pullRequestUrl = issue.pull_request.url;
+                  const prDetails = await github.request(pullRequestUrl);
+                  core.setOutput('base_ref', prDetails.data.base.ref);
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             - name: check
               id: check
               uses: actions/github-script@v6
               with:
                   script: |
+                      const baseRef = process.env.BASE_REF;
+                      console.log("baseRef:", baseRef);
+
                       let run = false;
 
                       const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
@@ -59,9 +73,12 @@ jobs:
                       } else {
                         core.setOutput( 'run', 'false' );
                       }
+              env:
+                BASE_REF: ${{ steps.fetch_pr_details.outputs.base_ref }}
+
     prep:
         name: Prep inputs
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: verify
         if: needs.verify.outputs.run == 'true'
         outputs:
@@ -107,7 +124,7 @@ jobs:
                       }
     check-release-branch-exists:
         name: Check for existence of release branch
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: prep
         steps:
             - name: Check for release branch
@@ -123,7 +140,7 @@ jobs:
                       } );
     cherry-pick-run:
         name: Run cherry pick tool
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
           actions: write
           contents: write
@@ -293,6 +310,15 @@ jobs:
                       })
 
                       core.setOutput( 'cherry-pick-pr', pr.data.html_url )
+
+                      // label PR
+
+                      const label = await github.rest.issues.addLabels({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: pr.data.number,
+                        labels: ["metric: code freeze exception"],
+                      });
 
             - name: Checkout trunk branch
               if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null

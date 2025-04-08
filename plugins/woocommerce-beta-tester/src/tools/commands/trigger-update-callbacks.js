@@ -3,47 +3,56 @@
  */
 import { SelectControl } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const TRIGGER_UPDATE_CALLBACKS_ACTION_NAME =
 	'runSelectedUpdateCallbacks';
 
 export const TriggerUpdateCallbacks = () => {
-	const { dbUpdateVersions } = useSelect( ( select ) => {
-		const { getDBUpdateVersions } = select( STORE_KEY );
-		return {
-			dbUpdateVersions: getDBUpdateVersions(),
-		};
-	} );
+	const dbUpdateVersions = useSelect(
+		( select ) => select( store ).getDBUpdateVersions(),
+		[]
+	);
+	const selectedVersion = useSelect(
+		( select ) =>
+			select( store ).getCommandParams(
+				TRIGGER_UPDATE_CALLBACKS_ACTION_NAME
+			).runSelectedUpdateCallbacks.version,
+		[]
+	);
+	const { updateCommandParams } = useDispatch( store );
 
-	const { updateCommandParams } = useDispatch( STORE_KEY );
-
-	function onCronChange( version ) {
+	function onChange( version ) {
 		updateCommandParams( TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {
 			version,
 		} );
 	}
 
-	function getOptions() {
-		return dbUpdateVersions.map( ( version ) => {
-			return { label: version, value: version };
-		} );
-	}
+	const options = useMemo(
+		() =>
+			dbUpdateVersions.map( ( version ) => ( {
+				label: version,
+				value: version,
+			} ) ),
+		[ dbUpdateVersions ]
+	);
 
 	return (
-		<div className="trigger-cron-job">
+		<div className="select-description">
 			{ ! dbUpdateVersions ? (
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
 					label="Select a version to run"
-					onChange={ onCronChange }
+					onChange={ onChange }
 					labelPosition="side"
-					options={ getOptions().reverse() }
+					options={ options }
+					value={ selectedVersion }
 				/>
 			) }
 		</div>

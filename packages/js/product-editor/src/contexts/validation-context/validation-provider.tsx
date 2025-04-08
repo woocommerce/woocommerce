@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
+import type { PropsWithChildren } from 'react';
+import { useEntityRecord } from '@wordpress/core-data';
 import { createElement, useRef, useState } from '@wordpress/element';
-import { PropsWithChildren } from 'react';
 
 /**
  * Internal dependencies
  */
 import {
+	ValidationError,
 	ValidationErrors,
 	ValidationProviderProps,
 	Validator,
@@ -17,25 +19,40 @@ import { ValidationContext } from './validation-context';
 import { findFirstInvalidElement } from './helpers';
 
 export function ValidationProvider< T >( {
-	initialValue,
+	postType,
+	productId,
 	children,
-}: PropsWithChildren< ValidationProviderProps< T > > ) {
+}: PropsWithChildren< ValidationProviderProps > ) {
 	const validatorsRef = useRef< Record< string, Validator< T > > >( {} );
-	const fieldRefs = useRef< Record< string, HTMLElement > >( {} );
+	const fieldRefs = useRef< Record< string, HTMLInputElement > >( {} );
 	const [ errors, setErrors ] = useState< ValidationErrors >( {} );
+	const { record: initialValue } = useEntityRecord< T >(
+		'postType',
+		postType,
+		productId
+	);
 
 	function registerValidator(
 		validatorId: string,
 		validator: Validator< T >
-	): React.Ref< HTMLElement > {
+	): React.Ref< HTMLInputElement > {
 		validatorsRef.current = {
 			...validatorsRef.current,
 			[ validatorId ]: validator,
 		};
 
-		return ( element: HTMLElement ) => {
+		return ( element: HTMLInputElement ) => {
 			fieldRefs.current[ validatorId ] = element;
 		};
+	}
+
+	function unRegisterValidator( validatorId: string ): void {
+		if ( validatorsRef.current[ validatorId ] ) {
+			delete validatorsRef.current[ validatorId ];
+		}
+		if ( fieldRefs.current[ validatorId ] ) {
+			delete fieldRefs.current[ validatorId ];
+		}
 	}
 
 	async function validateField(
@@ -48,15 +65,23 @@ export function ValidationProvider< T >( {
 			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
+				const errorWithValidatorId: ValidationError =
+					error !== undefined ? { validatorId, ...error } : undefined;
 				setErrors( ( currentErrors ) => ( {
 					...currentErrors,
-					[ validatorId ]: error,
+					[ validatorId ]: errorWithValidatorId,
 				} ) );
-				return error;
+				return errorWithValidatorId;
 			} );
 		}
 
 		return Promise.resolve( undefined );
+	}
+
+	async function getFieldByValidatorId(
+		validatorId: string
+	): Promise< HTMLInputElement > {
+		return fieldRefs.current[ validatorId ];
 	}
 
 	async function validateAll(
@@ -88,7 +113,9 @@ export function ValidationProvider< T >( {
 		<ValidationContext.Provider
 			value={ {
 				errors,
+				getFieldByValidatorId,
 				registerValidator,
+				unRegisterValidator,
 				validateField,
 				validateAll,
 			} }

@@ -1,0 +1,13 @@
+.woocommerce-inert-url-menu-item {
+	&__input {
+		min-width: 300px;
+
+		.components-base-control__field
+			.components-input-control__container
+			> .components-input-control__input:invalid
+			+ .components-input-control__suffix
+			+ .components-input-control__backdrop {
+			border-color: red;
+		}
+	}
+}

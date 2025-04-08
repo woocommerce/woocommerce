@@ -36,7 +36,7 @@ class Loader extends DeprecatedClassFacade {
 	 * @deprecated since 5.0.0, use Features::is_enabled( $feature )
 	 */
 	public static function is_feature_enabled( $feature ) {
-		wc_deprecated_function( 'is_feature_enabled', '5.0', '\Automattic\WooCommerce\Internal\Admin\Features\Features::is_enabled()' );
+		wc_deprecated_function( 'is_feature_enabled', '5.0', '\Automattic\WooCommerce\Internal\Features\Features::is_enabled()' );
 		return Features::is_enabled( $feature );
 	}
 

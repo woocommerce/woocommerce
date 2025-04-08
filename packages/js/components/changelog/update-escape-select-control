@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Allow returning to input on selectTree when pressing escape

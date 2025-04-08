@@ -2,10 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
-import { FocusEvent, KeyboardEvent } from 'react';
+import { KeyboardEvent } from 'react';
 import { Icon, help } from '@wordpress/icons';
+import { useInstanceId } from '@wordpress/compose';
 
 type Position =
 	| 'top left'
@@ -20,22 +22,39 @@ type Position =
 
 type TooltipProps = {
 	children?: JSX.Element | string;
+	helperText?: string;
 	position?: Position;
 	text: JSX.Element | string;
+	className?: string;
 };
 
-export const Tooltip: React.FC< TooltipProps > = ( {
+export const Tooltip = ( {
 	children = <Icon icon={ help } />,
+	className = '',
+	helperText = __( 'Help', 'woocommerce' ),
 	position = 'top center',
 	text,
-} ) => {
+}: TooltipProps ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
+
+	const uniqueIdentifier = useInstanceId(
+		Tooltip,
+		'product_tooltip'
+	) as string;
 
 	return (
 		<>
-			<div className="woocommerce-tooltip">
+			<div
+				className={ classnames(
+					'woocommerce-tooltip',
+					uniqueIdentifier
+				) }
+			>
 				<Button
-					className="woocommerce-tooltip__button"
+					className={ classnames(
+						'woocommerce-tooltip__button',
+						className
+					) }
 					onKeyDown={ (
 						event: KeyboardEvent< HTMLButtonElement >
 					) => {
@@ -45,20 +64,21 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						setIsPopoverVisible( true );
 					} }
 					onClick={ () => setIsPopoverVisible( ! isPopoverVisible ) }
-					label={ __( 'Help', 'woocommerce' ) }
+					label={ helperText }
 				>
 					{ children }
 				</Button>
 
 				{ isPopoverVisible && (
 					<Popover
-						focusOnMount="container"
+						focusOnMount={ true }
 						position={ position }
+						inline
 						className="woocommerce-tooltip__text"
-						onFocusOutside={ ( event: FocusEvent ) => {
+						onFocusOutside={ ( event ) => {
 							if (
-								event.relatedTarget?.classList.contains(
-									'woocommerce-tooltip__button'
+								event.currentTarget?.classList.contains(
+									uniqueIdentifier
 								)
 							) {
 								return;

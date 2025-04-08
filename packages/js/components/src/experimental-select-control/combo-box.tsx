@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { Icon, chevronDown } from '@wordpress/icons';
 
 type ComboBoxProps = {
-	children?: JSX.Element | JSX.Element[] | null;
+	children?: React.ReactNode | null;
 	comboBoxProps: JSX.IntrinsicElements[ 'div' ];
 	inputProps: JSX.IntrinsicElements[ 'input' ];
 	getToggleButtonProps?: () => Omit<

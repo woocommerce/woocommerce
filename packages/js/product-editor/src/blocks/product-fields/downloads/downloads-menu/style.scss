@@ -1,0 +1,15 @@
+.woocommerce-downloads-menu {
+	&__toggle {
+		flex-direction: row-reverse;
+
+		> span {
+			margin: 0 6px;
+		}
+	}
+
+	&__menu-content {
+		.components-menu-item__item {
+			min-width: 172px;
+		}
+	}
+}

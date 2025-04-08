@@ -4,25 +4,33 @@
 import { useSelect } from '@wordpress/data';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { plus } from '@wordpress/icons';
+import { plus, next, previous } from '@wordpress/icons';
 import {
 	createElement,
 	useRef,
 	useCallback,
 	useContext,
+	useState,
+	Fragment,
+	useEffect,
 } from '@wordpress/element';
+import classnames from 'classnames';
 import { MouseEvent } from 'react';
+import { Button, Popover, ToolbarItem } from '@wordpress/components';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	store as preferencesStore,
+	/* @ts-expect-error missing types. */
+} from '@wordpress/preferences';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	NavigableToolbar,
 	store as blockEditorStore,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore ToolSelector exists in WordPress components.
+	// @ts-expect-error ToolSelector exists in WordPress components.
 	ToolSelector,
+	BlockToolbar,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore ToolbarItem exists in WordPress components.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { Button, ToolbarItem } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -31,8 +39,8 @@ import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
-import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../constants';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -45,9 +53,16 @@ export function HeaderToolbar( {
 }: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
+	const [ isBlockToolsCollapsed, setIsBlockToolsCollapsed ] =
+		useState( true );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
+	const {
+		isInserterEnabled,
+		isTextModeEnabled,
+		hasBlockSelection,
+		hasFixedToolbar,
+	} = useSelect( ( select ) => {
 		const {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
@@ -61,89 +76,138 @@ export function HeaderToolbar( {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
 			__unstableGetEditorMode: getEditorMode,
+			// @ts-expect-error These selectors are available in the block data store.
+			getBlockSelectionStart,
 		} = select( blockEditorStore );
+		const { get: getPreference } = select( preferencesStore );
 
 		return {
 			isTextModeEnabled: getEditorMode() === 'text',
 			isInserterEnabled: hasInserterItems(
-				getBlockRootClientId( getBlockSelectionEnd() )
+				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
+					undefined
 			),
+			hasBlockSelection: !! getBlockSelectionStart(),
+			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
 		};
 	}, [] );
 
-	/* translators: accessibility text for the editor toolbar */
-	const toolbarAriaLabel = __( 'Document tools', 'woocommerce' );
+	const toggleInserter = useCallback(
+		() => setIsInserterOpened( ! isInserterOpened ),
+		[ isInserterOpened, setIsInserterOpened ]
+	);
 
-	const toggleInserter = useCallback( () => {
-		if ( isInserterOpened ) {
-			// Focusing the inserter button should close the inserter popover.
-			// However, there are some cases it won't close when the focus is lost.
-			// See https://github.com/WordPress/gutenberg/issues/43090 for more details.
-			inserterButton.current?.focus();
-			setIsInserterOpened( false );
-		} else {
-			setIsInserterOpened( true );
+	useEffect( () => {
+		// If we have a new block selection, show the block tools
+		if ( hasBlockSelection ) {
+			setIsBlockToolsCollapsed( false );
 		}
-	}, [ isInserterOpened, setIsInserterOpened ] );
+	}, [ hasBlockSelection ] );
 
 	return (
-		<NavigableToolbar
-			className="woocommerce-iframe-editor__header-toolbar"
-			aria-label={ toolbarAriaLabel }
-		>
-			<div className="woocommerce-iframe-editor__header-toolbar-left">
-				<ToolbarItem
-					ref={ inserterButton }
-					as={ Button }
-					className="woocommerce-iframe-editor__header-toolbar-inserter-toggle"
-					variant="primary"
-					isPressed={ isInserterOpened }
-					onMouseDown={ (
-						event: MouseEvent< HTMLButtonElement >
-					) => {
-						event.preventDefault();
-					} }
-					onClick={ toggleInserter }
-					disabled={ ! isInserterEnabled }
-					icon={ plus }
-					label={
-						! isInserterOpened
-							? __( 'Add', 'woocommerce' )
-							: __( 'Close', 'woocommerce' )
-					}
-					showTooltip
-				/>
-				{ isLargeViewport && (
-					<ToolbarItem
-						as={ ToolSelector }
-						disabled={ isTextModeEnabled }
-					/>
+		<div className="woocommerce-iframe-editor__header">
+			<div className="woocommerce-iframe-editor__header-left">
+				<NavigableToolbar
+					className="woocommerce-iframe-editor-document-tools"
+					aria-label={ __( 'Document tools', 'woocommerce' ) }
+					// @ts-expect-error variant prop exists
+					variant="unstyled"
+				>
+					<div className="woocommerce-iframe-editor-document-tools__left">
+						<ToolbarItem
+							ref={ inserterButton }
+							as={ Button }
+							className="woocommerce-iframe-editor__header-inserter-toggle"
+							// @ts-expect-error the prop variant is passed to the Button component
+							variant="primary"
+							isPressed={ isInserterOpened }
+							onMouseDown={ (
+								event: MouseEvent< HTMLButtonElement >
+							) => {
+								event.preventDefault();
+							} }
+							onClick={ toggleInserter }
+							disabled={ ! isInserterEnabled }
+							icon={ plus }
+							label={ __(
+								'Toggle block inserter',
+								'woocommerce'
+							) }
+							aria-expanded={ isInserterOpened }
+							showTooltip
+						/>
+						{ isLargeViewport && (
+							<ToolbarItem
+								as={ ToolSelector }
+								// @ts-expect-error the prop size is passed to the ToolSelector component
+								disabled={ isTextModeEnabled }
+								size="compact"
+							/>
+						) }
+						{ /* @ts-expect-error the prop size is passed to the EditorHistoryUndo component */ }
+						<ToolbarItem as={ EditorHistoryUndo } size="compact" />
+						{ /* @ts-expect-error the prop size is passed to the EditorHistoryRedo component */ }
+						<ToolbarItem as={ EditorHistoryRedo } size="compact" />
+						{ /* @ts-expect-error the prop size is passed to the DocumentOverview component */ }
+						<ToolbarItem as={ DocumentOverview } size="compact" />
+					</div>
+				</NavigableToolbar>
+				{ hasFixedToolbar && isLargeViewport && (
+					<>
+						<div
+							className={ classnames(
+								'selected-block-tools-wrapper',
+								{
+									'is-collapsed': isBlockToolsCollapsed,
+								}
+							) }
+						>
+							{ /* @ts-expect-error missing type */ }
+							<BlockToolbar hideDragHandle />
+						</div>
+						{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
+						<Popover.Slot name="block-toolbar" />
+						{ hasBlockSelection && (
+							<Button
+								className="edit-post-header__block-tools-toggle"
+								icon={ isBlockToolsCollapsed ? next : previous }
+								onClick={ () => {
+									setIsBlockToolsCollapsed(
+										( collapsed ) => ! collapsed
+									);
+								} }
+								label={
+									isBlockToolsCollapsed
+										? __(
+												'Show block tools',
+												'woocommerce'
+										  )
+										: __(
+												'Hide block tools',
+												'woocommerce'
+										  )
+								}
+							/>
+						) }
+					</>
 				) }
-				<ToolbarItem as={ EditorHistoryUndo } />
-				<ToolbarItem as={ EditorHistoryRedo } />
-				<ToolbarItem as={ DocumentOverview } />
 			</div>
-			<div className="woocommerce-iframe-editor__header-toolbar-right">
-				<ToolbarItem
-					as={ Button }
+			<div className="woocommerce-iframe-editor__header-right">
+				<Button
 					variant="tertiary"
 					className="woocommerce-modal-actions__cancel-button"
 					onClick={ onCancel }
 					text={ __( 'Cancel', 'woocommerce' ) }
 				/>
-				<ToolbarItem
-					as={ Button }
+				<Button
 					variant="primary"
 					className="woocommerce-modal-actions__done-button"
 					onClick={ onSave }
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
-				<ToolbarItem
-					as={ ShowBlockInspectorPanel }
-					className="woocommerce-show-block-inspector-panel"
-				/>
-				<ToolbarItem as={ MoreMenu } />
+				<PinnedItems.Slot scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE } />
+				<MoreMenu />
 			</div>
-		</NavigableToolbar>
+		</div>
 	);
 }

@@ -1,12 +1,8 @@
-/**
- * External dependencies
- */
-import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
-
-export type PublishButtonProps = Omit<
-	Button.ButtonProps,
-	'aria-disabled' | 'variant' | 'children'
-> & {
-	productStatus: Product[ 'status' ];
+export type PublishButtonProps = {
+	productType?: string;
+	isMenuButton?: boolean;
+	isPrePublishPanelVisible?: boolean;
+	visibleTab?: string | null;
+	disabled?: boolean;
+	onClick?: ( event: React.MouseEvent< HTMLElement > ) => void;
 };

@@ -4,9 +4,34 @@
 import { TriggerCronJob, TRIGGER_CRON_ACTION_NAME } from './trigger-cron';
 import { DisableEmail } from './disable-email';
 import {
+	UpdateBlockTemplateLoggingThreshold,
+	UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
+} from './update-block-template-logging-threshold';
+import {
 	TriggerUpdateCallbacks,
 	TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
 } from './trigger-update-callbacks';
+import {
+	SetComingSoonMode,
+	UPDATE_COMING_SOON_MODE_ACTION_NAME,
+} from './set-coming-soon-mode';
+import {
+	FakeWooPayments,
+	FAKE_WOO_PAYMENTS_ACTION_NAME,
+} from './fake-woo-payments';
+
+import {
+	UPDATE_WCCOM_REQUEST_ERRORS_MODE,
+	SetWccomRequestErrros,
+} from './set-wccom-request-errors';
+import {
+	SetWccomBaseUrl,
+	UPDATE_WCCOM_BASE_URL_ACTION_NAME,
+} from './set-wccom-base-url';
+import {
+	LoadTemplateVersion,
+	LOAD_TEMPLATE_VERSION_ACTION_NAME,
+} from './load-template-version';
 
 export default [
 	{
@@ -63,5 +88,45 @@ export default [
 		command: 'Run version update callbacks',
 		description: <TriggerUpdateCallbacks />,
 		action: TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
+	},
+	{
+		command: 'Reset Customize Your Store',
+		description: 'Resets Customize Your Store changes.',
+		action: 'resetCustomizeYourStore',
+	},
+	{
+		command: 'Update block template logging threshold',
+		description: <UpdateBlockTemplateLoggingThreshold />,
+		action: UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
+	},
+	{
+		command: 'Force coming soon page to show',
+		description: <SetComingSoonMode />,
+		action: UPDATE_COMING_SOON_MODE_ACTION_NAME,
+	},
+	{
+		command: 'Force errors on woocommerce.com requests',
+		description: <SetWccomRequestErrros />,
+		action: UPDATE_WCCOM_REQUEST_ERRORS_MODE,
+	},
+	{
+		command: 'Toggle Fake WooPayments Completion Status',
+		description: <FakeWooPayments />,
+		action: FAKE_WOO_PAYMENTS_ACTION_NAME,
+	},
+	{
+		command: 'Set WooCommerce.com Base URL',
+		description: <SetWccomBaseUrl />,
+		action: UPDATE_WCCOM_BASE_URL_ACTION_NAME,
+	},
+	{
+		command: 'Reset Launch Your Store',
+		description: 'Resets Launch Your Store and coming soon mode changes.',
+		action: 'resetLaunchYourStore',
+	},
+	{
+		command: 'Load Template Version',
+		description: <LoadTemplateVersion />,
+		action: LOAD_TEMPLATE_VERSION_ACTION_NAME,
 	},
 ];

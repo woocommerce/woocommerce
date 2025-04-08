@@ -11,7 +11,7 @@ on:
 jobs:
     release:
         name: Run release scripts
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: write
         steps:
@@ -19,10 +19,10 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Lint
-              working-directory: plugins/woocommerce-beta-tester
-              run: composer run phpcs
+              with:
+                install: '@woocommerce/plugin-woocommerce-beta-tester...'
+                build: '@woocommerce/plugin-woocommerce-beta-tester...'
+                pull-package-deps: '@woocommerce/plugin-woocommerce-beta-tester'
 
             - name: Build WooCommerce Beta Tester Zip
               working-directory: plugins/woocommerce-beta-tester

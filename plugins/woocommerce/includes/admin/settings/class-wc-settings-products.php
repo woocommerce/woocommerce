@@ -32,6 +32,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'box';
+
+	/**
 	 * Get own sections.
 	 *
 	 * @return array
@@ -50,6 +57,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_default_section() {
+		$locale_info            = include WC()->plugin_path() . '/i18n/locale-info.php';
+		$default_weight_unit    = $locale_info['US']['weight_unit'];
+		$default_dimension_unit = $locale_info['US']['dimension_unit'];
+
 		$settings =
 			array(
 				array(
@@ -111,7 +122,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'       => 'woocommerce_weight_unit',
 					'class'    => 'wc-enhanced-select',
 					'css'      => 'min-width:300px;',
-					'default'  => 'kg',
+					'default'  => $default_weight_unit,
 					'type'     => 'select',
 					'options'  => array(
 						'kg'  => I18nUtil::get_weight_unit_label( 'kg' ),
@@ -128,7 +139,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'       => 'woocommerce_dimension_unit',
 					'class'    => 'wc-enhanced-select',
 					'css'      => 'min-width:300px;',
-					'default'  => 'cm',
+					'default'  => $default_dimension_unit,
 					'type'     => 'select',
 					'options'  => array(
 						'm'  => I18nUtil::get_dimensions_unit_label( 'm' ),
@@ -378,7 +389,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'     => sprintf(
 					// translators: Link to WooCommerce Docs.
 						__( "If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='%s'>Digital/Downloadable Product Handling</a> guide.", 'woocommerce' ),
-						'https://docs.woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'
+						'https://woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'
 					),
 					'options'  => array(
 						'force'     => __( 'Force downloads', 'woocommerce' ),
@@ -396,7 +407,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip'      => sprintf(
 						/* translators: %1$s is a link to the WooCommerce documentation. */
 						__( 'If the "Force Downloads" or "X-Accel-Redirect/X-Sendfile" download method is selected but does not work, the system will use the "Redirect" method as a last resort. <a href="%1$s">See this guide</a> for more details.', 'woocommerce' ),
-						'https://docs.woocommerce.com/document/digital-downloadable-product-handling/'
+						'https://woocommerce.com/document/digital-downloadable-product-handling/'
 					),
 					'checkboxgroup' => 'start',
 					'autoload'      => false,
@@ -442,7 +453,21 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip' => sprintf(
 					// translators: Link to WooCommerce Docs.
 						__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
-						'https://docs.woocommerce.com/document/digital-downloadable-product-handling#unique-string'
+						'https://woocommerce.com/document/digital-downloadable-product-handling#unique-string'
+					),
+				),
+
+				array(
+					'title'    => __( 'Count partial downloads', 'woocommerce' ),
+					'desc'     => __( 'Count downloads even if only part of a file is fetched.', 'woocommerce' ),
+					'id'       => 'woocommerce_downloads_count_partial',
+					'type'     => 'checkbox',
+					'default'  => 'yes',
+					'desc_tip' => sprintf(
+						/* Translators: 1: opening link tag 2: closing link tag. */
+						__( 'Repeat fetches made within a reasonable window of time (by default, 30 minutes) will not be counted twice. This is a generally reasonably way to enforce download limits in relation to ranged requests. %1$sLearn more.%2$s', 'woocommerce' ),
+						'<a href="https://woocommerce.com/document/digital-downloadable-product-handling/">',
+						'</a>'
 					),
 				),
 
@@ -465,7 +490,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 		 * Product->Inventory has a setting `Out of stock visibility`.
 		 * Because of this, we need to recount the terms to keep them in-sync.
 		 */
-		WC()->call_function( 'wc_recount_all_terms' );
+		WC()->call_function( 'wc_recount_all_terms', false );
 
 		$this->do_update_options_action();
 	}

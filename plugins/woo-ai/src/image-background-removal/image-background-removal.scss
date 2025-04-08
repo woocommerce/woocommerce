@@ -1,0 +1,46 @@
+#woocommerce-ai-app-remove-background-link  {
+
+	.woo-ai-background-removal-link__new-block {
+		font-size: 0.8em;
+		margin: 0 5px;
+		background-color: #fdf9e8;
+		font-weight: 400;
+		padding: 2px 3px;
+	}
+
+	.components-notice {
+		padding: 0 0 0 5px;
+		margin: 5px 0 0 0;
+		font-size: .8em;
+		max-width: 125px;
+
+		.components-button.has-icon {
+			width: 25px;
+			min-width: unset;
+		}
+	}
+
+	.background-link_actions {
+		display: flex;
+
+		> button {
+			color: #2271b1;
+			padding: 0;
+			border: 0;
+			background: none;
+			cursor: pointer;
+		}
+
+		> img {
+			height: 16px;
+		}
+	}
+
+	.woocommerce-tour-kit-step__heading {
+		text-transform: none;
+	}
+}
+
+body.post-type-product .woocommerce-layout__footer {
+	z-index: 160001; /* value chosen to appear above media library modal */
+}

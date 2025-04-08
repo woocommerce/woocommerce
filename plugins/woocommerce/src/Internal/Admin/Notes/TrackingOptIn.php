@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use WC_Tracks;
 
 /**
  * Tracking_Opt_In
@@ -69,7 +70,7 @@ class TrackingOptIn {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'tracking-opt-in', __( 'Activate usage tracking', 'woocommerce' ), false, Note::E_WC_ADMIN_NOTE_ACTIONED, true );
+		$note->add_action( 'tracking-opt-in', __( 'Activate usage tracking', 'woocommerce' ), false, Note::E_WC_ADMIN_NOTE_ACTIONED, true, __( 'Usage tracking activated', 'woocommerce' ) );
 		return $note;
 	}
 
@@ -80,9 +81,18 @@ class TrackingOptIn {
 	 */
 	public function opt_in_to_tracking( $note ) {
 		if ( self::NOTE_NAME === $note->get_name() ) {
+			// Get the previous value of the tracking.
+			$prev_value = get_option( 'woocommerce_allow_tracking', 'no' );
+
 			// Opt in to tracking and schedule the first data update.
 			// Same mechanism as in WC_Admin_Setup_Wizard::wc_setup_store_setup_save().
 			update_option( 'woocommerce_allow_tracking', 'yes' );
+
+			// Track woocommerce_allow_tracking_toggled in case was set as 'no' before.
+			if ( class_exists( 'WC_Tracks' ) && 'no' === $prev_value ) {
+				WC_Tracks::track_woocommerce_allow_tracking_toggled( $prev_value, 'yes', 'usage_tracking_note' );
+			}
+
 			wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
 		}
 	}

@@ -16,7 +16,7 @@ import { createPullRequest } from '../../../core/github/repo';
 import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
 import { bumpFiles } from './bump';
-import { validateArgs } from './lib/validate';
+import { validateArgs, getIsAccelRelease } from './lib/validate';
 import { Options } from './types';
 
 export const versionBumpCommand = new Command( 'version-bump' )
@@ -45,6 +45,16 @@ export const versionBumpCommand = new Command( 'version-bump' )
 	.option(
 		'-c --commit-direct-to-base',
 		'Commit directly to the base branch. Do not create a PR just push directly to base branch',
+		false
+	)
+	.option(
+		'-f --force',
+		'Force a version bump, even when the new version is less than the existing version',
+		false
+	)
+	.option(
+		'-a --allow-accel',
+		'Allow accelerated versioning. When this option is not present, versions must be semantically correct',
 		false
 	)
 	.action( async ( version, options: Options ) => {
@@ -78,7 +88,10 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
-		const majorMinor = getMajorMinor( version );
+
+		const majorMinor = getIsAccelRelease( version )
+			? version
+			: getMajorMinor( version );
 		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
 
 		try {
@@ -91,14 +104,6 @@ export const versionBumpCommand = new Command( 'version-bump' )
 				Logger.notice( `Checking out ${ base }` );
 				await checkoutRemoteBranch( tmpRepoPath, base );
 			} else {
-				const exists = await git.raw( 'ls-remote', 'origin', branch );
-
-				if ( ! dryRun && exists.trim().length > 0 ) {
-					Logger.error(
-						`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
-					);
-				}
-
 				if ( base !== 'trunk' ) {
 					// if the base is not trunk, we need to checkout the base branch first before creating a new branch.
 					Logger.notice( `Checking out ${ base }` );
@@ -116,7 +121,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			Logger.notice(
 				`Bumping versions in ${ owner }/${ name } on ${ workingBranch } branch`
 			);
-			bumpFiles( tmpRepoPath, version );
+			await bumpFiles( tmpRepoPath, version );
 
 			if ( dryRun ) {
 				const diff = await git.diffSummary();
@@ -137,7 +142,12 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			);
 
 			Logger.notice( `Pushing ${ workingBranch } branch to Github` );
-			await git.push( 'origin', workingBranch );
+			// if commit is direct to base, we push normally else we push with force
+			if ( commitDirectToBase ) {
+				await git.push( 'origin', workingBranch );
+			} else {
+				await git.push( 'origin', workingBranch, [ '--force' ] );
+			}
 
 			if ( ! commitDirectToBase ) {
 				Logger.startTask( 'Creating a pull request' );

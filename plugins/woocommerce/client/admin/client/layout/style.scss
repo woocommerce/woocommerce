@@ -1,0 +1,273 @@
+.woocommerce-layout {
+	margin: 0;
+	padding: 0;
+
+	&__loading {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+.woocommerce-layout__no-match {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.components-card {
+		max-width: 680px;
+		width: 100%;
+	}
+}
+
+.woocommerce-layout__primary {
+	margin: $gutter-large 0 128px $fallback-gutter-large;
+	margin: $gutter-large 0 128px $gutter-large;
+
+	@include breakpoint("<782px") {
+		margin-top: 20px;
+	}
+}
+
+.woocommerce-layout .woocommerce-layout__main {
+	padding-right: $fallback-gutter-large;
+	padding-right: $gutter-large;
+	max-width: 100%;
+}
+
+.woocommerce-admin-page {
+	.update-nag {
+		display: none;
+	}
+
+	#wpbody {
+		&.no-header {
+			display: block;
+			margin-top: 0;
+
+			.woocommerce-layout__primary {
+				margin-top: 0;
+			}
+		}
+	}
+}
+
+.woocommerce-admin-is-loading {
+	#adminmenumain,
+	#wpfooter,
+	#wpcontent,
+	#wpadminbar,
+	#wpbody-content,
+	.woocommerce-layout__header,
+	.update-nag,
+	.woocommerce-store-alerts,
+	.woocommerce-message,
+	.notice,
+	.error,
+	.updated,
+	.components-modal__screen-overlay {
+		display: none;
+	}
+}
+
+.woocommerce-admin-full-screen {
+	background: $studio-gray-0;
+	color: $studio-gray-60;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+	#wpwrap {
+		top: 0;
+	}
+
+	#wpbody-content {
+		min-height: 100vh !important;
+	}
+
+	/* Hide wp-admin and WooCommerce elements when the dashboard body class is present */
+	#wpcontent > *,
+	#adminmenumain,
+	.woocommerce-layout__header,
+	.update-nag,
+	.woocommerce-store-alerts,
+	.woocommerce-message,
+	.notice,
+	.error,
+	.updated {
+		display: none;
+	}
+
+	#wpcontent {
+		margin-left: 0 !important;
+
+		> #wpbody {
+			display: block;
+			margin-top: 0 !important;
+		}
+	}
+
+	&.has-woocommerce-navigation {
+		#wpbody {
+			padding-left: 0;
+		}
+	}
+}
+
+.is-wp-toolbar-disabled {
+	#wpadminbar {
+		display: none !important;
+	}
+}
+
+.wp-toolbar .is-wp-toolbar-disabled,
+.wp-toolbar:has(
+	> .woocommerce-admin-full-screen .woocommerce-global-error-boundary
+) {
+	margin-top: -$adminbar-height;
+	@include breakpoint("<600px") {
+		margin-top: -$adminbar-height-mobile;
+	}
+}
+
+.woocommerce-task-dashboard__container .components-button.is-button,
+.woocommerce-profile-wizard__body .components-button.is-button,
+.woocommerce-admin-page .components-modal__frame .components-button.is-button {
+	height: 48px;
+	padding-left: 25px;
+	padding-right: 25px;
+	text-align: center;
+	font-size: 14px;
+	line-height: 36px;
+	font-weight: 500;
+	align-items: center;
+
+	&:disabled {
+		cursor: not-allowed;
+	}
+}
+
+// @todo Remove this after https://github.com/WordPress/gutenberg/issues/28311 is fixed
+.components-modal__header .components-button svg + span {
+	display: none;
+}
+
+.components-modal__frame.woocommerce-usage-modal {
+	width: 600px;
+	max-width: 100%;
+
+	.components-modal__header {
+		margin-bottom: 0;
+	}
+
+	.woocommerce-usage-modal__wrapper {
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+
+		a {
+			color: $studio-gray-60;
+		}
+
+		button.is-primary {
+			align-self: flex-end;
+		}
+	}
+
+	.woocommerce-usage-modal__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: $gap;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}
+
+.woocommerce-payments__usage-modal {
+	.components-modal__header {
+		height: auto;
+		padding: 24px 24px 0 24px;
+
+		.components-modal__header-heading {
+			font-size: 24px;
+			line-height: 32px;
+			margin: 0 0 24px 0;
+		}
+	}
+
+	.woocommerce-payments__usage-modal-message {
+		padding: $gap 0;
+		font-size: 16px;
+		line-height: 24px;
+	}
+
+	.woocommerce-payments__usage-footer {
+		display: flex;
+		justify-content: flex-end;
+		padding: $gap 0;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}
+
+.components-modal__frame.woocommerce-cart-modal {
+	width: 600px;
+	max-width: 100%;
+
+	.components-modal__header {
+		border-bottom: 0;
+		margin-bottom: $gap;
+		margin-top: $gap;
+
+		button {
+			display: none;
+		}
+	}
+
+	.components-modal__header-heading {
+		font-style: normal;
+		font-weight: normal;
+		font-size: 24px;
+		line-height: 32px;
+	}
+
+	.woocommerce-list {
+		margin-top: $gap-large;
+	}
+
+	.woocommerce-list .woocommerce-list__item:first-child {
+		border-top: 1px solid $studio-gray-5;
+	}
+
+	.woocommerce-list__item {
+		border-bottom: 1px solid $studio-gray-5;
+	}
+
+	.woocommerce-cart-modal__help-text {
+		font-size: 16px;
+		line-height: 24px;
+	}
+
+	.woocommerce-cart-modal__actions {
+		text-align: right;
+
+		button.is-link {
+			margin-right: $gap;
+			text-decoration: none;
+			font-weight: 600;
+			font-size: 14px;
+		}
+
+		button.is-primary {
+			align-self: flex-end;
+		}
+	}
+}

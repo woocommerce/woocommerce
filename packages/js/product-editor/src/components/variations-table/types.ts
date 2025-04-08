@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { ProductVariation } from '@woocommerce/data';
+import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 
 export type VariationActionsMenuItemProps = {
-	selection: ProductVariation | ProductVariation[];
+	selection: ProductVariation[];
 	onChange(
-		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
+		values: PartialProductVariation[] | React.FormEvent< HTMLDivElement >,
+		showSuccess?: boolean
 	): void;
 	onClose(): void;
+	supportsMultipleSelection?: boolean;
 };

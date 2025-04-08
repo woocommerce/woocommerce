@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "dist",
-		"target": "es6",
+		"target": "esnext",
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"moduleResolution": "node",

@@ -17,6 +17,20 @@ class Marketing {
 	use CouponsMovedTrait;
 
 	/**
+	 * Constant representing the key for the submenu name value in the global $submenu array.
+	 *
+	 * @var int
+	 */
+	const SUBMENU_NAME_KEY = 0;
+
+	/**
+	 * Constant representing the key for the submenu location value in the global $submenu array.
+	 *
+	 * @var int
+	 */
+	const SUBMENU_LOCATION_KEY = 2;
+
+	/**
 	 * Class instance.
 	 *
 	 * @var Marketing instance
@@ -44,6 +58,9 @@ class Marketing {
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 5 );
 		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 6 );
 
+		// Overwrite submenu default ordering for marketing menu. High priority gives plugins the chance to register their own menu items.
+		add_action( 'admin_menu', array( $this, 'reorder_marketing_submenu' ), 99 );
+
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
 	}
 
@@ -66,12 +83,12 @@ class Marketing {
 		}
 
 		PageController::get_instance()->connect_page(
-			[
+			array(
 				'id'         => 'woocommerce-marketing',
 				'title'      => 'Marketing',
 				'capability' => 'manage_woocommerce',
 				'path'       => 'wc-admin&path=/marketing',
-			]
+			)
 		);
 	}
 
@@ -82,12 +99,18 @@ class Marketing {
 		$this->register_overview_page();
 
 		$controller = PageController::get_instance();
-		$defaults   = [
+		$defaults   = array(
 			'parent'        => 'woocommerce-marketing',
 			'existing_page' => false,
-		];
+		);
 
-		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', [] );
+		/**
+		 * Filters marketing menu items.
+		 *
+		 * @since 4.1.0
+		 * @param array $items Marketing pages.
+		 */
+		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', array() );
 		foreach ( $marketing_pages as $marketing_page ) {
 			if ( ! is_array( $marketing_page ) ) {
 				continue;
@@ -115,16 +138,12 @@ class Marketing {
 
 		// First register the page.
 		PageController::get_instance()->register_page(
-			[
-				'id'       => 'woocommerce-marketing-overview',
-				'title'    => __( 'Overview', 'woocommerce' ),
-				'path'     => 'wc-admin&path=/marketing',
-				'parent'   => 'woocommerce-marketing',
-				'nav_args' => array(
-					'parent' => 'woocommerce-marketing',
-					'order'  => 10,
-				),
-			]
+			array(
+				'id'     => 'woocommerce-marketing-overview',
+				'title'  => __( 'Overview', 'woocommerce' ),
+				'path'   => 'wc-admin&path=/marketing',
+				'parent' => 'woocommerce-marketing',
+			)
 		);
 
 		// Now fix the path, since register_page() gets it wrong.
@@ -138,6 +157,67 @@ class Marketing {
 				$item[2] = 'admin.php?page=' . $item[2];
 			}
 		}
+	}
+
+	/**
+	 * Order marketing menu items alphabetically.
+	 * Overview should be first, and Coupons should be second, followed by other marketing menu items.
+	 *
+	 * @return  void
+	 */
+	public function reorder_marketing_submenu() {
+		global $submenu;
+
+		if ( ! isset( $submenu['woocommerce-marketing'] ) ) {
+			return;
+		}
+
+		$marketing_submenu = $submenu['woocommerce-marketing'];
+		$new_menu_order    = array();
+
+		// Overview should be first.
+		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, self::SUBMENU_NAME_KEY ), true );
+
+		if ( false === $overview_key ) {
+			/*
+			 * If Overview is not found, we may be on a site with a different language.
+			 * We can use a fallback and try to find the overview page by its path.
+			 */
+			$overview_key = array_search( 'admin.php?page=wc-admin&path=/marketing', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ), true );
+		}
+
+		if ( false !== $overview_key ) {
+			$new_menu_order[] = $marketing_submenu[ $overview_key ];
+			array_splice( $marketing_submenu, $overview_key, 1 );
+		}
+
+		// Coupons should be second.
+		$coupons_key = array_search( 'Coupons', array_column( $marketing_submenu, self::SUBMENU_NAME_KEY ), true );
+
+		if ( false === $coupons_key ) {
+			/*
+			 * If Coupons is not found, we may be on a site with a different language.
+			 * We can use a fallback and try to find the coupons page by its path.
+			 */
+			$coupons_key = array_search( 'edit.php?post_type=shop_coupon', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ), true );
+		}
+
+		if ( false !== $coupons_key ) {
+			$new_menu_order[] = $marketing_submenu[ $coupons_key ];
+			array_splice( $marketing_submenu, $coupons_key, 1 );
+		}
+
+		// Sort the rest of the items alphabetically.
+		usort(
+			$marketing_submenu,
+			function ( $a, $b ) {
+				return strcmp( $a[0], $b[0] );
+			}
+		);
+
+		$new_menu_order = array_merge( $new_menu_order, $marketing_submenu );
+
+		$submenu['woocommerce-marketing'] = $new_menu_order;  //phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**

@@ -14,15 +14,15 @@
 function usage() {
 	global $argv;
 	echo <<<EOH
-USAGE: {$argv[0]} [--debug|-v] [--list] [-p <path>|--path=<path>] <base-ref> <head-ref>
+USAGE: {$argv[0]} [--debug|-v] [--list] [-p <path>|--path=<path>] [--pr-number=<pr-number>|<base-ref> <head-ref>]
 Checks that a monorepo commit contains a Changelogger change entry for each
 project touched.
-  --debug, -v     Display verbose output.
-  --list          Just list projects, no explanatory output.
-  --path=<path>,  Project path to check for changed files.
-    -p <path>
-  <base-ref>      Base git ref to compare for changed files.
-  <head-ref>      Head git ref to compare for changed files.
+  --debug, -v              Display verbose output.
+  --list, -l               Just list projects, no explanatory output.
+  --path=<path>, -p <path> Project path to check for changed files.
+  --pr-number=<pr-number>  PR number for change detection. If specified, fetches the changes list via GitHub client.
+  <base-ref>               Base git ref to compare for changed files.
+  <head-ref>               Head git ref to compare for changed files.
 EOH;
 	exit( 1 );
 }
@@ -34,6 +34,7 @@ $long_options = array(
 	'list',
 	'help',
 	'path:',
+	'pr-number:',
 );
 $options = getopt( $short_options, $long_options, $remain_index );
 $arg_count = count( $argv ) - $remain_index;
@@ -42,25 +43,18 @@ if ( isset( $options['h'] ) || isset( $options['help'] ) ) {
 	usage();
 }
 
-$list = isset( $options['l'] ) || isset( $options['list'] );
-$verbose = isset( $options['v'] ) || isset( $options['debug'] );
-$path = false;
-if ( isset( $options['p'] ) || isset( $options['path'] ) ) {
-	$path = isset( $options['path'] ) ? $options['path'] : $options['p'];
-}
+$list      = isset( $options['l'] ) || isset( $options['list'] );
+$verbose   = isset( $options['v'] ) || isset( $options['debug'] );
+$path      = $options['path'] ?? $options['p'] ?? false;
+$pr_number = $options['pr-number'] ?? false;
 
-if ( $arg_count > 2 ) {
-	fprintf( STDERR, "\e[1;31mToo many arguments.\e[0m\n" );
+if ( ! $pr_number && $arg_count !== 2 ) {
+	fprintf( STDERR, "\e[1;31mBase and head refs should be provided.\e[0m\n" );
 	usage();
 }
 
-if ( $arg_count < 2 ) {
-	fprintf( STDERR, "\e[1;31mBase and head refs are required.\e[0m\n" );
-	usage();
-}
-
-$base = $argv[ count( $argv ) - 2 ];
-$head = $argv[ count( $argv ) - 1 ];
+$base = $arg_count ? $argv[ count( $argv ) - 2 ] : null;
+$head = $arg_count ? $argv[ count( $argv ) - 1 ] : null;
 
 if ( $verbose ) {
 	/**
@@ -121,23 +115,29 @@ foreach ( $composer_projects as $project_path ) {
 		continue;
 	}
 	$data  = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
-	$data += array(
-		'changelog'   => $project_path . '/CHANGELOG.md',
-		'changes-dir' => $project_path . '/changelog',
-	);
+
+	if ( ! isset( $data[ 'changelog' ] ) ) {
+		$data['changelog'] = $project_path . '/CHANGELOG.md';
+	}
+	if ( ! isset( $data[ 'changes-dir' ] ) ) {
+		$data['changes-dir'] = $project_path . '/changelog';
+	}
+
 	$changelogger_projects[ $project_path ] = $data;
 }
 
 // Support centralizing the changelogs for multiple components and validating them together.
 $project_component_map = array(
-	'plugins/woocommerce-admin' => 'plugins/woocommerce',
+	'plugins/woocommerce/client/blocks' => 'plugins/woocommerce',
 );
 
 // Process the diff.
-debug( 'Checking diff from %s...%s.', $base, $head );
+$pr_number ? debug( 'Checking diff from PR #%s.', $pr_number ) : debug( 'Checking diff from %s...%s.', $base, $head );
 $pipes = null;
 $p     = proc_open(
-	sprintf( 'git -c core.quotepath=off diff --no-renames --name-only %s...%s', escapeshellarg( $base ), escapeshellarg( $head ) ),
+	$pr_number
+		? sprintf( 'gh pr diff %s --name-only', escapeshellarg( $pr_number ) )
+		: sprintf( 'git -c core.quotepath=off diff --no-renames --name-only %s...%s', escapeshellarg( $base ), escapeshellarg( $head ) ),
 	array( array( 'pipe', 'r' ), array( 'pipe', 'w' ), STDERR ),
 	$pipes
 );
@@ -160,19 +160,14 @@ while ( ( $line = fgets( $pipes[1] ) ) ) {
 		}
 	}
 
-	// Also try to match to project components.
-	if ( false === $project_match ) {
-		foreach ( $project_component_map as $path => $project ) {
-			if ( substr( $line, 0, strlen( $path ) + 1 ) === $path . '/' ) {
-				debug( 'Mapping %s to project %s.', $line, $project );
-				$project_match = $project;
-				break;
-			}
-		}
+	// Support overriding the project when checking a component.
+	if ( isset( $project_component_map[ $project_match ] ) ) {
+		$project_match = $project_component_map[ $project_match ];
+		debug( 'Mapping %s to project %s.', $line, $project_match );
 	}
 
 	if ( false === $project_match ) {
-		debug( 'Ignoring non-project file %s.', $line );
+		debug( 'Ignoring file %s (no associated composer manifest).', $line );
 		continue;
 	}
 
@@ -191,6 +186,11 @@ while ( ( $line = fgets( $pipes[1] ) ) ) {
 			debug( 'PR touches file %s, marking %s as having a change file.', $line, $project_match );
 			$ok_projects[ $project_match ] = true;
 		}
+		continue;
+	}
+	// Ignore dot-files: those are development related, and it makes no sense to create a changelog entry for them.
+	if ( '.' === basename( $line )[0] ) {
+		debug( 'Ignoring changes dot-file %s.', $line );
 		continue;
 	}
 
@@ -216,10 +216,10 @@ foreach ( $touched_projects as $slug => $files ) {
 		} elseif ( getenv( 'CI' ) ) {
 			printf( "---\n" ); // Bracket message containing newlines for better visibility in GH's logs.
 			printf(
-				"::error::Project %s is being changed, but no change file in %s is touched!\n\nUse `pnpm --filter=./%s run changelog add` to add a change file.\n",
+				"::error::Project %s is being changed, but no change file in %s is touched!\n\nUse `pnpm --filter='%s' changelog add` to add a change file.\n",
 				$slug,
 				"$slug/{$changelogger_projects[ $slug ]['changes-dir']}/",
-				$slug
+				json_decode( file_get_contents( sprintf( './%s/package.json', $slug ) ), true )['name'] ?? ( './' . $slug )
 			);
 			printf( "---\n" );
 			$exit = 1;
@@ -234,7 +234,18 @@ foreach ( $touched_projects as $slug => $files ) {
 	}
 }
 if ( $exit && ! getenv( 'CI' ) && ! $list ) {
-	printf( "\e[32mUse `pnpm --filter={project} run changelog add` to add a change file for each project.\e[0m\n" );
+	printf( "\e[32mUse `pnpm --filter={project} changelog add` to add a change file for each project.\e[0m\n" );
+}
+
+// On success in CI, export list of passed package for further validation.
+if ( ! $exit && getenv( 'CI' ) ) {
+	$passed_packages = array_map(
+		function ( string $slug ) {
+			return json_decode( file_get_contents( sprintf( './%s/package.json', $slug ) ), true )['name'] ?? ( './' . $slug );
+		},
+		array_keys( $touched_projects )
+	);
+	echo sprintf( "Passed validation: %s", implode( ', ', $passed_packages ) ), PHP_EOL;
 }
 
 exit( $exit );

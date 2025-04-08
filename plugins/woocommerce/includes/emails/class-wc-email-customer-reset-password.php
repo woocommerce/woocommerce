@@ -79,7 +79,9 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Password Reset Request for {site_title}', 'woocommerce' );
+			return $this->email_improvements_enabled
+				? __( 'Reset your password for {site_title}', 'woocommerce' )
+				: __( 'Password Reset Request for {site_title}', 'woocommerce' );
 		}
 
 		/**
@@ -89,7 +91,9 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Password Reset Request', 'woocommerce' );
+			return $this->email_improvements_enabled
+				? __( 'Reset your password', 'woocommerce' )
+				: __( 'Password Reset Request', 'woocommerce' );
 		}
 
 		/**
@@ -160,6 +164,27 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 				)
 			);
 		}
+
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'user_id'       => $this->user_id,
+					'user_login'    => $this->user_login,
+					'reset_key'     => $this->reset_key,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
+
 
 		/**
 		 * Default content to show below main email content.

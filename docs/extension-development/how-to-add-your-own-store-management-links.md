@@ -1,4 +1,8 @@
-# Adding store management links
+---
+post_title: How to add store management links
+menu_title: Add store management links
+tags: reference
+---
 
 ## Introduction
 
@@ -70,4 +74,4 @@ addFilter(
 
 Here's a screen shot using our new custom store management link:
 
-![screen shot of custom store management link in wp-admin](https://i.imgur.com/yvXeSya.png)
+![screen shot of custom store management link in wp-admin](https://developer.woocommerce.com/wp-content/uploads/2023/12/yvXeSya.png)

@@ -1,4 +1,7 @@
 <?php
+declare( strict_types = 1);
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
@@ -6,7 +9,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 /**
  * Tests related to order edit locking in admin.
  */
-class EditLockTest extends WC_Unit_Test_Case {
+class EditLockTest extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
@@ -40,6 +43,9 @@ class EditLockTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		$this->setup_cot();
 		$this->toggle_cot_feature_and_usage( true );
 
@@ -57,6 +63,7 @@ class EditLockTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clean_up_cot_setup();
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 

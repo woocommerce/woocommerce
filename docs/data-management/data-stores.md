@@ -1,4 +1,8 @@
-# Data Stores
+---
+post_title: How to manage WooCommerce Data Stores
+menu_title: Manage data stores
+Tags: how-to
+---
 
 ## Introduction
 

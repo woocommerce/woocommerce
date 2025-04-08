@@ -15,10 +15,6 @@ class WC_Beta_Tester_Live_Branches {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( ! $this->woocommerce_is_installed() ) {
-			return;
-		}
-
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
 		add_action( 'admin_init', array( $this, 'register_scripts' ) );
 	}
@@ -36,6 +32,10 @@ class WC_Beta_Tester_Live_Branches {
 	 * Register live branches scripts.
 	 */
 	public function register_scripts() {
+		if ( ! $this->woocommerce_is_installed() ) {
+			return;
+		}
+
 		if ( ! is_admin() ) {
 			return;
 		}
@@ -65,6 +65,10 @@ class WC_Beta_Tester_Live_Branches {
 	 * Register live branches page.
 	 */
 	public function register_page() {
+		if ( ! $this->woocommerce_is_installed() ) {
+			return;
+		}
+
 		if ( ! function_exists( 'wc_admin_register_page' ) ) {
 			return;
 		}

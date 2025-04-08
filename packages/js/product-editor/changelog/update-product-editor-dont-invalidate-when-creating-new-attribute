@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+[Product Block Editor]: update the attributes list optimistically when a new attribute is created

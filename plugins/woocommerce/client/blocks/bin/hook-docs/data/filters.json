@@ -1,0 +1,1504 @@
+{
+    "$schema": "https://raw.githubusercontent.com/wp-hooks/generator/0.9.0/schema.json",
+    "hooks": [
+        {
+            "name": "__experimental_woocommerce_blocks_add_data_attributes_to_block",
+            "file": "BlockTypesController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the list of allowed Block Names",
+                "long_description": "This hook defines which block names should have block name and attribute data- attributes appended on render.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "5.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "List of namespaces.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$allowed_namespaces"
+                    }
+                ],
+                "long_description_html": "<p>This hook defines which block names should have block name and attribute data- attributes appended on render.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "__experimental_woocommerce_blocks_add_data_attributes_to_namespace",
+            "file": "BlockTypesController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the list of allowed block namespaces.",
+                "long_description": "This hook defines which block namespaces should have block name and attribute `data-` attributes appended on render.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "5.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "List of namespaces.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$allowed_namespaces"
+                    }
+                ],
+                "long_description_html": "<p>This hook defines which block namespaces should have block name and attribute <code>data-</code> attributes appended on render.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "__experimental_woocommerce_blocks_payment_gateway_features_list",
+            "file": "Payments/Integrations/PayPal.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter to control what features are available for each payment gateway.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.4.0"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/payment-gateways-features-list.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "List of supported features.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$features"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Gateway name.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$name"
+                    },
+                    {
+                        "name": "return",
+                        "content": "Updated list of supported features.",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "deprecated_function_trigger_error",
+            "file": "Domain/Bootstrap.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters whether to trigger an error for deprecated functions. (Same as WP core)",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.3.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Whether to trigger the error for deprecated functions. Default true.",
+                        "types": [
+                            "bool"
+                        ],
+                        "variable": "$trigger"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "loop_shop_per_page",
+            "file": "BlockTypes/ProductQuery.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "loop_shop_per_page",
+            "file": "BlockTypes/ProductCollection.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "wc_session_expiration",
+            "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the session expiration.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "8.7.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Expiration in seconds.",
+                        "types": [
+                            "int"
+                        ],
+                        "variable": "$expiration"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_add_cart_item",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the item being added to the cart.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of cart item data being added to the cart.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item_data"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Id of the item in the cart.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$cart_id"
+                    },
+                    {
+                        "name": "return",
+                        "content": "Updated cart item data.",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_add_cart_item_data",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter cart item data for add to cart requests.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of other cart item data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item_data"
+                    },
+                    {
+                        "name": "param",
+                        "content": "ID of the product added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$product_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Variation ID of the product added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$variation_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Quantity of the item added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$quantity"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 4
+        },
+        {
+            "name": "woocommerce_add_to_cart_quantity",
+            "file": "BlockTypes/ProductButton.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the change the quantity to add to cart.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The default quantity.",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\BlockTypes\\number"
+                        ],
+                        "variable": "$default_quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The product id.",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\BlockTypes\\number"
+                        ],
+                        "variable": "$product_id"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_add_to_cart_sold_individually_quantity",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter sold individually quantity for add to cart requests.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Defaults to 1.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$sold_individually_quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Quantity of the item added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "ID of the product added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$product_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Variation ID of the product added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$variation_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of other cart item data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item_data"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "integer"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 5
+        },
+        {
+            "name": "woocommerce_add_to_cart_validation",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters if an item being added to the cart passed validation checks.",
+                "long_description": "Allow 3rd parties to validate if an item can be added to the cart. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to exceptions instead.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "deprecated",
+                        "content": ""
+                    },
+                    {
+                        "name": "param",
+                        "content": "True if the item passed validation.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": "$passed_validation"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product ID being validated.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$product_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Quantity added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Variation ID being added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$variation_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Variation data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$variation"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "boolean"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>Allow 3rd parties to validate if an item can be added to the cart. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to exceptions instead.</p>"
+            },
+            "args": 5
+        },
+        {
+            "name": "woocommerce_adjust_non_base_location_prices",
+            "file": "StoreApi/Utilities/ProductQuery.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters if taxes should be removed from locations outside the store base location.",
+                "long_description": "The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "True by default.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": "$adjust_non_base_location_prices"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "boolean"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_apply_base_tax_for_local_pickup",
+            "file": "Shipping/ShippingController.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_apply_individual_use_coupon",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter coupons to remove when applying an individual use coupon.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of coupons to remove from the cart.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$coupons"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Coupon object applied to the cart.",
+                        "types": [
+                            "\\WC_Coupon"
+                        ],
+                        "variable": "$coupon"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of applied coupons already applied to the cart.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$applied_coupons"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_apply_with_individual_use_coupon",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters if a coupon can be applied alongside other individual use coupons.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Defaults to false.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": "$apply_with_individual_use_coupon"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Coupon object applied to the cart.",
+                        "types": [
+                            "\\WC_Coupon"
+                        ],
+                        "variable": "$coupon"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Individual use coupon already applied to the cart.",
+                        "types": [
+                            "\\WC_Coupon"
+                        ],
+                        "variable": "$individual_use_coupon"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of applied coupons already applied to the cart.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$applied_coupons"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "boolean"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 4
+        },
+        {
+            "name": "woocommerce_blocks_hook_compatibility_additional_data",
+            "file": "Templates/AbstractTemplateCompatibility.php",
+            "type": "filter",
+            "doc": {
+                "description": "When extensions implement their equivalent blocks of the template hook functions, they can use this filter to register their old hooked data here, so in the blockified template, the old hooked functions can be removed in favor of the new blocks while keeping the old hooked functions working in classic templates.",
+                "long_description": "Accepts an array of hooked data. The array should be in the following format: [   [     hook => <hook-name>,     function => <function-name>,     priority => <priority>,  ],  ... ] Where: - hook-name is the name of the hook that have the functions hooked to. - function-name is the hooked function name. - priority is the priority of the hooked function.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.5.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Additional hooked data. Default to empty",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$data"
+                    }
+                ],
+                "long_description_html": "<p>Accepts an array of hooked data. The array should be in the following format: [ [ hook =&gt; <hook-name>, function =&gt; <function-name>, priority =&gt; <priority>, ], ... ] Where:</p> <ul> <li>hook-name is the name of the hook that have the functions hooked to.</li> <li>function-name is the hooked function name.</li> <li>priority is the priority of the hooked function.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_blocks_product_grid_is_cacheable",
+            "file": "BlockTypes/AbstractProductGrid.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters whether or not the product grid is cacheable.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "The list of script dependencies.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": "$is_cacheable"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Query args for the products query passed to BlocksWpQuery.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$query_args"
+                    },
+                    {
+                        "name": "return",
+                        "content": "True to enable cache, false to disable cache.",
+                        "types": [
+                            "array"
+                        ]
+                    },
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_blocks_product_grid_item_html",
+            "file": "BlockTypes/AbstractProductGrid.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the HTML for products in the grid.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Product grid item HTML.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$html"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product data passed to the template.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$data"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product object.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "return",
+                        "content": "Updated product grid item HTML.",
+                        "types": [
+                            "string"
+                        ]
+                    },
+                    {
+                        "name": "since",
+                        "content": "2.2.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_blocks_register_script_dependencies",
+            "file": "Assets/Api.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the list of script dependencies.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "3.0.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The list of script dependencies.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$dependencies"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The script's handle.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$handle"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_cart_contents_changed",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the entire cart contents when the cart changes.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of all cart items.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_contents"
+                    },
+                    {
+                        "name": "return",
+                        "content": "Updated array of all cart items.",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_cart_item_permalink",
+            "file": "StoreApi/Schemas/V1/CartItemSchema.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter the product permalink.",
+                "long_description": "This is a hook taken from the legacy cart/mini-cart templates that allows the permalink to be changed for a product. This is specific to the cart endpoint.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product permalink.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$product_permalink"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item array.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item key.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$cart_item_key"
+                    }
+                ],
+                "long_description_html": "<p>This is a hook taken from the legacy cart/mini-cart templates that allows the permalink to be changed for a product. This is specific to the cart endpoint.</p>"
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_disable_compatibility_layer",
+            "file": "Templates/AbstractTemplateCompatibility.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter to disable the compatibility layer for the blockified templates.",
+                "long_description": "This hook allows to disable the compatibility layer for the blockified.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "TBD",
+                        "description": "TBD"
+                    },
+                    {
+                        "name": "param",
+                        "content": "",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\Templates\\boolean."
+                        ],
+                        "variable": ""
+                    }
+                ],
+                "long_description_html": "<p>This hook allows to disable the compatibility layer for the blockified.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_disable_compatibility_layer",
+            "file": "Templates/AbstractTemplateCompatibility.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter to disable the compatibility layer for the blockified templates.",
+                "long_description": "This hook allows to disable the compatibility layer for the blockified templates.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "TBD",
+                        "description": "TBD"
+                    },
+                    {
+                        "name": "param",
+                        "content": "",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\Templates\\boolean."
+                        ],
+                        "variable": ""
+                    }
+                ],
+                "long_description_html": "<p>This hook allows to disable the compatibility layer for the blockified templates.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_ga_disable_tracking",
+            "file": "Domain/Services/GoogleAnalytics.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter to disable Google Analytics tracking.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in GA extension."
+                    },
+                    {
+                        "name": "since",
+                        "content": "4.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "If true, tracking will be disabled.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": "$disable_tracking"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_get_item_data",
+            "file": "StoreApi/Schemas/V1/CartItemSchema.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters cart item data.",
+                "long_description": "Filters the variation option name for custom option slugs.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.3.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item data. Empty by default.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$item_data"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item array.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>Filters the variation option name for custom option slugs.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_loop_add_to_cart_args",
+            "file": "BlockTypes/ProductButton.php",
+            "type": "filter",
+            "doc": {
+                "description": "Allow filtering of the add to cart button arguments.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.7.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_loop_add_to_cart_link",
+            "file": "BlockTypes/ProductButton.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the add to cart button class.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "8.7.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The class.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$class"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_new_customer_data",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters customer data before a customer account is registered.",
+                "long_description": "This hook filters customer data. It allows user data to be changed, for example, username, password, email, first name, last name, and role.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "An array of customer (user) data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$customer_data"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>This hook filters customer data. It allows user data to be changed, for example, username, password, email, first name, last name, and role.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_pay_order_product_has_enough_stock",
+            "file": "StoreApi/Utilities/OrderController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters whether or not the product has enough stock.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "True if has enough stock.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": ""
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "since",
+                        "content": "9.8.0-dev"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_pay_order_product_in_stock",
+            "file": "StoreApi/Utilities/OrderController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters whether or not the product is in stock for this pay for order.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "True if in stock.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": ""
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "since",
+                        "content": "9.8.0-dev"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_registration_errors",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters registration errors before a customer account is registered.",
+                "long_description": "This hook filters registration errors. This can be used to manipulate the array of errors before they are displayed.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Error object.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$errors"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer username.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$username"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer email address.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$user_email"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "\\WP_Error"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>This hook filters registration errors. This can be used to manipulate the array of errors before they are displayed.</p>"
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_shared_settings",
+            "file": "Assets/AssetDataRegistry.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the array of shared settings.",
+                "long_description": "Low level hook for registration of new data late in the cycle. This is deprecated. Instead, use the data api:\n ```php Automattic\\WooCommerce\\Blocks\\Package::container()->get( Automattic\\WooCommerce\\Blocks\\Assets\\AssetDataRegistry::class )->add( $key, $value ) ```",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "5.0.0"
+                    },
+                    {
+                        "name": "deprecated",
+                        "content": ""
+                    },
+                    {
+                        "name": "param",
+                        "content": "Settings data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$data"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>Low level hook for registration of new data late in the cycle. This is deprecated. Instead, use the data api:</p> <pre><code class=\"language-php\">Automattic\\WooCommerce\\Blocks\\Package::container()-&gt;get( Automattic\\WooCommerce\\Blocks\\Assets\\AssetDataRegistry::class )-&gt;add( $key, $value )</code></pre>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_shipping_package_name",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the shipping package name.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.3.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Shipping package name.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$shipping_package_name"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Shipping package ID.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$package_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Shipping package from WooCommerce.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$package"
+                    },
+                    {
+                        "name": "return",
+                        "content": "Shipping package name.",
+                        "types": [
+                            "string"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_shipping_{$this->id}_is_available",
+            "file": "Shipping/PickupLocation.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_show_page_title",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "filter",
+            "doc": {
+                "description": "Hook: woocommerce_show_page_title",
+                "long_description": "Allows controlling the display of the page title.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": "<p>Allows controlling the display of the page title.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_single_product_image_thumbnail_html",
+            "file": "BlockTypes/ProductGalleryThumbnails.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter the HTML markup for a single product image thumbnail in the gallery.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "The HTML markup for the thumbnail.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$thumbnail_html"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The attachment ID of the thumbnail.",
+                        "types": [
+                            "int"
+                        ],
+                        "variable": "$attachment_id"
+                    },
+                    {
+                        "name": "since",
+                        "content": "7.9.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_add_to_cart_data",
+            "file": "StoreApi/Routes/V1/CartAddItem.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters cart item data sent via the API before it is passed to the cart controller.",
+                "long_description": "This hook filters cart items. It allows the request data to be changed, for example, quantity, or supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.\n CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values may be ignored. CartController::add_to_cart (and core) do already have a filter hook called woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "8.8.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "An array of customer (user) data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$customer_data"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>This hook filters cart items. It allows the request data to be changed, for example, quantity, or supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.</p> <p>CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values may be ignored. CartController::add_to_cart (and core) do already have a filter hook called woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_disable_nonce_check",
+            "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the Store API nonce check.",
+                "long_description": "This can be used to disable the nonce check when testing API endpoints via a REST API client.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.5.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "If true, nonce checks will be disabled.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": "$disable_nonce_check"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "boolean"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>This can be used to disable the nonce check when testing API endpoints via a REST API client.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_product_quantity_limit",
+            "file": "StoreApi/Utilities/QuantityLimits.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the quantity limit for a product being added to the cart via the Store API.",
+                "long_description": "Filters the variation option name for custom option slugs.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "6.8.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Quantity limit which defaults to 9999 unless sold individually.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$quantity_limit"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product instance.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "integer"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>Filters the variation option name for custom option slugs.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_product_quantity_{$value_type}",
+            "file": "StoreApi/Utilities/QuantityLimits.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the quantity minimum for a cart item in Store API. This allows extensions to control the minimum qty of items already within the cart.",
+                "long_description": "The suffix of the hook will vary depending on the value being filtered. For example, minimum, maximum, multiple_of, editable.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "6.8.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The value being filtered.",
+                        "types": [
+                            "mixed"
+                        ],
+                        "variable": "$value"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The product object.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The cart item if the product exists in the cart, or null.",
+                        "types": [
+                            "array",
+                            "null"
+                        ],
+                        "variable": "$cart_item"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "mixed"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>The suffix of the hook will vary depending on the value being filtered. For example, minimum, maximum, multiple_of, editable.</p>"
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_store_api_rate_limit_options",
+            "file": "StoreApi/Utilities/RateLimits.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters options for Rate Limits.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Array of option values.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$rate_limit_options"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    },
+                    {
+                        "name": "since",
+                        "content": "8.9.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        }
+    ]
+}

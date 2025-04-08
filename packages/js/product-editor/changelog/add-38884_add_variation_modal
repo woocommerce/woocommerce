@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new attribute modal to variations field and include tests for useProductAttributes hook.

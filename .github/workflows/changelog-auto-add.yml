@@ -2,45 +2,45 @@ name: 'Changelog Auto Add'
 on:
     pull_request_target:
         types: [opened, synchronize, reopened, edited]
+        paths-ignore:
+          - 'docs/**'
+          - '**/changelog/**'
+          - '**/changelog.txt'
+          - '.husky/**'
+          - '.cursor/**'
+          - '.github/**'
+          - '!.github/workflows/changelog-auto-add.yml'
     workflow_dispatch:
         inputs:
             prNumber:
                 description: Pull request number
                 required: true
+concurrency:
+    group: changelog-auto-add-${{ github.event_name }}-${{ github.event.number || inputs.prNumber }}
+    cancel-in-progress: true
 
 jobs:
     add-changelog:
         name: 'Add changelog to PR'
-        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
-        runs-on: ubuntu-20.04
+        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' && ( github.event_name != 'pull_request_target' || contains( github.event.pull_request.body, '[x] Automatically create a changelog' ) ) }}
+        runs-on: ubuntu-latest
         permissions:
             contents: write
             issues: write
             pull-requests: write
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-
-            - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: '8.6.7'
+            - name: Checkout
+              uses: actions/checkout@v4
 
             - name: Setup Node
-              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              uses: actions/setup-node@v4
               with:
-                  node-version-file: .nvmrc
-                  cache: pnpm
-                  registry-url: 'https://registry.npmjs.org'
+                  node-version-file: '.nvmrc'
 
-            - name: Install prerequisites
-              run: |
-                  pnpm install --filter monorepo-utils --ignore-scripts
-                  # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
-                  pnpm build
-              working-directory: tools/monorepo-utils
+            - name: Setup PNPM
+              uses: pnpm/action-setup@v4
 
-            - name: Add changelog
+            - name: Generate Changelog File
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm utils changefile ${{github.event.number || inputs.prNumber}} -o ${{ github.repository_owner }}
+                  GITHUB_TOKEN: ${{ secrets.PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+              run: pnpm utils changefile ${{ github.event.number || inputs.prNumber }} -o ${{ github.repository_owner }}

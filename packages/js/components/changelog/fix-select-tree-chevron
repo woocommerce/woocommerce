@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Show 'up' and 'down' chevron in SelectTree and remove suffix prop

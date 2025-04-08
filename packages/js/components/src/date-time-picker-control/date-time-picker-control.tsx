@@ -22,7 +22,6 @@ import {
 	DatePicker,
 	DateTimePicker as WpDateTimePicker,
 	Dropdown,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -31,6 +30,152 @@ import {
 export const defaultDateFormat = 'm/d/Y';
 export const default12HourDateTimeFormat = 'm/d/Y h:i a';
 export const default24HourDateTimeFormat = 'm/d/Y H:i';
+
+const MINUTE_IN_SECONDS = 60;
+const HOUR_IN_MINUTES = 60;
+const HOUR_IN_SECONDS = 60 * MINUTE_IN_SECONDS;
+
+/**
+ * Map of PHP formats to Moment.js formats.
+ *
+ * Copied from @wordpress/date, since it's not exposed. If this is exposed upstream,
+ * it should ideally be used from there.
+ */
+const formatMap: Record<
+	string,
+	string | ( ( momentDate: Moment ) => string | number )
+> = {
+	// Day.
+	d: 'DD',
+	D: 'ddd',
+	j: 'D',
+	l: 'dddd',
+	N: 'E',
+
+	S( momentDate: Moment ) {
+		// Do - D.
+		const num = momentDate.format( 'D' );
+		const withOrdinal = momentDate.format( 'Do' );
+		return withOrdinal.replace( num, '' );
+	},
+
+	w: 'd',
+	z( momentDate: Moment ) {
+		// DDD - 1.
+		return ( parseInt( momentDate.format( 'DDD' ), 10 ) - 1 ).toString();
+	},
+
+	// Week.
+	W: 'W',
+
+	// Month.
+	F: 'MMMM',
+	m: 'MM',
+	M: 'MMM',
+	n: 'M',
+	t( momentDate: Moment ) {
+		return momentDate.daysInMonth();
+	},
+
+	L( momentDate: Moment ) {
+		return momentDate.isLeapYear() ? '1' : '0';
+	},
+	o: 'GGGG',
+	Y: 'YYYY',
+	y: 'YY',
+
+	// Time.
+	a: 'a',
+	A: 'A',
+	B( momentDate: Moment ) {
+		const timezoned = moment( momentDate ).utcOffset( 60 );
+		const seconds = parseInt( timezoned.format( 's' ), 10 ),
+			minutes = parseInt( timezoned.format( 'm' ), 10 ),
+			hours = parseInt( timezoned.format( 'H' ), 10 );
+		return parseInt(
+			(
+				( seconds +
+					minutes * MINUTE_IN_SECONDS +
+					hours * HOUR_IN_SECONDS ) /
+				86.4
+			).toString(),
+			10
+		);
+	},
+	g: 'h',
+	G: 'H',
+	h: 'hh',
+	H: 'HH',
+	i: 'mm',
+	s: 'ss',
+	u: 'SSSSSS',
+	v: 'SSS',
+	// Timezone.
+	e: 'zz',
+	I( momentDate: Moment ) {
+		return momentDate.isDST() ? '1' : '0';
+	},
+	O: 'ZZ',
+	P: 'Z',
+	T: 'z',
+	Z( momentDate: Moment ) {
+		// Timezone offset in seconds.
+		const offset = momentDate.format( 'Z' );
+		const sign = offset[ 0 ] === '-' ? -1 : 1;
+		const parts = offset
+			.substring( 1 )
+			.split( ':' )
+			.map( ( n ) => parseInt( n, 10 ) );
+		return (
+			sign *
+			( parts[ 0 ] * HOUR_IN_MINUTES + parts[ 1 ] ) *
+			MINUTE_IN_SECONDS
+		);
+	},
+	// Full date/time.
+	c: 'YYYY-MM-DDTHH:mm:ssZ', // .toISOString.
+	r( momentDate: Moment ) {
+		return momentDate
+			.locale( 'en' )
+			.format( 'ddd, DD MMM YYYY HH:mm:ss ZZ' );
+	},
+	U: 'X',
+};
+
+/**
+ * A modified version of the `format` function from @wordpress/date.
+ * This is needed to create a date object from the typed string and the date format,
+ * that needs to be mapped from the PHP format to moment's format.
+ */
+const createMomentDate = ( dateFormat: string, date: string ) => {
+	let i, char;
+	const newFormat = [];
+	for ( i = 0; i < dateFormat.length; i++ ) {
+		char = dateFormat[ i ];
+		// Is this an escape?
+		if ( char === '\\' ) {
+			// Add next character, then move on.
+			i++;
+			newFormat.push( '[' + dateFormat[ i ] + ']' );
+			continue;
+		}
+		if ( char in formatMap ) {
+			const formatter = formatMap[ char ];
+			if ( typeof formatter !== 'string' ) {
+				// If the format is a function, call it.
+				newFormat.push( '[' + formatter( moment( date ) ) + ']' );
+			} else {
+				// Otherwise, add as a formatting string.
+				newFormat.push( formatter );
+			}
+		} else {
+			newFormat.push( '[' + char + ']' );
+		}
+	}
+	// Join with [] between to separate characters, and replace
+	// unneeded separators with static text.
+	return moment( date, newFormat.join( '[]' ) );
+};
 
 export type DateTimePickerControlOnChangeHandler = (
 	dateTimeIsoString: string,
@@ -48,9 +193,10 @@ export type DateTimePickerControlProps = {
 	onBlur?: () => void;
 	label?: string;
 	placeholder?: string;
-	help?: string | null;
+	help?: React.ReactNode;
 	onChangeDebounceWait?: number;
-} & Omit< React.HTMLAttributes< HTMLInputElement >, 'onChange' >;
+	popoverProps?: Record< string, boolean | string >;
+} & Omit< React.ComponentProps< typeof InputControl >, 'onChange' | 'onDrag' >;
 
 export const DateTimePickerControl = forwardRef(
 	function ForwardedDateTimePickerControl(
@@ -68,6 +214,7 @@ export const DateTimePickerControl = forwardRef(
 			help,
 			className = '',
 			onChangeDebounceWait = 500,
+			popoverProps = {},
 			...props
 		}: DateTimePickerControlProps,
 		ref: Ref< HTMLInputElement >
@@ -77,7 +224,7 @@ export const DateTimePickerControl = forwardRef(
 			'inspector-date-time-picker-control',
 			props.id
 		) as string;
-		const inputControl = useRef< InputControl >();
+		const inputControl = useRef< HTMLInputElement >();
 
 		const displayFormat = useMemo( () => {
 			if ( dateTimeFormat ) {
@@ -104,10 +251,12 @@ export const DateTimePickerControl = forwardRef(
 				: moment.utc( dateString, moment.ISO_8601, true );
 		}
 
-		function parseAsLocalDateTime( dateString: string | null ): Moment {
+		function parseAsLocalDateTime( dateString?: string | null ): Moment {
 			// parse input date string as local time;
 			// be lenient of user input and try to match any format Moment can
-			return moment( dateString );
+			return dateTimeFormat && dateString
+				? createMomentDate( dateTimeFormat, dateString )
+				: moment( dateString );
 		}
 
 		const maybeForceTime = useCallback(
@@ -141,8 +290,7 @@ export const DateTimePickerControl = forwardRef(
 		const formatDateTimeForDisplay = useCallback(
 			( dateTime: Moment ) => {
 				return dateTime.isValid()
-					? // @ts-expect-error TODO - fix this type error with moment
-					  formatDate( displayFormat, dateTime.local() )
+					? formatDate( displayFormat, dateTime.local() )
 					: dateTime.creationData().input?.toString() || '';
 			},
 			[ displayFormat ]
@@ -177,14 +325,14 @@ export const DateTimePickerControl = forwardRef(
 		}, [ onChange ] );
 
 		const setInputStringAndMaybeCallOnChange = useCallback(
-			( newInputString: string, isUserTypedInput: boolean ) => {
+			( newInputString: string | null, isUserTypedInput: boolean ) => {
 				// InputControl doesn't fire an onChange if what the user has typed
 				// matches the current value of the input field. To get around this,
 				// we pull the value directly out of the input field. This fixes
 				// the issue where the user ends up typing the same value. Unless they
 				// are typing extra slow. Without this workaround, we miss the last
 				// character typed.
-				const lastTypedValue = inputControl.current.value;
+				const lastTypedValue = inputControl.current?.value ?? '';
 
 				const newDateTime = maybeForceTime(
 					isUserTypedInput
@@ -234,7 +382,7 @@ export const DateTimePickerControl = forwardRef(
 
 				if ( ! newDateTime.isValid() ) {
 					// keep the invalid string, so the user can correct it
-					return currentDate;
+					return currentDate ?? '';
 				}
 
 				if ( ! newDateTime.isSame( inputStringDateTime ) ) {
@@ -264,19 +412,26 @@ export const DateTimePickerControl = forwardRef(
 			onBlurRef.current = onBlur;
 		}, [ onBlur ] );
 
-		const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
-			if ( ! willOpen && typeof onBlurRef.current === 'function' ) {
-				// in case the component is blurred before a debounced
-				// change has been processed, immediately set the input string
-				// to the current value of the input field, so that
-				// it won't be set back to the pre-change value
-				setInputStringAndMaybeCallOnChange(
-					inputControl.current.value,
-					true
-				);
-				onBlurRef.current();
-			}
-		}, [] );
+		const callOnBlurIfDropdownIsNotOpening = useCallback(
+			( willOpen: boolean ) => {
+				if (
+					! willOpen &&
+					typeof onBlurRef.current === 'function' &&
+					inputControl.current
+				) {
+					// in case the component is blurred before a debounced
+					// change has been processed, immediately set the input string
+					// to the current value of the input field, so that
+					// it won't be set back to the pre-change value
+					setInputStringAndMaybeCallOnChange(
+						inputControl.current.value,
+						true
+					);
+					onBlurRef.current();
+				}
+			},
+			[]
+		);
 
 		return (
 			<Dropdown
@@ -285,7 +440,6 @@ export const DateTimePickerControl = forwardRef(
 					className
 				) }
 				focusOnMount={ false }
-				// @ts-expect-error `onToggle` does exist.
 				onToggle={ callOnBlurIfDropdownIsNotOpening }
 				renderToggle={ ( { isOpen, onClose, onToggle } ) => (
 					<BaseControl id={ id } label={ label } help={ help }>
@@ -300,9 +454,9 @@ export const DateTimePickerControl = forwardRef(
 							} }
 							disabled={ disabled }
 							value={ getUserInputOrUpdatedCurrentDate() }
-							onChange={ ( newValue: string ) =>
+							onChange={ ( newValue: string | undefined ) =>
 								debouncedSetInputStringAndMaybeCallOnChange(
-									newValue,
+									newValue ?? '',
 									true
 								)
 							}
@@ -326,7 +480,7 @@ export const DateTimePickerControl = forwardRef(
 								/>
 							}
 							placeholder={ placeholder }
-							describedBy={ sprintf(
+							aria-describedby={ sprintf(
 								/* translators: A datetime format */
 								__(
 									'Date input describing a selected date in format %s',
@@ -349,6 +503,7 @@ export const DateTimePickerControl = forwardRef(
 					anchor: inputControl.current,
 					className: 'woocommerce-date-time-picker-control__popover',
 					placement: 'bottom-start',
+					...popoverProps,
 				} }
 				renderContent={ () => {
 					const Picker = isDateOnlyPicker
@@ -357,23 +512,20 @@ export const DateTimePickerControl = forwardRef(
 
 					return (
 						<Picker
-							// @ts-expect-error null is valid for currentDate
 							currentDate={
 								inputStringDateTime.isValid()
 									? formatDateTimeAsISO( inputStringDateTime )
 									: null
 							}
-							onChange={ ( newDateTimeISOString: string ) =>
+							onChange={ (
+								newDateTimeISOString: string | null
+							) =>
 								setInputStringAndMaybeCallOnChange(
 									newDateTimeISOString,
 									false
 								)
 							}
 							is12Hour={ is12HourPicker }
-							// Opt out of the Reset and Help buttons, as they are going to be removed.
-							// These properties are removed in @wordpress/components 25.0.0 (Gutenberg 15.9.0).
-							__nextRemoveResetButton
-							__nextRemoveHelpButton
 						/>
 					);
 				} }

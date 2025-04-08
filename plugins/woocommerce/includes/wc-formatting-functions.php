@@ -232,7 +232,7 @@ function wc_trim_zeros( $price ) {
  * @return float
  */
 function wc_round_tax_total( $value, $precision = null ) {
-	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
+	$precision   = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 	$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
@@ -371,15 +371,17 @@ function wc_format_coupon_code( $value ) {
 /**
  * Sanitize a coupon code.
  *
- * Uses sanitize_post_field since coupon codes are stored as
- * post_titles - the sanitization and escaping must match.
+ * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
+ *
+ * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
  *
  * @since  3.6.0
  * @param  string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	return wp_filter_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ) );
+	$value = wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
+	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
 }
 
 /**
@@ -977,6 +979,9 @@ function wc_format_postcode( $postcode, $country ) {
 	$postcode = wc_normalize_postcode( $postcode ?? '' );
 
 	switch ( $country ) {
+		case 'SE':
+			$postcode = substr_replace( $postcode, ' ', -2, 0 );
+			break;
 		case 'CA':
 		case 'GB':
 			$postcode = substr_replace( $postcode, ' ', -3, 0 );
@@ -996,15 +1001,19 @@ function wc_format_postcode( $postcode, $country ) {
 			break;
 		case 'PR':
 		case 'US':
+		case 'MN':
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
 		case 'NL':
 			$postcode = substr_replace( $postcode, ' ', 4, 0 );
 			break;
 		case 'LV':
-			if ( preg_match( '/(?:LV)?-?(\d+)/i', $postcode, $matches ) ) {
-				$postcode = count( $matches ) >= 2 ? "LV-$matches[1]" : $postcode;
-			}
+			$postcode = preg_replace( '/^(LV)?-?(\d+)$/', 'LV-${2}', $postcode );
+			break;
+		case 'CZ':
+		case 'SK':
+			$postcode = preg_replace( "/^({$country})-?(\d+)$/", '${1}-${2}', $postcode );
+			$postcode = substr_replace( $postcode, ' ', -2, 0 );
 			break;
 		case 'DK':
 			$postcode = preg_replace( '/^(DK)(.+)$/', '${1}-${2}', $postcode );
@@ -1222,7 +1231,7 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 		$letters_to_numbers = array_flip( $letters_to_numbers );
 		$numeric_postcode   = '';
 
-		for ( $i = 0; $i < $postcode_length; $i ++ ) {
+		for ( $i = 0; $i < $postcode_length; $i++ ) {
 			if ( is_numeric( $postcode[ $i ] ) ) {
 				$numeric_postcode .= str_pad( $postcode[ $i ], 2, '0', STR_PAD_LEFT );
 			} elseif ( isset( $letters_to_numbers[ $postcode[ $i ] ] ) ) {
@@ -1288,7 +1297,28 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-	$price = '<del aria-hidden="true">' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
+	// Format the prices.
+	$formatted_regular_price = is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price;
+	$formatted_sale_price    = is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price;
+
+	// Strikethrough pricing.
+	$price = '<del aria-hidden="true">' . $formatted_regular_price . '</del> ';
+
+	// For accessibility (a11y) we'll also display that information to screen readers.
+	$price .= '<span class="screen-reader-text">';
+	// translators: %s is a product's regular price.
+	$price .= esc_html( sprintf( __( 'Original price was: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_regular_price ) ) );
+	$price .= '</span>';
+
+	// Add the sale price.
+	$price .= '<ins aria-hidden="true">' . $formatted_sale_price . '</ins>';
+
+	// For accessibility (a11y) we'll also display that information to screen readers.
+	$price .= '<span class="screen-reader-text">';
+	// translators: %s is a product's current (sale) price.
+	$price .= esc_html( sprintf( __( 'Current price is: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_sale_price ) ) );
+	$price .= '</span>';
+
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
 }
 
@@ -1538,6 +1568,51 @@ function wc_parse_relative_date_option( $raw_value ) {
 function wc_sanitize_endpoint_slug( $raw_value ) {
 	return sanitize_title( $raw_value ?? '' );
 }
+
+/**
+ * Removes useless non-displayable and problematic Unicode characters from a string.
+ *
+ * This function eliminates characters that can cause formatting issues, invisible text,
+ * or unexpected behavior in copy-pasted text. Specifically, it removes:
+ *
+ * - **Soft hyphen (`U+00AD`)** – Invisible unless text is broken across lines.
+ * - **Zero-width spaces & joiners (`U+200B–U+200D`)** – Invisible and can cause copy/paste issues.
+ * - **Directional markers (`U+200E–U+200F`, `U+202A–U+202E`)** – Can affect text rendering.
+ * - **Byte Order Mark (BOM) (`U+FEFF`)** – Can interfere with encoding.
+ * - **Interlinear annotation characters (`U+FFF9–U+FFFB`)** – Rarely used and unnecessary in checkout fields.
+ *
+ * It does **not** remove:
+ *
+ * - **Non-breaking space (`U+00A0`)** – Useful for preventing line breaks in addresses.
+ * - **Word joiner (`U+2060`)** – Sometimes needed for proper text rendering in certain scripts.
+ *
+ * @param string $raw_value The input string to sanitize.
+ *
+ * @return string The sanitized string without problematic characters.
+ * @since 9.9.0
+ */
+function wc_remove_non_displayable_chars( string $raw_value ): string {
+	$remove_chars = array(
+		"\u{00AD}", // Soft Hyphen.
+		"\u{200B}", // Zero Width Space.
+		"\u{200C}", // Zero Width Non-Joiner.
+		"\u{200D}", // Zero Width Joiner.
+		"\u{200E}", // Left-to-Right Mark.
+		"\u{200F}", // Right-to-Left Mark.
+		"\u{202A}", // Left-to-Right Embedding.
+		"\u{202B}", // Right-to-Left Embedding.
+		"\u{202C}", // Pop Directional Formatting.
+		"\u{202D}", // Left-to-Right Override.
+		"\u{202E}", // Right-to-Left Override.
+		"\u{FEFF}", // Byte Order Mark (BOM).
+		"\u{FFF9}", // Interlinear Annotation Anchor.
+		"\u{FFFA}", // Interlinear Annotation Separator.
+		"\u{FFFB}", // Interlinear Annotation Terminator.
+	);
+
+	return str_replace( $remove_chars, '', $raw_value );
+}
+
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_order_received_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_add_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

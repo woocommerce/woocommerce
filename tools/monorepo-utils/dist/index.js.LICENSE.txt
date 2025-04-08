@@ -1,0 +1,40 @@
+/*!
+ * is-extendable <https://github.com/jonschlinkert/is-extendable>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+/*!
+ * mime-db
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2015-2022 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+/*!
+ * mime-types
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2015 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+/*!
+ * strip-bom-string <https://github.com/jonschlinkert/strip-bom-string>
+ *
+ * Copyright (c) 2015, 2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+/*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
+
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> */

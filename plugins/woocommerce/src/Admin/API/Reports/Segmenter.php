@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxesStatsDataStore;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.
@@ -363,11 +364,12 @@ class Segmenter {
 			$args = array(
 				'return' => 'objects',
 				'limit'  => -1,
-				'type'   => 'variation',
+				'type'   => ProductType::VARIATION,
 			);
 
 			if (
 				isset( $this->query_args['product_includes'] ) &&
+				is_array( $this->query_args['product_includes'] ) &&
 				count( $this->query_args['product_includes'] ) === 1
 			) {
 				$args['parent'] = $this->query_args['product_includes'][0];

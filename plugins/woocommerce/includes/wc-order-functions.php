@@ -8,7 +8,12 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -95,13 +100,13 @@ function wc_get_order( $the_order = false ) {
  */
 function wc_get_order_statuses() {
 	$order_statuses = array(
-		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
-		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
-		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
-		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
-		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
-		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::PENDING    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::PROCESSING => _x( 'Processing', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::ON_HOLD    => _x( 'On hold', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::COMPLETED  => _x( 'Completed', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::CANCELLED  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::REFUNDED   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+		OrderInternalStatus::FAILED     => _x( 'Failed', 'Order status', 'woocommerce' ),
 	);
 	return apply_filters( 'wc_order_statuses', $order_statuses );
 }
@@ -124,7 +129,14 @@ function wc_is_order_status( $maybe_status ) {
  * @return array
  */
 function wc_get_is_paid_statuses() {
-	return apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) );
+	/**
+	 * Filter the list of statuses which are considered 'paid'.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param array $statuses List of statuses.
+	 */
+	return apply_filters( 'woocommerce_order_is_paid_statuses', array( OrderStatus::PROCESSING, OrderStatus::COMPLETED ) );
 }
 
 /**
@@ -134,7 +146,14 @@ function wc_get_is_paid_statuses() {
  * @return array
  */
 function wc_get_is_pending_statuses() {
-	return apply_filters( 'woocommerce_order_is_pending_statuses', array( 'pending' ) );
+	/**
+	 * Filter the list of statuses which are considered 'pending payment'.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param array $statuses List of statuses.
+	 */
+	return apply_filters( 'woocommerce_order_is_pending_statuses', array( OrderStatus::PENDING ) );
 }
 
 /**
@@ -145,10 +164,27 @@ function wc_get_is_pending_statuses() {
  * @return string
  */
 function wc_get_order_status_name( $status ) {
-	$statuses = wc_get_order_statuses();
-	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
-	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
-	return $status;
+	// "Special statuses": these are in common usage across WooCommerce, but are not normally returned by
+	// wc_get_order_statuses().
+	$special_statuses = array(
+		'wc-' . OrderStatus::AUTO_DRAFT => OrderStatus::AUTO_DRAFT,
+		'wc-' . OrderStatus::TRASH      => OrderStatus::TRASH,
+	);
+
+	// Merge order is important. If the special statuses are ever returned by wc_get_order_statuses(), those definitions
+	// should take priority.
+	$statuses   = array_merge( $special_statuses, wc_get_order_statuses() );
+	$unprefixed = OrderUtil::remove_status_prefix( (string) $status );
+
+	if ( ! is_string( $status ) ) {
+		wc_doing_it_wrong(
+			__FUNCTION__,
+			__( 'An invalid order status slug was supplied.', 'woocommerce' ),
+			'9.6'
+		);
+	}
+
+	return $statuses[ 'wc-' . $unprefixed ] ?? $unprefixed;
 }
 
 /**
@@ -287,8 +323,6 @@ function wc_get_order_type( $type ) {
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- *      - exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
- *      orders screen.
  *      - add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
  *      - exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
  *      - exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
@@ -320,7 +354,6 @@ function wc_register_order_type( $type, $args = array() ) {
 
 	// Register for WC usage.
 	$order_type_args = array(
-		'exclude_from_orders_screen'       => false,
 		'add_order_meta_boxes'             => true,
 		'exclude_from_order_count'         => false,
 		'exclude_from_order_views'         => false,
@@ -343,7 +376,7 @@ function wc_register_order_type( $type, $args = array() ) {
  * @return int
  */
 function wc_processing_order_count() {
-	return wc_orders_count( 'processing' );
+	return wc_orders_count( OrderStatus::PROCESSING );
 }
 
 /**
@@ -355,35 +388,32 @@ function wc_processing_order_count() {
  */
 function wc_orders_count( $status, string $type = '' ) {
 	$count           = 0;
-	$legacy_statuses = array( 'draft', 'trash' );
-	$valid_statuses  = array_merge( array_keys( wc_get_order_statuses() ), $legacy_statuses );
+	$legacy_statuses = array(
+		OrderStatus::DRAFT,
+		OrderStatus::TRASH,
+	);
 	$status          = ( ! in_array( $status, $legacy_statuses, true ) && 0 !== strpos( $status, 'wc-' ) ) ? 'wc-' . $status : $status;
 	$valid_types     = wc_get_order_types( 'order-count' );
 	$type            = trim( $type );
 
-	if ( ! in_array( $status, $valid_statuses, true ) || ( $type && ! in_array( $type, $valid_types, true ) ) ) {
+	try {
+		$types_for_count   = $type ? array( $type ) : $valid_types;
+		$order_count_cache = new OrderCountCache();
+
+		foreach ( $types_for_count as $type ) {
+			$cache = $order_count_cache->get( $type, array( $status ) );
+			if ( false !== $cache && isset( $cache[ $status ] ) ) {
+				$count += $cache[ $status ];
+			} else {
+				$count_for_type = OrderUtil::get_count_for_type( $type );
+				$count         += $count_for_type[ $status ];
+			}
+		}
+
+		return $count;
+	} catch ( Exception $e ) {
 		return 0;
 	}
-
-	$cache_key    = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status . $type;
-	$cached_count = wp_cache_get( $cache_key, 'counts' );
-
-	if ( false !== $cached_count ) {
-		return $cached_count;
-	}
-
-	$types_for_count = $type ? array( $type ) : $valid_types;
-
-	foreach ( $types_for_count as $type ) {
-		$data_store = WC_Data_Store::load( 'shop_order' === $type ? 'order' : $type );
-		if ( $data_store ) {
-			$count += $data_store->get_order_count( $status );
-		}
-	}
-
-	wp_cache_set( $cache_key, $count, 'counts' );
-
-	return $count;
 }
 
 /**
@@ -436,7 +466,7 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	if ( $order->has_status( 'processing' ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
+	if ( $order->has_status( OrderStatus::PROCESSING ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
 		return;
 	}
 
@@ -487,9 +517,9 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
-		delete_user_meta( $order->get_customer_id(), '_money_spent' );
-		delete_user_meta( $order->get_customer_id(), '_order_count' );
-		delete_user_meta( $order->get_customer_id(), '_last_order' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_money_spent' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_order_count' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_last_order' );
 	} else {
 		$order_id = 0;
 	}
@@ -541,10 +571,11 @@ function wc_create_refund( $args = array() ) {
 			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 		}
 
-		$remaining_refund_amount = $order->get_remaining_refund_amount();
-		$remaining_refund_items  = $order->get_remaining_refund_items();
-		$refund_item_count       = 0;
-		$refund                  = new WC_Order_Refund( $args['refund_id'] );
+		$remaining_refund_amount     = $order->get_remaining_refund_amount();
+		$remaining_refund_items      = $order->get_remaining_refund_items();
+		$refund_item_count           = 0;
+		$refund                      = new WC_Order_Refund( $args['refund_id'] );
+		$refunded_order_and_products = array();
 
 		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
 			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
@@ -561,7 +592,7 @@ function wc_create_refund( $args = array() ) {
 		}
 
 		// Negative line items.
-		if ( count( $args['line_items'] ) > 0 ) {
+		if ( is_array( $args['line_items'] ) && count( $args['line_items'] ) > 0 ) {
 			$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
 
 			foreach ( $items as $item_id => $item ) {
@@ -575,6 +606,16 @@ function wc_create_refund( $args = array() ) {
 
 				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
 					continue;
+				}
+
+				// array of order id and product id which were refunded.
+				// later to be used for revoking download permission.
+				// checking if the item is a product, as we only need to revoke download permission for products.
+				if ( $item->is_type( 'line_item' ) ) {
+					$refunded_order_and_products[ $item_id ] = array(
+						'order_id'   => $order->get_id(),
+						'product_id' => $item->get_product_id(),
+					);
 				}
 
 				$class         = get_class( $item );
@@ -636,6 +677,19 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
+			// delete downloads that were refunded using order and product id, if present.
+			if ( ! empty( $refunded_order_and_products ) ) {
+				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
+					$download_data_store = WC_Data_Store::load( 'customer-download' );
+					$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
+					if ( ! empty( $downloads ) ) {
+						foreach ( $downloads as $download ) {
+							$download_data_store->delete_by_id( $download->get_id() );
+						}
+					}
+				}
+			}
+
 			/**
 			 * Trigger notification emails.
 			 *
@@ -652,7 +706,16 @@ function wc_create_refund( $args = array() ) {
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
 
-				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+				/**
+				 * Filter the status to set the order to when fully refunded.
+				 *
+				 * @since 2.7.0
+				 *
+				 * @param string $parent_status The status to set the order to when fully refunded.
+				 * @param int    $order_id      The order ID.
+				 * @param int    $refund_id     The refund ID.
+				 */
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', OrderStatus::REFUNDED, $order->get_id(), $refund->get_id() );
 
 				if ( $parent_status ) {
 					$order->update_status( $parent_status );
@@ -877,7 +940,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	}
 
 	$recorded_sales  = $order->get_data_store()->get_recorded_sales( $order );
-	$reflected_order = in_array( $order->get_status(), array( 'cancelled', 'trash' ), true );
+	$reflected_order = in_array( $order->get_status(), array( OrderStatus::CANCELLED, OrderStatus::TRASH ), true );
 
 	if ( ! $reflected_order && 'woocommerce_before_delete_order' === current_action() ) {
 		$reflected_order = true;
@@ -936,16 +999,29 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	$has_recorded = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
-	if ( $order->has_status( 'cancelled' ) && $has_recorded ) {
+	/**
+	 * Allow invalid order status filtering for updating coupon usage.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param array $invalid_statuses Array of statuses to consider invalid.
+	 */
+	$invalid_statuses = apply_filters(
+		'woocommerce_update_coupon_usage_invalid_statuses',
+		$invalid_statuses
+	);
+
+	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
+	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( 'cancelled' ) ) {
-		$order->get_data_store()->release_held_coupons( $order, true );
+	} elseif ( $order->has_status( $invalid_statuses ) ) {
+		wc_release_coupons_for_order( $order );
 		return;
 	} else {
 		return;
@@ -973,7 +1049,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 					break;
 			}
 		}
-		$order->get_data_store()->release_held_coupons( $order, true );
+		wc_release_coupons_for_order( $order );
 	}
 }
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
@@ -981,6 +1057,8 @@ add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts
 add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_failed', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
 
 /**
  * Cancel all unpaid orders after held duration to prevent stock lock for those products.
@@ -1006,7 +1084,7 @@ function wc_cancel_unpaid_orders() {
 			$order = wc_get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
-				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -1051,6 +1129,7 @@ function wc_get_order_note( $data ) {
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
+			'order_id'      => absint( $data->comment_post_ID ),
 		),
 		$data
 	);
@@ -1171,5 +1250,20 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
  * @return bool         True on success, false on failure.
  */
 function wc_delete_order_note( $note_id ) {
-	return wp_delete_comment( $note_id, true );
+	$note = wc_get_order_note( $note_id );
+	if ( $note && wp_delete_comment( $note_id, true ) ) {
+		/**
+		 * Action hook fired after an order note is deleted.
+		 *
+		 * @param int      $note_id Order note ID.
+		 * @param stdClass $note    Object with the deleted order note details.
+		 *
+		 * @since 9.1.0
+		 */
+		do_action( 'woocommerce_order_note_deleted', $note_id, $note );
+
+		return true;
+	}
+
+	return false;
 }

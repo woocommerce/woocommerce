@@ -38,11 +38,16 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
-
 		if ( isset( $context['source'] ) && $context['source'] ) {
 			$source = $context['source'];
 		} else {
 			$source = $this->get_log_source();
+		}
+
+		// Clear the source cache if this is a new source.
+		$cached_sources = get_option( WC_Admin_Log_Table_List::SOURCE_CACHE_OPTION_KEY, array() );
+		if ( ! in_array( $source, $cached_sources, true ) ) {
+			delete_option( WC_Admin_Log_Table_List::SOURCE_CACHE_OPTION_KEY );
 		}
 
 		return $this->add( $timestamp, $level, $message, $source, $context );
@@ -77,12 +82,13 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			'%s', // possible serialized context.
 		);
 
+		unset( $context['source'] );
 		if ( ! empty( $context ) ) {
-			try {
-				$insert['context'] = serialize( $context ); // @codingStandardsIgnoreLine.
-			} catch ( Exception $e ) {
-				$insert['context'] = serialize( 'There was an error while serializing the context: ' . $e->getMessage() );
+			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$context['backtrace'] = self::get_backtrace();
 			}
+
+			$insert['context'] = wp_json_encode( $context, JSON_PRETTY_PRINT );
 		}
 
 		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert, $format );
@@ -132,7 +138,24 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$format   = array_fill( 0, count( $log_ids ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
-		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_log WHERE log_id IN {$query_in}", $log_ids ) ); // @codingStandardsIgnoreLine.
+
+		$result = $wpdb->query(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+				"
+					DELETE FROM {$wpdb->prefix}woocommerce_log
+					WHERE log_id IN {$query_in}
+				",
+				$log_ids
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		if ( false !== $result ) {
+			\WC_Cache_Helper::get_transient_version( 'logs-db', true );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -154,6 +177,8 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 				date( 'Y-m-d H:i:s', $timestamp )
 			)
 		);
+
+		\WC_Cache_Helper::get_transient_version( 'logs-db', true );
 	}
 
 	/**

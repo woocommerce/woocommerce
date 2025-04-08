@@ -1,71 +1,85 @@
 /**
  * External dependencies
  */
-import Tour, { TourStepRendererProps } from '@automattic/tour-kit';
-import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import React from 'react';
+import { TourKit } from '@woocommerce/components';
+import { useState, useEffect } from '@wordpress/element';
+import { Config } from '@automattic/tour-kit';
 
 type TourSpotlightProps = {
-	onDismiss: () => void;
-	title: string;
+	id: string;
+	title: string | React.ReactElement;
 	description: string;
 	reference: string;
-	className?: string;
+	placement?: Config[ 'placement' ];
+	spotlightParent?: HTMLElement;
+	onDismissal?: () => void;
+	onDisplayed?: () => void;
 };
 
-export default function TourSpotlight( {
-	onDismiss,
+export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	title,
 	description,
 	reference,
-	className,
-}: TourSpotlightProps ) {
-	const [ showTour, setShowTour ] = useState( true );
+	placement = 'auto',
+	spotlightParent = document.body,
+	onDismissal = () => {},
+	onDisplayed = () => {},
+} ) => {
+	const anchorElement = document.querySelector( reference );
+	const [ isSpotlightVisible, setIsSpotlightVisible ] =
+		useState< boolean >( false );
 
-	const handleDismiss = () => {
-		setShowTour( false );
-		onDismiss();
-	};
-	// Define a configuration for the tour, passing along a handler for closing.
-	const config = {
-		steps: [
-			{
-				referenceElements: {
-					desktop: reference,
-				},
-				meta: {
-					description,
-				},
-			},
-		],
-		renderers: {
-			tourStep: ( { currentStepIndex }: TourStepRendererProps ) => {
-				return (
-					<div className={ className }>
-						<h3>{ title }</h3>
-						<p>
-							{
-								config.steps[ currentStepIndex ].meta
-									.description
-							}
-						</p>
-						<Button onClick={ handleDismiss }>
-							{ __( 'Got it', 'woocommerce' ) }
-						</Button>
-					</div>
-				);
-			},
-			tourMinimized: () => <div />,
-		},
-		closeHandler: () => handleDismiss(),
-		options: {},
-	};
+	// Avoids showing the spotlight before the layout is ready.
+	useEffect( () => {
+		const timeout = setTimeout( () => {
+			setIsSpotlightVisible( true );
+		}, 250 );
 
-	if ( ! showTour ) {
+		return () => clearTimeout( timeout );
+	}, [] );
+
+	if ( ! ( anchorElement && isSpotlightVisible ) ) {
 		return null;
 	}
 
-	return <Tour config={ config } />;
-}
+	return (
+		<TourKit
+			config={ {
+				steps: [
+					{
+						referenceElements: {
+							desktop: reference,
+						},
+						meta: {
+							name: `woo-ai-feature-spotlight`,
+							heading: title,
+							descriptions: {
+								desktop: description,
+							},
+							primaryButton: {
+								isHidden: true,
+							},
+						},
+					},
+				],
+				placement,
+				options: {
+					callbacks: {
+						onStepViewOnce: onDisplayed,
+					},
+					portalParentElement: spotlightParent,
+					effects: {
+						liveResize: {
+							mutation: true,
+							resize: true,
+						},
+					},
+				},
+				closeHandler: () => {
+					setIsSpotlightVisible( false );
+					onDismissal();
+				},
+			} }
+		/>
+	);
+};

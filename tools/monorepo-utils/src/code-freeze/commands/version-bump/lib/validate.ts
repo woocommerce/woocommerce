@@ -10,6 +10,18 @@ import { readFile } from 'fs/promises';
  */
 import { Logger } from '../../../../core/logger';
 import { Options } from '../types';
+
+/**
+ * Determine whether a version is an accel release.
+ *
+ * @param {string} version Version number
+ * @return {boolean} True if the version corresponds with an accel release, otherwise false
+ */
+export const getIsAccelRelease = ( version: string ): boolean => {
+	const isAccelRelease = version.match( /^(?:\d+\.){3}\d+?$/ );
+	return isAccelRelease !== null;
+};
+
 /**
  * Get a plugin's current version.
  *
@@ -57,25 +69,39 @@ export const validateArgs = async (
 	version: string,
 	options: Options
 ): Promise< void > => {
-	const { base } = options;
+	const { allowAccel, base, force } = options;
 	const nextVersion = version;
+	const isAllowedAccelRelease =
+		allowAccel && getIsAccelRelease( nextVersion );
 
-	if ( ! valid( nextVersion ) ) {
-		Logger.error(
-			'Invalid version supplied, please pass in a semantically correct version.'
-		);
+	if ( isAllowedAccelRelease ) {
+		if ( base === 'trunk' ) {
+			Logger.error(
+				`Version ${ nextVersion } is not a development version bump and cannot be applied to trunk, which only accepts development version bumps.`
+			);
+		}
+	} else {
+		if ( ! valid( nextVersion ) ) {
+			Logger.error(
+				'Invalid version supplied, please pass in a semantically correct version or use the correct option for accel releases.'
+			);
+		}
+
+		const prereleaseParameters = prerelease( nextVersion );
+		const isDevVersionBump =
+			prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
+
+		if ( ! isDevVersionBump && base === 'trunk' ) {
+			Logger.error(
+				`Version ${ nextVersion } is not a development version bump and cannot be applied to trunk, which only accepts development version bumps.`
+			);
+		}
 	}
 
-	const prereleaseParameters = prerelease( nextVersion );
-	const isDevVersionBump =
-		prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
-
-	if ( ! isDevVersionBump && base === 'trunk' ) {
-		Logger.error(
-			`Version ${ nextVersion } is not a development version bump and cannot be applied to trunk, which only accepts development version bumps.`
-		);
+	if ( force ) {
+		// When the force option is set, we do not compare currentVersion.
+		return;
 	}
-
 	const currentVersion = await getCurrentVersion( tmpRepoPath );
 
 	if ( ! currentVersion ) {

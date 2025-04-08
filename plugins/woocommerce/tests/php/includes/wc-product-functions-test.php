@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Class WC_Stock_Functions_Tests.
  */
@@ -46,14 +47,14 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			array(
 				'WC_Tax' =>
 				array(
-					'get_rates'          => function( $tax_class, $customer ) use ( &$customer_passed_to_get_rates ) {
+					'get_rates'          => function ( $tax_class, $customer ) use ( &$customer_passed_to_get_rates ) {
 						$customer_passed_to_get_rates = $customer;
 					},
-					'get_base_tax_rates' => function( $tax_class ) use ( &$get_base_rates_invoked ) {
+					'get_base_tax_rates' => function () use ( &$get_base_rates_invoked ) {
 						$get_base_rates_invoked = true;
 						return 0;
 					},
-					'calc_tax'           => function( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
+					'calc_tax'           => function () {
 						return array( 0 );
 					},
 				),
@@ -79,7 +80,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$customer = new stdClass();
 		$this->register_legacy_proxy_class_mocks(
 			array(
-				'WC_Customer' => function( $customer_id ) use ( &$customer_id_passed_to_wc_customer_constructor, $customer ) {
+				'WC_Customer' => function ( $customer_id ) use ( &$customer_id_passed_to_wc_customer_constructor, $customer ) {
 					$customer_id_passed_to_wc_customer_constructor = $customer_id;
 					return $customer;
 				},
@@ -196,5 +197,94 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		if ( ! $wc_tax_enabled ) {
 			update_option( 'woocommerce_calc_taxes', 'no' );
 		}
+	}
+
+	/**
+	 * @testDox Sales price is applied when scheduled sale starts.
+	 */
+	public function test_wc_scheduled_sales_sale_start() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+
+		$this->assertEquals( 100, wc_get_product( $product->get_id() )->get_price() );
+
+		wc_scheduled_sales();
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price() );
+	}
+
+	/**
+	 * @testDox Sales price is removed when scheduled sale ends.
+	 */
+	public function test_wc_scheduled_sales_sale_end() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price() );
+
+		wc_scheduled_sales();
+
+		$this->assertEquals( 100, wc_get_product( $product->get_id() )->get_price() );
+	}
+
+	/**
+	 * @testDox Test 'wc_get_related_products' with actual related products.
+	 */
+	public function test_wc_get_related_products_with_actual_related_products() {
+		$main_product = WC_Helper_Product::create_simple_product();
+
+		// Create related products.
+		$related_product1 = WC_Helper_Product::create_simple_product();
+		$related_product2 = WC_Helper_Product::create_simple_product();
+		$related_product3 = WC_Helper_Product::create_simple_product();
+
+		// Set up relationships - products can be related by category.
+		$category_term = wp_insert_term( 'Test Category', 'product_cat' );
+		wp_set_object_terms( $main_product->get_id(), $category_term['term_id'], 'product_cat' );
+		wp_set_object_terms( $related_product1->get_id(), $category_term['term_id'], 'product_cat' );
+		wp_set_object_terms( $related_product2->get_id(), $category_term['term_id'], 'product_cat' );
+		wp_set_object_terms( $related_product3->get_id(), $category_term['term_id'], 'product_cat' );
+
+		// Save all products.
+		$main_product->save();
+		$related_product1->save();
+		$related_product2->save();
+		$related_product3->save();
+
+		// Get related products with a limit of 2.
+		$related_products = wc_get_related_products( $main_product->get_id(), 2 );
+
+		// Test that we got related products (limited to 2).
+		$this->assertCount( 2, $related_products );
+
+		$related_products_numeric = wc_get_related_products( $main_product->get_id(), '2' );
+		$this->assertCount( 2, $related_products_numeric );
+
+		// Test with a larger limit to get all related products.
+		$all_related_products = wc_get_related_products( $main_product->get_id(), 10 );
+		$this->assertCount( 3, $all_related_products );
+
+		$empty_related_products = wc_get_related_products( $main_product->get_id(), 'non-numeric-limit' );
+		$this->assertEquals( array(), $empty_related_products );
+
+		// Clean up.
+		WC_Helper_Product::delete_product( $main_product->get_id() );
+		WC_Helper_Product::delete_product( $related_product1->get_id() );
+		WC_Helper_Product::delete_product( $related_product2->get_id() );
+		WC_Helper_Product::delete_product( $related_product3->get_id() );
 	}
 }

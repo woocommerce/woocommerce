@@ -333,7 +333,7 @@ class WC_Auth {
 				 */
 
 				// Check if Jetpack is installed and activated.
-				if ( class_exists( 'Jetpack' ) && Jetpack::connection()->is_active() ) {
+				if ( class_exists( 'Jetpack' ) && Jetpack::connection()->has_connected_owner() ) {
 
 					// Check if the user is using the WordPress.com SSO.
 					if ( Jetpack::is_module_active( 'sso' ) ) {
@@ -341,7 +341,7 @@ class WC_Auth {
 						$redirect_url = $this->build_url( $data, 'authorize' );
 
 						// Build the SSO URL.
-						$login_url = Jetpack_SSO::get_instance()->build_sso_button_url(
+						$login_url = \Automattic\Jetpack\Connection\SSO::get_instance()->build_sso_button_url(
 							array(
 								'redirect_to' => rawurlencode( esc_url_raw( $redirect_url ) ),
 								'action'      => 'login',
@@ -385,19 +385,20 @@ class WC_Auth {
 				wc_get_template(
 					'auth/form-grant-access.php',
 					array(
-						'app_name'    => wc_clean( $data['app_name'] ),
-						'return_url'  => add_query_arg(
+						'app_name'     => wc_clean( $data['app_name'] ),
+						'callback_url' => $this->get_formatted_url( $data['callback_url'] ),
+						'return_url'   => add_query_arg(
 							array(
 								'success' => 0,
 								'user_id' => wc_clean( $data['user_id'] ),
 							),
 							$this->get_formatted_url( $data['return_url'] )
 						),
-						'scope'       => $this->get_i18n_scope( wc_clean( $data['scope'] ) ),
-						'permissions' => $this->get_permissions_in_scope( wc_clean( $data['scope'] ) ),
-						'granted_url' => wp_nonce_url( $this->build_url( $data, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
-						'logout_url'  => wp_logout_url( $this->build_url( $data, 'login' ) ),
-						'user'        => wp_get_current_user(),
+						'scope'        => $this->get_i18n_scope( wc_clean( $data['scope'] ) ),
+						'permissions'  => $this->get_permissions_in_scope( wc_clean( $data['scope'] ) ),
+						'granted_url'  => wp_nonce_url( $this->build_url( $data, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
+						'logout_url'   => wp_logout_url( $this->build_url( $data, 'login' ) ),
+						'user'         => wp_get_current_user(),
 					)
 				);
 				exit;

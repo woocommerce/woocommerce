@@ -2,16 +2,20 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
+import { setOutput } from '@actions/core';
 
 /**
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
 import { requestAsync } from '../../../core/util';
+import { isGithubCI } from '../../../core/environment';
 
 type SlackResponse = {
 	ok: boolean;
 	error?: string;
+	channel?: string;
+	ts?: string;
 };
 
 export const slackMessageCommand = new Command( 'message' )
@@ -72,6 +76,9 @@ export const slackMessageCommand = new Command( 'message' )
 					Logger.notice(
 						`Slack message sent successfully to channel: ${ channel }`
 					);
+					if ( isGithubCI() ) {
+						setOutput( 'ts', response.ts );
+					}
 				}
 			} catch ( e: unknown ) {
 				Logger.error( e, shouldFail );

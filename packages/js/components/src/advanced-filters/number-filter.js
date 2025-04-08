@@ -75,13 +75,7 @@ class NumberFilter extends Component {
 		if ( type === 'currency' ) {
 			return symbolPosition.indexOf( 'right' ) === 0 ? (
 				<TextControlWithAffixes
-					suffix={
-						<span
-							dangerouslySetInnerHTML={ {
-								__html: currencySymbol,
-							} }
-						/>
-					}
+					suffix={ <span>{ currencySymbol }</span> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
@@ -90,13 +84,7 @@ class NumberFilter extends Component {
 				/>
 			) : (
 				<TextControlWithAffixes
-					prefix={
-						<span
-							dangerouslySetInnerHTML={ {
-								__html: currencySymbol,
-							} }
-						/>
-					}
+					prefix={ <span>{ currencySymbol }</span> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
@@ -141,7 +129,6 @@ class NumberFilter extends Component {
 		let labelFormat = '';
 
 		if ( filter.rule === 'lessthan' ) {
-			/* eslint-disable-next-line max-len */
 			/* translators: Sentence fragment, "maximum amount" refers to a numeric value the field must be less than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 			labelFormat = _x(
 				'%(field)s maximum amount',
@@ -149,7 +136,6 @@ class NumberFilter extends Component {
 				'woocommerce'
 			);
 		} else {
-			/* eslint-disable-next-line max-len */
 			/* translators: Sentence fragment, "minimum amount" refers to a numeric value the field must be more than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 			labelFormat = _x(
 				'%(field)s minimum amount',
@@ -182,14 +168,14 @@ class NumberFilter extends Component {
 		const rangeStartOnChange = ( newRangeStart ) => {
 			onFilterChange( {
 				property: 'value',
-				key: [ newRangeStart, rangeEnd ],
+				value: [ newRangeStart, rangeEnd ],
 			} );
 		};
 
 		const rangeEndOnChange = ( newRangeEnd ) => {
 			onFilterChange( {
 				property: 'value',
-				key: [ rangeStart, newRangeEnd ],
+				value: [ rangeStart, newRangeEnd ],
 			} );
 		};
 
@@ -198,7 +184,6 @@ class NumberFilter extends Component {
 				type: inputType,
 				value: rangeStart || '',
 				label: sprintf(
-					/* eslint-disable-next-line max-len */
 					/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 					__( '%(field)s range start', 'woocommerce' ),
 					{ field: get( config, [ 'labels', 'add' ] ) }
@@ -211,7 +196,6 @@ class NumberFilter extends Component {
 				type: inputType,
 				value: rangeEnd || '',
 				label: sprintf(
-					/* eslint-disable-next-line max-len */
 					/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 					__( '%(field)s range end', 'woocommerce' ),
 					{ field: get( config, [ 'labels', 'add' ] ) }

@@ -47,13 +47,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-10"
               >
                 Search for items
@@ -246,13 +246,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-10"
             >
               Search for items
@@ -526,13 +526,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-0"
               >
                 Search for items
@@ -710,13 +710,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-0"
             >
               Search for items
@@ -975,13 +975,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-1"
               >
                 Search for items
@@ -1159,13 +1159,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-1"
             >
               Search for items
@@ -1424,13 +1424,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-9"
               >
                 Search for items
@@ -1506,13 +1506,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-9"
             >
               Search for items
@@ -1669,13 +1669,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-8"
               >
                 Testing search label
@@ -1853,13 +1853,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-8"
             >
               Testing search label
@@ -2118,13 +2118,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-4"
               >
                 Search for items
@@ -2189,13 +2189,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-4"
             >
               Search for items
@@ -2341,13 +2341,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-7"
               >
                 Search for items
@@ -2412,13 +2412,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-7"
             >
               Search for items
@@ -2564,13 +2564,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-5"
               >
                 Search for items
@@ -2609,7 +2609,6 @@ Object {
                   <strong>
                     berry
                   </strong>
-                  
                 </span>
               </span>
             </label>
@@ -2636,7 +2635,6 @@ Object {
                   <strong>
                     berry
                   </strong>
-                  
                 </span>
               </span>
             </label>
@@ -2664,13 +2662,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-5"
             >
               Search for items
@@ -2709,7 +2707,6 @@ Object {
                 <strong>
                   berry
                 </strong>
-                
               </span>
             </span>
           </label>
@@ -2736,7 +2733,6 @@ Object {
                 <strong>
                   berry
                 </strong>
-                
               </span>
             </span>
           </label>
@@ -2845,13 +2841,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-6"
               >
                 Search for items
@@ -2890,7 +2886,6 @@ Object {
                   <strong>
                     bERry
                   </strong>
-                  
                 </span>
               </span>
             </label>
@@ -2917,7 +2912,6 @@ Object {
                   <strong>
                     bERry
                   </strong>
-                  
                 </span>
               </span>
             </label>
@@ -2945,13 +2939,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-6"
             >
               Search for items
@@ -2990,7 +2984,6 @@ Object {
                 <strong>
                   bERry
                 </strong>
-                
               </span>
             </span>
           </label>
@@ -3017,7 +3010,6 @@ Object {
                 <strong>
                   bERry
                 </strong>
-                
               </span>
             </span>
           </label>
@@ -3176,13 +3168,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-2"
               >
                 Search for items
@@ -3411,13 +3403,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-2"
             >
               Search for items
@@ -3768,13 +3760,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-3"
               >
                 Search for items
@@ -4045,13 +4037,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper ej5x27r4"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
             class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-3"
             >
               Search for items

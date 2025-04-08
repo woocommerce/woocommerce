@@ -45,7 +45,7 @@ class WC_Meta_Box_Product_Categories {
 		 * @param number $threshold The default threshold.
 		 * @returns number The threshold that will be used.
 		 */
-		if ( $categories_count <= apply_filters( 'woocommerce_product_category_metabox_search_threshold', 100 ) && function_exists( 'post_categories_meta_box' ) ) {
+		if ( $categories_count <= apply_filters( 'woocommerce_product_category_metabox_search_threshold', 5 ) && function_exists( 'post_categories_meta_box' ) ) {
 			return post_categories_meta_box( $post, $box );
 		}
 

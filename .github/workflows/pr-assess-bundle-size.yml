@@ -1,0 +1,74 @@
+name: Compressed Size
+
+on:
+    pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - ready_for_review
+        paths:
+            - '**.jsx?'
+            - '**.tsx?'
+            - '**.css'
+            - '**.scss'
+            - '**package*.json'
+            - '**.eslint*'
+            - '**.prettier*'
+            - '**.tsconfig*'
+            - '**/webpack.config.js'
+            - '!.github/**'
+            - '!packages/js/*e2e*/**'
+            - '!packages/js/*plugin*/**'
+            - '!packages/js/*internal*/**'
+            - '!packages/js/*create*/**'
+            - '!**/*.spec.*'
+            - '!**/tests/**'
+            - '!tools/**'
+            - '!changelog/**'
+            - '!docs/**'
+            - '!bin/**'
+            - '.github/workflows/pr-assess-bundle-size.yml'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+    build:
+        name: Check Asset Sizes
+        if: github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: write
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  php-version: false
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
+                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+            - name: Enable corepack for pnpm
+              shell: 'bash'
+              run: 'npm install -g corepack@latest && corepack enable pnpm'
+              # `npm install -g corepack@latest` addresses https://github.com/nodejs/corepack/issues/612.
+
+            - uses: preactjs/compressed-size-action@f780fd104362cfce9e118f9198df2ee37d12946c
+              env:
+                  BROWSERSLIST_IGNORE_OLD_DATA: true
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce/client/blocks,plugins/woocommerce/client/admin,plugins/woocommerce/client/legacy}/{build,build-style}/**/*.{js,css}'
+                  install-script: 'pnpm install --filter="@woocommerce/plugin-woocommerce..." --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts'
+                  build-script: '--filter="@woocommerce/plugin-woocommerce" build'
+                  clean-script: '--if-present clean:build'
+                  minimum-change-threshold: 100
+                  omit-unchanged: true

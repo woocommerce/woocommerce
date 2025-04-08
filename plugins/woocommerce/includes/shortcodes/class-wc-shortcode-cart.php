@@ -31,12 +31,14 @@ class WC_Shortcode_Cart {
 			$address['postcode'] = isset( $_POST['calc_shipping_postcode'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_postcode'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 			$address['city']     = isset( $_POST['calc_shipping_city'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_city'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 
+			if ( $address['postcode'] ) {
+				$address['postcode'] = wc_format_postcode( $address['postcode'], $address['country'] );
+			}
+
 			$address = apply_filters( 'woocommerce_cart_calculate_shipping_address', $address );
 
 			if ( $address['postcode'] && ! WC_Validation::is_postcode( $address['postcode'], $address['country'] ) ) {
 				throw new Exception( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ) );
-			} elseif ( $address['postcode'] ) {
-				$address['postcode'] = wc_format_postcode( $address['postcode'], $address['country'] );
 			}
 
 			if ( $address['country'] ) {

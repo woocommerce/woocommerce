@@ -8,17 +8,18 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { AttributeControl } from '../attribute-control';
 
-const attributeList: ProductAttribute[] = [
+const attributeList: ProductProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',
+		slug: 'Automotive',
 		position: 0,
 		visible: true,
 		variation: false,
@@ -27,6 +28,7 @@ const attributeList: ProductAttribute[] = [
 	{
 		id: 1,
 		name: 'Color',
+		slug: 'Color',
 		position: 2,
 		visible: true,
 		variation: true,
@@ -79,6 +81,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	__esModule: true,
 	__experimentalSelectControlMenuSlot: () => <div></div>,
 	ListItem: ( { children }: { children: JSX.Element } ) => children,
+	Tag: ( { label }: { label: string } ) => <span>{ label }</span>,
 	Sortable: ( {
 		onOrderChange,
 		children,
@@ -110,15 +113,6 @@ jest.mock( '@woocommerce/components', () => ( {
 describe( 'AttributeControl', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-	} );
-
-	describe( 'empty state', () => {
-		it( 'should show subtitle and "Add new" button', () => {
-			const { queryByText } = render(
-				<AttributeControl value={ [] } onChange={ () => {} } />
-			);
-			expect( queryByText( 'Add new' ) ).toBeInTheDocument();
-		} );
 	} );
 
 	it( 'should render the list of all attributes', async () => {

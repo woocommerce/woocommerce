@@ -16,6 +16,18 @@ require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 	/**
+	 * Setup test case.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Make sure the class file is loaded.
+		require_once WC_ABSPATH . 'includes/admin/settings/class-wc-settings-payment-gateways.php';
+	}
+
+	/**
 	 * @testdox get_sections should get all the existing sections.
 	 */
 	public function test_get_sections() {
@@ -67,15 +79,15 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_returns_all_settings() {
 		$sut = new WC_Settings_Payment_Gateways();
 
-		$settings               = $sut->get_settings_for_section( '' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'payment_gateways_options' => 'sectionend',
 			''                         => array( 'title', 'payment_gateways_banner', 'payment_gateways' ),
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**
@@ -130,7 +142,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$process_admin_options_invoked = false;
 		$init_invoked                  = false;
 
-		$gateway = WC_Payment_Gateways::instance()->payment_gateways()['bacs'];
+		$gateway = WC_Payment_Gateways::instance()->payment_gateways()[ WC_Gateway_BACS::ID ];
 
 		$payment_gateways = $this->getMockBuilder( WC_Payment_Gateways::class )
 								 ->setMethods( array( 'process_admin_options', 'init', 'payment_gateways' ) )

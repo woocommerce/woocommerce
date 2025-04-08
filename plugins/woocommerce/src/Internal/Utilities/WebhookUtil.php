@@ -5,21 +5,19 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use WC_Cache_Helper;
 
 /**
  * Class with utility methods for dealing with webhooks.
  */
 class WebhookUtil {
 
-	use AccessiblePrivateMethods;
-
 	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		self::add_action( 'deleted_user', array( $this, 'reassign_webhooks_to_new_user_id' ), 10, 2 );
-		self::add_action( 'delete_user_form', array( $this, 'maybe_render_user_with_webhooks_warning' ), 10, 2 );
+		add_action( 'deleted_user', array( $this, 'reassign_webhooks_to_new_user_id' ), 10, 2 );
+		add_action( 'delete_user_form', array( $this, 'maybe_render_user_with_webhooks_warning' ), 10, 2 );
 	}
 
 	/**
@@ -33,8 +31,10 @@ class WebhookUtil {
 	 *
 	 * @return void
 	 * @since 7.8.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function reassign_webhooks_to_new_user_id( int $old_user_id, ?int $new_user_id ): void {
+	public function reassign_webhooks_to_new_user_id( int $old_user_id, ?int $new_user_id ): void {
 		$webhook_ids = $this->get_webhook_ids_for_user( $old_user_id );
 
 		foreach ( $webhook_ids as $webhook_id ) {
@@ -51,8 +51,10 @@ class WebhookUtil {
 	 * @param array    $userids Array with the ids of the users that are about to be deleted.
 	 * @return void
 	 * @since 7.8.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function maybe_render_user_with_webhooks_warning( \WP_User $current_user, array $userids ): void {
+	public function maybe_render_user_with_webhooks_warning( \WP_User $current_user, array $userids ): void {
 		global $wpdb;
 
 		$at_least_one_user_with_webhooks = false;
@@ -132,5 +134,30 @@ class WebhookUtil {
 				'user_id' => $user_id,
 			)
 		);
+	}
+
+	/**
+	 * Gets the count of webhooks that are configured to use the Legacy REST API to compose their payloads.
+	 *
+	 * @param bool $clear_cache If true, the previously cached value of the count will be discarded if it exists.
+	 *
+	 * @return int
+	 */
+	public function get_legacy_webhooks_count( bool $clear_cache = false ): int {
+		global $wpdb;
+
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'legacy_count';
+		if ( $clear_cache ) {
+			wp_cache_delete( $cache_key, 'webhooks' );
+		}
+
+		$count = wp_cache_get( $cache_key, 'webhooks' );
+
+		if ( false === $count ) {
+			$count = absint( $wpdb->get_var( "SELECT count( webhook_id ) FROM {$wpdb->prefix}wc_webhooks WHERE `api_version` < 1;" ) );
+			wp_cache_add( $cache_key, $count, 'webhooks' );
+		}
+
+		return $count;
 	}
 }

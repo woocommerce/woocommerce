@@ -6,6 +6,9 @@
  * @version 3.2.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -116,8 +119,9 @@ final class WC_Cart_Session {
 
 		// Populate cart from order.
 		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart        = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
-			$order_again = true;
+			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+			$order_again         = true;
+			$update_cart_session = true;
 		}
 
 		// Prime caches to reduce future queries.
@@ -161,16 +165,16 @@ final class WC_Cart_Session {
 				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values, $product );
 
-			/**
-			 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
-			 *
-			 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
-			 * @param string     $key Cart item key.
-			 * @param array      $values Cart item values e.g. quantity and product_id.
-			 * @param WC_Product $product The product being added to the cart.
-			 *
-			 * @since 7.0.0
-			 */
+				/**
+				 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
+				 *
+				 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
+				 * @param string     $key Cart item key.
+				 * @param array      $values Cart item values e.g. quantity and product_id.
+				 * @param WC_Product $product The product being added to the cart.
+				 *
+				 * @since 7.0.0
+				 */
 			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values, $product ) ) {
 				$update_cart_session = true;
 				/* translators: %s: product name */
@@ -203,7 +207,27 @@ final class WC_Cart_Session {
 					)
 				);
 
+				/**
+				 * Filter to modify or add session data to the cart contents.
+				 *
+				 * @since 3.2.0
+				 *
+				 * @param array  $session_data Data for an item in the cart.
+				 * @param array  $values       Data for an item in the cart, without the product object.
+				 * @param string $key          The cart item hash.
+				 */
 				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+				if ( ! isset( $cart_contents[ $key ]['data'] ) || ! $cart_contents[ $key ]['data'] instanceof WC_Product ) {
+					// If the cart contents is missing the product object after filtering, something is wrong.
+					wc_doing_it_wrong(
+						__METHOD__,
+						'When filtering cart items with woocommerce_get_cart_item_from_session, each item must have a data key containing a product object.',
+						'9.8.0'
+					);
+
+					// Add the product back in.
+					$cart_contents[ $key ]['data'] = $product;
+				}
 
 				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
 				$this->cart->set_cart_contents( $cart_contents );
@@ -251,16 +275,72 @@ final class WC_Cart_Session {
 	/**
 	 * Will set cart cookies if needed and when possible.
 	 *
+	 * Headers are only updated if headers have not yet been sent.
+	 *
 	 * @since 3.2.0
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
-			if ( ! $this->cart->is_empty() ) {
-				$this->set_cart_cookies( true );
-			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
-				$this->set_cart_cookies( false );
+		if ( headers_sent() || ! did_action( 'wp_loaded' ) ) {
+			return;
+		}
+		if ( ! $this->cart->is_empty() ) {
+			$this->set_cart_cookies( true );
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
+			$this->set_cart_cookies( false );
+		}
+		$this->dedupe_cookies();
+	}
+
+	/**
+	 * Remove duplicate cookies from the response.
+	 */
+	private function dedupe_cookies() {
+		$all_cookies    = array_filter(
+			headers_list(),
+			function( $header ) {
+				return stripos( $header, 'Set-Cookie:' ) !== false;
+			}
+		);
+		$final_cookies  = array();
+		$update_cookies = false;
+		foreach ( $all_cookies as $cookie ) {
+
+			list(, $cookie_value)             = explode( ':', $cookie, 2 );
+			list($cookie_name, $cookie_value) = explode( '=', trim( $cookie_value ), 2 );
+
+			if ( stripos( $cookie_name, 'woocommerce_' ) !== false ) {
+				$key = $this->find_cookie_by_name( $cookie_name, $final_cookies );
+				if ( false !== $key ) {
+					$update_cookies = true;
+					unset( $final_cookies[ $key ] );
+				}
+			}
+			$final_cookies[] = $cookie;
+		}
+
+		if ( $update_cookies ) {
+			header_remove( 'Set-Cookie' );
+			foreach ( $final_cookies as $cookie ) {
+				// Using header here preserves previous cookie args.
+				header( $cookie, false );
 			}
 		}
+	}
+
+	/**
+	 * Find a cookie by name in an array of cookies.
+	 *
+	 * @param  string $cookie_name Name of the cookie to find.
+	 * @param  array  $cookies     Array of cookies to search.
+	 * @return mixed               Key of the cookie if found, false if not.
+	 */
+	private function find_cookie_by_name( $cookie_name, $cookies ) {
+		foreach ( $cookies as $key => $cookie ) {
+			if ( strpos( $cookie, $cookie_name ) !== false ) {
+				return $key;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -331,6 +411,7 @@ final class WC_Cart_Session {
 			foreach ( $setcookies as $name => $value ) {
 				if ( ! isset( $_COOKIE[ $name ] ) || $_COOKIE[ $name ] !== $value ) {
 					wc_setcookie( $name, $value );
+					$_COOKIE[ $name ] = $value;
 				}
 			}
 		} else {
@@ -382,7 +463,15 @@ final class WC_Cart_Session {
 	private function populate_cart_from_order( $order_id, $cart ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order->get_id() || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
+		/**
+		 * Filter the valid order statuses for reordering.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $valid_statuses Array of valid order statuses.
+		 */
+		$valid_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( OrderStatus::COMPLETED ) );
+		if ( ! $order->get_id() || ! $order->has_status( $valid_statuses ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
 			return;
 		}
 
@@ -406,7 +495,7 @@ final class WC_Cart_Session {
 			}
 
 			// Prevent reordering variable products if no selected variation.
-			if ( ! $variation_id && $product->is_type( 'variable' ) ) {
+			if ( ! $variation_id && $product->is_type( ProductType::VARIABLE ) ) {
 				continue;
 			}
 

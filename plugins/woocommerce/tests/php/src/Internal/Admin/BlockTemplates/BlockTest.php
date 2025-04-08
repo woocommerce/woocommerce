@@ -22,7 +22,7 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$this->expectException( \ValueError::class );
 
-		new Block( [], $template );
+		new Block( array(), $template );
 	}
 
 	/**
@@ -32,9 +32,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = new Block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			],
+			),
 			$template
 		);
 
@@ -49,18 +49,18 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template_2 = new BlockTemplate();
 
 		$parent = new Block(
-			[
+			array(
 				'blockName' => 'test-block-parent-name',
-			],
+			),
 			$template_2
 		);
 
 		$this->expectException( \ValueError::class );
 
 		new Block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			],
+			),
 			$template,
 			$parent
 		);
@@ -74,17 +74,17 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$child_block = $block->add_block(
-			[
+			array(
 				'id'        => 'test-block-id-2',
 				'blockName' => 'test-block-name-2',
-			]
+			)
 		);
 
 		$this->assertSame(
@@ -113,17 +113,17 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$child_block = $block->add_block(
-			[
+			array(
 				'id'        => 'test-block-id-2',
 				'blockName' => 'test-block-name-2',
-			]
+			)
 		);
 
 		$block->remove_block( 'test-block-id-2' );
@@ -152,17 +152,17 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$child_block = $block->add_block(
-			[
+			array(
 				'id'        => 'test-block-id-2',
 				'blockName' => 'test-block-name-2',
-			]
+			)
 		);
 
 		$template->remove_block( 'test-block-id-2' );
@@ -191,17 +191,17 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$child_block = $block->add_block(
-			[
+			array(
 				'id'        => 'test-block-id-2',
 				'blockName' => 'test-block-name-2',
-			]
+			)
 		);
 
 		$template->remove_block( 'test-block-id' );
@@ -239,10 +239,10 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$block->remove();
@@ -260,27 +260,27 @@ class BlockTest extends WC_Unit_Test_Case {
 		$block_template = new BlockTemplate();
 
 		$block = $block_template->add_block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$child_block_1 = $block->add_block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$grandchild_block = $child_block_1->add_block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$this->assertSame(
@@ -317,19 +317,19 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$template->remove_block( 'test-block-id' );
 
 		$child_block = $block->add_block(
-			[
+			array(
 				'id'        => 'test-block-id-2',
 				'blockName' => 'test-block-name-2',
-			]
+			)
 		);
 
 		$this->assertNull(
@@ -354,63 +354,208 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that hide conditions can be passed in when creating a block.
+	 */
+	public function test_hide_conditions_in_constructor() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			array(
+				'blockName'      => 'test-block-name',
+				'hideConditions' => array(
+					array(
+						'expression' => 'foo === bar',
+					),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'k0' => array(
+					'expression' => 'foo === bar',
+				),
+			),
+			$block->get_hide_conditions(),
+			'Failed asserting that the hide conditions are set correctly in the constructor.'
+		);
+	}
+
+	/**
+	 * Test that disable conditions can be passed in when creating a block.
+	 */
+	public function test_disable_conditions_in_constructor() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			array(
+				'blockName'         => 'test-block-name',
+				'disableConditions' => array(
+					array(
+						'expression' => 'foo === bar',
+					),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'k0' => array(
+					'expression' => 'foo === bar',
+				),
+			),
+			$block->get_disable_conditions(),
+			'Failed asserting that the disable conditions are set correctly in the constructor.'
+		);
+	}
+
+	/**
+	 * Test that hide conditions can be added to a block.
+	 */
+	public function test_add_hide_condition() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			array(
+				'blockName' => 'test-block-name',
+			)
+		);
+
+		$condition_1_key = $block->add_hide_condition( 'editedProduct.manage_stock === true' );
+
+		$condition_2_key = $block->add_hide_condition( 'true' );
+
+		$condition_3_key = $block->add_hide_condition( 'foo > 10' );
+
+		$block->remove_hide_condition( $condition_2_key );
+
+		$this->assertSame(
+			array(
+				$condition_1_key => array(
+					'expression' => 'editedProduct.manage_stock === true',
+				),
+				$condition_3_key => array(
+					'expression' => 'foo > 10',
+				),
+			),
+			$block->get_hide_conditions(),
+			'Failed asserting that the hide conditions are added correctly.'
+		);
+	}
+
+	/**
+	 * Test that hide conditions can be added to a block.
+	 */
+	public function test_add_disable_condition() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			array(
+				'blockName' => 'test-block-name',
+			)
+		);
+
+		$condition_1_key = $block->add_disable_condition( 'editedProduct.manage_stock === true' );
+
+		$condition_2_key = $block->add_disable_condition( 'true' );
+
+		$condition_3_key = $block->add_disable_condition( 'foo > 10' );
+
+		$block->remove_disable_condition( $condition_2_key );
+
+		$this->assertSame(
+			array(
+				$condition_1_key => array(
+					'expression' => 'editedProduct.manage_stock === true',
+				),
+				$condition_3_key => array(
+					'expression' => 'foo > 10',
+				),
+			),
+			$block->get_disable_conditions(),
+			'Failed asserting that the hide conditions are added correctly.'
+		);
+	}
+
+	/**
 	 * Test that getting the block as a formatted template is structured correctly.
 	 */
 	public function test_get_formatted_template() {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'id'         => 'test-block-id',
 				'blockName'  => 'test-block-name',
-				'attributes' => [
+				'attributes' => array(
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
-				],
-			]
+				),
+			)
 		);
 
+		$block->add_hide_condition( 'foo === bar' );
+
+		$block->add_disable_condition( 'test > 100' );
+
 		$block->add_block(
-			[
+			array(
 				'id'         => 'test-block-id-2',
 				'blockName'  => 'test-block-name-2',
-				'attributes' => [
+				'attributes' => array(
 					'attr-3' => 'value-3',
 					'attr-4' => 'value-4',
-				],
-			]
+				),
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'id'        => 'test-block-id-3',
 				'blockName' => 'test-block-name-3',
-			]
+			)
 		);
 
 		$formatted_template = $block->get_formatted_template();
 
 		$this->assertSame(
-			[
+			array(
 				'test-block-name',
-				[
-					'attr-1' => 'value-1',
-					'attr-2' => 'value-2',
-				],
-				[
-					[
+				array(
+					'attr-1'                          => 'value-1',
+					'attr-2'                          => 'value-2',
+					'_templateBlockId'                => 'test-block-id',
+					'_templateBlockOrder'             => 10000,
+					'_templateBlockHideConditions'    => array(
+						array(
+							'expression' => 'foo === bar',
+						),
+					),
+					'_templateBlockDisableConditions' => array(
+						array(
+							'expression' => 'test > 100',
+						),
+					),
+				),
+				array(
+					array(
 						'test-block-name-2',
-						[
-							'attr-3' => 'value-3',
-							'attr-4' => 'value-4',
-						],
-					],
-					[
+						array(
+							'attr-3'              => 'value-3',
+							'attr-4'              => 'value-4',
+							'_templateBlockId'    => 'test-block-id-2',
+							'_templateBlockOrder' => 10000,
+						),
+					),
+					array(
 						'test-block-name-3',
-						[],
-					],
-				],
-			],
+						array(
+							'_templateBlockId'    => 'test-block-id-3',
+							'_templateBlockOrder' => 10000,
+						),
+					),
+				),
+			),
 			$formatted_template,
 			'Failed asserting that the block is converted to a formatted template correctly.'
 		);
@@ -423,75 +568,110 @@ class BlockTest extends WC_Unit_Test_Case {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
-			[
+			array(
 				'blockName' => 'test-block-name',
-			]
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'blockName' => 'five',
 				'order'     => 5,
-			]
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'blockName' => 'three',
 				'order'     => 3,
-			]
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'blockName' => 'one',
 				'order'     => 1,
-			]
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'blockName' => 'four',
 				'order'     => 4,
-			]
+			)
 		);
 
 		$block->add_block(
-			[
+			array(
 				'blockName' => 'two',
 				'order'     => 2,
-			]
+			)
 		);
 
 		$this->assertSame(
-			[
+			array(
 				'test-block-name',
-				[],
-				[
-					[
+				array(
+					'_templateBlockId'    => 'test-block-name-1',
+					'_templateBlockOrder' => 10000,
+				),
+				array(
+					array(
 						'one',
-						[],
-					],
-					[
+						array(
+							'_templateBlockId'    => 'one-1',
+							'_templateBlockOrder' => 1,
+						),
+					),
+					array(
 						'two',
-						[],
-					],
-					[
+						array(
+							'_templateBlockId'    => 'two-1',
+							'_templateBlockOrder' => 2,
+						),
+					),
+					array(
 						'three',
-						[],
-					],
-					[
+						array(
+							'_templateBlockId'    => 'three-1',
+							'_templateBlockOrder' => 3,
+						),
+					),
+					array(
 						'four',
-						[],
-					],
-					[
+						array(
+							'_templateBlockId'    => 'four-1',
+							'_templateBlockOrder' => 4,
+						),
+					),
+					array(
 						'five',
-						[],
-					],
-				],
-			],
+						array(
+							'_templateBlockId'    => 'five-1',
+							'_templateBlockOrder' => 5,
+						),
+					),
+				),
+			),
 			$block->get_formatted_template(),
 			'Failed asserting that the inner blocks are sorted by order.'
 		);
+	}
+	/**
+	 * Test for set_attribute method.
+	 */
+	public function test_set_attribute() {
+		$template = new BlockTemplate();
+
+		$block = new Block(
+			array(
+				'blockName' => 'test-block-name',
+			),
+			$template
+		);
+
+		$block->set_attribute( 'test-attr', 'test-value' );
+
+		$this->assertSame( 'test-value', $block->get_attributes()['test-attr'] );
 	}
 }

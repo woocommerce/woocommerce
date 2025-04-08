@@ -310,42 +310,55 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 				[
 					'test-block-name-a',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'test-block-name-a-1',
+						'_templateBlockOrder' => 10,
 					],
 				],
 				[
 					'test-block-name-b',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'test-block-name-b-1',
+						'_templateBlockOrder' => 50,
 					],
 					[
 						[
 							'test-block-name-1',
 							[
-								'attr-3' => 'value-3',
-								'attr-4' => 'value-4',
+								'attr-3'              => 'value-3',
+								'attr-4'              => 'value-4',
+								'_templateBlockId'    => 'test-block-name-1-1',
+								'_templateBlockOrder' => 10,
 							],
 						],
 						[
 							'test-block-name-2',
 							[
-								'attr-1' => 'value-1',
-								'attr-2' => 'value-2',
+								'attr-1'              => 'value-1',
+								'attr-2'              => 'value-2',
+								'_templateBlockId'    => 'test-block-name-2-1',
+								'_templateBlockOrder' => 20,
 							],
 						],
 						[
 							'test-block-name-3',
-							[],
+							[
+								'_templateBlockId'    => 'test-block-name-3-1',
+								'_templateBlockOrder' => 30,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-c',
 					[
-						'attr-c1' => 'value-c1',
-						'attr-c2' => 'value-c2',
+						'attr-c1'             => 'value-c1',
+						'attr-c2'             => 'value-c2',
+						'_templateBlockId'    => 'test-block-name-c-1',
+						'_templateBlockOrder' => 100,
 					],
 				],
 			],
@@ -446,52 +459,71 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 				[
 					'test-block-name-a',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'a',
+						'_templateBlockOrder' => 10,
 					],
 					[
 						[
 							'inserted-block',
-							[],
+							[
+								'_templateBlockId'    => 'inserted-block-1',
+								'_templateBlockOrder' => 10000,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-b',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'b',
+						'_templateBlockOrder' => 50,
 					],
 					[
 						[
 							'test-block-name-1',
 							[
-								'attr-3' => 'value-3',
-								'attr-4' => 'value-4',
+								'attr-3'              => 'value-3',
+								'attr-4'              => 'value-4',
+								'_templateBlockId'    => 'test-block-name-1-1',
+								'_templateBlockOrder' => 10,
 							],
 						],
 						[
 							'another-inserted-block',
-							[],
+							[
+								'_templateBlockId'    => 'another-inserted-block-1',
+								'_templateBlockOrder' => 15,
+							],
 						],
 						[
 							'test-block-name-2',
 							[
-								'attr-1' => 'value-1',
-								'attr-2' => 'value-2',
+								'attr-1'              => 'value-1',
+								'attr-2'              => 'value-2',
+								'_templateBlockId'    => 'test-block-name-2-1',
+								'_templateBlockOrder' => 20,
 							],
 						],
 						[
 							'test-block-name-3',
-							[],
+							[
+								'_templateBlockId'    => 'test-block-name-3-1',
+								'_templateBlockOrder' => 30,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-c',
 					[
-						'attr-c1' => 'value-c1',
-						'attr-c2' => 'value-c2',
+						'attr-c1'             => 'value-c1',
+						'attr-c2'             => 'value-c2',
+						'_templateBlockId'    => 'test-block-name-c-1',
+						'_templateBlockOrder' => 100,
 					],
 				],
 			],
@@ -585,21 +617,28 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 				[
 					'test-block-name-a',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'a',
+						'_templateBlockOrder' => 10,
 					],
 					[
 						[
 							'inserted-block',
-							[],
+							[
+								'_templateBlockId'    => 'inserted-block-1',
+								'_templateBlockOrder' => 10000,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-c',
 					[
-						'attr-c1' => 'value-c1',
-						'attr-c2' => 'value-c2',
+						'attr-c1'             => 'value-c1',
+						'attr-c2'             => 'value-c2',
+						'_templateBlockId'    => 'test-block-name-c-1',
+						'_templateBlockOrder' => 100,
 					],
 				],
 			],

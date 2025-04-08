@@ -53,7 +53,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 		if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$linked = wc_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
 			/* translators: single or plural number of orders */
-			echo '<div class="updated"><p>' . sprintf( esc_html( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) ) . '</p></div>';
+			echo '<div class="updated"><p>' . esc_html( sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) ) . '</p></div>';
 		}
 
 		if ( ! empty( $_GET['refresh'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'refresh' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput

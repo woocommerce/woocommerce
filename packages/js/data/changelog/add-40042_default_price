@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Update totalCount in crud store to avoid unnecessary requests.

@@ -5,6 +5,12 @@
  * @since 2.3
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * WC_Tests_Product_Functions class.
  */
@@ -49,7 +55,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$variation->save();
 
 		$draft = WC_Helper_Product::create_simple_product();
-		$draft->set_status( 'draft' );
+		$draft->set_status( ProductStatus::DRAFT );
 		$draft->save();
 
 		$this->assertCount( 9, wc_get_products( array( 'return' => 'ids' ) ) );
@@ -58,7 +64,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'return' => 'ids',
-				'status' => 'draft',
+				'status' => ProductStatus::DRAFT,
 			)
 		);
 		$this->assertEquals( array( $draft->get_id() ), $products );
@@ -67,7 +73,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'return' => 'ids',
-				'type'   => 'variation',
+				'type'   => ProductType::VARIATION,
 			)
 		);
 		$this->assertCount( 6, $products );
@@ -76,7 +82,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'return' => 'ids',
-				'type'   => 'variation',
+				'type'   => ProductType::VARIATION,
 				'parent' => $variation->get_id(),
 			)
 		);
@@ -86,7 +92,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'return'         => 'ids',
-				'type'           => 'variation',
+				'type'           => ProductType::VARIATION,
 				'parent_exclude' => array( $variation->get_id() ),
 			)
 		);
@@ -225,6 +231,108 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$grouped->delete( true );
 		$draft->delete( true );
 		$variation->delete( true );
+	}
+
+	/**
+	 * @testdox We can search for products by category slugs and category IDs.
+	 */
+	public function test_searching_products_by_category() {
+		$cat1      = wp_insert_term( 'Cat One', 'product_cat' );
+		$cat1_term = get_term_by( 'id', $cat1['term_id'], 'product_cat' );
+		$cat2      = wp_insert_term( 'Cat Two', 'product_cat' );
+		$cat3      = wp_insert_term( 'Cat Three', 'product_cat' );
+
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_name( 'Product 1' );
+		$product1->set_category_ids( array( $cat1['term_id'] ) );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_name( 'Product 2' );
+		$product2->set_category_ids( array( $cat2['term_id'], $cat3['term_id'] ) );
+		$product2->save();
+
+		$product3 = WC_Helper_Product::create_simple_product();
+		$product3->set_name( 'Product 3' );
+		$product3->save();
+
+		// Search by category slug.
+		$products = wc_get_products(
+			array(
+				'category' => $cat1_term->slug,
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product1->get_id(), $products[0]->get_id() );
+
+		// Search by category ID.
+		$products = wc_get_products(
+			array(
+				'product_category_id' => $cat2['term_id'],
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+
+		// Search by multiple category IDs.
+		$products = wc_get_products(
+			array(
+				'product_category_id' => array( $cat2['term_id'], $cat3['term_id'] ),
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+	}
+
+	/**
+	 * @testdox We can search for products by tag slugs and tag IDs.
+	 */
+	public function test_searching_products_by_tag() {
+		$tag1      = wp_insert_term( 'Tag One', 'product_tag' );
+		$tag1_term = get_term_by( 'id', $tag1['term_id'], 'product_tag' );
+		$tag2      = wp_insert_term( 'Tag Two', 'product_tag' );
+		$tag3      = wp_insert_term( 'Tag Three', 'product_tag' );
+
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_name( 'Product 1' );
+		$product1->set_tag_ids( array( $tag1['term_id'] ) );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_name( 'Product 2' );
+		$product2->set_tag_ids( array( $tag2['term_id'], $tag3['term_id'] ) );
+		$product2->save();
+
+		$product3 = WC_Helper_Product::create_simple_product();
+		$product3->set_name( 'Product 3' );
+		$product3->save();
+
+		// Search by tag slug.
+		$products = wc_get_products(
+			array(
+				'tag' => $tag1_term->slug,
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product1->get_id(), $products[0]->get_id() );
+
+		// Search by tag ID.
+		$products = wc_get_products(
+			array(
+				'product_tag_id' => $tag2['term_id'],
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+
+		// Search by multiple tag IDs.
+		$products = wc_get_products(
+			array(
+				'product_tag_id' => array( $tag2['term_id'], $tag3['term_id'] ),
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
 	}
 
 	/**
@@ -465,35 +573,35 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_products_visibility() {
 		$product_1 = new WC_Product_Simple();
-		$product_1->set_catalog_visibility( 'visible' );
+		$product_1->set_catalog_visibility( CatalogVisibility::VISIBLE );
 		$product_1->save();
 
 		$product_2 = new WC_Product_Simple();
-		$product_2->set_catalog_visibility( 'hidden' );
+		$product_2->set_catalog_visibility( CatalogVisibility::HIDDEN );
 		$product_2->save();
 
 		$product_3 = new WC_Product_Simple();
-		$product_3->set_catalog_visibility( 'search' );
+		$product_3->set_catalog_visibility( CatalogVisibility::SEARCH );
 		$product_3->save();
 
 		$products = wc_get_products(
 			array(
 				'return'     => 'ids',
-				'visibility' => 'visible',
+				'visibility' => CatalogVisibility::VISIBLE,
 			)
 		);
 		$this->assertEquals( array( $product_1->get_id() ), $products );
 		$products = wc_get_products(
 			array(
 				'return'     => 'ids',
-				'visibility' => 'hidden',
+				'visibility' => CatalogVisibility::HIDDEN,
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
 		$products = wc_get_products(
 			array(
 				'return'     => 'ids',
-				'visibility' => 'search',
+				'visibility' => CatalogVisibility::SEARCH,
 			)
 		);
 		sort( $products );
@@ -512,13 +620,13 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_products_stock() {
 		$product_1 = new WC_Product_Simple();
 		$product_1->set_manage_stock( true );
-		$product_1->set_stock_status( 'instock' );
+		$product_1->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product_1->set_stock_quantity( 5 );
 		$product_1->save();
 
 		$product_2 = new WC_Product_Simple();
 		$product_2->set_manage_stock( true );
-		$product_2->set_stock_status( 'outofstock' );
+		$product_2->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product_2->set_stock_quantity( 0 );
 		$product_2->save();
 
@@ -540,7 +648,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'return'       => 'ids',
-				'stock_status' => 'outofstock',
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
@@ -556,26 +664,26 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_products_tax() {
 		$product_1 = new WC_Product_Simple();
-		$product_1->set_tax_status( 'taxable' );
+		$product_1->set_tax_status( ProductTaxStatus::TAXABLE );
 		$product_1->set_tax_class( 'reduced-rate' );
 		$product_1->save();
 
 		$product_2 = new WC_Product_Simple();
-		$product_2->set_tax_status( 'none' );
+		$product_2->set_tax_status( ProductTaxStatus::NONE );
 		$product_2->set_tax_class( 'standard' );
 		$product_2->save();
 
 		$products = wc_get_products(
 			array(
 				'return'     => 'ids',
-				'tax_status' => 'taxable',
+				'tax_status' => ProductTaxStatus::TAXABLE,
 			)
 		);
 		$this->assertEquals( array( $product_1->get_id() ), $products );
 		$products = wc_get_products(
 			array(
 				'return'     => 'ids',
-				'tax_status' => 'none',
+				'tax_status' => ProductTaxStatus::NONE,
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
@@ -746,11 +854,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 3.9.0
 	 */
 	public function test_wc_get_product_object() {
-		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( 'simple' ) );
-		$this->assertInstanceOf( 'WC_Product_Grouped', wc_get_product_object( 'grouped' ) );
-		$this->assertInstanceOf( 'WC_Product_External', wc_get_product_object( 'external' ) );
-		$this->assertInstanceOf( 'WC_Product_Variable', wc_get_product_object( 'variable' ) );
-		$this->assertInstanceOf( 'WC_Product_Variation', wc_get_product_object( 'variation' ) );
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( ProductType::SIMPLE ) );
+		$this->assertInstanceOf( 'WC_Product_Grouped', wc_get_product_object( ProductType::GROUPED ) );
+		$this->assertInstanceOf( 'WC_Product_External', wc_get_product_object( ProductType::EXTERNAL ) );
+		$this->assertInstanceOf( 'WC_Product_Variable', wc_get_product_object( ProductType::VARIABLE ) );
+		$this->assertInstanceOf( 'WC_Product_Variation', wc_get_product_object( ProductType::VARIATION ) );
 
 		// Test incorrect type.
 		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( 'foo+bar' ) );
@@ -831,12 +939,12 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	public function test_wc_update_product_stock_status_should_change_stock_status() {
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 
-		wc_update_product_stock_status( $product->get_id(), 'outofstock' );
+		wc_update_product_stock_status( $product->get_id(), ProductStockStatus::OUT_OF_STOCK );
 		$product = wc_get_product( $product->get_id() );
 
-		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 	}
 
 	/**
@@ -916,10 +1024,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_types = (array) apply_filters(
 			'product_type_selector',
 			array(
-				'simple'   => 'Simple product',
-				'grouped'  => 'Grouped product',
-				'external' => 'External/Affiliate product',
-				'variable' => 'Variable product',
+				ProductType::SIMPLE   => 'Simple product',
+				ProductType::GROUPED  => 'Grouped product',
+				ProductType::EXTERNAL => 'External/Affiliate product',
+				ProductType::VARIABLE => 'Variable product',
 			)
 		);
 
@@ -1070,9 +1178,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$status_options = (array) apply_filters(
 			'woocommerce_product_stock_status_options',
 			array(
-				'instock'     => 'In stock',
-				'outofstock'  => 'Out of stock',
-				'onbackorder' => 'On backorder',
+				ProductStockStatus::IN_STOCK     => 'In stock',
+				ProductStockStatus::OUT_OF_STOCK => 'Out of stock',
+				ProductStockStatus::ON_BACKORDER => 'On backorder',
 			)
 		);
 
@@ -1209,5 +1317,4 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $price_shop );
 	}
-
 }

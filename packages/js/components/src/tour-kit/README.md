@@ -1,6 +1,6 @@
 # tour-kit
 
-A Woocommerce Tour Kit variant based on [@automattic/tour-kit](https://github.com/Automattic/wp-calypso/blob/trunk/packages/tour-kit/README.md) for configurable guided tours. Contains some optional effects (like spotlight and overlay) that can be enabled/disabled depending on the desired use..
+A WooCommerce Tour Kit variant based on [@automattic/tour-kit](https://github.com/Automattic/wp-calypso/blob/trunk/packages/tour-kit/README.md) for configurable guided tours. Contains some optional effects (like spotlight and overlay) that can be enabled/disabled depending on the desired use..
 
 Uses [Popper.js](https://popper.js.org/) underneath (also customizable via tour configuration).
 

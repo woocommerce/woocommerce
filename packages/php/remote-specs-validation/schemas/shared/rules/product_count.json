@@ -1,0 +1,16 @@
+{
+	"type": "object",
+	"required": ["type", "operation", "value"],
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["product_count"]
+		},
+		"operation": {
+			"$ref": "#/definitions/operations"
+		},
+		"value": {
+			"type": "integer"
+		}
+	}
+}

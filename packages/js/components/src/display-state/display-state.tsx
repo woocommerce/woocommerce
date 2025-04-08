@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -12,16 +12,21 @@ export type DisplayStateProps = {
 	children: React.ReactNode;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const DisplayState: React.FC< DisplayStateProps > = ( {
+export const DisplayState = ( {
 	state = 'visible',
 	children,
-} ) => {
+	...props
+}: DisplayStateProps ) => {
 	if ( state === 'visible' ) {
-		return <>{ children }</>;
+		return <div { ...props }>{ children }</div>;
 	}
 
 	if ( state === 'visually-hidden' ) {
-		return <div style={ { display: 'none' } }>{ children }</div>;
+		return (
+			<div { ...props } style={ { display: 'none' } }>
+				{ children }
+			</div>
+		);
 	}
 
 	return null;

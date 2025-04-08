@@ -5,6 +5,9 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -12,9 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 	/**
-	 * Customer Invoice.
+	 * Order details email.
 	 *
-	 * An email sent to the customer via admin.
+	 * An email sent to the customer via admin, that summarizes the details of their order. This was
+	 * historically referred to as the 'invoice', and for backwards compatibility reasons that is still
+	 * reflected in the class name (although on a user-level we have moved away from that nomenclature).
 	 *
 	 * @class       WC_Email_Customer_Invoice
 	 * @version     3.5.0
@@ -29,8 +34,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		public function __construct() {
 			$this->id             = 'customer_invoice';
 			$this->customer_email = true;
-			$this->title          = __( 'Customer invoice / Order details', 'woocommerce' );
-			$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
+			$this->title          = __( 'Order details', 'woocommerce' );
 			$this->template_html  = 'emails/customer-invoice.php';
 			$this->template_plain = 'emails/plain/customer-invoice.php';
 			$this->placeholders   = array(
@@ -40,6 +44,11 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 			// Call parent constructor.
 			parent::__construct();
+
+			// Must be after parent's constructor which sets `email_improvements_enabled` property.
+			$this->description = $this->email_improvements_enabled
+				? __( 'Manually send an email to your shoppers containing their order information and payment links.', 'woocommerce' )
+				: __( 'Order detail emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
 			$this->manual = true;
 		}
@@ -52,11 +61,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject( $paid = false ) {
-			if ( $paid ) {
-				return __( 'Invoice for order #{order_number} on {site_title}', 'woocommerce' );
-			} else {
-				return __( 'Your latest {site_title} invoice', 'woocommerce' );
-			}
+			return __( 'Details for order #{order_number} on {site_title}', 'woocommerce' );
 		}
 
 		/**
@@ -67,11 +72,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading( $paid = false ) {
-			if ( $paid ) {
-				return __( 'Invoice for order #{order_number}', 'woocommerce' );
-			} else {
-				return __( 'Your invoice for order #{order_number}', 'woocommerce' );
-			}
+			return __( 'Details for order #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -80,7 +81,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_subject() {
-			if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
+			if ( $this->object->has_status( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ) ) {
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
 				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
@@ -112,7 +113,9 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_additional_content() {
-			return __( 'Thanks for using {site_url}!', 'woocommerce' );
+			return $this->email_improvements_enabled
+				? __( 'Thanks again! If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
+				: __( 'Thanks for using {site_url}!', 'woocommerce' );
 		}
 
 		/**
@@ -238,6 +241,10 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'desc_tip'    => true,
 				),
 			);
+			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+				$this->form_fields['cc']  = $this->get_cc_field();
+				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
 		}
 	}
 

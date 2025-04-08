@@ -47,12 +47,16 @@ export default {
 		'woocommerce'
 	),
 	chooseAvailableStartDate: ( { date } ) =>
+		/* translators: %s: start date */
 		sprintf( __( 'Select %s as a start date.', 'woocommerce' ), date ),
 	chooseAvailableEndDate: ( { date } ) =>
+		/* translators: %s: end date */
 		sprintf( __( 'Select %s as an end date.', 'woocommerce' ), date ),
 	chooseAvailableDate: ( { date } ) => date,
 	dateIsUnavailable: ( { date } ) =>
+		/* translators: %s: unavailable date which was selected */
 		sprintf( __( '%s is not selectable.', 'woocommerce' ), date ),
 	dateIsSelected: ( { date } ) =>
+		/* translators: %s: selected date successfully */
 		sprintf( __( 'Selected. %s', 'woocommerce' ), date ),
 };

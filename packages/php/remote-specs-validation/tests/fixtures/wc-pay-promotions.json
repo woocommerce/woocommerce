@@ -1,0 +1,290 @@
+[
+  {
+	"id": "woocommerce_payments:woopay",
+	"title": "WooPayments",
+	"content": "Payments made simple — including WooPay, a new express checkout feature.<br/><br/>By using WooPayments you agree to the <a href=\"https://wordpress.com/tos/\" target=\"_blank\">Terms of Service</a> (including WooPay <a href=\"https://wordpress.com/tos/#more-woopay-specifically\" target=\"_blank\">merchant terms</a>) and <a href=\"https://automattic.com/privacy/\" target=\"_blank\">Privacy Policy</a>.",
+	"image": "https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/wcpay.svg",
+	"plugins": [
+	  "woocommerce-payments"
+	],
+	"is_visible": [
+	  {
+		"type": "option",
+		"transformers": [
+		  {
+			"use": "dot_notation",
+			"arguments": {
+			  "path": "industry"
+			}
+		  },
+		  {
+			"use": "array_column",
+			"arguments": {
+			  "key": "slug"
+			}
+		  }
+		],
+		"option_name": "woocommerce_onboarding_profile",
+		"operation": "!contains",
+		"value": "cbd-other-hemp-derived-products",
+		"default": []
+	  },
+	  {
+		"type": "or",
+		"operands": [
+		  {
+			"type": "base_location_country",
+			"value": "US",
+			"operation": "="
+		  }
+		]
+	  },
+	  {
+		"type": "plugin_version",
+		"plugin": "woocommerce",
+		"version": "8.1.0-dev",
+		"operator": ">="
+	  }
+	],
+	"sub_title": "<img class=\"wcpay-visa-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/visa.svg\" alt=\"Visa\"><img class=\"wcpay-mastercard-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/mastercard.svg\" alt=\"Mastercard\"><img class=\"wcpay-amex-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/amex.svg\" alt=\"Amex\"><img class=\"wcpay-googlepay-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/googlepay.svg\" alt=\"Googlepay\"><img class=\"wcpay-applepay-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/applepay.svg\" alt=\"Applepay\">",
+	"additional_info": {
+	  "experiment_version": "v2"
+	}
+  },
+  {
+	"id": "woocommerce_payments",
+	"title": "WooPayments",
+	"content": "Payments made simple, with no monthly fees – designed exclusively for WooCommerce stores. Accept credit cards, debit cards, and other popular payment methods.",
+	"image": "https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/wcpay.svg",
+	"plugins": [
+	  "woocommerce-payments"
+	],
+	"is_visible": [
+	  {
+		"type": "option",
+		"transformers": [
+		  {
+			"use": "dot_notation",
+			"arguments": {
+			  "path": "industry"
+			}
+		  },
+		  {
+			"use": "array_column",
+			"arguments": {
+			  "key": "slug"
+			}
+		  }
+		],
+		"option_name": "woocommerce_onboarding_profile",
+		"operation": "!contains",
+		"value": "cbd-other-hemp-derived-products",
+		"default": []
+	  },
+	  {
+		"type": "or",
+		"operands": [
+		  {
+			"type": "base_location_country",
+			"value": "US",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "PR",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "AU",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "CA",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "DE",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "ES",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "FR",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "GB",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "IE",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "IT",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "NZ",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "AT",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "BE",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "NL",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "PL",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "PT",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "CH",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "HK",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "SG",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "CY",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "DK",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "EE",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "FI",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "GR",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "LU",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "LT",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "LV",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "NO",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "MT",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "SI",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "SK",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "BG",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "CZ",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "HR",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "HU",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "RO",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "SE",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "JP",
+			"operation": "="
+		  },
+		  {
+			"type": "base_location_country",
+			"value": "AE",
+			"operation": "="
+		  }
+		]
+	  }
+	],
+	"sub_title": "<img class=\"wcpay-visa-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/visa.svg\" alt=\"Visa\"><img class=\"wcpay-mastercard-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/mastercard.svg\" alt=\"Mastercard\"><img class=\"wcpay-amex-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/amex.svg\" alt=\"Amex\"><img class=\"wcpay-googlepay-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/googlepay.svg\" alt=\"Googlepay\"><img class=\"wcpay-applepay-icon wcpay-icon\" src=\"https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/icons/applepay.svg\" alt=\"Applepay\">",
+	"additional_info": {
+	  "experiment_version": "v2"
+	}
+  }
+]

@@ -101,13 +101,44 @@ export function* triggerWcaInstall() {
 export function* resetOnboardingWizard() {
 	yield runCommand( 'Reset Onboarding Wizard', function* () {
 		const optionsToDelete = [
-			'woocommerce_task_list_tracked_completed_tasks',
 			'woocommerce_onboarding_profile',
-			'_transient_wc_onboarding_themes',
+			'woocommerce_task_list_tracked_completed_tasks',
+			'woocommerce_private_link',
+			'woocommerce_share_key',
+			'woocommerce_store_pages_only',
 		];
+
+		const defaultOptions = {
+			woocommerce_allow_tracking: 'no',
+			woocommerce_default_country: 'US:CA',
+			woocommerce_currency: 'USD',
+			woocommerce_currency_pos: 'left',
+			woocommerce_price_thousand_sep: ',',
+			woocommerce_price_decimal_sep: '.',
+			woocommerce_price_num_decimals: '2',
+			woocommerce_coming_soon: 'no',
+			woocommerce_weight_unit: 'lbs',
+			woocommerce_dimension_unit: 'in',
+		};
+
+		// Delete existing options
 		yield apiFetch( {
 			method: 'DELETE',
 			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+
+		// Execute batch update of options
+		yield apiFetch( {
+			method: 'POST',
+			path: `${ API_NAMESPACE }/options`,
+			data: {
+				options: Object.entries( defaultOptions ).map(
+					( [ option_name, option_value ] ) => ( {
+						option_name,
+						option_value,
+					} )
+				),
+			},
 		} );
 	} );
 }
@@ -208,5 +239,143 @@ export function* runDisableEmail() {
 			method: 'POST',
 		} );
 		yield setIsEmailDisabled( response );
+	} );
+}
+
+export function* resetCustomizeYourStore() {
+	yield runCommand( 'Reset Customize Your Store', function* () {
+		const optionsToDelete = [
+			'woocommerce_customize_store_onboarding_tour_hidden',
+			'woocommerce_admin_customize_store_completed',
+			'woocommerce_admin_customize_store_completed_theme_id',
+		];
+		yield apiFetch( {
+			method: 'DELETE',
+			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-cys',
+			method: 'POST',
+		} );
+
+		yield apiFetch( {
+			path: '/wc-admin/ai/patterns',
+			method: 'DELETE',
+		} );
+	} );
+}
+
+export function setLoggingLevels( loggingLevels ) {
+	return {
+		type: TYPES.SET_LOGGING_LEVELS,
+		loggingLevels,
+	};
+}
+
+export function setBlockTemplateLoggingThreshold(
+	blockTemplateLoggingThreshold
+) {
+	return {
+		type: TYPES.SET_BLOCK_TEMPLATE_LOGGING_THRESHOLD,
+		blockTemplateLoggingThreshold,
+	};
+}
+
+export function* updateBlockTemplateLoggingThreshold( params ) {
+	yield runCommand( 'Update block template logging threshold', function* () {
+		yield apiFetch( {
+			path:
+				API_NAMESPACE +
+				'/tools/update-block-template-logging-threshold/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* updateComingSoonMode( params ) {
+	yield runCommand( 'Update coming soon mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/update-coming-soon-mode/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* updateWccomRequestErrorsMode( params ) {
+	yield runCommand( 'Update wccom request errors mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/set-wccom-request-errors/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* fakeWooPayments( params ) {
+	yield runCommand( 'Toggle Fake WooPayments Completion', function* () {
+		const newStatus = params.enabled === 'yes' ? 'no' : 'yes';
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/fake-wcpay-completion/v1',
+			method: 'POST',
+			data: {
+				enabled: newStatus,
+			},
+		} );
+
+		yield updateCommandParams( 'fakeWooPayments', {
+			enabled: newStatus,
+		} );
+
+		yield updateMessage(
+			'Toggle Fake WooPayments Completion',
+			`Fake WooPayments completion ${
+				newStatus === 'yes' ? 'disabled' : 'enabled'
+			}`
+		);
+	} );
+}
+
+export function* updateWccomBaseUrl( { url } ) {
+	yield runCommand( 'Set WooCommerce.com Base URL', function* () {
+		yield apiFetch( {
+			path: '/wc-admin-test-helper/tools/set-wccom-base-url/v1',
+			method: 'POST',
+			data: { url },
+		} );
+	} );
+}
+
+export function* resetLaunchYourStore() {
+	yield runCommand( 'Reset Launch Your Store', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-launch-your-store',
+			method: 'POST',
+		} );
+	} );
+}
+
+export function* loadTemplateVersion( params ) {
+	if ( ! params || ! params.template_name || ! params.version ) {
+		yield updateMessage(
+			'Load Template Version',
+			'Please select a template and version',
+			'error'
+		);
+		return;
+	}
+
+	yield runCommand( 'Load Template Version', function* () {
+		yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/load-template-version`,
+			method: 'POST',
+			data: {
+				template_name: params.template_name,
+				version: params.version,
+			},
+		} );
 	} );
 }

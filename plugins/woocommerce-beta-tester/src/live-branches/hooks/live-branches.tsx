@@ -1,7 +1,12 @@
-// @ts-ignore
+/**
+ * External dependencies
+ */
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from 'react';
-// @ts-ignore
+
+/**
+ * Internal dependencies
+ */
 import { API_NAMESPACE } from '../../features/data/constants';
 
 type PluginStatus = 'not-installed' | 'installed' | 'active';
@@ -79,9 +84,9 @@ export const useLiveBranchInstall = (
 			const activateResult = await apiFetch< Response >( {
 				path: `${ API_NAMESPACE }/live-branches/activate/v1`,
 				method: 'POST',
-				body: JSON.stringify( {
+				data: {
 					version,
-				} ),
+				},
 			} );
 
 			if ( activateResult.status >= 400 ) {
@@ -102,11 +107,11 @@ export const useLiveBranchInstall = (
 			const installResult = await apiFetch< Response >( {
 				path: `${ API_NAMESPACE }/live-branches/install/v1`,
 				method: 'POST',
-				body: JSON.stringify( {
+				data: {
 					pr_name: prName,
 					download_url: downloadUrl,
 					version,
-				} ),
+				},
 			} );
 
 			if ( installResult.status >= 400 ) {
@@ -126,9 +131,9 @@ export const useLiveBranchInstall = (
 			const activateResult = await apiFetch< Response >( {
 				path: `${ API_NAMESPACE }/live-branches/activate/v1`,
 				method: 'POST',
-				body: JSON.stringify( {
+				data: {
 					version,
-				} ),
+				},
 			} );
 
 			if ( activateResult.status >= 400 ) {

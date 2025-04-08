@@ -134,4 +134,50 @@ class WC_Admin_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'num_items_sold', $subtotals );
 		$this->assertArrayHasKey( 'segments', $subtotals );
 	}
+
+	/**
+	 * Test sending an invalid `date_type` parameter to fetch revenue stats.
+	 */
+	public function test_it_returns_400_error_when_date_type_param_is_invalid() {
+		// Given.
+		wp_set_current_user( $this->user );
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'date_type' => 'random_type',
+			)
+		);
+
+		// When.
+		$response = rest_do_request( $request );
+
+		// Then.
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test sending a valid `date_type` parameter to fetch revenue stats.
+	 */
+	public function test_it_returns_200_when_date_type_param_is_valid() {
+		// Given.
+		wp_set_current_user( $this->user );
+		$allowed_values = array( 'date_paid', 'date_created', 'date_completed' );
+
+		foreach ( $allowed_values as $allowed_value ) {
+			$request = new WP_REST_Request( 'GET', $this->endpoint );
+			$request->set_query_params(
+				array(
+					'date_type' => $allowed_value,
+				)
+			);
+
+			// When.
+			$response = rest_do_request( $request );
+			$data     = $response->get_data();
+
+			// Then.
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( 2, count( $data ) );
+		}
+	}
 }

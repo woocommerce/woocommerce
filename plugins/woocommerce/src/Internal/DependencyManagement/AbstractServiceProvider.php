@@ -18,6 +18,9 @@ use Automattic\WooCommerce\Vendor\League\Container\ServiceProvider\AbstractServi
  * - The `add_with_auto_arguments` method that allows to register classes without having to specify the injection method arguments.
  * - The `share_with_auto_arguments` method, sibling of the above.
  * - Convenience `add` and `share` methods that are just proxies for the same methods in `$this->getContainer()`.
+ *
+ * Note that `AbstractInterfaceServiceProvider` likely serves as a better base class for service providers
+ * tasked with registering classes that implement interfaces.
  */
 abstract class AbstractServiceProvider extends BaseServiceProvider {
 
@@ -147,7 +150,7 @@ abstract class AbstractServiceProvider extends BaseServiceProvider {
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 */
-	protected function add( string $id, $concrete = null, bool $shared = null ) : DefinitionInterface {
+	protected function add( string $id, $concrete = null, ?bool $shared = null ) : DefinitionInterface {
 		return $this->getContainer()->add( $id, $concrete, $shared );
 	}
 

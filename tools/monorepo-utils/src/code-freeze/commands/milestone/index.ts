@@ -9,10 +9,8 @@ import ora from 'ora';
  */
 import { getLatestGithubReleaseVersion } from '../../../core/github/repo';
 import { octokitWithAuth } from '../../../core/github/api';
-import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../../core/version';
 import { Logger } from '../../../core/logger';
-import { isGithubCI } from '../../../core/environment';
 
 export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
@@ -33,14 +31,6 @@ export const milestoneCommand = new Command( 'milestone' )
 	)
 	.action( async ( options ) => {
 		const { owner, name, dryRun, milestone } = options;
-		const isGithub = isGithubCI();
-
-		if ( milestone && isGithub ) {
-			Logger.error(
-				"You can't manually supply a milestone using Github mode. Please use the CLI locally to add a milestone."
-			);
-			process.exit( 1 );
-		}
 
 		let nextMilestone;
 		let nextReleaseVersion;
@@ -105,12 +95,6 @@ export const milestoneCommand = new Command( 'milestone' )
 				Logger.notice(
 					`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
 				);
-				if ( isGithub ) {
-					setGithubMilestoneOutputs(
-						nextReleaseVersion,
-						nextMilestone
-					);
-				}
 				process.exit( 0 );
 			} else {
 				milestoneSpinner.fail();
@@ -123,9 +107,7 @@ export const milestoneCommand = new Command( 'milestone' )
 		}
 
 		milestoneSpinner.succeed();
-		if ( isGithub ) {
-			setGithubMilestoneOutputs( nextReleaseVersion, nextMilestone );
-		}
+
 		Logger.notice(
 			`Successfully created milestone ${ nextMilestone } in ${ owner }/${ name }`
 		);

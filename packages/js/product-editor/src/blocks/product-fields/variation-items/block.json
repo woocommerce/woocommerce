@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-variation-items-field",
+	"title": "Product variations items",
+	"category": "woocommerce",
+	"description": "The product variations items.",
+	"keywords": [
+		"products",
+		"variations"
+	],
+	"textdomain": "default",
+	"attributes": {
+		"description": {
+			"type": "string",
+			"role": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"usesContext": [
+		"isInSelectedTab"
+	],
+	"editorStyle": "file:./editor.css"
+}

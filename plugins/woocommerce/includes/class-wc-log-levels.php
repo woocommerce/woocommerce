@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
  * Log levels class.
  */
 abstract class WC_Log_Levels {
-
 	/**
 	 * Log Levels
 	 *
@@ -79,7 +78,7 @@ abstract class WC_Log_Levels {
 	 * @return bool True if $level is a valid level.
 	 */
 	public static function is_valid_level( $level ) {
-		return array_key_exists( strtolower( $level ), self::$level_to_severity );
+		return is_string( $level ) && array_key_exists( strtolower( $level ), self::$level_to_severity );
 	}
 
 	/**
@@ -90,6 +89,15 @@ abstract class WC_Log_Levels {
 	 */
 	public static function get_level_severity( $level ) {
 		return self::is_valid_level( $level ) ? self::$level_to_severity[ strtolower( $level ) ] : 0;
+	}
+
+	/**
+	 * Get an associative array with `level name => numerical severity` key/value pairs.
+	 *
+	 * @return int[]
+	 */
+	public static function get_all_level_severities() {
+		return self::$level_to_severity;
 	}
 
 	/**
@@ -105,4 +113,47 @@ abstract class WC_Log_Levels {
 		return self::$severity_to_level[ $severity ];
 	}
 
+	/**
+	 * Get an associative array with `numerical severity => level name` key/value pairs.
+	 *
+	 * @return string[]
+	 */
+	public static function get_all_severity_levels() {
+		return self::$severity_to_level;
+	}
+
+	/**
+	 * Get the UI label for a log level.
+	 *
+	 * @param string $level Log level, options: emergency|alert|critical|error|warning|notice|info|debug.
+	 *
+	 * @return string
+	 */
+	public static function get_level_label( $level ) {
+		$labels = self::get_all_level_labels();
+
+		if ( ! array_key_exists( $level, $labels ) ) {
+			return '';
+		}
+
+		return $labels[ $level ];
+	}
+
+	/**
+	 * Get the UI labels for all log levels.
+	 *
+	 * @return string[]
+	 */
+	public static function get_all_level_labels() {
+		return array(
+			self::EMERGENCY => __( 'Emergency', 'woocommerce' ),
+			self::ALERT     => __( 'Alert', 'woocommerce' ),
+			self::CRITICAL  => __( 'Critical', 'woocommerce' ),
+			self::ERROR     => __( 'Error', 'woocommerce' ),
+			self::WARNING   => __( 'Warning', 'woocommerce' ),
+			self::NOTICE    => __( 'Notice', 'woocommerce' ),
+			self::INFO      => __( 'Info', 'woocommerce' ),
+			self::DEBUG     => __( 'Debug', 'woocommerce' ),
+		);
+	}
 }

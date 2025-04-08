@@ -2,38 +2,38 @@
  * External dependencies
  */
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	experimentalProductAttributeTermsStore,
 	Product,
-	ProductAttribute,
+	type ProductProductAttribute,
 	ProductAttributeTerm,
 	ProductDefaultAttribute,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { sift } from '../utils';
 
-export type EnhancedProductAttribute = ProductAttribute & {
+export type EnhancedProductAttribute = ProductProductAttribute & {
 	isDefault?: boolean;
 	terms?: ProductAttributeTerm[];
 	visible?: boolean;
 };
 
 type useProductAttributesProps = {
-	allAttributes: ProductAttribute[];
+	allAttributes: ProductProductAttribute[];
 	isVariationAttributes?: boolean;
 	onChange: (
-		attributes: ProductAttribute[],
+		attributes: ProductProductAttribute[],
 		defaultAttributes: ProductDefaultAttribute[]
 	) => void;
 	productId?: number;
 };
 
 const getFilteredAttributes = (
-	attr: ProductAttribute[],
+	attr: ProductProductAttribute[],
 	isVariationAttributes: boolean
 ) => {
 	return isVariationAttributes
@@ -76,17 +76,15 @@ export function useProductAttributes( {
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
-			return resolveSelect(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-			)
-				.getProductAttributeTerms< ProductAttributeTerm[] >( {
+			return resolveSelect( experimentalProductAttributeTermsStore )
+				.getProductAttributeTerms( {
 					attribute_id: attributeId,
 				} )
 				.then(
 					( attributeTerms ) => {
 						return attributeTerms;
 					},
-					( error ) => {
+					( error: string ) => {
 						return error;
 					}
 				);
@@ -95,7 +93,7 @@ export function useProductAttributes( {
 	);
 
 	const enhanceAttribute = (
-		globalAttribute: ProductAttribute,
+		globalAttribute: ProductProductAttribute,
 		allTerms: ProductAttributeTerm[]
 	) => {
 		return {
@@ -110,7 +108,7 @@ export function useProductAttributes( {
 		atts: EnhancedProductAttribute[],
 		variation: boolean,
 		startPosition: number
-	): ProductAttribute[] => {
+	): ProductProductAttribute[] => {
 		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
 			variation,
@@ -167,18 +165,21 @@ export function useProductAttributes( {
 		}
 	};
 
-	useEffect( () => {
-		const [ localAttributes, globalAttributes ]: ProductAttribute[][] =
-			sift(
-				getFilteredAttributes( allAttributes, isVariationAttributes ),
-				( attr: ProductAttribute ) => attr.id === 0
-			);
+	const fetchAttributes = useCallback( () => {
+		const [
+			localAttributes,
+			globalAttributes,
+		]: ProductProductAttribute[][] = sift(
+			getFilteredAttributes( allAttributes, isVariationAttributes ),
+			( attr: ProductProductAttribute ) => attr.id === 0
+		);
 
 		Promise.all(
 			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
 		).then( ( termData ) => {
 			setAttributes( [
 				...globalAttributes.map( ( attr, index ) =>
+					// @ts-expect-error TODO react-18-upgrade: getProductAttributeTerms type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 					enhanceAttribute( attr, termData[ index ] )
 				),
 				...localAttributes,
@@ -188,6 +189,7 @@ export function useProductAttributes( {
 
 	return {
 		attributes,
+		fetchAttributes,
 		handleChange,
 		setAttributes,
 	};

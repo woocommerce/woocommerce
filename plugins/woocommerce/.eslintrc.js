@@ -1,5 +1,3 @@
-/** @format */
-
 module.exports = {
 	env: {
 		browser: true,
@@ -17,7 +15,7 @@ module.exports = {
 		indent: 0,
 		'no-console': 1,
 	},
-	parser: 'babel-eslint',
+	parser: '@babel/eslint-parser',
 	parserOptions: {
 		ecmaVersion: 8,
 		ecmaFeatures: {
@@ -28,13 +26,13 @@ module.exports = {
 	},
 	overrides: [
 		{
-			files: ["tests/e2e-pw/**/*.spec.js", "tests/e2e/**/*.spec.js"],
+			files: [ 'tests/e2e/**/*.spec.js' ],
 			rules: {
-				"jest/no-test-callback": "off",
-				"@wordpress/no-unsafe-wp-apis": "off",
-				"import/no-extraneous-dependencies": "off",
-				"import/no-unresolved": "off"
-			}
+				'jest/no-test-callback': 'off',
+				'@wordpress/no-unsafe-wp-apis': 'off',
+				'import/no-extraneous-dependencies': 'off',
+				'import/no-unresolved': 'off',
+			},
 		},
-	]
+	],
 };
