@@ -4,6 +4,11 @@
 import type { KeyboardEvent } from 'react';
 import { store, getContext, getElement } from '@wordpress/interactivity';
 
+/**
+ * Internal dependencies
+ */
+import setStyles from '../../set-styles';
+
 type Option = {
 	value: string;
 	label: string;
@@ -19,6 +24,9 @@ type Context = {
 type PillsContext = Context & {
 	focused?: string;
 };
+
+// Set selected pill styles for proper contrast.
+setStyles();
 
 const { state, actions } = store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
