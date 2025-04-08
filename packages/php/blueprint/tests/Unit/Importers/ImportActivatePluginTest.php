@@ -15,11 +15,11 @@ class ImportActivatePluginTest extends TestCase {
 	}
 
 	public function test_process_successful_activation() {
-		$pluginName = 'sample-plugin';
+		$pluginPath = 'sample-plugin';
 
 		// Create a mock schema object
 		$schema = Mockery::mock();
-		$schema->pluginName = $pluginName;
+		$schema->pluginPath = $pluginPath;
 
 		// Create a partial mock of ImportActivatePlugin
 		$importActivatePlugin = Mockery::mock(ImportActivatePlugin::class)
@@ -27,8 +27,8 @@ class ImportActivatePluginTest extends TestCase {
 		                               ->shouldAllowMockingProtectedMethods();
 
 		// Mock the activate_plugin_by_slug method
-		$importActivatePlugin->shouldReceive('activate_plugin_by_slug')
-		                     ->with($pluginName)
+		$importActivatePlugin->shouldReceive('wp_activate_plugin')
+		                     ->with($pluginPath)
 		                     ->andReturn(true);
 
 		// Execute the process method
@@ -44,15 +44,15 @@ class ImportActivatePluginTest extends TestCase {
 		// Assert the success message is added
 		$messages = $result->get_messages('info');
 		$this->assertCount(1, $messages);
-		$this->assertEquals("Activated {$pluginName}.", $messages[0]['message']);
+		$this->assertEquals("Activated {$pluginPath}.", $messages[0]['message']);
 	}
 
 	public function test_process_failed_activation() {
-		$pluginName = 'invalid-plugin';
+		$pluginPath = 'invalid-plugin';
 
 		// Create a mock schema object
 		$schema = Mockery::mock();
-		$schema->pluginName = $pluginName;
+		$schema->pluginPath = $pluginPath;
 
 		// Create a partial mock of ImportActivatePlugin
 		$importActivatePlugin = Mockery::mock(ImportActivatePlugin::class)
@@ -60,9 +60,9 @@ class ImportActivatePluginTest extends TestCase {
 		                               ->shouldAllowMockingProtectedMethods();
 
 		// Mock the activate_plugin_by_slug method
-		$importActivatePlugin->shouldReceive('activate_plugin_by_slug')
-		                     ->with($pluginName)
-		                     ->andReturn(false);
+		$importActivatePlugin->shouldReceive('wp_activate_plugin')
+		                     ->with($pluginPath)
+		                     ->andReturn(new \WP_Error('error', 'Error message'));
 
 		// Execute the process method
 		$result = $importActivatePlugin->process($schema);
@@ -77,6 +77,6 @@ class ImportActivatePluginTest extends TestCase {
 		// Assert the error message is added
 		$messages = $result->get_messages('error');
 		$this->assertCount(1, $messages);
-		$this->assertEquals("Unable to activate {$pluginName}.", $messages[0]['message']);
+		$this->assertEquals("Unable to activate {$pluginPath}.", $messages[0]['message']);
 	}
 }

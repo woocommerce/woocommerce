@@ -12,7 +12,7 @@ import save from '../save';
 
 /**
  * Holds default config for this collection of blocks.
- * attributes and title are omitted here as these are added on an individual block level.
+ * Attributes and title are omitted here as these are added on an individual block level.
  */
 const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 	category: 'woocommerce-product-elements',
@@ -26,9 +26,6 @@ const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 		),
 	},
 	apiVersion: 3,
-	supports: {
-		html: false,
-	},
 	ancestor: [
 		'woocommerce/all-products',
 		'woocommerce/single-product',

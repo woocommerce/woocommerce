@@ -145,7 +145,6 @@ class CustomOrdersTableController {
 		add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
-		add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
 		add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_order_cache_group_as_non_persistent' ) );
 	}

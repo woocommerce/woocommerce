@@ -8,8 +8,6 @@ import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
-import { useSelect } from '@wordpress/data';
-import { cartStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -29,11 +27,10 @@ export const ShippingRatesControlPackage = ( {
 	showItems,
 	highlightChecked = false,
 }: PackageProps ): ReactElement => {
-	const { selectShippingRate, isSelectingRate } = useShippingData();
+	const { selectShippingRate, isSelectingRate, shippingRates } =
+		useShippingData();
 
-	const internalPackageCount = useSelect(
-		( select ) => select( cartStore )?.getCartData()?.shippingRates?.length
-	);
+	const internalPackageCount = shippingRates?.length || 1;
 
 	const packageClass = 'wc-block-components-shipping-rates-control__package';
 	const [ instanceCount, setInstanceCount ] = useState( 0 );

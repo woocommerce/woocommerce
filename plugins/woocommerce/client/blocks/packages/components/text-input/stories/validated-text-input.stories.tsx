@@ -222,14 +222,16 @@ const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	return <ValidatedTextInput { ...args } onChange={ onChange } />;
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< ValidatedTextInputProps > = Template.bind( {} );
 Default.args = {
 	id: 'unique-id',
 	label: 'Enter your value',
 	value: '',
 };
 
-export const WithError = Template.bind( {} );
+export const WithError: StoryFn< ValidatedTextInputProps > = Template.bind(
+	{}
+);
 WithError.args = {
 	id: 'unique-id',
 	showError: true,
@@ -238,7 +240,8 @@ WithError.args = {
 	value: 'Lorem ipsum',
 };
 
-export const WithCustomFormatter = Template.bind( {} );
+export const WithCustomFormatter: StoryFn< ValidatedTextInputProps > =
+	Template.bind( {} );
 WithCustomFormatter.args = {
 	id: 'unique-id',
 	label: 'Enter your value',

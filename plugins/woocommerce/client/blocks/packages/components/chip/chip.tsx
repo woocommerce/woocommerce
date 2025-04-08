@@ -2,13 +2,14 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import type { ElementType, HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-export interface ChipProps {
+export interface ChipProps extends HTMLAttributes< HTMLElement > {
 	/**
 	 * Text for chip content.
 	 */
@@ -20,7 +21,7 @@ export interface ChipProps {
 	/**
 	 * The element type for the chip. Default 'li'.
 	 */
-	element?: string;
+	element?: ElementType;
 	/**
 	 * CSS class used.
 	 */

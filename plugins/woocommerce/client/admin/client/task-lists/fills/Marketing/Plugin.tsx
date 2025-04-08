@@ -36,7 +36,7 @@ const tagsToPillsMap = {
 	marketplace: __( 'Marketplace', 'woocommerce' ),
 };
 
-export const Plugin: React.FC< PluginProps > = ( {
+export const Plugin = ( {
 	description,
 	imageUrl,
 	installAndActivate = () => {},
@@ -52,7 +52,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 	tags,
 	learnMoreLink = '',
 	installExternal = false,
-} ) => {
+}: PluginProps ) => {
 	return (
 		<div className="woocommerce-plugin-list__plugin">
 			{ imageUrl && (

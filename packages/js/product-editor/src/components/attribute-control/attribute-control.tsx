@@ -37,7 +37,7 @@ import { SectionActions } from '../block-slot-fill';
 import { AttributeControlProps } from './types';
 import { getEmptyStateSequentialNames } from '../../utils';
 
-export const AttributeControl: React.FC< AttributeControlProps > = ( {
+export const AttributeControl = ( {
 	value,
 	onAdd = () => {},
 	onAddAnother = () => {},
@@ -60,7 +60,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	disabledAttributeIds = [],
 	termsAutoSelection,
 	defaultVisibility = false,
-} ) => {
+}: AttributeControlProps ) => {
 	uiStrings = {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(

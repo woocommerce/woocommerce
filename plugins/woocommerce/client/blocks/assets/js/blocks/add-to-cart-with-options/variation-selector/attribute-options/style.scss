@@ -8,10 +8,9 @@
 }
 
 .wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
-	border: 1px solid $black;
-	border-radius: $grid-unit-40;
-	padding: 0.25em 1em;
-	text-transform: uppercase;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	padding: 0.25em 0.75em;
 	font-size: var(--wp--preset--font-size--small);
 	cursor: pointer;
 	user-select: none;
@@ -28,6 +27,7 @@
 	&[aria-checked="true"] {
 		background-color: $black;
 		color: $white;
+		border-color: $black;
 
 		&:hover {
 			background-color: color-mix(in srgb, var(--wp--preset--color--contrast) 85%, transparent);

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-variation-selector",
-	"version": "1.0.0",
 	"title": "Variation Selector (Experimental)",
 	"description": "Display a dropdown to select a variation to add to cart.",
 	"category": "woocommerce-product-elements",
@@ -9,5 +8,8 @@
 	"ancestor": [ "woocommerce/add-to-cart-with-options" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
+	"supports": {
+		"interactivity": true
+	},
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

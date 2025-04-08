@@ -3,7 +3,7 @@
  */
 import clsx from 'clsx';
 import { useInstanceId } from '@wordpress/compose';
-import type { ReactNode } from 'react';
+import type { ReactNode, InputHTMLAttributes } from 'react';
 import { forwardRef } from '@wordpress/element';
 
 /**
@@ -12,15 +12,23 @@ import { forwardRef } from '@wordpress/element';
 import './style.scss';
 
 export type CheckboxControlProps = {
-	className?: string;
 	label?: string | React.ReactNode;
-	id?: string;
 	onChange: ( value: boolean ) => void;
 	children?: ReactNode | null | undefined;
 	hasError?: boolean;
-	checked?: boolean;
-	disabled?: string | boolean | undefined;
-};
+	errorId?: string;
+	errorMessage?: string;
+} & Pick<
+	InputHTMLAttributes< HTMLInputElement >,
+	| 'value'
+	| 'name'
+	| 'aria-label'
+	| 'aria-describedby'
+	| 'className'
+	| 'id'
+	| 'disabled'
+	| 'checked'
+>;
 
 /**
  * Component used to show a checkbox control with styles.
@@ -41,8 +49,9 @@ export const CheckboxControl = forwardRef<
 			disabled = false,
 			errorId,
 			errorMessage,
+			value,
 			...rest
-		}: CheckboxControlProps & Record< string, unknown >,
+		}: CheckboxControlProps,
 		forwardedRef
 	): JSX.Element => {
 		const instanceId = useInstanceId( CheckboxControl );
@@ -69,7 +78,8 @@ export const CheckboxControl = forwardRef<
 						}
 						aria-invalid={ hasError === true }
 						checked={ checked }
-						disabled={ !! disabled }
+						disabled={ disabled }
+						value={ value }
 						{ ...rest }
 					/>
 					<svg

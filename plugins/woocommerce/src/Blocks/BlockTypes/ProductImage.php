@@ -162,8 +162,18 @@ class ProductImage extends AbstractBlock {
 		if ( ! empty( $attributes['scale'] ) ) {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
+
+		// Keep this aspect ratio for backward compatibility.
 		if ( ! empty( $attributes['aspectRatio'] ) ) {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['style']['dimensions']['aspectRatio'] );
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) {
+			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
 
 		$image_id = $product->get_image_id();
@@ -193,7 +203,7 @@ class ProductImage extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
 

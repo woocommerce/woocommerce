@@ -24,9 +24,11 @@ import { TrackedLink } from '~/components/tracked-link/tracked-link';
  */
 const AUTOMATION_PLUGINS = [ 'woocommerce-shipping' ];
 
-export const ShippingRecommendation: React.FC<
-	TaskProps & ShippingRecommendationProps
-> = ( { activePlugins, isJetpackConnected, isResolving } ) => {
+export const ShippingRecommendation = ( {
+	activePlugins,
+	isJetpackConnected,
+	isResolving,
+}: TaskProps & ShippingRecommendationProps ) => {
 	const [ pluginsToActivate, setPluginsToActivate ] = useState< string[] >(
 		[]
 	);

@@ -1407,3 +1407,14 @@ Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max,
 - `--activate` - If set, after installation, the plugin will activate it.
 - `--activate-network` - If set, the plugin will be network activated immediately after installation
 - `--insecure` - Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack.
+
+### wc blueprint
+
+#### wc blueprint import [schema-path]
+
+- `--show-messages` - Show debug messages. Supported log levels: all, error, info, debug.
+
+#### wc blueprint export [save-to-filename]
+
+- `--steps` - name of steps to export.
+
