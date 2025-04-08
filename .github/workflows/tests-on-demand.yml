@@ -1,5 +1,5 @@
-name: 'On demand tests run'
-run-name: On demand tests run - ${{ inputs.trigger }}
+name: 'On demand checks'
+run-name: On demand checks ${{ inputs.custom-trigger != '' && inputs.custom-trigger || inputs.trigger }}
 
 on:
   workflow_dispatch:

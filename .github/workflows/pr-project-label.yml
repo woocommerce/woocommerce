@@ -1,7 +1,7 @@
 name: 'Label Pull Request Project'
 on:
     pull_request_target:
-        types: [opened, reopened, synchronize, ready_for_review]
+        types: [opened, reopened, ready_for_review, review_requested, closed]
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -11,8 +11,6 @@ permissions: {}
 
 jobs:
     label_project:
-        # For draft PRs we'll only update labels initially, and keep updating only them after it ready for review.
-        if: ${{ github.event.pull_request.draft == false || join(github.event.pull_request.labels.*.name, '') == '' }}
         runs-on: ubuntu-latest
         permissions:
             contents: read

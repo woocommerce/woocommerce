@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-rating-counter",
-	"version": "1.0.0",
 	"title": "Product Rating Counter",
 	"description": "Display the review count of a product",
 	"category": "woocommerce-product-elements",

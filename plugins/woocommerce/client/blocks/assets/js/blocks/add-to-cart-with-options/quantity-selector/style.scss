@@ -13,9 +13,13 @@
 // Stepper CSS
 .wc-block-add-to-cart-with-options__quantity-selector--stepper {
 	.wc-block-components-quantity-selector {
+		&::after {
+			border: 1px solid currentColor;
+			opacity: 0.3;
+		}
+
 		display: inline-flex;
 		width: unset;
-		background-color: #fff;
 		margin-right: 0.5em;
 		margin-bottom: 0;
 
@@ -28,6 +32,9 @@
 			border: unset;
 			text-align: center;
 			order: 1;
+			font-weight: 600;
+			background-color: transparent;
+			color: currentColor;
 			margin: 0;
 			/**
 			* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
@@ -37,6 +44,10 @@
 			padding: 0.9rem 0;
 			margin-right: unset;
 			font-size: var(--wp--preset--font-size--small);
+
+			&:focus {
+				border-radius: unset;
+			}
 		}
 
 		input[type="number"]::-webkit-inner-spin-button,

@@ -41,7 +41,7 @@
 
 	.wc-block-product-filter-removable-chips__item {
 		border: 1px solid var(--wc-product-filter-removable-chips-border, color-mix(in srgb, currentColor 20%, transparent));
-		padding: 4px 8px;
+		padding: 0.25em 0.75em;
 		appearance: none;
 		background: var(--wc-product-filter-removable-chips-background, transparent);
 		border-radius: 2px;

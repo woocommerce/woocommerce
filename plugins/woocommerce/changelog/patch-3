@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Import missing class in GenericStatsController
