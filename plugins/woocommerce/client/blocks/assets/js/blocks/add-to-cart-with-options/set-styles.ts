@@ -51,6 +51,7 @@ function setStyles(): void {
 	 * we only provide the option to customize the background color.
 	 */
 	const style = document.createElement( 'style' );
+
 	// For simplicity, we only consider the background color of the first Variation Selector pills.
 	const pillsContainer = document.querySelector(
 		'.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills'
@@ -60,8 +61,7 @@ function setStyles(): void {
 	const selectedPillBackgroundColor =
 		getClosestColor( pillsContainer, 'color' ) || '#000';
 
-	// We use :where here to reduce specificity so customized colors and theme
-	// CSS take priority.
+	// We use :where here to reduce specificity so customized colors and theme CSS take priority.
 	style.appendChild(
 		document.createTextNode(
 			`:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill)[aria-checked="true"] {
