@@ -4,7 +4,6 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCPaymentGateways;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
