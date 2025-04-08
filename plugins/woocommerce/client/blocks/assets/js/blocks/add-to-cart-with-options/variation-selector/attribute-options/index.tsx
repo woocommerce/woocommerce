@@ -11,7 +11,6 @@ import metadata from './block.json';
 import AttributeOptionsEdit from './edit';
 import AttributeOptionsSave from './save';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
-import './editor.scss';
 import './style.scss';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
