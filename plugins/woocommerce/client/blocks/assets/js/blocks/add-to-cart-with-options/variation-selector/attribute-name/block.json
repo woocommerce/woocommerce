@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-variation-selector-attribute-name",
-	"version": "1.0.0",
 	"title": "Variation Selector Attribute Name (Experimental)",
 	"description": "The name of a given variable product attribute.",
 	"category": "woocommerce-product-elements",
@@ -13,6 +12,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"supports": {
 		"inserter": false,
+		"interactivity": true,
 		"align": false,
 		"alignWide": false,
 		"color": {

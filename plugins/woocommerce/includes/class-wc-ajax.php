@@ -1090,6 +1090,8 @@ class WC_AJAX {
 
 			$data = get_post_meta( $order_id );
 
+			$order = wc_get_order( $order_id );
+
 			// Get HTML to return.
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
