@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes an issue in which resetting mini cart colors would show a warning.
