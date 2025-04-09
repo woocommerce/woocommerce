@@ -92,9 +92,13 @@ $dialog-padding: 20px;
 		padding: 0;
 		border: none;
 		background: none;
+		width: 40px;
+		height: 40px;
+		border-radius: 100%;
+		background-color: #ffffff;
 
 		&:disabled {
-			opacity: 50%;
+			opacity: 20%;
 			cursor: not-allowed;
 		}
 	}
