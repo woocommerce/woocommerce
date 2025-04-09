@@ -9,7 +9,6 @@ import { Icon, buttons } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import AttributeOptionsEdit from './edit';
-import AttributeOptionsSave from './save';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 import './style.scss';
 
@@ -20,6 +19,6 @@ if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 		icon: {
 			src: <Icon icon={ buttons } />,
 		},
-		save: AttributeOptionsSave,
+		save: () => null,
 	} );
 }
