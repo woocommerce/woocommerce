@@ -7,9 +7,11 @@
 	border-left: 5px solid #2181d2;
 	padding-left: em(40px);
 }
-.wp-block-woocommerce-classic-shortcode__placeholder .components-placeholder__fieldset {
-	display: grid;
-	grid-template-columns: 1fr;
+.wp-block-woocommerce-classic-shortcode__placeholder {
+	.components-placeholder__fieldset {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
 }
 .wp-block-woocommerce-classic-shortcode__placeholder-wireframe,
 .wp-block-woocommerce-classic-shortcode__placeholder-copy {
@@ -47,8 +49,11 @@
 		margin: 0 0 $gap;
 	}
 	.wp-block-woocommerce-classic-shortcode__placeholder-migration-button-container {
-		justify-content: center;
 		margin: $gap 0;
+		display: inline-flex;
+		flex-wrap: nowrap;
+		gap: $gap;
+		justify-content: flex-start;
 	}
 }
 .wp-block-woocommerce-classic-shortcode__placeholder-wireframe {
