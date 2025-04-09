@@ -35,6 +35,24 @@ export default function ConnectButton( props: ConnectProps ) {
 		useState( false );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
+	const refreshSubscriptionsList = () => {
+		loadSubscriptions( false ).then( () => {
+			addNotice(
+				props.subscription.product_key,
+				sprintf(
+					// translators: %s is the product name.
+					__( '%s successfully connected.', 'woocommerce' ),
+					props.subscription.product_name
+				),
+				NoticeStatus.Success
+			);
+			setIsConnecting( false );
+			if ( props.onClose ) {
+				props.onClose();
+			}
+		} );
+	};
+
 	const connect = () => {
 		recordEvent( 'marketplace_product_connect_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
@@ -52,22 +70,10 @@ export default function ConnectButton( props: ConnectProps ) {
 					props.subscription.local.type === 'plugin'
 				) {
 					setShowActivationConfirmation( true );
+					return;
 				}
-				loadSubscriptions( false ).then( () => {
-					addNotice(
-						props.subscription.product_key,
-						sprintf(
-							// translators: %s is the product name.
-							__( '%s successfully connected.', 'woocommerce' ),
-							props.subscription.product_name
-						),
-						NoticeStatus.Success
-					);
-					setIsConnecting( false );
-					if ( props.onClose ) {
-						props.onClose();
-					}
-				} );
+
+				refreshSubscriptionsList();
 			} )
 			.catch( () => {
 				addNotice(
@@ -98,18 +104,7 @@ export default function ConnectButton( props: ConnectProps ) {
 	const activatePlugin = () => {
 		activateProductPlugin( props.subscription )
 			.then( () => {
-				addNotice(
-					props.subscription.product_key,
-					sprintf(
-						// translators: %s is the product name.
-						__(
-							'%s plugin successfully activated.',
-							'woocommerce'
-						),
-						props.subscription.product_name
-					),
-					NoticeStatus.Success
-				);
+				refreshSubscriptionsList();
 			} )
 			.catch( () => {
 				addNotice(
@@ -117,7 +112,7 @@ export default function ConnectButton( props: ConnectProps ) {
 					sprintf(
 						// translators: %s is the product name.
 						__(
-							'Failed activating the local plugin for %s.',
+							'%s is connected to WooCommerce.com but failed to activate the local plugin.',
 							'woocommerce'
 						),
 						props.subscription.product_name
