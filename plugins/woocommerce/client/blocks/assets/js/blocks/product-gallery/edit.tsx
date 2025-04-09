@@ -78,6 +78,13 @@ const TEMPLATE: InnerBlockTemplate[] = [
 										type: 'flex',
 										verticalAlignment: 'bottom',
 									},
+									style: {
+										border: { radius: '100%' },
+										color: {
+											background: '#ffffff',
+											text: '#000000',
+										},
+									},
 								},
 							],
 						],
