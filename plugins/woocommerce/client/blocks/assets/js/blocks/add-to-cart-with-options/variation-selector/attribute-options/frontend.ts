@@ -7,7 +7,7 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import setStyles from '../../set-styles';
+import setStyles from './set-styles';
 
 type Option = {
 	value: string;
