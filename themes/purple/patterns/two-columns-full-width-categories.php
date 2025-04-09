@@ -1,7 +1,7 @@
 <?php
 /**
- * Title: Two columns fullwidth categories
- * Slug: woostarter/two-columns-fullwidth-categories
+ * Title: Two columns full width categories
+ * Slug: woostarter/two-columns-full-width-categories
  * Categories: Columns, Gallery
  */
 ?>
