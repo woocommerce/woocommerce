@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent count cache errors when order hooks are run in different orders

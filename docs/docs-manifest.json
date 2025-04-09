@@ -82,7 +82,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "3ab803fa57edf756942c7ddc7839c62090769c190decec1d75a5db4e26343baa",
+          "hash": "f41290ce91f031a6986370478dcc57224e4bc947cf1fb32237711f894621655a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -1963,7 +1963,7 @@
           "menu_title": "Commands",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
-          "hash": "1c3dfbc9299c758173fc00ddf0d717f3342fa1280b3054d70efd5e0d7e81e9fa",
+          "hash": "35af242ac3398790af3fb3148cbc92f9494fa687436441693795cd7c189ef885",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
           "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
         },
@@ -1992,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "b5cc9790513c3bb6368b2c744fcb51673f782253a74206e8bdb1f69dabea15f4"
+  "hash": "9f2954119fa8980d4434d70c818c688f18205c65b7820abbadcc677ee669dd2a"
 }

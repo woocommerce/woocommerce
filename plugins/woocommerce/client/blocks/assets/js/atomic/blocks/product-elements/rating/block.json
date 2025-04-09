@@ -3,6 +3,7 @@
 	"icon": "info",
 	"title": "Product Rating",
 	"description": "Display the average rating of a product.",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"productId": {
 			"type": "number",
@@ -25,6 +26,32 @@
 			"default": false
 		}
 	},
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"text": true,
+			"background": false,
+			"link": false,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalSelector": ".wc-block-components-product-rating"
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
