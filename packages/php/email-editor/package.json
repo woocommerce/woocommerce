@@ -23,7 +23,9 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{php}"
+				"changes": [
+					"src/**/*.php"
+				]
 			},
 			"tests": [
 				{

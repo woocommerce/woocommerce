@@ -177,9 +177,9 @@ jobs:
           pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
-        if: ${{ inputs.refName != '' }}
+        if: ${{ inputs.artifactName != '' }}
         env:
-          RELEASE_TAG: ${{ inputs.refName }}
+          RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
           ARTIFACT_NAME: ${{ inputs.artifactName }}
           # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
           WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
