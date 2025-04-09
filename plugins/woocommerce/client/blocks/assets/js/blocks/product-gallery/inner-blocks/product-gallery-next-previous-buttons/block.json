@@ -19,6 +19,13 @@
 			"allowOrientation": false,
 			"allowInheriting": false
 		},
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"__experimentalBorder": {
+			"radius": true
+		},
 		"interactivity": true
 	},
 	"ancestor": [ "woocommerce/product-gallery-large-image" ]
