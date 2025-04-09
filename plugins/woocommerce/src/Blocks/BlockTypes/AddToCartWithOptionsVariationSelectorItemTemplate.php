@@ -18,6 +18,16 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-item';
 
 	/**
+	 * Disable the frontend script for this block type, it's built with script modules.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null
@@ -44,6 +54,8 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 		foreach ( $product_attributes as $product_attribute_name => $product_attribute_terms ) {
 			$content .= $this->get_product_row( $product_attribute_name, $product_attribute_terms, $attributes, $block );
 		}
+
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		return $content;
 	}
