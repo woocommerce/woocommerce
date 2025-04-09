@@ -117,7 +117,7 @@ const Template: StoryFn< FormStepProps > = ( args ) => (
 	</div>
 );
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< FormStepProps > = Template.bind( {} );
 
 Default.args = {
 	stepHeadingContent: () => <span>Step heading content</span>,

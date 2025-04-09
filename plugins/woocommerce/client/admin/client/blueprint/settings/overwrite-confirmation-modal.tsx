@@ -13,9 +13,13 @@ type OverwriteConfirmationModalProps = {
 	overwrittenItems: string[];
 };
 
-export const OverwriteConfirmationModal: React.FC<
-	OverwriteConfirmationModalProps
-> = ( { isOpen, isImporting, onClose, onConfirm, overwrittenItems } ) => {
+export const OverwriteConfirmationModal = ( {
+	isOpen,
+	isImporting,
+	onClose,
+	onConfirm,
+	overwrittenItems,
+}: OverwriteConfirmationModalProps ) => {
 	if ( ! isOpen ) return null;
 	return (
 		<Modal

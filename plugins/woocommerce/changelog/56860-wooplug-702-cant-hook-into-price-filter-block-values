@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add new filter hooks `woocommerce_product_filter_data` and improve `woocommerce_pre_product_filter_data` implementation to allow third-party modification of product filter results.

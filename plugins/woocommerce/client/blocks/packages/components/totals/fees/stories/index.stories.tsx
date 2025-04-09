@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import {
 	currenciesAPIShape,
 	currencies,
@@ -38,7 +38,7 @@ export default {
 
 type StorybookTotalFeesProps = TotalsFeesProps & { total: string };
 
-const Template: Story< StorybookTotalFeesProps > = ( args ) => {
+const Template: StoryFn< StorybookTotalFeesProps > = ( args ) => {
 	return (
 		<Fees
 			{ ...args }
@@ -55,13 +55,14 @@ const Template: Story< StorybookTotalFeesProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< StorybookTotalFeesProps > = Template.bind( {} );
 Default.args = {
 	currency: currencies.USD,
 	total: '1000',
 };
 
-export const AlternativeCurrency = Template.bind( {} );
+export const AlternativeCurrency: StoryFn< StorybookTotalFeesProps > =
+	Template.bind( {} );
 AlternativeCurrency.args = {
 	currency: currencies.EUR,
 	total: '1000',

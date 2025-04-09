@@ -3,11 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { useEntityRecord, Post } from '@wordpress/core-data';
-import { EntityRecordResolution } from '@wordpress/core-data/build-types/hooks/use-entity-record';
+import { useSelect } from '@wordpress/data';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as editorStore } from '@wordpress/editor';
 
 function HoverContent() {
 	return (
@@ -34,6 +36,8 @@ const updateIFrameBackgroundColor = (
 ) => {
 	if ( iframeRef?.current?.contentWindow?.document.body ) {
 		iframeRef.current.contentWindow.document.body.style.overflow = 'hidden';
+		iframeRef.current.contentWindow.document.body.style.pointerEvents =
+			'none';
 		iframeRef.current.contentWindow.document.body.style.backgroundColor =
 			isHovered
 				? '#00000059'
@@ -58,21 +62,20 @@ const updateiFrameSource = (
 const DEFAULT_EMAIL_TYPE = 'WC_Email_Customer_Processing_Order';
 
 export function WooContentPlaceholderEditContent() {
-	const { current_post_id, current_post_type } =
-		window.WooCommerceEmailEditor;
-	const { editedRecord, hasResolved } = useEntityRecord(
-		'postType',
-		current_post_type,
-		current_post_id
-	) as EntityRecordResolution< Post >;
-	const { slug: postSlug } = editedRecord;
+	const { postSlug } = useSelect(
+		( select ) => ( {
+			postSlug: select( editorStore ).getCurrentPost()?.slug,
+		} ),
+		[]
+	);
+
 	const iframeRef = useRef< HTMLIFrameElement | null >( null );
 	const [ isHovered, setIsHovered ] = useState( false );
 
 	const previewUrlBase = window.WooCommerceEmailEditor?.block_preview_url;
 
 	useEffect( () => {
-		if ( ! hasResolved ) {
+		if ( ! postSlug ) {
 			return;
 		}
 
@@ -84,7 +87,7 @@ export function WooContentPlaceholderEditContent() {
 				`${ previewUrlBase }&type=${ currentEmailType }`
 			);
 		}
-	}, [ hasResolved, postSlug, iframeRef, previewUrlBase ] );
+	}, [ postSlug, iframeRef, previewUrlBase ] );
 
 	return (
 		<div
@@ -99,6 +102,7 @@ export function WooContentPlaceholderEditContent() {
 						iframeRef?.current?.contentWindow?.document?.body
 							?.clientHeight || '750px',
 					backgroundColor: 'initial',
+					minHeight: '100px',
 				} }
 				ref={ iframeRef }
 				src={ `${ previewUrlBase }&type=${ DEFAULT_EMAIL_TYPE }` }

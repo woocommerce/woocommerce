@@ -10,6 +10,7 @@
 // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -35,7 +36,7 @@ if ( ! $tab_exists ) {
 	exit;
 }
 
-$hide_nav = Features::is_enabled( 'reactify-classic-payments-settings' ) &&
+$hide_nav = FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) &&
 	( 'checkout' === $current_tab && 'offline' === $current_section );
 
 // Move 'Advanced' to the last.
@@ -69,7 +70,6 @@ if ( array_key_exists( 'advanced', $tabs ) ) {
 				?>
 			</nav>
 		<?php endif; ?>
-		<div class="settings-content">
 			<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
 			<?php
 				do_action( 'woocommerce_sections_' . $current_tab );
@@ -85,7 +85,6 @@ if ( array_key_exists( 'advanced', $tabs ) ) {
 				<?php endif; ?>
 				<?php wp_nonce_field( 'woocommerce-settings' ); ?>
 			</p>
-		</div>
 	</form>
 	<?php do_action( 'woocommerce_after_settings_' . $current_tab ); ?>
 </div>

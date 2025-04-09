@@ -108,13 +108,6 @@ class Package {
 					);
 				}
 			);
-			// register Bootstrap.
-			$container->register(
-				Migration::class,
-				function () {
-					return new Migration();
-				}
-			);
 		}
 		return $container;
 	}

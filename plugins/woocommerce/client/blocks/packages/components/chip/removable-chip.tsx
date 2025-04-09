@@ -4,6 +4,14 @@
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, closeSmall } from '@wordpress/icons';
+import type { ComponentProps } from 'react';
+
+declare module '@wordpress/icons' {
+	interface IconProps extends Partial< ComponentProps< 'div' > > {
+		icon: JSX.Element;
+		size?: number;
+	}
+}
 
 /**
  * Internal dependencies
@@ -86,7 +94,7 @@ export const RemovableChip = ( {
 			{ ...props }
 			{ ...chipProps }
 			className={ clsx( className, 'is-removable' ) }
-			element={ removeOnAnyClick ? 'button' : props.element }
+			element={ removeOnAnyClick ? 'button' : props.element || 'li' }
 			screenReaderText={ screenReaderText }
 			text={ text }
 		>
@@ -94,6 +102,7 @@ export const RemovableChip = ( {
 				className="wc-block-components-chip__remove"
 				{ ...removeProps }
 			>
+				{ /* @ts-expect-error - TS wants the Icon component to define svg specific props, but it's not always SVG */ }
 				<Icon
 					className="wc-block-components-chip__remove-icon"
 					icon={ closeSmall }

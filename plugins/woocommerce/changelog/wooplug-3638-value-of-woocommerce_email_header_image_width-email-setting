@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Only changes the default value type from number to string for email logo width. No visible or functional change
+
+

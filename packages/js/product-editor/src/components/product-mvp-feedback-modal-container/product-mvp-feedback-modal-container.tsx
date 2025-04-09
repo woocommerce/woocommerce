@@ -14,9 +14,11 @@ import { Product } from '@woocommerce/data';
  */
 import { ProductMVPFeedbackModal } from '../product-mvp-feedback-modal';
 
-export const ProductMVPFeedbackModalContainer: React.FC< {
+export const ProductMVPFeedbackModalContainer = ( {
+	productId: _productId,
+}: {
 	productId?: number;
-} > = ( { productId: _productId } ) => {
+} ) => {
 	const { values } = useFormContext< Product >();
 	const { hideProductMVPFeedbackModal } = useDispatch( STORE_KEY );
 	const { isProductMVPModalVisible } = useSelect( ( select ) => {

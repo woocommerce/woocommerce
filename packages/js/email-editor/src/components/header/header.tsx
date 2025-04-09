@@ -239,7 +239,7 @@ export function Header() {
 				<SaveEmailButton />
 				<PreviewDropdown />
 				{ hasNonEmailEdits ? (
-					<SaveAllButton />
+					<SaveAllButton validateContent={ validateContent } />
 				) : (
 					<SendButton
 						validateContent={ validateContent }

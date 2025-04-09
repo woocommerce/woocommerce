@@ -93,7 +93,7 @@ const Template: StoryFn< SortSelectProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< SortSelectProps > = Template.bind( {} );
 Default.args = {
 	label: 'Choose one of the options',
 	options: [

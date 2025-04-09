@@ -107,7 +107,7 @@ class ExportWCShipping implements StepExporter, HasAlias {
 	 * @return string
 	 */
 	public function get_description(): string {
-		return __( 'It includes all settings in WooCommerce | Settings | Shipping.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | Shipping.', 'woocommerce' );
 	}
 
 	/**
@@ -157,7 +157,7 @@ class ExportWCShipping implements StepExporter, HasAlias {
 
 		$methods        = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_methods", ARRAY_A );
 		$method_options = $wpdb->get_results(
-			"SELECT * FROM {$wpdb->prefix}options WHERE option_name LIKE 'woocommerce_flat_rate_%_settings' 
+			"SELECT * FROM {$wpdb->prefix}options WHERE option_name LIKE 'woocommerce_flat_rate_%_settings'
             OR option_name LIKE 'woocommerce_free_shipping_%_settings'",
 			ARRAY_A
 		);

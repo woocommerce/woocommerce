@@ -42,6 +42,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Coming
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\StatsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ImportExportServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EmailEditorServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductFiltersServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -174,6 +175,7 @@ final class Container {
 			AdminSettingsServiceProvider::class,
 			AdminSuggestionsServiceProvider::class,
 			EmailEditorServiceProvider::class,
+			ProductFiltersServiceProvider::class,
 		);
 	}
 }

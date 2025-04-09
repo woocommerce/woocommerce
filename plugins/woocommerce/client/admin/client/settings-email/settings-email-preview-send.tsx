@@ -29,9 +29,7 @@ type WPError = {
 	};
 };
 
-export const EmailPreviewSend: React.FC< EmailPreviewSendProps > = ( {
-	type,
-} ) => {
+export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ email, setEmail ] = useState( '' );
 	const [ isSending, setIsSending ] = useState( false );

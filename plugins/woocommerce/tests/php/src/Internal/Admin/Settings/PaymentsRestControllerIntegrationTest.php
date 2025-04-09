@@ -941,7 +941,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertContains( PaymentExtensionSuggestions::WOOPAYMENTS, array_column( $other_suggestions, 'id' ) );
 
 		// Delete the user meta.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 
 		// Act.
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );

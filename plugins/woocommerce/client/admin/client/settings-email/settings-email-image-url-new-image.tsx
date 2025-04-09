@@ -14,10 +14,7 @@ type NewImageProps = {
 	setImageUrl: ( imageUrl: string ) => void;
 };
 
-export const NewImage: React.FC< NewImageProps > = ( {
-	inputId,
-	setImageUrl,
-} ) => {
+export const NewImage = ( { inputId, setImageUrl }: NewImageProps ) => {
 	return (
 		<div>
 			<button

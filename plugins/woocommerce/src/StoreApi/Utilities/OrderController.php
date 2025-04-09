@@ -171,7 +171,64 @@ class OrderController {
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
 		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
-		$this->validate_addresses( $order );
+		$this->validate_addresses( $order, $needs_shipping );
+
+		// Perform custom validations.
+		$this->perform_custom_order_validation( $order );
+	}
+
+	/**
+	 * Final validation for existing orders, ran before payment is taken.
+	 *
+	 * By this point we have an order populated with customer data and items.
+	 *
+	 * Since the cart is not involved, we don't validate shipping methods and assume the order already
+	 * contains the correct shipping items.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 * @param \WC_Order $order Order object.
+	 */
+	public function validate_existing_order_before_payment( \WC_Order $order ) {
+		$needs_shipping = $order->needs_shipping();
+
+		$this->validate_coupons( $order, true );
+		$this->validate_email( $order );
+		$this->validate_addresses( $order, $needs_shipping );
+
+		// Perform custom validations.
+		$this->perform_custom_order_validation( $order );
+	}
+
+	/**
+	 * Perform custom order validation via WooCommerce hooks.
+	 *
+	 * Allows plugins to perform custom validation before payment.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @throws RouteException Exception if validation fails.
+	 */
+	protected function perform_custom_order_validation( \WC_Order $order ) {
+		$validation_errors = new \WP_Error();
+
+		/**
+		 * Allow plugins to perform custom validation before payment.
+		 *
+		 * Plugins can add errors to the $validation_errors object.
+		 *
+		 * @param \WC_Order $order             The order object.
+		 * @param \WP_Error $validation_errors WP_Error object to add custom errors to.
+		 * @since 9.9.0
+		 */
+		do_action( 'woocommerce_checkout_validate_order_before_payment', $order, $validation_errors );
+
+		// Check if there are any errors after custom validation.
+		if ( $validation_errors->has_errors() ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_custom_validation_error',
+				esc_html( implode( ' ', $validation_errors->get_error_messages() ) ),
+				400
+			);
+		}
 	}
 
 	/**
@@ -189,8 +246,9 @@ class OrderController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
+	 * @param bool      $use_order_data Whether to use order data or cart data.
 	 */
-	protected function validate_coupons( \WC_Order $order ) {
+	protected function validate_coupons( \WC_Order $order, bool $use_order_data = false ) {
 		$coupon_codes  = $order->get_coupon_codes();
 		$coupons       = array_filter( array_map( array( $this, 'get_coupon' ), $coupon_codes ) );
 		$validators    = array( 'validate_coupon_email_restriction', 'validate_coupon_usage_limit' );
@@ -212,45 +270,59 @@ class OrderController {
 
 		if ( $coupon_errors ) {
 			// Remove all coupons that were not valid.
-			foreach ( $coupon_errors as $coupon_code => $message ) {
-				wc()->cart->remove_coupon( $coupon_code );
+			if ( $use_order_data ) {
+				$error_code = 'woocommerce_rest_order_coupon_errors';
+
+				foreach ( $coupon_errors as $coupon_code => $message ) {
+					$order->remove_coupon( $coupon_code );
+				}
+
+				// Recalculate totals.
+				$order->calculate_totals();
+			} else {
+				$error_code = 'woocommerce_rest_cart_coupon_errors';
+
+				foreach ( $coupon_errors as $coupon_code => $message ) {
+					wc()->cart->remove_coupon( $coupon_code );
+				}
+
+				// Recalculate totals.
+				wc()->cart->calculate_totals();
+
+				// Re-sync order with cart.
+				$this->update_order_from_cart( $order );
 			}
-
-			// Recalculate totals.
-			wc()->cart->calculate_totals();
-
-			// Re-sync order with cart.
-			$this->update_order_from_cart( $order );
 
 			// Return exception so customer can review before payment.
-			if ( 1 === count( $coupon_errors ) ) {
-				throw new RouteException(
-					'woocommerce_rest_cart_coupon_errors',
-					sprintf(
-						/* translators: %1$s Coupon codes, %2$s Reason */
-						__( '"%1$s" was removed from the cart. %2$s', 'woocommerce' ),
-						array_keys( $coupon_errors )[0],
-						array_values( $coupon_errors )[0],
-					),
-					409,
-					array(
-						'removed_coupons' => $coupon_errors,
-					)
+			if ( 1 === count( $coupon_errors ) && $use_order_data ) {
+				$error_message = sprintf(
+					/* translators: %1$s Coupon codes, %2$s Reason */
+					__( '"%1$s" was removed from the order. %2$s', 'woocommerce' ),
+					array_keys( $coupon_errors )[0],
+					array_values( $coupon_errors )[0],
+				);
+			} elseif ( 1 === count( $coupon_errors ) ) {
+				$error_message = sprintf(
+					/* translators: %1$s Coupon codes, %2$s Reason */
+					__( '"%1$s" was removed from the cart. %2$s', 'woocommerce' ),
+					array_keys( $coupon_errors )[0],
+					array_values( $coupon_errors )[0],
+				);
+			} elseif ( $use_order_data ) {
+				$error_message = sprintf(
+					/* translators: %s Coupon codes. */
+					__( 'Invalid coupons were removed from the order: "%s"', 'woocommerce' ),
+					implode( '", "', array_keys( $coupon_errors ) )
 				);
 			} else {
-				throw new RouteException(
-					'woocommerce_rest_cart_coupon_errors',
-					sprintf(
-						/* translators: %s Coupon codes. */
-						__( 'Invalid coupons were removed from the cart: "%s"', 'woocommerce' ),
-						implode( '", "', array_keys( $coupon_errors ) )
-					),
-					409,
-					array(
-						'removed_coupons' => $coupon_errors,
-					)
+				$error_message = sprintf(
+					/* translators: %s Coupon codes. */
+					__( 'Invalid coupons were removed from the cart: "%s"', 'woocommerce' ),
+					implode( '", "', array_keys( $coupon_errors ) )
 				);
 			}
+
+			throw new RouteException( $error_code, $error_message, 409, array( 'removed_coupons' => $coupon_errors ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 	}
 
@@ -289,10 +361,10 @@ class OrderController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
+	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
-	protected function validate_addresses( \WC_Order $order ) {
+	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
 		$errors           = new \WP_Error();
-		$needs_shipping   = wc()->cart->needs_shipping();
 		$billing_country  = $order->get_billing_country();
 		$shipping_country = $order->get_shipping_country();
 
