@@ -175,7 +175,7 @@ class Email_Editor {
 					'default-mode' => 'template-locked',
 				),
 				'title',
-				'custom-fields'
+				'custom-fields',
 			), // 'custom-fields' is required for loading meta fields via API.
 			'has_archive'            => true,
 			'show_in_rest'           => true, // Important to enable Gutenberg editor.
