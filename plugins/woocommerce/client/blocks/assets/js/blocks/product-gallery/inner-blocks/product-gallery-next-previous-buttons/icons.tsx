@@ -1,8 +1,3 @@
-/**
- * External dependencies
- */
-import { SVG } from '@wordpress/primitives';
-
 export const Icon = () => (
 	<svg
 		width="18"
