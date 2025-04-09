@@ -20,7 +20,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	[
 		'core/heading',
 		{
-			level: 3,
+			level: 2,
 			content: __( 'Filters', 'woocommerce' ),
 			style: {
 				margin: { top: '0', bottom: '0' },

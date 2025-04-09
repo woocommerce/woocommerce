@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+
 /**
  * ProductGalleryLargeImage class.
  */
@@ -49,10 +51,12 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery = $product->get_gallery_image_ids();
+		$product_gallery_data   = ProductGalleryUtils::get_product_gallery_image_data( $product );
+		$product_gallery_images = $product_gallery_data['images'];
 
-		if ( empty( $product_gallery ) ) {
-			return null;
+		// Don't show the arrows block if there is only one image.
+		if ( count( $product_gallery_images ) <= 1 ) {
+			return '';
 		}
 
 		$prev_button = $this->get_button( 'previous' );
