@@ -5,11 +5,6 @@ import { useBlockProps } from '@wordpress/block-editor';
 import clsx from 'clsx';
 import { BlockAttributes } from '@wordpress/blocks';
 
-/**
- * Internal dependencies
- */
-import { PrevButton, NextButton } from './icons';
-
 const getAlignmentStyle = ( alignment: string ): string => {
 	switch ( alignment ) {
 		case 'top':
@@ -48,8 +43,12 @@ export const Edit = ( {
 					'wc-block-product-gallery-large-image-next-previous-container'
 				) }
 			>
-				<PrevButton />
-				<NextButton />
+				<button className="wc-block-product-gallery-large-image-next-previous-left">
+					&lt;
+				</button>
+				<button className="wc-block-product-gallery-large-image-next-previous-right">
+					&gt;
+				</button>
 			</div>
 		</div>
 	);
