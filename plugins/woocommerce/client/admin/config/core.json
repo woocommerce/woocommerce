@@ -42,6 +42,6 @@
 		"add-to-cart-with-options-stepper-layout": true,
 		"blockified-add-to-cart": false,
 		"disable-core-profiler-fallback": true,
-		"reactify-classic-payments-settings": true,
+		"reactify-classic-payments-settings": true
 	}
 }
