@@ -11,10 +11,14 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { useEffect } from '@wordpress/element';
 import { useCustomDataContext } from '@woocommerce/shared-context';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import clsx from 'clsx';
+
+/**
+ * Internal dependencies
+ */
+import { useApplyEditorStyles } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
@@ -63,66 +67,17 @@ export default function AttributeOptionsEdit(
 		className,
 	} );
 
-	/**
-	 * This is a workaround for the Site Editor to set the correct
-	 * background color of the selected pills of Variation Selector based on
-	 * the main background color set by the theme.
-	 */
-	useEffect( () => {
-		let editorStylesWrapper = document.querySelector(
-			'.editor-styles-wrapper'
-		);
-		// If the editor styles wrapper is not available, look in the site editor canvas for it.
-		if ( ! editorStylesWrapper ) {
-			const canvasEl = document.querySelector(
-				'.edit-site-visual-editor__editor-canvas'
-			);
-
-			if ( ! ( canvasEl instanceof HTMLIFrameElement ) ) {
-				return;
+	// Apply selected variation pill styles based on Site Editor's background and text colors.
+	useApplyEditorStyles(
+		'add-to-cart-with-options-variation-selector-selected-pill',
+		( { editorBackgroundColor, editorColor } ) => `
+			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
+				background-color: ${ editorColor };
+				color: ${ editorBackgroundColor };
+				border-color: ${ editorColor };
 			}
-			const canvas =
-				canvasEl.contentDocument || canvasEl.contentWindow?.document;
-			if ( ! canvas ) {
-				return;
-			}
-			editorStylesWrapper = canvas.querySelector(
-				'.editor-styles-wrapper'
-			);
-		}
-
-		if ( ! editorStylesWrapper ) {
-			return;
-		}
-
-		const editorBackgroundColor =
-			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
-		const editorColor =
-			window.getComputedStyle( editorStylesWrapper )?.color;
-
-		if (
-			editorStylesWrapper &&
-			! editorStylesWrapper.querySelector(
-				'#add-to-cart-with-options-variation-selector-selected-pill'
-			) &&
-			editorBackgroundColor &&
-			editorColor
-		) {
-			const styleElement = document.createElement( 'style' );
-			styleElement.id =
-				'add-to-cart-with-options-variation-selector-selected-pill';
-			styleElement.appendChild(
-				document.createTextNode(
-					`:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
-							background-color: ${ editorColor };
-							color: ${ editorBackgroundColor };
-							border-color: ${ editorColor };
-						}`
-				)
-			);
-			editorStylesWrapper.appendChild( styleElement );
-		}
-	}, [] );
+		`
+	);
 
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
