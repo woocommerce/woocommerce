@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-title",
 	"version": "1.0.0",
 	"title": "Product Title",
-	"category": "woocommerce",
+	"category": "woocommerce-product-elements",
 	"description": "Display the title of a product.",
 	"supports": {
 		"html": false,
