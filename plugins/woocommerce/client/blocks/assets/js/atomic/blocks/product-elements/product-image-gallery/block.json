@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-image-gallery",
-	"version": "1.0.0",
 	"title": "Product Image Gallery",
 	"icon": "gallery",
 	"description": "Display a product's images.",

@@ -343,6 +343,14 @@ class Features {
 			$classes[] = sanitize_html_class( 'woocommerce-feature-enabled-' . $feature_key );
 		}
 
+		// Add the Reactify settings payments class if the feature is enabled.
+		if (
+			FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) &&
+			! in_array( 'woocommerce-feature-enabled-reactify-classic-payments-settings', $classes, true )
+		) {
+			$classes[] = 'woocommerce-feature-enabled-reactify-classic-payments-settings';
+		}
+
 		$admin_body_class = implode( ' ', array_unique( $classes ) );
 		return " $admin_body_class ";
 	}

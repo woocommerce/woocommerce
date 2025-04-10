@@ -55,7 +55,9 @@ const Template: StoryFn< RadioControlAccordionProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< RadioControlAccordionProps > = Template.bind(
+	{}
+);
 Default.args = {
 	options: [
 		{

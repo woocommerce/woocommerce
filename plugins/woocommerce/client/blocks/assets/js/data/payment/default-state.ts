@@ -29,7 +29,7 @@ const savedPaymentMethods = getSetting<
 >( 'customerPaymentMethods', {} );
 
 const defaultPaymentMethod = isEditor()
-	? globalPaymentMethods[ 0 ].id
+	? globalPaymentMethods[ 0 ]?.id || ''
 	: checkoutData?.payment_method;
 
 function getDefaultPaymentMethod() {
@@ -37,7 +37,7 @@ function getDefaultPaymentMethod() {
 		return '';
 	}
 
-	return defaultPaymentMethod;
+	return defaultPaymentMethod as string;
 }
 
 /**

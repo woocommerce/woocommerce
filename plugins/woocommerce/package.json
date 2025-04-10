@@ -48,7 +48,7 @@
 		"lint:php:changes:staged": "composer run-script lint-staged",
 		"lint:php:fix": "composer run-script phpcbf",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
-		"makepot": "composer run-script makepot",
+		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
 		"test:api:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
@@ -205,7 +205,7 @@
 						"start": "env:test"
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					]
 				},
@@ -268,7 +268,7 @@
 					],
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-gutenberg"
 					],
@@ -299,7 +299,7 @@
 					],
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-gutenberg"
 					],
@@ -325,7 +325,7 @@
 					],
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-hpos-disabled"
 					],
@@ -363,7 +363,7 @@
 					},
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-php-8.1"
 					],
@@ -398,7 +398,7 @@
 					},
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-wp-latest-1"
 					],
@@ -433,7 +433,7 @@
 					},
 					"events": [
 						"pull_request",
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e-wp-pre-release"
 					],
@@ -594,7 +594,6 @@
 						"pull_request",
 						"push",
 						"release-checks",
-						"nightly-checks",
 						"blocks-e2e"
 					],
 					"report": {
@@ -631,7 +630,7 @@
 						}
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
@@ -665,7 +664,7 @@
 						}
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-latest-1"
 					],
