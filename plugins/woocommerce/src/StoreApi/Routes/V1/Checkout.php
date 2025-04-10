@@ -86,7 +86,6 @@ class Checkout extends AbstractCartRoute {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
-				'validate_callback'   => [ $this, 'validate_callback' ],
 				'args'                => array_merge(
 					[
 						'payment_data'      => [
@@ -115,7 +114,6 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'validate_callback'   => [ $this, 'validate_callback' ],
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
@@ -148,11 +146,13 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$response    = null;
-		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
+		$this->load_cart_session( $request );
 
-		if ( is_wp_error( $nonce_check ) ) {
-			$response = $nonce_check;
+		$response            = null;
+		$validation_callback = $this->validate_callback( $request );
+
+		if ( is_wp_error( $validation_callback ) ) {
+			$response = $validation_callback;
 		}
 
 		if ( ! $response ) {
@@ -219,6 +219,12 @@ class Checkout extends AbstractCartRoute {
 	 * @return true|\WP_Error
 	 */
 	public function validate_callback( $request ) {
+		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
+
+		if ( is_wp_error( $nonce_check ) ) {
+			return $nonce_check;
+		}
+
 		/**
 		 * The request is cloned to avoid modifying the original request object when sanitizing params.
 		 * Un-sanitized params are used to see if required fields had values. Sanitized params are used to
