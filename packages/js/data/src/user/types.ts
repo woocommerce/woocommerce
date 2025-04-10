@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import schema from '@wordpress/core-data';
+import type { User, Context } from '@wordpress/core-data';
 
 export type UserPreferences = {
 	activity_panel_inbox_last_read?: string;
@@ -15,7 +15,6 @@ export type UserPreferences = {
 	dashboard_chart_type?: string;
 	dashboard_leaderboard_rows?: string;
 	dashboard_sections?: string;
-	help_panel_highlight_shown?: string;
 	homepage_layout?: string;
 	homepage_stats?: string;
 	orders_report_columns?: string;
@@ -33,21 +32,15 @@ export type UserPreferences = {
 	product_advice_card_dismissed?: {
 		[ key: string ]: 'yes' | 'no';
 	};
+	launch_your_store_tour_hidden?: 'yes' | 'no' | '';
+	coming_soon_banner_dismissed?: 'yes' | 'no' | '';
 };
 
-export type WoocommerceMeta = UserPreferences & {
-	task_list_tracked_started_tasks?: string;
-	variable_items_without_price_notice_dismissed?: string;
-	local_attributes_notice_dismissed_ids?: string;
-	product_advice_card_dismissed?: string;
+export type WoocommerceMeta = {
+	[ key in keyof UserPreferences ]: string;
 };
 
-export type WCUser<
-	T extends keyof schema.Schema.BaseUser< 'view' > = schema.Schema.ViewKeys.User
-> = Pick<
-	schema.Schema.BaseUser< 'view' >,
-	schema.Schema.ViewKeys.User | T
-> & {
+export type WCUser< T extends Context = 'edit' > = User< T > & {
 	// https://github.com/woocommerce/woocommerce/blob/3eb1938f4a0d0a93c9bcaf2a904f96bd501177fc/plugins/woocommerce/src/Internal/Admin/WCAdminUser.php#L40-L58
 	woocommerce_meta: WoocommerceMeta;
 	is_super_admin: boolean;

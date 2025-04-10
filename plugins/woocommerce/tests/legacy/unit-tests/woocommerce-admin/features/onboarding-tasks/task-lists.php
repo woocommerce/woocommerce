@@ -10,8 +10,9 @@
  */
 require_once __DIR__ . '/test-task.php';
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
  * Class WC_Tests_OnboardingTasks_TaskLists
@@ -42,8 +43,8 @@ class WC_Tests_OnboardingTasks_TaskLists extends WC_Unit_Test_Case {
 		// Filter the default task lists.
 		add_filter(
 			'woocommerce_admin_experimental_onboarding_tasklists',
-			function(
-			$task_lists
+			function (
+				$task_lists
 			) {
 				$this->assertIsArray( $task_lists );
 
@@ -137,5 +138,59 @@ class WC_Tests_OnboardingTasks_TaskLists extends WC_Unit_Test_Case {
 
 		// Assert we have the task we added.
 		$this->assertEquals( 'wc-unit-test_tasklists_get_json_visible_list', $json['tasks'][0]['id'] );
+	}
+
+	/**
+	 * Tests the setup_tasks_remaining method.
+	 */
+	public function test_setup_tasks_remaining() {
+		// Initialize the default task lists.
+		TaskLists::add_list(
+			array(
+				'id'                      => 'setup',
+				'title'                   => 'Setup',
+				'tasks'                   => array(),
+				'display_progress_header' => true,
+				'event_prefix'            => 'tasklist_',
+				'options'                 => array(
+					'use_completed_title' => true,
+				),
+				'visible'                 => true,
+			)
+		);
+
+		$setup_list = TaskLists::get_list( 'setup' );
+
+		for ( $i = 1; $i <= 3; $i++ ) {
+			TaskLists::add_task(
+				'setup',
+				new TestTask(
+					$setup_list,
+					array(
+						'id' => "setup-task-{$i}",
+					)
+				)
+			);
+		}
+
+		// Test when no tasks are completed.
+		$this->assertEquals( 3, TaskLists::setup_tasks_remaining() );
+
+		// Complete one task.
+		update_option( Task::COMPLETED_OPTION, array( 'setup-task-1' ) );
+		$this->assertEquals( 2, TaskLists::setup_tasks_remaining() );
+
+		// Complete all tasks.
+		update_option( Task::COMPLETED_OPTION, array( 'setup-task-1', 'setup-task-2', 'setup-task-3' ) );
+		$this->assertEquals( 0, TaskLists::setup_tasks_remaining() );
+
+		// Test when the setup list is hidden.
+		$setup_list->hide();
+		$this->assertNull( TaskLists::setup_tasks_remaining() );
+
+		// Test when the setup list has been previously completed.
+		$setup_list->unhide();
+		update_option( TaskList::COMPLETED_OPTION, array( 'setup' ) );
+		$this->assertNull( TaskLists::setup_tasks_remaining() );
 	}
 }

@@ -6,7 +6,6 @@ import { BlockEditorProvider } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
 import { createElement, useEffect, useState, useRef } from '@wordpress/element';
 import { debounce } from 'lodash';
-import React from 'react';
 import { uploadMedia } from '@wordpress/media-utils';
 import { useUser } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -100,6 +99,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 							placeholder={ placeholder }
 						/>
 					</ShortcutProvider>
+					{ /* @ts-expect-error Popover is missing Slot type: https://github.com/WordPress/gutenberg/blob/dd042a265afc0d4679858220441dd45c98b27ed3/packages/components/src/popover/index.tsx#L521 */ }
 					<Popover.Slot />
 				</BlockEditorProvider>
 			</SlotFillProvider>

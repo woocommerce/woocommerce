@@ -15,13 +15,15 @@ export type CollapsedProps = {
 	toggleText: string;
 	persistRender?: boolean;
 	children: React.ReactNode;
+	hintText?: string;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const CollapsibleContent: React.FC< CollapsedProps > = ( {
+export const CollapsibleContent = ( {
 	initialCollapsed = true,
 	toggleText,
 	children,
 	persistRender = false,
+	hintText,
 	...props
 }: CollapsedProps ) => {
 	const [ collapsed, setCollapsed ] = useState( initialCollapsed );
@@ -64,6 +66,12 @@ export const CollapsibleContent: React.FC< CollapsedProps > = ( {
 					size={ 16 }
 				/>
 			</button>
+
+			{ hintText && (
+				<p className="woocommerce-collapsible-content-hint">
+					{ hintText }
+				</p>
+			) }
 
 			<DisplayState state={ displayState }>
 				<div

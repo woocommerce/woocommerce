@@ -27,7 +27,65 @@ createCrudDataStore( {
 } );
 ```
 
-This will register a data store named `my/custom/store` with the following default selectors:
+#### TypeScript
+
+For TypeScript support, you can define your types and pass them as generic parameters to `createCrudDataStore`:
+
+```ts
+// types.ts
+import { CrudActions, CrudSelectors } from '../crud/types';
+
+// Define your resource type
+export type MyThing = {
+    id: number;
+    name: string;
+    description: string;
+};
+
+// Define the query parameters for mutations
+export type QueryMyThing = {
+    name: string;
+    description: string;
+};
+
+// Define which properties are read-only vs mutable
+type ReadOnlyProperties = 'id';
+type MutableProperties = Partial<Omit<QueryMyThing, ReadOnlyProperties>>;
+
+// Define your query parameters for selectors
+type Query = {
+    context?: string;
+    order_by?: string;
+};
+
+// Create your typed actions and selectors
+export type MyThingActions = CrudActions<
+    'MyThing',
+    MyThing,
+    MutableProperties
+>;
+
+export type MyThingSelectors = CrudSelectors<
+    'MyThing',
+    'MyThings',
+    MyThing,
+    Query,
+    MutableProperties
+>;
+
+// index.ts
+import { createCrudDataStore } from '../crud';
+import { MyThingActions, MyThingSelectors } from './types';
+
+export const store = createCrudDataStore<MyThingActions, MyThingSelectors>({
+    storeName: 'my/custom/store',
+    resourceName: 'MyThing',
+    pluralResourceName: 'MyThings',
+    namespace: '/my/rest/namespace',
+});
+```
+
+This will register a data store named `my/custom/store` with the following type-safe selectors:
 
 | Selector | Description |
 | --- | --- |
@@ -82,6 +140,85 @@ registerStore( 'my/custom/store', {
 	resolvers: { ...crudResolvers, myResolvers },
 } );
 ```
+
+#### TypeScript
+
+For TypeScript support in a customized store, you can define your types and extend the base CRUD types:
+
+```ts
+// types.ts
+import { CrudActions, CrudSelectors } from '../crud/types';
+import { DispatchFromMap } from '@automattic/data-stores';
+
+// Define your resource type
+export interface MyCustomResource {
+    id: number;
+    name: string;
+    // ... other properties
+}
+
+// Define which properties are read-only
+type ReadOnlyProperties = 'id' | 'date_created';
+
+// Define mutable properties
+type MutableProperties = Partial<Omit<MyCustomResource, ReadOnlyProperties>>;
+
+// Define query parameters
+type Query = {
+    context?: string;
+    custom_filter?: string;
+};
+
+// Define any custom actions
+export interface CustomActions {
+    customAction( id: number ): void;
+}
+
+// Define any custom selectors
+export interface CustomSelectors {
+    getCustomData( id: number ): MyCustomResource | undefined;
+}
+
+// Combine CRUD and custom types
+export type MyCustomActions = CrudActions<
+    'MyCustomResource',
+    MyCustomResource,
+    MutableProperties
+> & CustomActions;
+
+export type MyCustomSelectors = CrudSelectors<
+    'MyCustomResource',
+    'MyCustomResources',
+    MyCustomResource,
+    Query,
+    MutableProperties
+> & CustomSelectors;
+
+
+
+// index.ts
+import { Reducer } from 'redux';
+import { createCrudDataStore } from '../crud';
+import { ResourceState } from '../crud/reducer';
+import * as actions from './actions';
+import * as selectors from './selectors';
+import { reducer } from './reducer';
+import { MyCustomActions, MyCustomSelectors } from './types';
+
+export const store = createCrudDataStore<MyCustomActions, MyCustomSelectors>({
+    storeName: 'my/custom/store',
+    resourceName: 'MyCustomResource',
+    pluralResourceName: 'MyCustomResources',
+    namespace: '/my/rest/namespace',
+    storeConfig: {
+        reducer: reducer as Reducer<ResourceState>,
+        actions: actions as MyCustomActions,
+        selectors: selectors as MyCustomSelectors,
+    },
+});
+```
+
+This TypeScript implementation provides type safety for your actions and selectors while allowing you to extend the base CRUD functionality with custom methods.
 
 ## Structure
 

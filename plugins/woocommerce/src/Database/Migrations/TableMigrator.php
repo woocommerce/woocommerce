@@ -9,12 +9,12 @@ namespace Automattic\WooCommerce\Database\Migrations;
  * Base class for implementing WP posts to order tables migrations handlers.
  * It mainly contains methods to deal with error handling.
  *
- * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations
  */
 abstract class TableMigrator {
 
 	/**
-	 * An array of cummulated error messages.
+	 * An array of cumulated error messages.
 	 *
 	 * @var array
 	 */
@@ -80,7 +80,7 @@ abstract class TableMigrator {
 	 * @param string      $output Any of ARRAY_A | ARRAY_N | OBJECT | OBJECT_K constants.
 	 * @return mixed Whatever $wpdb->get_results returns.
 	 */
-	protected function db_get_results( string $query = null, string $output = OBJECT ) {
+	protected function db_get_results( ?string $query = null, string $output = OBJECT ) {
 		$wpdb = WC()->get_global( 'wpdb' );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

@@ -11,9 +11,10 @@ use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 class CustomerAccount extends AbstractBlock {
 	use BlockHooksTrait;
 
-	const TEXT_ONLY   = 'text_only';
-	const ICON_ONLY   = 'icon_only';
-	const DISPLAY_ALT = 'alt';
+	const TEXT_ONLY    = 'text_only';
+	const ICON_ONLY    = 'icon_only';
+	const DISPLAY_ALT  = 'alt';
+	const DISPLAY_LINE = 'line';
 
 	/**
 	 * Block name.
@@ -33,6 +34,7 @@ class CustomerAccount extends AbstractBlock {
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
 			'callback' => 'should_unhook_block',
+			'version'  => '8.4.0',
 		),
 	);
 
@@ -65,12 +67,19 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
 		$parsed_hooked_block['attrs']['displayStyle'] = 'icon_only';
+		$parsed_hooked_block['attrs']['iconStyle']    = 'line';
+		$parsed_hooked_block['attrs']['iconClass']    = 'wc-block-customer-account__account-icon';
 
-		/*
-		* The Mini Cart block (which is hooked into the header) has a margin of 0.5em on the left side.
-		* We want to match that margin for the Customer Account block so it looks consistent.
-		*/
-		$parsed_hooked_block['attrs']['style']['spacing']['margin']['left'] = '0.5em';
+		$customer_account_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
+
+		if ( ! is_string( $customer_account_block_font_size ) ) {
+			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
+
+			if ( is_string( $navigation_block_font_size ) ) {
+				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
+			}
+		}
+
 		return $parsed_hooked_block;
 	}
 
@@ -116,16 +125,26 @@ class CustomerAccount extends AbstractBlock {
 		$account_link = get_option( 'woocommerce_myaccount_page_id' ) ? wc_get_account_endpoint_url( 'dashboard' ) : wp_login_url();
 
 		$allowed_svg = array(
-			'svg'  => array(
+			'svg'    => array(
 				'class'   => true,
 				'xmlns'   => true,
 				'width'   => true,
 				'height'  => true,
 				'viewbox' => true,
 			),
-			'path' => array(
-				'd'    => true,
-				'fill' => true,
+			'path'   => array(
+				'd'         => true,
+				'fill'      => true,
+				'fill-rule' => true,
+				'clip-rule' => true,
+			),
+			'circle' => array(
+				'cx'           => true,
+				'cy'           => true,
+				'r'            => true,
+				'stroke'       => true,
+				'stroke-width' => true,
+				'fill'         => true,
 			),
 		);
 
@@ -153,25 +172,39 @@ class CustomerAccount extends AbstractBlock {
 			return '';
 		}
 
-		if ( self::DISPLAY_ALT === $attributes['iconStyle'] ) {
-			return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
+		if ( self::DISPLAY_LINE === $attributes['iconStyle'] ) {
+			return '<svg class="' . $attributes['iconClass'] . '" viewBox="1 1 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle
+					cx="16"
+					cy="10.5"
+					r="3.5"
+					stroke="currentColor"
+					stroke-width="2"
+					fill="none"
+				/>
 				<path
-					d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9
-					 	0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653
-					 	9.85277 6.23362 8.60221 6.23362 7.08638C6.23362 5.57056 7.46526 4.32 9 4.32ZM9 10.7242C11.1221 10.7242
-					  	12.96 12.2021 13.7937 14.4189C12.5242 15.5559 10.8379 16.238 9 16.238C7.16207 16.238 5.49474 15.5369
-					   	4.20632 14.4189C5.05891 12.2021 6.87793 10.7242 9 10.7242Z"
+					fill-rule="evenodd"
+					clip-rule="evenodd"
+					d="M11.5 18.5H20.5C21.8807 18.5 23 19.6193 23 21V25.5H25V21C25 18.5147 22.9853 16.5 20.5 16.5H11.5C9.01472 16.5 7 18.5147 7 21V25.5H9V21C9 19.6193 10.1193 18.5 11.5 18.5Z"
 					fill="currentColor"
 				/>
 			</svg>';
 		}
 
-		return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+		if ( self::DISPLAY_ALT === $attributes['iconStyle'] ) {
+			return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 25 25">
+				<path
+					d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9 0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653 9.85277 6.23362 8.60221 6.23362 7.08638C6.23362 5.57056 7.46526 4.32 9 4.32ZM9 10.7242C11.1221 10.7242 12.96 12.2021 13.7937 14.4189C12.5242 15.5559 10.8379 16.238 9 16.238C7.16207 16.238 5.49474 15.5369 4.20632 14.4189C5.05891 12.2021 6.87793 10.7242 9 10.7242Z"
+					fill="currentColor"
+				/>
+			</svg>';
+		}
+
+		return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 25 25">
 			<path
-				d="M8.00009 8.34785C10.3096 8.34785 12.1819 6.47909 12.1819 4.17393C12.1819 1.86876 10.3096 0 8.00009 0C5.69055
-				 	0 3.81824 1.86876 3.81824 4.17393C3.81824 6.47909 5.69055 8.34785 8.00009 8.34785ZM0.333496 15.6522C0.333496
-				  	15.8444 0.489412 16 0.681933 16H15.3184C15.5109 16 15.6668 15.8444 15.6668 15.6522V14.9565C15.6668 12.1428
-				   	13.7821 9.73911 10.0912 9.73911H5.90931C2.21828 9.73911 0.333645 12.1428 0.333645 14.9565L0.333496 15.6522Z"
+				fill-rule="evenodd"
+				clip-rule="evenodd"
+				d="M8.00009 8.34785C10.3096 8.34785 12.1819 6.47909 12.1819 4.17393C12.1819 1.86876 10.3096 0 8.00009 0C5.69055 0 3.81824 1.86876 3.81824 4.17393C3.81824 6.47909 5.69055 8.34785 8.00009 8.34785ZM0.333496 15.6522C0.333496 15.8444 0.489412 16 0.681933 16H15.3184C15.5109 16 15.6668 15.8444 15.6668 15.6522V14.9565C15.6668 12.1428 13.7821 9.73911 10.0912 9.73911H5.90931C2.21828 9.73911 0.333645 12.1428 0.333645 14.9565L0.333496 15.6522Z"
 				fill="currentColor"
 			/>
 		</svg>';

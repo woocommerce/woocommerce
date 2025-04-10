@@ -1,0 +1,64 @@
+.woocommerce-layout__header {
+	.woocommerce-layout__header-wrapper {
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-layout__header-heading {
+		.woocommerce-settings-payments-header__title {
+			color: $gray-900;
+			font-size: 16px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 24px;
+		}
+	}
+
+	.woocommerce-settings-payments-header__description {
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 20px;
+		color: $gray-700;
+		flex-basis: 100%;
+	}
+
+	&:has(.woocommerce-settings-payments-header__title) {
+		padding: $gap-large 2 * $gap-large;
+		border-bottom: 1px solid #ebebeb;
+
+		.woocommerce-layout__header-heading {
+			height: initial;
+			padding: 0;
+		}
+
+		.woocommerce-layout__header-wrapper {
+			min-height: 40px;
+			gap: $gap-smaller;
+		}
+
+		.woocommerce-settings-payments__back-button {
+			+ .woocommerce-layout__header-heading {
+				font-size: 16px;
+				font-style: normal;
+				font-weight: 600;
+				line-height: 24px;
+				flex-basis: 50%;
+			}
+		}
+
+		@media screen and ( max-width: 1024px ) {
+			padding: $gap-large;
+		}
+
+		@media screen and ( max-width: 782px ) {
+			padding: $gap-large $gap;
+		}
+	}
+
+	&:has(.woocommerce-settings-payments-header__description) {
+		.woocommerce-layout__header-heading,
+		.woocommerce-settings-payments-header__title,
+		.woocommerce-settings-payments-header__description {
+			display: block;
+		}
+	}
+}

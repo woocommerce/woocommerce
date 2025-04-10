@@ -1,6 +1,6 @@
 # WooCommerce Monorepo
 
-![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png)
+![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woo@2x.png)
 
 Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
@@ -17,27 +17,29 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 -   [PHP 7.4+](https://www.php.net/manual/en/install.php): WooCommerce Core currently features a minimum PHP version of 7.4. It is also needed to run Composer and various project build scripts. See [troubleshooting](DEVELOPMENT.md#troubleshooting) for troubleshooting problems installing PHP.
 -   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
 
-Once you've installed all of the prerequisites, you can run the following commands to get everything working.
+Note: A POSIX compliant operating system (e.g., Linux, macOS) is assumed. If you're working on a Windows machine, the recommended approach is to use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (available since Windows 10).
+
+Once you've installed all of the prerequisites, the following will prepare all of the build outputs necessary for development:
 
 ```bash
-# Ensure that you're using the correct version of Node
-nvm use
+# Ensure that correct version of Node is installed and being used
+nvm install
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
-pnpm install
+pnpm install -frozen-lockfile
 # Build all of the plugins, packages, and tools in the monorepo
 pnpm build
 ```
 
-At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
-
-Check out [our development guide](DEVELOPMENT.md) if you would like a more comprehensive look at working in our repository.
-
 ## Repository Structure
+
+Each plugin, package, and tool has its own `package.json` file containing project-specific dependencies and scripts. Most projects also contain a `README.md` file with any project-specific setup instructions and documentation.
 
 -   [**Plugins**](plugins): Our repository contains plugins that relate to or otherwise aid in the development of WooCommerce.
     -   [**WooCommerce Core**](plugins/woocommerce): The core WooCommerce plugin is available in the plugins directory.
 -   [**Packages**](packages): Contained within the packages directory are all of the [PHP](packages/php) and [JavaScript](packages/js) provided for the community. Some of these are internal dependencies and are marked with an `internal-` prefix.
 -   [**Tools**](tools): We also have a growing number of tools within our repository. Many of these are intended to be utilities and scripts for use in the monorepo, but, this directory may also contain external tools.
+
+If you'd like to learn more about how our monorepo works, [please check out this guide here](tools/README.md).
 
 ## Reporting Security Issues
 

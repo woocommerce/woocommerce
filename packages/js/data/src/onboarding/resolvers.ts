@@ -21,9 +21,11 @@ import {
 	getProductTypesSuccess,
 	getProductTypesError,
 	setJetpackAuthUrl,
+	setProfileProgress,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
 import {
+	CoreProfilerCompletedSteps,
 	ExtensionList,
 	GetJetpackAuthUrlResponse,
 	OnboardingProductTypes,
@@ -31,6 +33,7 @@ import {
 	TaskListType,
 } from './types';
 import { Plugin } from '../plugins/types';
+import { checkUserCapability } from '../utils';
 
 const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
@@ -46,6 +49,30 @@ export function* getProfileItems() {
 	} catch ( error ) {
 		yield setError( 'getProfileItems', error );
 	}
+}
+
+export function* getProfileProgress() {
+	try {
+		const results: {
+			core_profiler_completed_steps: Partial< CoreProfilerCompletedSteps >;
+			status: string;
+		} = yield apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/onboarding/profile/progress',
+			method: 'GET',
+		} );
+
+		yield setProfileProgress( results.core_profiler_completed_steps );
+	} catch ( error ) {
+		yield setError( 'getProfileProgress', error );
+	}
+}
+
+export function* getCoreProfilerCompletedSteps() {
+	yield resolveSelect( STORE_NAME, 'getProfileProgress' );
+}
+
+export function* getMostRecentCoreProfilerStep() {
+	yield resolveSelect( STORE_NAME, 'getProfileProgress' );
 }
 
 export function* getEmailPrefill() {
@@ -68,6 +95,8 @@ export function* getEmailPrefill() {
 export function* getTaskLists() {
 	const deprecatedTasks = new DeprecatedTasks();
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const results: TaskListType[] = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/tasks',
 			method: deprecatedTasks.hasDeprecatedTasks() ? 'POST' : 'GET',

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add react-window for SelectControl, set country dropdowns in core profiler and store location to use virtual scrolling

@@ -3,7 +3,6 @@
  */
 import classnames from 'classnames';
 import {
-	cloneElement,
 	useState,
 	createElement,
 	useCallback,
@@ -13,7 +12,7 @@ import {
 	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
-import { ChangeEvent, PropsWithChildren, useRef } from 'react';
+import { ChangeEvent, useRef } from 'react';
 import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
@@ -23,61 +22,18 @@ import _omit from 'lodash/omit';
 /**
  * Internal dependencies
  */
-import { FormContext, FormErrors } from './form-context';
-
-type FormProps< Values > = {
-	/**
-	 * Object of all initial errors to store in state.
-	 */
-	errors?: FormErrors< Values >;
-	/**
-	 * Object key:value pair list of all initial field values.
-	 */
-	initialValues?: Values;
-	/**
-	 * This prop helps determine whether or not a field has received focus
-	 */
-	touched?: Record< keyof Values, boolean >;
-	/**
-	 * Function to call when a form is submitted with valid fields.
-	 *
-	 * @deprecated
-	 */
-	onSubmitCallback?: ( values: Values ) => void;
-	/**
-	 * Function to call when a form is submitted with valid fields.
-	 */
-	onSubmit?: ( values: Values ) => void;
-	/**
-	 * Function to call when a value changes in the form.
-	 *
-	 * @deprecated
-	 */
-	onChangeCallback?: () => void;
-	/**
-	 * Function to call when a value changes in the form.
-	 */
-	onChange?: (
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		value: { name: string; value: any },
-		values: Values,
-		isValid: boolean
-	) => void;
-	/**
-	 * Function to call when one or more values change in the form.
-	 */
-	onChanges?: (
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		changedValues: { name: string; value: any }[],
-		values: Values,
-		isValid: boolean
-	) => void;
-	/**
-	 * A function that is passed a list of all values and
-	 * should return an `errors` object with error response.
-	 */
-	validate?: ( values: Values ) => FormErrors< Values >;
-};
+import { FormContext } from './form-context';
+import {
+	CheckboxProps,
+	ConsumerInputProps,
+	FormProps,
+	FormRef,
+	InputProps,
+	PropsWithChildrenFunction,
+	SelectControlProps,
+	FormContextType,
+	FormErrors,
+} from './types';
 
 function isChangeEvent< T >(
 	value: T | ChangeEvent< HTMLInputElement >
@@ -85,56 +41,21 @@ function isChangeEvent< T >(
 	return ( value as ChangeEvent< HTMLInputElement > ).target !== undefined;
 }
 
-export type FormRef< Values > = {
-	resetForm: ( initialValues: Values ) => void;
-};
-
-export type InputProps< Values, Value > = {
-	value: Value;
-	checked: boolean;
-	selected?: boolean;
-	onChange: (
-		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-	) => void;
-	onBlur: () => void;
-	className: string | undefined;
-	help: string | null | undefined;
-};
-
-export type CheckboxProps< Values, Value > = Omit<
-	InputProps< Values, Value >,
-	'value' | 'selected'
->;
-
-export type SelectControlProps< Values, Value > = Omit<
-	InputProps< Values, Value >,
-	'value'
-> & {
-	value: string | undefined;
-};
-
-export type ConsumerInputProps< Values > = {
-	className?: string;
-	onChange?: (
-		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-	) => void;
-	onBlur?: () => void;
-	[ key: string ]: unknown;
-	sanitize?: ( value: Values[ keyof Values ] ) => Values[ keyof Values ];
-};
-
 /**
  * A form component to handle form state and provide input helper props.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormComponent< Values extends Record< string, any > >(
+function FormComponent< Values extends Record< string, any > = any >(
 	{
 		children,
 		onSubmit = () => {},
 		onChange = () => {},
 		onChanges = () => {},
 		...props
-	}: PropsWithChildren< FormProps< Values > >,
+	}: PropsWithChildrenFunction<
+		FormProps< Values >,
+		FormContextType< Values >
+	>,
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
 	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );
@@ -242,7 +163,7 @@ function FormComponent< Values extends Record< string, any > >(
 
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( name: string, value: any ) => {
+		( name: keyof Values, value: any ) => {
 			setValues( _setWith( { ...values }, name, value, _clone ) );
 		},
 		[ values, validate, onChange, props.onChangeCallback ]
@@ -250,7 +171,7 @@ function FormComponent< Values extends Record< string, any > >(
 
 	const handleChange = useCallback(
 		(
-			name: string,
+			name: keyof Values,
 			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
 		) => {
 			// Handle native events.
@@ -268,7 +189,7 @@ function FormComponent< Values extends Record< string, any > >(
 	);
 
 	const handleBlur = useCallback(
-		( name: string ) => {
+		( name: keyof Values ) => {
 			setTouched( {
 				...touched,
 				[ name ]: true,
@@ -303,10 +224,10 @@ function FormComponent< Values extends Record< string, any > >(
 		}
 	};
 
-	function getInputProps< Value = Values[ keyof Values ] >(
-		name: string,
+	function getInputProps< P extends keyof Values >(
+		name: P,
 		inputProps: ConsumerInputProps< Values > = {}
-	): InputProps< Values, Value > {
+	): InputProps< Values, Values[ P ] > {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
@@ -347,20 +268,20 @@ function FormComponent< Values extends Record< string, any > >(
 		};
 	}
 
-	function getCheckboxControlProps< Value = Values[ keyof Values ] >(
-		name: string,
+	function getCheckboxControlProps< P extends keyof Values >(
+		name: P,
 		inputProps: ConsumerInputProps< Values > = {}
-	): CheckboxProps< Values, Value > {
+	): CheckboxProps< Values, Values[ P ] > {
 		return _omit( getInputProps( name, inputProps ), [
 			'selected',
 			'value',
 		] );
 	}
 
-	function getSelectControlProps< Value = Values[ keyof Values ] >(
-		name: string,
+	function getSelectControlProps< P extends keyof Values >(
+		name: P,
 		inputProps: ConsumerInputProps< Values > = {}
-	): SelectControlProps< Values, Value > {
+	): SelectControlProps< Values, Values[ P ] > {
 		const selectControlProps = getInputProps( name, inputProps );
 		return {
 			...selectControlProps,
@@ -376,7 +297,7 @@ function FormComponent< Values extends Record< string, any > >(
 		[ initialValues.current, values ]
 	);
 
-	const getStateAndHelpers = () => {
+	const getStateAndHelpers = (): FormContextType< Values > => {
 		return {
 			values,
 			errors,
@@ -396,8 +317,7 @@ function FormComponent< Values extends Record< string, any > >(
 
 	function getChildren() {
 		if ( typeof children === 'function' ) {
-			const element = children( getStateAndHelpers() );
-			return cloneElement( element );
+			return children( getStateAndHelpers() );
 		}
 		return children;
 	}
@@ -413,7 +333,10 @@ const Form = forwardRef( FormComponent ) as <
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	Values extends Record< string, any >
 >(
-	props: PropsWithChildren< FormProps< Values > > & {
+	props: PropsWithChildrenFunction<
+		FormProps< Values >,
+		FormContextType< Values >
+	> & {
 		ref?: React.ForwardedRef< FormRef< Values > >;
 	},
 	ref: React.Ref< FormRef< Values > >

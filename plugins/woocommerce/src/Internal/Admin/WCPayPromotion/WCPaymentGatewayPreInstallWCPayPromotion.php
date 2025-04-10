@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A Psuedo WCPay gateway class.
+ * A pseudo WCPay gateway class.
  *
- * @extends WC_Payment_Gateway
+ * @extends \WC_Payment_Gateway
  */
 class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 
@@ -87,7 +87,7 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if the promotional gateaway has been dismissed.
+	 * Check if the promotional gateway has been dismissed.
 	 *
 	 * @return bool
 	 */

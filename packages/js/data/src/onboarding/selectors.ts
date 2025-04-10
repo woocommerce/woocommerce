@@ -13,6 +13,7 @@ import {
 	ExtensionList,
 	ProfileItems,
 	GetJetpackAuthUrlResponse,
+	CoreProfilerCompletedSteps,
 } from './types';
 import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
@@ -27,6 +28,12 @@ export const getProfileItems = (
 	state: OnboardingState
 ): ProfileItems | Record< string, never > => {
 	return state.profileItems || {};
+};
+
+export const getProfileProgress = (
+	state: OnboardingState
+): Partial< CoreProfilerCompletedSteps > => {
+	return state.profileProgress || {};
 };
 
 export const getTaskLists = createSelector(
@@ -106,8 +113,36 @@ export const getJetpackAuthUrl = (
 	return state.jetpackAuthUrls[ query.redirectUrl ] || '';
 };
 
+export const getCoreProfilerCompletedSteps = createSelector(
+	( state: OnboardingState ) => {
+		return state.profileProgress || {};
+	},
+	( state: OnboardingState ) => [ state.profileProgress ]
+);
+
+export const getMostRecentCoreProfilerStep = createSelector(
+	( state: OnboardingState ) => {
+		const completedSteps = state.profileProgress || {};
+
+		return (
+			Object.entries(
+				completedSteps as Record<
+					string,
+					CoreProfilerCompletedSteps[ keyof CoreProfilerCompletedSteps ]
+				>
+			).sort( ( a, b ) => {
+				const dateA = new Date( a[ 1 ].completed_at );
+				const dateB = new Date( b[ 1 ].completed_at );
+				return dateB.getTime() - dateA.getTime();
+			} )[ 0 ]?.[ 0 ] || null
+		);
+	},
+	( state: OnboardingState ) => [ state.profileProgress ]
+);
+
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
+	getProfileProgress: () => ReturnType< typeof getProfileProgress >;
 	getPaymentGatewaySuggestions: () => ReturnType<
 		typeof getPaymentGatewaySuggestions
 	>;
@@ -118,5 +153,12 @@ export type OnboardingSelectors = {
 	) => ReturnType< typeof getTaskListsByIds >;
 	getTaskLists: () => ReturnType< typeof getTaskLists >;
 	getTaskList: ( id: string ) => ReturnType< typeof getTaskList >;
+	getTask: ( id: string ) => ReturnType< typeof getTask >;
 	getFreeExtensions: () => ReturnType< typeof getFreeExtensions >;
+	getCoreProfilerCompletedSteps: () => ReturnType<
+		typeof getCoreProfilerCompletedSteps
+	>;
+	getMostRecentCoreProfilerStep: () => ReturnType<
+		typeof getMostRecentCoreProfilerStep
+	>;
 } & WPDataSelectors;

@@ -12,6 +12,7 @@ import { ValidationContextProps } from './types';
 export const ValidationContext = createContext< ValidationContextProps< any > >(
 	{
 		errors: {},
+		getFieldByValidatorId: () => ( {} as Promise< HTMLInputElement > ),
 		registerValidator: () => () => {},
 		unRegisterValidator: () => () => {},
 		validateField: () => Promise.resolve( undefined ),

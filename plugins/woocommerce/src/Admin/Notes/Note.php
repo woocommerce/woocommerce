@@ -118,6 +118,17 @@ class Note extends \WC_Data {
 	*/
 
 	/**
+	 * Get deprecated types.
+	 *
+	 * @return array
+	 */
+	public static function get_deprecated_types() {
+		return array(
+			self::E_WC_ADMIN_NOTE_EMAIL,
+		);
+	}
+
+	/**
 	 * Get allowed types.
 	 *
 	 * @return array
@@ -130,7 +141,6 @@ class Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
 			self::E_WC_ADMIN_NOTE_MARKETING,
 			self::E_WC_ADMIN_NOTE_SURVEY,
-			self::E_WC_ADMIN_NOTE_EMAIL,
 		);
 
 		return apply_filters( 'woocommerce_note_types', $allowed_types );
@@ -390,6 +400,13 @@ class Note extends \WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'woocommerce' ) );
 		}
 
+		if ( in_array( $type, self::get_deprecated_types(), true ) ) {
+			$this->error(
+				'admin_note_invalid_data',
+				__( 'The admin note type prop is deprecated.', 'woocommerce' )
+			);
+		}
+
 		if ( ! in_array( $type, self::get_allowed_types(), true ) ) {
 			$this->error(
 				'admin_note_invalid_data',
@@ -534,7 +551,7 @@ class Note extends \WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note date prop cannot be empty.', 'woocommerce' ) );
 		}
 
-		if ( is_string( $date ) ) {
+		if ( is_string( $date ) && ! is_numeric( $date ) ) {
 			$date = wc_string_to_timestamp( $date );
 		}
 		$this->set_date_prop( 'date_created', $date );
@@ -546,7 +563,7 @@ class Note extends \WC_Data {
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 */
 	public function set_date_reminder( $date ) {
-		if ( is_string( $date ) ) {
+		if ( is_string( $date ) && ! is_numeric( $date ) ) {
 			$date = wc_string_to_timestamp( $date );
 		}
 		$this->set_date_prop( 'date_reminder', $date );
@@ -578,7 +595,8 @@ class Note extends \WC_Data {
 		if ( empty( $layout ) ) {
 			$layout = 'plain';
 		}
-		$valid_layouts = array( 'banner', 'plain', 'thumbnail' );
+		$valid_layouts = array( 'plain', 'thumbnail' );
+
 		if ( in_array( $layout, $valid_layouts, true ) ) {
 			$this->set_prop( 'layout', $layout );
 		} else {
@@ -676,7 +694,7 @@ class Note extends \WC_Data {
 	 *
 	 * @param string $note_action_name Name of action to add a nonce to.
 	 * @param string $nonce_action The nonce action.
-	 * @param string $nonce_name The nonce Name. This is used as the paramater name in the resulting URL for the action.
+	 * @param string $nonce_name The nonce Name. This is used as the parameter name in the resulting URL for the action.
 	 * @return void
 	 * @throws \Exception If note name cannot be found.
 	 */

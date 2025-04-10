@@ -2,18 +2,19 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect, useDispatch, select as WPSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { createElement, useEffect } from '@wordpress/element';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
 import { Options } from './types';
 
 export const useOptionsHydration = ( data: Options ) => {
-	const shouldHydrate = useSelect( ( select: typeof WPSelect ) => {
-		const { isResolving, hasFinishedResolution } = select( STORE_NAME );
+	const shouldHydrate = useSelect( ( select ) => {
+		const { isResolving, hasFinishedResolution } = select( store );
 
 		if ( ! data ) {
 			return {};
@@ -30,7 +31,7 @@ export const useOptionsHydration = ( data: Options ) => {
 	}, [] );
 
 	const { startResolution, finishResolution, receiveOptions } =
-		useDispatch( STORE_NAME );
+		useDispatch( store );
 
 	useEffect( () => {
 		Object.entries( shouldHydrate ).forEach( ( [ name, hydrate ] ) => {
@@ -44,7 +45,10 @@ export const useOptionsHydration = ( data: Options ) => {
 };
 
 export const withOptionsHydration = ( data: Options ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent<
+		ComponentType< Record< string, unknown > >,
+		ComponentType< Record< string, unknown > >
+	>(
 		( OriginalComponent ) => ( props ) => {
 			useOptionsHydration( data );
 

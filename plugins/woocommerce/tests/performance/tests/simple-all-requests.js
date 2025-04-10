@@ -25,6 +25,7 @@ import { wpLogin } from '../requests/merchant/wp-login.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
 import { ordersAPI } from '../requests/api/orders.js';
 import { admin_acc_login } from '../config.js';
+import { addCustomerOrder } from '../setup/add-customer-order.js';
 
 const shopper_request_threshold = 'p(95)<10000';
 const merchant_request_threshold = 'p(95)<10000';
@@ -250,6 +251,10 @@ export const options = {
 		],
 	},
 };
+
+export function setup() {
+	addCustomerOrder();
+}
 
 export function shopperBrowseFlow() {
 	homePage();

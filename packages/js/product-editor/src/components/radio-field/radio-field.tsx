@@ -11,12 +11,12 @@ import classNames from 'classnames';
 import { sanitizeHTML } from '../../utils/sanitize-html';
 import { RadioFieldProps } from './types';
 
-export function RadioField< T = string >( {
+export function RadioField( {
 	title,
 	description,
 	className,
 	...props
-}: RadioFieldProps< T > ) {
+}: RadioFieldProps ) {
 	return (
 		<RadioControl
 			{ ...props }

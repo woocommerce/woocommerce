@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Added pre-API call permission checks for some API calls that were being called on non-admin accessible screens

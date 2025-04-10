@@ -42,7 +42,7 @@ class OrderAdminServiceProvider extends AbstractServiceProvider {
 		$this->share( COTRedirectionController::class );
 		$this->share( PageController::class );
 		$this->share( Edit::class )->addArgument( PageController::class );
-		$this->share( ListTable::class )->addArgument( PageController::class );
+		$this->share( ListTable::class )->addArguments( array( PageController::class ) );
 		$this->share( EditLock::class );
 		$this->share( TaxonomiesMetaBox::class )->addArgument( OrdersTableDataStore::class );
 	}

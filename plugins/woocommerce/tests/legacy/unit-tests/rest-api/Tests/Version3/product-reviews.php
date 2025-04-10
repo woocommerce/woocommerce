@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * Tests for the product reviews REST API.
  *
@@ -50,40 +53,42 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 10, count( $product_reviews ) );
-		$this->assertContains(
-			array(
-				'id'                   => $review_id,
-				'date_created'         => $product_reviews[0]['date_created'],
-				'date_created_gmt'     => $product_reviews[0]['date_created_gmt'],
-				'product_id'           => $product->get_id(),
-				'product_name'         => $product->get_name(),
-				'product_permalink'    => $product->get_permalink(),
-				'status'               => 'approved',
-				'reviewer'             => 'admin',
-				'reviewer_email'       => 'woo@woo.local',
-				'review'               => "<p>Review content here</p>\n",
-				'rating'               => 0,
-				'verified'             => false,
-				'reviewer_avatar_urls' => $product_reviews[0]['reviewer_avatar_urls'],
-				'_links'               => array(
-					'self'       => array(
-						array(
-							'href' => rest_url( '/wc/v3/products/reviews/' . $review_id ),
+		$this->assertEmpty(
+			ArrayUtil::deep_assoc_array_diff(
+				array(
+					'id'                   => $review_id,
+					'date_created'         => $product_reviews[0]['date_created'],
+					'date_created_gmt'     => $product_reviews[0]['date_created_gmt'],
+					'product_id'           => $product->get_id(),
+					'product_name'         => $product->get_name(),
+					'product_permalink'    => $product->get_permalink(),
+					'status'               => 'approved',
+					'reviewer'             => 'admin',
+					'reviewer_email'       => 'woo@woo.local',
+					'review'               => "<p>Review content here</p>\n",
+					'rating'               => 0,
+					'verified'             => false,
+					'reviewer_avatar_urls' => $product_reviews[0]['reviewer_avatar_urls'],
+					'_links'               => array(
+						'self'       => array(
+							array(
+								'href' => rest_url( '/wc/v3/products/reviews/' . $review_id ),
+							),
 						),
-					),
-					'collection' => array(
-						array(
-							'href' => rest_url( '/wc/v3/products/reviews' ),
+						'collection' => array(
+							array(
+								'href' => rest_url( '/wc/v3/products/reviews' ),
+							),
 						),
-					),
-					'up'         => array(
-						array(
-							'href' => rest_url( '/wc/v3/products/' . $product->get_id() ),
+						'up'         => array(
+							array(
+								'href' => rest_url( '/wc/v3/products/' . $product->get_id() ),
+							),
 						),
 					),
 				),
-			),
-			$product_reviews
+				$product_reviews[0]
+			)
 		);
 	}
 

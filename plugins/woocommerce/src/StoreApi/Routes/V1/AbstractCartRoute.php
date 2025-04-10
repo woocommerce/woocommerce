@@ -1,5 +1,5 @@
 <?php
-
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
@@ -71,6 +71,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected $additional_fields_controller;
 
 	/**
+	 * True when this route has been requested with a valid cart token.
+	 *
+	 * @var bool|null
+	 */
+	protected $has_cart_token = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param SchemaController $schema_controller Schema Controller instance.
@@ -104,9 +111,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
-		$this->cart_controller->calculate_totals();
-
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
@@ -151,32 +155,9 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'Nonce-Timestamp', time() );
 		$response->header( 'User-ID', get_current_user_id() );
 		$response->header( 'Cart-Token', $this->get_cart_token() );
-
-		// The following headers are deprecated and should be removed in a future version.
-		$response->header( 'X-WC-Store-API-Nonce', $nonce );
+		$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
 
 		return $response;
-	}
-
-	/**
-	 * Load the cart session before handling responses.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	protected function load_cart_session( \WP_REST_Request $request ) {
-		$cart_token = $request->get_header( 'Cart-Token' );
-
-		if ( $cart_token && JsonWebToken::validate( $cart_token, $this->get_cart_token_secret() ) ) {
-			// Overrides the core session class.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
-		}
-
-		$this->cart_controller->load_cart();
 	}
 
 	/**
@@ -188,6 +169,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return string
 	 */
 	protected function get_cart_token() {
+		// Ensure cart is loaded.
+		$this->cart_controller->load_cart();
+
+		if ( ! wc()->session ) {
+			return null;
+		}
+
 		return JsonWebToken::create(
 			[
 				'user_id' => wc()->session->get_customer_id(),
@@ -224,6 +212,19 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Checks if the request has a valid cart token.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool
+	 */
+	protected function has_cart_token( \WP_REST_Request $request ) {
+		if ( is_null( $this->has_cart_token ) ) {
+			$this->has_cart_token = JsonWebToken::validate( $request->get_header( 'Cart-Token' ) ?? '', $this->get_cart_token_secret() );
+		}
+		return $this->has_cart_token;
+	}
+
+	/**
 	 * Checks if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -231,7 +232,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return $this->is_update_request( $request );
+		return $this->is_update_request( $request ) && ! $this->has_cart_token( $request );
 	}
 
 	/**
@@ -287,12 +288,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
-		} elseif ( $request->get_header( 'X-WC-Store-API-Nonce' ) ) {
-			$nonce = $request->get_header( 'X-WC-Store-API-Nonce' );
-
-			// @todo Remove handling and sending of deprecated X-WC-Store-API-Nonce Header (Blocks 7.5.0)
-			wc_deprecated_argument( 'X-WC-Store-API-Nonce', '7.2.0', 'Use the "Nonce" Header instead. This header will be removed after Blocks release 7.5' );
-			rest_handle_deprecated_argument( 'X-WC-Store-API-Nonce', 'Use the "Nonce" Header instead. This header will be removed after Blocks release 7.5', '7.2.0' );
 		}
 
 		/**
@@ -332,13 +327,11 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_Error WP Error object.
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
-
 		$additional_data['status'] = $http_status_code;
 
 		// If there was a conflict, return the cart so the client can resolve it.
 		if ( 409 === $http_status_code ) {
-			$cart                    = $this->cart_controller->get_cart_instance();
-			$additional_data['cart'] = $this->cart_schema->get_item_response( $cart );
+			$additional_data['cart'] = $this->cart_schema->get_item_response( $this->cart_controller->get_cart_for_response() );
 		}
 
 		return new \WP_Error( $error_code, $error_message, $additional_data );

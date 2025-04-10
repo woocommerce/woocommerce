@@ -20,7 +20,7 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 */
 	public function init() {
 		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_edit_page_link' ) );
-
+		add_filter( 'pre_get_document_title', array( $this, 'page_template_title' ) );
 		parent::init();
 	}
 

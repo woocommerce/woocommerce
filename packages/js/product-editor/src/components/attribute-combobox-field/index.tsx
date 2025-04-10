@@ -30,12 +30,15 @@ import type {
  * the `__experimentalRenderItem` property.
  */
 interface ComboboxControlProps
-	extends Omit< CoreComboboxControl.Props, 'label' | 'help' > {
+	extends Omit<
+		React.ComponentProps< typeof CoreComboboxControl >,
+		'label' | 'help'
+	> {
 	__experimentalRenderItem?: ( args: {
 		item: ComboboxControlOption;
 	} ) => string | JSX.Element;
+	className?: string;
 }
-
 /*
  * Create an alias for the ComboboxControl core component,
  * but with the custom ComboboxControlProps interface.
@@ -86,9 +89,7 @@ function ComboboxControlOption(
 	return <div className="item-wrapper">{ item.label }</div>;
 }
 
-const AttributesComboboxControl: React.FC<
-	AttributesComboboxControlComponent
-> = ( {
+const AttributesComboboxControl = ( {
 	label,
 	help,
 	current = null,
@@ -97,7 +98,7 @@ const AttributesComboboxControl: React.FC<
 	isLoading = false,
 	onAddNew,
 	onChange,
-} ) => {
+}: AttributesComboboxControlComponent ) => {
 	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
 		useState< ComboboxControlOption >( createNewAttributeOptionDefault );
 

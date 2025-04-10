@@ -29,7 +29,7 @@
 			<div class="wp-block-column is-vertically-aligned-center">
 				<!-- wp:group {"style":{"spacing":{"blockGap":"0px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 				<div class="wp-block-group">
-					<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconClass":"wc-block-customer-account__account-icon"} /-->
+					<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconStyle":"line","iconClass":"wc-block-customer-account__account-icon"} /-->
 
 					<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true} /-->
 				</div>

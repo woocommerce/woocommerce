@@ -83,8 +83,8 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_returns_all_settings() {
 		$sut = new WC_Settings_Products();
 
-		$settings               = $sut->get_settings_for_section( '' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'catalog_options'                              => array( 'title', 'sectionend' ),
@@ -103,7 +103,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_review_rating_required'           => 'checkbox',
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**
@@ -112,8 +112,8 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_inventory_settings_returns_all_settings() {
 		$sut = new WC_Settings_Products();
 
-		$settings               = $sut->get_settings_for_section( 'inventory' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( 'inventory' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'product_inventory_options'           => array( 'title', 'sectionend' ),
@@ -128,7 +128,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_stock_format'            => 'select',
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**
@@ -137,8 +137,8 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_downloadable_settings_returns_all_settings() {
 		$sut = new WC_Settings_Products();
 
-		$settings               = $sut->get_settings_for_section( 'downloadable' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( 'downloadable' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'digital_download_options'                         => array( 'title', 'sectionend' ),
@@ -148,9 +148,10 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_downloads_grant_access_after_payment' => 'checkbox',
 			'woocommerce_downloads_add_hash_to_filename'       => 'checkbox',
 			'woocommerce_downloads_deliver_inline'             => 'checkbox',
+			'woocommerce_downloads_count_partial'        => 'checkbox',
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**

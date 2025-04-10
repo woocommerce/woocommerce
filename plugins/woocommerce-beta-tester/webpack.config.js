@@ -1,12 +1,15 @@
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
+const path = require( 'path' );
 
 module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry,
 		// Separate entry point for the live-branches page.
+		app: './src/app/index.js',
 		'live-branches': './src/live-branches/index.tsx',
+		'product-editor-devtools': './src/product-editor-dev-tools/index.ts',
 	},
 	module: {
 		...defaultConfig.module,
@@ -15,7 +18,7 @@ module.exports = {
 			{
 				test: /\.tsx?$/,
 				use: 'ts-loader',
-				exclude: /node_modules/,
+				include: [ path.resolve( __dirname, './src/' ) ],
 			},
 		],
 	},

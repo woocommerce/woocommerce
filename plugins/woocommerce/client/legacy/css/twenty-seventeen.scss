@@ -10,6 +10,11 @@
 @import "fonts";
 
 /**
+ * Forms
+ */
+@import "forms";
+
+/**
  * Mixins
  */
 @mixin link() {
@@ -48,23 +53,6 @@
 		@include loader();
 	}
 
-	form .form-row {
-
-		.required {
-			color: firebrick;
-			text-decoration: none;
-			visibility: hidden; // Only show optional by default.
-
-			&[title] {
-				border: 0 !important;
-			}
-		}
-
-		.optional {
-			visibility: visible;
-		}
-	}
-
 	.woocommerce-form-login {
 
 		.woocommerce-form-login__submit {
@@ -77,6 +65,12 @@
 			line-height: 3em;
 		}
 	}
+
+	button.show-password-input:focus {
+		background-color: transparent !important;
+		outline: 1px solid #333;
+		outline-offset: 2px;
+	}	
 }
 
 .woocommerce-breadcrumb {
@@ -161,6 +155,11 @@
 	padding: 0.75em 0;
 }
 
+.woocommerce-ordering > label {
+	display: inline;
+	margin-right: 0.25rem;
+}
+
 /**
  * Products
  */
@@ -168,6 +167,10 @@ ul.products {
 
 	li.product {
 		list-style: none;
+
+		.woocommerce-loop-product__link {
+			display: block;
+		}
 
 		.price,
 		.star-rating {
@@ -373,6 +376,11 @@ table.variations {
 		display: inline-block;
 	}
 
+	.woocommerce-product-gallery__image a {
+		display: block;
+		outline-offset: -1px;
+	}
+
 	.flex-control-thumbs {
 
 		li {
@@ -431,10 +439,8 @@ table.variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	position: absolute;
-	top: 1em;
-	right: 1em;
-	z-index: 99;
+
+	@include woocommerce-product-gallery__trigger;
 }
 
 .woocommerce-tabs {
@@ -507,7 +513,7 @@ table.variations {
 					width: 1em;
 					height: 1em;
 					line-height: 1;
-					font-family: "WooCommerce";
+					font-family: WooCommerce;
 					content: "\e021";
 					text-indent: 0;
 				}
@@ -707,7 +713,7 @@ table.variations {
 		padding-right: 100px;
 	}
 
-	input[type=submit] {
+	input[type="submit"] {
 		position: absolute;
 		top: 0.5em;
 		right: 0.5em;
@@ -910,15 +916,15 @@ table.variations {
 			}
 		}
 
-		input[type=checkbox] {
+		input[type="checkbox"] {
 			display: none;
 		}
 
-		input[type=checkbox]:checked + span::after {
+		input[type="checkbox"]:checked + span::after {
 			right: 3px;
 		}
 
-		input[type=checkbox]:checked + span::before {
+		input[type="checkbox"]:checked + span::before {
 			border-color: #000;
 			background: #000;
 		}
@@ -1000,31 +1006,6 @@ table.variations {
 			}
 		}
 	}
-
-	.select2-choice,
-	.select2-choice:hover {
-		box-shadow: none !important;
-	}
-
-	.select2-choice {
-		padding: 0.7em 0 0.7em 0.7em;
-	}
-
-	.select2-container .select2-selection--single {
-		height: 48px;
-	}
-
-	.select2-container .select2-selection--single .select2-selection__rendered {
-		line-height: 48px;
-	}
-
-	.select2-container--default .select2-selection--single .select2-selection__arrow {
-		height: 46px;
-	}
-
-	.select2-container--focus .select2-selection {
-		border-color: black;
-	}
 }
 
 .woocommerce-checkout-review-order-table {
@@ -1088,7 +1069,7 @@ table.variations {
 		cursor: pointer;
 	}
 
-	input.input-radio[name=payment_method] {
+	input.input-radio[name="payment_method"] {
 		display: none;
 
 		& + label {
@@ -1141,33 +1122,6 @@ table.variations {
 		.payment_box {
 			background: #333;
 		}
-	}
-
-	.select2-container--default {
-
-		.select2-results {
-
-			.select2-results__options {
-				background: #333;
-			}
-
-			.select2-results__option[data-selected="true"] {
-				color: #333;
-			}
-		}
-
-		.select2-selection--single {
-			background-color: #333;
-			border: 1px solid #555;
-
-			.select2-selection__rendered {
-				color: #ccc;
-			}
-		}
-	}
-
-	.select2-container--focus .select2-selection {
-		border-color: white;
 	}
 }
 
@@ -1255,5 +1209,56 @@ table.variations {
 	&:hover {
 		text-decoration: underline;
 		color: #fff;
+	}
+}
+
+/**
+ * Coupon error notice
+ */
+.woocommerce-cart {
+
+	td.actions .coupon .coupon-error-notice {
+
+		@include coupon-error-notice-cart();
+	}
+}
+
+form.checkout_coupon {
+
+	.coupon-error-notice {
+
+		@include coupon-error-notice-checkout();
+	}
+
+	.input-text.has-error:focus {
+		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+.woocommerce-checkout {
+
+	form .form-row.woocommerce-invalid input.input-text {
+		border-color: var(--wc-red);
+	}
+
+	.checkout-inline-error-message {
+
+		@include checkout-inline-error-message();
+	}
+}
+
+/**
+ * Log in form
+ */
+.woocommerce-page {
+	form {
+		.password-input {
+			input[type="text"] {
+				padding-right: 2.5rem;
+			}
+		}
 	}
 }

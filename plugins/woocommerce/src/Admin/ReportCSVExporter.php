@@ -158,18 +158,29 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return bool|WC_REST_Reports_Controller Report controller instance or boolean false on error.
 	 */
 	protected function map_report_controller() {
-		// @todo - Add filter to this list.
-		$controller_map = array(
-			'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
-			'variations' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
-			'orders'     => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
-			'categories' => 'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
-			'taxes'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
-			'coupons'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
-			'stock'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
-			'downloads'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
-			'customers'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
-			'revenue'    => 'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
+		/**
+		 * Used to add custom report controllers.
+		 *
+		 * @since x.x.x
+		 *
+		 * @params array $controller_map A report type to report controller class map.
+		 *
+		 * @returns array Report type to report controller class map.
+		 */
+		$controller_map = apply_filters(
+			'woocommerce_export_report_controller_map',
+			array(
+				'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
+				'variations' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
+				'orders'     => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
+				'categories' => 'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
+				'taxes'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
+				'coupons'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
+				'stock'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
+				'downloads'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
+				'customers'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
+				'revenue'    => 'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
+			)
 		);
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
@@ -236,7 +247,23 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * Prepare data for export.
 	 */
 	public function prepare_data_to_export() {
-		$request  = new \WP_REST_Request( 'GET', "/wc-analytics/reports/{$this->report_type}" );
+		/**
+		 * Used to add/overwrite report data endpoint.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $endpoint The report's data endpoint.
+		 * @param string $type     The report's type.
+		 *
+		 * @returns string The report's endpoint.
+		 */
+		$report_endpoint = apply_filters(
+			'woocommerce_export_report_data_endpoint',
+			"/wc-analytics/reports/{$this->report_type}",
+			$this->report_type
+		);
+
+		$request  = new \WP_REST_Request( 'GET', $report_endpoint );
 		$params   = $this->controller->get_collection_params();
 		$defaults = array();
 

@@ -5,7 +5,7 @@ menu_title: Classic theme development
 
 ---
 
-**Note:** this document is geared toward the development of classic themes. Check this other document for [block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md).
+**Note:** this document is geared toward the development of classic themes. Check this other document for [block theme development](../block-theme-development/theming-woo-blocks.md).
 
 ---
 
@@ -73,11 +73,11 @@ add_action('woocommerce_before_main_content', 'my_theme_wrapper_start', 10);
 add_action('woocommerce_after_main_content', 'my_theme_wrapper_end', 10);
 
 function my_theme_wrapper_start() {
-    echo '<section id="main">';
+    echo '&lt;section id="main"&gt;';
 }
 
 function my_theme_wrapper_end() {
-    echo '</section>';
+    echo '&lt;/section&gt;';
 }
 ```
 

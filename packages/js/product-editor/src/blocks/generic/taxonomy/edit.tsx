@@ -26,9 +26,11 @@ import type {
 	TaxonomyMetadata,
 } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { Label } from '../../../components/label/label';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
+	help?: string;
 	slug: string;
 	property: string;
 	createTitle: string;
@@ -48,17 +50,18 @@ export function Edit( {
 			// @ts-ignore
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
-			}
+			},
+		[ attributes.slug ]
 	);
 	const {
 		label,
+		help,
 		slug,
 		property,
 		createTitle,
 		dialogNameHelpText,
 		parentTaxonomyText,
 		disabled,
-		placeholder,
 	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
@@ -103,6 +106,10 @@ export function Edit( {
 		value: String( taxonomy.id ),
 	} ) );
 
+	function handleClear() {
+		setSelectedEntries( [] );
+	}
+
 	return (
 		<div { ...blockProps }>
 			<>
@@ -113,13 +120,12 @@ export function Edit( {
 							'woocommerce-taxonomy-select'
 						) as string
 					}
-					label={ label }
+					label={ <Label label={ label } tooltip={ help } /> }
 					isLoading={ isResolving }
 					disabled={ disabled }
 					multiple
 					createValue={ searchValue }
 					onInputChange={ searchDelayed }
-					placeholder={ placeholder }
 					shouldNotRecursivelySelect
 					shouldShowCreateButton={ ( typedValue ) =>
 						! typedValue ||
@@ -175,6 +181,8 @@ export function Edit( {
 							);
 						}
 					} }
+					onClear={ handleClear }
+					isClearingAllowed={ ( selectedEntries || [] ).length > 0 }
 				></SelectTreeControl>
 				{ showCreateNewModal && (
 					<CreateTaxonomyModal

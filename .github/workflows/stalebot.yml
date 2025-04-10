@@ -1,19 +1,23 @@
-name: 'Process stale needs-feedback issues'
+name: 'Process stale issues and PRs'
 on:
     schedule:
         - cron: '21 0 * * *'
+    workflow_dispatch:
+    pull_request:
+        types: [converted_to_draft]
 
 permissions: {}
 
 jobs:
     stale:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
             issues: write
             pull-requests: write
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         steps:
-            - name: Scan issues
+            - name: Process stale issues
               uses: actions/stale@v9.0.0
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,16 +34,112 @@ jobs:
                   only-issue-labels: 'needs: author feedback'
                   close-issue-label: "status: can't reproduce"
                   ascending: true
-            - name: Close Stale Flaky Test Issues
+            - name: Process stale flaky tests issues
               uses: actions/stale@v9.0.0
               with:
-                  only-labels: 'metric: flaky e2e test, team: Vortex'
-                  days-before-stale: 5
-                  days-before-close: 2
-                  stale-issue-label: 'metric: stale flaky e2e test report'
-                  stale-issue-message: 'This test may have been a one-time failure. It will be auto-closed if no further activity occurs within the next 2 days.'
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  only-issue-labels: 'metric: flaky e2e test'
+                  exempt-issue-labels: 'type: skipped test'
+                  days-before-stale: -1
+                  days-before-close: -1
+                  days-before-issue-stale: 5
+                  days-before-issue-close: 2
+                  stale-issue-label: 'status: stale'
+                  stale-issue-message: 'This issue is being marked as stale due to inactivity. It will be auto-closed if no further activity occurs within the next 2 days.'
                   close-issue-message: 'Auto-closed due to inactivity. Please re-open if you believe this issue is still valid.'
                   close-issue-reason: 'not_planned'
                   remove-stale-when-updated: true
-                  exempt-all-assignees: true
+                  exempt-all-assignees: false
                   enable-statistics: true
+                  ascending: true
+                  operations-per-run: 120
+            - name: Remove stale PR approvals (over 30 days old)
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const thirtyDaysAgo = new Date();
+                      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                      console.log(`Checking for approvals before: ${thirtyDaysAgo.toISOString()}`);
+
+                      const prs = await github.paginate(github.rest.pulls.list, {
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        state: 'open',
+                        per_page: 100
+                      });
+
+                      for (const pr of prs) {
+                        const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          pull_number: pr.number
+                        });
+                        
+                        // Find the latest approval date for this PR
+                        let latestApproval = null;
+                        const approvalReviews = [];
+                        
+                        for (const review of reviews) {
+                          if (review.state === 'APPROVED') {
+                            const reviewDate = new Date(review.submitted_at);
+                            approvalReviews.push(review);
+                            if (!latestApproval || reviewDate > latestApproval) {
+                              latestApproval = reviewDate;
+                            }
+                          }
+                        }
+                        
+                        // Process only if we found any approvals
+                        if (latestApproval) {
+                          console.log(`PR #${pr.number} latest approval on ${latestApproval.toISOString()}`);
+                          
+                          if (latestApproval < thirtyDaysAgo) {
+                            console.log(`Found ${approvalReviews.length} approvals to dismiss on PR #${pr.number} (latest approval was on ${latestApproval.toISOString()})`);
+                            
+                            // Dismiss all approvals
+                            for (const review of approvalReviews) {
+                              console.log(`Dismissing approval from ${review.user.login}`);
+                              await github.rest.pulls.dismissReview({
+                                owner: context.repo.owner,
+                                repo: context.repo.repo,
+                                pull_number: pr.number,
+                                review_id: review.id,
+                                message: 'This approval has been dismissed due to being stale (latest PR approval was 30+ days old). Please request a new review.'
+                              });
+                            }
+                          } else {
+                            console.log(`Keeping approvals on PR #${pr.number} (latest approval on ${latestApproval.toISOString()})`);
+                          }
+                        }
+                      }
+
+    remove-draft-approvals:
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        if: github.event_name == 'pull_request' && github.event.action == 'converted_to_draft'
+        steps:
+            - name: Remove approvals from draft PR
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+
+                      const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: pr.number
+                      });
+
+                      for (const review of reviews) {
+                        if (review.state === 'APPROVED') {
+                          console.log(`Dismissing approval on draft PR #${pr.number} from ${review.user.login}`);
+                          await github.rest.pulls.dismissReview({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            pull_number: pr.number,
+                            review_id: review.id,
+                            message: 'This approval has been dismissed due to the PR being moved to draft status. Please request a new review when ready.'
+                          });
+                        }
+                      }

@@ -45,7 +45,8 @@ class Cart extends AbstractCartRoute {
 					'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 				],
 			],
-			'schema' => [ $this->schema, 'get_public_item_schema' ],
+			'schema'      => [ $this->schema, 'get_public_item_schema' ],
+			'allow_batch' => [ 'v1' => true ],
 		];
 	}
 
@@ -56,6 +57,6 @@ class Cart extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		return rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_instance() ) );
+		return rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 	}
 }

@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Variations
  */
@@ -65,11 +67,11 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$variation->save();
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
@@ -86,6 +88,35 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'extended_info', $variation_report );
 		$this->assertArrayHasKey( 'product', $variation_report['_links'] );
 		$this->assertArrayHasKey( 'variation', $variation_report['_links'] );
+	}
+
+	/**
+	 * Test to confirm that simple products are excluded from the variations reports by default
+	 */
+	public function test_simple_products_excluded_from_variations_reports_by_default() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = WC_Helper_Product::create_simple_product();
+
+		$order = WC_Helper_Order::create_order( 1, $simple_product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 15 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'product_includes' => $simple_product->get_id(),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, count( $reports ) );
 	}
 
 	/**
@@ -113,11 +144,11 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$variation_2->save();
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(

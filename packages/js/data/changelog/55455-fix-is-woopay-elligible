@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove wcSettings.admin.isWooPayEligible in favor of a REST endpoint check

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Use email templates registry when listing allowed templates for association with an email post

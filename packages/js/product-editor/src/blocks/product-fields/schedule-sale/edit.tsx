@@ -100,14 +100,21 @@ export function Edit( {
 		async function dateOnSaleFromValidator() {
 			if ( showScheduleSale && dateOnSaleFromGmt ) {
 				if ( ! _dateOnSaleFrom.isValid() ) {
-					return __( 'Please enter a valid date.', 'woocommerce' );
+					return {
+						message: __(
+							'Please enter a valid date.',
+							'woocommerce'
+						),
+					};
 				}
 
 				if ( _dateOnSaleFrom.isAfter( _dateOnSaleTo ) ) {
-					return __(
-						'The start date of the sale must be before the end date.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'The start date of the sale must be before the end date.',
+							'woocommerce'
+						),
+					};
 				}
 			}
 		},
@@ -123,14 +130,21 @@ export function Edit( {
 		async function dateOnSaleToValidator() {
 			if ( showScheduleSale && dateOnSaleToGmt ) {
 				if ( ! _dateOnSaleTo.isValid() ) {
-					return __( 'Please enter a valid date.', 'woocommerce' );
+					return {
+						message: __(
+							'Please enter a valid date.',
+							'woocommerce'
+						),
+					};
 				}
 
 				if ( _dateOnSaleTo.isBefore( _dateOnSaleFrom ) ) {
-					return __(
-						'The end date of the sale must be after the start date.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'The end date of the sale must be after the start date.',
+							'woocommerce'
+						),
+					};
 				}
 			}
 		},

@@ -138,7 +138,7 @@ export const createResolvers = ( {
 				totalsQuery
 			);
 			yield getItemsTotalCountSuccess( query, totalCount );
-			return totalCount;
+			return totalCount as number;
 		} catch ( error ) {
 			yield getItemsTotalCountError( query, error );
 			return error;

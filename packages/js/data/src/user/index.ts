@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+export { store } from '@wordpress/core-data'; // User store is the same as core data store
+
+/**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';

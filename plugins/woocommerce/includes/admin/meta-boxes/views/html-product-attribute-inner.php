@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<strong><?php echo esc_html( wc_attribute_label( $attribute->get_name() ) ); ?></strong>
 				<input type="hidden" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
 			<?php else : ?>
-				<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'f.e. size or color', 'woocommerce' ); ?>" />
+				<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'e.g. length or weight', 'woocommerce' ); ?>" />
 			<?php endif; ?>
 			<input type="hidden" name="attribute_position[<?php echo esc_attr( $i ); ?>]" class="attribute_position" value="<?php echo esc_attr( $attribute->get_position() ); ?>" />
 		</td>
@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				 *
 				 * @since 3.4.0
 				 * @param array|null $attribute_taxonomy Attribute taxonomy object.
-				 * @param number $i Attribute index.
+				 * @param int $i Attribute index.
 				 * @param WC_Product_Attribute $attribute Attribute object.
 				 */
 				do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 *
 	 * @since 3.4.0
 	 * @param WC_Product_Attribute $attribute Attribute object.
-	 * @param number $i Attribute index.
+	 * @param int $i Attribute index.
 	 */
 	do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i );
 	?>

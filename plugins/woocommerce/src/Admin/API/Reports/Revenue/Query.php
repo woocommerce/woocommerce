@@ -16,12 +16,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Revenue;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
-
 /**
  * API\Reports\Revenue\Query
+ *
+ * This query uses inconsistent names:
+ *  - `report-revenue-stats` data store
+ *  - `woocommerce_analytics_revenue_*` filters
+ * So, for backward compatibility, we cannot use GenericQuery.
  */
-class Query extends ReportsQuery {
+class Query extends \WC_Object_Query {
 
 	/**
 	 * Valid fields for Revenue report.

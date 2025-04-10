@@ -38,14 +38,19 @@ jQuery(function( $ ) {
 			}
         },
 
-        /**
-         * Insert generate coupon code buttom HTML.
-         */
-        insert_generate_coupon_code_button: function() {
-			$( '.post-type-shop_coupon' ).find( '#title' ).after(
-				'<a href="#" class="button generate-coupon-code">' + woocommerce_admin_meta_boxes_coupon.generate_button_text + '</a>'
-			);
-        },
+		/**
+		 * Insert generate coupon code button HTML.
+		 */
+		insert_generate_coupon_code_button: function () {
+			const $title = $('.post-type-shop_coupon').find('#title');
+			const button = document.createElement('a');
+			button.href = '#';
+			button.className = 'button generate-coupon-code';
+			button.textContent =
+				woocommerce_admin_meta_boxes_coupon.generate_button_text;
+
+			$title.after(button);
+		},
 
 		/**
 		 * Generate a random coupon code
@@ -66,5 +71,37 @@ jQuery(function( $ ) {
 		}
 	};
 
+	/**
+	 * Handles warning about coupons using password protection.
+	 */
+	const wc_coupon_password_warning = {
+		init: function() {
+			const $warning = $( '#wc-password-protected-coupon-warning' );
+			// Bail out early if necessary.
+			if ( 0 === $warning.length ) {
+				return;
+			}
+
+			const $visibility = $( 'input[name="visibility"]' ),
+				  $password_visibility = $( '#visibility-radio-password' ),
+				  $password_label = $( 'label[for="visibility-radio-password"]' );
+
+			// For coupons without password, prevent setting it.
+			if ( ! $password_visibility.is( ':checked' ) ) {
+				$password_visibility.prop( 'disabled', true );
+				$password_label.css( 'text-decoration', 'line-through' );
+				return;
+			}
+
+			$visibility.on(
+				'change',
+				function() {
+					$warning.toggleClass( 'hidden', ! $password_visibility.is( ':checked' ) );
+				}
+			);
+		}
+	};
+
 	wc_meta_boxes_coupon_actions.init();
+	wc_coupon_password_warning.init();
 });

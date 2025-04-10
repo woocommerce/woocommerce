@@ -22,7 +22,6 @@ export function DownloadsMenu( {
 }: DownloadsMenuProps ) {
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'bottom-end',
 			} }
@@ -33,7 +32,7 @@ export function DownloadsMenu( {
 					icon={ isOpen ? chevronUp : chevronDown }
 					variant="secondary"
 					onClick={ onToggle }
-					className="woocommerce-downloads-menu__toogle"
+					className="woocommerce-downloads-menu__toggle"
 				>
 					<span>{ __( 'Add new', 'woocommerce' ) }</span>
 				</Button>

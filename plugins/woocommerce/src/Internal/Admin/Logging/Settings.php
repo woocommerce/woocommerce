@@ -7,7 +7,6 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -19,8 +18,6 @@ use WP_Filesystem_Direct;
  * Settings class.
  */
 class Settings {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Default values for logging settings.
@@ -45,7 +42,7 @@ class Settings {
 	 * Class Settings.
 	 */
 	public function __construct() {
-		self::add_action( 'wc_logs_load_tab', array( $this, 'save_settings' ) );
+		add_action( 'wc_logs_load_tab', array( $this, 'save_settings' ) );
 	}
 
 	/**
@@ -54,13 +51,15 @@ class Settings {
 	 * The `wp_upload_dir` function takes into account the possibility of multisite, and handles changing
 	 * the directory if the context is switched to a different site in the network mid-request.
 	 *
+	 * @param bool $create_dir Optional. True to attempt to create the log directory if it doesn't exist. Default true.
+	 *
 	 * @return string The full directory path, with trailing slash.
 	 */
-	public static function get_log_directory(): string {
+	public static function get_log_directory( bool $create_dir = true ): string {
 		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
 			$dir = Constants::get_constant( 'WC_LOG_DIR' );
 		} else {
-			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir' );
+			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir', null, $create_dir );
 
 			/**
 			 * Filter to change the directory for storing WooCommerce's log files.
@@ -74,18 +73,20 @@ class Settings {
 
 		$dir = trailingslashit( $dir );
 
-		$realpath = realpath( $dir );
-		if ( false === $realpath ) {
-			$result = wp_mkdir_p( $dir );
+		if ( true === $create_dir ) {
+			$realpath = realpath( $dir );
+			if ( false === $realpath ) {
+				$result = wp_mkdir_p( $dir );
 
-			if ( true === $result ) {
-				// Create infrastructure to prevent listing contents of the logs directory.
-				try {
-					$filesystem = FilesystemUtil::get_wp_filesystem();
-					$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
-					$filesystem->put_contents( $dir . 'index.html', '' );
-				} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-					// Creation failed.
+				if ( true === $result ) {
+					// Create infrastructure to prevent listing contents of the logs directory.
+					try {
+						$filesystem = FilesystemUtil::get_wp_filesystem();
+						$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
+						$filesystem->put_contents( $dir . 'index.html', '' );
+					} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+						// Creation failed.
+					}
 				}
 			}
 		}
@@ -389,8 +390,10 @@ class Settings {
 	 * @param string $view The current view within the Logs tab.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function save_settings( string $view ): void {
+	public function save_settings( string $view ): void {
 		$is_saving = 'settings' === $view && isset( $_POST['save_settings'] );
 
 		if ( $is_saving ) {

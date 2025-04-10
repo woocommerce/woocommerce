@@ -1,5 +1,6 @@
 name: 🐞 Bug Report
 description: Report a bug if something isn't working as expected in WooCommerce Core.
+labels: ["type: bug"]
 body:
   - type: markdown
     attributes:

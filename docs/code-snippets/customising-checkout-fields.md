@@ -9,13 +9,13 @@ Custom code should be copied into your child theme's **functions.php** file.
 
 ## Note
 
-Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/checkout-block/additional-checkout-fields.md).
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](../cart-and-checkout-blocks/additional-checkout-fields.md).
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
 The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user's location.
 
-Before returning these fields, WooCommerce puts the fields through a *filter*. This allows them to be edited by third-party plugins, themes and your own custom code.
+Before returning these fields, WooCommerce puts the fields through a _filter_. This allows them to be edited by third-party plugins, themes and your own custom code.
 
 Billing:
 
@@ -74,7 +74,7 @@ That means you have **full control** over checkout fields - you only need to kno
 
 ## Overriding Core Fields
 
-Hooking into the  **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
+Hooking into the **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
 
 ```php
 _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' );
@@ -295,7 +295,7 @@ function custom_override_checkout_fields( $fields ) {
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta($order){
-    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '</p>';
+    echo '&lt;p&gt;&lt;strong&gt;'. esc_html__( 'Phone From Checkout Form' ) . ':&lt;/strong&gt; ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '&lt;/p&gt;';
 }
 ```
 
@@ -317,7 +317,7 @@ add_action( 'woocommerce_after_order_notes', 'my_custom_checkout_field' );
 
 function my_custom_checkout_field( $checkout ) {
 
-    echo '<div id="my_custom_checkout_field"><h2>' . esc_html__( 'My Field' ) . '</h2>';
+    echo '&lt;div id="my_custom_checkout_field"&gt;&lt;h2&gt;' . esc_html__( 'My Field' ) . '&lt;/h2&gt;';
 
     woocommerce_form_field(
         'my_field_name',
@@ -330,7 +330,7 @@ function my_custom_checkout_field( $checkout ) {
         $checkout->get_value( 'my_field_name' )
     );
 
-    echo '</div>';
+    echo '&lt;/div&gt;';
 
 }
 ```
@@ -339,7 +339,7 @@ This gives us:
 
 ![WooCommerce Codex - Checkout Field Hook](https://developer.woocommerce.com/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Hook.png)
 
-Next we need to validate the field when the checkout form is posted. For this example the field is required and not optional:
+Next we need to validate the field when the checkout form is posted. For this example let's check that the field contains only letters:
 
 ```php
 /**
@@ -348,10 +348,10 @@ Next we need to validate the field when the checkout form is posted. For this ex
 add_action( 'woocommerce_checkout_process', 'my_custom_checkout_field_process' );
 
 function my_custom_checkout_field_process() {
-    // Check if set, if its not set add an error.
-    if ( ! $_POST['my_field_name'] ) {
-        wc_add_notice( esc_html__( 'Please enter something into this new shiny field.' ), 'error' );
-    }
+    // Check if this field contains just letters.
+    if ( ! preg_match( '/^[a-zA-Z]+$/', $_POST['my_field_name'] ) ) {
+		wc_add_notice( esc_html__( 'Please enter only letters into this new shiny field.' ), 'error' );
+	}
 }
 ```
 
@@ -387,7 +387,7 @@ If you wish to display the custom field value on the admin order edition page, y
 add_action( 'woocommerce_admin_order_data_after_billing_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta( $order ){
-    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( $order->get_meta( 'My Field', true ) ) . '</p>';
+    echo '&lt;p&gt;&lt;strong&gt;' . esc_html__( 'My Field' ) . ':&lt;/strong&gt; ' . esc_html( $order->get_meta( 'My Field', true ) ) . '&lt;/p&gt;';
 }
 ```
 

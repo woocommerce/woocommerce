@@ -656,7 +656,7 @@ class FileController {
 	 */
 	public function get_log_directory_size(): int {
 		$bytes = 0;
-		$path  = realpath( Settings::get_log_directory() );
+		$path  = realpath( Settings::get_log_directory( false ) );
 
 		if ( wp_is_writable( $path ) ) {
 			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CATCH_GET_CHILD );

@@ -5,10 +5,31 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * PatternRegistry class.
+ *
+ * @internal
  */
 class PatternRegistry {
 	const SLUG_REGEX            = '/^[A-z0-9\/_-]+$/';
 	const COMMA_SEPARATED_REGEX = '/[\s,]+/';
+
+	/**
+	 * Returns pattern slugs with their localized labels for categorization.
+	 *
+	 * Each key represents a unique pattern slug, while the value is the localized label.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_category_labels() {
+		return [
+			'woo-commerce'     => __( 'WooCommerce', 'woocommerce' ),
+			'intro'            => __( 'Intro', 'woocommerce' ),
+			'featured-selling' => __( 'Featured Selling', 'woocommerce' ),
+			'about'            => __( 'About', 'woocommerce' ),
+			'social-media'     => __( 'Social Media', 'woocommerce' ),
+			'services'         => __( 'Services', 'woocommerce' ),
+			'reviews'          => __( 'Reviews', 'woocommerce' ),
+		];
+	}
 
 	/**
 	 * Register a block pattern.
@@ -122,10 +143,10 @@ class PatternRegistry {
 			}
 		}
 
-        // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
 		$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
 		if ( ! empty( $pattern_data['description'] ) ) {
-            // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
 			$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
 		}
 
@@ -160,16 +181,21 @@ class PatternRegistry {
 			}
 		}
 
+		$category_labels = $this->get_category_labels();
+
 		if ( ! empty( $pattern_data['categories'] ) ) {
 			foreach ( $pattern_data['categories'] as $key => $category ) {
 				$category_slug = _wp_to_kebab_case( $category );
 
 				$pattern_data['categories'][ $key ] = $category_slug;
 
+				$label = $category_labels[ $category_slug ] ?? self::kebab_to_capital_case( $category_slug );
+
 				register_block_pattern_category(
 					$category_slug,
-                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( $category, 'woocommerce' ) )
+					array(
+						'label' => $label,
+					),
 				);
 			}
 		}
@@ -193,5 +219,19 @@ class PatternRegistry {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Convert a kebab-case string to capital case.
+	 *
+	 * @param string $value The kebab-case string.
+	 *
+	 * @return string
+	 */
+	private static function kebab_to_capital_case( $value ) {
+		$string = str_replace( '-', ' ', $value );
+		$string = ucwords( $string );
+
+		return $string;
 	}
 }

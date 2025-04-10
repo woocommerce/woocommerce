@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Widgets
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Class for testing WC_Widget_Layered_Nav functionality.
  */
@@ -25,7 +27,7 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 			0          => array(
 				'taxonomy' => 'product_visibility',
 				'terms'    => array(
-					get_term_by( 'slug', 'outofstock', 'product_visibility' )->term_taxonomy_id,
+					get_term_by( 'slug', ProductStockStatus::OUT_OF_STOCK, 'product_visibility' )->term_taxonomy_id,
 					get_term_by( 'slug', 'exclude-from-catalog', 'product_visibility' )->term_taxonomy_id,
 				),
 				'field'    => 'term_taxonomy_id',
@@ -117,7 +119,7 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 				$variation_attributes
 			);
 			if ( ! in_array( $color, $colors_in_stock, true ) ) {
-				$variation_object->set_stock_status( 'outofstock' );
+				$variation_object->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 			}
 			$variation_object->save();
 
@@ -528,7 +530,7 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 				$variation_attributes
 			);
 			if ( 'all' === $set_as_out_of_stock || ( 'one' === $set_as_out_of_stock && $style === $existing_styles[0] ) ) {
-				$variation_object->set_stock_status( 'outofstock' );
+				$variation_object->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 			}
 
 			$variation_object->save();

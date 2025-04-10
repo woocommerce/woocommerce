@@ -1,6 +1,8 @@
-.woocommerce-product-custom-fields__create-modal {
+.components-modal__frame.woocommerce-product-custom-fields__create-modal {
 	min-width: 75%;
+}
 
+.woocommerce-product-custom-fields__create-modal {
 	[role="table"] {
 		width: 100%;
 
@@ -33,6 +35,10 @@
 
 				.components-input-base {
 					gap: 0;
+
+					.components-input-control__input {
+						height: 36px;
+					}
 				}
 			}
 

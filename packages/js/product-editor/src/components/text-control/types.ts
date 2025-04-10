@@ -2,12 +2,13 @@
  * This must inherit the InputControlProp from @wordpress/components
  * but it has not been exported yet
  */
+
 export type TextControlProps = Omit<
 	React.DetailedHTMLProps<
 		React.InputHTMLAttributes< HTMLInputElement >,
 		HTMLInputElement
 	>,
-	'onChange'
+	'onChange' | 'size' | 'value' | 'onDrag' | 'onDragEnd' | 'onDragStart'
 > & {
 	label: string;
 	help?: string;
@@ -15,5 +16,6 @@ export type TextControlProps = Omit<
 	tooltip?: string;
 	prefix?: React.ReactNode;
 	suffix?: React.ReactNode;
-	onChange?( value: string ): void;
+	value?: string;
+	onChange( value: string ): void;
 };

@@ -425,8 +425,8 @@
 		"key": "mailpoet"
 	  },
 	  {
-		"name": "Google Listings & Ads",
-		"description": "Drive sales with <a href=\"https://woocommerce.com/products/google-listings-and-ads\" target=\"_blank\">Google Listings and Ads</a>",
+		"name": "Google for WooCommerce",
+		"description": "Drive sales with <a href=\"https://woocommerce.com/products/google-listings-and-ads\" target=\"_blank\">Google for WooCommerce</a>",
 		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/google.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fgoogle%2Fstart",
 		"is_visible": [
@@ -501,7 +501,7 @@
 	"title": "Grow your store",
 	"plugins": [
 	  {
-		"name": "Google Listings & Ads",
+		"name": "Google for WooCommerce",
 		"description": "Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.",
 		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/google.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fgoogle%2Fstart",
@@ -1034,7 +1034,7 @@
 		"install_priority": 7
 	  },
 	  {
-		"name": "Google Listings & Ads",
+		"name": "Google for WooCommerce",
 		"description": "Reach millions of active shoppers across Google with free product listings and ads.",
 		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-google.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fgoogle%2Fstart",
@@ -1042,7 +1042,7 @@
 		"is_built_by_wc": true,
 		"min_php_version": "7.4",
 		"key": "google-listings-and-ads",
-		"label": "Drive sales with Google Listings & Ads",
+		"label": "Drive sales with Google for WooCommerce",
 		"learn_more_link": "https://woocommerce.com/products/google-listings-and-ads",
 		"install_priority": 6
 	  },

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Introduce `wpCoreVersion` worker fixture for handling backwards compatibilty in Blocks E2E tests.

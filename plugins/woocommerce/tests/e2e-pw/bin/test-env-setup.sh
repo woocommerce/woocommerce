@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+if [ ! -z ${CI+y} ]; then
+    # In CI we want to execute the setup behind single container call, while in dev-environments we use the script as it is.
+    # Inside the container the command executed from /var/www/html path as pwd
+    echo -e '--> Dispatching script execution into tests-cli\n'
+    wp-env run --debug tests-cli cp test-env-setup.sh test-env-setup-ci.sh
+    wp-env run --debug tests-cli sed -i -e 's/wp-env run tests-cli //' test-env-setup-ci.sh
+    wp-env run --debug tests-cli bash test-env-setup-ci.sh
+    exit $?
+fi
+
+echo -e 'Install twentytwenty, twentytwentytwo and storefront themes \n'
+wp-env run tests-cli wp theme install storefront twentytwenty twentytwentytwo &
+
 echo -e 'Activate default theme \n'
 wp-env run tests-cli wp theme activate twentytwentythree
 
@@ -16,6 +29,9 @@ wp-env run tests-cli wp plugin activate process-waiting-actions
 
 echo -e 'Activate Test Helper APIs utility plugin \n'
 wp-env run tests-cli wp plugin activate test-helper-apis
+
+echo -e 'Install Plugin-check utility plugin \n'
+wp-env run tests-cli wp plugin install plugin-check --activate
 
 echo -e 'Add Customer user \n'
 wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
@@ -37,9 +53,6 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	echo -e 'Enable tracking\n'
 	wp-env run tests-cli wp option update woocommerce_allow_tracking 'yes'
 fi
-
-echo -e 'Disabling coming soon option\n'
-wp-env run tests-cli wp option update woocommerce_coming_soon 'no'
 
 echo -e 'Upload test images \n'
 wp-env run tests-cli wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'

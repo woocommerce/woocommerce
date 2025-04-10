@@ -179,7 +179,10 @@
                           "$ref": "#/definitions/operations"
                         },
                         "value": {
-                          "type": "string"
+                          "type": [
+                            "string",
+                            "array"
+                          ]
                         }
                       }
                     },
@@ -201,7 +204,10 @@
                           "$ref": "#/definitions/operations"
                         },
                         "value": {
-                          "type": "string"
+                          "type": [
+                            "string",
+                            "array"
+                          ]
                         }
                       }
                     },
@@ -460,12 +466,65 @@
                           ]
                         },
                         "value": {
-                          "type": "integer"
+                          "oneOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 2,
+                              "maxItems": 2
+                            }
+                          ]
                         },
                         "operation": {
                           "$ref": "#/definitions/operations"
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "operation": {
+                                "const": "range"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "value": {
+                                "type": "array",
+                                "items": {
+                                  "type": "number"
+                                },
+                                "minItems": 2,
+                                "maxItems": 2
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "operation": {
+                                "not": {
+                                  "const": "range"
+                                }
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      ]
                     },
                     {
                       "type": "object",
@@ -864,7 +923,10 @@
               "$ref": "#/definitions/operations"
             },
             "value": {
-              "type": "string"
+              "type": [
+                "string",
+                "array"
+              ]
             }
           }
         },
@@ -886,7 +948,10 @@
               "$ref": "#/definitions/operations"
             },
             "value": {
-              "type": "string"
+              "type": [
+                "string",
+                "array"
+              ]
             }
           }
         },
@@ -1145,12 +1210,65 @@
               ]
             },
             "value": {
-              "type": "integer"
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              ]
             },
             "operation": {
               "$ref": "#/definitions/operations"
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "operation": {
+                    "const": "range"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "operation": {
+                    "not": {
+                      "const": "range"
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",

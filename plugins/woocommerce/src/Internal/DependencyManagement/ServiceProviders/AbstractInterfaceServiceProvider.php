@@ -28,17 +28,15 @@ abstract class AbstractInterfaceServiceProvider extends AbstractServiceProvider 
 			return true;
 		}
 
-		static $implements = array();
-		if ( empty( $implements ) ) {
-			foreach ( $this->provides as $class ) {
-				$implements_more = class_implements( $class );
-				if ( $implements_more ) {
-					$implements = array_merge( $implements, $implements_more );
-				}
+		$implements = array();
+		foreach ( $this->provides as $class ) {
+			$implements_more = class_implements( $class );
+			if ( $implements_more ) {
+				$implements = array_merge( $implements, $implements_more );
 			}
-
-			$implements = array_unique( $implements );
 		}
+
+		$implements = array_unique( $implements );
 
 		return array_key_exists( $alias, $implements );
 	}
@@ -56,7 +54,7 @@ abstract class AbstractInterfaceServiceProvider extends AbstractServiceProvider 
 	 *
 	 * @return DefinitionInterface
 	 */
-	protected function add_with_implements_tags( string $id, $concrete = null, bool $shared = null ): DefinitionInterface {
+	protected function add_with_implements_tags( string $id, $concrete = null, ?bool $shared = null ): DefinitionInterface {
 		$definition = $this->add( $id, $concrete, $shared );
 		foreach ( class_implements( $id ) as $interface ) {
 			$definition->addTag( $interface );

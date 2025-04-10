@@ -16,34 +16,9 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Pancake',
-				'sku'  => 'pancake-1',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Waffle 1',
-				'sku'  => 'pancake-2',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'French Toast',
-				'sku'  => 'waffle-2',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Waffle 3',
-				'sku'  => 'waffle-3',
-			)
-		);
+		for ( $i = 1; $i <= 4; $i ++ ) {
+			self::$products[] = WC_Helper_Product::create_simple_product();
+		}
 
 		foreach ( self::$products as $product ) {
 			for ( $i = 0; $i < 20; $i++ ) {

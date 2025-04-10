@@ -130,7 +130,7 @@ class Synchronize {
 	}
 
 	/**
-	 * Runs the syncronization task.
+	 * Runs the synchronization task.
 	 */
 	public function run() {
 		$products = $this->get_next_set_of_downloadable_products();

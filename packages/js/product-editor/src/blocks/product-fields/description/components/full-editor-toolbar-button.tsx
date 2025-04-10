@@ -12,7 +12,7 @@ import { parse, rawHandler } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { store } from '../../../../store/product-editor-ui';
+import { wooProductEditorUiStore } from '../../../../store/product-editor-ui';
 import { getContentFromFreeform } from '../edit';
 import { getGutenbergVersion } from '../../../../utils/get-gutenberg-version';
 
@@ -39,7 +39,9 @@ export default function FullEditorToolbarButton( {
 	label = __( 'Edit Product description', 'woocommerce' ),
 	text = __( 'Full editor', 'woocommerce' ),
 } ) {
-	const { openModalEditor, setModalEditorBlocks } = dispatch( store );
+	const { openModalEditor, setModalEditorBlocks } = dispatch(
+		wooProductEditorUiStore
+	);
 	const [ description ] = useEntityProp< string >(
 		'postType',
 		'product',

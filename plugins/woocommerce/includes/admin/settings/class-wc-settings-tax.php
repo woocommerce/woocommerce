@@ -36,6 +36,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'percent';
+
+	/**
 	 * Creates the React mount point for the embedded banner.
 	 */
 	public function conflict_error() {

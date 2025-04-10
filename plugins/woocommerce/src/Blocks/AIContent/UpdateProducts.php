@@ -4,8 +4,11 @@ namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
+
 /**
  * Pattern Images class.
+ *
+ * @internal
  */
 class UpdateProducts {
 
@@ -26,7 +29,7 @@ class UpdateProducts {
 			'price'       => 249,
 		],
 		[
-			'title'       => 'Black and White Summer Portrait',
+			'title'       => 'Black and White',
 			'image'       => 'assets/images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg',
 			'description' => 'This 24" x 30" high-quality print just exudes summer. Hang it on the wall and forget about the world outside.',
 			'price'       => 115,
@@ -113,7 +116,7 @@ class UpdateProducts {
 		$products_to_create   = max( 0, 6 - $real_products_count - $dummy_products_count );
 		while ( $products_to_create > 0 ) {
 			$this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
-			$products_to_create--;
+			--$products_to_create;
 		}
 
 		// Identify dummy products that need to have their content updated.
@@ -327,7 +330,7 @@ class UpdateProducts {
 	public function assign_ai_selected_images_to_dummy_products( $dummy_products_to_update, $ai_selected_images ) {
 		$products_information_list = [];
 		$dummy_products_count      = count( $dummy_products_to_update );
-		for ( $i = 0; $i < $dummy_products_count; $i ++ ) {
+		for ( $i = 0; $i < $dummy_products_count; $i++ ) {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 
 			if ( wc_is_valid_url( $image_src ) ) {
@@ -396,7 +399,7 @@ class UpdateProducts {
 		$ai_request_retries = 0;
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
-			$ai_request_retries ++;
+			++$ai_request_retries;
 			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30 );
 			if ( is_wp_error( $ai_response ) ) {
 				continue;
@@ -464,18 +467,18 @@ class UpdateProducts {
 
 			$this->product_update( $product, $product_image_id, self::DUMMY_PRODUCTS[ $i ]['title'], self::DUMMY_PRODUCTS[ $i ]['description'], self::DUMMY_PRODUCTS[ $i ]['price'] );
 
-			$i++;
+			++$i;
 		}
 	}
 
 	/**
 	 * Update the product with the new content.
 	 *
-	 * @param \WC_Product $product The product.
-	 * @param int         $product_image_id The product image ID.
-	 * @param string      $product_title The product title.
-	 * @param string      $product_description The product description.
-	 * @param int         $product_price The product price.
+	 * @param \WC_Product         $product The product.
+	 * @param int|string|WP_Error $product_image_id The product image ID.
+	 * @param string              $product_title The product title.
+	 * @param string              $product_description The product description.
+	 * @param int                 $product_price The product price.
 	 *
 	 * @return int|\WP_Error
 	 */

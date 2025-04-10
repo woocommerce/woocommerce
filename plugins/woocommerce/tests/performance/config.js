@@ -2,14 +2,20 @@
 export const base_url = __ENV.URL || 'http://localhost:8086';
 export const base_host = __ENV.HOST || 'localhost:8086';
 
+export const STORE_NAME = __ENV.STORE_NAME || 'WooCommerce Core E2E Test Suite';
+export const FOOTER_TEXT = 'Built with WooCommerce';
+
 export const admin_username = __ENV.A_USER || 'admin';
 export const admin_password = __ENV.A_PW || 'password';
 export const admin_acc_login = __ENV.A_ACC_LOGIN || false;
 
-export const customer_username =
-	__ENV.C_USER || 'customer@woocommercecoree2etestsuite.com';
+export const customer_username = __ENV.C_USER || 'customer';
+export const customer_email =
+	__ENV.C_EMAIL || 'customer@woocommercecoree2etestsuite.com';
 export const customer_password = __ENV.C_PW || 'password';
 export const customer_user_id = __ENV.C_UID || '2';
+export const customer_first_name = 'Jane';
+export const customer_last_name = 'Smith';
 
 export const hpos_status = __ENV.HPOS || false;
 
@@ -44,7 +50,6 @@ export const payment_method = 'cod';
 
 export const product_sku = __ENV.P_SKU || 'woo-beanie';
 export const product_url = __ENV.P_URL || 'beanie';
-export const product_id = __ENV.P_ID || '13';
 export const product_search_term = __ENV.P_TERM || 'beanie';
 export const product_category = __ENV.P_CAT || 'Accessories';
 

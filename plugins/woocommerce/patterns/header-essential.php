@@ -17,14 +17,14 @@
 
 	<!-- wp:group {"style":{"spacing":{"blockGap":"10px"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 	<div class="wp-block-group">
+		<!-- wp:navigation {"style":{"spacing":{"blockGap":"24px"}}} /-->
+
 		<!-- wp:group {"style":{"spacing":{"blockGap":"0px"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 		<div class="wp-block-group">
 			<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true} /-->
-			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconClass":"wc-block-customer-account__account-icon"} /-->
+			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconStyle":"line","iconClass":"wc-block-customer-account__account-icon"} /-->
 		</div>
 		<!-- /wp:group -->
-
-		<!-- wp:navigation {"style":{"spacing":{"blockGap":"24px"}}} /-->
 	</div>
 	<!-- /wp:group -->
 </div>

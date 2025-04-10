@@ -1,7 +1,7 @@
 <?php
-/**
- * Tests for the DatabaseUtil utility.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 /**
  * Tests relating to DatabaseUtil.
  */
-class DatabaseUtilTest extends WC_Unit_Test_Case {
+class DatabaseUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var DatabaseUtil
@@ -130,5 +130,29 @@ class DatabaseUtilTest extends WC_Unit_Test_Case {
 		$this->assertTrue( false !== $result ); // Ensure boolean false.
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
 		$this->assertEquals( 'Updated Content', $wpdb->get_var( $content_query ) );
+	}
+
+	/**
+	 * @testDox Test that sanitise_boolean_fts_search_term() works as expected.
+	 */
+	public function test_sanitise_boolean_fts_search_term(): void {
+		$terms_sanitized_mapping = array(
+			// Normal terms are suffixed with wildcard.
+			'abc'             => 'abc*',
+			'abc def'         => 'abc* def*',
+			// Terms containing operators are quoted.
+			'+abc -def'       => '"+abc -def"',
+			'++abc-def'       => '"++abc-def"',
+			'abc (>def <fgh)' => '"abc (>def <fgh)"',
+			'"abc" def'       => '"abc def"',
+			'abc*'            => '"abc*"',
+			// Some edge cases.
+			''                => '*',
+			'"'               => '""',
+		);
+
+		foreach ( $terms_sanitized_mapping as $term => $expected ) {
+			$this->assertEquals( $expected, $this->sut->sanitise_boolean_fts_search_term( $term ) );
+		}
 	}
 }

@@ -56,7 +56,7 @@ class DefaultMarketingRecommendations {
 
 		return array(
 			array(
-				'title'          => 'Google Listings and Ads',
+				'title'          => 'Google for WooCommerce',
 				'description'    => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/google-listings-and-ads/{$utm_string}",
 				'direct_install' => true,
@@ -99,6 +99,22 @@ class DefaultMarketingRecommendations {
 				'icon'           => "{$icon_dir_url}/tiktok.jpg",
 				'product'        => 'tiktok-for-business',
 				'plugin'         => 'tiktok-for-business/tiktok-for-woocommerce.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(),
+			),
+			array(
+				'title'          => 'Facebook for WooCommerce',
+				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/facebook/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/facebook.svg",
+				'product'        => 'facebook-for-woocommerce',
+				'plugin'         => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
 				'categories'     => array(
 					$marketing,
 				),

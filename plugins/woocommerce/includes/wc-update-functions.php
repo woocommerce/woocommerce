@@ -21,16 +21,22 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Blocks\Options as BlockOptions;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Update file paths for 2.0
@@ -416,7 +422,7 @@ function wc_update_209_brazillian_state() {
 
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
-	// Update brazillian state codes.
+	// Update Brazilian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
@@ -555,6 +561,8 @@ function wc_update_220_shipping() {
 
 /**
  * Update order statuses for 2.2
+ *
+ * Keeping the internal statuses names as strings to avoid regression issues (not referencing Automattic\WooCommerce\Enums\OrderInternalStatus class).
  *
  * @return void
  */
@@ -991,7 +999,7 @@ function wc_update_241_variations() {
 		$parent_stock_status = get_post_meta( $variation->variation_parent, '_stock_status', true );
 
 		// Set the _stock_status.
-		add_post_meta( $variation->variation_id, '_stock_status', $parent_stock_status ? $parent_stock_status : 'instock', true );
+		add_post_meta( $variation->variation_id, '_stock_status', $parent_stock_status ? $parent_stock_status : ProductStockStatus::IN_STOCK, true );
 
 		// Delete old product children array.
 		delete_transient( 'wc_product_children_' . $variation->variation_parent );
@@ -1266,7 +1274,7 @@ function wc_update_300_grouped_products() {
 	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
 	foreach ( $parents as $parent_id ) {
 		$parent = wc_get_product( $parent_id );
-		if ( $parent && $parent->is_type( 'grouped' ) ) {
+		if ( $parent && $parent->is_type( ProductType::GROUPED ) ) {
 			$children_ids = get_posts(
 				array(
 					'post_parent'    => $parent_id,
@@ -1331,7 +1339,7 @@ function wc_update_300_product_visibility() {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_taxonomy_id ) );
 	}
 
-	$outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' );
+	$outofstock_term = get_term_by( 'name', ProductStockStatus::OUT_OF_STOCK, 'product_visibility' );
 
 	if ( $outofstock_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_taxonomy_id ) );
@@ -2596,9 +2604,16 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 }
 
 /**
+ * Set a flag to indicate whether the blockified Product Grid Block should be used as a template.
+ */
+function wc_update_790_blockified_product_grid_block() {
+	update_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+}
+
+/**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
- * @return bool Whether there are pending migration recrods.
+ * @return bool Whether there are pending migration records.
  */
 function wc_update_810_migrate_transactional_metadata_for_hpos() {
 	global $wpdb;
@@ -2643,6 +2658,44 @@ LIMIT 250
 }
 
 /**
+ * Rename the checkout template to page-checkout.
+ */
+function wc_update_830_rename_checkout_template() {
+	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
+
+	if ( $template && ! empty( $template->wp_id ) ) {
+		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
+			define( 'WP_POST_REVISIONS', false );
+		}
+		wp_update_post(
+			array(
+				'ID'        => $template->wp_id,
+				'post_name' => 'page-checkout',
+			)
+		);
+	}
+}
+
+/**
+ * Rename the cart template to page-cart.
+ */
+function wc_update_830_rename_cart_template() {
+	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
+
+	if ( $template && ! empty( $template->wp_id ) ) {
+		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
+			define( 'WP_POST_REVISIONS', false );
+		}
+		wp_update_post(
+			array(
+				'ID'        => $template->wp_id,
+				'post_name' => 'page-cart',
+			)
+		);
+	}
+}
+
+/**
  * Remove the transient data for recommended marketing extensions.
  *
  * This is removed because it is not used anymore.
@@ -2671,7 +2724,7 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
 	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
@@ -2685,15 +2738,13 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 		return;
 	}
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
-	$new_note = WooSubscriptionsNotes::get_note();
-	$new_note->save();
 }
 
 /**
  * Disables the PayPal Standard gateway for stores that aren't using it.
  *
  * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
- * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * list of available Payment methods even if it's not setup. In WooCommerce 8.9 we will disable PayPal Standard for those stores
  * to reduce the amount of new connections to the legacy gateway.
  *
  * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
@@ -2730,4 +2781,296 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
  */
 function wc_update_910_add_launch_your_store_tour_option() {
 	add_option( 'woocommerce_show_lys_tour', 'yes' );
+}
+
+/**
+ * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ */
+function wc_update_920_add_wc_hooked_blocks_version_option() {
+	if ( ! wp_is_block_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name );
+
+	// If the option already exists, we don't need to do anything.
+	if ( false !== $option_value ) {
+		return;
+	}
+
+	/**
+	 * A list of theme slugs to execute this with.
+	 * We are applying this filter to allow for the list to be extended by third-parties who were already using it.
+	 *
+	 * @since 8.4.0
+	 */
+	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+	$active_theme_name                = wp_get_theme()->get( 'Name' );
+	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
+
+	if ( $should_set_hooked_blocks_version ) {
+		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
+		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
+		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
+		add_option( $option_name, '8.4.0' );
+	} else {
+		// For block themes that aren't approved themes set this option to "no" to completely disable hooked blocks.
+		// This means we can assume the absence of the option is when a site is switching from a classic theme to a block theme for the first time.
+		// Note: We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		add_option( $option_name, 'no' );
+	}
+}
+
+/**
+ * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
+ *
+ * New keys are now used for these, to improve compatibility with multisite networks.
+ *
+ * @return void
+ */
+function wc_update_910_remove_obsolete_user_meta() {
+	global $wpdb;
+
+	$deletions = $wpdb->query(
+		"
+		DELETE FROM $wpdb->usermeta
+		WHERE meta_key IN (
+			'_last_order',
+			'_order_count',
+			'_money_spent'
+		)
+	"
+	);
+
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice(
+			'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	} else {
+		$logger->info(
+			sprintf(
+				1 === $deletions
+					? 'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".'
+					: 'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
+				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
+}
+
+/**
+ * Add woocommerce_coming_soon option when it is not currently present.
+ */
+function wc_update_930_add_woocommerce_coming_soon_option() {
+	add_option( 'woocommerce_coming_soon', 'no' );
+}
+
+/**
+ * Migrate Launch Your Store tour meta keys to the woocommerce_meta user data fields.
+ */
+function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
+	// Rename `woocommerce_launch_your_store_tour_hidden` meta key to `woocommerce_admin_launch_your_store_tour_hidden`.
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_launch_your_store_tour_hidden',
+			'woocommerce_launch_your_store_tour_hidden'
+		)
+	);
+
+	// Rename `woocommerce_coming_soon_banner_dismissed` meta key to `woocommerce_admin_coming_soon_banner_dismissed`.
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_coming_soon_banner_dismissed',
+			'woocommerce_coming_soon_banner_dismissed'
+		)
+	);
+}
+
+/**
+ * Recreate FTS index if it already exists, so that phone number can be added to the index.
+ */
+function wc_update_940_add_phone_to_order_address_fts_index(): void {
+	$fts_already_exists = get_option( CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION ) === 'yes';
+	if ( ! $fts_already_exists ) {
+		return;
+	}
+
+	$hpos_controller = wc_get_container()->get( CustomOrdersTableController::class );
+	$result          = $hpos_controller->recreate_order_address_fts_index();
+	if ( ! $result['status'] ) {
+		if ( class_exists( 'WC_Admin_Settings ' ) ) {
+			WC_Admin_Settings::add_error( $result['message'] );
+		}
+	}
+}
+
+/**
+ * Remove user meta associated with the key 'woocommerce_admin_help_panel_highlight_shown'.
+ *
+ * This key is no longer needed since the help panel spotlight tour has been removed.
+ *
+ * @return void
+ */
+function wc_update_940_remove_help_panel_highlight_shown() {
+	global $wpdb;
+
+	$meta_key = 'woocommerce_admin_help_panel_highlight_shown';
+
+	$deletions = $wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM $wpdb->usermeta WHERE meta_key = %s",
+			$meta_key
+		)
+	);
+
+	// Get the WooCommerce logger to track the results of the deletion.
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice(
+			'During the update to 9.4.0, WooCommerce attempted to remove user meta with the key "woocommerce_admin_help_panel_highlight_shown", but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	} else {
+		$logger->info(
+			sprintf(
+				1 === $deletions
+					? 'During the update to 9.4.0, WooCommerce removed %d user meta row associated with the meta key "woocommerce_admin_help_panel_highlight_shown".'
+					: 'During the update to 9.4.0, WooCommerce removed %d user meta rows associated with the meta key "woocommerce_admin_help_panel_highlight_shown".',
+				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
+}
+
+/**
+ * Autoloads woocommerce_allow_tracking option.
+ */
+function wc_update_950_tracking_option_autoload() {
+	$options = array(
+		'woocommerce_allow_tracking' => 'yes',
+	);
+	wp_set_option_autoload_values( $options );
+}
+
+/**
+ * Update the base color for emails as part of the WooCommerce rebranding,
+ * but only if the user hasn't specified a custom color.
+ */
+function wc_update_961_migrate_default_email_base_color() {
+	$color = get_option( 'woocommerce_email_base_color' );
+	if ( '#7f54b3' === $color ) {
+		update_option( 'woocommerce_email_base_color', '#720eec' );
+	}
+}
+
+/**
+ * Add old refunded order items to the product_lookup_table.
+ */
+function wc_update_990_add_old_refunded_order_items_to_product_lookup_table() {
+	global $wpdb;
+
+	// Get every order ID where:
+	// 1. the total sales is less than 0, and
+	// 2. is not refunded shipping fee only, and
+	// 3. is not refunded tax fee only.
+	$refunded_orders = $wpdb->get_results(
+		"SELECT order_stats.order_id
+		FROM {$wpdb->prefix}wc_order_stats AS order_stats
+		WHERE order_stats.total_sales < 0 # Refunded orders
+			AND order_stats.total_sales != order_stats.shipping_total # Exclude refunded orders that only include a shipping refund
+			AND order_stats.total_sales != order_stats.tax_total # Exclude refunded orders that only include a tax refund"
+	);
+
+	if ( $refunded_orders ) {
+		foreach ( $refunded_orders as $refunded_order ) {
+			$order = wc_get_order( $refunded_order->order_id );
+			wc_get_logger()->info( sprintf( 'order_id: %s', $refunded_order->order_id ) );
+
+			// If the refund order has no line items, mark it as a full refund in orders_meta table.
+			// In the above query we already excluded orders for refunded shipping and tax, so it's safe to assume that the refund order without items is a full refund.
+			// Note that the "full" refund here means it's created by changing the order status to "Refunded", not partially refund all the items in the order.
+			if ( empty( $order->get_items() ) ) {
+				$order->update_meta_data( '_refund_type', 'full' );
+				$order->save_meta_data();
+			}
+
+			/**
+			 * Trigger an action to schedule the data import for old refunded order items.
+			 *
+			 * @param int $order_id The ID of the order to be synced.
+			 * @since 9.9.0
+			 */
+			do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
+		}
+	}
+}
+
+/**
+ * Update primary key to composite (order_item_id, order_id) in the wc_order_product_lookup table.
+ */
+function wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table() {
+	global $wpdb;
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+}
+
+/**
+ * Remove the option woocommerce_order_attribution_install_banner_dismissed.
+ * This data is now stored in the user meta table in the PR #55715.
+ */
+function wc_update_980_remove_order_attribution_install_banner_dismissed_option() {
+	delete_option( 'woocommerce_order_attribution_install_banner_dismissed' );
+}
+
+/**
+ * Remove the transient wc_count_comments as this has migrated to use cache.
+ */
+function wc_update_990_remove_wc_count_comments_transient() {
+	delete_transient( 'wc_count_comments' );
+}
+
+/**
+ * Remove all notes of type 'email' from wp_wc_admin_notes table.
+ *
+ * @return void
+ */
+function wc_update_990_remove_email_notes() {
+	global $wpdb;
+
+	$wpdb->delete(
+		$wpdb->prefix . 'wc_admin_notes',
+		array(
+			'type' => 'email',
+		),
+		array( '%s' )
+	);
 }

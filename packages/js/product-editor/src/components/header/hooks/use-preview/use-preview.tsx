@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
@@ -13,10 +12,10 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message-and-props';
+import { WPError } from '../../../../hooks/use-error-handler';
 import { useProductURL } from '../../../../hooks/use-product-url';
 import { PreviewButtonProps } from '../../preview-button';
-import { errorHandler } from '../../../../hooks/use-product-manager';
+import { formatProductError } from '../../../../utils/format-product-error';
 
 export function usePreview( {
 	productStatus,
@@ -29,7 +28,7 @@ export function usePreview( {
 }: PreviewButtonProps & {
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: WPError ): void;
-} ): Button.AnchorProps {
+} ) {
 	const anchorRef = useRef< HTMLAnchorElement >();
 
 	const [ productId ] = useEntityProp< number >(
@@ -46,7 +45,8 @@ export function usePreview( {
 			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			const isSaving = isSavingEntityRecord< boolean >(
+			// @ts-expect-error Selector is not typed
+			const isSaving = isSavingEntityRecord(
 				'postType',
 				productType,
 				productId
@@ -54,7 +54,8 @@ export function usePreview( {
 
 			return {
 				isDisabled: isSaving,
-				hasEdits: hasEditsForEntityRecord< boolean >(
+				// @ts-expect-error Selector is not typed
+				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					productType,
 					productId
@@ -79,7 +80,7 @@ export function usePreview( {
 	 *
 	 * @param event
 	 */
-	async function handleClick( event: MouseEvent< HTMLAnchorElement > ) {
+	async function handleClick( event: MouseEvent< HTMLElement > ) {
 		if ( ariaDisabled ) {
 			return event.preventDefault();
 		}
@@ -110,7 +111,7 @@ export function usePreview( {
 			}
 
 			// Persist the product changes before redirecting
-			const publishedProduct = await saveEditedEntityRecord< Product >(
+			const publishedProduct = await saveEditedEntityRecord(
 				'postType',
 				productType,
 				productId,
@@ -129,7 +130,10 @@ export function usePreview( {
 		} catch ( error ) {
 			if ( onSaveError ) {
 				onSaveError(
-					errorHandler( error as WPError, productStatus ) as WPError
+					formatProductError(
+						error as WPError,
+						productStatus
+					) as WPError
 				);
 			}
 		}
@@ -148,7 +152,7 @@ export function usePreview( {
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
 		href: getProductURL( true ),
-		variant: 'tertiary',
+		variant: 'tertiary' as const,
 		onClick: handleClick,
 	};
 }

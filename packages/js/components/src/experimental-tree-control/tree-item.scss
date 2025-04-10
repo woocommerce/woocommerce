@@ -6,6 +6,8 @@ $control-size: $gap-large;
 	&--highlighted {
 		> .experimental-woocommerce-tree-item__heading {
 			background-color: $gray-100;
+			outline: 1.5px solid var( --wp-admin-theme-color );
+			outline-offset: -1.5px;
 		}
 	}
 
@@ -44,6 +46,7 @@ $control-size: $gap-large;
 		svg.components-checkbox-control__checked,
 		svg.components-checkbox-control__indeterminate,
 		.components-checkbox-control__input[type='checkbox'] {
+			cursor: default;
 			&:focus {
 				outline: none;
 				box-shadow: none;
@@ -56,6 +59,7 @@ $control-size: $gap-large;
 		align-items: center;
 
 		.components-button {
+			cursor: default;
 			padding: 0;
 			height: $control-size;
 			width: $control-size;

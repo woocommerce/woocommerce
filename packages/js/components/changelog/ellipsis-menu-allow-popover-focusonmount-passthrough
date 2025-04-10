@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Allow the EllipsisMenu component to receive and passthrough the focusOnMount Popover prop.
+
+

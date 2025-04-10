@@ -1,0 +1,105 @@
+name: 🚧 Code freeze exception request
+description: Request to process a particular pull request as a code freeze exception.
+title: "[CFE]: "
+labels: ["code freeze exception"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Your target WC version will be extracted from the base of your PR. Ex: Base branch of PR is `release/9.5`. The Target WC version will be 9.5
+        Use this template to request changes to be included in a version of WooCommerce that is past its code freeze date.
+        **The request will be reviewed** and accepted or denied:
+        
+        * If accepted, please test your changes in against the release branch and merge.
+        * If rejected, please change the base against `trunk` and merge it.
+        
+        In either case you are responsible for managing the pull request as usual (provide a description, assign reviewers, ensure that CI jobs pass...)
+  - type: textarea
+    id: pr-urls
+    attributes:
+      label: "Which PR needs to be included? (please do not enter multiple PRs)"
+      description: "Pull request URL against the release branch"
+      placeholder: |
+        https://github.com/woocommerce/woocommerce/pull/1234
+    validations:
+      required: true
+  - type: textarea
+    id: why-needed
+    attributes:
+      label: "Why do these PRs need to break the code freeze?"
+      placeholder: "This is a revert of ... which introduced a bug that causes ..."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      id: consequence-if-not-included
+      label: "What is the consequence if this exception does not get included?"
+      placeholder: "The ... flow will be broken for ... users"
+    validations:
+      required: true
+  - type: textarea
+    id: plan-if-defects-discovered
+    attributes:
+      label: "What is the plan should defects to be discovered in these PRs ahead of final release?"
+      placeholder: "Reverting this PR and ... would be enough"
+    validations:
+      required: true
+  - type: textarea
+    id: how-to-communicate
+    attributes:
+      label: "How should this change be communicated in the release post on the public developer blog:"
+      description: "See the blog at [https://developer.woo.com/blog/](https://developer.woo.com/blog/) cc @woocommerce/developer-advocacy"
+      placeholder: "There is no need to add new communication to the already planned one."
+    validations:
+      required: true
+  - type: textarea
+    id: who-to-ask
+    attributes:
+      label: "If you’re not available and we have questions about this request, is there another person(s) and/or a team that we can ping?"
+      placeholder: "@person or anyone from the ... team"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Escape Analysis
+        For the sake of expediting this request, the details below can be completed at a later time should you so choose.
+        However, the Escape Analysis section is **required** for any accepted Code Freeze Exception.
+        In this section:
+        * Think about how the bug escaped your team.
+        * Write down ideas on how you could prevent this bug – for example, by writing automated tests, creating a new process, or updating documentation.
+        * Make a plan with your team to implement the changes proposed above in order to catch the bug earlier next time and add the related tasks to your backlog.
+        * Please, add a separate comment that includes the details for the Escape Analysis. Together with this Escape Analysis, please make sure to include an actionable item that covers the gap exposed by this analysis. It could be a GitHub issue, the reference of a new item to discuss in a team meeting, etc. Anything that prevents this analysis from getting lost in P2 will be useful.
+  - type: checkboxes
+    id: escape-analysis-completed
+    attributes:
+      label: "Acknowledgement"
+      options:
+        - label: "I understand that I need to write an incident report (aka Escape Analysis) as a comment on this post. This is required for the request to be accepted."
+          required: true
+        - label: "I understand that I need to create an issue as a result of the Escape Analysis and reference it in a comment on this post. This can be done at a later time, but it is required for this request to be closed."
+          required: true
+        - label: "I understand that I will need to merge the PR to the target `release` branch for which the fix was intended, when my request is approved"
+          required: true
+        - label: "I understand that I will need to merge the followup cherry-picked PR created by the github-actions bot to `trunk` when my request is approved"
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Closing checklist
+        Please ensure that the following checklist is completed before closing the request:
+  - type: checkboxes
+    id: closing-checklist
+    attributes:
+      label: "Closing checklist for Solaris"
+      options:
+        - label: "Escape analysis completed"
+          required: false
+        - label: "The fix is raised from intended release branch. For a fix targeting WC X.Y, the base branch should be `release/X.Y`"
+          required: false
+        - label: "PR merged to target `release` branch"
+          required: false
+        - label: "PR cherry-picked to `trunk` (you can find the links in PR comments to verify)"
+          required: false
+        - label: "Followup issue if any"
+          required: false

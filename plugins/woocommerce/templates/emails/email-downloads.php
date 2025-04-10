@@ -12,20 +12,18 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.4.0
+ * @version 9.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$text_align = is_rtl() ? 'right' : 'left';
-
 ?><h2 class="woocommerce-order-downloads__title"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></h2>
 
-<table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; margin-bottom: 40px;" border="1">
+<table class="td font-family" cellspacing="0" cellpadding="6" style="width: 100%; margin-bottom: 40px;" border="1">
 	<thead>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo esc_html( $column_name ); ?></th>
+				<th class="td text-align-left" scope="col"><?php echo esc_html( $column_name ); ?></th>
 			<?php endforeach; ?>
 		</tr>
 	</thead>
@@ -33,7 +31,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 	<?php foreach ( $downloads as $download ) : ?>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;">
+				<td class="td text-align-left">
 					<?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
 						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, $plain_text );

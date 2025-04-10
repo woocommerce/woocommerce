@@ -125,6 +125,11 @@ class WC_Helper_Subscriptions_API {
 	 * as JSON.
 	 */
 	public static function get_subscriptions() {
+		// If the site is connected, mark the time when the my subscriptions tab is first loaded.
+		if ( WC_Helper::is_site_connected() === true && empty( WC_Helper_Options::get( 'my_subscriptions_tab_loaded' ) ) ) {
+			WC_Helper_Options::update( 'my_subscriptions_tab_loaded', date( 'Y-m-d H:i:s' ) );
+		}
+
 		$subscriptions = WC_Helper::get_subscription_list_data();
 		wp_send_json(
 			array_values(
@@ -138,8 +143,21 @@ class WC_Helper_Subscriptions_API {
 	 * as JSON.
 	 */
 	public static function refresh() {
-		WC_Helper::refresh_helper_subscriptions();
-		self::get_subscriptions();
+		try {
+			WC_Helper::refresh_helper_subscriptions();
+			WC_Helper::get_subscriptions();
+			WC_Helper::get_product_usage_notice_rules();
+			self::get_subscriptions();
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage(),
+				),
+				400
+			);
+		}
+
+		WC_Helper::fetch_helper_connection_info();
 	}
 
 	/**

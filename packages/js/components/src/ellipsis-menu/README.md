@@ -1,9 +1,10 @@
-EllipsisMenu
-===
+# EllipsisMenu
+
+## EllipsisMenu
 
 This is a dropdown menu hidden behind a vertical ellipsis icon. When clicked, the inner MenuItems are displayed.
 
-## Usage
+### Usage
 
 ```jsx
 <EllipsisMenu label="Choose which analytics to display"
@@ -39,22 +40,22 @@ This is a dropdown menu hidden behind a vertical ellipsis icon. When clicked, th
 />
 ```
 
-### Props
+#### Props
 
 Name | Type | Default | Description
 --- | --- | --- | ---
 `label` | String | `null` | (required) The label shown when hovering/focusing on the icon button
 `renderContent` | Function | `null` | A function returning `MenuTitle`/`MenuItem` components as a render prop. Arguments from Dropdown passed as function arguments
+`placement` | String | `bottom-start` | Placement of the dropdown menu. For available values, see `popoverProps.placement` of `Dropdown` from `@wordpress/components`.
 
 
-MenuItem
-===
+## MenuItem
 
 `MenuItem` is used to give the item an accessible wrapper, with the `menuitem` role and added keyboard functionality (`onInvoke`).
 `MenuItem`s can also be deemed "clickable", though this is disabled by default because generally the inner component handles
 the click event.
 
-## Usage
+### Usage
 
 ```jsx
 <MenuItem onInvoke={ onToggle }>
@@ -67,7 +68,7 @@ the click event.
 </MenuItem>
 ```
 
-### Props
+#### Props
 
 Name | Type | Default | Description
 --- | --- | --- | ---
@@ -78,19 +79,18 @@ Name | Type | Default | Description
 `onInvoke` | Function | `null` | (required) A function called when this item is activated via keyboard ENTER or SPACE; or when the item is clicked (only if `isClickable` is set)
 
 
-MenuTitle
-===
+## MenuTitle
 
 `MenuTitle` is another valid Menu child, but this does not have any accessibility attributes associated
 (so this should not be used in place of the `EllipsisMenu` prop `label`).
 
-## Usage
+### Usage
 
 ```jsx
 <MenuTitle>Display stats</MenuTitle>
 ```
 
-### Props
+#### Props
 
 Name | Type | Default | Description
 --- | --- | --- | ---

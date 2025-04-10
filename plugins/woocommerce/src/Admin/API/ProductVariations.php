@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -170,8 +172,8 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 		$schema['properties']['type']      = array(
 			'description' => __( 'Product type.', 'woocommerce' ),
 			'type'        => 'string',
-			'default'     => 'variation',
-			'enum'        => array( 'variation' ),
+			'default'     => ProductType::VARIATION,
+			'enum'        => array( ProductType::VARIATION ),
 			'context'     => array( 'view', 'edit' ),
 		);
 		$schema['properties']['parent_id'] = array(

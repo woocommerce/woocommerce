@@ -46,7 +46,7 @@ type VariationsTableProps = {
 			handleDeleteAll: ( values: PartialProductVariation[] ) => void
 		) => void;
 		className?: string;
-		variant?: string;
+		variant?: 'link' | 'primary' | 'secondary';
 	}[];
 	onVariationTableChange?: (
 		type: 'update' | 'delete',
@@ -211,13 +211,17 @@ export const VariationsTable = forwardRef<
 		variation: PartialProductVariation,
 		showSuccess = true
 	) {
+		const { id, ...changes } = variation;
+
 		onUpdate( variation )
 			.then( ( response ) => {
 				recordEvent( 'product_variations_change', {
 					source: TRACKS_SOURCE,
 					product_id: productId,
 					variation_id: variation.id,
+					updated_options: Object.keys( changes ),
 				} );
+
 				if ( showSuccess ) {
 					createSuccessNotice(
 						getSnackbarText(
@@ -457,7 +461,6 @@ export const VariationsTable = forwardRef<
 									<CheckboxControl
 										value="all"
 										checked={ areAllSelected }
-										// @ts-expect-error Property 'indeterminate' does not exist
 										indeterminate={
 											! areAllSelected && areSomeSelected
 										}

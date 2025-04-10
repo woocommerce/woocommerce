@@ -108,8 +108,8 @@ class WC_Tracks_Client {
 	 * @return bool Always returns true.
 	 */
 	public static function record_pixel( $pixel ) {
-		// Add the Request Timestamp and URL terminator just before the HTTP request.
-		$pixel .= '&_rt=' . self::build_timestamp() . '&_=_';
+		// Add the Request Timestamp and no cache parameter just before the HTTP request.
+		$pixel = self::add_request_timestamp_and_nocache( $pixel );
 
 		wp_safe_remote_get(
 			$pixel,
@@ -133,6 +133,19 @@ class WC_Tracks_Client {
 		$ts = NumberUtil::round( microtime( true ) * 1000 );
 
 		return number_format( $ts, 0, '', '' );
+	}
+
+	/**
+	 * Add request timestamp and no cache parameter to pixel.
+	 * Use this the latest possible before the HTTP request.
+	 *
+	 * @param string $pixel Pixel URL.
+	 * @return string Pixel URL with request timestamp and URL terminator.
+	 */
+	public static function add_request_timestamp_and_nocache( $pixel ) {
+		$pixel .= '&_rt=' . self::build_timestamp() . '&_=_';
+
+		return $pixel;
 	}
 
 	/**

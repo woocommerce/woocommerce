@@ -191,7 +191,7 @@
 			// enable if you want key and mouse events to be disabled for content that is blocked
 			bindEvents: true,
 
-			// be default blockUI will supress tab navigation from leaving blocking content
+			// by default blockUI will suppress tab navigation from leaving blocking content
 			// (if bindEvents is true)
 			constrainTabKey: true,
 
@@ -286,7 +286,7 @@
 			var z = opts.baseZ;
 
 			// blockUI uses 3 layers for blocking, for simplicity they are all used on every platform;
-			// layer1 is the iframe layer which is used to supress bleed through of underlying content
+			// layer1 is the iframe layer which is used to suppress bleed through of underlying content
 			// layer2 is the overlay layer which has opacity and a wait cursor (by default)
 			// layer3 is the message content that is displayed while blocking
 			var lyr1, lyr2, lyr3, s;

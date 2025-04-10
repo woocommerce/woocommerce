@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Optimize product query for product creation task on page load

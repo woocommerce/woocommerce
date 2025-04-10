@@ -2,20 +2,24 @@
  * WooCommerce CSS Variables
  */
 
-$woocommerce:   	#7F54B3 !default;
+$woocommerce:   	#720eec !default;
 $green:         	#7ad03a !default;
 $red:           	#a00 !default;
 $orange:        	#ffba00 !default;
 $blue:          	#2ea2cc !default;
 
-$primary:           #7F54B3 !default;                                    // Primary color for buttons (alt)
-$primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color bg
+$primary:           #720eec !default;                                  // Primary color for buttons (alt)
+$primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color background.
 
-$secondary:         desaturate(lighten($primary, 40%), 21%) !default;    // Secondary buttons
-$secondarytext:     desaturate(darken($secondary, 60%), 21%) !default;   // Text on secondary color bg
+// In the past, the secondary color was derived from the WooCommerce purple (the primary color).
+// However, since it was used in many places in the frontend, we decided not to modify it
+// after the WooCommerce rebranding.
+// See: https://github.com/woocommerce/woocommerce/issues/55165.
+$secondary:         #e9e6ed !default;                                  // Secondary color for buttons, backgrounds, etc.
+$secondarytext:     #515151 !default;                                  // Text on secondary color background.
 
-$highlight:         adjust-hue($primary, 150deg) !default;               // Prices, In stock labels, sales flash
-$highlightext:      desaturate(lighten($highlight, 50%), 18%) !default;  // Text on highlight color bg
+$highlight:         adjust-hue(darken($primary, 18%), 150deg) !default;  // Prices, In stock labels, sales flash
+$highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text on highlight color background.
 
 $contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
@@ -35,4 +39,7 @@ $subtext:           #767676 !default;                                  // small,
 	--wc-highligh-text: #{$highlightext};
 	--wc-content-bg: #{$contentbg};
 	--wc-subtext: #{$subtext};
+	--wc-form-border-color: rgba(32, 7, 7, 0.8);
+	--wc-form-border-radius: 4px;
+	--wc-form-border-width: 1px;
 }

@@ -3,8 +3,8 @@
  */
 import { sanitize } from 'dompurify';
 
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
+const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br', 'abbr' ];
+const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download', 'title' ];
 
 export function sanitizeHTML(
 	html: string,

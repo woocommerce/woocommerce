@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use function WP_CLI\Utils\get_plugin_name;
 
 /**
  * Shows print shipping label banner on edit order page.
@@ -18,6 +20,9 @@ class ShippingLabelBanner {
 	 * @var ShippingLabelBannerDisplayRules
 	 */
 	private $shipping_label_banner_display_rules;
+
+	private const MIN_COMPATIBLE_WCST_VERSION       = '2.7.0';
+	private const MIN_COMPATIBLE_WCSHIPPING_VERSION = '1.1.0';
 
 	/**
 	 * Constructor
@@ -36,25 +41,15 @@ class ShippingLabelBanner {
 	 */
 	private function should_show_meta_box() {
 		if ( ! $this->shipping_label_banner_display_rules ) {
-			$jetpack_version   = null;
-			$jetpack_connected = null;
-			$wcs_version       = null;
-			$wcs_tos_accepted  = null;
-
-			if ( defined( 'JETPACK__VERSION' ) ) {
-				$jetpack_version = JETPACK__VERSION;
-			}
+			$dotcom_connected = null;
+			$wcs_version      = null;
 
 			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
-				$jetpack_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
+				$dotcom_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
 			}
 
-			if ( class_exists( '\WC_Connect_Loader' ) ) {
-				$wcs_version = \WC_Connect_Loader::get_wcs_version();
-			}
-
-			if ( class_exists( '\WC_Connect_Options' ) ) {
-				$wcs_tos_accepted = \WC_Connect_Options::get_option( 'tos_accepted' );
+			if ( class_exists( '\Automattic\WCShipping\Utils' ) ) {
+				$wcs_version = \Automattic\WCShipping\Utils::get_wcshipping_version();
 			}
 
 			$incompatible_plugins = class_exists( '\WC_Shipping_Fedex_Init' ) ||
@@ -64,10 +59,8 @@ class ShippingLabelBanner {
 
 			$this->shipping_label_banner_display_rules =
 				new ShippingLabelBannerDisplayRules(
-					$jetpack_version,
-					$jetpack_connected,
+					$dotcom_connected,
 					$wcs_version,
-					$wcs_tos_accepted,
 					$incompatible_plugins
 				);
 		}
@@ -77,15 +70,12 @@ class ShippingLabelBanner {
 
 	/**
 	 * Add metabox to order page.
-	 *
-	 * @param string   $post_type current post type.
-	 * @param \WP_Post $post Current post object.
 	 */
-	public function add_meta_boxes( $post_type, $post ) {
-		if ( 'shop_order' !== $post_type ) {
+	public function add_meta_boxes() {
+		if ( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
-		$order = wc_get_order( $post );
+
 		if ( $this->should_show_meta_box() ) {
 			add_meta_box(
 				'woocommerce-admin-print-label',
@@ -96,8 +86,6 @@ class ShippingLabelBanner {
 				'high',
 				array(
 					'context' => 'shipping_label',
-					'order'   => $post->ID,
-					'items'   => $this->count_shippable_items( $order ),
 				)
 			);
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_print_shipping_label_script' ) );
@@ -130,14 +118,30 @@ class ShippingLabelBanner {
 	public function add_print_shipping_label_script( $hook ) {
 		WCAdminAssets::register_style( 'print-shipping-label-banner', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'print-shipping-label-banner', true );
+		$wcst_version                 = null;
+		$wcshipping_installed_version = null;
+		$order                        = wc_get_order();
+		if ( class_exists( '\WC_Connect_Loader' ) ) {
+			$wcst_version = \WC_Connect_Loader::get_wcs_version();
+		}
+
+		$wc_shipping_plugin_file = WP_PLUGIN_DIR . '/woocommerce-shipping/woocommerce-shipping.php';
+		if ( file_exists( $wc_shipping_plugin_file ) ) {
+			$plugin_data                  = get_plugin_data( $wc_shipping_plugin_file );
+			$wcshipping_installed_version = $plugin_data['Version'];
+		}
 
 		$payload = array(
-			'nonce'                 => wp_create_nonce( 'wp_rest' ),
-			'baseURL'               => get_rest_url(),
-			'wcs_server_connection' => true,
+			// If WCS&T is not installed, it's considered compatible.
+			'is_wcst_compatible'                   => $wcst_version ? (int) version_compare( $wcst_version, self::MIN_COMPATIBLE_WCST_VERSION, '>=' ) : 1,
+			'order_id'                             => $order ? $order->get_id() : null,
+			// The banner is shown if the plugin is installed but not active, so we need to check if the installed version is compatible.
+			'is_incompatible_wcshipping_installed' => $wcshipping_installed_version ?
+			(int) version_compare( $wcshipping_installed_version, self::MIN_COMPATIBLE_WCSHIPPING_VERSION, '<' )
+			: 0,
 		);
 
-		wp_localize_script( 'print-shipping-label-banner', 'wcConnectData', $payload );
+		wp_localize_script( 'wc-admin-print-shipping-label-banner', 'wcShippingCoreData', $payload );
 	}
 
 	/**

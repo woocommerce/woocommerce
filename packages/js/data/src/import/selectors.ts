@@ -6,12 +6,12 @@ import { ImportState, ImportStatusQuery, ImportTotalsQuery } from './types';
 
 export const getImportStarted = ( state: ImportState ) => {
 	const { activeImport, lastImportStartTimestamp } = state;
-	return { activeImport, lastImportStartTimestamp } || {};
+	return { activeImport, lastImportStartTimestamp };
 };
 
 export const getFormSettings = ( state: ImportState ) => {
 	const { period, skipPrevious } = state;
-	return { period, skipPrevious } || {};
+	return { period, skipPrevious };
 };
 
 export const getImportStatus = (
@@ -28,12 +28,10 @@ export const getImportTotals = (
 ) => {
 	const { importTotals, lastImportStartTimestamp } = state;
 	const stringifiedQuery = JSON.stringify( query );
-	return (
-		{
-			...importTotals[ stringifiedQuery ],
-			lastImportStartTimestamp,
-		} || {}
-	);
+	return {
+		...importTotals[ stringifiedQuery ],
+		lastImportStartTimestamp,
+	};
 };
 
 export const getImportError = (

@@ -44,6 +44,37 @@ register_woocommerce_admin_test_helper_rest_route(
 	)
 );
 
+register_woocommerce_admin_test_helper_rest_route(
+	'/options',
+	'wca_test_helper_update_option',
+	array(
+		'methods' => 'POST',
+		'args'    => array(
+			'options' => array(
+				'description' => 'Array of options to update.',
+				'type'        => 'array',
+				'required'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'option_name'  => array(
+							'description'       => 'The name of the option to update.',
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'option_value' => array(
+							'description' => 'The new value for the option.',
+							'required'    => true,
+						),
+					),
+				),
+			),
+		),
+	)
+);
+
+
 /**
  * A helper to delete options.
  *
@@ -61,6 +92,7 @@ function wca_test_helper_delete_option( $request ) {
 		)
 	);
 
+	wp_cache_flush();
 	return new WP_REST_RESPONSE( null, 204 );
 }
 
@@ -98,3 +130,26 @@ function wca_test_helper_get_options( $request ) {
 	return new WP_REST_Response( $options, 200 );
 }
 
+/**
+ * Update WordPress options. Supports single or batch updates.
+ *
+ * @param WP_REST_Request $request The full request data.
+ * @return WP_REST_Response
+ */
+function wca_test_helper_update_option( $request ) {
+	$data     = $request->get_json_params();
+	$response = array();
+
+	foreach ( $data['options'] as $option ) {
+		if ( ! isset( $option['option_name'] ) || ! isset( $option['option_value'] ) ) {
+			continue;
+		}
+		update_option( $option['option_name'], $option['option_value'] );
+		$response[] = array(
+			'option_name'  => $option['option_name'],
+			'option_value' => $option['option_value'],
+		);
+	}
+
+	return new WP_REST_Response( $response, 200 );
+}

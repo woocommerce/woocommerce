@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Enums\ProductType;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -39,7 +42,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			'crosssell_ids',
 			'parent',
 		);
-		if ( $this->is_type( 'variation' ) ) {
+		if ( $this->is_type( ProductType::VARIATION ) ) {
 			$valid = array_merge( $valid, array(
 				'variation_id',
 				'variation_data',
@@ -73,7 +76,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 		switch ( $key ) {
 			case 'id' :
-				$value = $this->is_type( 'variation' ) ? $this->get_parent_id() : $this->get_id();
+				$value = $this->is_type( ProductType::VARIATION ) ? $this->get_parent_id() : $this->get_id();
 				break;
 			case 'product_type' :
 				$value = $this->get_type();
@@ -123,16 +126,16 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				$value = wc_get_product( $this->get_parent_id() );
 				break;
 			case 'variation_id' :
-				$value = $this->is_type( 'variation' ) ? $this->get_id() : '';
+				$value = $this->is_type( ProductType::VARIATION ) ? $this->get_id() : '';
 				break;
 			case 'variation_data' :
-				$value = $this->is_type( 'variation' ) ? wc_get_product_variation_attributes( $this->get_id() ) : '';
+				$value = $this->is_type( ProductType::VARIATION ) ? wc_get_product_variation_attributes( $this->get_id() ) : '';
 				break;
 			case 'variation_has_stock' :
-				$value = $this->is_type( 'variation' ) ? $this->managing_stock() : '';
+				$value = $this->is_type( ProductType::VARIATION ) ? $this->managing_stock() : '';
 				break;
 			case 'variation_shipping_class_id' :
-				$value = $this->is_type( 'variation' ) ? $this->get_shipping_class_id() : '';
+				$value = $this->is_type( ProductType::VARIATION ) ? $this->get_shipping_class_id() : '';
 				break;
 			case 'variation_has_sku' :
 			case 'variation_has_length' :
@@ -398,7 +401,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		wc_deprecated_function( 'WC_Product::get_post_data', '3.0', 'get_post' );
 
 		// In order to keep backwards compatibility it's required to use the parent data for variations.
-		if ( $this->is_type( 'variation' ) ) {
+		if ( $this->is_type( ProductType::VARIATION ) ) {
 			$post_data = get_post( $this->get_parent_id() );
 		} else {
 			$post_data = get_post( $this->get_id() );

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { MouseEvent } from 'react';
-import { Button, Dropdown } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
@@ -13,8 +13,8 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { store as productEditorUiStore } from '../../../store/product-editor-ui';
-import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
+import { wooProductEditorUiStore } from '../../../store/product-editor-ui';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -32,7 +32,8 @@ export function PublishButton( {
 }: PublishButtonProps ) {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
-	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
+	const { openPrepublishPanel } = useDispatch( wooProductEditorUiStore );
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
@@ -61,19 +62,17 @@ export function PublishButton( {
 				navigateTo( { url } );
 			}
 		},
-		onPublishError( error ) {
-			const { message, errorProps } = getProductErrorMessageAndProps(
-				error,
-				visibleTab
-			);
+		async onPublishError( error ) {
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps( error, visibleTab );
 			createErrorNotice( message, errorProps );
 		},
 	} );
 
 	if ( productType === 'product' && isMenuButton ) {
-		function renderPublishButtonMenu(
-			menuProps: Dropdown.RenderProps
-		): React.ReactElement {
+		function renderPublishButtonMenu( menuProps: {
+			onClose: () => void;
+		} ): React.ReactElement {
 			return (
 				<PublishButtonMenu
 					{ ...menuProps }

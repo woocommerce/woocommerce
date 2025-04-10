@@ -140,9 +140,9 @@ wc_get_logger()->info(
 
 ### Best practices
 
-* Rather than using the `WC_Logger`‘s `log()` method directly, it's better to use one of the wrapper methods that's specific to the log level. E.g. `info()` or `error()`.
+* Rather than using the `WC_Logger`'s `log()` method directly, it's better to use one of the wrapper methods that's specific to the log level. E.g. `info()` or `error()`.
 * Write a message that is a complete, coherent sentence. This will make it more useful for people who aren't familiar with the codebase.
-* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what's happening, since they may not speak the same language as the site owner.
+* Log messages should not be translatable. Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for anyone troubleshooting to understand what's happening, since they may not speak the same language as the site owner.
 * Ideally, each log entry message should be a single line (i.e. no line breaks within the message string). Additional lines or extra data should be put in the context array.
 * Avoid outputting structured data in the message string. Put it in a key in the context array instead. The logger will handle converting it to JSON and making it legible in the log viewer.
 * If you need to include a stack trace, let the logger generate it for you.
@@ -159,7 +159,7 @@ The `WC_Logger` class can be substituted for another class via the `woocommerce_
 
 In WooCommerce, a log handler is a PHP class that takes the raw log data and transforms it into a log entry that can be stored or dispatched. WooCommerce ships with four different log handler classes:
 
-* `Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2`: This is the default handler, representing the "file system" log storage method. It records log entries to files.
+* `Automattic\\WooCommerce\\Internal\\Admin\\Logging\\LogHandlerFileV2`: This is the default handler, representing the "file system" log storage method. It records log entries to files.
 * `WC_Log_Handler_File`: This is the old default handler that also records log entries to files. It may be deprecated in the future, and it is not recommended to use this class or extend it.
 * `WC_Log_Handler_DB`: This handler represents the "database" log storage method. It records log entries to the database.
 * `WC_Log_Handler_Email`: This handler does not store log entries, but instead sends them as email messages. Emails are sent to the site admin email address. This handler has [some limitations](https://github.com/woocommerce/woocommerce/blob/fe81a4cf27601473ad5c394a4f0124c785aaa4e6/plugins/woocommerce/includes/log-handlers/class-wc-log-handler-email.php#L15-L27).
@@ -184,6 +184,10 @@ add_filter( 'woocommerce_register_log_handlers', 'my_wc_log_handlers' );
 #### Creating a custom handler
 
 You may want to create your own log handler class in order to send logs somewhere else, such as a Slack channel or perhaps an InfluxDB instance. Your class must extend the [`WC_Log_Handler`](https://woocommerce.github.io/code-reference/classes/WC-Log-Handler.html) abstract class and implement the [`WC_Log_Handler_Interface`](https://woocommerce.github.io/code-reference/classes/WC-Log-Handler-Interface.html) interface. The [`WC_Log_Handler_Email`](https://github.com/woocommerce/woocommerce/blob/6688c60fe47ad42d49deedab8be971288e4786c1/plugins/woocommerce/includes/log-handlers/class-wc-log-handler-email.php) handler class provides a good example of how to set this up.
+
+### Log file storage location
+
+When using the "file system" log handler, by default the log files are stored in the `wc-logs` subdirectory of the WordPress `uploads` directory, which means they might be publicly accessible. WooCommerce adds an `.htaccess` file to prevent access to `wc-logs`, but not all web servers recognize that file. If you have the option, you may want to consider storing your log files in a directory outside of the web root. Make sure the directory has the same user/group permissions as the `uploads` directory so that WordPress can access it. Then use the `woocommerce_log_directory` filter hook to set the path to your custom directory.
 
 ### Turning off noisy logs
 

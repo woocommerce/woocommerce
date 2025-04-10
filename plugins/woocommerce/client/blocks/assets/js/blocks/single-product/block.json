@@ -1,0 +1,32 @@
+{
+	"name": "woocommerce/single-product",
+	"icon": "info",
+	"title": "Single Product",
+	"description": "Display a single product.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": [ "wide", "full" ]
+	},
+	"attributes": {
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		},
+		"productId": {
+			"type": "number"
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
+	},
+	"usesContext": [ "postId", "postType", "queryId" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

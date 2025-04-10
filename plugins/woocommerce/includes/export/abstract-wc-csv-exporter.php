@@ -360,6 +360,9 @@ abstract class WC_CSV_Exporter {
 	 * Additionally, Excel exposes the ability to launch arbitrary commands through
 	 * the DDE protocol.
 	 *
+	 * Number values are not escaped since a pure numeric value cannot form a valid formula to be injected.
+	 * This preserves negative numeric values (e.g. `-42`) as numbers in the CSV output.
+	 *
 	 * @see https://owasp.org/www-community/attacks/CSV_Injection
 	 * @see https://hackerone.com/reports/72785
 	 *
@@ -371,6 +374,11 @@ abstract class WC_CSV_Exporter {
 		// 0x09: Tab (\t)
 		// 0x0d: Carriage Return (\r)
 		$active_content_triggers = array( '=', '+', '-', '@', chr( 0x09 ), chr( 0x0d ) );
+
+		// Don't escape pure numeric values since they cannot form a valid formula to be injected.
+		if ( is_int( $data ) || is_float( $data ) ) {
+			return $data;
+		}
 
 		if ( in_array( mb_substr( $data, 0, 1 ), $active_content_triggers, true ) ) {
 			$data = "'" . $data;

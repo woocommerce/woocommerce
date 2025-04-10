@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Init WooCommerce data importers.
  *
@@ -34,6 +34,7 @@ class WC_Admin_Importers {
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_import', array( $this, 'do_ajax_product_import' ) );
+		add_action( 'in_admin_footer', array( $this, 'track_importer_exporter_view' ) );
 
 		// Register WooCommerce importers.
 		$this->importers['product_importer'] = array(
@@ -96,8 +97,13 @@ class WC_Admin_Importers {
 	 */
 	public function product_importer() {
 		if ( Constants::is_defined( 'WP_LOAD_IMPORTERS' ) ) {
-			wp_safe_redirect( admin_url( 'edit.php?post_type=product&page=product_importer' ) );
+			wp_safe_redirect( admin_url( 'edit.php?post_type=product&page=product_importer&source=wordpress-importer' ) );
 			exit;
+		}
+
+		// phpcs:ignore
+		if ( isset( $_GET['source'] ) && 'wordpress-importer' === sanitize_text_field( wp_unslash( $_GET['source'] ) ) ) {
+			wc_admin_record_tracks_event( 'product_importer_view_from_wp_importer' );
 		}
 
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -132,7 +138,9 @@ class WC_Admin_Importers {
 			}
 		}
 
-		require dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php';
+		wc_admin_record_tracks_event( 'tax_rates_importer_view_from_wp_importer' );
+
+		require __DIR__ . '/importers/class-wc-tax-rate-importer.php';
 
 		$importer = new WC_Tax_Rate_Importer();
 		$importer->dispatch();
@@ -182,7 +190,9 @@ class WC_Admin_Importers {
 								// Register the taxonomy now so that the import works!
 								register_taxonomy(
 									$term['domain'],
+									// phpcs:ignore
 									apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
+									// phpcs:ignore
 									apply_filters(
 										'woocommerce_taxonomy_args_' . $term['domain'],
 										array(
@@ -205,113 +215,34 @@ class WC_Admin_Importers {
 	 * Ajax callback for importing one batch of products from a CSV.
 	 */
 	public function do_ajax_product_import() {
-		global $wpdb;
-
-		check_ajax_referer( 'wc-product-import', 'security' );
-
-		if ( ! $this->import_allowed() || ! isset( $_POST['file'] ) ) { // PHPCS: input var ok.
+		if ( ! $this->import_allowed() ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient privileges to import products.', 'woocommerce' ) ) );
 		}
 
 		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
-		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
+		WC_Product_CSV_Importer_Controller::dispatch_ajax();
+	}
 
-		$file   = wc_clean( wp_unslash( $_POST['file'] ) ); // PHPCS: input var ok.
-		$params = array(
-			'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
-			'start_pos'          => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
-			'mapping'            => isset( $_POST['mapping'] ) ? (array) wc_clean( wp_unslash( $_POST['mapping'] ) ) : array(), // PHPCS: input var ok.
-			'update_existing'    => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false, // PHPCS: input var ok.
-			'character_encoding' => isset( $_POST['character_encoding'] ) ? wc_clean( wp_unslash( $_POST['character_encoding'] ) ) : '',
+	/**
+	 * Track importer/exporter view.
+	 *
+	 * @return void
+	 */
+	public function track_importer_exporter_view() {
+		$screen = get_current_screen();
 
-			/**
-			 * Batch size for the product import process.
-			 *
-			 * @param int $size Batch size.
-			 *
-			 * @since
-			 */
-			'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
-			'parse'              => true,
-		);
-
-		// Log failures.
-		if ( 0 !== $params['start_pos'] ) {
-			$error_log = array_filter( (array) get_user_option( 'product_import_error_log' ) );
-		} else {
-			$error_log = array();
+		if ( ! isset( $screen->id ) ) {
+			return;
 		}
 
-		$importer         = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );
-		$results          = $importer->import();
-		$percent_complete = $importer->get_percent_complete();
-		$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
+		// Don't track if we're in a specific import screen.
+		// phpcs:ignore
+		if ( isset( $_GET['import'] ) ) {
+			return;
+		}
 
-		update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
-
-		if ( 100 === $percent_complete ) {
-			// @codingStandardsIgnoreStart.
-			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
-			$wpdb->delete( $wpdb->posts, array(
-				'post_type'   => 'product',
-				'post_status' => 'importing',
-			) );
-			$wpdb->delete( $wpdb->posts, array(
-				'post_type'   => 'product_variation',
-				'post_status' => 'importing',
-			) );
-			// @codingStandardsIgnoreEnd.
-
-			// Clean up orphaned data.
-			$wpdb->query(
-				"
-				DELETE {$wpdb->posts}.* FROM {$wpdb->posts}
-				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->posts}.post_parent
-				WHERE wp.ID IS NULL AND {$wpdb->posts}.post_type = 'product_variation'
-			"
-			);
-			$wpdb->query(
-				"
-				DELETE {$wpdb->postmeta}.* FROM {$wpdb->postmeta}
-				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->postmeta}.post_id
-				WHERE wp.ID IS NULL
-			"
-			);
-			// @codingStandardsIgnoreStart.
-			$wpdb->query( "
-				DELETE tr.* FROM {$wpdb->term_relationships} tr
-				LEFT JOIN {$wpdb->posts} wp ON wp.ID = tr.object_id
-				LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				WHERE wp.ID IS NULL
-				AND tt.taxonomy IN ( '" . implode( "','", array_map( 'esc_sql', get_object_taxonomies( 'product' ) ) ) . "' )
-			" );
-			// @codingStandardsIgnoreEnd.
-
-			// Send success.
-			wp_send_json_success(
-				array(
-					'position'            => 'done',
-					'percentage'          => 100,
-					'url'                 => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-					'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-					'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-					'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
-				)
-			);
-		} else {
-			wp_send_json_success(
-				array(
-					'position'            => $importer->get_file_position(),
-					'percentage'          => $percent_complete,
-					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-					'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-					'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-					'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
-				)
-			);
+		if ( 'import' === $screen->id || 'export' === $screen->id ) {
+			wc_admin_record_tracks_event( 'wordpress_' . $screen->id . '_view' );
 		}
 	}
 }

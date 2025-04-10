@@ -9,6 +9,8 @@
  * WC_Admin_Tests_API_Reports_Orders_Stats
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Orders_Stats
  */
@@ -154,7 +156,7 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$global_attribute = new WC_Product_Attribute();
 		$global_attribute->set_id( $size_attr_id );
 		$global_attribute->set_name( 'pa_size' );
-		$global_attribute->set_options( array( $large_term->term_id ) ); // Set to small.
+		$global_attribute->set_options( array( $large_term->term_id ) ); // Set to large.
 		$global_attribute->set_position( 1 );
 		$global_attribute->set_visible( true );
 		$global_attribute->set_variation( false );
@@ -169,25 +171,26 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
-		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->set_status( OrderStatus::COMPLETED );
 		$variation_order_1->save();
 
 		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
-		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
 
 		$simple_product_order_1 = WC_Helper_Order::create_order( $this->user, $simple_product );
-		$simple_product_order_1->set_status( 'completed' );
+		$simple_product_order_1->set_status( OrderStatus::COMPLETED );
 		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
 		for ( $i = 0; $i < 10; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		WC_Helper_Queue::run_all_pending( 'woocommerce-db-updates' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );

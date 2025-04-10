@@ -263,23 +263,23 @@ const shopper = {
 		await quantityInput.type( quantityValue.toString() );
 	},
 
-	searchForProduct: async ( prouductName ) => {
+	searchForProduct: async ( productName ) => {
 		const searchFieldSelector = 'input.wp-block-search__input';
 		await page.waitForSelector( searchFieldSelector, { timeout: 100000 } );
-		await expect( page ).toFill( searchFieldSelector, prouductName );
+		await expect( page ).toFill( searchFieldSelector, productName );
 		await expect( page ).toClick( '.wp-block-search__button' );
 		// Single search results may go directly to product page
 		if ( await page.waitForSelector( 'h2.entry-title' ) ) {
 			await expect( page ).toMatchElement( 'h2.entry-title', {
-				text: prouductName,
+				text: productName,
 			} );
 			await expect( page ).toClick( 'h2.entry-title > a', {
-				text: prouductName,
+				text: productName,
 			} );
 		}
 		await page.waitForSelector( 'h1.entry-title' );
-		await expect( page.title() ).resolves.toMatch( prouductName );
-		await expect( page ).toMatchElement( 'h1.entry-title', prouductName );
+		await expect( page.title() ).resolves.toMatch( productName );
+		await expect( page ).toMatchElement( 'h1.entry-title', productName );
 	},
 
 	/*
