@@ -189,7 +189,16 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+        run: |
+          if [[ "${{ matrix.testType }}" == "unit:php" ]]; then
+              # randomized part of the wp-env ports
+              pool=(80 81 82 83 84 85 86 86 88 89)
+              index=$[$RANDOM % ${#pool[@]}]
+              randomized=${pool[$index]}
+              WP_ENV_TESTS_PORT="${randomized}86" WP_ENV_TESTS_MYSQL_PORT="5${randomized}86" pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+          else
+              pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+          fi
 
       - name: 'Determine BuildKite Analytics Message'
         env:
