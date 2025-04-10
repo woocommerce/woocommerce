@@ -150,12 +150,11 @@ class AddToCartWithOptions extends AbstractBlock {
 			* @since 7.6.0
 			* @param boolean.
 			*/
-			$is_disabled_compatibility_layer   = apply_filters( 'woocommerce_disable_compatibility_layer', false );
-			$is_not_purchasable_single_product = ProductType::SIMPLE === $product_type && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
+			$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-			if ( ! $is_disabled_compatibility_layer && ! $is_not_purchasable_single_product ) {
+			if ( ! $is_disabled_compatibility_layer ) {
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type ) {
+				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
@@ -193,7 +192,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_before = ob_get_clean();
 
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type ) {
+				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
