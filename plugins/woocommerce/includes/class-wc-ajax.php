@@ -226,6 +226,7 @@ class WC_AJAX {
 		foreach ( $ajax_heartbeat_callbacks as $ajax_callback ) {
 			add_filter(
 				'heartbeat_received',
+				// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 				function ( $response, $data ) use ( $ajax_callback ) {
 					return call_user_func_array( array( __CLASS__, $ajax_callback ), func_get_args() );
 				},
