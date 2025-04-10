@@ -196,12 +196,12 @@ jobs:
           randomized=${pool[$index]}
           
           # provision the environment to propagate the randomized ports
-          WP_ENV_TESTS_PORT="${randomized}86"
-          WP_ENV_TESTS_MYSQL_PORT="5${randomized}86"
-          echo "WP_ENV_TESTS_PORT=$WP_ENV_TESTS_PORT" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$WP_ENV_TESTS_MYSQL_PORT" >> "$GITHUB_ENV"
+          httpport="${randomized}86"
+          mysqlport="5${randomized}86"
+          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
+          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
           
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Determine BuildKite Analytics Message'
         env:
