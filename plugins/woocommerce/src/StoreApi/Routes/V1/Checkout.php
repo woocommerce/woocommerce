@@ -261,7 +261,7 @@ class Checkout extends AbstractCartRoute {
 				$additional_fields = $this->additional_fields_controller->get_fields_for_location( $context_data['location'] );
 			}
 
-			// These values are used to see if required fields have values.
+			// These values are used to validate custom rules and generate the document object.
 			$field_values = (array) $request->get_param( $context_data['param'] ) ?? [];
 
 			foreach ( $additional_fields as $field_key => $field ) {
