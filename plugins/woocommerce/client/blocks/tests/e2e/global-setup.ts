@@ -62,8 +62,8 @@ const prepareAttributes = async () => {
 
 async function globalSetup() {
 	console.log( 'Running global setup:' );
-	console.time( '└ Base URL: ' + BASE_URL );
-	console.time(
+	console.log( '└ Base URL: ' + BASE_URL );
+	console.log(
 		'├ Port override: ' + ( process.env.WP_ENV_TESTS_PORT || 'n/a' )
 	);
 	console.time( '├ Total time' );
