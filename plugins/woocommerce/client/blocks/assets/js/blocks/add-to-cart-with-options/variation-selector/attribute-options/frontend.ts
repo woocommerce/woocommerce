@@ -8,6 +8,7 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
  * Internal dependencies
  */
 import type { AddToCartWithOptionsStore } from '../../frontend';
+import setStyles from './set-styles';
 
 type Option = {
 	value: string;
@@ -25,6 +26,9 @@ type Context = {
 type PillsContext = Context & {
 	focused?: string;
 };
+
+// Set selected pill styles for proper contrast.
+setStyles();
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
