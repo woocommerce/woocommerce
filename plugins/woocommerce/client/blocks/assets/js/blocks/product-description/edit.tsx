@@ -143,7 +143,7 @@ function EditableContent( { context = {} } ) {
 	} );
 
 	if ( ! entityRecord ) {
-		return <Placeholder layoutClassNames={ blockProps } />;
+		return <Placeholder layoutClassNames={ blockProps.className } />;
 	}
 
 	return <div { ...props } />;
