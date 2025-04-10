@@ -62,11 +62,7 @@ const prepareAttributes = async () => {
 
 async function globalSetup() {
 	console.log( 'Running global setup:' );
-	console.log( '└ Base URL: ' + BASE_URL );
-	console.log(
-		'├ Port override: ' + ( process.env.WP_ENV_TESTS_PORT || 'n/a' )
-	);
-	console.time( '├ Total time' );
+	console.time( '└ Total time' );
 
 	let databaseImported = false;
 
