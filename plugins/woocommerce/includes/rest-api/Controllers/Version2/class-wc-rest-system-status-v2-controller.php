@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * System status controller class.
@@ -659,6 +660,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'HPOS_sync_enabled'              => array(
 							'description' => __( 'Is HPOS sync enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'enabled_features'               => array(
+							'description' => __( 'Enabled features.', 'woocommerce' ),
+							'type'        => 'array',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
@@ -1426,6 +1433,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
 		}
 
+		// Get list of enabled features.
+		$enabled_features_slugs = array_keys(
+			wp_list_filter(
+				wc_get_container()->get( FeaturesController::class )->get_features( true, true ),
+				array( 'is_enabled' => true )
+			)
+		);
+
 		// Return array of useful settings for debugging.
 		return array(
 			'api_enabled'                    => 'yes' === get_option( 'woocommerce_api_enabled' ),
@@ -1451,6 +1466,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'order_datastore'                => WC_Data_Store::load( 'order' )->get_current_class_name(),
 			'HPOS_enabled'                   => OrderUtil::custom_orders_table_usage_is_enabled(),
 			'HPOS_sync_enabled'              => wc_get_container()->get( Order_DataSynchronizer::class )->data_sync_is_enabled(),
+			'enabled_features'               => $enabled_features_slugs,
 		);
 	}
 
