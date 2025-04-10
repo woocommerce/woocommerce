@@ -153,12 +153,6 @@ class Checkout extends AbstractCartRoute {
 
 		if ( is_wp_error( $nonce_check ) ) {
 			$response = $nonce_check;
-		} else {
-			$validation_callback = $this->validate_callback( $request );
-
-			if ( is_wp_error( $validation_callback ) ) {
-				$response = $validation_callback;
-			}
 		}
 
 		if ( ! $response ) {
@@ -366,9 +360,15 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @throws RouteException On error.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
+		$validation_callback = $this->validate_callback( $request );
+
+		if ( is_wp_error( $validation_callback ) ) {
+			return $validation_callback;
+		}
+
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
@@ -420,10 +420,16 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		wc_log_order_step( '[Store API #1] Place Order flow initiated', null, false, true );
+
+		$validation_callback = $this->validate_callback( $request );
+
+		if ( is_wp_error( $validation_callback ) ) {
+			return $validation_callback;
+		}
 
 		/**
 		 * Ensure required permissions based on store settings are valid to place the order.
