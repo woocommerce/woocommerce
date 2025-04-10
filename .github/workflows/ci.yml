@@ -195,7 +195,7 @@ jobs:
           max=99
           randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
           httpport="${randomized}80"
-          mysqlport="${randomized}06"
+          mysqlport="${randomized}36"
 
           # provision the environment to propagate the randomized ports
           echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
