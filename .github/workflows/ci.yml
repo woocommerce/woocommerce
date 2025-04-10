@@ -190,14 +190,14 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
         run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts
-          pool=(70 71 72 73 74 75 76 77 78 79  80 81 82 83 84 85 86 87 88 89  90 91 92 93 94 95 96 97 98 99)
-          index=$[$RANDOM % ${#pool[@]}]
-          randomized=${pool[$index]}
-          
+          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
+          min=10
+          max=99
+          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
+          httpport="${randomized}80"
+          mysqlport="${randomized}06"
+
           # provision the environment to propagate the randomized ports
-          httpport="${randomized}86"
-          mysqlport="5${randomized}86"
           echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
           echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
           
