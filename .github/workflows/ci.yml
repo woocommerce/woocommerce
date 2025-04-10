@@ -281,7 +281,11 @@ jobs:
           fi
 
           # Finally, run the tests
-          WP_ENV_TESTS_PORT="$WP_ENV_TESTS_PORT" pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+          if [[ "${{ matrix.testEnv.shouldCreate && 'yes' }}" == "yes" ]]; then
+              WP_ENV_TESTS_PORT=$WP_ENV_TESTS_PORT pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+          else
+              pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+          fi
 
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed
