@@ -148,11 +148,17 @@ class Checkout extends AbstractCartRoute {
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
 
-		$response            = null;
-		$validation_callback = $this->validate_callback( $request );
+		$response    = null;
+		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
-		if ( is_wp_error( $validation_callback ) ) {
-			$response = $validation_callback;
+		if ( is_wp_error( $nonce_check ) ) {
+			$response = $nonce_check;
+		} else {
+			$validation_callback = $this->validate_callback( $request );
+
+			if ( is_wp_error( $validation_callback ) ) {
+				$response = $validation_callback;
+			}
 		}
 
 		if ( ! $response ) {
@@ -219,12 +225,6 @@ class Checkout extends AbstractCartRoute {
 	 * @return true|\WP_Error
 	 */
 	public function validate_callback( $request ) {
-		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
-
-		if ( is_wp_error( $nonce_check ) ) {
-			return $nonce_check;
-		}
-
 		/**
 		 * The request is cloned to avoid modifying the original request object when sanitizing params.
 		 * Un-sanitized params are used to see if required fields had values. Sanitized params are used to
