@@ -197,10 +197,12 @@ jobs:
           httpport="${randomized}86"
           mysqlport="5${randomized}86"
           
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
-          
           echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
           echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+          
+          # WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport 
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+          
 
       - name: 'Determine BuildKite Analytics Message'
         env:
