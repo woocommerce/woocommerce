@@ -90,4 +90,38 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		// Remove filter.
 		remove_all_filters( 'woocommerce_get_country_locale' );
 	}
+
+	/**
+	 * Test that register_local_pickup handles missing WC()->shipping and other dependencies gracefully.
+	 */
+	public function test_register_local_pickup_also_handles_missing_dependencies() {
+		add_filter( 'woocommerce_blocks_checkout_is_block_default', '__return_true', 10 );
+
+		$wc_backup = WC();
+
+		try {
+			// Test that the method does not throw exceptions without missing dependencies.
+			$this->shipping_controller->register_local_pickup();
+			$this->assertTrue( true, 'Method did not throw exceptions without missing dependencies' );
+
+			// Test that the method does not throw exceptions with missing shipping.
+			WC()->shipping = null;
+			$this->shipping_controller->register_local_pickup();
+			$this->assertTrue( true, 'Method did not throw exceptions with missing shipping' );
+
+			// Test that the method does not throw exceptions with missing WC object.
+			global $woocommerce;
+			$incomplete_wc = new \stdClass(); // Object without shipping property.
+			$woocommerce   = $incomplete_wc;
+
+			$this->shipping_controller->register_local_pickup();
+			$this->assertTrue( true, 'Method did not throw exceptions with missing WC object' );
+		} finally {
+			global $woocommerce;
+			$woocommerce = $wc_backup;
+
+			// Remove the filter we added for the test.
+			remove_filter( 'woocommerce_blocks_checkout_is_block_default', '__return_true', 10 );
+		}
+	}
 }
