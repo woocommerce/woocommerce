@@ -195,9 +195,9 @@ jobs:
               pool=(80 81 82 83 84 85 86 86 88 89)
               index=$[$RANDOM % ${#pool[@]}]
               randomized=${pool[$index]}
-              WP_ENV_TESTS_PORT="${randomized}86" WP_ENV_TESTS_MYSQL_PORT="5${randomized}86" pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+              WP_ENV_TESTS_PORT="${randomized}86" WP_ENV_TESTS_MYSQL_PORT="5${randomized}86" pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
           else
-              pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+              pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
           fi
 
       - name: 'Determine BuildKite Analytics Message'
