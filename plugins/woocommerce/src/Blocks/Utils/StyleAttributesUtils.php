@@ -44,6 +44,22 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get CSS value for shadow preset. Returns the same value if it's not a preset.
+	 *
+	 * @param string $shadow_name Shadow name.
+	 *
+	 * @return string CSS value for shadow preset.
+	 */
+	public static function get_shadow_value( $shadow_name ) {
+		if ( is_string( $shadow_name ) && str_contains( $shadow_name, 'var:preset|shadow|' ) ) {
+			$shadow_name = str_replace( 'var:preset|shadow|', '', $shadow_name );
+			return "var(--wp--preset--shadow--{$shadow_name})";
+		}
+
+		return $shadow_name;
+	}
+
+	/**
 	 * If spacing value is in preset format, convert it to a CSS var. Else return same value
 	 * For example:
 	 * "var:preset|spacing|50" -> "var(--wp--preset--spacing--50)"
@@ -584,6 +600,25 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for shadow from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return array
+	 */
+	public static function get_shadow_class_and_style( $attributes ) {
+		$shadow = $attributes['style']['shadow'] ?? null;
+
+		if ( ! $shadow ) {
+			return self::EMPTY_STYLE;
+		}
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'box-shadow: %s;', self::get_shadow_value( $shadow ) ),
+		);
+	}
+
+	/**
 	 * Get space-separated style rules from block attributes.
 	 *
 	 * @param array $attributes Block attributes.
@@ -734,6 +769,7 @@ class StyleAttributesUtils {
 			'line_height'      => self::get_line_height_class_and_style( $attributes ),
 			'margin'           => self::get_margin_class_and_style( $attributes ),
 			'padding'          => self::get_padding_class_and_style( $attributes ),
+			'shadow'           => self::get_shadow_class_and_style( $attributes ),
 			'text_align'       => self::get_text_align_class_and_style( $attributes ),
 			'text_color'       => self::get_text_color_class_and_style( $attributes ),
 			'text_decoration'  => self::get_text_decoration_class_and_style( $attributes ),
