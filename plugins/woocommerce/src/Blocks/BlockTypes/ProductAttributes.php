@@ -88,6 +88,10 @@ class ProductAttributes extends AbstractBlock {
 			);
 		}
 
+		if ( empty( $product_attributes ) ) {
+			return '';
+		}
+
 		ob_start();
 
 		$wrapper_attributes = get_block_wrapper_attributes(
