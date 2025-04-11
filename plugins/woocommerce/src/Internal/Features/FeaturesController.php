@@ -223,7 +223,6 @@ class FeaturesController {
 			$container = wc_get_container();
 			$container->get( CustomOrdersTableController::class )->add_feature_definition( $this );
 			$container->get( CostOfGoodsSoldController::class )->add_feature_definition( $this );
-			$container->get( PaymentsController::class )->adjust_feature_default_enablement_by_experiment( $this );
 
 			$this->init_compatibility_info_by_feature();
 		}
@@ -444,16 +443,6 @@ class FeaturesController {
 				),
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
-
-				/*
-				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
-				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
-				* feature.
-				*
-				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
-				*/
-				'is_legacy'          => true,
 				'is_experimental'    => false,
 			),
 			'block_email_editor'                 => array(
