@@ -91,11 +91,11 @@ $dialog-padding: 20px;
 	}
 
 	// Icons are centred but they are perceived off hence adjusting with padding.
-	&-left__icon {
+	&__icon--left {
 		padding: 2px 2px 0 0;
 	}
 
-	&-right__icon {
+	&__icon--right {
 		padding: 2px 0 0 2px;
 	}
 
@@ -103,7 +103,6 @@ $dialog-padding: 20px;
 		cursor: pointer;
 		z-index: 3;
 		pointer-events: all;
-		padding: 0;
 		border: none;
 		background: none;
 		width: 40px;
@@ -112,7 +111,9 @@ $dialog-padding: 20px;
 		background-color: #fff;
 
 		&:disabled {
-			opacity: 20%;
+			.wc-block-product-gallery-large-image-next-previous__icon {
+				opacity: 20%;
+			}
 			cursor: not-allowed;
 		}
 	}

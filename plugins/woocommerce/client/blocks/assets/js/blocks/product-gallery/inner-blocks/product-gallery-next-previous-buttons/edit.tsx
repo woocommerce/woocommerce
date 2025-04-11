@@ -25,10 +25,10 @@ export const Edit = (): JSX.Element => {
 				) }
 			>
 				<button className="wc-block-product-gallery-large-image-next-previous__button">
-					<PrevIcon className="wc-block-product-gallery-large-image-next-previous-left__icon" />
+					<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
 				</button>
 				<button className="wc-block-product-gallery-large-image-next-previous__button">
-					<NextIcon className="wc-block-product-gallery-large-image-next-previous-right__icon" />
+					<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
 				</button>
 			</div>
 		</div>
