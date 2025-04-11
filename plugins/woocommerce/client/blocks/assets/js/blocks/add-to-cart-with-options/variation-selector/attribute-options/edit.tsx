@@ -15,6 +15,11 @@ import { useCustomDataContext } from '@woocommerce/shared-context';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import clsx from 'clsx';
 
+/**
+ * Internal dependencies
+ */
+import { useApplyEditorStyles } from '../../../../shared/hooks/use-theme-colors';
+
 interface Attributes {
 	className?: string;
 	style?: 'pills' | 'dropdown';
@@ -62,6 +67,18 @@ export default function AttributeOptionsEdit(
 		className,
 	} );
 
+	// Apply selected variation pill styles based on Site Editor's background and text colors.
+	useApplyEditorStyles(
+		'add-to-cart-with-options-variation-selector-selected-pill',
+		( { editorBackgroundColor, editorColor } ) => `
+			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
+				background-color: ${ editorColor };
+				color: ${ editorBackgroundColor };
+				border-color: ${ editorColor };
+			}
+		`
+	);
+
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
@@ -98,10 +115,10 @@ export default function AttributeOptionsEdit(
 				</PanelBody>
 			</InspectorControls>
 
-			{ style === 'pills' ? (
-				<Pills id={ attribute.taxonomy } options={ options } />
-			) : (
-				<Disabled>
+			<Disabled>
+				{ style === 'pills' ? (
+					<Pills id={ attribute.taxonomy } options={ options } />
+				) : (
 					<select
 						id={ attribute.taxonomy }
 						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
@@ -112,8 +129,8 @@ export default function AttributeOptionsEdit(
 							</option>
 						) ) }
 					</select>
-				</Disabled>
-			) }
+				) }
+			</Disabled>
 		</div>
 	);
 }

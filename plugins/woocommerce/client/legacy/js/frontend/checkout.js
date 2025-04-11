@@ -231,7 +231,7 @@ jQuery( function( $ ) {
 
 						if ( ! pattern.test( $this.val() ) ) {
 							$this.attr( 'aria-invalid', 'true' );
-							$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-email woocommerce-invalid-phone' ); // eslint-disable-line max-len
+							$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-email' ); // eslint-disable-line max-len
 							validated = false;
 						}
 					}
@@ -537,11 +537,11 @@ jQuery( function( $ ) {
 					success:	function( result ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
-						
+
 						$( '.checkout-inline-error-message' ).remove();
 
 						try {
-							if ( 'success' === result.result && 
+							if ( 'success' === result.result &&
 								$form.triggerHandler( 'checkout_place_order_success', [ result, wc_checkout_form ] ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
@@ -651,9 +651,12 @@ jQuery( function( $ ) {
 					errorMessage.className = 'checkout-inline-error-message';
 					errorMessage.textContent = msg;
 
-					$formRow.appendChild( errorMessage );
-					$field.setAttribute( 'aria-describedby', descriptionId );
-					$field.setAttribute( 'aria-invalid', 'true' );
+					if ( $formRow && errorMessage.textContent.length > 0 ) {
+						$formRow.append( errorMessage );
+					}
+
+					$field.attr( 'aria-describedby', descriptionId );
+					$field.attr( 'aria-invalid', 'true' );
 				}
 			} );
 		},
@@ -671,6 +674,7 @@ jQuery( function( $ ) {
 		init: function() {
 			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
 			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
+			$( document.body ).on( 'keydown', '.woocommerce-remove-coupon', this.on_keydown_remove_coupon );
 			$( document.body ).on( 'blur change input', '#coupon_code', this.remove_coupon_error );
 			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit.bind( this ) );
 		},
@@ -693,13 +697,13 @@ jQuery( function( $ ) {
 			if ( $target.length === 0 ) {
 				return;
 			}
-	
+
 			var msg = $( $.parseHTML( html_element ) ).text().trim();
 
 			if ( msg === '' ) {
 				return;
 			}
-				
+
 			$target.find( '#coupon_code' )
 				.focus()
 				.addClass( 'has-error' )
@@ -821,6 +825,19 @@ jQuery( function( $ ) {
 				},
 				dataType: 'html'
 			});
+		},
+		/**
+		 * Handle when pressing the Space key on the remove coupon link.
+		 * This is necessary because the link got the role="button" attribute
+		 * and needs to act like a button.
+		 *
+		 * @param {Object} e The JQuery event
+		 */
+		on_keydown_remove_coupon: function( e ) {
+			if ( e.key === ' ' ) {
+				e.preventDefault();
+				$( this ).trigger( 'click' );
+			}
 		}
 	};
 

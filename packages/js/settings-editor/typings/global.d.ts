@@ -124,6 +124,7 @@ declare global {
 		wcSettings: {
 			admin: {
 				settingsData: SettingsData;
+				settingsScripts: Record< string, string[] >;
 			};
 		};
 		wcTracks: {

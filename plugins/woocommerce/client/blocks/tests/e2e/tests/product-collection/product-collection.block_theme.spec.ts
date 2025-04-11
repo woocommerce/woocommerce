@@ -431,18 +431,27 @@ test.describe( 'Product Collection', () => {
 			page,
 			pageObject,
 			editor,
+			wpCoreVersion,
 		} ) => {
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
 			await page
-				.getByRole( 'button', { name: 'Add New Template' } )
+				.getByRole( 'button', {
+					name:
+						wpCoreVersion >= 6.8
+							? 'Add Template'
+							: 'Add New Template',
+				} )
 				.click();
+
 			await page
 				.getByRole( 'button', { name: 'Single Item: Product' } )
 				.click();
 			await page
 				.getByRole( 'option', {
-					name: `Cap http://localhost:8889/product/cap/`,
+					name: `Cap http://localhost:${
+						process.env.WP_ENV_TESTS_PORT || '8889'
+					}/product/cap/`,
 				} )
 				.click();
 			await page
@@ -857,6 +866,7 @@ test.describe( 'Product Collection', () => {
 			admin,
 			page,
 			editor,
+			wpCoreVersion,
 		} ) => {
 			await wpCLI(
 				'option update woocommerce_default_catalog_orderby price'
@@ -871,8 +881,14 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
 			await page
-				.getByRole( 'button', { name: 'Add New Template' } )
+				.getByRole( 'button', {
+					name:
+						wpCoreVersion >= 6.8
+							? 'Add Template'
+							: 'Add New Template',
+				} )
 				.click();
+
 			await page
 				.getByRole( 'button', { name: 'Products by Category' } )
 				.click();
@@ -897,6 +913,7 @@ test.describe( 'Product Collection', () => {
 			admin,
 			page,
 			editor,
+			wpCoreVersion,
 		} ) => {
 			await wpCLI(
 				'option update woocommerce_default_catalog_orderby price'
@@ -907,8 +924,14 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
 			await page
-				.getByRole( 'button', { name: 'Add New Template' } )
+				.getByRole( 'button', {
+					name:
+						wpCoreVersion >= 6.8
+							? 'Add Template'
+							: 'Add New Template',
+				} )
 				.click();
+
 			await page
 				.getByRole( 'button', { name: 'Products by Tag' } )
 				.click();

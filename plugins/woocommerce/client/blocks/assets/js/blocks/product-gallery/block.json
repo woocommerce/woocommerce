@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-gallery",
-	"version": "1.0.0",
 	"title": "Product Gallery (Beta)",
 	"description": "Showcase your products relevant images and media.",
 	"category": "woocommerce",

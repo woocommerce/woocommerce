@@ -235,6 +235,10 @@
 							}
 
 							.woocommerce-edit-site-sidebar-navigation-screen-remove-test-data__group {
+								.components-base-control {
+									margin-bottom: 8px;
+								}
+
 								p {
 									color: $gray-700;
 									font-size: 0.8125rem;

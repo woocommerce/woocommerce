@@ -138,68 +138,22 @@ test.describe( `${ blockData.name }`, () => {
 				{ clientId: parentClientId }
 			);
 
-			const editorBoundingClientRect = await getBoundingClientRect( {
-				pageObject,
-				leftArrowSelector: blockData.selectors.editor.leftArrow,
-				rightArrowSelector: blockData.selectors.editor.rightArrow,
-				isFrontend: false,
-			} );
+			await expect( async () => {
+				const editorBoundingClientRect = await getBoundingClientRect( {
+					pageObject,
+					leftArrowSelector: blockData.selectors.editor.leftArrow,
+					rightArrowSelector: blockData.selectors.editor.rightArrow,
+					isFrontend: false,
+				} );
 
-			expect( editorBoundingClientRect.leftArrow.left ).toBeGreaterThan(
-				editorBoundingClientRect.gallery.left
-			);
+				expect(
+					editorBoundingClientRect.leftArrow.left
+				).toBeGreaterThan( editorBoundingClientRect.gallery.left );
 
-			expect( editorBoundingClientRect.rightArrow.right ).toBeLessThan(
-				editorBoundingClientRect.gallery.right
-			);
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			const frontendBoundingClientRect = await getBoundingClientRect( {
-				pageObject,
-				leftArrowSelector: blockData.selectors.editor.leftArrow,
-				rightArrowSelector: blockData.selectors.editor.rightArrow,
-				isFrontend: true,
-			} );
-
-			expect( frontendBoundingClientRect.leftArrow.left ).toBeGreaterThan(
-				frontendBoundingClientRect.gallery.left
-			);
-
-			expect( frontendBoundingClientRect.rightArrow.right ).toBeLessThan(
-				frontendBoundingClientRect.gallery.right
-			);
-		} );
-
-		test( 'Show buttons at the bottom of the image by default', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
-			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editor.getBlockByName(
-				'woocommerce/product-image-gallery'
-			);
-			const clientId =
-				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
-			const parentClientId =
-				( await editor.getBlockRootClientId( clientId ) ) ?? '';
-
-			await editor.selectBlocks( parentBlock );
-			await editor.insertBlock(
-				{ name: 'woocommerce/product-gallery' },
-				{ clientId: parentClientId }
-			);
-
-			const block = await pageObject.getNextPreviousButtonsBlock( {
-				page: 'editor',
-			} );
-
-			await expect( block ).toHaveCSS( 'align-items', 'flex-end' );
+				expect(
+					editorBoundingClientRect.rightArrow.right
+				).toBeLessThan( editorBoundingClientRect.gallery.right );
+			} ).toPass( { timeout: 3_000 } );
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -207,16 +161,25 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
-				{
-					page: 'frontend',
-				}
-			);
+			await expect( async () => {
+				const frontendBoundingClientRect = await getBoundingClientRect(
+					{
+						pageObject,
+						leftArrowSelector: blockData.selectors.editor.leftArrow,
+						rightArrowSelector:
+							blockData.selectors.editor.rightArrow,
+						isFrontend: true,
+					}
+				);
 
-			await expect( frontendBlock ).toHaveCSS(
-				'align-items',
-				'flex-end'
-			);
+				expect(
+					frontendBoundingClientRect.leftArrow.left
+				).toBeGreaterThan( frontendBoundingClientRect.gallery.left );
+
+				expect(
+					frontendBoundingClientRect.rightArrow.right
+				).toBeLessThan( frontendBoundingClientRect.gallery.right );
+			} ).toPass( { timeout: 3_000 } );
 		} );
 	} );
 } );

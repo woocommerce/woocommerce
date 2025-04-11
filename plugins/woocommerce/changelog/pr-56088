@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove spurious apostrophe in approved_directory_enabled input

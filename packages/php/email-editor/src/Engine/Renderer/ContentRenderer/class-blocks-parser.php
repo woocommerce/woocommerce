@@ -29,6 +29,6 @@ class Blocks_Parser extends WP_Block_Parser {
 	 */
 	public function parse( $document ) {
 		parent::parse( $document );
-		return apply_filters( 'woocommerce_blocks_renderer_parsed_blocks', $this->output );
+		return apply_filters( 'woocommerce_email_blocks_renderer_parsed_blocks', $this->output );
 	}
 }

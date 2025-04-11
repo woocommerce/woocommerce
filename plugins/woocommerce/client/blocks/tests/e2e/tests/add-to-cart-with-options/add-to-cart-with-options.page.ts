@@ -52,9 +52,11 @@ class AddToCartWithOptionsPage {
 		} );
 		await customProductTypeButton.click();
 
-		await this.editor.canvas.locator( '.components-spinner' ).waitFor( {
-			state: 'hidden',
-		} );
+		await addToCartWithOptionsBlock
+			.locator( '.components-spinner' )
+			.waitFor( {
+				state: 'hidden',
+			} );
 	}
 
 	async insertParagraphInTemplatePart( content: string ) {

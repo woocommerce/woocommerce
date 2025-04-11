@@ -61,7 +61,7 @@ describe( 'NoPermissions', () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				'Enhance your store by installing these free business features. No commitment required – you can remove them at any time.'
+				'No commitment required – you can remove them at any time.'
 			)
 		).toBeInTheDocument();
 	} );

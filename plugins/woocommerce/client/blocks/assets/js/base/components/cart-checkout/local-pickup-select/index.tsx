@@ -6,8 +6,7 @@ import {
 	RadioControlOptionType,
 } from '@woocommerce/blocks-components';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
-import { cartStore } from '@woocommerce/block-data';
-import { useSelect } from '@wordpress/data';
+import { useShippingData } from '@woocommerce/base-context';
 
 interface LocalPickupSelectProps {
 	title?: string | undefined;
@@ -33,9 +32,8 @@ export const LocalPickupSelect = ( {
 	renderPickupLocation,
 	packageCount,
 }: LocalPickupSelectProps ) => {
-	const internalPackageCount = useSelect(
-		( select ) => select( cartStore )?.getCartData()?.shippingRates?.length
-	);
+	const { shippingRates } = useShippingData();
+	const internalPackageCount = shippingRates?.length || 1;
 	// Hacky way to check if there are multiple packages, this way is borrowed from  `assets/js/base/components/cart-checkout/shipping-rates-control-package/index.tsx`
 	// We have no built-in way of checking if other extensions have added packages.
 	const multiplePackages =

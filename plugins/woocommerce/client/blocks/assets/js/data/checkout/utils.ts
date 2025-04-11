@@ -21,15 +21,22 @@ import {
 	type ConfigOf,
 } from '@wordpress/data/build-types/types';
 import { checkoutStore } from '@woocommerce/block-data';
+import { select } from '@wordpress/data';
+import type { AdditionalValues, ContactForm } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { shouldRetry } from '../../base/context/event-emit';
+import { store as validationStore } from '../validation';
 import {
 	CheckoutAndPaymentNotices,
 	CheckoutAfterProcessingWithErrorEventData,
 } from './types';
+import {
+	CONTACT_FORM_KEYS,
+	ORDER_FORM_KEYS,
+} from '../../settings/blocks/constants';
 
 /**
  * Based on the given observers, create Error Notices where necessary
@@ -229,4 +236,38 @@ export const getPaymentResultFromCheckoutResponse = (
 	}
 
 	return paymentResult;
+};
+
+export const validateAdditionalFields = (
+	additionalFields: AdditionalValues
+): boolean => {
+	// Early return if no additional fields to validate
+	if ( Object.keys( additionalFields ).length === 0 ) {
+		return true;
+	}
+
+	// Check each additional field for validation errors
+	// The validation store prefixes ads a prefix depending on the field location
+	for ( const fieldKey of Object.keys( additionalFields ) ) {
+		let prefix = '';
+		if ( CONTACT_FORM_KEYS.includes( fieldKey as keyof ContactForm ) ) {
+			prefix = 'contact_';
+		} else if (
+			ORDER_FORM_KEYS.includes( fieldKey as keyof AdditionalValues )
+		) {
+			prefix = 'order_';
+		} else {
+			return false;
+		}
+
+		const error = select( validationStore ).getValidationError(
+			`${ prefix }${ fieldKey }`
+		);
+
+		if ( error && ! error.hidden ) {
+			return false;
+		}
+	}
+
+	return true;
 };

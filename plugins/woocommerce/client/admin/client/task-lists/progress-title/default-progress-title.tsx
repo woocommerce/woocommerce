@@ -16,9 +16,9 @@ export type DefaultProgressTitleProps = {
 	taskListId: string;
 };
 
-export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
+export const DefaultProgressTitle = ( {
 	taskListId,
-} ) => {
+}: DefaultProgressTitleProps ) => {
 	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
 		( select ) => {
 			const taskList =

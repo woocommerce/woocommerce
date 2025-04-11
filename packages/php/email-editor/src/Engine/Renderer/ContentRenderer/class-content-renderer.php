@@ -86,9 +86,9 @@ class Content_Renderer {
 	private function initialize() {
 		add_filter( 'render_block', array( $this, 'render_block' ), 10, 2 );
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
-		add_filter( 'woocommerce_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
-		do_action( 'woocommerce_blocks_renderer_initialized', $this->blocks_registry );
+		do_action( 'woocommerce_email_blocks_renderer_initialized', $this->blocks_registry );
 	}
 
 	/**
@@ -164,7 +164,7 @@ class Content_Renderer {
 		$this->blocks_registry->remove_all_block_renderers();
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
-		remove_filter( 'woocommerce_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 	}
 
 	/**

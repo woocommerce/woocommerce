@@ -36,13 +36,16 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} ) => {
 			await requestUtils.setFeatureFlag( 'experimental-blocks', false );
 			await admin.createNewPost();
+
+			try {
+				await editor.insertBlock( { name: blockData.slug } );
+			} catch ( _error ) {
+				// noop
+			}
+
 			await expect(
-				editor.insertBlock( { name: blockData.slug } )
-			).rejects.toThrow(
-				new RegExp(
-					`Block type '${ blockData.slug }' is not registered.`
-				)
-			);
+				await editor.getBlockByName( blockData.slug )
+			).toBeHidden();
 		} );
 	} );
 

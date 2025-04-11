@@ -18,7 +18,7 @@ import { __, isRTL } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useRef } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 import { select } from '@wordpress/data';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
@@ -33,6 +33,7 @@ import QuantityBadge from './quantity-badge';
 import { defaultColorItem } from './utils/defaults';
 import { migrateAttributesToColorPanel } from './utils/data';
 import './editor.scss';
+import { useApplyEditorStyles } from '../../shared/hooks/use-theme-colors';
 
 export interface Attributes {
 	miniCartIcon: 'cart' | 'bag' | 'bag-alt';
@@ -95,64 +96,16 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		''
 	) as string;
 
-	/**
-	 * This is a workaround for the Site Editor to set the correct
-	 * background color of the Mini-Cart QuantityBadge block based on
-	 * the main background color set by the theme.
-	 */
-	useEffect( () => {
-		let editorStylesWrapper = document.querySelector(
-			'.editor-styles-wrapper'
-		);
-		// If the editor styles wrapper is not available, look in the site editor canvas for it.
-		if ( ! editorStylesWrapper ) {
-			const canvasEl = document.querySelector(
-				'.edit-site-visual-editor__editor-canvas'
-			);
-
-			if ( ! ( canvasEl instanceof HTMLIFrameElement ) ) {
-				return;
+	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
+	useApplyEditorStyles(
+		'mini-cart-quantity-badge-foreground-color',
+		( { editorBackgroundColor, editorColor } ) => `
+			:where(.wc-block-mini-cart__badge) {
+				color: ${ editorBackgroundColor };
+				background-color: ${ editorColor };
 			}
-			const canvas =
-				canvasEl.contentDocument || canvasEl.contentWindow?.document;
-			if ( ! canvas ) {
-				return;
-			}
-			editorStylesWrapper = canvas.querySelector(
-				'.editor-styles-wrapper'
-			);
-		}
-
-		if ( ! editorStylesWrapper ) {
-			return;
-		}
-
-		const editorBackgroundColor =
-			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
-		const editorColor =
-			window.getComputedStyle( editorStylesWrapper )?.color;
-
-		if (
-			editorStylesWrapper &&
-			! editorStylesWrapper.querySelector(
-				'#mini-cart-quantity-badge-foreground-color'
-			) &&
-			editorBackgroundColor &&
-			editorColor
-		) {
-			const style = document.createElement( 'style' );
-			style.id = 'mini-cart-quantity-badge-foreground-color';
-			style.appendChild(
-				document.createTextNode(
-					`:where(.wc-block-mini-cart__badge) {
-						color: ${ editorBackgroundColor };
-						background-color: ${ editorColor };
-					}`
-				)
-			);
-			editorStylesWrapper.appendChild( style );
-		}
-	}, [] );
+		`
+	);
 
 	const productCount =
 		productCountVisibility === 'never' ||

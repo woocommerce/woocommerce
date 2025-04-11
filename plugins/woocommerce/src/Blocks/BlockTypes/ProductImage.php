@@ -23,33 +23,6 @@ class ProductImage extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get block supports. Shared with the frontend.
-	 * IMPORTANT: If you change anything here, make sure to update the JS file too.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'__experimentalBorder'   =>
-			array(
-				'radius'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                        => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalSelector' => '.wc-block-components-product-image',
-		);
-	}
-
-	/**
 	 * It is necessary to register and enqueues assets during the render phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
@@ -162,8 +135,18 @@ class ProductImage extends AbstractBlock {
 		if ( ! empty( $attributes['scale'] ) ) {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
+
+		// Keep this aspect ratio for backward compatibility.
 		if ( ! empty( $attributes['aspectRatio'] ) ) {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['style']['dimensions']['aspectRatio'] );
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) {
+			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
 
 		$image_id = $product->get_image_id();
@@ -193,7 +176,7 @@ class ProductImage extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		$this->asset_data_registry->add( 'isBlockThemeEnabled', wc_current_theme_is_fse_theme() );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
 

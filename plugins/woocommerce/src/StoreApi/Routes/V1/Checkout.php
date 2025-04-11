@@ -115,6 +115,7 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this, 'get_response' ],
+				'validate_callback'   => [ $this, 'validate_callback' ],
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
@@ -173,6 +174,18 @@ class Checkout extends AbstractCartRoute {
 			if ( $this->order ) {
 				wc_release_stock_for_order( $this->order );
 				wc_release_coupons_for_order( $this->order );
+			}
+
+			if ( $request->get_method() === \WP_REST_Server::CREATABLE ) {
+				// Step logs the exception. If nothing abnormal occurred during the place order POST request, flow the log is removed.
+				wc_log_order_step(
+					'[Store API #FAIL] Placing Order failed',
+					array(
+						'status' => $response->get_status(),
+						'data'   => $response->get_data(),
+					),
+					true
+				);
 			}
 		}
 
@@ -358,9 +371,7 @@ class Checkout extends AbstractCartRoute {
 		/**
 		 * Persist additional fields, order notes and payment method for order.
 		 */
-		$this->persist_additional_fields_for_order( $request );
-		$this->persist_order_notes_for_order( $request );
-		$this->persist_payment_method_for_order( $request );
+		$this->update_order_from_request( $request );
 
 		if ( $request->get_param( '__experimental_calc_totals' ) ) {
 			/**
@@ -406,6 +417,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		wc_log_order_step( '[Store API #1] Place Order flow initiated', null, false, true );
+
 		/**
 		 * Ensure required permissions based on store settings are valid to place the order.
 		 */
@@ -421,6 +434,7 @@ class Checkout extends AbstractCartRoute {
 		 * Validate that the cart is not empty.
 		 */
 		$this->cart_controller->validate_cart_not_empty();
+		wc_log_order_step( '[Store API #2] Cart validated' );
 
 		/**
 		 * Validate items and fix violations before the order is processed.
@@ -432,18 +446,23 @@ class Checkout extends AbstractCartRoute {
 		 * uses the up-to-date customer address.
 		 */
 		$this->update_customer_from_request( $request );
+		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
+		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
 		$this->update_order_from_request( $request );
+		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );
+		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
+		wc_log_order_step( '[Store API #7] Validated order data', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Hold coupons for the order as soon as the draft order is created.
@@ -487,6 +506,7 @@ class Checkout extends AbstractCartRoute {
 				esc_html( $e->getCode() )
 			);
 		}
+		wc_log_order_step( '[Store API #8] Reserved stock for order', array( 'order_object' => $this->order ) );
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -536,6 +556,16 @@ class Checkout extends AbstractCartRoute {
 		} else {
 			$this->process_without_payment( $request, $payment_result );
 		}
+
+		wc_log_order_step(
+			'[Store API #9] Order processed',
+			array(
+				'order_object'           => $this->order,
+				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
+				'payment_status'         => $payment_result->status,
+			),
+			true
+		);
 
 		return $this->prepare_item_for_response(
 			(object) [
@@ -612,8 +642,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
+
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
 		}
 
 		wc_do_deprecated_action(
@@ -666,6 +699,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
+		wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
 	}
 
 	/**
@@ -746,6 +780,7 @@ class Checkout extends AbstractCartRoute {
 					$this->update_customer_address_field( $customer, $key, $value, $context_data['group'] );
 				}
 			}
+			wc_log_order_step( '[Store API #3::update_customer_from_request] Persisted ' . $context . ' fields' );
 		}
 
 		/**
@@ -769,9 +804,10 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways      = WC()->payment_gateways->get_available_payment_gateways();
-		$request_payment_method  = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-		$requires_payment_method = $this->order->needs_payment();
+		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
+		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
+		// For PUT requests, the order never requires payment, only POST does.
+		$requires_payment_method = $this->order->needs_payment() && 'POST' === $request->get_method();
 
 		if ( empty( $request_payment_method ) ) {
 			if ( $requires_payment_method ) {
@@ -837,10 +873,13 @@ class Checkout extends AbstractCartRoute {
 
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
+			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+
 		}
 
 		// Persist customer address data to account.
 		$this->order_controller->sync_customer_data_with_order( $this->order );
+		wc_log_order_step( '[Store API #6::process_customer] Synced customer data from order', array( 'customer_id' => $this->order->get_customer_id() ) );
 	}
 
 	/**
@@ -872,30 +911,6 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Persists order notes from the request to the order.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	private function persist_order_notes_for_order( \WP_REST_Request $request ) {
-		if ( isset( $request['order_notes'] ) ) {
-			$this->order->set_customer_note( sanitize_text_field( wp_unslash( $request['order_notes'] ) ) );
-		}
-	}
-
-	/**
-	 * Persists the chosen payment method to the order.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	private function persist_payment_method_for_order( \WP_REST_Request $request ) {
-		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		if ( isset( $request['payment_method'] ) && in_array( $request['payment_method'], array_keys( $available_gateways ), true ) ) {
-			WC()->session->set( 'chosen_payment_method', sanitize_text_field( wp_unslash( $request['payment_method'] ) ) );
-			$this->order->set_payment_method( sanitize_text_field( wp_unslash( $request['payment_method'] ) ) );
-		}
 	}
 
 	/**

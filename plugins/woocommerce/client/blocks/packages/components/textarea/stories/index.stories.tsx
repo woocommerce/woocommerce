@@ -67,7 +67,7 @@ const Template: StoryFn< TextareaProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< TextareaProps > = Template.bind( {} );
 
 Default.args = {
 	className: '',

@@ -33,13 +33,13 @@ require WC_ABSPATH . 'includes/wc-attribute-functions.php';
 require WC_ABSPATH . 'includes/wc-rest-functions.php';
 require WC_ABSPATH . 'includes/wc-widget-functions.php';
 require WC_ABSPATH . 'includes/wc-webhook-functions.php';
+require WC_ABSPATH . 'includes/wc-order-step-logger-functions.php';
 
 /**
  * Filters on data used in admin and frontend.
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'wc_sanitize_coupon_code' );
-add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.
 add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
@@ -1657,6 +1657,20 @@ function wc_get_credit_card_type_label( $type ) {
  */
 function wc_back_link( $label, $url ) {
 	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;&#xfe0e;</a></small>';
+}
+
+/**
+ * Outputs a header with "back" link so admin screens can easily jump back a page.
+ *
+ * @param string $title Title of the current page.
+ * @param string $label Label of the page to return to.
+ * @param string $url   URL of the page to return to.
+ */
+function wc_back_header( $title, $label, $url ) {
+	echo '<h2 class="wc-admin-header">';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons dashicons-arrow-left-alt2"></span></a></small>';
+	echo esc_html( $title );
+	echo '</h2>';
 }
 
 /**

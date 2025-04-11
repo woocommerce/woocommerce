@@ -20,7 +20,6 @@ class Products extends Task {
 	 */
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
-		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
 
@@ -109,27 +108,6 @@ class Products extends Task {
 	}
 
 	/**
-	 * Adds a return to task list notice when completing the manual product task.
-	 *
-	 * @param string $hook Page hook.
-	 */
-	public function possibly_add_manual_return_notice_script( $hook ) {
-		global $post;
-		if ( $hook !== 'post.php' || $post->post_type !== 'product' ) {
-			return;
-		}
-
-		if ( ! $this->is_active() || ! $this->is_complete() ) {
-			return;
-		}
-
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-product-notice', true );
-
-		// Clear the active task transient to only show notice once per active session.
-		delete_transient( self::ACTIVE_TASK_TRANSIENT );
-	}
-
-	/**
 	 * Adds a return to task list notice when completing the import product task.
 	 *
 	 * @param string $hook Page hook.
@@ -191,7 +169,7 @@ class Products extends Task {
 	/**
 	 * Set the has products transient if the product qualifies as a user created product.
 	 *
-	 * @param int $product_id Product ID.
+	 * @param int        $product_id Product ID.
 	 * @param WC_Product $product Product object.
 	 */
 	public function maybe_set_has_product_transient( $product_id, $product ) {
@@ -209,8 +187,8 @@ class Products extends Task {
 	 */
 	private function is_valid_product( $product ) {
 		return ProductStatus::PUBLISH === $product->get_status() &&
-			! $product->get_meta( '_headstart_post' ) &&
-			get_post_meta( $product->get_id(), '_edit_last', true );
+			( ! $product->get_meta( '_headstart_post' ) ||
+			get_post_meta( $product->get_id(), '_edit_last', true ) );
 	}
 
 	/**
@@ -224,28 +202,56 @@ class Products extends Task {
 			return 'yes' === $product_exists;
 		}
 
-		$args = array(
-			'post_type'      => 'product',
-			'post_status'    => ProductStatus::PUBLISH,
-			'posts_per_page' => 1,
-			'no_found_rows'  => true,
-			'fields'         => 'ids',
-			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				'relation' => 'OR',
-				array(
-					'key'     => '_headstart_post',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => '_edit_last',
-					'compare' => 'EXISTS',
-				),
-			),
+		global $wpdb;
+
+		/*
+		 * Check if any valid products exist and return 'yes' or 'no'
+		 * A valid product must:
+		 * 1. Be a published product post type
+		 * 2. Meet one of these conditions:
+		 *    - Have been edited by a user (_edit_last meta exists), OR
+		 *    - Not have _headstart_post meta, OR
+		 *    - Have _headstart_post meta but it's NULL
+		 */
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT IF(
+					EXISTS (
+						SELECT 1 FROM {$wpdb->posts} p
+						WHERE p.post_type = %s
+						AND p.post_status = %s
+						AND (
+							EXISTS (
+								SELECT 1 FROM {$wpdb->postmeta} pm
+								WHERE pm.post_id = p.ID
+								AND pm.meta_key = %s
+							)
+							OR
+							NOT EXISTS (
+								SELECT 1 FROM {$wpdb->postmeta} pm
+								WHERE pm.post_id = p.ID
+								AND pm.meta_key = %s
+							)
+							OR
+							EXISTS (
+								SELECT 1 FROM {$wpdb->postmeta} pm
+								WHERE pm.post_id = p.ID
+								AND pm.meta_key = %s
+								AND pm.meta_value = ''
+							)
+						)
+						LIMIT 1
+					),
+					'yes', 'no'
+				)",
+				'product',
+				ProductStatus::PUBLISH,
+				'_edit_last',
+				'_headstart_post',
+				'_headstart_post'
+			)
 		);
 
-		$products_query = new \WP_Query( $args );
-
-		$value = $products_query->post_count > 0 ? 'yes' : 'no';
 		set_transient( self::HAS_PRODUCT_TRANSIENT, $value );
 		return 'yes' === $value;
 	}

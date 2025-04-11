@@ -17,12 +17,12 @@ import {
 import { AutomatedTaxes } from './automated-taxes';
 import { Setup } from './setup';
 
-export const WooCommerceTax: React.FC< TaxChildProps > = ( {
+export const WooCommerceTax = ( {
 	isPending,
 	onAutomate,
 	onManual,
 	onDisable,
-} ) => {
+}: TaxChildProps ) => {
 	const {
 		generalSettings,
 		isJetpackConnected,

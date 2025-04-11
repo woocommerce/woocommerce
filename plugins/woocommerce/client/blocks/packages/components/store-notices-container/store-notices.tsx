@@ -8,7 +8,7 @@ import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch } from '@wordpress/data';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
-import type { NoticeType } from '@woocommerce/types';
+import type { NoticeStatus, NoticeType } from '@woocommerce/types';
 import type { NoticeBannerProps } from '@woocommerce/base-components/notice-banner';
 
 /**
@@ -123,11 +123,8 @@ const StoreNotices = ( {
 								decodeEntities( notice.content )
 							),
 						} ) );
-					const noticeProps: Omit< NoticeBannerProps, 'children' > & {
-						key: string;
-					} = {
-						key: `store-notice-${ status }`,
-						status,
+					const noticeProps: Omit< NoticeBannerProps, 'children' > = {
+						status: status as NoticeStatus,
 						onRemove: () => {
 							noticeGroup.forEach( ( notice ) => {
 								removeNotice( notice.id, notice.context );
@@ -135,11 +132,15 @@ const StoreNotices = ( {
 						},
 					};
 					return uniqueNotices.length === 1 ? (
-						<StoreNotice { ...noticeProps }>
+						<StoreNotice
+							key={ 'store-notice-' + status }
+							{ ...noticeProps }
+						>
 							<RawHTML>{ noticeGroup[ 0 ].content }</RawHTML>
 						</StoreNotice>
 					) : (
 						<StoreNotice
+							key={ 'store-notice-' + status }
 							{ ...noticeProps }
 							summary={
 								status === 'error'

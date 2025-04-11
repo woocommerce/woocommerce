@@ -413,6 +413,11 @@ jQuery( function ( $ ) {
 				this.remove_coupon_clicked
 			);
 			$( document ).on(
+				'keydown',
+				'a.woocommerce-remove-coupon',
+				this.on_keydown_remove_coupon
+			);
+			$( document ).on(
 				'click',
 				'.woocommerce-cart-form .product-remove > a',
 				this.item_remove_clicked
@@ -662,6 +667,20 @@ jQuery( function ( $ ) {
 					cart.update_cart( true );
 				},
 			} );
+		},
+
+		/**
+		 * Handle when pressing the Space key on the remove coupon link.
+		 * This is necessary because the link got the role="button" attribute
+		 * and needs to act like a button.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		on_keydown_remove_coupon: function ( evt ) {
+			if ( evt.key === ' ' ) {
+				evt.preventDefault();
+				$( evt.currentTarget ).trigger( 'click' );
+			}
 		},
 
 		/**

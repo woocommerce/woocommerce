@@ -9,7 +9,6 @@ import { Icon, heading } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import AttributeNameEdit from './edit';
-import AttributeNameSave from './save';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
@@ -19,6 +18,6 @@ if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 		icon: {
 			src: <Icon icon={ heading } />,
 		},
-		save: AttributeNameSave,
+		save: () => null,
 	} );
 }
