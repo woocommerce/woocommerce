@@ -3,10 +3,9 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { useCollection } from '@woocommerce/base-context/hooks';
 import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
 import { useSelect } from '@wordpress/data';
-import { optionsStore, Product } from '@woocommerce/data';
+import { optionsStore, Product, productsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -42,13 +41,18 @@ const Edit = ( {
 		};
 	}, [] );
 
-	const { results, isLoading } = useCollection< Product >( {
-		namespace: '/wc/v3',
-		resourceName: 'products',
-		resourceValues: [ Number( postId ) ],
-		shouldSelect: isSpecificProductContext,
-	} );
-	const product = results as unknown as Product;
+	const { product, isLoading } = useSelect(
+		( select ) => {
+			const { getProduct } = select( productsStore );
+			return {
+				product: getProduct( Number( postId ) ),
+				isLoading: select( productsStore ).isResolving( 'getProduct', [
+					Number( postId ),
+				] ),
+			};
+		},
+		[ postId ]
+	);
 
 	/**
 	 * Validate Query Loop block context
