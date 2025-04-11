@@ -1122,7 +1122,7 @@ class WC_Helper {
 	public static function activate_plugin( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
-			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );
+			throw new Exception( esc_html( __( 'Subscription not found', 'woocommerce' ) ) );
 		}
 		$product_id = $subscription['product_id'];
 		$local      = self::_get_local_from_product_id( $product_id );
