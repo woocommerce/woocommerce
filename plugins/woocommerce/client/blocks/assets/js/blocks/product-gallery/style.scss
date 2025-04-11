@@ -146,7 +146,19 @@ $dialog-padding: 20px;
 		aspect-ratio: 1 / 1;
 
 		&--active {
-			border-color: currentColor;
+			position: relative;
+
+			&::after {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: #111;
+				opacity: 0.1;
+				pointer-events: none;
+			}
 		}
 	}
 
