@@ -62,6 +62,16 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Hook into the add to cart button action.
+	 *
+	 * Outputs a test message when the `woocommerce_before_add_to_cart_button` action is triggered.
+	 * Used for testing that hooks are properly called during add to cart.
+	 */
+	public function hook_into_add_to_cart_button_action() {
+		echo 'Hook into add to cart button action';
+	}
+
+	/**
 	 * Tests that the correct content is rendered for each product type.
 	 */
 	public function test_product_type_add_to_cart_render() {
@@ -134,6 +144,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 */
 	public function test_product_type_add_to_cart_hooks_are_rendered() {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
+		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
 
 		global $product;
 		$product = new \WC_Product_Simple();
@@ -141,9 +152,18 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$product_id = $product->save();
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart with Options correctly renders the contents from the hook.' );
+		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart with Options correctly renders the contents from the wrapper hook.' );
+		$this->assertStringContainsString( 'Hook into add to cart button action', $markup, 'The Add to Cart with Options doesn\'t render the contents from the inner hooks.' );
+
+		$product->set_stock_status( 'outofstock' );
+		$product_id = $product->save();
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart with Options correctly renders the contents from the wrapper hook if the product is out of stock.' );
+		$this->assertStringNotContainsString( 'Hook into add to cart button action', $markup, 'The Add to Cart with Options doesn\'t render the contents from the inner hooks if the product is out of stock.' );
 
 		remove_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
+		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
 	}
 
 	/**
