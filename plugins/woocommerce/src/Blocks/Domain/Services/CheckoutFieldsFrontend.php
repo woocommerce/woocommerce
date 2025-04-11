@@ -298,6 +298,7 @@ class CheckoutFieldsFrontend {
 	 */
 	protected function get_posted_additional_field_values( $location, $group, $sanitize = true ) {
 		$additional_fields = $this->checkout_fields_controller->get_fields_for_location( $location );
+		$field_values      = [];
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		foreach ( $additional_fields as $field_key => $field_data ) {
