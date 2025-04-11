@@ -74,6 +74,7 @@ const ValidatedCheckboxControl = forwardRef<
 			label,
 			validateOnMount = true,
 			instanceId: preferredInstanceId = '',
+			disabled = false,
 			...rest
 		},
 		forwardedRef
@@ -214,6 +215,7 @@ const ValidatedCheckboxControl = forwardRef<
 				checked={ checked }
 				title="" // This prevents the same error being shown on hover.
 				label={ label }
+				disabled={ disabled }
 				{ ...rest }
 			>
 				<ValidationInputError propertyName={ errorIdString } />

@@ -6,7 +6,6 @@
 import { chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
-	BASE_URL,
 	adminFile,
 	wpCLI,
 	customerFile,
@@ -18,6 +17,7 @@ import {
  * Internal dependencies
  */
 import { customer, admin } from './test-data/data/data';
+import { BASE_URL } from './utils/constants';
 
 const prepareAttributes = async () => {
 	const browser = await chromium.launch();

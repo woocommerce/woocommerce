@@ -138,20 +138,22 @@ test.describe( `${ blockData.name }`, () => {
 				{ clientId: parentClientId }
 			);
 
-			const editorBoundingClientRect = await getBoundingClientRect( {
-				pageObject,
-				leftArrowSelector: blockData.selectors.editor.leftArrow,
-				rightArrowSelector: blockData.selectors.editor.rightArrow,
-				isFrontend: false,
-			} );
+			await expect( async () => {
+				const editorBoundingClientRect = await getBoundingClientRect( {
+					pageObject,
+					leftArrowSelector: blockData.selectors.editor.leftArrow,
+					rightArrowSelector: blockData.selectors.editor.rightArrow,
+					isFrontend: false,
+				} );
 
-			expect( editorBoundingClientRect.leftArrow.left ).toBeGreaterThan(
-				editorBoundingClientRect.gallery.left
-			);
+				expect(
+					editorBoundingClientRect.leftArrow.left
+				).toBeGreaterThan( editorBoundingClientRect.gallery.left );
 
-			expect( editorBoundingClientRect.rightArrow.right ).toBeLessThan(
-				editorBoundingClientRect.gallery.right
-			);
+				expect(
+					editorBoundingClientRect.rightArrow.right
+				).toBeLessThan( editorBoundingClientRect.gallery.right );
+			} ).toPass( { timeout: 3_000 } );
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -159,20 +161,25 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const frontendBoundingClientRect = await getBoundingClientRect( {
-				pageObject,
-				leftArrowSelector: blockData.selectors.editor.leftArrow,
-				rightArrowSelector: blockData.selectors.editor.rightArrow,
-				isFrontend: true,
-			} );
+			await expect( async () => {
+				const frontendBoundingClientRect = await getBoundingClientRect(
+					{
+						pageObject,
+						leftArrowSelector: blockData.selectors.editor.leftArrow,
+						rightArrowSelector:
+							blockData.selectors.editor.rightArrow,
+						isFrontend: true,
+					}
+				);
 
-			expect( frontendBoundingClientRect.leftArrow.left ).toBeGreaterThan(
-				frontendBoundingClientRect.gallery.left
-			);
+				expect(
+					frontendBoundingClientRect.leftArrow.left
+				).toBeGreaterThan( frontendBoundingClientRect.gallery.left );
 
-			expect( frontendBoundingClientRect.rightArrow.right ).toBeLessThan(
-				frontendBoundingClientRect.gallery.right
-			);
+				expect(
+					frontendBoundingClientRect.rightArrow.right
+				).toBeLessThan( frontendBoundingClientRect.gallery.right );
+			} ).toPass( { timeout: 3_000 } );
 		} );
 
 		test( 'Show buttons at the bottom of the image by default', async ( {

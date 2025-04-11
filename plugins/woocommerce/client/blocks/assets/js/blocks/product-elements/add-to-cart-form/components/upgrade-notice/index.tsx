@@ -28,10 +28,7 @@ const upgradeToBlockifiedAddToCartWithOptions = async (
 		return false;
 	}
 
-	const newBlock = createBlock( 'woocommerce/add-to-cart-with-options', {
-		isDescendentOfSingleProductBlock:
-			foundBlock.attributes.isDescendentOfSingleProductBlock,
-	} );
+	const newBlock = createBlock( 'woocommerce/add-to-cart-with-options' );
 	dispatch( 'core/block-editor' ).replaceBlock(
 		foundBlock.clientId,
 		newBlock

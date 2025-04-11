@@ -1,4 +1,4 @@
-name: Nightly builds
+name: 'Nightly builds'
 on:
   schedule:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
@@ -14,7 +14,7 @@ permissions: { }
 jobs:
   build:
     if: github.repository_owner == 'woocommerce'
-    name: Nightly builds
+    name: 'Nightly builds'
 
     runs-on: ubuntu-latest
     permissions:
@@ -62,5 +62,3 @@ jobs:
           asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
-
-
