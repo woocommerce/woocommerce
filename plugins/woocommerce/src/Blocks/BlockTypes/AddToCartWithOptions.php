@@ -241,17 +241,14 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			ob_start();
 
-			$add_to_cart_fn = 'woocommerce_' . $product_type . '_add_to_cart';
-			remove_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
-
-			/**
-			 * Trigger the single product add to cart action that prints the markup.
-			 *
-			 * @since 9.9.0
-			 */
-			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
-			if ( function_exists( $add_to_cart_fn ) ) {
-				add_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
+			if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+				$add_to_cart_fn = 'woocommerce_' . $product_type . '_add_to_cart';
+				/**
+				 * Trigger the single product add to cart action that prints the markup.
+				 *
+				 * @since 9.9.0
+				 */
+				do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 			}
 
 			$form_html = $form_html . ob_get_clean();
