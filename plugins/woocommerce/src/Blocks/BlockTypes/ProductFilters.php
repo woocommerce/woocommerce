@@ -134,6 +134,7 @@ class ProductFilters extends AbstractBlock {
 					<div
 						class="wc-block-product-filters__overlay-dialog"
 						role="dialog"
+						aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
 					>
 						<header class="wc-block-product-filters__overlay-header">
 							<button

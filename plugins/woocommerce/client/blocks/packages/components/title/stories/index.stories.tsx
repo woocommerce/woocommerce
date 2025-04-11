@@ -51,7 +51,7 @@ const Template: StoryFn< TitleProps > = ( args ) => {
 	return <Title { ...rest }>{ children }</Title>;
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< TitleProps > = Template.bind( {} );
 
 Default.args = {
 	headingLevel: '1',

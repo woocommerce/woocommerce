@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Remove unnecessary attribute assignment when upgrading to the Add to Cart with Options block
+
+
