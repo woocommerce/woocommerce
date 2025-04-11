@@ -312,7 +312,7 @@ jobs:
 
   alert-on-failure:
     name: 'Report results on Slack'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
     steps:
@@ -358,7 +358,7 @@ jobs:
       max-parallel: 1
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     env:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
 
@@ -409,7 +409,7 @@ jobs:
     name: 'Create issues for flaky tests'
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
     needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'alert-on-failure']
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     permissions:
       contents: read
       issues: write
