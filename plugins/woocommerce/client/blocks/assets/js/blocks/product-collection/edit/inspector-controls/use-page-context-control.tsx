@@ -80,28 +80,31 @@ const InheritQueryControl = ( {
 				isBlock
 				label={ label }
 				help={ inherit ? defaultInheritHelpText : customHelpText }
-				value={ !! inherit }
-				onChange={ ( value: boolean ) => {
-					if ( value ) {
+				value={ !! inherit ? 'default' : 'custom' }
+				onChange={ ( value: 'default' | 'custom' ) => {
+					if ( value === 'default' ) {
 						// If the inherit is enabled, we want to reset the query to the default.
 						setQueryAttribute( {
 							...DEFAULT_QUERY,
-							inherit: value,
+							inherit: true,
 						} );
 					} else {
 						// If the inherit is disabled, we want to reset the query to the previous query before the inherit was enabled.
 						setQueryAttribute( {
 							...DEFAULT_QUERY,
 							...queryObjectBeforeInheritEnabled,
-							inherit: value,
+							inherit: false,
 						} );
 					}
 					trackInteraction( CoreFilterNames.INHERIT );
 				} }
 			>
-				<ToggleGroupControlOption value label={ defaultOptionLabel } />
 				<ToggleGroupControlOption
-					value={ false }
+					value="default"
+					label={ defaultOptionLabel }
+				/>
+				<ToggleGroupControlOption
+					value="custom"
 					label={ customOptionLabel }
 				/>
 			</ToggleGroupControl>
@@ -135,17 +138,20 @@ const FilterableControl = ( {
 				isBlock
 				label={ label }
 				help={ filterable ? defaultFilterableHelpText : customHelpText }
-				value={ !! filterable }
-				onChange={ ( value: boolean ) => {
+				value={ !! filterable ? 'default' : 'custom' }
+				onChange={ ( value: 'default' | 'custom' ) => {
 					setQueryAttribute( {
-						filterable: value,
+						filterable: value === 'default',
 					} );
 					trackInteraction( CoreFilterNames.FILTERABLE );
 				} }
 			>
-				<ToggleGroupControlOption value label={ defaultOptionLabel } />
 				<ToggleGroupControlOption
-					value={ false }
+					value="default"
+					label={ defaultOptionLabel }
+				/>
+				<ToggleGroupControlOption
+					value="custom"
 					label={ customOptionLabel }
 				/>
 			</ToggleGroupControl>

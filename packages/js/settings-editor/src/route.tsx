@@ -16,21 +16,15 @@ import {
 	didFilter,
 	removeAction,
 } from '@wordpress/hooks';
-/* eslint-disable @woocommerce/dependency-group */
-// @ts-ignore No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-/* eslint-enable @woocommerce/dependency-group */
+import { useLocation } from '@automattic/site-admin';
 
 /**
  * Internal dependencies
  */
 import { Sidebar } from './components';
-import { Route, Location } from './types';
+import { Route } from './types';
 import { LegacyContent } from './legacy';
 import { SettingsDataContext } from './data';
-const { useLocation } = unlock( routerPrivateApis );
 
 const NotFound = () => {
 	return <h1>{ __( 'Page not found', 'woocommerce' ) }</h1>;
@@ -144,7 +138,7 @@ export function useModernRoutes(): Record< string, Route > {
 	const [ routes, setRoutes ] = useState< Record< string, Route > >(
 		getModernPages()
 	);
-	const location = useLocation() as Location;
+	const location = useLocation();
 	const isFirstRender = useRef( true );
 
 	/*
@@ -181,7 +175,7 @@ export function useModernRoutes(): Record< string, Route > {
 		}
 
 		setRoutes( getModernPages() );
-	}, [ location.params ] );
+	}, [ location.query ] );
 
 	return routes;
 }
@@ -197,12 +191,12 @@ export const useActiveRoute = (): {
 	tabs?: Array< { name: string; title: string } >;
 } => {
 	const { settingsData } = useContext( SettingsDataContext );
-	const location = useLocation() as Location;
+	const location = useLocation();
 	const modernRoutes = useModernRoutes();
 
 	return useMemo( () => {
 		const { tab: activePage = 'general', section: activeSection } =
-			location.params;
+			location.query || {};
 		const settingsPage = settingsData?.pages?.[ activePage ];
 
 		if ( ! settingsPage ) {
@@ -256,5 +250,5 @@ export const useActiveRoute = (): {
 			activeSection,
 			tabs,
 		};
-	}, [ settingsData, location.params, modernRoutes ] );
+	}, [ settingsData, location.query ] );
 };

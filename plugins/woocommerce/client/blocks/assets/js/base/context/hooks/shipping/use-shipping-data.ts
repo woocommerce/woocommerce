@@ -10,18 +10,14 @@ import {
 	deriveSelectedShippingRates,
 } from '@woocommerce/base-utils';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
  */
 import { useStoreEvents } from '../use-store-events';
 import type { ShippingData } from './types';
-import { useEditorContext } from '../../providers';
 
 export const useShippingData = (): ShippingData => {
-	const { isEditor } = useEditorContext();
-
 	const {
 		shippingRates,
 		needsShipping,
@@ -29,37 +25,23 @@ export const useShippingData = (): ShippingData => {
 		isLoadingRates,
 		isCollectable,
 		isSelectingRate,
-	} = useSelect(
-		( select ) => {
-			const store = select( cartStore );
-			const rates = isEditor
-				? previewCart.shipping_rates
-				: store.getShippingRates();
-			return {
-				shippingRates: rates,
-				needsShipping: isEditor
-					? previewCart.needs_shipping
-					: store.getNeedsShipping(),
-				hasCalculatedShipping: isEditor
-					? previewCart.has_calculated_shipping
-					: store.getHasCalculatedShipping(),
-				isLoadingRates: isEditor
-					? false
-					: store.isCustomerDataUpdating(),
-				isCollectable: rates.every(
-					( { shipping_rates: packageShippingRates } ) =>
-						packageShippingRates.find(
-							( { method_id: methodId } ) =>
-								hasCollectableRate( methodId )
-						)
-				),
-				isSelectingRate: isEditor
-					? false
-					: store.isShippingRateBeingSelected(),
-			};
-		},
-		[ isEditor ]
-	);
+	} = useSelect( ( select ) => {
+		const store = select( cartStore );
+		const rates = store.getShippingRates();
+		return {
+			shippingRates: rates,
+			needsShipping: store.getNeedsShipping(),
+			hasCalculatedShipping: store.getHasCalculatedShipping(),
+			isLoadingRates: store.isCustomerDataUpdating(),
+			isCollectable: rates.every(
+				( { shipping_rates: packageShippingRates } ) =>
+					packageShippingRates.find( ( { method_id: methodId } ) =>
+						hasCollectableRate( methodId )
+					)
+			),
+			isSelectingRate: store.isShippingRateBeingSelected(),
+		};
+	}, [] );
 
 	// set selected rates on ref so it's always current.
 	const selectedRates = useRef< Record< string, string > >( {} );

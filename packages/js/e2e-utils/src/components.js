@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { randomUUID as v4 } from 'crypto';
+
+/**
  * Internal dependencies
  */
 import { merchant, IS_RETEST_MODE } from './flows';
@@ -24,8 +29,6 @@ const simpleProductPrice = config.has( 'products.simple.price' )
 	: '9.99';
 const defaultVariableProduct = config.get( 'products.variable' );
 const defaultGroupedProduct = config.get( 'products.grouped' );
-
-const uuid = require( 'uuid' );
 
 /**
  * Verify and publish
@@ -129,7 +132,7 @@ const createSimpleDownloadableProduct = async (
 		downloadable: true,
 		downloads: [
 			{
-				id: uuid.v4(),
+				id: v4(),
 				name: downloadName,
 				file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 			},

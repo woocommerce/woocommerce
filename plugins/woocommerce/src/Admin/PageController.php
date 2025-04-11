@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\Features;
+
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -252,6 +254,19 @@ class PageController {
 	 * @return string Current screen ID.
 	 */
 	public function get_current_screen_id() {
+		// Return early if this is a REST API request.
+		if ( wp_is_serving_rest_request() ) {
+			/**
+			 * Filter the current screen ID for REST API requests.
+			 *
+			 * @since 3.9.0
+			 *
+			 * @param string|boolean $screen_id The screen id or false if not identified.
+			 * @param WP_Screen      $current_screen The current WP_Screen.
+			 */
+			return apply_filters( 'woocommerce_navigation_current_screen_id', false, null );
+		}
+
 		$current_screen = get_current_screen();
 		if ( ! $current_screen ) {
 			// Filter documentation below.
@@ -589,5 +604,12 @@ class PageController {
 	 */
 	public static function is_embed_page() {
 		return wc_admin_is_connected_page();
+	}
+
+	/**
+	 * Returns true if we are on a modern settings page.
+	 */
+	public static function is_modern_settings_page() {
+		return self::is_settings_page() && Features::is_enabled( 'settings' );
 	}
 }

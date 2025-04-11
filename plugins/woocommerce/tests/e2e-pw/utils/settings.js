@@ -17,7 +17,12 @@ function resolvePath( path ) {
  * @return {Promise<void>} A promise that resolves when the update is complete.
  */
 export async function updateValue( path, desiredValue ) {
-	await apiClient.put( resolvePath( path ), { value: desiredValue } );
+	await apiClient
+		.put( resolvePath( path ), { value: desiredValue } )
+		.catch( ( err ) => {
+			console.error( `Error updating ${ path }` );
+			throw err;
+		} );
 }
 
 /**
@@ -30,7 +35,11 @@ export async function updateValue( path, desiredValue ) {
 export async function updateIfNeeded( path, desiredValue ) {
 	const initialValue = await apiClient
 		.get( resolvePath( path ) )
-		.then( ( r ) => r.data.value );
+		.then( ( r ) => r.data.value )
+		.catch( ( err ) => {
+			console.log( `Error checking ${ path }` );
+			throw err;
+		} );
 	if ( initialValue !== desiredValue ) {
 		await updateValue( path, desiredValue );
 	}

@@ -5,9 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin =
-	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
@@ -142,6 +141,10 @@ const webpackConfig = {
 							! isProduction &&
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
+							isProduction &&
+								require.resolve(
+									'babel-plugin-transform-react-remove-prop-types'
+								),
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,

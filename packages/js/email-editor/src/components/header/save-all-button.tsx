@@ -44,7 +44,7 @@ const SaveAllContent = ( { onToggle } ) => {
 	return <EntitiesSavedStates close={ onToggle } />;
 };
 
-export function SaveAllButton() {
+export function SaveAllButton( { validateContent } ) {
 	const { isSaving } = useSelect(
 		( select ) => ( {
 			isSaving: select( storeName ).isSaving(),
@@ -73,7 +73,9 @@ export function SaveAllButton() {
 							recordEvent(
 								'header_save_all_button_save_button_clicked'
 							);
-							onToggle();
+							if ( validateContent() ) {
+								onToggle();
+							}
 						} }
 						variant="primary"
 						disabled={ isSaving }

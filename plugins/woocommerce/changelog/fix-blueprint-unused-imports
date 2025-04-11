@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove unused imports from Blueprint exporter classes and improve class documentation. 
