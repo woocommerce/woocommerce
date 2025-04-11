@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Enums\ActionQueuePriority;
  * This interface represents a queue supporting priorities. Please note that priorities enum is specific to action
  * scheduled library, and in case of alternative implementations you might need to introduce a new enum.
  */
-interface QueueWithPrioritiesInterface extends \WC_Queue_Interface {
+interface QueueWithPrioritiesInterface {
 	/**
 	 * Enqueue an action to run one time, as soon as possible
 	 *
@@ -18,9 +18,9 @@ interface QueueWithPrioritiesInterface extends \WC_Queue_Interface {
 	 * @param array  $args     Arguments to pass when the hook triggers.
 	 * @param string $group    The group to assign this job to.
 	 * @param int    $priority Action priority.
-	 * @return int The action ID
+	 * @return string The action ID
 	 */
-	public function add( $hook, $args = array(), $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function add_with_priority( $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule an action to run once at some time in the future
@@ -30,9 +30,9 @@ interface QueueWithPrioritiesInterface extends \WC_Queue_Interface {
 	 * @param array  $args      Arguments to pass when the hook triggers.
 	 * @param string $group     The group to assign this job to.
 	 * @param int    $priority  Action priority.
-	 * @return int The action ID
+	 * @return string The action ID
 	 */
-	public function schedule_single( $timestamp, $hook, $args = array(), $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule a recurring action
@@ -43,9 +43,9 @@ interface QueueWithPrioritiesInterface extends \WC_Queue_Interface {
 	 * @param array  $args                Arguments to pass when the hook triggers.
 	 * @param string $group               The group to assign this job to.
 	 * @param int    $priority            Action priority.
-	 * @return int The action ID
+	 * @return string The action ID
 	 */
-	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule an action that recurs on a cron-like schedule.
@@ -56,7 +56,7 @@ interface QueueWithPrioritiesInterface extends \WC_Queue_Interface {
 	 * @param array  $args          Arguments to pass when the hook triggers.
 	 * @param string $group         The group to assign this job to.
 	 * @param int    $priority      Action priority.
-	 * @return int The action ID
+	 * @return string The action ID
 	 */
-	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, array $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 }
