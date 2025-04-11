@@ -18,4 +18,4 @@ if [[ -z $changedFiles ]]; then
     exit 0
 fi
 
-composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
+XDEBUG_MODE=off composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
