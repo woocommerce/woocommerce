@@ -90,11 +90,16 @@ $dialog-padding: 20px;
 		justify-content: space-between;
 	}
 
-	svg {
-		z-index: 1;
+	// Icons are centred but they are perceived off hence adjusting with padding.
+	&-left__icon {
+		padding: 2px 2px 0 0;
 	}
 
-	button {
+	&-right__icon {
+		padding: 2px 0 0 2px;
+	}
+
+	&__button {
 		cursor: pointer;
 		z-index: 3;
 		pointer-events: all;

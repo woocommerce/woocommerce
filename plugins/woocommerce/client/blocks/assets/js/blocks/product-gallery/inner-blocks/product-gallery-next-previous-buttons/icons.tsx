@@ -14,3 +14,37 @@ export const Icon = () => (
 		/>
 	</svg>
 );
+
+export const PrevIcon = ( { className }: { className: string } ) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="8"
+		height="12"
+		fill="none"
+		className={ className }
+	>
+		<path
+			fill="currentColor"
+			fillRule="evenodd"
+			d="M6.445 12.005.986 6 6.445-.005l1.11 1.01L3.014 6l4.54 4.995-1.109 1.01Z"
+			clipRule="evenodd"
+		/>
+	</svg>
+);
+
+export const NextIcon = ( { className }: { className: string } ) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="8"
+		height="12"
+		fill="none"
+		className={ className }
+	>
+		<path
+			fill="currentColor"
+			fillRule="evenodd"
+			d="M1.555-.004 7.014 6l-5.459 6.005-1.11-1.01L4.986 6 .446 1.005l1.109-1.01Z"
+			clipRule="evenodd"
+		/>
+	</svg>
+);
