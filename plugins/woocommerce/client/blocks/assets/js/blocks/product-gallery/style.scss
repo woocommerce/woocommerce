@@ -144,6 +144,10 @@ $dialog-padding: 20px;
 		justify-content: center;
 		align-items: center;
 		aspect-ratio: 1 / 1;
+
+		&--active {
+			border-color: currentColor;
+		}
 	}
 
 	&__thumbnail__image {

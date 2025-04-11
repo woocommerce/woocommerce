@@ -149,12 +149,16 @@ const productGallery = {
 		 * @return Array The subset of processed image data.
 		 */
 		get thumbnails() {
-			const { imageData } = getContext();
+			const { imageData, selectedImageId } = getContext();
 			const allImageIds = imageData?.image_ids || [];
 			// Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
-			return allImageIds.map(
-				( imageId ) => imageData?.images[ imageId ]
-			);
+			return allImageIds.map( ( imageId ) => {
+				const imageObject = imageData?.images[ imageId ];
+				return {
+					...imageObject,
+					isActive: imageId === selectedImageId,
+				};
+			} );
 		},
 	},
 	actions: {
