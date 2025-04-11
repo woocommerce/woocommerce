@@ -218,6 +218,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'server_architecture'       => array(
+							'description' => __( 'Server architecture.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
 						'php_version'               => array(
 							'description' => __( 'PHP version.', 'woocommerce' ),
 							'type'        => 'string',
@@ -980,6 +986,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$get_response_successful = ! is_wp_error( $get_response_code ) && $get_response_code >= 200 && $get_response_code < 300;
 		}
 
+		// Operating system.
+		$server_architecture = sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) );
+
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
 
@@ -999,6 +1008,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'language'                  => get_locale(),
 			'external_object_cache'     => wp_using_ext_object_cache(),
 			'server_info'               => isset( $_SERVER['SERVER_SOFTWARE'] ) ? wc_clean( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
+			'server_architecture'       => $server_architecture,
 			'php_version'               => phpversion(),
 			'php_post_max_size'         => wc_let_to_num( ini_get( 'post_max_size' ) ),
 			'php_max_execution_time'    => (int) ini_get( 'max_execution_time' ),
