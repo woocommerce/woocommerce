@@ -57,10 +57,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 						{
 							style: {
 								border: { radius: '100%' },
-								color: {
-									background: '#ffffff',
-									text: '#000000',
-								},
 							},
 						},
 					],

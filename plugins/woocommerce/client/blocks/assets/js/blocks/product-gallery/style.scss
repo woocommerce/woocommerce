@@ -90,6 +90,10 @@ $dialog-padding: 20px;
 		justify-content: space-between;
 	}
 
+	&__icon {
+		color: inherit;
+	}
+
 	// Icons are centred but they are perceived off hence adjusting with padding.
 	&__icon--left {
 		padding: 2px 2px 0 0;
@@ -99,16 +103,15 @@ $dialog-padding: 20px;
 		padding: 2px 0 0 2px;
 	}
 
-	&__button {
+	.wc-block-product-gallery-large-image-next-previous__button {
 		cursor: pointer;
 		z-index: 3;
 		pointer-events: all;
 		border: none;
-		background: none;
 		width: 40px;
 		height: 40px;
-		border-radius: 100%;
-		background-color: #fff;
+		font-size: 12px;
+		padding: 0;
 
 		&:disabled {
 			.wc-block-product-gallery-large-image-next-previous__icon {

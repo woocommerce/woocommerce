@@ -18,13 +18,14 @@ export const Edit = (): JSX.Element => {
 			<div className="wc-block-product-gallery-large-image-next-previous-container">
 				<button
 					style={ style }
-					className="wc-block-product-gallery-large-image-next-previous__button"
+					className="wc-block-product-gallery-large-image-next-previous__button wp-block-button__link"
+					disabled
 				>
 					<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
 				</button>
 				<button
 					style={ style }
-					className="wc-block-product-gallery-large-image-next-previous__button"
+					className="wc-block-product-gallery-large-image-next-previous__button wp-block-button__link"
 				>
 					<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
 				</button>
