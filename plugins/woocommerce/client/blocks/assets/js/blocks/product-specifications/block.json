@@ -1,12 +1,12 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "woocommerce/product-attributes",
+	"name": "woocommerce/product-specifications",
 	"version": "1.0.0",
-	"title": "Product Attributes",
-	"description": "Display product attributes, weight, and dimensions.",
+	"title": "Product Specifications",
+	"description": "Display product weight, dimensions, and attributes.",
 	"category": "woocommerce",
-	"keywords": [ "dimensions", "weight", "additional information" ],
+	"keywords": [ "attributes", "weight", "dimensions", "additional information" ],
 	"textdomain": "woocommerce",
 	"ancestor": [
 		"woocommerce/single-product",

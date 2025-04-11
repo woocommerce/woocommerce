@@ -1,4 +1,4 @@
-table.wc-block-product-attributes {
+table.wc-block-product-specifications {
 	border: 0;
 	border-top: 1px dotted rgba(0, 0, 0, 0.1);
 	margin-bottom: 1.618em;
@@ -11,6 +11,7 @@ table.wc-block-product-attributes {
 		border-bottom: 1px dotted rgba(0, 0, 0, 0.1);
 		margin: 0;
 		line-height: 1.5;
+		text-align: left;
 	}
 
 	td {

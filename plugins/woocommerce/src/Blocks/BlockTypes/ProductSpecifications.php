@@ -3,15 +3,15 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * ProductAttributes class.
+ * ProductSpecifications class.
  */
-class ProductAttributes extends AbstractBlock {
+class ProductSpecifications extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-attributes';
+	protected $block_name = 'product-specifications';
 
 	/**
 	 * Get the frontend script handle for this block type.
@@ -37,28 +37,28 @@ class ProductAttributes extends AbstractBlock {
 		}
 
 		$product = wc_get_product( $block->context['postId'] );
+
 		if ( ! $product ) {
 			return '';
 		}
 
-		$product_attributes = array();
+		$product_data = array();
 
 		if ( $product->has_weight() ) {
-			$product_attributes['weight'] = array(
+			$product_data['weight'] = array(
 				'label' => __( 'Weight', 'woocommerce' ),
 				'value' => wc_format_weight( $product->get_weight() ),
 			);
 		}
 
 		if ( $product->has_dimensions() ) {
-			$product_attributes['dimensions'] = array(
+			$product_data['dimensions'] = array(
 				'label' => __( 'Dimensions', 'woocommerce' ),
 				'value' => wc_format_dimensions( $product->get_dimensions( false ) ),
 			);
 		}
 
-		$attributes = $product->get_attributes();
-		foreach ( $attributes as $attribute ) {
+		foreach ( $product->get_attributes() as $attribute ) {
 			$values = array();
 
 			if ( $attribute->is_taxonomy() ) {
@@ -82,30 +82,30 @@ class ProductAttributes extends AbstractBlock {
 				}
 			}
 
-			$product_attributes[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
+			$product_data[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
 				'label' => wc_attribute_label( $attribute->get_name() ),
 				'value' => wpautop( wptexturize( implode( ', ', $values ) ) ),
 			);
 		}
 
-		if ( empty( $product_attributes ) ) {
+		if ( empty( $product_data ) ) {
 			return '';
 		}
 
 		ob_start();
 
 		$wrapper_attributes = get_block_wrapper_attributes(
-			array( 'class' => 'wc-block-product-attributes' )
+			array( 'class' => 'wc-block-product-specifications' )
 		);
 		?>
-		<table <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php esc_attr_e( 'Product Attributes', 'woocommerce' ); ?>">
+		<table <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php esc_attr_e( 'Product Specifications', 'woocommerce' ); ?>">
 			<tbody>
-				<?php foreach ( $product_attributes as $product_attribute_key => $product_attribute ) : ?>
-					<tr class="wc-block-product-attributes-item wc-block-product-attributes-item__<?php echo esc_attr( $product_attribute_key ); ?>" scope="row">
-						<th class="wc-block-product-attributes-item__label">
+				<?php foreach ( $product_data as $product_attribute_key => $product_attribute ) : ?>
+					<tr class="wc-block-product-specifications-item wc-block-product-specifications-item__<?php echo esc_attr( $product_attribute_key ); ?>" scope="row">
+						<th class="wc-block-product-specifications-item__label">
 							<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 						</th>
-						<td class="wc-block-product-attributes-item__value">
+						<td class="wc-block-product-specifications-item__value">
 							<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 						</td>
 					</tr>

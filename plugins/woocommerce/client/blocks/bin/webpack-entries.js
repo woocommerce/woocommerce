@@ -191,8 +191,8 @@ const blocks = {
 	'blockified-product-reviews': {
 		customDir: 'product-reviews',
 	},
-	'product-attributes': {
-		customDir: 'product-attributes',
+	'product-specifications': {
+		customDir: 'product-specifications',
 	},
 	'product-review-rating': {
 		customDir: 'product-reviews/inner-blocks/review-rating',

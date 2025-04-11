@@ -36,7 +36,7 @@ const descriptionAccordion = createAccordionItem( 'Description', [
 
 const additionalInformationAccordion = createAccordionItem(
 	'Additional Information',
-	[ [ 'woocommerce/product-attributes', {} ] ]
+	[ [ 'woocommerce/product-specifications', {} ] ]
 );
 
 const reviewsAccordion = createAccordionItem( 'Reviews', [
