@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: disable wp-env debug mode for test containers.

@@ -101,7 +101,7 @@ describe( 'ShippingRecommendations', () => {
 		expect( queryByText( 'WooCommerce Shipping' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'should render WCS', async () => {
+	it( 'should render WooCommerce Shipping', async () => {
 		const { getByText } = render(
 			<ShippingRecommendations
 				page="wc-settings"

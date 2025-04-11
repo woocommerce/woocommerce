@@ -5,7 +5,7 @@ import {
 	DateSettings,
 	dateI18n,
 	getDate,
-	__experimentalGetSettings as getSettings,
+	getSettings,
 	isInTheFuture,
 } from '@wordpress/date';
 import { __, _x, isRTL, sprintf } from '@wordpress/i18n';

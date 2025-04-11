@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * Product block registration and style registration functionality.
@@ -160,33 +161,70 @@ class BlockRegistry {
 	 * @param array $attributes Block attributes.
 	 */
 	private function augment_attributes( $attributes ) {
+		global $wp_version;
 		// Note: If you modify this function, also update the client-side
 		// registerWooBlockType function in @woocommerce/block-templates.
-		return array_merge(
+		$augmented_attributes = array_merge(
 			$attributes,
 			array(
 				'_templateBlockId'                => array(
-					'type'               => 'string',
-					'__experimentalRole' => 'content',
+					'type' => 'string',
+					'role' => 'content',
 				),
 				'_templateBlockOrder'             => array(
-					'type'               => 'integer',
-					'__experimentalRole' => 'content',
+					'type' => 'integer',
+					'role' => 'content',
 				),
 				'_templateBlockHideConditions'    => array(
-					'type'               => 'array',
-					'__experimentalRole' => 'content',
+					'type' => 'array',
+					'role' => 'content',
 				),
 				'_templateBlockDisableConditions' => array(
-					'type'               => 'array',
-					'__experimentalRole' => 'content',
+					'type' => 'array',
+					'role' => 'content',
 				),
 				'disabled'                        => isset( $attributes['disabled'] ) ? $attributes['disabled'] : array(
-					'type'               => 'boolean',
-					'__experimentalRole' => 'content',
+					'type' => 'boolean',
+					'role' => 'content',
 				),
 			)
 		);
+		if ( ! $this->has_role_support() ) {
+			foreach ( $augmented_attributes as $key => $attribute ) {
+				if ( isset( $attribute['role'] ) ) {
+					$augmented_attributes[ $key ]['__experimentalRole'] = $attribute['role'];
+				}
+			}
+		}
+		return $augmented_attributes;
+	}
+
+	/**
+	 * Checks for block attribute role support.
+	 */
+	private function has_role_support() {
+		if ( Utils::wp_version_compare( '6.7', '>=' ) ) {
+			return true;
+		}
+
+		if ( is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
+			$gutenberg_version = '';
+
+			if ( defined( 'GUTENBERG_VERSION' ) ) {
+				$gutenberg_version = GUTENBERG_VERSION;
+			}
+
+			if ( ! $gutenberg_version ) {
+				$gutenberg_data    = get_file_data(
+					WP_PLUGIN_DIR . '/gutenberg/gutenberg.php',
+					array( 'Version' => 'Version' )
+				);
+				$gutenberg_version = $gutenberg_data['Version'];
+			}
+			return version_compare( $gutenberg_version, '19.4', '>=' );
+		}
+
+		return false;
 	}
 
 	/**

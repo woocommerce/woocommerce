@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Button, CardDivider } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	pluginsStore,
-	PAYMENT_SETTINGS_STORE_NAME,
+	paymentSettingsStore,
 	PaymentGatewayLink,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -30,6 +30,10 @@ interface EllipsisMenuContentProps {
 	 * Indicates if the menu is being used for a payment extension suggestion.
 	 */
 	isSuggestion: boolean;
+	/**
+	 * The ID of the payment extension suggestion. Optional.
+	 */
+	suggestionId?: string;
 	/**
 	 * The URL to call when hiding a payment extension suggestion. Optional.
 	 */
@@ -65,6 +69,7 @@ export const EllipsisMenuContent = ( {
 	providerId,
 	pluginFile,
 	isSuggestion,
+	suggestionId,
 	suggestionHideUrl = '',
 	onToggle,
 	links = [],
@@ -81,7 +86,7 @@ export const EllipsisMenuContent = ( {
 		invalidateResolutionForStoreSelector,
 		togglePaymentGateway,
 		hidePaymentExtensionSuggestion,
-	} = useDispatch( PAYMENT_SETTINGS_STORE_NAME );
+	} = useDispatch( paymentSettingsStore );
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 
@@ -120,6 +125,11 @@ export const EllipsisMenuContent = ( {
 	 * Disables the payment gateway from payment processing.
 	 */
 	const disableGateway = () => {
+		// Record the event when user clicks on a gateway's disable button.
+		recordEvent( 'settings_payments_provider_disable_click', {
+			provider_id: providerId,
+		} );
+
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
 
@@ -136,6 +146,11 @@ export const EllipsisMenuContent = ( {
 			gatewayToggleNonce
 		)
 			.then( () => {
+				// Record the event when user successfully disables a gateway.
+				recordEvent( 'settings_payments_provider_disable', {
+					provider_id: providerId,
+				} );
+
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDisabling( false );
 				onToggle();
@@ -155,6 +170,10 @@ export const EllipsisMenuContent = ( {
 	const hideSuggestion = () => {
 		setIsHidingSuggestion( true );
 
+		// Record the event before hiding the suggestion.
+		recordEvent( 'settings_payments_recommendations_dismiss', {
+			pes_id: suggestionId,
+		} );
 		hidePaymentExtensionSuggestion( suggestionHideUrl )
 			.then( () => {
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );

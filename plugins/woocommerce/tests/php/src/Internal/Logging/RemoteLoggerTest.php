@@ -369,7 +369,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'less severe than critical' => array(
 					fn() => null,
 					'error',
-					false,
+					true,
 				),
 				'critical level'            => array(
 					fn() => null,
@@ -550,7 +550,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'Missing backtrace'         => array(
 					'Some error message',
 					array( 'source' => 'fatal-errors' ),
-					false,
+					true,
 				),
 			);
 		}

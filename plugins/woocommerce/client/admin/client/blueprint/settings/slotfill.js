@@ -9,15 +9,11 @@ import {
 	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	useState,
-	useEffect,
-	createInterpolateElement,
-} from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { useState, createInterpolateElement } from '@wordpress/element';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
-import { settings, plugins, brush } from '@wordpress/icons';
+import { settings, plugins, layout } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -27,11 +23,12 @@ import { BlueprintUploadDropzone } from '../components/BlueprintUploadDropzone';
 import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-blueprint-settings-slotfill';
 
 const icons = {
 	plugins,
-	brush,
 	settings,
+	layout,
 };
 
 const Blueprint = () => {
@@ -44,7 +41,7 @@ const Blueprint = () => {
 	const [ checkedState, setCheckedState ] = useState(
 		blueprintStepGroups.reduce( ( acc, group ) => {
 			acc[ group.id ] = group.items.reduce( ( groupAcc, item ) => {
-				groupAcc[ item.id ] = true; // Default all to true
+				groupAcc[ item.id ] = item.checked ?? false;
 				return groupAcc;
 			}, {} );
 			return acc;
@@ -68,9 +65,6 @@ const Blueprint = () => {
 				},
 			} );
 			const link = document.createElement( 'a' );
-			link.innerHTML =
-				'Click here in case download does not start automatically';
-
 			let url = null;
 
 			if ( response.type === 'zip' ) {
@@ -85,7 +79,6 @@ const Blueprint = () => {
 				link.setAttribute( 'download', 'woo-blueprint.json' );
 			}
 
-			linkContainer.appendChild( document.createElement( 'br' ) );
 			linkContainer.appendChild( link );
 
 			link.click();
@@ -109,15 +102,6 @@ const Blueprint = () => {
 			},
 		} ) );
 	};
-
-	useEffect( () => {
-		const saveButton = document.getElementsByClassName(
-			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
-			saveButton.style.display = 'none';
-		}
-	} );
 
 	return (
 		<div className="blueprint-settings-slotfill">
@@ -154,7 +138,7 @@ const Blueprint = () => {
 			<h4>{ __( 'Import', 'woocommerce' ) }</h4>
 			<p>
 				{ __(
-					'Import a .zip or .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
+					'Import .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
 					'woocommerce'
 				) }
 			</p>
@@ -162,7 +146,7 @@ const Blueprint = () => {
 			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
 			<p className="blueprint-settings-export-intro">
 				{ __(
-					'Choose what you want to include, and export it as a .zip file.',
+					'Choose what you want to include, and export it as a .json file.',
 					'woocommerce'
 				) }
 			</p>
@@ -177,7 +161,11 @@ const Blueprint = () => {
 						) }
 					/>
 					<span className="blueprint-settings-export-group-item-count">
-						{ group.items.length }
+						{
+							Object.values( checkedState[ group.id ] ).filter(
+								( checked ) => checked
+							).length
+						}
 					</span>
 
 					<CollapsibleContent
@@ -187,6 +175,7 @@ const Blueprint = () => {
 					>
 						{ group.items.map( ( step ) => (
 							<ToggleControl
+								__nextHasNoMarginBottom
 								key={ step.id }
 								label={ step.label }
 								checked={ checkedState[ group.id ][ step.id ] }
@@ -234,7 +223,10 @@ const BlueprintSlotfill = () => {
 };
 
 export const registerBlueprintSlotfill = () => {
-	registerPlugin( 'woocommerce-admin-blueprint-settings-slotfill', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-blueprint-settings',
 		render: BlueprintSlotfill,
 	} );

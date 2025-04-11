@@ -16,7 +16,7 @@ type SiteIconProps = {
 function SiteIcon( { className }: SiteIconProps ) {
 	const { isRequestingSite, siteIconUrl } = useSelect( ( select ) => {
 		const { getEntityRecord } = select( coreDataStore );
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+		// @ts-expect-error Selector is not right typed with '__unstableBase'
 		const siteData = getEntityRecord( 'root', '__unstableBase' ) as
 			| { site_icon_url?: string }
 			| undefined;

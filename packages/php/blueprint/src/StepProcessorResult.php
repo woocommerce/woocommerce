@@ -8,7 +8,7 @@ use InvalidArgumentException;
  * A class returned by StepProcessor classes containing result of the process and messages.
  */
 class StepProcessorResult {
-	const MESSAGE_TYPES = array( 'error', 'info', 'debug' );
+	const MESSAGE_TYPES = array( 'error', 'info', 'debug', 'warn' );
 
 	/**
 	 * Messages
@@ -126,6 +126,17 @@ class StepProcessorResult {
 	 */
 	public function add_info( string $message ) {
 		$this->add_message( $message, 'info' );
+	}
+
+	/**
+	 * Add a new warn message.
+	 *
+	 * @param string $message message.
+	 *
+	 * @return void
+	 */
+	public function add_warn( string $message ) {
+		$this->add_message( $message, 'warn' );
 	}
 
 	/**

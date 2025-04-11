@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -53,7 +55,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-products.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-tax.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-shipping.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
+				if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways-react.php';
 				} else {
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
@@ -67,6 +69,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
+				add_action(
+					'admin_head',
+					function () {
+						if ( function_exists( 'get_current_screen' ) ) {
+							$screen = get_current_screen();
+							if ( 'woocommerce_page_wc-settings' === $screen->id ) {
+								$screen->remove_help_tabs();
+							}
+						}
+					}
+				);
 			}
 
 			return self::$settings;
@@ -78,7 +91,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function save() {
 			global $current_tab;
 
-			check_admin_referer( 'woocommerce-settings' );
+			if ( Features::is_enabled( 'settings' ) ) {
+				check_admin_referer( 'wp_rest' );
+			} else {
+				check_admin_referer( 'woocommerce-settings' );
+			}
 
 			// Trigger actions.
 			do_action( 'woocommerce_settings_save_' . $current_tab );

@@ -3,12 +3,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 
 interface SettingsButtonProps {
+	/**
+	 * ID of the associated gateway.
+	 */
+	gatewayId: string;
+
 	/**
 	 * The settings URL to navigate to when the enable gateway button is clicked.
 	 */
@@ -18,9 +24,9 @@ interface SettingsButtonProps {
 	 */
 	buttonText?: string;
 	/**
-	 * ID of the plugin that is being installed.
+	 * Whether the associated provider plugin is being installed.
 	 */
-	installingPlugin: string | null;
+	isInstallingPlugin?: boolean;
 }
 
 /**
@@ -28,15 +34,23 @@ interface SettingsButtonProps {
  * Used for managing settings for a payment gateway.
  */
 export const SettingsButton = ( {
+	gatewayId,
 	settingsHref,
-	installingPlugin,
+	isInstallingPlugin,
 	buttonText = __( 'Manage', 'woocommerce' ),
 }: SettingsButtonProps ) => {
+	const recordButtonClickEvent = () => {
+		recordEvent( 'settings_payments_provider_manage_click', {
+			provider_id: gatewayId,
+		} );
+	};
+
 	return (
 		<Button
 			variant={ 'secondary' }
 			href={ settingsHref }
-			disabled={ !! installingPlugin }
+			disabled={ isInstallingPlugin }
+			onClick={ recordButtonClickEvent }
 		>
 			{ buttonText }
 		</Button>

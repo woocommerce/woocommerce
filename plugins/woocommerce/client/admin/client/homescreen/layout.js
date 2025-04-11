@@ -41,6 +41,7 @@ import {
 	isTaskListVisible,
 	useTaskListsState,
 } from '~/hooks/use-tasklists-state';
+import { hasTwoColumnLayout } from './utils';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -49,20 +50,6 @@ const TaskLists = lazy( () =>
 		} )
 	)
 );
-
-export const hasTwoColumnLayout = (
-	userPrefLayout,
-	defaultHomescreenLayout,
-	isSetupTaskListActive
-) => {
-	const hasTwoColumnContent =
-		! isSetupTaskListActive || window.wcAdminFeatures.analytics;
-
-	return (
-		( userPrefLayout || defaultHomescreenLayout ) === 'two_columns' &&
-		hasTwoColumnContent
-	);
-};
 
 export const Layout = ( {
 	defaultHomescreenLayout,

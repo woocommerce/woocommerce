@@ -255,7 +255,7 @@ add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
  * @see woocommerce_demo_store()
  */
 add_action( 'wp_footer', 'wc_print_js', 25 );
-add_action( 'wp_footer', 'woocommerce_demo_store' );
+add_action( 'wp_body_open', 'woocommerce_demo_store' );
 
 /**
  * Order details.

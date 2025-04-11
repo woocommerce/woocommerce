@@ -107,11 +107,14 @@ export default function NoResults( props: {
 					return (
 						<ProductList
 							title={ productListTitle( productGroup.id ) }
+							description={ productGroup.description }
 							products={ productGroup.items }
 							groupURL={ productGroup.url }
 							productGroup={ productGroup.id }
 							type={ productGroup.itemType }
 							key={ productGroup.id }
+							groupURLText={ productGroup.url_text }
+							groupURLType={ productGroup.url_type }
 						/>
 					);
 				} ) }

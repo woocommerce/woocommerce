@@ -284,8 +284,6 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
-		$content = trim( $content );
-
 		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
@@ -296,10 +294,9 @@ final class BlockTypesController {
 		$processor = new \WP_HTML_Tag_Processor( $content );
 
 		if (
-			false === $processor->next_token() ||
-			'DIV' !== $processor->get_token_name() ||
-			$processor->is_tag_closer()
+			false === $processor->next_tag() || $processor->is_tag_closer()
 		) {
+
 			return $content;
 		}
 
@@ -441,10 +438,20 @@ final class BlockTypesController {
 			'ProductCategory',
 			'ProductCollection\Controller',
 			'ProductCollection\NoResults',
+			'ProductFilters',
+			'ProductFilterStatus',
+			'ProductFilterPrice',
+			'ProductFilterPriceSlider',
+			'ProductFilterAttribute',
+			'ProductFilterRating',
+			'ProductFilterActive',
+			'ProductFilterRemovableChips',
+			'ProductFilterClearButton',
+			'ProductFilterCheckboxList',
+			'ProductFilterChips',
 			'ProductGallery',
 			'ProductGalleryLargeImage',
 			'ProductGalleryLargeImageNextPrevious',
-			'ProductGalleryPager',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
@@ -500,26 +507,19 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'ProductFilters';
-			$block_types[] = 'ProductFilterStatus';
-			$block_types[] = 'ProductFilterPrice';
-			$block_types[] = 'ProductFilterPriceSlider';
-			$block_types[] = 'ProductFilterAttribute';
-			$block_types[] = 'ProductFilterRating';
-			$block_types[] = 'ProductFilterActive';
-			$block_types[] = 'ProductFilterRemovableChips';
-			$block_types[] = 'ProductFilterClearButton';
-			$block_types[] = 'ProductFilterCheckboxList';
-			$block_types[] = 'ProductFilterChips';
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
+			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
 				$block_types[] = 'AddToCartWithOptions';
 				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
 				$block_types[] = 'AddToCartWithOptionsVariationSelector';
+				$block_types[] = 'AddToCartWithOptionsVariationSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeName';
+				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeOptions';
 				$block_types[] = 'AddToCartWithOptionsGroupedProductSelector';
 				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemCTA';
 			}
 			// Generic blocks that will be pushed upstream.
 			$block_types[] = 'Accordion\AccordionGroup';
@@ -527,6 +527,11 @@ final class BlockTypesController {
 			$block_types[] = 'Accordion\AccordionPanel';
 			$block_types[] = 'Accordion\AccordionHeader';
 			$block_types[] = 'BlockifiedProductDetails';
+			$block_types[] = 'ProductDescription';
+
+			$block_types[] = 'Reviews\ProductReviews';
+			$block_types[] = 'Reviews\ProductReviewRating';
+			$block_types[] = 'Reviews\ProductReviewsTitle';
 		}
 
 		/**

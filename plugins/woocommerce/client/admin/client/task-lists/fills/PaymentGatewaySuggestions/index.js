@@ -14,8 +14,7 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath, getQuery } from '@woocommerce/navigation';
-import { Button } from '@wordpress/components';
-import ExternalIcon from 'gridicons/dist/external';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -35,6 +34,7 @@ import {
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
 import { getPluginSlug } from '~/utils';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
@@ -72,39 +72,46 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[ installedPaymentGateways, paymentGatewaySuggestions ]
 	);
 
-	const enablePaymentGateway = ( id ) => {
-		if ( ! id ) {
-			return;
-		}
+	const enablePaymentGateway = useCallback(
+		( id ) => {
+			if ( ! id ) {
+				return;
+			}
 
-		const gateway = getPaymentGateway( id );
+			const gateway = getPaymentGateway( id );
 
-		if ( ! gateway ) {
-			return;
-		}
+			if ( ! gateway ) {
+				return;
+			}
 
-		updatePaymentGateway( id, {
-			enabled: true,
-		} ).then( () => {
-			onComplete(
-				// use the paymentGateways variable.
-				// gateway variable doesn't have hasPlugins property.
-				! paymentGateways.get( id )?.hasPlugins
-					? {
-							// If we are already on a task page, don't redirect.
-							// Otherwise, redirect to Payments task page.
-							redirectPath: getQuery()?.task
-								? getNewPath(
-										{ task: getQuery().task },
-										{},
-										'/'
-								  )
-								: getNewPath( { task: 'payments' }, {}, '/' ),
-					  }
-					: {}
-			);
-		} );
-	};
+			updatePaymentGateway( id, {
+				enabled: true,
+			} ).then( () => {
+				onComplete(
+					// use the paymentGateways variable.
+					// gateway variable doesn't have hasPlugins property.
+					! paymentGateways.get( id )?.hasPlugins
+						? {
+								// If we are already on a task page, don't redirect.
+								// Otherwise, redirect to Payments task page.
+								redirectPath: getQuery()?.task
+									? getNewPath(
+											{ task: getQuery().task },
+											{},
+											'/'
+									  )
+									: getNewPath(
+											{ task: 'payments' },
+											{},
+											'/'
+									  ),
+						  }
+						: {}
+				);
+			} );
+		},
+		[ getPaymentGateway, updatePaymentGateway, onComplete, paymentGateways ]
+	);
 
 	const markConfigured = useCallback(
 		async ( id ) => {
@@ -118,7 +125,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 			enablePaymentGateway( id );
 		},
-		[ paymentGateways ]
+		[ paymentGateways, enablePaymentGateway ]
 	);
 
 	const recommendation = useMemo(
@@ -261,15 +268,17 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
-				<Button
-					href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
-					target="_blank"
-					onClick={ trackSeeMore }
-					variant="tertiary"
-				>
-					{ __( 'See more', 'woocommerce' ) }
-					<ExternalIcon size={ 18 } />
-				</Button>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'woocommerce'
+					) }
+					onClickCallback={ trackSeeMore }
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					) }
+				/>
 			}
 		></List>
 	);

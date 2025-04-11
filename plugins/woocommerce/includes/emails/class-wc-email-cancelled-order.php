@@ -143,6 +143,23 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		}
 
 		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'sent_to_admin' => true,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
+
+		/**
 		 * Default content to show below main email content.
 		 *
 		 * @since 3.7.0

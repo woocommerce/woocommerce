@@ -24,6 +24,9 @@ jest.mock( '../more-menu-items', () => ( {
 		</div>
 	) ),
 } ) );
+jest.mock( '@woocommerce/product-editor', () => ( {
+	isValidEmail: jest.fn(),
+} ) );
 
 describe( 'MoreMenuFill', () => {
 	beforeEach( () => {

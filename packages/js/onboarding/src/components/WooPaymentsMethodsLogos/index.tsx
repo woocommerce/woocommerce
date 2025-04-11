@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createElement } from '@wordpress/element';
 import { Popover } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
@@ -116,15 +116,7 @@ const PaymentMethods = [
 	},
 ];
 
-export const WooPaymentsMethodsLogos: React.FC< {
-	isWooPayEligible: boolean;
-	maxElements: number;
-	tabletWidthBreakpoint?: number;
-	maxElementsTablet?: number;
-	mobileWidthBreakpoint?: number;
-	maxElementsMobile?: number;
-	totalPaymentMethods?: number;
-} > = ( {
+export const WooPaymentsMethodsLogos = ( {
 	/**
 	 * Whether the store (location) is eligible for WooPay.
 	 * Based on this we will include or not the WooPay logo in the list.
@@ -156,6 +148,14 @@ export const WooPaymentsMethodsLogos: React.FC< {
 	 * If not eligible for WooPay, the total number of payment methods is reduced by one.
 	 */
 	totalPaymentMethods = 20,
+}: {
+	isWooPayEligible: boolean;
+	maxElements: number;
+	tabletWidthBreakpoint?: number;
+	maxElementsTablet?: number;
+	mobileWidthBreakpoint?: number;
+	maxElementsMobile?: number;
+	totalPaymentMethods?: number;
 } ) => {
 	const [ maxShownElements, setMaxShownElements ] = useState( maxElements );
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );

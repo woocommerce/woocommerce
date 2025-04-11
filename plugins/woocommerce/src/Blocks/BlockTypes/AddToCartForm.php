@@ -74,10 +74,10 @@ class AddToCartForm extends AbstractBlock {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button BEFORE the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wc-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wc-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $minus_button, $product_html );
 		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
 		return $new_html;
@@ -162,6 +162,9 @@ class AddToCartForm extends AbstractBlock {
 
 			return '';
 		}
+
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$product_name = $product->get_name();
 		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
 
@@ -193,12 +196,7 @@ class AddToCartForm extends AbstractBlock {
 		$form = sprintf(
 			'<div %1$s %2$s>%3$s</div>',
 			$wrapper_attributes,
-			$is_stepper_style ? 'data-wc-interactive=\'' . wp_json_encode(
-				array(
-					'namespace' => 'woocommerce/add-to-cart-form',
-				),
-				JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			) . '\'' : '',
+			$is_stepper_style ? 'data-wp-interactive="woocommerce/add-to-cart-form"' : '',
 			$product_html
 		);
 

@@ -3,7 +3,6 @@
  */
 import { createElement } from '@wordpress/element';
 import { Icon, warning } from '@wordpress/icons';
-import React from 'react';
 
 /**
  * Internal dependencies

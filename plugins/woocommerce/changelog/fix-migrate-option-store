@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate OPTIONS_STORE_NAME to optionsStore across multiple files

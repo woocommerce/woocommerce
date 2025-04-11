@@ -354,6 +354,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'woocommerce'
 					),
 					'property' => 'short_description',
+					'lock'     => array(
+						'move' => true,
+					),
 				),
 			)
 		);
@@ -387,6 +390,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'helpText' => null,
 					'label'    => null,
 					'property' => 'description',
+					'lock'     => array(
+						'move' => true,
+					),
 				),
 			)
 		);
@@ -884,6 +890,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'property'    => 'purchase_note',
 					'label'       => __( 'Post-purchase note', 'woocommerce' ),
 					'placeholder' => __( 'Enter an optional note attached to the order confirmation message sent to the shopper.', 'woocommerce' ),
+					'lock'        => array(
+						'move' => true,
+					),
 				),
 			)
 		);

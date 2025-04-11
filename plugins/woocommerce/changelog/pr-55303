@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix for additional features not being registered in WP CLI

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMachine } from '@xstate5/react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import clsx from 'clsx';
 
 /**

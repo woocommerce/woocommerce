@@ -14,6 +14,10 @@ const resultsFiles = [
 		file: 'product-editor.performance-results.json',
 		metricsPrefix: 'product-editor-',
 	},
+	{
+		file: 'frontend.performance-results.json',
+		metricsPrefix: 'frontend-',
+	},
 ];
 const ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH || path.join( process.cwd(), 'artifacts' );

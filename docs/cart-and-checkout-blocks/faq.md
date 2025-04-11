@@ -11,11 +11,72 @@ We will add to the FAQ document as we receive questions, this isn't the document
 
 If you have questions that aren't addressed here, we invite you to ask them on [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions) or in the [WooCommerce Community Slack](https://woocommerce.com/community-slack/)
 
+## General questions
+
+### How do I react to changes to the Cart or Checkout e.g. shipping method selection, or address changes?
+
+The Cart and Checkout blocks read all their data from [`@wordpress/data` data stores](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-data/). We also have [documentation for the data stores WooCommerce Blocks uses](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/data-store).
+
+It is common for developers to want to react to changes in the cart or checkout. For example, if a user changes their shipping method, or changes a line of their address.
+
+There are two ways to do this, depending on how your code is running.
+
+#### If your code is running in a React component
+
+If your component is an inner block of the Cart/Checkout, or rendered in a [Slot/Fill](./slot-fills.md), you can directly select the data you need from the relevant data store and perform any necessary actions when the data changes. For more information on available selectors, refer to the [documentation for the relevant data store](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/data-store).
+
+```js
+/**
+ * External dependencies
+ */
+import { useSelect } from '@wordpress/data';
+import { cartStore } from '@woocommerce/block-data';
+import { useEffect } from '@wordpress/element';
+
+export const MyComponent = () => {
+	const { shippingAddress } = useSelect(
+		( select ) => select( cartStore ).getCartData(),
+		[]
+	);
+	useEffect( () => {
+		// Do something when shippingAddress changes
+	}, [ shippingAddress ] );
+};
+```
+
+#### If your code is running in a non-React context
+
+This would be true if you're not rendering a block, or running any React code. This means you won't have access to React hooks or custom hooks like `useSelect`. In this case you'd need to use the non-hook alternative to `useSelect` which is `select`. Given the requirement to react to changes, simply calling `select` will not be enough as this will only run once. You'll need to use the `subscribe` method to subscribe to changes to the data you're interested in.
+
+```ts
+/**
+ * External dependencies
+ */
+import { select, subscribe } from '@wordpress/data';
+import { cartStore } from '@woocommerce/block-data';
+
+let previousCountry = '';
+const unsubscribe = subscribe( () => {
+  const { shippingAddress } = select( cartStore ).getCartData();
+  if ( shippingAddress.country !== previousCountry ) {
+    previousCountry = shippingAddress.country;
+    // Do something when shipping country changes.
+  }
+  if ( /* some other condition that makes this subscription no longer needed */ ) {
+    unsubscribe();
+  }
+}, cartStore );
+```
+
+Since the `subscribe` callback would run every time the data store receives an action, you'll need to use caching to avoid doing work when it isn't required. For example, if you only want to do work when the country changes, you would need to cache the previous value and compare it to the current value before running the task.
+
+If you no longer need to react to changes, you can unsubscribe from the data store using the `unsubscribe` method which is returned by the `subscribe` method, like in the example above.
+
 ## Cart modifications
 
 ### How do I dynamically make changes to the cart from the client?
 
-To perform actions on the server based on a client-side action, you'll need to use [`extensionCartUpdate`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
+To perform actions on the server based on a client-side action, you'll need to use [`extensionCartUpdate`](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
 
 As an example, to add a "Get 10% off if you sign up to the mailing list" checkbox on your site you can use `extensionCartUpdate` to automatically apply a 10% coupon to the cart.
 
@@ -108,7 +169,7 @@ add_action(
 
 ### How to force-refresh the cart from the server
 
-This can be achieved using [`extensionCartUpdate`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md) which is the preferred way, but it is also possible by executing the `receiveCart` action on the `wc/store/cart` data store with a valid cart object, like so:
+This can be achieved using [`extensionCartUpdate`](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md) which is the preferred way, but it is also possible by executing the `receiveCart` action on the `wc/store/cart` data store with a valid cart object, like so:
 
 ```js
 const { dispatch } = window.wp.data;

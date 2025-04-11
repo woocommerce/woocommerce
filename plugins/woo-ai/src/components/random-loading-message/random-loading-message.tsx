@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useState, useEffect, useRef } from '@wordpress/element';
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Spinner } from '@woocommerce/components';
 

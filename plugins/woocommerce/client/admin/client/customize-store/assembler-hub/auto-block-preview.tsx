@@ -59,7 +59,7 @@ interface BlockListWithRenderAppender
 	renderAppender?: RenderAppenderType;
 }
 // This is used to avoid rendering the block list if the sizes change.
-let MemoizedBlockList: React.FC< BlockListWithRenderAppender >;
+let MemoizedBlockList: React.ComponentType< BlockListWithRenderAppender >;
 
 const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 const MAX_HEIGHT = 2000;
@@ -127,7 +127,7 @@ function ScaledBlockPreview( {
 	const { setSelectedBlockRef } = useContext( SelectedBlockContext );
 
 	const selectedBlockClientId = useSelect( ( select ) => {
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+		// @ts-expect-error Selector is not typed
 		const block = select( blockEditorStore ).getSelectedBlock();
 
 		return block?.clientId;

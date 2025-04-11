@@ -38,6 +38,7 @@ import {
 	ShippingLayoutRow,
 } from './shipping-providers/partners';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -652,6 +653,22 @@ export class Shipping extends Component {
 						/>
 					</CardBody>
 				</Card>
+				<TrackedLink
+					textProps={ {
+						as: 'div',
+						className:
+							'woocommerce-task-dashboard__container woocommerce-task-marketplace-link',
+					} }
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+						'woocommerce'
+					) }
+					eventName="tasklist_shipping_visit_marketplace_click"
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+				/>
 			</div>
 		);
 	}

@@ -23,6 +23,7 @@ class Authentication {
 		add_action( 'set_logged_in_cookie', array( $this, 'set_logged_in_cookie' ) );
 		add_filter( 'rest_pre_serve_request', array( $this, 'send_cors_headers' ), 10, 1 );
 		add_filter( 'rest_allowed_cors_headers', array( $this, 'allowed_cors_headers' ) );
+		add_filter( 'rest_exposed_cors_headers', array( $this, 'exposed_cors_headers' ) );
 
 		// If cart has a valid token, override the core session class.
 		// Validate returns early if no token, so no performance penalty.
@@ -49,6 +50,18 @@ class Authentication {
 		$allowed_headers[] = 'Cart-Token';
 		$allowed_headers[] = 'Nonce';
 		return $allowed_headers;
+	}
+
+	/**
+	 * Expose Store API headers in CORS responses.
+	 * We're explicitly exposing the Cart-Token, not the nonce. Only one of them is needed.
+	 *
+	 * @param array $exposed_headers Exposed headers.
+	 * @return array
+	 */
+	public function exposed_cors_headers( $exposed_headers ) {
+		$exposed_headers[] = 'Cart-Token';
+		return $exposed_headers;
 	}
 
 	/**

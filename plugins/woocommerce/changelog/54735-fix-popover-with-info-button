@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make the popover implementation in the incentive component consistent with the on in the logo's component.

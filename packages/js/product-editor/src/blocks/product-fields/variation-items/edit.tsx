@@ -3,11 +3,11 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PartialProductVariation,
 	ProductVariation,
 	Product,
 	useUserPreferences,
+	experimentalProductVariationsStore,
 } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
@@ -37,7 +37,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDismissed = useRef( false );
 	const { invalidateResolution } = useDispatch(
-		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		experimentalProductVariationsStore
 	);
 	const productId = useEntityId( 'postType', 'product' );
 	const blockProps = useWooBlockProps( attributes );
@@ -66,8 +66,8 @@ export function Edit( {
 	const totalCountWithoutPriceRequestParams = useMemo(
 		() => ( {
 			product_id: productId,
-			order: 'asc',
-			orderby: 'menu_order',
+			order: 'asc' as const,
+			orderby: 'menu_order' as const,
 			has_price: false,
 		} ),
 		[ productId ]
@@ -76,13 +76,12 @@ export function Edit( {
 	const { totalCountWithoutPrice } = useSelect(
 		( select ) => {
 			const { getProductVariationsTotalCount } = select(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				experimentalProductVariationsStore
 			);
 
 			return {
 				totalCountWithoutPrice: productHasOptions
-					? // @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-					  getProductVariationsTotalCount(
+					? getProductVariationsTotalCount(
 							totalCountWithoutPriceRequestParams
 					  )
 					: 0,
@@ -140,12 +139,11 @@ export function Edit( {
 			source: TRACKS_SOURCE,
 		} );
 		const productVariationsListPromise = resolveSelect(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		).getProductVariations( {
 			product_id: productId,
-			order: 'asc',
-			// @ts-expect-error TODO react-18-upgrade: getProductVariations type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
-			orderby: 'menu_order',
+			order: 'asc' as const,
+			orderby: 'menu_order' as const,
 			has_price: false,
 			_fields: [ 'id' ],
 			per_page: totalCountWithoutPrice,

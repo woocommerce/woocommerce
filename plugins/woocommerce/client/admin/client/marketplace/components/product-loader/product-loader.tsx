@@ -23,7 +23,13 @@ export default function ProductLoader(
 	return (
 		<div className="woocommerce-marketplace__product-list">
 			{ hasTitle !== false && (
-				<ProductListHeader title="" groupURL={ null } />
+				<ProductListHeader
+					title=""
+					groupURL={ null }
+					description=""
+					groupURLText={ null }
+					groupURLType={ undefined }
+				/>
 			) }
 			<div className="woocommerce-marketplace__product-list-content">
 				{ [ ...Array( placeholderCount ) ].map( ( element, i ) => (

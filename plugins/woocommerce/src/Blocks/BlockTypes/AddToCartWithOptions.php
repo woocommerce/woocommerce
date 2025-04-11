@@ -34,6 +34,21 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Modifies the block context for product button blocks when inside the Add to Cart with Options block.
+	 *
+	 * @param array $context The block context.
+	 * @param array $block   The parsed block.
+	 * @return array Modified block context.
+	 */
+	public function set_is_descendant_of_add_to_cart_with_options_context( $context, $block ) {
+		if ( 'woocommerce/product-button' === $block['blockName'] ) {
+			$context['woocommerce/isDescendantOfAddToCartWithOptions'] = true;
+		}
+
+		return $context;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -59,6 +74,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			return '';
 		}
 
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
 		$product_type = $product->get_type();
 
 		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
@@ -75,11 +92,11 @@ class AddToCartWithOptions extends AbstractBlock {
 			$template_part = get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
 
 			if ( $template_part && ! empty( $template_part->content ) ) {
-				$template_part_contents = do_blocks( $template_part->content );
+				$template_part_contents = $template_part->content;
 			}
 
 			if ( '' === $template_part_contents ) {
-				$template_part_contents = do_blocks( file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				$template_part_contents = file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
 			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
@@ -94,10 +111,31 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
+			/**
+			 * Filters the change the quantity to add to cart.
+			 *
+			 * @since 10.9.0
+			 * @param number $default_quantity The default quantity.
+			 * @param number $product_id The product id.
+			 */
+			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
+
+			$context = array(
+				'productId' => $product->get_id(),
+				'quantity'  => $default_quantity,
+				'variation' => array(),
+			);
+
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'class' => $classes,
-					'style' => esc_attr( $classes_and_styles['styles'] ),
+					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+					'data-wp-context'     => wp_json_encode(
+						$context,
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
+					'data-wp-on--submit'  => 'actions.handleSubmit',
+					'class'               => $classes,
+					'style'               => esc_attr( $classes_and_styles['styles'] ),
 				)
 			);
 
@@ -116,7 +154,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( ! $is_disabled_compatibility_layer ) {
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type ) {
+				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
@@ -154,7 +192,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_before = ob_get_clean();
 
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type ) {
+				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
@@ -192,15 +230,32 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_after = ob_get_clean();
 			}
 
+			// Because we are printing the template part using do_blocks, context from the outside is lost.
+			// This filter is used to add the isDescendantOfAddToCartWithOptions context back.
+			add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ), 10, 2 );
+			$template_part_blocks = do_blocks( $template_part_contents );
+			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
+
 			$form_html = sprintf(
 				'<form %1$s>%2$s%3$s%4$s</form>',
 				$wrapper_attributes,
 				$hooks_before,
-				$template_part_contents,
+				$template_part_blocks,
 				$hooks_after,
 			);
 
-			$product = $previous_product;
+			ob_start();
+
+			remove_action( 'woocommerce_' . $product_type . '_add_to_cart', 'woocommerce_' . $product_type . '_add_to_cart', 30 );
+			/**
+			 * Trigger the single product add to cart action that prints the markup.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
+			add_action( 'woocommerce_' . $product_type . '_add_to_cart', 'woocommerce_' . $product_type . '_add_to_cart', 30 );
+
+			$form_html = $form_html . ob_get_clean();
 		} else {
 			ob_start();
 
@@ -214,6 +269,27 @@ class AddToCartWithOptions extends AbstractBlock {
 			$form_html = ob_get_clean();
 		}
 
+		$product = $previous_product;
+
 		return $form_html;
+	}
+
+	/**
+	 * Disable the frontend script for this block type, it's built with script modules.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
 	}
 }

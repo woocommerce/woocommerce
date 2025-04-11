@@ -55,21 +55,9 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it returns legacy email preview when feature flag is disabled.
+	 * Tests that it returns processing order email preview.
 	 */
-	public function test_it_returns_legacy_email_preview_by_default() {
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-		$message        = $this->sut->render();
-		$legacy_title   = 'HTML email template';
-		$legacy_content = 'Lorem ipsum dolor sit amet';
-		$this->assertStringContainsString( $legacy_title, $message );
-		$this->assertStringContainsString( $legacy_content, $message );
-	}
-
-	/**
-	 * Tests that it returns processing order email preview when feature flag is enabled.
-	 */
-	public function test_it_returns_order_email_preview_under_feature_flag() {
+	public function test_it_returns_order_email_preview() {
 		$message       = $this->sut->render();
 		$order_title   = 'Thank you for your order';
 		$order_content = 'We’ve received your order and will let you know when it’s on its way to you!';
@@ -91,7 +79,7 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it renders HTML email.
+	 * Tests that it renders plain text email.
 	 */
 	public function test_it_renders_plain_text_email() {
 		set_transient( self::DEFAULT_EMAIL_TYPE_KEY, 'plain', HOUR_IN_SECONDS );
@@ -252,9 +240,9 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	 * Test that transient values are applied in email preview
 	 */
 	public function test_transient_values_in_preview() {
-		$original_value = get_option( EmailPreview::get_email_style_settings_ids()[0] );
-		update_option( EmailPreview::get_email_style_settings_ids()[0], 'option_value' );
-		set_transient( EmailPreview::get_email_style_settings_ids()[0], 'transient_value', HOUR_IN_SECONDS );
+		$original_value = get_option( EmailPreview::get_email_style_setting_ids()[0] );
+		update_option( EmailPreview::get_email_style_setting_ids()[0], 'option_value' );
+		set_transient( EmailPreview::get_email_style_setting_ids()[0], 'transient_value', HOUR_IN_SECONDS );
 
 		$this->sut->set_email_type( EmailPreview::DEFAULT_EMAIL_TYPE );
 		$content = $this->sut->render();
@@ -262,8 +250,8 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'option_value', $content );
 		$this->assertStringContainsString( 'transient_value', $content );
 
-		update_option( EmailPreview::get_email_style_settings_ids()[0], $original_value );
-		delete_transient( EmailPreview::get_email_style_settings_ids()[0] );
+		update_option( EmailPreview::get_email_style_setting_ids()[0], $original_value );
+		delete_transient( EmailPreview::get_email_style_setting_ids()[0] );
 	}
 
 	/**

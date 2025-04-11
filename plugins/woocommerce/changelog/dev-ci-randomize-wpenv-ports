@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: randomize wp-env test containers ports when running tests.

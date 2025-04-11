@@ -1,0 +1,21 @@
+.wc-block-checkout__shipping-option {
+	.wc-block-components-radio-control__option {
+		margin: 0;
+		padding: 0.875em 0.875em 0.875em em($gap-huge);
+	}
+
+	.wc-block-checkout__shipping-option--free {
+		text-transform: uppercase;
+	}
+
+	.wc-block-components-shipping-rates-control__no-results-notice {
+		margin: em($gap-small) 0;
+	}
+
+	.wc-block-components-shipping-rates-control__no-shipping-address-message {
+		background-color: color-mix(in srgb, currentColor 6%, transparent);
+		color: color-mix(in srgb, currentColor 66%, transparent);
+		padding: em($gap-large);
+		text-align: center;
+	}
+}

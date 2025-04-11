@@ -1,15 +1,19 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	products: async ( { api }, use ) => {
+	products: async ( { restApi }, use ) => {
 		const keys = [ 'main', 'linked1', 'linked2' ];
 		const products = {};
 
 		for ( const key of Object.values( keys ) ) {
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: `${ key } ${ Date.now() }`,
 					type: 'simple',
 					regular_price: '12.99',
@@ -23,7 +27,9 @@ const test = baseTest.extend( {
 
 		// Cleanup
 		for ( const product of Object.values( products ) ) {
-			await api.delete( `products/${ product.id }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} );
 		}
 	},
 } );
@@ -124,11 +130,14 @@ test.describe(
 			} );
 		} );
 
-		test( 'remove up-sells', async ( { page, api, products } ) => {
+		test( 'remove up-sells', async ( { page, restApi, products } ) => {
 			// Add up-sells
-			await api.put( `products/${ products.main.id }`, {
-				upsell_ids: [ products.linked1.id ],
-			} );
+			await restApi.put(
+				`${ WC_API_PATH }/products/${ products.main.id }`,
+				{
+					upsell_ids: [ products.linked1.id ],
+				}
+			);
 
 			// Verify up-sells are present, so we can assert the opposite after removing them
 			// This should prevent a possible false negative result
@@ -223,7 +232,10 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
-				await page.getByRole( 'link', { name: 'View cart' } ).click();
+				await page
+					.getByRole( 'link', { name: 'View cart' } )
+					.first()
+					.click();
 
 				// check for cross-sells
 				const sectionLocator = page.locator( 'div' ).filter( {
@@ -245,11 +257,14 @@ test.describe(
 			} );
 		} );
 
-		test( 'remove cross-sells', async ( { page, api, products } ) => {
+		test( 'remove cross-sells', async ( { page, restApi, products } ) => {
 			// Add cross-sells
-			await api.put( `products/${ products.main.id }`, {
-				cross_sell_ids: [ products.linked1.id ],
-			} );
+			await restApi.put(
+				`${ WC_API_PATH }/products/${ products.main.id }`,
+				{
+					cross_sell_ids: [ products.linked1.id ],
+				}
+			);
 
 			await navigate( page, products.main.id );
 
@@ -278,7 +293,10 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
-				await page.getByRole( 'link', { name: 'View cart' } ).click();
+				await page
+					.getByRole( 'link', { name: 'View cart' } )
+					.first()
+					.click();
 
 				// check for cross-sells
 				await expect(

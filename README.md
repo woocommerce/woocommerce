@@ -25,7 +25,7 @@ Once you've installed all of the prerequisites, the following will prepare all o
 # Ensure that correct version of Node is installed and being used
 nvm install
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
-pnpm install
+pnpm install -frozen-lockfile
 # Build all of the plugins, packages, and tools in the monorepo
 pnpm build
 ```

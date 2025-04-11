@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useState, useCallback } from '@wordpress/element';

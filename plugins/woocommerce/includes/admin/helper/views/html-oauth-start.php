@@ -5,20 +5,7 @@
  * @package WooCommerce\Views
  */
 
-use Automattic\WooCommerce\Internal\BrandingController;
-
 defined( 'ABSPATH' ) || exit();
-
-// Old branding.
-$logo_filename = 'woocommerce_logo.png';
-
-if (
-	class_exists( 'Automattic\WooCommerce\Internal\BrandingController' )
-	&& BrandingController::use_new_branding()
-) {
-	// New branding.
-	$logo_filename = 'woo-logo.svg';
-}
 
 ?>
 
@@ -29,7 +16,7 @@ if (
 
 		<div class="start-container">
 			<div class="text">
-			<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/' . $logo_filename ); ?>" alt="
+			<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/woo-logo.svg' ); ?>" alt="
 								<?php
 								esc_attr_e(
 									'WooCommerce',

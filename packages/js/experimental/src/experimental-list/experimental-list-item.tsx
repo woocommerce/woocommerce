@@ -34,21 +34,23 @@ type ListItemProps = {
 
 export type ListAnimation = 'slide-right' | 'none' | 'custom';
 
-export const ExperimentalListItem: React.FC< ListItemProps > = ( {
+export const ExperimentalListItem = ( {
 	children,
 	disableGutters = false,
 	animation = 'none',
 	className = '',
+
 	// extract out the props that must be passed down from TransitionGroup
 	exit,
+
 	enter,
 	onExited,
+
 	// in is a TS reserved keyword so can't be a variable name
 	in: transitionIn,
 
-	// Everything else you might pass into an HTML element
 	...otherProps
-} ): JSX.Element => {
+}: ListItemProps ): JSX.Element => {
 	// for styling purposes only
 	const hasAction = !! otherProps?.onClick;
 

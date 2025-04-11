@@ -6,7 +6,7 @@ import { Icon, check, warning } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { isValidEmail } from '@woocommerce/product-editor';
+import { isValidEmail } from '@woocommerce/product-editor/build/utils/validate-email'; // Import from the build directory so we don't load the entire product editor since we only need this one function.
 
 /**
  * Internal dependencies
@@ -29,9 +29,7 @@ type WPError = {
 	};
 };
 
-export const EmailPreviewSend: React.FC< EmailPreviewSendProps > = ( {
-	type,
-} ) => {
+export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ email, setEmail ] = useState( '' );
 	const [ isSending, setIsSending ] = useState( false );

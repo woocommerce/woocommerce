@@ -1,10 +1,12 @@
 <?php
+
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
-use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Package;
-
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
  * Product Filter: Rating Block
@@ -78,10 +80,10 @@ final class ProductFilterRating extends AbstractBlock {
 
 		foreach ( $active_ratings as $rating ) {
 			$items[] = array(
-				'type'  => 'rating',
-				'value' => $rating,
+				'type'        => 'rating',
+				'value'       => $rating,
 				/* translators: %s is referring to rating value. Example: Rated 4 out of 5. */
-				'label' => sprintf( __( 'Rating: Rated %d out of 5', 'woocommerce' ), $rating ),
+				'activeLabel' => sprintf( __( 'Rating: Rated %d out of 5', 'woocommerce' ), $rating ),
 			);
 		}
 
@@ -117,8 +119,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 		$filter_options = array_map(
 			function ( $rating ) use ( $selected_rating, $attributes ) {
-				$value       = (string) $rating['rating'];
-				$count_label = $attributes['showCounts'] ? "({$rating['count']})" : '';
+				$value = (string) $rating['rating'];
 
 				$aria_label = sprintf(
 					/* translators: %s is referring to rating value. Example: Rated 4 out of 5. */
@@ -127,34 +128,32 @@ final class ProductFilterRating extends AbstractBlock {
 				);
 
 				return array(
-					'id'        => 'rating-' . $value,
-					'selected'  => in_array( $value, $selected_rating, true ),
-					'label'     => $this->render_rating_label( (int) $value, $count_label ),
+					'label'     => $this->render_rating_label( (int) $value ),
 					'ariaLabel' => $aria_label,
 					'value'     => $value,
+					'selected'  => in_array( $value, $selected_rating, true ),
+					'count'     => $rating['count'],
 					'type'      => 'rating',
-					'data'      => $rating,
 				);
 			},
 			$rating_counts_with_min
 		);
 
 		$filter_context = array(
-			'items'  => $filter_options,
-			'parent' => $this->get_full_block_name(),
+			'items'      => $filter_options,
+			'showCounts' => $attributes['showCounts'] ?? false,
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-context'      => wp_json_encode(
+			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context' => wp_json_encode(
 				array(
-					'hasFilterOptions'    => ! empty( $filter_options ),
-					/* translators: {{labe}} is the rating filter item label. */
+					/* translators: {{label}} is the rating filter item label. */
 					'activeLabelTemplate' => __( 'Rating: {{label}}', 'woocommerce' ),
+					'filterType'          => 'rating',
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( empty( $filter_options ) ) {
@@ -178,11 +177,10 @@ final class ProductFilterRating extends AbstractBlock {
 	/**
 	 * Render the rating label.
 	 *
-	 * @param int    $rating The rating to render.
-	 * @param string $count_label The count label to render.
+	 * @param int $rating The rating to render.
 	 * @return string|false
 	 */
-	private function render_rating_label( $rating, $count_label ) {
+	private function render_rating_label( $rating ) {
 		$width = $rating * 20;
 
 		$rating_label = sprintf(
@@ -195,12 +193,8 @@ final class ProductFilterRating extends AbstractBlock {
 		?>
 		<div class="wc-block-components-product-rating">
 			<div class="wc-block-components-product-rating__stars" role="img" aria-label="<?php echo esc_attr( $rating_label ); ?>">
-				<span style="width: <?php echo esc_attr( $width ); ?>%" aria-hidden="true">
-				</span>
+				<span style="width: <?php echo esc_attr( $width ); ?>%" aria-hidden="true"></span>
 			</div>
-			<span class="wc-block-components-product-rating-count">
-				<?php echo esc_html( $count_label ); ?>
-			</span>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -212,7 +206,6 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_rating_counts( $block ) {
-		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		if ( ! empty( $query_vars['tax_query'] ) ) {
@@ -227,8 +220,9 @@ final class ProductFilterRating extends AbstractBlock {
 			);
 		}
 
-		$counts = $filters->get_rating_counts( $query_vars );
-		$data   = array();
+		$container = wc_get_container();
+		$counts    = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_rating_counts( $query_vars );
+		$data      = array();
 
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
@@ -238,5 +232,16 @@ final class ProductFilterRating extends AbstractBlock {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

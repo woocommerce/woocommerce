@@ -14,10 +14,10 @@ import {
 	Fragment,
 	useEffect,
 } from '@wordpress/element';
-import { isWpVersion } from '@woocommerce/settings';
 import classnames from 'classnames';
 import { MouseEvent } from 'react';
 import { Button, Popover, ToolbarItem } from '@wordpress/components';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as preferencesStore,
@@ -31,10 +31,6 @@ import {
 	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -44,7 +40,6 @@ import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
 import { MoreMenu } from './more-menu';
-import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
 import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../constants';
 
 type HeaderToolbarProps = {
@@ -109,9 +104,6 @@ export function HeaderToolbar( {
 		}
 	}, [ hasBlockSelection ] );
 
-	const renderBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
-
 	return (
 		<div className="woocommerce-iframe-editor__header">
 			<div className="woocommerce-iframe-editor__header-left">
@@ -160,7 +152,7 @@ export function HeaderToolbar( {
 						<ToolbarItem as={ DocumentOverview } size="compact" />
 					</div>
 				</NavigableToolbar>
-				{ hasFixedToolbar && isLargeViewport && renderBlockToolbar && (
+				{ hasFixedToolbar && isLargeViewport && (
 					<>
 						<div
 							className={ classnames(

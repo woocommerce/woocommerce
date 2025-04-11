@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Popover } from '@wordpress/components';
 import { Link, Pill } from '@woocommerce/components';

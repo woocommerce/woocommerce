@@ -17,12 +17,12 @@ import {
 import { AutomatedTaxes } from './automated-taxes';
 import { Setup } from './setup';
 
-export const WooCommerceTax: React.FC< TaxChildProps > = ( {
+export const WooCommerceTax = ( {
 	isPending,
 	onAutomate,
 	onManual,
 	onDisable,
-} ) => {
+}: TaxChildProps ) => {
 	const {
 		generalSettings,
 		isJetpackConnected,
@@ -38,14 +38,12 @@ export const WooCommerceTax: React.FC< TaxChildProps > = ( {
 			generalSettings: getSettings( 'general' ).general,
 			isJetpackConnected: select( pluginsStore ).isJetpackConnected(),
 			isResolving:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-				! hasFinishedResolution( 'isJetpackConnected' ) ||
+				! hasFinishedResolution( 'isJetpackConnected', undefined ) ||
 				! select( settingsStore ).hasFinishedResolution(
 					'getSettings',
 					[ 'general' ]
 				) ||
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-				! hasFinishedResolution( 'getActivePlugins' ),
+				! hasFinishedResolution( 'getActivePlugins', undefined ),
 			pluginsToActivate: difference( AUTOMATION_PLUGINS, activePlugins ),
 		};
 	}, [] );

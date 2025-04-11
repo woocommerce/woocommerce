@@ -39,10 +39,7 @@ type ReminderTextProps = {
 
 const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
 
-const ReminderText: React.FC< ReminderTextProps > = ( {
-	remainingCount,
-	tracksProps,
-} ) => {
+const ReminderText = ( { remainingCount, tracksProps }: ReminderTextProps ) => {
 	const translationText =
 		remainingCount === 1
 			? /* translators: 1: remaining tasks count */
@@ -82,10 +79,10 @@ const ReminderText: React.FC< ReminderTextProps > = ( {
 	);
 };
 
-export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
+export const TasksReminderBar = ( {
 	taskListId,
 	updateBodyMargin,
-} ) => {
+}: ReminderBarProps ) => {
 	const { updateOptions } = useDispatch( optionsStore );
 	const {
 		remainingCount,

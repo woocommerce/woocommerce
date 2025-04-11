@@ -191,6 +191,7 @@
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 1;
 			text-decoration: none;
+			overflow: hidden;
 		}
 
 		&__sponsored-label {
@@ -353,6 +354,11 @@
 					}
 				}
 			}
+		}
+
+		&__installed-label {
+			font-weight: 500;
+			color: $valid-green;
 		}
 	}
 }

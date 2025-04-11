@@ -37,7 +37,7 @@ import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getScreenName } from '../../utils';
-import { hasTwoColumnLayout } from '../../homescreen/layout';
+import { hasTwoColumnLayout } from '~/homescreen/utils';
 import { isTaskListActive } from '../../hooks/use-tasklists-state';
 
 import './style.scss';

@@ -33,7 +33,7 @@ const features = [
 		icon: DiscountImage,
 		title: __( 'Discounted rates', 'woocommerce' ),
 		description: __(
-			'Access discounted shipping rates with DHL and USPS.',
+			'Access discounted shipping rates with USPS, UPS, and DHL.',
 			'woocommerce'
 		),
 	},

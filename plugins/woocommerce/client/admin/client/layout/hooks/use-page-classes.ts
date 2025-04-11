@@ -2,19 +2,33 @@
  * External dependencies
  */
 import { useEffect } from '@wordpress/element';
-import { RouteMatch } from 'react-router-dom';
+import { Params } from 'react-router-dom';
 
-type Page = {
-	container: JSX.Element;
-	path: string;
+export type Page = {
+	container?: JSX.Element;
+	path?: string;
 	breadcrumbs:
 		| string[]
-		| ( ( { match }: { match: RouteMatch } ) => string[] );
-	wpOpenMenu: string;
-	navArgs: {
+		| ( ( {
+				match,
+		  }: {
+				match: {
+					params: Params;
+					url?: string;
+				};
+		  } ) => string[] );
+	wpOpenMenu?: string;
+	navArgs?: {
 		id: string;
 	};
-	capability: string;
+	capability?: string;
+	layout?: {
+		header: boolean;
+		footer: boolean;
+		showNotices: boolean;
+		showStoreAlerts: boolean;
+		showPluginArea: boolean;
+	};
 };
 
 export function usePageClasses( page: Page ) {

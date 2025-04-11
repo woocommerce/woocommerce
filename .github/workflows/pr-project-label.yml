@@ -1,19 +1,17 @@
 name: 'Label Pull Request Project'
 on:
     pull_request_target:
-        types:
-            - opened
-            - reopened
-            - synchronize
+        types: [opened, reopened, ready_for_review, review_requested, closed]
+
 concurrency:
-    group: label-pr-${{ github.event_name }}-${{ github.event.action }}-${{ github.event.pull_request.head.ref }}
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
     cancel-in-progress: true
 
 permissions: {}
 
 jobs:
     label_project:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
             pull-requests: write
@@ -22,3 +20,25 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   configuration-path: .github/project-pr-labeler.yml
+
+    label_by_content:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: write
+        needs: label_project
+
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+            with:
+              ref: refs/pull/${{ github.event.pull_request.number }}/merge
+              sparse-checkout: |
+                .github/workflows/scripts
+                plugins/woocommerce/changelog
+
+          - name: Detect changelog types from content
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              PR_NUMBER: ${{ github.event.pull_request.number }}
+            run: bash .github/workflows/scripts/label-pr-by-changelog-type.sh

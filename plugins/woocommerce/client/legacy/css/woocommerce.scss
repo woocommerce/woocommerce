@@ -1467,7 +1467,8 @@ p.demo_store,
 			z-index: 2;
 			width: 1em;
 			height: 1em;
-			background-color: $primary;
+			// We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: #7F54B3;
 			border-radius: 1em;
 			cursor: ew-resize;
 			outline: none;
@@ -1484,12 +1485,14 @@ p.demo_store,
 			display: block;
 			border: 0;
 			border-radius: 1em;
-			background-color: $primary;
+			// We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: #7F54B3;
 		}
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			background-color: darken($primary, 30%);
+			// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: darken(#7F54B3, 30%);
 			border: 0;
 		}
 
@@ -1616,13 +1619,15 @@ p.demo_store,
 		}
 
 		&.alt {
-			background-color: $primary;
-			color: $primarytext;
+			// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: #7F54B3;
+			color: desaturate(lighten(#7F54B3, 50%), 18%);
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
-				background-color: darken($primary, 5%);
-				color: $primarytext;
+				// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+				background-color: darken(#7F54B3, 5%);
+				color: desaturate(lighten(#7F54B3, 50%), 18%);
 			}
 
 			&.disabled,
@@ -1631,8 +1636,9 @@ p.demo_store,
 			&.disabled:hover,
 			&:disabled:hover,
 			&:disabled[disabled]:hover {
-				background-color: $primary;
-				color: $primarytext;
+				// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+				background-color: #7F54B3;
+				color: desaturate(lighten(#7F54B3, 50%), 18%);
 			}
 		}
 
@@ -1997,15 +2003,17 @@ p.demo_store,
 	}
 
 	#payment {
-		background: desaturate(rgba($primary, 0.14), 21%);
+		// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+		background: desaturate(rgba(#7F54B3, 0.14), 21%);
 		border-radius: 5px;
 
 		ul.payment_methods {
 			@include clearfix();
 			text-align: left;
 			padding: 1em;
+			// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
 			border-bottom: 1px solid
-				darken(desaturate(rgba($primary, 0.14), 21%), 10%);
+				darken(desaturate(rgba(#7F54B3, 0.14), 21%), 10%);
 			margin: 0;
 			list-style: none outside;
 

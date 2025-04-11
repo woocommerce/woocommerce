@@ -120,14 +120,8 @@ export const useUserPreferences = () => {
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			getLastEntitySaveError,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			hasStartedResolution,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			hasFinishedResolution,
 		} = select( store );
 
@@ -150,8 +144,6 @@ export const useUserPreferences = () => {
 	) => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			saveUser = async ( userToSave: {
 				id: number;
 				woocommerce_meta: { [ key: string ]: boolean };

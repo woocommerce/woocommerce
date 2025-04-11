@@ -40,6 +40,7 @@ import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { useLaunchYourStore } from '~/launch-your-store';
 import { useTaskListsState } from '~/hooks/use-tasklists-state';
+import HeaderAccount from '../marketplace/components/header-account/header-account';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -323,6 +324,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! isPerformingSetupTask(),
 		};
 
+		const headerAccount = {
+			component: () => <HeaderAccount page="wc-admin" />,
+			visible: isHomescreen,
+		};
+
 		const previewSite = {
 			name: 'previewSite',
 			title: __( 'Preview site', 'woocommerce' ),
@@ -361,6 +367,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			previewSite,
 			previewStore,
 			displayOptions,
+			headerAccount,
 			help,
 		].filter( ( tab ) => tab.visible );
 	};

@@ -4,7 +4,7 @@
 		"checkJs": true,
 		"allowSyntheticDefaultImports": true,
 		"jsx": "preserve",
-		"target": "es6",
+		"target": "esnext",
 		"module": "commonjs",
 		"declaration": true,
 		"declarationMap": true,
@@ -38,6 +38,7 @@
 	"references": [
 		{ "path": "./plugins/woocommerce/" },
 		{ "path": "./plugins/woocommerce/client/admin" },
+		{ "path": "./plugins/woocommerce/client/blocks" },
 		{ "path": "./packages/js/admin-e2e-tests" },
 		{ "path": "./packages/js/api" },
 		{ "path": "./packages/js/components" },

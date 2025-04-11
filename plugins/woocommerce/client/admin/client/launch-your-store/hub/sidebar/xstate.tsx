@@ -11,16 +11,15 @@ import {
 	spawnChild,
 	enqueueActions,
 } from 'xstate5';
-import React from 'react';
 import clsx from 'clsx';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import {
 	optionsStore,
-	PAYMENT_GATEWAYS_STORE_NAME,
 	settingsStore,
 	TaskListType,
 	TaskType,
 	PaymentGateway,
+	paymentGatewaysStore,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -138,7 +137,7 @@ export const getWooPaymentsStatus = async () => {
 
 	// Check the gateway is installed
 	const paymentGateways: PaymentGateway[] = await resolveSelect(
-		PAYMENT_GATEWAYS_STORE_NAME
+		paymentGatewaysStore
 	).getPaymentGateways();
 	const enabledPaymentGateways = paymentGateways.filter(
 		( gateway ) => gateway.enabled

@@ -115,6 +115,7 @@ declare global {
 	interface SettingsData {
 		start: CustomSettingsField | null;
 		pages: SettingsPages;
+		_wpnonce: string;
 	}
 }
 
@@ -123,6 +124,7 @@ declare global {
 		wcSettings: {
 			admin: {
 				settingsData: SettingsData;
+				settingsScripts: Record< string, string[] >;
 			};
 		};
 		wcTracks: {

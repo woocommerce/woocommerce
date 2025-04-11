@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/product-editor';
 import { Spinner } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import React, { lazy, Suspense, useContext, useEffect } from 'react';
+import { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';

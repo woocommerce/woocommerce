@@ -20,7 +20,7 @@ class SetSiteOptionsTest extends TestCase {
 
 		$expected_array = array(
 			'step'    => 'setSiteOptions',
-			'options' => $options,
+			'options' => (object) $options,
 		);
 
 		$this->assertEquals( $expected_array, $setSiteOptions->prepare_json_array() );
@@ -44,12 +44,8 @@ class SetSiteOptionsTest extends TestCase {
 					'type' => 'string',
 					'enum' => array( 'setSiteOptions' ),
 				),
-				'options' => array(
-					'type'                 => 'object',
-					'additionalProperties' => new \stdClass(),
-				),
 			),
-			'required'   => array( 'step', 'options' ),
+			'required'   => array( 'step'  ),
 		);
 
 		$this->assertEquals( $expected_schema, SetSiteOptions::get_schema() );

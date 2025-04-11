@@ -16,7 +16,7 @@ export function BlockIcon( { clientId }: BlockIconProps ) {
 			// Try to get the icon from the block's attributes
 			const { getBlockAttributes, getBlockName } =
 				select( 'core/block-editor' );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const attributes = getBlockAttributes( clientId );
 			if ( attributes?.icon ) {
 				return attributes.icon;
@@ -25,9 +25,9 @@ export function BlockIcon( { clientId }: BlockIconProps ) {
 			// If there is no icon defined in attributes
 			// Then try to get icon from block's metadata
 			const { getBlockType } = select( 'core/blocks' );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const blockName = getBlockName( clientId );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const block = getBlockType( blockName ?? undefined );
 			return block?.icon;
 		},

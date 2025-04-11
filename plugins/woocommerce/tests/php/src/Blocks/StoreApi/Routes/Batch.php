@@ -17,6 +17,13 @@ class Batch extends ControllerTestCase {
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
+		add_filter(
+			'__experimental_woocommerce_store_api_batch_request_methods',
+			function ( $methods ) {
+				$methods[] = 'GET';
+				return $methods;
+			}
+		);
 		parent::setUp();
 
 		$fixtures = new FixtureData();
@@ -122,10 +129,11 @@ class Batch extends ControllerTestCase {
 		$this->assertEquals( 201, $response_data['responses'][1]['status'], $response_data['responses'][1]['status'] );
 	}
 
+
 	/**
-	 * Get Requests not supported by batch.
+	 * Do a batch request with a get request.
 	 */
-	public function test_get_cart_route_batch() {
+	public function test_batch_get_requests() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
@@ -133,18 +141,20 @@ class Batch extends ControllerTestCase {
 				'requests' => array(
 					array(
 						'method' => 'GET',
-						'path'   => '/wc/store/v1/cart',
-						'body'   => array(
-							'id'       => 99,
-							'quantity' => 1,
-						),
+						'path'   => '/wc/store/v1/products',
+					),
+					array(
+						'method' => 'GET',
+						'path'   => '/wc/store/v1/products/collection-data',
 					),
 				),
 			)
 		);
+
 		$response      = rest_get_server()->dispatch( $request );
 		$response_data = $response->get_data();
 
-		$this->assertEquals( 'rest_invalid_param', $response_data['code'] );
+		$this->assertEquals( 2, count( $response_data['responses'] ) );
+		$this->assertEquals( 200, $response_data['responses'][0]['status'] );
 	}
 }

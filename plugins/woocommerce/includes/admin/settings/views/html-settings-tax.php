@@ -118,15 +118,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 			</span>
 			<span class="pagination-links">
-
-				<a class="tablenav-pages-navspan" data-goto="1">
-					<span class="screen-reader-text"><?php esc_html_e( 'First page', 'woocommerce' ); ?></span>
-					<span aria-hidden="true">&laquo;</span>
-				</a>
-				<a class="tablenav-pages-navspan" data-goto="<# print( Math.max( 1, parseInt( data.current_page, 10 ) - 1 ) ) #>">
-					<span class="screen-reader-text"><?php esc_html_e( 'Previous page', 'woocommerce' ); ?></span>
-					<span aria-hidden="true">&lsaquo;</span>
-				</a>
+				<# if ( data.current_page === 1 ) { #>
+					<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&laquo;</span>
+					<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&lsaquo;</span>
+				<# } else { #>
+					<a class="button" data-goto="1">
+						<span class="screen-reader-text"><?php esc_html_e( 'First page', 'woocommerce' ); ?></span>
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+					<a class="button" data-goto="<# print( Math.max( 1, parseInt( data.current_page, 10 ) - 1 ) ) #>">
+						<span class="screen-reader-text"><?php esc_html_e( 'Previous page', 'woocommerce' ); ?></span>
+						<span aria-hidden="true">&lsaquo;</span>
+					</a>
+				<# } #>
 
 				<span class="paging-input">
 					<label for="current-page-selector" class="screen-reader-text"><?php esc_html_e( 'Current page', 'woocommerce' ); ?></label>
@@ -140,14 +144,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 				</span>
 
-				<a class="tablenav-pages-navspan" data-goto="<# print( Math.min( data.qty_pages, parseInt( data.current_page, 10 ) + 1 ) ) #>">
-					<span class="screen-reader-text"><?php esc_html_e( 'Next page', 'woocommerce' ); ?></span>
-					<span aria-hidden="true">&rsaquo;</span>
-				</a>
-				<a class="tablenav-pages-navspan" data-goto="{{ data.qty_pages }}">
-					<span class="screen-reader-text"><?php esc_html_e( 'Last page', 'woocommerce' ); ?></span>
-					<span aria-hidden="true">&raquo;</span>
-				</a>
+				<# if ( data.current_page === data.qty_pages ) { #>
+					<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&rsaquo;</span>
+					<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&raquo;</span>
+				<# } else { #>
+					<a class="button" data-goto="<# print( Math.min( data.qty_pages, parseInt( data.current_page, 10 ) + 1 ) ) #>">
+						<span class="screen-reader-text"><?php esc_html_e( 'Next page', 'woocommerce' ); ?></span>
+						<span aria-hidden="true">&rsaquo;</span>
+					</a>
+					<a class="button" data-goto="{{ data.qty_pages }}">
+						<span class="screen-reader-text"><?php esc_html_e( 'Last page', 'woocommerce' ); ?></span>
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				<# } #>
 
 			</span>
 		</div>

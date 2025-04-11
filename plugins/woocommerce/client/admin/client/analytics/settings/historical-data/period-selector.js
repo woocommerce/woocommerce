@@ -6,7 +6,7 @@ import moment from 'moment';
 import { SelectControl } from '@wordpress/components';
 import { DatePicker } from '@woocommerce/components';
 import { dateValidationMessages } from '@woocommerce/date';
-import { IMPORT_STORE_NAME } from '@woocommerce/data';
+import { importStore } from '@woocommerce/data';
 import { withDispatch } from '@wordpress/data';
 
 function HistoricalDataPeriodSelector( {
@@ -86,6 +86,6 @@ function HistoricalDataPeriodSelector( {
 }
 
 export default withDispatch( ( dispatch ) => {
-	const { setImportPeriod } = dispatch( IMPORT_STORE_NAME );
+	const { setImportPeriod } = dispatch( importStore );
 	return { setImportPeriod };
 } )( HistoricalDataPeriodSelector );

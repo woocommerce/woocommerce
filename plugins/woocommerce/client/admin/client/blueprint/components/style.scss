@@ -1,5 +1,29 @@
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
 .blueprint-upload-dropzone-error {
-	padding-block: 12px;
+	margin-top: 16px;
+	.components-notice.is-error {
+		background: #fce2e4;
+		border-left-color: #cc1818;
+		padding: 0;
+		color: #1e1e1e;
+		button.components-notice__dismiss {
+			align-self: inherit;
+			padding: 12px;
+			svg {
+				fill: #1e1e1e;
+				width: 15px;
+			}
+		}
+		.components-notice__content {
+			margin: 0;
+			pre {
+				margin: 0;
+				padding: 12px;
+				font-family: $font-sf-pro-display;
+			}
+		}
+	}
 }
 
 .blueprint-upload-form {
@@ -51,6 +75,9 @@
 .blueprint-upload-dropzone-success {
 	background: #fff;
 	padding: 16px;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+	margin: 16px 0 0 0;
 
 	.blueprint-upload-dropzone-text {
 		margin: 0;

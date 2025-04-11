@@ -1,7 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
-const { variableProducts: utils } = require( '../../utils' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { variableProducts as utils } from '../../utils';
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
 const {
 	createVariableProduct,
 	showVariableProductTour,

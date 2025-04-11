@@ -1,8 +1,16 @@
-const { request } = require( '@playwright/test' );
-const { test, expect, tags } = require( '../../fixtures/fixtures' );
-const { setOption } = require( '../../utils/options' );
-const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { expect, tags, test } from '../../fixtures/fixtures';
+import { setOption } from '../../utils/options';
+import { activateTheme, DEFAULT_THEME } from '../../utils/themes';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_ADMIN_API_PATH } from '../../utils/api-client';
 
 test.describe(
 	'Launch Your Store - logged in',
@@ -10,8 +18,8 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeEach( async ( { wcAdminApi } ) => {
-			await wcAdminApi.post( 'onboarding/profile', {
+		test.beforeEach( async ( { restApi } ) => {
+			await restApi.post( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
 				skipped: true,
 			} );
 		} );

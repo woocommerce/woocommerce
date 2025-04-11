@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove span from inside the country select HTML element

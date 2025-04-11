@@ -17,8 +17,6 @@ import {
 } from '~/marketing/hooks';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
-import wooIconUrlNew from './woo-new.svg';
-import { isNewBranding } from '~/utils/admin-settings';
 import illustrationUrl from './illustration.svg';
 
 type IntroductionBannerProps = {
@@ -34,12 +32,6 @@ export const IntroductionBanner = ( {
 	const { data: dataRegistered } = useRegisteredChannels();
 	const { data: dataRecommended } = useRecommendedChannels();
 	const { data: dataCampaignTypes } = useCampaignTypes();
-
-	if ( isNewBranding() ) {
-		import( './IntroductionBanner-new.scss' );
-	} else {
-		import( './IntroductionBanner-old.scss' );
-	}
 
 	const showButtons = !! (
 		dataRegistered?.length && dataCampaignTypes?.length
@@ -103,9 +95,7 @@ export const IntroductionBanner = ( {
 					<FlexItem>
 						<Flex>
 							<img
-								src={
-									isNewBranding() ? wooIconUrlNew : wooIconUrl
-								}
+								src={ wooIconUrl }
 								alt={ __( 'WooCommerce logo', 'woocommerce' ) }
 								width="24"
 								height="24"

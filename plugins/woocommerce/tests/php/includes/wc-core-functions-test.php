@@ -224,4 +224,52 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '', $result['state'] );
 		remove_all_filters( 'woocommerce_geolocate_ip' );
 	}
+
+	/**
+	 * Test wc_delete_transients() function.
+	 */
+	public function test_wc_delete_transients() {
+		// Set up test transients.
+		$transient_name1 = 'wc_test_transient_1';
+		$transient_name2 = 'wc_test_transient_2';
+
+		set_transient( $transient_name1, 'test_value_1', HOUR_IN_SECONDS );
+		set_transient( $transient_name2, 'test_value_2', HOUR_IN_SECONDS );
+
+		// Verify transients exist before deletion.
+		$this->assertEquals( 'test_value_1', get_transient( $transient_name1 ) );
+		$this->assertEquals( 'test_value_2', get_transient( $transient_name2 ) );
+
+		// Delete the transients.
+		_wc_delete_transients( array( $transient_name1, $transient_name2 ) );
+
+		// Verify transients are deleted.
+		$this->assertFalse( get_transient( $transient_name1 ) );
+		$this->assertFalse( get_transient( $transient_name2 ) );
+
+		// Test with a single transient name (string instead of array).
+		$transient_name3 = 'wc_test_transient_3';
+		set_transient( $transient_name3, 'test_value_3', HOUR_IN_SECONDS );
+		$this->assertEquals( 'test_value_3', get_transient( $transient_name3 ) );
+
+		// Pass the transient name as an array element
+		_wc_delete_transients( array( $transient_name3 ) );
+
+		$this->assertFalse( get_transient( $transient_name3 ) );
+
+		// Test with a transient that does not exist.
+		$wc_test_transient_not_existing = 'wc_test_transient_not_existing';
+		$this->assertTrue( _wc_delete_transients( array( $wc_test_transient_not_existing ) ) );
+
+		// Test with empty input.
+		$this->assertFalse( _wc_delete_transients( array() ) );
+		$this->assertFalse( _wc_delete_transients( '' ) );
+
+		// Test with other non-array arguments.
+		$this->assertFalse( _wc_delete_transients( 'test' ) );
+		$this->assertFalse( _wc_delete_transients( null ) );
+		$this->assertFalse( _wc_delete_transients( 123 ) );
+		$this->assertFalse( _wc_delete_transients( true ) );
+		$this->assertFalse( _wc_delete_transients( new stdClass() ) );
+	}
 }

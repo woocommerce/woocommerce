@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -30,11 +31,13 @@ jest.mock( '@woocommerce/admin-layout', () => {
 		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
 	};
 } );
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
+} ) );
 
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
 	getInstalledPlugins: () => [],
-	isJetpackConnected: () => false,
 	getSettings: () => ( {
 		general: {
 			woocommerce_default_country: 'US',
@@ -52,42 +55,19 @@ describe( 'ShippingRecommendations', () => {
 		);
 	} );
 
-	it( 'should not render when WCS is already installed and Jetpack is connected', () => {
+	it( `should not render if the following plugins are active: woocommerce-shipping`, () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				...defaultSelectReturn,
-				getActivePlugins: () => [ 'woocommerce-services' ],
-				isJetpackConnected: () => true,
+				getActivePlugins: () => 'woocommerce-shipping',
 			} ) )
 		);
+
 		render( <ShippingRecommendations /> );
 
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
 		).not.toBeInTheDocument();
-	} );
-
-	[
-		[ 'woocommerce-shipping' ],
-		[ 'woocommerce-tax' ],
-		[ 'woocommerce-shipping', 'woocommerce-tax' ],
-	].forEach( ( activePlugins ) => {
-		it( `should not render if the following plugins are active: ${ JSON.stringify(
-			activePlugins
-		) }`, () => {
-			( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-				fn( () => ( {
-					...defaultSelectReturn,
-					getActivePlugins: () => activePlugins,
-				} ) )
-			);
-
-			render( <ShippingRecommendations /> );
-
-			expect(
-				screen.queryByText( 'WooCommerce Shipping' )
-			).not.toBeInTheDocument();
-		} );
 	} );
 
 	it( 'should not render when store location is not US', () => {
@@ -124,11 +104,45 @@ describe( 'ShippingRecommendations', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'should render WCS when not installed', () => {
+	it( 'should render WC Shipping when not installed', () => {
 		render( <ShippingRecommendations /> );
 
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
 		).toBeInTheDocument();
+	} );
+
+	it( 'should trigger event settings_shipping_recommendation_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+		render( <ShippingRecommendations /> );
+
+		fireEvent.click(
+			screen.getByText( 'Official WooCommerce Marketplace' )
+		);
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_visit_marketplace_click',
+			{}
+		);
+	} );
+
+	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+		const mockLocation = {
+			href: 'test',
+		} as Location;
+
+		mockLocation.href = 'test';
+		Object.defineProperty( global.window, 'location', {
+			value: mockLocation,
+		} );
+
+		render( <ShippingRecommendations /> );
+
+		fireEvent.click(
+			screen.getByText( 'Official WooCommerce Marketplace' )
+		);
+
+		expect( mockLocation.href ).toContain(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
+		);
 	} );
 } );

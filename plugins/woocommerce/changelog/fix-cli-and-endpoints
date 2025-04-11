@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Add validation to prevent PHP warning in CLI when using the 'count' format.

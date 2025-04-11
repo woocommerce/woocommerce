@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import { createMemoryHistory } from 'history';

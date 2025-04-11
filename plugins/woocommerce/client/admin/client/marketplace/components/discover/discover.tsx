@@ -83,8 +83,11 @@ export default function Discover(): JSX.Element | null {
 					key={ groups.id }
 					productGroup={ groups.id }
 					title={ groups.title }
+					description={ groups.description }
 					products={ groups.items }
 					groupURL={ groups.url }
+					groupURLText={ groups.url_text }
+					groupURLType={ groups.url_type }
 					type={ groups.itemType }
 				/>
 			) ) }

@@ -18,13 +18,13 @@ export type PluginListProps = {
 	title?: string;
 };
 
-export const PluginList: React.FC< PluginListProps > = ( {
+export const PluginList = ( {
 	currentPlugin,
 	installAndActivate = () => {},
 	onManage = () => {},
 	plugins = [],
 	title,
-} ) => {
+}: PluginListProps ) => {
 	return (
 		<div className="woocommerce-plugin-list">
 			{ title && (
@@ -44,6 +44,9 @@ export const PluginList: React.FC< PluginListProps > = ( {
 					manageUrl,
 					slug,
 					name,
+					tags,
+					learnMoreLink,
+					installExternal,
 				} = plugin;
 				return (
 					<Plugin
@@ -60,6 +63,9 @@ export const PluginList: React.FC< PluginListProps > = ( {
 						isDisabled={ !! currentPlugin }
 						isInstalled={ isInstalled }
 						slug={ slug }
+						tags={ tags }
+						learnMoreLink={ learnMoreLink }
+						installExternal={ installExternal }
 					/>
 				);
 			} ) }

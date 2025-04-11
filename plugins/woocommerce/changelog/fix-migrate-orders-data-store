@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update orders store import to use ordersStore from @woocommerce/data

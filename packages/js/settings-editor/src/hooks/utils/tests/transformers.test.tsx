@@ -96,8 +96,8 @@ describe( 'dataforms-transformers', () => {
 				desc: 'Select Input',
 				value: 'value1',
 				options: {
-					'Option 1': 'value1',
-					'Option 2': 'value2',
+					value1: 'Option 1',
+					value2: 'Option 2',
 				},
 			};
 

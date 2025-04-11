@@ -139,7 +139,6 @@ test.describe(
 			assemblerPage,
 		} ) => {
 			const assembler = await assemblerPage.getAssembler();
-			const editor = await assemblerPage.getEditor();
 
 			await assembler
 				.locator( '.block-editor-block-patterns-list__list-item' )
@@ -163,13 +162,28 @@ test.describe(
 				const expectedHeaderClass =
 					extractHeaderClass( headerPickerClass );
 
-				const headerPattern = editor.locator(
-					'header div.wc-blocks-header-pattern'
+				const editor = await assemblerPage.getEditor();
+				const header = editor.getByRole( 'document', {
+					name: 'Header',
+				} );
+
+				await expect(
+					header,
+					'Header should be visible'
+				).toBeVisible();
+
+				const headerPattern = header.locator(
+					`div.wc-blocks-header-pattern`
 				);
 
 				await expect(
-					await headerPattern.getAttribute( 'class' )
-				).toContain( expectedHeaderClass );
+					headerPattern,
+					'Header pattern should be visible'
+				).toBeVisible();
+				await expect(
+					headerPattern,
+					`Header should have class ${ expectedHeaderClass }`
+				).toHaveClass( new RegExp( expectedHeaderClass ) );
 			}
 		} );
 	}

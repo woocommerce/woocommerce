@@ -44,11 +44,16 @@ export type PaymentIncentive = {
 	cta_label: string;
 	tc_url: string;
 	badge: string;
-	_dismissals: string[];
+	_dismissals: PaymentIncentiveDismissal[];
 	_links: {
 		dismiss: LinkData;
 	};
 };
+
+interface PaymentIncentiveDismissal {
+	timestamp: number; // timestamp in seconds
+	context: string;
+}
 
 export type RecommendedPaymentMethod = {
 	id: string;
@@ -150,6 +155,8 @@ export type SuggestedPaymentExtension = {
 	tags: string[];
 	plugin: PluginData;
 	links: PaymentGatewayLink[];
+	_links?: Record< string, LinkData >;
+	_incentive?: PaymentIncentive;
 };
 
 export type SuggestedPaymentExtensionCategory = {
@@ -166,6 +173,7 @@ export type PaymentSettingsState = {
 	suggestionCategories: SuggestedPaymentExtensionCategory[];
 	isFetching: boolean;
 	errors: Record< string, unknown >;
+	isWooPayEligible: boolean;
 };
 
 export type OrderMap = Record< string, number >;
@@ -181,3 +189,7 @@ export type EnableGatewayResponse = {
 	success: boolean;
 	data: unknown;
 };
+
+export interface WooPayEligibilityResponse {
+	is_eligible: boolean;
+}

@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   send-slack-notification-when-pr-contains-rest-api-changes:
     if: "${{ github.event.label.name == 'contains: rest api change' && (github.event.pull_request.state == 'open' || github.event.pull_request.merged) }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Wait 2 minutes for other labelling jobs to finish
         run: sleep 2m

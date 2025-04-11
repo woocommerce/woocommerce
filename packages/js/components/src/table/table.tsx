@@ -15,7 +15,6 @@ import { find, get, noop } from 'lodash';
 import { withInstanceId } from '@wordpress/compose';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import deprecated from '@wordpress/deprecated';
-import React from 'react';
 
 /**
  * Internal dependencies

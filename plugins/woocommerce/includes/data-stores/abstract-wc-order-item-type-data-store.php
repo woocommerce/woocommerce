@@ -240,7 +240,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		$cogs_value = (float) $cogs_value;
 		if ( 0.0 === $cogs_value ) {
-			$this->order_item_data_store->delete_metadata( $item->get_id(), '_cogs_value', '', true );
+			$this->order_item_data_store->delete_metadata( $item->get_id(), '_cogs_value', '' );
 		} else {
 			$this->order_item_data_store->update_metadata( $item->get_id(), '_cogs_value', $cogs_value );
 		}

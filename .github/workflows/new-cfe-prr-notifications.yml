@@ -8,7 +8,7 @@ permissions: {}
 jobs:
   prep:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved' || github.event.label.name == 'Rejected'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       pr_number: ${{ steps.extract-pr.outputs.PR_NUMBER }}
     steps:
@@ -39,7 +39,7 @@ jobs:
 
   verify:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       release_number: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
     permissions:
@@ -189,7 +189,7 @@ jobs:
 
   apply-milestone:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved' || github.event.label.name == 'Rejected'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
     needs:
@@ -206,7 +206,7 @@ jobs:
 
   cfe-created:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs:
       - verify
     permissions:
@@ -251,7 +251,7 @@ jobs:
 
   request-approved:
     if: ${{ github.event.label.name == 'Approved' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       issues: write
@@ -313,7 +313,7 @@ jobs:
 
   request-rejected:
     if: ${{ github.event.label.name == 'Rejected' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:

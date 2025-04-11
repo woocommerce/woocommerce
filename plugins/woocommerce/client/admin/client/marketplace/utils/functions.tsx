@@ -33,8 +33,11 @@ import { noticeStore } from '../contexts/notice-store';
 interface ProductGroup {
 	id: string;
 	title: string;
+	description: string;
 	items: Product[];
 	url: string;
+	url_text: string | null;
+	url_type: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	itemType: ProductType;
 }
 
@@ -244,6 +247,23 @@ function connectProduct( subscription: Subscription ): Promise< void > {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/connect';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
+function activateProductPlugin( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate-plugin';
 	const data = new URLSearchParams();
 	data.append( 'product_key', subscription.product_key );
 	return apiFetch( {
@@ -486,15 +506,29 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
-const connectUrl = (): string => {
+// If you need to add support for a different page, make sure to
+// update WC_Helper::get_source_page() in the backend.
+const connectUrl = ( page = 'wc-admin', reconnect = false ): string => {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
-	if ( ! wccomSettings.connectURL ) {
+	if ( ! reconnect && ! wccomSettings.connectURL ) {
+		return '';
+	} else if ( reconnect && ! wccomSettings.reConnectURL ) {
 		return '';
 	}
 
-	return appendURLParams( wccomSettings.connectURL, [
-		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+	const url = reconnect
+		? wccomSettings.reConnectURL
+		: wccomSettings.connectURL;
+
+	// We have to manipulate `page` from the frontend, since `wccomHelper`
+	// settings remain static when switching pages on the frontend.
+	const updatedHref = new URL( window.location.href );
+	updatedHref.searchParams.set( 'page', page );
+
+	return appendURLParams( url, [
+		[ 'redirect_admin_url', encodeURIComponent( updatedHref.toString() ) ],
+		[ 'page', page ],
 	] );
 };
 
@@ -502,6 +536,7 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	activateProductPlugin,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,

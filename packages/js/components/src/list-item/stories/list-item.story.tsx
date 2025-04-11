@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import React from 'react';
 
 /**
  * Internal dependencies

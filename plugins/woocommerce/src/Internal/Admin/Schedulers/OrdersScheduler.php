@@ -7,13 +7,13 @@ namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrderDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
-use Automattic\WooCommerce\Admin\Overrides\Order;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -42,11 +42,13 @@ class OrdersScheduler extends ImportScheduler {
 		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
 		ProductsDataStore::init();
 		TaxesDataStore::init();
+		OrderDataStore::init();
 
 		parent::init();
 	}
@@ -213,7 +215,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
-		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() ) {
+		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() && 'woocommerce_schedule_import' !== current_filter() ) {
 			return $order_id;
 		}
 

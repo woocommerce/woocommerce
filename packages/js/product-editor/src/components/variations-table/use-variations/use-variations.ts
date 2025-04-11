@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	experimentalProductVariationsStore,
 	PartialProductVariation,
 	ProductProductAttribute,
 	ProductVariation,
@@ -35,19 +35,24 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		params: GetVariationsRequest,
 		invalidateResolutionBeforeRequest = false
 	) {
-		const requestParams: GetVariationsRequest = {
-			page: 1,
-			per_page: perPageRef.current,
-			order: 'asc',
-			orderby: 'menu_order',
-			attributes: [],
-			...params,
-		};
+		const requestParams = {
+			product_id: params.product_id,
+			page: params.page || 1,
+			per_page: params.per_page || perPageRef.current,
+			order: params.order || 'asc',
+			orderby: ( params.orderby || 'menu_order' ) as
+				| 'date'
+				| 'id'
+				| 'include'
+				| 'title'
+				| 'slug'
+				| 'menu_order',
+			attributes: params.attributes || [],
+		} as const;
 
 		try {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const { invalidateResolution } = dispatch(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				experimentalProductVariationsStore
 			);
 
 			if ( invalidateResolutionBeforeRequest ) {
@@ -60,15 +65,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			}
 
 			const { getProductVariations, getProductVariationsTotalCount } =
-				resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+				resolveSelect( experimentalProductVariationsStore );
 
 			setIsLoading( true );
 			setGetVariationsError( undefined );
 
-			// @ts-expect-error TODO react-18-upgrade: requestParams type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 			const data = await getProductVariations( requestParams );
-
-			// @ts-expect-error TODO react-18-upgrade: requestParams type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 			const total = await getProductVariationsTotalCount( requestParams );
 
 			setVariations( data );
@@ -164,7 +166,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		setIsSelectingAll( true );
 
 		const { getProductVariations } = resolveSelect(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		);
 
 		let currentPage = 1;
@@ -176,7 +178,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				page: currentPage++,
 				per_page: 50,
 				order: 'asc',
-				// @ts-expect-error TODO react-18-upgrade: param type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 				orderby: 'menu_order',
 				attributes: filters,
 			} );
@@ -281,15 +282,14 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			} )
 		);
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const { updateProductVariation } = dispatch(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		);
 
-		return updateProductVariation< Promise< ProductVariation > >(
+		return updateProductVariation(
 			{ product_id: productId, id: variationId },
 			variation
-		).then( async ( response: ProductVariation ) => {
+		).then( async ( response ) => {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
@@ -310,11 +310,10 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onDelete( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const { deleteProductVariation, invalidateResolutionForStore } =
-			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			dispatch( experimentalProductVariationsStore );
 
-		return deleteProductVariation< Promise< ProductVariation > >( {
+		return deleteProductVariation( {
 			product_id: productId,
 			id: variationId,
 		} ).then( async ( response: ProductVariation ) => {
@@ -353,9 +352,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
-			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			dispatch( experimentalProductVariationsStore );
 
 		selectedVariationsRef.current = {};
 		setSelectedCount( 0 );
@@ -380,9 +378,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				)
 			);
 
-			const response = await batchUpdateProductVariations< {
-				update: ProductVariation[];
-			} >(
+			const response = await batchUpdateProductVariations(
 				{ product_id: productId },
 				{
 					update: subset,
@@ -423,9 +419,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
-			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			dispatch( experimentalProductVariationsStore );
 
 		selectedVariationsRef.current = {};
 		setSelectedCount( 0 );
@@ -450,9 +445,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				)
 			);
 
-			const response = await batchUpdateProductVariations< {
-				delete: ProductVariation[];
-			} >(
+			const response = await batchUpdateProductVariations(
 				{ product_id: productId },
 				{
 					delete: subset.map( ( { id } ) => id ),

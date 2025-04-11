@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useContext } from '@wordpress/element';
 import { screen, render, renderHook } from '@testing-library/react';
 import { addAction, applyFilters, didFilter } from '@wordpress/hooks';
 /* eslint-disable @woocommerce/dependency-group */
 // @ts-ignore No types for this exist yet.
-import { privateApis } from '@wordpress/router';
+import { useLocation } from '@automattic/site-admin';
 /* eslint-enable @woocommerce/dependency-group */
 
 /**
@@ -20,16 +20,11 @@ jest.mock( '@wordpress/hooks', () => ( {
 	removeAction: jest.fn(),
 	applyFilters: jest.fn(),
 	didFilter: jest.fn(),
+	addFilter: jest.fn(),
 } ) );
 
-jest.mock( '@wordpress/router', () => ( {
-	privateApis: {
-		useLocation: jest.fn(),
-	},
-} ) );
-
-jest.mock( '@wordpress/edit-site/build-module/lock-unlock', () => ( {
-	unlock: jest.fn( ( apis ) => apis ),
+jest.mock( '@automattic/site-admin', () => ( {
+	useLocation: jest.fn(),
 } ) );
 
 jest.mock( '../components/sidebar', () => ( {
@@ -37,6 +32,11 @@ jest.mock( '../components/sidebar', () => ( {
 	Sidebar: ( { children }: { children: React.ReactNode } ) => (
 		<div data-testid="sidebar-navigation-screen">{ children }</div>
 	),
+} ) );
+
+jest.mock( '@wordpress/element', () => ( {
+	...jest.requireActual( '@wordpress/element' ),
+	useContext: jest.fn(),
 } ) );
 
 const mockSettingsPages = {
@@ -65,6 +65,7 @@ const mockSettingsPages = {
 		},
 	},
 	start: null,
+	_wpnonce: 'test-nonce',
 };
 
 describe( 'route.tsx', () => {
@@ -76,16 +77,17 @@ describe( 'route.tsx', () => {
 		window.wcSettings = {
 			admin: {
 				settingsData: mockSettingsPages,
+				settingsScripts: {},
 			},
 		};
 
+		( useContext as jest.Mock ).mockReturnValue( {
+			settingsData: mockSettingsPages,
+		} );
+
 		// Mock default location
-		(
-			privateApis as {
-				useLocation: jest.Mock;
-			}
-		 ).useLocation.mockReturnValue( {
-			params: { tab: 'general' },
+		( useLocation as jest.Mock ).mockReturnValue( {
+			query: { tab: 'general' },
 		} );
 	} );
 
@@ -107,12 +109,8 @@ describe( 'route.tsx', () => {
 
 		it( 'should return not found route for non-existent pages', () => {
 			// Mock location for non-existent page
-			(
-				privateApis as {
-					useLocation: jest.Mock;
-				}
-			 ).useLocation.mockReturnValue( {
-				params: { tab: 'non-existent' },
+			( useLocation as jest.Mock ).mockReturnValue( {
+				query: { tab: 'non-existent' },
 			} );
 
 			const { result } = renderHook( () => useActiveRoute() );
@@ -124,33 +122,30 @@ describe( 'route.tsx', () => {
 		} );
 
 		it( 'should return modern route for modern pages', () => {
-			(
-				privateApis as {
-					useLocation: jest.Mock;
-				}
-			 ).useLocation.mockReturnValue( {
-				params: { tab: 'modern' },
+			( useLocation as jest.Mock ).mockReturnValue( {
+				query: { tab: 'modern' },
 			} );
 
 			// Mock a modern page
-			window.wcSettings = {
-				admin: {
-					settingsData: {
-						pages: {
-							modern: {
-								label: 'Modern',
-								icon: 'published',
-								slug: 'modern',
-								sections: {},
-								is_modern: true,
-								start: null,
-								end: null,
-							},
-						},
+			const mockModernPages = {
+				pages: {
+					modern: {
+						label: 'Modern',
+						icon: 'published',
+						slug: 'modern',
+						sections: {},
+						is_modern: true,
 						start: null,
+						end: null,
 					},
 				},
+				start: null,
+				_wpnonce: 'test-nonce',
 			};
+
+			( useContext as jest.Mock ).mockReturnValue( {
+				settingsData: mockModernPages,
+			} );
 
 			( applyFilters as jest.Mock ).mockReturnValue( {
 				modern: {

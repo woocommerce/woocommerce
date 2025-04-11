@@ -1,8 +1,15 @@
-const { test } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect } = require( '@playwright/test' );
+/**
+ * External dependencies
+ */
+import { faker } from '@faker-js/faker';
 
-const { clickOnTab } = require( '../../../utils/simple-products' );
-const { tags } = require( '../../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test } from '../../../fixtures/block-editor-fixtures';
+import { expect, tags } from '../../../fixtures/fixtures';
+import { clickOnTab } from '../../../utils/simple-products';
+import { getFakeCategory } from '../../../utils/data';
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -10,13 +17,13 @@ const NEW_EDITOR_ADD_PRODUCT_URL =
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 const productData = {
-	name: `Simple product Name ${ new Date().getTime().toString() }`,
+	name: faker.commerce.productName(),
 	summary: 'This is a product summary',
 	productPrice: '100',
 	salePrice: '90',
 };
 
-const categoryName = `my-category-${ new Date().getTime().toString() }`;
+const categoryName = getFakeCategory().name;
 
 const tagName = `my-tag-${ new Date().getTime().toString() }`;
 
@@ -143,8 +150,8 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 			).toBeVisible();
 
 			await expect(
-				await page.getByRole( 'link', { name: categoryName } ).count()
-			).toBeGreaterThan( 0 );
+				page.getByRole( 'link', { name: categoryName } ).first()
+			).toBeVisible();
 
 			await expect(
 				page.getByRole( 'link', { name: tagName } )

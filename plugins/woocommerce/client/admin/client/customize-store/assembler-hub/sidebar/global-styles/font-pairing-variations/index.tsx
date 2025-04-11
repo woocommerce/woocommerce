@@ -70,13 +70,8 @@ export const FontPairing = () => {
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 	const trackingAllowed = useSelect(
 		( select ) =>
-			// Todo: awaiting more global fix, demo:
-			// https://github.com/woocommerce/woocommerce/pull/54146
-			(
-				select( optionsStore ) as {
-					getOption: ( option: string ) => unknown;
-				}
-			 ).getOption( 'woocommerce_allow_tracking' ) === 'yes',
+			select( optionsStore ).getOption( 'woocommerce_allow_tracking' ) ===
+			'yes',
 		[]
 	);
 

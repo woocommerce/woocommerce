@@ -47,7 +47,7 @@ import {
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
@@ -350,11 +350,11 @@ export function BlockEditor( {
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect(
 		(
-			selectCore: ( key: string ) => {
-				isModalEditorOpen: () => boolean;
+			selectCore: ( key: typeof wooProductEditorUiStore ) => {
+				isModalEditorOpen: () => boolean | undefined;
 			}
 		) => {
-			return selectCore( productEditorUiStore ).isModalEditorOpen();
+			return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
 		},
 		[]
 	);
@@ -372,11 +372,7 @@ export function BlockEditor( {
 			<Suspense fallback={ null }>
 				<ModalEditor
 					onClose={
-						(
-							dispatch( productEditorUiStore ) as {
-								closeModalEditor: () => void;
-							}
-						 ).closeModalEditor
+						dispatch( wooProductEditorUiStore ).closeModalEditor
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
 					name={

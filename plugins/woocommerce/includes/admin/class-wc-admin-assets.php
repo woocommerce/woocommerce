@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
-use Automattic\WooCommerce\Internal\BrandingController;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -62,6 +62,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
 			if ( $screen && $screen->is_block_editor() ) {
+				if ( ! wp_is_block_theme() ) {
+					wp_register_style( 'woocommerce-classictheme-editor-fonts', WC()->plugin_url() . '/assets/css/woocommerce-classictheme-editor-fonts.css', array(), $version );
+					wp_enqueue_style( 'woocommerce-classictheme-editor-fonts' );
+				}
+
 				$styles = WC_Frontend_Scripts::get_styles();
 
 				if ( $styles ) {
@@ -116,11 +121,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
 				wp_enqueue_style( 'woocommerce_admin_marketplace_styles' );
-			}
-
-			// Override primary color if new branding is in use.
-			if ( BrandingController::use_new_branding() ) {
-				wp_enqueue_style( 'woocommerce_admin_variables', WC()->plugin_url() . '/assets/css/variables-new-branding.css', array(), $version );
 			}
 		}
 
@@ -183,6 +183,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
 					'search_product_attributes_nonce' => wp_create_nonce( 'search-product-attributes' ),
 					'search_pages_nonce'              => wp_create_nonce( 'search-pages' ),
+					'search_order_metakeys_nonce'     => wp_create_nonce( 'search-order-metakeys' ),
 				)
 			);
 
@@ -319,6 +320,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 					'i18n_variation_count_single'         => esc_js( __( '1 variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
+					'i18n_variation_cost_remove_warning'  => esc_js( __( 'The custom cost of goods sold values will revert back to their defaults for all the variations. Would you like to continue?', 'woocommerce' ) ),
 					'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
 				);
 
@@ -453,6 +455,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_attributes_used_for_variations_placeholder' => sprintf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), esc_attr( WC_DELIMITER ) )
 				);
 
+				$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
+				if( $cogs_controller->feature_is_enabled() ) {
+					$params['cogs_value_tooltip_simple_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip( false ) );
+					$params['cogs_value_tooltip_variable_products'] = esc_attr( $cogs_controller->get_general_cost_edit_field_tooltip( true ) );
+				}
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
 			}
 

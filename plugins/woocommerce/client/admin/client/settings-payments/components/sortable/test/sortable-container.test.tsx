@@ -3,7 +3,6 @@
  */
 import { render, screen, act } from '@testing-library/react';
 import { DndContext } from '@dnd-kit/core';
-import React from 'react';
 import '@testing-library/jest-dom';
 
 /**

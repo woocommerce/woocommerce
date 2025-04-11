@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { countriesStore } from '@woocommerce/data';
 import { Fragment, useState } from '@wordpress/element';
 import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
@@ -61,20 +61,15 @@ const StoreLocation = ( {
 	validate = defaultValidate,
 }: StoreLocationProps ) => {
 	const { hasFinishedResolution } = useSelect( ( select ) => {
-		const countryStore = select( COUNTRIES_STORE_NAME );
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+		const countryStore = select( countriesStore );
 		countryStore.getCountries();
 
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			getLocale: countryStore.getLocale,
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			locales: countryStore.getLocales(),
 			hasFinishedResolution:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-				countryStore.hasFinishedResolution( 'getLocales' ) &&
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-				countryStore.hasFinishedResolution( 'getCountries' ),
+				countryStore.hasFinishedResolution( 'getLocales', undefined ) &&
+				countryStore.hasFinishedResolution( 'getCountries', undefined ),
 		};
 	}, [] );
 	const [ isSubmitting, setSubmitting ] = useState( false );

@@ -14,7 +14,7 @@ permissions: {}
 jobs:
     changelog-version-update:
         name: Update changelog and version
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
           contents: write
           pull-requests: write

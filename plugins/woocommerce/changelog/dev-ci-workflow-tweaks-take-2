@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: skip running core API tests for changes in JS dependencies.

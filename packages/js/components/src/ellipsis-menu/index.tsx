@@ -7,7 +7,7 @@ import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 import Ellipsis from 'gridicons/dist/ellipsis';
-import React, { MouseEvent, KeyboardEvent, ReactNode } from 'react';
+import { MouseEvent, KeyboardEvent, ReactNode } from 'react';
 
 type CallbackProps = {
 	isOpen?: boolean;

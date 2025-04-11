@@ -6,7 +6,6 @@ import { BlockEditorProvider } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
 import { createElement, useEffect, useState, useRef } from '@wordpress/element';
 import { debounce } from 'lodash';
-import React from 'react';
 import { uploadMedia } from '@wordpress/media-utils';
 import { useUser } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

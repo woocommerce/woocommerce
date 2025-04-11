@@ -3,8 +3,8 @@ declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
-use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
  * Product Filter: Status Block.
@@ -85,10 +85,10 @@ final class ProductFilterStatus extends AbstractBlock {
 
 		foreach ( $active_statuses as $status ) {
 			$items[] = array(
-				'type'  => 'status',
-				'value' => $status,
+				'type'        => 'status',
+				'value'       => $status,
 				// translators: %s: status.
-				'label' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
+				'activeLabel' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
 			);
 		}
 
@@ -130,35 +130,33 @@ final class ProductFilterStatus extends AbstractBlock {
 
 		$filter_options = array_map(
 			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
-				$label = $stock_statuses[ $item['status'] ] . ( $attributes['showCounts'] ? ' (' . $item['count'] . ')' : '' );
 				return array(
-					'label'     => $label,
-					'ariaLabel' => $label,
+					'label'     => $stock_statuses[ $item['status'] ],
+					'ariaLabel' => $stock_statuses[ $item['status'] ],
 					'value'     => $item['status'],
 					'selected'  => in_array( $item['status'], $selected_stock_statuses, true ),
+					'count'     => $item['count'],
 					'type'      => 'status',
-					'data'      => $item,
 				);
 			},
 			$stock_status_data
 		);
 
 		$filter_context = array(
-			'items'  => array_values( $filter_options ),
-			'parent' => $this->get_full_block_name(),
+			'items'      => array_values( $filter_options ),
+			'showCounts' => $attributes['showCounts'] ?? false,
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-context'      => wp_json_encode(
+			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context' => wp_json_encode(
 				array(
-					'hasFilterOptions'    => ! empty( $filter_options ),
 					/* translators: {{label}} is the status filter item label. */
 					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
+					'filterType'          => 'status',
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( empty( $filter_options ) ) {
@@ -187,7 +185,6 @@ final class ProductFilterStatus extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_stock_status_counts( $block ) {
-		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		unset(
@@ -206,8 +203,9 @@ final class ProductFilterStatus extends AbstractBlock {
 			$query_vars['meta_query'] = ProductCollectionUtils::remove_query_array( $query_vars['meta_query'], 'key', '_stock_status' );
 		}
 
-		$counts = $filters->get_stock_status_counts( $query_vars );
-		$data   = array();
+		$container = wc_get_container();
+		$counts    = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_stock_status_counts( $query_vars, array_keys( wc_get_product_stock_status_options() ) );
+		$data      = array();
 
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
@@ -222,5 +220,16 @@ final class ProductFilterStatus extends AbstractBlock {
 				return $stock_count['count'] > 0;
 			}
 		);
+	}
+
+	/**
+	 * Disable the block type script, this uses script modules.
+	 *
+	 * @param string|null $key The key.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

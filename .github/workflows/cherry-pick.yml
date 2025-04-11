@@ -33,7 +33,7 @@ permissions: {}
 jobs:
     verify:
         name: Verify
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         outputs:
             run: ${{ steps.check.outputs.run }}
         steps:
@@ -78,7 +78,7 @@ jobs:
 
     prep:
         name: Prep inputs
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: verify
         if: needs.verify.outputs.run == 'true'
         outputs:
@@ -124,7 +124,7 @@ jobs:
                       }
     check-release-branch-exists:
         name: Check for existence of release branch
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: prep
         steps:
             - name: Check for release branch
@@ -140,7 +140,7 @@ jobs:
                       } );
     cherry-pick-run:
         name: Run cherry pick tool
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
           actions: write
           contents: write

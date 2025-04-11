@@ -82,6 +82,20 @@ export function* togglePaymentGateway(
 	}
 }
 
+export function* attachPaymentExtensionSuggestion( url: string ) {
+	try {
+		// Use apiFetch for the AJAX request
+		const result: { success: boolean } = yield apiFetch( {
+			url,
+			method: 'POST',
+		} );
+
+		return result;
+	} catch ( error ) {
+		throw error;
+	}
+}
+
 export function* hidePaymentExtensionSuggestion( url: string ) {
 	try {
 		// Use apiFetch for the AJAX request
@@ -116,10 +130,22 @@ export function updateProviderOrdering( orderMap: OrderMap ): {
 	};
 }
 
+export function setIsWooPayEligible( isEligible: boolean ): {
+	type: ACTION_TYPES.SET_IS_ELIGIBLE;
+	isEligible: boolean;
+} {
+	return {
+		type: ACTION_TYPES.SET_IS_ELIGIBLE,
+		isEligible,
+	};
+}
+
 export type Actions =
 	| ReturnType< typeof getPaymentProvidersRequest >
 	| ReturnType< typeof getPaymentProvidersSuccess >
 	| ReturnType< typeof getPaymentProvidersError >
 	| ReturnType< typeof togglePaymentGateway >
+	| ReturnType< typeof attachPaymentExtensionSuggestion >
 	| ReturnType< typeof hidePaymentExtensionSuggestion >
-	| ReturnType< typeof updateProviderOrdering >;
+	| ReturnType< typeof updateProviderOrdering >
+	| ReturnType< typeof setIsWooPayEligible >;
