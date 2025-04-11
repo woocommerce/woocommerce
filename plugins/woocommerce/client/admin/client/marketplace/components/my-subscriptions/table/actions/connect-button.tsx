@@ -36,21 +36,27 @@ export default function ConnectButton( props: ConnectProps ) {
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
 	const refreshSubscriptionsList = () => {
-		loadSubscriptions( false ).then( () => {
-			addNotice(
-				props.subscription.product_key,
-				sprintf(
-					// translators: %s is the product name.
-					__( '%s successfully connected.', 'woocommerce' ),
-					props.subscription.product_name
-				),
-				NoticeStatus.Success
-			);
-			setIsConnecting( false );
-			if ( props.onClose ) {
-				props.onClose();
-			}
-		} );
+		setIsConnecting( true );
+		setShowActivationConfirmation( false );
+		loadSubscriptions( false )
+			.then( () => {
+				addNotice(
+					props.subscription.product_key,
+					sprintf(
+						// translators: %s is the product name.
+						__( '%s successfully connected.', 'woocommerce' ),
+						props.subscription.product_name
+					),
+					NoticeStatus.Success
+				);
+				setIsConnecting( false );
+				if ( props.onClose ) {
+					props.onClose();
+				}
+			} )
+			.catch( () => {
+				setIsConnecting( false );
+			} );
 	};
 
 	const connect = () => {
@@ -69,6 +75,7 @@ export default function ConnectButton( props: ConnectProps ) {
 					! props.subscription.local.active &&
 					props.subscription.local.type === 'plugin'
 				) {
+					setIsConnecting( false );
 					setShowActivationConfirmation( true );
 					return;
 				}
@@ -102,6 +109,7 @@ export default function ConnectButton( props: ConnectProps ) {
 	};
 
 	const activatePlugin = () => {
+		setIsConnecting( true );
 		activateProductPlugin( props.subscription )
 			.then( () => {
 				refreshSubscriptionsList();
@@ -120,7 +128,6 @@ export default function ConnectButton( props: ConnectProps ) {
 					NoticeStatus.Error
 				);
 			} );
-
 		setShowActivationConfirmation( false );
 	};
 
@@ -131,7 +138,7 @@ export default function ConnectButton( props: ConnectProps ) {
 		return (
 			<Modal
 				title={ __( 'Activate the Plugin', 'woocommerce' ) }
-				onRequestClose={ () => setShowActivationConfirmation( false ) }
+				onRequestClose={ () => refreshSubscriptionsList() }
 				focusOnMount={ true }
 				className="woocommerce-marketplace__header-account-modal"
 				style={ { borderRadius: 4 } }
@@ -153,8 +160,9 @@ export default function ConnectButton( props: ConnectProps ) {
 				</p>
 				<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
 					<Button
-						onClick={ () => setShowActivationConfirmation( false ) }
-						variant="secondary"
+						onClick={ () => refreshSubscriptionsList() }
+						variant="tertiary"
+						className="woocommerce-marketplace__header-account-modal-button"
 					>
 						{ __( 'No', 'woocommerce' ) }
 					</Button>
