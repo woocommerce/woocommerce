@@ -22,6 +22,7 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   configuration-path: .github/project-pr-labeler.yml
+
     label_by_content:
         runs-on: ubuntu-latest
         permissions:
@@ -32,8 +33,9 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v4
             with:
-              ref: refs/pull/${{ github.event.pull_request.number }}/merge  # Ensures only merged changes are used
-              fetch-depth: 0
+              sparse-checkout: |
+                .github/workflows/scripts
+                plugins/woocommerce/changelog
 
           - name: Validate Trusted Execution
             run: |
