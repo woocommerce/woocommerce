@@ -8,15 +8,15 @@ import { isEmptyObject } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import sharedConfig from '../shared/config';
 import edit from './edit';
 import { BLOCK_ICON as icon } from './constants';
+import save from '../save';
 import metadata from './block.json';
 import './upgrade';
 
 const deprecated = [
 	{
-		save: sharedConfig.save,
+		save,
 		migrate: ( attributes: BlockAttributes ) => {
 			// We don't deprecate attributes, but adding new ones.
 			// For backwards compatibility, some new attributes require
@@ -34,10 +34,11 @@ const deprecated = [
 
 const blockConfig = {
 	...metadata,
-	...sharedConfig,
+
 	icon: { src: icon },
 	deprecated,
 	edit,
+	save,
 };
 
 registerProductBlockType( blockConfig, {

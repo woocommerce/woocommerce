@@ -674,6 +674,7 @@ jQuery( function( $ ) {
 		init: function() {
 			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
 			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
+			$( document.body ).on( 'keydown', '.woocommerce-remove-coupon', this.on_keydown_remove_coupon );
 			$( document.body ).on( 'blur change input', '#coupon_code', this.remove_coupon_error );
 			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit.bind( this ) );
 		},
@@ -824,6 +825,19 @@ jQuery( function( $ ) {
 				},
 				dataType: 'html'
 			});
+		},
+		/**
+		 * Handle when pressing the Space key on the remove coupon link.
+		 * This is necessary because the link got the role="button" attribute
+		 * and needs to act like a button.
+		 *
+		 * @param {Object} e The JQuery event
+		 */
+		on_keydown_remove_coupon: function( e ) {
+			if ( e.key === ' ' ) {
+				e.preventDefault();
+				$( this ).trigger( 'click' );
+			}
 		}
 	};
 
