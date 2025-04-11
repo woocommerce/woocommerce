@@ -1107,6 +1107,13 @@ class WC_Helper {
 		return $activated;
 	}
 
+	/**
+	 * Activate a plugin for a product key.
+	 *
+	 * @throws Exception When the subscription is not found.
+	 * @param string $product_key Subscription product key.
+	 * @return bool True if activated, false otherwise.
+	 */
 	public static function activate_plugin( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
