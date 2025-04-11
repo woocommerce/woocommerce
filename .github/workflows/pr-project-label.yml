@@ -32,6 +32,7 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v4
             with:
+              ref: refs/pull/${{ github.event.pull_request.number }}/merge
               sparse-checkout: |
                 .github/workflows/scripts
                 plugins/woocommerce/changelog
