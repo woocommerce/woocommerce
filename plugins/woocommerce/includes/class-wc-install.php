@@ -818,11 +818,11 @@ class WC_Install {
 		}
 
 		// After the callbacks finish, update the db version to the current WC version.
-		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
-			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
-			// TODO(kalessil): $queue = WC()->queue();
-			WC()->queue()->schedule_single(
-				$scheduled_time + $loop,
+		if ( version_compare( $current_db_version, $current_wc_version, '<' ) ) {
+			$queue = WC()->queue();
+			if ( ! $queue->get_next( 'woocommerce_update_db_to_current_version' ) ) {
+				$queue->schedule_single(
+					$scheduled_time + $loop,
 					'woocommerce_update_db_to_current_version',
 					array(
 						'version' => $current_wc_version,
@@ -831,9 +831,9 @@ class WC_Install {
 					ActionQueuePriority::URGENT
 				);
 			}
+		}
 
 		wc_get_logger()->info( 'Database updates scheduled.', array( 'source' => 'wc-updater' ) );
-		}
 	}
 
 	/**
