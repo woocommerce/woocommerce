@@ -189,7 +189,21 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+        run: |
+          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
+          min=10
+          max=99
+          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
+          httpport="${randomized}80"
+          mysqlport="${randomized}36"
+
+          # provision the environment to propagate the randomized ports
+          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
+          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
+          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+          
+          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Determine BuildKite Analytics Message'
         env:
@@ -225,7 +239,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 25 ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 20 ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
