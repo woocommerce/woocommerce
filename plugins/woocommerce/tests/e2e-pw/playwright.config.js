@@ -6,8 +6,11 @@ import { defineConfig, devices } from '@playwright/test';
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
 if ( ! process.env.BASE_URL ) {
-	console.log( 'BASE_URL is not set. Using default.' );
-	process.env.BASE_URL = 'http://localhost:8086';
+	process.env.BASE_URL =
+		'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
+	console.log(
+		'BASE_URL is not set. Using default: ' + process.env.BASE_URL
+	);
 }
 
 const { BASE_URL, CI, E2E_MAX_FAILURES, REPEAT_EACH } = process.env;

@@ -273,7 +273,7 @@ test.describe(
 				await page.goto( CLASSIC_CART_PAGE.slug );
 				await applyCoupon( page, 'expired-coupon' );
 				await expect(
-					page.getByText( 'This coupon has expired.' )
+					page.getByText( 'Coupon "expired-coupon" has expired.' )
 				).toBeVisible();
 			} );
 
@@ -285,7 +285,7 @@ test.describe(
 				await expandCouponForm( page );
 				await applyCoupon( page, 'expired-coupon' );
 				await expect(
-					page.getByText( 'This coupon has expired.' )
+					page.getByText( 'Coupon "expired-coupon" has expired.' )
 				).toBeVisible();
 			} );
 		} );
@@ -303,7 +303,7 @@ test.describe(
 					page
 						.getByRole( 'alert' )
 						.getByText(
-							'The minimum spend for this coupon is $50.00.'
+							'The minimum spend for coupon "min-max-spend-individual" is $50.00.'
 						)
 				).toBeVisible();
 
@@ -338,7 +338,7 @@ test.describe(
 				// failed because we need to have at least $50 in cart (single product is only $20)
 				await expect(
 					page.getByText(
-						'The minimum spend for this coupon is $50.00.'
+						'The minimum spend for coupon "min-max-spend-individual" is $50.00.'
 					)
 				).toBeVisible();
 
@@ -377,7 +377,7 @@ test.describe(
 				// failed because this product is on sale.
 				await expect(
 					page.getByText(
-						'Sorry, this coupon is not valid for sale items.'
+						'Sorry, coupon "no-sale-use-limit" is not valid for sale items.'
 					)
 				).toBeVisible();
 			} );
@@ -392,7 +392,7 @@ test.describe(
 				// failed because this product is on sale
 				await expect(
 					page.getByText(
-						'Sorry, this coupon is not valid for sale items.'
+						'Sorry, coupon "no-sale-use-limit" is not valid for sale items.'
 					)
 				).toBeVisible();
 			} );
@@ -440,7 +440,7 @@ test.describe(
 				// failed because this coupon code has been used too much
 				await expect(
 					page.getByText(
-						'Coupon usage limit has been reached. Please try again after some time, or contact us for help.'
+						'Usage limit for coupon "no-sale-use-limit" has been reached. Please try again after some time, or contact us for help.'
 					)
 				).toBeVisible();
 			} );
@@ -455,7 +455,7 @@ test.describe(
 				// failed because this coupon code has been used too much
 				await expect(
 					page.getByText(
-						'Coupon usage limit has been reached. Please try again after some time, or contact us for help.'
+						'Usage limit for coupon "no-sale-use-limit" has been reached. Please try again after some time, or contact us for help.'
 					)
 				).toBeVisible();
 			} );
@@ -478,7 +478,7 @@ test.describe(
 				// failed because this product is not included for coupon
 				await expect(
 					page.getByText(
-						'Sorry, this coupon is not applicable to selected products.'
+						'Sorry, coupon "product-and-category-included" is not applicable to selected products.'
 					)
 				).toBeVisible();
 			} );
@@ -493,7 +493,7 @@ test.describe(
 				// failed because this product is not included for coupon
 				await expect(
 					page.getByText(
-						'Sorry, this coupon is not applicable to selected products.'
+						'Sorry, coupon "product-and-category-included" is not applicable to selected products.'
 					)
 				).toBeVisible();
 			} );
@@ -541,7 +541,7 @@ test.describe(
 				// failed because this product is excluded from coupon
 				await expect(
 					page.getByText(
-						'Sorry, this coupon is not applicable to selected products.'
+						'Sorry, coupon "product-and-category-included" is not applicable to selected products.'
 					)
 				).toBeVisible();
 			} );
@@ -556,7 +556,7 @@ test.describe(
 				// failed because this product is excluded from coupon
 				await expect(
 					page.getByText(
-						'Sorry, this coupon is not applicable to selected products.'
+						'Sorry, coupon "product-and-category-included" is not applicable to selected products.'
 					)
 				).toBeVisible();
 			} );
@@ -708,7 +708,9 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 			await expect(
-				page.getByText( 'Coupon usage limit has been reached.' )
+				page.getByText(
+					'Usage limit for coupon "email-restricted" has been reached.'
+				)
 			).toBeVisible();
 
 			// clean up the order we just made

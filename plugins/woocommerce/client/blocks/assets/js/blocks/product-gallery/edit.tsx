@@ -33,61 +33,36 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		[
 			[ 'woocommerce/product-gallery-thumbnails' ],
 			[
-				'core/group',
-				{
-					layout: {
-						type: 'flex',
-						orientation: 'vertical',
-						justifyContent: 'center',
-						verticalAlignment: 'top',
-					},
-					style: {
-						layout: { selfStretch: 'fixed', flexSize: '100%' },
-					},
-					metadata: {
-						name: 'Large Image and Navigation',
-					},
-					className:
-						'wc-block-product-gallery__large-image-and-navigation',
-				},
+				'woocommerce/product-gallery-large-image',
+				{},
 				[
 					[
-						'woocommerce/product-gallery-large-image',
-						{},
-						[
-							[
-								'woocommerce/product-sale-badge',
-								{
-									align: 'right',
-									style: {
-										spacing: {
-											margin: {
-												top: '4px',
-												right: '4px',
-												bottom: '4px',
-												left: '4px',
-											},
-										},
+						'woocommerce/product-sale-badge',
+						{
+							align: 'right',
+							style: {
+								spacing: {
+									margin: {
+										top: '4px',
+										right: '4px',
+										bottom: '4px',
+										left: '4px',
 									},
 								},
-							],
-							[
-								'woocommerce/product-gallery-large-image-next-previous',
-								{
-									layout: {
-										type: 'flex',
-										verticalAlignment: 'bottom',
-									},
-									style: {
-										border: { radius: '100%' },
-										color: {
-											background: '#ffffff',
-											text: '#000000',
-										},
-									},
+							},
+						},
+					],
+					[
+						'woocommerce/product-gallery-large-image-next-previous',
+						{
+							style: {
+								border: { radius: '100%' },
+								color: {
+									background: '#ffffff',
+									text: '#000000',
 								},
-							],
-						],
+							},
+						},
 					],
 				],
 			],

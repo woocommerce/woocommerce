@@ -32,7 +32,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$this->id    = 'email';
 		$this->label = __( 'Emails', 'woocommerce' );
 
-		add_action( 'admin_notices', array( $this, 'display_email_sender_options_notice' ) );
 		add_action( 'woocommerce_admin_field_email_notification', array( $this, 'email_notification_setting' ) );
 		add_action( 'woocommerce_admin_field_email_notification_block_emails', array( $this, 'email_notification_setting_block_emails' ) );
 		add_action( 'woocommerce_admin_field_email_preview', array( $this, 'email_preview' ) );
@@ -311,124 +310,117 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_recipient_options',
 				),
+				array(
+					'title' => __( 'Email sender options', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => __( "Set the name and email address you'd like your outgoing emails to use.", 'woocommerce' ),
+					'id'    => 'email_options',
+				),
+
+				array(
+					'title'    => __( '"From" name', 'woocommerce' ),
+					'desc'     => '',
+					'id'       => 'woocommerce_email_from_name',
+					'type'     => 'text',
+					'css'      => 'min-width:400px;',
+					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'             => __( '"From" address', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_from_address',
+					'type'              => 'email',
+					'custom_attributes' => array(
+						'multiple' => 'multiple',
+					),
+					'css'               => 'min-width:400px;',
+					'default'           => get_option( 'admin_email' ),
+					'autoload'          => false,
+					'desc_tip'          => true,
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'email_options',
+				),
 			);
-		// Email sender options is available in the new email editor.
-		// If the feature flag is disabled, we show the email sender options.
+
+		// If the email editor is enabled the design is handled by the email editor.
 		if ( ! $block_email_editor_enabled ) {
 			$settings = array_merge(
 				$settings,
 				array(
 					array(
-						'title' => __( 'Email sender options', 'woocommerce' ),
+						'title' => __( 'Email template', 'woocommerce' ),
 						'type'  => 'title',
-						'desc'  => __( "Set the name and email address you'd like your outgoing emails to use.", 'woocommerce' ),
-						'id'    => 'email_options',
+						'desc'  => $email_template_description,
+						'id'    => 'email_template_options',
 					),
 
+					$logo_image,
+
+					$logo_image_width,
+
+					$header_alignment,
+
+					$font_family,
+
+					$base_color_setting_in_template_opts,
+
+					$bg_color_setting_in_template_opts,
+
+					$body_bg_color_setting_in_template_opts,
+
+					$body_text_color_setting_in_template_opts,
+
 					array(
-						'title'    => __( '"From" name', 'woocommerce' ),
-						'desc'     => '',
-						'id'       => 'woocommerce_email_from_name',
-						'type'     => 'text',
-						'css'      => 'min-width:400px;',
-						'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
+						'title'       => __( 'Footer text', 'woocommerce' ),
+						'desc'        => $footer_text_description,
+						'id'          => 'woocommerce_email_footer_text',
+						'css'         => 'width:400px; height: 75px;',
+						'placeholder' => __( 'N/A', 'woocommerce' ),
+						'type'        => 'textarea',
+						'default'     => $footer_text_default,
+						'autoload'    => false,
+						'desc_tip'    => true,
+					),
+
+					$footer_text_color_setting_in_template_opts,
+
+					array(
+						'type' => 'sectionend',
+						'id'   => 'email_template_options',
+					),
+
+					$color_palette_section_header,
+
+					$base_color_setting_in_palette,
+
+					$bg_color_setting_in_palette,
+
+					$body_bg_color_setting_in_palette,
+
+					$body_text_color_setting_in_palette,
+
+					$footer_text_color_setting_in_palette,
+
+					array(
+						'title'    => __( 'Auto-sync with theme', 'woocommerce' ),
+						'desc'     => __( 'Automatically update email styles when theme styles change', 'woocommerce' ),
+						'id'       => 'woocommerce_email_auto_sync_with_theme',
+						'type'     => 'hidden',
+						'default'  => 'no',
 						'autoload' => false,
-						'desc_tip' => true,
 					),
 
-					array(
-						'title'             => __( '"From" address', 'woocommerce' ),
-						'desc'              => '',
-						'id'                => 'woocommerce_email_from_address',
-						'type'              => 'email',
-						'custom_attributes' => array(
-							'multiple' => 'multiple',
-						),
-						'css'               => 'min-width:400px;',
-						'default'           => get_option( 'admin_email' ),
-						'autoload'          => false,
-						'desc_tip'          => true,
-					),
+					$color_palette_section_end,
+
+					array( 'type' => 'email_preview' ),
 				)
 			);
 		}
-
-		$settings = array_merge(
-			$settings,
-			array(
-				array(
-					'type' => 'sectionend',
-					'id'   => 'email_options',
-				),
-
-				array(
-					'title' => __( 'Email template', 'woocommerce' ),
-					'type'  => 'title',
-					'desc'  => $email_template_description,
-					'id'    => 'email_template_options',
-				),
-
-				$logo_image,
-
-				$logo_image_width,
-
-				$header_alignment,
-
-				$font_family,
-
-				$base_color_setting_in_template_opts,
-
-				$bg_color_setting_in_template_opts,
-
-				$body_bg_color_setting_in_template_opts,
-
-				$body_text_color_setting_in_template_opts,
-
-				array(
-					'title'       => __( 'Footer text', 'woocommerce' ),
-					'desc'        => $footer_text_description,
-					'id'          => 'woocommerce_email_footer_text',
-					'css'         => 'width:400px; height: 75px;',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'type'        => 'textarea',
-					'default'     => $footer_text_default,
-					'autoload'    => false,
-					'desc_tip'    => true,
-				),
-
-				$footer_text_color_setting_in_template_opts,
-
-				array(
-					'type' => 'sectionend',
-					'id'   => 'email_template_options',
-				),
-
-				$color_palette_section_header,
-
-				$base_color_setting_in_palette,
-
-				$bg_color_setting_in_palette,
-
-				$body_bg_color_setting_in_palette,
-
-				$body_text_color_setting_in_palette,
-
-				$footer_text_color_setting_in_palette,
-
-				array(
-					'title'    => __( 'Auto-sync with theme', 'woocommerce' ),
-					'desc'     => __( 'Automatically update email styles when theme styles change', 'woocommerce' ),
-					'id'       => 'woocommerce_email_auto_sync_with_theme',
-					'type'     => 'hidden',
-					'default'  => 'no',
-					'autoload' => false,
-				),
-
-				$color_palette_section_end,
-
-				array( 'type' => 'email_preview' ),
-			)
-		);
 
 		// Remove empty elements that depend on the email_improvements feature flag.
 		$settings = array_filter( $settings );
@@ -912,17 +904,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				update_option( 'woocommerce_email_improvements_last_disabled_at', $current_date );
 			}
 		}
-	}
-
-	/**
-	 * Display the email sender options notice about moving the sender options to the email template editor.
-	 */
-	public function display_email_sender_options_notice() {
-		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
-			WC_Admin_Notices::add_notice( 'email_sender_options' );
-			return;
-		}
-		WC_Admin_Notices::remove_notice( 'email_sender_options' );
 	}
 }
 
