@@ -42,4 +42,4 @@ jobs:
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               PR_NUMBER: ${{ github.event.pull_request.number }}
-            run: .github/workflows/scripts/label-pr-by-changelog-type.sh
+            run: bash .github/workflows/scripts/label-pr-by-changelog-type.sh
