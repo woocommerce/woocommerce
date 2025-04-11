@@ -14,7 +14,7 @@ jobs:
   identify-jobs-to-run:
     name: 'Analyze changes'
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     outputs:
       needs-code-validation: ${{ steps.target-changes.outputs.needs-code-validation }}
       needs-changelog-validation: ${{ steps.target-changes.outputs.needs-changelog-validation }}
@@ -42,7 +42,7 @@ jobs:
     name: 'Build Project Jobs'
     if: ${{ !cancelled() }}
     needs: 'identify-jobs-to-run'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
@@ -91,7 +91,7 @@ jobs:
 
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     needs: [ 'identify-jobs-to-run', 'project-jobs' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
@@ -284,7 +284,7 @@ jobs:
     # using a job that runs after all the others and either passes or fails based
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     steps:
@@ -448,7 +448,7 @@ jobs:
     name: 'Validate dependencies version'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-syncpack-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     permissions:
       contents: read
 
@@ -476,7 +476,7 @@ jobs:
     name: 'Validate changelog'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && ! contains( github.event.pull_request.body, '[x] This Pull Request does not require a changelog' ) }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     permissions:
       contents: read
 
@@ -509,7 +509,7 @@ jobs:
     name: 'Validate markdown'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     permissions:
       contents: read
 
