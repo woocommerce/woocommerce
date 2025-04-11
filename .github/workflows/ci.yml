@@ -200,6 +200,8 @@ jobs:
           # provision the environment to propagate the randomized ports
           echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
           echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
+          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
           
           WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
@@ -281,12 +283,7 @@ jobs:
           fi
 
           # Finally, run the tests
-          if [[ "${{ matrix.testEnv.shouldCreate && 'yes' }}" == "yes" ]]; then
-              # WP_BASE_URL is set only to satisfy blocks global setup (setupRest calls).
-              WP_BASE_URL="http://localhost:$WP_ENV_TESTS_PORT" pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
-          else
-              pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
-          fi
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
 
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed
