@@ -107,7 +107,7 @@ jobs:
           # We tried to speed checkout up with shallow copies, but `git merge-base ...` used on different levels of tooling forces us to follow this approach.
           fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
+      - uses: './.github/actions/setup-woocommerce-monorepo-blacksmith'
         id: 'setup-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
@@ -134,7 +134,7 @@ jobs:
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
+      - uses: './.github/actions/setup-woocommerce-monorepo-blacksmith'
         name: 'Install Monorepo'
         id: 'install-monorepo'
         with:
@@ -483,7 +483,7 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
+      - uses: './.github/actions/setup-woocommerce-monorepo-blacksmith'
 
       - name: 'Validate - missing entries'
         id: validate_missing
