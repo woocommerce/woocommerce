@@ -80,14 +80,18 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$slug = $product_type . '-product-add-to-cart-with-options';
 
-		/**
-		 * Filter to declare product type's cart block template is supported.
-		 * 
-		 * @since x.x.x
-		 * @param boolean $supports Is the type supported
-		 * @param string $product_type The product type 
-		 */
-		$template_part_path = apply_filters( 'woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html', $product_type );
+		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+			$template_part_path = Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html';
+		} else {
+			/**
+			 * Filter to declare product type's cart block template is supported.
+			 * 
+			 * @since x.x.x
+			 * @param boolean $supports Is the type supported
+			 * @param string $product_type The product type 
+			 */
+			$template_part_path = apply_filters( 'woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html', $product_type );
+		}
 
 		if ( file_exists( $template_part_path ) ) {
 
