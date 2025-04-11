@@ -10,7 +10,6 @@ import { Icon, buttons } from '@wordpress/icons';
 import metadata from './block.json';
 import AttributeOptionsEdit from './edit';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
-import './editor.scss';
 import './style.scss';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
