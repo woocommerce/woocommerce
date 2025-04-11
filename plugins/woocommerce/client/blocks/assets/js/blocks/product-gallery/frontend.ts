@@ -68,6 +68,73 @@ const scrollImageIntoView = ( imageId: number ) => {
 };
 
 /**
+ * Scrolls the thumbnail into view.
+ *
+ * @param {number} imageId - The ID of the thumbnail to scroll into view.
+ */
+const scrollThumbnailIntoView = ( imageId: number ) => {
+	if ( ! imageId ) {
+		return;
+	}
+
+	// Get the current element that triggered the action
+	const element = getElement()?.ref as HTMLElement;
+
+	if ( ! element ) {
+		return;
+	}
+
+	// Find the closest gallery container
+	const galleryContainer = element.closest(
+		'.wp-block-woocommerce-product-gallery'
+	);
+
+	if ( ! galleryContainer ) {
+		return;
+	}
+
+	const thumbnailElement = galleryContainer.querySelector(
+		`.wc-block-product-gallery-thumbnails__thumbnail img[data-image-id="${ imageId }"]`
+	);
+
+	if ( ! thumbnailElement ) {
+		return;
+	}
+
+	// Find the thumbnail scrollable container
+	const scrollContainer = thumbnailElement.closest(
+		'.wc-block-product-gallery-thumbnails__scrollable'
+	);
+
+	if ( ! scrollContainer ) {
+		return;
+	}
+
+	const thumbnail = thumbnailElement.closest(
+		'.wc-block-product-gallery-thumbnails__thumbnail'
+	);
+
+	if ( ! thumbnail ) {
+		return;
+	}
+
+	// Calculate the scroll position to center the thumbnail
+	const containerRect = scrollContainer.getBoundingClientRect();
+	const thumbnailRect = thumbnail.getBoundingClientRect();
+
+	const scrollTop =
+		scrollContainer.scrollTop +
+		( thumbnailRect.top - containerRect.top ) -
+		( containerRect.height - thumbnailRect.height ) / 2;
+
+	// Use scrollTo to avoid scrolling the entire page
+	scrollContainer.scrollTo( {
+		top: scrollTop,
+		behavior: 'smooth',
+	} );
+};
+
+/**
  * Gets the number of the active image.
  *
  * @param {number[]} imageIds        - The IDs of the images.
@@ -186,6 +253,7 @@ const productGallery = {
 
 			if ( imageIndex !== -1 ) {
 				scrollImageIntoView( imageId );
+				scrollThumbnailIntoView( imageId );
 			}
 		},
 		selectCurrentImage: ( event?: MouseEvent ) => {
