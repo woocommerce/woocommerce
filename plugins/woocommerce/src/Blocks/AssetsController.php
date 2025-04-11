@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 
 /**
- * AssetsController class.
+ * AssetsController clazzzz.
  *
  * @since 5.0.0
  * @internal
