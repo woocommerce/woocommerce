@@ -12,19 +12,29 @@ import { optionsStore, Product, productsStore } from '@woocommerce/data';
  */
 import { ProductAttributesEditProps } from './types';
 
-function Placeholder() {
-	const blockProps = useBlockProps();
-	return (
-		<div { ...blockProps }>
-			<p>
-				{ __(
-					'This block displays product attributes including dimensions and weight. When viewing a product page, the attributes will automatically appear here.',
-					'woocommerce'
-				) }
-			</p>
-		</div>
-	);
-}
+const getFormattedDimensions = (
+	dimensions: Product[ 'dimensions' ],
+	dimensionUnit: string
+) => {
+	if ( ! dimensions ) return '';
+
+	const dimensionKeys = [
+		'length',
+		'width',
+		'height',
+	] as ( keyof Product[ 'dimensions' ] )[];
+
+	const validDimensions = dimensionKeys
+		.map( ( key ) => dimensions[ key ] )
+		.filter(
+			( value ): value is string =>
+				typeof value === 'string' && value.length > 0
+		);
+
+	if ( validDimensions.length === 0 ) return '';
+
+	return `${ validDimensions.join( ' × ' ) } ${ dimensionUnit }`;
+};
 
 const Edit = ( {
 	context: { postId, postType },
@@ -33,22 +43,36 @@ const Edit = ( {
 	const blockProps = useBlockProps();
 	const isSpecificProductContext = !! ( postId && postType === 'product' );
 
-	const { dimensionUnit, weightUnit } = useSelect( ( select ) => {
-		const { getOption } = select( optionsStore );
-		return {
-			dimensionUnit: getOption( 'woocommerce_dimension_unit' ) as string,
-			weightUnit: getOption( 'woocommerce_weight_unit' ) as string,
-		};
-	}, [] );
+	const { dimensionUnit, weightUnit, isLoadingUnits } = useSelect(
+		( select ) => {
+			const { getOption } = select( optionsStore );
+			return {
+				dimensionUnit: getOption(
+					'woocommerce_dimension_unit'
+				) as string,
+				weightUnit: getOption( 'woocommerce_weight_unit' ) as string,
+				isLoadingUnits:
+					! select( optionsStore ).hasFinishedResolution(
+						'getOption',
+						[ 'woocommerce_dimension_unit' ]
+					) ||
+					! select( optionsStore ).hasFinishedResolution(
+						'getOption',
+						[ 'woocommerce_weight_unit' ]
+					),
+			};
+		},
+		[]
+	);
 
-	const { product, isLoading } = useSelect(
+	const { product, isLoadingProduct } = useSelect(
 		( select ) => {
 			const { getProduct } = select( productsStore );
 			return {
 				product: getProduct( Number( postId ) ),
-				isLoading: select( productsStore ).isResolving( 'getProduct', [
-					Number( postId ),
-				] ),
+				isLoadingProduct: ! select(
+					productsStore
+				).hasFinishedResolution( 'getProduct', [ Number( postId ) ] ),
 			};
 		},
 		[ postId ]
@@ -70,7 +94,7 @@ const Edit = ( {
 	/**
 	 * Display loading state
 	 */
-	if ( isLoading && isSpecificProductContext ) {
+	if ( isLoadingUnits || ( isLoadingProduct && isSpecificProductContext ) ) {
 		return (
 			<div { ...blockProps }>
 				<span className="wc-product-attributes__loading">
@@ -91,81 +115,65 @@ const Edit = ( {
 		);
 	}
 
-	const getFormattedDimensions = ( dimensions: Product[ 'dimensions' ] ) => {
-		if ( ! dimensions ) return null;
-
-		const dimensionKeys = [
-			'length',
-			'width',
-			'height',
-		] as ( keyof Product[ 'dimensions' ] )[];
-
-		const validDimensions = dimensionKeys
-			.map( ( key ) => dimensions[ key ] )
-			.filter(
-				( value ): value is string =>
-					typeof value === 'string' && value.length > 0
-			);
-
-		if ( validDimensions.length === 0 ) return null;
-
-		return `${ validDimensions.join( ' × ' ) } ${ dimensionUnit }`;
+	const productAttributesData: Record<
+		string,
+		{ label: string; value: string }
+	> = {
+		weight: {
+			label: __( 'Weight', 'woocommerce' ),
+			value: '',
+		},
+		dimensions: {
+			label: __( 'Dimensions', 'woocommerce' ),
+			value: '',
+		},
 	};
 
-	const formattedDimensions = product?.dimensions
-		? getFormattedDimensions( product.dimensions )
-		: null;
+	if ( isSpecificProductContext ) {
+		productAttributesData.weight.value = product?.weight
+			? `${ product.weight } ${ weightUnit }`
+			: '';
+		productAttributesData.dimensions.value = product?.dimensions
+			? getFormattedDimensions( product.dimensions, dimensionUnit )
+			: '';
+		product?.attributes?.forEach( ( attribute ) => {
+			productAttributesData[ attribute.name.toLowerCase() ] = {
+				label: attribute.name,
+				value: attribute.options.join( ', ' ),
+			};
+		} );
+	} else {
+		productAttributesData.weight.value = `10 ${ weightUnit }`;
+		productAttributesData.dimensions.value = `10 × 10 × 10 ${ dimensionUnit }`;
+		productAttributesData.test_attribute = {
+			label: __( 'Test Attribute', 'woocommerce' ),
+			value: __( 'First, Second, Third', 'woocommerce' ),
+		};
+	}
 
-	return isSpecificProductContext ? (
-		/**
-		 * Display product attributes
-		 */
+	return (
 		<div { ...blockProps }>
 			<table className="wc-block-product-attributes">
 				<tbody>
-					{ /* Display Weight if available */ }
-					{ product?.weight && (
-						<tr className="wc-block-product-attributes-item wc-block-product-attributes-item__weight">
-							<th className="wc-block-product-attributes-item__label">
-								{ __( 'Weight', 'woocommerce' ) }
-							</th>
-							<td className="wc-block-product-attributes-item__value">
-								{ `${ product.weight } ${ weightUnit }` }
-							</td>
-						</tr>
+					{ Object.entries( productAttributesData ).map(
+						( [ key, data ] ) =>
+							data.value && (
+								<tr
+									key={ key }
+									className={ `wc-block-product-attributes-item wc-block-product-attributes-item__${ key }` }
+								>
+									<td className="wc-block-product-attributes-item__label">
+										{ data.label }
+									</td>
+									<td className="wc-block-product-attributes-item__value">
+										{ data.value }
+									</td>
+								</tr>
+							)
 					) }
-
-					{ /* Display Dimensions if available */ }
-					{ formattedDimensions && (
-						<tr className="wc-block-product-attributes-item wc-block-product-attributes-item__dimensions">
-							<th className="wc-block-product-attributes-item__label">
-								{ __( 'Dimensions', 'woocommerce' ) }
-							</th>
-							<td className="wc-block-product-attributes-item__value">
-								{ formattedDimensions }
-							</td>
-						</tr>
-					) }
-
-					{ /* Display Product Attributes */ }
-					{ product?.attributes?.map( ( attribute ) => (
-						<tr
-							key={ attribute.id }
-							className={ `wc-block-product-attributes-item wc-block-product-attributes-item__${ attribute.name.toLowerCase() }` }
-						>
-							<th className="wc-block-product-attributes-item__label">
-								{ attribute.name }
-							</th>
-							<td className="wc-block-product-attributes-item__value">
-								{ attribute.options.join( ', ' ) }
-							</td>
-						</tr>
-					) ) }
 				</tbody>
 			</table>
 		</div>
-	) : (
-		<Placeholder />
 	);
 };
 
