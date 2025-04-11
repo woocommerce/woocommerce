@@ -13,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
-use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil };
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
  * System status controller class.
@@ -51,7 +52,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action(
 			'upgrader_process_complete',
-			function( $upgrader, $extra ) {
+			function ( $upgrader, $extra ) {
 				if ( ! $extra || ! $extra['type'] ) {
 					return;
 				}
@@ -373,7 +374,41 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'plugin'            => array(
+								'description' => __( 'Plugin basename. The path to the main plugin file relative to the plugins directory.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'name'              => array(
+								'description' => __( 'Name of the plugin.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version'           => array(
+								'description' => __( 'Current plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version_latest'    => array(
+								'description' => __( 'Latest available plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'url'               => array(
+								'description' => __( 'Plugin URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_name'       => array(
+								'description' => __( 'Plugin author name.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_url'        => array(
+								'description' => __( 'Plugin author URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'network_activated' => array(
+								'description' => __( 'Whether the plugin can only be activated network-wide.', 'woocommerce' ),
+								'type'        => 'boolean',
+							),
+						),
 					),
 				),
 				'inactive_plugins'   => array(
@@ -382,7 +417,41 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'plugin'            => array(
+								'description' => __( 'Plugin basename. The path to the main plugin file relative to the plugins directory.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'name'              => array(
+								'description' => __( 'Name of the plugin.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version'           => array(
+								'description' => __( 'Current plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'version_latest'    => array(
+								'description' => __( 'Latest available plugin version.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'url'               => array(
+								'description' => __( 'Plugin URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_name'       => array(
+								'description' => __( 'Plugin author name.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'author_url'        => array(
+								'description' => __( 'Plugin author URL.', 'woocommerce' ),
+								'type'        => 'string',
+							),
+							'network_activated' => array(
+								'description' => __( 'Whether the plugin can only be activated network-wide.', 'woocommerce' ),
+								'type'        => 'boolean',
+							),
+						),
 					),
 				),
 				'dropins_mu_plugins' => array(
@@ -427,6 +496,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 						'is_child_theme'          => array(
 							'description' => __( 'Is this theme a child theme?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'is_block_theme'          => array(
+							'description' => __( 'Is this theme a block theme?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -486,7 +561,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 					'properties'  => array(
 						'api_enabled'                    => array(
-							'description' => __( 'REST API enabled?', 'woocommerce' ),
+							'description' => __( 'Legacy REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -615,7 +690,42 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type' => 'string',
+						'type'       => 'object',
+						'properties' => array(
+							'page_name'          => array(
+								'type' => 'string',
+							),
+							'page_id'            => array(
+								'type' => 'string',
+							),
+							'page_set'           => array(
+								'type' => 'boolean',
+							),
+							'page_exists'        => array(
+								'type' => 'boolean',
+							),
+							'page_visible'       => array(
+								'type' => 'boolean',
+							),
+							'shortcode'          => array(
+								'type' => 'string',
+							),
+							'block'              => array(
+								'type' => 'string',
+							),
+							'shortcode_required' => array(
+								'type' => 'boolean',
+							),
+							'shortcode_present'  => array(
+								'type' => 'boolean',
+							),
+							'block_present'      => array(
+								'type' => 'boolean',
+							),
+							'block_required'     => array(
+								'type' => 'boolean',
+							),
+						),
 					),
 				),
 				'post_type_counts'   => array(
@@ -864,7 +974,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$database_version = wc_get_server_database_version();
-		$log_directory    = LoggingUtil::get_log_directory();
+		$log_directory    = LoggingUtil::get_log_directory( false );
 
 		// Return all environment info. Described by JSON Schema.
 		return array(
@@ -1044,15 +1154,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				return array();
 			}
 
-			$active_plugins = (array) get_option( 'active_plugins', array() );
-			if ( is_multisite() ) {
-				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-			}
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
+			$active_plugins_data  = array();
 
-			$active_plugins_data = array();
-
-			foreach ( $active_plugins as $plugin ) {
+			foreach ( $active_valid_plugins as $plugin ) {
 				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 			}
@@ -1270,6 +1375,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 				'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 				'is_child_theme'          => is_child_theme(),
+				'is_block_theme'          => wp_is_block_theme(),
 				'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 				'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
 				'has_outdated_templates'  => $outdated_templates,
@@ -1371,29 +1477,64 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		// WC pages to check against.
 		$check_pages = array(
 			_x( 'Shop base', 'Page setting', 'woocommerce' ) => array(
-				'option'    => 'woocommerce_shop_page_id',
-				'shortcode' => '',
-				'block'     => '',
+				'option' => 'woocommerce_shop_page_id',
 			),
 			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
-				'option'    => 'woocommerce_cart_page_id',
-				'shortcode' => '[' . apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( 'woocommerce_cart' ), '8.3.0', 'woocommerce_create_pages' ) . ']',
-				'block'     => 'woocommerce/cart',
+				'option'             => 'woocommerce_cart_page_id',
+				'shortcode'          => '[' . apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( 'woocommerce_cart' ), '8.3.0', 'woocommerce_create_pages' ) . ']',
+				'block'              => 'woocommerce/cart',
+				'shortcode_callback' => function ( $page ) {
+					if ( $page ) {
+						$shortcode = apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( 'woocommerce_cart' ), '8.3.0', 'woocommerce_create_pages' );
+						if ( has_shortcode( $page->post_content, $shortcode ) ) {
+							return $shortcode;
+						}
+					}
+					return '';
+				},
+				'block_callback'     => function ( $page ) {
+					if ( $page ) {
+						if ( has_block( 'woocommerce/cart', $page->post_content ) ) {
+							return 'woocommerce/cart';
+						}
+						if ( CartCheckoutUtils::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart', $page->post_content ) ) {
+							return 'woocommerce/classic-shortcode';
+						}
+					}
+					return '';
+				},
 			),
 			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
-				'option'    => 'woocommerce_checkout_page_id',
-				'shortcode' => '[' . apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( 'woocommerce_checkout' ), '8.3.0', 'woocommerce_create_pages' ) . ']',
-				'block'     => 'woocommerce/checkout',
+				'option'             => 'woocommerce_checkout_page_id',
+				'shortcode'          => '[' . apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( 'woocommerce_checkout' ), '8.3.0', 'woocommerce_create_pages' ) . ']',
+				'block'              => 'woocommerce/checkout',
+				'shortcode_callback' => function ( $page ) {
+					if ( $page ) {
+						$shortcode = apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( 'woocommerce_checkout' ), '8.3.0', 'woocommerce_create_pages' );
+						if ( has_shortcode( $page->post_content, $shortcode ) ) {
+							return $shortcode;
+						}
+					}
+					return '';
+				},
+				'block_callback'     => function ( $page ) {
+					if ( $page ) {
+						if ( has_block( 'woocommerce/checkout', $page->post_content ) ) {
+							return 'woocommerce/checkout';
+						}
+						if ( CartCheckoutUtils::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout', $page->post_content ) ) {
+							return 'woocommerce/classic-shortcode';
+						}
+					}
+					return '';
+				},
 			),
 			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
-				'block'     => '',
 			),
 			_x( 'Terms and conditions', 'Page setting', 'woocommerce' ) => array(
-				'option'    => 'woocommerce_terms_page_id',
-				'shortcode' => '',
-				'block'     => '',
+				'option' => 'woocommerce_terms_page_id',
 			),
 		);
 
@@ -1408,6 +1549,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$block_present      = false;
 			$block_required     = false;
 			$page               = false;
+			$block              = '';
+			$shortcode          = '';
 
 			// Page checks.
 			if ( $page_id ) {
@@ -1424,22 +1567,27 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			}
 
 			// Shortcode checks.
-			if ( $values['shortcode'] && $page ) {
+			if ( $page && isset( $values['shortcode_callback'], $values['shortcode'] ) ) {
 				$shortcode_required = true;
-				if ( has_shortcode( $page->post_content, trim( $values['shortcode'], '[]' ) ) ) {
-					$shortcode_present = true;
-				}
-
-				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
-				if ( ! $shortcode_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
-					$shortcode_present = has_block( 'woocommerce/classic-shortcode', $page->post_content );
-				}
+				$result             = $values['shortcode_callback']( $page );
+				$shortcode          = $result ? $result : $values['shortcode'];
+				$shortcode_present  = (bool) $result;
+			} elseif ( $page && isset( $values['shortcode'] ) ) {
+				$shortcode          = $values['shortcode'];
+				$shortcode_required = true;
+				$shortcode_present  = has_shortcode( $page->post_content, trim( $shortcode, '[]' ) );
 			}
 
 			// Block checks.
-			if ( $values['block'] && $page ) {
+			if ( $page && isset( $values['block_callback'], $values['block'] ) ) {
 				$block_required = true;
-				$block_present  = has_block( $values['block'], $page->post_content );
+				$result         = $values['block_callback']( $page );
+				$block          = $result ? $result : $values['block'];
+				$block_present  = (bool) $result;
+			} elseif ( $page && isset( $values['block'] ) ) {
+				$block          = $values['block'];
+				$block_required = true;
+				$block_present  = has_block( $block, $page->post_content );
 			}
 
 			// Wrap up our findings into an output array.
@@ -1449,8 +1597,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'page_set'           => $page_set,
 				'page_exists'        => $page_exists,
 				'page_visible'       => $page_visible,
-				'shortcode'          => $values['shortcode'],
-				'block'              => $values['block'],
+				'shortcode'          => $shortcode,
+				'block'              => $block,
 				'shortcode_required' => $shortcode_required,
 				'shortcode_present'  => $shortcode_present,
 				'block_present'      => $block_present,

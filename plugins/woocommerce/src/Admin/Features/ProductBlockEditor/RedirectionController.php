@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
@@ -75,7 +76,7 @@ class RedirectionController {
 			$product_data_type = $product_data['type'];
 			// Treat a variable product as a simple product since there is not a product template
 			// for variable products.
-			$product_type = $product->get_type() === 'variable' ? 'simple' : $product->get_type();
+			$product_type = $product->get_type() === ProductType::VARIABLE ? ProductType::SIMPLE : $product->get_type();
 
 			if ( isset( $product_data_type ) && $product_data_type !== $product_type ) {
 				continue;
@@ -96,7 +97,7 @@ class RedirectionController {
 	/**
 	 * Check if a product is supported by the new experience.
 	 *
-	 * @param array $product_templates The registered product teamplates.
+	 * @param array $product_templates The registered product templates.
 	 */
 	public function set_product_templates( array $product_templates ): void {
 		$this->product_templates = $product_templates;
@@ -155,8 +156,8 @@ class RedirectionController {
 		$path_pieces = explode( '/', wp_parse_url( $path, PHP_URL_PATH ) );
 
 		return array(
-			'page'       => $path_pieces[1],
-			'product_id' => 'product' === $path_pieces[1] ? absint( $path_pieces[2] ) : null,
+			'page'       => $path_pieces[1] ?? '',
+			'product_id' => 'product' === ( $path_pieces[1] ?? '' ) ? absint( $path_pieces[2] ?? 0 ) : null,
 		);
 	}
 

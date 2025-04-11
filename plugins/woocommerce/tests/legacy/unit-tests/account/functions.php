@@ -11,12 +11,39 @@
 class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 
 	/**
-	 * Test wc_lostpassword_url().
+	 * Test wc_lostpassword_url() from admin screen.
 	 *
 	 * @since 3.3.0
 	 */
 	public function test_wc_lostpassword_url() {
-		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?lost-password', wc_lostpassword_url() );
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'login_form_login' ); // Simulate admin login screen.
+
+		// Admin URL is expected.
+		$expected_url = admin_url( '/wp-login.php?action=lostpassword' );
+
+		$this->assertEquals( $expected_url, wc_lostpassword_url( $expected_url ) );
+	}
+
+	/**
+	 * Test wc_lostpassword_url() from my account page.
+	 */
+	public function test_wc_lostpassword_url_from_account_page() {
+		// Create the account page, since other tests may delete it.
+		$page = wc_create_page(
+			'myaccount',
+			'woocommerce_myaccount_page_id',
+			'My Account',
+			'',
+			'',
+			'publish'
+		);
+		$this->go_to( wc_get_page_permalink( 'myaccount' ) );
+
+		// Front-end URL is expected.
+		$expected_url = wc_get_endpoint_url( 'lost-password', '', get_the_permalink( 'myaccount' ) );
+
+		$this->assertEquals( $expected_url, wc_lostpassword_url() );
 	}
 
 	/**
@@ -148,21 +175,25 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_get_account_orders_actions() {
-		$order = WC_Helper_Order::create_order();
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
 
 		$this->assertEquals(
 			array(
 				'view'   => array(
-					'url'  => $order->get_view_order_url(),
-					'name' => 'View',
+					'url'        => $order->get_view_order_url(),
+					'name'       => 'View',
+					'aria-label' => "View order {$order_id}",
 				),
 				'pay'    => array(
-					'url'  => $order->get_checkout_payment_url(),
-					'name' => 'Pay',
+					'url'        => $order->get_checkout_payment_url(),
+					'name'       => 'Pay',
+					'aria-label' => "Pay for order {$order_id}",
 				),
 				'cancel' => array(
-					'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
-					'name' => 'Cancel',
+					'url'        => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
+					'name'       => 'Cancel',
+					'aria-label' => "Cancel order {$order_id}",
 				),
 			),
 			wc_get_account_orders_actions( $order->get_id() )
@@ -194,7 +225,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( '1234' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_card_type( 'mastercard' );
 		$token->set_last4( '1234' );
 		$token->set_expiry_month( '12' );
@@ -210,7 +241,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				'cc' => array(
 					array(
 						'method'     => array(
-							'gateway' => 'bacs',
+							'gateway' => WC_Gateway_BACS::ID,
 							'last4'   => '1234',
 							'brand'   => 'Mastercard',
 						),
@@ -240,7 +271,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_saved_payment_methods_list_item_cc() {
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( '1234' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_card_type( 'mastercard' );
 		$token->set_last4( '1234' );
 		$token->set_expiry_month( '12' );
@@ -263,7 +294,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 		// Co-branded credit card.
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( '1001' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_card_type( 'cartes_bancaires' );
 		$token->set_last4( '1001' );
 		$token->set_expiry_month( '12' );
@@ -292,7 +323,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_saved_payment_methods_list_item_echeck() {
 		$token = new WC_Payment_Token_ECheck();
 		$token->set_token( '1234' );
-		$token->set_gateway_id( 'bacs' );
+		$token->set_gateway_id( WC_Gateway_BACS::ID );
 		$token->set_last4( '1234' );
 		$token->save();
 

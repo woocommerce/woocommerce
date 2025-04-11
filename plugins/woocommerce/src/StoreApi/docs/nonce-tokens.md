@@ -11,7 +11,7 @@ Nonces are generated numbers used to verify origin and intent of requests for se
 
 ## Store API Endpoints that Require Nonces
 
-POST requests to the `/cart` endpoints and all requests to the `/checkout` endpoints require a nonce to function. Failure to provide a valid nonce will return an error response.
+POST requests to the `/cart` endpoints and all requests to the `/checkout` endpoints require a nonce to function. Failure to provide a valid nonce will return an error response, unless you're using [Cart Tokens](cart-tokens.md) instead.
 
 ## Sending Nonce Tokens with requests
 
@@ -53,7 +53,7 @@ NOTE: This should only be done on development sites where security is not import
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/nonce-tokens.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/nonce-tokens.md)
 
 <!-- /FEEDBACK -->
 

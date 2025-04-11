@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Helper
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * Class WC_Helper_Shipping.
  *
@@ -25,7 +27,7 @@ class WC_Helper_Shipping {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => $cost,
 		);
 

@@ -9,7 +9,6 @@ import { createElement, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import { TABS_SLOT_NAME } from '../../../components/tabs/constants';
-import { TabsFillProps } from '../../../components/tabs';
 
 export const DEFAULT_TAB_ORDER = 100;
 
@@ -41,7 +40,7 @@ export function TabButton( {
 
 	return (
 		<Fill name={ TABS_SLOT_NAME }>
-			{ ( fillProps: TabsFillProps ) => {
+			{ ( fillProps ) => {
 				const { onClick } = fillProps;
 				return (
 					<OrderedWrapper order={ order }>

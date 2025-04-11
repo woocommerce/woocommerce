@@ -22,7 +22,11 @@ import Menu from './menu';
  * @param {string} props.label
  * @return {Object} -
  */
-const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
+const SummaryList = ( {
+	children,
+	isDropdownBreakpoint,
+	label = __( 'Performance Indicators', 'woocommerce' ),
+} ) => {
 	const items = children( {} );
 	// We default to "one" because we can't have empty children.
 	const itemCount = Children.count( items ) || 1;
@@ -77,10 +81,6 @@ SummaryList.propTypes = {
 	 * An optional label of this group, read to screen reader users.
 	 */
 	label: PropTypes.string,
-};
-
-SummaryList.defaultProps = {
-	label: __( 'Performance Indicators', 'woocommerce' ),
 };
 
 export default withViewportMatch( {

@@ -4,6 +4,8 @@
  * @package WooCommerce\Tests\Discounts
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
  /**
   * WC_Tests_Discounts.
   */
@@ -128,7 +130,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		// Create dummy content.
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_tax_status( 'taxable' );
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
 		$product->save();
 		$this->store_product( $product );
 		WC()->cart->empty_cart();
@@ -181,7 +183,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		foreach ( $test_data['cart'] as $key => $item ) {
 			$products[ $key ] = WC_Helper_Product::create_simple_product();
 			$products[ $key ]->set_regular_price( $item['price'] );
-			$products[ $key ]->set_tax_status( 'taxable' );
+			$products[ $key ]->set_tax_status( ProductTaxStatus::TAXABLE );
 			$products[ $key ]->save();
 			$this->store_product( $products[ $key ] );
 			WC()->cart->add_to_cart( $products[ $key ]->get_id(), $item['qty'] );
@@ -1381,13 +1383,13 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
-		$product->set_tax_status( 'taxable' );
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
 		$product->save();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		$product2 = WC_Helper_Product::create_simple_product();
 		$product2->set_regular_price( 100 );
-		$product2->set_tax_status( 'taxable' );
+		$product2->set_tax_status( ProductTaxStatus::TAXABLE );
 		$product2->save();
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 

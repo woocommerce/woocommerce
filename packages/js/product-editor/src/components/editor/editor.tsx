@@ -5,14 +5,17 @@ import {
 	createElement,
 	StrictMode,
 	Fragment,
+	useCallback,
 	useState,
 } from '@wordpress/element';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
 } from '@woocommerce/admin-layout';
+import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import { Popover } from '@wordpress/components';
+import InterfaceSkeleton from '@wordpress/interface/build-module/components/interface-skeleton';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -21,10 +24,6 @@ import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { InterfaceSkeleton } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -34,18 +33,24 @@ import { BlockEditor } from '../block-editor';
 import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { ValidationProvider } from '../../contexts/validation-context';
 import { EditorProps } from './types';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { PrepublishPanel } from '../prepublish-panel/prepublish-panel';
 
 export function Editor( { productId, postType = 'product' }: EditorProps ) {
 	const [ isEditorLoading, setIsEditorLoading ] = useState( true );
-	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
+
+	const query = getQuery() as Record< string, string >;
+	const selectedTab = query.tab || null;
+
+	const setSelectedTab = useCallback( ( tabId: string ) => {
+		navigateTo( { url: getNewPath( { tab: tabId } ) } );
+	}, [] );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
 
 	// Check if the prepublish sidebar is open from the store.
 	const isPrepublishPanelOpen = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isPrepublishPanelOpen();
+		return select( wooProductEditorUiStore ).isPrepublishPanelOpen();
 	}, [] );
 
 	return (
@@ -97,6 +102,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 									}
 								/>
 							</EditorLoadingContext.Provider>
+							{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
 							<Popover.Slot />
 						</ValidationProvider>
 					</ShortcutProvider>

@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     7.0.1
+ * @version     9.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,12 +31,12 @@ if ( is_user_logged_in() ) {
 	<?php echo ( $message ) ? wpautop( wptexturize( $message ) ) : ''; // @codingStandardsIgnoreLine ?>
 
 	<p class="form-row form-row-first">
-		<label for="username"><?php esc_html_e( 'Username or email', 'woocommerce' ); ?>&nbsp;<span class="required">*</span></label>
-		<input type="text" class="input-text" name="username" id="username" autocomplete="username" />
+		<label for="username"><?php esc_html_e( 'Username or email', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span><span class="screen-reader-text"><?php esc_html_e( 'Required', 'woocommerce' ); ?></span></label>
+		<input type="text" class="input-text" name="username" id="username" autocomplete="username" required aria-required="true" />
 	</p>
 	<p class="form-row form-row-last">
-		<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?>&nbsp;<span class="required">*</span></label>
-		<input class="input-text woocommerce-Input" type="password" name="password" id="password" autocomplete="current-password" />
+		<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span><span class="screen-reader-text"><?php esc_html_e( 'Required', 'woocommerce' ); ?></span></label>
+		<input class="input-text woocommerce-Input" type="password" name="password" id="password" autocomplete="current-password" required aria-required="true" />
 	</p>
 	<div class="clear"></div>
 

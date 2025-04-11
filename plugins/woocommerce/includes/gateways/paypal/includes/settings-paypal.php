@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes\Payment
  */
 
+use Automattic\WooCommerce\Utilities\LoggingUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 return array(
@@ -55,7 +57,11 @@ return array(
 		'label'       => __( 'Enable logging', 'woocommerce' ),
 		'default'     => 'no',
 		/* translators: %s: URL */
-		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside %s Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ), '<code>' . WC_Log_Handler_File::get_log_file_path( 'paypal' ) . '</code>' ),
+		'description' => sprintf(
+			// translators: %s is a placeholder for a URL.
+			__( 'Log PayPal events such as IPN requests and review them on the <a href="%s">Logs screen</a>. Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ),
+			esc_url( LoggingUtil::get_logs_tab_url() )
+		),
 	),
 	'ipn_notification'      => array(
 		'title'       => __( 'IPN email notifications', 'woocommerce' ),

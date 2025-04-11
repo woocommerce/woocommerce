@@ -4,7 +4,7 @@
 import { dispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import type { Product, ProductStatus } from '@woocommerce/data';
-
+import type { ReactElement } from 'react';
 /**
  * Internal dependencies
  */
@@ -34,7 +34,7 @@ export function showSuccessNotice(
 
 	const noticeContent = getNoticeContent( product, prevStatus );
 	const noticeOptions = {
-		icon: '🎉',
+		icon: '🎉' as unknown as ReactElement,
 		actions: [
 			{
 				label: __( 'View in store', 'woocommerce' ),

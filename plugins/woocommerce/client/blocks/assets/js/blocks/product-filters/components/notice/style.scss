@@ -1,0 +1,17 @@
+.wc-block-product-filter-components-notice {
+	display: flex;
+	padding: $gap;
+	gap: $gap-smaller;
+	border: 1px solid;
+
+	&__icon {
+		fill: $alert-red;
+	}
+
+	&__content {
+		> * {
+			padding: 0;
+			margin: 0;
+		}
+	}
+}

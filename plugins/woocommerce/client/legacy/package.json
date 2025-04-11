@@ -17,7 +17,7 @@
 		"watch:build:project:assets": "pnpm build:project --watch"
 	},
 	"devDependencies": {
-		"@types/node": "^16.18.68",
+		"@types/node": "20.x.x",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
@@ -39,7 +39,7 @@
 		"gruntify-eslint": "5.0.0",
 		"sass": "^1.69.5",
 		"stylelint": "^14.16.1",
-		"wireit": "0.14.3"
+		"wireit": "0.14.10"
 	},
 	"dependencies": {
 		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.2.0"

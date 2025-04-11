@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update new Settings to use @automattic/site-admin's router instead of Gutenberg

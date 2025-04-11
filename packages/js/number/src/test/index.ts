@@ -50,7 +50,7 @@ describe( 'numberFormat', () => {
 } );
 
 describe( 'parseNumber', () => {
-	it( 'should remove thousand seperator before parsing number', () => {
+	it( 'should remove thousand separator before parsing number', () => {
 		const config = {
 			decimalSeparator: ',',
 			thousandSeparator: '.',
@@ -59,7 +59,7 @@ describe( 'parseNumber', () => {
 		expect( parseNumber( config, '12.345,679' ) ).toBe( '12345.679' );
 	} );
 
-	it( 'supports empty string as the thousandSeperator', () => {
+	it( 'supports empty string as the thousandSeparator', () => {
 		const config = {
 			decimalSeparator: ',',
 			thousandSeparator: '',
@@ -68,7 +68,7 @@ describe( 'parseNumber', () => {
 		expect( parseNumber( config, '12345,679' ) ).toBe( '12345.679' );
 	} );
 
-	it( 'supports empty string as the decimalSeperator', () => {
+	it( 'supports empty string as the decimalSeparator', () => {
 		const config = {
 			decimalSeparator: '',
 			thousandSeparator: ',',

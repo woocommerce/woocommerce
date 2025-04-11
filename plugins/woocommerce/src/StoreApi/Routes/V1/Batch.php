@@ -67,7 +67,14 @@ class Batch extends AbstractRoute implements RouteInterface {
 						'properties' => array(
 							'method'  => array(
 								'type'    => 'string',
-								'enum'    => array( 'POST', 'PUT', 'PATCH', 'DELETE' ),
+								/**
+								 * Filters the allowed methods for store API batch requests.
+								 *
+								 * @since 9.8.0
+								 *
+								 * @param string[] $methods Allowed methods.
+								 */
+								'enum'    => apply_filters( '__experimental_woocommerce_store_api_batch_request_methods', array( 'POST', 'PUT', 'PATCH', 'DELETE' ) ),
 								'default' => 'POST',
 							),
 							'path'    => array(
@@ -128,7 +135,6 @@ class Batch extends AbstractRoute implements RouteInterface {
 		$nonce = wp_create_nonce( 'wc_store_api' );
 
 		$response->header( 'Nonce', $nonce );
-		$response->header( 'X-WC-Store-API-Nonce', $nonce );
 		$response->header( 'Nonce-Timestamp', time() );
 		$response->header( 'User-ID', get_current_user_id() );
 

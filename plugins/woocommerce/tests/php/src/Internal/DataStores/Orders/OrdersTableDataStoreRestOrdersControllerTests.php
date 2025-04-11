@@ -1,10 +1,15 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
+
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil as ArrayUtilAlias;
+use WC_Data_Store;
 
 if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
 	require_once dirname( __FILE__, 5 ) . '/includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller-tests.php';

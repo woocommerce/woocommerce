@@ -1,4 +1,5 @@
 const { encodeCredentials } = require( '../../utils/plugin-utils' );
+const { admin } = require( '../../test-data/data' );
 
 export class CustomizeStorePage {
 	request;
@@ -11,15 +12,15 @@ export class CustomizeStorePage {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
 		} );
 
 		await apiContext.post(
-			'/wp-json/wc-admin-test-helper/tools/reset-cys'
+			'./wp-json/wc-admin-test-helper/tools/reset-cys'
 		);
 	}
 }

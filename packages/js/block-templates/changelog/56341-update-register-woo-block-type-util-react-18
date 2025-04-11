@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Cleanup task: Fix TypeScript error in block templates package from React 18 upgrade.
+

@@ -33,6 +33,13 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'payment';
+
+	/**
 	 * Get own sections.
 	 *
 	 * @return array
@@ -189,17 +196,20 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										break;
 									case 'action':
 										$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
-										// Override the behaviour for WooPayments plugin.
+										// Override the behaviour for the WooPayments plugin.
 										if (
 											// Keep old brand name for backwards compatibility.
 											( 'WooCommerce Payments' === $method_title || 'WooPayments' === $method_title ) &&
 											class_exists( 'WC_Payments_Account' )
 										) {
 											if ( ! WooCommercePayments::is_connected() || WooCommercePayments::is_account_partially_onboarded() ) {
-												// The CTA text and label is "Finish set up" if the account is not connected or not completely onboarded.
-												$setup_url = WC_Payments_Account::get_connect_url(); // Plugin will handle the redirection to the connect page or directly to the provider (e.g. Stripe).
+												// The CTA text and label is "Finish setup" if the account is not connected or not completely onboarded.
+												// Plugin will handle the redirection to the connect page or directly to the provider (e.g. Stripe).
+												$setup_url = WC_Payments_Account::get_connect_url();
+												// Add the `from` parameter to the URL, so we know where the user came from.
+												$setup_url = add_query_arg( 'from', 'WCADMIN_PAYMENT_SETTINGS', $setup_url );
 												/* Translators: %s Payment gateway name. */
-												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
+												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish setup', 'woocommerce' ) . '</a>';
 											} else {
 												// If the account is fully onboarded, the CTA text and label is "Manage" regardless gateway is enabled or not.
 												/* Translators: %s Payment gateway name. */
@@ -210,7 +220,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
 										} else {
 											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish setup', 'woocommerce' ) . '</a>';
 										}
 										break;
 									case 'status':
@@ -243,12 +253,27 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							$active_plugins     = PluginsHelper::get_active_plugin_slugs();
 
 							if ( $wcpay_setup ) {
-								$link_text = __( 'Discover additional payment providers', 'woocommerce' );
 								$filter_by = 'category_additional';
 							} else {
-								$link_text = __( 'Discover other payment providers', 'woocommerce' );
 								$filter_by = 'category_other';
 							}
+
+							$marketplace_cta_allowed_html = array(
+								'a' => array(
+									'href'  => array(),
+									'id'    => array(),
+									'style' => array(),
+								),
+							);
+
+							$marketplace_cta = sprintf(
+								wp_kses(
+									/* translators: %s: URL to WooCommerce marketplace */
+									__( 'Visit the <a href="%s" id="settings-other-payment-methods" style="text-decoration: underline;">Official WooCommerce Marketplace</a> to find additional payment providers.', 'woocommerce' ),
+									$marketplace_cta_allowed_html
+								),
+								esc_url( admin_url( 'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways' ) )
+							);
 
 							$plugin_suggestions = array_filter(
 								$plugin_suggestions,
@@ -262,16 +287,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 							$columns_count = count( $columns );
 
-							$external_link_icon = '<svg style="margin-left: 4px" class="gridicon gridicons-external needs-offset" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M19 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6v2H5v12h12v-6h2zM13 3v2h4.586l-7.793 7.793 1.414 1.414L19 6.414V11h2V3h-8z"></path></g></svg>';
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
-							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
-							echo "<a id='settings-other-payment-methods' href='https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
-							// phpcs:ignore
-							echo $link_text;
-							// phpcs:ignore
-							echo $external_link_icon;
-							echo '</a>';
+							echo "<td style='font-size: 13px; border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
+							echo '<span style="margin-right: 10px;">';
+							echo wp_kses( $marketplace_cta, $marketplace_cta_allowed_html );
+							echo '</span>';
 							if ( count( $plugin_suggestions ) ) {
 								foreach ( $plugin_suggestions as $plugin_suggestion ) {
 									$alt = str_replace( '.png', '', basename( $plugin_suggestion->image_72x72 ) );

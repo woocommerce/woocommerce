@@ -6,8 +6,9 @@
  * @version 3.0.0
  */
 
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as ProductAttributesLookupCLIRunner;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,6 +35,7 @@ class WC_CLI {
 		require_once __DIR__ . '/cli/class-wc-cli-tracker-command.php';
 		require_once __DIR__ . '/cli/class-wc-cli-com-command.php';
 		require_once __DIR__ . '/cli/class-wc-cli-com-extension-command.php';
+		$this->maybe_include_blueprint_cli();
 	}
 
 	/**
@@ -50,6 +52,19 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );
 		$cli_runner = wc_get_container()->get( ProductAttributesLookupCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', fn() => \WP_CLI::add_command( 'wc palt', $cli_runner ) );
+
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) && class_exists( \Automattic\WooCommerce\Blueprint\Cli::class ) ) {
+			WP_CLI::add_hook( 'after_wp_load', 'Automattic\WooCommerce\Blueprint\Cli::register_commands' );
+		}
+	}
+
+	/**
+	 * Include Blueprint CLI if it's available.
+	 */
+	private function maybe_include_blueprint_cli() {
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
+			require_once dirname( WC_PLUGIN_FILE ) . '/vendor/woocommerce/blueprint/src/Cli.php';
+		}
 	}
 }
 

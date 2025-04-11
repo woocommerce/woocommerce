@@ -70,11 +70,11 @@ class CartSelectShippingRate extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shipping_disabled', esc_html__( 'Shipping is disabled.', 'woocommerce' ), 404 );
 		}
 
 		if ( ! isset( $request['rate_id'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_missing_rate_id', __( 'Invalid Rate ID.', 'woocommerce' ), 400 );
+			throw new RouteException( 'woocommerce_rest_cart_missing_rate_id', esc_html__( 'Invalid Rate ID.', 'woocommerce' ), 400 );
 		}
 
 		$cart       = $this->cart_controller->get_cart_instance();
@@ -90,7 +90,7 @@ class CartSelectShippingRate extends AbstractCartRoute {
 				}
 			}
 		} catch ( \WC_Rest_Exception $e ) {
-			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
+			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		/**
@@ -107,7 +107,6 @@ class CartSelectShippingRate extends AbstractCartRoute {
 		 */
 		do_action( 'woocommerce_store_api_cart_select_shipping_rate', $package_id, $rate_id, $request );
 
-		$cart->calculate_shipping();
 		$cart->calculate_totals();
 
 		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );

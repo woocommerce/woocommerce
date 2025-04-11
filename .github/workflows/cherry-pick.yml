@@ -1,9 +1,7 @@
 name: Cherry Pick Tool
 on:
     issues:
-        types: [milestoned, labeled]
-    pull_request:
-        types: [closed]
+        types: [milestoned]
     workflow_dispatch:
         inputs:
             release_branch:
@@ -35,7 +33,7 @@ permissions: {}
 jobs:
     verify:
         name: Verify
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         outputs:
             run: ${{ steps.check.outputs.run }}
         steps:
@@ -64,9 +62,9 @@ jobs:
 
                       const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
 
-                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null && baseRef == 'trunk';
+                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null;
 
-                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null && baseRef == 'trunk';
+                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null;
 
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
@@ -80,7 +78,7 @@ jobs:
 
     prep:
         name: Prep inputs
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: verify
         if: needs.verify.outputs.run == 'true'
         outputs:
@@ -126,7 +124,7 @@ jobs:
                       }
     check-release-branch-exists:
         name: Check for existence of release branch
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: prep
         steps:
             - name: Check for release branch
@@ -142,7 +140,7 @@ jobs:
                       } );
     cherry-pick-run:
         name: Run cherry pick tool
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
           actions: write
           contents: write

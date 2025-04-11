@@ -7,6 +7,9 @@ namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTem
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use WC_Tax;
 
 /**
@@ -239,6 +242,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					array(
 						'expression' => 'editedProduct.type === "variable"',
 					),
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
 				),
 			)
 		);
@@ -264,6 +270,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					array(
 						'expression' => 'editedProduct.type === "variable"',
 					),
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
 				),
 			)
 		);
@@ -287,7 +296,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'options'  => array(
 							array(
 								'label' => __( 'Product and shipping', 'woocommerce' ),
-								'value' => 'taxable',
+								'value' => ProductTaxStatus::TAXABLE,
 							),
 							array(
 								'label' => __( 'Only shipping', 'woocommerce' ),
@@ -345,6 +354,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'woocommerce'
 					),
 					'property' => 'short_description',
+					'lock'     => array(
+						'move' => true,
+					),
 				),
 			)
 		);
@@ -378,6 +390,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'helpText' => null,
 					'label'    => null,
 					'property' => 'description',
+					'lock'     => array(
+						'move' => true,
+					),
 				),
 			)
 		);
@@ -559,7 +574,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 20,
 				'attributes' => array(
 					'label'      => __( 'Hide in product catalog', 'woocommerce' ),
-					'visibility' => 'search',
+					'visibility' => CatalogVisibility::SEARCH,
 				),
 			)
 		);
@@ -570,7 +585,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 30,
 				'attributes' => array(
 					'label'      => __( 'Hide from search results', 'woocommerce' ),
-					'visibility' => 'catalog',
+					'visibility' => CatalogVisibility::CATALOG,
 				),
 			)
 		);
@@ -730,11 +745,49 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order' => 10,
 			)
 		);
-		$product_inventory_inner_section->add_block(
+		$inventory_columns               = $product_inventory_inner_section->add_block(
+			array(
+				'id'        => 'product-inventory-inner-columns',
+				'blockName' => 'core/columns',
+			)
+		);
+		$inventory_columns->add_block(
+			array(
+				'id'        => 'product-inventory-inner-column1',
+				'blockName' => 'core/column',
+			)
+		)->add_block(
 			array(
 				'id'                => 'product-sku-field',
 				'blockName'         => 'woocommerce/product-sku-field',
 				'order'             => 10,
+				'disableConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "variable"',
+					),
+				),
+			)
+		);
+		$inventory_columns->add_block(
+			array(
+				'id'        => 'product-inventory-inner-column2',
+				'blockName' => 'core/column',
+			)
+		)->add_block(
+			array(
+				'id'                => 'product-unique-id-field',
+				'blockName'         => 'woocommerce/product-text-field',
+				'order'             => 20,
+				'attributes'        => array(
+					'property' => 'global_unique_id',
+					// translators: %1$s GTIN %2$s UPC %3$s EAN %4$s ISBN.
+					'label'    => sprintf( __( '%1$s, %2$s, %3$s, or %4$s', 'woocommerce' ), '<abbr title="' . esc_attr__( 'Global Trade Item Number', 'woocommerce' ) . '">' . esc_html__( 'GTIN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'Universal Product Code', 'woocommerce' ) . '">' . esc_html__( 'UPC', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'European Article Number', 'woocommerce' ) . '">' . esc_html__( 'EAN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'International Standard Book Number', 'woocommerce' ) . '">' . esc_html__( 'ISBN', 'woocommerce' ) . '</abbr>' ),
+					'tooltip'  => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+					'pattern'  => array(
+						'value'   => '[0-9\-]*',
+						'message' => __( 'Please enter only numbers and hyphens (-).', 'woocommerce' ),
+					),
+				),
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
@@ -807,15 +860,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'options'  => array(
 						array(
 							'label' => __( 'In stock', 'woocommerce' ),
-							'value' => 'instock',
+							'value' => ProductStockStatus::IN_STOCK,
 						),
 						array(
 							'label' => __( 'Out of stock', 'woocommerce' ),
-							'value' => 'outofstock',
+							'value' => ProductStockStatus::OUT_OF_STOCK,
 						),
 						array(
 							'label' => __( 'On backorder', 'woocommerce' ),
-							'value' => 'onbackorder',
+							'value' => ProductStockStatus::ON_BACKORDER,
 						),
 					),
 				),
@@ -837,6 +890,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'property'    => 'purchase_note',
 					'label'       => __( 'Post-purchase note', 'woocommerce' ),
 					'placeholder' => __( 'Enter an optional note attached to the order confirmation message sent to the shopper.', 'woocommerce' ),
+					'lock'        => array(
+						'move' => true,
+					),
 				),
 			)
 		);

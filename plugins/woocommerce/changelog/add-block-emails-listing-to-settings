@@ -1,0 +1,5 @@
+Significance: patch
+Type: add
+Comment: Add emails listing built using the DataViews component linked to the block email editor. The feature is behind a feature flag.
+
+

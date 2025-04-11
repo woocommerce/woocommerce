@@ -18,7 +18,7 @@ import type {
 	TextAreaBlockEditAttributes,
 	TextAreaBlockEditProps,
 } from './types';
-import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
+import AlignmentToolbarButton from './toolbar/toolbar-button-alignment';
 import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { Label } from '../../../components/label/label';
@@ -100,7 +100,7 @@ export function TextAreaBlockEdit( {
 		<div { ...blockProps }>
 			{ isRichTextMode && (
 				<BlockControls { ...blockControlsBlockProps }>
-					<AligmentToolbarButton
+					<AlignmentToolbarButton
 						align={ align }
 						setAlignment={ setAlignment }
 					/>

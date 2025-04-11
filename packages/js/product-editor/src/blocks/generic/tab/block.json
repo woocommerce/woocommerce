@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-tab",
 	"title": "Product tab",
 	"category": "woocommerce",
 	"description": "The product tab.",
-	"keywords": [ "products", "tab", "group" ],
+	"keywords": [
+		"products",
+		"tab",
+		"group"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"id": {
@@ -27,6 +31,8 @@
 	"providesContext": {
 		"isInSelectedTab": "isSelected"
 	},
-	"usesContext": [ "selectedTab" ],
+	"usesContext": [
+		"selectedTab"
+	],
 	"editorStyle": "file:./editor.css"
 }

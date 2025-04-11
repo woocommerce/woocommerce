@@ -1,14 +1,18 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class OrdersTableQueryTests.
  */
-class LegacyDataHandlerTests extends WC_Unit_Test_Case {
+class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
@@ -169,24 +173,24 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 
 		$destination_data_store = 'hpos' === $source_data_store ? 'posts' : 'hpos';
 
-		// Make some changes to the HPOS version.
-		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), $source_data_store );
-		$order_hpos->set_billing_first_name( 'Mr. HPOS' );
-		$order_hpos->update_meta_data( 'meta_key', 'hpos' );
-		$order_hpos->save();
+		// Make some changes to the source version.
+		$order_from_source = $this->sut->get_order_from_datastore( $order->get_id(), $source_data_store );
+		$order_from_source->set_billing_first_name( 'Mr. HPOS' );
+		$order_from_source->update_meta_data( 'meta_key', 'hpos' );
+		$order_from_source->save();
 
-		// Fetch the posts version and make sure it's different.
-		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
-		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
-		$this->assertNotEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key' ) );
+		// Fetch the destination version and make sure it's different.
+		$order_from_dest = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
+		$this->assertNotEquals( $order_from_source->get_billing_first_name(), $order_from_dest->get_billing_first_name() );
+		$this->assertNotEquals( $order_from_source->get_meta( 'meta_key' ), $order_from_dest->get_meta( 'meta_key' ) );
 
-		// Backfill to posts.
+		// Backfill to the destination.
 		$this->sut->backfill_order_to_datastore( $order->get_id(), $source_data_store, $destination_data_store );
 
 		// Confirm data is now the same.
-		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
-		$this->assertEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
-		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key' ) );
+		$order_from_dest = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
+		$this->assertEquals( $order_from_source->get_billing_first_name(), $order_from_dest->get_billing_first_name() );
+		$this->assertEquals( $order_from_source->get_meta( 'meta_key' ), $order_from_dest->get_meta( 'meta_key' ) );
 	}
 
 	/**
@@ -200,13 +204,13 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 		// Test order.
 		$this->enable_cot_sync();
 		$order = new \WC_Order();
-		$order->set_status( 'on-hold' );
+		$order->set_status( OrderStatus::ON_HOLD );
 		$order->add_meta_data( 'my_meta', 'hpos+posts' );
 		$order->save();
 		$this->disable_cot_sync();
 
 		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
-		$order_hpos->set_status( 'completed' );
+		$order_hpos->set_status( OrderStatus::COMPLETED );
 		$order_hpos->set_billing_first_name( 'Mr. HPOS' );
 		$order_hpos->set_billing_address_1( 'HPOS Street' );
 		$order_hpos->update_meta_data( 'my_meta', 'hpos' );

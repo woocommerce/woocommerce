@@ -1,7 +1,7 @@
 <?php
-/**
- * Tests for BatchProcessingController class.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\BatchProcessing;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 /**
  * Class BatchProcessingControllerTests.
  */
-class BatchProcessingControllerTests extends WC_Unit_Test_Case {
+class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 
 	/**
 	 * Instance of BatchProcessingController.

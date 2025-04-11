@@ -17,7 +17,7 @@ import { isInTheFuture } from '@wordpress/date';
  */
 import { PublishButton } from '../header/publish-button';
 import { PrepublishPanelProps } from './types';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
 import { VisibilitySection } from './visibility-section';
 import { ScheduleSection } from './schedule-section';
@@ -41,7 +41,7 @@ export function PrepublishPanel( {
 		Product[ 'status' ]
 	>( 'postType', productType, 'status' );
 
-	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
+	const { closePrepublishPanel } = useDispatch( wooProductEditorUiStore );
 
 	const isPublishedOrScheduled =
 		productType === 'product' && prevStatus !== 'future'

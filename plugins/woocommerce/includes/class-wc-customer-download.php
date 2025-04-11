@@ -171,13 +171,8 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 */
 	public function get_download_count( $context = 'view' ) {
 		// Check for count of download logs.
-		$data_store       = WC_Data_Store::load( 'customer-download-log' );
-		$download_log_ids = $data_store->get_download_logs_for_permission( $this->get_id() );
-
-		$download_log_count = 0;
-		if ( ! empty( $download_log_ids ) ) {
-			$download_log_count = count( $download_log_ids );
-		}
+		$data_store         = WC_Data_Store::load( 'customer-download-log' );
+		$download_log_count = $data_store->get_download_logs_count_for_permission( $this->get_id() );
 
 		// Check download count in prop.
 		$download_count_prop = $this->get_prop( 'download_count', $context );

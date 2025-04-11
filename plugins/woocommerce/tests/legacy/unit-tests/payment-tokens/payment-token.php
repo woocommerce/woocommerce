@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Payment_Token
  * @package WooCommerce\Tests\Payment_Tokens
@@ -50,8 +51,8 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_payment_gateway_id() {
 		$token = new WC_Payment_Token_Stub();
-		$token->set_gateway_id( 'paypal' );
-		$this->assertEquals( 'paypal', $token->get_gateway_id() );
+		$token->set_gateway_id( WC_Gateway_Paypal::ID );
+		$this->assertEquals( WC_Gateway_Paypal::ID, $token->get_gateway_id() );
 	}
 
 	/**
@@ -75,11 +76,11 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 		$raw_token = time() . ' ' . __FUNCTION__;
 		$token     = new WC_Payment_Token_Stub();
 		$token->set_token( $raw_token );
-		$token->set_gateway_id( 'paypal' );
+		$token->set_gateway_id( WC_Gateway_Paypal::ID );
 		$token->set_extra( 'woocommerce' );
 
 		$this->assertEquals( $raw_token, $token->get_token() );
-		$this->assertEquals( 'paypal', $token->get_gateway_id() );
+		$this->assertEquals( WC_Gateway_Paypal::ID, $token->get_gateway_id() );
 		$this->assertEquals( 'stub', $token->get_type() );
 
 		$data = $token->get_data();

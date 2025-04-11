@@ -16,35 +16,6 @@ const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
 
-async function setPreferences( page, context, preferences ) {
-	await page.waitForFunction( () => window?.wp?.data );
-
-	await page.evaluate(
-		async ( props ) => {
-			for ( const [ key, value ] of Object.entries(
-				props.preferences
-			) ) {
-				await window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( props.context, key, value );
-			}
-		},
-		{ context, preferences }
-	);
-}
-
-async function editPost( admin, page, postId ) {
-	const query = new URLSearchParams();
-	query.set( 'post', String( postId ) );
-	query.set( 'action', 'edit' );
-
-	await admin.visitAdminPage( 'post.php', query.toString() );
-	await setPreferences( page, 'core/edit-post', {
-		welcomeGuide: false,
-		fullscreenMode: false,
-	} );
-}
-
 test.describe( 'Editor Performance', () => {
 	test.use( {
 		perfUtils: async ( { page }, use ) => {
@@ -86,7 +57,7 @@ test.describe( 'Editor Performance', () => {
 				metrics,
 			} ) => {
 				// Open the test draft.
-				await editPost( admin, page, draftId );
+				await admin.editPost( draftId );
 				const canvas = await perfUtils.getCanvas();
 
 				// Wait for the first block.
@@ -146,11 +117,10 @@ test.describe( 'Editor Performance', () => {
 			await perfUtils.loadBlocksForLargePost();
 			await editor.insertBlock( { name: 'core/paragraph' } );
 			draftId = await perfUtils.saveDraft();
-			console.log( draftId );
 		} );
 
-		test( 'Run the test', async ( { admin, page, perfUtils, metrics } ) => {
-			await editPost( admin, page, draftId );
+		test( 'Run the test', async ( { admin, perfUtils, metrics } ) => {
+			await admin.editPost( draftId );
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
 

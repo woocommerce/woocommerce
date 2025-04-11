@@ -1,4 +1,8 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
+
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataCleanup;
@@ -7,7 +11,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 /**
  * Tests for the {@see LegacyDataCleanup} class.
  */
-class LegacyDataCleanupTests extends WC_Unit_Test_Case {
+class LegacyDataCleanupTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**

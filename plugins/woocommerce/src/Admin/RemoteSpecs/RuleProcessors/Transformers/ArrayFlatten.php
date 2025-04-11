@@ -20,7 +20,7 @@ class ArrayFlatten implements TransformerInterface {
 	 *
 	 * @return mixed|null
 	 */
-	public function transform( $value, stdClass $arguments = null, $default_value = array() ) {
+	public function transform( $value, ?stdClass $arguments = null, $default_value = array() ) {
 		if ( ! is_array( $value ) ) {
 			return $default_value;
 		}
@@ -43,7 +43,7 @@ class ArrayFlatten implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function validate( stdClass $arguments = null ) {
+	public function validate( ?stdClass $arguments = null ) {
 		return true;
 	}
 }

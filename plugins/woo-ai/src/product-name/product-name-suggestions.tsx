@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';

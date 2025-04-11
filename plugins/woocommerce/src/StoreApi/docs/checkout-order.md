@@ -7,14 +7,12 @@
 
 The checkout order API facilitates the processing of existing orders and handling payments.
 
-All checkout order endpoints require [Nonce Tokens](nonce-tokens.md).
+All checkout order endpoints require a [Nonce Token](nonce-tokens.md) or a [Cart Token](cart-tokens.md) otherwise these endpoints will return an error.
 
 ## Process Order and Payment
 
 Accepts the final chosen payment method, and any additional payment data, then attempts payment and
 returns the result.
-
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
 ```http
 POST /wc/store/v1/checkout/{ORDER_ID}
@@ -161,7 +159,7 @@ For further information on generating a `stripe_source` please check [the Stripe
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/checkout-order.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/checkout-order.md)
 
 <!-- /FEEDBACK -->
 

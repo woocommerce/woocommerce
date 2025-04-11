@@ -6,9 +6,9 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 /**
  * Task Lists class.
  */
@@ -117,7 +117,6 @@ class TaskLists {
 			'Payments',
 			'Tax',
 			'Shipping',
-			'Marketing',
 			'LaunchYourStore',
 		);
 
@@ -131,9 +130,16 @@ class TaskLists {
 		// Remove the old Personalize your store task if the new CustomizeStore is enabled.
 		$task_to_remove                 = Features::is_enabled( 'customize-store' ) ? 'Appearance' : 'CustomizeStore';
 		$store_customisation_task_index = array_search( $task_to_remove, $tasks, true );
-
 		if ( false !== $store_customisation_task_index ) {
 			unset( $tasks[ $store_customisation_task_index ] );
+		}
+
+		// If the React-based Payments settings page is enabled, we don't need the dedicated WooPayments task.
+		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			$key = array_search( 'WooCommercePayments', $tasks, true );
+			if ( false !== $key ) {
+				unset( $tasks[ $key ] );
+			}
 		}
 
 		self::add_list(
@@ -165,7 +171,8 @@ class TaskLists {
 					),
 				),
 				'tasks'   => array(
-					'StoreConnect',
+					'Marketing',
+					'ExtendStore',
 					'AdditionalPayments',
 					'GetMobileApp',
 				),
@@ -297,7 +304,6 @@ class TaskLists {
 				$task_list->add_task( $task );
 			}
 		}
-
 	}
 
 	/**
@@ -318,8 +324,8 @@ class TaskLists {
 	public static function get_lists_by_ids( $ids ) {
 		return array_filter(
 			self::$lists,
-			function( $list ) use ( $ids ) {
-				return in_array( $list->get_list_id(), $ids, true );
+			function ( $task_list ) use ( $ids ) {
+				return in_array( $task_list->get_list_id(), $ids, true );
 			}
 		);
 	}
@@ -404,25 +410,31 @@ class TaskLists {
 	/**
 	 * Return number of setup tasks remaining
 	 *
-	 * @return number
+	 * This is not updated immediately when a task is completed, but rather when task is marked as complete in the database to reduce performance impact.
+	 *
+	 * @return int|null
 	 */
 	public static function setup_tasks_remaining() {
 		$setup_list = self::get_list( 'setup' );
 
-		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->has_previously_completed() || $setup_list->is_complete() ) {
+		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->has_previously_completed() ) {
 			return;
 		}
 
-		$remaining_tasks = array_values(
+		$viewable_tasks  = $setup_list->get_viewable_tasks();
+		$completed_tasks = get_option( Task::COMPLETED_OPTION, array() );
+		if ( ! is_array( $completed_tasks ) ) {
+			$completed_tasks = array();
+		}
+
+		return count(
 			array_filter(
-				$setup_list->get_viewable_tasks(),
-				function( $task ) {
-					return ! $task->is_complete();
+				$viewable_tasks,
+				function ( $task ) use ( $completed_tasks ) {
+					return ! in_array( $task->get_id(), $completed_tasks, true );
 				}
 			)
 		);
-
-		return count( $remaining_tasks );
 	}
 
 	/**
@@ -443,7 +455,6 @@ class TaskLists {
 				break;
 			}
 		}
-
 	}
 
 	/**
@@ -454,8 +465,19 @@ class TaskLists {
 	 * @return array
 	 */
 	public static function task_list_preloaded_settings( $settings ) {
-		$settings['visibleTaskListIds'] = array_keys( self::get_visible() );
+		$settings['visibleTaskListIds']   = self::all_hidden() ? array() : array_keys( self::get_visible() );
+		$settings['completedTaskListIds'] = get_option( TaskList::COMPLETED_OPTION, array() );
 
 		return $settings;
+	}
+
+	/**
+	 * Check if all task lists are hidden.
+	 *
+	 * @return bool
+	 */
+	public static function all_hidden() {
+		$hidden_lists = get_option( TaskList::HIDDEN_OPTION, array() );
+		return count( $hidden_lists ) === count( self::get_lists() );
 	}
 }

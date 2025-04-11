@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -93,9 +94,13 @@ if ( ! function_exists( 'is_cart' ) ) {
 	 * @return bool
 	 */
 	function is_cart() {
-		$page_id = wc_get_page_id( 'cart' );
-
-		return ( $page_id && is_page( $page_id ) ) || Constants::is_defined( 'WOOCOMMERCE_CART' ) || wc_post_content_has_shortcode( 'woocommerce_cart' );
+		/**
+		 * Filter to allow for custom logic to determine if the cart page is being viewed.
+		 *
+		 * @since 2.4.0
+		 * @param bool $is_cart Whether the cart page is being viewed.
+		 */
+		return apply_filters( 'woocommerce_is_cart', false ) || Constants::is_defined( 'WOOCOMMERCE_CART' ) || CartCheckoutUtils::is_cart_page();
 	}
 }
 
@@ -107,9 +112,13 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	 * @return bool
 	 */
 	function is_checkout() {
-		$page_id = wc_get_page_id( 'checkout' );
-
-		return ( $page_id && is_page( $page_id ) ) || wc_post_content_has_shortcode( 'woocommerce_checkout' ) || apply_filters( 'woocommerce_is_checkout', false ) || Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' );
+		/**
+		 * Filter to allow for custom logic to determine if the checkout page is being viewed.
+		 *
+		 * @since 2.4.0
+		 * @param bool $is_checkout Whether the checkout page is being viewed.
+		 */
+		return apply_filters( 'woocommerce_is_checkout', false ) || Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) || CartCheckoutUtils::is_checkout_page();
 	}
 }
 
@@ -325,7 +334,12 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 		if ( $product && method_exists( $product, 'get_variation_attributes' ) ) {
 			$variation_attributes = $product->get_variation_attributes();
 			$attributes           = $product->get_attributes();
-			return ( in_array( $name, array_keys( $attributes ), true ) && in_array( $value, $variation_attributes[ $attributes[ $name ]['name'] ], true ) );
+
+			return (
+				in_array( $name, array_keys( $attributes ), true ) &&
+				isset( $variation_attributes[ $attributes[ $name ]['name'] ] ) &&
+				in_array( $value, $variation_attributes[ $attributes[ $name ]['name'] ], true )
+			);
 		} else {
 			return false;
 		}
@@ -501,17 +515,12 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
  * Check if the current theme is a block theme.
  *
  * @since 6.0.0
+ * @deprecated 9.9.0 Use wp_is_block_theme() instead.
  * @return bool
  */
 function wc_current_theme_is_fse_theme() {
-	if ( function_exists( 'wp_is_block_theme' ) ) {
-		return (bool) wp_is_block_theme();
-	}
-	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
-		return (bool) gutenberg_is_fse_theme();
-	}
-
-	return false;
+	wc_deprecated_function( __FUNCTION__, '9.9.0', 'wp_is_block_theme' );
+	return wp_is_block_theme();
 }
 
 /**
@@ -521,7 +530,7 @@ function wc_current_theme_is_fse_theme() {
  * @return bool
  */
 function wc_current_theme_supports_woocommerce_or_fse() {
-	return (bool) current_theme_supports( 'woocommerce' ) || wc_current_theme_is_fse_theme();
+	return (bool) current_theme_supports( 'woocommerce' ) || wp_is_block_theme();
 }
 
 /**
@@ -535,7 +544,7 @@ function wc_current_theme_supports_woocommerce_or_fse() {
  * @return string
  */
 function wc_wp_theme_get_element_class_name( $element ) {
-	if ( wc_current_theme_is_fse_theme() && function_exists( 'wp_theme_get_element_class_name' ) ) {
+	if ( wp_is_block_theme() && function_exists( 'wp_theme_get_element_class_name' ) ) {
 		return wp_theme_get_element_class_name( $element );
 	}
 
@@ -556,7 +565,7 @@ function wc_wp_theme_get_element_class_name( $element ) {
  */
 function wc_block_theme_has_styles_for_element( $element ) {
 	if (
-		! wc_current_theme_is_fse_theme() ||
+		! wp_is_block_theme() ||
 		wc_wp_theme_get_element_class_name( $element ) === ''
 	) {
 		return false;

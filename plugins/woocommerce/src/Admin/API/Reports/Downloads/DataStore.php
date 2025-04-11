@@ -20,6 +20,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_download_log';
@@ -27,12 +29,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'downloads';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -51,12 +57,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'downloads';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$this->report_columns = array(
@@ -252,6 +262,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Gets WHERE time clause of SQL request with date-related constraints.
 	 *
+	 * @override ReportsDataStore::add_time_period_sql_params()
+	 *
 	 * @param array  $query_args Parameters supplied by the user.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 * @return string
@@ -294,93 +306,88 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults            = parent::get_default_query_vars();
+		$defaults['orderby'] = 'timestamp';
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
+		$this->initialize_queries();
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page' => get_option( 'posts_per_page' ),
-			'page'     => 1,
-			'order'    => 'DESC',
-			'orderby'  => 'timestamp',
-			'before'   => TimeInterval::default_before(),
-			'after'    => TimeInterval::default_after(),
-			'fields'   => '*',
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$selections = $this->selected_columns( $query_args );
+		$this->add_sql_query_params( $query_args );
 
-		if ( false === $data ) {
-			$this->initialize_queries();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$db_records_count = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM (
+				{$this->subquery->get_query_statement()}
+			) AS tt"
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
-			);
-
-			$selections = $this->selected_columns( $query_args );
-			$this->add_sql_query_params( $query_args );
-
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-					{$this->subquery->get_query_statement()}
-				) AS tt"
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-			$params      = $this->get_limit_params( $query_args );
-			$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return $data;
-			}
-
-			$this->subquery->clear_sql_clause( 'select' );
-			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-
-			$download_data = $wpdb->get_results(
-				$this->subquery->get_query_statement(), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				ARRAY_A
-			);
-
-			if ( null === $download_data ) {
-				return $data;
-			}
-
-			$download_data = array_map( array( $this, 'cast_numbers' ), $download_data );
-			$data          = (object) array(
-				'data'    => $download_data,
-				'total'   => $db_records_count,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
+		$params      = $this->get_limit_params( $query_args );
+		$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
+		if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+			return $data;
 		}
+
+		$this->subquery->clear_sql_clause( 'select' );
+		$this->subquery->add_sql_clause( 'select', $selections );
+		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+
+		$download_data = $wpdb->get_results(
+			$this->subquery->get_query_statement(), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			ARRAY_A
+		);
+
+		if ( null === $download_data ) {
+			return $data;
+		}
+
+		$download_data = array_map( array( $this, 'cast_numbers' ), $download_data );
+		$data          = (object) array(
+			'data'    => $download_data,
+			'total'   => $db_records_count,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 
 		return $data;
 	}
 
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * @override ReportsDataStore::normalize_order_by()
 	 *
 	 * @param string $order_by Sorting criterion.
 	 * @return string

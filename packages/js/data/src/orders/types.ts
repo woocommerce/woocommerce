@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { Schema } from '@wordpress/core-data';
-
+import { Post } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
@@ -102,7 +101,7 @@ export type OrderStatus =
 	| 'refunded'
 	| 'failed';
 
-export type Order< Status = OrderStatus > = Omit< Schema.Post, 'status' > & {
+export type Order< Status = OrderStatus > = Omit< Post, 'status' > & {
 	id: number;
 	number: string;
 	order_key: string;

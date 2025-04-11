@@ -7,10 +7,9 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,8 +17,6 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Local notices cache.
@@ -49,6 +46,7 @@ class WC_Admin_Notices {
 		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
 		'base_tables_missing'                => 'base_tables_missing_notice',
 		'download_directories_sync_complete' => 'download_directories_sync_complete',
+		'email_sender_options'               => 'email_sender_options_notice',
 	);
 
 	/**
@@ -69,7 +67,7 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
+		add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -164,7 +162,7 @@ class WC_Admin_Notices {
 	 * and the Legacy REST API plugin is not installed.
 	 */
 	private static function maybe_add_legacy_api_removal_notice() {
-		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 && is_null( WC()->api ) ) {
+		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 && ! WC()->legacy_rest_api_is_available() ) {
 			self::add_custom_notice(
 				'legacy_webhooks_unsupported_in_woo_90',
 				sprintf(
@@ -187,9 +185,11 @@ class WC_Admin_Notices {
 
 	/**
 	 * Remove the admin notice about the unsupported webhooks if the Legacy REST API plugin is installed.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function maybe_remove_legacy_api_removal_notice() {
-		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( ! is_null( WC()->api ) || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
+	public static function maybe_remove_legacy_api_removal_notice() {
+		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( WC()->legacy_rest_api_is_available() || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
 			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
 		}
 	}
@@ -655,6 +655,33 @@ class WC_Admin_Notices {
 		}
 
 		include __DIR__ . '/views/html-notice-base-table-missing.php';
+	}
+
+	/**
+	 * Display notice about moving the sender options to the email template editor.
+	 */
+	public static function email_sender_options_notice() {
+		$is_block_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $is_block_editor_enabled && ! empty( $_GET['page'] ) && ! empty( $_GET['tab'] ) && 'wc-settings' === $_GET['page'] && 'email' === $_GET['tab'] ) {
+			/**
+			 * Filter whether to hide the email sender options notice.
+			 *
+			 * @since 9.8.0
+			 *
+			 * @param bool $is_dismissed Whether the notice has been dismissed by the current user.
+			 */
+			$notice_dismissed = apply_filters(
+				'woocommerce_hide_email_sender_options_notice',
+				get_user_meta( get_current_user_id(), 'dismissed_woocommerce_email_sender_options_notice', true )
+			);
+
+			if ( ! $notice_dismissed ) {
+				include __DIR__ . '/views/html-notice-email-sender-options.php';
+			} else {
+				self::remove_notice( 'email_sender_options' );
+			}
+		}
 	}
 
 	/**

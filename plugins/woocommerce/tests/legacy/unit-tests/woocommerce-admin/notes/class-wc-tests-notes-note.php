@@ -53,4 +53,31 @@ class WC_Admin_Tests_Notes_Note extends WC_Unit_Test_Case {
 		$this->assertEquals( $date_created_from_first_save, $date_created_from_second_save );
 	}
 
+	/**
+	 * Tests setting date_reminder with various input types.
+	 *
+	 * @dataProvider date_reminder_provider
+	 * @param mixed $input Input date value.
+	 * @param int   $expected_timestamp Expected timestamp.
+	 */
+	public function test_set_date_reminder_with_various_inputs( $input, $expected_timestamp ) {
+		$note = new Note();
+		$note->set_date_reminder( $input );
+		$date_reminder = $note->get_date_reminder();
+		$this->assertEquals( $expected_timestamp, $date_reminder );
+	}
+
+	/**
+	 * Data provider for test_set_date_reminder_with_various_inputs.
+	 *
+	 * @return array
+	 */
+	public function date_reminder_provider() {
+		return array(
+			'timestamp'          => array( 1609459200, '2021-01-01T00:00:00+00:00' ),
+			'timestamp string'   => array( '1609459200', '2021-01-01T00:00:00+00:00' ),
+			'date string'        => array( '2021-01-01', '2021-01-01T00:00:00+00:00' ),
+			'WC_DateTime object' => array( new WC_DateTime( '2021-01-01' ), '2021-01-01T00:00:00+00:00' ),
+		);
+	}
 }

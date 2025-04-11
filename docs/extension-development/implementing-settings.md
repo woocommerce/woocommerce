@@ -16,7 +16,7 @@ Create your main plugin file to [hook](https://developer.wordpress.org/reference
 
 ### Creating the Integration Class
 
-Now that we have the framework setup let's actually implement this Integration class. There already is a `WC_Integration` class so we want to make a [child class](http://php.net/manual/en/keyword.extends.php 'PHP Child Class'). This way it inherits all of the existing methods and data. You'll need to set an id, a description, and a title for your integration. These will show up on the integration page. You'll also need to load the settings by calling: `$this->init_form_fields();` & `$this->init_settings();` You'll also need to save your options by calling the `woocommerce_update_options_integration_{your method id}` hook. Lastly you have to input some settings to save! We've included two dummy fields below but we'll go more into fields in the next section.
+Now that we have the framework setup let's actually implement this Integration class. There already is a `WC_Integration` class so we want to make a [child class](https://www.php.net/manual/en/language.oop5.inheritance.php). This way it inherits all of the existing methods and data. You'll need to set an id, a description, and a title for your integration. These will show up on the integration page. You'll also need to load the settings by calling: `$this->init_form_fields();` & `$this->init_settings();` You'll also need to save your options by calling the `woocommerce_update_options_integration_{your method id}` hook. Lastly you have to input some settings to save! We've included two dummy fields below but we'll go more into fields in the next section.
 
 > Added to a file named `class-wc-integration-demo-integration.php`
 
@@ -167,7 +167,7 @@ WooCommerce includes support for 8 types of settings.
 -   select
 -   multiselect
 
-And these settings have attributes which you can use. These affect the way the setting looks and behaves on the settings page. It doesn't affect the setting itself. The attributes will manifest slightly differently depending on the setting type. A placeholder for example doesn't work with checkboxes. To see exactly how they work you should look through the [source code](https://github.com/woocommerce/woocommerce/blob/master/includes/abstracts/abstract-wc-settings-api.php#L180 'WC Settings API on GitHub'). Ex.
+And these settings have attributes which you can use. These affect the way the setting looks and behaves on the settings page. It doesn't affect the setting itself. The attributes will manifest slightly differently depending on the setting type. A placeholder for example doesn't work with checkboxes. To see exactly how they work you should look through the [source code](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/abstracts/abstract-wc-settings-api.php 'WC Settings API on GitHub'). Ex.
 
 -   title
 -   class
@@ -227,19 +227,19 @@ public function generate_button_html( $key, $data ) {
 
 	ob_start();
 	?>
-	<tr valign="top">
-		<th scope="row" class="titledesc">
-			<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+	&lt;tr valign="top"&gt;
+		&lt;th scope="row" class="titledesc"&gt;
+			&lt;label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?>&lt;/label&gt;
 			<?php echo $this->get_tooltip_html( $data ); ?>
-		</th>
-		<td class="forminp">
-			<fieldset>
-				<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-				<button class="<?php echo esc_attr( $data['class'] ); ?>" type="button" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php echo $this->get_custom_attribute_html( $data ); ?>><?php echo wp_kses_post( $data['title'] ); ?></button>
+		&lt;/th&gt;
+		&lt;td class="forminp"&gt;
+			&lt;fieldset&lt;
+				&lt;legend class="screen-reader-text"&gt;&lt;span&gt;<?php echo wp_kses_post( $data['title'] ); ?&gt;&lt;/span&gt;&lt;/legend&gt;
+				&lt;button class="<?php echo esc_attr( $data['class'] ); ?>" type="button" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php echo $this->get_custom_attribute_html( $data ); ?>&gt;<?php echo wp_kses_post( $data['title'] ); ?>&lt;/button&gt;
 				<?php echo $this->get_description_html( $data ); ?>
-			</fieldset>
-		</td>
-	</tr>
+			&lt;/fieldset&gt;
+		&lt;/td&gt;
+	&lt;/tr&gt;
 	<?php
 	return ob_get_clean();
 }

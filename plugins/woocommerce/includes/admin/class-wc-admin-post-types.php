@@ -7,6 +7,9 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,6 +46,12 @@ class WC_Admin_Post_Types {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_filter( 'woocommerce_order_updated_messages', array( $this, 'order_updated_messages' ) );
 		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_post_updated_messages' ), 10, 2 );
+		add_action(
+			'admin_notices',
+			function () {
+				$this->maybe_display_warning_for_password_protected_coupon();
+			}
+		);
 
 		// Disable Auto Save.
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
@@ -257,6 +266,33 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Shows a warning when editing a password-protected coupon.
+	 *
+	 * @since 9.2.0
+	 */
+	private function maybe_display_warning_for_password_protected_coupon() {
+		if ( ! function_exists( 'get_current_screen' ) || 'shop_coupon' !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( ! isset( $GLOBALS['post'] ) || 'shop_coupon' !== $GLOBALS['post']->post_type ) {
+			return;
+		}
+
+		wp_admin_notice(
+			__(
+				'This coupon is password protected. WooCommerce does not support password protection for coupons. You can temporarily hide a coupon by making it private. Alternatively, usage limits and restrictions can be configured below.',
+				'woocommerce'
+			),
+			array(
+				'type'               => 'warning',
+				'id'                 => 'wc-password-protected-coupon-warning',
+				'additional_classes' => empty( $GLOBALS['post']->post_password ) ? array( 'hidden' ) : array(),
+			)
+		);
+	}
+
+	/**
 	 * Custom bulk edit - form.
 	 *
 	 * @param string $column_name Column being shown.
@@ -415,7 +451,7 @@ class WC_Admin_Post_Types {
 
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
-		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
+		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -424,6 +460,7 @@ class WC_Admin_Post_Types {
 			} else {
 				$new_regular_price = null;
 			}
+
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
@@ -447,20 +484,26 @@ class WC_Admin_Post_Types {
 			}
 		}
 
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() && isset( $request_data['_cogs_value'] ) ) {
+			$cogs_value = $request_data['_cogs_value'];
+			$cogs_value = '' === $cogs_value ? null : (float) wc_format_decimal( $cogs_value );
+			$product->set_cogs_value( $cogs_value );
+		}
+
 		// Handle Stock Data.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$manage_stock = ! empty( $request_data['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
+		$manage_stock = ! empty( $request_data['_manage_stock'] ) && ProductType::GROUPED !== $product->get_type() ? 'yes' : 'no';
 		$backorders   = ! empty( $request_data['_backorders'] ) ? wc_clean( $request_data['_backorders'] ) : 'no';
 		if ( ! empty( $request_data['_stock_status'] ) ) {
 			$stock_status = wc_clean( $request_data['_stock_status'] );
 		} else {
-			$stock_status = $product->is_type( 'variable' ) ? null : 'instock';
+			$stock_status = $product->is_type( ProductType::VARIABLE ) ? null : ProductStockStatus::IN_STOCK;
 		}
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$product->set_manage_stock( $manage_stock );
 
-		if ( 'external' !== $product->get_type() ) {
+		if ( ProductType::EXTERNAL !== $product->get_type() ) {
 			$product->set_backorders( $backorders );
 		}
 
@@ -544,8 +587,14 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		// Handle price - remove dates and set to lowest.
-		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
+		/**
+		 * Handle price - remove dates and set to lowest.
+		 *
+		 * @param array $product_types Array of product types that can change price.
+		 *
+		 * @since 3.0.0
+		 */
+		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( ProductType::SIMPLE, ProductType::EXTERNAL ) );
 		$can_product_type_change_price = false;
 		foreach ( $change_price_product_types as $product_type ) {
 			if ( $product->is_type( $product_type ) ) {
@@ -574,7 +623,7 @@ class WC_Admin_Post_Types {
 		$backorders         = ! empty( $request_data['_backorders'] ) ? wc_clean( $request_data['_backorders'] ) : $backorders;
 
 		if ( ! empty( $request_data['_manage_stock'] ) ) {
-			$manage_stock = 'yes' === wc_clean( $request_data['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
+			$manage_stock = 'yes' === wc_clean( $request_data['_manage_stock'] ) && ProductType::GROUPED !== $product->get_type() ? 'yes' : 'no';
 		} else {
 			$manage_stock = $was_managing_stock;
 		}
@@ -583,7 +632,7 @@ class WC_Admin_Post_Types {
 
 		$product->set_manage_stock( $manage_stock );
 
-		if ( 'external' !== $product->get_type() ) {
+		if ( ProductType::EXTERNAL !== $product->get_type() ) {
 			$product->set_backorders( $backorders );
 		}
 
@@ -608,6 +657,10 @@ class WC_Admin_Post_Types {
 
 		$stock_status = empty( $request_data['_stock_status'] ) ? null : wc_clean( $request_data['_stock_status'] );
 		$product      = $this->maybe_update_stock_status( $product, $stock_status );
+
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+			$this->maybe_update_cogs_value( $product, $request_data );
+		}
 
 		$product->save();
 
@@ -825,11 +878,11 @@ class WC_Admin_Post_Types {
 	 * @return WC_Product The supplied product, or the synced product if it was a variable product.
 	 */
 	private function maybe_update_stock_status( $product, $stock_status ) {
-		if ( $product->is_type( 'external' ) ) {
+		if ( $product->is_type( ProductType::EXTERNAL ) ) {
 			// External products are always in stock.
-			$product->set_stock_status( 'instock' );
+			$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		} elseif ( isset( $stock_status ) ) {
-			if ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+			if ( $product->is_type( ProductType::VARIABLE ) && ! $product->get_manage_stock() ) {
 				// Stock status is determined by children.
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
@@ -863,7 +916,8 @@ class WC_Admin_Post_Types {
 			return false;
 		}
 
-		$old_price     = (float) $product->{"get_{$price_type}_price"}();
+		$old_price     = $product->{"get_{$price_type}_price"}();
+		$old_price     = '' === $old_price ? (float) $product->get_regular_price() : (float) $old_price;
 		$price_changed = false;
 
 		$change_price  = absint( $request_data[ "change_{$price_type}_price" ] );
@@ -873,13 +927,17 @@ class WC_Admin_Post_Types {
 
 		switch ( $change_price ) {
 			case 1:
-				$new_price = $price;
+				if ( empty( $price ) ) {
+					$new_price = $product->get_regular_price();
+				} else {
+					$new_price = $price;
+				}
 				break;
 			case 2:
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = $old_price + ( $old_price * $percent );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = $old_price + $price;
 				}
 				break;
@@ -887,7 +945,7 @@ class WC_Admin_Post_Types {
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = max( 0, $old_price - ( $old_price * $percent ) );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = max( 0, $old_price - $price );
 				}
 				break;
@@ -927,6 +985,22 @@ class WC_Admin_Post_Types {
 	 */
 	protected function request_data() {
 		return $_REQUEST;
+	}
+
+	/**
+	 * Update the Cost of Goods Sold value coming from a bulk edit for a product.
+	 *
+	 * @param WC_Product $product The product to update.
+	 * @param array      $request_data The current request data.
+	 */
+	private function maybe_update_cogs_value( WC_Product $product, array $request_data ) {
+		$change_cogs_value = absint( $request_data['change_cogs_value'] );
+		if ( 1 !== $change_cogs_value ) {
+			return;
+		}
+
+		$cogs_value = wc_clean( wp_unslash( $request_data['_cogs_value'] ?? '' ) );
+		$product->set_cogs_value( '' === $cogs_value ? null : (float) wc_format_decimal( $cogs_value ) );
 	}
 }
 

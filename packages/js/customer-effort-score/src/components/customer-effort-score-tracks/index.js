@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -21,25 +21,29 @@ import {
 import { getStoreAgeInWeeks } from '../../utils';
 
 /**
+ * @typedef {Object} CustomerEffortScoreTracksProps
+ * @property {string}   action               - The action name sent to Tracks
+ * @property {Object}   [trackProps]         - Additional props sent to Tracks
+ * @property {string}   title                - The title displayed in the modal
+ * @property {string}   [description]        - Description shown in CES modal
+ * @property {string}   [noticeLabel]        - Label for notice, defaults to title
+ * @property {string}   [firstQuestion]      - The first survey question
+ * @property {string}   [secondQuestion]     - The second survey question
+ * @property {string}   [icon]               - Optional icon to show in notice
+ * @property {string}   [onSubmitLabel]      - The label displayed upon survey submission
+ * @property {string[]} [cesShownForActions] - The array of actions that the CES modal has been shown for
+ * @property {boolean}  [allowTracking]      - Whether tracking is allowed or not
+ * @property {boolean}  resolving            - Whether props are still being resolved
+ * @property {number}   [storeAgeInWeeks]    - The age of the store in weeks
+ * @property {Function} [createNotice]       - Function to create a snackbar
+ */
+
+/**
  * A CustomerEffortScore wrapper that uses tracks to track the selected
  * customer effort score.
  *
- * @param {Object}   props                    Component props.
- * @param {string}   props.action             The action name sent to Tracks.
- * @param {Object}   props.trackProps         Additional props sent to Tracks.
- * @param {string}   props.title              The title displayed in the modal.
- * @param {string}   props.noticeLabel        Label for notice, defaults to title.
- * @param {string}   props.description        Description shown in CES modal.
- * @param {string}   props.firstQuestion      The first survey question.
- * @param {string}   props.secondQuestion     The second survey question.
- * @param {string}   props.icon               Optional icon to show in notice.
- * @param {string}   props.onSubmitLabel      The label displayed upon survey submission.
- * @param {Array}    props.cesShownForActions The array of actions that the CES modal has been shown for.
- * @param {boolean}  props.allowTracking      Whether tracking is allowed or not.
- * @param {boolean}  props.resolving          Are values still being resolved.
- * @param {number}   props.storeAgeInWeeks    The age of the store in weeks.
- * @param {Function} props.updateOptions      Function to update options.
- * @param {Function} props.createNotice       Function to create a snackbar.
+ * @param {CustomerEffortScoreTracksProps} props Component props
+ * @return {JSX.Element} The rendered component
  */
 function _CustomerEffortScoreTracks( {
 	action,
@@ -55,7 +59,6 @@ function _CustomerEffortScoreTracks( {
 	allowTracking,
 	resolving,
 	storeAgeInWeeks,
-	updateOptions,
 	createNotice,
 } ) {
 	const [ modalShown, setModalShown ] = useState( false );
@@ -91,12 +94,17 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
+
 		if ( ! cesShownForActions || ! cesShownForActions.includes( action ) ) {
-			updateOptions( {
-				[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-					action,
-					...( cesShownForActions || [] ),
-				],
+			apiFetch( {
+				path: 'wc-admin/options',
+				method: 'POST',
+				data: {
+					[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+						action,
+						...( cesShownForActions || [] ),
+					],
+				},
 			} );
 		}
 	};
@@ -169,53 +177,14 @@ function _CustomerEffortScoreTracks( {
 	);
 }
 
-_CustomerEffortScoreTracks.propTypes = {
-	/**
-	 * The action name sent to Tracks.
-	 */
-	action: PropTypes.string.isRequired,
-	/**
-	 * Additional props sent to Tracks.
-	 */
-	trackProps: PropTypes.object,
-	/**
-	 * The label displayed in the modal.
-	 */
-	title: PropTypes.string.isRequired,
-	/**
-	 * The label for the snackbar that appears upon survey submission.
-	 */
-	onSubmitLabel: PropTypes.string,
-	/**
-	 * The array of actions that the CES modal has been shown for.
-	 */
-	cesShownForActions: PropTypes.arrayOf( PropTypes.string ),
-	/**
-	 * Whether tracking is allowed or not.
-	 */
-	allowTracking: PropTypes.bool,
-	/**
-	 * Whether props are still being resolved.
-	 */
-	resolving: PropTypes.bool.isRequired,
-	/**
-	 * The age of the store in weeks.
-	 */
-	storeAgeInWeeks: PropTypes.number,
-	/**
-	 * Function to update options.
-	 */
-	updateOptions: PropTypes.func,
-	/**
-	 * Function to create a snackbar
-	 */
-	createNotice: PropTypes.func,
-};
-
+/**
+ * @typedef {import('react').ComponentType} ComponentType
+ *
+ * @type {ComponentType<CustomerEffortScoreTracksProps>}
+ */
 export const CustomerEffortScoreTracks = compose(
 	withSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const cesShownForActions = getOption( SHOWN_FOR_ACTIONS_OPTION_NAME );
 
@@ -247,11 +216,9 @@ export const CustomerEffortScoreTracks = compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
-			updateOptions,
 			createNotice,
 		};
 	} )

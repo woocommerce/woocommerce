@@ -34,6 +34,36 @@ function register_helper_api() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-options',
+		'/delete',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'api_delete_option',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
+		'e2e-environment',
+		'/info',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'get_environment_info',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
+		'e2e-theme',
+		'/activate',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'activate_theme',
+			'permission_callback' => 'is_allowed',
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'register_helper_api' );
@@ -101,9 +131,70 @@ function api_update_option( WP_REST_Request $request ) {
 }
 
 /**
+ * Delete a WordPress option.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response
+ */
+function api_delete_option( WP_REST_Request $request ) {
+	$option_name  = sanitize_text_field( $request['option_name'] );
+
+	$option_exists = get_option( $option_name, null );
+
+	if ( null === $option_exists ) {
+		return new WP_REST_Response( 'Option ' . $option_name . ' does not exist.', 200 );
+	}
+
+	if ( delete_option( $option_name ) ) {
+		return new WP_REST_Response( 'Delete option SUCCESS: ' . $option_name, 200 );
+	}
+
+	return new WP_REST_Response( 'Delete option FAILED: ' . $option_name, 400 );
+}
+
+/**
  * Check if user is admin
  * @return bool
  */
 function is_allowed() {
 	return current_user_can( 'manage_options' );
+}
+
+/**
+ * Get environment info
+ * @return WP_REST_Response
+ */
+function get_environment_info() {
+	$data['Core'] = get_bloginfo( 'version' );
+	$data['PHP']  = sprintf( '%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
+
+	$all_plugins = get_plugins();
+
+	foreach ( $all_plugins as $plugin_file => $plugin_data ) {
+		if ( is_plugin_active( $plugin_file ) ) {
+			$data[ $plugin_data['Name'] ] = $plugin_data['Version'];
+		}
+	}
+
+	return new WP_REST_Response( $data, 200 );
+}
+
+/**
+ * Activate a theme via the REST API.
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function activate_theme( WP_REST_Request $request ) {
+	$theme_name = sanitize_text_field( $request['theme_name'] );
+
+	if ( empty( $theme_name ) ) {
+		return new WP_REST_Response( array( 'message' => 'Theme name is empty.' ), 400 );
+	}
+
+	if ( wp_get_theme( $theme_name )->exists() ) {
+		switch_theme( $theme_name );
+		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' activated successfully." ), 200 );
+	} else {
+		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
+	}
 }

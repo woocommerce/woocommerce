@@ -1,8 +1,14 @@
 <?php
 /**
+ * Note: This pattern is deprecated, it will be removed once newsletter feature flag is deployed.
+ * If you are updating this pattern, please also update page-coming-soon-with-header-footer.php.
+ */
+
+/**
  * Title: Coming Soon Store Only
  * Slug: woocommerce/coming-soon-store-only
  * Categories: WooCommerce
+ * Inserter: false
  * Feature Flag: launch-your-store
  *
  * @package WooCommerce\Blocks
@@ -19,11 +25,11 @@ if ( 'twentytwentyfour' === $current_theme ) {
 
 ?>
 
-<!-- wp:woocommerce/coming-soon {"storeOnly":true} -->
-<div class="wp-block-woocommerce-coming-soon">
+<!-- wp:woocommerce/coming-soon {"storeOnly":true, "className":"woocommerce-coming-soon-store-only"} -->
+<div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-store-only">
 
 <?php
-if ( wc_current_theme_is_fse_theme() ) {
+if ( wp_is_block_theme() ) {
 	echo '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->';
 }
 ?>
@@ -51,10 +57,9 @@ if ( wc_current_theme_is_fse_theme() ) {
 <!-- /wp:group -->
 
 <?php
-if ( wc_current_theme_is_fse_theme() ) {
+if ( wp_is_block_theme() ) {
 	echo '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
 }
 ?>
-
-<style>.woocommerce-breadcrumb {display: none;}</style></div>
+</div>
 <!-- /wp:woocommerce/coming-soon -->

@@ -47,17 +47,25 @@
 	 */
 	function updateCheckoutBlockData( values ) {
 		// Update Checkout block data if available.
-		if ( window.wp && window.wp.data && window.wp.data.dispatch && window.wc && window.wc.wcBlocksData ) {
-			window.wp.data.dispatch( window.wc.wcBlocksData.CHECKOUT_STORE_KEY ).__internalSetExtensionData(
-				'woocommerce/order-attribution',
-				values,
-				true
-			);
+		if (
+			window.wp &&
+			window.wp.data &&
+			window.wp.data.dispatch &&
+			window.wc &&
+			window.wc.wcBlocksData
+		) {
+			window.wp.data
+				.dispatch( window.wc.wcBlocksData.CHECKOUT_STORE_KEY )
+				.setExtensionData(
+					'woocommerce/order-attribution',
+					values,
+					true
+				);
 		}
 	}
 
 	/**
-	 * Determin whether sourcebuster.js is available.
+	 * Determine whether sourcebuster.js is available.
 	 *
 	 * @returns {boolean} Whether sourcebuster.js is available.
 	 */

@@ -13,7 +13,7 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import { PaymentMethodsIcons } from './PaymentMethodsIcons';
+import { WooPaymentsMethodsLogos } from '../WooPaymentsMethodsLogos';
 import { WCPayBannerImage } from './WCPayBannerImage';
 
 export const WCPayBannerFooter: React.VFC< {
@@ -28,7 +28,10 @@ export const WCPayBannerFooter: React.VFC< {
 				) }
 			</Text>
 		</div>
-		<PaymentMethodsIcons isWooPayEligible={ isWooPayEligible } />
+		<WooPaymentsMethodsLogos
+			isWooPayEligible={ isWooPayEligible }
+			maxElements={ 10 }
+		/>
 	</CardFooter>
 );
 
@@ -99,7 +102,7 @@ export const WCPayBannerBody: React.VFC< {
 	);
 };
 
-export const WCPayBanner: React.FC = ( { children } ) => {
+export const WCPayBanner = ( { children }: { children?: React.ReactNode } ) => {
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-banner">
 			{ children }

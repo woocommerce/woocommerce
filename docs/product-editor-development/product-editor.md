@@ -3,6 +3,8 @@ post_title: Product editor development handbook
 menu_title: Development handbook
 ---
 
+**Important:** WooCommerce is shifting focus to work on a new beta of the Product Editor Experience, v3. [Read more on our Developer Blog](https://developer.woocommerce.com/2024/11/06/whats-next-in-the-product-editor/).
+
 This handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.
 
 The product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).
@@ -37,5 +39,7 @@ Please note that this check is currently not being enforced: the product editor 
 ## Related documentation
 
 - [Examples on Template API usage](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md/)
+- [How to guides](https://github.com/woocommerce/woocommerce/blob/trunk/docs/product-editor-development/how-to-guides/README.md)
 - [Related hooks and Template API documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md)
 - [Generic blocks documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md)
+- [Validations and error handling](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/contexts/validation-context/README.md)

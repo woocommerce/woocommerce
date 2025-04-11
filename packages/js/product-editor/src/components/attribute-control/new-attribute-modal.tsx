@@ -10,12 +10,11 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	type ProductAttributesActions,
-	type WPDataActions,
 	type ProductAttributeTerm,
 	type ProductAttribute,
+	experimentalProductAttributesStore,
 } from '@woocommerce/data';
-import { Button, Modal, Notice } from '@wordpress/components';
+import { Button, Modal, Notice, Tooltip } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -25,6 +24,7 @@ import { TRACKS_SOURCE } from '../../constants';
 import { AttributeTableRow } from './attribute-table-row';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import type { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
+import { isAttributeFilledOut } from './utils';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -62,7 +62,7 @@ type AttributeForm = {
  */
 const attributeSortCriteria = { order_by: 'name' };
 
-export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
+export const NewAttributeModal = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
 	notice,
@@ -90,7 +90,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	termsAutoSelection,
 	defaultVisibility = false,
 	defaultSearch,
-} ) => {
+}: NewAttributeModalProps ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
 			const attributeRow = document.querySelector(
@@ -111,14 +111,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		onAddAnother();
 	};
 
-	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
-		return (
-			( attribute.terms && attribute.terms.length > 0 ) ||
-			( attribute.options && attribute.options.length > 0 )
-		);
-	};
-
-	const isGlobalAttribute = ( attribute: EnhancedProductAttribute ) => {
+	const isGlobalAttribute = (
+		attribute: EnhancedProductAttribute
+	): boolean => {
 		return attribute.id !== 0;
 	};
 
@@ -134,16 +129,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		return isGlobalAttribute( attribute )
 			? mapTermsToOptions( attribute.terms )
 			: attribute.options;
-	};
-
-	const isAttributeFilledOut = (
-		attribute: EnhancedProductAttribute | null
-	): attribute is EnhancedProductAttribute => {
-		return (
-			attribute !== null &&
-			attribute.name.length > 0 &&
-			hasTermsOrOptions( attribute )
-		);
 	};
 
 	const getVisibleOrTrue = ( attribute: EnhancedProductAttribute ) =>
@@ -220,8 +205,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createProductAttribute } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	) as unknown as ProductAttributesActions & WPDataActions;
+		experimentalProductAttributesStore
+	);
 
 	return (
 		<>
@@ -238,6 +223,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
+					const isAddButtonDisabled = ! values.attributes.every(
+						( attr ) => isAttributeFilledOut( attr )
+					);
+
 					/**
 					 * Select the attribute in the form field.
 					 * If the attribute does not exist, create it.
@@ -327,14 +316,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						index: number,
 						attribute?: EnhancedProductAttribute
 					) {
-						/*
-						 * By convention, it's a global attribute if the attribute ID is 0.
-						 * For global attributes, the field name suffix
-						 * to set the attribute terms is 'options',
-						 * for local attributes, the field name suffix is 'terms'.
-						 */
 						const attributeTermPropName =
-							attribute?.id === 0 ? 'options' : 'terms';
+							attribute && isGlobalAttribute( attribute )
+								? 'terms'
+								: 'options';
 
 						const fieldName = `attributes[${ index }].${ attributeTermPropName }`;
 
@@ -371,13 +356,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					return (
 						<Modal
 							title={ title }
-							onRequestClose={ (
-								event:
-									| React.KeyboardEvent< Element >
-									| React.MouseEvent< Element >
-									| React.FocusEvent< Element >
-							) => {
-								if ( ! event.isPropagationStopped() ) {
+							onRequestClose={ ( event ) => {
+								if ( ! event?.isPropagationStopped() ) {
 									onCancel();
 								}
 							} }
@@ -472,21 +452,34 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								>
 									{ cancelLabel }
 								</Button>
-								<Button
-									isPrimary
-									label={ addAccessibleLabel }
-									disabled={
-										values.attributes.length === 1 &&
-										( values.attributes[ 0 ] === null ||
-											values.attributes[ 0 ] ===
-												undefined )
-									}
-									onClick={ () =>
-										onAddingAttributes( values )
+								<Tooltip
+									text={
+										isAddButtonDisabled
+											? __(
+													'Add at least one attribute and one value. Press Enter to select.',
+													'woocommerce'
+											  )
+											: ''
 									}
 								>
-									{ addLabel }
-								</Button>
+									{ /*
+									 * we need to wrap the button in a div to make the tooltip work,
+									 * since when the button is disabled, the tooltip is not shown.
+									 */ }
+									<div>
+										<Button
+											variant="primary"
+											label={ addAccessibleLabel }
+											showTooltip={ true }
+											disabled={ isAddButtonDisabled }
+											onClick={ () =>
+												onAddingAttributes( values )
+											}
+										>
+											{ addLabel }
+										</Button>
+									</div>
+								</Tooltip>
 							</div>
 						</Modal>
 					);

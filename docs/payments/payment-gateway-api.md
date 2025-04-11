@@ -19,7 +19,7 @@ Form and iFrame based gateways post data offsite, meaning there are less securit
 
 ## Creating a basic payment gateway
 
-**Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [the payment method integration documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md).
+**Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [the payment method integration documentation](../cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md).
 
 Payment gateways should be created as additional plugins that hook into WooCommerce. Inside the plugin, you need to create a class after plugins are loaded. Example:
 
@@ -153,11 +153,13 @@ $order->payment_complete();
 
 This ensures stock reductions are made, and the status is changed to the correct value.
 
-If payment fails, you should throw an error and return null:
+If payment fails, you should throw an error and return an array with the failure status:
 
 ```php
-wc_add_notice( \_\_('Payment error:', 'woothemes') . $error_message, 'error' );
-return;
+wc_add_notice( __('Payment error:', 'woothemes') . $error_message, 'error' );
+return array(
+    'result'   => 'failure'
+);
 ```
 
 WooCommerce will catch this error and show it on the checkout page.
@@ -201,11 +203,13 @@ The next but optional method to add is `validate_fields()`. Return true if the f
 
 Finally, you need to add payment code inside your `process_payment( $order_id )` method. This takes the posted form data and attempts payment directly via the payment provider.
 
-If payment fails, you should output an error and return nothing:
+If payment fails, you should output an error and return the failure array:
 
 ```php
 wc_add_notice( \_\_('Payment error:', 'woothemes') . $error_message, 'error' );
-return;
+return array(
+    'result'   => 'failure',
+);
 ```
 
 If payment is successful, you should set the order as paid and return the success array:

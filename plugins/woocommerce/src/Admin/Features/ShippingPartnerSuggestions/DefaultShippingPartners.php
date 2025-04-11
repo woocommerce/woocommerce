@@ -257,11 +257,10 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
-				'id'                => 'woocommerce-services',
+				'id'                => 'woocommerce-shipping',
 				'name'              => 'WooCommerce Shipping',
-				'slug'              => 'woocommerce-services',
+				'slug'              => 'woocommerce-shipping',
 				'description'       => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),
-				'dependencies'      => array( 'jetpack' ),
 				'layout_column'     => array(
 					'image'    => $asset_base_url . 'wcs-column.svg',
 					'features' => array(
@@ -278,13 +277,22 @@ class DefaultShippingPartners {
 						array(
 							'icon'        => $asset_base_url . 'discount.svg',
 							'title'       => __( 'Discounted rates', 'woocommerce' ),
-							'description' => __( 'Access discounted shipping rates with DHL and USPS.', 'woocommerce' ),
+							'description' => __( 'Access discounted shipping rates with USPS, UPS, and DHL.', 'woocommerce' ),
 						),
 					),
 				),
 				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
+					(object) array(
+						'type'    => 'not',
+						'operand' => array(
+							(object) array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-shipping' ),
+							),
+						),
+					),
 				),
 				'available_layouts' => array( 'column' ),
 			),
@@ -298,19 +306,10 @@ class DefaultShippingPartners {
 	 * @return object Rules to match.
 	 */
 	public static function get_rules_for_countries( $countries ) {
-		$rules = array();
-
-		foreach ( $countries as $country ) {
-			$rules[] = (object) array(
-				'type'      => 'base_location_country',
-				'value'     => $country,
-				'operation' => '=',
-			);
-		}
-
 		return (object) array(
-			'type'     => 'or',
-			'operands' => $rules,
+			'type'      => 'base_location_country',
+			'operation' => 'in',
+			'value'     => $countries,
 		);
 	}
 }

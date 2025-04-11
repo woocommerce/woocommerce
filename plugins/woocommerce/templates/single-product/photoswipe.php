@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.0.0
+ * @version 9.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="pswp" tabindex="-1" role="dialog" aria-modal="true" aria-hidden="true">
 	<div class="pswp__bg"></div>
 	<div class="pswp__scroll-wrap">
 		<div class="pswp__container">
@@ -31,10 +31,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="pswp__ui pswp__ui--hidden">
 			<div class="pswp__top-bar">
 				<div class="pswp__counter"></div>
-				<button class="pswp__button pswp__button--close" aria-label="<?php esc_attr_e( 'Close (Esc)', 'woocommerce' ); ?>"></button>
-				<button class="pswp__button pswp__button--share" aria-label="<?php esc_attr_e( 'Share', 'woocommerce' ); ?>"></button>
-				<button class="pswp__button pswp__button--fs" aria-label="<?php esc_attr_e( 'Toggle fullscreen', 'woocommerce' ); ?>"></button>
 				<button class="pswp__button pswp__button--zoom" aria-label="<?php esc_attr_e( 'Zoom in/out', 'woocommerce' ); ?>"></button>
+				<button class="pswp__button pswp__button--fs" aria-label="<?php esc_attr_e( 'Toggle fullscreen', 'woocommerce' ); ?>"></button>
+				<button class="pswp__button pswp__button--share" aria-label="<?php esc_attr_e( 'Share', 'woocommerce' ); ?>"></button>
+				<button class="pswp__button pswp__button--close" aria-label="<?php esc_attr_e( 'Close (Esc)', 'woocommerce' ); ?>"></button>
 				<div class="pswp__preloader">
 					<div class="pswp__preloader__icn">
 						<div class="pswp__preloader__cut">

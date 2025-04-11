@@ -8,6 +8,8 @@
  * @version 2.6.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -19,6 +21,11 @@ defined( 'ABSPATH' ) || exit;
 function wc_lostpassword_url( $default_url = '' ) {
 	// Avoid loading too early.
 	if ( ! did_action( 'init' ) ) {
+		return $default_url;
+	}
+
+	// Don't change the admin form.
+	if ( did_action( 'login_form_login' ) ) {
 		return $default_url;
 	}
 
@@ -131,21 +138,15 @@ function wc_get_account_menu_items() {
 }
 
 /**
- * Get account menu item classes.
+ * Find current item in account menu.
  *
- * @since 2.6.0
+ * @since 9.3.0
  * @param string $endpoint Endpoint.
- * @return string
+ * @return bool
  */
-function wc_get_account_menu_item_classes( $endpoint ) {
+function wc_is_current_account_menu_item( $endpoint ) {
 	global $wp;
 
-	$classes = array(
-		'woocommerce-MyAccount-navigation-link',
-		'woocommerce-MyAccount-navigation-link--' . $endpoint,
-	);
-
-	// Set current item class.
 	$current = isset( $wp->query_vars[ $endpoint ] );
 	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
 		$current = true; // Dashboard is not an endpoint, so needs a custom check.
@@ -155,7 +156,23 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$current = true;
 	}
 
-	if ( $current ) {
+	return $current;
+}
+
+/**
+ * Get account menu item classes.
+ *
+ * @since 2.6.0
+ * @param string $endpoint Endpoint.
+ * @return string
+ */
+function wc_get_account_menu_item_classes( $endpoint ) {
+	$classes = array(
+		'woocommerce-MyAccount-navigation-link',
+		'woocommerce-MyAccount-navigation-link--' . $endpoint,
+	);
+
+	if ( wc_is_current_account_menu_item( $endpoint ) ) {
 		$classes[] = 'is-active';
 	}
 
@@ -176,11 +193,13 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
+	$url = wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
+
 	if ( 'customer-logout' === $endpoint ) {
-		return wc_logout_url();
+		return wp_nonce_url( $url, 'customer-logout' );
 	}
 
-	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
+	return $url;
 }
 
 /**
@@ -281,16 +300,22 @@ function wc_get_account_orders_actions( $order ) {
 
 	$actions = array(
 		'pay'    => array(
-			'url'  => $order->get_checkout_payment_url(),
-			'name' => __( 'Pay', 'woocommerce' ),
+			'url'        => $order->get_checkout_payment_url(),
+			'name'       => __( 'Pay', 'woocommerce' ),
+			/* translators: %s: order number */
+			'aria-label' => sprintf( __( 'Pay for order %s', 'woocommerce' ), $order->get_order_number() ),
 		),
 		'view'   => array(
-			'url'  => $order->get_view_order_url(),
-			'name' => __( 'View', 'woocommerce' ),
+			'url'        => $order->get_view_order_url(),
+			'name'       => __( 'View', 'woocommerce' ),
+			/* translators: %s: order number */
+			'aria-label' => sprintf( __( 'View order %s', 'woocommerce' ), $order->get_order_number() ),
 		),
 		'cancel' => array(
-			'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
-			'name' => __( 'Cancel', 'woocommerce' ),
+			'url'        => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
+			'name'       => __( 'Cancel', 'woocommerce' ),
+			/* translators: %s: order number */
+			'aria-label' => sprintf( __( 'Cancel order %s', 'woocommerce' ), $order->get_order_number() ),
 		),
 	);
 
@@ -298,7 +323,16 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['pay'] );
 	}
 
-	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ), true ) ) {
+	/**
+	 * Filters the valid order statuses for cancel action.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array    $statuses_for_cancel Array of valid order statuses for cancel action.
+	 * @param WC_Order $order                Order instance.
+	 */
+	$statuses_for_cancel = apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+	if ( ! in_array( $order->get_status(), $statuses_for_cancel, true ) ) {
 		unset( $actions['cancel'] );
 	}
 

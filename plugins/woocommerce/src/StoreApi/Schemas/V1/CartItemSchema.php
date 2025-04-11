@@ -31,7 +31,11 @@ class CartItemSchema extends ItemSchema {
 	 * @return array
 	 */
 	public function get_item_response( $cart_item ) {
-		$product = $cart_item['data'];
+		$product = $cart_item['data'] ?? false;
+
+		if ( ! $product instanceof \WC_Product ) {
+			return [];
+		}
 
 		/**
 		 * Filter the product permalink.
@@ -62,7 +66,7 @@ class CartItemSchema extends ItemSchema {
 			'show_backorder_badge' => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
 			'sold_individually'    => $product->is_sold_individually(),
 			'permalink'            => $product_permalink,
-			'images'               => $this->get_images( $product ),
+			'images'               => $this->get_cart_images( $product, $cart_item, $cart_item['key'] ),
 			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
 			'item_data'            => $this->get_item_data( $cart_item ),
 			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
@@ -77,6 +81,69 @@ class CartItemSchema extends ItemSchema {
 			'catalog_visibility'   => $product->get_catalog_visibility(),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
+	}
+
+	/**
+	 * Get list of product images for the cart item.
+	 *
+	 * @param \WC_Product $product       Product instance.
+	 * @param array       $cart_item     Cart item array.
+	 * @param string      $cart_item_key Cart item key.
+	 * @return array
+	 */
+	protected function get_cart_images( \WC_Product $product, array $cart_item, string $cart_item_key ) {
+		$product_images = $this->get_images( $product );
+
+		/**
+		 * Filter the cart product images.
+		 *
+		 * This hook allows the cart item images to be changed. This is specific to the cart endpoint.
+		 *
+		 * @param array  $product_images  Array of image objects, as defined in ImageAttachmentSchema.
+		 * @param array  $cart_item      Cart item array.
+		 * @param string $cart_item_key  Cart item key.
+		 * @since 9.6.0
+		 */
+		$filtered_images = apply_filters( 'woocommerce_store_api_cart_item_images', $product_images, $cart_item, $cart_item_key );
+
+		if ( ! is_array( $filtered_images ) || count( $filtered_images ) === 0 ) {
+			return $product_images;
+		}
+
+		// Return the original images if the filtered image has no ID, or an invalid thumbnail or source URL.
+		$valid_images = array();
+		$logger       = wc_get_logger();
+
+		foreach ( $filtered_images as $image ) {
+			// If id is not set then something is wrong with the image, and further logging would break (it uses the ID).
+			if ( ! isset( $image->id ) ) {
+				$logger->warning( 'After passing through woocommerce_cart_item_images filter, one of the images did not have an id property.' );
+				continue;
+			}
+
+			// Check if thumbnail is a valid url.
+			if ( empty( $image->thumbnail ) || ! filter_var( $image->thumbnail, FILTER_VALIDATE_URL ) ) {
+				$logger->warning( sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid thumbnail property.', $image->id ) );
+				continue;
+			}
+
+			// Check if src is a valid url.
+			if ( empty( $image->src ) || ! filter_var( $image->src, FILTER_VALIDATE_URL ) ) {
+				$logger->warning( sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid src property.', $image->id ) );
+				continue;
+			}
+
+			// Image is valid, add to resulting array.
+			$valid_images[] = $image;
+		}
+
+		// If there are no valid images remaining, return original array.
+		if ( count( $valid_images ) === 0 ) {
+			return $product_images;
+		}
+
+		// Return the filtered images.
+		return $valid_images;
 	}
 
 	/**

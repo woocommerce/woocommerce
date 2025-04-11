@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Minor tooling tweaks (zip compression level, composer invocation)

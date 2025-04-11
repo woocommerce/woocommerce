@@ -48,14 +48,6 @@ Help text that appears for the name field in the dialog that appears when creati
 
 Label for the parent taxonomy field in the dialog that appears when creating a new taxonomy.
 
-### placeholder
-
-- **Type:** `String`
-- **Required:** `No`
-
-Placeholder for when the input field is empty.
-
-
 ## Usage
 
 Please note that to use this block you need to have the custom taxonomy registered in the backend, attached to the products post type and added to the REST API. Here's a snippet that shows how to add an already registered taxonomy to the REST API:

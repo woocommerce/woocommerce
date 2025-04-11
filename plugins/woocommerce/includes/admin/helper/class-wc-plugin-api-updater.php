@@ -80,19 +80,23 @@ class WC_Plugin_Api_Updater {
 			return $response;
 		}
 
-		$product_id = array_keys( $products );
-		$product_id = array_shift( $product_id );
-
+		$product_id        = array_keys( $products );
+		$product_id        = array_shift( $product_id );
+		$is_site_connected = WC_Helper::is_site_connected();
+		$endpoint          = add_query_arg(
+			array( 'product_id' => absint( $product_id ) ),
+			'info'
+		);
 		// Fetch the product information from the Helper API.
 		$request = WC_Helper_API::get(
-			add_query_arg(
-				array(
-					'product_id' => absint( $product_id ),
-				),
-				'info'
-			),
-			array( 'authenticated' => true )
+			$endpoint,
+			array( 'authenticated' => $is_site_connected )
 		);
+
+		// If we tried to authenticate and failed, try again without authentication.
+		if ( is_wp_error( $request ) && $is_site_connected ) {
+			$request = WC_Helper_API::get( $endpoint );
+		}
 
 		$results = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! empty( $results ) ) {

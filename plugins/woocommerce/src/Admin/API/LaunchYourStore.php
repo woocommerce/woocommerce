@@ -117,7 +117,7 @@ class LaunchYourStore {
 	}
 
 	/**
-	 * Initializes options for coming soon. Does not override if options exist.
+	 * Initializes options for coming soon. Overwrites existing coming soon status but keeps the private link and share key.
 	 *
 	 * @return bool|void
 	 */
@@ -133,8 +133,8 @@ class LaunchYourStore {
 		$private_link     = 'no';
 		$share_key        = wp_generate_password( 32, false );
 
-		add_option( 'woocommerce_coming_soon', $coming_soon );
-		add_option( 'woocommerce_store_pages_only', $store_pages_only );
+		update_option( 'woocommerce_coming_soon', $coming_soon );
+		update_option( 'woocommerce_store_pages_only', $store_pages_only );
 		add_option( 'woocommerce_private_link', $private_link );
 		add_option( 'woocommerce_share_key', $share_key );
 

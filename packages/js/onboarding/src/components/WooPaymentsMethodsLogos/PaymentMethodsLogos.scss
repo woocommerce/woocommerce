@@ -1,0 +1,84 @@
+.woocommerce-woopayments-payment-methods-logos {
+	display: flex;
+	align-items: center;
+	padding: $gap-small 0;
+	gap: $gap-smaller;
+
+	svg {
+		width: 38px;
+		height: 24px;
+		// Elements without background get a border
+		&:not([style*="background"]) {
+			border: 1px solid $gray-100;
+		}
+		// Elements with background get extra 2px in dimensions to match bordered elements
+		&[style*="background"] {
+			width: 40px;
+			height: 26px;
+		}
+		border-radius: 3px;
+	}
+
+	&-count {
+		width: 38px;
+		height: 24px;
+		background-color: rgba($gray-700, 0.10);
+		color: $gray-900;
+		text-align: center;
+		line-height: 24px;
+		border-radius: 3px;
+		font-size: 11px;
+		font-weight: 600;
+	}
+
+	&-count:hover {
+		cursor: pointer;
+		color: rgba(56, 88, 233, 1);
+		background-color: rgba(56, 88, 233, 0.15);
+		border-color: rgba(56, 88, 233, 1);
+	}
+}
+
+.wc_payment_gateways_wrapper [data-gateway_id="pre_install_woocommerce_payments_promotion"] {
+	.woocommerce-woopayments-payment-methods-logos {
+		padding: 0;
+	}
+
+	@media only screen and (max-width: 768px) {
+		.wc-payment-gateway-method__name {
+			display: block;
+		}
+		.pre-install-payment-gateway__subtitle {
+			margin-left: 0;
+		}
+	}
+}
+
+.woocommerce-woopayments-payment-methods-logos-popover {
+	.components-popover__content {
+		background: $white;
+		border: 1px solid $gray-100;
+		border-radius: 3px;
+		max-width: 255px;
+		padding: $gap-smaller;
+		box-shadow: none;
+		margin-bottom: $gap-smaller;
+
+		a {
+			outline: none;
+			text-decoration: none;
+
+			&:focus {
+				box-shadow: none;
+			}
+		}
+	}
+
+	.woocommerce-woopayments-payment-methods-logos {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		grid-template-rows: repeat(3, 1fr);
+		gap: $gap-smaller;
+		padding: 0px;
+	}
+}

@@ -3,15 +3,12 @@
 namespace Automattic\WooCommerce\Caches;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * A class to control the usage of the orders cache.
  */
 class OrderCacheController {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The orders cache to use.

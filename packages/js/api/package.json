@@ -5,8 +5,7 @@
 	"description": "A simple interface for interacting with a WooCommerce installation.",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
 	"engines": {
-		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"node": "^20.11.1"
 	},
 	"repository": {
 		"type": "git",
@@ -33,7 +32,7 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:typescript": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -55,17 +54,17 @@
 	},
 	"devDependencies": {
 		"@types/create-hmac": "1.1.0",
-		"@types/jest": "^27.5.2",
-		"@types/node": "^16.18.68",
+		"@types/jest": "27.5.x",
+		"@types/node": "20.x.x",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"axios-mock-adapter": "^1.22.0",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
-		"wireit": "0.14.3"
+		"jest": "27.5.x",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
+		"wireit": "0.14.10"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -86,7 +85,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"
@@ -114,10 +112,10 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
+				"package.json",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json"
+				"node_modules/@woocommerce/eslint-plugin/index.js"
 			]
 		}
 	}

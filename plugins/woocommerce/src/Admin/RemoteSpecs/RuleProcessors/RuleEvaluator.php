@@ -36,9 +36,9 @@ class RuleEvaluator {
 	 * Evaluate the given rules as an AND operation - return false early if a
 	 * rule evaluates to false.
 	 *
-	 * @param array|object $rules The rule or rules being processed.
+	 * @param array|object $rules        The rule or rules being processed.
 	 * @param object|null  $stored_state Stored state.
-	 * @param array        $logger_args Arguments for the event logger. `slug` is required.
+	 * @param array        $logger_args  Arguments for the rule evaluator logger. `slug` is required.
 	 *
 	 * @throws \InvalidArgumentException Thrown when $logger_args is missing slug.
 	 *
@@ -65,13 +65,16 @@ class RuleEvaluator {
 				throw new \InvalidArgumentException( 'Missing required field: slug in $logger_args.' );
 			}
 
-			array_key_exists( 'source', $logger_args ) ? $source = $logger_args['source'] : $source = null;
+			$source = isset( $logger_args['source'] ) ? $logger_args['source'] : null;
 
 			$evaluation_logger = new EvaluationLogger( $logger_args['slug'], $source );
 		}
 
 		foreach ( $rules as $rule ) {
 			if ( ! is_object( $rule ) ) {
+				$evaluation_logger && $evaluation_logger->add_result( 'rule not an object', false );
+				$evaluation_logger && $evaluation_logger->log();
+
 				return false;
 			}
 

@@ -15,9 +15,19 @@
 
 The main purpose prevent abuse on endpoints from excessive calls and performance degradation on the machine running the store.
 
-Rate limit tracking is controlled by either `USER ID` (logged in) or `IP ADDRESS` (unauthenticated requests).
+Rate limit tracking is controlled by either `USER ID` (logged in), `IP ADDRESS` (unauthenticated requests) or filter defined logic to fingerprint and group requests.
 
 It also offers standard support for running behind a proxy, load balancer, etc. This also optional and disabled by default.
+
+## UI Control
+
+Currently, this feature is only controlled via the `woocommerce_store_api_rate_limit_options` filter. To control it via a UI, you can use the following community plugin: [Rate Limiting UI for WooCommerce](https://wordpress.org/plugins/rate-limiting-ui-for-woocommerce/).
+
+## Checkout rate limiting
+
+You can enable rate limiting for Checkout place order and `POST /checkout` endpoint only via the UI by going to WooCommerce -> Settings -> Advanced -> Features and enabling "Rate limiting Checkout block and Store API".
+
+When enabled via the UI, the rate limiting will only be applied to the `POST /checkout` and Place Order flow for Checkout block. The limit will be a maximum of 3 requests per 60 seconds.
 
 ## Limit information
 
@@ -52,6 +62,21 @@ If the Store is running behind a proxy, load balancer, cache service, CDNs, etc.
 
 This is disabled by default.
 
+## Enable Rate Limit by request custom fingerprinting
+
+For more advanced use cases, you can enable rate limiting by custom fingerprinting.
+This allows for a custom implementation to group requests without relying on logged-in User ID or IP Address.
+
+### Custom basic example for grouping requests by User-Agent and Accept-Language combination
+
+```php
+add_filter( 'woocommerce_store_api_rate_limit_id', function() {
+    $accept_language = isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) : '';
+    
+    return md5( wc_get_user_agent() . $accept_language );
+} );
+```
+
 ## Limit usage information observability
 
 Current limit information can be observed via custom response headers:
@@ -80,7 +105,7 @@ A custom action `woocommerce_store_api_rate_limit_exceeded` was implemented for 
 ```php
 add_action(
     'woocommerce_store_api_rate_limit_exceeded',
-    function ( $offending_ip ) { /* Custom tracking implementation */ }
+    function ( $offending_ip, $action_id ) { /* Custom tracking implementation */ }
 );
 ```
 
@@ -90,7 +115,7 @@ add_action(
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/rate-limiting.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/rate-limiting.md)
 
 <!-- /FEEDBACK -->
 

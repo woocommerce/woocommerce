@@ -52,7 +52,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 				action: PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 				showDescription: false,
 				title: __(
-					'What do you think of the new product form?',
+					'What do you think of the new product editor?',
 					'woocommerce'
 				),
 				firstQuestion: __(
@@ -60,7 +60,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 					'woocommerce'
 				),
 				secondQuestion: __(
-					'Product form is easy to use',
+					'Product editor is easy to use',
 					'woocommerce'
 				),
 				onsubmitLabel: __(
@@ -203,7 +203,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 					<div className="woocommerce-product-mvp-ces-footer__message">
 						{ createInterpolateElement(
 							__(
-								'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+								'How is your experience with the new product editor? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
 								'woocommerce'
 							),
 							{

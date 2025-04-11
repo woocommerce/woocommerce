@@ -513,13 +513,28 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	}
 
 	/**
-	 * Get held time for resources before cancelling the order. Use 60 minutes as sane default.
+	 * Get held time for resources before cancelling the order.
+	 * It will use `woocommerce_coupon_hold_minutes` filter to get the value, defaulting to `woocommerce_hold_stock_minutes` option if set, with a 1-minute minimum if set to 0.
 	 * Note that the filter `woocommerce_coupon_hold_minutes` only support minutes because it's getting used elsewhere as well, however this function returns in seconds.
 	 *
 	 * @return int
 	 */
 	private function get_tentative_held_time() {
-		return apply_filters( 'woocommerce_coupon_hold_minutes', ( (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) ) ) * 60;
+		$default_hold_time_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 1 );
+
+		if ( 0 >= $default_hold_time_minutes ) {
+			// Held time is at least 1 minute if `woocommerce_hold_stock_minutes` is set to 0.
+			$default_hold_time_minutes = 1;
+		}
+
+		/**
+		 * Filter the tentative hold time in minutes for a coupon before it expires.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param int $default_hold_time_minutes The default hold time for coupons in minutes.
+		 */
+		return (int) apply_filters( 'woocommerce_coupon_hold_minutes', $default_hold_time_minutes ) * 60;
 	}
 
 	/**
@@ -533,17 +548,18 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 
 		$usage_limit = $coupon->get_usage_limit();
-		$held_time   = $this->get_tentative_held_time();
 
-		if ( 0 >= $usage_limit || 0 >= $held_time ) {
+		if ( 0 >= $usage_limit ) {
 			return null;
 		}
 
-		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
+		$held_time = $this->get_tentative_held_time();
+
+		if ( 0 >= $held_time ) {
 			return null;
 		}
 
-		// Make sure we have usage_count meta key for this coupon because its required for `$query_for_usages`.
+		// Make sure we have usage_count meta key for this coupon because it's required for `$query_for_usages`.
 		// We are not directly modifying `$query_for_usages` to allow for `usage_count` not present only keep that query simple.
 		if ( ! metadata_exists( 'post', $coupon->get_id(), 'usage_count' ) ) {
 			$coupon->set_usage_count( $coupon->get_usage_count() ); // Use `get_usage_count` here to write default value, which may changed by a filter.
@@ -631,14 +647,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	public function check_and_hold_coupon_for_user( $coupon, $user_aliases, $user_alias ) {
 		global $wpdb;
 		$limit_per_user = $coupon->get_usage_limit_per_user();
-		$held_time      = $this->get_tentative_held_time();
 
-		if ( 0 >= $limit_per_user || 0 >= $held_time ) {
+		if ( 0 >= $limit_per_user ) {
 			// This coupon do not have any restriction for usage per customer. No need to check further, lets bail.
 			return null;
 		}
 
-		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
+		$held_time = $this->get_tentative_held_time();
+
+		if ( 0 >= $held_time ) {
+			// This coupon has held time set to zero. No need to check further, lets bail.
 			return null;
 		}
 

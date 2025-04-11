@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use WC_Tax;
 
 /**
@@ -337,13 +338,11 @@ class CartSchema extends AbstractSchema {
 		// Get cart errors first so if recalculations are performed, it's reflected in the response.
 		$cart_errors = $this->get_cart_errors( $cart );
 
-		// The core cart class will not include shipping in the cart totals if `show_shipping()` returns false. This can
-		// happen if an address is required, or through the use of hooks. This tracks if shipping has actually been
-		// calculated so we can avoid returning costs and rates prematurely.
-		$has_calculated_shipping = $cart->show_shipping();
-
-		// Get shipping packages to return in the response from the cart.
-		$shipping_packages = $has_calculated_shipping ? $controller->get_shipping_packages() : [];
+		// Get shipping packages to return in the response from the cart. Always get the shipping packages if local
+		// pickup is enabled and has methods. If the address is required then regular shipping rates will be filtered
+		// out later.
+		$has_local_pickup_methods = LocalPickupUtils::is_local_pickup_enabled() && count( LocalPickupUtils::get_local_pickup_method_ids() ) > 0;
+		$shipping_packages        = $cart->has_calculated_shipping() || $has_local_pickup_methods ? $controller->get_shipping_packages() : [];
 
 		// Get visible cross sells products.
 		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
@@ -358,7 +357,7 @@ class CartSchema extends AbstractSchema {
 			'needs_payment'           => $cart->needs_payment(),
 			'needs_shipping'          => $cart->needs_shipping(),
 			'payment_requirements'    => $this->extend->get_payment_requirements(),
-			'has_calculated_shipping' => $has_calculated_shipping,
+			'has_calculated_shipping' => $cart->has_calculated_shipping(),
 			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
 			'items_count'             => $cart->get_cart_contents_count(),
 			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
@@ -376,8 +375,7 @@ class CartSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_totals( $cart ) {
-		$has_calculated_shipping = $cart->show_shipping();
-		$decimals                = wc_get_price_decimals();
+		$decimals = wc_get_price_decimals();
 
 		return [
 			'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), $decimals ),
@@ -386,8 +384,8 @@ class CartSchema extends AbstractSchema {
 			'total_fees_tax'     => $this->prepare_money_response( $cart->get_fee_tax(), $decimals ),
 			'total_discount'     => $this->prepare_money_response( $cart->get_discount_total(), $decimals ),
 			'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), $decimals ),
-			'total_shipping'     => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_total(), $decimals ) : null,
-			'total_shipping_tax' => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_tax(), $decimals ) : null,
+			'total_shipping'     => $cart->has_calculated_shipping() ? $this->prepare_money_response( $cart->get_shipping_total(), $decimals ) : null,
+			'total_shipping_tax' => $cart->has_calculated_shipping() ? $this->prepare_money_response( $cart->get_shipping_tax(), $decimals ) : null,
 			// Explicitly request context='edit'; default ('view') will render total as markup.
 			'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), $decimals ),
 			'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), $decimals ),

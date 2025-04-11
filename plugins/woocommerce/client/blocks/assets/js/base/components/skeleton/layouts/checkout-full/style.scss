@@ -1,0 +1,23 @@
+@media (max-width: 833px) {
+	.wc-block-components-sidebar-layout {
+		.wc-block-components-main {
+			padding: 0;
+			width: 100%;
+		}
+
+		.wc-block-components-sidebar {
+			width: 100%;
+			padding: 0;
+		}
+	}
+}
+
+.wc-block-components-skeleton {
+	margin-bottom: $gap-largest;
+}
+
+@media (min-width: 834px) {
+	.wc-block-components-skeleton.wc-block-components-skeleton--checkout-order-summary-mobile {
+		display: none;
+	}
+}

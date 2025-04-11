@@ -87,7 +87,7 @@ Also, we didn't see a noticeable negative performance impact when keeping synchr
 
 ### Switch to HPOS as authoritative
 
-It's time to switch to HPOS. Go to **WooCommerce > Settings > Advanced > Features** and set HPOS to be authoritative (select “**Use the WooCommerce orders tables**").
+It's time to switch to HPOS. Go to **WooCommerce > Settings > Advanced > Features** and set HPOS to be authoritative (select "**Use the WooCommerce orders tables**").
 
 As mentioned above, don't turn off synchronization yet. If there are any issues, the system can be instantaneously reverted to the posts table, resulting in no downtime.
 
@@ -107,7 +107,7 @@ We disable sync on read first because it demands more resources. If your site is
 
 ### Switch off sync on write
 
-If everything is working as expected, you can disable sync on write as well. Given sync on read was already disabled, you can disable sync altogether from the settings. As usual, go to **WooCommerce > Settings > Advanced > Features**, and uncheck **“Enable compatibility mode"**.
+If everything is working as expected, you can disable sync on write as well. Given sync on read was already disabled, you can disable sync altogether from the settings. As usual, go to **WooCommerce > Settings > Advanced > Features**, and uncheck **"Enable compatibility mode"**.
 
 On our high-volume site, we fully disabled sync after 1 week. We still run some manual synchronization (via `wp wc cot sync`) periodically so that we have the opportunity to fall back to posts immediately should anything happen.
 
@@ -118,11 +118,11 @@ Now with synchronization fully disabled, test out various critical flows, check 
 ### Review: Phase 3 Checklist
 
 1. [ ] Plan to be online and monitoring your live site for a period of time.
-2. [ ] Enable synchronization with posts set as authoritative: in **WooCommerce > Settings > Advanced > Features** > select “**Use the WordPress posts tables**".
+2. [ ] Enable synchronization with posts set as authoritative: in **WooCommerce > Settings > Advanced > Features** > select "**Use the WordPress posts tables**".
 3. [ ] Start migration via CLI using the `wp wc cot sync` command.
 4. [ ] Monitor for errors during migration; halt or resume as necessary.
 5. [ ] Verify migrated data integrity using the verify command `wp wc cot verify_cot_data`.
-6. [ ] Enable synchronization with HPOS set as authoritative: in **WooCommerce > Settings > Advanced > Features** > select “Use the **WooCommerce orders tables**".
+6. [ ] Enable synchronization with HPOS set as authoritative: in **WooCommerce > Settings > Advanced > Features** > select "Use the **WooCommerce orders tables**".
 7. [ ] Test all critical flows, perform checkouts with multiple payment methods, and verify order data accuracy.
 8. [ ] Monitor support tickets for any issues.
 9. [ ] Disable synchronization on read using the provided snippet: `add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_false' );`
@@ -137,4 +137,4 @@ Now with synchronization fully disabled, test out various critical flows, check 
 3. [ ] Regularly communicate with stakeholders regarding testing progress and outcomes.
 4. [ ] Plan for potential fallback scenarios, ensuring the ability to revert to posts if issues arise.
 
-Did you follow this guide? Drop us a comment below to let us know how it went. Still have more questions? Reach to us on our dedicated HPOS upgrade channel in the Community Slack: [#hpos-upgrade-party](https://woocommercecommunity.slack.com/archives/C043X91E72M). If you are not yet a member of the Woo Slack Communtiy, you can join [here](https://woocommerce.com/community-slack/).
+Did you follow this guide? Drop us a comment below to let us know how it went. Still have more questions? Reach to us on our dedicated HPOS upgrade channel in the Community Slack: [#hpos-upgrade-party](https://woocommercecommunity.slack.com/archives/C043X91E72M). If you are not yet a member of the Woo Slack Community, you can join [here](https://woocommerce.com/community-slack/).

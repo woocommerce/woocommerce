@@ -24,10 +24,10 @@ export function BlockFill( {
 
 	const closestAncestorClientId = useSelect(
 		( select ) => {
-			// @ts-expect-error Outdated type definition.
 			const { getBlockParentsByBlockName } =
 				select( 'core/block-editor' );
 
+			// @ts-expect-error Selector is not typed
 			const [ closestParentClientId ] = getBlockParentsByBlockName(
 				clientId,
 				slotContainerBlockName,

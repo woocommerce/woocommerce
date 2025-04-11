@@ -33,4 +33,4 @@ Express payment buttons on mobile should occupy the full width. Don't use the ex
 
 Maintain the minimum amount of clear space on all sides of the payment button. The clear space adapts based on the size of the button.
 
-![Clear space.png](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/01/Clear-space.png)
+![Clear space.png](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2025/02/Clear-space-updated.png)

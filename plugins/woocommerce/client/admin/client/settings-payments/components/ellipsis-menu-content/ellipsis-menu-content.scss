@@ -1,0 +1,31 @@
+.woocommerce-ellipsis-menu__popover .woocommerce-ellipsis-menu__content {
+	&__item {
+		padding: 0 8px;
+	}
+
+	.components-button {
+		justify-content: left;
+		padding: 8px;
+		line-height: 20px;
+
+		&__danger {
+			color: $studio-red-50;
+		}
+	}
+
+	.components-button__danger:hover {
+		color: $studio-red-70;
+	}
+
+	.components-card__divider {
+		margin: 6px 0;
+	}
+}
+
+.components-dropdown__content .components-popover__content {
+	padding: 8px 0;
+}
+
+.components-popover__content {
+	border-radius: 2px;
+}

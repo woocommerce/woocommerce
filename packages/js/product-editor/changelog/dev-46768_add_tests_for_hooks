@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add tests for snackbar error handling hooks #49498

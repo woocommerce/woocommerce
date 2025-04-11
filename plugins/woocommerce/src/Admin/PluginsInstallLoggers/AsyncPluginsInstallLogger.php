@@ -32,7 +32,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 			'no'
 		);
 
-		// Set status as failed in case we run out of exectuion time.
+		// Set status as failed in case we run out of execution time.
 		register_shutdown_function(
 			function () {
 				$error = error_get_last();
@@ -57,7 +57,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	}
 
 	/**
-	 * Retreive the option.
+	 * Retrieve the option.
 	 *
 	 * @return false|mixed|void
 	 */
@@ -122,7 +122,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 *
 	 * @return void
 	 */
-	public function add_error( string $plugin_name, string $error_message = null ) {
+	public function add_error( string $plugin_name, ?string $error_message = null ) {
 		$option = $this->get();
 
 		$option['plugins'][ $plugin_name ]['errors'][] = $error_message;

@@ -172,11 +172,6 @@ const StoreOwnerFlow = {
 		StoreOwnerFlowDeprecated();
 		await merchant.openSettings( tab, section );
 	},
-
-	runSetupWizard: async () => {
-		StoreOwnerFlowDeprecated();
-		await merchant.runSetupWizard();
-	},
 };
 
 export { CustomerFlow, StoreOwnerFlow };

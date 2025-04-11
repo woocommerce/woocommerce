@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -22,6 +24,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
 	/**
+	 * Unique ID for this gateway.
+	 *
+	 * @var string
+	 */
+	const ID = 'cheque';
+
+	/**
 	 * Gateway instructions that will be added to the thank you page and emails.
 	 *
 	 * @var string
@@ -32,7 +41,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
-		$this->id                 = 'cheque';
+		$this->id                 = self::ID;
 		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = _x( 'Check payments', 'Check payment method', 'woocommerce' );
@@ -109,15 +118,19 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * @param bool     $plain_text Email format: plain text or HTML.
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		/**
-		 * Filter the email instructions order status.
-		 *
-		 * @since 7.4
-		 * @param string $terms The order status.
-		 * @param object $order The order object.
-		 */
-		if ( $this->instructions && ! $sent_to_admin && 'cheque' === $order->get_payment_method() && $order->has_status( apply_filters( 'woocommerce_cheque_email_instructions_order_status', 'on-hold', $order ) ) ) {
-			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
+		if ( $this->instructions && ! $sent_to_admin && self::ID === $order->get_payment_method() ) {
+			/**
+			 * Filter the email instructions order status.
+			 *
+			 * @since 7.4
+			 *
+			 * @param string $status The default status.
+			 * @param object $order  The order object.
+			 */
+			$instructions_order_status = apply_filters( 'woocommerce_cheque_email_instructions_order_status', OrderStatus::ON_HOLD, $order );
+			if ( $order->has_status( $instructions_order_status ) ) {
+				echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
+			}
 		}
 	}
 
@@ -132,8 +145,17 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( $order->get_total() > 0 ) {
+			/**
+			 * Filter the order status for cheque payment.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param string $status The default status.
+			 * @param object $order  The order object.
+			 */
+			$process_payment_status = apply_filters( 'woocommerce_cheque_process_payment_order_status', OrderStatus::ON_HOLD, $order );
 			// Mark as on-hold (we're awaiting the cheque).
-			$order->update_status( apply_filters( 'woocommerce_cheque_process_payment_order_status', 'on-hold', $order ), _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
+			$order->update_status( $process_payment_status, _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();
 		}

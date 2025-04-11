@@ -1,0 +1,102 @@
+.wc-block-components-shipping-rates-control__package {
+	margin: 0;
+
+	.wc-block-components-radio-control__label {
+		font-weight: 500;
+	}
+
+	.wc-block-components-shipping-rates-control__package__delivery_time {
+		text-transform: none;
+	}
+
+	.wc-block-components-shipping-rates-control__package__description--free {
+		text-transform: uppercase;
+	}
+
+	&.wc-block-components-panel {
+		margin-bottom: 0;
+	}
+
+	.wc-block-components-panel__button {
+		margin-bottom: 0;
+		margin-top: 0;
+		padding-bottom: em($gap-small);
+		padding-top: em($gap-small);
+	}
+
+	.wc-block-components-panel__content {
+		padding-bottom: em($gap-small);
+	}
+
+	.wc-block-components-radio-control,
+	.wc-block-components-radio-control__option-layout {
+		padding-bottom: 0;
+	}
+
+	.wc-block-components-radio-control .wc-block-components-radio-control__option-layout {
+		padding-bottom: 0;
+	}
+
+	.wc-block-components-radio-control__description-group {
+		// Display in a column so the delivery time can render first.
+		display: flex;
+		flex-direction: column;
+
+		// Use balance as this is not a good candidate for pretty. Pretty is intended for body copy which this is not.
+		text-wrap: balance;
+		// This targets the rate *description* and prevents the rules applying to the delivery_time.
+		.wc-block-components-radio-control__description {
+			padding-right: $gap-small;
+			order: 2;
+		}
+
+		.wc-block-components-radio-control__secondary-description {
+			order: 1;
+			text-align: left;
+			width: auto;
+			margin: $gap-smaller  0;
+		}
+	}
+
+	&--disabled {
+		opacity: 0.5;
+		transition: opacity 200ms ease;
+	}
+}
+
+.wc-block-components-shipping-rates-control__package-header {
+	margin: 0 0 $gap-small;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.is-large {
+	.wc-block-components-shipping-rates-control__package {
+		// This targets the rate *description* and prevents the rules applying to the delivery_time.
+		.wc-block-components-radio-control__description {
+			padding-right: $gap;
+		}
+	}
+}
+
+.wc-block-components-shipping-rates-control__package-items {
+	@include font-size(small);
+	display: inline-block;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-components-shipping-rates-control__package-item {
+	@include wrap-break-word();
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
+	content: ", ";
+	white-space: pre;
+}

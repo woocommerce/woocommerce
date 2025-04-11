@@ -25,6 +25,7 @@ export type PaymentGateway = {
 	method_supports: string[];
 	settings: SettingDefinition;
 	settings_url: string;
+	needs_setup?: boolean;
 };
 
 export type PluginsState = {

@@ -6,6 +6,10 @@
 @import "mixins";
 @import "animation";
 
+/**
+ * Forms
+ */
+ @import "forms";
 
 /*
 	Layout fix.
@@ -130,6 +134,10 @@
 		margin-top: 0;
 	}
 
+	.woocommerce-ordering > label {
+		margin-right: 0.25rem;
+	}
+
 	// The 'order by' dropdown on the Shop page is rather tiny unless the font size is increased.
 	select.orderby {
 		font-size: var(--wp--preset--font-size--medium);
@@ -238,29 +246,8 @@
 		div.woocommerce-product-gallery {
 			position: relative;
 
-			a.woocommerce-product-gallery__trigger {
-				position: absolute;
-				top: 1rem;
-				right: 1rem;
-				z-index: 1;
-				text-decoration: none;
-				border-radius: 1rem;
-				border-style: solid;
-				line-height: 1.5rem;
-				padding: 0;
-				font-size: 0.6rem;
-				background: var(--wp--preset--color--white);
-				border-color: var(--wp--preset--color--white);
-				height: 1.5rem;
-				width: 1.5rem;
-				overflow: hidden;
-
-				&::before {
-					content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" focusable="false" viewBox="0 0 24 24" width="24" height="24"><path d="M13.5 6C10.5 6 8 8.5 8 11.5c0 1.1.3 2.1.9 3l-3.4 3 1 1.1 3.4-2.9c1 .9 2.2 1.4 3.6 1.4 3 0 5.5-2.5 5.5-5.5C19 8.5 16.5 6 13.5 6zm0 9.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z" /></svg>');
-					display: block;
-					transform: rotateY(180deg);
-					margin-left: 1.55rem;
-				}
+			.woocommerce-product-gallery__trigger {
+				@include woocommerce-product-gallery__trigger;
 			}
 
 			figure.woocommerce-product-gallery__wrapper,
@@ -268,6 +255,12 @@
 				margin: 0;
 			}
 
+		}
+
+		.woocommerce-product-gallery__image a {
+			display: block;
+			line-height: 0;
+			outline-offset: -1px;
 		}
 
 		div.summary {
@@ -630,7 +623,6 @@ ul.wc-tabs {
 
 					#coupon_code {
 						float: left;
-						margin-bottom: 1rem;
 					}
 				}
 			}
@@ -1057,26 +1049,6 @@ ul.wc-tabs {
 
 }
 
-// TODO: This could look nicer.
-.select2-container {
-
-	.select2-selection,
-	.select2-dropdown {
-		border: 1px solid var(--wp--preset--color--black);
-		border-radius: 0;
-	}
-
-	.select2-dropdown {
-		border-top: 0;
-
-		.select2-search__field {
-			border: 1px solid var(--wp--preset--color--black);
-			border-radius: 0;
-		}
-	}
-}
-
-
 // Store-wide notice
 .theme-twentytwentythree .woocommerce-store-notice {
 	color: black;
@@ -1151,4 +1123,37 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
   &[role='alert']::before {
     content: '\2713';
   }
+}
+
+/**
+ * Coupon error notice
+ */
+ .woocommerce-cart {
+	td.actions .coupon .coupon-error-notice {
+		@include coupon-error-notice-cart();
+		margin-top: 0;
+ 	}
+}
+
+form.checkout_coupon {
+	.coupon-error-notice {
+		@include coupon-error-notice-checkout();
+	}
+
+	.input-text.has-error:focus {
+		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+ .woocommerce-checkout {
+	form .form-row.woocommerce-invalid input.input-text {
+		border-color: var(--wc-red);
+	}
+
+	.checkout-inline-error-message {
+		@include checkout-inline-error-message();
+	}
 }

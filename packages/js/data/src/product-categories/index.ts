@@ -3,8 +3,12 @@
  */
 import { STORE_NAME, WC_PRODUCT_CATEGORIES_NAMESPACE } from './constants';
 import { createCrudDataStore } from '../crud';
+import { ProductCategoryActions, ProductCategorySelectors } from './types';
 
-createCrudDataStore( {
+export const store = createCrudDataStore<
+	ProductCategoryActions,
+	ProductCategorySelectors
+>( {
 	storeName: STORE_NAME,
 	resourceName: 'ProductCategory',
 	pluralResourceName: 'ProductCategories',
