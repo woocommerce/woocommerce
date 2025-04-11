@@ -1,37 +1,6 @@
 name: 'CI'
 on:
-  push:
-    paths-ignore:
-      - 'docs/**'
-      - '**/changelog/**'
-      - '.cursor/**'
-      - '**/*.md'
-      - '**/changelog.txt'
-      - '.gitignore'
-      - '.github/**'
-      - '!.github/workflows/ci.yml'
-    branches:
-      - 'trunk'
-      - 'release/*'
-  workflow_call:
-    inputs:
-      trigger:
-        description: 'Type of run to trigger. E.g. nightly-checks, release-checks, etc.'
-        required: true
-        default: 'default'
-        type: string
-      wc-version:
-        description: 'Specific WooCommerce version to install by the test jobs supporting it'
-        required: false
-        type: string
-      refName:
-        description: 'The ref name to run tests on. It needs to have a corresponding release published.'
-        required: false
-        type: string
-      artifactName:
-        description: 'The release artifact name to download and run tests for.'
-        required: false
-        type: string
+  pull_request:
 
 concurrency:
   # Cancel concurrent jobs but not for push event. For push use the run_id to have a unique group.
