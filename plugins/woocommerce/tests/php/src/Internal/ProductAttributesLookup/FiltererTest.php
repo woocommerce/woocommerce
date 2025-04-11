@@ -1034,7 +1034,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return array[]
 	 */
-	private function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core() {
+	public function data_provider_for_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_core() {
 		return array(
 			array( array(), 'and', true ),
 			array( array(), 'or', true ),
