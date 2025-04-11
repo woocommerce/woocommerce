@@ -9,27 +9,18 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { PrevIcon, NextIcon } from './icons';
 
 export const Edit = (): JSX.Element => {
-	const { style, ...blockProps } = useBlockProps( {
-		className: 'wc-block-product-gallery-large-image-next-previous',
+	const blockProps = useBlockProps( {
+		className: 'wc-block-product-gallery-large-image-next-previous__button',
 	} );
 
 	return (
-		<div { ...blockProps }>
-			<div className="wc-block-product-gallery-large-image-next-previous-container">
-				<button
-					style={ style }
-					className="wc-block-product-gallery-large-image-next-previous__button wp-block-button__link"
-					disabled
-				>
-					<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
-				</button>
-				<button
-					style={ style }
-					className="wc-block-product-gallery-large-image-next-previous__button wp-block-button__link"
-				>
-					<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
-				</button>
-			</div>
+		<div className="wc-block-product-gallery-large-image-next-previous">
+			<button { ...blockProps } disabled>
+				<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
+			</button>
+			<button { ...blockProps }>
+				<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
+			</button>
 		</div>
 	);
 };
