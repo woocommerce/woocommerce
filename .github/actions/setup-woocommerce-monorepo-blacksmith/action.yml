@@ -82,8 +82,8 @@ runs:
           id: 'project-filters'
           shell: 'bash'
           run: |
-              echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
-              echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
+              echo "install=$(node ./.github/actions/setup-woocommerce-monorepo-blacksmith/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
+              echo "build=$(node ./.github/actions/setup-woocommerce-monorepo-blacksmith/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
         - name: 'Install Project Dependencies'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
