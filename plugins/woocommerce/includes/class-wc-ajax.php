@@ -47,11 +47,27 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Set the 'wc-ajax' argument in $wp_query.
+	 */
+	private static function set_wc_ajax_argument_in_query() {
+		global $wp_query;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['wc-ajax'] ) && empty( $wp_query->get( 'wc-ajax' ) ) ) {
+			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
 	 * Set WC AJAX constant and headers.
 	 */
 	public static function define_ajax() {
+		global $wp_query;
+
 		// phpcs:disable
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
+		self::set_wc_ajax_argument_in_query();
+		if ( ! empty( $wp_query->get( 'wc-ajax' ) ) ) {
 			wc_maybe_define_constant( 'DOING_AJAX', true );
 			wc_maybe_define_constant( 'WC_DOING_AJAX', true );
 			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
@@ -88,9 +104,7 @@ class WC_AJAX {
 		global $wp_query;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
-			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
-		}
+		self::set_wc_ajax_argument_in_query();
 
 		$action = $wp_query->get( 'wc-ajax' );
 
@@ -198,7 +212,7 @@ class WC_AJAX {
 		foreach ( $ajax_private_events as $ajax_event ) {
 			add_action(
 				'wp_ajax_woocommerce_' . $ajax_event,
-				function() use ( $ajax_event ) {
+				function () use ( $ajax_event ) {
 					call_user_func( array( __CLASS__, $ajax_event ) );
 				}
 			);
@@ -212,7 +226,8 @@ class WC_AJAX {
 		foreach ( $ajax_heartbeat_callbacks as $ajax_callback ) {
 			add_filter(
 				'heartbeat_received',
-				function( $response, $data ) use ( $ajax_callback ) {
+				// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				function ( $response, $data ) use ( $ajax_callback ) {
 					return call_user_func_array( array( __CLASS__, $ajax_callback ), func_get_args() );
 				},
 				11,
@@ -738,7 +753,7 @@ class WC_AJAX {
 					if ( ! $attribute ) {
 						continue;
 					}
-					$i++;
+					++$i;
 					$metabox_class = array();
 
 					if ( $attribute->is_taxonomy() ) {
@@ -949,8 +964,8 @@ class WC_AJAX {
 					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
-						$loop ++;
-						$file_counter ++;
+						++$loop;
+						++$file_counter;
 
 						if ( $file->get_name() ) {
 							$file_count = $file->get_name();
@@ -1899,7 +1914,7 @@ class WC_AJAX {
 						$item_exists = count(
 							array_filter(
 								$terms_map[ $ancestor ]->children,
-								function( $term ) use ( $current_child ) {
+								function ( $term ) use ( $current_child ) {
 									return $term->term_id === $current_child->term_id;
 								}
 							)
@@ -1914,7 +1929,7 @@ class WC_AJAX {
 		}
 		$parent_terms = array_filter(
 			array_values( $terms_map ),
-			function( $term ) {
+			function ( $term ) {
 				return 0 === $term->parent;
 			}
 		);
@@ -2111,9 +2126,9 @@ class WC_AJAX {
 				continue;
 			}
 			if ( $nextid === $id ) {
-				$index ++;
+				++$index;
 			}
-			$index ++;
+			++$index;
 			$menu_orders[ $id ] = $index;
 
 			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
@@ -3672,7 +3687,7 @@ class WC_AJAX {
 	 *
 	 * @return void
 	 */
-	private static function order_delete_meta() : void {
+	private static function order_delete_meta(): void {
 		wc_get_container()->get( CustomMetaBox::class )->delete_meta_ajax();
 	}
 
