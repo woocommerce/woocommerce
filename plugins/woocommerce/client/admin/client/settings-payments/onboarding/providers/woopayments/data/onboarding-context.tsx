@@ -241,7 +241,12 @@ export const OnboardingProvider: React.FC< {
 				navigateToNextStep,
 				getStepByKey,
 				refreshOnboardingSteps,
-				closeModal,
+				closeModal: () => {
+					closeModal();
+					// Refresh the onboarding steps to get the latest data after closing the modal.
+					// This is to avoid showing the loader next time, but still have fresh data.
+					refreshOnboardingSteps();
+				},
 			} }
 		>
 			{ children }
