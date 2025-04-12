@@ -113,7 +113,7 @@ jobs:
           install: '${{ matrix.projectName }}...'
           pull-package-deps: '${{ matrix.projectName }}'
           php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
-          caching-action: ${{ ( github.repository == 'woocommerce/woocommerce' && 'useblacksmith/cache@v5' ) || 'actions/cache@v4' }}
+          infrastructure: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith' ) || 'github' }}
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
@@ -144,7 +144,7 @@ jobs:
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || ( matrix.testType == 'unit' && 'dependencies' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
-          caching-action: ${{ ( github.repository == 'woocommerce/woocommerce' && 'useblacksmith/cache@v5' ) || 'actions/cache@v4' }}
+          infrastructure: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith' ) || 'github' }}
 
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
@@ -487,7 +487,7 @@ jobs:
 
       - uses: './.github/actions/setup-woocommerce-monorepo-blacksmith'
         with:
-          caching-action: ${{ ( github.repository == 'woocommerce/woocommerce' && 'useblacksmith/cache@v5' ) || 'actions/cache@v4' }}
+          infrastructure: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith' ) || 'github' }}
 
       - name: 'Validate - missing entries'
         id: validate_missing
