@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: This is a bug fix for an edge case that prevents a fatal error but doesn't change any functionality. The fix simply adds a defensive check to ensure proper degradation when a WordPress core function is called too early.
+
