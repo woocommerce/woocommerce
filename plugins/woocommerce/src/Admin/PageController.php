@@ -267,7 +267,13 @@ class PageController {
 			return apply_filters( 'woocommerce_navigation_current_screen_id', false, null );
 		}
 
-		$current_screen = get_current_screen();
+		$current_screen = null;
+		// Check if the current screen is set.
+		// @see: https://github.com/woocommerce/woocommerce/issues/57206
+		if ( function_exists( 'get_current_screen' ) ) {
+			$current_screen = get_current_screen();
+		}
+
 		if ( ! $current_screen ) {
 			// Filter documentation below.
 			return apply_filters( 'woocommerce_navigation_current_screen_id', false, $current_screen );
