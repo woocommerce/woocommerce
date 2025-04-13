@@ -333,6 +333,11 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 		}
 
+		// If created_via filter is provided, add it to query args
+        if ( ! empty( $request['created_via'] ) ) {
+            $args['created_via'] = $request['created_via'];
+        }
+
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
