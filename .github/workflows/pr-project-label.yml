@@ -20,25 +20,3 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   configuration-path: .github/project-pr-labeler.yml
-
-    label_by_content:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            pull-requests: write
-        needs: label_project
-
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v4
-            with:
-              ref: refs/pull/${{ github.event.pull_request.number }}/merge
-              sparse-checkout: |
-                .github/workflows/scripts
-                plugins/woocommerce/changelog
-
-          - name: Detect changelog types from content
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              PR_NUMBER: ${{ github.event.pull_request.number }}
-            run: bash .github/workflows/scripts/label-pr-by-changelog-type.sh
