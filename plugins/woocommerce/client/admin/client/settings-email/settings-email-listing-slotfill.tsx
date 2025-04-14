@@ -3,6 +3,7 @@
  */
 import { createSlotFill } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -38,6 +39,14 @@ const EmailListingFill: React.FC< { emailTypes: EmailType[] } > = ( {
 } ) => {
 	return (
 		<Fill>
+			<div id="email_notification_settings-description">
+				<p>
+					{ __(
+						"Manage email notifications sent from WooCommerce below or click on 'Edit template' to customize your email template design.",
+						'woocommerce'
+					) }
+				</p>
+			</div>
 			<ListView emailTypes={ emailTypes } />
 		</Fill>
 	);

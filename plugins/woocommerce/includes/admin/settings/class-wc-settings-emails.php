@@ -210,7 +210,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
 			$email_notifications_field = 'email_notification_block_emails';
-			$email_notifications_desc  = __( 'Manage email notifications sent from WooCommerce below or click on \'Edit template\' to customize your email template design.', 'woocommerce' );
+			$email_notifications_desc  = null;
 		} else {
 			$email_notifications_field = 'email_notification';
 			/* translators: %s: help description with link to WP Mail logging and support page. */
