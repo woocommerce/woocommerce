@@ -159,8 +159,8 @@
 // There is no variant handling row stacking as it is applied by default.
 .wc-block-components-radio-control__description-group--column {
 	flex-direction: column;
-	
-	// Use balance as this is not a good candidate for pretty. Pretty is 
+
+	// Use balance as this is not a good candidate for pretty. Pretty is
 	// intended  for body copy which this is not.
 	text-wrap: balance;
 
