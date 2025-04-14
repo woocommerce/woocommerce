@@ -8,12 +8,25 @@ namespace Automattic\WooCommerce\Blueprint\Steps;
  * @package Automattic\WooCommerce\Blueprint\Steps
  */
 class RunSql extends Step {
-	protected string $sql  = '';
-	protected string $name = 'schema.sql';
 	/**
-	 * Sql to run.
+	 * Sql code to run.
 	 *
-	 * @var string $sql Sql code to run.
+	 * @var string
+	 */
+	protected string $sql = '';
+
+	/**
+	 * Name of the sql file.
+	 *
+	 * @var string
+	 */
+	protected string $name = 'schema.sql';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $sql Sql code to run.
+	 * @param string $name Name of the sql file.
 	 */
 	public function __construct( string $sql, $name = 'schema.sql' ) {
 		$this->sql  = $sql;

@@ -6,8 +6,16 @@ use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
 use Automattic\WooCommerce\Blueprint\Tests\TestCase;
 
+/**
+ * Unit tests for ExportInstallPluginSteps class.
+ */
 class ExportInstallPluginStepsTest extends TestCase {
 
+	/**
+	 * The plugins to test.
+	 *
+	 * @var array<string, array<string, mixed>>
+	 */
 	protected array $plugins = array(
 		'plugina/plugina.php' => array(
 			'Title'           => 'plugina',
@@ -23,6 +31,11 @@ class ExportInstallPluginStepsTest extends TestCase {
 		),
 	);
 
+	/**
+	 * Get a mock of the ExportInstallPluginSteps class.
+	 *
+	 * @return Mockery\MockInterface
+	 */
 	private function get_mock() {
 		$mock = Mock( ExportInstallPluginSteps::class )->makePartial();
 		$mock->shouldReceive( 'wp_get_plugins' )->andReturn( $this->plugins );
@@ -42,9 +55,6 @@ class ExportInstallPluginStepsTest extends TestCase {
 			)
 		);
 
-		/**
-		 * @var Step[] $result The result of the export.
-		 */
 		$result = $mock->export();
 		$this->assertCount( 3, $result );
 
@@ -65,7 +75,7 @@ class ExportInstallPluginStepsTest extends TestCase {
 		// Return an empty object for the plugina.
 		$mock->shouldReceive( 'wp_plugins_api' )->withArgs(
 			function ( $method, $args ) {
-				if ( $method === 'plugin_information' && $args['slug'] === 'plugina' ) {
+				if ( 'plugin_information' === $method && 'plugina' === $args['slug'] ) {
 					return true;
 				}
 				return false;

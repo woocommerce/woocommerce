@@ -18,7 +18,7 @@ class ActivateTheme extends Step {
 	/**
 	 * ActivateTheme constructor.
 	 *
-	 * @param string $theme_name The name of the theme to be activated.
+	 * @param string $theme_folder_name The name of the theme to be activated.
 	 */
 	public function __construct( $theme_folder_name ) {
 		$this->theme_folder_name = $theme_folder_name;

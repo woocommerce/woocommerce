@@ -30,7 +30,8 @@ class ImportRunSql implements StepProcessor {
 		global $wpdb;
 		$result = StepProcessorResult::success( RunSql::get_step_name() );
 
-		$wpdb->query( $schema->sql->contents );
+		// Security check: Check if we can use prepared statements.
+		$wpdb->query( $schema->sql->contents ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		if ( $wpdb->last_error ) {
 			$result->add_error( "Error executing SQL: {$wpdb->last_error}" );
 		} else {

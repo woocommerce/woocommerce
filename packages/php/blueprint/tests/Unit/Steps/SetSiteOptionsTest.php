@@ -16,14 +16,14 @@ class SetSiteOptionsTest extends TestCase {
 			'timezone'  => 'UTC',
 		);
 
-		$setSiteOptions = new SetSiteOptions( $options );
+		$set_site_options = new SetSiteOptions( $options );
 
 		$expected_array = array(
 			'step'    => 'setSiteOptions',
 			'options' => (object) $options,
 		);
 
-		$this->assertEquals( $expected_array, $setSiteOptions->prepare_json_array() );
+		$this->assertEquals( $expected_array, $set_site_options->prepare_json_array() );
 	}
 
 	/**

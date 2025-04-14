@@ -15,7 +15,7 @@ class InstallThemeTest extends TestCase {
 		$resource = 'https://example.com/my-theme.zip';
 		$options  = array( 'activate' => true );
 
-		$installTheme = new InstallTheme( $slug, $resource, $options );
+		$install_theme = new InstallTheme( $slug, $resource, $options );
 
 		$expected_array = array(
 			'step'      => 'installTheme',
@@ -26,7 +26,7 @@ class InstallThemeTest extends TestCase {
 			'options'   => $options,
 		);
 
-		$this->assertEquals( $expected_array, $installTheme->prepare_json_array() );
+		$this->assertEquals( $expected_array, $install_theme->prepare_json_array() );
 	}
 
 	/**

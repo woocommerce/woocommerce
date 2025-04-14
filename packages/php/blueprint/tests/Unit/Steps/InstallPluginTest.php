@@ -15,7 +15,7 @@ class InstallPluginTest extends TestCase {
 		$resource = 'https://example.com/sample-plugin.zip';
 		$options  = array( 'activate' => true );
 
-		$installPlugin = new InstallPlugin( $slug, $resource, $options );
+		$install_plugin = new InstallPlugin( $slug, $resource, $options );
 
 		$expected_array = array(
 			'step'       => 'installPlugin',
@@ -26,7 +26,7 @@ class InstallPluginTest extends TestCase {
 			'options'    => $options,
 		);
 
-		$this->assertEquals( $expected_array, $installPlugin->prepare_json_array() );
+		$this->assertEquals( $expected_array, $install_plugin->prepare_json_array() );
 	}
 
 	/**

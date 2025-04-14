@@ -104,7 +104,13 @@ class ExportSchema {
 		return $schema;
 	}
 
-	public function onBeforeExport( $step_name, $callback ) {
+	/**
+	 * Subscribe to the onBeforeExport event.
+	 *
+	 * @param string   $step_name The step name to subscribe to.
+	 * @param callable $callback  The callback to execute.
+	 */
+	public function on_before_export( $step_name, $callback ) {
 		$this->subscribe(
 			'onBeforeExport',
 			function ( $exporter ) use ( $step_name, $callback ) {

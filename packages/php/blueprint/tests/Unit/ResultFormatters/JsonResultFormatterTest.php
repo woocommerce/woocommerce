@@ -7,17 +7,30 @@ use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 
+/**
+ * Unit tests for JsonResultFormatter class.
+ */
 class JsonResultFormatterTest extends TestCase {
+	/**
+	 * Tear down the test.
+	 *
+	 * @return void
+	 */
 	protected function tearDown(): void {
 		Mockery::close();
 		parent::tearDown();
 	}
 
+	/**
+	 * Test the format method.
+	 *
+	 * @return void
+	 */
 	public function test_format_all_message_types() {
-		$mockResult1 = Mockery::mock( StepProcessorResult::class );
-		$mockResult1->shouldReceive( 'get_step_name' )
+		$mock_result1 = Mockery::mock( StepProcessorResult::class );
+		$mock_result1->shouldReceive( 'get_step_name' )
 					->andReturn( 'Step 1' );
-		$mockResult1->shouldReceive( 'get_messages' )
+		$mock_result1->shouldReceive( 'get_messages' )
 					->with( 'all' )
 					->andReturn(
 						array(
@@ -31,13 +44,13 @@ class JsonResultFormatterTest extends TestCase {
 							),
 						)
 					);
-		$mockResult1->shouldReceive( 'is_success' )
+		$mock_result1->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$mockResult2 = Mockery::mock( StepProcessorResult::class );
-		$mockResult2->shouldReceive( 'get_step_name' )
+		$mock_result2 = Mockery::mock( StepProcessorResult::class );
+		$mock_result2->shouldReceive( 'get_step_name' )
 					->andReturn( 'Step 2' );
-		$mockResult2->shouldReceive( 'get_messages' )
+		$mock_result2->shouldReceive( 'get_messages' )
 					->with( 'all' )
 					->andReturn(
 						array(
@@ -47,10 +60,10 @@ class JsonResultFormatterTest extends TestCase {
 							),
 						)
 					);
-		$mockResult2->shouldReceive( 'is_success' )
+		$mock_result2->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$results = array( $mockResult1, $mockResult2 );
+		$results = array( $mock_result1, $mock_result2 );
 
 		$formatter = new JsonResultFormatter( $results );
 
@@ -86,11 +99,16 @@ class JsonResultFormatterTest extends TestCase {
 		$this->assertEquals( $expected, $formatted );
 	}
 
+	/**
+	 * Test formatting with a specific message type.
+	 *
+	 * @return void
+	 */
 	public function test_format_specific_message_type() {
-		$mockResult1 = Mockery::mock( StepProcessorResult::class );
-		$mockResult1->shouldReceive( 'get_step_name' )
+		$mock_result1 = Mockery::mock( StepProcessorResult::class );
+		$mock_result1->shouldReceive( 'get_step_name' )
 					->andReturn( 'Step 1' );
-		$mockResult1->shouldReceive( 'get_messages' )
+		$mock_result1->shouldReceive( 'get_messages' )
 					->with( 'info' )
 					->andReturn(
 						array(
@@ -100,19 +118,19 @@ class JsonResultFormatterTest extends TestCase {
 							),
 						)
 					);
-		$mockResult1->shouldReceive( 'is_success' )
+		$mock_result1->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$mockResult2 = Mockery::mock( StepProcessorResult::class );
-		$mockResult2->shouldReceive( 'get_step_name' )
+		$mock_result2 = Mockery::mock( StepProcessorResult::class );
+		$mock_result2->shouldReceive( 'get_step_name' )
 					->andReturn( 'Step 2' );
-		$mockResult2->shouldReceive( 'get_messages' )
+		$mock_result2->shouldReceive( 'get_messages' )
 					->with( 'info' )
 					->andReturn( array() );
-		$mockResult2->shouldReceive( 'is_success' )
+		$mock_result2->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$results = array( $mockResult1, $mockResult2 );
+		$results = array( $mock_result1, $mock_result2 );
 
 		$formatter = new JsonResultFormatter( $results );
 
@@ -134,32 +152,42 @@ class JsonResultFormatterTest extends TestCase {
 		$this->assertEquals( $expected, $formatted );
 	}
 
+	/**
+	 * Test that is_success returns true when all results are successful.
+	 *
+	 * @return void
+	 */
 	public function test_is_success_returns_true() {
-		$mockResult1 = Mockery::mock( StepProcessorResult::class );
-		$mockResult1->shouldReceive( 'is_success' )
+		$mock_result1 = Mockery::mock( StepProcessorResult::class );
+		$mock_result1->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$mockResult2 = Mockery::mock( StepProcessorResult::class );
-		$mockResult2->shouldReceive( 'is_success' )
+		$mock_result2 = Mockery::mock( StepProcessorResult::class );
+		$mock_result2->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$results = array( $mockResult1, $mockResult2 );
+		$results = array( $mock_result1, $mock_result2 );
 
 		$formatter = new JsonResultFormatter( $results );
 
 		$this->assertTrue( $formatter->is_success() );
 	}
 
+	/**
+	 * Test that is_success returns false when any result is not successful.
+	 *
+	 * @return void
+	 */
 	public function test_is_success_returns_false() {
-		$mockResult1 = Mockery::mock( StepProcessorResult::class );
-		$mockResult1->shouldReceive( 'is_success' )
+		$mock_result1 = Mockery::mock( StepProcessorResult::class );
+		$mock_result1->shouldReceive( 'is_success' )
 					->andReturn( true );
 
-		$mockResult2 = Mockery::mock( StepProcessorResult::class );
-		$mockResult2->shouldReceive( 'is_success' )
+		$mock_result2 = Mockery::mock( StepProcessorResult::class );
+		$mock_result2->shouldReceive( 'is_success' )
 					->andReturn( false );
 
-		$results = array( $mockResult1, $mockResult2 );
+		$results = array( $mock_result1, $mock_result2 );
 
 		$formatter = new JsonResultFormatter( $results );
 

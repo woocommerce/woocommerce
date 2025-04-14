@@ -15,11 +15,17 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 class ExportInstallThemeSteps implements StepExporter {
 	use UseWPFunctions;
 
+	/**
+	 * Filter callback.
+	 *
+	 * @var callable
+	 */
 	private $filter_callback;
+
 	/**
 	 * Register a filter callback to filter the plugins to export.
 	 *
-	 * @param callable $callback
+	 * @param callable $callback Filter callback.
 	 *
 	 * @return void
 	 */
