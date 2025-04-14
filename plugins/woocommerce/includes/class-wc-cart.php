@@ -54,6 +54,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	protected $shipping_methods;
 
 	/**
+	 * Whether the shipping totals have been calculated. This will only return true if shipping was calculated, not if
+	 * shipping is disabled or if there are no cart contents.
+	 *
+	 * @var bool
+	 */
+	protected $has_calculated_shipping = false;
+
+	/**
 	 * Total defaults used to reset.
 	 *
 	 * @var array
@@ -1399,7 +1407,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get cart's owner.
 	 *
 	 * @since  3.2.0
-	 * @return WC_Customer
+	 * @return \WC_Customer
 	 */
 	public function get_customer() {
 		return WC()->customer;
@@ -1448,23 +1456,42 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Whether the shipping totals have been calculated.
+	 *
+	 * @return bool
+	 */
+	public function has_calculated_shipping() {
+		return $this->has_calculated_shipping;
+	}
+
+	/**
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
-		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping()->calculate_shipping( $this->get_shipping_packages() ) ) : array();
+		// Reset totals.
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 
+		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+			return $this->shipping_methods;
+		}
+
+		$this->has_calculated_shipping = true;
+		$this->shipping_methods        = $this->get_chosen_shipping_methods( WC()->shipping()->calculate_shipping( $this->get_shipping_packages() ) );
+
+		$shipping_costs = wp_list_pluck( $this->shipping_methods, 'cost' );
 		$shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
 		$merged_taxes   = array();
 		foreach ( $shipping_taxes as $taxes ) {
 			foreach ( $taxes as $tax_id => $tax_amount ) {
-				if ( ! isset( $merged_taxes[ $tax_id ] ) ) {
-					$merged_taxes[ $tax_id ] = 0;
-				}
-				$merged_taxes[ $tax_id ] += $tax_amount;
+				$merged_taxes[ $tax_id ] = ( $merged_taxes[ $tax_id ] ?? 0 ) + $tax_amount;
 			}
 		}
 
-		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
+		$this->set_shipping_total( array_sum( $shipping_costs ) );
 		$this->set_shipping_tax( array_sum( $merged_taxes ) );
 		$this->set_shipping_taxes( $merged_taxes );
 
@@ -1560,6 +1587,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
 			return false;
 		}
+
 		$needs_shipping = false;
 
 		foreach ( $this->get_cart_contents() as $values ) {
@@ -1582,49 +1610,31 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Sees if the customer has entered enough data to calc the shipping yet.
+	 * Sees if the customer has entered enough data to calculate shipping.
 	 *
 	 * @return bool
 	 */
 	public function show_shipping() {
-		if ( ! wc_shipping_enabled() || ! $this->get_cart_contents() ) {
+		// If there are no shipping methods or no cart contents, no need to calculate shipping.
+		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) || ! $this->get_cart_contents() ) {
 			return false;
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			$country = $this->get_customer()->get_shipping_country();
-			if ( ! $country ) {
-				return false;
-			}
-			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
-			/**
-			 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
-			 * This can be used to allow shipping calculations to be done without a state.
-			 *
-			 * @since 8.4.0
-			 *
-			 * @param bool $show_state Whether to use the state field. Default true.
-			 */
-			$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-			$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
-			if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() ) {
-				return false;
-			}
-			/**
-			 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
-			 * This can be used to allow shipping calculations to be done without a postcode.
-			 *
-			 * @since 8.4.0
-			 *
-			 * @param bool $show_postcode Whether to use the postcode field. Default true.
-			 */
-			$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-			$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
-			if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() ) {
+			$customer = $this->get_customer();
+
+			if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
 				return false;
 			}
 		}
 
+		/**
+		 * Filter to allow plugins to prevent shipping calculations.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param bool $ready Whether the cart is ready to calculate shipping.
+		 */
 		return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
