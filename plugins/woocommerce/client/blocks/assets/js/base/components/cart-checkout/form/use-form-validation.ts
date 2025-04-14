@@ -95,7 +95,9 @@ const EMPTY_OBJECT: FormErrors = {};
 export const useFormValidation = (
 	formFields: KeyedFormFields,
 	// Form type, can be billing, shipping, contact, order, or calculator.
-	formType: FormType
+	formType: FormType,
+	// Allows certain fields to be overridden for forms that don't auto update data store.
+	overrideValues?: AddressFormValues
 ): {
 	errors: FormErrors;
 	previousErrors: FormErrors | undefined;
@@ -117,18 +119,22 @@ export const useFormValidation = (
 		| OrderFormValues
 		| Record< string, never >;
 
-	switch ( formType ) {
-		case 'billing':
-		case 'shipping':
-			values = data.customer.address || {};
-			break;
-		case 'contact':
-		case 'order':
-			values = data.checkout.additional_fields || {};
-			break;
-		default:
-			values = {};
-			break;
+	if ( overrideValues ) {
+		values = overrideValues;
+	} else {
+		switch ( formType ) {
+			case 'billing':
+			case 'shipping':
+				values = data.customer.address || {};
+				break;
+			case 'contact':
+			case 'order':
+				values = data.checkout.additional_fields || {};
+				break;
+			default:
+				values = {};
+				break;
+		}
 	}
 
 	const partialSchema = formFields.reduce<
