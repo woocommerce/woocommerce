@@ -27,26 +27,26 @@ class Util {
 	}
 
 	/**
-	 * @param array $row array row with key and value
+	 * @param array  $row array row with key and value
 	 * @param string $table name
 	 * @param string $type one of insert, insert ignore, replace into
 	 *
 	 * @return false|string
 	 */
-	public static function array_to_insert_sql ($row, $table, $type = 'insert ignore') {
-		if (empty($row) || !is_array($row)) {
+	public static function array_to_insert_sql( $row, $table, $type = 'insert ignore' ) {
+		if ( empty( $row ) || ! is_array( $row ) ) {
 			return false; // Return false if input data is empty or not an array
 		}
 
-		$allowed_types = ['insert', 'insert ignore', 'replace into'];
-		if (!in_array($type, $allowed_types)) {
+		$allowed_types = array( 'insert', 'insert ignore', 'replace into' );
+		if ( ! in_array( $type, $allowed_types ) ) {
 			return false; // Return false if input type is not valid
 		}
 
 		// Get column names and values
-		$columns = '`' . implode('`, `', array_keys($row)) . '`';
-		$escapedValues = array_map(fn($value) => "'" . addslashes($value) . "'", $row);
-		$values = implode(', ', $escapedValues);
+		$columns       = '`' . implode( '`, `', array_keys( $row ) ) . '`';
+		$escapedValues = array_map( fn( $value ) => "'" . addslashes( $value ) . "'", $row );
+		$values        = implode( ', ', $escapedValues );
 		// Construct final SQL query
 		return "{$type} `$table` ($columns) VALUES ($values);";
 	}
@@ -69,13 +69,13 @@ class Util {
 		return implode( '', $words );
 	}
 
-	public static function array_flatten($array) {
-		return new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
+	public static function array_flatten( $array ) {
+		return new RecursiveIteratorIterator( new RecursiveArrayIterator( $array ) );
 	}
 
 	/**
 	 * Convert a string from camelCase to snake_case.
-	 * 
+	 *
 	 * @param string $input The string to be converted.
 	 *
 	 * @return string

@@ -18,39 +18,39 @@ class ImportDeactivatePluginTest extends TestCase {
 		$pluginName = 'sample-plugin';
 
 		// Create a mock schema object
-		$schema = Mockery::mock();
+		$schema             = Mockery::mock();
 		$schema->pluginName = $pluginName;
 
 		// Create a partial mock of ImportDeactivatePlugin
-		$importDeactivatePlugin = Mockery::mock(ImportDeactivatePlugin::class)
-		                                 ->makePartial()
-		                                 ->shouldAllowMockingProtectedMethods();
+		$importDeactivatePlugin = Mockery::mock( ImportDeactivatePlugin::class )
+										->makePartial()
+										->shouldAllowMockingProtectedMethods();
 
 		// Mock the deactivate_plugin_by_slug method
-		$importDeactivatePlugin->shouldReceive('deactivate_plugin_by_slug')
-		                       ->with($pluginName)
-		                       ->andReturnNull();
+		$importDeactivatePlugin->shouldReceive( 'deactivate_plugin_by_slug' )
+								->with( $pluginName )
+								->andReturnNull();
 
 		// Execute the process method
-		$result = $importDeactivatePlugin->process($schema);
+		$result = $importDeactivatePlugin->process( $schema );
 
 		// Assert the result is an instance of StepProcessorResult
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
 
 		// Assert success
-		$this->assertTrue($result->is_success());
-		$this->assertEquals(DeactivatePlugin::get_step_name(), $result->get_step_name());
+		$this->assertTrue( $result->is_success() );
+		$this->assertEquals( DeactivatePlugin::get_step_name(), $result->get_step_name() );
 
 		// Assert the info message is added
-		$messages = $result->get_messages('info');
-		$this->assertCount(1, $messages);
-		$this->assertEquals("Deactivated {$pluginName}.", $messages[0]['message']);
+		$messages = $result->get_messages( 'info' );
+		$this->assertCount( 1, $messages );
+		$this->assertEquals( "Deactivated {$pluginName}.", $messages[0]['message'] );
 	}
 
 	public function test_get_step_class() {
 		$importDeactivatePlugin = new ImportDeactivatePlugin();
 
 		// Assert the correct step class is returned
-		$this->assertEquals(DeactivatePlugin::class, $importDeactivatePlugin->get_step_class());
+		$this->assertEquals( DeactivatePlugin::class, $importDeactivatePlugin->get_step_class() );
 	}
 }

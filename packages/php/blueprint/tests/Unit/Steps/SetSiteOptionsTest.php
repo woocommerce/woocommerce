@@ -40,12 +40,12 @@ class SetSiteOptionsTest extends TestCase {
 		$expected_schema = array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'    => array(
+				'step' => array(
 					'type' => 'string',
 					'enum' => array( 'setSiteOptions' ),
 				),
 			),
-			'required'   => array( 'step'  ),
+			'required'   => array( 'step' ),
 		);
 
 		$this->assertEquals( $expected_schema, SetSiteOptions::get_schema() );

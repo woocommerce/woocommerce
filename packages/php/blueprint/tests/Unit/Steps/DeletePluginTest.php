@@ -11,7 +11,7 @@ class DeletePluginTest extends TestCase {
 	 * Test the constructor and JSON preparation.
 	 */
 	public function testConstructorAndPrepareJsonArray() {
-		$plugin_name = 'sample-plugin/sample-plugin.php';
+		$plugin_name  = 'sample-plugin/sample-plugin.php';
 		$deletePlugin = new DeletePlugin( $plugin_name );
 
 		$expected_array = array(

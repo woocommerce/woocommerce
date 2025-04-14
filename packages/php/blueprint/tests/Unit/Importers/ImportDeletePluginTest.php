@@ -18,72 +18,72 @@ class ImportDeletePluginTest extends TestCase {
 		$pluginName = 'sample-plugin';
 
 		// Create a mock schema object
-		$schema = Mockery::mock();
+		$schema             = Mockery::mock();
 		$schema->pluginName = $pluginName;
 
 		// Create a partial mock of ImportDeletePlugin
-		$importDeletePlugin = Mockery::mock(ImportDeletePlugin::class)
-		                             ->makePartial()
-		                             ->shouldAllowMockingProtectedMethods();
+		$importDeletePlugin = Mockery::mock( ImportDeletePlugin::class )
+									->makePartial()
+									->shouldAllowMockingProtectedMethods();
 
 		// Mock the delete_plugin_by_slug method
-		$importDeletePlugin->shouldReceive('delete_plugin_by_slug')
-		                   ->with($pluginName)
-		                   ->andReturn(true);
+		$importDeletePlugin->shouldReceive( 'delete_plugin_by_slug' )
+							->with( $pluginName )
+							->andReturn( true );
 
 		// Execute the process method
-		$result = $importDeletePlugin->process($schema);
+		$result = $importDeletePlugin->process( $schema );
 
 		// Assert the result is an instance of StepProcessorResult
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
 
 		// Assert success
-		$this->assertTrue($result->is_success());
-		$this->assertEquals(DeletePlugin::get_step_name(), $result->get_step_name());
+		$this->assertTrue( $result->is_success() );
+		$this->assertEquals( DeletePlugin::get_step_name(), $result->get_step_name() );
 
 		// Assert the info message is added
-		$messages = $result->get_messages('info');
-		$this->assertCount(1, $messages);
-		$this->assertEquals("Deleted {$pluginName}.", $messages[0]['message']);
+		$messages = $result->get_messages( 'info' );
+		$this->assertCount( 1, $messages );
+		$this->assertEquals( "Deleted {$pluginName}.", $messages[0]['message'] );
 	}
 
 	public function test_process_failed_deletion() {
 		$pluginName = 'invalid-plugin';
 
 		// Create a mock schema object
-		$schema = Mockery::mock();
+		$schema             = Mockery::mock();
 		$schema->pluginName = $pluginName;
 
 		// Create a partial mock of ImportDeletePlugin
-		$importDeletePlugin = Mockery::mock(ImportDeletePlugin::class)
-		                             ->makePartial()
-		                             ->shouldAllowMockingProtectedMethods();
+		$importDeletePlugin = Mockery::mock( ImportDeletePlugin::class )
+									->makePartial()
+									->shouldAllowMockingProtectedMethods();
 
 		// Mock the delete_plugin_by_slug method
-		$importDeletePlugin->shouldReceive('delete_plugin_by_slug')
-		                   ->with($pluginName)
-		                   ->andReturn(false);
+		$importDeletePlugin->shouldReceive( 'delete_plugin_by_slug' )
+							->with( $pluginName )
+							->andReturn( false );
 
 		// Execute the process method
-		$result = $importDeletePlugin->process($schema);
+		$result = $importDeletePlugin->process( $schema );
 
 		// Assert the result is an instance of StepProcessorResult
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
 
 		// Assert failure
-		$this->assertFalse($result->is_success());
-		$this->assertEquals(DeletePlugin::get_step_name(), $result->get_step_name());
+		$this->assertFalse( $result->is_success() );
+		$this->assertEquals( DeletePlugin::get_step_name(), $result->get_step_name() );
 
 		// Assert the error message is added
-		$messages = $result->get_messages('error');
-		$this->assertCount(1, $messages);
-		$this->assertEquals("Unable to delete {$pluginName}.", $messages[0]['message']);
+		$messages = $result->get_messages( 'error' );
+		$this->assertCount( 1, $messages );
+		$this->assertEquals( "Unable to delete {$pluginName}.", $messages[0]['message'] );
 	}
 
 	public function test_get_step_class() {
 		$importDeletePlugin = new ImportDeletePlugin();
 
 		// Assert the correct step class is returned
-		$this->assertEquals(DeletePlugin::class, $importDeletePlugin->get_step_class());
+		$this->assertEquals( DeletePlugin::class, $importDeletePlugin->get_step_class() );
 	}
 }

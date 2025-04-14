@@ -18,75 +18,74 @@ class ImportInstallThemeTest extends TestCase {
 	public function test_process_successful_installation_and_switching() {
 		$themeSlug = 'sample-theme';
 
-		$schema = Mockery::mock();
-		$schema->themeData = (object)[
-			'slug' => $themeSlug,
+		$schema            = Mockery::mock();
+		$schema->themeData = (object) array(
+			'slug'     => $themeSlug,
 			'resource' => 'valid-resource',
 			'activate' => true,
-		];
+		);
 
-		$resourceStorage = Mockery::mock(ResourceStorages::class);
-		$resourceStorage->shouldReceive('is_supported_resource')
-		                ->with('valid-resource')
-		                ->andReturn(true);
-		$resourceStorage->shouldReceive('download')
-		                ->with($themeSlug, 'valid-resource')
-		                ->andReturn('/path/to/theme.zip');
+		$resourceStorage = Mockery::mock( ResourceStorages::class );
+		$resourceStorage->shouldReceive( 'is_supported_resource' )
+						->with( 'valid-resource' )
+						->andReturn( true );
+		$resourceStorage->shouldReceive( 'download' )
+						->with( $themeSlug, 'valid-resource' )
+						->andReturn( '/path/to/theme.zip' );
 
-		$importInstallTheme = Mockery::mock(ImportInstallTheme::class, [$resourceStorage])
-		                             ->makePartial()
-		                             ->shouldAllowMockingProtectedMethods();
+		$importInstallTheme = Mockery::mock( ImportInstallTheme::class, array( $resourceStorage ) )
+									->makePartial()
+									->shouldAllowMockingProtectedMethods();
 
-		$importInstallTheme->shouldReceive('wp_get_themes')
-		                   ->andReturn([]);
-		$importInstallTheme->shouldReceive('install')
-		                   ->with('/path/to/theme.zip')
-		                   ->andReturn(true);
-		$importInstallTheme->shouldReceive('wp_switch_theme')
-		                   ->with($themeSlug)
-		                   ->andReturn(true);
+		$importInstallTheme->shouldReceive( 'wp_get_themes' )
+							->andReturn( array() );
+		$importInstallTheme->shouldReceive( 'install' )
+							->with( '/path/to/theme.zip' )
+							->andReturn( true );
+		$importInstallTheme->shouldReceive( 'wp_switch_theme' )
+							->with( $themeSlug )
+							->andReturn( true );
 
-		$result = $importInstallTheme->process($schema);
+		$result = $importInstallTheme->process( $schema );
 
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
-		$this->assertTrue($result->is_success());
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
+		$this->assertTrue( $result->is_success() );
 	}
 
 	public function test_process_installation_failure() {
 		$themeSlug = 'failed-theme';
 
-		$schema = Mockery::mock();
-		$schema->themeData = (object)[
-			'slug' => $themeSlug,
+		$schema            = Mockery::mock();
+		$schema->themeData = (object) array(
+			'slug'     => $themeSlug,
 			'resource' => 'wordpress.org/themes',
 			'activate' => false,
-		];
+		);
 
-		$resourceStorage = Mockery::mock(ResourceStorages::class);
-		$resourceStorage->shouldReceive('is_supported_resource')
-		                ->with('wordpress.org/themes')
-		                ->andReturn(true);
-		$resourceStorage->shouldReceive('download')
-		                ->with($themeSlug, 'wordpress.org/themes')
-		                ->andReturn('/path/to/theme.zip');
+		$resourceStorage = Mockery::mock( ResourceStorages::class );
+		$resourceStorage->shouldReceive( 'is_supported_resource' )
+						->with( 'wordpress.org/themes' )
+						->andReturn( true );
+		$resourceStorage->shouldReceive( 'download' )
+						->with( $themeSlug, 'wordpress.org/themes' )
+						->andReturn( '/path/to/theme.zip' );
 
-		$importInstallTheme = Mockery::mock(ImportInstallTheme::class, [$resourceStorage])
-		                             ->makePartial()
-		                             ->shouldAllowMockingProtectedMethods();
+		$importInstallTheme = Mockery::mock( ImportInstallTheme::class, array( $resourceStorage ) )
+									->makePartial()
+									->shouldAllowMockingProtectedMethods();
 
-		$importInstallTheme->shouldReceive('wp_get_themes')
-		                   ->andReturn([]);
-		$importInstallTheme->shouldReceive('install')
-		                   ->with('/path/to/theme.zip')
-		                   ->andReturn(false);
+		$importInstallTheme->shouldReceive( 'wp_get_themes' )
+							->andReturn( array() );
+		$importInstallTheme->shouldReceive( 'install' )
+							->with( '/path/to/theme.zip' )
+							->andReturn( false );
 
-		$result = $importInstallTheme->process($schema);
+		$result = $importInstallTheme->process( $schema );
 
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
-		$this->assertFalse($result->is_success());
-		$errorMessages = $result->get_messages('error');
-		$this->assertCount(1, $errorMessages); // Only error message
-		$this->assertEquals("Failed to install theme '{$themeSlug}'.", $errorMessages[1]['message']);
-
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
+		$this->assertFalse( $result->is_success() );
+		$errorMessages = $result->get_messages( 'error' );
+		$this->assertCount( 1, $errorMessages ); // Only error message
+		$this->assertEquals( "Failed to install theme '{$themeSlug}'.", $errorMessages[1]['message'] );
 	}
 }

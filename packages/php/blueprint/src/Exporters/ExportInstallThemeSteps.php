@@ -23,7 +23,7 @@ class ExportInstallThemeSteps implements StepExporter {
 	 *
 	 * @return void
 	 */
-	public function filter(callable $callback) {
+	public function filter( callable $callback ) {
 		$this->filter_callback = $callback;
 	}
 	/**
@@ -32,8 +32,8 @@ class ExportInstallThemeSteps implements StepExporter {
 	 * @return array
 	 */
 	public function export() {
-		$steps        = array();
-		$themes       = $this->wp_get_themes();
+		$steps  = array();
+		$themes = $this->wp_get_themes();
 		if ( is_callable( $this->filter_callback ) ) {
 			$themes = call_user_func( $this->filter_callback, $themes );
 		}

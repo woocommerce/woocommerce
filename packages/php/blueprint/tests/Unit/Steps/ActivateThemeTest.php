@@ -11,11 +11,11 @@ class ActivateThemeTest extends TestCase {
 	 * Test the constructor and JSON preparation.
 	 */
 	public function testConstructorAndPrepareJsonArray() {
-		$theme_name = 'my-theme';
+		$theme_name    = 'my-theme';
 		$activateTheme = new ActivateTheme( $theme_name );
 
 		$expected_array = array(
-			'step'      => 'activateTheme',
+			'step'            => 'activateTheme',
 			'themeFolderName' => $theme_name,
 		);
 
@@ -36,7 +36,7 @@ class ActivateThemeTest extends TestCase {
 		$expected_schema = array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'      => array(
+				'step'            => array(
 					'type' => 'string',
 					'enum' => array( 'activateTheme' ),
 				),

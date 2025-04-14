@@ -18,65 +18,65 @@ class ImportActivatePluginTest extends TestCase {
 		$pluginPath = 'sample-plugin';
 
 		// Create a mock schema object
-		$schema = Mockery::mock();
+		$schema             = Mockery::mock();
 		$schema->pluginPath = $pluginPath;
 
 		// Create a partial mock of ImportActivatePlugin
-		$importActivatePlugin = Mockery::mock(ImportActivatePlugin::class)
-		                               ->makePartial()
-		                               ->shouldAllowMockingProtectedMethods();
+		$importActivatePlugin = Mockery::mock( ImportActivatePlugin::class )
+										->makePartial()
+										->shouldAllowMockingProtectedMethods();
 
 		// Mock the activate_plugin_by_slug method
-		$importActivatePlugin->shouldReceive('wp_activate_plugin')
-		                     ->with($pluginPath)
-		                     ->andReturn(true);
+		$importActivatePlugin->shouldReceive( 'wp_activate_plugin' )
+							->with( $pluginPath )
+							->andReturn( true );
 
 		// Execute the process method
-		$result = $importActivatePlugin->process($schema);
+		$result = $importActivatePlugin->process( $schema );
 
 		// Assert the result is an instance of StepProcessorResult
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
 
 		// Assert success
-		$this->assertTrue($result->is_success());
-		$this->assertEquals(ActivatePlugin::get_step_name(), $result->get_step_name());
+		$this->assertTrue( $result->is_success() );
+		$this->assertEquals( ActivatePlugin::get_step_name(), $result->get_step_name() );
 
 		// Assert the success message is added
-		$messages = $result->get_messages('info');
-		$this->assertCount(1, $messages);
-		$this->assertEquals("Activated {$pluginPath}.", $messages[0]['message']);
+		$messages = $result->get_messages( 'info' );
+		$this->assertCount( 1, $messages );
+		$this->assertEquals( "Activated {$pluginPath}.", $messages[0]['message'] );
 	}
 
 	public function test_process_failed_activation() {
 		$pluginPath = 'invalid-plugin';
 
 		// Create a mock schema object
-		$schema = Mockery::mock();
+		$schema             = Mockery::mock();
 		$schema->pluginPath = $pluginPath;
 
 		// Create a partial mock of ImportActivatePlugin
-		$importActivatePlugin = Mockery::mock(ImportActivatePlugin::class)
-		                               ->makePartial()
-		                               ->shouldAllowMockingProtectedMethods();
+		$importActivatePlugin = Mockery::mock( ImportActivatePlugin::class )
+										->makePartial()
+										->shouldAllowMockingProtectedMethods();
 
 		// Mock the activate_plugin_by_slug method
-		$importActivatePlugin->shouldReceive('wp_activate_plugin')
-		                     ->with($pluginPath)
-		                     ->andReturn(new \WP_Error('error', 'Error message'));
+		$importActivatePlugin->shouldReceive( 'wp_activate_plugin' )
+							->with( $pluginPath )
+							->andReturn( new \WP_Error( 'error', 'Error message' ) );
 
 		// Execute the process method
-		$result = $importActivatePlugin->process($schema);
+		$result = $importActivatePlugin->process( $schema );
 
 		// Assert the result is an instance of StepProcessorResult
-		$this->assertInstanceOf(StepProcessorResult::class, $result);
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
 
 		// Assert failure
-		$this->assertFalse($result->is_success());
-		$this->assertEquals(ActivatePlugin::get_step_name(), $result->get_step_name());
+		$this->assertFalse( $result->is_success() );
+		$this->assertEquals( ActivatePlugin::get_step_name(), $result->get_step_name() );
 
 		// Assert the error message is added
-		$messages = $result->get_messages('error');
-		$this->assertCount(1, $messages);
-		$this->assertEquals("Unable to activate {$pluginPath}.", $messages[0]['message']);
+		$messages = $result->get_messages( 'error' );
+		$this->assertCount( 1, $messages );
+		$this->assertEquals( "Unable to activate {$pluginPath}.", $messages[0]['message'] );
 	}
 }

@@ -47,7 +47,7 @@ class CliResultFormatter {
 			}
 		}
 
-		$format_items_exist = function_exists('format_items');
+		$format_items_exist = function_exists( 'format_items' );
 
 		if ( $format_items_exist ) {
 			format_items( 'table', $items, $header );

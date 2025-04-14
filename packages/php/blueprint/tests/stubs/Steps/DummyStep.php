@@ -11,15 +11,15 @@ class DummyStep extends Step {
 
 	public static function get_schema( int $version = 1 ): array {
 		return array(
-			'type'       => 'object',
+			'type'                 => 'object',
 			'additionalProperties' => false,
-			'properties' => array(
+			'properties'           => array(
 				'step' => array(
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
 			),
-			'required'   => array( 'step' ),
+			'required'             => array( 'step' ),
 		);
 	}
 

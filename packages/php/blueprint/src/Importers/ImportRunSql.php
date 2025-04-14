@@ -31,7 +31,7 @@ class ImportRunSql implements StepProcessor {
 		$result = StepProcessorResult::success( RunSql::get_step_name() );
 
 		$wpdb->query( $schema->sql->contents );
-		if ($wpdb->last_error) {
+		if ( $wpdb->last_error ) {
 			$result->add_error( "Error executing SQL: {$wpdb->last_error}" );
 		} else {
 			$result->add_debug( "Executed SQL ({$schema->sql->name}): {$schema->sql->contents}" );
