@@ -255,6 +255,66 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the created_via parameter is properly stored when creating orders.
+	 */
+	public function test_order_created_via_param(): void {
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order_params = array(
+			'line_items'  => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+			'created_via' => 'some_value',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		wp_cache_flush();
+
+		$order = wc_get_order( $data['id'] );
+		$this->assertNotEmpty( $order );
+		$this->assertEquals( $order_params['created_via'], $order->get_created_via() );
+	}
+
+	/**
+	 * Tests that the created_via parameter is set to 'rest-api' when empty.
+	 */
+	public function test_order_empty_created_via_param_is_set_to_rest_api() {
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order_params = array(
+			'line_items'  => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+			'created_via' => '',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		wp_cache_flush();
+
+		$order = wc_get_order( $data['id'] );
+		$this->assertNotEmpty( $order );
+		$this->assertEquals( 'rest-api', $order->get_created_via() );
+	}
+
+	/**
 	 * Tests deleting an order.
 	 */
 	public function test_orders_delete(): void {
