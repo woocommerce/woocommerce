@@ -32,7 +32,8 @@
 		}
 
 		// This rule removes the fake border-top from the selected element to prevent a double border.
-		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option::after {
+		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted
+			+ div.wc-block-components-radio-control-accordion-option::after {
 			display: none;
 		}
 	}
@@ -84,7 +85,8 @@
 
 	// Remove the fake border-top from the item after the selected element, this is to prevent a double border with the
 	// selected element's box-shadow.
-	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option::after {
+	.wc-block-components-radio-control__option--checked-option-highlighted
+		+ .wc-block-components-radio-control__option::after {
 		display: none;
 	}
 
@@ -137,7 +139,7 @@
 }
 
 .wc-block-components-radio-control__option
-.wc-block-components-radio-control__option-layout {
+	.wc-block-components-radio-control__option-layout {
 	&::after {
 		display: none;
 	}
@@ -159,8 +161,8 @@
 // There is no variant handling row stacking as it is applied by default.
 .wc-block-components-radio-control__description-group--column {
 	flex-direction: column;
-	
-	// Use balance as this is not a good candidate for pretty. Pretty is 
+
+	// Use balance as this is not a good candidate for pretty. Pretty is
 	// intended  for body copy which this is not.
 	text-wrap: balance;
 
@@ -263,7 +265,7 @@
 
 .theme-twentytwentyone {
 	.wc-block-components-radio-control
-	.wc-block-components-radio-control__input {
+		.wc-block-components-radio-control__input {
 		&:checked {
 			border-width: 2px;
 
