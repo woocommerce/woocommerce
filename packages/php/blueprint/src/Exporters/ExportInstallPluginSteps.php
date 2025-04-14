@@ -108,7 +108,7 @@ class ExportInstallPluginSteps implements StepExporter {
 	 *
 	 * @return array
 	 */
-	protected function sort_plugins_by_dep( array $plugins ) {
+	public function sort_plugins_by_dep( array $plugins ) {
 		$sorted  = array();
 		$visited = array();
 
