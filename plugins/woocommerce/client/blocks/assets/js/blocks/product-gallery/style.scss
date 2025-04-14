@@ -78,12 +78,21 @@ $dialog-padding: 20px;
 }
 
 .wc-block-product-gallery-large-image-next-previous {
+	position: absolute;
 	display: flex;
-	align-items: flex-end;
-	flex-direction: row;
-	justify-content: space-between;
+	align-items: center;
 	width: 100%;
 	height: 100%;
+
+	&-container {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	svg {
+		z-index: 1;
+	}
 
 	button {
 		cursor: pointer;
@@ -97,49 +106,6 @@ $dialog-padding: 20px;
 			opacity: 50%;
 			cursor: not-allowed;
 		}
-	}
-
-	.is-vertically-aligned-top {
-		align-items: flex-start;
-	}
-
-	.is-vertically-aligned-center {
-		align-items: center;
-	}
-
-	.is-vertically-aligned-bottom {
-		align-items: flex-end;
-	}
-}
-
-// Next/Previous Buttons Settings
-.wc-block-product-gallery-large-image-next-previous-settings {
-	width: 100%;
-}
-
-//  Next/Previous Buttons Inside the Image Settings
-.wc-block-product-gallery-large-image-next-previous-left--inside-image {
-	margin-left: 15px;
-}
-
-.wc-block-product-gallery-large-image-next-previous-right--inside-image {
-	margin-right: 15px;
-}
-
-.wc-block-product-gallery-large-image-next-previous-container {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	position: absolute;
-	width: 100%;
-
-	&.wc-block-product-gallery-large-image-next-previous--inside-image {
-		margin-top: 15px;
-		margin-bottom: 15px;
-	}
-
-	svg {
-		z-index: 1;
 	}
 }
 
