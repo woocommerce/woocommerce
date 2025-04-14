@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createSlotFill } from '@wordpress/components';
+import { createSlotFill, Button } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 
@@ -34,18 +34,31 @@ export type EmailType = {
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const EmailListingFill: React.FC< { emailTypes: EmailType[] } > = ( {
-	emailTypes,
-} ) => {
+const EmailListingFill: React.FC< {
+	emailTypes: EmailType[];
+	editTemplateUrl: string | null;
+} > = ( { emailTypes, editTemplateUrl } ) => {
 	return (
 		<Fill>
-			<div id="email_notification_settings-description">
+			<div
+				id="email_notification_settings-description"
+				className="woocommerce-email-listing-description"
+			>
 				<p>
 					{ __(
 						"Manage email notifications sent from WooCommerce below or click on 'Edit template' to customize your email template design.",
 						'woocommerce'
 					) }
 				</p>
+				{ editTemplateUrl && (
+					<Button
+						variant="primary"
+						href={ editTemplateUrl }
+						className="woocommerce-email-listing-edit-template-button"
+					>
+						{ __( 'Edit template', 'woocommerce' ) }
+					</Button>
+				) }
 			</div>
 			<ListView emailTypes={ emailTypes } />
 		</Fill>
@@ -59,6 +72,9 @@ export const registerSettingsEmailListingFill = () => {
 		return null;
 	}
 	const emailTypesData = slotElement.getAttribute( 'data-email-types' );
+	const editTemplateUrl = slotElement.getAttribute(
+		'data-edit-template-url'
+	);
 	let emailTypes: EmailType[] = [];
 	try {
 		emailTypes = JSON.parse( emailTypesData || '' );
@@ -66,6 +82,11 @@ export const registerSettingsEmailListingFill = () => {
 
 	registerPlugin( 'woocommerce-admin-settings-email-listing', {
 		scope: 'woocommerce-email-listing',
-		render: () => <EmailListingFill emailTypes={ emailTypes } />,
+		render: () => (
+			<EmailListingFill
+				emailTypes={ emailTypes }
+				editTemplateUrl={ editTemplateUrl }
+			/>
+		),
 	} );
 };
