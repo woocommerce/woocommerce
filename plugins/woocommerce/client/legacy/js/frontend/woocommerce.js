@@ -193,7 +193,7 @@ jQuery( function ( $ ) {
 
 /**
  * Handle when pressing the Space key on the remove item link.
- * This is necessary because the link got the role="button" attribute
+ * This is necessary because the link has the role="button" attribute
  * and needs to act like a button.
  */
 function on_keydown_remove_from_cart( e ) {
