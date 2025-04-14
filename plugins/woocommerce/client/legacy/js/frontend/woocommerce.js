@@ -184,7 +184,7 @@ jQuery( function ( $ ) {
 
 	// If the "Enable AJAX add to cart buttons on archives" setting is disabled
 	// the add-to-cart.js file won't be loaded, so we need to add the event listener here.
-	if( typeof wc_add_to_cart_params === 'undefined') {
+	if ( typeof wc_add_to_cart_params === 'undefined') {
 		$( document.body ).on( 'keydown', '.remove_from_cart_button', on_keydown_remove_from_cart );
 	}
 
