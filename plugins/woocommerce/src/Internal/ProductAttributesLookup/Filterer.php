@@ -137,6 +137,8 @@ class Filterer {
 				WHERE is_variation_attribute=1
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
+				GROUP BY product_or_parent_id
+				HAVING COUNT(DISTINCT term_id)={$count}
 			)";
 		}
 
@@ -288,6 +290,8 @@ class Filterer {
 							WHERE is_variation_attribute=1
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
+							GROUP BY product_or_parent_id
+							HAVING COUNT(DISTINCT term_id)={$terms_count}
 						) temp )";
 				}
 			} else {

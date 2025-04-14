@@ -66,6 +66,21 @@ class WC_Helper_Subscriptions_API {
 		);
 		register_rest_route(
 			'wc/v3',
+			'/marketplace/subscriptions/activate-plugin',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'activate_plugin' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'args'                => array(
+					'product_key' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'wc/v3',
 			'/marketplace/subscriptions/disconnect',
 			array(
 				'methods'             => 'POST',
@@ -187,6 +202,39 @@ class WC_Helper_Subscriptions_API {
 			wp_send_json_error(
 				array(
 					'message' => __( 'There was an error connecting your subscription. Please try again.', 'woocommerce' ),
+				),
+				400
+			);
+		}
+	}
+
+	/**
+	 * Activate a plugin for a WooCommerce.com subscription.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public static function activate_plugin( $request ) {
+		$product_key = $request->get_param( 'product_key' );
+		try {
+			$success = WC_Helper::activate_plugin( $product_key );
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage(),
+				),
+				400
+			);
+		}
+		if ( $success ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'The plugin for your subscription has been activated.', 'woocommerce' ),
+				)
+			);
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'The plugin for your subscription couldn\'t be activated.', 'woocommerce' ),
 				),
 				400
 			);
