@@ -121,7 +121,11 @@
 	display: block;
 	margin: em($gap) 0;
 	margin-top: 0;
-	padding: 0 0 0 em($gap-larger);
+	// padding-left here is aligned with the size of the radio input element,
+	// we need to reserve at least this amount of space for the label to not
+	// overflow the input. Input has position: absolute set, so it doesn't
+	// take any space on its own.
+	padding: 0 calc($gap + em(24px)) 0 em($gap-huge);
 	position: relative;
 	cursor: pointer;
 
