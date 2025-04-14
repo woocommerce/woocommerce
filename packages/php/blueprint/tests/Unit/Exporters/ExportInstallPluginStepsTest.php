@@ -73,7 +73,7 @@ class ExportInstallPluginStepsTest extends TestCase {
 	 * @return void
 	 */
 	public function test_export_does_not_include_plugins_with_unknown_download_link() {
-		$mock = Mock( ExportInstallPluginSteps::class )->makePartial();
+		$mock = $this->get_mock();
 
 		// Return an empty object for the plugina.
 		$mock->shouldReceive( 'wp_plugins_api' )->withArgs(
