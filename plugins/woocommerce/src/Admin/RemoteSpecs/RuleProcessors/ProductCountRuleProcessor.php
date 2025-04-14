@@ -6,6 +6,8 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,7 +35,7 @@ class ProductCountRuleProcessor implements RuleProcessorInterface {
 					'limit'    => 1,
 					'paginate' => true,
 					'return'   => 'ids',
-					'status'   => array( 'publish' ),
+					'status'   => array( ProductStatus::PUBLISH ),
 				)
 			)
 			: $product_query;

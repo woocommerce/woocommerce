@@ -1,0 +1,6 @@
+Significance: patch
+Type: fix
+
+- Normalize variation selector pill styling by removing uppercase text and updating border styles to use currentColor.
+- Standardize padding (0.25em 0.75em) across both variation selector pills and product filter chips.
+- Remove duplicate styles from editor.scss that were already present in style.scss.

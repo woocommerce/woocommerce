@@ -47,7 +47,7 @@ CustomActionCallback.args = {
 };
 
 export default {
-	title: 'WooCommerce Admin/experimental/Error Boundary',
+	title: 'Experimental/Error Boundary',
 	component: ErrorBoundary,
 	argTypes: {
 		errorMessage: {

@@ -10,6 +10,10 @@ export default () => (
 		viewBox="0 0 64 40"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
+		style={ {
+			// Having a background color on the SVG will make the border disappear
+			background: '#006FCF',
+		} }
 	>
 		<g clipPath="url(#clip0_7623_49052)">
 			<rect width="64" height="40" rx="3" fill="white" />

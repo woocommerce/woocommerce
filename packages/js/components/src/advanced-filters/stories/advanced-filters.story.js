@@ -191,6 +191,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/AdvancedFilters',
+	title: 'Components/AdvancedFilters',
 	component: AdvancedFilters,
 };

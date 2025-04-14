@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -33,6 +32,6 @@ export const Draggable = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/ListItem',
+	title: 'Components/ListItem',
 	component: ListItem,
 };

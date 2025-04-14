@@ -1,0 +1,117 @@
+.wc-block-components-order-summary {
+	&.is-large {
+		// Compensate for removing Panel.
+		padding: 0 $gap;
+	}
+
+	.wc-block-components-order-summary__button-text {
+		font-weight: 500;
+	}
+	.wc-block-components-panel__button {
+		padding-top: 0;
+		margin-top: 0;
+	}
+
+	.wc-block-components-panel__content {
+		margin-bottom: 0;
+	}
+
+	.wc-block-components-order-summary__content {
+		display: table;
+		width: 100%;
+	}
+
+	.wc-block-components-order-summary-item {
+		@include font-size(small);
+		display: flex;
+		padding-bottom: 1px;
+		padding-top: $gap;
+		width: 100%;
+
+		&:first-child {
+			padding-top: 0;
+		}
+
+		&:last-child {
+			border-bottom: 0;
+
+			> div {
+				padding-bottom: 0;
+			}
+
+			&::after {
+				display: none;
+			}
+		}
+
+		.wc-block-components-product-metadata {
+			@include font-size(regular);
+		}
+	}
+
+	.wc-block-components-order-summary-item__image,
+	.wc-block-components-order-summary-item__description {
+		display: table-cell;
+		vertical-align: top;
+	}
+
+	.wc-block-components-order-summary-item__image {
+		width: #{$gap-large * 2};
+		padding-bottom: $gap;
+		margin-top: 10px;
+		position: relative;
+
+		> img {
+			width: #{$gap-large * 2};
+			max-width: #{$gap-large * 2};
+		}
+	}
+
+	.wc-block-components-order-summary-item__quantity {
+		align-items: center;
+		background: #fff;
+		border: 2px solid;
+		border-radius: 1em;
+		box-shadow: 0 0 0 2px #fff;
+		border-color: $universal-border-light;
+		color: #000;
+		display: flex;
+		line-height: 1;
+		min-height: 20px;
+		padding: 0 0.4em;
+		position: absolute;
+		justify-content: center;
+		min-width: 20px;
+		right: 0;
+		top: 0;
+		transform: translate(50%, -50%);
+		white-space: nowrap;
+		z-index: 1;
+	}
+
+	.wc-block-components-order-summary-item__description {
+		padding-left: $gap-large;
+		padding-right: $gap-small;
+		padding-bottom: $gap;
+
+		p,
+		.wc-block-components-product-metadata {
+			line-height: 1.375;
+			margin-top: $gap-smaller;
+		}
+	}
+
+	.wc-block-components-order-summary-item__total-price {
+		font-weight: bold;
+		margin-left: auto;
+		text-align: right;
+	}
+	.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via {
+		padding-top: $gap-smallest;
+	}
+
+	.wc-block-components-order-summary-item__individual-prices {
+		display: block;
+		padding-top: $gap-smaller;
+	}
+}

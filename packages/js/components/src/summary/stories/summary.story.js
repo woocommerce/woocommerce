@@ -36,6 +36,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/SummaryList',
+	title: 'Components/SummaryList',
 	component: SummaryList,
 };

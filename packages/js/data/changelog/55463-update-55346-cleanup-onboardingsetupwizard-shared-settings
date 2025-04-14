@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove euCountries and local_info from wcSettings.admin.onboarding

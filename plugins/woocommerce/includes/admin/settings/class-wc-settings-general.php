@@ -27,6 +27,13 @@ class WC_Settings_General extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'cog';
+
+	/**
 	 * Get settings or the default section.
 	 *
 	 * @return array

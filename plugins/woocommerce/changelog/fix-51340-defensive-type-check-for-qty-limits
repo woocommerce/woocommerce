@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure QuantityLimits::limit_to_multiple() receives correct values to prevent fatal errors.

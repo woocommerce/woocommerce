@@ -25,7 +25,7 @@ permissions: {}
 jobs:
     code-freeze-prep:
         name: 'Verify that today is the day of the code freeze and prepare repository'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: write
             issues: write
@@ -116,17 +116,9 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
 
-            - name: Generate changelog changes
-              id: changelog
-              if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
-              
-
     notify-slack:
         name: 'Sends code freeze notification to Slack'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: code-freeze-prep
         if: ${{ inputs.skipSlackPing != true && ( needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' || needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' ) }}
         outputs:
@@ -166,7 +158,7 @@ jobs:
 
     build-monthly:
         name: Build beta zip file
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: code-freeze-prep
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         permissions:
@@ -196,7 +188,7 @@ jobs:
 
     build-a:
         name: Build accelerated zip file
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: code-freeze-prep
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         permissions:
@@ -226,7 +218,7 @@ jobs:
                   
     r2-upload-monthly:
       name: Upload Beta to R2
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-latest
       needs: [ code-freeze-prep, build-monthly ]
       if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
       steps:
@@ -252,7 +244,7 @@ jobs:
 
     slack-upload-monthly:
         name: Upload Beta to Slack
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, notify-slack, build-monthly ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' && inputs.skipSlackPing != true }}
         steps:
@@ -295,7 +287,7 @@ jobs:
 
     r2-upload-accelerated:
       name: Upload Accelerated to R2
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-latest
       needs: [ code-freeze-prep, build-a ]
       if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
       steps:
@@ -321,7 +313,7 @@ jobs:
 
     slack-upload-accelerated:
         name: Upload Accelerated to Slack
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, notify-slack, build-a ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' && inputs.skipSlackPing != true }}
         steps:
@@ -364,7 +356,7 @@ jobs:
 
     github-upload-monthly:
         name: Create single-zipped GitHub asset (Monthly)
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, build-monthly ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         steps:
@@ -390,7 +382,7 @@ jobs:
 
     github-upload-accelerated:
         name: Create single-zipped GitHub asset (Accelerated)
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, build-a ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         steps:

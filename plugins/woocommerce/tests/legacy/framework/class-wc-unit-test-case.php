@@ -418,6 +418,22 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Test that render_tracking_pixels includes required timestamp parameters.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertTracksEventHasRequestTimestampAndNoCache( $event_name ) {
+		ob_start();
+		WC_Tracks_Footer_Pixel::instance()->render_tracking_pixels();
+		$output = ob_get_clean();
+
+		// Verify request timestamp and no cache parameters are present.
+		$this->assertStringContainsString( $event_name, $output, 'Event name should be present in the output' );
+		$this->assertStringContainsString( '_rt=', $output, 'Pixel URL should contain request timestamp parameter' );
+		$this->assertStringContainsString( '_=', $output, 'Pixel URL should contain nocache parameter' );
+	}
+
+	/**
 	 * Assert that the difference between two floats is smaller than a given delta.
 	 *
 	 * @param float      $expected The expected value.

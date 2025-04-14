@@ -19,6 +19,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/Section',
+	title: 'Components/Section',
 	component: Section,
 };

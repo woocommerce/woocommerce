@@ -8,12 +8,17 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Checkout class.
  */
 class WC_Checkout {
+	use CogsAwareTrait;
 
 	/**
 	 * The single instance of the class.
@@ -393,7 +398,7 @@ class WC_Checkout {
 			 * different items or cost, create a new order. We use a hash to
 			 * detect changes which is based on cart items + order total.
 			 */
-			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) ) {
 				/**
 				 * Indicates that we are resuming checkout for an existing order (which is pending payment, and which
 				 * has not changed since it was added to the current shopping session).
@@ -423,7 +428,7 @@ class WC_Checkout {
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
-					// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
+					// Store custom fields prefixed with either shipping_ or billing_. This is for backwards compatibility with 2.6.x.
 				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
 					if ( ! isset( $shipping_fields[ $key ] ) ) {
 						$order->update_meta_data( '_' . $key, $value );
@@ -450,6 +455,10 @@ class WC_Checkout {
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$this->set_data_from_cart( $order );
+
+			if ( $this->cogs_is_enabled() ) {
+				$order->calculate_cogs_total_value();
+			}
 
 			/**
 			 * Action hook to adjust order before save.
@@ -478,7 +487,7 @@ class WC_Checkout {
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order && $order instanceof WC_Order ) {
-				$order->get_data_store()->release_held_coupons( $order );
+				wc_release_coupons_for_order( $order );
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
 				 *
@@ -546,8 +555,8 @@ class WC_Checkout {
 					array(
 						'name'         => $product->get_name(),
 						'tax_class'    => $product->get_tax_class(),
-						'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
-						'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
+						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
+						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
 					)
 				);
 			}
@@ -624,6 +633,7 @@ class WC_Checkout {
 						'taxes'        => array(
 							'total' => $shipping_rate->taxes,
 						),
+						'tax_status'   => $shipping_rate->tax_status,
 					)
 				);
 
@@ -876,6 +886,9 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
+					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
+					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
+
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
@@ -934,7 +947,7 @@ class WC_Checkout {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $data['terms-field'] ) ) {
-			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
+			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), array( 'id' => 'terms' ) );
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
@@ -945,7 +958,7 @@ class WC_Checkout {
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
 					/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
-					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . $shipping_country ) );
+					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix( $shipping_country ) . ' ' . $shipping_country ) );
 				}
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -1077,6 +1090,16 @@ class WC_Checkout {
 
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
+			wc_log_order_step(
+				'[Shortcode #6A] Order payment processed successfully',
+				array(
+					'order_id'       => $order_id,
+					'payment_method' => $payment_method,
+					'redirected'     => ! wp_doing_ajax() ? 'yes' : 'no',
+				),
+				true
+			);
+
 			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
@@ -1098,6 +1121,15 @@ class WC_Checkout {
 		$order = wc_get_order( $order_id );
 		$order->payment_complete();
 		wc_empty_cart();
+
+		wc_log_order_step(
+			'[Shortcode #6B] Order processed without payment',
+			array(
+				'order_object' => $order,
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
+			),
+			true
+		);
 
 		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(
@@ -1191,7 +1223,7 @@ class WC_Checkout {
 				if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
 					$customer->{"set_{$key}"}( $value );
 
-					// Store custom fields prefixed with wither shipping_ or billing_.
+					// Store custom fields prefixed with either shipping_ or billing_.
 				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
 					$customer->update_meta_data( $key, $value );
 				}
@@ -1266,6 +1298,8 @@ class WC_Checkout {
 				throw new Exception( $expiry_message );
 			}
 
+			wc_log_order_step( '[Shortcode #1] Place Order flow initiated', null, false, true );
+
 			do_action( 'woocommerce_checkout_process' );
 
 			$errors      = new WP_Error();
@@ -1274,8 +1308,14 @@ class WC_Checkout {
 			// Update session for customer and totals.
 			$this->update_session( $posted_data );
 
+			wc_log_order_step( '[Shortcode #2] Session updated with checkout data and totals calculated' );
+
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
+
+			if ( empty( $errors->errors ) ) {
+				wc_log_order_step( '[Shortcode #3] Checkout posted data validated', array( 'payment_method' => $posted_data['payment_method'] ) );
+			}
 
 			foreach ( $errors->errors as $code => $messages ) {
 				$data = $errors->get_error_data( $code );
@@ -1297,7 +1337,17 @@ class WC_Checkout {
 					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
 				}
 
+				wc_log_order_step(
+					'[Shortcode #4] Validated/Created customer and created order object',
+					array( 'order_object' => $order )
+				);
+
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
+
+				wc_log_order_step(
+					'[Shortcode #5] woocommerce_checkout_order_processed hook ran successfully',
+					array( 'order_object' => $order )
+				);
 
 				/**
 				 * Note that woocommerce_cart_needs_payment is only used in
@@ -1316,6 +1366,8 @@ class WC_Checkout {
 				}
 			}
 		} catch ( Exception $e ) {
+			// Step logs the exception. If nothing abnormal occurred during the process_checkout flow, the log is removed.
+			wc_log_order_step( '[Shortcode #EXPECTEDFAIL] ' . $e->getMessage(), array( 'error_code' => $e->getCode() ), true );
 			wc_add_notice( $e->getMessage(), 'error' );
 		}
 		$this->send_ajax_failure_response();

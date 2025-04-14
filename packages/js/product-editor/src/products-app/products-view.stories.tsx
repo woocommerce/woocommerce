@@ -59,7 +59,7 @@ const ProductsView = ( {
 };
 
 export default {
-	title: 'Product App/Products View',
+	title: 'Product Editor/Product App/Products View',
 	component: ProductsView,
 };
 

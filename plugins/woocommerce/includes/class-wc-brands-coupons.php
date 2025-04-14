@@ -2,6 +2,8 @@
 
 declare( strict_types = 1);
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * WC_Brands_Coupons class.
  *
@@ -182,7 +184,7 @@ class WC_Brands_Coupons {
 	 * @return int Product ID
 	 */
 	private function get_product_id( $product ) {
-		return $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+		return $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id();
 	}
 }
 

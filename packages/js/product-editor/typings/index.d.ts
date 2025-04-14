@@ -65,3 +65,42 @@ declare module '@wordpress/edit-site/build-module/components/site-hub' {
 	} >;
 	export default SiteHub;
 }
+
+declare module '@wordpress/interface/build-module/components/pinned-items' {
+	const PinnedItems: React.FunctionComponent< {
+		scope: string;
+		children: React.ReactNode;
+	} > & {
+		Slot: React.FunctionComponent< {
+			children?: React.ReactNode;
+			scope: string;
+		} >;
+	};
+	export default PinnedItems;
+}
+
+declare module '@wordpress/interface/build-module/components/action-item' {
+	const ActionItem: React.FunctionComponent< {
+		children: React.ReactNode;
+		scope: string;
+	} > & {
+		Slot: React.FunctionComponent< {
+			children?: React.ReactNode;
+			name: string;
+			label: string;
+			as: React.ElementType;
+			fillProps: Record< string, unknown >;
+		} >;
+	};
+	export default ActionItem;
+}
+
+declare module '@wordpress/interface/build-module/components/interface-skeleton' {
+	const InterfaceSkeleton: React.FunctionComponent< {
+		children?: React.ReactNode;
+		header?: React.ReactNode;
+		content?: React.ReactNode;
+		actions?: React.ReactNode;
+	} >;
+	export default InterfaceSkeleton;
+}

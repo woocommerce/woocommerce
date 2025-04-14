@@ -19,6 +19,7 @@ const {
 	sanitizeBranchName,
 } = require( './utils' );
 const config = require( './config' );
+const { calculateDelta } = require( './calculate-delta.ts' );
 const { processPerformanceReports } = require( './process-reports.ts' );
 
 const ARTIFACTS_PATH =
@@ -31,6 +32,7 @@ const ARTIFACTS_PATH =
  * @property {number=}  rounds           Run each test suite this many times for each branch.
  * @property {string=}  testsBranch      The branch whose performance test files will be used for testing.
  * @property {boolean=} skipBenchmarking Skip benchmarking and get to report processing (reports supplied from outside).
+ * @property {boolean=} delta            Check the difference in performance between branches in percentage.
  * @property {string=}  wpVersion        The WordPress version to be used as the base install for testing.
  */
 
@@ -63,6 +65,7 @@ async function runTestSuite( testSuite, testRunnerDir, runKey ) {
 async function runPerformanceTests( branches, options ) {
 	const runningInCI = !! process.env.CI || !! options.ci;
 	const skipBenchmarking = !! options.skipBenchmarking;
+	const delta = !! options.delta;
 	const TEST_ROUNDS = options.rounds || 1;
 
 	// The default value doesn't work because commander provides an array.
@@ -97,6 +100,9 @@ async function runPerformanceTests( branches, options ) {
 		} );
 
 		await processPerformanceReports( testSuites, branches );
+		if ( delta ) {
+			calculateDelta( testSuites, branches );
+		}
 		return;
 	}
 
@@ -321,6 +327,9 @@ async function runPerformanceTests( branches, options ) {
 	}
 
 	await processPerformanceReports( testSuites, branches );
+	if ( delta ) {
+		calculateDelta( testSuites, branches );
+	}
 }
 
 module.exports = {

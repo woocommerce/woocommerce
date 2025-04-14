@@ -28,6 +28,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/OrderStatus',
+	title: 'Components/OrderStatus',
 	component: OrderStatus,
 };

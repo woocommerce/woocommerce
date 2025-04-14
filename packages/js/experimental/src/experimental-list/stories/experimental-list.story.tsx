@@ -13,7 +13,7 @@ import { ListProps } from '../experimental-list';
 import './style.scss';
 
 export default {
-	title: 'WooCommerce Admin/experimental/List',
+	title: 'Experimental/List',
 	component: List,
 	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 	argTypes: {
@@ -48,7 +48,6 @@ export const Primary = Template.bind( { onClick: () => {} } );
 Primary.args = {
 	listType: 'ul',
 	animation: 'slide-right',
-	direction: 'top',
 };
 
 export const CollapsibleListExample: Story = ( args ) => {
@@ -65,7 +64,7 @@ export const CollapsibleListExample: Story = ( args ) => {
 				// eslint-disable-next-line no-console
 				console.log( 'expanded' );
 			} }
-			direction="top"
+			direction="up"
 			{ ...args }
 		>
 			<ListItem onClick={ () => {} }>

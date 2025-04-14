@@ -3,9 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
  * Product Filter: Attribute Block.
@@ -26,11 +26,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
-		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
 		parent::initialize();
 
-		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
-		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+		add_filter( 'woocommerce_blocks_product_filters_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
+		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
 		add_action( 'deleted_transient', array( $this, 'delete_default_attribute_id_transient' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 	}
@@ -84,13 +83,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Register the active filters data.
+	 * Prepare the active filter items.
 	 *
-	 * @param array $data   The active filters data.
+	 * @param array $items  The active filter items.
 	 * @param array $params The query param parsed from the URL.
-	 * @return array Active filters data.
+	 * @return array Active filters items.
 	 */
-	public function register_active_filters_data( $data, $params ) {
+	public function prepare_selected_filters( $items, $params ) {
 		$product_attributes_map = array_reduce(
 			wc_get_attribute_taxonomies(),
 			function ( $acc, $attribute_object ) {
@@ -118,40 +117,27 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		);
 
-		$action_namespace = $this->get_full_block_name();
-
 		foreach ( $active_product_attributes as $product_attribute ) {
-			$terms = explode( ',', get_query_var( "filter_{$product_attribute}" ) );
+			if ( empty( $params[ "filter_{$product_attribute}" ] ) ) {
+				continue;
+			}
+			$terms                = explode( ',', $params[ "filter_{$product_attribute}" ] );
+			$attribute_label      = wc_attribute_label( "pa_{$product_attribute}" );
+			$attribute_query_type = $params[ "query_type_{$product_attribute}" ] ?? 'or';
 
 			// Get attribute term by slug.
-			$terms = array_map(
-				function ( $term ) use ( $product_attribute, $action_namespace ) {
-					$term_object = get_term_by( 'slug', $term, "pa_{$product_attribute}" );
-					return array(
-						'title'      => $term_object->name,
-						'attributes' => array(
-							'value'             => $term,
-							'data-wc-on--click' => "$action_namespace::actions.toggleFilter",
-							'data-wc-context'   => "$action_namespace::" . wp_json_encode(
-								array(
-									'attributeSlug' => $product_attribute,
-									'queryType'     => get_query_var( "query_type_{$product_attribute}" ),
-								),
-								JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-							),
-						),
-					);
-				},
-				$terms
-			);
-
-			$data[ $product_attribute ] = array(
-				'type'  => $product_attributes_map[ $product_attribute ],
-				'items' => $terms,
-			);
+			foreach ( $terms as $term ) {
+				$term_object = get_term_by( 'slug', $term, "pa_{$product_attribute}" );
+				$items[]     = array(
+					'type'               => 'attribute/' . $product_attribute,
+					'value'              => $term,
+					'activeLabel'        => "$attribute_label: $term_object->name",
+					'attributeQueryType' => $attribute_query_type,
+				);
+			}
 		}
 
-		return $data;
+		return $items;
 	}
 
 	/**
@@ -175,83 +161,84 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
 		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
+		$hide_empty        = $block_attributes['hideEmpty'] ?? true;
+		$orderby           = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
+		$order             = $block_attributes['sortOrder'] ? strtoupper( explode( '-', $block_attributes['sortOrder'] )[1] ) : 'DESC';
 
-		if ( empty( $attribute_counts ) ) {
-			return sprintf(
-				'<div %s></div>',
-				get_block_wrapper_attributes(
-					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					)
-				),
-			);
+		$args = array(
+			'taxonomy' => $product_attribute->slug,
+			'orderby'  => $orderby,
+			'order'    => $order,
+		);
+
+		if ( $hide_empty ) {
+			$args['include'] = array_keys( $attribute_counts );
+		} else {
+			$args['hide_empty'] = false;
 		}
 
-		$attribute_terms = get_terms(
-			array(
-				'taxonomy' => $product_attribute->slug,
-				'include'  => array_keys( $attribute_counts ),
-			)
-		);
+		$attribute_terms = get_terms( $args );
 
-		$selected_terms = array_filter(
-			explode(
-				',',
-				get_query_var( 'filter_' . str_replace( 'pa_', '', $product_attribute->slug ) )
-			)
-		);
+		$filter_param_key = 'filter_' . str_replace( 'pa_', '', $product_attribute->slug );
+		$filter_params    = $block->context['filterParams'] ?? array();
+		$selected_terms   = array();
 
-		$attribute_options = array_map(
-			function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
-				$term             = (array) $term;
-				$term['count']    = $attribute_counts[ $term['term_id'] ];
-				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
-				return array(
-					'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
-					'value'    => $term['slug'],
-					'selected' => $term['selected'],
-					'rawData'  => $term,
-				);
-			},
-			$attribute_terms
-		);
-
-		$filtered_options = array_filter(
-			$attribute_options,
-			function ( $option ) use ( $block_attributes ) {
-				$hide_empty = $block_attributes['hideEmpty'] ?? true;
-				if ( $hide_empty ) {
-					return $option['rawData']['count'] > 0;
-				}
-				return true;
-			}
-		);
+		if ( $filter_params && ! empty( $filter_params[ $filter_param_key ] ) ) {
+			$selected_terms = array_filter( explode( ',', $filter_params[ $filter_param_key ] ) );
+		}
 
 		$filter_context = array(
-			'action' => "{$this->get_full_block_name()}::actions.toggleFilter",
-			'items'  => $filtered_options,
+			'showCounts' => $block_attributes['showCounts'] ?? false,
+			'items'      => array(),
 		);
 
-		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-			$content .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
+		if ( ! empty( $attribute_counts ) ) {
+			$attribute_options = array_map(
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
+					$term          = (array) $term;
+					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
+					return array(
+						'label'              => $term['name'],
+						'ariaLabel'          => $term['name'],
+						'value'              => $term['slug'],
+						'selected'           => in_array( $term['slug'], $selected_terms, true ),
+						'count'              => $term['count'],
+						'type'               => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+						'attributeQueryType' => $block_attributes['queryType'],
+					);
+				},
+				$attribute_terms
+			);
+
+			$filter_context['items'] = $attribute_options;
 		}
 
-		$context = array(
-			'attributeSlug'      => str_replace( 'pa_', '', $product_attribute->slug ),
-			'queryType'          => $block_attributes['queryType'],
-			'selectType'         => 'multiple',
-			'hasSelectedFilters' => count( $selected_terms ) > 0,
+		$wrapper_attributes = array(
+			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context' => wp_json_encode(
+				array(
+					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
+					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
 		);
+
+		if ( empty( $filter_context['items'] ) ) {
+			$wrapper_attributes['hidden'] = true;
+		}
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
-			get_block_wrapper_attributes(
-				array(
-					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-				)
-			),
-			$content
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 
@@ -263,24 +250,26 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
-		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		if ( 'and' !== strtolower( $query_type ) ) {
 			unset( $query_vars[ 'filter_' . str_replace( 'pa_', '', $slug ) ] );
 		}
 
-		unset(
-			$query_vars['taxonomy'],
-			$query_vars['term']
-		);
+		if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
+			unset(
+				$query_vars['taxonomy'],
+				$query_vars['term']
+			);
+		}
 
 		if ( ! empty( $query_vars['tax_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
 		}
 
-		$counts           = $filters->get_attribute_counts( $query_vars, $slug );
+		$container        = wc_get_container();
+		$counts           = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_attribute_counts( $query_vars, $slug );
 		$attribute_counts = array();
 
 		foreach ( $counts as $key => $value ) {
@@ -400,14 +389,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 		<!-- wp:heading {"level":3} -->
 		<h3 class="wp-block-heading">{{attribute_label}}</h3>
 		<!-- /wp:heading -->
-
-		<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
-		<!-- wp:buttons {"layout":{"type":"flex"}} -->
-		<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
-			<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
-			<!-- /wp:button --></div>
-		<!-- /wp:buttons -->
-		<!-- /wp:woocommerce/product-filter-clear-button --></div>
 	<!-- /wp:group -->
 
 	<!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true}} -->
@@ -427,16 +408,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Skip default rendering routine for inner blocks.
+	 * Disable the block type script, this uses script modules.
 	 *
-	 * @param array $settings Array of determined settings for registering a block type.
-	 * @param array $metadata Metadata provided for registering a block type.
-	 * @return array
+	 * @param string|null $key The key.
+	 *
+	 * @return null
 	 */
-	public function add_block_type_metadata_settings( $settings, $metadata ) {
-		if ( ! empty( $metadata['name'] ) && "woocommerce/{$this->block_name}" === $metadata['name'] ) {
-			$settings['skip_inner_blocks'] = true;
-		}
-		return $settings;
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }

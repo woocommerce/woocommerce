@@ -4,7 +4,7 @@ post_title: Template structure & Overriding templates via a theme
 
 ---
 
-**NOTE** This document makes reference to classic themes which use PHP templates. If you are working on a block theme with HTML templates, [please check the Theming docs for block themes](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/designers/theming/README.md).
+**NOTE** This document makes reference to classic themes which use PHP templates. If you are working on a block theme with HTML templates, [please check the Theming docs for block themes](../block-theme-development/theming-woo-blocks.md).
 Overview
 
 ---
@@ -22,77 +22,14 @@ Below is video walkthrough showing how one may go about updating the template fi
 
 ## Template list
 
-The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Below are links to the current and earlier versions of the WooCommerce template files on Github, where you can view the code exactly as it appears in those files:
+The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Alternatively, you can find the [template files on our repository on GitHub](https://github.com/woocommerce/woocommerce/blob/trunk/docs/theme-development/template-structure.md).
 
-| Latest Version | Files |
-| -------------- | ----- | 
-| 8.9            | [View template files](https://github.com/woocommerce/woocommerce/tree/8.9.0/plugins/woocommerce/templates) |
+Note: if you are looking for the template files of older versions, you can find them in these paths:
 
-Below are the links to the files of all major previous WooCommerce versions: 
-
-| Version        | Files |
-| -------------- | ----- | 
-| 8.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.8.0/plugins/woocommerce/templates) |
-| 8.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.7.0/plugins/woocommerce/templates) |
-| 8.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.6.0/plugins/woocommerce/templates) |
-| 8.5.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.5.0/plugins/woocommerce/templates) |
-| 8.4.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.4.0/plugins/woocommerce/templates) |
-| 8.3.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.3.0/plugins/woocommerce/templates) |
-| 8.2.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.2.0/plugins/woocommerce/templates) |
-| 8.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.1.0/plugins/woocommerce/templates) |
-| 8.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/8.0.0/plugins/woocommerce/templates) |
-| 7.9.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.9.0/plugins/woocommerce/templates) |
-| 7.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.8.0/plugins/woocommerce/templates) |
-| 7.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.7.0/plugins/woocommerce/templates) |
-| 7.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.6.0/plugins/woocommerce/templates) |
-| 7.5.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.5.0/plugins/woocommerce/templates) |
-| 7.4.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.4.0/plugins/woocommerce/templates) |
-| 7.3.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.3.0/plugins/woocommerce/templates) |
-| 7.2.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.2.0/plugins/woocommerce/templates) |
-| 7.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.1.0/plugins/woocommerce/templates) |
-| 7.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/7.0.0/plugins/woocommerce/templates) |
-| 6.9.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.9.0/plugins/woocommerce/templates) |
-| 6.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.8.0/plugins/woocommerce/templates) |
-| 6.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.7.0/plugins/woocommerce/templates) |
-| 6.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.6.0/plugins/woocommerce/templates) |
-| 6.5.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.5.0/plugins/woocommerce/templates) |
-| 6.4.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.4.0/plugins/woocommerce/templates) |
-| 6.3.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.3.0/plugins/woocommerce/templates) |
-| 6.2.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.2.0/plugins/woocommerce/templates) |
-| 6.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.1.0/plugins/woocommerce/templates) |
-| 6.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/6.0.0/plugins/woocommerce/templates) |
-| 5.9.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.9.0/templates) |
-| 5.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.8.0/templates) | 
-| 5.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.7.0/templates) |
-| 5.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.6.0/templates) |
-| 5.5.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.5.0/templates) |
-| 5.4.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.4.0/templates) |
-| 5.3.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.3.0/templates) |
-| 5.2.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.2.0/templates) |
-| 5.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.1.0/templates) |
-| 5.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/5.0.0/templates) |
-| 4.9.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.9.0/templates) |
-| 4.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.8.0/templates) |
-| 4.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.7.0/templates) |
-| 4.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.6.0/templates) |
-| 4.5.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.5.0/templates) |
-| 4.4.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.4.0/templates) |
-| 4.3.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.3.0/templates) |
-| 4.2.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.2.0/templates) |
-| 4.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.1.0/templates) |
-| 4.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/4.0.0/templates) |
-| 3.9.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.9.0/templates) |
-| 3.8.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.8.0/templates) |
-| 3.7.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.7.0/templates) |
-| 3.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.6.0/templates) |
-| 3.5.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.5.0/templates) |
-| 3.4.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.4.0/templates) |
-| 3.3.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.3.0/templates) |
-| 3.2.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.2.0/templates) |
-| 3.1.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.1.0/templates) |
-| 3.0.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/3.0.0/templates) |
-| 2.6.0          | [View template files](https://github.com/woocommerce/woocommerce/tree/2.6.0/templates) |
-
+* Versions 6.0.0 and later: `https://github.com/woocommerce/woocommerce/tree/[VERSION_NUMBER]/plugins/woocommerce/templates`
+    * For example, to find the template files for WooCommerce 9.4.0, you would navigate to [https://github.com/woocommerce/woocommerce/tree/9.4.0/plugins/woocommerce/templates](https://github.com/woocommerce/woocommerce/tree/9.4.0/plugins/woocommerce/templates).
+* Versions prior to 6.0.0: `https://github.com/woocommerce/woocommerce/tree/[VERSION_NUMBER]/templates`
+    * For example, to find the template files for WooCommerce 5.9.0, you would navigate to [https://github.com/woocommerce/woocommerce/tree/5.9.0/templates](https://github.com/woocommerce/woocommerce/tree/5.9.0/templates).
              
 ## Changing Templates via Hooks
 

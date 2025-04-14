@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Performance: introduce pending product reviews counter caching for better admin performance.

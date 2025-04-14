@@ -5,7 +5,7 @@ import { PanelBody } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
-	// @ts-expect-error no exported member
+	// @ts-expect-error __experimentalPublishDateTimePicker does not exist
 	__experimentalPublishDateTimePicker as PublishDateTimePicker,
 } from '@wordpress/block-editor';
 

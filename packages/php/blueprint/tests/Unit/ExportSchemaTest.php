@@ -49,7 +49,7 @@ class ExportSchemaTest extends TestCase {
 		$result = $mock->export();
 		$this->assertCount( 1, $result['steps'] );
 		$this->assertEquals( 'setSiteOptions', $result['steps'][0]['step'] );
-		$this->assertEquals( array(), $result['steps'][0]['options'] );
+		$this->assertEquals( (object) array(), $result['steps'][0]['options'] );
 	}
 
 	/**
@@ -70,27 +70,28 @@ class ExportSchemaTest extends TestCase {
 	}
 
 	/**
-	 * Test that it uses the exporters from the filter.
-	 *
-	 * @return void
-	 */
-	public function test_wooblueprint_exporters_filter() {
-	}
-
-	/**
 	 * Test that it filters out exporters that are not in the list of steps to export.
 	 *
 	 * @return void
 	 */
 	public function test_it_only_uses_exporters_specified_by_steps_argment() {
-	}
+		$mock = Mock(
+			ExportSchema::class,
+			array(
+				array(
+					new EmptySetSiteOptionsExporter(),
+				),
+			)
+		);
+		$mock->makePartial();
 
-	/**
-	 * Test that it calls include_private_plugins method on ExportInstallPluginSteps when
-	 * exporting a zip schema.
-	 *
-	 * @return void
-	 */
-	public function test_it_calls_include_private_plugins_for_zip_export() {
+		$result = $mock->export(
+			array(
+				'setSiteOptions',
+			)
+		);
+
+		$this->assertCount( 1, $result['steps'] );
+		$this->assertEquals( 'setSiteOptions', $result['steps'][0]['step'] );
 	}
 }

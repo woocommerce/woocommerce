@@ -7,9 +7,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import classNames from 'classnames';
 import { createElement } from '@wordpress/element';
 import {
-	// @ts-expect-error missing type.
 	__experimentalItem as Item,
-	// @ts-expect-error missing type.
 	__experimentalHStack as HStack,
 	FlexBlock,
 } from '@wordpress/components';
@@ -28,7 +26,7 @@ type SidebarNavigationItemProps = {
 	withChevron?: boolean;
 	uid?: string;
 	params?: Record< string, string >;
-	onClick?: ( e: Event ) => void;
+	onClick?: ( e: React.MouseEvent ) => void;
 	children: React.ReactNode;
 };
 
@@ -45,7 +43,7 @@ export default function SidebarNavigationItem( {
 }: SidebarNavigationItemProps ) {
 	const history = useHistory();
 	// If there is no custom click handler, create one that navigates to `params`.
-	function handleClick( e: Event ) {
+	function handleClick( e: React.MouseEvent ) {
 		if ( onClick ) {
 			onClick( e );
 		} else if ( params ) {

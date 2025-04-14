@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Limit clearing of wc_count_comments transient to applicable comments.

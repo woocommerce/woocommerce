@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fixed fatal error call to a member function is_empty() | mini-cart.php:24
-

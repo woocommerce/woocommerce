@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Ignore Analytics report entries in the legacy `woocommerce_admin_reports` filter

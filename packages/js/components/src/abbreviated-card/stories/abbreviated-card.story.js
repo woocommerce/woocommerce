@@ -15,6 +15,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/AbbreviatedCard',
+	title: 'Components/AbbreviatedCard',
 	component: AbbreviatedCard,
 };

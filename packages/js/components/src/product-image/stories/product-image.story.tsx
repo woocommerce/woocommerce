@@ -21,6 +21,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/ProductImage',
+	title: 'Components/ProductImage',
 	component: ProductImage,
 };

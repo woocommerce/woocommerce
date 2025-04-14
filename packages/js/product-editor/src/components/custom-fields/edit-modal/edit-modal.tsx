@@ -45,7 +45,7 @@ export function EditModal( {
 	}
 
 	function changeHandler( prop: keyof Metadata< string > ) {
-		return function handleChange( value: string | null ) {
+		return function handleChange( value: string | null | undefined ) {
 			setCustomField( ( current ) => ( {
 				...current,
 				[ prop ]: value,

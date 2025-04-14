@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! empty( $methods ) ) {
 					foreach ( $methods as $method ) {
 						$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
+						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '" data-id="' . esc_attr( $method->instance_id ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
 				} else {
 					echo '<li>' . esc_html_e( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';

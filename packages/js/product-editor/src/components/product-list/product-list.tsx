@@ -102,7 +102,6 @@ export function ProductList( {
 							>
 								<Button
 									icon={ external }
-									size={ 24 }
 									aria-label={ __(
 										'See product page',
 										'woocommerce'
@@ -116,7 +115,6 @@ export function ProductList( {
 								/>
 								<Button
 									icon={ closeSmall }
-									size={ 24 }
 									aria-label={ __(
 										'Remove product',
 										'woocommerce'

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Product Gallery ( Beta ): migrates thumbnails to iAPI and simplifies the code.

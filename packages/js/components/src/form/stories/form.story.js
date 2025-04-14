@@ -121,6 +121,6 @@ export const Basic = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/Form',
+	title: 'Components/Form',
 	component: Form,
 };

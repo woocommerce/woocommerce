@@ -11,6 +11,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/ViewMoreList',
+	title: 'Components/ViewMoreList',
 	component: ViewMoreList,
 };

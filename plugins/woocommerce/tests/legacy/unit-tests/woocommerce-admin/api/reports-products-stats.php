@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Products_Stats
  */
@@ -62,7 +64,7 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$time = time();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );

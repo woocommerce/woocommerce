@@ -2,8 +2,7 @@
  * External dependencies
  */
 
-import { registerStore } from '@wordpress/data';
-import { Reducer } from 'redux';
+import { createReduxStore, register } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -12,17 +11,17 @@ import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
-import reducer, { ProductState, State } from './reducer';
+import reducer from './reducer';
 import controls from '../controls';
 
-registerStore< State >( STORE_NAME, {
-	// @ts-expect-error There are no types for this.
-	__experimentalUseThunks: true,
-	reducer: reducer as Reducer< ProductState >,
+export const store = createReduxStore( STORE_NAME, {
+	reducer,
 	actions,
 	controls,
 	selectors,
 	resolvers,
 } );
+
+register( store );
 
 export const PRODUCTS_STORE_NAME = STORE_NAME;

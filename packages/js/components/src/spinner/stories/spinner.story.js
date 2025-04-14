@@ -10,6 +10,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/Spinner',
+	title: 'Components/Spinner',
 	component: Spinner,
 };

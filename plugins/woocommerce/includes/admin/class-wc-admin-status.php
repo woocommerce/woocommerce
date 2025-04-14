@@ -206,7 +206,7 @@ class WC_Admin_Status {
 	 * @return array
 	 */
 	public static function scan_template_files( $template_path ) {
-		$files  = @scandir( $template_path ); // @codingStandardsIgnoreLine.
+		$files  = is_string( $template_path ) ? @scandir( $template_path ) : array(); // @codingStandardsIgnoreLine.
 		$result = array();
 
 		if ( ! empty( $files ) ) {

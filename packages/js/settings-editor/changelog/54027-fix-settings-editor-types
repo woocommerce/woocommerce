@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the type errors that introduced by the React 18 upgrade in the settings-editor package.

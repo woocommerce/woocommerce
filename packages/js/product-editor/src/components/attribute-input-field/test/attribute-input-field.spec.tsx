@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useState, createElement } from '@wordpress/element';
 import type {
 	ProductProductAttribute,
@@ -181,7 +182,7 @@ describe( 'AttributeInputField', () => {
 				onChange={ jest.fn() }
 			/>
 		);
-		queryByText( 'Update Input' )?.click();
+		userEvent.click( queryByText( 'Update Input' )! );
 		expect(
 			queryByText( attributeList[ 0 ].name )
 		).not.toBeInTheDocument();
@@ -208,7 +209,7 @@ describe( 'AttributeInputField', () => {
 		const { queryByText } = render(
 			<AttributeInputField onChange={ jest.fn() } />
 		);
-		queryByText( 'Update Input' )?.click();
+		userEvent.click( queryByText( 'Update Input' ) as HTMLElement );
 		expect( queryByText( 'Create "Co"' ) ).toBeInTheDocument();
 	} );
 } );

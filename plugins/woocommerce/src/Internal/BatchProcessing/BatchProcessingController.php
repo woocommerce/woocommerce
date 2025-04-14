@@ -257,7 +257,7 @@ class BatchProcessingController {
 	 * @param float                   $time_taken Time take by the batch to complete processing.
 	 * @param \Exception|null         $last_error Exception object in processing the batch, if there was one.
 	 */
-	private function update_processor_state( BatchProcessorInterface $batch_processor, float $time_taken, \Exception $last_error = null ): void {
+	private function update_processor_state( BatchProcessorInterface $batch_processor, float $time_taken, ?\Exception $last_error = null ): void {
 		$current_status                      = $this->get_process_details( $batch_processor );
 		$current_status['total_time_spent'] += $time_taken;
 		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;

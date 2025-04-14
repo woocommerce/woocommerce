@@ -1,5 +1,5 @@
 <?php
-
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
@@ -111,8 +111,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
-
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
@@ -157,26 +155,9 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'Nonce-Timestamp', time() );
 		$response->header( 'User-ID', get_current_user_id() );
 		$response->header( 'Cart-Token', $this->get_cart_token() );
+		$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
 
 		return $response;
-	}
-
-	/**
-	 * Load the cart session before handling responses.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->has_cart_token( $request ) ) {
-			// Overrides the core session class.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
-		}
-		$this->cart_controller->load_cart();
 	}
 
 	/**
@@ -188,6 +169,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return string
 	 */
 	protected function get_cart_token() {
+		// Ensure cart is loaded.
+		$this->cart_controller->load_cart();
+
+		if ( ! wc()->session ) {
+			return null;
+		}
+
 		return JsonWebToken::create(
 			[
 				'user_id' => wc()->session->get_customer_id(),

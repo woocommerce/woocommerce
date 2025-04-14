@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * WooPayments Promotion engine.
@@ -19,8 +20,16 @@ class Init extends RemoteSpecsEngine {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$is_payments_page = isset( $_GET['page'] ) && $_GET['page'] === 'wc-settings' && isset( $_GET['tab'] ) && $_GET['tab'] === 'checkout'; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( ! wp_is_json_request() && ! $is_payments_page ) {
+		// If the React-based Payments settings page is enabled, we don't need the old WooPayments promotion system,
+		// as we will show the WooPayments suggestion with the new system.
+		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			return;
+		}
+
+		/* phpcs:disable WordPress.Security.NonceVerification */
+		$is_payments_setting_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab'];
+
+		if ( ! wp_is_json_request() && ! $is_payments_setting_page ) {
 			return;
 		}
 
@@ -76,25 +85,28 @@ class Init extends RemoteSpecsEngine {
 	public static function set_gateway_top_of_list( $ordering ) {
 		$ordering = (array) $ordering;
 		$id       = WCPaymentGatewayPreInstallWCPayPromotion::GATEWAY_ID;
-		// Only tweak the ordering if the list hasn't been reordered with WooCommerce Payments in it already.
+		// Only tweak the ordering if the list hasn't been reordered with WooPayments in it already.
 		if ( ! isset( $ordering[ $id ] ) || ! is_numeric( $ordering[ $id ] ) ) {
-			$is_empty        = empty( $ordering ) || ( count( $ordering ) === 1 && $ordering[0] === false );
-			$ordering[ $id ] = $is_empty ? 0 : ( min( $ordering ) - 1 );
+			$is_empty        = empty( $ordering ) || ( count( $ordering ) === 1 && in_array( $ordering[0], array( false, '' ) ) );
+			$ordering[ $id ] = $is_empty ? 0 : ( min( array_map( 'intval', $ordering ) ) - 1 );
 		}
+
 		return $ordering;
 	}
 
 	/**
 	 * Get WooPayments promotion spec.
 	 *
+	 * @param boolean $fetch_from_remote Whether to fetch the spec from remote or not.
+	 *
 	 * @return object|false WooPayments promotion spec or false if there isn't one.
 	 */
-	public static function get_wc_pay_promotion_spec() {
-		$promotions            = self::get_promotions();
+	public static function get_wc_pay_promotion_spec( $fetch_from_remote = true ) {
+		$promotions            = $fetch_from_remote ? self::get_promotions() : self::get_cached_or_default_promotions();
 		$wc_pay_promotion_spec = array_values(
 			array_filter(
 				$promotions,
-				function( $promotion ) {
+				function ( $promotion ) {
 					return isset( $promotion->plugins ) && in_array( 'woocommerce-payments', $promotion->plugins, true );
 				}
 			)
@@ -137,12 +149,29 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
+	 * Gets either cached or default promotions.
+	 *
+	 * @return array
+	 */
+	public static function get_cached_or_default_promotions() {
+		$specs = 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' )
+			? DefaultPromotions::get_all()
+			: WCPayPromotionDataSourcePoller::get_instance()->get_cached_specs();
+
+		if ( ! is_array( $specs ) || 0 === count( $specs ) ) {
+			$specs = DefaultPromotions::get_all();
+		}
+		$results = EvaluateSuggestion::evaluate_specs( $specs, array( 'source' => 'wc-wcpay-promotions' ) );
+		return $results['suggestions'];
+	}
+
+	/**
 	 * Get merchant WooPay eligibility.
 	 *
 	 * @return boolean If merchant is eligible for WooPay.
 	 */
 	public static function is_woopay_eligible() {
-		$wcpay_promotion = self::get_wc_pay_promotion_spec();
+		$wcpay_promotion = self::get_wc_pay_promotion_spec( false );
 
 		return $wcpay_promotion && 'woocommerce_payments:woopay' === $wcpay_promotion->id;
 	}
@@ -181,4 +210,3 @@ class Init extends RemoteSpecsEngine {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );
 	}
 }
-

@@ -8,7 +8,7 @@ import { createElement } from '@wordpress/element';
  */
 import { CollapsibleContent } from '../';
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	return (
 		<CollapsibleContent toggleText="Advanced">
 			All this business in here is collapsed.
@@ -16,7 +16,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const Expanded: React.FC = () => {
+export const Expanded = () => {
 	return (
 		<CollapsibleContent toggleText="Advanced" initialCollapsed={ false }>
 			All this business in here is initially expanded.
@@ -25,6 +25,6 @@ export const Expanded: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/CollapsibleContent',
+	title: 'Components/CollapsibleContent',
 	component: Basic,
 };

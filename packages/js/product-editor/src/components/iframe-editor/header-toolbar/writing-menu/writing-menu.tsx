@@ -13,7 +13,6 @@ import {
 } from '@wordpress/preferences';
 
 export function WritingMenu() {
-	// @ts-expect-error missing types.
 	const { set: setPreference } = useDispatch( preferencesStore );
 
 	const turnOffDistractionFree = () => {

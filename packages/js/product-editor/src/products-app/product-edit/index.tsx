@@ -1,20 +1,18 @@
 /**
  * External dependencies
  */
+import { productsStore } from '@woocommerce/data';
 import { DataForm, isItemValid } from '@wordpress/dataviews';
 import type { Form } from '@wordpress/dataviews';
 import { createElement, useState, useMemo } from '@wordpress/element';
+import { FormEvent } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
 import {
-	// @ts-expect-error missing types.
 	__experimentalHeading as Heading,
-	// @ts-expect-error missing types.
 	__experimentalText as Text,
-	// @ts-expect-error missing types.
 	__experimentalHStack as HStack,
-	// @ts-expect-error missing types.
 	__experimentalVStack as VStack,
 	FlexItem,
 	Button,
@@ -62,7 +60,9 @@ export default function ProductEdit( {
 			return {
 				initialEdits:
 					ids.length === 1
-						? select( 'wc/admin/products' ).getProduct( ids[ 0 ] )
+						? select( productsStore ).getProduct(
+								Number.parseInt( ids[ 0 ], 10 )
+						  )
 						: null,
 			};
 		},
@@ -77,13 +77,14 @@ export default function ProductEdit( {
 	}, [ initialEdits, edits ] );
 	const isUpdateDisabled = ! isItemValid(
 		itemWithEdits,
+		// @ts-expect-error productFields is not typed correctly.
 		productFields,
 		form
 	);
 
-	const onSubmit = async ( event: Event ) => {
+	const onSubmit = async ( event: FormEvent ) => {
 		event.preventDefault();
-
+		// @ts-expect-error productFields is not typed correctly.
 		if ( ! isItemValid( itemWithEdits, productFields, form ) ) {
 			return;
 		}
@@ -136,6 +137,7 @@ export default function ProductEdit( {
 					<VStack spacing={ 4 } as="form" onSubmit={ onSubmit }>
 						<DataForm
 							data={ itemWithEdits }
+							// @ts-expect-error productFields is not typed correctly.
 							fields={ productFields }
 							form={ form }
 							onChange={ setEdits }

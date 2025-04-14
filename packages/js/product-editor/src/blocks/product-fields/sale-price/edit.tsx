@@ -10,7 +10,6 @@ import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -108,7 +107,7 @@ export function Edit( {
 						)
 					}
 					disabled={ disabled }
-					onBlur={ validateSalePrice }
+					onBlur={ () => validateSalePrice() }
 				/>
 			</BaseControl>
 		</div>

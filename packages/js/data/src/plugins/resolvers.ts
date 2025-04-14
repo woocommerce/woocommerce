@@ -10,7 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { WC_ADMIN_NAMESPACE, JETPACK_NAMESPACE } from '../constants';
 import { OPTIONS_STORE_NAME } from '../options';
-import { PAYPAL_NAMESPACE, STORE_NAME } from './constants';
+import { PAYPAL_NAMESPACE } from './constants';
 import {
 	setIsRequesting,
 	updateActivePlugins,
@@ -26,8 +26,10 @@ import {
 	PaypalOnboardingStatus,
 	RecommendedTypes,
 	JetpackConnectionDataResponse,
+	Plugin,
 } from './types';
 import { checkUserCapability } from '../utils';
+import { store } from './';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -114,12 +116,15 @@ export function* isJetpackConnected() {
 
 export function* getJetpackConnectionData() {
 	yield setIsRequesting( 'getJetpackConnectionData', true );
-
 	try {
-		yield checkUserCapability( 'manage_woocommerce' );
+		const isConnected: boolean = yield resolveSelect(
+			store,
+			'isJetpackConnected'
+		);
+		// See API side permission check here: https://github.com/Automattic/jetpack-connection/blob/trunk/src/class-manager.php#L1560-L1568.
+		yield checkUserCapability( isConnected ? 'read' : 'manage_options' );
 
 		const url = JETPACK_NAMESPACE + '/connection/data';
-
 		const results: JetpackConnectionDataResponse = yield apiFetch( {
 			path: url,
 			method: 'GET',
@@ -187,7 +192,7 @@ export function* getPaypalOnboardingStatus() {
 	const errorData: {
 		data?: { status: number };
 	} = yield resolveSelect(
-		STORE_NAME,
+		store,
 		'getPluginsError',
 		'getPaypalOnboardingStatus'
 	);

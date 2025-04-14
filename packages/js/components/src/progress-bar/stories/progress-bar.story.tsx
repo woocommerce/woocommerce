@@ -11,6 +11,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/ProgressBar',
+	title: 'Components/ProgressBar',
 	component: ProgressBar,
 };

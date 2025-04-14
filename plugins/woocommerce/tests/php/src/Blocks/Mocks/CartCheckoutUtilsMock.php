@@ -17,4 +17,11 @@ class CartCheckoutUtilsMock extends CartCheckoutUtils {
 	public static function deep_sort_test( $array_to_sort ) {
 		return self::deep_sort_with_accents( $array_to_sort );
 	}
+
+	/**
+	 * Protected test wrapper for migrate_checkout_block_field_visibility_attributes.
+	 */
+	public static function migrate_checkout_block_field_visibility_attributes_test() {
+		return self::migrate_checkout_block_field_visibility_attributes();
+	}
 }

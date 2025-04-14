@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { ProductAttribute } from '@woocommerce/data';
 import '@wordpress/interface/src/style.scss';
 

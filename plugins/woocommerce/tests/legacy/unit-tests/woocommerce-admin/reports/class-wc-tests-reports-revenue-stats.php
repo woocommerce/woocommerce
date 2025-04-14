@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class WC_Admin_Tests_Reports_Revenue_Stats
@@ -35,7 +36,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		$coupon->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->apply_coupon( $coupon );
 		$order->set_cart_tax( 5 );

@@ -24,7 +24,7 @@ export function ValidationProvider< T >( {
 	children,
 }: PropsWithChildren< ValidationProviderProps > ) {
 	const validatorsRef = useRef< Record< string, Validator< T > > >( {} );
-	const fieldRefs = useRef< Record< string, HTMLElement > >( {} );
+	const fieldRefs = useRef< Record< string, HTMLInputElement > >( {} );
 	const [ errors, setErrors ] = useState< ValidationErrors >( {} );
 	const { record: initialValue } = useEntityRecord< T >(
 		'postType',
@@ -35,13 +35,13 @@ export function ValidationProvider< T >( {
 	function registerValidator(
 		validatorId: string,
 		validator: Validator< T >
-	): React.Ref< HTMLElement > {
+	): React.Ref< HTMLInputElement > {
 		validatorsRef.current = {
 			...validatorsRef.current,
 			[ validatorId ]: validator,
 		};
 
-		return ( element: HTMLElement ) => {
+		return ( element: HTMLInputElement ) => {
 			fieldRefs.current[ validatorId ] = element;
 		};
 	}
@@ -80,7 +80,7 @@ export function ValidationProvider< T >( {
 
 	async function getFieldByValidatorId(
 		validatorId: string
-	): Promise< HTMLElement > {
+	): Promise< HTMLInputElement > {
 		return fieldRefs.current[ validatorId ];
 	}
 

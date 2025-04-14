@@ -1,7 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint;
+namespace Automattic\WooCommerce\Blueprint\ResultFormatters;
 
+use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use function WP_CLI\Utils\format_items;
 
 /**
@@ -46,7 +47,13 @@ class CliResultFormatter {
 			}
 		}
 
-		format_items( 'table', $items, $header );
+		$format_items_exist = function_exists('format_items');
+
+		if ( $format_items_exist ) {
+			format_items( 'table', $items, $header );
+		} else {
+			throw new \Exception( 'WP CLI Utils not found' );
+		}
 	}
 
 	/**

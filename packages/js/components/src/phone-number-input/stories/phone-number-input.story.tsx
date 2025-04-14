@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 /**
  * Internal dependencies
@@ -11,13 +11,15 @@ import PhoneNumberInput from '../';
 import { validatePhoneNumber } from '../validation';
 
 export default {
-	title: 'WooCommerce Admin/components/PhoneNumberInput',
+	title: 'Components/PhoneNumberInput',
 	component: PhoneNumberInput,
 };
 
-const PNI: React.FC<
-	Partial< React.ComponentPropsWithoutRef< typeof PhoneNumberInput > >
-> = ( { children, onChange, ...rest } ) => {
+const PNI = ( {
+	children,
+	onChange,
+	...rest
+}: Partial< React.ComponentPropsWithoutRef< typeof PhoneNumberInput > > ) => {
 	const [ phone, setPhone ] = useState( '' );
 	const [ output, setOutput ] = useState( '' );
 

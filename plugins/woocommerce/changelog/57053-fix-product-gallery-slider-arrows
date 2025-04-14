@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Ensure the arrows of the Product Gallery slider don't appear when the featured image and the gallery image are the same.
+

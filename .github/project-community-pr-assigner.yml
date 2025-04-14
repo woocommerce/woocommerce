@@ -1,68 +1,64 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 "*":
-  - team: vortex
+  - team: flux
 
 ".github/**/*":
-  - team: vortex
+  - team: flux
 
 "bin/*":
-  - team: vortex
+  - team: flux
 
 "docs/**/*":
   - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/e2e-utils/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/e2e-environment/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/api-core-tests/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/e2e-core-tests/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/components/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/csv-export/**/*":
   - team: woo-fse
 
 "packages/js/currency/**/*":
-  - team: woo-fse
+  - team: fractal
 
 "packages/js/customer-effort-score/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/data/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/date/**/*":
   - team: woo-fse
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/eslint-plugin/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/experimental/**/*":
   - team: woo-fse
 
 "packages/js/explat/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "packages/js/navigation/**/*":
   - team: woo-fse
@@ -71,28 +67,26 @@
   - team: woo-fse
 
 "packages/js/onboarding/**/*":
-  - team: ghidorah
+  - team: woo-fse
 
 "packages/js/product-editor/**/*":
   - team: woo-fse
 
 "packages/js/tracks/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/**/*":
-  - team: proton
+  - team: flux
 
 "plugins/woocommerce/templates/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce/templates/emails/**/*":
-  - team: proton
+  - team: flux
 
 "plugins/woocommerce/src/Admin/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/src/Blocks/**/*":
   - team: rubik
@@ -100,28 +94,27 @@
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: woo-fse
-  - team: ghidorah
 
 "plugins/woocommerce/src/StoreApi/**/*":
   - team: rubik
   - team: woo-fse
 
-"plugins/woocommerce-admin/**/*":
+"plugins/woocommerce/client/admin/**/*":
   - team: woo-fse
-  - team: ghidorah
 
-"plugins/woocommerce-blocks/**/*":
+"plugins/woocommerce/client/blocks/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: vortex
+  - team: woo-fse
+  - team: flux
 
 "tools/**/*":
-  - team: vortex
+  - team: flux
 
 '**/composer.json':
-  - team: vortex
+  - team: flux
 
 '**/package.json':
-  - team: vortex
+  - team: flux

@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -104,7 +106,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		parent::create( $order );
 
 		// Do not fire 'woocommerce_new_order' for draft statuses.
-		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
+		if ( in_array( $order->get_status( 'edit' ), array( OrderStatus::AUTO_DRAFT, OrderStatus::DRAFT, 'checkout-draft' ), true ) ) {
 			return;
 		}
 
@@ -185,8 +187,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function update( &$order ) {
 		// Before updating, ensure date paid is set if missing.
-		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) {
-			$order->set_date_paid( $order->get_date_created( 'edit' ) );
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) ) {
+			/**
+			 * Filter the order status to use when payment is complete.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param string   $payment_complete_status Default status to use when payment is complete.
+			 * @param int      $order_id               Order ID.
+			 */
+			$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $order->get_id(), $order );
+			if ( $order->has_status( $payment_complete_status ) ) {
+				$order->set_date_paid( $order->get_date_created( 'edit' ) );
+			}
 		}
 
 		// Also grab the current status so we can compare.
@@ -205,7 +218,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$previous_status = OrderUtil::remove_status_prefix( $previous_status );
 		$current_status  = OrderUtil::remove_status_prefix( $current_status );
 
-		$draft_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft' );
+		$draft_statuses = array( 'new', OrderStatus::AUTO_DRAFT, OrderStatus::DRAFT, 'checkout-draft' );
 
 		// This hook should be fired only if the new status is not one of draft statuses and the previous status was one of the draft statuses.
 		if (
@@ -440,6 +453,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Get the total shipping tax refunded.
+	 *
+	 * @param  WC_Order $order Order object.
+	 *
+	 * @since 9.9.0
+	 * @return float
+	 */
+	public function get_total_shipping_tax_refunded( $order ) {
+		global $wpdb;
+
+		$total = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
+				$order->get_id()
+			)
+		) ?? 0;
+
+		return abs( $total );
+	}
+
+	/**
 	 * Get the total shipping refunded.
 	 *
 	 * @param  WC_Order $order Order object.
@@ -471,6 +510,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_order_id_by_order_key( $order_key ) {
 		global $wpdb;
+		if ( empty( $order_key ) ) {
+			return 0;
+		}
 		return $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = %s", $order_key ) );
 	}
 
@@ -565,7 +607,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
 				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-				AND     posts.post_status = 'wc-pending'
+				AND     posts.post_status = '" . OrderInternalStatus::PENDING . "'
 				AND     posts.post_modified < %s",
 				// @codingStandardsIgnoreEnd
 				gmdate( 'Y-m-d H:i:s', absint( $date ) )

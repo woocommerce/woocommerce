@@ -4,13 +4,12 @@ namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use \WP_HTTP_Response;
-use \WP_REST_Request;
-use \WP_REST_Response;
-use \WP_Error;
-use \InvalidArgumentException;
-use \Exception;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use WP_HTTP_Response;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
+use InvalidArgumentException;
+use Exception;
 
 /**
  * Base class for REST API controllers defined inside the 'src' directory.
@@ -19,14 +18,13 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  * container with the 'share_with_implements_tags' method inside a service provider that inherits from
  * 'AbstractInterfaceServiceProvider'. This ensures that 'register_routes' is invoked.
  *
- * Derived classes must also contain this line:
- * use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+ * Also, the following must be added at the end of the 'init_hooks' method in the 'WooCommerce' class,
+ * otherwise the routes won't be registered:
+ * $container->get( <full class name>::class )->register();
  *
  * Minimal controller example:
  *
  * class FoobarsController extends RestApiControllerBase {
- *
- * use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  *
  * protected function get_rest_api_namespace(): string {
  *   return 'foobars';
@@ -79,7 +77,6 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  * }
  */
 abstract class RestApiControllerBase implements RegisterHooksInterface {
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The root namespace for the JSON REST API endpoints.
@@ -92,7 +89,7 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 * Register the hooks used by the class.
 	 */
 	public function register() {
-		static::add_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this, 'handle_woocommerce_rest_api_get_rest_namespaces' ) );
+		add_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this, 'handle_woocommerce_rest_api_get_rest_namespaces' ) );
 	}
 
 	/**
@@ -101,8 +98,10 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 *
 	 * @param array $namespaces The original list of WooCommerce REST API namespaces/controllers.
 	 * @return array The updated list of WooCommerce REST API namespaces/controllers.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	protected function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
+	public function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
 		$namespaces['wc/v3'][ $this->get_rest_api_namespace() ] = static::class;
 		return $namespaces;
 	}

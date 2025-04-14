@@ -47,6 +47,6 @@ const DatePickerExample = () => {
 export const Basic = () => <DatePickerExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/calendar/DatePicker',
+	title: 'Components/calendar/DatePicker',
 	component: DatePicker,
 };

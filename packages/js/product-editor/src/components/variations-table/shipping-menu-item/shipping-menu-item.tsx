@@ -40,7 +40,6 @@ export function ShippingMenuItem( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'right-start',
 			} }

@@ -95,6 +95,6 @@ const Examples = () => {
 export const Basic = () => <Examples />;
 
 export default {
-	title: 'WooCommerce Admin/components/TextControlWithAffixes',
+	title: 'Components/TextControlWithAffixes',
 	component: TextControlWithAffixes,
 };

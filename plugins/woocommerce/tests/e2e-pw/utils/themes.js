@@ -16,11 +16,14 @@ export const activateTheme = async ( baseURL, theme ) => {
 		},
 	} );
 
-	const response = await requestContext.post( '/wp-json/e2e-theme/activate', {
-		data: {
-			theme_name: theme,
-		},
-	} );
+	const response = await requestContext.post(
+		'./wp-json/e2e-theme/activate',
+		{
+			data: {
+				theme_name: theme,
+			},
+		}
+	);
 
 	const result = await response.json();
 

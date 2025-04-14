@@ -2,12 +2,12 @@
 
 namespace Automattic\WooCommerce\Internal\ReceiptRendering;
 
+use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
 use Exception;
-use WC_Order;
+use WC_Abstract_Order;
 
 /**
  * This class generates printable order receipts as transient files (see src/Internal/TransientFiles).
@@ -83,15 +83,15 @@ class ReceiptRenderingEngine {
 	 * transient file is created with the supplied expiration date (defaulting to "tomorrow"), and the new file name
 	 * is stored as order meta with the key RECEIPT_FILE_NAME_META_KEY.
 	 *
-	 * @param int|WC_Order    $order The order object or order id to get the receipt for.
-	 * @param string|int|null $expiration_date GMT expiration date formatted as yyyy-mm-dd, or as a timestamp, or null for "tomorrow".
-	 * @param bool            $force_new If true, creates a new receipt file even if one already exists for the order.
+	 * @param int|WC_Abstract_Order $order The order object or order id to get the receipt for.
+	 * @param string|int|null       $expiration_date GMT expiration date formatted as yyyy-mm-dd, or as a timestamp, or null for "tomorrow".
+	 * @param bool                  $force_new If true, creates a new receipt file even if one already exists for the order.
 	 * @return string|null The file name of the new or already existing receipt file, null if an order id is passed and the order doesn't exist.
 	 * @throws InvalidArgumentException Invalid expiration date (wrongly formatted, or it's a date in the past).
 	 * @throws Exception The directory to store the file doesn't exist and can't be created.
 	 */
 	public function generate_receipt( $order, $expiration_date = null, bool $force_new = false ): ?string {
-		if ( ! $order instanceof WC_Order ) {
+		if ( ! $order instanceof WC_Abstract_Order ) {
 			$order = wc_get_order( $order );
 			if ( false === $order ) {
 				return null;
@@ -126,7 +126,7 @@ class ReceiptRenderingEngine {
 		 * See the template file, Templates/order-receipt.php, for reference on how the data is used.
 		 *
 		 * @param array $data The original set of data.
-		 * @param WC_Order $order The order for which the receipt is being generated.
+		 * @param WC_Abstract_Order $order The order for which the receipt is being generated.
 		 * @returns array The updated set of data.
 		 *
 		 * @since 9.0.0
@@ -164,7 +164,7 @@ class ReceiptRenderingEngine {
 			 *
 			 * @param string $line_item_display_data Data to use to generate the HTML table row to be rendered for the line item.
 			 * @param array $line_item_data The relevant data for the line item for which the HTML table row is being generated.
-			 * @param WC_Order $order The order for which the receipt is being generated.
+			 * @param WC_Abstract_Order $order The order for which the receipt is being generated.
 			 * @return string The actual data to use to generate the HTML for the line item.
 			 *
 			 * @since 9.0.0
@@ -191,7 +191,7 @@ class ReceiptRenderingEngine {
 		 * See Templates/order-receipt-css.php for the original CSS styles.
 		 *
 		 * @param string $css The original CSS styles to use.
-		 * @param WC_Order $order The order for which the receipt is being generated.
+		 * @param WC_Abstract_Order $order The order for which the receipt is being generated.
 		 * @return string The actual CSS styles that will be used.
 		 *
 		 * @since 9.0.0
@@ -243,12 +243,12 @@ class ReceiptRenderingEngine {
 	 * A receipt is considered to be available for the order if there's an order meta entry with key
 	 * RECEIPT_FILE_NAME_META_KEY AND the transient file it points to exists AND it has not expired.
 	 *
-	 * @param WC_Order $order The order object or order id to get the receipt for.
+	 * @param WC_Abstract_Order $order The order object or order id to get the receipt for.
 	 * @return string|null The receipt file name, or null if no receipt is currently available for the order.
 	 * @throws Exception Thrown if a wrong file path is passed.
 	 */
 	public function get_existing_receipt( $order ): ?string {
-		if ( ! $order instanceof WC_Order ) {
+		if ( ! $order instanceof WC_Abstract_Order ) {
 			$order = wc_get_order( $order );
 			if ( false === $order ) {
 				return null;
@@ -272,10 +272,10 @@ class ReceiptRenderingEngine {
 	/**
 	 * Get the order data that the receipt template will use.
 	 *
-	 * @param WC_Order $order The order to get the data from.
+	 * @param WC_Abstract_Order $order The order to get the data from.
 	 * @return array The order data as an associative array.
 	 */
-	private function get_order_data( WC_Order $order ): array {
+	private function get_order_data( WC_Abstract_Order $order ): array {
 		$store_name = get_bloginfo( 'name' );
 		if ( $store_name ) {
 			/* translators: %s = store name */
@@ -362,15 +362,19 @@ class ReceiptRenderingEngine {
 			);
 		}
 
+		$is_order_failed = $order->has_status( 'failed' );
+
 		$line_items_info[] = array(
 			'type'   => 'amount_paid',
-			'title'  => __( 'Amount Paid', 'woocommerce' ),
+			'title'  => $is_order_failed ? __( 'Amount', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
 			'amount' => wc_price( $order->get_total(), $get_price_args ),
 		);
 
+		$payment_info = $this->get_woo_pay_data( $order );
+
 		return array(
-			'order'            => $order,
-			'constants'        => array(
+			'order'                     => $order,
+			'constants'                 => array(
 				'font_size'        => self::FONT_SIZE,
 				'margin'           => self::MARGIN,
 				'title_font_size'  => self::TITLE_FONT_SIZE,
@@ -379,23 +383,26 @@ class ReceiptRenderingEngine {
 				'icon_height'      => self::ICON_HEIGHT,
 				'icon_width'       => self::ICON_WIDTH,
 			),
-			'texts'            => array(
+			'texts'                     => array(
 				'receipt_title'                => $receipt_title,
-				'amount_paid_section_title'    => __( 'Amount Paid', 'woocommerce' ),
-				'date_paid_section_title'      => __( 'Date Paid', 'woocommerce' ),
+				'amount_paid_section_title'    => $is_order_failed ? __( 'Order Total', 'woocommerce' ) : __( 'Amount Paid', 'woocommerce' ),
+				'date_paid_section_title'      => $is_order_failed ? __( 'Order Date', 'woocommerce' ) : __( 'Date Paid', 'woocommerce' ),
 				'payment_method_section_title' => __( 'Payment method', 'woocommerce' ),
+				'payment_status_section_title' => __( 'Payment status', 'woocommerce' ),
+				'payment_status'               => $is_order_failed ? __( 'Failed', 'woocommerce' ) : __( 'Success', 'woocommerce' ),
 				'summary_section_title'        => $summary_title,
 				'order_notes_section_title'    => __( 'Notes', 'woocommerce' ),
 				'app_name'                     => __( 'Application Name', 'woocommerce' ),
 				'aid'                          => __( 'AID', 'woocommerce' ),
 				'account_type'                 => __( 'Account Type', 'woocommerce' ),
 			),
-			'formatted_amount' => wc_price( $order->get_total(), $get_price_args ),
-			'formatted_date'   => wc_format_datetime( $order->get_date_paid() ),
-			'line_items'       => $line_items_info,
-			'payment_method'   => $order->get_payment_method_title(),
-			'notes'            => array_map( 'get_comment_text', $order->get_customer_order_notes() ),
-			'payment_info'     => $this->get_woo_pay_data( $order ),
+			'formatted_amount'          => wc_price( $order->get_total(), $get_price_args ),
+			'formatted_date'            => wc_format_datetime( $order->get_date_paid() ?? $order->get_date_created() ),
+			'line_items'                => $line_items_info,
+			'payment_method'            => $order->get_payment_method_title(),
+			'show_payment_method_title' => empty( $payment_info['card_last4'] ) && empty( $payment_info['brand'] ),
+			'notes'                     => array_map( 'get_comment_text', $order->get_customer_order_notes() ),
+			'payment_info'              => $payment_info,
 		);
 	}
 
@@ -404,67 +411,26 @@ class ReceiptRenderingEngine {
 	 *
 	 * It will return null if any of these is true:
 	 *
-	 * - Payment method is not 'woocommerce_payments".
+	 * - Payment method is not "woocommerce_payments".
 	 * - WooCommerce Payments is not installed.
 	 * - No intent id is stored for the order.
 	 * - Retrieving the payment information from Stripe API (providing the intent id) fails.
 	 * - The received data set doesn't contain the expected information.
 	 *
-	 * @param WC_Order $order The order to get the data from.
+	 * @param WC_Abstract_Order $order The order to get the data from.
 	 * @return array|null An array of payment information for the order, or null if not available.
 	 */
-	private function get_woo_pay_data( WC_Order $order ): ?array {
-		// For testing purposes: if WooCommerce Payments development mode is enabled,
-		// an order meta item with key '_wcpay_payment_details' will be used if it exists as a replacement
-		// for the call to the Stripe API's 'get intent' endpoint.
-		// The value must be the JSON encoding of an array simulating the "payment_details" part of the response from the endpoint
-		// (at the very least it must contain the "card_present" key).
-		$payment_details = json_decode( defined( 'WCPAY_DEV_MODE' ) && WCPAY_DEV_MODE ? $order->get_meta( '_wcpay_payment_details' ) : false, true );
+	private function get_woo_pay_data( WC_Abstract_Order $order ): ?array {
+		$card_info = PaymentInfo::get_card_info( $order );
 
-		if ( ! $payment_details ) {
-			if ( 'woocommerce_payments' !== $order->get_payment_method() ) {
-				return null;
-			}
-
-			if ( ! class_exists( \WC_Payments::class ) ) {
-				return null;
-			}
-
-			$intent_id = $order->get_meta( '_intent_id' );
-			if ( ! $intent_id ) {
-				return null;
-			}
-
-			try {
-				$payment_details = \WC_Payments::get_payments_api_client()->get_intent( $intent_id )->get_charge()->get_payment_method_details();
-			} catch ( Exception $ex ) {
-				$order_id = $order->get_id();
-				$message  = $ex->getMessage();
-				wc_get_logger()->error( StringUtil::class_name_without_namespace( static::class ) . " - retrieving info for charge {$intent_id} for order {$order_id}: {$message}" );
-				return null;
-			}
-		}
-
-		$card_data = $payment_details['card_present'] ?? null;
-		if ( is_null( $card_data ) ) {
+		if ( empty( $card_info ) ) {
 			return null;
 		}
 
-		$card_brand = $card_data['brand'] ?? '';
-		if ( ! in_array( $card_brand, self::KNOWN_CARD_TYPES, true ) ) {
-			$card_brand = 'unknown';
-		}
+		// Backcompat for custom templates.
+		$card_info['card_icon']  = $card_info['icon'];
+		$card_info['card_last4'] = $card_info['last4'];
 
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$card_svg = base64_encode( file_get_contents( __DIR__ . "/CardIcons/{$card_brand}.svg" ) );
-
-		return array(
-			'payment_method' => 'woocommerce_payments',
-			'card_icon'      => $card_svg,
-			'card_last4'     => wp_kses( $card_data['last4'] ?? '', array() ),
-			'app_name'       => wp_kses( $card_data['receipt']['application_preferred_name'] ?? null, array() ),
-			'aid'            => wp_kses( $card_data['receipt']['dedicated_file_name'] ?? null, array() ),
-			'account_type'   => wp_kses( $card_data['receipt']['account_type'] ?? null, array() ),
-		);
+		return $card_info;
 	}
 }

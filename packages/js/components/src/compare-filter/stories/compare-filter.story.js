@@ -28,6 +28,6 @@ export const Basic = ( {
 } ) => <CompareFilter path={ path } query={ query } { ...compareFilter } />;
 
 export default {
-	title: 'WooCommerce Admin/components/CompareFilter',
+	title: 'Components/CompareFilter',
 	component: CompareFilter,
 };

@@ -41,7 +41,7 @@ const SearchListControlExample = ( { showCount, isCompact, isSingle } ) => {
 export const Basic = ( args ) => <SearchListControlExample { ...args } />;
 
 export default {
-	title: 'WooCommerce Admin/components/SearchListControl',
+	title: 'Components/SearchListControl',
 	component: SearchListControl,
 	args: {
 		showCount: false,

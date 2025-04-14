@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
-export const base_url = __ENV.URL || 'http://localhost:8086';
-export const base_host = __ENV.HOST || 'localhost:8086';
+export const base_url =
+	__ENV.URL || 'http://localhost:' + ( __ENV.WP_ENV_TESTS_PORT || '8086' );
+export const base_host =
+	__ENV.HOST || 'localhost:' + ( __ENV.WP_ENV_TESTS_PORT || '8086' );
 
 export const STORE_NAME = __ENV.STORE_NAME || 'WooCommerce Core E2E Test Suite';
 export const FOOTER_TEXT = 'Built with WooCommerce';
@@ -50,7 +52,6 @@ export const payment_method = 'cod';
 
 export const product_sku = __ENV.P_SKU || 'woo-beanie';
 export const product_url = __ENV.P_URL || 'beanie';
-export const product_id = __ENV.P_ID || '13';
 export const product_search_term = __ENV.P_TERM || 'beanie';
 export const product_category = __ENV.P_CAT || 'Accessories';
 

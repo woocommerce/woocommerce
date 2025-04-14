@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Fragment } from '@wordpress/element';
-import React, { DragEventHandler } from 'react';
+import { DragEventHandler } from 'react';
 import { Icon, wordpress } from '@wordpress/icons';
 
 /**
@@ -58,6 +58,6 @@ export const CustomHandle = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/Sortable',
+	title: 'Components/Sortable',
 	component: Sortable,
 };

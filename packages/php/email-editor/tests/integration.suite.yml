@@ -1,0 +1,10 @@
+# Codeception Test Suite Configuration
+#
+# Suite for unit (internal) tests.
+
+actor: IntegrationTester
+bootstrap: _bootstrap.php
+modules:
+  enabled:
+    - Asserts
+error_level: E_ALL

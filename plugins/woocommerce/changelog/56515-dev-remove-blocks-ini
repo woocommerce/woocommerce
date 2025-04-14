@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove blocks.ini from `@woocommerce/block-library`

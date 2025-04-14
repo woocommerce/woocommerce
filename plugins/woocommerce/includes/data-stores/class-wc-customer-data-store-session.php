@@ -78,6 +78,15 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function save_to_session( $customer ) {
+		if ( ! WC()->session ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				__( 'WC_Session is not available, customer data cannot be saved to session.', 'woocommerce' ),
+				'9.8.0'
+			);
+			return;
+		}
+
 		$data = array();
 		foreach ( $this->session_keys as $session_key ) {
 			$function_key = $session_key;
@@ -111,6 +120,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$data[ $session_key ] = (string) $session_value;
 			}
 		}
+
 		WC()->session->set( 'customer', $data );
 	}
 

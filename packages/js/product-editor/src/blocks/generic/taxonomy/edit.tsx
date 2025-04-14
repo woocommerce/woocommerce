@@ -50,7 +50,8 @@ export function Edit( {
 			// @ts-ignore
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
-			}
+			},
+		[ attributes.slug ]
 	);
 	const {
 		label,
@@ -61,7 +62,6 @@ export function Edit( {
 		dialogNameHelpText,
 		parentTaxonomyText,
 		disabled,
-		placeholder,
 	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
@@ -126,7 +126,6 @@ export function Edit( {
 					multiple
 					createValue={ searchValue }
 					onInputChange={ searchDelayed }
-					placeholder={ placeholder }
 					shouldNotRecursivelySelect
 					shouldShowCreateButton={ ( typedValue ) =>
 						! typedValue ||

@@ -28,6 +28,6 @@ const SegmentedSelectionExample = () => {
 export const Basic = () => <SegmentedSelectionExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/SegmentedSelection',
+	title: 'Components/SegmentedSelection',
 	component: SegmentedSelection,
 };

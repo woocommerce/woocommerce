@@ -10,12 +10,12 @@ type FormSectionProps = {
 	className?: string;
 };
 
-export const FormSection: React.FC< FormSectionProps > = ( {
+export const FormSection = ( {
 	title,
 	description,
 	className,
 	children,
-} ) => {
+}: React.PropsWithChildren< FormSectionProps > ) => {
 	return (
 		<div className={ classnames( 'woocommerce-form-section', className ) }>
 			<div className="woocommerce-form-section__header">

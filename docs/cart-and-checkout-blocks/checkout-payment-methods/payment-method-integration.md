@@ -158,7 +158,7 @@ The options you feed the configuration instance should be an object in this shap
 
 ## Props Fed to Payment Method Nodes
 
-A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/assets/js/types/type-defs/payment-method-interface.ts).
+A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](../../../plugins/woocommerce/client/blocks/assets/js/types/type-defs/payment-method-interface.ts).
 
 | Property                 | Type                                                                                                                                                                                                                                                                                                                                                                      | Description                                                                                                                                                                                                                                                                                                        |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -394,7 +394,7 @@ const bankTransferPaymentMethod = {
 };
 ```
 
-Payment method nodes are passed everything from the [usePaymentMethodInterface hook](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/block-client-apis/checkout/checkout-api.md#usepaymentmethodinterface). So we can consume this in our `<Content />` component like this:
+Payment method nodes are passed everything from the [usePaymentMethodInterface hook](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/block-client-apis/checkout/checkout-api.md#usepaymentmethodinterface). So we can consume this in our `<Content />` component like this:
 
 ```js
 const Content = ( props ) => {

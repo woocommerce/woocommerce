@@ -8,6 +8,7 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -354,7 +355,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 
-			if ( $order->get_status() === 'wc-completed' ) {
+			if ( $order->get_status() === OrderInternalStatus::COMPLETED ) {
 				++$complete;
 			}
 
@@ -410,9 +411,29 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return $result;
 	}
 
-	$transient_name    = 'wc_customer_bought_product_' . md5( $customer_email . $user_id );
-	$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
-	$transient_value   = get_transient( $transient_name );
+	/**
+	 * Whether to use lookup tables - it can optimize performance, but correctness depends on the frequency of the AS job.
+	 *
+	 * @since 9.7.0
+	 *
+	 * @param bool $enabled
+	 * @param string $customer_email Customer email to check.
+	 * @param int    $user_id User ID to check.
+	 * @param int    $product_id Product ID to check.
+	 * @return bool
+	 */
+	$use_lookup_tables = apply_filters( 'woocommerce_customer_bought_product_use_lookup_tables', false, $customer_email, $user_id, $product_id );
+
+	$transient_name = 'wc_customer_bought_product_' . md5( $customer_email . $user_id . $use_lookup_tables );
+
+	if ( $use_lookup_tables ) {
+		// Lookup tables get refreshed along with the `woocommerce_reports` transient version.
+		$transient_version = WC_Cache_Helper::get_transient_version( 'woocommerce_reports' );
+	} else {
+		$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
+	}
+
+	$transient_value = get_transient( $transient_name );
 
 	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
 		$result = $transient_value['value'];
@@ -450,7 +471,21 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			if ( $user_id ) {
 				$user_id_clause = 'OR o.customer_id = ' . absint( $user_id );
 			}
-			$sql    = "
+			if ( $use_lookup_tables ) {
+				// HPOS: yes, Lookup table: yes.
+				$sql = "
+SELECT DISTINCT product_or_variation_id FROM (
+SELECT CASE WHEN product_id != 0 THEN product_id ELSE variation_id END AS product_or_variation_id
+FROM {$wpdb->prefix}wc_order_product_lookup lookup
+INNER JOIN $order_table AS o ON lookup.order_id = o.ID
+WHERE o.status IN ('" . implode( "','", $statuses ) . "')
+AND ( o.billing_email IN ('" . implode( "','", $customer_data ) . "') $user_id_clause )
+) AS subquery
+WHERE product_or_variation_id != 0
+";
+			} else {
+				// HPOS: yes, Lookup table: no.
+				$sql = "
 SELECT DISTINCT im.meta_value FROM $order_table AS o
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON o.id = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
@@ -459,8 +494,27 @@ AND im.meta_key IN ('_product_id', '_variation_id' )
 AND im.meta_value != 0
 AND ( o.billing_email IN ('" . implode( "','", $customer_data ) . "') $user_id_clause )
 ";
+			}
 			$result = $wpdb->get_col( $sql );
+		} elseif ( $use_lookup_tables ) {
+			// HPOS: no, Lookup table: yes.
+			$result = $wpdb->get_col(
+				"
+SELECT DISTINCT product_or_variation_id FROM (
+SELECT CASE WHEN lookup.product_id != 0 THEN lookup.product_id ELSE lookup.variation_id END AS product_or_variation_id
+FROM {$wpdb->prefix}wc_order_product_lookup AS lookup
+INNER JOIN {$wpdb->posts} AS p ON p.ID = lookup.order_id
+INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+) AS subquery
+WHERE product_or_variation_id != 0
+		"
+			); // WPCS: unprepared SQL ok.
 		} else {
+			// HPOS: no, Lookup table: no.
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$result = $wpdb->get_col(
 				"
 SELECT DISTINCT im.meta_value FROM {$wpdb->posts} AS p
@@ -473,7 +527,8 @@ AND im.meta_key IN ( '_product_id', '_variation_id' )
 AND im.meta_value != 0
 AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 		"
-			); // WPCS: unprepared SQL ok.
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		}
 		$result = array_map( 'absint', $result );
 

@@ -6,7 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
 import { WCUser } from './types';
 
 /**
@@ -19,17 +19,17 @@ export const useUser = () => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
-			select( STORE_NAME );
+			select( store );
 
 		return {
 			isRequesting:
-				hasStartedResolution( 'getCurrentUser' ) &&
-				! hasFinishedResolution( 'getCurrentUser' ),
+				hasStartedResolution( 'getCurrentUser', [] ) &&
+				! hasFinishedResolution( 'getCurrentUser', [] ),
 			// We register additional user data in backend so we need to use a type assertion here for WC user.
-			user: getCurrentUser() as WCUser< 'capabilities' >,
+			user: getCurrentUser() as WCUser,
 			getCurrentUser,
 		};
-	} );
+	}, [] );
 
 	const currentUserCan = ( capability: string ) => {
 		if ( userData.user && userData.user.is_super_admin ) {

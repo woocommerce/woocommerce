@@ -4,7 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 
 /**
  * Adds hooks to add a badge to the WordPress admin bar showing site visibility.
@@ -17,6 +18,20 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 */
 	final public function init() {
+		add_action( 'init', array( $this, 'init_hooks' ) );
+	}
+
+	/**
+	 * Sets up the hooks if user has required capabilities.
+	 *
+	 * @internal
+	 */
+	public function init_hooks() {
+		// Early exit if the user is not logged in as administrator / shop manager.
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
 		add_action( 'admin_bar_menu', array( $this, 'site_visibility_badge' ), 31 );
 		add_action( 'wp_head', array( $this, 'output_css' ) );
 		add_action( 'admin_head', array( $this, 'output_css' ) );
@@ -30,7 +45,7 @@ class ComingSoonAdminBarBadge {
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
 		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
 			return;
 		}
 
@@ -68,7 +83,7 @@ class ComingSoonAdminBarBadge {
 	 */
 	public function output_css() {
 		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
 			return;
 		}
 

@@ -27,6 +27,10 @@ program
 		'Skips benchmarking and gets straight to reporting phase (tests results already available)'
 	)
 	.option(
+		'--delta',
+		'Check the difference in performance between branches in percentage'
+	)
+	.option(
 		'--rounds <count>',
 		'Run each test suite this many times for each branch; results are summarized, default = 1'
 	)

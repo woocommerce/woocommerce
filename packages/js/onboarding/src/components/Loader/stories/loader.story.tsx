@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createElement } from 'react';
+import { createElement } from 'react';
 
 /**
  * Internal dependencies
@@ -79,7 +79,7 @@ ExampleLoaderWithControls.args = {
 };
 
 export default {
-	title: 'WooCommerce Admin/Onboarding/Loader',
+	title: 'Onboarding/Loader',
 	component: ExampleLoaderWithControls,
 	argTypes: {
 		title: {

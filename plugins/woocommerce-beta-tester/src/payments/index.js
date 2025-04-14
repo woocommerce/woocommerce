@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { ORDERS_STORE_NAME } from '@woocommerce/data';
+import { ordersStore } from '@woocommerce/data';
 import { ToggleControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -15,7 +15,7 @@ const Payments = () => {
 		isError,
 	} = useSelect( ( select ) => {
 		const { getOrders, hasFinishedResolution, getOrdersError } =
-			select( ORDERS_STORE_NAME );
+			select( ordersStore );
 
 		const query = {
 			page: 1,
@@ -31,7 +31,7 @@ const Payments = () => {
 		};
 	} );
 
-	const { getOrderSuccess } = useDispatch( ORDERS_STORE_NAME );
+	const { getOrderSuccess } = useDispatch( ordersStore );
 
 	const isTestOrder = ( order ) =>
 		order.meta_data.find( ( metaItem ) => metaItem.key === metaKey )

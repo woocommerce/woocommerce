@@ -1,0 +1,19 @@
+.wc-block-editor-single-product {
+	&__selection {
+		width: 100%;
+	}
+	&__reset-layout {
+		padding: 0;
+	}
+	&__info-icon {
+		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
+	}
+}
+.wc-block-single-product__edit-card {
+	padding: 16px;
+	border-top: 1px solid $gray-200;
+
+	.wc-block-single-product__edit-card-title {
+		margin: 0 0 $gap;
+	}
+}

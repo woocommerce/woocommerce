@@ -56,6 +56,6 @@ const ExampleEllipsisMenu = () => {
 export const Basic = () => <ExampleEllipsisMenu />;
 
 export default {
-	title: 'WooCommerce Admin/components/EllipsisMenu',
+	title: 'Components/EllipsisMenu',
 	component: EllipsisMenu,
 };

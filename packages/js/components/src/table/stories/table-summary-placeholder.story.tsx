@@ -17,6 +17,6 @@ export const Basic = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/TableSummaryPlaceholder',
+	title: 'Components/TableSummaryPlaceholder',
 	component: TableSummaryPlaceholder,
 };

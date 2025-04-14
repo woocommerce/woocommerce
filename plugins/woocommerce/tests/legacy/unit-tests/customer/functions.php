@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Customer
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
 /**
@@ -149,7 +150,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$order1      = new WC_Order();
 		$order1->set_billing_email( 'test@example.com' );
-		$order1->set_status( 'completed' );
+		$order1->set_status( OrderStatus::COMPLETED );
 		$order1->save();
 		$order2 = new WC_Order();
 		$order2->save();
@@ -173,7 +174,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$order3->set_billing_email( 'test@example.com' );
-		$order3->set_status( 'completed' );
+		$order3->set_status( OrderStatus::COMPLETED );
 		$order3->add_item( $item );
 		$order3->save();
 
@@ -206,7 +207,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$order1      = new WC_Order();
 		$order1->set_billing_email( 'test@example.com' );
-		$order1->set_status( 'completed' );
+		$order1->set_status( OrderStatus::COMPLETED );
 		$order1->save();
 
 		wp_update_user(
@@ -242,7 +243,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		// Test after new order created.
 		$order1 = new WC_Order();
 		$order1->set_customer_id( $customer_id );
-		$order1->set_status( 'completed' );
+		$order1->set_status( OrderStatus::COMPLETED );
 		$order1->save();
 
 		$customer = new WC_Customer( $customer_id );
@@ -271,22 +272,29 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		$order_1 = WC_Helper_Order::create_order( $customer_id_1, $product_1 );
 		$order_1->set_billing_email( 'test@example.com' );
-		$order_1->set_status( 'completed' );
+		$order_1->set_status( OrderStatus::COMPLETED );
 		$order_1->save();
 		$order_2 = WC_Helper_Order::create_order( $customer_id_2, $product_2 );
 		$order_2->set_billing_email( 'test2@example.com' );
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( OrderStatus::COMPLETED );
 		$order_2->save();
 		$order_3 = WC_Helper_Order::create_order( $customer_id_1, $product_2 );
 		$order_3->set_billing_email( 'test@example.com' );
-		$order_3->set_status( 'pending' );
+		$order_3->set_status( OrderStatus::PENDING );
 		$order_3->save();
 
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+		// Manually trigger the product lookup tables update, since it may take a few moments for it to happen automatically.
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		foreach ( array( '__return_true', '__return_false' ) as $lookup_tables ) {
+			add_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
+			$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
+			$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
+			$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+			remove_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+		}
 	}
 
 	/**
@@ -402,7 +410,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		$order = new WC_Order();
 		$order->set_customer_id( $customer_id );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$cust_download->set_order_id( $order->get_id() );
@@ -427,22 +435,22 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
 		$order_1 = new WC_Order();
-		$order_1->set_status( 'completed' );
+		$order_1->set_status( OrderStatus::COMPLETED );
 		$order_1->set_total( '100.00' );
 		$order_1->set_customer_id( $customer_id_1 );
 		$order_1->save();
 		$order_2 = new WC_Order();
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( OrderStatus::COMPLETED );
 		$order_2->set_total( '15.50' );
 		$order_2->set_customer_id( $customer_id_1 );
 		$order_2->save();
 		$order_3 = new WC_Order();
-		$order_3->set_status( 'completed' );
+		$order_3->set_status( OrderStatus::COMPLETED );
 		$order_3->set_total( '50.01' );
 		$order_3->set_customer_id( $customer_id_2 );
 		$order_3->save();
 		$order_4 = new WC_Order();
-		$order_4->set_status( 'pending' );
+		$order_4->set_status( OrderStatus::PENDING );
 		$order_4->set_total( '1.00' );
 		$order_4->set_customer_id( $customer_id_2 );
 		$order_4->save();

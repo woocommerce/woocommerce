@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Remove pending sync order count when no sync is in progress

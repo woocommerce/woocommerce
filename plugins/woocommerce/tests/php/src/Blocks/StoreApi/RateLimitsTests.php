@@ -138,6 +138,40 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 
 		unset( $_SERVER['HTTP_FORWARDED'] );
 		$this->assertequals( '0.0.0.0', $get_ip_address->invokeArgs( $authentication, array( true ) ) );
+	}
 
+	/**
+	 * Tests that get_rate_limiting_id() correctly returns the USER ID, IP or filter result for set conditions.
+	 *
+	 * @return void
+	 * @throws ReflectionException On failing invoked protected method through reflection class.
+	 */
+	public function test_get_rate_limiting_id_method() {
+		$authentication = new ReflectionClass( Authentication::class );
+		// As the method we're testing is protected, we're using ReflectionClass to set it accessible from the outside.
+		$get_rate_limiting_id = $authentication->getMethod( 'get_rate_limiting_id' );
+		$get_rate_limiting_id->setAccessible( true );
+
+		$_SERVER['REMOTE_ADDR'] = '76.45.67.102';
+		$this->assertEquals( md5( '76.45.67.102' ), $get_rate_limiting_id->invokeArgs( $authentication, array( false ) ) );
+
+		$user_id = $this->factory->user->create( [ 'role' => 'customer' ] );
+		wp_set_current_user( $user_id );
+		$this->assertEquals( $user_id, $get_rate_limiting_id->invokeArgs( $authentication, array( false ) ) );
+
+		$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'en-US,en;q=0.9';
+		$_SERVER['HTTP_USER_AGENT']      = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3';
+
+		add_filter(
+			'woocommerce_store_api_rate_limit_id',
+			function () {
+				return wc_get_user_agent() . $_SERVER['HTTP_ACCEPT_LANGUAGE']; // @codingStandardsIgnoreLine
+			}
+		);
+
+		$this->assertEquals(
+			sanitize_key( wc_get_user_agent() . $_SERVER['HTTP_ACCEPT_LANGUAGE'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$get_rate_limiting_id->invokeArgs( $authentication, array( false ) )
+		);
 	}
 }

@@ -33,6 +33,7 @@ export const defaultState: OnboardingState = {
 		store_email: null,
 		is_store_country_set: null,
 	},
+	profileProgress: {},
 	emailPrefill: '',
 	paymentMethods: [],
 	productTypes: {},
@@ -78,6 +79,11 @@ const reducer: Reducer< OnboardingState, Action > = (
 				profileItems: action.replace
 					? action.profileItems
 					: { ...state.profileItems, ...action.profileItems },
+			};
+		case TYPES.SET_PROFILE_PROGRESS:
+			return {
+				...state,
+				profileProgress: action.profileProgress,
 			};
 		case TYPES.SET_EMAIL_PREFILL:
 			return {

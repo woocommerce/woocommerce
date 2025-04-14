@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -14,8 +13,6 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * A class of utilities for dealing with plugins.
  */
 class PluginUtil {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The LegacyProxy instance to use.
@@ -49,8 +46,8 @@ class PluginUtil {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		self::add_action( 'activated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
-		self::add_action( 'deactivated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
+		add_action( 'activated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
+		add_action( 'deactivated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
 
 		$this->plugins_excluded_from_compatibility_ui = array( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
 	}
@@ -190,7 +187,7 @@ class PluginUtil {
 				$full_matches[] = $wp_plugin;
 			}
 
-			if ( false !== strpos( $wp_plugin, $file_name ) ) {
+			if ( ! empty( $file_name ) && false !== strpos( $wp_plugin, $file_name ) ) {
 				$partial_matches[] = $wp_plugin;
 			}
 		}
@@ -208,8 +205,10 @@ class PluginUtil {
 
 	/**
 	 * Handle plugin activation and deactivation by clearing the WooCommerce aware plugin ids cache.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_plugin_de_activation(): void {
+	public function handle_plugin_de_activation(): void {
 		$this->woocommerce_aware_plugins        = null;
 		$this->woocommerce_aware_active_plugins = null;
 	}

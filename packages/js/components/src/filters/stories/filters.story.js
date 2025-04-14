@@ -247,6 +247,6 @@ export const Examples = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/ReportFilters',
+	title: 'Components/ReportFilters',
 	component: ReportFilters,
 };

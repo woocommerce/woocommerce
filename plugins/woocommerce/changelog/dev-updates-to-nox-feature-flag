@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove a/b test logic for new payment settings page, enable the page by default.

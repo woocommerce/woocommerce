@@ -53,12 +53,23 @@ class ImportInstallTheme implements StepProcessor {
 	public function process( $schema ): StepProcessorResult {
 		$installed_themes = $this->wp_get_themes();
 		// phpcs:ignore
-		$theme = $schema->themeZipFile;
+		$theme = $schema->themeData;
+
+		if (  'wordpress.org/themes' !== $theme->resource ) {
+			$this->result->add_info("Skipped installing a theme. Unsupported resource type. Only 'wordpress.org/themes' is supported at the moment.");
+			return $this->result;
+		}
+
+		if ( ! isset( $schema->options ) ) {
+			$schema->options = new \stdClass();
+		}
 
 		if ( isset( $installed_themes[ $theme->slug ] ) ) {
+			$this->activate_theme( $schema );
 			$this->result->add_info( "Skipped installing {$theme->slug}. It is already installed." );
 			return $this->result;
 		}
+
 		if ( $this->storage->is_supported_resource( $theme->resource ) === false ) {
 			$this->result->add_error( "Invalid resource type for {$theme->slug}" );
 			return $this->result;
@@ -81,16 +92,32 @@ class ImportInstallTheme implements StepProcessor {
 			$this->result->add_error( "Failed to install theme '$theme->slug'." );
 		}
 
-		$theme_switch = true === $theme->activate && $this->wp_switch_theme( $theme->slug );
-
-		if ( $theme_switch ) {
-			$this->result->add_info( "Switched theme to '$theme->slug'." );
-		} else {
-			$this->result->add_error( "Failed to switch theme to '$theme->slug'." );
-		}
+		$this->activate_theme( $schema );
 
 		return $this->result;
 	}
+
+	/**
+	 * Attempt to activate the theme if the schema specifies to do so.
+	 *
+	 * @param object $schema installTheme schema.
+	 *
+	 * @return void
+	 */
+	protected function activate_theme( $schema ) {
+		// phpcs:ignore
+		$theme = $schema->themeData;
+		if ( isset( $schema->options->activate ) && true === $schema->options->activate ) {
+			$this->wp_switch_theme( $theme->slug );
+			$current_theme = $this->wp_get_theme()->get_stylesheet();
+			if ( $current_theme === $theme->slug ) {
+				$this->result->add_info( "Switched theme to '$theme->slug'." );
+			} else {
+				$this->result->add_error( "Failed to switch theme to '$theme->slug'." );
+			}
+		}
+	}
+
 
 	/**
 	 * Install the theme from the local plugin path.

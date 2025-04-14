@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { Option } from '../select-control/types';
+
 export type Field = {
 	id: string;
 	type: 'text' | 'password' | 'checkbox' | 'select';
@@ -14,7 +19,8 @@ export type Field = {
 };
 
 export type FormInputProps = React.InputHTMLAttributes< HTMLInputElement > & {
-	onChange: ( value: string | boolean ) => void;
+	onChange: ( value: string | boolean | Option[] ) => void;
+	onBlur?: () => void;
 };
 
 export type ControlProps = FormInputProps & {

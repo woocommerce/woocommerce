@@ -15,7 +15,7 @@ test.describe( 'Refunds API tests', () => {
 
 		// call API to create a product
 		const createProductResponse = await request.post(
-			`/wp-json/wc/v3/products`,
+			`./wp-json/wc/v3/products`,
 			{
 				data: product,
 			}
@@ -37,7 +37,7 @@ test.describe( 'Refunds API tests', () => {
 
 		// Call API to create an order (containing the previously created product id)
 		const createOrderResponse = await request.post(
-			`/wp-json/wc/v3/orders`,
+			`./wp-json/wc/v3/orders`,
 			{
 				data: order,
 			}
@@ -61,12 +61,12 @@ test.describe( 'Refunds API tests', () => {
 	test.afterAll( async ( { request } ) => {
 		// Cleanup the created product and order
 		// call API to delete the product
-		await request.delete( `/wp-json/wc/v3/products/${ productId }`, {
+		await request.delete( `./wp-json/wc/v3/products/${ productId }`, {
 			data: { force: true },
 		} );
 
 		// call API to delete the order
-		await request.delete( `/wp-json/wc/v3/orders/${ orderId }`, {
+		await request.delete( `./wp-json/wc/v3/orders/${ orderId }`, {
 			data: { force: true },
 		} );
 	} );
@@ -74,7 +74,7 @@ test.describe( 'Refunds API tests', () => {
 	test( 'can create a refund', async ( { request } ) => {
 		// call API to create a refund
 		const response = await request.post(
-			`/wp-json/wc/v3/orders/${ orderId }/refunds`,
+			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
 			{
 				data: expectedRefund,
 			}
@@ -89,7 +89,7 @@ test.describe( 'Refunds API tests', () => {
 		// Verify that the order was refunded.
 		// call API to get the order
 		const getOrderResponse = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }`
+			`./wp-json/wc/v3/orders/${ orderId }`
 		);
 		const getOrderResponseJSON = await getOrderResponse.json();
 		expect( getOrderResponseJSON.refunds ).toHaveLength( 1 );
@@ -107,7 +107,7 @@ test.describe( 'Refunds API tests', () => {
 	test( 'can retrieve a refund', async ( { request } ) => {
 		// call API to retrieve the refund from the order
 		const response = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }/refunds/${ expectedRefund.id }`
+			`./wp-json/wc/v3/orders/${ orderId }/refunds/${ expectedRefund.id }`
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -118,7 +118,7 @@ test.describe( 'Refunds API tests', () => {
 		request,
 	} ) => {
 		// call API to retrieve the refund from the order
-		const response = await request.get( `/wp-json/wc/v3/refunds/` );
+		const response = await request.get( `./wp-json/wc/v3/refunds/` );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( responseJSON ).toHaveLength( 1 );
@@ -130,7 +130,7 @@ test.describe( 'Refunds API tests', () => {
 	test( 'can list all refunds', async ( { request } ) => {
 		// call API to retrieve all the refunds
 		const response = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }/refunds`
+			`./wp-json/wc/v3/orders/${ orderId }/refunds`
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -141,7 +141,7 @@ test.describe( 'Refunds API tests', () => {
 	test( 'can delete a refund', async ( { request } ) => {
 		// call API to delete the previously created refund
 		const response = await request.delete(
-			`/wp-json/wc/v3/orders/${ orderId }/refunds/${ expectedRefund.id }`,
+			`./wp-json/wc/v3/orders/${ orderId }/refunds/${ expectedRefund.id }`,
 			{
 				data: { force: true },
 			}
@@ -154,14 +154,14 @@ test.describe( 'Refunds API tests', () => {
 		// Verify that the refund cannot be retrieved
 		// call API to attempt to retrieve the refund that was previously deleted
 		const retrieveRefundResponse = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }/refunds/${ expectedRefund.id }`
+			`./wp-json/wc/v3/orders/${ orderId }/refunds/${ expectedRefund.id }`
 		);
 		expect( retrieveRefundResponse.status() ).toEqual( 404 );
 
 		// Verify that the order no longer has a refund
 		// call API to retrieve the order
 		const retrieveOrderResponse = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }`
+			`./wp-json/wc/v3/orders/${ orderId }`
 		);
 		const retrieveOrderResponseJSON = await retrieveOrderResponse.json();
 		expect( retrieveOrderResponseJSON.refunds ).toHaveLength( 0 );

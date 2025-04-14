@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Reports Orders REST API Test Class
@@ -65,7 +66,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
@@ -103,7 +104,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		// Make sure the order is paid at least a minute ago to avoid issues with the same timestamp - undeterministic order.
 		$order->set_date_paid( $order->get_date_paid()->modify( '-1 minute' ) );
@@ -220,21 +221,21 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
-		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->set_status( OrderStatus::COMPLETED );
 		$variation_order_1->save();
 
 		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
-		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
 
 		$simple_product_order_1 = WC_Helper_Order::create_order( $this->user, $simple_product );
-		$simple_product_order_1->set_status( 'completed' );
+		$simple_product_order_1->set_status( OrderStatus::COMPLETED );
 		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
 		for ( $i = 0; $i < 10; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
@@ -356,17 +357,17 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
-		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->set_status( OrderStatus::COMPLETED );
 		$variation_order_1->save();
 
 		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
-		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
 
 		// Create more orders for simple products.
 		for ( $i = 0; $i < 10; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
@@ -431,12 +432,12 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		);
 		$excluded_product_item->save();
 		$order_to_be_excluded->add_item( $excluded_product_item );
-		$order_to_be_excluded->set_status( 'completed' );
+		$order_to_be_excluded->set_status( OrderStatus::COMPLETED );
 		$order_to_be_excluded->save();
 
 		// Create an order that doesn't have the excluded products.
 		$order_to_be_included = WC_Helper_Order::create_order( $this->user, $simple_product );
-		$order_to_be_included->set_status( 'completed' );
+		$order_to_be_included->set_status( OrderStatus::COMPLETED );
 		$order_to_be_included->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -501,7 +502,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$first_simple_product = WC_Helper_Product::create_simple_product();
 		$first_order          = WC_Helper_Order::create_order( $this->user, $first_simple_product );
 		$first_order->set_currency( get_woocommerce_currency() );
-		$first_order->set_status( 'on-hold' );
+		$first_order->set_status( OrderStatus::ON_HOLD );
 		$first_order->save();
 
 		// Create another simple order with another currency.
@@ -513,7 +514,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$second_simple_product = WC_Helper_Product::create_simple_product();
 		$second_order          = WC_Helper_Order::create_order( $this->user, $second_simple_product );
 		$second_order->set_currency( $second_currency );
-		$second_order->set_status( 'on-hold' );
+		$second_order->set_status( OrderStatus::ON_HOLD );
 		$second_order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -522,7 +523,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'order_status' => array( 'on-hold' ),
+				'order_status' => array( OrderStatus::ON_HOLD ),
 			)
 		);
 		$response        = $this->server->dispatch( $request );

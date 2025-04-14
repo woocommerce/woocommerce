@@ -27,15 +27,12 @@ class WC_Helper_Admin {
 	 * @return void
 	 */
 	public static function load() {
-		global $pagenow;
-
 		if ( is_admin() ) {
-			$is_in_app_marketplace = ( 'admin.php' === $pagenow
-				&& isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'] //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				&& isset( $_GET['path'] ) && '/extensions' === $_GET['path'] //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$is_wc_home_or_in_app_marketplace = (
+				isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'] //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			);
 
-			if ( $is_in_app_marketplace ) {
+			if ( $is_wc_home_or_in_app_marketplace ) {
 				add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
 			}
 		}
@@ -51,6 +48,11 @@ class WC_Helper_Admin {
 	 * @return mixed $settings
 	 */
 	public static function add_marketplace_settings( $settings ) {
+		if ( ! WC_Helper::is_site_connected() && isset( $_GET['connect'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_safe_redirect( self::get_connection_url() );
+			exit;
+		}
+
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
@@ -64,15 +66,19 @@ class WC_Helper_Admin {
 		);
 
 		$woo_connect_notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
+		$blog_name               = get_bloginfo( 'name' );
 
 		$settings['wccomHelper'] = array(
 			'isConnected'                => WC_Helper::is_site_connected(),
 			'connectURL'                 => self::get_connection_url(),
+			'reConnectURL'               => self::get_connection_url( true ),
 			'userEmail'                  => $auth_user_email,
 			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
 			'storeCountry'               => wc_get_base_location()['country'],
+			'storeName'                  => $blog_name ? $blog_name : '',
 			'inAppPurchaseURLParams'     => WC_Admin_Addons::get_in_app_purchase_url_params(),
 			'installedProducts'          => $installed_products,
+			'mySubscriptionsTabLoaded'   => WC_Helper_Options::get( 'my_subscriptions_tab_loaded' ),
 			'wooUpdateManagerInstalled'  => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
 			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
@@ -80,12 +86,17 @@ class WC_Helper_Admin {
 			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
 			'woocomConnectNoticeType'    => $woo_connect_notice_type,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
+			'connected_notice'           => PluginsHelper::get_wccom_connected_notice( $auth_user_email ),
 		);
 
 		if ( WC_Helper::is_site_connected() ) {
 			$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
 			$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
 			$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
+			$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
+			$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
+		} else {
+			$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
 		}
 
 		return $settings;
@@ -95,18 +106,20 @@ class WC_Helper_Admin {
 	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
+	 * @param bool $reconnect indicate if the site is being reconnected.
+	 *
 	 * @return string
 	 */
-	public static function get_connection_url() {
-		global $current_screen;
-
+	public static function get_connection_url( $reconnect = false ) {
+		// Default to wc-addons, although this can be changed from the frontend
+		// in the function `connectUrl()` within marketplace functions.tsx.
 		$connect_url_args = array(
 			'page'    => 'wc-addons',
 			'section' => 'helper',
 		);
 
 		// No active connection.
-		if ( WC_Helper::is_site_connected() ) {
+		if ( WC_Helper::is_site_connected() && ! $reconnect ) {
 			$connect_url_args['wc-helper-disconnect'] = 1;
 			$connect_url_args['wc-helper-nonce']      = wp_create_nonce( 'disconnect' );
 		} else {

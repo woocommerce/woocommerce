@@ -1,0 +1,27 @@
+{
+	"landingPage": "/wp-admin/edit.php?post_type=woo_email",
+	"preferredVersions": {
+		"php": "8.2",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "url",
+				"url": "https://github-proxy.com/https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip"
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php include 'wordpress/wp-load.php'; delete_transient( '_wc_activation_redirect' ); update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );"
+		}
+	]
+}

@@ -3,7 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Mocks;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Controller;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\QueryBuilder;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\HandlerRegistry;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
@@ -14,7 +16,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 /**
  * ProductCollectionMock used to test Product Query block functions.
  */
-class ProductCollectionMock extends ProductCollection {
+class ProductCollectionMock extends Controller {
 
 	/**
 	 * Initialize our mock class.
@@ -31,7 +33,9 @@ class ProductCollectionMock extends ProductCollection {
 	 * Override the normal initialization behavior to prevent registering the block with WordPress filters.
 	 */
 	protected function initialize() {
-		$this->register_core_collections();
+		$this->query_builder               = new QueryBuilder();
+		$this->collection_handler_registry = new HandlerRegistry();
+		$this->register_core_collections_and_set_handler_store();
 	}
 
 	/**
@@ -49,7 +53,7 @@ class ProductCollectionMock extends ProductCollection {
 	 * @param array $data The attribute data.
 	 */
 	public function set_attributes_filter_query_args( $data ) {
-		$this->attributes_filter_query_args = $data;
+		$this->query_builder->set_attributes_filter_query_args( $data );
 	}
 
 	/**
@@ -62,7 +66,8 @@ class ProductCollectionMock extends ProductCollection {
 	 * @param callable|null $preview_query   An optional hook that returns a query to use in preview mode.
 	 */
 	public function register_collection_handlers( $collection_name, $build_query, $frontend_args = null, $editor_args = null, $preview_query = null ) {
-		parent::register_collection_handlers( $collection_name, $build_query, $frontend_args, $editor_args, $preview_query );
+		$handlers = $this->collection_handler_registry->register_collection_handlers( $collection_name, $build_query, $frontend_args, $editor_args, $preview_query );
+		$this->query_builder->set_collection_handler( $collection_name, $handlers );
 	}
 
 	/**
@@ -71,6 +76,6 @@ class ProductCollectionMock extends ProductCollection {
 	 * @param string $collection_name The name of the collection to unregister.
 	 */
 	public function unregister_collection_handlers( $collection_name ) {
-		unset( $this->collection_handlers[ $collection_name ] );
+		$this->collection_handler_registry->unregister_collection_handlers( $collection_name );
 	}
 }

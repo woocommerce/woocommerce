@@ -7,6 +7,9 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -188,7 +191,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 *
 	 * @return array
 	 */
-	protected function get_low_in_stock_products( $page = 1, $per_page = 1, $status = 'publish' ) {
+	protected function get_low_in_stock_products( $page = 1, $per_page = 1, $status = ProductStatus::PUBLISH ) {
 		global $wpdb;
 
 		$offset              = ( $page - 1 ) * $per_page;
@@ -257,7 +260,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'name'             => $query_result->post_title,
 			'parent_id'        => (int) $query_result->post_parent,
 			'stock_quantity'   => (int) $query_result->stock_quantity,
-			'type'             => 'product_variation' === $query_result->post_type ? 'variation' : 'simple',
+			'type'             => 'product_variation' === $query_result->post_type ? ProductType::VARIATION : ProductType::SIMPLE,
 		);
 	}
 
@@ -424,7 +427,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'default'           => 'publish',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
+			'enum'              => array_merge( array_keys( get_post_statuses() ), array( ProductStatus::FUTURE ) ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -445,7 +448,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'default'           => 'publish',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
+			'enum'              => array_merge( array_keys( get_post_statuses() ), array( ProductStatus::FUTURE ) ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

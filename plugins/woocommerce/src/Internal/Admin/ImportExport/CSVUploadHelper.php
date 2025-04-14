@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 
 /**
@@ -12,8 +11,6 @@ use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
  * @since 9.3.0
  */
 class CSVUploadHelper {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Name (inside the uploads folder) to use for the CSV import directory.
@@ -95,10 +92,10 @@ class CSVUploadHelper {
 			return $overrides_;
 		};
 
-		self::add_filter( 'upload_dir', array( $this, 'override_upload_dir' ) );
-		self::add_filter( 'wp_unique_filename', array( $this, 'override_unique_filename' ), 0, 2 );
-		self::add_filter( 'wp_handle_upload_overrides', $overrides_callback, 999 );
-		self::add_filter( 'wp_handle_upload_prefilter', array( $this, 'remove_txt_from_uploaded_file' ), 0 );
+		add_filter( 'upload_dir', array( $this, 'override_upload_dir' ) );
+		add_filter( 'wp_unique_filename', array( $this, 'override_unique_filename' ), 0, 2 );
+		add_filter( 'wp_handle_upload_overrides', $overrides_callback, 999 );
+		add_filter( 'wp_handle_upload_prefilter', array( $this, 'remove_txt_from_uploaded_file' ), 0 );
 
 		$orig_files_import = $_FILES['import'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing
 		$_FILES['import']  = $file;  // wp_import_handle_upload() expects the file to be in 'import'.
@@ -133,8 +130,10 @@ class CSVUploadHelper {
 	 *
 	 * @param array $uploads WP upload dir details.
 	 * @return array
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function override_upload_dir( $uploads ): array {
+	public function override_upload_dir( $uploads ): array {
 		$new_subdir = '/' . $this->get_import_subdir_name();
 
 		$uploads['path']   = $uploads['basedir'] . $new_subdir;
@@ -150,8 +149,10 @@ class CSVUploadHelper {
 	 * @param string $filename File name.
 	 * @param string $ext      File extension.
 	 * @return string
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function override_unique_filename( string $filename, string $ext ): string {
+	public function override_unique_filename( string $filename, string $ext ): string {
 		$length = min( 10, 255 - strlen( $filename ) - 1 );
 		if ( 1 < $length ) {
 			$suffix   = strtolower( wp_generate_password( $length, false, false ) );
@@ -167,8 +168,10 @@ class CSVUploadHelper {
 	 *
 	 * @param array $file File details in the form of a $_FILES entry.
 	 * @return array Modified file details.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function remove_txt_from_uploaded_file( array $file ): array {
+	public function remove_txt_from_uploaded_file( array $file ): array {
 		$file['name'] = substr( $file['name'], 0, -4 );
 		return $file;
 	}

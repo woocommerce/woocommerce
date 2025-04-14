@@ -8,6 +8,8 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
 import { Product, ProductQuery, ReadOnlyProperties } from '../products/types';
+import { CustomActions } from './actions';
+import { CustomSelectors } from './selectors';
 
 export type ProductVariationAttribute = {
 	id: number;
@@ -81,17 +83,25 @@ export type ProductVariation = Omit<
 export type PartialProductVariation = Partial< ProductVariation > &
 	Pick< ProductVariation, 'id' >;
 
-type Query = Omit< ProductQuery, 'name' >;
+type Query = Omit< ProductQuery, 'name' > & {
+	product_id: number;
+	has_price?: boolean;
+	attributes?: {
+		attribute: string;
+		terms: string[];
+	}[];
+};
 
 type MutableProperties = Partial<
 	Omit< ProductVariation, ReadOnlyProperties >
 >;
 
-type ProductVariationActions = CrudActions<
+export type ProductVariationActions = CrudActions<
 	'ProductVariation',
 	ProductVariation,
 	MutableProperties
->;
+> &
+	CustomActions;
 
 export type ProductVariationSelectors = CrudSelectors<
 	'ProductVariation',
@@ -99,7 +109,8 @@ export type ProductVariationSelectors = CrudSelectors<
 	ProductVariation,
 	Query,
 	MutableProperties
->;
+> &
+	CustomSelectors;
 
 export type ActionDispatchers = DispatchFromMap< ProductVariationActions >;
 

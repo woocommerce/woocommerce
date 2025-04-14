@@ -1,8 +1,3 @@
-/**
- * External dependencies
- */
-import React from 'react';
-
 type SuggestionPillItemProps = {
 	suggestion: string;
 	onSuggestionClick: ( suggestion: string ) => void;

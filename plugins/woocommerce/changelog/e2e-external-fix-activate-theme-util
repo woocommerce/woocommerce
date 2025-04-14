@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-E2E tests - fixing activateTheme util to work on wp env and external envs

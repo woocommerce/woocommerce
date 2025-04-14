@@ -36,6 +36,6 @@ const SearchExample = () => {
 export const Basic = () => <SearchExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/Search',
+	title: 'Components/Search',
 	component: Search,
 };

@@ -28,6 +28,10 @@ import {
 	SetWccomBaseUrl,
 	UPDATE_WCCOM_BASE_URL_ACTION_NAME,
 } from './set-wccom-base-url';
+import {
+	LoadTemplateVersion,
+	LOAD_TEMPLATE_VERSION_ACTION_NAME,
+} from './load-template-version';
 
 export default [
 	{
@@ -114,5 +118,15 @@ export default [
 		command: 'Set WooCommerce.com Base URL',
 		description: <SetWccomBaseUrl />,
 		action: UPDATE_WCCOM_BASE_URL_ACTION_NAME,
+	},
+	{
+		command: 'Reset Launch Your Store',
+		description: 'Resets Launch Your Store and coming soon mode changes.',
+		action: 'resetLaunchYourStore',
+	},
+	{
+		command: 'Load Template Version',
+		description: <LoadTemplateVersion />,
+		action: LOAD_TEMPLATE_VERSION_ACTION_NAME,
 	},
 ];

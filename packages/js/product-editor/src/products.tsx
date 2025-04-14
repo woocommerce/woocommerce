@@ -6,10 +6,14 @@ import {
 	StrictMode,
 	Suspense,
 	createElement,
-	// @ts-expect-error createRoot is available.
 	createRoot,
 	lazy,
 } from '@wordpress/element';
+
+import {
+	Root,
+	// @ts-expect-error missing types.
+} from 'react-dom/client';
 
 /**
  * Internal dependencies
@@ -27,9 +31,9 @@ const ProductsApp = lazy( () =>
  *
  * @param {string} id DOM element id.
  */
-export function initializeProductsDashboard( id: string ) {
+export function initializeProductsDashboard( id: string ): Root {
 	const target = document.getElementById( id );
-	const root = createRoot( target );
+	const root = createRoot( target! );
 	const isGutenbergEnabled = getGutenbergVersion() > 0;
 
 	root.render(

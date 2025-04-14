@@ -23,8 +23,7 @@ Alternatively, you can select and use a different theme that already uses curren
 
 You need to determine what templates to update, make a backup of the old templates, and then restore any customizations.
 
-1. Go to WooCommerce > Status > System Status. Scroll to the end of the page where there is a list of templates overridden by your theme/child theme and a warning message that they need to be updated. In the example below, the templates `form-pay.php` and `form-login.php` are outdated:
- ![An example for outdated templates.](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/fix_outdated_theme_templates.png)
+1. Go to WooCommerce > Status > System Status. Scroll to the end of the page where there is a list of templates overridden by your theme/child theme and a warning message that they need to be updated.
 2. Save a backup of the outdated template.
 3. Copy the default template from `wp-content/plugins/woocommerce/templates/[path-to-the-template]` and paste it in your theme folder found at `wp-content/themes/[path-to-theme]`.
 4. Open the template you pasted into the theme folder with a text editor, such as Sublime, Visual Code, BBEdit, Notepad++, and replicate any changes that you had to the previous template in your new, updated template file.

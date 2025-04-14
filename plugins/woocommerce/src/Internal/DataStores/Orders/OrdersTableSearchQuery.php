@@ -156,15 +156,15 @@ class OrdersTableSearchQuery {
 		}
 
 		foreach ( $this->search_filters as $search_filter ) {
-			$search_where = $this->generate_where_for_search_filter( $search_filter );
-			if ( ! empty( $search_where ) ) {
+			$search_where = trim( $this->generate_where_for_search_filter( $search_filter ) );
+			if ( strlen( $search_where ) > 0 ) {
 				$where[] = $search_where;
 			}
 		}
 
 		$where_statement = implode( ' OR ', $where );
 
-		return " ( $where_statement ) ";
+		return ( strlen( $where_statement ) > 0 ) ? " ( $where_statement ) " : '';
 	}
 
 	/**

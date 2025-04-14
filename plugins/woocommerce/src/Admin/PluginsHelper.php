@@ -72,11 +72,21 @@ class PluginsHelper {
 	const DISMISS_MISSING_SUBS_NOTICE = 'woo_subscription_missing_notice_dismiss';
 
 	/**
+	 * Meta key for dismissing disconnected notice
+	 */
+	const DISMISS_DISCONNECT_NOTICE = 'woo_disconnect_notice_dismiss';
+
+	/**
+	 * Meta key for dismissing connected notice
+	 */
+	const DISMISS_CONNECT_NOTICE = 'woo_connect_notice_dismiss';
+
+	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
-		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
+		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 3 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
@@ -214,10 +224,11 @@ class PluginsHelper {
 	 *
 	 * @param array                     $plugins Plugins to install.
 	 * @param PluginsInstallLogger|null $logger an optional logger.
+	 * @param string|null               $source place where the request is coming from.
 	 *
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, PluginsInstallLogger $logger = null ) {
+	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null, string $source = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -307,6 +318,13 @@ class PluginsHelper {
 				continue;
 			}
 
+			/**
+			 * Action triggered before a plugin is installed.
+			 *
+			 * @since 9.8
+			 */
+			do_action( 'woocommerce_plugins_install_before', $slug, $source );
+
 			$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
 			$result   = $upgrader->install( $api->download_link );
 			// result can be false or WP_Error.
@@ -359,6 +377,13 @@ class PluginsHelper {
 
 			$installed_plugins[] = $plugin;
 			$logger && $logger->installed( $plugin, $time[ $plugin ] );
+
+			/**
+			 * Action triggered after a plugin is installed.
+			 *
+			 * @since 9.8
+			 */
+			do_action( 'woocommerce_plugins_install_after', $slug, $source );
 		}
 
 		$data = array(
@@ -378,14 +403,16 @@ class PluginsHelper {
 	 *
 	 * It is used to call install_plugins and activate_plugins with a custom logger.
 	 *
-	 * @param array  $plugins A list of plugins to install.
-	 * @param string $job_id An unique job I.D.
+	 * @param array       $plugins A list of plugins to install.
+	 * @param string      $job_id An unique job I.D.
+	 * @param string|null $source The source of the request.
+	 *
 	 * @return bool
 	 */
-	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id ) {
+	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id, string $source = null ) {
 		$option_name = 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id;
 		$logger      = new AsyncPluginsInstallLogger( $option_name );
-		self::install_plugins( $plugins, $logger );
+		self::install_plugins( $plugins, $logger, $source );
 		self::activate_plugins( $plugins, $logger );
 		return true;
 	}
@@ -420,7 +447,7 @@ class PluginsHelper {
 	 *
 	 * @return WP_Error|array Plugin Status
 	 */
-	public static function activate_plugins( $plugins, PluginsInstallLogger $logger = null ) {
+	public static function activate_plugins( $plugins, ?PluginsInstallLogger $logger = null ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
 			return new WP_Error(
 				'woocommerce_plugins_invalid_plugins',
@@ -1078,17 +1105,75 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Get notice information when WCCOM connection is disconnected.
+	 *
+	 * @return string disconnect notice.
+	 */
+	public static function get_wccom_disconnected_notice() {
+		if ( WC_Helper::is_site_connected() ) {
+			return '';
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_DISCONNECT_NOTICE, false ) ) {
+			return '';
+		}
+
+		$user_email = \WC_Helper_Options::get( 'last_disconnected_user_data' )['email'] ?? null;
+		if ( empty( $user_email ) ) {
+			return '';
+		}
+
+		return sprintf(
+			/* translators: 1: Disconnected user email */
+			__( 'Successfully disconnected from <b>%1$s</b>.', 'woocommerce' ),
+			$user_email
+		);
+	}
+
+	/**
+	 * Get the connected status notice message.
+	 *
+	 * @param string $user_email the user email.
+	 *
+	 * @return string the connected notice message.
+	 */
+	public static function get_wccom_connected_notice( $user_email ) {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return '';
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_CONNECT_NOTICE, false ) ) {
+			return '';
+		}
+
+		if ( ! $user_email ) {
+			return '';
+		}
+
+		return sprintf(
+		/* translators: 1: Disconnected user email */
+			__( 'Successfully connected to <b>%s</b>.', 'woocommerce' ),
+			$user_email
+		);
+	}
+
+	/**
 	 * Determine whether a specific notice should be shown to the current user.
 	 *
 	 * @param string $dismiss_notice_meta User meta that includes the timestamp when a store notice was dismissed.
+	 * @param bool   $show_after_one_month Show the notices dismissed earlier than one month.
 	 * @return bool True if the notice should be shown, false otherwise.
 	 */
-	public static function should_show_notice( $dismiss_notice_meta ) {
+	public static function should_show_notice( $dismiss_notice_meta, $show_after_one_month = true ) {
 		// Get the current user ID.
 		$user_id = get_current_user_id();
 
 		// Get the timestamp when the notice was dismissed.
 		$dismissed_timestamp = get_user_meta( $user_id, $dismiss_notice_meta, true );
+
+		if ( ! $show_after_one_month ) {
+			return empty( $dismissed_timestamp );
+		}
 
 		// If the notice was dismissed within the last month, do not show it.
 		if ( ! empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {

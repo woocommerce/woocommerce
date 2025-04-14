@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\{ PluginUtil, StringUtil };
 
 /**
@@ -20,8 +19,6 @@ use Automattic\WooCommerce\Utilities\{ PluginUtil, StringUtil };
  */
 class PluginInstaller implements RegisterHooksInterface {
 
-	use AccessiblePrivateMethods;
-
 	/**
 	 * Flag indicating that a plugin install is in progress, so the upgrader_process_complete hook must be ignored.
 	 *
@@ -33,8 +30,8 @@ class PluginInstaller implements RegisterHooksInterface {
 	 * Attach hooks used by the class.
 	 */
 	public function register() {
-		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
-		self::add_action( 'upgrader_process_complete', array( $this, 'handle_upgrader_process_complete' ), 10, 2 );
+		add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
+		add_action( 'upgrader_process_complete', array( $this, 'handle_upgrader_process_complete' ), 10, 2 );
 	}
 
 	/**
@@ -223,8 +220,10 @@ class PluginInstaller implements RegisterHooksInterface {
 	 *
 	 * @param string $plugin_file Name of the plugin.
 	 * @param array  $plugin_data Plugin data.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
+	public function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
 		global $wp_list_table;
 
 		if ( is_null( $wp_list_table ) ) {
@@ -286,8 +285,10 @@ class PluginInstaller implements RegisterHooksInterface {
 	 *
 	 * @param \WP_Upgrader $upgrader The upgrader class that has performed the plugin upgrade/reinstall.
 	 * @param array        $hook_extra Extra information about the upgrade process.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_upgrader_process_complete( \WP_Upgrader $upgrader, array $hook_extra ) {
+	public function handle_upgrader_process_complete( \WP_Upgrader $upgrader, array $hook_extra ) {
 		if ( $this->installing_plugin || ! ( $upgrader instanceof \Plugin_Upgrader ) || ( 'plugin' !== ( $hook_extra['type'] ?? null ) ) ) {
 			return;
 		}

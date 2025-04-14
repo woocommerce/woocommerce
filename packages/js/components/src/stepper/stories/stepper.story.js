@@ -130,6 +130,6 @@ const BasicExamples = () => {
 export const Examples = () => <BasicExamples />;
 
 export default {
-	title: 'WooCommerce Admin/components/Stepper',
+	title: 'Components/Stepper',
 	component: Stepper,
 };

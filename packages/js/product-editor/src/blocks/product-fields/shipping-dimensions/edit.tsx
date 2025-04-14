@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import {
-	OPTIONS_STORE_NAME,
-	Product,
-	ProductDimensions,
-} from '@woocommerce/data';
+import { optionsStore, Product, ProductDimensions } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import {
@@ -60,10 +56,10 @@ export function Edit( {
 	const [ highlightSide, setHighlightSide ] = useState< HighlightSides >();
 
 	const { dimensionUnit, weightUnit } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption } = select( optionsStore );
 		return {
-			dimensionUnit: getOption( 'woocommerce_dimension_unit' ),
-			weightUnit: getOption( 'woocommerce_weight_unit' ),
+			dimensionUnit: getOption( 'woocommerce_dimension_unit' ) as string,
+			weightUnit: getOption( 'woocommerce_weight_unit' ) as string,
 		};
 	}, [] );
 

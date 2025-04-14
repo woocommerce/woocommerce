@@ -11,7 +11,8 @@ process.env.STORAGE_STATE_PATH ??= path.join(
 	process.env.WP_ARTIFACTS_PATH,
 	'storage-states/admin.json'
 );
-process.env.WP_BASE_URL ??= 'http://localhost:8086';
+process.env.WP_BASE_URL ??=
+	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
 
 const config = defineConfig( {
 	reporter: [ [ 'list' ], [ './config/performance-reporter.ts' ] ],

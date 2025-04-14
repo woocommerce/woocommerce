@@ -18,7 +18,6 @@ import type { ForwardedRef } from 'react';
 import {
 	BaseControl,
 	Button,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -50,7 +49,7 @@ export type NumberProps = {
 const MEDIUM_DELAY = 500;
 const SHORT_DELAY = 100;
 
-export const NumberControl: React.FC< NumberProps > = forwardRef(
+export const NumberControl = forwardRef(
 	(
 		{
 			id,

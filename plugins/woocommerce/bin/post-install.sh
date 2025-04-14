@@ -2,5 +2,11 @@
 
 # Required for dev and build environments: generate optimized autoloaders, safe to run in background.
 composer dump-autoload --optimize --quiet &
-# Required for dev environments: install tooling dependencies, if it failing we'll notice it in CI/locally.
-composer bin all install --ansi &
+
+if [ -z ${CI+y} ]; then
+	# Required for dev-environments: install tooling dependencies in background
+    composer bin all install --ansi &
+else
+	# Required for CI-environments: install tooling dependencies synchronously
+	composer bin all install --ansi
+fi

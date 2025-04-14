@@ -18,130 +18,103 @@ The functionality to hide all other methods, and only show Free Shipping, requir
 
 Before adding snippets, clear your WooCommerce cache. Go to WooCommerce > System Status > Tools > WooCommerce Transients > Clear transients.
 
-Add this code to your child theme's `functions.php`, or via a plugin that allows custom functions to be added. Please don't add custom code directly to a parent theme's `functions.php` as changes are entirely erased when a parent theme updates.
-
 ## Code Snippets
+
+### How do I only show Free Shipping?
+
+The following snippet will hide all other shipping methods if Free Shipping is available for the customer.
+
+```php
+/**
+ * Hide other shipping rates when free shipping is available.
+ *
+ * @param array $rates Array of rates found for the package.
+ *
+ * @return array
+ */
+function fsc_hide_shipping_rates_when_free_is_available( $rates ) {
+	// Go through each rate found.
+	foreach ( $rates as $rate_id => $rate ) {
+		// If Free Shipping is found, define it as the only rate and break out of the foreach.
+		if ( 'free_shipping' === $rate->method_id ) {
+			$rates = [ $rate_id => $rate ];
+			break;
+		}
+	}
+	return $rates;
+}
+add_filter( 'woocommerce_package_rates', 'fsc_hide_shipping_rates_when_free_is_available', 10, 1 );
+```
+
+### How do I only show Local Pickup and Free Shipping?
+
+The following snippet will hide all other shipping methods but Free Shipping and Local Pickup if they are available for the customer.
+
+```php
+/**
+ * If Free Shipping is available hide other rates, excluding Local Pickup.
+ *
+ * @param array $rates Array of rates found for the package.
+ *
+ * @return array
+ */
+function fsc_hide_shipping_rates_when_free_is_available_excluding_local( $rates ) {
+	// Define arrays to hold our Free Shipping and Local Pickup methods, if found.
+	$free_shipping = [];
+	$local_pickup  = [];
+
+	// Go through each rate received.
+	foreach ( $rates as $rate_id => $rate ) {
+		// If either method is found, add them to their respective array.
+		if ( 'free_shipping' === $rate->method_id ) {
+			$free_shipping[ $rate_id ] = $rate;
+			continue;
+		}
+		if ( 'pickup_location' === $rate->method_id ) {
+			$local_pickup[ $rate_id ] = $rate;
+		}
+	}
+
+	// If the free_shipping array contains a method, then merge the local_pickup into it, and overwrite the rates array.
+	if ( ! empty( $free_shipping ) ) {
+		$rates = array_merge( $free_shipping, $local_pickup );
+	}
+
+	return $rates;
+}
+
+add_filter( 'woocommerce_package_rates', 'fsc_hide_shipping_rates_when_free_is_available_excluding_local', 10, 1 );
+```
 
 ### Enabling or Disabling Free Shipping via Hooks
 
-You can hook into the `is_available` function of the free shipping method.
+If you would like to know if Free Shipping is available programmatically, this is possible. WooCommerce applies a filter like the below:
 
 ```php
 return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
 ```
 
-This means you can use `add_filter()` on `woocommerce_shipping_free_shipping_is_available` and return `true` or `false`.
-
-### How do I only show Free Shipping?
-
-The following snippet hides everything but `free_shipping`, if it's available and the customer's cart qualifies. 
+This means you can use `add_filter()` on `woocommerce_shipping_free_shipping_is_available` and receive `true` or `false` if Free Shipping is enabled. For example, this next snippet would log if Free Shipping is available or not:
 
 ```php
 /**
- * Hide shipping rates when free shipping is available.
- * Updated to support WooCommerce 2.6 Shipping Zones.
+ * Log if Free Shipping is available or not.
  *
- * @param array $rates Array of rates found for the package.
- * @return array
- */
-function my_hide_shipping_when_free_is_available( $rates ) {
-	$free = array();
-	foreach ( $rates as $rate_id => $rate ) {
-		if ( 'free_shipping' === $rate->method_id ) {
-			$free[ $rate_id ] = $rate;
-			break;
-		}
-	}
-	return ! empty( $free ) ? $free : $rates;
-}
-add_filter( 'woocommerce_package_rates', 'my_hide_shipping_when_free_is_available', 100 );
-```
-
-### How do I only show Local Pickup and Free Shipping?
-
-The snippet below hides everything but `free_shipping` and `local_pickup`, if it's available and the customer's cart qualifies. 
-
-```php
-
-/**
- * Hide shipping rates when free shipping is available, but keep "Local pickup" 
- * Updated to support WooCommerce 2.6 Shipping Zones
- */
-
-function hide_shipping_when_free_is_available( $rates, $package ) {
-	$new_rates = array();
-	foreach ( $rates as $rate_id => $rate ) {
-		// Only modify rates if free_shipping is present.
-		if ( 'free_shipping' === $rate->method_id ) {
-			$new_rates[ $rate_id ] = $rate;
-			break;
-		}
-	}
-
-	if ( ! empty( $new_rates ) ) {
-		//Save local pickup if it's present.
-		foreach ( $rates as $rate_id => $rate ) {
-			if ('local_pickup' === $rate->method_id ) {
-				$new_rates[ $rate_id ] = $rate;
-				break;
-			}
-		}
-		return $new_rates;
-	}
-
-	return $rates;
-}
-
-add_filter( 'woocommerce_package_rates', 'hide_shipping_when_free_is_available', 10, 2 );
-```
-
-### Only show free shipping in all states except…
-
-This snippet results in showing only free shipping in all states except the exclusion list. It hides free shipping if the customer is in one of the states listed:
-
-```php
-/**
- * Hide ALL shipping options when free shipping is available and customer is NOT in certain states
+ * @param bool $is_available If Free Shipping is available, then `true`, `false` if not.
  *
- * Change $excluded_states = array( 'AK','HI','GU','PR' ); to include all the states that DO NOT have free shipping
+ * @return bool
  */
-add_filter( 'woocommerce_package_rates', 'hide_all_shipping_when_free_is_available' , 10, 2 );
-
-/**
- * Hide ALL Shipping option when free shipping is available
- *
- * @param array $available_methods
- */
-function hide_all_shipping_when_free_is_available( $rates, $package ) {
- 
-	$excluded_states = array( 'AK','HI','GU','PR' );
-	if( isset( $rates['free_shipping'] ) AND !in_array( WC()->customer->shipping_state, $excluded_states ) ) :
-		// Get Free Shipping array into a new array
-		$freeshipping = array();
-		$freeshipping = $rates['free_shipping'];
- 
-		// Empty the $available_methods array
-		unset( $rates );
- 
-		// Add Free Shipping back into $avaialble_methods
-		$rates = array();
-		$rates[] = $freeshipping;
- 
-	endif;
- 
-	if( isset( $rates['free_shipping'] ) AND in_array( WC()->customer->shipping_state, $excluded_states ) ) {
- 
-		// remove free shipping option
-		unset( $rates['free_shipping'] );
- 
+function fsc_free_shipping_is_available( $is_available ) {
+	if ( $is_available ) {
+		error_log( 'Free shipping is available' );
+	} else {
+		error_log( 'Free shipping is NOT available' );
 	}
-
-	return $rates;
+	return $is_available;
 }
+add_filter( 'woocommerce_shipping_free_shipping_is_available', 'fsc_free_shipping_is_available', 10, 1 );
 ```
 
 ### Enable Shipping Methods on a per Class / Product Basis, split orders, or other scenarios?
 
 Need more flexibility? Take a look at our [premium Shipping Method extensions](https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/).
-
-

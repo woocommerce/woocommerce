@@ -49,6 +49,13 @@ interface SelectTreeProps extends TreeControlProps {
 	initialInputValue?: string | undefined;
 	isClearingAllowed?: boolean;
 	onClear?: () => void;
+	placeholder?: string;
+}
+
+function isBlurEvent(
+	event: React.SyntheticEvent | React.FocusEvent
+): event is React.FocusEvent {
+	return event.type === 'blur';
 }
 
 export const SelectTree = function SelectTree( {
@@ -86,18 +93,22 @@ export const SelectTree = function SelectTree( {
 
 	const selectedItemsFocusHandle = useRef< SelectedItemFocusHandle >( null );
 
-	function isEventOutside( event: React.FocusEvent ) {
+	function isEventOutside( event: React.SyntheticEvent | React.FocusEvent ) {
+		let target: Element | null = event.currentTarget;
+		if ( isBlurEvent( event ) ) {
+			target = event.relatedTarget;
+		}
 		const isInsideSelect = document
 			.getElementById( selectTreeInstanceId )
-			?.contains( event.relatedTarget );
+			?.contains( target );
 
 		const isInsidePopover = document
 			.getElementById( menuInstanceId )
 			?.closest(
 				'.woocommerce-experimental-select-tree-control__popover-menu'
 			)
-			?.contains( event.relatedTarget );
-		const isInRemoveTag = event.relatedTarget?.classList.contains(
+			?.contains( target );
+		const isInRemoveTag = target?.classList.contains(
 			'woocommerce-tag__remove'
 		);
 		return ! isInsideSelect && ! isInRemoveTag && ! isInsidePopover;
@@ -160,7 +171,10 @@ export const SelectTree = function SelectTree( {
 		}
 	}, [ props.createValue ] );
 
-	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
+	const inputProps: Omit<
+		React.InputHTMLAttributes< HTMLInputElement >,
+		'type'
+	> = {
 		className: 'woocommerce-experimental-select-control__input',
 		id: `${ props.id }-input`,
 		'aria-autocomplete': 'list',

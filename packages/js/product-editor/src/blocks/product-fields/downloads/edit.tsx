@@ -74,9 +74,12 @@ export function DownloadBlockEdit( {
 		useState< ProductDownload | null >();
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
-		const { getEditorSettings } = select( 'core/editor' );
+		const { getEditorSettings } = select( 'core/editor' ) as {
+			getEditorSettings: () => Record< string, unknown >;
+		};
+
 		return getEditorSettings();
-	} );
+	}, [] );
 
 	const allowedTypes = allowedMimeTypes
 		? Object.values( allowedMimeTypes )

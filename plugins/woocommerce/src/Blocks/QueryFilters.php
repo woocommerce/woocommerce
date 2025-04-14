@@ -148,7 +148,7 @@ final class QueryFilters {
 			WHERE product_id IN ( {$product_query_sql} )
 			AND average_rating > 0
 			GROUP BY rounded_average_rating
-			ORDER BY rounded_average_rating ASC
+			ORDER BY rounded_average_rating DESC
 		";
 
 		$results = $wpdb->get_results( $rating_count_sql ); // phpcs:ignore
@@ -209,7 +209,7 @@ final class QueryFilters {
 		}
 
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', array_map( 'esc_sql', explode( ',', $wp_query->get( 'filter_stock_status' ) ) ) ) . '")';
+		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN (\'' . implode( '\',\'', array_map( 'esc_sql', explode( ',', $wp_query->get( 'filter_stock_status' ) ) ) ) . '\')';
 
 		return $args;
 	}
@@ -306,7 +306,7 @@ final class QueryFilters {
 		global $wpdb;
 
 		// Select only used tax classes to avoid unwanted calculations.
-		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+		$product_tax_classes = array_filter( $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" ) );
 
 		if ( empty( $product_tax_classes ) ) {
 			return '';

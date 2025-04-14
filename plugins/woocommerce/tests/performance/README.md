@@ -86,7 +86,6 @@ addresses_guest_billing_* | billing address details for guest customer user | no
 payment_method | payment method (currently only `cod` supported) | no
 product_sku | SKU of product to be used in cart and checkout flow | yes `__ENV.P_SKU`
 product_url | the `product-name` portion of product permalink of the product to be used in cart and checkout flow | yes `__ENV.P_URL`
-product_id | the product ID of of product to be used in cart and checkout flow | yes `__ENV.P_ID`
 product_search_term | search term to return product to be used in cart and checkout flow | yes `__ENV.P_TERM`
 product_category | category of product to be used for browsing category products | yes `__ENV.P_CAT`
 coupon_code | coupon code to be used in applying coupon flow | yes `__ENV.P_COUPON`

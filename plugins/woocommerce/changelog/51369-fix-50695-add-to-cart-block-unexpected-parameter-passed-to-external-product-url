@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix: Prevent `is-descendent-of-single-product-block=false` from being added to external product URLs.

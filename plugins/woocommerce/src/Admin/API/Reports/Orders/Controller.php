@@ -461,6 +461,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_columns = array(
 			'date_created'    => __( 'Date', 'woocommerce' ),
 			'order_number'    => __( 'Order #', 'woocommerce' ),
+			'total_formatted' => __( 'N. Revenue (formatted)', 'woocommerce' ),
 			'status'          => __( 'Status', 'woocommerce' ),
 			'customer_name'   => __( 'Customer', 'woocommerce' ),
 			'customer_type'   => __( 'Customer type', 'woocommerce' ),
@@ -493,6 +494,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_item = array(
 			'date_created'    => $item['date'],
 			'order_number'    => $item['order_number'],
+			'total_formatted' => $item['total_formatted'],
 			'status'          => $item['status'],
 			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'   => $item['customer_type'],

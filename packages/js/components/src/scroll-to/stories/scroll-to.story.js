@@ -13,6 +13,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/ScrollTo',
+	title: 'Components/ScrollTo',
 	component: ScrollTo,
 };

@@ -27,7 +27,7 @@ export function UserPreferencesTabPanel( {
 	const update = useCallback(
 		(
 			preferences: UserPreferences | UserPreferenceProp,
-			value?,
+			value?: unknown,
 			force = false
 		) => {
 			const dataToUpdate =

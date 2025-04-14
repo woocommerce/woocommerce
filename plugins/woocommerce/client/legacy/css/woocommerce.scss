@@ -11,6 +11,7 @@
 @import "variables";
 @import "animation";
 @import "fonts";
+@import "forms";
 
 /**
  * Global styles
@@ -80,7 +81,9 @@ p.demo_store,
 		text-align: center;
 		line-height: 1;
 		border-radius: 100%;
-		color: var(--wc-red) !important; // Required for default theme compatibility
+		color: var(
+			--wc-red
+		) !important; // Required for default theme compatibility
 		text-decoration: none;
 		font-weight: 700;
 		border: 0;
@@ -182,45 +185,13 @@ p.demo_store,
 				display: inline-block;
 			}
 
+			.woocommerce-product-gallery__image a {
+				display: block;
+				outline-offset: -2px;
+			}
+
 			.woocommerce-product-gallery__trigger {
-				position: absolute;
-				top: 0.5em;
-				right: 0.5em;
-				font-size: 2em;
-				z-index: 9;
-				width: 36px;
-				height: 36px;
-				background: #fff;
-				text-indent: -9999px;
-				border-radius: 100%;
-				box-sizing: content-box;
-
-				&::before {
-					content: "";
-					display: block;
-					width: 10px;
-					height: 10px;
-					border: 2px solid #000;
-					border-radius: 100%;
-					position: absolute;
-					top: 9px;
-					left: 9px;
-					box-sizing: content-box;
-				}
-
-				&::after {
-					content: "";
-					display: block;
-					width: 2px;
-					height: 8px;
-					background: #000;
-					border-radius: 6px;
-					position: absolute;
-					top: 19px;
-					left: 22px;
-					transform: rotate(-45deg);
-					box-sizing: content-box;
-				}
+				@include woocommerce-product-gallery__trigger;
 			}
 
 			.flex-control-thumbs {
@@ -450,7 +421,7 @@ p.demo_store,
 					appearance: none;
 					-webkit-appearance: none;
 					-moz-appearance: none;
-					padding-right: 2em;
+					padding-right: 3em;
 					background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=)
 						no-repeat;
 					background-size: 16px;
@@ -563,6 +534,10 @@ p.demo_store,
 
 		a {
 			text-decoration: none;
+
+			&.woocommerce-loop-product__link {
+				display: block;
+			}
 		}
 
 		a img {
@@ -623,6 +598,10 @@ p.demo_store,
 
 	.woocommerce-ordering {
 		margin: 0 0 1em;
+
+		> label {
+			margin-right: 0.25rem;
+		}
 
 		select {
 			vertical-align: top;
@@ -893,6 +872,7 @@ p.demo_store,
 				line-height: 1;
 				font-family: "WooCommerce";
 				content: "\e021";
+				content: "\e021" / "";
 				text-indent: 0;
 			}
 
@@ -1175,139 +1155,6 @@ p.demo_store,
 	/**
 	 * Forms
 	 */
-	form .form-row {
-		padding: 3px;
-		margin: 0 0 6px;
-
-		[placeholder]:focus::-webkit-input-placeholder {
-			transition: opacity 0.5s 0.5s ease;
-			opacity: 0;
-		}
-
-		label {
-			line-height: 2;
-		}
-
-		label.hidden {
-			visibility: hidden;
-		}
-
-		label.inline {
-			display: inline;
-		}
-
-		.woocommerce-input-wrapper {
-			.description {
-				background: #1e85be;
-				color: #fff;
-				border-radius: 3px;
-				padding: 1em;
-				margin: 0.5em 0 0;
-				clear: both;
-				display: none;
-				position: relative;
-
-				a {
-					color: #fff;
-					text-decoration: underline;
-					border: 0;
-					box-shadow: none;
-				}
-
-				&::before {
-					left: 50%;
-					top: 0%;
-					margin-top: -4px;
-					transform: translateX(-50%) rotate(180deg);
-					content: "";
-					position: absolute;
-					border-width: 4px 6px 0 6px;
-					border-style: solid;
-					border-color: #1e85be transparent transparent transparent;
-					z-index: 100;
-					display: block;
-				}
-			}
-		}
-
-		select {
-			cursor: pointer;
-			margin: 0;
-		}
-
-		.required {
-			color: var(--wc-red);
-			font-weight: 700;
-			border: 0 !important;
-			text-decoration: none;
-			visibility: hidden; // Only show optional by default.
-		}
-
-		.optional {
-			visibility: visible;
-		}
-
-		.input-checkbox {
-			display: inline;
-			margin: -2px 8px 0 0;
-			text-align: center;
-			vertical-align: middle;
-		}
-
-		input.input-text,
-		textarea {
-			box-sizing: border-box;
-			width: 100%;
-			margin: 0;
-			outline: 0;
-			line-height: normal;
-		}
-
-		textarea {
-			height: 4em;
-			line-height: 1.5;
-			display: block;
-			box-shadow: none;
-		}
-
-		.select2-container {
-			width: 100%;
-			line-height: 2em;
-		}
-
-		&.woocommerce-invalid {
-			label {
-				color: var(--wc-red);
-			}
-
-			.select2-container,
-			input.input-text,
-			select {
-				border-color: var(--wc-red);
-			}
-		}
-
-		&.woocommerce-validated {
-			.select2-container,
-			input.input-text,
-			select {
-				border-color: darken($green, 5%);
-			}
-		}
-
-		::-webkit-input-placeholder {
-			line-height: normal;
-		}
-
-		:-moz-placeholder {
-			line-height: normal;
-		}
-
-		:-ms-input-placeholder {
-			line-height: normal;
-		}
-	}
-
 	form.login,
 	form.checkout_coupon,
 	form.register {
@@ -1398,6 +1245,18 @@ p.demo_store,
 	.woocommerce-customer-details,
 	.woocommerce-order-details {
 		margin-bottom: 2em;
+
+		.order-actions--heading {
+			vertical-align: middle;
+		}
+
+		.order-actions-button {
+			margin-right: 10px;
+
+			&:last-child {
+				margin-right: 0;
+			}
+		}
 
 		*:last-child {
 			margin-bottom: 0;
@@ -1608,7 +1467,8 @@ p.demo_store,
 			z-index: 2;
 			width: 1em;
 			height: 1em;
-			background-color: $primary;
+			// We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: #7F54B3;
 			border-radius: 1em;
 			cursor: ew-resize;
 			outline: none;
@@ -1625,12 +1485,14 @@ p.demo_store,
 			display: block;
 			border: 0;
 			border-radius: 1em;
-			background-color: $primary;
+			// We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: #7F54B3;
 		}
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			background-color: darken($primary, 30%);
+			// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: darken(#7F54B3, 30%);
 			border: 0;
 		}
 
@@ -1700,7 +1562,7 @@ p.demo_store,
  */
 .woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
 :where(body:not(.woocommerce-block-theme-has-button-styles)):where(
-		:not(.edit-post-visual-editor *)
+		:not(.edit-post-visual-editor)
 	)
 	.woocommerce {
 	a.button,
@@ -1757,13 +1619,15 @@ p.demo_store,
 		}
 
 		&.alt {
-			background-color: $primary;
-			color: $primarytext;
+			// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			background-color: #7F54B3;
+			color: desaturate(lighten(#7F54B3, 50%), 18%);
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
-				background-color: darken($primary, 5%);
-				color: $primarytext;
+				// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+				background-color: darken(#7F54B3, 5%);
+				color: desaturate(lighten(#7F54B3, 50%), 18%);
 			}
 
 			&.disabled,
@@ -1772,8 +1636,9 @@ p.demo_store,
 			&.disabled:hover,
 			&:disabled:hover,
 			&:disabled[disabled]:hover {
-				background-color: $primary;
-				color: $primarytext;
+				// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+				background-color: #7F54B3;
+				color: desaturate(lighten(#7F54B3, 50%), 18%);
 			}
 		}
 
@@ -1863,7 +1728,7 @@ p.demo_store,
 	&::before {
 		font-family: "WooCommerce";
 		content: "\e028";
-		content: "\e028" / ""; // Add an empty alternative text so screen readers ignore it
+		content: "\e028"/ ""; // Add an empty alternative text so screen readers ignore it
 		display: inline-block;
 		position: absolute;
 		top: 1em;
@@ -2129,17 +1994,26 @@ p.demo_store,
 		.shipping_address {
 			clear: both;
 		}
+
+		.checkout-inline-error-message {
+			color: var(--wc-red);
+			font-size: 0.75em;
+			margin-bottom: 0;
+		}
 	}
 
 	#payment {
-		background: $secondary;
+		// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+		background: desaturate(rgba(#7F54B3, 0.14), 21%);
 		border-radius: 5px;
 
 		ul.payment_methods {
 			@include clearfix();
 			text-align: left;
 			padding: 1em;
-			border-bottom: 1px solid darken($secondary, 10%);
+			// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+			border-bottom: 1px solid
+				darken(desaturate(rgba(#7F54B3, 0.14), 21%), 10%);
 			margin: 0;
 			list-style: none outside;
 
@@ -2410,41 +2284,4 @@ body:not(.search-results) .twentysixteen .entry-summary {
 .twentysixteen .price ins {
 	background: inherit;
 	color: inherit;
-}
-
-#coming-soon-footer-banner {
-	width: 100%;
-	min-height: 56px;
-	background: #fff;
-	position: fixed;
-	display: flex;
-	font-size: 13px;
-	bottom: 0;
-	line-height: 16px;
-	align-items: center;
-	border-top: 1px solid #dcdcdc;
-	padding: 16px;
-	box-sizing: border-box;
-	z-index: 100;
-
-	.coming-soon-footer-banner__content {
-		text-align: center;
-		flex: 1;
-		margin-right: 10px;
-		line-height: 16px;
-		text-wrap: pretty;
-	}
-
-	a {
-		color: #3858e9;
-		text-decoration: none;
-	}
-
-	a.coming-soon-footer-banner-dismiss {
-		background-image: url('data:image/svg+xml,<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.4995 13.0602L16.2118 16.7725L17.2725 15.7118L13.5602 11.9995L17.2725 8.28723L16.2119 7.22657L12.4995 10.9389L8.78722 7.22656L7.72656 8.28722L11.4389 11.9995L7.72657 15.7119L8.78723 16.7725L12.4995 13.0602Z" fill="%23757575"/></svg>');
-		width: 24px;
-		height: 24px;
-		cursor: pointer;
-		background-repeat: no-repeat;
-	}
 }

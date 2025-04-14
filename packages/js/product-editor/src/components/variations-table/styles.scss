@@ -24,6 +24,7 @@
 			.woocommerce-product-variations__table-row {
 				min-height: auto;
 			}
+
 			.woocommerce-product-variations__table-rowheader {
 				text-transform: uppercase;
 				color: $gray-700;
@@ -33,6 +34,7 @@
 				border-bottom: 1px solid $gray-200;
 			}
 		}
+
 		&-body {
 			.woocommerce-product-variations__table-row {
 				&:not(:last-child) {
@@ -40,10 +42,12 @@
 				}
 			}
 		}
+
 		&-footer {
 			border-top: 1px solid $gray-200;
 			padding-top: $grid-unit-30;
 		}
+
 		&-row {
 			position: relative;
 			display: grid;
@@ -70,12 +74,14 @@
 		border-left: 0px;
 		margin: 0 0 $gap-small 0;
 		padding: $gap-small $gap;
+
 		&.is-error {
 			background-color: #fcf0f1;
 		}
 
 		.components-notice__actions {
 			margin-top: $gap-small;
+
 			.components-button:first-child {
 				margin-left: 0px;
 			}
@@ -90,14 +96,18 @@
 		.woocommerce-tooltip {
 			position: absolute;
 			left: -$grid-unit-40;
-			rotate: 180deg;
 
 			.components-button {
 				padding: 0;
 				width: 24px;
 				height: 24px;
 				color: $alert-red;
+				rotate: 180deg;
 			}
+		}
+
+		.woocommerce-tooltip__text .components-popover__content {
+			width: max-content;
 		}
 	}
 
@@ -139,12 +149,15 @@
 
 	&__status-dot {
 		margin-right: $gap-smaller;
+
 		&.green {
 			color: $alert-green;
 		}
+
 		&.yellow {
 			color: $alert-yellow;
 		}
+
 		&.red {
 			color: $alert-red;
 		}
@@ -190,6 +203,7 @@
 			color: $alert-red;
 		}
 	}
+
 	&__add-image-button {
 		border-radius: 2px;
 		border: 1px dashed $gray-400;
@@ -205,12 +219,14 @@
 			margin: 0;
 		}
 	}
+
 	&__image-button {
 		margin-right: $gap-small;
 		width: $grid-unit-40;
 		height: $grid-unit-40;
 		padding: 0;
 	}
+
 	&__image {
 		width: 100%;
 		height: 100%;

@@ -92,7 +92,7 @@ class WC_Beta_Tester {
 	public function __construct() {
 		$this->plugin_name   = plugin_basename( WC_BETA_TESTER_FILE );
 		$this->plugin_config = array(
-			'plugin_file'        => 'woocommerce/woocommerce.php',
+			'plugin_file'        => WC_PLUGIN_BASENAME,
 			'slug'               => 'woocommerce',
 			'proper_folder_name' => 'woocommerce',
 			'api_url'            => 'https://api.wordpress.org/plugins/info/1.0/woocommerce.json',
@@ -300,6 +300,8 @@ class WC_Beta_Tester {
 		if ( version_compare( $response->version, $new_version, '=' ) ) {
 			return $response;
 		}
+
+		$warning = '';
 
 		if ( $this->is_beta_version( $new_version ) ) {
 			$warning = __( '<h1><span>&#9888;</span>This is a beta release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );

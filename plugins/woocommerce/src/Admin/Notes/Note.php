@@ -118,6 +118,17 @@ class Note extends \WC_Data {
 	*/
 
 	/**
+	 * Get deprecated types.
+	 *
+	 * @return array
+	 */
+	public static function get_deprecated_types() {
+		return array(
+			self::E_WC_ADMIN_NOTE_EMAIL,
+		);
+	}
+
+	/**
 	 * Get allowed types.
 	 *
 	 * @return array
@@ -130,7 +141,6 @@ class Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
 			self::E_WC_ADMIN_NOTE_MARKETING,
 			self::E_WC_ADMIN_NOTE_SURVEY,
-			self::E_WC_ADMIN_NOTE_EMAIL,
 		);
 
 		return apply_filters( 'woocommerce_note_types', $allowed_types );
@@ -390,6 +400,13 @@ class Note extends \WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'woocommerce' ) );
 		}
 
+		if ( in_array( $type, self::get_deprecated_types(), true ) ) {
+			$this->error(
+				'admin_note_invalid_data',
+				__( 'The admin note type prop is deprecated.', 'woocommerce' )
+			);
+		}
+
 		if ( ! in_array( $type, self::get_allowed_types(), true ) ) {
 			$this->error(
 				'admin_note_invalid_data',
@@ -578,11 +595,7 @@ class Note extends \WC_Data {
 		if ( empty( $layout ) ) {
 			$layout = 'plain';
 		}
-		$valid_layouts = array( 'banner', 'plain', 'thumbnail' );
-
-		if ( 'banner' === $layout ) {
-			wc_deprecated_argument( 'Note::set_layout', '9.4.0', 'The "banner" layout is deprecated. Please use "thumbnail" instead to display a image.' );
-		}
+		$valid_layouts = array( 'plain', 'thumbnail' );
 
 		if ( in_array( $layout, $valid_layouts, true ) ) {
 			$this->set_prop( 'layout', $layout );

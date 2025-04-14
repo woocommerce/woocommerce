@@ -2,19 +2,21 @@ const webpackOverride = require( '../webpack.config' );
 
 const staticDirs = [
 	{
-		from: '../../../plugins/woocommerce-admin/client',
-		to: 'main/plugins/woocommerce-admin/client',
+		from: '../../../plugins/woocommerce/client/admin/client',
+		to: 'main/plugins/woocommerce/client/admin/client',
 	},
 ];
 if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
 	// Add WooCommerce Blocks Storybook for build process.
 	staticDirs.push( {
-		from: '../../../plugins/woocommerce-blocks/storybook/dist',
+		from: '../../../plugins/woocommerce/client/blocks/storybook/dist',
 		to: '/assets/woocommerce-blocks',
 	} );
 }
 module.exports = {
 	stories: [
+		// Introductory documentation
+		'../stories/**/*.mdx',
 		// WooCommerce Admin / @woocommerce/components components
 		'../../../packages/js/components/src/**/stories/*.story.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/experimental components
@@ -22,11 +24,18 @@ module.exports = {
 		// WooCommerce Admin / @woocommerce/onboarding components
 		'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
 		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
-		'../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)',
+		'../../../plugins/woocommerce/client/admin/client/**/stories/*.story.@(js|tsx)',
 	],
 	refs: ( config, { configType } ) => {
 		if ( configType === 'DEVELOPMENT' ) {
-			return {};
+			// WooCommerce Blocks gets automatically on port 6006 run when you run pnpm --filter=@woocommerce/storybook watch:build
+			return {
+				'woocommerce-blocks': {
+					expanded: false,
+					title: 'Blocks',
+					url: 'http://localhost:6006',
+				},
+			};
 		}
 
 		let pathPrefix = (
@@ -38,7 +47,7 @@ module.exports = {
 		return {
 			'woocommerce-blocks': {
 				expanded: false,
-				title: 'WooCommerce Blocks',
+				title: 'Blocks',
 				url: pathPrefix + '/assets/woocommerce-blocks',
 			},
 		};

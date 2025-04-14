@@ -77,7 +77,7 @@ export function CreateModal( {
 		customField: Metadata< string >,
 		prop: keyof Metadata< string >
 	) {
-		return function handleChange( value: string | null ) {
+		return function handleChange( value: string | null | undefined ) {
 			setCustomFields( ( current ) =>
 				current.map( ( field ) =>
 					field.id === customField.id

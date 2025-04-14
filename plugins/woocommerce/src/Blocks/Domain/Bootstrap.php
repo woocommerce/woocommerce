@@ -17,7 +17,6 @@ use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
@@ -25,7 +24,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
-use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
@@ -38,9 +36,6 @@ use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
-use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
-use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
 
 
@@ -65,14 +60,6 @@ class Bootstrap {
 	 */
 	private $package;
 
-
-	/**
-	 * Holds the Migration instance
-	 *
-	 * @var Migration
-	 */
-	private $migration;
-
 	/**
 	 * Constructor
 	 *
@@ -81,7 +68,6 @@ class Bootstrap {
 	public function __construct( Container $container ) {
 		$this->container = $container;
 		$this->package   = $container->get( Package::class );
-		$this->migration = $container->get( Migration::class );
 
 		$this->init();
 		/**
@@ -105,13 +91,6 @@ class Bootstrap {
 	protected function init() {
 		$this->register_dependencies();
 		$this->register_payment_methods();
-		$this->load_interactivity_api();
-
-		// This is just a temporary solution to make sure the migrations are run. We have to refactor this. More details: https://github.com/woocommerce/woocommerce-blocks/issues/10196.
-		if ( $this->package->get_version() !== $this->package->get_version_stored_on_db() ) {
-			$this->migration->run_migrations();
-			$this->package->set_version_stored_on_db();
-		}
 
 		add_action(
 			'admin_init',
@@ -131,7 +110,7 @@ class Bootstrap {
 			function () {
 				$is_store_api_request = wc()->is_store_api_request();
 
-				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+				if ( ! $is_store_api_request && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
 				}
@@ -142,13 +121,16 @@ class Bootstrap {
 		$is_rest              = wc()->is_rest_api_request();
 		$is_store_api_request = wc()->is_store_api_request();
 
+		// Initialize Store API in non-admin context.
+		if ( ! is_admin() ) {
+			$this->container->get( StoreApi::class )->init();
+		}
+
 		// Load and init assets.
-		$this->container->get( StoreApi::class )->init();
 		$this->container->get( PaymentsApi::class )->init();
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
-		$this->container->get( TasksController::class )->init();
 		$this->container->get( CheckoutFields::class )->init();
 
 		// Load assets in admin and on the frontend.
@@ -165,13 +147,19 @@ class Bootstrap {
 		if ( ! $is_store_api_request ) {
 			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
 			// regular rest requests to maintain compatibility with the store editor.
-			$this->container->get( AIPatterns::class );
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
-			$this->container->get( PTKPatternsStore::class );
-			$this->container->get( TemplateOptions::class )->init();
+
+			if ( is_admin() || $is_rest ) {
+				$this->container->get( AIPatterns::class );
+				$this->container->get( PTKPatternsStore::class );
+			}
+
+			if ( is_admin() ) {
+				$this->container->get( TemplateOptions::class )->init();
+			}
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -213,22 +201,9 @@ class Bootstrap {
 	}
 
 	/**
-	 * Load and set up the Interactivity API if enabled.
-	 */
-	protected function load_interactivity_api() {
-			require_once __DIR__ . '/../Interactivity/load.php';
-	}
-
-	/**
 	 * Register core dependencies with the container.
 	 */
 	protected function register_dependencies() {
-		$this->container->register(
-			FeatureGating::class,
-			function () {
-				return new FeatureGating();
-			}
-		);
 		$this->container->register(
 			AssetApi::class,
 			function ( Container $container ) {
@@ -408,12 +383,6 @@ class Bootstrap {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new ShippingController( $asset_api, $asset_data_registry );
-			}
-		);
-		$this->container->register(
-			TasksController::class,
-			function () {
-				return new TasksController();
 			}
 		);
 		$this->container->register(

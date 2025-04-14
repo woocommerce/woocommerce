@@ -61,6 +61,6 @@ export const Basic = ( {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/FilterPicker',
+	title: 'Components/FilterPicker',
 	component: FilterPicker,
 };

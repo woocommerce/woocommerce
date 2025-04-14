@@ -13,6 +13,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/EmptyContent',
+	title: 'Components/EmptyContent',
 	component: EmptyContent,
 };

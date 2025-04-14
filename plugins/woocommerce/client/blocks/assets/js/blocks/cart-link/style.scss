@@ -1,0 +1,20 @@
+.wc-block-cart-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+
+	.wc-block-cart-link__text {
+		display: inline-flex;
+	}
+
+	.wc-block-mini-cart__icon {
+		display: inline-flex;
+		margin: 0;
+		height: auto;
+	}
+
+	.has-background > & {
+		padding: $gap-smallest;
+	}
+}

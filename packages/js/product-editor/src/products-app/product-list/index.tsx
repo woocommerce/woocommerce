@@ -10,7 +10,7 @@ import {
 	useEffect,
 	Fragment,
 } from '@wordpress/element';
-import { Product, ProductQuery } from '@woocommerce/data';
+import { Product, ProductQuery, productsStore } from '@woocommerce/data';
 import { drawerRight, seen, unseen } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
@@ -18,13 +18,9 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
 import {
-	// @ts-expect-error missing types.
 	__experimentalHeading as Heading,
-	// @ts-expect-error missing types.
 	__experimentalText as Text,
-	// @ts-expect-error missing types.
 	__experimentalHStack as HStack,
-	// @ts-expect-error missing types.
 	__experimentalVStack as VStack,
 	FlexItem,
 	Button,
@@ -113,7 +109,7 @@ function useView(
 
 			setView( newView );
 		},
-		[ history, isCustom ]
+		[ history ]
 	);
 
 	// When layout URL param changes, update the view type
@@ -173,7 +169,9 @@ export default function ProductList( {
 			}
 		} );
 		const orderby =
-			view.sort?.field === 'name' ? 'title' : view.sort?.field;
+			view.sort?.field === 'name'
+				? 'title'
+				: ( view.sort?.field as ProductQuery[ 'orderby' ] );
 
 		return {
 			per_page: view.perPage,
@@ -183,27 +181,27 @@ export default function ProductList( {
 			search: view.search,
 			...filters,
 		};
-	}, [ location.params, view ] );
+	}, [ view ] );
 
 	const onChangeSelection = useCallback(
-		( items ) => {
+		( items: string[] ) => {
 			setSelection( items );
 			history.push( {
 				...location.params,
 				postId: items.join( ',' ),
 			} );
 		},
-		[ history, location.params, view?.type ]
+		[ history, location.params ]
 	);
 
 	// TODO: Use the Woo data store to get all the products, as this doesn't contain all the product data.
 	const { records, totalCount, isLoading } = useSelect(
 		( select ) => {
 			const { getProducts, getProductsTotalCount, isResolving } =
-				select( 'wc/admin/products' );
+				select( productsStore );
 			return {
 				records: getProducts( queryParams ) as Product[],
-				totalCount: getProductsTotalCount( queryParams ) as number,
+				totalCount: getProductsTotalCount( queryParams ),
 				isLoading: isResolving( 'getProducts', [ queryParams ] ),
 			};
 		},
@@ -212,8 +210,10 @@ export default function ProductList( {
 
 	const paginationInfo = useMemo(
 		() => ( {
-			totalItems: totalCount,
-			totalPages: Math.ceil( totalCount / ( view.perPage || PAGE_SIZE ) ),
+			totalItems: totalCount ?? 0,
+			totalPages: Math.ceil(
+				( totalCount ?? 0 ) / ( view.perPage || PAGE_SIZE )
+			),
 		} ),
 		[ totalCount, view.perPage ]
 	);
@@ -223,9 +223,11 @@ export default function ProductList( {
 			const { getPostType, canUser } = select( coreStore );
 			const postTypeData:
 				| { labels: Record< string, string > }
+				// @ts-expect-error Selector is not typed
 				| undefined = getPostType( postType );
 			return {
 				labels: postTypeData?.labels,
+				// @ts-expect-error Selector is not typed
 				canCreateRecord: canUser( 'create', {
 					kind: 'postType',
 					name: postType,
@@ -275,7 +277,6 @@ export default function ProductList( {
 										<Button
 											variant="primary"
 											disabled={ true }
-											// @ts-expect-error missing type.
 											__next40pxDefaultSize
 										>
 											{ labels.add_new_item }
@@ -311,7 +312,6 @@ export default function ProductList( {
 					header={
 						<>
 							<Button
-								// @ts-expect-error outdated type.
 								size="compact"
 								icon={ showNewNavigation ? seen : unseen }
 								label={ __(
@@ -323,7 +323,6 @@ export default function ProductList( {
 								} }
 							/>
 							<Button
-								// @ts-expect-error outdated type.
 								size="compact"
 								isPressed={ quickEdit }
 								icon={ drawerRight }

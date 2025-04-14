@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
@@ -20,7 +19,6 @@ use Automattic\WooCommerce\Utilities\RestApiUtil;
  * See: https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
  */
 class LegacyRestApiStub implements RegisterHooksInterface {
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The instance of RestApiUtil to use.
@@ -33,9 +31,9 @@ class LegacyRestApiStub implements RegisterHooksInterface {
 	 * Set up the Legacy REST API endpoints stub.
 	 */
 	public function register() {
-		self::add_action( 'init', array( __CLASS__, 'add_rewrite_rules_for_legacy_rest_api_stub' ), 0 );
-		self::add_action( 'query_vars', array( __CLASS__, 'add_query_vars_for_legacy_rest_api_stub' ), 0 );
-		self::add_action( 'parse_request', array( __CLASS__, 'parse_legacy_rest_api_request' ), 0 );
+		add_action( 'init', array( __CLASS__, 'add_rewrite_rules_for_legacy_rest_api_stub' ), 0 );
+		add_action( 'query_vars', array( __CLASS__, 'add_query_vars_for_legacy_rest_api_stub' ), 0 );
+		add_action( 'parse_request', array( __CLASS__, 'parse_legacy_rest_api_request' ), 0 );
 	}
 
 	/**
@@ -51,8 +49,10 @@ class LegacyRestApiStub implements RegisterHooksInterface {
 	/**
 	 * Add the necessary rewrite rules for the Legacy REST API
 	 * (either the dedicated extension if it's installed, or the stub otherwise).
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function add_rewrite_rules_for_legacy_rest_api_stub() {
+	public static function add_rewrite_rules_for_legacy_rest_api_stub() {
 		add_rewrite_rule( '^wc-api/v([1-3]{1})/?$', 'index.php?wc-api-version=$matches[1]&wc-api-route=/', 'top' );
 		add_rewrite_rule( '^wc-api/v([1-3]{1})(.*)?', 'index.php?wc-api-version=$matches[1]&wc-api-route=$matches[2]', 'top' );
 		add_rewrite_endpoint( 'wc-api', EP_ALL );
@@ -64,8 +64,10 @@ class LegacyRestApiStub implements RegisterHooksInterface {
 	 *
 	 * @param array $vars The query variables array to extend.
 	 * @return array The extended query variables array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function add_query_vars_for_legacy_rest_api_stub( $vars ) {
+	public static function add_query_vars_for_legacy_rest_api_stub( $vars ) {
 		$vars[] = 'wc-api-version';
 		$vars[] = 'wc-api-route';
 		$vars[] = 'wc-api';
@@ -79,8 +81,10 @@ class LegacyRestApiStub implements RegisterHooksInterface {
 	 * Otherwise it returns a "The WooCommerce API is disabled on this site" error,
 	 * unless the request contains a "wc-api" variable and the appropriate
 	 * "woocommerce_api_*" hook is set.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private static function parse_legacy_rest_api_request() {
+	public static function parse_legacy_rest_api_request() {
 		global $wp;
 
 		// The WC_Legacy_REST_API_Plugin class existence means that the Legacy REST API extension is installed and active.

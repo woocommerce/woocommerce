@@ -8,6 +8,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -103,7 +105,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			 *
 			 * @param string[] $order_statuses Order statuses.
 			 */
-			$order_statuses  = apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
+			$order_statuses  = apply_filters( 'woocommerce_reports_order_statuses', array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD ) );
 			$query['where'] .= "AND orders.{$orders_column_status} IN ( 'wc-" . implode( "','wc-", $order_statuses ) . "' ) ";
 
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
@@ -135,7 +137,29 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$version = Constants::get_constant( 'WC_VERSION' );
 
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'flot' ), $version, true );
+			wp_enqueue_script( 'wc-status-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-status-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
 
+			wp_localize_script(
+				'wc-status-widget-async',
+				'wc_status_widget_params',
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'security' => wp_create_nonce( 'wc-status-widget' ),
+				)
+			);
+
+			// Display loading placeholder.
+			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
+			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '</div>';
+			echo '<div id="wc-status-widget-content" style="display:none;"></div>';
+		}
+
+		/**
+		 * Generate the actual status widget content.
+		 * This contains the original content of the status_widget() method.
+		 */
+		public function status_widget_content() {
 			//phpcs:ignore
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
 
@@ -253,8 +277,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			foreach ( wc_get_order_types( 'order-count' ) as $type ) {
 				$counts            = OrderUtil::get_count_for_type( $type );
-				$on_hold_count    += $counts['wc-on-hold'];
-				$processing_count += $counts['wc-processing'];
+				$on_hold_count    += $counts[ OrderInternalStatus::ON_HOLD ];
+				$processing_count += $counts[ OrderInternalStatus::PROCESSING ];
 			}
 			?>
 			<li class="processing-orders">

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { MouseEvent } from 'react';
-import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import type { Product } from '@woocommerce/data';
@@ -26,7 +25,7 @@ export function usePublish< T = Product >( {
 }: PublishButtonProps & {
 	onPublishSuccess?( product: T ): void;
 	onPublishError?( error: WPError ): void;
-} ): Button.ButtonProps {
+} ) {
 	const { isValidating, isDirty, isPublishing, publish } =
 		useProductManager( productType );
 
@@ -45,7 +44,7 @@ export function usePublish< T = Product >( {
 	const handlePublish = () =>
 		publish().then( onPublishSuccess ).catch( onPublishError );
 
-	function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+	function handleClick( event: MouseEvent< HTMLElement > ) {
 		if ( isDisabled ) {
 			event.preventDefault?.();
 			return;
@@ -85,7 +84,7 @@ export function usePublish< T = Product >( {
 		...props,
 		isBusy,
 		'aria-disabled': isDisabled,
-		variant: 'primary',
+		variant: 'primary' as const,
 		onClick: handleClick,
 	};
 }

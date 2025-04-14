@@ -18,6 +18,6 @@ export const Basic = () => (
 );
 
 export default {
-	title: 'WooCommerce Admin/components/DropdownButton',
+	title: 'Components/DropdownButton',
 	component: DropdownButton,
 };
