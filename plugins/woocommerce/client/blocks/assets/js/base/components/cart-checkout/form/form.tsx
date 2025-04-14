@@ -93,9 +93,7 @@ const Form = <
 		formFields,
 		addressType,
 		// Temporary override for shipping calculator address form.
-		addressType === 'shipping' || addressType === 'billing'
-			? ( values as AddressFormValues )
-			: undefined
+		addressType === 'shipping' ? ( values as AddressFormValues ) : undefined
 	);
 
 	useEffect( () => {
@@ -128,7 +126,7 @@ const Form = <
 				}
 			} );
 		}
-	}, [ errors, previousErrors, addressType ] );
+	}, [ errors, previousErrors, addressType, values ] );
 
 	// Changing country may change format for postcodes.
 	useEffect( () => {
