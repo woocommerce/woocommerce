@@ -236,10 +236,13 @@ export function Header() {
 				</div>
 			) }
 			<div className="editor-header__settings edit-post-header__settings">
-				<SaveEmailButton />
+				{ editorMode === 'email' && <SaveEmailButton /> }
 				<PreviewDropdown />
-				{ hasNonEmailEdits ? (
-					<SaveAllButton validateContent={ validateContent } />
+				{ hasNonEmailEdits || editorMode === 'template' ? (
+					<SaveAllButton
+						validateContent={ validateContent }
+						isDisabled={ dirtyEntityRecords.length === 0 }
+					/>
 				) : (
 					<SendButton
 						validateContent={ validateContent }
