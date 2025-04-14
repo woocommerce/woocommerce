@@ -19,14 +19,17 @@ class ExportInstallPluginStepsTest extends TestCase {
 	protected array $plugins = array(
 		'plugina/plugina.php' => array(
 			'Title'           => 'plugina',
+			'Name'            => 'plugina',
 			'RequiresPlugins' => array( 'pluginc' ),
 		),
 		'pluginb/pluginb.php' => array(
 			'Title'           => 'pluginb',
+			'Name'            => 'pluginb',
 			'RequiresPlugins' => array( 'plugina' ),
 		),
 		'pluginc/pluginc.php' => array(
 			'Title'           => 'pluginc',
+			'Name'            => 'pluginc',
 			'RequiresPlugins' => array(),
 		),
 	);
@@ -104,14 +107,17 @@ class ExportInstallPluginStepsTest extends TestCase {
 			array(
 				'pluginc/pluginc.php' => array(
 					'Title'           => 'pluginc',
+					'Name'            => 'pluginc',
 					'RequiresPlugins' => array(),
 				),
 				'plugina/plugina.php' => array(
 					'Title'           => 'plugina',
+					'Name'            => 'plugina',
 					'RequiresPlugins' => array( 'pluginc' ),
 				),
 				'pluginb/pluginb.php' => array(
 					'Title'           => 'pluginb',
+					'Name'            => 'pluginb',
 					'RequiresPlugins' => array( 'plugina' ),
 				),
 			),
