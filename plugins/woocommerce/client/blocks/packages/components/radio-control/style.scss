@@ -131,7 +131,8 @@
 }
 
 .wc-block-components-radio-control__option-layout {
-	display: table;
+	display: flex;
+	flex-direction: column;
 	width: 100%;
 }
 
@@ -144,16 +145,34 @@
 
 .wc-block-components-radio-control__label-group,
 .wc-block-components-radio-control__description-group {
-	display: table-row;
-
-	> span {
-		display: table-cell;
-	}
+	display: flex;
+	justify-content: space-between;
 
 	.wc-block-components-radio-control__secondary-label,
 	.wc-block-components-radio-control__secondary-description {
 		text-align: right;
-		min-width: 50%;
+		flex-basis: 50%;
+	}
+}
+
+// For column description stacking we need to apply some layout changes.
+// There is no variant handling row stacking as it is applied by default.
+.wc-block-components-radio-control__description-group--column {
+	flex-direction: column;
+	
+	// Use balance as this is not a good candidate for pretty. Pretty is 
+	// intended  for body copy which this is not.
+	text-wrap: balance;
+
+	.wc-block-components-radio-control__description {
+		margin: $gap-smaller 0;
+	}
+
+	.wc-block-components-radio-control__secondary-description {
+		text-align: left;
+		// Leaves a bit less space causing longer description to wrap nicer on
+		// smaller screens.
+		padding-right: $gap-small;
 	}
 }
 
