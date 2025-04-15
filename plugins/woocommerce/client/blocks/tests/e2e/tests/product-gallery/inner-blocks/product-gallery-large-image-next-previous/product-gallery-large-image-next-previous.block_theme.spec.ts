@@ -89,11 +89,13 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'woocommerce/product-gallery',
 		} );
 
-		const block = await pageObject.getNextPreviousButtonsBlock( {
+		const blocks = await pageObject.getNextPreviousButtonsBlock( {
 			page: 'editor',
 		} );
 
-		await expect( block ).toBeVisible();
+		// There are two "instances" of the block in the editor, so we need to check both.
+		await expect( blocks.nth( 0 ) ).toBeVisible();
+		await expect( blocks.nth( 1 ) ).toBeVisible();
 	} );
 
 	test( 'Renders Next/Previous Button block on the frontend side', async ( {
