@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Reload order when adding an item via `add_order_item` ajax request before generating HTML fragments

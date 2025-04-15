@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Ensure the product placeholder image doesn't appear when there are gallery images available.
+

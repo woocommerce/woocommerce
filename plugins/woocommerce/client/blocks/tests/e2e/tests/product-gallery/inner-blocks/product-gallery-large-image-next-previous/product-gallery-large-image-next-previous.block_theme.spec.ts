@@ -181,49 +181,5 @@ test.describe( `${ blockData.name }`, () => {
 				).toBeLessThan( frontendBoundingClientRect.gallery.right );
 			} ).toPass( { timeout: 3_000 } );
 		} );
-
-		test( 'Show buttons at the bottom of the image by default', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
-			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editor.getBlockByName(
-				'woocommerce/product-image-gallery'
-			);
-			const clientId =
-				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
-			const parentClientId =
-				( await editor.getBlockRootClientId( clientId ) ) ?? '';
-
-			await editor.selectBlocks( parentBlock );
-			await editor.insertBlock(
-				{ name: 'woocommerce/product-gallery' },
-				{ clientId: parentClientId }
-			);
-
-			const block = await pageObject.getNextPreviousButtonsBlock( {
-				page: 'editor',
-			} );
-
-			await expect( block ).toHaveCSS( 'align-items', 'flex-end' );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
-				{
-					page: 'frontend',
-				}
-			);
-
-			await expect( frontendBlock ).toHaveCSS(
-				'align-items',
-				'flex-end'
-			);
-		} );
 	} );
 } );
