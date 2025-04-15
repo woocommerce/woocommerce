@@ -89,7 +89,7 @@ class ImportStep {
 
 		// validate importer is a step processor before processing.
 		if ( ! $importer instanceof StepProcessor ) {
-			$result->add_error( "Importer {$this->step_definition->step} is not a valid step processor" );
+			$result->add_warn( "Importer {$this->step_definition->step} is not a valid step processor" );
 			return $result;
 		}
 

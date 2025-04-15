@@ -63,10 +63,25 @@ class ExportSchemaTest extends TestCase {
 
 		$exporter->shouldReceive( 'wp_apply_filters' )
 			->with( 'wooblueprint_export_landingpage', Mockery::any() )
-			->andReturn( 'test' );
+			->andReturn( '/test' );
 
 		$result = $exporter->export();
-		$this->assertEquals( 'test', $result['landingPage'] );
+		$this->assertEquals( '/test', $result['landingPage'] );
+	}
+
+	/**
+	 * Test that it throws an exception when the landing page path is invalid.
+	 */
+	public function test_throw_exception_when_landing_page_path_is_invalid() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Invalid loading page path.' );
+
+		$exporter = $this->get_mock( true );
+		$exporter->shouldReceive( 'wp_apply_filters' )
+			->with( 'wooblueprint_export_landingpage', Mockery::any() )
+			->andReturn( 'invalid-path' );
+
+		$exporter->export();
 	}
 
 	/**

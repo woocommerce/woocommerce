@@ -43,9 +43,18 @@ class ExportSchema {
 	 */
 	public function export( $steps = array() ) {
 		$loading_page_path = $this->wp_apply_filters( 'wooblueprint_export_landingpage', '/' );
-
-		// Validate that the landing page path is a valid relative local URL path.
-		if ( ! preg_match( '#^/[^/].*#', $loading_page_path ) ) {
+		/**
+		 * Validate that the landing page path is a valid relative local URL path.
+		 *
+		 * Accepts:
+		 * - /
+		 * - /path/to/page
+		 *
+		 * Rejects:
+		 * - http://example.com/path/to/page
+		 * - invalid-path
+		 */
+		if ( ! preg_match( '#^/$|^/[^/].*#', $loading_page_path ) ) {
 			throw new \InvalidArgumentException( 'Invalid loading page path.' );
 		}
 
