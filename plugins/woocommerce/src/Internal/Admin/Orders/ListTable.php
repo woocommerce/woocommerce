@@ -571,7 +571,7 @@ class ListTable extends WP_List_Table {
 	 * Implements filtering of orders by created_via value.
 	 */
 	private function set_created_via_args(): void {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$created_via = sanitize_text_field( wp_unslash( $_GET['_created_via'] ?? '' ) );
 
 		if ( empty( $created_via ) ) {
@@ -579,7 +579,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$this->order_query_args['created_via'] = $created_via;
-		$this->has_filter = true;
+		$this->has_filter                      = true;
 	}
 
 	/**
@@ -588,11 +588,12 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function created_via_filter() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$current_created_via = isset( $_GET['_created_via'] ) ? sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) : '';
 
 		$created_via_options = array(
-			'' => __( 'Filter by sales channel', 'woocommerce' ),
-			'store-api' => __( 'Site Checkout', 'woocommerce' ),
+			''             => __( 'Filter by sales channel', 'woocommerce' ),
+			'store-api'    => __( 'Site Checkout', 'woocommerce' ),
 			'pos-rest-api' => __( 'Point of Sale', 'woocommerce' ),
 		);
 		?>
