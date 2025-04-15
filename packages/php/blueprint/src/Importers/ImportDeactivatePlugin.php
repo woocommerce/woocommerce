@@ -25,8 +25,13 @@ class ImportDeactivatePlugin implements StepProcessor {
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$name = $schema->pluginName;
 
-		$this->deactivate_plugin_by_slug( $name );
-		$result->add_info( "Deactivated {$name}." );
+		$deactivated = $this->deactivate_plugin_by_slug( $name );
+
+		if ( $this->is_wp_error( $deactivated ) ) {
+			$result->add_error( "Unable to deactivate {$name}." );
+		} else {
+			$result->add_info( "Deactivated {$name}." );
+		}
 
 		return $result;
 	}
