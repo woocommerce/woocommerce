@@ -3291,6 +3291,12 @@ importers:
         specifier: 0.14.10
         version: 0.14.10
 
+  packages/php/blueprint:
+    devDependencies:
+      '@wordpress/env':
+        specifier: 10.17.0
+        version: 10.17.0(patch_hash=ovltjfwrjswkqlvmxt7r5kywn4)(@types/node@22.9.1)
+
   packages/php/email-editor:
     devDependencies:
       '@wordpress/env':
@@ -24276,6 +24282,9 @@ packages:
   third-party-web@0.26.5:
     resolution: {integrity: sha512-tDuKQJUTfjvi9Fcrs1s6YAQAB9mzhTSbBZMfNgtWNmJlHuoFeXO6dzBFdGeCWRvYL50jQGK0jPsBZYxqZQJ2SA==}
 
+  third-party-web@0.26.6:
+    resolution: {integrity: sha512-GsjP92xycMK8qLTcQCacgzvffYzEqe29wyz3zdKVXlfRD5Kz1NatCTOZEeDaSd6uCZXvGd2CNVtQ89RNIhJWvA==}
+
   throat@4.1.0:
     resolution: {integrity: sha512-wCVxLDcFxw7ujDxaeJC6nfl2XfHJNYs8yUYJnvMgtPEFlttP9tHSfRUv2vBe6C4hkVFPWoP1P6ZccbYjmSEkKA==}
 
@@ -28741,7 +28750,9 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -29841,7 +29852,7 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.39':
     dependencies:
-      third-party-web: 0.26.5
+      third-party-web: 0.26.6
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -48971,7 +48982,9 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:
@@ -57428,6 +57441,8 @@ snapshots:
   therror@0.2.0: {}
 
   third-party-web@0.26.5: {}
+
+  third-party-web@0.26.6: {}
 
   throat@4.1.0: {}
 
