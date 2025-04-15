@@ -17,6 +17,7 @@ class ActivatePlugin extends Step {
 
 	/**
 	 * The path to the plugin file relative to the plugins directory.
+	 *
 	 * @var string  The path to the plugin file relative to the plugins directory.
 	 */
 	private string $plugin_path;
