@@ -147,6 +147,8 @@ $dialog-padding: 20px;
 
 		&--active {
 			position: relative;
+			pointer-events: none;
+			cursor: default;
 
 			&::after {
 				content: "";
@@ -157,7 +159,6 @@ $dialog-padding: 20px;
 				height: 100%;
 				background-color: #111;
 				opacity: 0.1;
-				pointer-events: none;
 			}
 		}
 	}
