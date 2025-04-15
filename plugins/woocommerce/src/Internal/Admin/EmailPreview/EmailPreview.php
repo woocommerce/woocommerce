@@ -424,7 +424,7 @@ class EmailPreview {
 	/**
 	 * Get the placeholders for the email preview.
 	 *
-	 * @param WC_Order|WP_User $email_object The object to render email with.
+	 * @param mixed $email_object The object to render email with. Can be WC_Order, WP_User, etc.
 	 * @return array
 	 */
 	private function get_placeholders( $email_object ) {
@@ -441,7 +441,7 @@ class EmailPreview {
 		 *
 		 * @param array    $placeholders Placeholders for email subject.
 		 * @param string   $email_type The email type to preview.
-		 * @param WC_Order|WP_User $email_object The object to render email with.
+		 * @param mixed $email_object The object to render email with.
 		 *
 		 * @since 9.6.0
 		 */
