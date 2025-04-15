@@ -37,6 +37,7 @@ final class ProductFilterActive extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
+			'data-wp-interactive'  => 'woocommerce/product-filters',
 			'data-wp-key'          => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'      => wp_json_encode(
 				array(
