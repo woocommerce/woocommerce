@@ -1288,7 +1288,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$applied_coupons = $this->get_items( 'coupon' );
 		foreach ( $applied_coupons as $applied_coupon ) {
 			if ( $applied_coupon->get_code() === $coupon->get_code() ) {
-				return new WP_Error( 'invalid_coupon', __( 'Coupon code already applied!', 'woocommerce' ) );
+				return new WP_Error(
+					'invalid_coupon',
+					sprintf(
+						/* translators: %s: coupon code */
+						esc_html__( 'Coupon code "%s" already applied!', 'woocommerce' ),
+						esc_html( $coupon->get_code() )
+					)
+				);
 			}
 		}
 
