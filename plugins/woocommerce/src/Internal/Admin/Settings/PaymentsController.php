@@ -78,7 +78,7 @@ class PaymentsController {
 
 		$wc_initial_installed_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION, '0.0.0' );
 		// If the WooCommerce installed version is 9.7+, we don't need to do anything. Just let it be enabled.
-		if ( version_compare( $wc_initial_installed_version, '9.7.0', '>=' ) ) {
+		if ( version_compare( $wc_initial_installed_version, '9.7.0.rc', '>=' ) ) {
 			return;
 		}
 
