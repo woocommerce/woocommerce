@@ -54,12 +54,12 @@ class InstallTheme extends Step {
 	 */
 	public function prepare_json_array(): array {
 		return array(
-			'step'         => static::get_step_name(),
+			'step'      => static::get_step_name(),
 			'themeData' => array(
 				'resource' => $this->resource,
 				'slug'     => $this->slug,
 			),
-			'options'      => $this->options,
+			'options'   => $this->options,
 		);
 	}
 
@@ -73,22 +73,22 @@ class InstallTheme extends Step {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'         => array(
+				'step'      => array(
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
 				'themeData' => array(
-					"anyOf" => [
-						require __DIR__ . "/schemas/definitions/VFSReference.php",
-						require __DIR__ . "/schemas/definitions/LiteralReference.php",
-						require __DIR__ . "/schemas/definitions/CorePluginReference.php",
-						require __DIR__ . "/schemas/definitions/CoreThemeReference.php",
-						require __DIR__ . "/schemas/definitions/UrlReference.php",
-						require __DIR__ . "/schemas/definitions/GitDirectoryReference.php",
-						require __DIR__ . "/schemas/definitions/DirectoryLiteralReference.php",
-					]
+					'anyOf' => array(
+						require __DIR__ . '/schemas/definitions/VFSReference.php',
+						require __DIR__ . '/schemas/definitions/LiteralReference.php',
+						require __DIR__ . '/schemas/definitions/CorePluginReference.php',
+						require __DIR__ . '/schemas/definitions/CoreThemeReference.php',
+						require __DIR__ . '/schemas/definitions/UrlReference.php',
+						require __DIR__ . '/schemas/definitions/GitDirectoryReference.php',
+						require __DIR__ . '/schemas/definitions/DirectoryLiteralReference.php',
+					),
 				),
-				'options'      => array(
+				'options'   => array(
 					'type'       => 'object',
 					'properties' => array(
 						'activate' => array(
