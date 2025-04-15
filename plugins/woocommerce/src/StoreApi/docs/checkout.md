@@ -2,8 +2,8 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Get Checkout Data](#get-checkout-data)
--   [Process Order and Payment](#process-order-and-payment)
+- [Get Checkout Data](#get-checkout-data)
+- [Process Order and Payment](#process-order-and-payment)
 
 The checkout API facilitates the creation of orders (from the current cart) and handling payments for payment methods.
 
@@ -27,41 +27,41 @@ curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/
 
 ```json
 {
-	"order_id": 146,
-	"status": "checkout-draft",
-	"order_key": "wc_order_VPffqyvgWVqWL",
-	"customer_note": "",
-	"customer_id": 1,
-	"billing_address": {
-		"first_name": "Peter",
-		"last_name": "Venkman",
-		"company": "",
-		"address_1": "550 Central Park West",
-		"address_2": "Corner Penthouse Spook Central",
-		"city": "New York",
-		"state": "NY",
-		"postcode": "10023",
-		"country": "US",
-		"email": "admin@example.com",
-		"phone": "555-2368"
-	},
-	"shipping_address": {
-		"first_name": "Peter",
-		"last_name": "Venkman",
-		"company": "",
-		"address_1": "550 Central Park West",
-		"address_2": "Corner Penthouse Spook Central",
-		"city": "New York",
-		"state": "NY",
-		"postcode": "10023",
-		"country": "US"
-	},
-	"payment_method": "",
-	"payment_result": {
-		"payment_status": "",
-		"payment_details": [],
-		"redirect_url": ""
-	}
+  "order_id": 146,
+  "status": "checkout-draft",
+  "order_key": "wc_order_VPffqyvgWVqWL",
+  "customer_note": "",
+  "customer_id": 1,
+  "billing_address": {
+    "first_name": "Peter",
+    "last_name": "Venkman",
+    "company": "",
+    "address_1": "550 Central Park West",
+    "address_2": "Corner Penthouse Spook Central",
+    "city": "New York",
+    "state": "NY",
+    "postcode": "10023",
+    "country": "US",
+    "email": "admin@example.com",
+    "phone": "555-2368"
+  },
+  "shipping_address": {
+    "first_name": "Peter",
+    "last_name": "Venkman",
+    "company": "",
+    "address_1": "550 Central Park West",
+    "address_2": "Corner Penthouse Spook Central",
+    "city": "New York",
+    "state": "NY",
+    "postcode": "10023",
+    "country": "US"
+  },
+  "payment_method": "",
+  "payment_result": {
+    "payment_status": "",
+    "payment_details": [],
+    "redirect_url": ""
+  }
 }
 ```
 
@@ -79,20 +79,22 @@ Note the `__experimental_calc_totals` parameter. This is used to determine if th
 | :------------------ | :----- | :------: | :-------------------------------------------------- |
 | `additional_fields` | object |    No    | Name => value pairs of additional fields to update. |
 | `payment_method`    | string |    No    | The ID of the payment method selected.              |
+| `order_notes`       | string |    No    | Order notes.                                        |
 
 ```sh
-curl --header "Nonce: 12345" --request PUT https://example-store.com/wp-json/wc/store/v1/checkout?additional_fields[plugin-namespace/leave-on-porch]=true&additional_fields[plugin-namespace/location-on-porch]=dsdd&payment_method=bacs
+curl --header "Nonce: 12345" --request PUT https://example-store.com/wp-json/wc/store/v1/checkout?additional_fields[plugin-namespace/leave-on-porch]=true&additional_fields[plugin-namespace/location-on-porch]=dsdd&payment_method=bacs&order_notes=Please%20leave%20package%20on%20back%20porch
 ```
 
 ### Example Request
 
 ```json
 {
-	"additional_fields": {
-		"plugin-namespace/leave-on-porch": true,
-		"plugin-namespace/location-on-porch": "dsdd"
-	},
-	"payment_method": "bacs"
+  "additional_fields": {
+    "plugin-namespace/leave-on-porch": true,
+    "plugin-namespace/location-on-porch": "dsdd"
+  },
+  "payment_method": "bacs",
+  "order_notes": "Please leave package on back porch"
 }
 ```
 
@@ -169,39 +171,39 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 
 ```json
 {
-	"billing_address": {
-		"first_name": "Peter",
-		"last_name": "Venkman",
-		"company": "",
-		"address_1": "550 Central Park West",
-		"address_2": "Corner Penthouse Spook Central",
-		"city": "New York",
-		"state": "NY",
-		"postcode": "10023",
-		"country": "US",
-		"email": "admin@example.com",
-		"phone": "555-2368"
-	},
-	"shipping_address": {
-		"first_name": "Peter",
-		"last_name": "Venkman",
-		"company": "",
-		"address_1": "550 Central Park West",
-		"address_2": "Corner Penthouse Spook Central",
-		"city": "New York",
-		"state": "NY",
-		"postcode": "10023",
-		"country": "US"
-	},
-	"customer_note": "Test notes on order.",
-	"create_account": false,
-	"payment_method": "cheque",
-	"payment_data": [],
-	"extensions": {
-		"some-extension-name": {
-			"some-data-key": "some data value"
-		}
-	}
+  "billing_address": {
+    "first_name": "Peter",
+    "last_name": "Venkman",
+    "company": "",
+    "address_1": "550 Central Park West",
+    "address_2": "Corner Penthouse Spook Central",
+    "city": "New York",
+    "state": "NY",
+    "postcode": "10023",
+    "country": "US",
+    "email": "admin@example.com",
+    "phone": "555-2368"
+  },
+  "shipping_address": {
+    "first_name": "Peter",
+    "last_name": "Venkman",
+    "company": "",
+    "address_1": "550 Central Park West",
+    "address_2": "Corner Penthouse Spook Central",
+    "city": "New York",
+    "state": "NY",
+    "postcode": "10023",
+    "country": "US"
+  },
+  "customer_note": "Test notes on order.",
+  "create_account": false,
+  "payment_method": "cheque",
+  "payment_data": [],
+  "extensions": {
+    "some-extension-name": {
+      "some-data-key": "some data value"
+    }
+  }
 }
 ```
 
@@ -209,41 +211,41 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 
 ```json
 {
-	"order_id": 146,
-	"status": "on-hold",
-	"order_key": "wc_order_VPffqyvgWVqWL",
-	"customer_note": "",
-	"customer_id": 1,
-	"billing_address": {
-		"first_name": "Peter",
-		"last_name": "Venkman",
-		"company": "",
-		"address_1": "550 Central Park West",
-		"address_2": "Corner Penthouse Spook Central",
-		"city": "New York",
-		"state": "NY",
-		"postcode": "10023",
-		"country": "US",
-		"email": "admin@example.com",
-		"phone": "555-2368"
-	},
-	"shipping_address": {
-		"first_name": "Peter",
-		"last_name": "Venkman",
-		"company": "",
-		"address_1": "550 Central Park West",
-		"address_2": "Corner Penthouse Spook Central",
-		"city": "New York",
-		"state": "NY",
-		"postcode": "10023",
-		"country": "US"
-	},
-	"payment_method": "cheque",
-	"payment_result": {
-		"payment_status": "success",
-		"payment_details": [],
-		"redirect_url": "https://local.wordpress.test/block-checkout/order-received/146/?key=wc_order_VPffqyvgWVqWL"
-	}
+  "order_id": 146,
+  "status": "on-hold",
+  "order_key": "wc_order_VPffqyvgWVqWL",
+  "customer_note": "",
+  "customer_id": 1,
+  "billing_address": {
+    "first_name": "Peter",
+    "last_name": "Venkman",
+    "company": "",
+    "address_1": "550 Central Park West",
+    "address_2": "Corner Penthouse Spook Central",
+    "city": "New York",
+    "state": "NY",
+    "postcode": "10023",
+    "country": "US",
+    "email": "admin@example.com",
+    "phone": "555-2368"
+  },
+  "shipping_address": {
+    "first_name": "Peter",
+    "last_name": "Venkman",
+    "company": "",
+    "address_1": "550 Central Park West",
+    "address_2": "Corner Penthouse Spook Central",
+    "city": "New York",
+    "state": "NY",
+    "postcode": "10023",
+    "country": "US"
+  },
+  "payment_method": "cheque",
+  "payment_result": {
+    "payment_status": "success",
+    "payment_details": [],
+    "redirect_url": "https://local.wordpress.test/block-checkout/order-received/146/?key=wc_order_VPffqyvgWVqWL"
+  }
 }
 ```
 
@@ -257,36 +259,36 @@ For further information on generating a `stripe_source` please check [the Stripe
 
 ```json
 {
-	"payment_data": [
-		{
-			"key": "stripe_source",
-			"value": "src_xxxxxxxxxxxxx"
-		},
-		{
-			"key": "billing_email",
-			"value": "myemail@email.com"
-		},
-		{
-			"key": "billing_first_name",
-			"value": "Jane"
-		},
-		{
-			"key": "billing_last_name",
-			"value": "Doe"
-		},
-		{
-			"key": "paymentMethod",
-			"value": "stripe"
-		},
-		{
-			"key": "paymentRequestType",
-			"value": "cc"
-		},
-		{
-			"key": "wc-stripe-new-payment-method",
-			"value": true
-		}
-	]
+  "payment_data": [
+    {
+      "key": "stripe_source",
+      "value": "src_xxxxxxxxxxxxx"
+    },
+    {
+      "key": "billing_email",
+      "value": "myemail@email.com"
+    },
+    {
+      "key": "billing_first_name",
+      "value": "Jane"
+    },
+    {
+      "key": "billing_last_name",
+      "value": "Doe"
+    },
+    {
+      "key": "paymentMethod",
+      "value": "stripe"
+    },
+    {
+      "key": "paymentRequestType",
+      "value": "cc"
+    },
+    {
+      "key": "wc-stripe-new-payment-method",
+      "value": true
+    }
+  ]
 }
 ```
 
