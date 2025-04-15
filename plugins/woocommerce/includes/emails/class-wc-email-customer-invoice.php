@@ -138,6 +138,10 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
+			if ( $this->block_email_editor_enabled ) {
+				$this->personalizer->set_context( $this->prepare_context_data( $this->personalizer->get_context() ) );
+			}
+
 			if ( $this->get_recipient() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}

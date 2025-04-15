@@ -70,7 +70,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function get_default_subject() {
 			return $this->email_improvements_enabled
-				? __( '[{site_title}]: Cha-ching! You’ve got a new order: #{order_number}', 'woocommerce' )
+				? __( '[{site_title}]: Cha-ching! You\'ve got a new order: #{order_number}', 'woocommerce' )
 				: __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
@@ -104,6 +104,10 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$this->object                         = $order;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
+
+				if ( $this->block_email_editor_enabled ) {
+					$this->personalizer->set_context( $this->prepare_context_data( $this->personalizer->get_context() ) );
+				}
 
 				$email_already_sent = $order->get_new_order_email_sent();
 			}

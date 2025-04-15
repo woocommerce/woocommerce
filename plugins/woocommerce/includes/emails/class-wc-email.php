@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Pelago\Emogrifier\CssInliner;
@@ -265,6 +267,15 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public $block_email_editor_enabled;
 
+
+
+	/**
+	 * Personalizer instance for converting Personalization tags.
+	 *
+	 * @var Personalizer
+	 */
+	public $personalizer;
+
 	/**
 	 * Block content template path.
 	 *
@@ -306,6 +317,13 @@ class WC_Email extends WC_Settings_API {
 			$this->bcc = $this->get_option( 'bcc' );
 		}
 
+		if ( $this->block_email_editor_enabled ) {
+			$context                    = array();
+			$context['recipient_email'] = $this->get_recipient();
+			$editor_container           = Email_Editor_Container::container();
+			$this->personalizer         = $editor_container->get( Personalizer::class );
+			$this->personalizer->set_context( $context );
+		}
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
@@ -479,7 +497,11 @@ class WC_Email extends WC_Settings_API {
 		 * @param object|bool $object  The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email    $email   WC_Email instance managing the email.
 		 */
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
+		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
+		if ( $this->block_email_editor_enabled ) {
+			$subject = $this->personalizer->personalize_content( $subject );
+		}
+		return $subject;
 	}
 
 	/**
@@ -1427,6 +1449,29 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		return $option;
+	}
+
+	/**
+	 * Prepare context data for email personalization.
+	 * Adds new order specific context data.
+	 *
+	 * @since x.x.x
+	 * @param array $context Previous version of context data.
+	 * @return array Context data for personalization
+	 */
+	protected function prepare_context_data( array $context ): array {
+		$context['recipient_email'] = $this->get_recipient();
+		$context['order']           = $this->object instanceof WC_Order ? $this->object : null;
+		// For emails of type new_user or reset_password we want to set user directly from the object.
+		if ( $this->object instanceof \WP_User ) {
+			$context['wp_user'] = $this->object;
+		} elseif ( $this->object instanceof WC_Order ) {
+			$context['wp_user'] = $this->object->get_user();
+		} else {
+			$context['wp_user'] = null;
+		}
+		$context['wc_email'] = $this;
+		return $context;
 	}
 
 	/**

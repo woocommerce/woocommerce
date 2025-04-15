@@ -114,6 +114,10 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 				$this->set_password_url   = $this->generate_set_password_url();
 			}
 
+			if ( $this->block_email_editor_enabled ) {
+				$this->personalizer->set_context( $this->prepare_context_data( $this->personalizer->get_context() ) );
+			}
+
 			if ( $this->is_enabled() && $this->get_recipient() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}
