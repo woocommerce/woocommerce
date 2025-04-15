@@ -13,7 +13,7 @@ trait UsePluginHelpers {
 	 *
 	 * @param string $slug The slug of the plugin to activate.
 	 *
-	 * @return bool True if the plugin was activated, false otherwise.
+	 * @return false|null|WP_Error Null on success, WP_Error on invalid file, false if not found.
 	 */
 	public function activate_plugin_by_slug( $slug ) {
 		// Get all installed plugins.
@@ -59,7 +59,7 @@ trait UsePluginHelpers {
 	 *
 	 * @param string $slug The slug of the plugin to delete.
 	 *
-	 * @return bool True if the plugin was deleted, false otherwise.
+	 * @return bool|WP_Error True if the plugin was deleted, false otherwise.
 	 */
 	public function delete_plugin_by_slug( $slug ) {
 		// Get all installed plugins.
