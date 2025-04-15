@@ -205,7 +205,7 @@ trait UseWPFunctions {
 		if ( ! function_exists( 'switch_theme' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 		}
-		return switch_theme( $name );
+		switch_theme( $name );
 	}
 
 	/**
