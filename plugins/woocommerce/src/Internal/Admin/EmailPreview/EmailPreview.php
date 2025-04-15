@@ -439,9 +439,9 @@ class EmailPreview {
 		/**
 		 * Placeholders for email preview.
 		 *
-		 * @param array    $placeholders Placeholders for email subject.
-		 * @param string   $email_type The email type to preview.
-		 * @param mixed $email_object The object to render email with.
+		 * @param array  $placeholders Placeholders for email subject.
+		 * @param string $email_type   The email type to preview.
+		 * @param mixed  $email_object The object to render email with. @since 9.9.0
 		 *
 		 * @since 9.6.0
 		 */
