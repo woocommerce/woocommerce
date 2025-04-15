@@ -439,12 +439,13 @@ class EmailPreview {
 		/**
 		 * Placeholders for email preview.
 		 *
-		 * @param WC_Order $placeholders Placeholders for email subject.
+		 * @param array    $placeholders Placeholders for email subject.
 		 * @param string   $email_type The email type to preview.
+		 * @param WC_Order|WP_User $email_object The object to render email with.
 		 *
 		 * @since 9.6.0
 		 */
-		return apply_filters( 'woocommerce_email_preview_placeholders', $placeholders, $this->email_type );
+		return apply_filters( 'woocommerce_email_preview_placeholders', $placeholders, $this->email_type, $email_object );
 	}
 
 	/**
