@@ -82,6 +82,7 @@ class PaymentsController {
 			return;
 		}
 
+		// For pre-9.7 stores, we check 9.7 experiment group first.
 		$experiment_transient = get_transient( 'abtest_variation_woocommerce_payment_settings_2025_v1' );
 		if ( 'treatment' === $experiment_transient ) {
 			// If the user is in the experiment treatment group and he didn't interact with the WCAdmin feature flag
@@ -90,10 +91,8 @@ class PaymentsController {
 		}
 
 		// Finally, make sure the feature is disabled by default for existing stores, created with WC pre-9.7.
-		// For our purposes here, on top of NOT being a fresh/blank store,
-		// we believe that an "existing" store needs to have enabled gateways, of any kind.
-		// Otherwise, we consider it's a new store and will let the feature be enabled by default.
-		if ( ! \WC_Install::is_new_install() && $this->store_has_enabled_gateways() ) {
+		// Only do so for stores that are not blank.
+		if ( ! \WC_Install::is_new_install() ) {
 			update_option( $option_name, 'no' );
 		}
 	}
