@@ -42,7 +42,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 					...woocommerce_data,
 					[ name ]: value,
 				},
-			},
+			}
 		);
 	};
 
@@ -51,13 +51,36 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 	return (
 		<>
 			<br />
-			<RichTextWithButton
-				attributeName="subject"
-				attributeValue={ woocommerce_email_data.subject }
-				updateProperty={ updateWooMailProperty }
-				label={ __( 'Subject', 'woocommerce' ) }
-				placeholder={ woocommerce_email_data.default_subject }
-			/>
+			{ woocommerce_email_data.email_type ===
+			'customer_refunded_order' ? (
+				<>
+					<RichTextWithButton
+						attributeName="subject_full"
+						attributeValue={ woocommerce_email_data.subject_full }
+						updateProperty={ updateWooMailProperty }
+						label={ __( 'Full Refund Subject', 'woocommerce' ) }
+						placeholder={ woocommerce_email_data.default_subject }
+					/>
+					<br />
+					<RichTextWithButton
+						attributeName="subject_partial"
+						attributeValue={
+							woocommerce_email_data.subject_partial
+						}
+						updateProperty={ updateWooMailProperty }
+						label={ __( 'Partial Refund Subject', 'woocommerce' ) }
+						placeholder={ woocommerce_email_data.default_subject }
+					/>
+				</>
+			) : (
+				<RichTextWithButton
+					attributeName="subject"
+					attributeValue={ woocommerce_email_data.subject }
+					updateProperty={ updateWooMailProperty }
+					label={ __( 'Subject', 'woocommerce' ) }
+					placeholder={ woocommerce_email_data.default_subject }
+				/>
+			) }
 
 			<br />
 			<RichTextWithButton

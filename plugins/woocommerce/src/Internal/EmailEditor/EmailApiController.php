@@ -45,8 +45,11 @@ class EmailApiController {
 
 		return array(
 			'subject'         => $post_option['subject'] ?? null,
+			'subject_full'    => $post_option['subject_full'] ?? null, // For customer_refunded_order email type because it has two different subjects.
+			'subject_partial' => $post_option['subject_partial'] ?? null,
 			'preheader'       => $post_option['preheader'] ?? null,
 			'default_subject' => $email->get_default_subject(),
+			'email_type'      => $email_type,
 		);
 	}
 
@@ -63,9 +66,19 @@ class EmailApiController {
 		$email_type  = get_post_meta( $post->ID, Integration::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
 		$option_name = "woocommerce_{$email_type}_settings";
 		$post_option = get_option( $option_name );
-		if ( array_key_exists( 'subject', $data ) ) {
+
+		// Handle customer_refunded_order email type because it has two different subjects.
+		if ( 'customer_refunded_order' === $email_type ) {
+			if ( array_key_exists( 'subject_full', $data ) ) {
+				$post_option['subject_full'] = $data['subject_full'];
+			}
+			if ( array_key_exists( 'subject_partial', $data ) ) {
+				$post_option['subject_partial'] = $data['subject_partial'];
+			}
+		} elseif ( array_key_exists( 'subject', $data ) ) {
 			$post_option['subject'] = $data['subject'];
 		}
+
 		if ( array_key_exists( 'preheader', $data ) ) {
 			$post_option['preheader'] = $data['preheader'];
 		}
@@ -81,8 +94,11 @@ class EmailApiController {
 		return Builder::object(
 			array(
 				'subject'         => Builder::string()->nullable(),
+				'subject_full'    => Builder::string()->nullable(), // For customer_refunded_order email type because it has two different subjects.
+				'subject_partial' => Builder::string()->nullable(),
 				'preheader'       => Builder::string()->nullable(),
 				'default_subject' => Builder::string(),
+				'email_type'      => Builder::string(),
 			)
 		)->to_array();
 	}
