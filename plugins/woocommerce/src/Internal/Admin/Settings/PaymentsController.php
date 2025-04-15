@@ -30,12 +30,13 @@ class PaymentsController {
 		add_action(
 			'add_option_woocommerce_feature_reactify-classic-payments-settings_enabled',
 			array( $this, 'adjust_feature_default_enablement' ),
-			999,
+			10,
 			2
 		);
 
 		// Hook into the WooCommerce updated event to handle feature enablement for v9.8.0 and v9.8.1.
-		add_action( 'woocommerce_updated', array( $this, 'handle_feature_enablement_for_v9_8' ), 999 );
+		// This action is fired after the WC_Install::install() method is run and the option is added to the DB.
+		add_action( 'woocommerce_updated', array( $this, 'handle_feature_enablement_for_v9_8' ) );
 
 		// Because we gate the hooking based on a feature flag,
 		// we need to delay the registration until the 'woocommerce_init' hook.
@@ -75,7 +76,13 @@ class PaymentsController {
 			return;
 		}
 
-		// Make sure the feature is disabled by default for existing stores.
+		$wc_initial_installed_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION, '0.0.0' );
+		// If the WooCommerce installed version is 9.7+, we don't need to do anything. Just let it be enabled.
+		if ( version_compare( $wc_initial_installed_version, '9.7.0', '>=' ) ) {
+			return;
+		}
+
+		// Finally, make sure the feature is disabled by default for existing stores, created with WC pre-9.7.
 		// For our purposes here, on top of NOT being a fresh/blank store,
 		// we believe that an "existing" store needs to have enabled gateways, of any kind.
 		// Otherwise, we consider it's a new store and will let the feature be enabled by default.
@@ -90,6 +97,11 @@ class PaymentsController {
 	 * @return void
 	 */
 	public function handle_feature_enablement_for_v9_8() {
+		// If the feature is already enabled, we don't need to do anything.
+		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			return;
+		}
+
 		$wc_initial_installed_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION, '0.0.0' );
 		// Sanity check: if we are at the same version as the one we are checking for, we don't need to do anything.
 		if ( WC()->version === $wc_initial_installed_version ) {
@@ -102,16 +114,9 @@ class PaymentsController {
 			return;
 		}
 
-		// If the feature is already enabled, we don't need to do anything.
-		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-			return;
-		}
-
-		// If the feature is not enabled and the store is "empty" or did not enable any gateway yet,
+		// If the feature is not enabled and the store was created with 9.8.0 or 9.8.1,
 		// we will one-time force enable it.
-		if ( \WC_Install::is_new_install() || ! $this->store_has_enabled_gateways() ) {
-			wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'reactify-classic-payments-settings', true );
-		}
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'reactify-classic-payments-settings', true );
 	}
 
 	/**
