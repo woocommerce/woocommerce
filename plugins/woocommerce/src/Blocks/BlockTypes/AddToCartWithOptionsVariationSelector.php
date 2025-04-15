@@ -58,8 +58,6 @@ class AddToCartWithOptionsVariationSelector extends AbstractBlock {
 
 			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports' ), 10, 3 );
 
-			wp_enqueue_script_module( $this->get_full_block_name() );
-
 			return $content;
 		}
 

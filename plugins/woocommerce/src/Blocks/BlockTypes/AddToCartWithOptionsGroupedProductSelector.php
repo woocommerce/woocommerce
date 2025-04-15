@@ -34,8 +34,6 @@ class AddToCartWithOptionsGroupedProductSelector extends AbstractBlock {
 	protected function render( $attributes, $content, $block ): string {
 		global $product;
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		if ( $product instanceof \WC_Product && $product->is_type( 'grouped' ) ) {
 			return $content;
 		}
