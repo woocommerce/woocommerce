@@ -215,7 +215,6 @@ class Renderer {
 					</div>
 				</template>
 			</div>
-		</div>
 		<?php
 		return ob_get_clean();
 	}
