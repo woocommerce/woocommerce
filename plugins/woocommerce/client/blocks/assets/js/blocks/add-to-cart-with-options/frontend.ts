@@ -70,20 +70,15 @@ const addToCartWithOptionsStore = store(
 					{ lock: universalLock }
 				);
 
-				const { productId } = getContext< Context >();
+				const { productId, quantity, variation } =
+					getContext< Context >();
 				const product = wooState.cart?.items.find(
 					( item ) => item.id === productId
 				);
 				const currentQuantity = product?.quantity || 0;
 
-				const {
-					productId: id,
-					quantity,
-					variation,
-				} = getContext< Context >();
-
 				yield actions.addCartItem( {
-					id,
+					id: productId,
 					quantity: currentQuantity + quantity,
 					variation,
 				} );
