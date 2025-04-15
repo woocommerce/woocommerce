@@ -886,7 +886,8 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_sanitize_phone_number( $data[ $key ] );
+					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
+					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
 
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
@@ -1089,6 +1090,16 @@ class WC_Checkout {
 
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
+			wc_log_order_step(
+				'[Shortcode #6A] Order payment processed successfully',
+				array(
+					'order_id'       => $order_id,
+					'payment_method' => $payment_method,
+					'redirected'     => ! wp_doing_ajax() ? 'yes' : 'no',
+				),
+				true
+			);
+
 			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
@@ -1110,6 +1121,15 @@ class WC_Checkout {
 		$order = wc_get_order( $order_id );
 		$order->payment_complete();
 		wc_empty_cart();
+
+		wc_log_order_step(
+			'[Shortcode #6B] Order processed without payment',
+			array(
+				'order_object' => $order,
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
+			),
+			true
+		);
 
 		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(
@@ -1278,6 +1298,8 @@ class WC_Checkout {
 				throw new Exception( $expiry_message );
 			}
 
+			wc_log_order_step( '[Shortcode #1] Place Order flow initiated', null, false, true );
+
 			do_action( 'woocommerce_checkout_process' );
 
 			$errors      = new WP_Error();
@@ -1286,8 +1308,14 @@ class WC_Checkout {
 			// Update session for customer and totals.
 			$this->update_session( $posted_data );
 
+			wc_log_order_step( '[Shortcode #2] Session updated with checkout data and totals calculated' );
+
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
+
+			if ( empty( $errors->errors ) ) {
+				wc_log_order_step( '[Shortcode #3] Checkout posted data validated', array( 'payment_method' => $posted_data['payment_method'] ) );
+			}
 
 			foreach ( $errors->errors as $code => $messages ) {
 				$data = $errors->get_error_data( $code );
@@ -1309,7 +1337,17 @@ class WC_Checkout {
 					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
 				}
 
+				wc_log_order_step(
+					'[Shortcode #4] Validated/Created customer and created order object',
+					array( 'order_object' => $order )
+				);
+
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
+
+				wc_log_order_step(
+					'[Shortcode #5] woocommerce_checkout_order_processed hook ran successfully',
+					array( 'order_object' => $order )
+				);
 
 				/**
 				 * Note that woocommerce_cart_needs_payment is only used in
@@ -1328,6 +1366,8 @@ class WC_Checkout {
 				}
 			}
 		} catch ( Exception $e ) {
+			// Step logs the exception. If nothing abnormal occurred during the process_checkout flow, the log is removed.
+			wc_log_order_step( '[Shortcode #EXPECTEDFAIL] ' . $e->getMessage(), array( 'error_code' => $e->getCode() ), true );
 			wc_add_notice( $e->getMessage(), 'error' );
 		}
 		$this->send_ajax_failure_response();

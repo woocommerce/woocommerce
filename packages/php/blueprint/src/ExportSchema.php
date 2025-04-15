@@ -15,7 +15,8 @@ use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
  * @package Automattic\WooCommerce\Blueprint
  */
 class ExportSchema {
-	use UseWPFunctions, UsePubSub;
+	use UseWPFunctions;
+	use UsePubSub;
 
 	/**
 	 * Step exporters.
@@ -89,7 +90,7 @@ class ExportSchema {
 		 * @var StepExporter $exporter
 		 */
 		foreach ( $exporters as $exporter ) {
-			$this->publish('onBeforeExport', $exporter);
+			$this->publish( 'onBeforeExport', $exporter );
 			$step = $exporter->export();
 			if ( is_array( $step ) ) {
 				foreach ( $step as $_step ) {
@@ -103,11 +104,20 @@ class ExportSchema {
 		return $schema;
 	}
 
-	public function onBeforeExport($step_name, $callback) {
-		$this->subscribe('onBeforeExport', function($exporter) use ($step_name, $callback) {
-			if ($step_name === $exporter->get_step_name()) {
-				$callback( $exporter );
+	/**
+	 * Subscribe to the onBeforeExport event.
+	 *
+	 * @param string   $step_name The step name to subscribe to.
+	 * @param callable $callback  The callback to execute.
+	 */
+	public function on_before_export( $step_name, $callback ) {
+		$this->subscribe(
+			'onBeforeExport',
+			function ( $exporter ) use ( $step_name, $callback ) {
+				if ( $step_name === $exporter->get_step_name() ) {
+					$callback( $exporter );
+				}
 			}
-		});
+		);
 	}
 }

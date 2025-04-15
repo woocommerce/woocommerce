@@ -33,6 +33,7 @@ require WC_ABSPATH . 'includes/wc-attribute-functions.php';
 require WC_ABSPATH . 'includes/wc-rest-functions.php';
 require WC_ABSPATH . 'includes/wc-widget-functions.php';
 require WC_ABSPATH . 'includes/wc-webhook-functions.php';
+require WC_ABSPATH . 'includes/wc-order-step-logger-functions.php';
 
 /**
  * Filters on data used in admin and frontend.
@@ -1659,6 +1660,20 @@ function wc_back_link( $label, $url ) {
 }
 
 /**
+ * Outputs a header with "back" link so admin screens can easily jump back a page.
+ *
+ * @param string $title Title of the current page.
+ * @param string $label Label of the page to return to.
+ * @param string $url   URL of the page to return to.
+ */
+function wc_back_header( $title, $label, $url ) {
+	echo '<h2 class="wc-admin-header">';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons dashicons-arrow-left-alt2"></span></a></small>';
+	echo esc_html( $title );
+	echo '</h2>';
+}
+
+/**
  * Display a WooCommerce help tip.
  *
  * @since  2.5.0
@@ -2625,8 +2640,7 @@ function wc_get_server_database_version() {
 		);
 	}
 
-	// phpcs:ignore WordPress.DB.RestrictedFunctions
-	$server_info = mysqli_get_server_info( $wpdb->dbh );
+	$server_info = $wpdb->get_var( 'SELECT VERSION()' );
 
 	return array(
 		'string' => $server_info,

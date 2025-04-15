@@ -86,7 +86,6 @@ class Checkout extends AbstractCartRoute {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
-				'validate_callback'   => [ $this, 'validate_callback' ],
 				'args'                => array_merge(
 					[
 						'payment_data'      => [
@@ -115,7 +114,6 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'validate_callback'   => [ $this, 'validate_callback' ],
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
@@ -148,6 +146,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$this->load_cart_session( $request );
+
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
@@ -174,6 +174,18 @@ class Checkout extends AbstractCartRoute {
 			if ( $this->order ) {
 				wc_release_stock_for_order( $this->order );
 				wc_release_coupons_for_order( $this->order );
+			}
+
+			if ( $request->get_method() === \WP_REST_Server::CREATABLE ) {
+				// Step logs the exception. If nothing abnormal occurred during the place order POST request, flow the log is removed.
+				wc_log_order_step(
+					'[Store API #FAIL] Placing Order failed',
+					array(
+						'status' => $response->get_status(),
+						'data'   => $response->get_data(),
+					),
+					true
+				);
 			}
 		}
 
@@ -207,14 +219,6 @@ class Checkout extends AbstractCartRoute {
 	 * @return true|\WP_Error
 	 */
 	public function validate_callback( $request ) {
-		/**
-		 * The request is cloned to avoid modifying the original request object when sanitizing params.
-		 * Un-sanitized params are used to see if required fields had values. Sanitized params are used to
-		 * validate field values.
-		 */
-		$sanitized_request = clone $request;
-		$sanitized_request->sanitize_params();
-
 		$validate_contexts = [
 			'shipping_address' => [
 				'group'    => 'shipping',
@@ -250,18 +254,15 @@ class Checkout extends AbstractCartRoute {
 			$errors = new \WP_Error();
 
 			if ( Features::is_enabled( 'experimental-blocks' ) ) {
-				$document_object = $this->get_document_object_from_rest_request( $sanitized_request );
+				$document_object = $this->get_document_object_from_rest_request( $request );
 				$document_object->set_context( $context );
 				$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 			} else {
 				$additional_fields = $this->additional_fields_controller->get_fields_for_location( $context_data['location'] );
 			}
 
-			// These values are used to see if required fields have values.
-			$field_values = (array) $request->get_param( $context_data['param'] ) ?? [];
-
 			// These values are used to validate custom rules and generate the document object.
-			$sanitized_field_values = (array) $sanitized_request->get_param( $context_data['param'] ) ?? [];
+			$field_values = (array) $request->get_param( $context_data['param'] ) ?? [];
 
 			foreach ( $additional_fields as $field_key => $field ) {
 				// Skip values that were not posted if the request is partial or the field is not required.
@@ -270,8 +271,7 @@ class Checkout extends AbstractCartRoute {
 				}
 
 				// Clean the field value to trim whitespace.
-				$field_value           = wc_clean( wp_unslash( $field_values[ $field_key ] ?? '' ) );
-				$sanitized_field_value = $sanitized_field_values[ $field_key ] ?? '';
+				$field_value = wc_clean( wp_unslash( $field_values[ $field_key ] ?? '' ) );
 
 				if ( empty( $field_value ) ) {
 					if ( true === $field['required'] ) {
@@ -289,7 +289,7 @@ class Checkout extends AbstractCartRoute {
 					continue;
 				}
 
-				$valid_check = $this->additional_fields_controller->validate_field( $field, $sanitized_field_value );
+				$valid_check = $this->additional_fields_controller->validate_field( $field, $field_value );
 
 				if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
 					foreach ( $valid_check->get_error_codes() as $code ) {
@@ -307,7 +307,7 @@ class Checkout extends AbstractCartRoute {
 			}
 
 			// Validate all fields for this location (this runs custom validation callbacks).
-			$valid_location_check = $this->additional_fields_controller->validate_fields_for_location( $sanitized_field_values, $context_data['location'], $context_data['group'] );
+			$valid_location_check = $this->additional_fields_controller->validate_fields_for_location( $field_values, $context_data['location'], $context_data['group'] );
 
 			if ( is_wp_error( $valid_location_check ) && $valid_location_check->has_errors() ) {
 				foreach ( $valid_location_check->get_error_codes() as $code ) {
@@ -348,9 +348,15 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @throws RouteException On error.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
+		$validation_callback = $this->validate_callback( $request );
+
+		if ( is_wp_error( $validation_callback ) ) {
+			return $validation_callback;
+		}
+
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
@@ -402,9 +408,17 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		wc_log_order_step( '[Store API #1] Place Order flow initiated', null, false, true );
+
+		$validation_callback = $this->validate_callback( $request );
+
+		if ( is_wp_error( $validation_callback ) ) {
+			return $validation_callback;
+		}
+
 		/**
 		 * Ensure required permissions based on store settings are valid to place the order.
 		 */
@@ -420,6 +434,7 @@ class Checkout extends AbstractCartRoute {
 		 * Validate that the cart is not empty.
 		 */
 		$this->cart_controller->validate_cart_not_empty();
+		wc_log_order_step( '[Store API #2] Cart validated' );
 
 		/**
 		 * Validate items and fix violations before the order is processed.
@@ -431,18 +446,23 @@ class Checkout extends AbstractCartRoute {
 		 * uses the up-to-date customer address.
 		 */
 		$this->update_customer_from_request( $request );
+		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
+		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
 		$this->update_order_from_request( $request );
+		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );
+		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
+		wc_log_order_step( '[Store API #7] Validated order data', array( 'order_object' => $this->order ) );
 
 		/**
 		 * Hold coupons for the order as soon as the draft order is created.
@@ -486,6 +506,7 @@ class Checkout extends AbstractCartRoute {
 				esc_html( $e->getCode() )
 			);
 		}
+		wc_log_order_step( '[Store API #8] Reserved stock for order', array( 'order_object' => $this->order ) );
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -535,6 +556,16 @@ class Checkout extends AbstractCartRoute {
 		} else {
 			$this->process_without_payment( $request, $payment_result );
 		}
+
+		wc_log_order_step(
+			'[Store API #9] Order processed',
+			array(
+				'order_object'           => $this->order,
+				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
+				'payment_status'         => $payment_result->status,
+			),
+			true
+		);
 
 		return $this->prepare_item_for_response(
 			(object) [
@@ -611,8 +642,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
+
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
+			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
 		}
 
 		wc_do_deprecated_action(
@@ -665,6 +699,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
+		wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
 	}
 
 	/**
@@ -745,6 +780,7 @@ class Checkout extends AbstractCartRoute {
 					$this->update_customer_address_field( $customer, $key, $value, $context_data['group'] );
 				}
 			}
+			wc_log_order_step( '[Store API #3::update_customer_from_request] Persisted ' . $context . ' fields' );
 		}
 
 		/**
@@ -837,10 +873,13 @@ class Checkout extends AbstractCartRoute {
 
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
+			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+
 		}
 
 		// Persist customer address data to account.
 		$this->order_controller->sync_customer_data_with_order( $this->order );
+		wc_log_order_step( '[Store API #6::process_customer] Synced customer data from order', array( 'customer_id' => $this->order->get_customer_id() ) );
 	}
 
 	/**

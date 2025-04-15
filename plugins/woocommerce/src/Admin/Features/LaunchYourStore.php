@@ -185,7 +185,7 @@ class LaunchYourStore {
 		}
 
 		$store_pages_only = get_option( 'woocommerce_store_pages_only' ) === 'yes';
-		if ( $store_pages_only && ! WCAdminHelper::is_store_page() ) {
+		if ( $store_pages_only && ! WCAdminHelper::is_current_page_store_page() ) {
 			return false;
 		}
 

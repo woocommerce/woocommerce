@@ -163,7 +163,7 @@ const Template: StoryFn< TextInputProps > = ( args ) => {
 	return <TextInput { ...args } onChange={ onChange } />;
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< TextInputProps > = Template.bind( {} );
 Default.args = {
 	id: 'unique-id',
 	label: 'Enter your value',

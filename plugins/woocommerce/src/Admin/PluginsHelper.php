@@ -228,7 +228,7 @@ class PluginsHelper {
 	 *
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null, string $source = null ) {
+	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null, ?string $source = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -409,7 +409,7 @@ class PluginsHelper {
 	 *
 	 * @return bool
 	 */
-	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id, string $source = null ) {
+	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id, ?string $source = null ) {
 		$option_name = 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id;
 		$logger      = new AsyncPluginsInstallLogger( $option_name );
 		self::install_plugins( $plugins, $logger, $source );

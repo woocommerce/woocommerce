@@ -1,14 +1,13 @@
 {
 	"name": "woocommerce/customer-account",
-	"version": "1.0.0",
 	"title": "Customer account",
 	"description": "A block that allows your customers to log in and out of their accounts in your store.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce",
-		"My Account"
-	],
+	"keywords": [ "WooCommerce", "My Account" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": true,
 		"color": {
 			"text": true

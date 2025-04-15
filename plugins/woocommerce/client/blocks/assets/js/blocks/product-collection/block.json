@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-collection",
-	"version": "1.0.0",
 	"title": "Product Collection",
 	"description": "Display a collection of products from your store.",
 	"category": "woocommerce",

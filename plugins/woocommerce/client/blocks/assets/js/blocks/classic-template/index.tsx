@@ -316,6 +316,9 @@ const registerClassicTemplateBlock = ( {
 						'woocommerce'
 				  ),
 		supports: {
+			interactivity: {
+				clientNavigation: false,
+			},
 			align: [ 'wide', 'full' ],
 			html: false,
 			multiple: false,
