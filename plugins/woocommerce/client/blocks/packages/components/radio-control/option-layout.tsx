@@ -40,7 +40,10 @@ const OptionLayout = ( {
 				<div
 					className={ clsx(
 						'wc-block-components-radio-control__description-group',
-						`wc-block-components-radio-control__description-group--${ descriptionStackingDirection }`
+						{
+							'wc-block-components-radio-control__description-group--row':
+								descriptionStackingDirection === 'row',
+						}
 					) }
 				>
 					{ description && (
