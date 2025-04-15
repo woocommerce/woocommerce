@@ -17,9 +17,9 @@ const blockData = {
 		frontend: {},
 		editor: {
 			leftArrow:
-				'.wc-block-product-gallery-large-image-next-previous-left',
+				'.wc-block-product-gallery-large-image-next-previous__icon--left',
 			rightArrow:
-				'.wc-block-product-gallery-large-image-next-previous-right',
+				'.wc-block-product-gallery-large-image-next-previous__icon--right',
 		},
 	},
 	slug: 'single-product',
