@@ -1236,7 +1236,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Shows where the order was created.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'customer_note' => array(
 					'description' => __( 'Note left by customer during checkout.', 'woocommerce' ),

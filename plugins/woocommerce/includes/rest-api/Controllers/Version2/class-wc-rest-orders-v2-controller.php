@@ -1176,7 +1176,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Shows where the order was created.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'version'              => array(
 					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
