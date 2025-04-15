@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix implicitly nullable parameters deprecation warnings in PluginsHelper and CheckoutSchema
