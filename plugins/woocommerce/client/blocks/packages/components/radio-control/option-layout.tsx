@@ -41,8 +41,8 @@ const OptionLayout = ( {
 					className={ clsx(
 						'wc-block-components-radio-control__description-group',
 						{
-							'wc-block-components-radio-control__description-group--row':
-								descriptionStackingDirection === 'row',
+							'wc-block-components-radio-control__description-group--column':
+								descriptionStackingDirection === 'column',
 						}
 					) }
 				>
