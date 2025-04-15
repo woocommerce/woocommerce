@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Check the session exists before accessing it in `wc_get_notices`.

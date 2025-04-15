@@ -162,9 +162,9 @@ class ZipExportedSchema {
 			// phpcs:ignore
 			function ( $resource ) use ( $type ) {
 				if ( 'plugins' === $type ) {
-					return 'self/plugins' === $resource['pluginZipFile']['resource'];
+					return 'self/plugins' === $resource['pluginData']['resource'];
 				} elseif ( 'themes' === $type ) {
-					return 'self/themes' === $resource['themeZipFile']['resource'];
+					return 'self/themes' === $resource['themeData']['resource'];
 				}
 
 				return false;
@@ -181,7 +181,7 @@ class ZipExportedSchema {
 		$files = array();
 
 		foreach ( $steps as $step ) {
-			$resource = $step[ 'plugins' === $type ? 'pluginZipFile' : 'themeZipFile' ];
+			$resource = $step[ 'plugins' === $type ? 'pluginData' : 'themeData' ];
 			if ( ! $this->is_plugin_dir( $resource['slug'] ) ) {
 				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug'] );
 			}
@@ -212,7 +212,7 @@ class ZipExportedSchema {
 	 */
 	private function create_json_schema_file() {
 		$schema_file = $this->get_working_dir_path( 'woo-blueprint.json' );
-		$this->wp_filesystem_put_contents( $schema_file, json_encode( $this->schema, JSON_PRETTY_PRINT ) );
+		$this->wp_filesystem_put_contents( $schema_file, wp_json_encode( $this->schema, JSON_PRETTY_PRINT ) );
 		return $schema_file;
 	}
 

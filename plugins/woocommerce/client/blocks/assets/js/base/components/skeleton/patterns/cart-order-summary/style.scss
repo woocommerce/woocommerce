@@ -1,0 +1,26 @@
+.wc-block-components-skeleton.wc-block-components-skeleton--cart-order-summary {
+	gap: 0;
+	border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+	margin-bottom: $gap-large;
+
+	.wc-block-components-skeleton__row {
+		padding: $gap-small;
+		display: flex;
+		gap: 1rem;
+		justify-content: space-between;
+
+		&:not(:last-child) {
+			position: relative;
+
+			&::after {
+				content: "";
+				position: absolute;
+				bottom: 0;
+				left: $gap-small;
+				right: $gap-small;
+				height: 1px;
+				background: color-mix(in srgb, currentColor 10%, transparent);
+			}
+		}
+	}
+}

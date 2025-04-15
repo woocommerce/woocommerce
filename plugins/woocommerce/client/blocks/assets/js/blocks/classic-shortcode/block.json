@@ -1,13 +1,13 @@
 {
 	"name": "woocommerce/classic-shortcode",
-	"version": "1.0.0",
 	"title": "Classic Shortcode",
 	"description": "Renders classic WooCommerce shortcodes.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
+		"interactivity": {
+			"clientNavigation": false
+		},
 		"align": true,
 		"html": false,
 		"multiple": false,
@@ -18,10 +18,7 @@
 		"shortcode": {
 			"type": "string",
 			"default": "cart",
-			"enum": [
-				"cart",
-				"checkout"
-			]
+			"enum": [ "cart", "checkout" ]
 		},
 		"align": {
 			"type": "string",

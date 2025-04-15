@@ -412,14 +412,10 @@ jQuery( function ( $ ) {
 					$line_subtotal_tax.attr( 'data-subtotal_tax' ),
 					woocommerce_admin.mon_decimal_point
 				) / o_qty;
-				var round_at_subtotal  = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
-				var precision          = woocommerce_admin_meta_boxes[
-					round_at_subtotal ? 'rounding_precision' : 'currency_format_num_decimals'
-					];
 
 				if ( 0 < unit_total_tax ) {
 					$line_total_tax.val(
-						parseFloat( accounting.formatNumber( unit_total_tax * qty, precision, '' ) )
+						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
@@ -427,7 +423,11 @@ jQuery( function ( $ ) {
 
 				if ( 0 < unit_subtotal_tax ) {
 					$line_subtotal_tax.val(
-						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, precision, '' ) )
+						parseFloat( accounting.formatNumber(
+							unit_subtotal_tax * qty,
+							woocommerce_admin_meta_boxes.rounding_precision,
+							''
+						) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
@@ -1111,13 +1111,13 @@ jQuery( function ( $ ) {
 					) / qty;
 
 					if ( 0 < unit_total_tax ) {
-						var round_at_subtotal = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
-						var precision         = woocommerce_admin_meta_boxes[
-							round_at_subtotal ? 'rounding_precision' : 'currency_format_num_decimals'
-							];
 
 						$refund_line_total_tax.val(
-							parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, precision, '' ) )
+							parseFloat( accounting.formatNumber(
+								unit_total_tax * refund_qty,
+								woocommerce_admin_meta_boxes.rounding_precision,
+								''
+							) )
 								.toString()
 								.replace( '.', woocommerce_admin.mon_decimal_point )
 						).trigger( 'change' );
@@ -1705,4 +1705,35 @@ jQuery( function ( $ ) {
 	wc_meta_boxes_order_notes.init();
 	wc_meta_boxes_order_downloads.init();
 	wc_meta_boxes_order_custom_meta.init();
+
+	/**
+	 * Event listeners to allow third-party plugins to reinitialize WooCommerce order meta boxes
+	 * after dynamically modifying their content.
+	 *
+	 * Usage Example:
+	 *
+	 * // Reinitialize the Order Data Panel:
+	 * window.dispatchEvent(new CustomEvent("wc_meta_boxes_order_init"));
+	 *
+	 * // Reinitialize Order Items Panel:
+	 * window.dispatchEvent(new CustomEvent("wc_meta_boxes_order_items_init"));
+	 *
+	 * These events ensure that order meta boxes can be dynamically updated
+	 * and properly reinitialized as needed.
+	 */
+	window.addEventListener('wc_meta_boxes_order_init', (e) => {
+		wc_meta_boxes_order.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_items_init', (e) => {
+		wc_meta_boxes_order_items.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_notes_init', (e) => {
+		wc_meta_boxes_order_notes.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_downloads_init', (e) => {
+		wc_meta_boxes_order_downloads.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_custom_meta_init', (e) => {
+		wc_meta_boxes_order_custom_meta.init()
+	});
 });

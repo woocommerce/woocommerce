@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: partially fix OOM errors when building core zip-file in some environments
