@@ -11,6 +11,9 @@
 @import "@automattic/site-admin/src/components/sidebar-navigation-screen/style.scss";
 @import "@automattic/site-admin/src/components/site-icon/style.scss";
 
+// Import form controls styles
+@import "./form-controls/style.scss";
+
 .woocommerce-settings-header {
 	&.woocommerce-site-page-header.woocommerce-settings-header--has-tabs {
 		border-bottom: none;
@@ -97,3 +100,4 @@
 	gap: 10px;
 	margin: 8px 0;
 }
+

@@ -751,7 +751,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp">
-								<select multiple="multiple" name="<?php echo esc_attr( $value['field_name'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries / regions&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
+								<select
+									multiple="multiple"
+									name="<?php echo esc_attr( $value['field_name'] ); ?>[]"
+									id="<?php echo esc_attr( $value['id'] ); ?>"
+									style="width:350px"
+									data-placeholder="<?php esc_attr_e( 'Choose countries / regions&hellip;', 'woocommerce' ); ?>"
+									aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>"
+									class="wc-enhanced-select">
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {

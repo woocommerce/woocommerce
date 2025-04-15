@@ -11,15 +11,15 @@ class DeactivatePluginTest extends TestCase {
 	 * Test the constructor and JSON preparation.
 	 */
 	public function testConstructorAndPrepareJsonArray() {
-		$plugin_name = 'sample-plugin/sample-plugin.php';
-		$deactivatePlugin = new DeactivatePlugin( $plugin_name );
+		$plugin_name       = 'sample-plugin/sample-plugin.php';
+		$deactivate_plugin = new DeactivatePlugin( $plugin_name );
 
 		$expected_array = array(
 			'step'       => 'deactivatePlugin',
 			'pluginName' => $plugin_name,
 		);
 
-		$this->assertEquals( $expected_array, $deactivatePlugin->prepare_json_array() );
+		$this->assertEquals( $expected_array, $deactivate_plugin->prepare_json_array() );
 	}
 
 	/**

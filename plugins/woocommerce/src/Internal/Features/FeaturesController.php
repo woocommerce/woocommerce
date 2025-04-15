@@ -346,21 +346,7 @@ class FeaturesController {
 				'is_experimental'    => true,
 				'enabled_by_default' => false,
 				'is_legacy'          => true,
-				'disable_ui'         => ! $alpha_feature_testing_is_enabled,
-				'setting'            => array(
-					'disabled' => ! ( $alpha_feature_testing_is_enabled && wp_using_ext_object_cache() ),
-					'desc_tip' => function () {
-						$string = '';
-						if ( ! wp_using_ext_object_cache() ) {
-							$string = __(
-								'⚠ This feature is currently only suggested with the use of external object caching.',
-								'woocommerce'
-							);
-						}
-
-						return $string;
-					},
-				),
+				'disable_ui'         => false,
 				'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
 			'remote_logging'                     => array(
