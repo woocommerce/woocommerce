@@ -580,6 +580,7 @@
 					],
 					"changes": [
 						"patterns/**/*.php",
+						"includes/**/*.php",
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html"
