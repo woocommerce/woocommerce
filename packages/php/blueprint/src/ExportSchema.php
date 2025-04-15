@@ -3,8 +3,6 @@
 namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
-use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
-use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 
 /**
@@ -40,10 +38,19 @@ class ExportSchema {
 	 * @param string[] $steps Array of step names to export, optional.
 	 *
 	 * @return array The exported schema array.
+	 *
+	 * @throws \InvalidArgumentException If the landing page path is invalid.
 	 */
 	public function export( $steps = array() ) {
+		$loading_page_path = $this->wp_apply_filters( 'wooblueprint_export_landingpage', '/' );
+
+		// Validate that the landing page path is a valid relative local URL path.
+		if ( ! preg_match( '#^/[^/].*#', $loading_page_path ) ) {
+			throw new \InvalidArgumentException( 'Invalid loading page path.' );
+		}
+
 		$schema = array(
-			'landingPage' => $this->wp_apply_filters( 'wooblueprint_export_landingpage', '/' ),
+			'landingPage' => $loading_page_path,
 			'steps'       => array(),
 		);
 
@@ -59,6 +66,14 @@ class ExportSchema {
 		 * @since 0.0.1
 		 */
 		$exporters = $this->wp_apply_filters( 'wooblueprint_exporters', array_merge( $this->exporters, $built_in_exporters ) );
+
+		// Validate that the exporters are instances of StepExporter.
+		$exporters = array_filter(
+			$exporters,
+			function ( $exporter ) {
+				return $exporter instanceof StepExporter;
+			}
+		);
 
 		// Filter out any exporters that are not in the list of steps to export.
 		if ( count( $steps ) ) {
