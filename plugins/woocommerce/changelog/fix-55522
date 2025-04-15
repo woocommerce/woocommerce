@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure 'multi_select_countries' settings have their 'id' attribute set.

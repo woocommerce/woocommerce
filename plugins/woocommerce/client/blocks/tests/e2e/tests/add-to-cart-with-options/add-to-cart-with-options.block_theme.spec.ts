@@ -80,4 +80,50 @@ test.describe( 'Add to Cart with Options Block', () => {
 		const skeleton = block.locator( '.wc-block-components-skeleton' );
 		await expect( skeleton ).toBeVisible();
 	} );
+
+	test( 'allows adding simple products to cart', async ( {
+		page,
+		pageObject,
+		editor,
+		admin,
+	} ) => {
+		await pageObject.setFeatureFlags();
+
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//single-product',
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		const addToCartFormBlock = await editor.getBlockByName(
+			'woocommerce/add-to-cart-form'
+		);
+		await editor.selectBlocks( addToCartFormBlock );
+
+		await page
+			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
+			.click();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/beanie' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of Beanie'
+		);
+		await increaseQuantityButton.click();
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByLabel( 'Add to cart: “Beanie”' );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '3 in cart' );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '6 in cart' );
+	} );
 } );
