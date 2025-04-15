@@ -31,6 +31,8 @@ class CliResultFormatter {
 	 * @param string $message_type The message type to format.
 	 *
 	 * @return void
+	 *
+	 * @throws \Exception If WP CLI Utils is not found.
 	 */
 	public function format( $message_type = 'debug' ) {
 		$header = array( 'Step Processor', 'Type', 'Message' );
@@ -47,7 +49,7 @@ class CliResultFormatter {
 			}
 		}
 
-		$format_items_exist = function_exists('format_items');
+		$format_items_exist = function_exists( 'format_items' );
 
 		if ( $format_items_exist ) {
 			format_items( 'table', $items, $header );

@@ -73,7 +73,7 @@ function Search(): JSX.Element {
 	const onFocus = () => {
 		recordEvent( 'marketplace_search_start', {
 			current_search_term: searchTerm,
-			current_tab: query.tab,
+			current_tab: query.tab || 'discover',
 		} );
 	};
 

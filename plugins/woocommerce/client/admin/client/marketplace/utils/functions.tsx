@@ -259,6 +259,23 @@ function connectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+function activateProductPlugin( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate-plugin';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 function disconnectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === false ) {
 		return Promise.resolve();
@@ -519,6 +536,7 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	activateProductPlugin,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
