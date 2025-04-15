@@ -176,9 +176,6 @@ class Renderer {
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region() {
-		// Remove this extra div wrapper once we can use two context
-		// directives in the top level div (https://github.com/WordPress/gutenberg/discussions/62720).
-
 		wp_interactivity_state(
 			'woocommerce/store-notices',
 			array(

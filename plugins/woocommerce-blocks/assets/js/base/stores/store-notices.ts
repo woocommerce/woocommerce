@@ -21,6 +21,8 @@ const getStoreNoticeContext = getContextFn< {
 	notice: NoticeWithId;
 } >;
 
+// Todo: Go back to the Store Notices block context once more than one context
+// can be added to an element (https://github.com/WordPress/gutenberg/discussions/62720).
 const getProductCollectionContext = () =>
 	getContextFn< {
 		notices: NoticeWithId[];
