@@ -593,7 +593,9 @@ class ListTable extends WP_List_Table {
 
 		$created_via_options = array(
 			''             => __( 'Filter by sales channel', 'woocommerce' ),
-			'store-api'    => __( 'Site Checkout', 'woocommerce' ),
+			'admin'        => __( 'Admin', 'woocommerce' ),
+			'checkout'     => __( 'Legacy Checkout', 'woocommerce' ),
+			'store-api'    => __( 'Blocks Checkout', 'woocommerce' ),
 			'pos-rest-api' => __( 'Point of Sale', 'woocommerce' ),
 		);
 		?>
