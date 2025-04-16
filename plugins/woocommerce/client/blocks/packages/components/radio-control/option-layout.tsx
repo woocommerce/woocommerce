@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import clsx from 'clsx';
+
+/**
  * Internal dependencies
  */
 import type { RadioControlOptionLayout } from './types';
@@ -9,6 +14,7 @@ const OptionLayout = ( {
 	description,
 	secondaryDescription,
 	id,
+	descriptionStackingDirection,
 }: RadioControlOptionLayout ): JSX.Element => {
 	return (
 		<div className="wc-block-components-radio-control__option-layout">
@@ -31,7 +37,15 @@ const OptionLayout = ( {
 				) }
 			</div>
 			{ ( description || secondaryDescription ) && (
-				<div className="wc-block-components-radio-control__description-group">
+				<div
+					className={ clsx(
+						'wc-block-components-radio-control__description-group',
+						{
+							'wc-block-components-radio-control__description-group--column':
+								descriptionStackingDirection === 'column',
+						}
+					) }
+				>
 					{ description && (
 						<span
 							id={ id && `${ id }__description` }
