@@ -111,7 +111,7 @@
 		"webpack-cli": "^3.3.12",
 		"webpack-remove-empty-scripts": "^0.7.3",
 		"webpack-rtl-plugin": "^2.0.0",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
