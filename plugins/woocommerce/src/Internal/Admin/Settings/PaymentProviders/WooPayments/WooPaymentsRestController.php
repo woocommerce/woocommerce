@@ -316,6 +316,34 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/reset',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'reset_onboarding' ),
+					'validation_callback' => 'rest_validate_request_arg',
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'from'   => array(
+							'description'       => __( 'Where from in the onboarding flow this request was triggered.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'source' => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+				'schema' => fn() => $this->get_schema_for_get_onboarding_details(),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/woopay-eligibility',
 			array(
 				array(
@@ -619,6 +647,27 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding reset action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function reset_onboarding( WP_REST_Request $request ) {
+		try {
+			$this->woopayments->reset_onboarding( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+			)
+		);
 	}
 
 	/**
