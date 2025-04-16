@@ -179,6 +179,10 @@ class RestApi {
 
 		$data = $exporter->export( $steps );
 
+		if ( is_wp_error( $data ) ) {
+			return new \WP_REST_Response( $data, 400 );
+		}
+
 		return new \WP_HTTP_Response(
 			array(
 				'data' => $data,
