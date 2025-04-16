@@ -475,7 +475,9 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				// Disable the apartment field.
-				await shippingApartmentToggle.uncheck();
+				await expect( async () => {
+					await shippingApartmentToggle.uncheck();
+				} ).toPass();
 
 				// Verify that the apartment link and the apartment field are hidden.
 				await expect( shippingApartmentLink ).toBeHidden();
