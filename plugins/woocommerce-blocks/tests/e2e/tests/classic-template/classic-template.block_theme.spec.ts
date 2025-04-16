@@ -63,7 +63,7 @@ const getClassicTemplateBlocksInInserter = async ( {
 	await editor.openGlobalBlockInserter();
 
 	await editor.page
-		.getByLabel( 'Search for blocks and patterns' )
+		.getByRole( 'searchbox', { name: 'Search' } )
 		.fill( 'classic' );
 
 	// Wait for blocks search to have finished.
@@ -256,14 +256,29 @@ test.describe( `${ blockData.name } Block `, () => {
 		const searchResults = editor.page.getByLabel( 'Actions', {
 			exact: true,
 		} );
+		// Wait until there's only one search result.
 		await expect.poll( async () => await searchResults.count() ).toBe( 1 );
-		await searchResults.first().click();
+
+		const actionsButton = editor.page.getByRole( 'button', {
+			name: 'Actions',
+		} );
+		await actionsButton.click();
+
 		await editor.page.getByRole( 'menuitem', { name: 'Reset' } ).click();
 		await editor.page.getByRole( 'button', { name: 'Reset' } ).click();
 		await expect( resetNotice ).toBeVisible();
 
-		// Open the template again.
-		await editor.page.getByRole( 'menuitem', { name: 'Edit' } ).click();
+		const editButton = editor.page.getByRole( 'menuitem', {
+			name: 'Edit',
+		} );
+
+		// Keep WP v6.7 compatibility.
+		if ( await editButton.isHidden() ) {
+			await actionsButton.click();
+		}
+
+		// Edit the template again.
+		await editButton.click();
 
 		// Verify the Classic Template block is still registered.
 		const classicTemplateBlocks = await getClassicTemplateBlocksInInserter(

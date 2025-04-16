@@ -161,6 +161,7 @@ test.describe( 'Merchant → Checkout', () => {
 			).toBeVisible();
 		} );
 	} );
+
 	test( 'Merchant can see T&S and Privacy Policy links with checkbox', async ( {
 		frontendUtils,
 		checkoutPageObject,

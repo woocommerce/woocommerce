@@ -20,7 +20,11 @@ test.describe( 'Single Product template', () => {
 
 		// Create the specific product template.
 		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
-		await page.getByLabel( 'Add New Template' ).click();
+		await page
+			.getByRole( 'button', { name: 'Add Template' } )
+			// Keep WP v6.7 compatibility.
+			.or( page.getByRole( 'button', { name: 'Add New Template' } ) )
+			.click();
 		await page
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();

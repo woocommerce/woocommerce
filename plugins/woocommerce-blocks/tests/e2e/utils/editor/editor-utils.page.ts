@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
+import {
+	Editor as CoreEditor,
+	expect,
+} from '@wordpress/e2e-test-utils-playwright';
 
 export class Editor extends CoreEditor {
 	async getBlockByName( name: string ) {
@@ -33,15 +36,23 @@ export class Editor extends CoreEditor {
 	 * Opens the global inserter.
 	 */
 	async openGlobalBlockInserter() {
-		const toggleButton = this.page.getByRole( 'button', {
-			name: 'Toggle block inserter',
-		} );
+		const toggleButton = this.page
+			.getByRole( 'button', {
+				name: 'Block Inserter',
+				exact: true,
+			} )
+			// Keep WP v6.7 compatibility.
+			.or(
+				this.page.getByRole( 'button', {
+					name: 'Toggle block inserter',
+				} )
+			);
+
 		const isOpen =
 			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
 
 		if ( ! isOpen ) {
 			await toggleButton.click();
-			await this.page.locator( '.block-editor-inserter__menu' ).waitFor();
 		}
 	}
 
@@ -73,30 +84,15 @@ export class Editor extends CoreEditor {
 
 	async revertTemplate( { templateName }: { templateName: string } ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		// Let's wait for the search to finish.
+		await expect(
+			this.page.locator( '.dataviews-view-grid__title-actions' ).first()
+		).toHaveText( templateName );
 
-		// Depending on the context, we need to click either on a link (in the template page)
-		// or a button (in the template-parts/patterns page) to visit the template.
-		const link = this.page.getByRole( 'link', {
-			name: templateName,
-			exact: true,
-		} );
-
-		if ( await link.isVisible() ) {
-			await link.click();
-		}
-
-		const button = this.page
-			.getByRole( 'button', {
-				name: new RegExp( templateName, 'i' ),
-				exact: true,
-			} )
-			.and( this.page.locator( '.is-link' ) );
-
-		if ( await button.isVisible() ) {
-			await button.click();
-		}
-
-		await this.page.getByLabel( 'Actions' ).click();
+		await this.page
+			.getByRole( 'button', { name: 'Actions' } )
+			.first()
+			.click();
 		await this.page
 			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
 			.click();

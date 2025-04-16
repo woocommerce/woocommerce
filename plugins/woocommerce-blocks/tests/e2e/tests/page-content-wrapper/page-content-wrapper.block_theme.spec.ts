@@ -51,25 +51,19 @@ for ( const template of templates ) {
 
 			await admin.editPost( pageId );
 
-			// Prevent trying to insert the paragraph block before the editor is
-			// ready.
 			await expect(
 				editor.canvas.locator( template.blockClassName )
 			).toBeVisible();
 
-			await editor.insertBlock( {
-				name: 'core/paragraph',
-				attributes: { content: userText },
+			// editor.isertBlock() doesn't work here.
+			await editor.insertBlockUsingGlobalInserter( 'Paragraph' );
+			await editor.canvas
+				.getByRole( 'document', { name: 'Empty block' } )
+				.fill( userText );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
 			} );
-
-			await page
-				.getByRole( 'button', { name: 'Save', exact: true } )
-				.click();
-
-			await page
-				.getByRole( 'button', { name: 'Dismiss this notice' } )
-				.filter( { hasText: 'updated' } )
-				.waitFor();
 
 			// Verify edits are in the template when viewed from the frontend.
 			await template.visitPage( { frontendUtils } );
