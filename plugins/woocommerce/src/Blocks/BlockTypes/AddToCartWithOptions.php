@@ -86,7 +86,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			/**
 			 * Filter to declare product type's cart block template is supported.
 			 * 
-			 * @since x.x.x
+			 * @since 9.9.0
 			 * @param mixed string|boolean The template part path if it exists
 			 * @param string $product_type The product type 
 			 */
