@@ -27,21 +27,24 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
-		const store = select( validationStore );
-		return {
-			hasValidationErrors: store.hasValidationErrors(),
-			invalidProps: Object.keys( billingAddress )
-				.filter( ( key ) => {
-					return (
-						key !== 'email' &&
-						store.getValidationError( 'billing_' + key ) !==
-							undefined
-					);
-				} )
-				.filter( Boolean ),
-		};
-	} );
+	const { hasValidationErrors, invalidProps } = useSelect(
+		( select ) => {
+			const store = select( validationStore );
+			return {
+				hasValidationErrors: store.hasValidationErrors(),
+				invalidProps: Object.keys( billingAddress )
+					.filter( ( key ) => {
+						return (
+							key !== 'email' &&
+							store.getValidationError( 'billing_' + key ) !==
+								undefined
+						);
+					} )
+					.filter( Boolean ),
+			};
+		},
+		[ billingAddress ]
+	);
 
 	useEffect( () => {
 		if ( invalidProps.length > 0 && editing === false ) {
@@ -66,23 +69,20 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const renderAddressCardComponent = useCallback(
-		() => (
-			<AddressCard
-				address={ billingAddress }
-				target="billing"
-				onEdit={ () => {
-					setEditing( true );
-				} }
-				isExpanded={ editing }
-			/>
-		),
-		[ billingAddress, editing, setEditing ]
-	);
-
-	const renderAddressFormComponent = useCallback(
-		() => (
-			<>
+	return (
+		<AddressWrapper
+			isEditing={ editing }
+			addressCard={
+				<AddressCard
+					address={ billingAddress }
+					target="billing"
+					onEdit={ () => {
+						setEditing( true );
+					} }
+					isExpanded={ editing }
+				/>
+			}
+			addressForm={
 				<Form
 					id="billing"
 					addressType="billing"
@@ -91,16 +91,7 @@ const CustomerAddress = () => {
 					fields={ ADDRESS_FORM_KEYS }
 					isEditing={ editing }
 				/>
-			</>
-		),
-		[ billingAddress, onChangeAddress, editing ]
-	);
-
-	return (
-		<AddressWrapper
-			isEditing={ editing }
-			addressCard={ renderAddressCardComponent }
-			addressForm={ renderAddressFormComponent }
+			}
 		/>
 	);
 };
