@@ -59,8 +59,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 					'woocommerce-remote-inbox-engine'
 				);
 				if ( null === $next_hook ) {
-					WC()->queue()->schedule_single(
-						time(),
+					WC()->queue()->add(
 						'woocommerce_run_on_woocommerce_admin_updated',
 						array(),
 						'woocommerce-remote-inbox-engine'

@@ -200,7 +200,7 @@ class WC_Marketplace_Suggestions {
 			$next = WC()->queue()->get_next( 'woocommerce_update_marketplace_suggestions' );
 			if ( ! $next ) {
 				WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
-				WC()->queue()->schedule_single( time(), 'woocommerce_update_marketplace_suggestions' );
+				WC()->queue()->add( 'woocommerce_update_marketplace_suggestions' );
 			}
 		}
 

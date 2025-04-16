@@ -157,8 +157,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			// Schedule the async deletion of related product transients.
 			// This should run async cause it also fetches all related products
 			// of the current product to be deleted which we can can't be sure how many there are.
-			WC()->queue()->schedule_single(
-				time(),
+			WC()->queue()->add(
 				'wc_delete_related_product_transients_async',
 				array( 'post_id' => $post_id ),
 				'wc_delete_related_product_transients_group'

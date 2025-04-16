@@ -29,8 +29,7 @@ class AssignDefaultCategory {
 	 * @return void
 	 */
 	public function schedule_action() {
-		WC()->queue()->schedule_single(
-			time(),
+		WC()->queue()->add(
 			'wc_schedule_update_product_default_cat',
 			array(),
 			'wc_update_product_default_cat'
