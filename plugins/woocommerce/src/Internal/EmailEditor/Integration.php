@@ -6,11 +6,13 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
+use Throwable;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -97,6 +99,8 @@ class Integration {
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
 		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
+		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_email_preview_data' ) );
+		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_email_preview_data' ), 100, 1 );
 	}
 
 	/**
@@ -199,5 +203,76 @@ class Integration {
 				'schema'          => $this->template_api_controller->get_template_data_schema(),
 			)
 		);
+	}
+
+	/**
+	 * Filter email preview data to replace placeholders with actual content.
+	 *
+	 * This method retrieves the appropriate email type based on the request,
+	 * generates the email content using the WooContentProcessor, and replaces
+	 * the placeholder in the preview HTML.
+	 *
+	 * @param array|string $data The preview data. If an array, it contains the 'html' key.
+	 * @return array|string The updated preview data with placeholders replaced.
+	 */
+	public function update_email_preview_data( $data ) {
+		// Nonce verification is disabled here because the preview action doesn't modify data,
+		// and the check caused issues with the 'Preview in new tab' feature due to context changes.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$default_type_param = 'WC_Email_Customer_Processing_Order';
+		$email_preview      = wc_get_container()->get( EmailPreview::class );
+
+		if ( isset( $_GET['woo_email'] ) ) {
+			$type_param = sanitize_text_field( wp_unslash( $_GET['woo_email'] ) );
+			// Transform snake case email type to WC class name format.
+			$type_param = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $type_param ) ) );
+		} else {
+			$type_param = $default_type_param;
+		}
+		// phpcs:enable
+		try {
+			$email_preview->set_email_type( $type_param );
+		} catch ( \InvalidArgumentException $e ) {
+			$email_preview->set_email_type( $default_type_param );
+		}
+
+		/**
+		 * Woo content processor service.
+		 *
+		 * @var WooContentProcessor $woo_content_processor - service for processing Woo content.
+		 */
+		$woo_content_processor = wc_get_container()->get( WooContentProcessor::class );
+
+		$generate_placeholder_content = function () use ( $email_preview, $woo_content_processor ) {
+			add_filter( 'woocommerce_email_styles', array( $woo_content_processor, 'prepare_css' ), 10, 2 );
+			$content = $woo_content_processor->get_woo_content( $email_preview->get_email() );
+			$content = $email_preview->get_email()->style_inline( $content );
+			$content = $email_preview->ensure_links_open_in_new_tab( $content );
+			return $content;
+		};
+
+		$email_preview->set_up_filters();
+
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$message = $generate_placeholder_content();
+		} else {
+			// Start output buffering to prevent partial renders with PHP notices or warnings.
+			ob_start();
+			try {
+				$message = $generate_placeholder_content();
+			} catch ( Throwable $e ) {
+				ob_end_clean();
+				wp_die( esc_html__( 'There was an error rendering the email editor placeholder content.', 'woocommerce' ), 404 );
+			}
+			ob_end_clean();
+		}
+
+		$email_preview->clean_up_filters();
+
+		if ( is_array( $data ) && isset( $data['html'] ) ) {
+			$data['html'] = str_replace( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER, $message, $data['html'] );
+		}
+
+		return $data;
 	}
 }
