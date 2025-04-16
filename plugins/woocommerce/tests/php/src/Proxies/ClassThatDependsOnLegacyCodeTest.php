@@ -113,7 +113,7 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_instance_of_can_be_used_via_injected_legacy_proxy_and_woocommerce_object( $method_to_use ) {
 		$instance = $this->sut->$method_to_use( \WC_Queue_Interface::class, 34 );
-		$this->assertInstanceOf( \WC_Queue_Interface::class, $instance );
+		$this->assertInstanceOf( \WC_Action_Queue::class, $instance );
 	}
 
 	/**

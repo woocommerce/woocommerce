@@ -86,7 +86,7 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_instance_of_wc_queue_interface_gets_an_instance_of_the_appropriate_class() {
 		$instance = $this->sut->get_instance_of( \WC_Queue_Interface::class, 34 );
-		$this->assertInstanceOf( \WC_Queue_Interface::class, $instance );
+		$this->assertInstanceOf( \WC_Action_Queue::class, $instance );
 	}
 
 	/**
