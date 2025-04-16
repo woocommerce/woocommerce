@@ -16,7 +16,7 @@ use WC_Gateway_Paypal;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * PageController
+ * PageController clazz.
  */
 class PageController {
 	/**
