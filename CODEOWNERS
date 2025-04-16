@@ -15,3 +15,7 @@
 /*.* @woocommerce/flux
 /changelog.txt
 /pnpm-lock.yaml
+
+# Test code owners for nested directories
+/plugins/woocommerce/ @woocommerce/flux
+/plugins/woocommerce/src/Internal/Admin/ @woocommerce/woo-fse
