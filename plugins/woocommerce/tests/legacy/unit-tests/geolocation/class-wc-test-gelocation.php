@@ -41,7 +41,11 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 
 		$_SERVER['REMOTE_ADDR'] = '208.67.220.220';
 		$this->assertEquals( '208.67.220.220', WC_Geolocation::get_ip_address() );
+		$_SERVER['REMOTE_ADDR'] = '208.67.220.220, 208.67.220.220, 208.67.220.220';
+		$this->assertEquals( '208.67.220.220', WC_Geolocation::get_ip_address() );
 		$_SERVER['REMOTE_ADDR'] = '2620:0:ccc::2';
+		$this->assertEquals( '2620:0:ccc::2', WC_Geolocation::get_ip_address() );
+		$_SERVER['REMOTE_ADDR'] = '2620:0:ccc::2, 2001:4860:4860::8888';
 		$this->assertEquals( '2620:0:ccc::2', WC_Geolocation::get_ip_address() );
 		unset( $_SERVER['REMOTE_ADDR'] );
 	}
