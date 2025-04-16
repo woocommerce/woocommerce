@@ -8,6 +8,9 @@
  * @since   3.6.0
  */
 
+use Automattic\WooCommerce\Enums\ActionQueuePriority;
+use Automattic\WooCommerce\Internal\Queue\QueueWithPrioritiesInterface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -77,8 +80,11 @@ class WC_Marketplace_Updater {
 	 * Re-schedules the job earlier than the main weekly one.
 	 */
 	public static function retry() {
-		WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
-		WC()->queue()->schedule_single( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
+		$queue = WC()->queue();
+		$queue->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+		( $queue instanceof QueueWithPrioritiesInterface )
+			? $queue->schedule_single_with_priority( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions', array(), '', ActionQueuePriority::HIGH )
+			: $queue->schedule_single( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
 	}
 }
 
