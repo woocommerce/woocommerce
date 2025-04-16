@@ -95,6 +95,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 							data-wp-on--input="actions.debounceSetPrice"
 							data-wp-on--change--set-price="woocommerce/product-filter-price::actions.setMinPrice"
 							data-wp-on--change--navigate="woocommerce/product-filters::actions.navigate"
+							aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
 						<span data-wp-text="woocommerce/product-filter-price::state.formattedMinPrice"><?php echo wp_kses_post( $formatted_min_price ); ?></span>
@@ -119,6 +120,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						data-wp-on--mouseup="woocommerce/product-filters::actions.navigate"
 						data-wp-on--keyup="woocommerce/product-filters::actions.navigate"
 						data-wp-on--touchend="woocommerce/product-filters::actions.navigate"
+						aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 					/>
 					<input
 						type="range"
@@ -133,6 +135,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						data-wp-on--mouseup="woocommerce/product-filters::actions.navigate"
 						data-wp-on--keyup="woocommerce/product-filters::actions.navigate"
 						data-wp-on--touchend="woocommerce/product-filters::actions.navigate"
+						aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 					/>
 				</div>
 				<div class="wc-block-product-filter-price-slider__right text">
@@ -145,6 +148,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 							data-wp-on--input="actions.debounceSetPrice"
 							data-wp-on--change--set-price="woocommerce/product-filter-price::actions.setMaxPrice"
 							data-wp-on--change--navigate="woocommerce/product-filters::actions.navigate"
+							aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
 					<span data-wp-text="woocommerce/product-filter-price::state.formattedMaxPrice"><?php echo wp_kses_post( $formatted_max_price ); ?></span>

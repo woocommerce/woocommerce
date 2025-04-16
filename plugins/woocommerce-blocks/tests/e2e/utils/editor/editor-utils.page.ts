@@ -1,12 +1,25 @@
 /**
  * External dependencies
  */
+import { Page } from '@playwright/test';
 import {
 	Editor as CoreEditor,
 	expect,
 } from '@wordpress/e2e-test-utils-playwright';
 
+type EditorConstructorProps = {
+	page: Page;
+	wpCoreVersion: number;
+};
+
 export class Editor extends CoreEditor {
+	wpCoreVersion: number;
+
+	constructor( { page, wpCoreVersion }: EditorConstructorProps ) {
+		super( { page } );
+		this.wpCoreVersion = wpCoreVersion;
+	}
+
 	async getBlockByName( name: string ) {
 		const blockSelector = `[data-type="${ name }"]`;
 		const canvasLocator = this.page
@@ -36,17 +49,13 @@ export class Editor extends CoreEditor {
 	 * Opens the global inserter.
 	 */
 	async openGlobalBlockInserter() {
-		const toggleButton = this.page
-			.getByRole( 'button', {
-				name: 'Block Inserter',
-				exact: true,
-			} )
-			// Keep WP v6.7 compatibility.
-			.or(
-				this.page.getByRole( 'button', {
-					name: 'Toggle block inserter',
-				} )
-			);
+		const toggleButton = this.page.getByRole( 'button', {
+			name:
+				this.wpCoreVersion >= 6.8
+					? 'Block Inserter'
+					: 'Toggle block inserter',
+			exact: true,
+		} );
 
 		const isOpen =
 			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
