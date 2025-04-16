@@ -90,7 +90,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			 * @param boolean $supports Is the type supported
 			 * @param string $product_type The product type 
 			 */
-			$template_part_path = apply_filters( 'woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
+			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
 		}
 
 		if ( file_exists( $template_part_path ) ) {
