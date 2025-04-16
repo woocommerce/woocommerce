@@ -78,7 +78,7 @@ class ImportStep {
 	 * @return StepProcessorResult
 	 */
 	public function import() {
-		$result = StepProcessorResult::success( 'ImportStep' );
+		$result = StepProcessorResult::success( $this->step_definition->step );
 
 		if ( ! isset( $this->indexed_importers[ $this->step_definition->step ] ) ) {
 			$result->add_warn( "Unable to find an importer for {$this->step_definition->step}" );
