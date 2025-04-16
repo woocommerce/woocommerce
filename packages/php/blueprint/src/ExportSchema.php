@@ -94,14 +94,17 @@ class ExportSchema {
 			}
 		}
 
-		/**
-		 * StepExporter.
-		 *
-		 * @var StepExporter $exporter
-		 */
+		// Make sure the user has the required capabilities to export the steps.
+		foreach ( $exporters as $exporter ) {
+			if ( ! $exporter->check_step_capabilities() ) {
+				return new \WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export step: ' . $exporter->get_step_name() );
+			}
+		}
+
 		foreach ( $exporters as $exporter ) {
 			$this->publish( 'onBeforeExport', $exporter );
 			$step = $exporter->export();
+
 			if ( is_array( $step ) ) {
 				foreach ( $step as $_step ) {
 					$schema['steps'][] = $_step->get_json_array();
