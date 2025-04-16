@@ -26,92 +26,10 @@ class PaymentsController {
 	 * Register hooks.
 	 */
 	public function register() {
-		// Hook into feature flag WP option DB addition (not update) to one-time adjust the feature's default enablement.
-		add_action(
-			'add_option_woocommerce_feature_reactify-classic-payments-settings_enabled',
-			array( $this, 'adjust_feature_default_enablement' ),
-			999,
-			2
-		);
-
-		// Hook into the WooCommerce updated event to handle feature enablement for v9.8.0 and v9.8.1.
-		add_action( 'woocommerce_updated', array( $this, 'handle_feature_enablement_for_v9_8' ), 999 );
-
 		// Because we gate the hooking based on a feature flag,
 		// we need to delay the registration until the 'woocommerce_init' hook.
 		// Otherwise, we end up in an infinite loop.
 		add_action( 'woocommerce_init', array( $this, 'delayed_register' ) );
-	}
-
-	/**
-	 * Adjust the new Payments Settings page feature default enablement.
-	 *
-	 * Currently, we target only new stores so we need to make sure that
-	 * the feature is not enabled by default for existing stores.
-	 * At the same time, we need to migrate the old WCAdmin feature flag value.
-	 *
-	 * Note: We rely on the fact that this logic is only executed ONCE, when the feature flag is first added to the DB.
-	 *       If the feature flag is already present in the DB, this method should not be called.
-	 *
-	 * @param string $option_name  The name of the option.
-	 * @param mixed  $option_value The value of the option.
-	 *
-	 * @return void
-	 */
-	public function adjust_feature_default_enablement( $option_name, $option_value ) {
-		// First, migrate the WCAdmin feature flag to the new feature flag.
-		// If there is a value saved for the old feature flag, we will respect it.
-		$wc_admin_helper_features = get_option( 'wc_admin_helper_feature_values', array() );
-		foreach ( $wc_admin_helper_features as $feature => $value ) {
-			if ( 'reactify-classic-payments-settings' === $feature ) {
-				update_option( $option_name, filter_var( $value, FILTER_VALIDATE_BOOLEAN ) ? 'yes' : 'no' );
-				return;
-			}
-		}
-
-		// If the feature was added as disabled, don't do anything.
-		// This means that some logic explicitly disabled the feature, by default.
-		if ( ! filter_var( $option_value, FILTER_VALIDATE_BOOLEAN ) ) {
-			return;
-		}
-
-		// Make sure the feature is disabled by default for existing stores.
-		// For our purposes here, on top of NOT being a fresh/blank store,
-		// we believe that an "existing" store needs to have enabled gateways, of any kind.
-		// Otherwise, we consider it's a new store and will let the feature be enabled by default.
-		if ( ! \WC_Install::is_new_install() && $this->store_has_enabled_gateways() ) {
-			update_option( $option_name, 'no' );
-		}
-	}
-
-	/**
-	 * Handle the feature enablement for WooCommerce v9.8.0 and v9.8.1.
-	 *
-	 * @return void
-	 */
-	public function handle_feature_enablement_for_v9_8() {
-		$wc_initial_installed_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION, '0.0.0' );
-		// Sanity check: if we are at the same version as the one we are checking for, we don't need to do anything.
-		if ( WC()->version === $wc_initial_installed_version ) {
-			return;
-		}
-
-		// If the WooCommerce installed version is not 9.8.0 or 9.8.1, we don't need to do anything.
-		if ( version_compare( $wc_initial_installed_version, '9.8.0', '<' ) &&
-			version_compare( $wc_initial_installed_version, '9.8.1', '>' ) ) {
-			return;
-		}
-
-		// If the feature is already enabled, we don't need to do anything.
-		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-			return;
-		}
-
-		// If the feature is not enabled and the store is "empty" or did not enable any gateway yet,
-		// we will one-time force enable it.
-		if ( \WC_Install::is_new_install() || ! $this->store_has_enabled_gateways() ) {
-			wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'reactify-classic-payments-settings', true );
-		}
 	}
 
 	/**
