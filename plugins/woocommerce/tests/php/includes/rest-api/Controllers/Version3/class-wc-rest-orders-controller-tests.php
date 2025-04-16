@@ -436,6 +436,49 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the `created_via` parameter is accepted and does not cause errors.
+	 */
+	public function test_created_via_param_is_accepted() {
+		// Create some orders with different created_via values.
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		// Request orders using the new param.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		// Just assert that the response contains orders (we're not testing filter logic).
+		$this->assertIsArray( $data );
+		$this->assertNotEmpty( $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value.
+	 */
+	public function test_get_orders_by_invalid_created_via() {
+	    // Prepare request with an invalid created_via value.
+	    $request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+	    $request->set_param( 'created_via', array( 'invalid_source' ) );
+
+	    // Execute the request.
+	    $response = rest_do_request( $request );
+	    $this->assertEquals( 200, $response->get_status() );
+
+	    $data = $response->get_data();
+	    $this->assertEmpty( $data );
+	}
+
+	/**
 	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should also be updated.
 	 */
 	public function test_order_update_line_item_quantity_updates_product_stock() {
