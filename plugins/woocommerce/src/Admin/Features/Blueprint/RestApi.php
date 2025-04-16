@@ -58,7 +58,7 @@ class RestApi {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'export' ),
-					'permission_callback' => array( $this, 'check_permission' ),
+					'permission_callback' => array( $this, 'check_export_permission' ),
 					'args'                => array(
 						'steps' => array(
 							'description' => __( 'A list of plugins to install', 'woocommerce' ),
@@ -98,7 +98,7 @@ class RestApi {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'import_step' ),
-					'permission_callback' => array( $this, 'check_permission' ),
+					'permission_callback' => array( $this, 'check_import_permission' ),
 					'args'                => array(
 						'step_definition' => array(
 							'description' => __( 'The step definition to import', 'woocommerce' ),
@@ -113,13 +113,28 @@ class RestApi {
 	}
 
 	/**
-	 * Check if the current user has permission to perform the request.
+	 * General permission check for export requests.
 	 *
 	 * @return bool|\WP_Error
 	 */
-	public function check_permission() {
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+	public function check_export_permission() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot export WooCommerce Blueprints.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * General permission check for import requests.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function check_import_permission() {
+		if (
+			! current_user_can( 'manage_woocommerce' ) ||
+			! current_user_can( 'manage_options' )
+		) {
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot import WooCommerce Blueprints.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
