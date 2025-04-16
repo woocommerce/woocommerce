@@ -315,6 +315,24 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the created_via parameter cannot be updated.
+	 */
+	public function test_created_via_cannot_be_updated() {
+		$order = new \WC_Order();
+		$order->set_created_via( 'original_value' );
+		$order->save();
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'created_via' => 'updated_value' ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'original_value', $data['created_via'] );
+	}
+
+	/**
 	 * Tests deleting an order.
 	 */
 	public function test_orders_delete(): void {
