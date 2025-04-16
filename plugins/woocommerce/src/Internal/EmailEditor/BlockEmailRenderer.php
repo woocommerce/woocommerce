@@ -101,7 +101,7 @@ class BlockEmailRenderer {
 	 */
 	private function render_block_email( \WP_Post $email_post, string $woo_content, \WC_Email $wc_email ): ?string {
 		$subject   = $wc_email->get_subject(); // We will get subject from $email_post after we add it to the editor.
-		$preheader = ''; // We will get the preheader from $email_post after we add it to the editor.
+		$preheader = $wc_email->get_preheader();
 		try {
 			$this->personalizer->set_context( $this->prepare_context_data( $wc_email ) );
 			$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en' );

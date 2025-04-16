@@ -504,6 +504,30 @@ class WC_Email extends WC_Settings_API {
 		return $subject;
 	}
 
+
+
+	/**
+	 * Get email preheader.
+	 *
+	 * @return string
+	 */
+	public function get_preheader() {
+		/**
+		 * Provides an opportunity to inspect and modify preheader for the email.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param string      $preheader Preheader of the email.
+		 * @param object|bool $object  The object (ie, product or order) this email relates to, if any.
+		 * @param WC_Email    $email   WC_Email instance managing the email.
+		 */
+		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader' ) ), $this->object, $this );
+		if ( $this->block_email_editor_enabled ) {
+			$preheader = $this->personalizer->personalize_content( $preheader );
+		}
+		return $preheader;
+	}
+
 	/**
 	 * Get email heading.
 	 *
@@ -816,7 +840,11 @@ class WC_Email extends WC_Settings_API {
 
 					$dom_document = $css_inliner->getDomDocument();
 
-					HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+					// When the email is rendered in the block editor, we don't want to remove the elements with display: none.
+					// The main reason is using preview text in the email body which is hidden by default.
+					if ( ! $this->block_email_editor_enabled ) {
+						HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+					}
 					$content = CssToAttributeConverter::fromDomDocument( $dom_document )
 						->convertCssToVisualAttributes()
 						->render();
