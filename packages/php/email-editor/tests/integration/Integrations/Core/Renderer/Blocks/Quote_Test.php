@@ -126,16 +126,14 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'border-top-right-radius:20px;', $rendered );
 		$this->assertStringContainsString( 'border-top-color:#444444;', $rendered );
 		$this->assertStringContainsString( 'border-top-width:4px;', $rendered );
-		$this->assertStringContainsString( 'border-top-style:solid;', $rendered );
 		$this->assertStringContainsString( 'border-right-color:#333333;', $rendered );
 		$this->assertStringContainsString( 'border-right-width:3px;', $rendered );
-		$this->assertStringContainsString( 'border-right-style:solid;', $rendered );
 		$this->assertStringContainsString( 'border-bottom-color:#111111;', $rendered );
 		$this->assertStringContainsString( 'border-bottom-width:1px;', $rendered );
 		$this->assertStringContainsString( 'border-bottom-style:dotted;', $rendered );
 		$this->assertStringContainsString( 'border-left-color:#222222;', $rendered );
 		$this->assertStringContainsString( 'border-left-width:2px;', $rendered );
-		$this->assertStringContainsString( 'border-left-style:solid;', $rendered );
+		$this->assertStringContainsString( 'border-style:solid;', $rendered );
 		$this->assertStringContainsString( 'padding-bottom:5px;', $rendered );
 		$this->assertStringContainsString( 'padding-left:15px;', $rendered );
 		$this->assertStringContainsString( 'padding-right:20px;', $rendered );

@@ -54,8 +54,6 @@ class Quote extends Abstract_Block_Renderer {
 				'style'           => array(),
 				'backgroundColor' => '',
 				'textColor'       => '',
-				'borderColor'     => '',
-				'layout'          => array(),
 			)
 		);
 
@@ -66,21 +64,21 @@ class Quote extends Abstract_Block_Renderer {
 					array(
 						'background' => $block_attributes['backgroundColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
 						'text'       => $block_attributes['textColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['textColor'] ) : null,
-						'border'     => $block_attributes['borderColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['borderColor'] ) : null,
 					)
 				),
 				'background' => $block_attributes['style']['background'] ?? array(),
-				'border'     => $block_attributes['style']['border'] ?? array(),
 			)
 		)['declarations'];
 
 		$table_styles['border-collapse'] = 'separate'; // Needed for the border radius to work.
 
+		// Add default background size.
+		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
+
 		// Add default border style.
-		foreach ( array( 'top', 'right', 'bottom', 'left' ) as $position ) {
-			if ( isset( $table_styles[ "border-$position-width" ] ) && ! isset( $table_styles[ "border-$position-style" ] ) ) {
-				$table_styles[ "border-$position-style" ] = 'solid';
-			}
+		$border_styles = $this->get_styles_from_block( array( 'border' => $block_attributes['style']['border'] ?? array() ) )['declarations'];
+		if ( ! empty( $border_styles ) ) {
+			$table_styles = array_merge( $table_styles, array( 'border-style' => 'solid' ), $border_styles );
 		}
 
 		// Padding properties need to be added to the table cell.
@@ -89,8 +87,6 @@ class Quote extends Abstract_Block_Renderer {
 				'spacing' => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ),
 			)
 		)['declarations'];
-
-		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
 
 		return sprintf(
 			'<table class="email-block-quote %3$s" style="%1$s" width="100%%" border="0" cellpadding="0" cellspacing="0" role="presentation">
