@@ -138,6 +138,7 @@ runs:
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
           uses: 'google/wireit@setup-github-actions-caching/v2'
+          continue-on-error: true
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
