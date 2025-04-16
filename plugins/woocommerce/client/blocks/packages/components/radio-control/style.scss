@@ -121,7 +121,11 @@
 	display: block;
 	margin: em($gap) 0;
 	margin-top: 0;
-	padding: 0 0 0 em($gap-larger);
+	// padding-left here is aligned with the size of the radio input element,
+	// we need to reserve at least this amount of space for the label to not
+	// overflow the input. Input has position: absolute set, so it doesn't
+	// take any space on its own.
+	padding: 0 calc($gap + em(24px)) 0 em($gap-huge);
 	position: relative;
 	cursor: pointer;
 
@@ -131,7 +135,8 @@
 }
 
 .wc-block-components-radio-control__option-layout {
-	display: table;
+	display: flex;
+	flex-direction: column;
 	width: 100%;
 }
 
@@ -144,16 +149,34 @@
 
 .wc-block-components-radio-control__label-group,
 .wc-block-components-radio-control__description-group {
-	display: table-row;
-
-	> span {
-		display: table-cell;
-	}
+	display: flex;
+	justify-content: space-between;
 
 	.wc-block-components-radio-control__secondary-label,
 	.wc-block-components-radio-control__secondary-description {
 		text-align: right;
-		min-width: 50%;
+		flex-basis: 50%;
+	}
+}
+
+// For column description stacking we need to apply some layout changes.
+// There is no variant handling row stacking as it is applied by default.
+.wc-block-components-radio-control__description-group--column {
+	flex-direction: column;
+
+	// Use balance as this is not a good candidate for pretty. Pretty is
+	// intended  for body copy which this is not.
+	text-wrap: balance;
+
+	.wc-block-components-radio-control__description {
+		margin: $gap-smaller 0;
+	}
+
+	.wc-block-components-radio-control__secondary-description {
+		text-align: left;
+		// Leaves a bit less space causing longer description to wrap nicer on
+		// smaller screens.
+		padding-right: $gap-small;
 	}
 }
 

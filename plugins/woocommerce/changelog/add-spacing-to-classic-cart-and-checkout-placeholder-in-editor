@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adds spacing between Classic Cart and Classic Checkout block buttons in the placeholder rendered in the editor
