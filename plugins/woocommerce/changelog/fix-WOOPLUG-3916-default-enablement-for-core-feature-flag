@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: We fix the default enablement behavior of the new Payments Settings page to properly target all new stores.
+
+
