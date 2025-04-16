@@ -31,6 +31,24 @@ class AddToCartWithOptions extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
+		$this->asset_data_registry->add( 'themeTemplatePartsExist', $this->get_theme_template_parts() );
+	}
+
+	/**
+	 * Get available theme template parts for each product type.
+	 *
+	 * @return array Array of product types with boolean values indicating template part existence.
+	 */
+	protected function get_theme_template_parts() {
+		$product_types = array_keys( wc_get_product_types() );
+
+		$theme_template_parts = array();
+		foreach ( $product_types as $product_type ) {
+			$slug                                  = $product_type . '-product-add-to-cart-with-options';
+			$theme_template_parts[ $product_type ] = BlockTemplateUtils::theme_has_template_part( $slug );
+		}
+
+		return $theme_template_parts;
 	}
 
 	/**
