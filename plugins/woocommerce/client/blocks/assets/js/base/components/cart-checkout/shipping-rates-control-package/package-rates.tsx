@@ -76,6 +76,7 @@ const PackageRates = ( {
 			disabled={ disabled }
 			selected={ selectedOption }
 			options={ rates.map( renderOption ) }
+			descriptionStackingDirection="column"
 		/>
 	);
 };

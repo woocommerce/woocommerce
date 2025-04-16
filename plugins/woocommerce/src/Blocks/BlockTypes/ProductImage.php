@@ -23,33 +23,6 @@ class ProductImage extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get block supports. Shared with the frontend.
-	 * IMPORTANT: If you change anything here, make sure to update the JS file too.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'__experimentalBorder'   =>
-			array(
-				'radius'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                        => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalSelector' => '.wc-block-components-product-image',
-		);
-	}
-
-	/**
 	 * It is necessary to register and enqueues assets during the render phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {

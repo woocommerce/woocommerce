@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix wc admin scripts loading on unrelated WP admin pages

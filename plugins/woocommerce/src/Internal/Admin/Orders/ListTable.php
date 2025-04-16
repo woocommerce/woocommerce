@@ -84,7 +84,7 @@ class ListTable extends WP_List_Table {
 	 * Init method, invoked by DI container.
 	 *
 	 * @internal This method is not intended to be used directly (except for testing).
-	 * @param PageController      $page_controller Page controller instance for this request.
+	 * @param PageController $page_controller Page controller instance for this request.
 	 */
 	final public function init( PageController $page_controller ) {
 		$this->page_controller = $page_controller;
@@ -811,66 +811,82 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$trash_status = esc_sql( OrderStatus::TRASH );
-
-		$first_year_month_gmt = $wpdb->get_row(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$orders_table   = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$min_max_months = $wpdb->get_row(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is escaped above.
 			$wpdb->prepare(
 				"
-					SELECT YEAR( t.date_created_gmt ) AS year,
-					       MONTH( t.date_created_gmt ) AS month
-					FROM $orders_table t
+					SELECT MIN( t.date_created_gmt ) as min_date_gmt,
+					       MAX( t.date_created_gmt ) as max_date_gmt
+					FROM `{$orders_table}` t
 					WHERE type = %s
 					AND status != %s
-					ORDER BY year ASC, month ASC
-					LIMIT 1
 				",
 				$this->order_type,
-				$trash_status
+				OrderStatus::TRASH
 			)
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
-		if ( is_object( $first_year_month_gmt ) ) {
-			$start = new \WC_DateTime(
-				sprintf(
-					'%s-%s-01',
-					$first_year_month_gmt->year,
-					$first_year_month_gmt->month
-				)
-			);
-			$start->setTimezone( wp_timezone() ); // Adjust date and time to reflect site timezone.
-		} else {
-			$start = new \WC_DateTime( 'now', wp_timezone() );
-		}
+		/**
+		 * Normalize "this month" to be the first day of the month in the current timezone of the site.
+		 */
+		$this_month = new \WC_DateTime(
+			'now',
+			new \DateTimeZone( 'UTC' )
+		);
+		$this_month->setTimezone( wp_timezone() );
+		$this_month->setDate( $this_month->format( 'Y' ), $this_month->format( 'm' ), 1 );
+		$this_month->setTime( 0, 0 );
 
-		$end     = new \WC_DateTime( 'now', wp_timezone() );
 		$options = array();
 
-		// If, somehow, the oldest order date is in the future, swap the start and end of the range.
-		if ( $start > $end ) {
-			$end   = $start;
-			$start = new \WC_DateTime( 'now', wp_timezone() );
-		}
+		if ( isset( $min_max_months ) && ! is_null( $min_max_months->min_date_gmt ) ) {
+			$start = new \WC_DateTime(
+				$min_max_months->min_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$start->setTimezone( wp_timezone() );
+			$start->setDate( $start->format( 'Y' ), $start->format( 'm' ), 1 );
+			$start->setTime( 0, 0 );
 
-		while (
-			$start->date( 'Y' ) < $end->date( 'Y' )
-			|| $start->date( 'n' ) < $end->date( 'n' )
-		) {
+			$end = new \WC_DateTime(
+				$min_max_months->max_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$end->setTimezone( wp_timezone() );
+			$end->setDate( $end->format( 'Y' ), $end->format( 'm' ), 1 );
+			$end->setTime( 0, 0 );
+
+			if ( $start > $this_month ) {
+				$start = $this_month;
+			}
+
+			if ( $end < $this_month ) {
+				$end = $this_month;
+			}
+
+			$intervals = new \DatePeriod( $start, new \DateInterval( 'P1M' ), $end );
+
+			foreach ( $intervals as $interval ) {
+				$option        = new \stdClass();
+				$option->year  = $interval->format( 'Y' );
+				$option->month = $interval->format( 'n' );
+				$options[]     = $option;
+			}
+
 			$option        = new \stdClass();
-			$option->year  = $start->date( 'Y' );
-			$option->month = $start->date( 'n' );
+			$option->year  = $end->format( 'Y' );
+			$option->month = $end->format( 'n' );
 			$options[]     = $option;
-
-			$start->add( new \DateInterval( 'P1M' ) );
 		}
 
-		// Add in the current year-month.
-		$option        = new \stdClass();
-		$option->year  = $end->date( 'Y' );
-		$option->month = $end->date( 'n' );
-		$options[]     = $option;
+		if ( count( $options ) < 1 ) {
+			$option        = new \stdClass();
+			$option->year  = $this_month->format( 'Y' );
+			$option->month = $this_month->format( 'n' );
+			$options[]     = $option;
+		}
 
 		return array_reverse( $options );
 	}

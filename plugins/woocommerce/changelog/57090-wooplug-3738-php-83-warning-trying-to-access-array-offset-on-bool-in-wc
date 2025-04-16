@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+`wc_get_gallery_image_html`: prevent errors when retrieving image attributes.

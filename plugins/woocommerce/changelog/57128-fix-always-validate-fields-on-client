@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issue in which client side validation in Checkout didn't work.

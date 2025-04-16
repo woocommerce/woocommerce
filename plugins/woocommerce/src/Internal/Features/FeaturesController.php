@@ -223,7 +223,6 @@ class FeaturesController {
 			$container = wc_get_container();
 			$container->get( CustomOrdersTableController::class )->add_feature_definition( $this );
 			$container->get( CostOfGoodsSoldController::class )->add_feature_definition( $this );
-			$container->get( PaymentsController::class )->adjust_feature_default_enablement_by_experiment( $this );
 
 			$this->init_compatibility_info_by_feature();
 		}
@@ -347,21 +346,7 @@ class FeaturesController {
 				'is_experimental'    => true,
 				'enabled_by_default' => false,
 				'is_legacy'          => true,
-				'disable_ui'         => ! $alpha_feature_testing_is_enabled,
-				'setting'            => array(
-					'disabled' => ! ( $alpha_feature_testing_is_enabled && wp_using_ext_object_cache() ),
-					'desc_tip' => function () {
-						$string = '';
-						if ( ! wp_using_ext_object_cache() ) {
-							$string = __(
-								'⚠ This feature is currently only suggested with the use of external object caching.',
-								'woocommerce'
-							);
-						}
-
-						return $string;
-					},
-				),
+				'disable_ui'         => false,
 				'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
 			'remote_logging'                     => array(
@@ -422,8 +407,8 @@ class FeaturesController {
 						'Enable blueprint to import and export settings in bulk',
 						'woocommerce'
 					),
-					'enabled_by_default' => true,
-					'disable_ui'         => false,
+					'enabled_by_default' => false,
+					'disable_ui'         => true,
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -442,8 +427,16 @@ class FeaturesController {
 					'Enable the new payments settings experience',
 					'woocommerce'
 				),
-				'enabled_by_default' => true,
+				'enabled_by_default' => false,
 				'disable_ui'         => false,
+				'is_experimental'    => false,
+			),
+			'block_email_editor'                 => array(
+				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
+				'description'        => __(
+					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
+					'woocommerce'
+				),
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -454,16 +447,7 @@ class FeaturesController {
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
 				'is_legacy'          => true,
-				'is_experimental'    => false,
-			),
-			'block_email_editor'                 => array(
-				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
-				'description'        => __(
-					'Enable the block-based email editor for transactional emails',
-					'woocommerce'
-				),
 				'enabled_by_default' => false,
-				'disable_ui'         => true,
 			),
 		);
 

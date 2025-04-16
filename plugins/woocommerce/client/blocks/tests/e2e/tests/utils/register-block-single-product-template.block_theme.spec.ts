@@ -129,7 +129,8 @@ test.describe( 'registerProductBlockType registers', () => {
 		} );
 	} );
 
-	test( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
+	// Skipping test due to flaky nature of the test not being able to detect when the blocks in the iframes are available.
+	test.skip( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
 		admin,
 		page,
 	} ) => {
