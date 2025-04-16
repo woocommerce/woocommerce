@@ -4,8 +4,6 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
-use Automattic\WooCommerce\Blueprint\Steps\ActivatePlugin;
-use Automattic\WooCommerce\Blueprint\Steps\ActivateTheme;
 use Automattic\WooCommerce\Blueprint\Steps\RunSql;
 use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
@@ -48,5 +46,37 @@ class ImportRunSql implements StepProcessor {
 	 */
 	public function get_step_class(): string {
 		return RunSql::class;
+	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @param object $schema The schema to process.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities( $schema ): bool {
+		// General check.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		$sql           = $schema->sql->contents;
+		$sql_lowercase = strtolower( trim( $sql ) );
+
+		// Check for specific operations.
+		if ( strpos( $sql_lowercase, 'posts' ) !== false ) {
+			if ( ! current_user_can( 'edit_posts' ) ) {
+				return false;
+			}
+		}
+
+		if ( strpos( $sql_lowercase, 'users' ) !== false ) {
+			if ( ! current_user_can( 'edit_users' ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

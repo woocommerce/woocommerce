@@ -86,7 +86,6 @@ class ImportStep {
 		}
 
 		$importer = $this->indexed_importers[ $this->step_definition->step ];
-
 		// validate importer is a step processor before processing.
 		if ( ! $importer instanceof StepProcessor ) {
 			$result->add_warn( "Importer {$this->step_definition->step} is not a valid step processor" );
@@ -94,13 +93,18 @@ class ImportStep {
 		}
 
 		// validate steps before processing.
-		$this->validate_step_schemas( $importer, $result );
-
-		if ( count( $result->get_messages( 'error' ) ) !== 0 ) {
+		if ( ! $this->validate_step_schemas( $importer, $result ) ) {
 			return $result;
 		}
 
-		$result->merge_messages( $importer->process( $this->step_definition ) );
+		// validate step capabilities before processing.
+		if ( ! $importer->check_step_capabilities( $this->step_definition ) ) {
+			$result->add_error( "User does not have the required capabilities to run {$this->step_definition->step} step" );
+			return $result;
+		}
+
+		$importer_result = $importer->process( $this->step_definition );
+		$result->merge_messages( $importer_result );
 
 		return $result;
 	}
@@ -111,7 +115,7 @@ class ImportStep {
 	 * @param StepProcessor       $importer The importer.
 	 * @param StepProcessorResult $result The result object to add messages to.
 	 *
-	 * @return void
+	 * @return bool True if the step schemas are valid, false otherwise.
 	 */
 	protected function validate_step_schemas( StepProcessor $importer, StepProcessorResult $result ) {
 		$step_schema = call_user_func( array( $importer->get_step_class(), 'get_schema' ) );
@@ -127,6 +131,9 @@ class ImportStep {
 			}
 
 			$result->add_error( implode( "\n", $formatted_errors ) );
+
+			return false;
 		}
+		return true;
 	}
 }
