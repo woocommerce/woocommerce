@@ -45,7 +45,7 @@ interface QueueWithPrioritiesInterface {
 	 * @param int    $priority            Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_recurring_with_priority( int $timestamp, $interval_in_seconds, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_recurring_with_priority( int $timestamp, int $interval_in_seconds, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule an action that recurs on a cron-like schedule.
@@ -58,5 +58,5 @@ interface QueueWithPrioritiesInterface {
 	 * @param int    $priority      Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_cron_with_priority( int $timestamp, $cron_schedule, string $hook, array $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_cron_with_priority( int $timestamp, string $cron_schedule, string $hook, array $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 }
