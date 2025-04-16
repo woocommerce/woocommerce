@@ -82,4 +82,16 @@ export class Admin extends CoreAdmin {
 
 		await Promise.any( [ welcomePopUp(), editorLoaded() ] );
 	}
+
+	/**
+	 * Clicks the 'Save changes' button on an admin page and waits for it to become disabled to ensure the page is saved.
+	 *
+	 * @param this The Admin instance.
+	 */
+	async saveAdminPage() {
+		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
+		await this.page
+			.getByRole( 'button', { name: 'Save changes' } )
+			.isDisabled();
+	}
 }

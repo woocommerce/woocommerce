@@ -364,9 +364,7 @@ test.describe( 'Shopper → Shipping', () => {
 		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
