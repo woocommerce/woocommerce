@@ -97,7 +97,7 @@ class ExportSchema {
 		// Make sure the user has the required capabilities to export the steps.
 		foreach ( $exporters as $exporter ) {
 			if ( ! $exporter->check_step_capabilities() ) {
-				return new \WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export step: ' . $exporter->get_step_name() );
+				return new \WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export for step: ' . $exporter->get_step_name() );
 			}
 		}
 
