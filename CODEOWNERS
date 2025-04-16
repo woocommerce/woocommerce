@@ -18,4 +18,4 @@
 
 # Test code owners for nested directories
 /plugins/woocommerce/ @woocommerce/flux
-/plugins/woocommerce/src/Internal/Admin/ @woocommerce/woo-fse
+/plugins/woocommerce/src/Admin/ @woocommerce/woo-fse
