@@ -1011,6 +1011,58 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test onboarding reset.
+	 */
+	public function test_onboarding_reset() {
+		// Arrange.
+		$from   = 'test-from';
+		$source = 'test-source';
+
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'reset_onboarding' )
+			->with( $from, $source )
+			->willReturn( array( 'success' => true ) );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/reset' );
+		$request->set_param( 'from', $from );
+		$request->set_param( 'source', $source );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'success', $data );
+		$this->assertTrue( $data['success'] );
+	}
+
+	/**
+	 * Test onboarding reset with exception.
+	 */
+	public function test_onboarding_reset_with_exception() {
+		// Arrange.
+		$from   = 'test-from';
+		$source = 'test-source';
+
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'reset_onboarding' )
+			->willThrowException( new \Exception( 'Test exception' ) );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/reset' );
+		$request->set_param( 'from', $from );
+		$request->set_param( 'source', $source );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+	}
+
+	/**
 	 * Mock the onboarding details with the given country code.
 	 *
 	 * @param string $country_code The country code to mock.

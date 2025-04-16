@@ -4765,6 +4765,152 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that reset_onboarding throws an exception when the REST API call fails.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_throws_on_error_response() {
+		// Arrange the REST API requests.
+		$requests_made  = array();
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+							return new WP_Error( $expected_error['code'], $expected_error['message'] );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->reset_onboarding();
+	}
+
+	/**
+	 * Test that reset_onboarding throws an exception when the REST API call doesn't respond properly.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_throws_on_invalid_response() {
+		// Arrange the REST API requests.
+		$requests_made = array();
+		// Not an array.
+		$expected_response = '';
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
+
+		// Act.
+		$this->sut->reset_onboarding();
+	}
+
+	/**
+	 * Test that reset_onboarding throws an exception when the REST API call doesn't succeed.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_throws_on_failure() {
+		// Arrange the REST API requests.
+		$requests_made = array();
+		// Not an array.
+		$expected_response = array( 'success' => false );
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
+
+		// Act.
+		$this->sut->reset_onboarding();
+	}
+
+	/**
+	 * Test reset_onboarding.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding() {
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_payload  = array(
+			'from'   => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+			'source' => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+		);
+		$expected_response = array(
+			'success' => true,
+		);
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->reset_onboarding();
+
+		// Assert.
+		self::assertEquals( $expected_response, $result );
+		self::assertCount( 1, $requests_made );
+		self::assertEquals( $expected_payload, $requests_made[0] );
+	}
+
+	/**
 	 * Get the mock business types for onboarding fields.
 	 *
 	 * @return array[]
