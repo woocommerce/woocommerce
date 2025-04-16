@@ -54,7 +54,7 @@
 		"storybook": "7.6.19",
 		"typescript": "5.7.x",
 		"webpack": "5.97.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"wireit": {
 		"build:storybook": {
