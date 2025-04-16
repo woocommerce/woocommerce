@@ -228,7 +228,7 @@
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-rtl-plugin": "2.0.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.6"
