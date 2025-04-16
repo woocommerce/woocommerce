@@ -293,6 +293,7 @@ jobs:
           name: 'last-run__${{ strategy.job-index }}'
           path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
           if-no-files-found: ignore
+          include-hidden-files: true
           overwrite: true
 
       - name: 'Upload artifacts'

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Enhance IP address retrieval in WC_Geolocation to handle multiple IPs in REMOTE_ADDR
