@@ -148,4 +148,20 @@ class ExportSchemaTest extends TestCase {
 		$this->assertCount( 1, $result['steps'] );
 		$this->assertEquals( 'setSiteOptions', $result['steps'][0]['step'] );
 	}
+
+	/**
+	 * Test that it returns a WP_Error when the exporter is not capable.
+	 */
+	public function test_it_returns_wp_error_when_exporter_is_not_capable() {
+		$exporter = Mockery::mock( EmptySetSiteOptionsExporter::class );
+		$exporter->makePartial();
+		$exporter->shouldReceive( 'check_step_capabilities' )
+			->andReturn( false );
+
+		$mock = Mock( ExportSchema::class, array( array( $exporter ) ) );
+		$mock->makePartial();
+
+		$result = $mock->export();
+		$this->assertInstanceOf( WP_Error::class, $result );
+	}
 }
