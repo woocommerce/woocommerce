@@ -73,7 +73,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 		'themeTemplatePartsExist',
 		{}
 	) as Record< string, boolean >;
- 
+
 	const { templatePartId } = useSelect(
 		( select ) => {
 			const { getCurrentTheme } = select( coreStore );
