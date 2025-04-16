@@ -521,7 +521,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param object|bool $object  The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email    $email   WC_Email instance managing the email.
 		 */
-		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader' ) ), $this->object, $this );
+		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
 			$preheader = $this->personalizer->personalize_content( $preheader );
 		}

@@ -78,6 +78,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		$wc_mail_mock->id = 'test_email';
 		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
 		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Test Woo Preheader' );
 		$wc_mail_mock->method( 'get_content_html' )->willReturn( $test_woo_content );
 		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( $test_woo_content );
 
