@@ -126,10 +126,16 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 		scrollContainer.scrollTop +
 		( thumbnailRect.top - containerRect.top ) -
 		( containerRect.height - thumbnailRect.height ) / 2;
+	const scrollLeft =
+		scrollContainer.scrollLeft +
+		( thumbnailRect.left - containerRect.left ) -
+		( containerRect.width - thumbnailRect.width ) / 2;
 
-	// Use scrollTo to avoid scrolling the entire page
+	// Use scrollTo to avoid scrolling the entire page which
+	// happesn with scrollIntoView.
 	scrollContainer.scrollTo( {
 		top: scrollTop,
+		left: scrollLeft,
 		behavior: 'smooth',
 	} );
 };
