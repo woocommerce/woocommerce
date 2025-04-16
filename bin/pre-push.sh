@@ -55,7 +55,7 @@ if [ -n "$changedFiles" ]; then
 			echo "[ERR] (aborting, please run manually to troubleshoot)"
 			exit 1
 		fi
-		echo "[OK ($duration sec.)]"
+		echo "($duration sec.) [OK]"
 		iteration=$(expr $iteration + 1)
 	done < <(echo $lintingJobs | jq --compact-output '.[]')
 fi
