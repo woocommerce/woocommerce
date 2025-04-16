@@ -59,7 +59,7 @@
 		"ts-jest": "29.1.x",
 		"lib0": "0.2.x",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.6",
