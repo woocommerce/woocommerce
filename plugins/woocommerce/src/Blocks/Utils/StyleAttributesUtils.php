@@ -24,7 +24,7 @@ class StyleAttributesUtils {
 	 * @return (string)
 	 */
 	public static function get_color_value( $color_value ) {
-		if ( is_string( $color_value ) && str_contains( $color_value, 'var:preset|color|' ) ) {
+		if ( is_string( $color_value ) && strpos( $color_value, 'var:preset|color|' ) !== false ) {
 			$color_value = str_replace( 'var:preset|color|', '', $color_value );
 			return sprintf( 'var(--wp--preset--color--%s)', $color_value );
 		}
@@ -51,7 +51,7 @@ class StyleAttributesUtils {
 	 * @return string CSS value for shadow preset.
 	 */
 	public static function get_shadow_value( $shadow_name ) {
-		if ( is_string( $shadow_name ) && str_contains( $shadow_name, 'var:preset|shadow|' ) ) {
+		if ( is_string( $shadow_name ) && strpos( $shadow_name, 'var:preset|shadow|' ) !== false ) {
 			$shadow_name = str_replace( 'var:preset|shadow|', '', $shadow_name );
 			return "var(--wp--preset--shadow--{$shadow_name})";
 		}
@@ -71,7 +71,7 @@ class StyleAttributesUtils {
 	 */
 	public static function get_spacing_value( $spacing_value ) {
 		// Used following code as reference: https://github.com/WordPress/gutenberg/blob/cff6d70d6ff5a26e212958623dc3130569f95685/lib/block-supports/layout.php/#L219-L225.
-		if ( is_string( $spacing_value ) && str_contains( $spacing_value, 'var:preset|spacing|' ) ) {
+		if ( is_string( $spacing_value ) && strpos( $spacing_value, 'var:preset|spacing|' ) !== false ) {
 			$spacing_value = str_replace( 'var:preset|spacing|', '', $spacing_value );
 			return sprintf( 'var(--wp--preset--spacing--%s)', $spacing_value );
 		}
