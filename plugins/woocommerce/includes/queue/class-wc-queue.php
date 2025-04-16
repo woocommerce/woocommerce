@@ -39,7 +39,7 @@ class WC_Queue {
 	/**
 	 * Single instance of WC_Queue_Interface
 	 *
-	 * @return static|WC_Queue_Interface
+	 * @return WC_Queue_Interface|WC_Action_Queue
 	 */
 	final public static function instance() {
 		if ( is_null( self::$instance ) ) {
