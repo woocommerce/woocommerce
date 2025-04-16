@@ -74,7 +74,6 @@ class ExportSchema {
 		 * @since 0.0.1
 		 */
 		$exporters = $this->wp_apply_filters( 'wooblueprint_exporters', array_merge( $this->exporters, $built_in_exporters ) );
-
 		// Validate that the exporters are instances of StepExporter.
 		$exporters = array_filter(
 			$exporters,
@@ -97,7 +96,7 @@ class ExportSchema {
 		// Make sure the user has the required capabilities to export the steps.
 		foreach ( $exporters as $exporter ) {
 			if ( ! $exporter->check_step_capabilities() ) {
-				return new \WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export for step: ' . $exporter->get_step_name() );
+				return new WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export for step: ' . $exporter->get_step_name() );
 			}
 		}
 
