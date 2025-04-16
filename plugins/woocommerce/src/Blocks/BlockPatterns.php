@@ -120,7 +120,8 @@ class BlockPatterns {
 			 * If we encounter a pattern with an absolute path (containing $patterns_path),
 			 * we keep it as is. Otherwise, we construct the full path from the relative source.
 			 */
-			$pattern_path = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
+			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
+			$pattern['source'] = $pattern_path;
 
 			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern, $this->get_patterns_dictionary() );
 		}
