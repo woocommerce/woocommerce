@@ -223,7 +223,6 @@ class FeaturesController {
 			$container = wc_get_container();
 			$container->get( CustomOrdersTableController::class )->add_feature_definition( $this );
 			$container->get( CostOfGoodsSoldController::class )->add_feature_definition( $this );
-			$container->get( PaymentsController::class )->adjust_feature_default_enablement_by_experiment( $this );
 
 			$this->init_compatibility_info_by_feature();
 		}
@@ -442,7 +441,7 @@ class FeaturesController {
 					'Enable the new payments settings experience',
 					'woocommerce'
 				),
-				'enabled_by_default' => true,
+				'enabled_by_default' => false,
 				'disable_ui'         => false,
 
 				/*
