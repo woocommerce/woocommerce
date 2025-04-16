@@ -211,7 +211,7 @@ class WC_Meta_Box_Order_Data {
 		</style>
 		<div class="panel-wrap woocommerce">
 			<input name="post_title" type="hidden" value="<?php echo esc_attr( empty( $order->get_title() ) ? __( 'Order', 'woocommerce' ) : $order->get_title() ); ?>" />
-			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
+			<input name="post_status" type="hidden" value="wc-<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel woocommerce-order-data">
 				<h2 class="woocommerce-order-data__heading">
 					<?php
