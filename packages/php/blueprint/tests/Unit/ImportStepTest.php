@@ -2,14 +2,14 @@
 
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Importers\DummyImporter;
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Steps\DummyStep;
-use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\Blueprint\ImportStep;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
+use WP_UnitTestCase;
 
 /**
  * Class ImportStepTest
  */
-class ImportStepTest extends TestCase {
+class ImportStepTest extends WP_UnitTestCase {
 
 	/**
 	 * Tear down Mockery after each test.
@@ -107,5 +107,22 @@ class ImportStepTest extends TestCase {
 		$result   = $importer->import();
 		$this->assertNotEmpty( $result->get_messages( 'error' ) );
 		$this->assertEquals( 'Schema validation failed for step dummy', $result->get_messages( 'error' )[0]['message'] );
+	}
+
+	/**
+	 * Test it returns error when step capabilities are not valid.
+	 *
+	 * @return void
+	 */
+	public function test_it_returns_error_when_step_capabilities_are_not_valid() {
+		// create a user with editor role using wp native function.
+		$user_id = $this->factory->user->create( array( 'role' => 'editor' ) );
+
+		wp_set_current_user( $user_id );
+
+		$importer = new ImportStep( (object) array( 'step' => 'setSiteOptions' ) );
+		$result   = $importer->import();
+		$this->assertNotEmpty( $result->get_messages( 'error' ) );
+		$this->assertEquals( 'User does not have the required capabilities to run setSiteOptions step', $result->get_messages( 'error' )[0]['message'] );
 	}
 }
