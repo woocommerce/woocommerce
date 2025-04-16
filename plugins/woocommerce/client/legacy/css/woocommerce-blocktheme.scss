@@ -438,6 +438,10 @@ a.added_to_cart {
 	}
 
 	.woocommerce-orders-table__cell.woocommerce-orders-table__cell-order-actions {
+		&::before {
+			display: none;
+		}
+
 		a {
 			display: block;
 			margin-bottom: 1em;

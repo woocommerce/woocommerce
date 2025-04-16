@@ -747,7 +747,7 @@
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10",
+		"wireit": "0.14.12",
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {
