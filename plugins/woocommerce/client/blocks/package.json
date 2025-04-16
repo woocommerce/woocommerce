@@ -248,7 +248,7 @@
 		"webpack": "5.97.x",
 		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "5.1.x",
-		"wireit": "0.14.10",
+		"wireit": "0.14.12",
 		"wordpress-data-wp-6-7": "npm:@wordpress/data@wp-6.7",
 		"wp-types": "3.63.0"
 	},

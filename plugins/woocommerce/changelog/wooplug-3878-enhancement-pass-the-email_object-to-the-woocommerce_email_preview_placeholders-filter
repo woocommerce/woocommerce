@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add $email_object to the woocommerce_email_preview_placeholders filter
