@@ -20,7 +20,7 @@ interface QueueWithPrioritiesInterface {
 	 * @param int    $priority Action priority.
 	 * @return string The action ID
 	 */
-	public function add_with_priority( $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function add_with_priority( string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule an action to run once at some time in the future
@@ -32,7 +32,7 @@ interface QueueWithPrioritiesInterface {
 	 * @param int    $priority  Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_single_with_priority( int $timestamp, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule a recurring action
@@ -45,7 +45,7 @@ interface QueueWithPrioritiesInterface {
 	 * @param int    $priority            Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_recurring_with_priority( int $timestamp, $interval_in_seconds, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 
 	/**
 	 * Schedule an action that recurs on a cron-like schedule.
@@ -58,5 +58,5 @@ interface QueueWithPrioritiesInterface {
 	 * @param int    $priority      Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, array $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
+	public function schedule_cron_with_priority( int $timestamp, $cron_schedule, string $hook, array $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL );
 }

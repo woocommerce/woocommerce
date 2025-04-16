@@ -32,7 +32,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @return string The action ID.
 	 */
 	public function add( $hook, $args = array(), $group = '' ) {
-		return $this->add_with_priority( $hook, $args, (string) $group );
+		return $this->add_with_priority( (string) $hook, $args, (string) $group );
 	}
 
 	/**
@@ -44,7 +44,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @param int    $priority Action priority.
 	 * @return string The action ID
 	 */
-	public function add_with_priority( $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
+	public function add_with_priority( string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
 		return $this->schedule_single_with_priority( time(), $hook, $args, $group, $priority );
 	}
 
@@ -58,7 +58,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @return string The action ID.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
-		return $this->schedule_single_with_priority( $timestamp, $hook, $args, (string) $group );
+		return $this->schedule_single_with_priority( (int) $timestamp, (string) $hook, $args, (string) $group );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @param int    $priority  Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
+	public function schedule_single_with_priority( int $timestamp, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
 		return as_schedule_single_action( $timestamp, $hook, $args, $group, false, $priority );
 	}
 
@@ -86,7 +86,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @return string The action ID.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
-		return $this->schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args, (string) $group );
+		return $this->schedule_recurring_with_priority( (int) $timestamp, $interval_in_seconds, (string) $hook, $args, (string) $group );
 	}
 
 	/**
@@ -100,7 +100,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @param int    $priority            Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
+	public function schedule_recurring_with_priority( int $timestamp, $interval_in_seconds, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
 		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, false, $priority );
 	}
 
@@ -125,7 +125,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @return string The action ID
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
-		return $this->schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, $args, (string) $group );
+		return $this->schedule_cron_with_priority( (int) $timestamp, $cron_schedule, (string) $hook, $args, (string) $group );
 	}
 
 	/**
@@ -139,7 +139,7 @@ class WC_Action_Queue implements QueueFifoInterface, QueueWithPrioritiesInterfac
 	 * @param int    $priority      Action priority.
 	 * @return string The action ID
 	 */
-	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
+	public function schedule_cron_with_priority( int $timestamp, $cron_schedule, string $hook, $args = array(), string $group = '', int $priority = ActionQueuePriority::NORMAL ) {
 		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, false, $priority );
 	}
 
