@@ -50,6 +50,7 @@ const Blueprint = () => {
 	);
 
 	const exportBlueprint = async ( _steps ) => {
+		setError( null );
 		setExportEnabled( false );
 
 		const linkContainer = document.getElementById(
