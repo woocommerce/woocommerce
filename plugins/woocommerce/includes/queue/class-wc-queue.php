@@ -34,12 +34,12 @@ class WC_Queue {
 	 *
 	 * @var class-string<WC_Queue_Interface>
 	 */
-	protected static $default_cass = DefaultQueueWithPriorities::class;
+	protected static $default_cass = WC_Action_Queue::class;
 
 	/**
 	 * Single instance of WC_Queue_Interface
 	 *
-	 * @return QueueProxy
+	 * @return static|WC_Queue_Interface
 	 */
 	final public static function instance() {
 		if ( is_null( self::$instance ) ) {
@@ -47,8 +47,7 @@ class WC_Queue {
 			self::$instance = new $class();
 			self::$instance = self::validate_instance( self::$instance );
 		}
-
-		return new QueueProxy( self::$instance );
+		return self::$instance;
 	}
 
 	/**
