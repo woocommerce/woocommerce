@@ -94,7 +94,7 @@
 		"typescript": "5.7.x",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"publishConfig": {
 		"access": "public"
