@@ -18,6 +18,9 @@ export interface RadioControlProps {
 	disabled?: boolean;
 	// Should the selected option be highlighted with a border?
 	highlightChecked?: boolean;
+	// How the description should stack, follows the same naming as flex layout,
+	// so column means vertical stacking, and row means horizontal stacking.
+	descriptionStackingDirection?: 'column' | 'row';
 }
 
 export interface RadioControlOptionProps {
@@ -28,6 +31,7 @@ export interface RadioControlOptionProps {
 	disabled?: boolean;
 	// Should the selected option be highlighted with a border?
 	highlightChecked?: boolean;
+	descriptionStackingDirection: 'column' | 'row';
 }
 
 interface RadioControlOptionContent {
@@ -45,4 +49,5 @@ export interface RadioControlOption extends RadioControlOptionContent {
 
 export interface RadioControlOptionLayout extends RadioControlOptionContent {
 	id?: string;
+	descriptionStackingDirection: 'column' | 'row';
 }
