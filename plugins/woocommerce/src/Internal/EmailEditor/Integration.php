@@ -218,53 +218,26 @@ class Integration {
 	 */
 	private function update_email_preview_data( $data, string $email_type ) {
 		$default_type_param = 'WC_Email_Customer_Processing_Order';
-		$email_preview      = wc_get_container()->get( EmailPreview::class );
+		$type_param         = $default_type_param;
 
-		// Transform snake case email type to WC class name format if provided.
 		if ( ! empty( $email_type ) ) {
 			$type_param = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_type ) ) );
-		} else {
-			$type_param = $default_type_param;
 		}
+
+		$email_preview = wc_get_container()->get( EmailPreview::class );
 
 		try {
-			$email_preview->set_email_type( $type_param );
+			$message = $email_preview->generate_placeholder_content( $type_param );
 		} catch ( \InvalidArgumentException $e ) {
-			$email_preview->set_email_type( $default_type_param );
-		}
-
-		/**
-		 * Woo content processor service.
-		 *
-		 * @var WooContentProcessor $woo_content_processor - service for processing Woo content.
-		 */
-		$woo_content_processor = wc_get_container()->get( WooContentProcessor::class );
-
-		$generate_placeholder_content = function () use ( $email_preview, $woo_content_processor ) {
-			add_filter( 'woocommerce_email_styles', array( $woo_content_processor, 'prepare_css' ), 10, 2 );
-			$content = $woo_content_processor->get_woo_content( $email_preview->get_email() );
-			$content = $email_preview->get_email()->style_inline( $content );
-			$content = $email_preview->ensure_links_open_in_new_tab( $content );
-			return $content;
-		};
-
-		$email_preview->set_up_filters();
-
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$message = $generate_placeholder_content();
-		} else {
-			// Start output buffering to prevent partial renders with PHP notices or warnings.
-			ob_start();
+			// If the provided type was invalid, fall back to the default.
 			try {
-				$message = $generate_placeholder_content();
-			} catch ( Throwable $e ) {
-				ob_end_clean();
-				wp_die( esc_html__( 'There was an error rendering the email editor placeholder content.', 'woocommerce' ), 404 );
+				$message = $email_preview->generate_placeholder_content( $default_type_param );
+			} catch ( \Throwable $e ) {
+				return $data;
 			}
-			ob_end_clean();
+		} catch ( \Throwable $e ) {
+			return $data;
 		}
-
-		$email_preview->clean_up_filters();
 
 		return str_replace( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER, $message, $data );
 	}
