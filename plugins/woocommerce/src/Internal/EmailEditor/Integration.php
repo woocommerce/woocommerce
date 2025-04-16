@@ -99,8 +99,8 @@ class Integration {
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
 		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
-		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_email_preview_data' ) );
-		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_email_preview_data' ), 100, 1 );
+		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
+		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 	}
 
 	/**
@@ -212,24 +212,21 @@ class Integration {
 	 * generates the email content using the WooContentProcessor, and replaces
 	 * the placeholder in the preview HTML.
 	 *
-	 * @param array|string $data The preview data. If an array, it contains the 'html' key.
-	 * @return array|string The updated preview data with placeholders replaced.
+	 * @param string $data       The preview data.
+	 * @param string $email_type The email type identifier (e.g., 'customer_processing_order').
+	 * @return string The updated preview data with placeholders replaced.
 	 */
-	public function update_email_preview_data( $data ) {
-		// Nonce verification is disabled here because the preview action doesn't modify data,
-		// and the check caused issues with the 'Preview in new tab' feature due to context changes.
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	private function update_email_preview_data( $data, string $email_type ) {
 		$default_type_param = 'WC_Email_Customer_Processing_Order';
 		$email_preview      = wc_get_container()->get( EmailPreview::class );
 
-		if ( isset( $_GET['woo_email'] ) ) {
-			$type_param = sanitize_text_field( wp_unslash( $_GET['woo_email'] ) );
-			// Transform snake case email type to WC class name format.
-			$type_param = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $type_param ) ) );
+		// Transform snake case email type to WC class name format if provided.
+		if ( ! empty( $email_type ) ) {
+			$type_param = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_type ) ) );
 		} else {
 			$type_param = $default_type_param;
 		}
-		// phpcs:enable
+
 		try {
 			$email_preview->set_email_type( $type_param );
 		} catch ( \InvalidArgumentException $e ) {
@@ -269,10 +266,47 @@ class Integration {
 
 		$email_preview->clean_up_filters();
 
-		if ( is_array( $data ) && isset( $data['html'] ) ) {
-			$data['html'] = str_replace( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER, $message, $data['html'] );
-		}
+		return str_replace( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER, $message, $data );
+	}
 
+	/**
+	 * Filter email preview data used when sending a preview email.
+	 *
+	 * @param string $data The preview data.
+	 * @return string The updated preview data with placeholders replaced.
+	 */
+	public function update_send_preview_email_rendered_data( $data ) {
+		$email_type = '';
+		$post_body  = file_get_contents( 'php://input' );
+
+		if ( $post_body ) {
+			$decoded_body = json_decode( $post_body );
+
+			if ( json_last_error() === JSON_ERROR_NONE && isset( $decoded_body->postId ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$post_id = absint( $decoded_body->postId ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$post    = get_post( $post_id );
+
+				if ( $post instanceof \WP_Post ) {
+					$email_type = $post->post_name;
+					return $this->update_email_preview_data( $data, $email_type );
+				}
+			}
+		}
 		return $data;
+	}
+
+	/**
+	 * Filter email preview data used when previewing the email in new tab.
+	 *
+	 * @param string $data The preview HTML string.
+	 * @return string The updated preview HTML with placeholders replaced.
+	 */
+	public function update_preview_post_template_html_data( $data ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// Nonce verification is disabled here because the preview action doesn't modify data,
+		// and the check caused issues with the 'Preview in new tab' feature due to context changes.
+		$type_param = isset( $_GET['woo_email'] ) ? sanitize_text_field( wp_unslash( $_GET['woo_email'] ) ) : '';
+		// phpcs:enable
+		return $this->update_email_preview_data( $data, $type_param );
 	}
 }
