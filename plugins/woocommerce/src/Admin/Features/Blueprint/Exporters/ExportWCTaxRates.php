@@ -81,4 +81,13 @@ class ExportWCTaxRates implements StepExporter, HasAlias {
 	public function get_alias(): string {
 		return 'setWCTaxRates';
 	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities(): bool {
+		return current_user_can( 'manage_woocommerce' );
+	}
 }
