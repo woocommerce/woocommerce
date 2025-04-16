@@ -13,7 +13,6 @@ use ActionScheduler_QueueRunner;
 use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
-use Automattic\WooCommerce\Enums\ActionQueuePriority;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Plugin_Upgrader;
@@ -435,13 +434,7 @@ class PluginsHelper {
 		}
 
 		$job_id = uniqid();
-		WC()->queue()->schedule_single(
-			time() + 5,
-			'woocommerce_plugins_install_callback',
-			array( $plugins ),
-			'',
-			ActionQueuePriority::URGENT
-		);
+		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_install_callback', array( $plugins ) );
 
 		return $job_id;
 	}
@@ -552,9 +545,7 @@ class PluginsHelper {
 		WC()->queue()->schedule_single(
 			time() + 5,
 			'woocommerce_plugins_activate_callback',
-			array( $plugins, $job_id ),
-			'',
-			ActionQueuePriority::URGENT
+			array( $plugins, $job_id )
 		);
 
 		return $job_id;

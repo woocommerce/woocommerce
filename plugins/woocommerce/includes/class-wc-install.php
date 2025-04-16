@@ -8,7 +8,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
-use Automattic\WooCommerce\Enums\ActionQueuePriority;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
@@ -462,8 +461,7 @@ class WC_Install {
 				array(
 					'update_callback' => $callback,
 				),
-				'woocommerce-db-updates',
-				ActionQueuePriority::URGENT
+				'woocommerce-db-updates'
 			);
 		}
 	}
@@ -806,8 +804,7 @@ class WC_Install {
 						array(
 							'update_callback' => $update_callback,
 						),
-						'woocommerce-db-updates',
-						ActionQueuePriority::URGENT
+						'woocommerce-db-updates'
 					);
 					++$loop;
 				}
@@ -820,19 +817,16 @@ class WC_Install {
 		}
 
 		// After the callbacks finish, update the db version to the current WC version.
-		if ( version_compare( $current_db_version, $current_wc_version, '<' ) ) {
-			$queue = WC()->queue();
-			if ( ! $queue->get_next( 'woocommerce_update_db_to_current_version' ) ) {
-				$queue->schedule_single(
-					$scheduled_time + $loop,
-					'woocommerce_update_db_to_current_version',
-					array(
-						'version' => $current_wc_version,
-					),
-					'woocommerce-db-updates',
-					ActionQueuePriority::URGENT
-				);
-			}
+		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
+			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
+			WC()->queue()->schedule_single(
+				$scheduled_time + $loop,
+				'woocommerce_update_db_to_current_version',
+				array(
+					'version' => $current_wc_version,
+				),
+				'woocommerce-db-updates'
+			);
 		}
 
 		wc_get_logger()->info( 'Database updates scheduled.', array( 'source' => 'wc-updater' ) );

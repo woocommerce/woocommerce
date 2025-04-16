@@ -8,8 +8,6 @@
  * @since   3.6.0
  */
 
-use Automattic\WooCommerce\Enums\ActionQueuePriority;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -199,16 +197,10 @@ class WC_Marketplace_Suggestions {
 
 		// If the options have never been updated, or were updated over a week ago, queue update.
 		if ( empty( $data['updated'] ) || ( time() - WEEK_IN_SECONDS ) > $data['updated'] ) {
-			$queue = WC()->queue();
-			$next  = $queue->get_next( 'woocommerce_update_marketplace_suggestions' );
+			$next = WC()->queue()->get_next( 'woocommerce_update_marketplace_suggestions' );
 			if ( ! $next ) {
-				$queue->cancel_all( 'woocommerce_update_marketplace_suggestions' );
-				$queue->add(
-					'woocommerce_update_marketplace_suggestions',
-					array(),
-					'',
-					empty( $data['updated'] ) ? ActionQueuePriority::URGENT : ActionQueuePriority::HIGH
-				);
+				WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+				WC()->queue()->schedule_single( time(), 'woocommerce_update_marketplace_suggestions' );
 			}
 		}
 
