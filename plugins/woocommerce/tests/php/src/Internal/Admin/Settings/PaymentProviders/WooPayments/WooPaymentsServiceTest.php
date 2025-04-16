@@ -4357,7 +4357,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_get_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return new WP_Error( $expected_error['code'], $expected_error['message'] );
@@ -4391,7 +4391,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_get_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -4471,7 +4471,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_get_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -4558,7 +4558,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_get_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
