@@ -212,15 +212,15 @@ class RestApi {
 	private function steps_payload_to_blueprint_steps( $steps ) {
 		$blueprint_steps = array();
 
-		if ( isset( $steps['settings'] ) ) {
+		if ( isset( $steps['settings'] ) && count( $steps['settings'] ) > 0 ) {
 			$blueprint_steps = array_merge( $blueprint_steps, $steps['settings'] );
 		}
 
-		if ( isset( $steps['plugins'] ) ) {
+		if ( isset( $steps['plugins'] ) && count( $steps['plugins'] ) > 0 ) {
 			$blueprint_steps[] = 'installPlugin';
 		}
 
-		if ( isset( $steps['themes'] ) ) {
+		if ( isset( $steps['themes'] ) && count( $steps['themes'] ) > 0 ) {
 			$blueprint_steps[] = 'installTheme';
 		}
 
