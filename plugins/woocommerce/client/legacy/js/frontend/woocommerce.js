@@ -196,10 +196,10 @@ jQuery( function ( $ ) {
  * This is necessary because the link has the role="button" attribute
  * and needs to act like a button.
  */
-function on_keydown_remove_from_cart( e ) {
-	if ( e.key === ' ' ) {
-		e.preventDefault();
-		e.currentTarget.click();
+function on_keydown_remove_from_cart( event ) {
+	if ( event.key === ' ' ) {
+		event.preventDefault();
+		event.currentTarget.click();
 	}
 }
 
