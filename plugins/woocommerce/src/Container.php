@@ -176,7 +176,6 @@ final class Container {
 			AdminSuggestionsServiceProvider::class,
 			EmailEditorServiceProvider::class,
 			ProductFiltersServiceProvider::class,
-			BackgroundSchedulerServiceProvider::class,
 		);
 	}
 }

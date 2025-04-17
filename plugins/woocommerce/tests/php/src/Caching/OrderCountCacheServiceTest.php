@@ -135,4 +135,12 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $initial_count[ OrderInternalStatus::COMPLETED ], $count[ OrderInternalStatus::COMPLETED ] );
 		$this->assertEquals( $initial_count[ OrderInternalStatus::CANCELLED ] + 1, $count[ OrderInternalStatus::CANCELLED ] );
 	}
+
+	/**
+	 * Test that background actions are scheduled.
+	 */
+	public function test_background_actions_scheduled() {
+		$this->order_cache->schedule_background_actions();
+		$this->assertTrue( as_has_scheduled_action( 'woocommerce_refresh_order_count_cache' ) );
+	}
 }
