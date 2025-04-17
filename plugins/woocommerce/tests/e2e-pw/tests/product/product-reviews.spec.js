@@ -313,9 +313,9 @@ test.describe( 'Product Reviews', () => {
 			await reviewRow.hover();
 
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
-			await expect(
-				page.locator( '.trash-undo-inside' )
-			).toContainText( `Comment by ${ review.reviewer } moved to the Trash` );
+			await expect( page.locator( '.trash-undo-inside' ) ).toContainText(
+				`Comment by ${ review.reviewer } moved to the Trash`
+			);
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
 			await expect(
@@ -324,9 +324,9 @@ test.describe( 'Product Reviews', () => {
 
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
 
-			await expect(
-				page.locator( '.trash-undo-inside' )
-			).toContainText( `Comment by ${ review.reviewer } moved to the Trash` );
+			await expect( page.locator( '.trash-undo-inside' ) ).toContainText(
+				`Comment by ${ review.reviewer } moved to the Trash`
+			);
 
 			await page.click( 'a[href*="comment_status=trash"]' );
 
