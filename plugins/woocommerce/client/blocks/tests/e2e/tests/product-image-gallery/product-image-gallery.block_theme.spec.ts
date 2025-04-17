@@ -18,7 +18,7 @@ const blockData = {
 test.use( { ...devices[ 'Pixel 7' ] } );
 
 test.describe( `${ blockData.name }`, () => {
-	test( 'should not switch to the next image when the user has focused on the rating or tabs', async ( {
+	test( 'should not switch to the next image when the user cursor is focused on the rating', async ( {
 		page,
 	} ) => {
 		await page.goto( blockData.productPage );
@@ -43,7 +43,7 @@ test.describe( `${ blockData.name }`, () => {
 		);
 	} );
 
-	test( 'should switch to the next image when the user has focused on tabs but it is on mobile', async ( {
+	test( 'should switch to the next image when the user cursor is focused on tabs', async ( {
 		page,
 	} ) => {
 		await page.goto( blockData.productPage );
