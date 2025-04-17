@@ -55,9 +55,9 @@ const renderShippingRatesControlOption = (
 	return {
 		label: decodeEntities( option.name ),
 		value: option.rate_id,
-		description: decodeEntities( option.description ),
+		description: decodeEntities( option.delivery_time ),
 		secondaryLabel,
-		secondaryDescription: decodeEntities( option.delivery_time ),
+		secondaryDescription: decodeEntities( option.description ),
 	};
 };
 
