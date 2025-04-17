@@ -4,6 +4,8 @@
  * @package WooCommerce\Tests\Queue
  */
 
+use Automattic\WooCommerce\Enums\ActionQueuePriority;
+
 /**
  * WC_Tests_Discounts.
  */
@@ -12,7 +14,7 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 	/**
 	 * Test scheduling and retrieving actions.
 	 */
-	public function test_schedule_and_get_actions() {
+	public function test_schedule_and_get_actions(): void {
 		$queue = WC_Queue::instance();
 
 		// Set up action arguments.
@@ -122,5 +124,34 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 		// Test wildcard search.
 		$action_ids = $queue->search( array( 'search' => $unique_hash ), 'ids' );
 		$this->assertEquals( count( $action_ids ), 3 );
+	}
+
+	/**
+	 * Test new APIs with priority support.
+	 */
+	public function test_api_with_priority_support(): void
+	{
+		$group_id = uniqid( '', true );
+		$hook     = 'api_with_priority_support_hook';
+		$queue    = WC_Queue::instance();
+
+		$queue->add_with_priority( $hook, array(), $group_id, ActionQueuePriority::URGENT );
+		$queue->schedule_single_with_priority( time(), $hook, array(), $group_id, ActionQueuePriority::HIGH );
+		$queue->schedule_recurring_with_priority( time(), 1, $hook, array(), $group_id, ActionQueuePriority::NORMAL );
+		$queue->schedule_cron_with_priority( time(), '* * * * *', $hook, array(), $group_id, ActionQueuePriority::LOW );
+
+		$actions = $queue->search(
+			array(
+				'hook'    => $hook,
+				'group'   => $group_id,
+				'orderby' => 'action_id'
+			)
+		);
+
+		$this->assertCount( 4, $actions );
+		$this->assertSame(
+			[ ActionQueuePriority::URGENT, ActionQueuePriority::HIGH, ActionQueuePriority::NORMAL, ActionQueuePriority::LOW ],
+			array_map( fn ( ActionScheduler_Action $action) => $action->get_priority(), array_values( $actions ) )
+		);
 	}
 }
