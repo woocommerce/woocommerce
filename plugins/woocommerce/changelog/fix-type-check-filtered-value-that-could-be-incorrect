@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add type safety check to render_block callback.
