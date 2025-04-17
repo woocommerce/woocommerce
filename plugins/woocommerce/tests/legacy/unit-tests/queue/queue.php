@@ -129,8 +129,7 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 	/**
 	 * Test new APIs with priority support.
 	 */
-	public function test_api_with_priority_support(): void
-	{
+	public function test_api_with_priority_support(): void {
 		$group_id = uniqid( '', true );
 		$hook     = 'api_with_priority_support_hook';
 		$queue    = WC_Queue::instance();
@@ -150,7 +149,7 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 
 		$this->assertCount( 4, $actions );
 		$this->assertSame(
-			[ ActionQueuePriority::URGENT, ActionQueuePriority::HIGH, ActionQueuePriority::NORMAL, ActionQueuePriority::LOW ],
+			array( ActionQueuePriority::URGENT, ActionQueuePriority::HIGH, ActionQueuePriority::NORMAL, ActionQueuePriority::LOW ),
 			array_map( fn( ActionScheduler_Action $action ) => $action->get_priority(), array_values( $actions ) )
 		);
 	}
