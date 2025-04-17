@@ -39,7 +39,7 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
-		"lint:changes:branch:php": "pnpm lint:php:changes:branch",
+		"lint:changes:branch:php": "XDEBUG_MODE=off pnpm lint:php:changes:branch",
 		"lint:lang:js": "eslint . --ext=js,ts",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
