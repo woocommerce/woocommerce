@@ -69,10 +69,10 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 }: {
 	productType: string;
 } ) => {
-	const themeTemplatePartsExist = getSetting(
-		'themeTemplatePartsExist',
+	const themeTemplatePartPaths = getSetting(
+		'themeTemplatePartPaths',
 		{}
-	) as Record< string, boolean >;
+	) as Record< string, string | null >;
 
 	const { templatePartId } = useSelect(
 		( select ) => {
@@ -90,7 +90,9 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 			const wooCommerceTemplatePartId = `woocommerce/woocommerce//${ templatePartSlug }`;
 
 			const themeTemplatePartExists =
-				themeTemplatePartsExist[ productType ] || false;
+				themeTemplatePartPaths &&
+				productType in themeTemplatePartPaths &&
+				themeTemplatePartPaths[ productType ] !== null;
 
 			return {
 				templatePartId: themeTemplatePartExists
@@ -98,7 +100,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 					: wooCommerceTemplatePartId,
 			};
 		},
-		[ productType, themeTemplatePartsExist ]
+		[ productType, themeTemplatePartPaths ]
 	);
 
 	const blockProps = useBlockProps();
