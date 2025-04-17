@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -333,10 +334,18 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 		}
 
-		// If created_via filter is provided, add it to query args
-        if ( ! empty( $request['created_via'] ) ) {
-            $args['created_via'] = $request['created_via'];
-        }
+		// If created_via filter is provided, add it to query args.
+		if ( ! empty( $request['created_via'] ) ) {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$args['created_via'] = $request['created_via'];
+			} else {
+				$args['meta_query'][] = array(
+					'key'     => '_created_via',
+					'value'   => $request['created_via'],
+					'compare' => 'IN',
+				);
+			}
+		}
 
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
@@ -426,13 +435,13 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		);
 
 		$params['created_via'] = array(
-		    'description'       => __( 'Limit result set to orders created via specific sources (e.g. checkout, admin).', 'woocommerce' ),
-		    'type'              => 'array',
-		    'items'             => array(
-				'type' => 'string'
+			'description'       => __( 'Limit result set to orders created via specific sources (e.g. checkout, admin).', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
 			),
-		    'validate_callback' => 'rest_validate_request_arg',
-		    'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_list',
 		);
 
 		return $params;
