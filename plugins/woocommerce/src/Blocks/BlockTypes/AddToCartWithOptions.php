@@ -31,24 +31,23 @@ class AddToCartWithOptions extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
-		$this->asset_data_registry->add( 'themeTemplatePartsExist', $this->get_theme_template_parts() );
+		$this->asset_data_registry->add( 'themeTemplatePartPaths', $this->get_theme_template_part_paths() );
 	}
 
 	/**
-	 * Get available theme template parts for each product type.
+	 * Get available theme template part paths for each product type.
 	 *
-	 * @return array Array of product types with boolean values indicating template part existence.
+	 * @return array Array of product types with template part paths or null if not exists.
 	 */
-	protected function get_theme_template_parts() {
+	protected function get_theme_template_part_paths() {
 		$product_types = array_keys( wc_get_product_types() );
 
-		$theme_template_parts = array();
+		$theme_template_part_paths = array();
 		foreach ( $product_types as $product_type ) {
-			$slug                                  = $product_type . '-product-add-to-cart-with-options';
-			$theme_template_parts[ $product_type ] = BlockTemplateUtils::theme_has_template_part( $slug );
+			$slug                                       = $product_type . '-product-add-to-cart-with-options';
+			$theme_template_part_paths[ $product_type ] = BlockTemplateUtils::get_theme_template_path( $slug, 'wp_template_part' );
 		}
-
-		return $theme_template_parts;
+		return $theme_template_part_paths;
 	}
 
 	/**
