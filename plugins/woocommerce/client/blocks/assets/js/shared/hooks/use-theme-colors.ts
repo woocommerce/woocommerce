@@ -1,32 +1,24 @@
 /**
  * External dependencies
  */
-import { useEffect, useRef } from '@wordpress/element';
-import { generateUniqueId } from '@woocommerce/utils';
+import { useEffect } from '@wordpress/element';
 
 export interface EditorColors {
 	editorBackgroundColor: string;
 	editorColor: string;
 }
 
-// Static map to track injected styles by their signature.
-const injectedStyles = new Map< string, string >();
-
 /**
  * Hook to inject a <style> element in the Site Editor using theme background and foreground colors.
  *
+ * @param styleId         - The ID of the style element to inject.
  * @param getStyleContent - Callback that receives editor colors and returns CSS to inject.
  */
 export const useApplyEditorStyles = (
+	styleId: string,
 	getStyleContent: ( colors: EditorColors ) => string
 ): void => {
-	// Generate a unique ID once when the hook is initialized.
-	const styleIdRef = useRef< string >(
-		`editor-style-${ generateUniqueId() }`
-	);
-
 	useEffect( () => {
-		const styleId = styleIdRef.current;
 		// Find the editor styles wrapper in the main document.
 		let editorStylesWrapper = document.querySelector(
 			'.editor-styles-wrapper'
@@ -67,19 +59,20 @@ export const useApplyEditorStyles = (
 			return;
 		}
 
+		const alreadyInjected = editorStylesWrapper.querySelector(
+			`#${ styleId }`
+		);
+
+		// Check if we've already injected a style with this id.
+		if ( alreadyInjected ) {
+			return;
+		}
+
 		// Generate the content for this style.
 		const styleContent = getStyleContent( {
 			editorBackgroundColor,
 			editorColor,
 		} );
-
-		// Create a signature for this style content.
-		const styleSignature = `${ editorBackgroundColor }-${ editorColor }-${ styleContent }`;
-
-		// Check if we've already injected a style with this signature.
-		if ( injectedStyles.has( styleSignature ) ) {
-			return;
-		}
 
 		// Create and inject the style element with the ref ID.
 		const styleElement = document.createElement( 'style' );
@@ -87,21 +80,10 @@ export const useApplyEditorStyles = (
 		styleElement.appendChild( document.createTextNode( styleContent ) );
 		editorStylesWrapper.appendChild( styleElement );
 
-		// Store this style in our map with signature as key and ID as value.
-		injectedStyles.set( styleSignature, styleId );
-
-		// Clean up function.
-		return () => {
-			if ( injectedStyles.get( styleSignature ) === styleId ) {
-				injectedStyles.delete( styleSignature );
-			}
-
-			const existingStyleElement = editorStylesWrapper?.querySelector(
-				`#${ styleId }`
-			);
-			if ( existingStyleElement ) {
-				existingStyleElement.remove();
-			}
-		};
-	}, [ getStyleContent ] );
+		/**
+		 * We are intentionally not cleaning up the style element here, because
+		 * blocks might be remounted many times, so this way we avoid removing
+		 * and appending the style element many times.
+		 */
+	}, [ getStyleContent, styleId ] );
 };
