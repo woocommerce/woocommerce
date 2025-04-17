@@ -587,9 +587,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 
 		// Filter the orders by created via.
-		if ( ! empty( $_GET['_created_via'] ) ) {
+		if ( ! empty( $_GET['_created_via'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			// @codingStandardsIgnoreStart
-			$created_via = explode(',',sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ));
+			$created_via = explode(',', sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) );
 
 			$query_vars['meta_query'] = array(
 				array(
