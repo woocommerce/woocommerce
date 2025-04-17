@@ -292,7 +292,13 @@ export const shouldRenderPaymentMethod = (
 	method: RecommendedPaymentMethod,
 	method_enabled: boolean
 ) => {
+	// Starting from WooPayments 9.2, the method has a category which we use to determine if it should be rendered.
 	if ( method.category === 'primary' ) {
+		return true;
+	}
+
+	// However, in WooPayments < 9.2, we use the `enabled` property (retured from the server) to determine if the method should be rendered.
+	if ( method.enabled ) {
 		return true;
 	}
 
