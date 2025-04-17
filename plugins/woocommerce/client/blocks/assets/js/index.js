@@ -1,5 +1,3 @@
-
-
 /**
  * Internal dependencies
  */

@@ -1,5 +1,3 @@
-
-
 export const SetupProgress = ( {
 	setupTasksComplete,
 	setupCompletePercent,
