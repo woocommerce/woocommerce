@@ -204,6 +204,7 @@ class WC_Marketplace_Suggestions {
 			$next  = $queue->get_next( 'woocommerce_update_marketplace_suggestions' );
 			if ( ! $next ) {
 				$queue->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+
 				( $queue instanceof QueueWithPrioritiesInterface )
 					? $queue->add_with_priority( 'woocommerce_update_marketplace_suggestions', array(), '', ActionQueuePriority::HIGH )
 					: $queue->add( 'woocommerce_update_marketplace_suggestions' );

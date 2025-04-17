@@ -82,6 +82,7 @@ class WC_Marketplace_Updater {
 	public static function retry() {
 		$queue = WC()->queue();
 		$queue->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+
 		( $queue instanceof QueueWithPrioritiesInterface )
 			? $queue->schedule_single_with_priority( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions', array(), '', ActionQueuePriority::HIGH )
 			: $queue->schedule_single( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
