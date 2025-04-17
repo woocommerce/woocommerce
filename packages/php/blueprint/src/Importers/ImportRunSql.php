@@ -79,15 +79,16 @@ class ImportRunSql implements StepProcessor {
 			return $result;
 		}
 
-		$wpdb->suppress_errors();
+		$wpdb->suppress_errors( true );
 		$wpdb->query( 'START TRANSACTION' );
 
 		try {
 			$query_result = $wpdb->query( $normalized_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
-			if ( $wpdb->last_error ) {
+			$last_error = $wpdb->last_error;
+			if ( $last_error ) {
 				$wpdb->query( 'ROLLBACK' );
-				$result->add_error( "Error executing SQL: {$wpdb->last_error}" );
+				$result->add_error( 'Error executing SQL: ' . $last_error );
 			} else {
 				$wpdb->query( 'COMMIT' );
 				$result->add_debug( "Executed SQL ({$schema->sql->name}): Affected {$query_result} rows" );
