@@ -476,6 +476,19 @@
 
 		// Custom event for when variation selection has been changed.
 		form.$form.trigger( 'woocommerce_variation_has_changed' );
+
+		// Trigger also a JS native event so we can listen to it from non-jQuery files.
+		const nativeEvent = new CustomEvent(
+			'woocommerce_variation_has_changed',
+			{
+				bubbles: true,
+				cancelable: true,
+				detail: {
+					form: form.$form.get( 0 ),
+				},
+			}
+		);
+		document.body.dispatchEvent( nativeEvent );
 	};
 
 	/**

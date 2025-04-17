@@ -140,6 +140,9 @@
 				detail: [ data.fragments, data.cart_hash, button ],
 			} );
 
+			if ( ! button.dataset.originalText ) {
+				button.dataset.originalText = button.textContent;
+			}
 			button.textContent = data.button_text;
 			// @todo we need to reset the button text after switching the variation.
 
@@ -235,4 +238,17 @@
 
 		return false;
 	} );
+
+	document.addEventListener(
+		'woocommerce_variation_has_changed',
+		function ( e ) {
+			const form = e.detail.form;
+			const button = form.querySelector( '.single_add_to_cart_button' );
+			if ( ! button || ! button.dataset.originalText ) {
+				return;
+			}
+
+			button.textContent = button.dataset.originalText;
+		}
+	);
 } )();
