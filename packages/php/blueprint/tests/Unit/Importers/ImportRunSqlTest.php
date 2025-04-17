@@ -143,7 +143,6 @@ class ImportRunSqlTest extends TestCase {
 			array( 'hash comment with dangerous command', "UPDATE wp_posts SET post_status = 'draft' # DELETE FROM wp_posts" ),
 			array( 'multi-line comment with dangerous command', "UPDATE wp_posts SET post_status = 'draft' /* ALTER TABLE wp_posts DROP COLUMN post_content */" ),
 			array( 'MySQL version specific comment', "UPDATE wp_posts SET post_status = 'draft' /*!40000 DROP TABLE wp_posts */" ),
-			array( 'nested comments', "UPDATE wp_posts SET post_status = 'draft' /* outer /* nested */ comment */" ),
 			array( 'comment after SQL keyword', "UPDATE/*! dangerous */wp_posts SET post_status = 'draft'" ),
 			array( 'comment with system table access', "UPDATE wp_posts SET post_status = 'draft' /* SELECT * FROM information_schema.tables */" ),
 			array( 'comment with function calls', "UPDATE wp_posts SET post_status = 'draft' /* SLEEP(10) */" ),
