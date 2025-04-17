@@ -17,6 +17,12 @@ defined( 'ABSPATH' ) || exit;
  * Marketplace Suggestions Updater
  */
 class WC_Marketplace_Updater {
+	/**
+	 * The marketplace data update jobs group ID.
+	 *
+	 * @var string
+	 */
+	public const JOBS_GROUP = 'marketplace_suggestions';
 
 	/**
 	 * Setup.
@@ -81,11 +87,11 @@ class WC_Marketplace_Updater {
 	 */
 	public static function retry() {
 		$queue = WC()->queue();
-		$queue->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+		$queue->cancel_all( 'woocommerce_update_marketplace_suggestions', array(), self::JOBS_GROUP );
 
 		( $queue instanceof QueueWithPrioritiesInterface )
-			? $queue->schedule_single_with_priority( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions', array(), '', ActionQueuePriority::HIGH )
-			: $queue->schedule_single( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
+			? $queue->schedule_single_with_priority( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions', array(), self::JOBS_GROUP, ActionQueuePriority::HIGH )
+			: $queue->schedule_single( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions', array(), self::JOBS_GROUP );
 	}
 }
 
