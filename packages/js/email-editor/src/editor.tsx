@@ -31,7 +31,6 @@ function Editor() {
 		<StrictMode>
 			<KeyboardShortcuts />
 			<InnerEditor
-				initialEdits={ [] }
 				postId={ postId }
 				postType={ editorCurrentPostType }
 				settings={ settings }
