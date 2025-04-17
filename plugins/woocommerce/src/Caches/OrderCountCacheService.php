@@ -5,8 +5,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Caches;
 
 use WC_Order;
-use Automattic\WooCommerce\Admin\Schedulers\BackgroundAction;
-use Automattic\WooCommerce\Admin\Schedulers\BackgroundScheduler;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
