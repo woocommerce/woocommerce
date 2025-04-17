@@ -78,32 +78,40 @@ $dialog-padding: 20px;
 }
 
 .wc-block-product-gallery-large-image-next-previous {
-	position: absolute;
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	width: 100%;
 	height: 100%;
 
-	&-container {
-		width: 100%;
-		display: flex;
-		justify-content: space-between;
+	&__icon {
+		color: inherit;
 	}
 
-	svg {
-		z-index: 1;
+	// Icons are centred but they are perceived off hence adjusting with padding.
+	&__icon--left {
+		padding: 2px 2px 0 0;
 	}
 
-	button {
+	&__icon--right {
+		padding: 2px 0 0 2px;
+	}
+
+	&__button {
 		cursor: pointer;
 		z-index: 3;
 		pointer-events: all;
-		padding: 0;
 		border: none;
-		background: none;
+		width: 40px;
+		height: 40px;
+		font-size: 12px;
+		padding: 0;
+		background: #fff;
 
 		&:disabled {
-			opacity: 50%;
+			.wc-block-product-gallery-large-image-next-previous__icon {
+				opacity: 35%;
+			}
 			cursor: not-allowed;
 		}
 	}
