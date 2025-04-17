@@ -132,7 +132,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Edit the first variation.', async () => {
@@ -215,7 +219,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect the first variation to be virtual.', async () => {
@@ -312,7 +320,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect all "Downloadable" checkboxes to be checked.', async () => {
