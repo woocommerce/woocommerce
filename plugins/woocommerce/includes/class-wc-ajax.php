@@ -239,22 +239,24 @@ class WC_AJAX {
 	/**
 	 * Get a refreshed cart fragment, including the mini cart HTML.
 	 */
-	public static function get_refreshed_fragments( $quantities = array() ) {
+	public static function get_refreshed_fragments( $args = array() ) {
 		ob_start();
 
 		woocommerce_mini_cart();
 
 		$mini_cart = ob_get_clean();
 
-		$data = array(
-			'fragments'  => apply_filters(
-				'woocommerce_add_to_cart_fragments',
-				array(
-					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
-				)
+		$data = array_merge(
+			array(
+				'fragments' => apply_filters(
+					'woocommerce_add_to_cart_fragments',
+					array(
+						'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+					)
+				),
+				'cart_hash' => WC()->cart->get_cart_hash(),
 			),
-			'cart_hash'  => WC()->cart->get_cart_hash(),
-			'quantities' => $quantities,
+			$args
 		);
 
 		wp_send_json( $data );
@@ -498,8 +500,6 @@ class WC_AJAX {
 			);
 		}
 
-		$quantities = array();
-
 		foreach ( $products_to_add as $product_to_add ) {
 			$product_id = $product_to_add['product_id'];
 			$quantity   = $product_to_add['quantity'];
@@ -520,30 +520,39 @@ class WC_AJAX {
 				$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation );
 				if ( $cart_item_key ) {
 					$cart_item = WC()->cart->get_cart_item( $cart_item_key );
-					if ( $variation_id ) {
-						$quantities[ $variation_id ] = $cart_item['quantity'];
-					} else {
-						$quantities[ $product_id ] = $cart_item['quantity'];
-					}
 
 					do_action( 'woocommerce_ajax_added_to_cart', $product_id );
-
-					if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
-						wc_add_to_cart_message( array( $product_id => $quantity ), true );
-					}
-
-					self::get_refreshed_fragments( $quantities );
 				}
+			} else {
+				// If there was an error adding to the cart, redirect to the product page to show any errors.
+				$data = array(
+					'error'       => true,
+					'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
+				);
+
+				wp_send_json( $data );
 			}
-
-			// If there was an error adding to the cart, redirect to the product page to show any errors.
-			$data = array(
-				'error'       => true,
-				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
-			);
-
-			wp_send_json( $data );
 		}
+
+		$args = array();
+		if ( ! is_array( $_POST['product_id'] ) ) {
+			// We will only return 'X in cart' when adding one product at a time,
+			// so we are excluding grouped products.
+			$args = array(
+				'button_text' => esc_attr(
+					sprintf(
+						/* translators: %s number of products in cart. */
+						_n( '%d in cart', '%d in cart', $cart_item['quantity'], 'woocommerce' ),
+						$cart_item['quantity']
+					)
+				),
+			);
+		} else {
+			$args = array(
+				'button_text' => __( 'Added to cart', 'woocommerce' ),
+			);
+		}
+		self::get_refreshed_fragments( $args );
 
 		// phpcs:enable
 	}
