@@ -15,7 +15,6 @@ import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 import { noticeContexts } from '../context/event-emit/utils';
 import type { PaymentStoreDescriptor } from '../../data/payment';
 import type { StoreNoticesStoreDescriptor } from '../../data/store-notices';
-import { checkPaymentMethodsCanPay } from 'assets/js/data/payment/utils/check-payment-methods';
 
 export const DEFAULT_ERROR_MESSAGE = __(
 	'Something went wrong. Please contact us to get assistance.',
