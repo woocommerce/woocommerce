@@ -773,10 +773,10 @@ jQuery( function ( $ ) {
 		 *
 		 * @param {Object} evt The JQuery event
 		 */
-		on_keydown_remove_item: function ( evt ) {
-			if( evt.key === ' ' ) {
-				evt.preventDefault();
-				$( evt.currentTarget ).trigger( 'click' );
+		on_keydown_remove_item: function ( event ) {
+			if ( event.key === ' ' ) {
+				event.preventDefault();
+				$( event.currentTarget ).trigger( 'click' );
 			}
 		},
 
