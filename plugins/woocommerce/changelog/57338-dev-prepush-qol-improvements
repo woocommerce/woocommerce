@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: pre-push linting improvements (additional output and linting speed for blocks/admin packages).
