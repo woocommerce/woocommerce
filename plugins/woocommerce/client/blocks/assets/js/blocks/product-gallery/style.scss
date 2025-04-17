@@ -147,37 +147,35 @@ $dialog-padding: 20px;
 
 
 	&.wc-block-product-gallery-thumbnails--overflow {
-		$mid-gradient-size: 4%;
-		$mid-gradient-start: rgba(0, 0, 0, 0.6) $mid-gradient-size;
-		$mid-gradient-end: rgba(0, 0, 0, 0.6) calc(100% - $mid-gradient-size);
 		$gradient-size: 20%;
-		$gradient-start: black $gradient-size;
-		$gradient-end: black calc(100% - $gradient-size);
-		$gradient-top: transparent $mid-gradient-start $gradient-start;
-		$gradient-bottom: $gradient-end $mid-gradient-end transparent;
+		$gradient-mid-step-size: 12%;
+		$gradient-mid-step: rgba(0, 0, 0, 0.4);
+
+		$gradient: transparent 0,  $gradient-mid-step $gradient-mid-step-size, black $gradient-size;
+		$gradient-end: black calc(100% - $gradient-size), $gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
 
 		&-top {
-			mask-image: linear-gradient(to bottom, $gradient-top, black 100%);
+			mask-image: linear-gradient(to bottom, $gradient);
 		}
 
 		&-bottom {
-			mask-image: linear-gradient(to bottom, black 0, $gradient-end, $mid-gradient-end, transparent);
+			mask-image: linear-gradient(to top, $gradient);
 		}
 
 		&-top.wc-block-product-gallery-thumbnails--overflow-bottom {
-			mask-image: linear-gradient(to bottom, transparent, $mid-gradient-start $gradient-start, transparent);
+			mask-image: linear-gradient(to bottom, $gradient, $gradient-end);
 		}
 
 		&-left {
-			mask-image: linear-gradient(to right, transparent, black $gradient-size, black 100%);
+			mask-image: linear-gradient(to right, $gradient);
 		}
 
 		&-right {
-			mask-image: linear-gradient(to right, black 0, black calc(100% - $gradient-size), transparent);
+			mask-image: linear-gradient(to left, $gradient);
 		}
 
 		&-left.wc-block-product-gallery-thumbnails--overflow-right {
-			mask-image: linear-gradient(to right, transparent, black $gradient-size, black calc(100% - $gradient-size), transparent);
+			mask-image: linear-gradient(to right, $gradient, $gradient-end);
 		}
 	}
 
