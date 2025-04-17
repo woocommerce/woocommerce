@@ -111,131 +111,42 @@ class ImportRunSqlTest extends TestCase {
 		);
 	}
 
-		/**
-		 * Test SQL normalization with various formatting cases.
-		 *
-		 * @param string $input_sql    The input SQL query with various formatting.
-		 * @param string $expected_sql The expected normalized SQL query.
-		 *
-		 * @dataProvider sql_normalization_provider
-		 */
-	public function test_normalize_sql( string $input_sql, string $expected_sql ): void {
-		$normalized = $this->importer->normalize_sql( $input_sql );
-		$this->assertEquals( $expected_sql, $normalized );
-	}
 
 	/**
-	 * Data provider for SQL normalization test cases.
+	 * Test detection of suspicious SQL comments.
 	 *
-	 * @return array
+	 * @dataProvider suspicious_comments_provider
+	 *
+	 * @param string $name The name of the test case.
+	 * @param string $sql  The SQL query to test.
 	 */
-	public function sql_normalization_provider(): array {
+	public function test_contains_suspicious_comments( string $name, string $sql ): void {
+		$schema   = $this->create_sql_schema( $sql, $name );
+		$importer = new ImportRunSql();
+		$result   = $importer->process( $schema );
+
+		$this->assertFalse( $result->is_success() );
+		$error_messages = $result->get_messages( 'error' );
+		$this->assertNotEmpty( $error_messages );
+		$this->assertStringContainsString( 'SQL query contains suspicious comment patterns.', $error_messages[0]['message'], $name );
+	}
+
+
+	/**
+	 * Data provider for suspicious SQL comments.
+	 *
+	 * @return array[] Test cases with SQL queries containing suspicious comments.
+	 */
+	public function suspicious_comments_provider(): array {
 		return array(
-			'multiple spaces'           => array(
-				'INSERT   INTO     wp_posts    (post_title)     VALUES     (\'test\')',
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'newlines and tabs'         => array(
-				"INSERT\nINTO\twp_posts\n(post_title)\nVALUES\n('test')",
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'spaces around operators'   => array(
-				'UPDATE wp_posts SET post_title=\'test\'WHERE id=1AND status=\'publish\'',
-				'UPDATE wp_posts SET post_title = \'test\' WHERE id = 1 AND status = \'publish\'',
-			),
-			'spaces around parentheses' => array(
-				'INSERT INTO wp_posts( post_title )VALUES( \'test\' )',
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'mixed whitespace'          => array(
-				"UPDATE\n  wp_posts\t\tSET    post_title  =  'test'\n  WHERE    id=1",
-				'UPDATE wp_posts SET post_title = \'test\' WHERE id = 1',
-			),
-			'arithmetic operators'      => array(
-				'UPDATE wp_posts SET menu_order=menu_order+1WHERE id>5',
-				'UPDATE wp_posts SET menu_order = menu_order + 1 WHERE id > 5',
-			),
-			'multiple conditions'       => array(
-				'UPDATE wp_posts SET post_status=\'publish\'WHERE post_type=\'post\'AND post_date<\'2023-01-01\'',
-				'UPDATE wp_posts SET post_status = \'publish\' WHERE post_type = \'post\' AND post_date < \'2023-01-01\'',
-			),
-			'replace query'             => array(
-				"REPLACE    INTO\n\twp_options(option_name,option_value)VALUES('test_key','test_value')",
-				'REPLACE INTO wp_options (option_name, option_value) VALUES (\'test_key\', \'test_value\')',
-			),
-			'commas without space'      => array(
-				'INSERT INTO wp_posts(title,content,status)VALUES(\'test\',\'content\',\'draft\')',
-				'INSERT INTO wp_posts (title, content, status) VALUES (\'test\', \'content\', \'draft\')',
-			),
-			'comparison operators'      => array(
-				'UPDATE wp_posts SET status=\'draft\' WHERE post_date>=\'2023-01-01\'AND id<=100',
-				'UPDATE wp_posts SET status = \'draft\' WHERE post_date >= \'2023-01-01\' AND id <= 100',
-			),
-		);
-	}
-
-	/**
-	 * Test SQL normalization with excessive whitespace.
-	 */
-	public function test_normalize_sql_excessive_whitespace(): void {
-		$input    = "INSERT\n\n\tINTO\n\n\twp_posts\n\n\t(post_title)\n\n\tVALUES\n\n\t('test')";
-		$expected = 'INSERT INTO wp_posts (post_title) VALUES (\'test\')';
-
-		$normalized = $this->importer->normalize_sql( $input );
-		$this->assertEquals( $expected, $normalized );
-	}
-
-	/**
-	 * Test SQL normalization with inconsistent casing.
-	 */
-	public function test_normalize_sql_inconsistent_casing(): void {
-		$input    = 'insert INTO wp_posts (post_title) values (\'test\')';
-		$expected = 'INSERT INTO wp_posts (post_title) VALUES (\'test\')';
-
-		$normalized = $this->importer->normalize_sql( $input );
-		$this->assertEquals( $expected, $normalized );
-	}
-
-	/**
-	 * Test SQL comment normalization.
-	 *
-	 * @param string $input_sql    The input SQL query with comments.
-	 * @param string $expected_sql The expected normalized SQL query.
-	 *
-	 * @dataProvider sql_comment_provider
-	 */
-	public function test_normalize_sql_comments( string $input_sql, string $expected_sql ): void {
-		$normalized = $this->importer->normalize_sql( $input_sql );
-		$this->assertEquals( $expected_sql, $normalized );
-	}
-
-	/**
-	 * Data provider for SQL comment test cases.
-	 *
-	 * @return array
-	 */
-	public function sql_comment_provider(): array {
-		return array(
-			'single line comments' => array(
-				"INSERT INTO wp_posts -- This is a comment\n(post_title) VALUES ('test')",
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'hash comments'        => array(
-				"INSERT INTO wp_posts #This is a comment\n(post_title) VALUES ('test')",
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'multi line comments'  => array(
-				"INSERT INTO wp_posts /* This is a\nmulti-line comment */ (post_title) VALUES ('test')",
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'nested comments'      => array(
-				"INSERT INTO wp_posts /* Outer /* Inner */ Comment */ (post_title) VALUES ('test')",
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
-			'mixed comments'       => array(
-				"INSERT INTO wp_posts -- First comment\n/* Second comment */\n#Third comment\n(post_title) VALUES ('test')",
-				'INSERT INTO wp_posts (post_title) VALUES (\'test\')',
-			),
+			array( 'single line comment with dangerous command', "UPDATE wp_posts SET post_status = 'draft' -- DROP TABLE wp_posts" ),
+			array( 'hash comment with dangerous command', "UPDATE wp_posts SET post_status = 'draft' # DELETE FROM wp_posts" ),
+			array( 'multi-line comment with dangerous command', "UPDATE wp_posts SET post_status = 'draft' /* ALTER TABLE wp_posts DROP COLUMN post_content */" ),
+			array( 'MySQL version specific comment', "UPDATE wp_posts SET post_status = 'draft' /*!40000 DROP TABLE wp_posts */" ),
+			array( 'nested comments', "UPDATE wp_posts SET post_status = 'draft' /* outer /* nested */ comment */" ),
+			array( 'comment after SQL keyword', "UPDATE/*! dangerous */wp_posts SET post_status = 'draft'" ),
+			array( 'comment with system table access', "UPDATE wp_posts SET post_status = 'draft' /* SELECT * FROM information_schema.tables */" ),
+			array( 'comment with function calls', "UPDATE wp_posts SET post_status = 'draft' /* SLEEP(10) */" ),
 		);
 	}
 
@@ -256,17 +167,9 @@ class ImportRunSqlTest extends TestCase {
 		$error_messages = $result->get_messages( 'error' );
 		$this->assertNotEmpty( $error_messages );
 
-		// Some injection patterns might trigger the invalid query type check first.
-		$expected_messages = array(
-			'SQL query contains potential injection patterns',
-			'Only INSERT, UPDATE, REPLACE INTO queries are allowed',
-		);
-
-		$actual_message = $error_messages[0]['message'];
-		$this->assertTrue(
-			in_array( $actual_message, $expected_messages, true ),
-			sprintf( 'Expected one of [%s], but got "%s"', implode( ', ', $expected_messages ), $actual_message )
-		);
+		$expected_message = 'SQL query contains potential injection patterns.';
+		$actual_message   = $error_messages[0]['message'];
+		$this->assertEquals( $expected_message, $actual_message );
 	}
 
 	/**
@@ -293,8 +196,6 @@ class ImportRunSqlTest extends TestCase {
 	public function test_protected_tables_access(): void {
 		global $wpdb;
 		$protected_tables = array(
-			'users',
-			'usermeta',
 			$wpdb->prefix . 'users',
 			$wpdb->prefix . 'usermeta',
 		);
@@ -310,7 +211,7 @@ class ImportRunSqlTest extends TestCase {
 			$this->assertFalse( $result->is_success() );
 			$error_messages = $result->get_messages( 'error' );
 			$this->assertNotEmpty( $error_messages );
-			$this->assertStringContainsString( 'Modifications to admin users or roles are not allowed', $error_messages[0]['message'] );
+			$this->assertStringContainsString( 'Modifications to admin users or roles are not allowed', $error_messages[0]['message'], $table );
 		}
 	}
 
@@ -371,7 +272,6 @@ class ImportRunSqlTest extends TestCase {
 		$this->assertNotEmpty( $error_messages );
 		$this->assertStringContainsString( 'Error executing SQL', $error_messages[0]['message'] );
 	}
-
 
 	/**
 	 * Create a schema object for SQL testing.

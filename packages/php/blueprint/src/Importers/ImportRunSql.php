@@ -47,11 +47,10 @@ class ImportRunSql implements StepProcessor {
 		global $wpdb;
 		$result = StepProcessorResult::success( RunSql::get_step_name() );
 
-		// Normalize whitespace to prevent obfuscation techniques.
-		$normalized_sql = $this->normalize_sql( $schema->sql->contents );
+		$sql = trim( $schema->sql->contents );
 
 		// Check if the query type is allowed.
-		if ( ! $this->is_allowed_query_type( $normalized_sql ) ) {
+		if ( ! $this->is_allowed_query_type( $sql ) ) {
 			$result->add_error(
 				sprintf(
 					'Only %s queries are allowed.',
@@ -61,20 +60,26 @@ class ImportRunSql implements StepProcessor {
 			return $result;
 		}
 
+		// Check for SQL comments that might be hiding malicious code.
+		if ( $this->contains_suspicious_comments( $sql ) ) {
+			$result->add_error( 'SQL query contains suspicious comment patterns.' );
+			return $result;
+		}
+
 		// Detect SQL injection patterns.
-		if ( $this->contains_sql_injection_patterns( $normalized_sql ) ) {
+		if ( $this->contains_sql_injection_patterns( $sql ) ) {
 			$result->add_error( 'SQL query contains potential injection patterns.' );
 			return $result;
 		}
 
 		// Check if the query affects protected tables.
-		if ( $this->affects_protected_tables( $normalized_sql ) ) {
+		if ( $this->affects_protected_tables( $sql ) ) {
 			$result->add_error( 'Modifications to admin users or roles are not allowed.' );
 			return $result;
 		}
 
 		// Check if the query affects user capabilities in wp_options.
-		if ( $this->affects_user_capabilities( $normalized_sql ) ) {
+		if ( $this->affects_user_capabilities( $sql ) ) {
 			$result->add_error( 'Modifications to user roles or capabilities are not allowed.' );
 			return $result;
 		}
@@ -83,7 +88,7 @@ class ImportRunSql implements StepProcessor {
 		$wpdb->query( 'START TRANSACTION' );
 
 		try {
-			$query_result = $wpdb->query( $normalized_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$query_result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 			$last_error = $wpdb->last_error;
 			if ( $last_error ) {
@@ -132,34 +137,6 @@ class ImportRunSql implements StepProcessor {
 
 		return true;
 	}
-
-	/**
-	 * Normalize SQL by removing excessive whitespace and standardizing syntax.
-	 *
-	 * This method processes the SQL query to remove unnecessary whitespace characters,
-	 * ensuring a consistent and readable format. It also standardizes the syntax
-	 * around common tokens like operators and punctuation.
-	 *
-	 * @param string $sql_content The SQL query to normalize.
-	 * @return string Normalized SQL query.
-	 */
-	public function normalize_sql( string $sql_content ): string {
-		// Simplify by combining whitespace removal and comment removal.
-		$sql = preg_replace( '/\s+/', ' ', $sql_content );
-		$sql = preg_replace( '/--.*$/m', '', $sql ); // Remove single-line comments (-- style).
-		$sql = preg_replace( '/#.*$/m', '', $sql ); // Remove hash-style comments (# style).
-
-		$pattern = '/\/\*.*?\*\//s'; // Remove multi-line comments (/* style */).
-		while ( preg_match( $pattern, $sql ) ) {
-			$sql = preg_replace( $pattern, '', $sql );
-		}
-
-		// Standardize whitespace around common tokens.
-		$sql = preg_replace( '/\s*(=|<|>|\(|\)|\+|-|\*|\/|,)\s*/', ' $1 ', $sql );
-
-		return trim( $sql );
-	}
-
 	/**
 	 * Check if the SQL query type is allowed.
 	 *
@@ -167,13 +144,79 @@ class ImportRunSql implements StepProcessor {
 	 * @return bool True if the query type is allowed, false otherwise.
 	 */
 	private function is_allowed_query_type( string $sql_content ): bool {
+		$uppercase_sql_content = strtoupper( trim( $sql_content ) );
+
 		foreach ( self::ALLOWED_QUERY_TYPES as $query_type ) {
-			if ( 0 === stripos( trim( $sql_content ), $query_type ) ) {
+			if ( 0 === stripos( $uppercase_sql_content, $query_type ) ) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+	/**
+	 * Check for suspicious comment patterns that might hide malicious code.
+	 *
+	 * This method detects various types of SQL comments that might be used
+	 * to hide malicious SQL commands or bypass security filters.
+	 *
+	 * @param string $sql_content The SQL query to check.
+	 * @return bool True if suspicious comments found, false otherwise.
+	 */
+	private function contains_suspicious_comments( string $sql_content ): bool {
+		// Quick check if there are any comments at all before running regex.
+		if ( strpos( $sql_content, '--' ) === false &&
+		strpos( $sql_content, '/*' ) === false &&
+		strpos( $sql_content, '#' ) === false ) {
+			return false;
+		}
+
+		// List of potentially dangerous SQL commands to check for in comments.
+		$dangerous_commands = array(
+			'DELETE',
+			'DROP',
+			'ALTER',
+			'CREATE',
+			'TRUNCATE',
+			'GRANT',
+			'REVOKE',
+			'EXEC',
+			'EXECUTE',
+			'CALL',
+			'INTO OUTFILE',
+			'INTO DUMPFILE',
+			'LOAD_FILE',
+			'LOAD DATA',
+			'BENCHMARK',
+			'SLEEP',
+			'INFORMATION_SCHEMA',
+			'USER\\(',
+			'DATABASE\\(',
+			'SCHEMA\\(',
+		);
+
+		$dangerous_pattern = implode( '|', $dangerous_commands );
+
+		// Check for SQL comments that might be hiding malicious code.
+		$patterns = array(
+			// Single-line comments (-- style) containing dangerous commands.
+			'/--.*?(' . $dangerous_pattern . ')/i',
+			// Single-line comments (# style) containing dangerous commands.
+			'/#.*?(' . $dangerous_pattern . ')/i',
+			// Multi-line comments hiding dangerous commands.
+			'/\/\*.*?(' . $dangerous_pattern . ').*?\*\//is',
+			// MySQL-specific execution comments (version-specific code execution).
+			'/\/\*![0-9]*.*?\*\//',
+		);
+
+		foreach ( $patterns as $pattern ) {
+			if ( preg_match( $pattern, $sql_content ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 * Check for common SQL injection patterns.
@@ -222,12 +265,9 @@ class ImportRunSql implements StepProcessor {
 	 */
 	private function affects_protected_tables( string $sql_content ): bool {
 		global $wpdb;
-
 		$protected_tables = array(
-			$wpdb->prefix . 'users',
-			$wpdb->prefix . 'usermeta',
-			$wpdb->usermeta,
 			$wpdb->users,
+			$wpdb->usermeta,
 		);
 
 		foreach ( $protected_tables as $table ) {
