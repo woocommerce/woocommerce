@@ -59,8 +59,10 @@ export const useThemeColors = (
 			return;
 		}
 
+		const styleElementId = `${ styleId }-editor-theme-colors`;
+
 		const alreadyInjected = editorStylesWrapper.querySelector(
-			`#${ styleId }`
+			`#${ styleElementId }`
 		);
 
 		// Check if we've already injected a style with this id.
@@ -74,9 +76,9 @@ export const useThemeColors = (
 			editorColor,
 		} );
 
-		// Create and inject the style element with the ref ID.
+		// Create and inject the style element with the specific ID.
 		const styleElement = document.createElement( 'style' );
-		styleElement.id = styleId;
+		styleElement.id = styleElementId;
 		styleElement.appendChild( document.createTextNode( styleContent ) );
 		editorStylesWrapper.appendChild( styleElement );
 
