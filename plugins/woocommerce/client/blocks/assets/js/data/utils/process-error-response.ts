@@ -12,7 +12,6 @@ import {
 	isString,
 } from '@woocommerce/types';
 import { noticeContexts } from '@woocommerce/base-context/event-emit/utils';
-import { CheckoutPutData } from '../checkout/types';
 
 type ApiParamError = {
 	param: string;

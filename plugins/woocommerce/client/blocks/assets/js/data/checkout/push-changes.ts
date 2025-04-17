@@ -12,9 +12,9 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { STORE_KEY as CHECKOUT_STORE_KEY } from './constants';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
-import { clearFieldErrorNotices, processErrorResponse } from '../utils';
+import { processErrorResponse } from '../utils';
 import { CheckoutPutData } from './types';
-import { validateAdditionalFields } from './utils';
+import { clearFieldErrorNotices, validateAdditionalFields } from './utils';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
