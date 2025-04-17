@@ -117,7 +117,7 @@ export const createKycAccountSession = async (
 	poEligible: boolean
 ): Promise< AccountKycResult > => {
 	return await apiFetch< AccountKycResult >( {
-		url: apiURL, 
+		url: apiURL,
 		method: 'POST',
 		data: {
 			self_assessment: fromDotNotation( data ),
