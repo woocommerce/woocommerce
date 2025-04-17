@@ -118,7 +118,7 @@ export const createKycAccountSession = async (
 ): Promise< AccountKycResult > => {
 	const selfAssessmentData = fromDotNotation( data );
 	const requestData: Record< string, unknown > = {
-		progressive: isPoEligible,
+		progressive: poEligible,
 	};
 
 	// Only pass the self assessment data if at least one field is set.
