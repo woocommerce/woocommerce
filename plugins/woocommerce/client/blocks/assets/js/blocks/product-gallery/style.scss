@@ -117,10 +117,6 @@ $dialog-padding: 20px;
 	}
 }
 
-@mixin gradient($direction) {
-	background: linear-gradient(to $direction, var(--wp--preset--color--base) 25%, transparent);
-}
-
 @mixin horizontal-thumbnails {
 	.wc-block-product-gallery-thumbnails__thumbnail {
 		height: 100%;
