@@ -405,6 +405,337 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		$this->assertEquals( 'provider-2', $second_result[0]->id );
 	}
 
+
+	/**
+	 * Test settings when no providers are registered.
+	 */
+	public function test_add_address_autocomplete_settings_no_providers() {
+		// Do it this way to simulate the actual settings page with the filter.
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
+
+		// Find the autocomplete settings.
+		$autocomplete_enabled_setting  = null;
+		$autocomplete_provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_enabled' === $setting['id'] ) {
+				$autocomplete_enabled_setting = $setting;
+				break;
+			}
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$autocomplete_provider_setting = $setting;
+				break;
+			}
+		}
+
+		// Preferred provider should not be in the settings if no providers are registered.
+		$this->assertNull( $autocomplete_provider_setting );
+
+		$this->assertNotNull( $autocomplete_enabled_setting );
+		$this->assertEquals( 'checkbox', $autocomplete_enabled_setting['type'] );
+		$this->assertTrue( $autocomplete_enabled_setting['disabled'] );
+		$this->assertStringContainsString( 'WooPayments', $autocomplete_enabled_setting['desc_tip'] );
+	}
+
+	/**
+	 * Test settings when one provider is registered.
+	 */
+	public function test_add_address_autocomplete_settings_single_provider() {
+		// Define test provider class.
+		$provider_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'test-provider';
+				$this->name = 'Test Provider';
+			}
+		};
+
+		// Get class name for filter.
+		$provider_class_name = get_class( $provider_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider_class_name ) {
+				$providers[] = $provider_class_name;
+				return $providers;
+			}
+		);
+
+		// Do it this way to simulate the actual settings page with the filter.
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
+
+		// Find the autocomplete setting.
+		$autocomplete_enabled_setting  = null;
+		$autocomplete_provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_enabled' === $setting['id'] ) {
+				$autocomplete_enabled_setting = $setting;
+				break;
+			}
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$autocomplete_provider_setting = $setting;
+				break;
+			}
+		}
+
+		// Preferred provider should not be in the settings if only one provider is registered.
+		$this->assertNull( $autocomplete_provider_setting );
+
+		$this->assertNotNull( $autocomplete_enabled_setting );
+		$this->assertEquals( 'checkbox', $autocomplete_enabled_setting['type'] );
+		$this->assertFalse( $autocomplete_enabled_setting['disabled'] );
+		$this->assertStringNotContainsString( 'WooPayments', $autocomplete_enabled_setting['desc_tip'] );
+
+		// Verify provider select is not added when only one provider exists.
+		$provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$provider_setting = $setting;
+				break;
+			}
+		}
+
+		$this->assertNull( $provider_setting );
+	}
+
+	/**
+	 * Test settings when multiple providers are registered.
+	 */
+	public function test_add_address_autocomplete_settings_multiple_providers() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
+			}
+		);
+
+		// Do it this way to simulate the actual settings page with the filter.
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
+
+		// Find the provider select setting.
+		$provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$provider_setting = $setting;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $provider_setting );
+		$this->assertEquals( 'select', $provider_setting['type'] );
+		$this->assertEquals( 'provider-1', $provider_setting['default'] );
+		$this->assertArrayHasKey( 'provider-1', $provider_setting['options'] );
+		$this->assertArrayHasKey( 'provider-2', $provider_setting['options'] );
+		$this->assertEquals( 'Provider One', $provider_setting['options']['provider-1'] );
+		$this->assertEquals( 'Provider Two', $provider_setting['options']['provider-2'] );
+	}
+
+	/**
+	 * Test that settings are added in the correct position.
+	 */
+	public function test_add_address_autocomplete_settings_position() {
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
+
+		// Find the position of the default customer address setting and the autocomplete setting.
+		$default_address_pos = -1;
+		$autocomplete_pos    = -1;
+		foreach ( $settings as $index => $setting ) {
+			if ( isset( $setting['id'] ) ) {
+				if ( 'woocommerce_default_customer_address' === $setting['id'] ) {
+					$default_address_pos = $index;
+				} elseif ( 'woocommerce_address_autocomplete_enabled' === $setting['id'] ) {
+					$autocomplete_pos = $index;
+				}
+			}
+		}
+
+		$this->assertGreaterThan( -1, $default_address_pos );
+		$this->assertGreaterThan( -1, $autocomplete_pos );
+		$this->assertGreaterThan( $default_address_pos, $autocomplete_pos );
+		$this->assertEquals( $default_address_pos + 1, $autocomplete_pos );
+	}
+
+	/**
+	 * Test getting preferred provider when set in options.
+	 */
+	public function test_get_preferred_provider_from_options() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
+			}
+		);
+
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-2' );
+
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEquals( 'provider-2', $preferred_provider );
+	}
+
+	/**
+	 * Test getting preferred provider when option is not set.
+	 */
+	public function test_get_preferred_provider_fallback() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
+			}
+		);
+
+		delete_option( 'woocommerce_address_autocomplete_provider' );
+
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEquals( 'provider-1', $preferred_provider );
+	}
+
+	/**
+	 * Test getting preferred provider when selected provider is no longer available.
+	 */
+	public function test_get_preferred_provider_unavailable() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
+			}
+		);
+
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-3' );
+
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEquals( 'provider-1', $preferred_provider );
+	}
+
+	/**
+	 * Test getting preferred provider with no providers registered.
+	 */
+	public function test_get_preferred_provider_no_providers() {
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEmpty( $preferred_provider );
+	}
+
 	/**
 	 * Test that providers are not reinstantiated when the filter returns the same class names in a new array.
 	 */
