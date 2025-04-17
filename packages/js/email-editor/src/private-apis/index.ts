@@ -6,6 +6,10 @@ import { privateApis as componentsPrivateApis } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import {
 	// @ts-expect-error No types for privateApis.
+	privateApis as editorPrivateApis,
+} from '@wordpress/editor';
+import {
+	// @ts-expect-error No types for privateApis.
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
 
@@ -63,6 +67,11 @@ const { ColorPanel: StylesColorPanel } = unlock( blockEditorPrivateApis );
  */
 const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
 
+/**
+ * The Editor is the main component for the email editor.
+ */
+const { Editor } = unlock( editorPrivateApis );
+
 export {
 	BlockCanvas,
 	Tabs,
@@ -70,4 +79,5 @@ export {
 	unlockPatternsRelatedSelectorsFromCoreStore,
 	unlockGetEnabledClientIdsTree,
 	useGlobalStylesOutputWithConfig,
+	Editor,
 };
