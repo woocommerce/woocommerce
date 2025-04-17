@@ -278,8 +278,12 @@ export const validateAdditionalFields = (
  * Clears error notices for fields that have been successfully updated.
  */
 export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
+	if ( ! isObject( data ) ) {
+		return;
+	}
+
 	// Check if additional fields were updated successfully
-	if ( data.additional_fields ) {
+	if ( data?.additional_fields ) {
 		const noticeIds = Object.keys( data.additional_fields );
 		noticeIds.forEach( ( noticeId ) => {
 			removeNoticeById( noticeId );
