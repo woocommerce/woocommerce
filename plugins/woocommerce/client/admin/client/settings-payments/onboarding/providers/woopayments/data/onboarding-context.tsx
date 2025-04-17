@@ -62,9 +62,8 @@ export const OnboardingProvider: React.FC< {
 	);
 
 	// Make UI refresh when plugin is installed.
-	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } = useDispatch(
-		paymentSettingsStore
-	);
+	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
+		useDispatch( paymentSettingsStore );
 
 	// Initial data fetch from store
 	const { storeData, isStoreLoading } = useSelect(
