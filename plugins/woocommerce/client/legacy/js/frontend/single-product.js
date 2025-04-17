@@ -1,5 +1,6 @@
 /*global wc_single_product_params, PhotoSwipe, PhotoSwipeUI_Default */
 jQuery( function( $ ) {
+	var sliderKeyupBlockers = [ '.stars', '.tabs', '.wc-tabs'];
 
 	// wc_single_product_params is required to continue.
 	if ( typeof wc_single_product_params === 'undefined' ) {
@@ -73,14 +74,13 @@ jQuery( function( $ ) {
 			
 			$tabs.eq( targetIndex ).focus();
 		} )
-		.on( 'focusout', '.wc-tabs li a, ul.tabs li a, #respond p.stars a', function() {
+		.on( 'blur', '.wc-tabs li a, ul.tabs li a, #respond p.stars a', function() {
 			if ( ! productGalleryElement.data( 'flexslider' ) ) {
 				// Don't do anything if gallery does not exist.
 				return;
 			}
 			setTimeout( function () {
 				var $activeElement = $( document.activeElement );
-				var sliderKeyupBlockers = [ '.stars', '.tabs', '.wc-tabs'];
 				var $closestBlocker = $activeElement.closest( sliderKeyupBlockers.join( ', ' ) );
 		
 				if ( $closestBlocker.length ) {
@@ -91,6 +91,17 @@ jQuery( function( $ ) {
 		
 				productGalleryElement.data('flexslider').animating = false;
 			}, 0);
+		} )
+		.on( 'touchstart', function( event ) {
+			var $target = $( event.target );			
+			var $activeElement = $( document.activeElement );
+			var $closestBlockerFromTarget = $target.closest( sliderKeyupBlockers.join( ', ' ) );
+			var $closestBlockerFromActiveElement = $activeElement.closest( sliderKeyupBlockers.join( ', ' ) );
+			
+			// If tabs or stars are focused and the touched element is outside them, release the slider.
+			if ( $closestBlockerFromActiveElement.length && ! $closestBlockerFromTarget.length ) {
+				$activeElement.blur();
+			}
 		} )
 		// Review link
 		.on( 'click', 'a.woocommerce-review-link', function() {
