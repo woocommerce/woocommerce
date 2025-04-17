@@ -499,7 +499,15 @@ export const updateCustomerData =
 	) =>
 	async ( { dispatch }: CartThunkArgs ) => {
 		try {
+			console.log( '!!!Updating customer data', customerData );
 			dispatch.updatingCustomerData( true );
+			if ( 'billing_address' in customerData ) {
+				dispatch.updatingCustomerBillingData( true );
+			}
+			if ( 'shipping_address' in customerData ) {
+				dispatch.updatingCustomerShippingData( true );
+			}
+
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -521,6 +529,8 @@ export const updateCustomerData =
 			return Promise.reject( error );
 		} finally {
 			dispatch.updatingCustomerData( false );
+			dispatch.updatingCustomerBillingData( false );
+			dispatch.updatingCustomerShippingData( false );
 		}
 	};
 
