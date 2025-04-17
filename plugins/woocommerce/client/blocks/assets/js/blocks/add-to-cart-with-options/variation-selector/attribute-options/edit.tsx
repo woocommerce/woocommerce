@@ -18,7 +18,7 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import { useApplyEditorStyles } from '../../../../shared/hooks/use-theme-colors';
+import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
@@ -68,7 +68,7 @@ export default function AttributeOptionsEdit(
 	} );
 
 	// Apply selected variation pill styles based on Site Editor's background and text colors.
-	useApplyEditorStyles(
+	useThemeColors(
 		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {

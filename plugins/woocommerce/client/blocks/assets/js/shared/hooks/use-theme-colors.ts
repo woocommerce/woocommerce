@@ -14,7 +14,7 @@ export interface EditorColors {
  * @param styleId         - The ID of the style element to inject.
  * @param getStyleContent - Callback that receives editor colors and returns CSS to inject.
  */
-export const useApplyEditorStyles = (
+export const useThemeColors = (
 	styleId: string,
 	getStyleContent: ( colors: EditorColors ) => string
 ): void => {
