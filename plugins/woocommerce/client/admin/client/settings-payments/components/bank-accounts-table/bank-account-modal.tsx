@@ -1,45 +1,57 @@
 /**
  * External dependencies
  */
-import {
-	Modal,
-	TextControl,
-	SelectControl,
-	Button,
-} from '@wordpress/components';
-import { useState } from 'react';
+import { Modal, TextControl, Button } from '@wordpress/components';
+import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import { BankAccount } from './bank-accounts-table';
+import { getDefaultRoutingField } from './utils';
 
-interface BankAccountModalProps {
-	account: {
-		country: string;
-		name: string;
-		number: string;
-		bank: string;
-		routing: string;
-		bic: string;
-	};
+interface Props {
+	account: BankAccount | null;
 	onClose: () => void;
+	onSave: ( account: BankAccount ) => void;
+	defaultCountry: string;
 }
 
 export const BankAccountModal = ( {
 	account,
 	onClose,
-}: BankAccountModalProps ) => {
-	const [ formData, setFormData ] = useState( {
-		country: account?.country || '',
-		name: account?.name || '',
-		number: account?.number || '',
-		bank: account?.bank || '',
-		routing: account?.routing || '',
-		bic: account?.bic || '',
-	} );
+	onSave,
+	defaultCountry,
+}: Props ) => {
+	const [ formData, setFormData ] = useState< BankAccount >(
+		account || {
+			id: '',
+			account_name: '',
+			account_number: '',
+			bank_name: '',
+			routing_number: '',
+			sort_code: '',
+			iban: '',
+			bic: '',
+		}
+	);
+	const [ routingField, setRoutingField ] = useState<
+		'routing_number' | 'sort_code' | 'iban'
+	>( 'iban' );
 
-	const updateField = ( field, value ) => {
+	useEffect( () => {
+		if ( account ) {
+			if ( account.routing_number ) setRoutingField( 'routing_number' );
+			else if ( account.sort_code ) setRoutingField( 'sort_code' );
+			else if ( account.iban ) setRoutingField( 'iban' );
+			else setRoutingField( getDefaultRoutingField( defaultCountry ) );
+		} else {
+			setRoutingField( getDefaultRoutingField( defaultCountry ) );
+		}
+	}, [ account, defaultCountry ] );
+
+	const updateField = ( field: keyof BankAccount, value: string ) => {
 		setFormData( ( prev ) => ( { ...prev, [ field ]: value } ) );
 	};
 
@@ -54,48 +66,58 @@ export const BankAccountModal = ( {
 			shouldCloseOnClickOutside={ false }
 		>
 			<p>{ __( 'Add your bank account details.', 'woocommerce' ) }</p>
-			<SelectControl
-				label={ __( 'Country', 'woocommerce' ) }
-				required
-				value={ formData.country }
-				options={ [
-					{ label: __( 'Please select', 'woocommerce' ), value: '' },
-					{ label: 'United States', value: 'US' },
-					{ label: 'Germany', value: 'DE' },
-					{ label: 'Australia', value: 'AU' },
-				] }
-				onChange={ ( value ) => updateField( 'country', value ) }
-			/>
 
 			<TextControl
 				label={ __( 'Account Name', 'woocommerce' ) }
 				required
-				value={ formData.name }
-				onChange={ ( value ) => updateField( 'name', value ) }
+				value={ formData.account_name }
+				onChange={ ( value ) => updateField( 'account_name', value ) }
 			/>
 
 			<TextControl
 				label={ __( 'Account Number', 'woocommerce' ) }
 				required
-				value={ formData.number }
-				onChange={ ( value ) => updateField( 'number', value ) }
+				value={ formData.account_number }
+				onChange={ ( value ) => updateField( 'account_number', value ) }
 			/>
 
 			<TextControl
 				label={ __( 'Bank Name', 'woocommerce' ) }
-				value={ formData.bank }
-				onChange={ ( value ) => updateField( 'bank', value ) }
+				value={ formData.bank_name }
+				onChange={ ( value ) => updateField( 'bank_name', value ) }
 			/>
 
-			<TextControl
-				label={ __( 'Routing Number', 'woocommerce' ) }
-				required={ !! formData.country && formData.country === 'US' }
-				value={ formData.routing }
-				onChange={ ( value ) => updateField( 'routing', value ) }
-			/>
+			{ routingField === 'routing_number' && (
+				<TextControl
+					label={ __( 'Routing Number', 'woocommerce' ) }
+					required
+					value={ formData.routing_number }
+					onChange={ ( value ) =>
+						updateField( 'routing_number', value )
+					}
+				/>
+			) }
+
+			{ routingField === 'sort_code' && (
+				<TextControl
+					label={ __( 'BSB', 'woocommerce' ) }
+					required
+					value={ formData.sort_code }
+					onChange={ ( value ) => updateField( 'sort_code', value ) }
+				/>
+			) }
+
+			{ routingField === 'iban' && (
+				<TextControl
+					label={ __( 'IBAN', 'woocommerce' ) }
+					required
+					value={ formData.iban }
+					onChange={ ( value ) => updateField( 'iban', value ) }
+				/>
+			) }
 
 			<TextControl
-				label={ __( 'BIC/SWIFT', 'woocommerce' ) }
+				label={ __( 'BIC / SWIFT', 'woocommerce' ) }
 				value={ formData.bic }
 				onChange={ ( value ) => updateField( 'bic', value ) }
 			/>
@@ -107,15 +129,13 @@ export const BankAccountModal = ( {
 					marginTop: '16px',
 				} }
 			>
-				<Button isSecondary onClick={ onClose }>
+				<Button variant={ 'secondary' } onClick={ onClose }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					isPrimary
+					variant={ 'primary' }
 					style={ { marginLeft: '8px' } }
-					onClick={ () => {
-						/* save logic */
-					} }
+					onClick={ () => onSave( formData ) }
 				>
 					{ __( 'Save', 'woocommerce' ) }
 				</Button>
@@ -123,5 +143,3 @@ export const BankAccountModal = ( {
 		</Modal>
 	);
 };
-
-export default BankAccountModal;

@@ -1,38 +1,65 @@
-import { Button, Card, Icon, MenuGroup, MenuItem } from '@wordpress/components';
-import { moreVertical } from '@wordpress/icons';
+/**
+ * External dependencies
+ */
+import { Button, Card, MenuGroup, MenuItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { EllipsisMenu } from '@woocommerce/components';
 import { useState } from 'react';
-import BankAccountModal from './bank-account-modal';
 
-export default function BankAccountsTable() {
-	const [ selectedAccount, setSelectedAccount ] = useState( null );
+/**
+ * Internal dependencies
+ */
+import { BankAccountModal } from './bank-account-modal';
+
+const DEFAULT_STORE_COUNTRY = 'US'; // Ideally passed as a prop from backend
+
+export interface BankAccount {
+	id: string;
+	account_name: string;
+	account_number: string;
+	bank_name: string;
+	routing_number: string;
+	sort_code: string;
+	iban: string;
+	bic: string;
+}
+
+function generateId() {
+	return Math.random().toString( 36 ).substring( 2, 10 );
+}
+interface Props {
+	accounts: BankAccount[];
+	onChange: ( accounts: BankAccount[] ) => void;
+	defaultCountry: string;
+}
+
+export const BankAccountsTable = ( {
+	accounts,
+	onChange,
+	defaultCountry,
+}: Props ) => {
+	const [ selectedAccount, setSelectedAccount ] =
+		useState< BankAccount | null >( null );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
-	const accounts = [
-		{
-			id: 1,
-			name: 'Red Potato Shop Inc',
-			number: '123456789',
-			bank: 'Bank of America',
-		},
-		{
-			id: 2,
-			name: 'Sarah Lee',
-			number: '987654321',
-			bank: 'Commonwealth Bank',
-		},
-		{
-			id: 3,
-			name: 'Max Müller',
-			number: 'DE44500105175407324931',
-			bank: 'Deutsche Bank',
-		},
-	];
-
-	const openModal = ( account = null ) => {
+	const openModal = ( account: BankAccount | null = null ) => {
 		setSelectedAccount( account );
 		setIsModalOpen( true );
+	};
+
+	const handleSave = ( updated: BankAccount ) => {
+		onChange(
+			accounts.some( ( acc ) => acc.id === updated.id )
+				? accounts.map( ( acc ) =>
+						acc.id === updated.id ? updated : acc
+				  )
+				: [ ...accounts, { ...updated, id: generateId() } ]
+		);
+		setIsModalOpen( false );
+	};
+
+	const handleDelete = ( accountId: string ) => {
+		onChange( accounts.filter( ( acc ) => acc.id !== accountId ) );
 	};
 
 	return (
@@ -49,44 +76,48 @@ export default function BankAccountsTable() {
 				<tbody>
 					{ accounts.map( ( account ) => (
 						<tr key={ account.id }>
-							<td>{ account.name }</td>
-							<td>{ account.number }</td>
-							<td>{ account.bank }</td>
+							<td>{ account.account_name }</td>
+							<td>{ account.account_number }</td>
+							<td>{ account.bank_name }</td>
 							<td>
 								<EllipsisMenu
 									label={ __( 'Options', 'woocommerce' ) }
-									icon={ moreVertical }
-									popoverProps={ {
-										position: 'bottom right',
-									} }
-								>
-									<MenuGroup>
-										<MenuItem
-											onClick={ () =>
-												openModal( account )
-											}
-										>
-											{ __(
-												'View / edit',
-												'woocommerce'
-											) }
-										</MenuItem>
-										<MenuItem
-											isDestructive
-											onClick={ () => {
-												/* delete logic */
-											} }
-										>
-											{ __( 'Delete', 'woocommerce' ) }
-										</MenuItem>
-									</MenuGroup>
-								</EllipsisMenu>
+									placement={ 'bottom-right' }
+									renderContent={ () => (
+										<MenuGroup>
+											<MenuItem
+												onClick={ () =>
+													openModal( account )
+												}
+											>
+												{ __(
+													'View / edit',
+													'woocommerce'
+												) }
+											</MenuItem>
+											<MenuItem
+												isDestructive
+												onClick={ () =>
+													handleDelete( account.id )
+												}
+											>
+												{ __(
+													'Delete',
+													'woocommerce'
+												) }
+											</MenuItem>
+										</MenuGroup>
+									) }
+								/>
 							</td>
 						</tr>
 					) ) }
 					<tr>
 						<td colSpan={ 4 }>
-							<Button isSecondary onClick={ () => openModal() }>
+							<Button
+								isSecondary
+								onClick={ () => openModal( null ) }
+							>
 								{ __( '+ Add account', 'woocommerce' ) }
 							</Button>
 						</td>
@@ -98,8 +129,10 @@ export default function BankAccountsTable() {
 				<BankAccountModal
 					account={ selectedAccount }
 					onClose={ () => setIsModalOpen( false ) }
+					onSave={ handleSave }
+					defaultCountry={ defaultCountry }
 				/>
 			) }
 		</Card>
 	);
-}
+};
