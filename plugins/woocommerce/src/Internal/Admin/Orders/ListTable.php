@@ -578,7 +578,7 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
-		$this->order_query_args['created_via'] = $created_via;
+		$this->order_query_args['created_via'] = explode( ',', $created_via );
 		$this->has_filter                      = true;
 	}
 
@@ -592,11 +592,10 @@ class ListTable extends WP_List_Table {
 		$current_created_via = isset( $_GET['_created_via'] ) ? sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) : '';
 
 		$created_via_options = array(
-			''             => __( 'All sales channels', 'woocommerce' ),
-			'admin'        => __( 'Admin', 'woocommerce' ),
-			'checkout'     => __( 'Legacy Checkout', 'woocommerce' ),
-			'store-api'    => __( 'Blocks Checkout', 'woocommerce' ),
-			'pos-rest-api' => __( 'Point of Sale', 'woocommerce' ),
+			''                   => __( 'All sales channels', 'woocommerce' ),
+			'admin'              => __( 'Admin', 'woocommerce' ),
+			'checkout,store-api' => __( 'Checkout', 'woocommerce' ),
+			'pos-rest-api'       => __( 'Point of Sale', 'woocommerce' ),
 		);
 		?>
 
