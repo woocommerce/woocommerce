@@ -119,6 +119,8 @@ class BlockPatterns {
 			 * Previously, patterns were stored with absolute paths. Now we store relative paths.
 			 * If we encounter a pattern with an absolute path (containing $patterns_path),
 			 * we keep it as is. Otherwise, we construct the full path from the relative source.
+			 *
+			 * @todo: Remove this once we have migrated all patterns to the new relative path format: https://github.com/woocommerce/woocommerce/issues/57354
 			 */
 			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source'] = $pattern_path;
