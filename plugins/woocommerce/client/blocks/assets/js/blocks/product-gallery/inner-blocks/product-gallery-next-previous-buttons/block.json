@@ -9,7 +9,15 @@
 	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"shadow": true,
+		"__experimentalBorder": {
+			"radius": true
+		}
 	},
 	"ancestor": [ "woocommerce/product-gallery-large-image" ]
 }

@@ -66,7 +66,7 @@ Available resources in the Store API are listed below, with links to more detail
 |                                                              | `GET`, `POST`, `PUT`, `DELETE` | [`/wc/store/v1/cart/items/:key`](docs/cart-items.md#single-cart-item)                         |
 | [`Cart Coupons`](docs/cart-coupons.md)                       | `GET`, `POST`, `DELETE`        | [`/wc/store/v1/cart/coupons`](docs/cart-coupons.md#list-cart-coupons)                         |
 |                                                              | `GET`, `DELETE`                | [`/wc/store/v1/cart/coupon/:code`](docs/cart-coupons.md#single-cart-coupon)                   |
-| [`Checkout`](docs/checkout.md)                               | `GET`, `POST`                  | [`/wc/store/v1/checkout`](docs/checkout.md)                                                   |
+| [`Checkout`](docs/checkout.md)                               | `GET`, `POST`, `PUT`           | [`/wc/store/v1/checkout`](docs/checkout.md)                                                   |
 | [`Checkout order`](docs/checkout-order.md)                   | `POST`                         | [`/wc/store/v1/checkout/:id`](docs/checkout-order.md)                                         |
 | [`Order`](docs/order.md)                                     | `GET`                          | [`/wc/store/v1/order/:id`](docs/order.md)                                                     |
 | [`Products`](docs/products.md)                               | `GET`                          | [`/wc/store/v1/products`](docs/products.md#list-products)                                     |
@@ -175,4 +175,3 @@ If you're looking to add _new routes and endpoints_, rather than extending the S
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/README.md)
 
 <!-- /FEEDBACK -->
-

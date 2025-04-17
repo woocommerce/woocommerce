@@ -114,7 +114,18 @@ class BlockPatterns {
 
 		$patterns = $this->get_block_patterns();
 		foreach ( $patterns as $pattern ) {
-			$this->pattern_registry->register_block_pattern( $pattern['source'], $pattern, $this->get_patterns_dictionary() );
+			/**
+			 * Handle backward compatibility for pattern source paths.
+			 * Previously, patterns were stored with absolute paths. Now we store relative paths.
+			 * If we encounter a pattern with an absolute path (containing $patterns_path),
+			 * we keep it as is. Otherwise, we construct the full path from the relative source.
+			 *
+			 * Remove the backward compatibility logic in the WooCommerce 10.1 lifecycle: https://github.com/woocommerce/woocommerce/issues/57354.
+			 */
+			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
+			$pattern['source'] = $pattern_path;
+
+			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern, $this->get_patterns_dictionary() );
 		}
 	}
 
@@ -155,8 +166,9 @@ class BlockPatterns {
 		$patterns = array();
 
 		foreach ( $files as $file ) {
-			$data           = get_file_data( $file, $default_headers );
-			$data['source'] = $file;
+			$data = get_file_data( $file, $default_headers );
+			// We want to store the relative path in the cache, so we can use it later to register the pattern.
+			$data['source'] = str_replace( $this->patterns_path . '/', '', $file );
 			$patterns[]     = $data;
 		}
 
