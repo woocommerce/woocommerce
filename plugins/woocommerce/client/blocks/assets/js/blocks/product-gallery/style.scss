@@ -146,6 +146,22 @@ $dialog-padding: 20px;
 	}
 
 
+	&__thumbnail {
+		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		aspect-ratio: 1 / 1;
+	}
+
+	&__thumbnail__image {
+		cursor: pointer;
+		max-width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
+	}
+
 	&.wc-block-product-gallery-thumbnails--overflow {
 		$gradient-size: 20%;
 		$gradient-mid-step-size: 12%;
@@ -177,22 +193,6 @@ $dialog-padding: 20px;
 		&-left.wc-block-product-gallery-thumbnails--overflow-right {
 			mask-image: linear-gradient(to right, $gradient, $gradient-end);
 		}
-	}
-
-	&__thumbnail {
-		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
-		box-sizing: border-box;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		aspect-ratio: 1 / 1;
-	}
-
-	&__thumbnail__image {
-		cursor: pointer;
-		max-width: 100%;
-		aspect-ratio: 1 / 1;
-		object-fit: contain;
 	}
 }
 
