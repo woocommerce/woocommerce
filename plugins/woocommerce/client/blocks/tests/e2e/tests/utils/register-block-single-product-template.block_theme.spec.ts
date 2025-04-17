@@ -129,8 +129,7 @@ test.describe( 'registerProductBlockType registers', () => {
 		} );
 	} );
 
-	// Skipping test due to flaky nature of the test not being able to detect when the blocks in the iframes are available.
-	test.skip( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
+	test( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
 		admin,
 		page,
 	} ) => {
@@ -143,15 +142,19 @@ test.describe( 'registerProductBlockType registers', () => {
 			'site-editor.php?postType=wp_template&activeView=WooCommerce'
 		);
 
-		const singleProductTemplate = page.getByRole( 'button', {
-			name: 'Single Product',
-		} );
+		const singleProductTemplate = page.getByLabel( 'Single Product' );
 
 		await expect( singleProductTemplate ).toBeVisible();
 
 		const previewCanvas = singleProductTemplate.frameLocator(
 			'iframe[title="Editor canvas"]'
 		);
+
+		// Wait for the iframe to be fully loaded.
+		await previewCanvas.locator( 'body' ).evaluate( () => {
+			return document?.readyState === 'complete';
+		} );
+
 		for ( const blockType of productBlockTypes ) {
 			const block = previewCanvas.locator(
 				`[data-type="${ blockType }"]`
