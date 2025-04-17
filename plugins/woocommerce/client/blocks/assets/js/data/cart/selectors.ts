@@ -189,13 +189,33 @@ export const isItemPendingDelete = (
 	return state.cartItemsPendingDelete.includes( cartItemKey );
 };
 /**
- * Retrieves if the address is being applied for shipping.
+ * Retrieves if the address is being applied for shipping and/or billing.
  *
  * @param {CartState} state The current state.
- * @return {boolean} are shipping rates loading.
+ * @return {boolean} address is being applied for shipping and/or billing.
  */
 export const isCustomerDataUpdating = ( state: CartState ): boolean => {
 	return !! state.metaData.updatingCustomerData;
+};
+
+/**
+ * Retrieves if the address is being applied for billing only
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} address is being applied for billing only.
+ */
+export const isCustomerBillingDataUpdating = ( state: CartState ): boolean => {
+	return !! state.metaData.updatingCustomerBillingData;
+};
+
+/**
+ * Retrieves if the address is being applied for shipping only
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} address is being applied for shipping only.
+ */
+export const isCustomerShippingDataUpdating = ( state: CartState ): boolean => {
+	return !! state.metaData.updatingCustomerShippingData;
 };
 
 /**
