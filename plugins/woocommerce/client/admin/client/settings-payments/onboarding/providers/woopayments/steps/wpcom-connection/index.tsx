@@ -13,11 +13,11 @@ import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
 
 export const JetpackStep: React.FC = () => {
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, closeModal } = useOnboardingContext();
 
 	return (
 		<>
-			<WooPaymentsStepHeader onClose={ () => {} } />
+			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step--content">
 				<div className="settings-payments-onboarding-modal__step--content-jetpack">
 					<h1 className="settings-payments-onboarding-modal__step--content-jetpack-title">
