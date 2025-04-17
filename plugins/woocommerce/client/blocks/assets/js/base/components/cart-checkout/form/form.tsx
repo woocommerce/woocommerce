@@ -91,7 +91,9 @@ const Form = <
 
 	const { errors, previousErrors } = useFormValidation(
 		formFields,
-		addressType
+		addressType,
+		// Temporary override for shipping calculator address form.
+		addressType === 'shipping' ? ( values as AddressFormValues ) : undefined
 	);
 
 	useEffect( () => {

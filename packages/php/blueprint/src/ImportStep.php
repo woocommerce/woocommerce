@@ -110,7 +110,7 @@ class ImportStep {
 	protected function validate_step_schemas( StepProcessor $importer, StepProcessorResult $result ) {
 		$step_schema = call_user_func( array( $importer->get_step_class(), 'get_schema' ) );
 
-		$validate = $this->validator->validate( $this->step_definition, json_encode( $step_schema ) );
+		$validate = $this->validator->validate( $this->step_definition, wp_json_encode( $step_schema ) );
 
 		if ( ! $validate->isValid() ) {
 			$result->add_error( "Schema validation failed for step {$this->step_definition->step}" );

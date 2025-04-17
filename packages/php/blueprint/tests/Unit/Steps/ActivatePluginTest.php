@@ -18,15 +18,15 @@ class ActivatePluginTest extends TestCase {
 	 * Test the constructor and JSON preparation.
 	 */
 	public function testConstructorAndPrepareJsonArray() {
-		$plugin_name = 'sample-plugin/sample-plugin.php';
-		$activatePlugin = new ActivatePlugin( $plugin_name );
+		$plugin_name     = 'sample-plugin/sample-plugin.php';
+		$activate_plugin = new ActivatePlugin( $plugin_name );
 
 		$expected_array = array(
 			'step'       => 'activatePlugin',
 			'pluginPath' => $plugin_name,
 		);
 
-		$this->assertEquals( $expected_array, $activatePlugin->prepare_json_array() );
+		$this->assertEquals( $expected_array, $activate_plugin->prepare_json_array() );
 	}
 
 	/**

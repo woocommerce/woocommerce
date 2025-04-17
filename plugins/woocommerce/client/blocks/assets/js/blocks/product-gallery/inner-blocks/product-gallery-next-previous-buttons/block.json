@@ -9,17 +9,15 @@
 	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
 	"supports": {
-		"layout": {
-			"default": {
-				"type": "flex",
-				"verticalAlignment": "bottom"
-			},
-			"allowVerticalAlignment": true,
-			"allowJustification": false,
-			"allowOrientation": false,
-			"allowInheriting": false
+		"interactivity": true,
+		"color": {
+			"background": true,
+			"text": true
 		},
-		"interactivity": true
+		"shadow": true,
+		"__experimentalBorder": {
+			"radius": true
+		}
 	},
 	"ancestor": [ "woocommerce/product-gallery-large-image" ]
 }

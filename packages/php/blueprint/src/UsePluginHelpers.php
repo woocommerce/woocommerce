@@ -40,10 +40,10 @@ trait UsePluginHelpers {
 	public function is_plugin_dir( $slug ) {
 		$all_plugins = $this->wp_get_plugins();
 		foreach ( $all_plugins as $plugin_file => $plugin_data ) {
-			// Extract the directory name from the plugin file path
+			// Extract the directory name from the plugin file path.
 			$plugin_dir = explode( '/', $plugin_file )[0];
 
-			// Check for an exact match with the slug
+			// Check for an exact match with the slug.
 			if ( $plugin_dir === $slug ) {
 				return true;
 			}

@@ -2,7 +2,7 @@
 	"name": "woocommerce/product-stock-indicator",
 	"icon": "info",
 	"title": "Product Stock Indicator",
-	"description": "Display product stock status.",
+	"description": "Let shoppers know when products are out of stock or on backorder. This block is hidden when products are in stock.",
 	"category": "woocommerce-product-elements",
 	"attributes": {
 		"isDescendentOfQueryLoop": {
