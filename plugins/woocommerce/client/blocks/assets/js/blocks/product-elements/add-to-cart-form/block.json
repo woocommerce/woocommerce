@@ -18,7 +18,7 @@
 	},
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"viewScriptModule": "file:../woocommerce/add-to-cart-form.js",
+	"viewScriptModule": "woocommerce/add-to-cart-form",
 	"style": "file:../woocommerce/add-to-cart-form-style.css",
 	"editorStyle": "file:../woocommerce/add-to-cart-form-editor.css"
 }

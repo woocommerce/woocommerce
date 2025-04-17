@@ -85,6 +85,6 @@
 	],
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"viewScriptModule": "file:../woocommerce/product-button.js",
+	"viewScriptModule": "woocommerce/product-button",
 	"style": "file:../woocommerce/product-button-style.css"
 }

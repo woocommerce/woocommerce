@@ -19,7 +19,7 @@
 	},
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"viewScriptModule": "file:../woocommerce/add-to-cart-with-options.js",
+	"viewScriptModule": "woocommerce/add-to-cart-with-options",
 	"style": "file:../woocommerce/add-to-cart-with-options-style.css",
 	"editorStyle": "file:../woocommerce/add-to-cart-with-options-editor.css"
 }

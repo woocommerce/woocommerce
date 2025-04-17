@@ -13,5 +13,5 @@
 		"html": false
 	},
 	"usesContext": [ "query", "filterParams" ],
-	"viewScriptModule": "file:../woocommerce/product-filter-price.js"
+	"viewScriptModule": "woocommerce/product-filter-price"
 }

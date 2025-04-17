@@ -53,7 +53,7 @@
 			"type": "string"
 		}
 	},
-	"viewScriptModule": "file:../woocommerce/product-filter-chips.js",
+	"viewScriptModule": "woocommerce/product-filter-chips",
 	"style": "file:../woocommerce/product-filter-chips-style.css",
 	"editorStyle": "file:../woocommerce/product-filter-chips-editor.css"
 }

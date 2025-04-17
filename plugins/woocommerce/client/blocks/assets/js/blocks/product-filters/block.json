@@ -47,7 +47,7 @@
 			"isPreview": true
 		}
 	},
-	"viewScriptModule": "file:../woocommerce/product-filters.js",
+	"viewScriptModule": "woocommerce/product-filters",
 	"style": "file:../woocommerce/product-filters-style.css",
 	"editorStyle": "file:../woocommerce/product-filters-editor.css"
 }

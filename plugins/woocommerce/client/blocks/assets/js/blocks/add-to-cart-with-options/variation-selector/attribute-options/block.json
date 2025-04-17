@@ -26,6 +26,6 @@
 		"woocommerce/attributeName",
 		"woocommerce/attributeTerms"
 	],
-	"viewScriptModule": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-options.js",
+	"viewScriptModule": "woocommerce/add-to-cart-with-options-variation-selector-attribute-options",
 	"style": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-options-style.css"
 }

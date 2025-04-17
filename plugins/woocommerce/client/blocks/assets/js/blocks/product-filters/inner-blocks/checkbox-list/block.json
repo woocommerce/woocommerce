@@ -44,7 +44,7 @@
 			"default": ""
 		}
 	},
-	"viewScriptModule": "file:../woocommerce/product-filter-checkbox-list.js",
+	"viewScriptModule": "woocommerce/product-filter-checkbox-list",
 	"style": "file:../woocommerce/product-filter-checkbox-list-style.css",
 	"editorStyle": "file:../woocommerce/product-filter-checkbox-list-editor.css"
 }
