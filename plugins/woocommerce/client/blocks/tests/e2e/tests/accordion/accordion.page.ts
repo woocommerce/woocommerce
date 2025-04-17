@@ -71,6 +71,7 @@ export class AccordionPage {
 		} );
 		await this.editor.canvas
 			.getByRole( 'document', { name: 'Empty block' } )
+			.nth( 0 )
 			.fill( content );
 	}
 
