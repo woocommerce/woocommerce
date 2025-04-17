@@ -47,8 +47,8 @@ trait CheckoutTrait {
 	 */
 	private function process_without_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$initial_status = $this->order->get_status();
-		
-		// Transition the order to pending, and then completed. This ensures 
+
+		// Transition the order to pending, and then completed. This ensures
 		// transactional emails fire for pending_to_complete events. Look at the
 		// comment below to inspect what we do for possible custom statuses
 		// set by the plugin consumers.
@@ -58,7 +58,7 @@ trait CheckoutTrait {
 		// moving to payment processing. If it's not the case we're dealing with
 		// a custom status defined by the plugin consumer. In this case we don't
 		// want order stat to move to `pending`. The reason for it is that
-		// `pending` orders currently transist to `completed` state by default, 
+		// `pending` orders currently transist to `completed` state by default,
 		// whereas we want the custom status to be preserved for the order.
 		if ( $initial_status !== $this->order_controller->default_order_status() ) {
 			$this->order->update_status( $initial_status );
@@ -82,7 +82,7 @@ trait CheckoutTrait {
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		try {
 			$initial_status = $this->order->get_status();
-			
+
 			// Transition the order to pending before making payment.
 			$this->order->update_status( 'pending' );
 
@@ -90,7 +90,7 @@ trait CheckoutTrait {
 			// moving to payment processing. If it's not the case we're dealing with
 			// a custom status defined by the plugin consumer. In this case we don't
 			// want order stat to move to `pending`. The reason for it is that
-			// `pending` orders currently transist to `completed` state by default, 
+			// `pending` orders currently transist to `completed` state by default,
 			// whereas we want the custom status to be preserved for the order.
 			if ( $initial_status !== $this->order_controller->default_order_status() ) {
 				$this->order->update_status( $initial_status );
