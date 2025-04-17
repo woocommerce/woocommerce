@@ -3,12 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import StripeSpinner from '../stripe-spinner';
 import { useEffect } from 'react';
 
 /**
  * Internal dependencies
  */
+import StripeSpinner from '../stripe-spinner';
 import Stepper from '~/settings-payments/onboarding/components/stepper';
 import { useOnboardingContext } from '../../data/onboarding-context';
 
