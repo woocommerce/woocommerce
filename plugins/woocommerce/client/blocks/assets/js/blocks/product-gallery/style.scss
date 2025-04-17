@@ -145,6 +145,42 @@ $dialog-padding: 20px;
 		pointer-events: auto;
 	}
 
+
+	&.wc-block-product-gallery-thumbnails--overflow {
+		$mid-gradient-size: 4%;
+		$mid-gradient-start: rgba(0, 0, 0, 0.6) $mid-gradient-size;
+		$mid-gradient-end: rgba(0, 0, 0, 0.6) calc(100% - $mid-gradient-size);
+		$gradient-size: 20%;
+		$gradient-start: black $gradient-size;
+		$gradient-end: black calc(100% - $gradient-size);
+		$gradient-top: transparent $mid-gradient-start $gradient-start;
+		$gradient-bottom: $gradient-end $mid-gradient-end transparent;
+
+		&-top {
+			mask-image: linear-gradient(to bottom, $gradient-top, black 100%);
+		}
+
+		&-bottom {
+			mask-image: linear-gradient(to bottom, black 0, $gradient-end, $mid-gradient-end, transparent);
+		}
+
+		&-top.wc-block-product-gallery-thumbnails--overflow-bottom {
+			mask-image: linear-gradient(to bottom, transparent, $mid-gradient-start $gradient-start, transparent);
+		}
+
+		&-left {
+			mask-image: linear-gradient(to right, transparent, black $gradient-size, black 100%);
+		}
+
+		&-right {
+			mask-image: linear-gradient(to right, black 0, black calc(100% - $gradient-size), transparent);
+		}
+
+		&-left.wc-block-product-gallery-thumbnails--overflow-right {
+			mask-image: linear-gradient(to right, transparent, black $gradient-size, black calc(100% - $gradient-size), transparent);
+		}
+	}
+
 	&__thumbnail {
 		border: $thumbnails-border-width solid rgba($color: #000, $alpha: 0.1);
 		box-sizing: border-box;
@@ -159,53 +195,6 @@ $dialog-padding: 20px;
 		max-width: 100%;
 		aspect-ratio: 1 / 1;
 		object-fit: contain;
-	}
-
-	&::before,
-	&::after {
-		content: "";
-		position: absolute;
-		opacity: 0;
-		transition: opacity 0.2s linear;
-		pointer-events: none;
-	}
-
-	&.wc-block-product-gallery-thumbnails--overflow {
-		&-top::before,
-		&-bottom::after {
-			left: 0;
-			height: $thumbnails-gradient-size;
-			width: 100%;
-			opacity: 1;
-		}
-
-		&-top::before {
-			top: 0;
-			@include gradient(bottom);
-		}
-
-		&-bottom::after {
-			bottom: 0;
-			@include gradient(top);
-		}
-
-		&-right::after,
-		&-left::before {
-			top: 0;
-			height: 100%;
-			width: $thumbnails-gradient-size;
-			opacity: 1;
-		}
-
-		&-left::before {
-			left: 0;
-			@include gradient(right);
-		}
-
-		&-right::after {
-			right: 0;
-			@include gradient(left);
-		}
 	}
 }
 
