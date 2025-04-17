@@ -316,6 +316,7 @@ body.wc-block-product-gallery-dialog-open {
 // On mobile devices (<600px):
 // - Product gallery groups are stacked vertically
 // - Thumbnails appear below the main gallery image and are arranged horizontally in a row
+// - Next/Previous buttons are hidden
 @include breakpoint("<600px") {
 	.wc-block-product-gallery {
 		@include horizontal-thumbnails;
@@ -324,11 +325,12 @@ body.wc-block-product-gallery-dialog-open {
 			flex-direction: column;
 		}
 
-		.wc-block-product-gallery-thumbnails {
-			order: 1;
+		.wc-block-product-gallery-large-image-next-previous {
+			display: none;
 		}
 
 		.wc-block-product-gallery-thumbnails {
+			order: 1;
 			width: 100%;
 			height: 20%;
 			aspect-ratio: 5 / 1 !important;

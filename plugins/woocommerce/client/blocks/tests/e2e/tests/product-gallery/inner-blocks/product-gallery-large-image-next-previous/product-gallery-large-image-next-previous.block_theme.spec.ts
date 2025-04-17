@@ -119,6 +119,32 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( block ).toBeVisible();
 	} );
 
+	test( 'Next/Previous Button block is hidden on mobile', async ( {
+		admin,
+		editor,
+		page,
+		pageObject,
+	} ) => {
+		await addBlock( admin, editor );
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+
+		await page.setViewportSize( {
+			height: 667,
+			width: 390, // iPhone 12 Pro
+		} );
+
+		const block = await pageObject.getNextPreviousButtonsBlock( {
+			page: 'frontend',
+		} );
+
+		await expect( block ).toBeHidden();
+	} );
+
 	test.describe( `${ blockData.name } Settings`, () => {
 		test( 'Show button inside of the image', async ( {
 			page,
