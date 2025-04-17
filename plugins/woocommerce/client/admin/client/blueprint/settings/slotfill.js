@@ -14,6 +14,7 @@ import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
 import { settings, plugins, layout } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -85,8 +86,19 @@ const Blueprint = () => {
 			if ( url ) {
 				window.URL.revokeObjectURL( url );
 			}
+
+			recordEvent( 'blueprint_export_success', {
+				has_plugins: _steps.plugins?.length > 0,
+				has_themes: _steps.themes?.length > 0,
+				has_settings: _steps.settings?.length > 0,
+				settings_exported: _steps.settings,
+			} );
 		} catch ( e ) {
 			setError( e.message );
+
+			recordEvent( 'blueprint_export_error', {
+				error_message: e.message || 'unknown',
+			} );
 		}
 
 		setExportEnabled( true );
@@ -130,6 +142,9 @@ const Blueprint = () => {
 								target="_blank"
 								className="woocommerce-admin-inline-documentation-link"
 								rel="noreferrer"
+								onClick={ () => {
+									recordEvent( 'blueprint_learn_more_click' );
+								} }
 							>
 								{ __( 'Learn more', 'woocommerce' ) }
 							</a>
