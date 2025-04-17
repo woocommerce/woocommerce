@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Move generateUniqueId to @woocommerce/utils package and refactor useApplyEditorStyles hook to use it internally, removing the need for consumers to provide a unique style ID.
+Move generateUniqueId to @woocommerce/utils package.
