@@ -169,12 +169,22 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.8.1 2025-04-09 =
+= 9.8.0 2025-05-06 =
 
 **WooCommerce**
 
-* Fix - Fix a bug in which having 2x of a sold individually item in cart would throw a fatal. [#57070](https://github.com/woocommerce/woocommerce/pull/57070)
-* Dev - Fix flakiness in `product/product-edit.spec.js` [#56900](https://github.com/woocommerce/woocommerce/pull/56900)
+* Fix - Fix coming soon breaks other page [#57216](https://github.com/woocommerce/woocommerce/pull/57216)
+* Fix - Fix deprecated function WCAdminHelper::is_store_page() used [#57169](https://github.com/woocommerce/woocommerce/pull/57169)
+* Fix - Fix implicitly nullable parameters deprecation warnings in PluginsHelper and CheckoutSchema [#57212](https://github.com/woocommerce/woocommerce/pull/57212)
+* Fix - Fix issue in which client side validation in Checkout didn't work. [#57278](https://github.com/woocommerce/woocommerce/pull/57278)
+* Fix - Fix undefined variable warning when saving billing address. [#57189](https://github.com/woocommerce/woocommerce/pull/57189)
+* Fix - Fix wc admin scripts loading on unrelated WP admin pages [#57186](https://github.com/woocommerce/woocommerce/pull/57186)
+* Fix - Store API - Move cart init and validation back within checkout route to avoid loading early. [#57255](https://github.com/woocommerce/woocommerce/pull/57255)
+* Update - Merge legacy cart and block based cart shipping calculation methods to ensure shipping calculations happen only when a full address has been provided. [#57176](https://github.com/woocommerce/woocommerce/pull/57176)
+* Dev - Bump wireit dependency version to latest. [#57313](https://github.com/woocommerce/woocommerce/pull/57313)
+* Dev - Introduce `wpCoreVersion` worker fixture for handling backwards compatibilty in Blocks E2E tests. [#56584](https://github.com/woocommerce/woocommerce/pull/56584)
+* Dev - Make E2E tests compatible with WP v6.8 [#56262](https://github.com/woocommerce/woocommerce/pull/56262)
+* Dev - Remove legacy filters pattern. [#56304](https://github.com/woocommerce/woocommerce/pull/56304)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
