@@ -105,8 +105,8 @@ class ListTable extends WP_List_Table {
 		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
-		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'created_via_filter' ) );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
 
 		$this->items_per_page();
 		set_screen_options();
@@ -592,7 +592,7 @@ class ListTable extends WP_List_Table {
 		$current_created_via = isset( $_GET['_created_via'] ) ? sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) : '';
 
 		$created_via_options = array(
-			''             => __( 'Filter by sales channel', 'woocommerce' ),
+			''             => __( 'All sales channels', 'woocommerce' ),
 			'admin'        => __( 'Admin', 'woocommerce' ),
 			'checkout'     => __( 'Legacy Checkout', 'woocommerce' ),
 			'store-api'    => __( 'Blocks Checkout', 'woocommerce' ),
