@@ -16,6 +16,7 @@ import {
 	isString,
 } from '@woocommerce/types';
 import { noticeContexts } from '@woocommerce/base-context/event-emit/utils';
+import { CheckoutPutData } from '../checkout/types';
 
 type ApiParamError = {
 	param: string;
@@ -280,7 +281,7 @@ export const processErrorResponse = (
 /**
  * Clears error notices for fields that have been successfully updated.
  */
-export const clearFieldErrorNotices = ( data ) => {
+export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
 	// Check if additional fields were updated successfully
 	if ( data.additional_fields ) {
 		const noticeIds = Object.keys( data.additional_fields );
