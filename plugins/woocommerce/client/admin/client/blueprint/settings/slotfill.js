@@ -34,7 +34,7 @@ const icons = {
 
 const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
-	const [ error, setError ] = useState( null );
+	const [ exportError, setExportError ] = useState( null );
 
 	const blueprintStepGroups =
 		window.wcSettings?.admin?.blueprint_step_groups || [];
@@ -94,7 +94,7 @@ const Blueprint = () => {
 				settings_exported: _steps.settings,
 			} );
 		} catch ( e ) {
-			setError( e.message );
+			setExportError( e.message );
 
 			recordEvent( 'blueprint_export_error', {
 				error_message: e.message || 'unknown',
@@ -117,17 +117,6 @@ const Blueprint = () => {
 
 	return (
 		<div className="blueprint-settings-slotfill">
-			{ error && (
-				<Notice
-					status="error"
-					onRemove={ () => {
-						setError( null );
-					} }
-					isDismissible
-				>
-					{ error }
-				</Notice>
-			) }
 			<h3>{ __( 'Blueprint', 'woocommerce' ) }</h3>
 			<p className="blueprint-settings-intro-text">
 				{ createInterpolateElement(
@@ -167,6 +156,18 @@ const Blueprint = () => {
 					'woocommerce'
 				) }
 			</p>
+			{ exportError && (
+				<Notice
+					className="blueprint-export-error"
+					status="error"
+					onRemove={ () => {
+						setExportError( null );
+					} }
+					isDismissible
+				>
+					{ exportError }
+				</Notice>
+			) }
 			{ blueprintStepGroups.map( ( group, index ) => (
 				<div key={ index } className="blueprint-settings-export-group">
 					<Icon
