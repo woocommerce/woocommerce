@@ -116,12 +116,19 @@ export const createKycAccountSession = async (
 	apiURL: string,
 	poEligible: boolean
 ): Promise< AccountKycResult > => {
+	const selfAssessmentData = fromDotNotation( data );
+	const requestData: Record< string, unknown > = {
+		progressive: isPoEligible,
+	};
+
+	// Only pass the self assessment data if at least one field is set.
+	if ( Object.keys( selfAssessmentData ).length > 0 ) {
+		requestData.self_assessment = selfAssessmentData;
+	}
+
 	return await apiFetch< AccountKycResult >( {
 		url: apiURL,
 		method: 'POST',
-		data: {
-			self_assessment: fromDotNotation( data ),
-			progressive: poEligible,
-		},
+		data: requestData,
 	} );
 };
