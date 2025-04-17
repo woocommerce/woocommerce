@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { createNotice, DEFAULT_ERROR_MESSAGE } from '@woocommerce/base-utils';
+import {
+	createNotice,
+	DEFAULT_ERROR_MESSAGE,
+	removeNoticeById,
+} from '@woocommerce/base-utils';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	objectHasProp,
@@ -156,6 +160,7 @@ const getNoticeOptionsForParamError = (
 	context?: string
 ) => {
 	let additionalFieldContext: string | undefined = '';
+	let additionalFieldId: string | undefined = '';
 	// Check if this error response comes from an additional field.
 	if (
 		isObject( data ) &&
@@ -168,8 +173,14 @@ const getNoticeOptionsForParamError = (
 		);
 	}
 
+	// If the error response comes from an additional field we need to use the key as the ID so we can remove it later.
+	// Its also needed to ensure additional fields dont replace each other when there are multiple.
+	if ( objectHasProp( data, 'key' ) && isString( data.key ) ) {
+		additionalFieldId = data.key;
+	}
+
 	return {
-		id,
+		id: additionalFieldId || id,
 		context:
 			context ||
 			additionalFieldContext ||
@@ -264,4 +275,19 @@ export const processErrorResponse = (
 			response?.data?.context ||
 			getErrorContextFromCode( response.code ),
 	} );
+};
+
+/**
+ * Clears error notices for fields that have been successfully updated.
+ */
+export const clearFieldErrorNotices = ( data ) => {
+	// Check if additional fields were updated successfully
+	if ( data.additional_fields ) {
+		const noticeIds = Object.keys( data.additional_fields );
+		noticeIds.forEach( ( noticeId ) => {
+			removeNoticeById( noticeId, {
+				context: noticeContexts.CART, // TODO: Use the same context from the error response
+			} );
+		} );
+	}
 };

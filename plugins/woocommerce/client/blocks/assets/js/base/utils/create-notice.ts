@@ -15,6 +15,7 @@ import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 import { noticeContexts } from '../context/event-emit/utils';
 import type { PaymentStoreDescriptor } from '../../data/payment';
 import type { StoreNoticesStoreDescriptor } from '../../data/store-notices';
+import { checkPaymentMethodsCanPay } from 'assets/js/data/payment/utils/check-payment-methods';
 
 export const DEFAULT_ERROR_MESSAGE = __(
 	'Something went wrong. Please contact us to get assistance.',
@@ -83,4 +84,17 @@ export const removeNoticesWithContext = ( context: string ) => {
 	getNotices( context ).forEach( ( notice ) => {
 		removeNotice( notice.id, context );
 	} );
+};
+
+/**
+ * Remove a notice by its ID.
+ *
+ * @param {string} id - The ID of the notice to remove.
+ */
+export const removeNoticeById = (
+	id: string,
+	options: Partial< NoticeOptions > = {}
+) => {
+	const { removeNotice } = dispatch( noticesStore );
+	removeNotice( id, options?.context );
 };
