@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createNotice,
-	DEFAULT_ERROR_MESSAGE,
-	removeNoticeById,
-} from '@woocommerce/base-utils';
+import { createNotice, DEFAULT_ERROR_MESSAGE } from '@woocommerce/base-utils';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	objectHasProp,
@@ -276,19 +272,4 @@ export const processErrorResponse = (
 			response?.data?.context ||
 			getErrorContextFromCode( response.code ),
 	} );
-};
-
-/**
- * Clears error notices for fields that have been successfully updated.
- */
-export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
-	// Check if additional fields were updated successfully
-	if ( data.additional_fields ) {
-		const noticeIds = Object.keys( data.additional_fields );
-		noticeIds.forEach( ( noticeId ) => {
-			removeNoticeById( noticeId, {
-				context: noticeContexts.CART, // TODO: Use the same context from the error response
-			} );
-		} );
-	}
 };

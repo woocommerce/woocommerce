@@ -37,6 +37,7 @@ import {
 	CONTACT_FORM_KEYS,
 	ORDER_FORM_KEYS,
 } from '../../settings/blocks/constants';
+import { removeNoticeById } from '@woocommerce/base-utils';
 
 /**
  * Based on the given observers, create Error Notices where necessary
@@ -270,4 +271,17 @@ export const validateAdditionalFields = (
 	}
 
 	return true;
+};
+
+/**
+ * Clears error notices for fields that have been successfully updated.
+ */
+export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
+	// Check if additional fields were updated successfully
+	if ( data.additional_fields ) {
+		const noticeIds = Object.keys( data.additional_fields );
+		noticeIds.forEach( ( noticeId ) => {
+			removeNoticeById( noticeId );
+		} );
+	}
 };

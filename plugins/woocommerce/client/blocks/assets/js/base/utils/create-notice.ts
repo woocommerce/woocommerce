@@ -89,11 +89,28 @@ export const removeNoticesWithContext = ( context: string ) => {
  * Remove a notice by its ID.
  *
  * @param {string} id - The ID of the notice to remove.
+ * @param {string} [context] - The context of the notice to remove.
  */
-export const removeNoticeById = (
-	id: string,
-	options: Partial< NoticeOptions > = {}
-) => {
+export const removeNoticeById = ( id: string, context?: string ) => {
 	const { removeNotice } = dispatch( noticesStore );
-	removeNotice( id, options?.context );
+
+	if ( context ) {
+		removeNotice( id, context );
+		return;
+	}
+
+	const selectors = select(
+		'wc/store/store-notices'
+	) as CurriedSelectorsOf< StoreNoticesStoreDescriptor >;
+	const containers = selectors.getRegisteredContainers();
+	const { getNotices } = select( noticesStore );
+
+	// At this point we are removing the notice from all WC contexts since we don't know which one it is.
+	containers.forEach( ( container ) => {
+		getNotices( container ).forEach( ( notice ) => {
+			if ( notice.id === id ) {
+				removeNotice( notice.id, container );
+			}
+		} );
+	} );
 };
