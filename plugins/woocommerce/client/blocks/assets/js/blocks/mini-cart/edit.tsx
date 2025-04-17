@@ -98,6 +98,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 
 	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
 	useApplyEditorStyles(
+		'mini-cart',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-mini-cart__badge) {
 				color: ${ editorBackgroundColor };

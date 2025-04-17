@@ -69,6 +69,7 @@ export default function AttributeOptionsEdit(
 
 	// Apply selected variation pill styles based on Site Editor's background and text colors.
 	useApplyEditorStyles(
+		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
 				background-color: ${ editorColor };
