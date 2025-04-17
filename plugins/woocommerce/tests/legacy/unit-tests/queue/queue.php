@@ -144,14 +144,14 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 			array(
 				'hook'    => $hook,
 				'group'   => $group_id,
-				'orderby' => 'action_id'
+				'orderby' => 'action_id',
 			)
 		);
 
 		$this->assertCount( 4, $actions );
 		$this->assertSame(
 			[ ActionQueuePriority::URGENT, ActionQueuePriority::HIGH, ActionQueuePriority::NORMAL, ActionQueuePriority::LOW ],
-			array_map( fn ( ActionScheduler_Action $action) => $action->get_priority(), array_values( $actions ) )
+			array_map( fn( ActionScheduler_Action $action ) => $action->get_priority(), array_values( $actions ) )
 		);
 	}
 }
