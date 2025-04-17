@@ -175,9 +175,9 @@ jQuery( function( $ ) {
 	 * This is necessary because the link got the role="button" attribute
 	 * and needs to act like a button.
 	 */
-	AddToCartHandler.prototype.onKeydownRemoveFromCart = function( e ) {
-		if ( e.key === ' ' ) {
-			e.preventDefault();
+	AddToCartHandler.prototype.onKeydownRemoveFromCart = function( event ) {
+		if ( event.key === ' ' ) {
+			event.preventDefault();
 			$( this ).trigger( 'click' );
 		}
 	};
