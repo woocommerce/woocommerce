@@ -119,7 +119,7 @@ abstract class WC_Session {
 	/**
 	 * Get customer ID.
 	 *
-	 * @return int
+	 * @return string
 	 */
 	public function get_customer_id() {
 		return $this->_customer_id;
