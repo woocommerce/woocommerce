@@ -338,12 +338,12 @@ class RestApi {
 	 * @return bool Returns true if imports are allowed, false otherwise.
 	 */
 	private function can_import_blueprint() {
-		// Check if override constant is defined and true
+		// Check if override constant is defined and true.
 		if ( defined( 'ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE' ) && ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE ) {
 			return true;
 		}
 
-		// Only allow imports in coming soon mode
+		// Only allow imports in coming soon mode.
 		if ( $this->coming_soon_helper->is_site_live() ) {
 			return false;
 		}
