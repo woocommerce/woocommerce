@@ -4,7 +4,10 @@ namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
+use Automattic\WooCommerce\Blueprint\Logger;
+use Automattic\WooCommerce\Blueprint\Steps\Step;
 use WP_Error;
+use WC_Log_Levels;
 
 /**
  * Class ExportSchema
@@ -93,25 +96,56 @@ class ExportSchema {
 			}
 		}
 
+		$export_steps      = array();
+		$exporters_classes = array();
 		// Make sure the user has the required capabilities to export the steps.
 		foreach ( $exporters as $exporter ) {
 			if ( ! $exporter->check_step_capabilities() ) {
 				return new WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export for step: ' . $exporter->get_step_name() );
 			}
+
+			$step_name           = $exporter instanceof HasAlias ? $exporter->get_alias() : $exporter->get_step_name();
+			$export_steps[]      = $step_name;
+			$exporters_classes[] = get_class( $exporter );
 		}
+
+		$logger = new Logger();
+		$logger->log(
+			sprintf( 'Starting export of %d steps', count( $export_steps ) ),
+			WC_Log_Levels::INFO,
+			array(
+				'steps'     => $export_steps,
+				'exporters' => $exporters_classes,
+			)
+		);
 
 		foreach ( $exporters as $exporter ) {
-			$this->publish( 'onBeforeExport', $exporter );
-			$step = $exporter->export();
+			try {
+				$this->publish( 'onBeforeExport', $exporter );
+				$step = $exporter->export();
+				$this->add_result_to_schema( $schema, $step );
 
-			if ( is_array( $step ) ) {
-				foreach ( $step as $_step ) {
-					$schema['steps'][] = $_step->get_json_array();
-				}
-			} else {
-				$schema['steps'][] = $step->get_json_array();
+			} catch ( \Throwable $e ) {
+				$step_name = $exporter instanceof HasAlias ? $exporter->get_alias() : $exporter->get_step_name();
+				$logger->log(
+					sprintf( 'Export "%s" step failed', $step_name ),
+					WC_Log_Levels::ERROR,
+					array(
+						'error' => $e->getMessage(),
+					)
+				);
+				return new WP_Error( 'wooblueprint_export_step_failed', 'Export step failed: ' . $e->getMessage() );
 			}
 		}
+
+		$logger->log(
+			sprintf( 'Export of %d steps completed', count( $export_steps ) ),
+			WC_Log_Levels::INFO,
+			array(
+				'steps'     => $export_steps,
+				'exporters' => $exporters_classes,
+			)
+		);
 
 		return $schema;
 	}
@@ -131,5 +165,22 @@ class ExportSchema {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Add export result to the schema array.
+	 *
+	 * @param array      $schema Schema array to add steps to.
+	 * @param array|Step $step   Step or array of steps to add.
+	 */
+	private function add_result_to_schema( array &$schema, $step ): void {
+		if ( is_array( $step ) ) {
+			foreach ( $step as $_step ) {
+				$schema['steps'][] = $_step->get_json_array();
+			}
+			return;
+		}
+
+		$schema['steps'][] = $step->get_json_array();
 	}
 }
