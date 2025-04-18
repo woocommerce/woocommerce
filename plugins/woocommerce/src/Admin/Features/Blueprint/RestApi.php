@@ -291,6 +291,17 @@ class RestApi {
 	 * @return array
 	 */
 	public function import_step( \WP_REST_Request $request ) {
+		if ( ! $this->can_import_blueprint() ) {
+			return array(
+				'success'  => false,
+				'messages' => array(
+					array(
+						'message' => __( 'Blueprint imports are disabled', 'woocommerce' ),
+						'type'    => 'error',
+					),
+				),
+			);
+		}
 		// Get the raw body size.
 		$body_size = strlen( $request->get_body() );
 		if ( $body_size > $this->get_max_file_size() ) {
