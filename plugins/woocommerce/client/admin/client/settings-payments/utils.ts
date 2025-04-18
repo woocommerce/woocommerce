@@ -297,7 +297,7 @@ export const shouldRenderPaymentMethod = (
 		return true;
 	}
 
-	// However, in WooPayments < 9.2, we use the `enabled` property (retured from the server) to determine if the method should be rendered.
+	// However, in WooPayments < 9.2, we use the `enabled` property (returned from the server) to determine if the method should be rendered.
 	if ( method.enabled ) {
 		return true;
 	}
