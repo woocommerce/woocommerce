@@ -15,7 +15,8 @@
 				"flexWrap": "nowrap"
 			},
 			"allowOrientation": true,
-			"allowSwitching": false
+			"allowEditing": true,
+			"allowJustification": false
 		}
 	},
 	"textdomain": "woocommerce",
