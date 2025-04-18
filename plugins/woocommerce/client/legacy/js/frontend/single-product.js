@@ -73,12 +73,6 @@ jQuery( function( $ ) {
 			
 			$tabs.eq( targetIndex ).focus();
 		} )
-		.on( 'focusout', '.wc-tabs li a, ul.tabs li a, #respond p.stars a', function() {
-			if ( ! productGalleryElement.data( 'flexslider' ) ) {
-				// Don't do anything if gallery does not exist.
-				return;
-			}
-		} )
 		// Review link
 		.on( 'click', 'a.woocommerce-review-link', function() {
 			$( '.reviews_tab a' ).trigger( 'click' );
@@ -143,7 +137,7 @@ jQuery( function( $ ) {
 		 * Handle keyup events for tabs, tabs li a, and respond p.stars a.
 		 * The stopPropagation is used to prevent the keyup event from being triggered on the flexslider.
 		 */
-		.on( 'keyup', '.wc-tabs li a, ul.tabs li a,#respond p.stars a', function( e ) {
+		.on( 'keyup', '.wc-tabs li a, ul.tabs li a, #respond p.stars a', function( e ) {
 			var direction = e.key;
 			var next = [ 'ArrowRight', 'ArrowDown' ];
 			var prev = [ 'ArrowLeft', 'ArrowUp' ];
