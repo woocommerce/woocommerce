@@ -1501,21 +1501,27 @@ class Checkout extends MockeryTestCase {
 	 * Test that custom status 'ready_for_pickup' is not changed when order is finished.
 	 */
 	public function test_custom_status_not_changed_on_payment_complete() {
-		add_filter( 'woocommerce_register_shop_order_post_statuses', function ( $order_statuses ) {
-			$order_statuses['wc-ready_for_pickup'] = array(
-				'label'                     => 'Ready for Pickup',
-				'public'                    => false,
-				'exclude_from_search'       => false,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-			);
-			return $order_statuses;
-		} );
-		
-		add_filter( 'wc_order_statuses', function ( $order_statuses ) {
-			$order_statuses['wc-ready_for_pickup'] = 'Ready for Pickup';
-			return $order_statuses;
-		});
+		add_filter(
+			'woocommerce_register_shop_order_post_statuses',
+			function ( $order_statuses ) {
+				$order_statuses['wc-ready_for_pickup'] = array(
+					'label'                     => 'Ready for Pickup',
+					'public'                    => false,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+				);
+				return $order_statuses;
+			}
+		);
+
+		add_filter(
+			'wc_order_statuses',
+			function ( $order_statuses ) {
+				$order_statuses['wc-ready_for_pickup'] = 'Ready for Pickup';
+				return $order_statuses;
+			}
+		);
 
 		// Create a simple product and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
