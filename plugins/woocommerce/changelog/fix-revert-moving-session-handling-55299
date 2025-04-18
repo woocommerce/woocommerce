@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API - Move cart init and validation back within checkout route to avoid loading early.

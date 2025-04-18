@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\StoreApi;
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Automattic\WooCommerce\StoreApi\SessionHandler;
 
 /**
  * Authentication class.
