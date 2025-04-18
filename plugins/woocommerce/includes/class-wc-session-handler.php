@@ -366,7 +366,6 @@ class WC_Session_Handler extends WC_Session {
 	 * @param string|mixed $old_session_key Optional session ID prior to user log-in.  If $old_session_key is not tied
 	 *                                      to a user, the session will be deleted tied to that key will be deleted with the
 	 *                                      assumption that it was migrated to the current session being saved.
-	 *
 	 */
 	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
@@ -391,10 +390,7 @@ class WC_Session_Handler extends WC_Session {
 			 * self::init_session_cookie() upon user login detection initially occurs. However, since some third-party
 			 * extensions override this method, relocating this logic could break backward compatibility.
 			 */
-			if ( ! empty( $old_session_key ) &&
-			     $this->_customer_id !== $old_session_key &&
-			     ! is_object( get_user_by( 'id', $old_session_key ) )
-			) {
+			if ( ! empty( $old_session_key ) && $this->_customer_id !== $old_session_key && ! is_object( get_user_by( 'id', $old_session_key ) ) ) {
 				$this->delete_session( $old_session_key );
 			}
 		}
