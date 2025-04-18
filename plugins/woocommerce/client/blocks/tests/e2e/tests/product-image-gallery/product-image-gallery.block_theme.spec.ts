@@ -43,6 +43,27 @@ test.describe( `${ blockData.name }`, () => {
 		);
 	} );
 
+	test( 'should not switch to the next image when the user cursor is focused on the tabs', async ( {
+		page,
+	} ) => {
+		await page.goto( blockData.productPage );
+
+		const activeImageSrc = await page
+			.locator( '.flex-active' )
+			.getAttribute( 'src' );
+
+		await page.getByRole( 'tab', { name: 'Reviews' } ).focus();
+
+		await page.keyboard.press( 'ArrowRight' );
+
+		const newActiveImage = page.locator( '.flex-active' );
+
+		await expect( newActiveImage ).toHaveAttribute(
+			'src',
+			activeImageSrc as string
+		);
+	} );
+
 	test( 'should switch to the next image when the user cursor is focused on tabs', async ( {
 		page,
 	} ) => {
