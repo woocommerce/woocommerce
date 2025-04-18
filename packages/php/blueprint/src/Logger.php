@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use WC_Log_Levels;
 use WC_Logger_Interface;
 
@@ -9,6 +10,8 @@ use WC_Logger_Interface;
  * Class Logger
  */
 class Logger {
+	use UseWPFunctions;
+
 	/**
 	 * WooCommerce logger class instance.
 	 *
@@ -37,7 +40,7 @@ class Logger {
 			array_merge(
 				array(
 					'source'  => 'wc-blueprint',
-					'user_id' => get_current_user_id(),
+					'user_id' => $this->wp_get_current_user_id(),
 				),
 				$context
 			)

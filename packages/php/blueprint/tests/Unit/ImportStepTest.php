@@ -4,12 +4,11 @@ use Automattic\WooCommerce\Blueprint\Tests\stubs\Importers\DummyImporter;
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Steps\DummyStep;
 use Automattic\WooCommerce\Blueprint\ImportStep;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
-use WP_UnitTestCase;
 
 /**
  * Class ImportStepTest
  */
-class ImportStepTest extends WP_UnitTestCase {
+class ImportStepTest extends \WP_UnitTestCase {
 
 	/**
 	 * Tear down Mockery after each test.

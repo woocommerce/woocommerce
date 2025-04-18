@@ -311,4 +311,13 @@ trait UseWPFunctions {
 
 		return $wp_filesystem->get_contents( $file_path );
 	}
+
+	/**
+	 * Retrieves the current user's ID.
+	 *
+	 * @return int The current user's ID.
+	 */
+	public function wp_get_current_user_id() {
+		return get_current_user_id();
+	}
 }
