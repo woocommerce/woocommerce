@@ -139,7 +139,11 @@ jQuery( function( $ ) {
 				return false;
 			}
 		} )
-		.on( 'keyup', '#respond p.stars a', function( e ) {
+		/**
+		 * Handle keyup events for tabs, tabs li a, and respond p.stars a.
+		 * The stopPropagation is used to prevent the keyup event from being triggered on the flexslider.
+		 */
+		.on( 'keyup', '.wc-tabs li a, ul.tabs li a,#respond p.stars a', function( e ) {
 			var direction = e.key;
 			var next = [ 'ArrowRight', 'ArrowDown' ];
 			var prev = [ 'ArrowLeft', 'ArrowUp' ];
