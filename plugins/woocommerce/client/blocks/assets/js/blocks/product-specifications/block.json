@@ -14,10 +14,6 @@
 		"core/post-template"
 	],
 	"attributes": {
-		"fontSize": {
-			"type": "string",
-			"default": "medium"
-		},
 		"showWeight": {
 			"type": "boolean",
 			"default": true

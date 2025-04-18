@@ -8,7 +8,6 @@ type Context = {
 };
 
 interface ProductSpecificationsAttributes {
-	fontSize?: string;
 	showWeight: boolean;
 	showDimensions: boolean;
 	showAttributes: boolean;
