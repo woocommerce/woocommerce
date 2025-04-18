@@ -44,7 +44,7 @@ class ProductSpecifications extends AbstractBlock {
 
 		$product_data = array();
 
-		// Get display settings with defaults
+		// Get display settings with defaults.
 		$show_weight     = isset( $attributes['showWeight'] ) ? $attributes['showWeight'] : true;
 		$show_dimensions = isset( $attributes['showDimensions'] ) ? $attributes['showDimensions'] : true;
 		$show_attributes = isset( $attributes['showAttributes'] ) ? $attributes['showAttributes'] : true;
