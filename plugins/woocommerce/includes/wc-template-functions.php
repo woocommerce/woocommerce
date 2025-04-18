@@ -356,7 +356,7 @@ function wc_body_class( $classes ) {
 		}
 	}
 
-	if ( wc_current_theme_is_fse_theme() ) {
+	if ( wp_is_block_theme() ) {
 
 		$classes[] = 'woocommerce-uses-block-theme';
 
@@ -1747,10 +1747,10 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 		array(
 			'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
 			'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-			'data-src'                => esc_url( $full_src[0] ),
-			'data-large_image'        => esc_url( $full_src[0] ),
-			'data-large_image_width'  => esc_attr( $full_src[1] ),
-			'data-large_image_height' => esc_attr( $full_src[2] ),
+			'data-src'                => isset( $full_src[0] ) ? esc_url( $full_src[0] ) : '',
+			'data-large_image'        => isset( $full_src[0] ) ? esc_url( $full_src[0] ) : '',
+			'data-large_image_width'  => isset( $full_src[1] ) ? esc_attr( $full_src[1] ) : '',
+			'data-large_image_height' => isset( $full_src[2] ) ? esc_attr( $full_src[2] ) : '',
 			'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
 			'alt'                     => esc_attr( $alt_text ),
 		),
@@ -1770,7 +1770,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 		$image_params
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '"  data-thumb-sizes="' . esc_attr( $thumbnail_sizes ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	return '<div data-thumb="' . esc_url( isset( $thumbnail_src[0] ) ? $thumbnail_src[0] : '' ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( isset( $thumbnail_srcset ) ? $thumbnail_srcset : '' ) . '"  data-thumb-sizes="' . esc_attr( isset( $thumbnail_sizes ) ? $thumbnail_sizes : '' ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( isset( $full_src[0] ) ? $full_src[0] : '' ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_get_alt_from_product_title_and_position' ) ) {
@@ -4293,7 +4293,7 @@ add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 
  */
 function wc_set_hooked_blocks_version() {
 	// Only set the version if the current theme is a block theme.
-	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+	if ( ! wp_is_block_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
 		return;
 	}
 
@@ -4336,7 +4336,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 	$enable_store_notice_in_classic_theme_option = 'woocommerce_enable_store_notice_in_classic_theme';
 	$is_store_notice_active_option               = 'woocommerce_demo_store';
 
-	if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() ) {
+	if ( ! $old_theme->is_block_theme() && wp_is_block_theme() ) {
 		/*
 		 * When switching from a classic theme to a block theme, check if the store notice is active,
 		 * if it is, disable it but set an option to re-enable it when switching back to a classic theme.
@@ -4345,7 +4345,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 			update_option( $is_store_notice_active_option, wc_bool_to_string( false ) );
 			add_option( $enable_store_notice_in_classic_theme_option, wc_bool_to_string( true ) );
 		}
-	} elseif ( $old_theme->is_block_theme() && ! wc_current_theme_is_fse_theme() ) {
+	} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
 		/*
 		 * When switching from a block theme to a clasic theme, check if we have set the option to
 		 * re-enable the store notice. If so, re-enable it.
@@ -4374,7 +4374,7 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 	$option_value = get_option( $option_name, false );
 
 	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
-	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
+	if ( ! $old_theme->is_block_theme() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
 		add_option( $option_name, WC()->version );
 	}
 }

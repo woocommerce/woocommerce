@@ -1,18 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-removable-chips",
-	"version": "1.0.0",
 	"title": "Chips",
 	"description": "Display removable active filters as chips.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"ancestor": [
-		"woocommerce/product-filter-active"
-	],
+	"ancestor": [ "woocommerce/product-filter-active" ],
 	"supports": {
 		"layout": {
 			"allowSwitching": false,
@@ -24,27 +19,24 @@
 		},
 		"interactivity": true
 	},
-	"usesContext": [
-		"queryId",
-		"filterData"
-	],
+	"usesContext": [ "queryId", "filterData" ],
 	"attributes": {
-		"chipText":{
+		"chipText": {
 			"type": "string"
 		},
-		"customChipText":{
+		"customChipText": {
 			"type": "string"
 		},
-		"chipBackground":{
+		"chipBackground": {
 			"type": "string"
 		},
-		"customChipBackground":{
+		"customChipBackground": {
 			"type": "string"
 		},
-		"chipBorder":{
+		"chipBorder": {
 			"type": "string"
 		},
-		"customChipBorder":{
+		"customChipBorder": {
 			"type": "string"
 		}
 	}

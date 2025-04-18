@@ -79,67 +79,41 @@ $dialog-padding: 20px;
 
 .wc-block-product-gallery-large-image-next-previous {
 	display: flex;
-	align-items: flex-end;
-	flex-direction: row;
+	align-items: center;
 	justify-content: space-between;
 	width: 100%;
 	height: 100%;
 
-	button {
+	&__icon {
+		color: inherit;
+	}
+
+	// Icons are centred but they are perceived off hence adjusting with padding.
+	&__icon--left {
+		padding: 2px 2px 0 0;
+	}
+
+	&__icon--right {
+		padding: 2px 0 0 2px;
+	}
+
+	&__button {
 		cursor: pointer;
 		z-index: 3;
 		pointer-events: all;
-		padding: 0;
 		border: none;
-		background: none;
+		width: 40px;
+		height: 40px;
+		font-size: 12px;
+		padding: 0;
+		background: #fff;
 
 		&:disabled {
-			opacity: 50%;
+			.wc-block-product-gallery-large-image-next-previous__icon {
+				opacity: 35%;
+			}
 			cursor: not-allowed;
 		}
-	}
-
-	.is-vertically-aligned-top {
-		align-items: flex-start;
-	}
-
-	.is-vertically-aligned-center {
-		align-items: center;
-	}
-
-	.is-vertically-aligned-bottom {
-		align-items: flex-end;
-	}
-}
-
-// Next/Previous Buttons Settings
-.wc-block-product-gallery-large-image-next-previous-settings {
-	width: 100%;
-}
-
-//  Next/Previous Buttons Inside the Image Settings
-.wc-block-product-gallery-large-image-next-previous-left--inside-image {
-	margin-left: 15px;
-}
-
-.wc-block-product-gallery-large-image-next-previous-right--inside-image {
-	margin-right: 15px;
-}
-
-.wc-block-product-gallery-large-image-next-previous-container {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	position: absolute;
-	width: 100%;
-
-	&.wc-block-product-gallery-large-image-next-previous--inside-image {
-		margin-top: 15px;
-		margin-bottom: 15px;
-	}
-
-	svg {
-		z-index: 1;
 	}
 }
 
@@ -342,6 +316,7 @@ body.wc-block-product-gallery-dialog-open {
 // On mobile devices (<600px):
 // - Product gallery groups are stacked vertically
 // - Thumbnails appear below the main gallery image and are arranged horizontally in a row
+// - Next/Previous buttons are hidden
 @include breakpoint("<600px") {
 	.wc-block-product-gallery {
 		@include horizontal-thumbnails;
@@ -349,11 +324,13 @@ body.wc-block-product-gallery-dialog-open {
 		.wc-block-product-gallery__gallery-area {
 			flex-direction: column;
 		}
-		.wc-block-product-gallery__large-image-and-navigation {
-			order: -1;
+
+		.wc-block-product-gallery-large-image-next-previous {
+			display: none;
 		}
 
 		.wc-block-product-gallery-thumbnails {
+			order: 1;
 			width: 100%;
 			height: 20%;
 			aspect-ratio: 5 / 1 !important;

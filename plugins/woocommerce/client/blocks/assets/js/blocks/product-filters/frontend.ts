@@ -6,28 +6,6 @@ import * as iAPI from '@wordpress/interactivity';
 const { getContext, store, getServerContext } = iAPI;
 const getSetting = window.wc.wcSettings.getSetting;
 
-function isParamsEqual(
-	obj1: Record< string, string >,
-	obj2: Record< string, string >
-): boolean {
-	const keys1 = Object.keys( obj1 );
-	const keys2 = Object.keys( obj2 );
-
-	// First check if both objects have the same number of keys
-	if ( keys1.length !== keys2.length ) {
-		return false;
-	}
-
-	// Check if all keys and values are the same
-	for ( const key of keys1 ) {
-		if ( obj1[ key ] !== obj2[ key ] ) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
 function selectFilter() {
 	const context = getContext< ProductFiltersContext >();
 	const newActiveFilter = {
@@ -79,7 +57,6 @@ export type ActiveFilterItem = Pick<
 export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
 	params: Record< string, string >;
-	originalParams: Record< string, string >;
 	activeFilters: ActiveFilterItem[];
 	item: FilterItem;
 	activeLabelTemplate: string;
@@ -193,24 +170,24 @@ const productFiltersStore = {
 		},
 		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
 		*navigate(): Generator {
-			const { originalParams } = getServerContext
+			const context = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
-
-			if ( isParamsEqual( state.params, originalParams ) ) {
-				return;
-			}
 
 			const canonicalUrl = getSetting( 'canonicalUrl' );
 			const url = new URL( canonicalUrl );
 			const { searchParams } = url;
 
-			for ( const key in originalParams ) {
+			for ( const key in context.params ) {
 				searchParams.delete( key );
 			}
 
 			for ( const key in state.params ) {
 				searchParams.set( key, state.params[ key ] );
+			}
+
+			if ( window.location.href === url.href ) {
+				return;
 			}
 
 			const isBlockTheme = getSetting( 'isBlockTheme' );

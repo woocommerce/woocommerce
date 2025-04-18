@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { useEffect, useState } from '@wordpress/element';
 
 /**
@@ -19,7 +19,7 @@ export default {
 	},
 } as Meta< CheckboxControlProps >;
 
-const Template: Story< CheckboxControlProps > = ( args ) => {
+const Template: StoryFn< CheckboxControlProps > = ( args ) => {
 	const [ checked, setChecked ] = useState( args.checked );
 	useEffect( () => {
 		setChecked( args.checked );
@@ -33,5 +33,5 @@ const Template: Story< CheckboxControlProps > = ( args ) => {
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< CheckboxControlProps > = Template.bind( {} );
 Default.args = {};

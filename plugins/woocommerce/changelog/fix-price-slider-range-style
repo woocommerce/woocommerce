@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Price slider range values between client navigation events.

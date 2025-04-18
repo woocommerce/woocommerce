@@ -52,7 +52,8 @@ export const SettingsPaymentsMain = () => {
 		PaymentProvider[] | null
 	>( null );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
-	const { updateProviderOrdering } = useDispatch( paymentSettingsStore );
+	const { updateProviderOrdering, attachPaymentExtensionSuggestion } =
+		useDispatch( paymentSettingsStore );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const [
 		postSandboxAccountSetupModalVisible,
@@ -290,7 +291,12 @@ export const SettingsPaymentsMain = () => {
 	}, [ suggestions, providers, isFetching ] );
 
 	const setupPlugin = useCallback(
-		( id: string, slug: string, onboardingUrl: string | null ) => {
+		(
+			id: string,
+			slug: string,
+			onboardingUrl: string | null,
+			attachUrl: string | null
+		) => {
 			if ( installingPlugin ) {
 				return;
 			}
@@ -307,6 +313,10 @@ export const SettingsPaymentsMain = () => {
 			} );
 			installAndActivatePlugins( [ slug ] )
 				.then( async ( response ) => {
+					if ( attachUrl ) {
+						attachPaymentExtensionSuggestion( attachUrl );
+					}
+
 					createNoticesFromResponse( response );
 					invalidateResolutionForStoreSelector(
 						'getPaymentProviders'

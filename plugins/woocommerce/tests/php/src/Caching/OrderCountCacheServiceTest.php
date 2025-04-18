@@ -4,8 +4,10 @@ declare( strict_types = 1);
 namespace Automattic\WooCommerce\Tests\Caching;
 
 use WC_Helper_Order;
+use WC_Order;
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -78,5 +80,59 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $initial_count[ OrderInternalStatus::PENDING ] - 1, $count[ OrderInternalStatus::PENDING ] );
 		$this->assertEquals( $initial_count[ OrderInternalStatus::COMPLETED ] + 1, $count[ OrderInternalStatus::COMPLETED ] );
+	}
+
+	/**
+	 * Test that count gets incremented on new orders with initial status and does not incorrectly decrement the pending count.
+	 */
+	public function test_count_on_new_order_with_initial_status() {
+		$initial_count = OrderUtil::get_count_for_type( 'shop_order' );
+		$order_data    = array(
+			'status'        => OrderStatus::COMPLETED,
+			'customer_id'   => 1,
+			'customer_note' => '',
+			'total'         => '',
+		);
+
+		$order = wc_create_order( $order_data );
+
+		$count = OrderUtil::get_count_for_type( 'shop_order' );
+
+		$this->assertEquals( $initial_count[ OrderInternalStatus::PENDING ], $count[ OrderInternalStatus::PENDING ] );
+		$this->assertEquals( $initial_count[ OrderInternalStatus::COMPLETED ] + 1, $count[ OrderInternalStatus::COMPLETED ] );
+	}
+
+	/**
+	 * Test that count works when status change hook is triggered on new orders.
+	 */
+	public function test_count_on_new_order_with_status_change() {
+		$initial_count = OrderUtil::get_count_for_type( 'shop_order' );
+
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		$count = OrderUtil::get_count_for_type( 'shop_order' );
+
+		$this->assertEquals( $initial_count[ OrderInternalStatus::CANCELLED ] + 1, $count[ OrderInternalStatus::CANCELLED ] );
+		$this->assertEquals( $initial_count[ OrderInternalStatus::PENDING ], $count[ OrderInternalStatus::PENDING ] );
+	}
+
+	/**
+	 * Test that count works when status change hook is triggered on multiple status changes.
+	 */
+	public function test_count_on_multiple_status_changes() {
+		$initial_count = OrderUtil::get_count_for_type( 'shop_order' );
+
+		$order = new WC_Order();
+		$order->set_status( OrderInternalStatus::COMPLETED );
+		$order->set_status( OrderInternalStatus::CANCELLED );
+		$order->save();
+
+		$count = OrderUtil::get_count_for_type( 'shop_order' );
+
+		$this->assertEquals( $initial_count[ OrderInternalStatus::PENDING ], $count[ OrderInternalStatus::PENDING ] );
+		$this->assertEquals( $initial_count[ OrderInternalStatus::COMPLETED ], $count[ OrderInternalStatus::COMPLETED ] );
+		$this->assertEquals( $initial_count[ OrderInternalStatus::CANCELLED ] + 1, $count[ OrderInternalStatus::CANCELLED ] );
 	}
 }

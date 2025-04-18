@@ -5,8 +5,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
-use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
  * Product Filter: Rating Block
@@ -145,8 +145,9 @@ final class ProductFilterRating extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					/* translators: {{label}} is the rating filter item label. */
 					'activeLabelTemplate' => __( 'Rating: {{label}}', 'woocommerce' ),
@@ -206,7 +207,6 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_rating_counts( $block ) {
-		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		if ( ! empty( $query_vars['tax_query'] ) ) {
@@ -221,8 +221,9 @@ final class ProductFilterRating extends AbstractBlock {
 			);
 		}
 
-		$counts = $filters->get_rating_counts( $query_vars );
-		$data   = array();
+		$container = wc_get_container();
+		$counts    = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_rating_counts( $query_vars );
+		$data      = array();
 
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(

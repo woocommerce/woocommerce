@@ -1,18 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-attribute",
-	"version": "1.0.0",
 	"title": "Attribute",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"ancestor": [
-		"woocommerce/product-filters"
-	],
+	"ancestor": [ "woocommerce/product-filters" ],
 	"supports": {
 		"interactivity": true,
 		"color": {
@@ -58,10 +53,7 @@
 			}
 		}
 	},
-	"usesContext": [
-		"query",
-		"filterParams"
-	],
+	"usesContext": [ "query", "filterParams" ],
 	"attributes": {
 		"attributeId": {
 			"type": "number",

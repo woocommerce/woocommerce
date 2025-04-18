@@ -15,6 +15,7 @@ const blockConfig = {
 	edit,
 	save,
 };
+// @ts-expect-error metadata is not typed.
 registerProductBlockType( blockConfig, {
 	isAvailableOnPostEditor: true,
 } );

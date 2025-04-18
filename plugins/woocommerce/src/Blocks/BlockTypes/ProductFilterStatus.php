@@ -3,8 +3,8 @@ declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
-use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
  * Product Filter: Status Block.
@@ -148,8 +148,9 @@ final class ProductFilterStatus extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					/* translators: {{label}} is the status filter item label. */
 					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
@@ -185,7 +186,6 @@ final class ProductFilterStatus extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_stock_status_counts( $block ) {
-		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		unset(
@@ -204,8 +204,9 @@ final class ProductFilterStatus extends AbstractBlock {
 			$query_vars['meta_query'] = ProductCollectionUtils::remove_query_array( $query_vars['meta_query'], 'key', '_stock_status' );
 		}
 
-		$counts = $filters->get_stock_status_counts( $query_vars );
-		$data   = array();
+		$container = wc_get_container();
+		$counts    = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_stock_status_counts( $query_vars, array_keys( wc_get_product_stock_status_options() ) );
+		$data      = array();
 
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(

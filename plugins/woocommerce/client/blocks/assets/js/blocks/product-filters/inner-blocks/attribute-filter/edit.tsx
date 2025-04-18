@@ -138,7 +138,7 @@ const Edit = ( props: EditProps ) => {
 				[
 					'core/heading',
 					{
-						level: 4,
+						level: 3,
 						content:
 							attributeObject?.label ||
 							__( 'Attribute', 'woocommerce' ),

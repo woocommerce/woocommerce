@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+registerProductBlockType: Re-enable the test for block visibility after addressing flakiness.

@@ -149,7 +149,7 @@ class RestApi {
 		$exporter      = new ExportSchema();
 
 		if ( isset( $payload['plugins'] ) ) {
-			$exporter->onBeforeExport(
+			$exporter->on_before_export(
 				'installPlugin',
 				function ( ExportInstallPluginSteps $exporter ) use ( $payload ) {
 					$exporter->filter(
@@ -162,7 +162,7 @@ class RestApi {
 		}
 
 		if ( isset( $payload['themes'] ) ) {
-			$exporter->onBeforeExport(
+			$exporter->on_before_export(
 				'installTheme',
 				function ( ExportInstallThemeSteps $exporter ) use ( $payload ) {
 					$exporter->filter(

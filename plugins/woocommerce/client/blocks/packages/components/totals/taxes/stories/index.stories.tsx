@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 
 /**
@@ -32,9 +32,9 @@ export default {
 	},
 } as Meta< TotalsTaxesProps >;
 
-const Template: Story< TotalsTaxesProps > = ( args ) => <Taxes { ...args } />;
+const Template: StoryFn< TotalsTaxesProps > = ( args ) => <Taxes { ...args } />;
 
-export const Default = Template.bind( {} );
+export const Default: StoryFn< TotalsTaxesProps > = Template.bind( {} );
 Default.args = {
 	currency: currencies.USD,
 };

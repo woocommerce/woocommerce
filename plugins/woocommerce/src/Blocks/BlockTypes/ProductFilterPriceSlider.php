@@ -60,9 +60,10 @@ class ProductFilterPriceSlider extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'       => esc_attr( $classes ),
-				'style'       => esc_attr( $style ),
-				'data-wp-key' => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'data-wp-interactive' => 'woocommerce/product-filters',
+				'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'class'               => esc_attr( $classes ),
+				'style'               => esc_attr( $style ),
 			)
 		);
 
@@ -112,8 +113,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						data-wp-bind--value="state.minPrice"
-						data-wp-bind--min="context.minRange"
-						data-wp-bind--max="context.maxRange"
 						data-wp-on--input="actions.setMinPrice"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
@@ -126,8 +125,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						data-wp-bind--value="state.maxPrice"
-						data-wp-bind--min="context.minRange"
-						data-wp-bind--max="context.maxRange"
 						data-wp-on--input="actions.setMaxPrice"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"

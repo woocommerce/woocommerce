@@ -35,6 +35,8 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Blocks\Options as BlockOptions;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Update file paths for 2.0
@@ -2602,6 +2604,13 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 }
 
 /**
+ * Set a flag to indicate whether the blockified Product Grid Block should be used as a template.
+ */
+function wc_update_790_blockified_product_grid_block() {
+	update_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+}
+
+/**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
  * @return bool Whether there are pending migration records.
@@ -2646,6 +2655,44 @@ LIMIT 250
 	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
 
 	return ! empty( $has_pending );
+}
+
+/**
+ * Rename the checkout template to page-checkout.
+ */
+function wc_update_830_rename_checkout_template() {
+	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
+
+	if ( $template && ! empty( $template->wp_id ) ) {
+		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
+			define( 'WP_POST_REVISIONS', false );
+		}
+		wp_update_post(
+			array(
+				'ID'        => $template->wp_id,
+				'post_name' => 'page-checkout',
+			)
+		);
+	}
+}
+
+/**
+ * Rename the cart template to page-cart.
+ */
+function wc_update_830_rename_cart_template() {
+	$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
+
+	if ( $template && ! empty( $template->wp_id ) ) {
+		if ( ! defined( 'WP_POST_REVISIONS' ) ) {
+			define( 'WP_POST_REVISIONS', false );
+		}
+		wp_update_post(
+			array(
+				'ID'        => $template->wp_id,
+				'post_name' => 'page-cart',
+			)
+		);
+	}
 }
 
 /**
@@ -2740,7 +2787,7 @@ function wc_update_910_add_launch_your_store_tour_option() {
  * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
  */
 function wc_update_920_add_wc_hooked_blocks_version_option() {
-	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+	if ( ! wp_is_block_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
 		return;
 	}
 
@@ -2972,7 +3019,7 @@ function wc_update_990_add_old_refunded_order_items_to_product_lookup_table() {
 			// If the refund order has no line items, mark it as a full refund in orders_meta table.
 			// In the above query we already excluded orders for refunded shipping and tax, so it's safe to assume that the refund order without items is a full refund.
 			// Note that the "full" refund here means it's created by changing the order status to "Refunded", not partially refund all the items in the order.
-			if ( empty( $order->get_items() ) ) {
+			if ( $order && empty( $order->get_items() ) ) {
 				$order->update_meta_data( '_refund_type', 'full' );
 				$order->save_meta_data();
 			}
@@ -3022,7 +3069,7 @@ function wc_update_990_remove_email_notes() {
 	$wpdb->delete(
 		$wpdb->prefix . 'wc_admin_notes',
 		array(
-			'type' => 'email'
+			'type' => 'email',
 		),
 		array( '%s' )
 	);

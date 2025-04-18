@@ -51,7 +51,6 @@ function SidebarContent( props: Props ) {
 			}
 			icon={ drawerRight }
 			scope={ storeName }
-			smallScreenTitle={ __( 'No title', 'woocommerce' ) }
 			isActiveByDefault
 			{ ...props }
 		>

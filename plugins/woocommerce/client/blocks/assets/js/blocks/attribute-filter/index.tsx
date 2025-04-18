@@ -16,7 +16,6 @@ import metadata from './block.json';
 import deprecated from './deprecated';
 
 registerBlockType( metadata, {
-	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
@@ -24,9 +23,6 @@ registerBlockType( metadata, {
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
-	},
-	supports: {
-		...metadata.supports,
 	},
 	attributes: {
 		...metadata.attributes,
