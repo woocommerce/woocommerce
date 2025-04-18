@@ -1494,4 +1494,77 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
 		$this->assertStringContainsString( 'Sorry, we do not allow orders from the provided country (FR)', $response->get_data()['message'] );
 	}
+
+	/**
+	 * Test that custom status 'ready_for_pickup' is not changed when order is finished.
+	 */
+	public function test_custom_status_not_changed_on_payment_complete() {
+		add_filter( 'woocommerce_register_shop_order_post_statuses', function ( $order_statuses ) {
+			$order_statuses['wc-ready_for_pickup'] = array(
+				'label'                     => 'Ready for Pickup',
+				'public'                    => false,
+				'exclude_from_search'       => false,
+				'show_in_admin_all_list'    => true,
+				'show_in_admin_status_list' => true,
+				'label_count'               => _n_noop( 'Ready for Pickup (%s)', 'Ready for Pickup (%s)' ),
+			);
+			return $order_statuses;
+		} );
+		
+		// Create a simple product and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->save();  
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Set custom status.
+		$order->set_status( 'ready_for_pickup' );
+		$order->save();
+
+		$this->assertEquals( 'ready_for_pickup', $order->get_status() );
+
+		// Simulate payment complete.
+		$order->payment_complete();
+
+		// Assert status remains custom.
+		$this->assertEquals( 'ready_for_pickup', $order->get_status(), 'Order status should not change after payment complete.' );
+
+		// Unregister custom status to clean up.
+		global $wp_post_statuses;
+		unset( $wp_post_statuses['wc-ready_for_pickup'] );
+	}
 }
