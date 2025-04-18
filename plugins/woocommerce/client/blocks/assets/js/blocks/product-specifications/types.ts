@@ -7,4 +7,12 @@ type Context = {
 	context: { postId: string; postType: string };
 };
 
-export type ProductSpecificationsEditProps = BlockEditProps< object > & Context;
+interface ProductSpecificationsAttributes {
+	fontSize?: string;
+	showWeight: boolean;
+	showDimensions: boolean;
+	showAttributes: boolean;
+}
+
+export type ProductSpecificationsEditProps =
+	BlockEditProps< ProductSpecificationsAttributes > & Context;
