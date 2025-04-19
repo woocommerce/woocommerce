@@ -1,12 +1,11 @@
 <?php
-declare( strict_types=1 );
-
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
  * MiniCartProductsTableBlock class.
  */
 class MiniCartProductsTableBlock extends AbstractInnerBlock {
+
 	/**
 	 * Block name.
 	 *
