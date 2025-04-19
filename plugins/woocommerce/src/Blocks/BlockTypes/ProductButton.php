@@ -68,7 +68,6 @@ class ProductButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// wp_enqueue_script_module( $this->get_full_block_name() );
 		// This workaround ensures that WordPress loads the core/button block styles.
 		// For more details, see https://github.com/woocommerce/woocommerce/pull/53052.
 		( new \WP_Block( array( 'blockName' => 'core/button' ) ) )->render();

@@ -109,9 +109,7 @@ const { state } = store< Store >(
 
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
-				console.log( 'hello loading stores' );
 				yield import( '@woocommerce/stores/woocommerce/cart' );
-				console.log( 'hello loaded stores' );
 
 				const { actions } = store< WooCommerce >(
 					'woocommerce',
