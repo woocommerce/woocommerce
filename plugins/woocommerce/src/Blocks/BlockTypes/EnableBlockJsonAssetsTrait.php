@@ -11,7 +11,7 @@ trait EnableBlockJsonAssetsTrait {
 	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
-	// phpcs:ignore
+	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found, Squiz.Commenting.FunctionComment.Missing
 	protected function get_block_type_script( $key = null ) {
 		return null;
 	}
