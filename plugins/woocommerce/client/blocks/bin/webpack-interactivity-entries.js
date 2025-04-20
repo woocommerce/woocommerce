@@ -37,6 +37,7 @@ function findInteractivityBlockAssets( dir = [] ) {
 					if (
 						! fs.existsSync( path.join( blockDir, 'frontend.ts' ) )
 					) {
+						// eslint-disable-next-line no-console
 						console.warn(
 							`viewScriptModule was declared in ${ blockJson.name } block.json but no frontend.ts file exists.`
 						);
@@ -47,6 +48,7 @@ function findInteractivityBlockAssets( dir = [] ) {
 					if (
 						! fs.existsSync( path.join( blockDir, 'style.scss' ) )
 					) {
+						// eslint-disable-next-line no-console
 						console.warn(
 							`style was declared in ${ blockJson.name } block.json but no style.scss file exists.`
 						);
@@ -57,6 +59,7 @@ function findInteractivityBlockAssets( dir = [] ) {
 					if (
 						! fs.existsSync( path.join( blockDir, 'editor.scss' ) )
 					) {
+						// eslint-disable-next-line no-console
 						console.warn(
 							`editorStyle was declared in ${ blockJson.name } block.json but no editor.scss file exists.`
 						);
