@@ -312,6 +312,12 @@ trait OrderAttributionMeta {
 					__( 'Web admin', 'woocommerce' )
 					: 'Web admin';
 				break;
+			case 'pos':
+				$label  = '';
+				$source = $translated ?
+					__( 'Point of Sale', 'woocommerce' )
+					: 'Point of Sale';
+				break;
 
 			default:
 				$label  = '';
