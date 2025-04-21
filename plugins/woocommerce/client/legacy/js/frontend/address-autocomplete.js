@@ -7,9 +7,15 @@ var wooAddressProviders = {};
  * Register an address autocomplete provider
  *
  * @param {Object} provider The provider object
+ * @return {boolean} Whether the registration was successful
  */
 function registerAddressAutocompleteProvider( provider ) {
 	// Check required properties
+	if ( ! provider || typeof provider !== 'object' ) {
+		console.error( 'Address provider must be a valid object' );
+		return false;
+	}
+
 	if ( ! provider.id || typeof provider.id !== 'string' ) {
 		console.error( 'Address provider must have a valid ID' );
 		return false;
@@ -31,8 +37,16 @@ function registerAddressAutocompleteProvider( provider ) {
 	}
 
 	// Check if provider is registered on server
-	var serverProviders = window.wc_checkout_params.address_providers || [];
-	console.log( JSON.stringify( serverProviders ) );
+	var serverProviders = [];
+	if ( window && window.wc_checkout_params && window.wc_checkout_params.address_providers ) {
+		serverProviders = window.wc_checkout_params.address_providers;
+	}
+
+	if ( ! Array.isArray( serverProviders ) ) {
+		console.error( 'Server providers configuration is invalid' );
+		return false;
+	}
+
 	var isRegistered = serverProviders.some( function ( serverProvider ) {
 		return serverProvider.id === provider.id;
 	} );
