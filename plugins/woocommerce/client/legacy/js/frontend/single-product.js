@@ -99,7 +99,7 @@ jQuery( function( $ ) {
 		} )
 		// Star ratings for comments
 		.on( 'init', '#rating', function() {
-			$( '#rating' )
+			$( this )
 				.hide()
 				.before(
 					'<p class="stars">\
