@@ -18,34 +18,14 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-quantity-selector';
 
 	/**
-	 * Get the block's attributes.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return array  Block attributes merged with defaults.
-	 */
-	private function parse_attributes( $attributes ) {
-		// These should match what's set in JS `registerBlockType`.
-		$defaults = array(
-			'quantitySelectorStyle' => 'input',
-		);
-
-		return wp_parse_args( $attributes, $defaults );
-	}
-
-
-	/**
 	 * Enqueue assets specific to this block.
-	 * We enqueue frontend scripts only if the quantitySelectorStyle is set to 'stepper'.
+	 * Enqueue frontend scripts for the stepper functionality.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
-		if ( ! isset( $attributes['quantitySelectorStyle'] ) || 'stepper' !== $attributes['quantitySelectorStyle'] ) {
-			return;
-		}
-
 		parent::enqueue_assets( $attributes, $content, $block );
 	}
 
@@ -54,7 +34,7 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 	 *
 	 * @param string $product_html Quantity input HTML.
 	 * @param string $product_name Product name.
-	 * @return stringa Quantity input HTML with increment and decrement buttons.
+	 * @return string Quantity input HTML with increment and decrement buttons.
 	 */
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
@@ -140,8 +120,6 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
-		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually();
-
 		ob_start();
 
 		woocommerce_quantity_input(
@@ -169,19 +147,17 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 		$product_html = ob_get_clean();
 
 		$product_name = $product->get_name();
-		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
+		$product_html = $this->add_steppers( $product_html, $product_name );
+		$product_html = $this->add_stepper_classes( $product_html );
 
-		$parsed_attributes  = $this->parse_attributes( $attributes );
-		$product_html       = $is_stepper_style ? $this->add_stepper_classes( $product_html ) : $product_html;
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		$classes = implode(
 			' ',
 			array_filter(
 				array(
-					'wp-block-add-to-cart-with-options-quantity-selector wc-block-add-to-cart-with-options__quantity-selector',
+					'wp-block-add-to-cart-with-options-quantity-selector wc-block-add-to-cart-with-options__quantity-selector wc-block-add-to-cart-with-options__quantity-selector--stepper',
 					esc_attr( $classes_and_styles['classes'] ),
-					$is_stepper_style ? 'wc-block-add-to-cart-with-options__quantity-selector--stepper' : 'wc-block-add-to-cart-with-options__quantity-selector--input',
 				)
 			)
 		);
@@ -194,9 +170,8 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 		);
 
 		$form = sprintf(
-			'<div %1$s %2$s>%3$s</div>',
+			'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
 			$wrapper_attributes,
-			$is_stepper_style ? 'data-wp-interactive="woocommerce/add-to-cart-with-options"' : '',
 			$product_html
 		);
 

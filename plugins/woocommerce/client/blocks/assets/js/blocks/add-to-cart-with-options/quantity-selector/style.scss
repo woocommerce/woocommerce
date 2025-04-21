@@ -8,10 +8,8 @@
 		font-size: var(--wp--preset--font-size--small);
 		padding: 0.9rem 1.1rem;
 	}
-}
 
-// Stepper CSS
-.wc-block-add-to-cart-with-options__quantity-selector--stepper {
+	// Stepper CSS
 	.wc-block-components-quantity-selector {
 		&::after {
 			border: 1px solid currentColor;
