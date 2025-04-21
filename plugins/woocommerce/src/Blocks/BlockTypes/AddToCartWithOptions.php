@@ -93,7 +93,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
 		}
 
-		if ( file_exists( $template_part_path ) ) {
+		if ( is_string( $template_part_path) && file_exists( $template_part_path ) ) {
 
 			$template_part_contents = '';
 			// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
