@@ -85,10 +85,10 @@ class AddToCartWithOptions extends AbstractBlock {
 		} else {
 			/**
 			 * Filter to declare product type's cart block template is supported.
-			 * 
+			 *
 			 * @since 9.9.0
 			 * @param mixed string|boolean The template part path if it exists
-			 * @param string $product_type The product type 
+			 * @param string $product_type The product type
 			 */
 			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
 		}
