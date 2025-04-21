@@ -1,1325 +1,804 @@
 /**
- * @jest-environment jsdom
+ * Address provider registration for WooCommerce shortcode checkout
  */
 
-describe( 'Address Autocomplete Provider Registration', () => {
-	beforeEach( () => {
-		delete global.window.wc;
-		// Reset the window object and providers before each test
-		Object.assign( global.window, {
-			wc_checkout_params: {
-				address_providers: [
-					{ id: 'test-provider', name: 'Test provider' },
-					{ id: 'wc-payments', name: 'WooCommerce Payments' },
-					{ id: 'provider-1', name: 'Provider 1' },
-					{ id: 'provider-2', name: 'Provider 2' },
-				],
-			},
-		} );
+// Make functions and state available globally under window.wc.addressAutocomplete
+window.wc = window.wc || {};
+window.wc.addressAutocomplete = window.wc.addressAutocomplete || {
+	providers: {},
+	activeProvider: { billing: null, shipping: null },
+};
 
-		// Reset the module before each test
-		jest.resetModules();
-		require( '../address-autocomplete' );
-	} );
+/**
+ * Register an address autocomplete provider
+ *
+ * @param {Object} provider The provider object
+ * @return {boolean} Whether the registration was successful
+ */
+function registerAddressAutocompleteProvider( provider ) {
+	try {
+		// Check required properties
+		if ( ! provider || typeof provider !== 'object' ) {
+			throw new Error( 'Address provider must be a valid object' );
+		}
 
-	test( 'should successfully register a valid provider', () => {
-		const validProvider = {
-			id: 'test-provider',
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
+		if ( ! provider.id || typeof provider.id !== 'string' ) {
+			throw new Error( 'Address provider must have a valid ID' );
+		}
 
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				validProvider
+		if ( typeof provider.canSearch !== 'function' ) {
+			throw new Error(
+				'Address provider must have a canSearch function'
 			);
-		expect( result ).toBe( true );
-		expect( console ).not.toHaveErrored();
-	} );
+		}
 
-	test( 'should reject invalid provider (null, undefined, non-object)', () => {
-		const invalidProviders = [ null, undefined, 'string', 123, true ];
+		if ( typeof provider.search !== 'function' ) {
+			throw new Error( 'Address provider must have a search function' );
+		}
 
-		invalidProviders.forEach( ( provider ) => {
-			const result =
-				window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-					provider
+		if ( typeof provider.select !== 'function' ) {
+			throw new Error( 'Address provider must have a select function' );
+		}
+
+		// Check if provider is registered on server.
+		var serverProviders = [];
+		if (
+			window &&
+			window.wc_checkout_params &&
+			Array.isArray( window.wc_checkout_params.address_providers ) &&
+			window.wc_checkout_params.address_providers.length > 0
+		) {
+			serverProviders = window.wc_checkout_params.address_providers;
+		}
+
+		if ( ! Array.isArray( serverProviders ) ) {
+			throw new Error( 'Server providers configuration is invalid' );
+		}
+
+		var isRegistered = serverProviders.some( function ( serverProvider ) {
+			return (
+				serverProvider &&
+				typeof serverProvider === 'object' &&
+				typeof serverProvider.id === 'string' &&
+				serverProvider.id === provider.id
+			);
+		} );
+		if ( ! isRegistered ) {
+			throw new Error(
+				'Provider ' + provider.id + ' not registered on server'
+			);
+		}
+
+		// Check if a provider with the same ID already exists
+		if ( window.wc.addressAutocomplete.providers[ provider.id ] ) {
+			console.warn(
+				'Address provider with ID "' +
+					provider.id +
+					'" is already registered.'
+			);
+			return false;
+		}
+
+		// Freeze and add provider to registry.
+		Object.freeze( provider );
+		window.wc.addressAutocomplete.providers[ provider.id ] = provider;
+		return true;
+	} catch ( error ) {
+		console.error( 'Error registering address provider:', error.message );
+		return false;
+	}
+}
+
+// Export the registration function
+window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
+	registerAddressAutocompleteProvider;
+
+( function () {
+	/**
+	 * Set the active address provider based on which providers' (queried in order) canSearch returns true.
+	 * Triggers when country changes.
+	 * @param country {string} country code.
+	 * @param type {string} type 'billing' or 'shipping'
+	 */
+	function setActiveProvider( country, type ) {
+		// Get server providers list (already ordered by preference).
+		const serverProviders =
+			( window &&
+				window.wc_checkout_params &&
+				window.wc_checkout_params.address_providers ) ||
+			[];
+
+		// Check providers in preference order (server handles preferred provider ordering).
+		for ( const serverProvider of serverProviders ) {
+			const provider =
+				window.wc.addressAutocomplete.providers[ serverProvider.id ];
+
+			if ( provider && provider.canSearch( country ) ) {
+				window.wc.addressAutocomplete.activeProvider[ type ] = provider;
+				// Add autocomplete-available class to parent .woocommerce-input-wrapper
+				const addressInput = document.getElementById(
+					`${ type }_address_1`
 				);
-			expect( result ).toBe( false );
-			expect( console ).toHaveErroredWith(
-				'Error registering address provider:',
-				'Address provider must be a valid object'
-			);
-			expect( console ).toHaveErrored();
-		} );
-	} );
-
-	test( 'should handle missing wc_checkout_params', () => {
-		delete global.window.wc; // ensure fresh load
-		global.window.wc_checkout_params = undefined;
-		jest.resetModules();
-		require( '../address-autocomplete' );
-		const validProvider = {
-			id: 'test-provider',
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				validProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Provider test-provider not registered on server'
-		);
-	} );
-
-	test( 'should handle invalid address_providers type', () => {
-		delete global.window.wc; // ensure fresh load
-		global.window.wc_checkout_params = undefined;
-		jest.resetModules();
-		require( '../address-autocomplete' );
-		const validProvider = {
-			id: 'test-provider',
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				validProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Provider test-provider not registered on server'
-		);
-	} );
-
-	test( 'should reject provider without ID', () => {
-		const invalidProvider = {
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				invalidProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Address provider must have a valid ID'
-		);
-	} );
-
-	test( 'should reject provider with non-string ID', () => {
-		const invalidProvider = {
-			id: 123,
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				invalidProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Address provider must have a valid ID'
-		);
-	} );
-
-	test( 'should reject provider without canSearch function', () => {
-		const invalidProvider = {
-			id: 'test-provider',
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				invalidProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Address provider must have a canSearch function'
-		);
-	} );
-
-	test( 'should reject provider without search function', () => {
-		const invalidProvider = {
-			id: 'test-provider',
-			canSearch: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				invalidProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Address provider must have a search function'
-		);
-	} );
-
-	test( 'should reject provider without select function', () => {
-		const invalidProvider = {
-			id: 'test-provider',
-			canSearch: () => {},
-			search: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				invalidProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Address provider must have a select function'
-		);
-	} );
-
-	test( 'should reject provider not registered on server', () => {
-		const unregisteredProvider = {
-			id: 'unregistered-provider',
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				unregisteredProvider
-			);
-		expect( result ).toBe( false );
-		expect( console ).toHaveErroredWith(
-			'Error registering address provider:',
-			'Provider unregistered-provider not registered on server'
-		);
-	} );
-
-	test( 'should freeze provider after successful registration', () => {
-		const validProvider = {
-			id: 'test-provider',
-			canSearch: () => {},
-			search: () => {},
-			select: () => {},
-		};
-
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				validProvider
-			);
-		expect( result ).toBe( true );
-
-		// Verify provider is frozen
-		expect(
-			Object.isFrozen(
-				window.wc.addressAutocomplete.providers[ 'test-provider' ]
-			)
-		).toBe( true );
-
-		// Attempt to modify should throw in strict mode
-		expect( () => {
-			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp =
-				'test';
-		} ).toThrow( TypeError );
-
-		// Verify the property wasn't added
-		expect(
-			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp
-		).toBeUndefined();
-	} );
-
-	test( 'should not allow duplicate provider registration', () => {
-		const provider1 = {
-			id: 'test-provider',
-			canSearch: () => false,
-			search: () => [ 'original' ],
-			select: () => {},
-		};
-
-		const provider2 = {
-			id: 'test-provider',
-			canSearch: () => true,
-			search: () => [ 'duplicate' ],
-			select: () => {},
-		};
-
-		// Mock console.warn to capture warning message
-		const consoleSpy = jest
-			.spyOn( console, 'warn' )
-			.mockImplementation( () => {} );
-
-		// Register first provider
-		const firstResult =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				provider1
-			);
-		expect( firstResult ).toBe( true );
-
-		// Try to register second provider with same ID
-		const duplicateResult =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				provider2
-			);
-		expect( duplicateResult ).toBe( false );
-
-		// Verify warning was logged
-		expect( consoleSpy ).toHaveBeenCalledWith(
-			'Address provider with ID "test-provider" is already registered.'
-		);
-
-		// Verify the original provider is preserved (not overwritten)
-		expect(
-			window.wc.addressAutocomplete.providers[
-				'test-provider'
-			].canSearch()
-		).toBe( false );
-		expect(
-			window.wc.addressAutocomplete.providers[ 'test-provider' ].search()
-		).toEqual( [ 'original' ] );
-
-		consoleSpy.mockRestore();
-	} );
-
-	test( 'should allow multiple providers with different IDs', () => {
-		const provider1 = {
-			id: 'provider-1',
-			canSearch: () => true,
-			search: () => [ 'provider1-results' ],
-			select: () => {},
-		};
-
-		const provider2 = {
-			id: 'provider-2',
-			canSearch: () => true,
-			search: () => [ 'provider2-results' ],
-			select: () => {},
-		};
-
-		// Register both providers
-		const result1 =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				provider1
-			);
-		const result2 =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				provider2
-			);
-
-		expect( result1 ).toBe( true );
-		expect( result2 ).toBe( true );
-
-		// Verify both providers are registered
-		expect(
-			window.wc.addressAutocomplete.providers[ 'provider-1' ]
-		).toBeDefined();
-		expect(
-			window.wc.addressAutocomplete.providers[ 'provider-2' ]
-		).toBeDefined();
-
-		// Verify they maintain their separate functionality
-		expect(
-			window.wc.addressAutocomplete.providers[ 'provider-1' ].search()
-		).toEqual( [ 'provider1-results' ] );
-		expect(
-			window.wc.addressAutocomplete.providers[ 'provider-2' ].search()
-		).toEqual( [ 'provider2-results' ] );
-	} );
-} );
-
-describe( 'Address Suggestions Component', () => {
-	let mockProvider;
-	let billingAddressInput;
-	let shippingAddressInput;
-
-	beforeEach( async () => {
-		// Reset DOM
-		document.body.innerHTML = '';
-		delete global.window.wc;
-
-		// Mock jQuery
-		global.window.jQuery = jest.fn( ( selector ) => ( {
-			hasClass: jest.fn( () => false ),
-			trigger: jest.fn(),
-			select2: jest.fn(),
-			on: jest.fn(),
-		} ) );
-
-		// Setup window object
-		Object.assign( global.window, {
-			wc_checkout_params: {
-				address_providers: [
-					{ id: 'test-provider', name: 'Test provider' },
-				],
-			},
-		} );
-
-		// Create DOM structure
-		const form = document.createElement( 'form' );
-
-		// Billing fields
-		const billingCountry = document.createElement( 'select' );
-		billingCountry.id = 'billing_country';
-		const billingOption = document.createElement( 'option' );
-		billingOption.value = 'US';
-		billingOption.selected = true;
-		billingCountry.appendChild( billingOption );
-		billingCountry.value = 'US';
-
-		const billingAddress1 = document.createElement( 'input' );
-		billingAddress1.id = 'billing_address_1';
-		billingAddress1.type = 'text';
-
-		const billingCity = document.createElement( 'input' );
-		billingCity.id = 'billing_city';
-		billingCity.type = 'text';
-
-		const billingPostcode = document.createElement( 'input' );
-		billingPostcode.id = 'billing_postcode';
-		billingPostcode.type = 'text';
-
-		const billingState = document.createElement( 'input' );
-		billingState.id = 'billing_state';
-		billingState.type = 'text';
-
-		// Create wrapper for billing address
-		const billingWrapper = document.createElement( 'div' );
-		billingWrapper.className = 'woocommerce-input-wrapper';
-		billingWrapper.appendChild( billingAddress1 );
-
-		// Shipping fields
-		const shippingCountry = document.createElement( 'select' );
-		shippingCountry.id = 'shipping_country';
-		const shippingOption = document.createElement( 'option' );
-		shippingOption.value = 'US';
-		shippingOption.selected = true;
-		shippingCountry.appendChild( shippingOption );
-		shippingCountry.value = 'US';
-
-		const shippingAddress1 = document.createElement( 'input' );
-		shippingAddress1.id = 'shipping_address_1';
-		shippingAddress1.type = 'text';
-
-		const shippingCity = document.createElement( 'input' );
-		shippingCity.id = 'shipping_city';
-		shippingCity.type = 'text';
-
-		const shippingPostcode = document.createElement( 'input' );
-		shippingPostcode.id = 'shipping_postcode';
-		shippingPostcode.type = 'text';
-
-		const shippingState = document.createElement( 'input' );
-		shippingState.id = 'shipping_state';
-		shippingState.type = 'text';
-
-		// Create wrapper for shipping address
-		const shippingWrapper = document.createElement( 'div' );
-		shippingWrapper.className = 'woocommerce-input-wrapper';
-		shippingWrapper.appendChild( shippingAddress1 );
-
-		form.appendChild( billingCountry );
-		form.appendChild( billingWrapper );
-		form.appendChild( billingCity );
-		form.appendChild( billingPostcode );
-		form.appendChild( billingState );
-		form.appendChild( shippingCountry );
-		form.appendChild( shippingWrapper );
-		form.appendChild( shippingCity );
-		form.appendChild( shippingPostcode );
-		form.appendChild( shippingState );
-
-		document.body.appendChild( form );
-
-		billingAddressInput = billingAddress1;
-		shippingAddressInput = shippingAddress1;
-
-		// Create mock provider
-		mockProvider = {
-			id: 'test-provider',
-			canSearch: jest.fn( ( country ) => country === 'US' ),
-			search: jest.fn( async ( query, country, type ) => [
-				{
-					id: 'addr1',
-					label: '123 Main Street, City, US',
-					matchedSubstrings: [ { offset: 0, length: 3 } ],
-				},
-				{
-					id: 'addr2',
-					label: '456 Oak Avenue, Town, US',
-					matchedSubstrings: [ { offset: 0, length: 3 } ],
-				},
-			] ),
-			select: jest.fn( async ( addressId ) => ( {
-				address_1: '123 Main Street',
-				city: 'City',
-				postcode: '12345',
-				country: 'US',
-				state: 'CA',
-			} ) ),
-		};
-
-		// Reset modules and require fresh instance
-		jest.resetModules();
-		require( '../address-autocomplete' );
-
-		// Register the mock provider
-		window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-			mockProvider
-		);
-
-		// Trigger DOMContentLoaded event and wait for initialization
-		const event = new Event( 'DOMContentLoaded' );
-		document.dispatchEvent( event );
-
-		// Wait a bit for DOM initialization to complete
-		await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
-	} );
-
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
-
-	describe( 'DOM Initialization', () => {
-		test( 'should create suggestions container for address inputs', () => {
-			const billingSuggestions = document.getElementById(
-				'address_suggestions_billing'
-			);
-			const shippingSuggestions = document.getElementById(
-				'address_suggestions_shipping'
-			);
-
-			expect( billingSuggestions ).toBeTruthy();
-			expect( shippingSuggestions ).toBeTruthy();
-
-			expect( billingSuggestions.className ).toBe(
-				'woocommerce-address-suggestions'
-			);
-			expect( billingSuggestions.style.display ).toBe( 'none' );
-			expect( billingSuggestions.getAttribute( 'role' ) ).toBe(
-				'region'
-			);
-			expect( billingSuggestions.getAttribute( 'aria-live' ) ).toBe(
-				'polite'
-			);
-
-			// Check suggestions list
-			const billingList =
-				billingSuggestions.querySelector( '.suggestions-list' );
-			expect( billingList ).toBeTruthy();
-			expect( billingList.getAttribute( 'role' ) ).toBe( 'listbox' );
-			expect( billingList.getAttribute( 'aria-label' ) ).toBe(
-				'Address suggestions'
-			);
-
-			// Check search icon container exists
-			const billingIconContainer = document.querySelector(
-				'.address-search-icon'
-			);
-			expect( billingIconContainer ).toBeTruthy();
-		} );
-
-		test( 'should set active provider based on country value', () => {
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
-				mockProvider
-			);
-			expect(
-				window.wc.addressAutocomplete.activeProvider.shipping
-			).toBe( mockProvider );
-		} );
-
-		test( 'should add autocomplete-available class when provider is active', () => {
-			const billingWrapper = billingAddressInput.closest(
+				if ( addressInput ) {
+					const wrapper = addressInput.closest(
+						'.woocommerce-input-wrapper'
+					);
+					if ( wrapper ) {
+						wrapper.classList.add( 'autocomplete-available' );
+					}
+				}
+				return;
+			}
+		}
+
+		// No provider can search for this country.
+		window.wc.addressAutocomplete.activeProvider[ type ] = null;
+		// Remove autocomplete-available class from parent .woocommerce-input-wrapper
+		const addressInput = document.getElementById( `${ type }_address_1` );
+		if ( addressInput ) {
+			const wrapper = addressInput.closest(
 				'.woocommerce-input-wrapper'
 			);
-			const shippingWrapper = shippingAddressInput.closest(
-				'.woocommerce-input-wrapper'
+			if ( wrapper ) {
+				wrapper.classList.remove( 'autocomplete-available' );
+			}
+		}
+	}
+
+	document.addEventListener( 'DOMContentLoaded', function () {
+		// This script would not be enqueued if the feature was not enabled.
+		const addressTypes = [ 'billing', 'shipping' ];
+		const addressInputs = {};
+		const suggestionsContainers = {};
+		const suggestionsLists = {};
+		let activeSuggestionIndices = {};
+		let addressSelectionTimeout;
+		const blurHandlers = {};
+
+		/**
+		 * Cache address fields for a given type, will re-run when country changes.
+		 * @param type
+		 * @return {{address_2: HTMLElement, city: HTMLElement, country: HTMLElement, postcode: HTMLElement}}
+		 */
+		function cacheAddressFields( type ) {
+			addressInputs[ type ] = {};
+			addressInputs[ type ][ 'address_1' ] = document.getElementById(
+				`${ type }_address_1`
+			);
+			addressInputs[ type ][ 'city' ] = document.getElementById(
+				`${ type }_city`
+			);
+			addressInputs[ type ][ 'country' ] = document.getElementById(
+				`${ type }_country`
+			);
+			addressInputs[ type ][ 'postcode' ] = document.getElementById(
+				`${ type }_postcode`
+			);
+			addressInputs[ type ][ 'state' ] = document.getElementById(
+				`${ type }_state`
+			);
+		}
+
+		// Initialize for both billing and shipping.
+		addressTypes.forEach( ( type ) => {
+			cacheAddressFields( type );
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const cityInput = addressInputs[ type ][ 'city' ];
+			const countryInput = addressInputs[ type ][ 'country' ];
+			const postcodeInput = addressInputs[ type ][ 'postcode' ];
+
+			if ( addressInput ) {
+				// Create suggestions container if it doesn't exist.
+				if (
+					! document.getElementById( `address_suggestions_${ type }` )
+				) {
+					const container = document.createElement( 'div' );
+					container.id = `address_suggestions_${ type }`;
+					container.className = 'woocommerce-address-suggestions';
+					container.style.display = 'none';
+					container.setAttribute( 'role', 'region' );
+					container.setAttribute( 'aria-live', 'polite' );
+
+					const list = document.createElement( 'ul' );
+					list.className = 'suggestions-list';
+					list.setAttribute( 'role', 'listbox' );
+					list.setAttribute( 'aria-label', 'Address suggestions' );
+
+					container.appendChild( list );
+					addressInput.parentNode.insertBefore(
+						container,
+						addressInput.nextSibling
+					);
+
+					// Add search icon.
+					const searchIcon = document.createElement( 'div' );
+					searchIcon.className = 'address-search-icon';
+					addressInput.parentNode.appendChild( searchIcon );
+				}
+
+				addressInputs[ type ] = {};
+				addressInputs[ type ][ 'address_1' ] = addressInput;
+				addressInputs[ type ][ 'city' ] = cityInput;
+				addressInputs[ type ][ 'country' ] = countryInput;
+				addressInputs[ type ][ 'postcode' ] = postcodeInput;
+
+				suggestionsContainers[ type ] = document.getElementById(
+					`address_suggestions_${ type }`
+				);
+				suggestionsLists[ type ] =
+					suggestionsContainers[ type ].querySelector(
+						'.suggestions-list'
+					);
+				activeSuggestionIndices[ type ] = -1;
+			}
+
+			// Get country value and set active address provider based on it.
+			if ( countryInput ) {
+				setActiveProvider( countryInput.value, type );
+
+				/**
+				 * Listen for country changes to re-evaluate provider availability.
+				 * Handle both regular change events and Select2 events.
+				 */
+				const handleCountryChange = function () {
+					cacheAddressFields( type );
+					setActiveProvider( countryInput.value, type );
+					if ( addressInputs[ type ][ 'address_1' ] ) {
+						hideSuggestions( type );
+					}
+				};
+
+				countryInput.addEventListener( 'change', handleCountryChange );
+
+				// Also listen for Select2 change event if jQuery and Select2 are available.
+				if ( window.jQuery && window.jQuery( countryInput ).select2 ) {
+					window
+						.jQuery( countryInput )
+						.on( 'select2:select', handleCountryChange );
+				}
+			}
+		} );
+
+		/**
+		 * Disable browser autofill for address inputs to prevent conflicts with autocomplete.
+		 * @param input {HTMLInputElement} The input element to disable autofill for.
+		 */
+		function disableBrowserAutofill( input ) {
+			if ( input.getAttribute( 'autocomplete' ) === 'off' ) {
+				return;
+			}
+
+			input.setAttribute( 'autocomplete', 'off' );
+			input.setAttribute( 'data-lpignore', 'true' );
+			input.setAttribute( 'data-op-ignore', 'true' );
+			input.setAttribute( 'data-1p-ignore', 'true' );
+
+			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
+			// This is achieved by removing and re-adding the element to trigger browser updates.
+			const parentElement = input.parentElement;
+			if ( parentElement ) {
+				parentElement.appendChild( parentElement.removeChild( input ) );
+				input.focus();
+			}
+		}
+
+		/**
+		 * Enable browser autofill for address input.
+		 * @param input {HTMLInputElement} The input element to enable autofill for.
+		 * @param shouldFocus {boolean} Whether to focus the input after enabling autofill.
+		 */
+		function enableBrowserAutofill( input, shouldFocus = true ) {
+			if ( input.getAttribute( 'autocomplete' ) !== 'off' ) {
+				return;
+			}
+
+			input.setAttribute( 'autocomplete', 'address-line1' );
+			input.setAttribute( 'data-lpignore', 'false' );
+			input.setAttribute( 'data-op-ignore', 'false' );
+			input.setAttribute( 'data-1p-ignore', 'false' );
+
+			// To ensure browser updates and re-enables autofill, we need to refocus the element.
+			// This is achieved by removing and re-adding the element to trigger browser updates.
+			const parentElement = input.parentElement;
+			if ( parentElement ) {
+				parentElement.appendChild( parentElement.removeChild( input ) );
+				if ( shouldFocus ) {
+					input.focus();
+				}
+			}
+		}
+
+		/**
+		 * Get highlighted label parts based on matches returned by `search` results.
+		 * @param label {string} The label to highlight.
+		 * @param matches {*[]} Array of match objects with `offset` and `length`.
+		 * @return {*[]} Array of nodes with highlighted parts.
+		 */
+		function getHighlightedLabel( label, matches ) {
+			// Sanitize label for display.
+			const sanitizedLabel = sanitizeForDisplay( label );
+			const parts = [];
+			let lastIndex = 0;
+
+			// Validate matches array.
+			if ( ! Array.isArray( matches ) ) {
+				// If matches is invalid, just return plain text.
+				parts.push( document.createTextNode( sanitizedLabel ) );
+				return parts;
+			}
+
+			// Validate matches.
+			const safeMatches = matches.filter(
+				( match ) =>
+					match &&
+					typeof match.offset === 'number' &&
+					typeof match.length === 'number' &&
+					match.offset >= 0 &&
+					match.length > 0 &&
+					match.offset + match.length <= sanitizedLabel.length
 			);
 
-			expect(
-				billingWrapper.classList.contains( 'autocomplete-available' )
-			).toBe( true );
-			expect(
-				shippingWrapper.classList.contains( 'autocomplete-available' )
-			).toBe( true );
+			safeMatches.forEach( ( match ) => {
+				// Add text before match.
+				if ( match.offset > lastIndex ) {
+					parts.push(
+						document.createTextNode(
+							sanitizedLabel.slice( lastIndex, match.offset )
+						)
+					);
+				}
+
+				// Add bold matched text.
+				const bold = document.createElement( 'strong' );
+				bold.textContent = sanitizedLabel.slice(
+					match.offset,
+					match.offset + match.length
+				);
+				parts.push( bold );
+
+				lastIndex = match.offset + match.length;
+			} );
+
+			// Add remaining text.
+			if ( lastIndex < sanitizedLabel.length ) {
+				parts.push(
+					document.createTextNode( sanitizedLabel.slice( lastIndex ) )
+				);
+			}
+
+			return parts;
+		}
+
+		/**
+		 * Sanitize HTML for display by removing any HTML tags.
+		 *
+		 * @param html
+		 * @return {string|string}
+		 */
+		function sanitizeForDisplay( html ) {
+			const doc = document.implementation.createHTMLDocument( '' );
+			doc.body.innerHTML = html;
+			return doc.body.textContent || '';
+		}
+
+		/**
+		 * Handle searching and displaying autocomplete results below the address input if the value meets the criteria
+		 * of 3 or more characters. No suggestion is initially highlighted.
+		 * @param inputValue {string} The value entered into the address input.
+		 * @param country {string} The country code to pass to the provider's search method.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 * @return {Promise<void>}
+		 */
+		async function displaySuggestions( inputValue, country, type ) {
+			// Sanitize input value.
+			const sanitizedInput = sanitizeForDisplay( inputValue );
+			if ( sanitizedInput !== inputValue ) {
+				console.warn( 'Input was sanitized for security' );
+			}
+
+			// Check if the address section exists (shipping may be disabled/hidden)
+			if (
+				! addressInputs[ type ] ||
+				! addressInputs[ type ][ 'address_1' ]
+			) {
+				return;
+			}
+
+			if (
+				! suggestionsLists[ type ] ||
+				! suggestionsContainers[ type ]
+			) {
+				return;
+			}
+
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const suggestionsList = suggestionsLists[ type ];
+			const suggestionsContainer = suggestionsContainers[ type ];
+
+			// Hide suggestions if input has less than 3 characters
+			if ( sanitizedInput.length < 3 ) {
+				hideSuggestions( type );
+				enableBrowserAutofill( addressInput );
+				return;
+			}
+
+			// Check if we have an active provider for this address type.
+			if ( ! window.wc.addressAutocomplete.activeProvider[ type ] ) {
+				hideSuggestions( type );
+				enableBrowserAutofill( addressInput );
+				return;
+			}
+
+			try {
+				const filteredSuggestions =
+					await window.wc.addressAutocomplete.activeProvider[
+						type
+					].search( sanitizedInput, country, type );
+
+				// Validate suggestions array.
+				if ( ! Array.isArray( filteredSuggestions ) ) {
+					console.error(
+						'Invalid suggestions response - not an array'
+					);
+					hideSuggestions( type );
+					return;
+				}
+
+				// Limit number of suggestions, API may return many results but we should only show the first 5.
+				const maxSuggestions = 5;
+				const safeSuggestions = filteredSuggestions.slice(
+					0,
+					maxSuggestions
+				);
+
+				if ( safeSuggestions.length === 0 ) {
+					hideSuggestions( type );
+					return;
+				}
+
+				// Clear existing suggestions only when we have new results to show.
+				suggestionsList.innerHTML = '';
+
+				safeSuggestions.forEach( ( suggestion, index ) => {
+					const li = document.createElement( 'li' );
+					li.setAttribute( 'role', 'option' );
+					li.id = `suggestion-item-${ type }-${ index }`;
+					li.dataset.id = suggestion.id;
+					li.setAttribute( 'tabindex', '-1' );
+
+					li.textContent = ''; // Clear existing content.
+					const labelParts = getHighlightedLabel(
+						suggestion.label,
+						suggestion.matchedSubstrings || []
+					);
+					labelParts.forEach( ( part ) => li.appendChild( part ) );
+
+					li.addEventListener( 'click', async function () {
+						// Hide suggestions immediately for better UX.
+						hideSuggestions( type );
+						await selectAddress( type, this.dataset.id );
+						addressInput.focus();
+					} );
+
+					li.addEventListener( 'mouseenter', function () {
+						setActiveSuggestion( type, index );
+					} );
+
+					suggestionsList.appendChild( li );
+				} );
+
+				disableBrowserAutofill( addressInput );
+				suggestionsContainer.style.display = 'block';
+				suggestionsContainer.style.marginTop =
+					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
+				addressInput.setAttribute( 'aria-expanded', 'true' );
+				addressInput.setAttribute(
+					'aria-owns',
+					`address_suggestions_${ type }_list`
+				);
+				suggestionsList.id = `address_suggestions_${ type }_list`;
+				// Don't auto-highlight first suggestion for better screen reader accessibility
+				activeSuggestionIndices[ type ] = -1;
+
+				// Add blur event listener when suggestions are shown
+				if ( ! blurHandlers[ type ] ) {
+					blurHandlers[ type ] = function () {
+						// Use a small delay to allow clicks on suggestions to register
+						setTimeout( () => {
+							hideSuggestions( type );
+							enableBrowserAutofill( addressInput, false );
+						}, 200 );
+					};
+					addressInput.addEventListener(
+						'blur',
+						blurHandlers[ type ]
+					);
+				}
+			} catch ( error ) {
+				console.error( 'Address search error:', error );
+				hideSuggestions( type );
+				enableBrowserAutofill( addressInput );
+			}
+		}
+
+		/**
+		 * Hide the suggestions container for a given address type.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 */
+		function hideSuggestions( type ) {
+			// Check if the address section exists (shipping may be disabled/hidden)
+			if (
+				! addressInputs[ type ] ||
+				! addressInputs[ type ][ 'address_1' ]
+			) {
+				return;
+			}
+
+			if (
+				! suggestionsLists[ type ] ||
+				! suggestionsContainers[ type ]
+			) {
+				return;
+			}
+
+			const suggestionsList = suggestionsLists[ type ];
+			const suggestionsContainer = suggestionsContainers[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+
+			suggestionsList.innerHTML = '';
+			suggestionsContainer.style.display = 'none';
+			addressInput.setAttribute( 'aria-expanded', 'false' );
+			addressInput.removeAttribute( 'aria-activedescendant' );
+			addressInput.removeAttribute( 'aria-owns' );
+			activeSuggestionIndices[ type ] = -1;
+
+			// Remove blur event listener when suggestions are hidden
+			if ( blurHandlers[ type ] ) {
+				addressInput.removeEventListener(
+					'blur',
+					blurHandlers[ type ]
+				);
+				delete blurHandlers[ type ];
+			}
+		}
+
+		/**
+		 * Helper function to set field value and trigger events.
+		 * @param input {HTMLInputElement} The input element to set the value for.
+		 * @param value {string} The value to set.
+		 */
+		const setFieldValue = ( input, value ) => {
+			if ( input ) {
+				input.value = value;
+				input.dispatchEvent( new Event( 'change' ) );
+
+				// Also trigger Select2 update if it's a Select2 field.
+				if (
+					window.jQuery &&
+					window
+						.jQuery( input )
+						.hasClass( 'select2-hidden-accessible' )
+				) {
+					window.jQuery( input ).trigger( 'change' );
+				}
+			}
+		};
+
+		/**
+		 * Select an address from the suggestions list and submit it to the provider's `select` method.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 * @param addressId {string} The ID of the address to select.
+		 * @return {Promise<void>}
+		 */
+		async function selectAddress( type, addressId ) {
+			let addressData;
+			try {
+				addressData =
+					await window.wc.addressAutocomplete.activeProvider[
+						type
+					].select( addressId );
+			} catch ( error ) {
+				console.error(
+					'Error selecting address from provider',
+					window.wc.addressAutocomplete.activeProvider[ type ].id,
+					error
+				);
+				return; // Exit early if address selection fails.
+			}
+
+			if (
+				typeof addressData !== 'object' ||
+				addressData === null ||
+				! addressData
+			) {
+				// Return without setting the address since response was invalid.
+				return;
+			}
+
+			if ( addressData.country ) {
+				setFieldValue(
+					addressInputs[ type ][ 'country' ],
+					addressData.country
+				);
+			}
+			if ( addressData.address_1 ) {
+				setFieldValue(
+					addressInputs[ type ][ 'address_1' ],
+					addressData.address_1
+				);
+			}
+
+			// Note: Passing an invalid ID to clearTimeout() silently does nothing; no exception is thrown.
+			if ( addressSelectionTimeout ) {
+				clearTimeout( addressSelectionTimeout );
+			}
+
+			addressSelectionTimeout = setTimeout( function () {
+				// Cache address fields again as they may have updated following the country change.
+				cacheAddressFields( type );
+
+				// Set all available fields.
+				// Only set fields if the address data property exists and has a value.
+				if ( addressData.address_2 ) {
+					setFieldValue(
+						addressInputs[ type ][ 'address_2' ],
+						addressData.address_2
+					);
+				}
+				if ( addressData.city ) {
+					setFieldValue(
+						addressInputs[ type ][ 'city' ],
+						addressData.city
+					);
+				}
+				if ( addressData.postcode ) {
+					setFieldValue(
+						addressInputs[ type ][ 'postcode' ],
+						addressData.postcode
+					);
+				}
+				if ( addressData.state ) {
+					setFieldValue(
+						addressInputs[ type ][ 'state' ],
+						addressData.state
+					);
+				}
+			}, 200 );
+		}
+
+		/**
+		 * Set the active suggestion in the suggestions list, highlights it.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 * @param index {number} The index of the suggestion to set as active.
+		 */
+		function setActiveSuggestion( type, index ) {
+			// Check if the address section exists (shipping may be disabled/hidden)
+			if (
+				! addressInputs[ type ] ||
+				! addressInputs[ type ][ 'address_1' ]
+			) {
+				return;
+			}
+
+			if ( ! suggestionsLists[ type ] ) {
+				return;
+			}
+
+			const suggestionsList = suggestionsLists[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+
+			const activeLi = suggestionsList.querySelector( 'li.active' );
+			if ( activeLi ) {
+				activeLi.classList.remove( 'active' );
+				activeLi.setAttribute( 'aria-selected', 'false' );
+			}
+
+			const newActiveLi = suggestionsList.querySelector(
+				`li#suggestion-item-${ type }-${ index }`
+			);
+
+			if ( newActiveLi ) {
+				newActiveLi.classList.add( 'active' );
+				newActiveLi.setAttribute( 'aria-selected', 'true' );
+				addressInput.setAttribute(
+					'aria-activedescendant',
+					newActiveLi.id
+				);
+				activeSuggestionIndices[ type ] = index;
+			}
+		}
+
+		// Initialize event handlers for each address type.
+		addressTypes.forEach( ( type ) => {
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const countryInput = addressInputs[ type ][ 'country' ];
+			if ( addressInput && countryInput ) {
+				addressInput.addEventListener( 'input', function () {
+					displaySuggestions( this.value, countryInput.value, type );
+				} );
+
+				addressInput.addEventListener( 'keydown', async function ( e ) {
+					// Check if suggestions exist before accessing them
+					if (
+						! suggestionsLists[ type ] ||
+						! suggestionsContainers[ type ]
+					) {
+						return;
+					}
+
+					const items =
+						suggestionsLists[ type ].querySelectorAll( 'li' );
+					if (
+						items.length === 0 ||
+						suggestionsContainers[ type ].style.display === 'none'
+					) {
+						return;
+					}
+
+					let newIndex = activeSuggestionIndices[ type ];
+
+					if ( e.key === 'ArrowDown' ) {
+						e.preventDefault();
+						newIndex =
+							( activeSuggestionIndices[ type ] + 1 ) %
+							items.length;
+						setActiveSuggestion( type, newIndex );
+					} else if ( e.key === 'ArrowUp' ) {
+						e.preventDefault();
+						newIndex =
+							( activeSuggestionIndices[ type ] -
+								1 +
+								items.length ) %
+							items.length;
+						setActiveSuggestion( type, newIndex );
+					} else if ( e.key === 'Enter' ) {
+						if ( activeSuggestionIndices[ type ] > -1 ) {
+							e.preventDefault();
+							const selectedItem = suggestionsLists[
+								type
+							].querySelector(
+								`li#suggestion-item-${ type }-${ activeSuggestionIndices[ type ] }`
+							);
+							// Hide suggestions immediately for better UX.
+							hideSuggestions( type );
+							enableBrowserAutofill( addressInput );
+							await selectAddress(
+								type,
+								selectedItem.dataset.id
+							);
+						}
+					} else if ( e.key === 'Escape' ) {
+						hideSuggestions( type );
+						enableBrowserAutofill( addressInput );
+					}
+				} );
+			}
+		} );
+
+		// Hide suggestions when clicking outside.
+		document.addEventListener( 'click', function ( event ) {
+			addressTypes.forEach( ( type ) => {
+				// Check if the address section exists before accessing elements
+				if (
+					! addressInputs[ type ] ||
+					! addressInputs[ type ][ 'address_1' ]
+				) {
+					return;
+				}
+
+				if ( ! suggestionsContainers[ type ] ) {
+					return;
+				}
+
+				const target = event.target;
+				if (
+					target !== suggestionsContainers[ type ] &&
+					! suggestionsContainers[ type ].contains( target ) &&
+					target !== addressInputs[ type ][ 'address_1' ]
+				) {
+					hideSuggestions( type );
+				}
+			} );
 		} );
 	} );
-
-	describe( 'Active Provider Management', () => {
-		test( 'should set active provider when country matches canSearch criteria', () => {
-			const billingCountry = document.getElementById( 'billing_country' );
-			billingCountry.value = 'US';
-			billingCountry.dispatchEvent( new Event( 'change' ) );
-
-			expect( mockProvider.canSearch ).toHaveBeenCalledWith( 'US' );
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
-				mockProvider
-			);
-		} );
-
-		test( 'should clear active provider when country does not match canSearch criteria', () => {
-			const billingCountry = document.getElementById( 'billing_country' );
-			// Create new option and select it
-			const frOption = document.createElement( 'option' );
-			frOption.value = 'FR';
-			billingCountry.appendChild( frOption );
-			billingCountry.value = 'FR';
-			billingCountry.dispatchEvent( new Event( 'change' ) );
-
-			expect( mockProvider.canSearch ).toHaveBeenCalledWith( 'FR' );
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
-				null
-			);
-		} );
-
-		test( 'should remove autocomplete-available class when no provider is active', () => {
-			const billingCountry = document.getElementById( 'billing_country' );
-			const billingWrapper = billingAddressInput.closest(
-				'.woocommerce-input-wrapper'
-			);
-
-			billingCountry.value = 'FR';
-			billingCountry.dispatchEvent( new Event( 'change' ) );
-
-			expect(
-				billingWrapper.classList.contains( 'autocomplete-available' )
-			).toBe( false );
-		} );
-
-		test( 'should handle country change for both billing and shipping', () => {
-			const billingCountry = document.getElementById( 'billing_country' );
-			const shippingCountry =
-				document.getElementById( 'shipping_country' );
-
-			// Add FR option to billing
-			const frOption = document.createElement( 'option' );
-			frOption.value = 'FR';
-			billingCountry.appendChild( frOption );
-			billingCountry.value = 'FR';
-
-			billingCountry.dispatchEvent( new Event( 'change' ) );
-			shippingCountry.dispatchEvent( new Event( 'change' ) );
-
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
-				null
-			);
-			expect(
-				window.wc.addressAutocomplete.activeProvider.shipping
-			).toBe( mockProvider );
-		} );
-	} );
-
-	describe( 'Address Suggestions Display', () => {
-		test( 'should not display suggestions for input less than 3 characters', async () => {
-			billingAddressInput.value = 'ab';
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			// Wait for timeout
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsList = document.querySelector(
-				'#address_suggestions_billing .suggestions-list'
-			);
-			expect( suggestionsList.innerHTML ).toBe( '' );
-			expect( mockProvider.search ).not.toHaveBeenCalled();
-		} );
-
-		test( 'should hide suggestions when input goes from 3+ characters to less than 3', async () => {
-			// First show suggestions with 3+ characters
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Now reduce to less than 3 characters
-			billingAddressInput.value = '12';
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-		} );
-
-		test( 'should display suggestions for input with 3 or more characters', async () => {
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			// Wait for timeout and async operations
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			expect( mockProvider.search ).toHaveBeenCalledWith(
-				'123',
-				'US',
-				'billing'
-			);
-
-			const suggestionsList = document.querySelector(
-				'#address_suggestions_billing .suggestions-list'
-			);
-			const suggestions = suggestionsList.querySelectorAll( 'li' );
-
-			expect( suggestions ).toHaveLength( 2 );
-			expect( suggestions[ 0 ].textContent ).toContain(
-				'123 Main Street'
-			);
-			expect( suggestions[ 1 ].textContent ).toContain(
-				'456 Oak Avenue'
-			);
-		} );
-
-		test( 'should highlight matched text in suggestions', async () => {
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsList = document.querySelector(
-				'#address_suggestions_billing .suggestions-list'
-			);
-			const firstSuggestion = suggestionsList.querySelector( 'li' );
-			const strongElement = firstSuggestion.querySelector( 'strong' );
-
-			expect( strongElement ).toBeTruthy();
-			expect( strongElement.textContent ).toBe( '123' );
-		} );
-
-		test( 'should limit suggestions to maximum of 5', async () => {
-			// Mock provider to return more than 5 suggestions
-			mockProvider.search.mockResolvedValue(
-				Array.from( { length: 10 }, ( _, i ) => ( {
-					id: `addr${ i }`,
-					label: `${ i } Test Street`,
-					matchedSubstrings: [],
-				} ) )
-			);
-
-			billingAddressInput.value = 'test';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsList = document.querySelector(
-				'#address_suggestions_billing .suggestions-list'
-			);
-			const suggestions = suggestionsList.querySelectorAll( 'li' );
-
-			expect( suggestions ).toHaveLength( 5 );
-		} );
-
-		test( 'should hide suggestions when no results returned', async () => {
-			mockProvider.search.mockResolvedValue( [] );
-
-			billingAddressInput.value = 'xyz';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-		} );
-
-		test( 'should hide suggestions and log error when search throws exception', async () => {
-			mockProvider.search.mockRejectedValue(
-				new Error( 'Search failed' )
-			);
-
-			const consoleSpy = jest
-				.spyOn( console, 'error' )
-				.mockImplementation( () => {} );
-
-			billingAddressInput.value = 'test';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-			expect( consoleSpy ).toHaveBeenCalledWith(
-				'Address search error:',
-				expect.any( Error )
-			);
-
-			consoleSpy.mockRestore();
-		} );
-	} );
-
-	describe( 'Keyboard Navigation', () => {
-		beforeEach( async () => {
-			// Setup suggestions
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-		} );
-
-		test( 'should navigate down with ArrowDown key', () => {
-			const suggestions = document.querySelectorAll(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-
-			// No suggestion should be active initially
-			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
-				false
-			);
-			expect( suggestions[ 0 ].getAttribute( 'aria-selected' ) ).toBe(
-				null
-			);
-
-			// Press ArrowDown
-			const keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// First suggestion should now be active
-			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
-				true
-			);
-			expect( suggestions[ 0 ].getAttribute( 'aria-selected' ) ).toBe(
-				'true'
-			);
-			expect( suggestions[ 1 ].classList.contains( 'active' ) ).toBe(
-				false
-			);
-		} );
-
-		test( 'should navigate up with ArrowUp key', () => {
-			const suggestions = document.querySelectorAll(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-
-			// Navigate to first item first
-			let keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// Navigate to second item
-			keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// Press ArrowUp
-			keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowUp',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// First suggestion should be active again
-			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
-				true
-			);
-			expect( suggestions[ 1 ].classList.contains( 'active' ) ).toBe(
-				false
-			);
-		} );
-
-		test( 'should wrap around when navigating beyond bounds', () => {
-			const suggestions = document.querySelectorAll(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-
-			// Navigate to first item
-			let keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// Navigate to second (last) item
-			keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// Navigate beyond last item - should wrap to first
-			keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
-				true
-			);
-			expect( suggestions[ 1 ].classList.contains( 'active' ) ).toBe(
-				false
-			);
-		} );
-
-		test( 'should select address with Enter key', async () => {
-			const suggestions = document.querySelectorAll(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-
-			// Navigate to first suggestion first
-			let keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// Press Enter to select first suggestion
-			keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'Enter',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			// Wait for async operations
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			expect( mockProvider.select ).toHaveBeenCalledWith( 'addr1' );
-
-			// Suggestions should be hidden
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-		} );
-
-		test( 'should hide suggestions with Escape key', () => {
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Press Escape
-			const keydownEvent = new KeyboardEvent( 'keydown', {
-				key: 'Escape',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( keydownEvent );
-
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-		} );
-
-		test( 'should not handle keyboard events when suggestions are hidden', () => {
-			// Hide suggestions first
-			const escapeEvent = new KeyboardEvent( 'keydown', {
-				key: 'Escape',
-				bubbles: true,
-			} );
-			billingAddressInput.dispatchEvent( escapeEvent );
-
-			// Try to navigate with ArrowDown - should not throw error
-			const arrowEvent = new KeyboardEvent( 'keydown', {
-				key: 'ArrowDown',
-				bubbles: true,
-			} );
-			expect( () => {
-				billingAddressInput.dispatchEvent( arrowEvent );
-			} ).not.toThrow();
-		} );
-	} );
-
-	describe( 'Address Selection', () => {
-		test( 'should populate address fields when address is selected', async () => {
-			// Setup suggestions
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			// Click on first suggestion
-			const firstSuggestion = document.querySelector(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-			firstSuggestion.click();
-
-			// Wait for async operations and timeout
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			expect( mockProvider.select ).toHaveBeenCalledWith( 'addr1' );
-
-			// Check that fields are populated
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
-				'123 Main Street'
-			);
-			expect( document.getElementById( 'billing_city' ).value ).toBe(
-				'City'
-			);
-			expect( document.getElementById( 'billing_postcode' ).value ).toBe(
-				'12345'
-			);
-			expect( document.getElementById( 'billing_country' ).value ).toBe(
-				'US'
-			);
-			expect( document.getElementById( 'billing_state' ).value ).toBe(
-				'CA'
-			);
-		} );
-
-		test( 'should handle partial address data from provider', async () => {
-			// Mock provider to return partial data
-			mockProvider.select.mockResolvedValue( {
-				address_1: '123 Main Street',
-				city: 'City',
-				// Missing postcode, country, state
-			} );
-
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const firstSuggestion = document.querySelector(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-			firstSuggestion.click();
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			// Only provided fields should be populated
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
-				'123 Main Street'
-			);
-			expect( document.getElementById( 'billing_city' ).value ).toBe(
-				'City'
-			);
-			expect( document.getElementById( 'billing_postcode' ).value ).toBe(
-				''
-			);
-		} );
-
-		test( 'should handle provider selection errors gracefully', async () => {
-			mockProvider.select.mockRejectedValue(
-				new Error( 'Selection failed' )
-			);
-
-			const consoleSpy = jest
-				.spyOn( console, 'error' )
-				.mockImplementation( () => {} );
-
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const firstSuggestion = document.querySelector(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-			firstSuggestion.click();
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			expect( consoleSpy ).toHaveBeenCalledWith(
-				'Error selecting address from provider',
-				'test-provider',
-				expect.any( Error )
-			);
-
-			// Fields should remain unchanged
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
-				'123'
-			);
-
-			consoleSpy.mockRestore();
-		} );
-
-		test( 'should handle invalid address data from provider', async () => {
-			mockProvider.select.mockResolvedValue( null );
-
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const firstSuggestion = document.querySelector(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-			firstSuggestion.click();
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			// Fields should remain unchanged
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
-				'123'
-			);
-		} );
-	} );
-
-	describe( 'Browser Autofill Management', () => {
-		test( 'should disable browser autofill when suggestions are shown', async () => {
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'off'
-			);
-			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
-				'true'
-			);
-			expect( billingAddressInput.getAttribute( 'data-op-ignore' ) ).toBe(
-				'true'
-			);
-			expect( billingAddressInput.getAttribute( 'data-1p-ignore' ) ).toBe(
-				'true'
-			);
-		} );
-
-		test( 'should enable browser autofill when suggestions are hidden', async () => {
-			// First show suggestions
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			// Then hide them
-			billingAddressInput.value = 'xy';
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'address-line1'
-			);
-			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
-				'false'
-			);
-		} );
-	} );
-
-	describe( 'Security and Sanitization', () => {
-		test( 'should sanitize input values for XSS protection', async () => {
-			const maliciousInput = '<script>alert("xss")</script>';
-			const consoleSpy = jest
-				.spyOn( console, 'warn' )
-				.mockImplementation( () => {} );
-
-			billingAddressInput.value = maliciousInput;
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			expect( consoleSpy ).toHaveBeenCalledWith(
-				'Input was sanitized for security'
-			);
-			expect( mockProvider.search ).toHaveBeenCalledWith(
-				'alert("xss")',
-				'US',
-				'billing'
-			);
-
-			consoleSpy.mockRestore();
-		} );
-
-		test( 'should handle invalid match data safely', async () => {
-			// Mock provider to return invalid match data
-			mockProvider.search.mockResolvedValue( [
-				{
-					id: 'addr1',
-					label: '123 Main Street',
-					matchedSubstrings: [
-						{ offset: -1, length: 5 }, // Invalid offset
-						{ offset: 50, length: 10 }, // Offset beyond string length
-						{ offset: 0, length: -1 }, // Invalid length
-						null, // Null match
-					],
-				},
-			] );
-
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsList = document.querySelector(
-				'#address_suggestions_billing .suggestions-list'
-			);
-			const firstSuggestion = suggestionsList.querySelector( 'li' );
-
-			// Should still render the suggestion without highlighting
-			expect( firstSuggestion.textContent ).toBe( '123 Main Street' );
-			expect( firstSuggestion.querySelector( 'strong' ) ).toBe( null );
-		} );
-	} );
-
-	describe( 'Click Outside Behavior', () => {
-		test( 'should hide suggestions when clicking outside', async () => {
-			// Show suggestions first
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Click outside
-			const outsideElement = document.createElement( 'div' );
-			document.body.appendChild( outsideElement );
-			outsideElement.click();
-
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-		} );
-
-		test( 'should not hide suggestions when clicking inside suggestions container', async () => {
-			// Show suggestions first
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Click inside suggestions container
-			suggestionsContainer.click();
-
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-		} );
-
-		test( 'should not hide suggestions when clicking address input', async () => {
-			// Show suggestions first
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Click on address input
-			billingAddressInput.click();
-
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-		} );
-	} );
-
-	describe( 'Blur Event Behavior', () => {
-		test( 'should hide suggestions when input loses focus', async () => {
-			// Show suggestions first
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Blur the input
-			billingAddressInput.dispatchEvent( new Event( 'blur' ) );
-
-			// Wait for blur timeout
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-		} );
-
-		test( 'should not refocus input when blurred with suggestions active', async () => {
-			// Show suggestions first
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'block' );
-
-			// Create another element to focus
-			const otherElement = document.createElement( 'input' );
-			document.body.appendChild( otherElement );
-
-			// Blur the address input and focus the other element
-			billingAddressInput.blur();
-			otherElement.focus();
-
-			// Wait for blur timeout
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			// The other element should still be focused (address input shouldn't refocus)
-			expect( document.activeElement ).toBe( otherElement );
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-
-			document.body.removeChild( otherElement );
-		} );
-
-		test( 'should not have blur event listener when suggestions are not shown', () => {
-			// No suggestions should be shown initially
-			const suggestionsContainer = document.getElementById(
-				'address_suggestions_billing'
-			);
-			expect( suggestionsContainer.style.display ).toBe( 'none' );
-
-			// Blur the input - should not cause any issues
-			expect( () => {
-				billingAddressInput.dispatchEvent( new Event( 'blur' ) );
-			} ).not.toThrow();
-		} );
-
-		test( 'should enable browser autofill without refocusing when suggestions are hidden via blur', async () => {
-			// Show suggestions first
-			billingAddressInput.value = '123';
-			billingAddressInput.focus();
-			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
-
-			// Verify autofill is disabled
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'off'
-			);
-
-			// Blur the input
-			billingAddressInput.dispatchEvent( new Event( 'blur' ) );
-
-			// Wait for blur timeout
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
-
-			// Autofill should be re-enabled
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'address-line1'
-			);
-			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
-				'false'
-			);
-		} );
-	} );
-} );
+} )();
