@@ -29,6 +29,8 @@ import Bancontact from '../../images/payment-methods/bancontact';
 import Eps from '../../images/payment-methods/eps';
 import Becs from '../../images/payment-methods/becs';
 import Przelewy24 from '../../images/payment-methods/przelewy24';
+import GrabPay from '../../images/payment-methods/grabpay';
+import WechatPay from '../../images/payment-methods/wechat-pay';
 
 /**
  * Payment methods list.
@@ -114,6 +116,14 @@ const PaymentMethods = [
 		name: 'przelewy24',
 		component: <Przelewy24 key="przelewy24" />,
 	},
+	{
+		name: 'grabpay',
+		component: <GrabPay key="grabpay" />,
+	},
+	{
+		name: 'wechatpay',
+		component: <WechatPay key="wechatpay" />,
+	},
 ];
 
 export const WooPaymentsMethodsLogos = ( {
@@ -147,7 +157,7 @@ export const WooPaymentsMethodsLogos = ( {
 	 * The default is set according to https://woocommerce.com/document/woopayments/payment-methods.
 	 * If not eligible for WooPay, the total number of payment methods is reduced by one.
 	 */
-	totalPaymentMethods = 20,
+	totalPaymentMethods = 22,
 }: {
 	isWooPayEligible: boolean;
 	maxElements: number;
