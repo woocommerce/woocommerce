@@ -39,7 +39,10 @@ const CTA = () => {
 			);
 		}
 		return (
-			<div className="quantity">
+			<div className="quantity wc-block-components-quantity-selector">
+				<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
+					-
+				</button>
 				<input
 					style={
 						// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
@@ -58,6 +61,9 @@ const CTA = () => {
 					className="input-text qty text"
 					readOnly
 				/>
+				<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">
+					+
+				</button>
 			</div>
 		);
 	}

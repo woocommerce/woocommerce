@@ -50,9 +50,61 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 			)
 		);
 
-		$quantity_selector_html = ob_get_clean();
+		$quantity_html = ob_get_clean();
 
-		return $quantity_selector_html;
+		// Modify the quantity input to add stepper buttons.
+		$product_name  = $product->get_name();
+		$quantity_html = $this->add_steppers_to_quantity_input( $quantity_html, $product_name );
+		$quantity_html = $this->add_stepper_classes_to_quantity_input( $quantity_html );
+
+		// Add interactive data attribute for the stepper functionality.
+		$quantity_html = '<div data-wp-interactive="woocommerce/add-to-cart-with-options">' . $quantity_html . '</div>';
+
+		return $quantity_html;
+	}
+
+	/**
+	 * Add increment and decrement buttons to the quantity input field.
+	 *
+	 * @param string $quantity_html Quantity input HTML.
+	 * @param string $product_name Product name.
+	 * @return string Quantity input HTML with increment and decrement buttons.
+	 */
+	private function add_steppers_to_quantity_input( $quantity_html, $product_name ) {
+		// Regex pattern to match the <input> element with id starting with 'quantity_'.
+		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+		// Replacement string to add button BEFORE the matched <input> element.
+		/* translators: %s refers to the item name in the cart. */
+		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		// Replacement string to add button AFTER the matched <input> element.
+		/* translators: %s refers to the item name in the cart. */
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$new_html    = preg_replace( $pattern, $minus_button, $quantity_html );
+		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
+		return $new_html;
+	}
+
+	/**
+	 * Add classes to the Quantity Selector needed for the stepper style.
+	 *
+	 * @param string $quantity_html The Quantity Selector HTML.
+	 *
+	 * @return string The Quantity Selector HTML with classes added.
+	 */
+	private function add_stepper_classes_to_quantity_input( $quantity_html ) {
+		$html = new \WP_HTML_Tag_Processor( $quantity_html );
+
+		// Add classes to the form.
+		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector' );
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
+		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector__input' );
+		}
+
+		return $html->get_updated_html();
 	}
 
 	/**
@@ -117,6 +169,8 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 		$markup = '';
 
 		if ( $product instanceof \WC_Product ) {
+			wp_enqueue_script_module( $this->get_full_block_name() );
+
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
@@ -133,5 +187,16 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 		$product = $previous_product;
 
 		return $markup;
+	}
+
+	/**
+	 * Enqueue frontend script
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Rendered block output.
+	 * @param WP_Block $block Block instance.
+	 */
+	protected function enqueue_scripts( $attributes = array(), $content = '', $block = null ) {
+		wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
 	}
 }

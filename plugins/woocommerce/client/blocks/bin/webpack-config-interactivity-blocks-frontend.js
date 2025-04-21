@@ -39,6 +39,8 @@ const entries = {
 		'./assets/js/blocks/add-to-cart-with-options/frontend.ts',
 	'woocommerce/add-to-cart-with-options-grouped-product-selector':
 		'./assets/js/blocks/add-to-cart-with-options/grouped-product-selector/frontend.ts',
+	'woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta':
+		'./assets/js/blocks/add-to-cart-with-options/grouped-product-selector/product-item-cta/frontend.ts',
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 	'woocommerce/add-to-cart-with-options-variation-selector':
