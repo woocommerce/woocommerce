@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1506,15 +1507,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	protected function get_chosen_shipping_methods( $calculated_shipping_packages = array() ) {
-		$chosen_methods = array();
-		// Get chosen methods for each package to get our totals.
-		foreach ( $calculated_shipping_packages as $key => $package ) {
-			$chosen_method = wc_get_chosen_shipping_method_for_package( $key, $package );
-			if ( $chosen_method ) {
-				$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
-			}
-		}
-		return $chosen_methods;
+		return ShippingUtil::get_selected_shipping_rates_from_packages( $calculated_shipping_packages );
 	}
 
 	/**

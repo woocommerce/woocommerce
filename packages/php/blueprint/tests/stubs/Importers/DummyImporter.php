@@ -6,11 +6,25 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Steps\DummyStep;
 
-class DummyImporter implements StepProcessor{
+/**
+ * Dummy importer class.
+ */
+class DummyImporter implements StepProcessor {
+	/**
+	 * Process the step.
+	 *
+	 * @param object $schema The schema to process.
+	 * @return StepProcessorResult The result of the step.
+	 */
 	public function process( $schema ): StepProcessorResult {
 		return StepProcessorResult::success( DummyStep::get_step_name() );
 	}
 
+	/**
+	 * Get the step class.
+	 *
+	 * @return string The step class.
+	 */
 	public function get_step_class(): string {
 		return DummyStep::class;
 	}
