@@ -668,6 +668,9 @@ class WooPaymentsService {
 			throw new Exception( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
 		}
 
+		// Remove NOX-specific onboarding data.
+		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
+
 		return $response;
 	}
 
