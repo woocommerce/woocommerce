@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 /**
@@ -433,6 +434,98 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
+
+	/**
+	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
+	 */
+	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is enabled.
+	 */
+	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'invalid_source' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
+	}
+
+	/**
+	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
+	 */
+	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is disabled.
+	 */
+	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'invalid_source' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
 	}
 
 	/**
