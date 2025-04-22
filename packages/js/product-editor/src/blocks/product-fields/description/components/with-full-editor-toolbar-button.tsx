@@ -14,39 +14,38 @@ import type {
 } from '../types';
 import FullEditorToolbarButton from './full-editor-toolbar-button';
 
-const wooBlockwithFullEditorToolbarButton =
-	createHigherOrderComponent< DescriptionBlockEditComponent >(
-		( BlockEdit: DescriptionBlockEditComponent ) => {
-			return ( props: DescriptionBlockEditProps ) => {
-				// Only extend summary field block instances
-				if ( props?.name !== 'woocommerce/product-summary-field' ) {
-					return <BlockEdit { ...props } />;
-				}
+const wooBlockwithFullEditorToolbarButton = createHigherOrderComponent(
+	( BlockEdit: DescriptionBlockEditComponent ) => {
+		return ( props: DescriptionBlockEditProps ) => {
+			// Only extend summary field block instances
+			if ( props?.name !== 'woocommerce/product-summary-field' ) {
+				return <BlockEdit { ...props } />;
+			}
 
-				/*
-				 * Extend the toolbar only to the summary field block instance
-				 * that has the `woocommerce/product-description-field__content` template block ID.
-				 */
-				if (
-					props?.attributes?._templateBlockId !==
-					'product-description__content'
-				) {
-					return <BlockEdit { ...props } />;
-				}
+			/*
+			 * Extend the toolbar only to the summary field block instance
+			 * that has the `woocommerce/product-description-field__content` template block ID.
+			 */
+			if (
+				props?.attributes?._templateBlockId !==
+				'product-description__content'
+			) {
+				return <BlockEdit { ...props } />;
+			}
 
-				const blockControlProps = { group: 'other' };
+			const blockControlProps = { group: 'other' };
 
-				return (
-					<>
-						<BlockControls { ...blockControlProps }>
-							<FullEditorToolbarButton />
-						</BlockControls>
-						<BlockEdit { ...props } />
-					</>
-				);
-			};
-		},
-		'wooBlockwithFullEditorToolbarButton'
-	);
+			return (
+				<>
+					<BlockControls { ...blockControlProps }>
+						<FullEditorToolbarButton />
+					</BlockControls>
+					<BlockEdit { ...props } />
+				</>
+			);
+		};
+	},
+	'wooBlockwithFullEditorToolbarButton'
+);
 
 export default wooBlockwithFullEditorToolbarButton;

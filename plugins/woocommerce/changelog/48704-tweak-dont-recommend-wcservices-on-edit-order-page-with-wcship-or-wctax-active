@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: If either the upcoming WooCommerce Shipping or WooCommerce Tax extension is active, don't display a banner recommending WooCommerce Shipping & Tax on the "Edit order" page.  The changes in this PR only remove the banner recommending WCS&T which, if installed, would lead to a notice about incompatibility.
-

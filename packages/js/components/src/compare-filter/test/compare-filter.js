@@ -7,7 +7,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Basic } from '../stories/index';
+import { Basic } from '../stories/compare-filter.story';
 import { CompareFilter } from '../index';
 import Search from '../../search';
 import productAutocompleter from '../../search/autocompleters/product';

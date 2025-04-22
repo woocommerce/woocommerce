@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * This class adds actions to track usage of the Product Collection Block.
@@ -32,7 +33,7 @@ class WC_Product_Collection_Block_Tracking {
 	 */
 	public function track_collection_instances( $post_id, $post ) {
 
-		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! wc_current_theme_is_fse_theme() ) {
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! wp_is_block_theme() ) {
 			return;
 		}
 
@@ -121,7 +122,7 @@ class WC_Product_Collection_Block_Tracking {
 					'in_single_product' => $is_in_single_product ? 'yes' : 'no',
 					'in_template_part'  => $is_in_template_part ? 'yes' : 'no',
 					'in_synced_pattern' => $is_in_synced_pattern ? 'yes' : 'no',
-					'filters'           => $this->get_query_filters_usage_data( $block ),
+					'filters'           => wp_json_encode( $this->get_query_filters_usage_data( $block ) ),
 				);
 			}
 
@@ -273,7 +274,7 @@ class WC_Product_Collection_Block_Tracking {
 
 		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
 			$stock_statuses = wc_get_product_stock_status_options();
-			$default_values = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array_diff_key( $stock_statuses, array( 'outofstock' => '' ) ) : $stock_statuses;
+			$default_values = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array_diff_key( $stock_statuses, array( ProductStockStatus::OUT_OF_STOCK => '' ) ) : $stock_statuses;
 			$default_diff   = array_diff( array_keys( $default_values ), $query_attrs['woocommerceStockStatus'] );
 			if ( ! empty( $default_diff ) ) {
 				$filters['stock-status'] = 'yes';

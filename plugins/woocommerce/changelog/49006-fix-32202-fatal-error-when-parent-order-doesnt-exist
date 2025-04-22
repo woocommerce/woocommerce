@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal error in order reports when parent order doesn't exist

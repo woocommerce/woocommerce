@@ -1,7 +1,8 @@
 {
 	"require-dev": {
 		"woocommerce/woocommerce-sniffs": "1.0.0",
-		"sirbrillig/phpcs-changed": "^2.11.1"
+		"sirbrillig/phpcs-changed": "^2.11.1",
+		"suin/phpcs-psr4-sniff": "^3.0"
 	},
 	"config": {
 		"platform": {

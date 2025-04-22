@@ -7,8 +7,6 @@ import { createElement, forwardRef, useContext } from '@wordpress/element';
 
 import { redo as redoIcon, undo as undoIcon } from '@wordpress/icons';
 import { Ref } from 'react';
-// @ts-expect-error missing types.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { displayShortcut, isAppleOS } from '@wordpress/keycodes';
 
 /**

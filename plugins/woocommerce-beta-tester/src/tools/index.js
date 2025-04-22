@@ -77,9 +77,8 @@ function Tools( {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getCurrentlyRunning, getMessages, getCommandParams } = select(
-			STORE_KEY
-		);
+		const { getCurrentlyRunning, getMessages, getCommandParams } =
+			select( STORE_KEY );
 		return {
 			currentlyRunningCommands: getCurrentlyRunning(),
 			messages: getMessages(),

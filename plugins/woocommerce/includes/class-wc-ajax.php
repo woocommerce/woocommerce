@@ -7,6 +7,10 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
@@ -43,11 +47,27 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Set the 'wc-ajax' argument in $wp_query.
+	 */
+	private static function set_wc_ajax_argument_in_query() {
+		global $wp_query;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['wc-ajax'] ) && empty( $wp_query->get( 'wc-ajax' ) ) ) {
+			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
 	 * Set WC AJAX constant and headers.
 	 */
 	public static function define_ajax() {
+		global $wp_query;
+
 		// phpcs:disable
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
+		self::set_wc_ajax_argument_in_query();
+		if ( ! empty( $wp_query->get( 'wc-ajax' ) ) ) {
 			wc_maybe_define_constant( 'DOING_AJAX', true );
 			wc_maybe_define_constant( 'WC_DOING_AJAX', true );
 			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
@@ -84,9 +104,7 @@ class WC_AJAX {
 		global $wp_query;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
-			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
-		}
+		self::set_wc_ajax_argument_in_query();
 
 		$action = $wp_query->get( 'wc-ajax' );
 
@@ -152,6 +170,7 @@ class WC_AJAX {
 			'load_order_items',
 			'add_order_note',
 			'delete_order_note',
+			'json_search_order_metakeys',
 			'json_search_products',
 			'json_search_products_and_variations',
 			'json_search_downloadable_products_and_variations',
@@ -178,6 +197,7 @@ class WC_AJAX {
 			'shipping_zone_methods_save_settings',
 			'shipping_classes_save_changes',
 			'toggle_gateway_enabled',
+			'load_status_widget',
 		);
 
 		foreach ( $ajax_events as $ajax_event ) {
@@ -192,7 +212,7 @@ class WC_AJAX {
 		foreach ( $ajax_private_events as $ajax_event ) {
 			add_action(
 				'wp_ajax_woocommerce_' . $ajax_event,
-				function() use ( $ajax_event ) {
+				function () use ( $ajax_event ) {
 					call_user_func( array( __CLASS__, $ajax_event ) );
 				}
 			);
@@ -206,7 +226,8 @@ class WC_AJAX {
 		foreach ( $ajax_heartbeat_callbacks as $ajax_callback ) {
 			add_filter(
 				'heartbeat_received',
-				function( $response, $data ) use ( $ajax_callback ) {
+				// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				function ( $response, $data ) use ( $ajax_callback ) {
 					return call_user_func_array( array( __CLASS__, $ajax_callback ), func_get_args() );
 				},
 				11,
@@ -467,13 +488,13 @@ class WC_AJAX {
 		$variation_id      = 0;
 		$variation         = array();
 
-		if ( $product && 'variation' === $product->get_type() ) {
+		if ( $product && ProductType::VARIATION === $product->get_type() ) {
 			$variation_id = $product_id;
 			$product_id   = $product->get_parent_id();
 			$variation    = $product->get_variation_attributes();
 		}
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && 'publish' === $product_status ) {
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && ProductStatus::PUBLISH === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -623,7 +644,7 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$product_type = isset( $_POST['product_type'] ) ? sanitize_text_field( wp_unslash( $_POST['product_type'] ) ) : 'simple';
+		$product_type = isset( $_POST['product_type'] ) ? sanitize_text_field( wp_unslash( $_POST['product_type'] ) ) : ProductType::SIMPLE;
 
 		$i             = absint( $_POST['i'] );
 		$metabox_class = array();
@@ -636,7 +657,7 @@ class WC_AJAX {
 		$attribute->set_variation(
 			apply_filters(
 				'woocommerce_attribute_default_is_variation',
-				'variable' === $product_type ? 1 : 0,
+				ProductType::VARIABLE === $product_type ? 1 : 0,
 				$product_type
 			)
 		);
@@ -732,7 +753,7 @@ class WC_AJAX {
 					if ( ! $attribute ) {
 						continue;
 					}
-					$i++;
+					++$i;
 					$metabox_class = array();
 
 					if ( $attribute->is_taxonomy() ) {
@@ -789,7 +810,7 @@ class WC_AJAX {
 		}
 		$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
 		$product_id   = absint( wp_unslash( $_POST['post_id'] ) );
-		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : 'simple';
+		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : ProductType::SIMPLE;
 		$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
 		$product      = new $classname( $product_id );
 		$product->set_attributes( $attributes );
@@ -827,14 +848,12 @@ class WC_AJAX {
 		$product_id       = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id ); // phpcs:ignore
 		$loop             = intval( $_POST['loop'] );
-		$product_object   = wc_get_product_object( 'variable', $product_id ); // Forces type to variable in case product is unsaved.
-		$variation_object = wc_get_product_object( 'variation' );
+		$product_object   = wc_get_product_object( ProductType::VARIABLE, $product_id ); // Forces type to variable in case product is unsaved.
+		$variation_object = wc_get_product_object( ProductType::VARIATION );
 		$variation_object->set_parent_id( $product_id );
 		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
-		$variation_id   = $variation_object->save();
-		$variation      = get_post( $variation_id );
-		$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
-		include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
+		$variation_object->save();
+		self::render_variation_html( $product_object, $variation_object, $loop, self::base_cost_or_null( $product_object ) );
 		wp_die();
 	}
 
@@ -945,8 +964,8 @@ class WC_AJAX {
 					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
-						$loop ++;
-						$file_counter ++;
+						++$loop;
+						++$file_counter;
 
 						if ( $file->get_name() ) {
 							$file_count = $file->get_name();
@@ -1058,7 +1077,7 @@ class WC_AJAX {
 				if ( ! $product ) {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
-				if ( 'variable' === $product->get_type() ) {
+				if ( ProductType::VARIABLE === $product->get_type() ) {
 					/* translators: %s product name */
 					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
 				}
@@ -1085,6 +1104,8 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
 			$data = get_post_meta( $order_id );
+
+			$order = wc_get_order( $order_id );
 
 			// Get HTML to return.
 			ob_start();
@@ -1652,7 +1673,7 @@ class WC_AJAX {
 				$exclude_type = strtolower( trim( $exclude_type ) );
 			}
 			$exclude_types = array_intersect(
-				array_merge( array( 'variation' ), array_keys( wc_get_product_types() ) ),
+				array_merge( array( ProductType::VARIATION ), array_keys( wc_get_product_types() ) ),
 				$exclude_types
 			);
 		}
@@ -1893,7 +1914,7 @@ class WC_AJAX {
 						$item_exists = count(
 							array_filter(
 								$terms_map[ $ancestor ]->children,
-								function( $term ) use ( $current_child ) {
+								function ( $term ) use ( $current_child ) {
 									return $term->term_id === $current_child->term_id;
 								}
 							)
@@ -1908,7 +1929,7 @@ class WC_AJAX {
 		}
 		$parent_terms = array_filter(
 			array_values( $terms_map ),
-			function( $term ) {
+			function ( $term ) {
 				return 0 === $term->parent;
 			}
 		);
@@ -2007,6 +2028,7 @@ class WC_AJAX {
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_categories', $found_product_categories, $search_text ) );
 	}
 
+
 	/**
 	 * Ajax request handling for page searching.
 	 */
@@ -2104,9 +2126,9 @@ class WC_AJAX {
 				continue;
 			}
 			if ( $nextid === $id ) {
-				$index ++;
+				++$index;
 			}
-			$index ++;
+			++$index;
 			$menu_orders[ $id ] = $index;
 
 			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
@@ -2394,7 +2416,7 @@ class WC_AJAX {
 		$variations     = wc_get_products(
 			array(
 				'status'  => array( 'private', 'publish' ),
-				'type'    => 'variation',
+				'type'    => ProductType::VARIATION,
 				'parent'  => $product_id,
 				'limit'   => $per_page,
 				'page'    => $page,
@@ -2409,12 +2431,10 @@ class WC_AJAX {
 		if ( $variations ) {
 			wc_render_invalid_variation_notice( $product_object );
 
+			$base_cost = self::base_cost_or_null( $product_object );
 			foreach ( $variations as $variation_object ) {
-				$variation_id   = $variation_object->get_id();
-				$variation      = get_post( $variation_id );
-				$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
-				include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
-				$loop++;
+				self::render_variation_html( $product_object, $variation_object, $loop, $base_cost );
+				++$loop;
 			}
 		}
 		wp_die();
@@ -2468,7 +2488,7 @@ class WC_AJAX {
 	private static function variation_bulk_action_toggle_enabled( $variations, $data ) {
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
-			$variation->set_status( 'private' === $variation->get_status( 'edit' ) ? 'publish' : 'private' );
+			$variation->set_status( ProductStatus::PRIVATE === $variation->get_status( 'edit' ) ? ProductStatus::PUBLISH : ProductStatus::PRIVATE );
 			$variation->save();
 		}
 	}
@@ -2542,7 +2562,7 @@ class WC_AJAX {
 	 * @used-by bulk_edit_variations
 	 */
 	private static function variation_bulk_action_variable_stock_status_instock( $variations, $data ) {
-		self::variation_bulk_set( $variations, 'stock_status', 'instock' );
+		self::variation_bulk_set( $variations, 'stock_status', ProductStockStatus::IN_STOCK );
 	}
 
 	/**
@@ -2554,7 +2574,7 @@ class WC_AJAX {
 	 * @used-by bulk_edit_variations
 	 */
 	private static function variation_bulk_action_variable_stock_status_outofstock( $variations, $data ) {
-		self::variation_bulk_set( $variations, 'stock_status', 'outofstock' );
+		self::variation_bulk_set( $variations, 'stock_status', ProductStockStatus::OUT_OF_STOCK );
 	}
 
 	/**
@@ -2566,7 +2586,7 @@ class WC_AJAX {
 	 * @used-by bulk_edit_variations
 	 */
 	private static function variation_bulk_action_variable_stock_status_onbackorder( $variations, $data ) {
-		self::variation_bulk_set( $variations, 'stock_status', 'onbackorder' );
+		self::variation_bulk_set( $variations, 'stock_status', ProductStockStatus::ON_BACKORDER );
 	}
 
 	/**
@@ -2788,6 +2808,28 @@ class WC_AJAX {
 		self::variation_bulk_adjust_price( $variations, 'sale_price', '-', wc_clean( $data['value'] ) );
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	/**
+	 * Bulk action - Unset cost values.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 */
+	private static function variation_bulk_action_variable_unset_cogs_value( $variations, $data ) {
+		if ( ! wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+			return;
+		}
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			$variation->set_cogs_value( null );
+			$variation->save();
+		}
+	}
+	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
 	/**
 	 * Bulk action - Set Price.
 	 *
@@ -2802,6 +2844,11 @@ class WC_AJAX {
 		foreach ( $variations as $variation_id ) {
 			$variation   = wc_get_product( $variation_id );
 			$field_value = $variation->{"get_$field"}( 'edit' );
+
+			// Skip variations without a price set
+			if ( '' === $field_value || null === $field_value ) {
+				continue;
+			}
 
 			if ( '%' === substr( $value, -1 ) ) {
 				$percent      = wc_format_decimal( substr( $value, 0, -1 ) );
@@ -3610,6 +3657,25 @@ class WC_AJAX {
 	}
 
 	/**
+	 * AJAX handler for asynchronously loading the status widget content.
+	 */
+	public static function load_status_widget() {
+		check_ajax_referer( 'wc-status-widget', 'security' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'view_woocommerce_reports' ) || ! current_user_can( 'publish_shop_orders' ) ) {
+			wp_send_json_error( 'missing_permissions' );
+			wp_die();
+		}
+
+		include_once __DIR__ . '/admin/class-wc-admin-dashboard.php';
+		ob_start();
+		$wc_admin_dashboard = new WC_Admin_Dashboard();
+		$wc_admin_dashboard->status_widget_content();
+		$content = ob_get_clean();
+		wp_send_json_success( array( 'content' => $content ) );
+	}
+
+	/**
 	 * Reimplementation of WP core's `wp_ajax_add_meta` method to support order custom meta updates with custom tables.
 	 */
 	private static function order_add_meta() {
@@ -3621,8 +3687,18 @@ class WC_AJAX {
 	 *
 	 * @return void
 	 */
-	private static function order_delete_meta() : void {
+	private static function order_delete_meta(): void {
 		wc_get_container()->get( CustomMetaBox::class )->delete_meta_ajax();
+	}
+
+	/**
+	 * Hooked into `wp_ajax_woocommerce_json_search_order_metakeys` to return the list of unique meta keys for the
+	 * edit order screen custom fields metabox.
+	 *
+	 * @return void
+	 */
+	public static function json_search_order_metakeys(): void {
+		wc_get_container()->get( CustomMetaBox::class )->search_metakeys_ajax();
 	}
 
 	/**
@@ -3649,6 +3725,35 @@ class WC_AJAX {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->check_locked_orders_ajax( $response, $data );
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	/**
+	 * Render a variation editor.
+	 *
+	 * NOTE! Do NOT remove the apparently unused function arguments.
+	 * These are actually used inside the included html-variation-admin template.
+	 *
+	 * @param WC_Product $product_object PArent product of the variation being edited.
+	 * @param WC_Product $variation_object Variation being edited.
+	 * @param int        $loop Index of the variation being rendered.
+	 * @param float|null $base_cost Default cost for variations, null if the Cost of Goods Sold feature is disabled.
+	 */
+	private static function render_variation_html( WC_Product $product_object, WC_Product $variation_object, $loop, ?float $base_cost ) {
+		$variation_id   = $variation_object->get_id();
+		$variation      = get_post( $variation_id );
+		$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
+		include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
+	}
+	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
+	/**
+	 * Get the Cost of Goods Sold value for a product (0 if it's null), return null if the Cost of Goods Sold feature is disabled.
+	 *
+	 * @param WC_Product $product_object Product object.
+	 * @return float|null Cost of the product, or null.
+	 */
+	private static function base_cost_or_null( WC_Product $product_object ): ?float {
+		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ? ( $product_object->get_cogs_value() ?? 0 ) : null;
+	}
 }
 
 WC_AJAX::init();

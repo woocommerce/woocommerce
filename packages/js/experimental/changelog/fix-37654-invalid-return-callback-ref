@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix invalid return callback ref warning

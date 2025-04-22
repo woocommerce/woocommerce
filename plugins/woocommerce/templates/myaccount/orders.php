@@ -14,7 +14,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.1.0
+ * @version 9.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,7 +27,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 		<thead>
 			<tr>
 				<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) : ?>
-					<th class="woocommerce-orders-table__header woocommerce-orders-table__header-<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo esc_html( $column_name ); ?></span></th>
+					<th scope="col" class="woocommerce-orders-table__header woocommerce-orders-table__header-<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo esc_html( $column_name ); ?></span></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -39,12 +39,19 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				$item_count = $order->get_item_count() - $order->get_item_count_refunded();
 				?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
-					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) : ?>
-						<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
+					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) :
+						$is_order_number = 'order-number' === $column_id;
+					?>
+						<?php if ( $is_order_number ) : ?>
+							<th class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>" scope="row">
+						<?php else : ?>
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
+						<?php endif; ?>
+
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
 								<?php do_action( 'woocommerce_my_account_my_orders_column_' . $column_id, $order ); ?>
 
-							<?php elseif ( 'order-number' === $column_id ) : ?>
+							<?php elseif ( $is_order_number ) : ?>
 								<?php /* translators: %s: the order number, usually accompanied by a leading # */ ?>
 								<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'View order number %s', 'woocommerce' ), $order->get_order_number() ) ); ?>">
 									<?php echo esc_html( _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ); ?>
@@ -68,12 +75,25 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
 								if ( ! empty( $actions ) ) {
 									foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
+										if ( empty( $action['aria-label'] ) ) {
+											// Generate the aria-label based on the action name.
+											/* translators: %1$s Action name, %2$s Order number. */
+											$action_aria_label = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
+										} else {
+											$action_aria_label = $action['aria-label'];
+										}
+										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '">' . esc_html( $action['name'] ) . '</a>';
+										unset( $action_aria_label );
 									}
 								}
 								?>
 							<?php endif; ?>
-						</td>
+
+						<?php if ( $is_order_number ) : ?>
+							</th>
+						<?php else : ?>
+							</td>
+						<?php endif; ?>
 					<?php endforeach; ?>
 				</tr>
 				<?php

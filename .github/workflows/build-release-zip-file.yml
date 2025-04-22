@@ -6,13 +6,97 @@ on:
         description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name or refs/heads/release/x.x). The resulting file will be available as an artifact on the workflow run.'
         required: false
         default: ''
+      skip_verify:
+        description: 'Skip the PR verification step (default: false) pass true to skip'
+        required: false
+        default: 'false'
 
 permissions: {}
 
 jobs:
+  verify:
+    name: 'Verify if any PR is left open by author:app/github-actions'
+    outputs:
+      runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
+    runs-on: ubuntu-latest
+    steps:
+        - name: Verify if any PR is left open by author:app/github-actions
+          id: verify-prs
+          uses: actions/github-script@v6
+          with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              script: |
+                  let runBuildZipJob = true;
+                  const event = context.payload;
+
+                  if (event.inputs.skip_verify !== 'false') {
+                    core.setOutput('runBuildZipJob', runBuildZipJob);
+                    console.log('Skipping verification step');
+                    return;
+                  }
+
+                  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+
+                  // Helper function to add delay between API calls
+                  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+                  // Function to handle API call with retry logic
+                  const searchPRs = async (query) => {
+                    let attempts = 0;
+                    while (attempts < 5) {
+                      try {
+                        return await github.rest.search.issuesAndPullRequests({ q: query });
+                      } catch (error) {
+                        if (error.status === 403 && error.message.includes('secondary rate limit')) {
+                          console.log('Rate limit hit, retrying...');
+                          await delay(31000); // 31 second delay before retry
+                          attempts++;
+                        } else {
+                          throw error;
+                        }
+                      }
+                    }
+                    throw new Error('Failed to fetch PRs after multiple attempts');
+                  };
+
+                  // Search for PRs from github-actions bot
+                  const githubActionsPRsQuery = await searchPRs(`repo:${owner}/${repo} is:pr is:open author:app/github-actions`);
+                  const prsOpenByGithubActions = githubActionsPRsQuery.data.items;
+
+                  let failureMessage = ``;
+
+                  if (prsOpenByGithubActions.length > 0) {
+                      runBuildZipJob = false;
+
+                      failureMessage += `Identified \`${prsOpenByGithubActions.length}\` open PR(s) from \`github-actions\` bot which should be merged or closed before proceeding. <https://github.com/${owner}/${repo}/issues?q=is%3Apr+is%3Aopen+author%3Aapp%2Fgithub-actions|Link to PRs>`;
+
+                      failureMessage += '\n\nThis step maintains the code integrity and is critical to avoid regression in future releases. Please merge them or close them before proceeding or set \`skip_verify\` to \`true\` before running the workflow to skip this step if you are confident that the PRs are irrelevant.';
+
+                      console.error(failureMessage);
+                      core.setOutput('failureMessage', failureMessage);
+                  }
+                  core.setOutput('runBuildZipJob', runBuildZipJob);
+
+        - name: Notify Slack on failure
+          if: ${{ steps.verify-prs.outputs.failureMessage != '' }}
+          uses: archive/github-actions-slack@v2.0.0
+          with:
+              slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+              slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+              slack-text: |
+                  :x: Oops we may have missed PRs left open by `github-actions` bot. WooCommerce release zip build failed.
+                  :warning-8c: ${{ steps.verify-prs.outputs.failureMessage }}
+                  <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Workflow Run>
+              slack-optional-unfurl_links: false
+              slack-optional-unfurl_media: false
+          continue-on-error: true
+
+
   build:
     name: Build release zip file
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    if: ${{ needs.verify.outputs.runBuildZipJob == 'true' }}
+    needs: verify
     permissions:
       contents: read
     steps:
@@ -31,7 +115,7 @@ jobs:
         run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
 
       - name: Upload the zip file as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

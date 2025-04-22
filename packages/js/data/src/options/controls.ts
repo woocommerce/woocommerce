@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { controls as dataControls } from '@wordpress/data-controls';
-import { Action } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
@@ -70,7 +69,7 @@ const debouncedFetch = async ( optionName: string ) => {
 
 export const controls = {
 	...dataControls,
-	async BATCH_FETCH( { optionName }: Action ) {
+	async BATCH_FETCH( { optionName }: { optionName: string } ) {
 		optionNames.push( optionName );
 
 		// Consolidate multiple fetches into a single fetch

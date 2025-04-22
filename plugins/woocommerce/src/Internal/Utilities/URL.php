@@ -281,7 +281,7 @@ class URL {
 			$double_dots   = array_keys( $this->path_parts, '..', true );
 			$max_dot_index = max( array_merge( $single_dots, $double_dots ) );
 
-			// Prepend the required number of traversals and discard unnessary trailing segments.
+			// Prepend the required number of traversals and discard unnecessary trailing segments.
 			$last_traversal = $max_dot_index + ( $this->is_non_root_directory ? 1 : 0 );
 			$parent_path    = str_repeat( '../', $level ) . join( '/', array_slice( $this->path_parts, 0, $last_traversal ) );
 		} elseif ( $parent_path_parts_to_keep < 0 ) {
@@ -352,11 +352,11 @@ class URL {
 	/**
 	 * Outputs the path. Especially useful if it was a a regular filepath that was passed in originally.
 	 *
-	 * @param string $path_override If provided this will be used as the URL path. Does not impact drive letter.
+	 * @param string|null $path_override If provided this will be used as the URL path. Does not impact drive letter.
 	 *
 	 * @return string
 	 */
-	public function get_path( string $path_override = null ): string {
+	public function get_path( ?string $path_override = null ): string {
 		return ( $this->components['drive'] ? $this->components['drive'] . ':' : '' ) . ( $path_override ?? $this->components['path'] );
 	}
 

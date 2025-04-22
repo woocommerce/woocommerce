@@ -1,5 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\Templates;
+
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * SingleProductTemplateCompatibility class.
@@ -12,12 +16,12 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	const IS_FIRST_BLOCK = '__wooCommerceIsFirstBlock';
 	const IS_LAST_BLOCK  = '__wooCommerceIsLastBlock';
 
-
 	/**
 	 * Inject hooks to rendered content of corresponding blocks.
 	 *
 	 * @param mixed $block_content The rendered block content.
 	 * @param mixed $block         The parsed block data.
+	 *
 	 * @return string
 	 */
 	public function inject_hooks( $block_content, $block ) {
@@ -55,6 +59,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * Since that there is a custom logic for the first and last block, we have to inject the hooks manually.
 	 * The first block supports the following hooks:
 	 * woocommerce_before_single_product
+	 * woocommerce_before_single_product_summary
 	 *
 	 * The last block supports the following hooks:
 	 * woocommerce_after_single_product
@@ -62,6 +67,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * @param mixed $block_content The rendered block content.
 	 * @param mixed $block         The parsed block data.
 	 * @param array $block_hooks   The hooks that should be injected to the block.
+	 *
 	 * @return string
 	 */
 	private function inject_hook_to_first_and_last_blocks( $block_content, $block, $block_hooks ) {
@@ -69,6 +75,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 			'before' => array(
 				'woocommerce_before_main_content'   => $this->hook_data['woocommerce_before_main_content'],
 				'woocommerce_before_single_product' => $this->hook_data['woocommerce_before_single_product'],
+				'woocommerce_before_single_product_summary' => $this->hook_data['woocommerce_before_single_product_summary'],
 			),
 			'after'  => array(),
 		);
@@ -195,7 +202,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 				),
 			),
 			'woocommerce_before_single_product_summary' => array(
-				'block_names' => array( 'core/post-excerpt' ),
+				'block_names' => array(),
 				'position'    => 'before',
 				'hooked'      => array(
 					'woocommerce_show_product_sale_flash' => 10,
@@ -203,7 +210,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 				),
 			),
 			'woocommerce_single_product_summary'        => array(
-				'block_names' => array( 'core/post-excerpt' ),
+				'block_names' => array( 'core/post-excerpt', 'woocommerce/product-summary' ),
 				'position'    => 'before',
 				'hooked'      => array(
 					'woocommerce_template_single_title'   => 5,
@@ -245,6 +252,16 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 					'woocommerce_output_related_products'  => 20,
 				),
 			),
+			'woocommerce_before_add_to_cart_form'       => array(
+				'block_names' => array( 'woocommerce/add-to-cart-with-options' ),
+				'position'    => 'before',
+				'hooked'      => array(),
+			),
+			'woocommerce_after_add_to_cart_form'        => array(
+				'block_names' => array( 'woocommerce/add-to-cart-with-options' ),
+				'position'    => 'after',
+				'hooked'      => array(),
+			),
 		);
 	}
 
@@ -255,15 +272,11 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * @return string
 	 */
 	public static function add_compatibility_layer( $template_content ) {
-		$parsed_blocks = parse_blocks( $template_content );
-
-		if ( ! self::has_single_product_template_blocks( $parsed_blocks ) ) {
-			$template = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $parsed_blocks );
-			return self::serialize_blocks( $template );
+		$blocks = parse_blocks( $template_content );
+		if ( self::has_single_product_template_blocks( $blocks ) ) {
+			$blocks = self::wrap_single_product_template( $template_content );
 		}
-
-		$wrapped_blocks = self::wrap_single_product_template( $template_content );
-		$template       = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $wrapped_blocks );
+		$template = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $blocks );
 		return self::serialize_blocks( $template );
 	}
 
@@ -383,27 +396,15 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 
 	/**
 	 * Check if the Single Product template has a single product template block:
-	 * woocommerce/product-gallery-image, woocommerce/product-details, woocommerce/add-to-cart-form]
+	 * woocommerce/product-gallery-image, woocommerce/product-details, woocommerce/add-to-cart-form, etc.
 	 *
 	 * @param array $parsed_blocks Array of parsed block objects.
 	 * @return bool True if the template has a single product template block, false otherwise.
 	 */
 	private static function has_single_product_template_blocks( $parsed_blocks ) {
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-price', 'woocommerce/breadcrumbs' );
+		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/add-to-cart-with-options', 'woocommerce/product-meta', 'woocommerce/product-price', 'woocommerce/breadcrumbs' );
 
-		$found = false;
-
-		foreach ( $parsed_blocks as $block ) {
-			if ( isset( $block['blockName'] ) && in_array( $block['blockName'], $single_product_template_blocks, true ) ) {
-				$found = true;
-				break;
-			}
-			$found = self::has_single_product_template_blocks( $block['innerBlocks'], $single_product_template_blocks );
-			if ( $found ) {
-				break;
-			}
-		}
-		return $found;
+		return BlockTemplateUtils::has_block_including_patterns( $single_product_template_blocks, $parsed_blocks );
 	}
 
 

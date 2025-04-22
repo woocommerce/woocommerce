@@ -152,6 +152,16 @@
 				.button.alt {
 					float: right;
 				}
+
+				.coupon-error-notice {
+					clear: left;
+					color: var(--wc-red);
+					float: left;
+					font-size: 0.75em;
+					margin-bottom: 0;
+					text-align: left;
+					width: 48%;
+				}
 			}
 
 			.button {

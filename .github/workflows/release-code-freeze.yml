@@ -25,13 +25,12 @@ permissions: {}
 jobs:
     code-freeze-prep:
         name: 'Verify that today is the day of the code freeze and prepare repository'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: write
             issues: write
             pull-requests: write
         outputs:
-            pnpmVersion: ${{ steps.read-pnpm-version.outputs.version }}
             isTodayAcceleratedFreeze: ${{ steps.get-versions.outputs.isTodayAcceleratedFreeze }}
             isTodayMonthlyFreeze: ${{ steps.get-versions.outputs.isTodayMonthlyFreeze }}
             acceleratedVersion: ${{ steps.get-versions.outputs.acceleratedVersion }}
@@ -47,18 +46,8 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Read PNPM Version
-              id: read-pnpm-version
-              shell: bash
-              run: |
-                version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)
-                echo "version=$version" >> $GITHUB_OUTPUT
-                echo "PNPM Version: $version"
-
             - name: Setup PNPM
-              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ steps.read-pnpm-version.outputs.version }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -127,17 +116,9 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
 
-            - name: Generate changelog changes
-              id: changelog
-              if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
-              
-
     notify-slack:
         name: 'Sends code freeze notification to Slack'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: code-freeze-prep
         if: ${{ inputs.skipSlackPing != true && ( needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' || needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' ) }}
         outputs:
@@ -149,9 +130,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -179,7 +158,7 @@ jobs:
 
     build-monthly:
         name: Build beta zip file
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: code-freeze-prep
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         permissions:
@@ -199,7 +178,7 @@ jobs:
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -209,7 +188,7 @@ jobs:
 
     build-a:
         name: Build accelerated zip file
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: code-freeze-prep
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         permissions:
@@ -229,7 +208,7 @@ jobs:
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -239,12 +218,12 @@ jobs:
                   
     r2-upload-monthly:
       name: Upload Beta to R2
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-latest
       needs: [ code-freeze-prep, build-monthly ]
       if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
       steps:
           - id: download
-            uses: actions/download-artifact@v3
+            uses: actions/download-artifact@v4
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
@@ -265,7 +244,7 @@ jobs:
 
     slack-upload-monthly:
         name: Upload Beta to Slack
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, notify-slack, build-monthly ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' && inputs.skipSlackPing != true }}
         steps:
@@ -275,9 +254,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -294,7 +271,7 @@ jobs:
               working-directory: tools/monorepo-utils
 
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -310,12 +287,12 @@ jobs:
 
     r2-upload-accelerated:
       name: Upload Accelerated to R2
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-latest
       needs: [ code-freeze-prep, build-a ]
       if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
       steps:
           - id: download
-            uses: actions/download-artifact@v3
+            uses: actions/download-artifact@v4
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
@@ -336,7 +313,7 @@ jobs:
 
     slack-upload-accelerated:
         name: Upload Accelerated to Slack
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, notify-slack, build-a ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' && inputs.skipSlackPing != true }}
         steps:
@@ -346,9 +323,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -365,7 +340,7 @@ jobs:
               working-directory: tools/monorepo-utils
 
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -381,12 +356,12 @@ jobs:
 
     github-upload-monthly:
         name: Create single-zipped GitHub asset (Monthly)
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, build-monthly ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         steps:
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -397,7 +372,7 @@ jobs:
               run: unzip ${{ steps.download.outputs.download-path }}/woocommerce.zip -d zipfile
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -407,12 +382,12 @@ jobs:
 
     github-upload-accelerated:
         name: Create single-zipped GitHub asset (Accelerated)
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [ code-freeze-prep, build-a ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         steps:
             - id: download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -423,7 +398,7 @@ jobs:
               run: unzip ${{ steps.download.outputs.download-path }}/woocommerce.zip -d zipfile
 
             - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:

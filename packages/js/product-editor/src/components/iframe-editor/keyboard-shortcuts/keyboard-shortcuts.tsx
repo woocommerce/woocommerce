@@ -27,7 +27,6 @@ export const KeyboardShortcuts = () => {
 	} = useContext( EditorContext );
 
 	const { isSettingsSidebarOpen } = useSelect( ( select ) => {
-		// @ts-expect-error These selectors are available in the interface data store.
 		const { getActiveComplementaryArea } = select( interfaceStore );
 
 		return {
@@ -38,7 +37,6 @@ export const KeyboardShortcuts = () => {
 		};
 	}, [] );
 
-	// @ts-expect-error These actions are available in the interface data store.
 	const { disableComplementaryArea, enableComplementaryArea } =
 		useDispatch( interfaceStore );
 

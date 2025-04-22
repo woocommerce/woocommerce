@@ -1,0 +1,30 @@
+.woocommerce-layout__header-tasks-reminder-bar {
+	height: 40px;
+	background-color: #007cba;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: #fff;
+	padding: 0 $gap-small;
+
+	&::before {
+		content: "";
+	}
+
+	button {
+		&:hover {
+			opacity: 0.7;
+			color: inherit;
+		}
+
+		color: inherit;
+	}
+
+	a {
+		color: inherit;
+	}
+
+	p {
+		font-size: 13px;
+	}
+}

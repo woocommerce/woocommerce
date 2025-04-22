@@ -1,9 +1,8 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
  */
-import { sleep, check, group } from 'k6';
+import { sleep, group, check } from 'k6';
 import http from 'k6/http';
 import {
 	randomIntBetween,
@@ -13,16 +12,22 @@ import {
 /**
  * Internal dependencies
  */
-import { base_url, think_time_min, think_time_max } from '../../config.js';
+import {
+	base_url,
+	think_time_min,
+	think_time_max,
+	STORE_NAME,
+	FOOTER_TEXT,
+} from '../../config.js';
 import {
 	htmlRequestHeader,
 	commonRequestHeaders,
 	commonGetRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function myAccountOrders() {
-	let response;
 	let my_account_order_id;
 
 	group( 'My Account', function () {
@@ -34,27 +39,14 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/my-account`, {
+		const response = http.get( `${ base_url }/my-account`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
-			'body contains: my account welcome message': ( response ) =>
-				response.body.includes(
-					'From your account dashboard you can view'
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+		checkResponse( response, 200, {
+			title: `My account – ${ STORE_NAME }`,
+			body: 'From your account dashboard you can view',
+			footer: FOOTER_TEXT,
 		} );
 	} );
 
@@ -69,30 +61,21 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/my-account/orders/`, {
+		const response = http.get( `${ base_url }/my-account/orders/`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account Orders' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
-			"body contains: 'Orders' title": ( response ) =>
-				response.body.includes( '>Orders</h1>' ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+
+		checkResponse( response, 200, {
+			title: `Orders – ${ STORE_NAME }`,
+			body: '>Orders</h1>',
+			footer: FOOTER_TEXT,
 		} );
+
 		my_account_order_id = findBetween(
 			response.body,
 			'my-account/view-order/',
-			'/">'
+			'/"'
 		);
 	} );
 
@@ -107,28 +90,24 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get(
+		const response = http.get(
 			`${ base_url }/my-account/view-order/${ my_account_order_id }`,
 			{
 				headers: requestHeaders,
 				tags: { name: 'Shopper - My Account Open Order' },
 			}
 		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
-			"body contains: 'Order number' title": ( response ) =>
-				response.body.includes( `${ my_account_order_id }</h1>` ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+
+		check( my_account_order_id, {
+			'order ID is not undefined': () => {
+				return !! my_account_order_id;
+			},
+		} );
+
+		checkResponse( response, 200, {
+			title: `Order #${ my_account_order_id } – ${ STORE_NAME }`,
+			body: `Order #<mark class="order-number">${ my_account_order_id }</mark> was placed`,
+			footer: FOOTER_TEXT,
 		} );
 	} );
 

@@ -1,0 +1,118 @@
+# Applies only to the 9.8 cycle.
+# This workflow is used to merge the release branch into trunk when a CFE is merged.
+# We're explicitly excluding 'release/9.8' from new-cfe-cherry-pick.yml throughout the duration of this experiment.
+name: Update trunk from release branch after a CFE
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - 'release/9.8'
+  workflow_dispatch:
+    inputs:
+      silent:
+        description: 'Run silently. Do not trigger Slack pings.'
+        type: boolean
+        required: false
+        default: false
+      source_pr:
+        description: 'PR number that originated the event.'
+        type: number
+        required: true
+
+permissions: {}
+
+jobs:
+  open-pr-after-cfe-merge:
+    name: 'Open PR merging release branch into trunk after CFE merge'
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'cherry pick to trunk'))
+    runs-on: ubuntu-latest
+    permissions:
+        pull-requests: write
+    steps:
+      - name: 'Fetch CFE PR details'
+        id: cfe-details
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const cfePR = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: 'workflow_dispatch' === context.eventName ? context.payload.inputs.source_pr : context.payload.pull_request.number
+            });
+
+            if ( ! cfePR.data.merged || cfePR.data.state != 'closed' || cfePR.data.base.ref != 'release/9.8' ) {
+              core.setFailed( 'Triggered with invalid PR' );
+              process.exit( 1 );
+            }
+
+            core.setOutput( 'prNumber', cfePR.data.number );
+            core.setOutput( 'prTitle', cfePR.data.title );
+            core.setOutput( 'prURL', cfePR.data.html_url );
+      - name: 'Open or fetch merge PR' # Temporarily disabled.
+        id: fetch-pr
+        if: false
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let prNumber, prURL;
+
+            // PR already exists?
+            const existingPRs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              base: 'trunk',
+              head: 'release/9.8'
+            });
+
+            if ( existingPRs.data.length > 0 ) {
+              prNumber = existingPRs.data[0].number;
+              prURL = existingPRs.data[0].html_url;
+            } else {
+              // Create a new PR targeting trunk.
+              const newPR = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: 'trunk',
+                head: 'release/9.8',
+                title: '[9.8 cycle] Sync `trunk` with latest `release/9.8`',
+                body: 'This PR brings over changes from `release/9.8` to `trunk` after the merge of the following PR(s). Confirm that the changes in this PR are correct **and merge it by creating a merge commit**. Do not rebase or squash.'
+              });
+
+              prNumber = newPR.data.number;
+              prURL = newPR.data.html_url;
+            }
+
+            // Add comment with CFE PR details.
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: 'Includes: ${{ steps.cfe-details.outputs.prURL }}'
+            });
+
+            return prURL;
+          result-encoding: string
+        continue-on-error: true
+      - name: 'Notify via Slack (success)'
+        uses: archive/github-actions-slack@v2.0.0
+        if: ${{ success() && inputs.silent != true }}
+        continue-on-error: true
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
+          slack-text: |
+            :pull-request-merged: *[9.8 cycle]* CFE PR _<${{ steps.cfe-details.outputs.prURL }}|${{ steps.cfe-details.outputs.prNumber }} - ${{ steps.cfe-details.outputs.prTitle }}>_ was merged into the release branch. Confirm it's included in the next `release/9.8` → `trunk` <${{ steps.fetch-pr.outputs.result || format( 'https://github.com/{0}/compare/trunk...release/9.8?expand=1', github.repository ) }}|sync>.
+      - name: 'Notify via Slack (failure)'
+        uses: archive/github-actions-slack@v2.0.0
+        if: failure() && inputs.silent != true
+        continue-on-error: true
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
+          slack-text: |
+            :warning: *[9.8 cycle]* An error occurred while running the release branch → `trunk` sync workflow after a CFE was merged. Please visit this link to debug: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.

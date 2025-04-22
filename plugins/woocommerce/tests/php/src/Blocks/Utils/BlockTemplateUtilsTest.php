@@ -2,11 +2,11 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
-use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\TemplateOptions;
 use WP_UnitTestCase;
 
 /**
@@ -30,6 +30,10 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		// Switch to a block theme and initialize template logic.
 		switch_theme( 'twentytwentytwo' );
 		$this->container = Package::container();
+
+		// We need to manually register the BlockTemplatesRegistry and
+		// TemplateOptions classes because they are conditionally registered
+		// in Bootstrap.php so they wouldn't run in the test environment.
 		$this->container->register(
 			BlockTemplatesRegistry::class,
 			function () {
@@ -37,6 +41,13 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			}
 		);
 		$this->container->get( BlockTemplatesRegistry::class )->init();
+		$this->container->register(
+			TemplateOptions::class,
+			function () {
+				return new TemplateOptions();
+			}
+		);
+		$this->container->get( TemplateOptions::class )->init();
 
 		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
@@ -44,7 +55,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides data for testing template_is_eligible_for_product_archive_fallback.
+	 * Provides data for testing template_is_eligible_for_fallback functions.
 	 */
 	public function provideFallbackData() {
 		return array(
@@ -56,39 +67,27 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test template_is_eligible_for_product_archive_fallback.
-	 *
-	 * @param string $input    The template slug.
-	 * @param bool   $expected The expected result.
-	 *
-	 * @dataProvider provideFallbackData
+	 * Test template_is_eligible_for_fallback_from_db when the template is not eligible.
 	 */
-	public function test_template_is_eligible_for_product_archive_fallback( $input, $expected ) {
-		$this->assertEquals( $expected, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $input ) );
+	public function test_template_is_eligible_for_fallback_from_db_no_eligible_template() {
+		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'single-product', array() ) );
 	}
 
 	/**
-	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is not eligible.
+	 * Test template_is_eligible_for_fallback_from_db when the template is eligible but not in the db.
 	 */
-	public function test_template_is_eligible_for_product_archive_fallback_from_db_no_eligible_template() {
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'single-product', array() ) );
+	public function test_template_is_eligible_for_fallback_from_db_eligible_template_empty_db() {
+		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'taxonomy-product_cat', array() ) );
 	}
 
 	/**
-	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is eligible but not in the db.
+	 * Test template_is_eligible_for_fallback_from_db when the template is eligible and in the db.
 	 */
-	public function test_template_is_eligible_for_product_archive_fallback_from_db_eligible_template_empty_db() {
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'taxonomy-product_cat', array() ) );
-	}
-
-	/**
-	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is eligible and in the db.
-	 */
-	public function test_template_is_eligible_for_product_archive_fallback_from_db_eligible_template_custom_in_the_db() {
+	public function test_template_is_eligible_for_fallback_from_db_eligible_template_custom_in_the_db() {
 		$db_templates = array(
 			(object) array( 'slug' => 'archive-product' ),
 		);
-		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'taxonomy-product_cat', $db_templates ) );
+		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'taxonomy-product_cat', $db_templates ) );
 	}
 
 	/**
@@ -377,7 +376,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 */
 	public function update_plugin(): void {
 		update_option( Options::WC_BLOCK_VERSION, 1 );
-		Migration::wc_blocks_update_1030_blockified_product_grid_block();
+		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
 	}
 
 	/**

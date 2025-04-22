@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use Automattic\WooCommerce\Admin\Notes\Note;
 
@@ -55,13 +56,13 @@ class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 	 * When get_note() is called
 	 * Then it should return null
 	 */
-	public function test_it_does_not_add_note_if_prouduct_is_less_than_a_day_old() {
+	public function test_it_does_not_add_note_if_product_is_less_than_a_day_old() {
 		// Given.
 		wp_insert_post(
 			array(
 				'post_title'   => 'a product',
 				'post_type'    => 'product',
-				'post_status'  => 'publish',
+				'post_status'  => ProductStatus::PUBLISH,
 				'post_content' => '',
 			)
 		);
@@ -85,7 +86,7 @@ class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 			array(
 				'post_title'   => 'a product',
 				'post_type'    => 'product',
-				'post_status'  => 'publish',
+				'post_status'  => ProductStatus::PUBLISH,
 				'post_content' => '',
 			)
 		);

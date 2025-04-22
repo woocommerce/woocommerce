@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 4.3.0
+ * @version 9.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -75,7 +75,7 @@ if ( ! comments_open() ) {
 					'title_reply'         => have_comments() ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
 					/* translators: %s is product title */
 					'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
-					'title_reply_before'  => '<span id="reply-title" class="comment-reply-title">',
+					'title_reply_before'  => '<span id="reply-title" class="comment-reply-title" role="heading" aria-level="3">',
 					'title_reply_after'   => '</span>',
 					'comment_notes_after' => '',
 					'label_submit'        => esc_html__( 'Submit', 'woocommerce' ),
@@ -86,16 +86,18 @@ if ( ! comments_open() ) {
 				$name_email_required = (bool) get_option( 'require_name_email', 1 );
 				$fields              = array(
 					'author' => array(
-						'label'    => __( 'Name', 'woocommerce' ),
-						'type'     => 'text',
-						'value'    => $commenter['comment_author'],
-						'required' => $name_email_required,
+						'label'        => __( 'Name', 'woocommerce' ),
+						'type'         => 'text',
+						'value'        => $commenter['comment_author'],
+						'required'     => $name_email_required,
+						'autocomplete' => 'name',
 					),
 					'email'  => array(
-						'label'    => __( 'Email', 'woocommerce' ),
-						'type'     => 'email',
-						'value'    => $commenter['comment_author_email'],
-						'required' => $name_email_required,
+						'label'        => __( 'Email', 'woocommerce' ),
+						'type'         => 'email',
+						'value'        => $commenter['comment_author_email'],
+						'required'     => $name_email_required,
+						'autocomplete' => 'email',
 					),
 				);
 
@@ -109,7 +111,7 @@ if ( ! comments_open() ) {
 						$field_html .= '&nbsp;<span class="required">*</span>';
 					}
 
-					$field_html .= '</label><input id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="' . esc_attr( $field['type'] ) . '" value="' . esc_attr( $field['value'] ) . '" size="30" ' . ( $field['required'] ? 'required' : '' ) . ' /></p>';
+					$field_html .= '</label><input id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="' . esc_attr( $field['type'] ) . '" autocomplete="' . esc_attr( $field['autocomplete'] ) . '" value="' . esc_attr( $field['value'] ) . '" size="30" ' . ( $field['required'] ? 'required' : '' ) . ' /></p>';
 
 					$comment_form['fields'][ $key ] = $field_html;
 				}
@@ -121,7 +123,7 @@ if ( ! comments_open() ) {
 				}
 
 				if ( wc_review_ratings_enabled() ) {
-					$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><select name="rating" id="rating" required>
+					$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating" id="comment-form-rating-label">' . esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><select name="rating" id="rating" required>
 						<option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>
 						<option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>
 						<option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>

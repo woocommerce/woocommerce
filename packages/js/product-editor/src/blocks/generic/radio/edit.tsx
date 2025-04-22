@@ -30,7 +30,7 @@ export function Edit( {
 				description={ description }
 				selected={ value }
 				options={ options }
-				onChange={ ( selected ) => setValue( selected || '' ) }
+				onChange={ ( selected: string ) => setValue( selected || '' ) }
 				disabled={ disabled }
 			/>
 		</div>

@@ -1,9 +1,8 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
  */
-import { sleep, check, group } from 'k6';
+import { sleep, group } from 'k6';
 import http from 'k6/http';
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
 
@@ -15,6 +14,8 @@ import {
 	think_time_min,
 	think_time_max,
 	product_category,
+	FOOTER_TEXT,
+	STORE_NAME,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -22,6 +23,7 @@ import {
 	commonGetRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function categoryPage() {
 	let response;
@@ -42,23 +44,10 @@ export function categoryPage() {
 				tags: { name: 'Shopper - Category Page' },
 			}
 		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "Accessories – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Accessories – WooCommerce Core E2E Test Suite',
-			"body contains: Category's title": ( response ) =>
-				response.body.includes(
-					`<h1 class="woocommerce-products-header__title page-title">${ product_category }</h1>`
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+		checkResponse( response, 200, {
+			title: `Accessories – ${ STORE_NAME }`,
+			body: `<h1 class="woocommerce-products-header__title page-title">${ product_category }</h1>`,
+			footer: FOOTER_TEXT,
 		} );
 	} );
 

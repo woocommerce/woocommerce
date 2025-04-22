@@ -5,10 +5,11 @@
  * @package WooCommerce\Admin\Tests\Coupons
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class WC_Admin_Tests_Reports_Coupons
@@ -40,26 +41,26 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Order without coupon.
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
 		// Order with 1 coupon.
 		$order_1c = WC_Helper_Order::create_order( 1, $product );
-		$order_1c->set_status( 'completed' );
+		$order_1c->set_status( OrderStatus::COMPLETED );
 		$order_1c->apply_coupon( $coupon_1 );
 		$order_1c->calculate_totals();
 		$order_1c->save();
 
 		// Order with 2 coupons.
 		$order_2c = WC_Helper_Order::create_order( 1, $product );
-		$order_2c->set_status( 'completed' );
+		$order_2c->set_status( OrderStatus::COMPLETED );
 		$order_2c->apply_coupon( $coupon_1 );
 		$order_2c->apply_coupon( $coupon_2 );
 		$order_2c->calculate_totals();
 		$order_2c->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -96,8 +97,8 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new CouponsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'coupons' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 
 		// Test order by orders_count DESC.
@@ -352,7 +353,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Order with coupons.
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->apply_coupon( $coupon_1 );
 		$order->apply_coupon( $coupon_2 );
 		$order->calculate_totals();
@@ -375,7 +376,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Delete the coupons.
 		$coupon_2->delete( true );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );

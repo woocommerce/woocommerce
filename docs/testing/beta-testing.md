@@ -15,13 +15,13 @@ Please ensure you test responsibly, it is not a good idea to run beta versions o
 
 To get started, go to Plugins > Add New > Upload plugin, and install the beta tester plugin which you can download from:
 
-[WooCommerce Beta Tester](https://wordpress.org/plugins/woocommerce-beta-tester/)
+[WooCommerce Beta Tester](https://woocommerce.com/products/woocommerce-beta-tester/)
 
 This plugin will give you access to all of the WooCommerce versions uploaded to [WordPress.org]. This includes beta releases and release candidates.
 
 ## Giving Feedback
 
-During testing, if you come across a bug or want to propose or contribute an enhancement, [submit an issue on Github](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+). Ensure you read our guidelines on contributing and note which version you are using specifically. It is also possible to easily submit a new GitHub issue through the [beta tester plugin](https://wordpress.org/plugins/woocommerce-beta-tester/).
+During testing, if you come across a bug or want to propose or contribute an enhancement, [submit an issue on Github](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+). Ensure you read our guidelines on contributing and note which version you are using specifically. It is also possible to easily submit a new GitHub issue through the [beta tester plugin](https://woocommerce.com/products/woocommerce-beta-tester/).
 
 Sometimes we may also ask for feedback via other means, such as the surveys and calls for testing on the [developer blog](https://developer.woocommerce.com/blog/). We appreciate immediate feedback, comments, and responses to surveys as it helps us judge how well received our releases and betas are and will help us shape future versions.
 

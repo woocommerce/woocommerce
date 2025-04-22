@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -50,8 +49,6 @@ class Coupons {
 		if ( ! wc_coupons_enabled() ) {
 			return;
 		}
-
-		( new CouponPageMoved() )->init();
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_add_marketing_coupon_script' ) );
 		add_action( 'woocommerce_register_post_type_shop_coupon', array( $this, 'move_coupons' ) );

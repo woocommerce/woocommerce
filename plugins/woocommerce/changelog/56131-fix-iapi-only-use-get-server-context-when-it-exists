@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only use Interactivity API's `getServerContext` if it's available (WP > 6.7).

@@ -53,9 +53,12 @@
 		padding: 20px 15px 30px;
 
 		p {
-			color: #757575;
 			font-style: normal;
 			font-weight: 400;
+		}
+
+		@media screen and (max-width: 1024px) {
+			justify-content: left;
 		}
 	}
 

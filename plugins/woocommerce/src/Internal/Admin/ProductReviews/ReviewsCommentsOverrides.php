@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WP_Comment_Query;
 use WP_Screen;
 
@@ -11,23 +10,23 @@ use WP_Screen;
  */
 class ReviewsCommentsOverrides {
 
-	use AccessiblePrivateMethods;
-
 	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		self::add_action( 'admin_notices', array( $this, 'display_notices' ) );
-		self::add_filter( 'woocommerce_dismiss_admin_notice_capability', array( $this, 'get_dismiss_capability' ), 10, 2 );
-		self::add_filter( 'comments_list_table_query_args', array( $this, 'exclude_reviews_from_comments' ) );
+		add_action( 'admin_notices', array( $this, 'display_notices' ) );
+		add_filter( 'woocommerce_dismiss_admin_notice_capability', array( $this, 'get_dismiss_capability' ), 10, 2 );
+		add_filter( 'comments_list_table_query_args', array( $this, 'exclude_reviews_from_comments' ) );
 	}
 
 	/**
 	 * Renders admin notices.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	protected function display_notices() : void {
+	public function display_notices(): void {
 		$screen = get_current_screen();
 
 		if ( empty( $screen ) || $screen->base !== 'edit-comments' ) {
@@ -111,8 +110,10 @@ class ReviewsCommentsOverrides {
 	 * @param string|mixed $default_capability The default required capability.
 	 * @param string|mixed $notice_name The notice name.
 	 * @return string
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	protected function get_dismiss_capability( $default_capability, $notice_name ) {
+	public function get_dismiss_capability( $default_capability, $notice_name ) {
 		return $notice_name === self::REVIEWS_MOVED_NOTICE_ID ? Reviews::get_capability() : $default_capability;
 	}
 
@@ -121,8 +122,10 @@ class ReviewsCommentsOverrides {
 	 *
 	 * @param array|mixed $args {@see WP_Comment_Query} query args.
 	 * @return array
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	protected function exclude_reviews_from_comments( $args ) : array {
+	public function exclude_reviews_from_comments( $args ): array {
 		$screen = get_current_screen();
 
 		// We only wish to intervene if the edit comments screen has been requested.

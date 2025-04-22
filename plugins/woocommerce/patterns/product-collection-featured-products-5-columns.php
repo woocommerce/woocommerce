@@ -20,14 +20,18 @@ $collection_title = $content['titles'][0]['default'] ?? '';
 	</h3>
 	<!-- /wp:heading -->
 
+	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
 	<!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 	<div class="wp-block-group alignwide">
-		<!-- wp:woocommerce/product-collection {"queryId":2,"query":{"perPage":5,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":5},"queryContextIncludes":["collection"],"align":"wide"} -->
+		<!-- wp:woocommerce/product-collection {"queryId":2,"query":{"perPage":5,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":5},"queryContextIncludes":["collection"],"align":"wide"} -->
 		<div class="wp-block-woocommerce-product-collection alignwide">
 			<!-- wp:woocommerce/product-template -->
 			<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true,"aspectRatio":"1"} /-->
 
-			<!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+			<!-- wp:post-title {"textAlign":"left","level":2,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.4"}}} /-->
 
 			<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"small"} /-->
 			<!-- /wp:woocommerce/product-template -->

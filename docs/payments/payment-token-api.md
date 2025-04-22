@@ -187,7 +187,7 @@ public function set_last4( $last4 ) {
 }
 ```
 
-That's it! These meta functions are provided by [WC_Data](https://github.com/woothemes/woocommerce/blob/trunk/includes/abstracts/abstract-wc-data.php).
+That's it! These meta functions are provided by [WC_Data](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/abstracts/abstract-wc-data.php).
 
 #### Step 3: Use Your New Token Type
 
@@ -310,7 +310,7 @@ echo $token->get_card_type();
 
 #### set_card_type( $type )
 
-Set the credit card type. This is a freeform text field, but the following values can be used and WooCommerce will show a formatted label New labels can be added with the `wocommerce_credit_card_type_labels` filter.
+Set the credit card type. This is a freeform text field, but the following values can be used and WooCommerce will show a formatted label New labels can be added with the `woocommerce_credit_card_type_labels` filter.
 
 ```php
 $token = WC_Payment_Tokens::get( 42 );

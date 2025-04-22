@@ -1,6 +1,8 @@
 <?php
 /**
  * Interface for a rule processor.
+ *
+ * @deprecated 9.4.0 Use \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleProcessorInterface instead.
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
@@ -9,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Rule processor interface
+ *
+ * @deprecated 9.4.0 Use \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleProcessorInterface instead.
  */
 interface RuleProcessorInterface {
 	/**

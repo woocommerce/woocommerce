@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	DateSettings,
-	__experimentalGetSettings as getSettings,
-} from '@wordpress/date';
+import { DateSettings, getSettings } from '@wordpress/date';
 
 export function isSiteSettingsTime12HourFormatted() {
 	const settings = getSettings() as DateSettings;

@@ -39,18 +39,18 @@ import { Text } from '../experimental';
 const SummaryNumber = ( {
 	children,
 	delta,
-	href,
-	hrefType,
-	isOpen,
+	href = '',
+	hrefType = 'wc-admin',
+	isOpen = false,
 	label,
 	labelTooltipText,
 	onToggle,
-	prevLabel,
+	prevLabel = __( 'Previous period:', 'woocommerce' ),
 	prevValue,
-	reverseTrend,
-	selected,
+	reverseTrend = false,
+	selected = false,
 	value,
-	onLinkClickCallback,
+	onLinkClickCallback = noop,
 } ) => {
 	const liClasses = classnames( 'woocommerce-summary__item-container', {
 		'is-dropdown-button': onToggle,
@@ -192,8 +192,7 @@ SummaryNumber.propTypes = {
 	/**
 	 * The type of the link
 	 */
-	hrefType: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] )
-		.isRequired,
+	hrefType: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] ),
 	/**
 	 * Boolean describing whether the menu list is open. Only applies in mobile view,
 	 * and only applies to the toggle-able item (first in the list).
@@ -236,16 +235,6 @@ SummaryNumber.propTypes = {
 	 * A function to be called after a SummaryNumber, rendered as a link, is clicked.
 	 */
 	onLinkClickCallback: PropTypes.func,
-};
-
-SummaryNumber.defaultProps = {
-	href: '',
-	hrefType: 'wc-admin',
-	isOpen: false,
-	prevLabel: __( 'Previous period:', 'woocommerce' ),
-	reverseTrend: false,
-	selected: false,
-	onLinkClickCallback: noop,
 };
 
 export default SummaryNumber;

@@ -3,6 +3,9 @@
  * @package WooCommerce\Tests\WC_Shortcodes
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+
 /**
  * Class WC_Shortcodes_Test.
  */
@@ -136,7 +139,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_hidden_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_catalog_visibility( 'hidden' );
+		$product->set_catalog_visibility( CatalogVisibility::HIDDEN );
 		$product->save();
 		$product_id = $product->get_id();
 		wp_set_current_user( self::$user_contributor );
@@ -167,7 +170,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'trash',
+				'status' => ProductStatus::TRASH,
 			)
 		);
 
@@ -188,7 +191,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'sku'    => 'test-sku',
-				'status' => 'trash',
+				'status' => ProductStatus::TRASH,
 			)
 		);
 
@@ -210,7 +213,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'trash',
+				'status' => ProductStatus::TRASH,
 			)
 		);
 
@@ -227,7 +230,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_draft_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
 		$product_id = $product->get_id();
 		$this->disable_deprecation_notice();
@@ -235,7 +238,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'draft',
+				'status' => ProductStatus::DRAFT,
 			)
 		);
 
@@ -248,7 +251,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'draft',
+				'status' => ProductStatus::DRAFT,
 			)
 		);
 
@@ -261,7 +264,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_private_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_status( 'private' );
+		$product->set_status( ProductStatus::PRIVATE );
 		$product->save();
 		$product_id = $product->get_id();
 		$this->disable_deprecation_notice();
@@ -269,7 +272,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -282,7 +285,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -295,7 +298,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_private_product_by_sku() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_status( 'private' );
+		$product->set_status( ProductStatus::PRIVATE );
 		$product->set_sku( 'test-sku' );
 		$product->save();
 		$this->disable_deprecation_notice();
@@ -303,7 +306,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'sku'    => 'test-sku',
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -316,7 +319,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'sku'    => 'test-sku',
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -329,7 +332,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_private_product_override() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_status( 'private' );
+		$product->set_status( ProductStatus::PRIVATE );
 		$product->save();
 		$product_id = $product->get_id();
 		$this->disable_deprecation_notice();
@@ -337,7 +340,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -352,7 +355,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -366,7 +369,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -400,7 +403,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'private',
+				'status' => ProductStatus::PRIVATE,
 			)
 		);
 
@@ -415,7 +418,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_pending_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_status( 'pending' );
+		$product->set_status( ProductStatus::PENDING );
 		$product->save();
 		$product_id = $product->get_id();
 		$this->disable_deprecation_notice();
@@ -423,7 +426,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'pending',
+				'status' => ProductStatus::PENDING,
 			)
 		);
 
@@ -436,7 +439,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'     => $product_id,
-				'status' => 'pending',
+				'status' => ProductStatus::PENDING,
 			)
 		);
 

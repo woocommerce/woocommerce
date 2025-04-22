@@ -9,9 +9,9 @@ declare(strict_types=1);
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 
-$header  = __( 'Discover a world of possibilities', 'woocommerce' );
-$content = __( 'Welcome to a world of limitless possibilities, where the journey is as exhilarating as the destination, and where every moment is an opportunity to make your mark on the canvas of existence. The only limit is the extent of your imagination.', 'woocommerce' );
-$button  = __( 'Get Started', 'woocommerce' );
+$header  = __( 'Committed to a greener lifestyle', 'woocommerce' );
+$content = __( "Our passion is crafting mindful moments with locally sourced, organic, and sustainable products. We're more than a store; we're your path to a community-driven, eco-friendly lifestyle that embraces premium quality.", 'woocommerce' );
+$button  = __( 'Meet us', 'woocommerce' );
 $image_0 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
 
 ?>

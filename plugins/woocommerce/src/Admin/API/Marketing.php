@@ -79,6 +79,19 @@ class Marketing extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/misc-recommendations',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_misc_recommendations' ),
+					'permission_callback' => array( $this, 'get_recommended_plugins_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -140,5 +153,20 @@ class Marketing extends \WC_REST_Data_Controller {
 
 		$category = $request->get_param( 'category' );
 		return rest_ensure_response( $marketing_specs->get_knowledge_base_posts( $category ) );
+	}
+
+	/**
+	 * Return misc recommendations.
+	 *
+	 * @param \WP_REST_Request $request Request data.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return \WP_Error|\WP_REST_Response
+	 */
+	public function get_misc_recommendations( $request ) {
+		$misc_recommendations = MarketingRecommendationsInit::get_misc_recommendations();
+
+		return rest_ensure_response( $misc_recommendations );
 	}
 }

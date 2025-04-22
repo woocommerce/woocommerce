@@ -1,0 +1,28 @@
+.wp-block-woocommerce-cart-order-summary-shipping-block {
+	.wc-block-components-totals-shipping-panel {
+		.wc-block-components-panel__button {
+			padding-top: 0;
+		}
+
+		.wc-block-components-shipping-calculator {
+			padding-top: 0;
+		}
+	}
+}
+
+.wc-block-components-shipping-calculator-address {
+	margin-bottom: 0;
+}
+
+.wc-block-components-totals-shipping__change-address__link {
+	white-space: nowrap;
+}
+
+.wc-block-components-shipping-calculator-address__button {
+	width: 100%;
+	margin-top: em($gap-large);
+}
+
+.wc-block-components-shipping-calculator {
+	padding: em($gap-smaller) 0 em($gap-small);
+}

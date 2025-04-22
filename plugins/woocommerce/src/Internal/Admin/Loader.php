@@ -5,12 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
-use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Loader Class.
@@ -111,7 +111,7 @@ class Loader {
 
 	/**
 	 * Set up a div for the header embed to render into.
-	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
+	 * The initial contents here are meant as a place loader for when the PHP page initially loads.
 	 */
 	public static function embed_page_header() {
 		if ( ! PageController::is_admin_page() && ! PageController::is_embed_page() ) {
@@ -122,16 +122,24 @@ class Loader {
 			return;
 		}
 
+		if ( PageController::is_modern_settings_page() ) {
+			return;
+		}
+
 		$sections = self::get_embed_breadcrumbs();
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 
 		$page_title      = '';
-		$pages_with_tabs = array( 'Settings', 'Reports', 'Status' );
+		$pages_with_tabs = array(
+			'admin.php?page=wc-settings',
+			'admin.php?page=wc-reports',
+			'admin.php?page=wc-status',
+		);
 
 		if (
 			count( $sections ) > 2 &&
 			is_array( $sections[1] ) &&
-			in_array( $sections[1][1], $pages_with_tabs, true )
+			in_array( $sections[1][0], $pages_with_tabs, true )
 		) {
 			$page_title = $sections[1][1];
 		} else {
@@ -156,7 +164,7 @@ class Loader {
 	 * @param string $admin_body_class Body class to add.
 	 */
 	public static function add_admin_body_classes( $admin_body_class = '' ) {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page() || PageController::is_modern_settings_page() ) {
 			return $admin_body_class;
 		}
 
@@ -164,6 +172,12 @@ class Loader {
 		$classes[] = 'woocommerce-admin-page';
 		if ( PageController::is_embed_page() ) {
 			$classes[] = 'woocommerce-embed-page';
+		}
+
+		// Add page ID as a class.
+		$page_id = PageController::get_instance()->get_current_screen_id();
+		if ( $page_id ) {
+			$classes[] = $page_id;
 		}
 
 		/**
@@ -313,9 +327,9 @@ class Loader {
 		if ( ! function_exists( 'wc_blocks_container' ) ) {
 			global $wp_locale;
 			// inject data not available via older versions of wc_blocks/woo.
-			$settings['orderStatuses'] = self::get_order_statuses( wc_get_order_statuses() );
-			$settings['stockStatuses'] = self::get_order_statuses( wc_get_product_stock_status_options() );
-			$settings['currency']      = self::get_currency_settings();
+			$settings['orderStatuses'] = Settings::get_order_statuses( wc_get_order_statuses() );
+			$settings['stockStatuses'] = Settings::get_order_statuses( wc_get_product_stock_status_options() );
+			$settings['currency']      = Settings::get_currency_settings();
 			$settings['locale']        = array(
 				'siteLocale'    => isset( $settings['siteLocale'] )
 					? $settings['siteLocale']
@@ -441,26 +455,29 @@ class Loader {
 	 *
 	 * @param array $statuses Order statuses.
 	 * @return array formatted statuses.
+	 *
+	 * @deprecated migrate to \Automattic\WooCommerce\Internal\Admin\Settings instead.
 	 */
 	public static function get_order_statuses( $statuses ) {
-		$formatted_statuses = array();
-		foreach ( $statuses as $key => $value ) {
-			$formatted_key                        = preg_replace( '/^wc-/', '', $key );
-			$formatted_statuses[ $formatted_key ] = $value;
-		}
-		return $formatted_statuses;
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.9.0', '\Automattic\WooCommerce\Internal\Admin\Settings::get_order_statuses' );
+
+		return Settings::get_order_statuses( $statuses );
 	}
 
 	/**
 	 * Get all order statuses present in analytics tables that aren't registered.
 	 *
 	 * @return array Unregistered order statuses.
+	 *
+	 * @deprecated migrate to \Automattic\WooCommerce\Internal\Admin\Settings instead.
 	 */
 	public static function get_unregistered_order_statuses() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.9.0' );
+
 		$registered_statuses   = wc_get_order_statuses();
 		$all_synced_statuses   = OrdersDataStore::get_all_statuses();
 		$unregistered_statuses = array_diff( $all_synced_statuses, array_keys( $registered_statuses ) );
-		$formatted_status_keys = self::get_order_statuses( array_fill_keys( $unregistered_statuses, '' ) );
+		$formatted_status_keys = Settings::get_order_statuses( array_fill_keys( $unregistered_statuses, '' ) );
 		$formatted_statuses    = array_keys( $formatted_status_keys );
 
 		return array_combine( $formatted_statuses, $formatted_statuses );
@@ -471,14 +488,13 @@ class Loader {
 	 *
 	 * @param array $groups Array of setting groups.
 	 * @return array
+	 *
+	 * @deprecated migrate to \Automattic\WooCommerce\Internal\Admin\Settings instead.
 	 */
 	public static function add_settings_group( $groups ) {
-		$groups[] = array(
-			'id'          => 'wc_admin',
-			'label'       => __( 'WooCommerce Admin', 'woocommerce' ),
-			'description' => __( 'Settings for WooCommerce admin reporting.', 'woocommerce' ),
-		);
-		return $groups;
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.9.0', '\Automattic\WooCommerce\Internal\Admin\Settings::add_settings_group' );
+
+		return Settings::get_instance()->add_settings_group( $groups );
 	}
 
 	/**
@@ -486,39 +502,13 @@ class Loader {
 	 *
 	 * @param array $settings Array of settings in wc admin group.
 	 * @return array
+	 *
+	 * @deprecated migrate to \Automattic\WooCommerce\Internal\Admin\Settings instead.
 	 */
 	public static function add_settings( $settings ) {
-		$unregistered_statuses = self::get_unregistered_order_statuses();
-		$registered_statuses   = self::get_order_statuses( wc_get_order_statuses() );
-		$all_statuses          = array_merge( $unregistered_statuses, $registered_statuses );
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.9.0', '\Automattic\WooCommerce\Internal\Admin\Settings::add_settings' );
 
-		$settings[] = array(
-			'id'          => 'woocommerce_excluded_report_order_statuses',
-			'option_key'  => 'woocommerce_excluded_report_order_statuses',
-			'label'       => __( 'Excluded report order statuses', 'woocommerce' ),
-			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce' ),
-			'default'     => array( 'pending', 'cancelled', 'failed' ),
-			'type'        => 'multiselect',
-			'options'     => $all_statuses,
-		);
-		$settings[] = array(
-			'id'          => 'woocommerce_actionable_order_statuses',
-			'option_key'  => 'woocommerce_actionable_order_statuses',
-			'label'       => __( 'Actionable order statuses', 'woocommerce' ),
-			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce' ),
-			'default'     => array( 'processing', 'on-hold' ),
-			'type'        => 'multiselect',
-			'options'     => $all_statuses,
-		);
-		$settings[] = array(
-			'id'          => 'woocommerce_default_date_range',
-			'option_key'  => 'woocommerce_default_date_range',
-			'label'       => __( 'Default Date Range', 'woocommerce' ),
-			'description' => __( 'Default Date Range', 'woocommerce' ),
-			'default'     => 'period=month&compare=previous_year',
-			'type'        => 'text',
-		);
-		return $settings;
+		return Settings::get_instance()->add_settings( $settings );
 	}
 
 	/**
@@ -526,8 +516,12 @@ class Loader {
 	 *
 	 * @param array $settings Array of settings to merge into.
 	 * @return array
+	 *
+	 * @deprecated migrate to \Automattic\WooCommerce\Internal\Admin\Settings instead.
 	 */
 	public static function get_custom_settings( $settings ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.9.0' );
+
 		$wc_rest_settings_options_controller = new \WC_REST_Setting_Options_Controller();
 		$wc_admin_group_settings             = $wc_rest_settings_options_controller->get_group_settings( 'wc_admin' );
 		$settings['wcAdminSettings']         = array();
@@ -541,7 +535,7 @@ class Loader {
 	}
 
 	/**
-	 * Return an object defining the currecy options for the site's current currency
+	 * Return an object defining the currency options for the site's current currency
 	 *
 	 * @return  array  Settings for the current currency {
 	 *     Array of settings.
@@ -550,27 +544,13 @@ class Loader {
 	 *     @type string $precision  Number of decimals.
 	 *     @type string $symbol     Symbol for currency.
 	 * }
+	 *
+	 * @deprecated migrate to \Automattic\WooCommerce\Internal\Admin\Settings instead.
 	 */
 	public static function get_currency_settings() {
-		$code = get_woocommerce_currency();
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.9.0', '\Automattic\WooCommerce\Internal\Admin\Settings::get_currency_settings' );
 
-		/**
-		 * The wc_currency_settings hook
-		 *
-		 * @since 6.5.0
-		 */
-		return apply_filters(
-			'wc_currency_settings',
-			array(
-				'code'              => $code,
-				'precision'         => wc_get_price_decimals(),
-				'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $code ) ),
-				'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
-				'decimalSeparator'  => wc_get_price_decimal_separator(),
-				'thousandSeparator' => wc_get_price_thousand_separator(),
-				'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
-			)
-		);
+		return Settings::get_currency_settings();
 	}
 
 	/**

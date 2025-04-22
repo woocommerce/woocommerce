@@ -10,12 +10,11 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
-
 /**
  * API\Reports\Stock\Stats\Query
+ * This query takes no arguments, so we do not inherit from GenericQuery.
  */
-class Query extends ReportsQuery {
+class Query extends \WC_Object_Query {
 
 	/**
 	 * Get product data based on the current query vars.

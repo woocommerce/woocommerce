@@ -1,4 +1,4 @@
-name: Run post release processes
+name: Run post release processes - deprecated
 on:
     release:
         types: [released]
@@ -14,12 +14,14 @@ permissions: {}
 jobs:
     changelog-version-update:
         name: Update changelog and version
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
           contents: write
           pull-requests: write
         steps:
             - uses: actions/checkout@v3
+              with:
+                  ref: trunk
 
             - name: Git fetch trunk branch
               run: git fetch origin trunk
@@ -40,16 +42,12 @@ jobs:
                   script: |
                       const fs = require( 'node:fs' );
                       const version = ${{ toJSON( github.event.release.tag_name ) }}
-
                       fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
                         if ( err ) {
                           console.error( err );
                         }
-
                         const regex = /Stable\stag:\s(\d+\.\d+\.\d+)/;
-
                         const stableVersion = data.match( regex )[1];
-
                         // If the release version is less than stable version we can bail.
                         if ( version.localeCompare( stableVersion, undefined, { numeric: true, sensitivity: 'base' } ) == -1 ) {
                           console.log( 'Release version is less than stable version. No automated action taken. A manual process is required.' );
@@ -59,7 +57,6 @@ jobs:
                           core.setOutput( 'continue', 'true' )
                         }
                       } )
-
             - name: Update changelog.txt entries
               uses: actions/github-script@v6
               id: update-entries
@@ -68,39 +65,30 @@ jobs:
                   script: |
                       const fs = require( 'node:fs' );
                       const version = ${{ toJSON( github.event.release.tag_name ) }}
-
                       // Read the saved readme.txt file from earlier.
                       fs.readFile( '../../readme.txt', 'utf-8', function( err, readme ) {
                         if ( err ) {
                           core.setOutput( 'continue', 'false' );
                           console.error( err );
                         }
-
                         const regex = /(== Changelog ==[\s\S]+)\s{2}\[See changelog for all versions\]\(https:\/\/raw\.githubusercontent\.com\/woocommerce\/woocommerce\/trunk\/changelog\.txt\)\./;
-
                         const entries = readme.match( regex )[1];
-
                         fs.readFile( './changelog.txt', 'utf-8', function( err, changelog ) {
                           if ( err ) {
                             core.setOutput( 'continue', 'false' );
                             console.error( err );
                           }
-
                           const regex = /== Changelog ==/;
-
                           const updatedChangelog = changelog.replace( regex, entries );
-
                           fs.writeFile( './changelog.txt', updatedChangelog, err => {
                             if ( err ) {
                               core.setOutput( 'continue', 'false' );
                               console.error( 'Unable to update changelog entries in changelog.txt' );
                             }
-
                             core.setOutput( 'continue', 'true' );
                           } )
                         } )
                       } )
-
             - name: Commit changes
               if: steps.update-entries.outputs.continue == 'true'
               run: git commit -am "Prep trunk post release ${{ github.event.release.tag_name }}"
@@ -115,7 +103,6 @@ jobs:
               with:
                   script: |
                       const body = "This PR updates the changelog.txt entries based on the latest release: ${{ github.event.release.tag_name }}"
-
                       const pr = await github.rest.pulls.create({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
@@ -124,7 +111,6 @@ jobs:
                         base: "trunk",
                         body: body
                       })
-
                       const prCreated = await github.rest.pulls.requestReviewers({
                         owner: context.repo.owner,
                         repo: context.repo.repo,

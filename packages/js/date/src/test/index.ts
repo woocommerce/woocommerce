@@ -1052,7 +1052,7 @@ describe( 'getStoreTimeZoneMoment', () => {
 		expect( utcOffset ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should use the utc offest when it is set', () => {
+	it( 'should use the utc offset when it is set', () => {
 		global.window.wcSettings = {
 			timeZone: '+06:00',
 		};

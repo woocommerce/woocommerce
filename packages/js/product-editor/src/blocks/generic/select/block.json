@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-select-field",
 	"title": "Product select field",
 	"category": "woocommerce",
@@ -10,12 +10,9 @@
 	"attributes": {
 		"label": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"property": {
-			"type": "string"
-		},
-		"placeholder": {
 			"type": "string"
 		},
 		"help": {

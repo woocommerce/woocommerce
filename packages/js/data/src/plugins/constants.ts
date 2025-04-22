@@ -52,7 +52,7 @@ export const pluginNames = {
 		'Mercado Pago payments for WooCommerce',
 		'woocommerce'
 	),
-	'google-listings-and-ads': __( 'Google Listings and Ads', 'woocommerce' ),
+	'google-listings-and-ads': __( 'Google for WooCommerce', 'woocommerce' ),
 	'woo-razorpay': __( 'Razorpay', 'woocommerce' ),
 	mailpoet: __( 'MailPoet', 'woocommerce' ),
 	'pinterest-for-woocommerce': __(

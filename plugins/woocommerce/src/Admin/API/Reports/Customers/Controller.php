@@ -34,6 +34,19 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/customers';
 
 	/**
+	 * Get data from Customers\Query.
+	 *
+	 * @override GenericController::get_datastore_data()
+	 *
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
+	 */
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new Query( $query_args );
+		return $query->get_data();
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -85,34 +98,6 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Get all reports.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new Query( $query_args );
-		$report_data     = $customers_query->get_data();
-
-		$data = array();
-
-		foreach ( $report_data->data as $customer_data ) {
-			$item   = $this->prepare_item_for_response( $customer_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
-	}
-
-
-	/**
 	 * Get one report.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -139,11 +124,11 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param array            $report  Report data item as returned from Data Store.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -319,18 +304,20 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']['default']      = 'date_registered';
-		$params['orderby']['enum']         = array(
-			'username',
-			'name',
-			'country',
-			'city',
-			'state',
-			'postcode',
-			'date_registered',
-			'date_last_active',
-			'orders_count',
-			'total_spend',
-			'avg_order_value',
+		$params['orderby']['enum']         = $this->apply_custom_orderby_filters(
+			array(
+				'username',
+				'name',
+				'country',
+				'city',
+				'state',
+				'postcode',
+				'date_registered',
+				'date_last_active',
+				'orders_count',
+				'total_spend',
+				'avg_order_value',
+			)
 		);
 		$params['match']                   = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make the Leaderboards on the Analytics > Dashboard page use consistent currency and number formatting across the page, and perceive the currency setting comes from the relevant filter.

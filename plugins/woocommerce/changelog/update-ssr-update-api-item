@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Update the "API enabled" entry in the System Status Report to clarify that it pertains to the Legacy REST API.

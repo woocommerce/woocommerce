@@ -1,6 +1,6 @@
 # WooCommerce End to End Test Utilities
 
-This package contains utilities to simplify writing e2e tests specific to WooCommmerce.
+This package contains utilities to simplify writing e2e tests specific to WooCommerce.
 
 
 ## Installation
@@ -12,7 +12,8 @@ npm install @woocommerce/e2e-utils --save
 ## Usage
 
 Example:
-~~~js
+
+```js
 import {
 	shopper,
 	merchant,
@@ -29,7 +30,7 @@ describe( 'Cart page', () => {
 		await expect( page ).toMatchElement( '.cart-empty', { text: 'Your cart is currently empty.' } );
 	} );
 } );
-~~~
+```
 
 ### Retries
 
@@ -86,7 +87,6 @@ This package provides support for enabling retries in tests:
 |----------|-------------|------------|
 | `addDownloadableProductPermission` | `productName` | Add a downloadable permission for product in order |
 | `collapseAdminMenu` | `collapse` | Collapse or expand the WP admin menu |
-| `dismissOnboardingWizard` |  | Dismiss the onboarding wizard if present |
 | `goToOrder` | `orderId` | Go to view a single order |
 | `goToProduct` | `productId` | Go to view a single product |
 | `login` | | Log in as merchant |
@@ -100,7 +100,6 @@ This package provides support for enabling retries in tests:
 | `openPermalinkSettings` | | Go to Settings -> Permalinks |
 | `openPlugins` | | Go to the Plugins screen |
 | `openSettings` | | Go to WooCommerce -> Settings |
-| `runSetupWizard` | | Open the onboarding profiler |
 | `updateOrderStatus` | `orderId, status` | Update the status of an order |
 | `openEmailLog` | | Open the WP Mail Log page |
 | `openAnalyticsPage` | | Open any Analytics page |
@@ -210,7 +209,6 @@ There is a general utilities object `utils` with the following functions:
 | `clickFilter` | `selector` | helper method that clicks on a list page filter |
 | `clickTab` | `tabName` | Click on a WooCommerce -> Settings tab |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
-| `completeOnboardingWizard` | | completes the onboarding wizard with some default settings |
 | `createCoupon` | `couponAmount`, `couponType` | creates a basic coupon. Default amount is 5. Default coupon type is fixed discount. Returns the generated coupon code. |
 | `createGroupedProduct` | | creates a grouped product for the grouped product tests. Returns the product id. |
 | `createSimpleDownloadableProduct` | `name, downloadLimit, downloadName, price` | Create a simple downloadable product |

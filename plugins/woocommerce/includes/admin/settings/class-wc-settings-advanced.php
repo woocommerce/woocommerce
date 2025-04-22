@@ -5,7 +5,7 @@
  * @package  WooCommerce\Admin
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,18 +33,31 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'more';
+
+	/**
 	 * Get own sections.
 	 *
 	 * @return array
 	 */
 	protected function get_own_sections() {
-		return array(
+		$sections = array(
 			''                => __( 'Page setup', 'woocommerce' ),
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
+
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
+			$sections['blueprint'] = __( 'Blueprint (beta)', 'woocommerce' );
+		}
+
+		return $sections;
 	}
 
 	/**
@@ -348,7 +361,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
 					'default'       => 'no',
-					'autoload'      => false,
+					'autoload'      => true,
 				),
 				array(
 					'type' => 'sectionend',
@@ -427,6 +440,23 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
+	 * Get settings for the Blueprint section.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_blueprint_section() {
+		$settings =
+			array(
+				array(
+					'id'   => 'wc_settings_blueprint_slotfill',
+					'type' => 'slotfill_placeholder',
+				),
+			);
+
+		return $settings;
+	}
+
+	/**
 	 * Form method.
 	 *
 	 * @deprecated 3.4.4
@@ -457,7 +487,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Output the settings.
 	 */
 	public function output() {
-		global $current_section;
+		global $current_section, $hide_save_button;
+
+		if ( 'blueprint' === $current_section ) {
+			$hide_save_button = true;
+		}
 
 		if ( 'webhooks' === $current_section ) {
 			WC_Admin_Webhooks::page_output();
@@ -474,6 +508,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	public function save() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		global $current_section;
+
+		$prev_value = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ? 'yes' : 'no';
+		$new_value  = isset( $_POST['woocommerce_allow_tracking'] ) && ( 'yes' === $_POST['woocommerce_allow_tracking'] || '1' === $_POST['woocommerce_allow_tracking'] ) ? 'yes' : 'no';
 
 		if ( apply_filters( 'woocommerce_rest_api_valid_to_save', ! in_array( $current_section, array( 'keys', 'webhooks' ), true ) ) ) {
 			// Prevent the T&Cs and checkout page from being set to the same page.
@@ -494,8 +531,16 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				}
 			}
 
+			if ( class_exists( 'WC_Tracks' ) && 'no' === $new_value && 'yes' === $prev_value ) {
+				WC_Tracks::track_woocommerce_allow_tracking_toggled( $prev_value, $new_value, 'settings' );
+			}
+
 			$this->save_settings_for_current_section();
 			$this->do_update_options_action();
+
+			if ( class_exists( 'WC_Tracks' ) && 'yes' === $new_value && 'no' === $prev_value ) {
+				WC_Tracks::track_woocommerce_allow_tracking_toggled( $prev_value, $new_value, 'settings' );
+			}
 		}
 		// phpcs:enable
 	}

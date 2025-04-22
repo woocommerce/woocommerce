@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Prevent product button loading unnecessary dependencies
+
+

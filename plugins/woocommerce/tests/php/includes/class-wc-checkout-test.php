@@ -46,16 +46,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param bool $expect_error_message_for_shipping_country True to expect an error to be generated for the shipping country.
 	 */
 	public function test_validate_posted_data_adds_error_for_non_existing_country( $ship_to_different_address, $expect_error_message_for_shipping_country ) {
-		$_POST = array(
+		$data = array(
 			'billing_country'           => 'XX',
 			'shipping_country'          => 'YY',
 			'ship_to_different_address' => $ship_to_different_address,
 		);
-		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		add_filter(
 			'woocommerce_cart_needs_shipping_address',
-			function() {
+			function () {
 				return true;
 			}
 		);
@@ -75,12 +74,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox the customer notes are correctly sanitized.
 	 */
 	public function test_order_notes() {
-		$_POST = array(
+		$data = array(
 			'ship_to_different_address' => false,
-			'order_comments'             => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
-			'payment_method'            => 'bacs',
+			'order_comments'            => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
+			'payment_method'            => WC_Gateway_BACS::ID,
 		);
-		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$errors = new WP_Error();
 
@@ -100,6 +98,32 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox the customer notes can have linebreaks.
+	 */
+	public function test_order_notes_linebreaks() {
+		$data = array(
+			'ship_to_different_address' => false,
+			'order_comments'            => 'A string' . PHP_EOL . 'with linebreaks' . PHP_EOL . 'in it.',
+			'payment_method'            => WC_Gateway_BACS::ID,
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+		$result = $this->sut->create_order( $data );
+
+		$content = wc_get_template_html(
+			'order/order-details.php',
+			array(
+				'order_id'       => $result,
+				'show_downloads' => false,
+			)
+		);
+		// The preg_replace is necessary because the template outputs a lot of whitespace, we can just make sure the <br /> tags are there as the other whitespace doesn't matter.
+		$this->assertStringContainsString( 'A string<br />with linebreaks<br />in it.', preg_replace( '/[\t\n\r]+/', '', $content ) );
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' doesn't add errors for existing billing/shipping countries.
 	 *
 	 * @testWith [true]
@@ -108,12 +132,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param bool $ship_to_different_address True to simulate shipping to a different address than the billing address.
 	 */
 	public function test_validate_posted_data_does_not_add_error_for_existing_country( $ship_to_different_address ) {
-		$_POST = array(
+		$data = array(
 			'billing_country'           => 'ES',
 			'shipping_country'          => 'ES',
 			'ship_to_different_address' => $ship_to_different_address,
 		);
-		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$errors = new WP_Error();
 
@@ -132,12 +155,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param bool $ship_to_different_address True to simulate shipping to a different address than the billing address.
 	 */
 	public function test_validate_posted_data_does_not_add_error_for_empty_country( $ship_to_different_address ) {
-		$_POST = array(
+		$data = array(
 			'billing_country'           => '',
 			'shipping_country'          => '',
 			'ship_to_different_address' => $ship_to_different_address,
 		);
-		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$errors = new WP_Error();
 
@@ -159,48 +181,61 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_validate_checkout_adds_we_dont_ship_error_only_if_country_exists( $country, $expect_we_dont_ship_error ) {
 		add_filter(
 			'woocommerce_countries_allowed_countries',
-			function() {
+			function () {
 				return array( 'ES' );
 			}
 		);
 
 		add_filter(
 			'woocommerce_cart_needs_shipping',
-			function() {
+			function () {
 				return true;
 			}
 		);
 
 		add_filter(
 			'wc_shipping_enabled',
-			function() {
+			function () {
 				return true;
 			}
 		);
 
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'wc_get_shipping_method_count' => function( $include_legacy = false, $enabled_only = false ) {
+				'wc_get_shipping_method_count' => function ( $include_legacy = false, $enabled_only = false ) {
 					return 1;
 				},
 			)
 		);
 
-		$_POST = array(
+		$data = array(
 			'billing_country'           => $country,
 			'shipping_country'          => $country,
 			'ship_to_different_address' => false,
 		);
-		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$errors = new WP_Error();
 
 		$this->sut->validate_checkout( $data, $errors );
 
 		$this->assertEquals(
-			$expect_we_dont_ship_error ? 'Unfortunately <strong>we do not ship to the JP</strong>. Please enter an alternative shipping address.' : '',
+			$expect_we_dont_ship_error ? 'Unfortunately <strong>we do not ship to JP</strong>. Please enter an alternative shipping address.' : '',
 			$errors->get_error_message( 'shipping' )
 		);
 	}
-}
 
+	/**
+	 * @testdox If the WooCommerce class's customer object is null (like if WC has not been fully initialized yet),
+	 *          calling WC_Checkout::get_value should not throw an error.
+	 */
+	public function test_get_value_no_error_on_null_customer() {
+		$sut = WC_Checkout::instance();
+
+		$orig_customer = WC()->customer;
+		WC()->customer = null;
+
+		$this->assertNull( $sut->get_value( 'billing_country' ) );
+
+		WC()->customer = $orig_customer;
+	}
+}

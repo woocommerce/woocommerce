@@ -2,8 +2,10 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
@@ -216,7 +218,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return mixed
 	 */
-	public function set_items_per_page( $default, string $option, int $value ) {
+	public function set_items_per_page( $default, string $option, int $value ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound -- backwards compat.
 		return 'edit_' . $this->order_type . '_per_page' === $option ? absint( $value ) : $default;
 	}
 
@@ -413,10 +415,16 @@ class ListTable extends WP_List_Table {
 		// We must ensure the 'paginate' argument is set.
 		$order_query_args['paginate'] = true;
 
+		// Attempt to use cache if no additional query arguments are used.
+		if ( empty( array_diff( array_keys( $this->order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
+			$this->order_query_args['no_found_rows'] = true;
+			$order_query_args['no_found_rows']       = true;
+		}
+
 		$orders      = wc_get_orders( $order_query_args );
 		$this->items = $orders->orders;
 
-		$max_num_pages = $orders->max_num_pages;
+		$max_num_pages = $this->get_max_num_pages( $orders );
 
 		// Check in case the user has attempted to page beyond the available range of orders.
 		if ( 0 === $max_num_pages && $this->order_query_args['page'] > 1 ) {
@@ -437,6 +445,24 @@ class ListTable extends WP_List_Table {
 
 		// Are we inside the trash?
 		$this->is_trash = 'trash' === $this->request['status'];
+	}
+
+	/**
+	 * Get the max number of pages from orders or from cache.
+	 *
+	 * @param WC_Order[]|stdClass Number of pages and an array of order objects.
+	 * @return int
+	 */
+	private function get_max_num_pages( &$orders ) {
+		if ( ! isset( $this->order_query_args['no_found_rows'] ) || ! $this->order_query_args['no_found_rows'] ) {
+			return $orders->max_num_pages;
+		}
+
+		$count         = $this->count_orders_by_status( $this->order_query_args['status'] );
+		$limit         = $this->get_items_per_page( 'edit_' . $this->order_type . '_per_page' );
+		$orders->total = $count;
+
+		return ceil( $count / $limit );
 	}
 
 	/**
@@ -595,28 +621,9 @@ class ListTable extends WP_List_Table {
 	 * @return int
 	 */
 	private function count_orders_by_status( $status ): int {
-		global $wpdb;
-
-		// Compute all counts and cache if necessary.
-		if ( is_null( $this->status_count_cache ) ) {
-			$orders_table = OrdersTableDataStore::get_orders_table_name();
-
-			$res = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT status, COUNT(*) AS cnt FROM {$orders_table} WHERE type = %s GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$this->order_type
-				),
-				ARRAY_A
-			);
-
-			$this->status_count_cache =
-				$res
-				? array_combine( array_column( $res, 'status' ), array_map( 'absint', array_column( $res, 'cnt' ) ) )
-				: array();
-		}
-
 		$status = (array) $status;
-		$count  = array_sum( array_intersect_key( $this->status_count_cache, array_flip( $status ) ) );
+		$counts = OrderUtil::get_count_for_type( $this->order_type );
+		$count  = array_sum( array_intersect_key( $counts, array_flip( $status ) ) );
 
 		/**
 		 * Allows 3rd parties to modify the count of orders by status.
@@ -754,7 +761,7 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	private function months_filter() {
-		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
+		global $wp_locale;
 
 		/**
 		 * Filters whether to remove the 'Months' drop-down from the order list table.
@@ -767,28 +774,11 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
-		global $wp_locale;
-		global $wpdb;
-
-		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$utc_offset   = wc_timezone_offset();
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-					SELECT DISTINCT YEAR( t.date_created_local ) AS year,
-									MONTH( t.date_created_local ) AS month
-					FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE type = %s AND status != 'trash' ) t
-					ORDER BY year DESC, month DESC
-				",
-				$this->order_type
-			)
-		);
-
 		$m = isset( $_GET['m'] ) ? (int) $_GET['m'] : 0;
 		echo '<select name="m" id="filter-by-date">';
 		echo '<option ' . selected( $m, 0, false ) . ' value="0">' . esc_html__( 'All dates', 'woocommerce' ) . '</option>';
+
+		$order_dates = $this->get_months_filter_options();
 
 		foreach ( $order_dates as $date ) {
 			$month           = zeroise( $date->month, 2 );
@@ -808,6 +798,115 @@ class ListTable extends WP_List_Table {
 		}
 
 		echo '</select>';
+	}
+
+	/**
+	 * Get a list of year-month options for filtering the orders list table.
+	 *
+	 * This finds the oldest order and generates a year-month option for every month in the range between then and the
+	 * current month.
+	 *
+	 * @return \stdClass[]
+	 */
+	protected function get_months_filter_options(): array {
+		global $wpdb;
+
+		$orders_table   = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$min_max_months = $wpdb->get_row(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is escaped above.
+			$wpdb->prepare(
+				"
+					SELECT MIN( t.date_created_gmt ) as min_date_gmt,
+					       MAX( t.date_created_gmt ) as max_date_gmt
+					FROM `{$orders_table}` t
+					WHERE type = %s
+					AND status != %s
+				",
+				$this->order_type,
+				OrderStatus::TRASH
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		/**
+		 * Normalize "this month" to be the first day of the month in the current timezone of the site.
+		 */
+		$this_month = new \WC_DateTime(
+			'now',
+			new \DateTimeZone( 'UTC' )
+		);
+		$this_month->setTimezone( wp_timezone() );
+		$this_month->setDate( $this_month->format( 'Y' ), $this_month->format( 'm' ), 1 );
+		$this_month->setTime( 0, 0 );
+
+		$options = array();
+
+		if ( isset( $min_max_months ) && ! is_null( $min_max_months->min_date_gmt ) ) {
+			$start = new \WC_DateTime(
+				$min_max_months->min_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$start->setTimezone( wp_timezone() );
+			$start->setDate( $start->format( 'Y' ), $start->format( 'm' ), 1 );
+			$start->setTime( 0, 0 );
+
+			$end = new \WC_DateTime(
+				$min_max_months->max_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$end->setTimezone( wp_timezone() );
+			$end->setDate( $end->format( 'Y' ), $end->format( 'm' ), 1 );
+			$end->setTime( 0, 0 );
+
+			if ( $start > $this_month ) {
+				$start = $this_month;
+			}
+
+			if ( $end < $this_month ) {
+				$end = $this_month;
+			}
+
+			$intervals = new \DatePeriod( $start, new \DateInterval( 'P1M' ), $end );
+
+			foreach ( $intervals as $interval ) {
+				$option        = new \stdClass();
+				$option->year  = $interval->format( 'Y' );
+				$option->month = $interval->format( 'n' );
+				$options[]     = $option;
+			}
+
+			$option        = new \stdClass();
+			$option->year  = $end->format( 'Y' );
+			$option->month = $end->format( 'n' );
+			$options[]     = $option;
+		}
+
+		if ( count( $options ) < 1 ) {
+			$option        = new \stdClass();
+			$option->year  = $this_month->format( 'Y' );
+			$option->month = $this_month->format( 'n' );
+			$options[]     = $option;
+		}
+
+		return array_reverse( $options );
+	}
+
+	/**
+	 * Get order year-months cache. We cache the results in the options table, since these results will change very infrequently.
+	 * We use the heuristic to always return current year-month when getting from cache to prevent an additional query.
+	 *
+	 * @deprecated 9.9.0
+	 *
+	 * @return array List of year-months.
+	 */
+	protected function get_and_maybe_update_months_filter_cache(): array {
+		wc_deprecated_function(
+			__METHOD__,
+			'9.9.0',
+			'get_months_filter_options'
+		);
+
+		return $this->get_months_filter_options();
 	}
 
 	/**
@@ -976,6 +1075,14 @@ class ListTable extends WP_List_Table {
 			echo '<a href="#" class="order-preview" data-order-id="' . absint( $order->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
 			echo '<a href="' . esc_url( $this->get_order_edit_link( $order ) ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
+
+		// Used for showing date & status next to order number/buyer name on small screens.
+		echo '<div class="order_date small-screen-only">';
+		$this->render_order_date_column( $order );
+		echo '</div>';
+		echo '<div class="order_status small-screen-only">';
+		$this->render_order_status_column( $order );
+		echo '</div>';
 	}
 
 	/**
@@ -1056,14 +1163,14 @@ class ListTable extends WP_List_Table {
 	 */
 	private function get_order_status_label( WC_Order $order ): string {
 		$status_names = array(
-			'Pending payment' => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
-			'On hold'         => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
-			'Processing'      => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
-			'Completed'       => __( 'Order fulfilled and complete.', 'woocommerce' ),
-			'Failed'          => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
-			'Draft'           => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
-			'Canceled'        => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
-			'Refunded'        => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
+			'pending'        => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
+			'on-hold'        => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
+			'processing'     => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
+			'completed'      => __( 'Order fulfilled and complete.', 'woocommerce' ),
+			'failed'         => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
+			'checkout-draft' => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'cancelled'      => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
+			'refunded'       => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
 		);
 
 		/**
@@ -1073,9 +1180,9 @@ class ListTable extends WP_List_Table {
 		 * @param WC_Order $order  Current order object.
 		 * @since 9.1.0
 		 */
-		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names );
+		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names, $order );
 
-		$status_name = wc_get_order_status_name( $order->get_status() );
+		$status_name = $order->get_status();
 
 		return isset( $status_names[ $status_name ] ) ? $status_names[ $status_name ] : '';
 	}
@@ -1664,7 +1771,8 @@ class ListTable extends WP_List_Table {
 		<select name="search-filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
 				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $selected ) ) ); ?>><?php echo esc_html( $label ); ?></option>
-				<?php
-			}
+			<?php } ?>
+		</select>
+		<?php
 	}
 }

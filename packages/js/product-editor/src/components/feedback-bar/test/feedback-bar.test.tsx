@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { createElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 

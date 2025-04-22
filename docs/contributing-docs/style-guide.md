@@ -79,7 +79,7 @@ Note: While we've outlined specific rules above, all other default linting rules
           - Subitem 1.1
     ```
 
-   [Reference: MD007]([https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)#md007---unordered-list-indentation)
+   [Reference: MD007](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md007---unordered-list-indentation)
 
 3. **Line Length**: 
     - No specific restriction on the line length, but keep paragraphs and sentences readable.

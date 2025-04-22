@@ -10,7 +10,6 @@ import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 

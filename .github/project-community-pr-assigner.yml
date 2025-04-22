@@ -1,125 +1,120 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 "*":
-  - team: vortex
+  - team: flux
 
 ".github/**/*":
-  - team: vortex
+  - team: flux
 
 "bin/*":
-  - team: vortex
+  - team: flux
 
 "docs/**/*":
   - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/e2e-utils/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/e2e-environment/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/api-core-tests/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/e2e-core-tests/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/components/**/*":
-  - team: mothra
-  - team: ghidorah
+  - team: woo-fse
 
 "packages/js/csv-export/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/currency/**/*":
-  - team: mothra
+  - team: fractal
 
 "packages/js/customer-effort-score/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/data/**/*":
-  - team: mothra
-  - team: ghidorah
+  - team: woo-fse
 
 "packages/js/date/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/eslint-plugin/**/*":
-  - team: vortex
+  - team: flux
 
 "packages/js/experimental/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/explat/**/*":
-  - team: mothra
-  - team: ghidorah
+  - team: woo-fse
 
 "packages/js/navigation/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/number/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/onboarding/**/*":
-  - team: ghidorah
+  - team: woo-fse
 
 "packages/js/product-editor/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/tracks/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "plugins/woocommerce/**/*":
-  - team: proton
+  - team: flux
 
 "plugins/woocommerce/templates/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce/templates/emails/**/*":
-  - team: proton
+  - team: flux
 
 "plugins/woocommerce/src/Admin/**/*":
-  - team: mothra
-  - team: ghidorah
+  - team: woo-fse
 
 "plugins/woocommerce/src/Blocks/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
-  - team: mothra
-  - team: ghidorah
+  - team: woo-fse
 
 "plugins/woocommerce/src/StoreApi/**/*":
   - team: rubik
   - team: woo-fse
 
-"plugins/woocommerce-admin/**/*":
-  - team: mothra
-  - team: ghidorah
+"plugins/woocommerce/client/admin/**/*":
+  - team: woo-fse
 
-"plugins/woocommerce-blocks/**/*":
+"plugins/woocommerce/client/blocks/**/*":
   - team: rubik
   - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: vortex
+  - team: woo-fse
+  - team: flux
 
 "tools/**/*":
-  - team: vortex
+  - team: flux
 
 '**/composer.json':
-  - team: vortex
+  - team: flux
 
 '**/package.json':
-  - team: vortex
+  - team: flux

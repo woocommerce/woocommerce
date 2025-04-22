@@ -77,6 +77,11 @@ class WC_Autoloader {
 			return;
 		}
 
+		// If the class is already loaded from a merged package, prevent autoloader from loading it as well.
+		if ( \Automattic\WooCommerce\Packages::should_load_class( $class ) ) {
+			return;
+		}
+
 		$file = $this->get_file_name_from_class( $class );
 		$path = '';
 

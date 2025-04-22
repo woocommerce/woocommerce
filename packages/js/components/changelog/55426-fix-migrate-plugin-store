@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Migrate to register(storeDescriptor) for plugins data store

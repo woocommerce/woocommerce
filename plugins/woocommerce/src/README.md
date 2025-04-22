@@ -1,37 +1,41 @@
 # WooCommerce `src` files
 
-
 ## Table of contents
 
-  * [Installing Composer](#installing-composer)
-    + [Updating the autoloader class maps](#updating-the-autoloader-class-maps)
-  * [Installing packages](#installing-packages)
-  * [The container](#the-container)
-    + [Resolving classes](#resolving-classes)
-      - [From other classes in the `src` directory](#1-other-classes-in-the-src-directory)
-      - [From code in the `includes` directory](#2-code-in-the-includes-directory)
-    + [Registering classes](#registering-classes)
-      - [Using concretes](#using-concretes)
-      - [A note on legacy classes](#a-note-on-legacy-classes)
-  * [The `Internal` namespace](#the-internal-namespace)
-  * [Interacting with legacy code](#interacting-with-legacy-code)
-    + [The `LegacyProxy` class](#the-legacyproxy-class)
-    + [Using the legacy proxy](#using-the-legacy-proxy)
-    + [Using the mockable proxy in tests](#using-the-mockable-proxy-in-tests)
-    + [But how does `get_instance_of` work?](#but-how-does-get_instance_of-work)
-    + [Creating specialized proxies](#creating-specialized-proxies)
-  * [Defining new actions and filters](#defining-new-actions-and-filters)
-  * [Writing unit tests](#writing-unit-tests)
-    + [Mocking dependencies](#mocking-dependencies)
-    + [Additional tools for writing unit tests](#additional-tools-for-writing-unit-tests)
-
+* [A note on @internal annotations](#a-note-on-internal-annotations)
+* [Installing Composer](#installing-composer)
+    * [Updating the autoloader class maps](#updating-the-autoloader-class-maps)
+* [Installing packages](#installing-packages)
+* [The container](#the-container)
+    * [Resolving classes](#resolving-classes)
+        * [From other classes in the `src` directory](#1-other-classes-in-the-src-directory)
+        * [From code in the `includes` directory](#2-code-in-the-includes-directory)
+    * [Registering classes](#registering-classes)
+        * [Using concretes](#using-concretes)
+        * [A note on legacy classes](#a-note-on-legacy-classes)
+* [The `Internal` namespace](#the-internal-namespace)
+* [Interacting with legacy code](#interacting-with-legacy-code)
+    * [The `LegacyProxy` class](#the-legacyproxy-class)
+    * [Using the legacy proxy](#using-the-legacy-proxy)
+    * [Using the mockable proxy in tests](#using-the-mockable-proxy-in-tests)
+    * [But how does `get_instance_of` work?](#but-how-does-get_instance_of-work)
+    * [Creating specialized proxies](#creating-specialized-proxies)
+* [Defining new actions and filters](#defining-new-actions-and-filters)
+* [Writing unit tests](#writing-unit-tests)
+    * [Mocking dependencies](#mocking-dependencies)
+    * [Additional tools for writing unit tests](#additional-tools-for-writing-unit-tests)
 
 This directory is home to new WooCommerce class files under the `Automattic\WooCommerce` namespace using [PSR-4](https://www.php-fig.org/psr/psr-4/) file naming. This is to take full advantage of autoloading.
 
 Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
 
-A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src` directory in general) in a way that makes it easy to write unit tests. 
+A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src` directory in general) in a way that makes it easy to write unit tests.
 
+## A note on `@internal` annotations
+
+Some classes and methods in this folder have an `@internal` annotation in their documentation comment block. This means that the code entity is intended for internal usage of WooCommerce core only, and **must not** be used in extensions. Backwards compatibility for these code entities is not guaranteed: they could be renamed, modified (in behavior, return value or arguments accepted) or deleted.
+
+See also [the README file for the `Internal` folder](Internal/README.md).
 
 ## Installing Composer
 
@@ -43,36 +47,50 @@ If you don't have Composer installed, go and check how to [install Composer](htt
 
 If you add a class to WooCommerce you need to run the following to ensure it's included in the autoloader class-maps:
 
-```
+```bash
 composer dump-autoload
 ```
-
 
 ## Installing packages
 
 To install the packages WooCommerce requires, from the main directory run:
 
-```
+```bash
 composer install
 ```
 
 To update packages run:
 
-```
+```bash
 composer update
 ```
 
-
 ## The container
+
+### Important notice
+
+As of version 9.5 WooCommerce uses a new, simpler, custom-made container instead of the old one based on the PHP League's Container package. However, the old container is still in place and it's possible to configure WooCommerce to use it (instead of the new container) by adding one of these snippets:
+
+1. `define('WOOCOMMERCE_USE_OLD_DI_CONTAINER', true);`
+2. `add_filter('woocommerce_use_old_di_container', '__return_true');`
+
+This should be done **only** if a problem with the new container causes disruption in the site *(and if you discover such a problem, please [create an issue in GitHub](https://github.com/woocommerce/woocommerce/issues/new) so that we can keep track of it and work on a fix)*. This fallback mechanism, together with the old container and the PHP League's Container package, will be removed in WooCommerce 10.0.
+
+The new container is used in the same way as the old one: it's only for classes in the `src` directory, dependencies are defined in an `init` method of the classes, the container exposes a `get` method and a `has` method, and `wc_get_container` can be used to use the container from [legacy code](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/README.md/?rgh-link-date=2024-10-29T14%3A32%3A58Z#L6-L7); the difference is that explicit class registration is not needed anymore (any class in the `Automattic\Woocommerce` namespace can be resolved). **However**, until WooCommerce 10.0 arrives please keep registering new classes using service providers as instructed below, so that the old container can be used if needed.
+
+As for the unit tests, they can be forced to use the old container by defining the `USE_OLD_DI_CONTAINER` environment variable.
+
+#### End of important notice
 
 WooCommerce uses a [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container for registering and resolving all the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. More specifically, we use [the container from The PHP League](https://container.thephpleague.com/); this is relevant when registering classes, but not when resolving them. The full class name of the container used is `Automattic\WooCommerce\Container` (it uses the PHP League's container under the hood).
 
-_Resolving_ a class means asking the container to provide an instance of the class (or interface). _Registering_ a class means telling the container how the class should be resolved.
+*Resolving* a class means asking the container to provide an instance of the class (or interface). *Registering* a class means telling the container how the class should be resolved.
 
 In principle, the container should be used to register and resolve all the classes in the `src` directory. The exception might be data-only classes that could be created the old way (using a plain `new` statement); but as a rule of thumb, the container should always be used.
 
 There are two ways to resolve registered classes, depending on from where they are resolved:
-* Classes in the `src` directory specify their dependencies as `init` arguments, which are automatically supplied by the container when the class is resolved (this is called _dependency injection_).
+
+* Classes in the `src` directory specify their dependencies as `init` arguments, which are automatically supplied by the container when the class is resolved (this is called *dependency injection*).
 * For code in the `includes` directory there's a `wc_get_container` function that will return the container, then its `get` method can be used to resolve any class.  
 
 ### Resolving classes
@@ -81,7 +99,7 @@ There are two ways to resolve registered classes, depending on from where they n
 
 #### 1. Other classes in the `src` directory
 
-When a class in the `src` directory depends on other one classes from the same directory, it should use method injection. This means specifying these dependencies as arguments in a `init` method with appropriate type hints, and storing these in private variables, ready to be used when needed: 
+When a class in the `src` directory depends on other one classes from the same directory, it should use method injection. This means specifying these dependencies as arguments in a `init` method with appropriate type hints, and storing these in private variables, ready to be used when needed:
 
 ```php
 use TheService1Namespace\Service1;
@@ -138,10 +156,9 @@ function wc_function_that_needs_service_1() {
 }
 ```
 
-This is also the recommended approach when moving code from `includes` to `src` while keeping the existing entry points for the old code in place for compatibility.   
+This is also the recommended approach when moving code from `includes` to `src` while keeping the existing entry points for the old code in place for compatibility.
 
 Worth noting: the container will throw a `ContainerException` when receiving a request for resolving a class that hasn't been registered. All classes need to have been registered prior to being resolved.
-
 
 ### Registering classes
 
@@ -149,7 +166,7 @@ For a class to be resolvable using the container, it needs to have been previous
 
 The `Container` class is "read-only", in that it has a `get` method to resolve classes but it doesn't have any method to register classes. Instead, class registration is done by using [service providers](https://container.thephpleague.com/3.x/service-providers/). That's how the whole process would go when creating a new class:  
 
-First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Automattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
+First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Automattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above.
 
 Example of such a class:
 
@@ -189,16 +206,16 @@ class TheClassServiceProvider extends AbstractServiceProvider {
 }
 ```
 
-Last (but certainly not least, don't forget this step!), add the class name of the service provider to the `$service_providers` property in the `Container` class.
+Last (but certainly not least, don't forget this step!), add the class name of the service provider to the array returned by the `get_service_providers` method in the `Container` class.
 
 Worth noting:
 
 * In the example the service provider is used to register only one class, but service providers can be used to register a group of related classes. The `$provides` property must contain all the names of the classes that the provider can register.
 * The container will invoke the provider `register` method the first time any of the classes in `$provides` is resolved.
 * If you look at [the service provider documentation](https://container.thephpleague.com/3.x/service-providers/) you will see that classes are registered using `this->getContainer()->add`. WooCommerce's `AbstractServiceProvider` adds a utility `add` method itself that serves the same purpose.
-* You can use `share` instead of `add` to register single-instance classes (the class is instantiated only once and cached, so the same instance is returned every time the class is resolved). 
+* You can use `share` instead of `add` to register single-instance classes (the class is instantiated only once and cached, so the same instance is returned every time the class is resolved).
 
-If the class being registered has `init` arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the `init` arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method. 
+If the class being registered has `init` arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the `init` arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method.
 
 An alternative version of the service provider, which is used to register both the class and its dependency, and which takes advantage of `add_with_auto_arguments`, could be as follows:
 
@@ -256,14 +273,13 @@ $factory = function( TheDependencyClass $dependency ) {
 $this->add( TheClass::class, $factory );
 ```
 
-Note that if the closure is defined as a function with arguments, the supplied parameters will be resolved too. 
+Note that if the closure is defined as a function with arguments, the supplied parameters will be resolved too.
 
 #### A note on legacy classes
 
 The container is intended for registering **only** classes in the `src` folder. There is a check in place to prevent classes outside the root `Automattic\Woocommerce` namespace from being registered.
 
-This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests. 
-
+This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests.
 
 ## The `Internal` namespace
 
@@ -274,10 +290,9 @@ Classes in `Automattic\WooCommerce\Internal` are meant to be WooCommerce infrast
 What this implies for you as developer depends on what type of contribution are you making:
 
 * **If you are working on WooCommerce core:** When you need to add a new class please think carefully if the class could be useful for plugins. If you really think so, add it to the appropriate namespace rooted at `Automattic\WooCommerce`. If not, add it to the appropriate namespace but rooted at `Automattic\WooCommerce\Internal`.
-  * When in doubt, always make the code internal. If an internal class is later deemed to be worth being made public, the change can be made easily (by just changing the class namespace) and nothing will break. Turning a public class into an internal class, on the other hand, is impossible since it could break existing plugins.
+    * When in doubt, always make the code internal. If an internal class is later deemed to be worth being made public, the change can be made easily (by just changing the class namespace) and nothing will break. Turning a public class into an internal class, on the other hand, is impossible since it could break existing plugins.
 
 * **If you are a plugin developer:** You should **never** use code from the `Automattic\WooCommerce\Internal` namespace in your plugins. Doing so might cause your plugin to break in future versions of WooCommerce.
-
 
 ## Interacting with legacy code
 
@@ -318,7 +333,7 @@ class TheClass {
         $this->legacy_proxy->call_function( 'the_function_name', 'param1', 'param2' );
     }
 }
-``` 
+```
 
 However, the recommended way (especially when no other dependencies need to be dependency-injected) is to use the equivalent methods in the `WooCommerce` class via the `WC()` helper, like this:
 
@@ -328,7 +343,7 @@ class TheClass {
         WC()->call_function( 'the_function_name', 'param1', 'param2' );
     }
 }
-``` 
+```
 
 Both ways are completely equivalent since the helper methods are just doing `wc_get_container()->get( LegacyProxy::class )->...` under the hood.
 
@@ -349,11 +364,11 @@ Here's an example of how function mocks are defined:
 // In this context '$this' is a class that extends WC_Unit_Test_Case
 
 $this->register_legacy_proxy_function_mocks(
-	array(
-		'the_function_name' => function( $param1, $param2 ) {
-			return "I'm the mock of the_function_name and I was invoked with $param1 and $param2.";
-		},
-	)
+ array(
+  'the_function_name' => function( $param1, $param2 ) {
+   return "I'm the mock of the_function_name and I was invoked with $param1 and $param2.";
+  },
+ )
 );
 ```
 
@@ -377,18 +392,17 @@ That said, an alternative middle ground would be to create more specialized case
 
 ```php
 class ActionsProxy {
-	public function did_action( $tag ) {
-		return did_action( $tag );
-	}
+ public function did_action( $tag ) {
+  return did_action( $tag );
+ }
 
-	public function apply_filters( $tag, $value, ...$parameters ) {
-		return apply_filters( $tag, $value, ...$parameters );
-	}
+ public function apply_filters( $tag, $value, ...$parameters ) {
+  return apply_filters( $tag, $value, ...$parameters );
+ }
 }
 ```
 
 Note however that such a class would have to be explicitly dependency-injected (unless additional helper methods are defined in the `WooCommerce` class), and that you would need to create a pairing mock class (e.g. `MockableActionsProxy`) and replace the original registration using `wc_get_container()->replace( ActionsProxy::class, MockableActionsProxy::class )`.
-
 
 ## Defining new actions and filters
 
@@ -396,8 +410,7 @@ WordPress' hooks (actions and filters) are a very powerful extensibility mechani
 
 In order to keep the code as easy as reasonably possible to read and maintain, **hooks shouldn't be used to drive WooCommerce's internal logic and processes**. If you need the services of a given class or function, please call these directly (by using dependency-injection or the legacy proxy as appropriate to get access to the desired service). **New hooks should be introduced only if they provide a valuable extension point for plugins**.
 
-As usual, there might be reasonable exceptions to this; but please keep this rule in mind whenever you consider creating a new hook.      
-
+As usual, there might be reasonable exceptions to this; but please keep this rule in mind whenever you consider creating a new hook.
 
 ## Writing unit tests
 
@@ -405,7 +418,7 @@ Unit tests are a fundamental tool to keep the code reliable and reasonably safe 
 
 **If you are a WooCommerce core team member or a contributor from other team at Automattic:** Please write unit tests to cover any code addition or modification that you make to the `src` directory (and ideally the same for the `includes` directory, by the way). There are always reasonable exceptions, but the rule of thumb is that all code should be covered by tests.
 
-**If you are an external contributor:** When adding or changing code on the WooCommerce codebase, and especially in the `src` directory, adding unit tests is recommended but not mandatory: no contributions will be rejected solely for lacking unit tests. However, please try to at least make the code easily testable by honoring the container and dependency-injection mechanism, and by using the legacy proxy to interact with legacy code when needed. If you do so, the WooCommerce team or other contributors will be able to add the missing tests.     
+**If you are an external contributor:** When adding or changing code on the WooCommerce codebase, and especially in the `src` directory, adding unit tests is recommended but not mandatory: no contributions will be rejected solely for lacking unit tests. However, please try to at least make the code easily testable by honoring the container and dependency-injection mechanism, and by using the legacy proxy to interact with legacy code when needed. If you do so, the WooCommerce team or other contributors will be able to add the missing tests.
 
 ### Mocking dependencies
 
@@ -416,7 +429,7 @@ $dependency_mock = somehow_create_mock();
 $sut = new TheClassToTest( $dependency_mock ); //sut = System Under Test
 $result = $sut->do_something();
 $this->assertEquals( $result, 'the expected result' );
-```    
+```
 
 However, while this works well for simple scenarios, in the real world dependencies will often have other dependencies in turn, so instantiating all the required intermediate objects will be complex. To make things easier, while tests run the `Container` class is replaced with an `ExtendedContainer` class that has a couple of additional methods:
 
@@ -445,3 +458,4 @@ Note: of course all of this applies to dependencies from the `src` directory, fo
 
 * [The code hacker](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/Tools/CodeHacking#readme), which allows modifying the code before it's tested in order to mock functions, static methods and `final` classes. This is a last resort mechanism when using other mechanisms like [the `LegacyProxy` class](#the-legacyproxy-class) is not an option.
 * [The DynamicDecorator class](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/Tools/DynamicDecorator.php), which wraps an arbitrary object and allows to define replacements its for methods and properties; the decorator is then used in lieu of the original object. This can be useful when extending the class of the original object isn't possible or is too complicated. See [the unis tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/php/src/Proxies/DynamicDecoratorTest.php) for examples of how it's used.
+

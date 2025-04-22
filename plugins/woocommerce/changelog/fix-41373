@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Ensures the product ID is valid when interacting with product variations via the REST API.

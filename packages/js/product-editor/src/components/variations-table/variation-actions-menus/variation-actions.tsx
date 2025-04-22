@@ -74,8 +74,6 @@ export function VariationActions( {
 					</>
 				) : (
 					<MenuItem
-						href={ singleSelection?.permalink }
-						target="_blank"
 						rel="noreferrer"
 						onClick={ () => {
 							recordEvent( 'product_variations_preview', {
@@ -142,7 +140,6 @@ export function VariationActions( {
 							? __( 'Delete variation', 'woocommerce' )
 							: undefined
 					}
-					variant="link"
 					onClick={ () => {
 						onDelete( selection );
 						onClose();

@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-collapsible",
 	"title": "Collapsible",
 	"category": "widgets",
@@ -9,7 +9,7 @@
 	"attributes": {
 		"toggleText": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"initialCollapsed": {
 			"type": "boolean"

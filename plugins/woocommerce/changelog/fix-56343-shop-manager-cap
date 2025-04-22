@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Enable shop managers to create new customer accounts via the REST API, but not other types of user accounts

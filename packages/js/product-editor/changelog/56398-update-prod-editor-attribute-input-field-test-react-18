@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: React 18 update cleanup task - enable the `AttributeTermInputField` test and remove related comments.
+

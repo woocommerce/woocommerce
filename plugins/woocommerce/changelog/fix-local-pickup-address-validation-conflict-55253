@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Made it possible to use local pickup for any allowed billing address since shipping address is not required.

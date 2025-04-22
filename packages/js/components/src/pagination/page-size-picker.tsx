@@ -46,7 +46,6 @@ export function PageSizePicker( {
 		<div className="woocommerce-pagination__per-page-picker">
 			<SelectControl
 				label={ label }
-				// @ts-expect-error outdated types file.
 				labelPosition="side"
 				value={ perPage.toString() }
 				onChange={ perPageChange }

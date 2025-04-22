@@ -95,18 +95,6 @@ In this section, you will see some real examples of testing instructions that ha
 
 Before:
 
-![Instructions needing improvement](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682262-25bec5c3-154c-45ec-aa3d-d3e07f52669e.png)
-
-After:
-
-![Improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682303-1b12ab97-f27a-41cb-a8db-da8a78d18840.png)
-
-Improvements:
-
-![Changes made](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682323-0ecc998d-69ab-4201-8daa-820b948315e8.png)
-
-Before:
-
 ![Instructions needing improvement](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
 
 After:

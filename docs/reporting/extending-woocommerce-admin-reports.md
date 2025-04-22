@@ -23,7 +23,7 @@ cd woocommerce-admin
 npm run build
 ```
 
-Once thats working, we can setup the extension folder ready for JavaScript development.
+Once that's working, we can setup the extension folder ready for JavaScript development.
 
 ```sh
 npm run create-wc-extension
@@ -32,7 +32,7 @@ npm run create-wc-extension
 After choosing a name, move into that folder and start webpack to watch and build files.
 
 ```sh
-cd ../<my-plugin-name>
+cd ../&lt;my-plugin-name&gt;
 npm install
 npm start
 ```

@@ -1,6 +1,10 @@
 #!/bin/sh
 
-PLUGIN_SLUG="woocommerce"
+# Possible slugs: woocommerce-dev (live branches) and woocommerce (plugin build)
+if [ -z "$PLUGIN_SLUG" ]; then
+	PLUGIN_SLUG="woocommerce"
+fi
+
 PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
@@ -14,10 +18,10 @@ echo "Cleaning up assets..."
 find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/client/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/js/." ! -name '.gitkeep' -type f -exec rm -f {} +
 
 echo "Installing PHP and JS dependencies..."
-pnpm install
+pnpm install --frozen-lockfile
 
 echo "Running JS Build..."
-if [ -z "${NODE_ENV}" ]; then
+if [ -z "$NODE_ENV" ]; then
 	export NODE_ENV=production
 fi
 pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"

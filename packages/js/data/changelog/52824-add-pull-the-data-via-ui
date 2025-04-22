@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pull data into the react version of the settings page from the new API

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove unused Codeception config file for the email-editor package

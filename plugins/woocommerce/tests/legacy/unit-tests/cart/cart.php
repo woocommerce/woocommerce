@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Cart
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * Class Cart.
  */
@@ -58,7 +60,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
@@ -226,7 +228,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => '8.05',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
@@ -1000,7 +1002,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => '4.12',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
