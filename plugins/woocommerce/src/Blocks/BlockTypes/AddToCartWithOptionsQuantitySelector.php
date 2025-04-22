@@ -143,7 +143,7 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 		$managing_stock = $product->managing_stock();
 		$stock_quantity = $product->get_stock_quantity();
 
-		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ( ( $managing_stock && $stock_quantity > 1 ) || ! $managing_stock ) && ! $product->is_sold_individually();
+		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually() && ( ( $managing_stock && $stock_quantity > 1 ) || ! $managing_stock );
 
 		ob_start();
 
