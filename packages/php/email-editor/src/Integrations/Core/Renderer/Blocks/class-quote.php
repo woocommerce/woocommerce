@@ -25,17 +25,47 @@ class Quote extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
-		$content      = '';
-		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
+		$content = '';
+		$dom_helper = new Dom_Document_Helper( $block_content );
 
+		// Extract citation if present.
+		$citation_content = '';
+		$cite_element = $dom_helper->find_element( 'cite' );
+		if ( $cite_element ) {
+			$citation_content = $this->get_citation_wrapper( $dom_helper->get_element_inner_html( $cite_element ), $parsed_block['email_attrs'] ?? array() );
+		}
+
+		// Process inner blocks for main content.
+		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
 		foreach ( $inner_blocks as $block ) {
 			$content .= render_block( $block );
 		}
 
 		return str_replace(
-			'{quote_content}',
-			$content,
+			array( '{quote_content}', '{citation_content}' ),
+			array( $content, $citation_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $settings_controller )
+		);
+	}
+
+	/**
+	 * Returns the citation content with a wrapper.
+	 *
+	 * @param string $citation_content The citation text.
+	 * @param array  $email_attrs The email attributes.
+	 * @return string The wrapped citation HTML or empty string if no citation.
+	 */
+	private function get_citation_wrapper( string $citation_content, array $email_attrs ): string {
+		if ( empty( $citation_content ) ) {
+			return '';
+		}
+
+		return $this->add_spacer(
+			sprintf(
+				'<p class="email-block-quote-citation" style="margin: 0; font-style: italic;">%s</p>',
+				$citation_content
+			),
+			$email_attrs
 		);
 	}
 
@@ -94,6 +124,7 @@ class Quote extends Abstract_Block_Renderer {
           <tr>
             <td class="email-block-quote-content" style="%2$s" width="100%%">
               {quote_content}
+              {citation_content}
             </td>
           </tr>
         </tbody>
