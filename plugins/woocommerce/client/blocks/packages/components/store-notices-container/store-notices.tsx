@@ -66,7 +66,6 @@ const StoreNotices = ( {
 				behavior: 'smooth',
 			} );
 		}
-	}, [ noticeIds, previousNoticeIds, ref ] );
 	}, [ errorIds, previousErrorIds, ref ] );
 
 	// Group notices by whether or not they are dismissible. Dismissible notices can be grouped.
