@@ -4,8 +4,8 @@
 import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
 import {
 	ADDRESS_FORM_KEYS,
-	SHIPPING_COUNTRIES,
-	SHIPPING_STATES,
+	COUNTRIES,
+	STATES,
 } from '@woocommerce/block-settings';
 import {
 	AddressForm,
@@ -157,16 +157,14 @@ export const formatShippingAddress = (
 	if ( Object.values( address ).length === 0 ) {
 		return null;
 	}
-	const formattedCountry = isString( SHIPPING_COUNTRIES[ address.country ] )
-		? decodeEntities( SHIPPING_COUNTRIES[ address.country ] )
+	const formattedCountry = isString( COUNTRIES[ address.country ] )
+		? decodeEntities( COUNTRIES[ address.country ] )
 		: '';
 
 	const formattedState =
-		isObject( SHIPPING_STATES[ address.country ] ) &&
-		isString( SHIPPING_STATES[ address.country ][ address.state ] )
-			? decodeEntities(
-					SHIPPING_STATES[ address.country ][ address.state ]
-			  )
+		isObject( STATES[ address.country ] ) &&
+		isString( STATES[ address.country ][ address.state ] )
+			? decodeEntities( STATES[ address.country ][ address.state ] )
 			: address.state;
 
 	const addressParts = [];

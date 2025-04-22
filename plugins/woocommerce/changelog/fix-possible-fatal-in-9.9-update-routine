@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent possible fatal error in 9.9 migration.

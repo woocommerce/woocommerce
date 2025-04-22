@@ -3019,7 +3019,7 @@ function wc_update_990_add_old_refunded_order_items_to_product_lookup_table() {
 			// If the refund order has no line items, mark it as a full refund in orders_meta table.
 			// In the above query we already excluded orders for refunded shipping and tax, so it's safe to assume that the refund order without items is a full refund.
 			// Note that the "full" refund here means it's created by changing the order status to "Refunded", not partially refund all the items in the order.
-			if ( empty( $order->get_items() ) ) {
+			if ( $order && empty( $order->get_items() ) ) {
 				$order->update_meta_data( '_refund_type', 'full' );
 				$order->save_meta_data();
 			}
