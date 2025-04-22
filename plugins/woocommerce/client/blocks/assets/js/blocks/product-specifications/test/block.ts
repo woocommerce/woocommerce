@@ -47,6 +47,21 @@ describe( 'Product Specifications block', () => {
 			expect( block.getByText( /Weight/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Dimensions/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Test Attribute/i ) ).toBeInTheDocument();
+
+			// Verify toggle controls are checked by default
+			expect(
+				screen.getByRole( 'checkbox', { name: /Show Weight/i } )
+			).toBeChecked();
+			expect(
+				screen.getByRole( 'checkbox', {
+					name: /Show Dimensions/i,
+				} )
+			).toBeChecked();
+			expect(
+				screen.getByRole( 'checkbox', {
+					name: /Show Attributes/i,
+				} )
+			).toBeChecked();
 		} );
 
 		test( 'should hide weight section when toggled off', () => {
@@ -75,6 +90,7 @@ describe( 'Product Specifications block', () => {
 			);
 
 			expect( block.getByText( /Weight/i ) ).toBeInTheDocument();
+
 			expect(
 				block.queryByText( /Dimensions/i )
 			).not.toBeInTheDocument();
