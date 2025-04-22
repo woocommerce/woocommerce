@@ -59,9 +59,14 @@ export function Editor( {
 
 	useEffect( () => {
 		return () => {
-			getBlockTypes().forEach( ( { name } ) =>
-				unregisterBlockType( name )
-			);
+			getBlockTypes().forEach( ( { name } ) => {
+				// Unregister all blocks except for WooCommerce blocks.
+				if ( name.includes( 'woocommerce' ) ) {
+					return;
+				}
+
+				unregisterBlockType( name );
+			} );
 			getFormatTypes().forEach( ( { name } ) =>
 				unregisterFormatType( name )
 			);
