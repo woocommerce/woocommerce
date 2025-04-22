@@ -15,8 +15,7 @@ import { NAME_SPACE } from './constants';
 const previewTextMaxLength = 150;
 const previewTextRecommendedLength = 80;
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error RichTextWithButton has default any type and is not exported yet.
 const SidebarSettings = ( { RichTextWithButton } ) => {
 	const [ woocommerce_email_data ] = useEntityProp(
 		'postType',
