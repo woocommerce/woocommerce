@@ -74,25 +74,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 		{}
 	) as Record< string, string | null >;
 
-	const { templatePartId } = useSelect(
-		( select ) => {
-			const { getCurrentTheme } = select( coreStore );
-			const currentTheme = getCurrentTheme()?.stylesheet;
-
-			if ( ! currentTheme ) {
-				return {
-					templatePartId: null,
-				};
-			}
-
-			return {
-				templatePartId:
-					addToCartWithOptionsTemplatePartIds?.[ productType ] ||
-					null,
-			};
-		},
-		[ productType, addToCartWithOptionsTemplatePartIds ]
-	);
+	const templatePartId = addToCartWithOptionsTemplatePartIds?.[ productType ];
 
 	const blockProps = useBlockProps();
 
