@@ -42,31 +42,6 @@ function wc_empty_cart() {
 }
 
 /**
- * Load the persistent cart.
- *
- * @param string  $user_login User login.
- * @param WP_User $user       User data.
- * @deprecated 2.3
- */
-function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-		return;
-	}
-
-	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
-
-	if ( ! $saved_cart ) {
-		return;
-	}
-
-	$cart = WC()->session->cart;
-
-	if ( empty( $cart ) || ! is_array( $cart ) || 0 === count( $cart ) ) {
-		WC()->session->cart = $saved_cart['cart'];
-	}
-}
-
-/**
  * Retrieves unvalidated referer from '_wp_http_referer' or HTTP referer.
  *
  * Do not use for redirects, use {@see wp_get_referer()} instead.
