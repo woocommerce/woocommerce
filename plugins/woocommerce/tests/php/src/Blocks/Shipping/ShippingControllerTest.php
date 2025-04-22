@@ -95,9 +95,19 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 * Test that register_local_pickup handles missing WC()->shipping and other dependencies gracefully.
 	 */
 	public function test_register_local_pickup_also_handles_missing_dependencies() {
-		add_filter( 'woocommerce_blocks_checkout_is_block_default', '__return_true', 10 );
-
-		$wc_backup = WC();
+		$wc_backup  = WC();
+		$mock_utils = $this->getMockBuilder( \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::class )->getMock();
+		$mock_utils->method( 'is_checkout_block_default' )->willReturn( true );
+		$logger_mock = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		// We need this to make sure our mock logger is getting returned.
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $logger_mock ) {
+				return $logger_mock;
+			},
+			10,
+			0
+		);
 
 		try {
 			// Test that the method does not throw exceptions without missing dependencies.
@@ -109,6 +119,14 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 			$this->shipping_controller->register_local_pickup();
 			$this->assertTrue( true, 'Method did not throw exceptions with missing shipping' );
 
+			// Test that the error is logged when WC()->shipping->register_shipping_method is not available.
+			$logger_mock->expects( $this->once() )
+						->method( 'error' )
+						->with(
+							'Error registering pickup location: WC()->shipping->register_shipping_method is not available',
+							array( 'source' => 'shipping-controller' )
+						);
+
 			// Test that the method does not throw exceptions with missing WC object.
 			global $woocommerce;
 			$incomplete_wc = new \stdClass(); // Object without shipping property.
@@ -119,9 +137,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		} finally {
 			global $woocommerce;
 			$woocommerce = $wc_backup;
-
-			// Remove the filter we added for the test.
-			remove_filter( 'woocommerce_blocks_checkout_is_block_default', '__return_true', 10 );
+			remove_all_filters( 'woocommerce_logging_class' );
 		}
 	}
 }
