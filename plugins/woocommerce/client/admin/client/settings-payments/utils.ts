@@ -7,6 +7,7 @@ import {
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -115,12 +116,16 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 	);
 };
 
-export const getWooPaymentsResetAccountLink = () => {
-	return getAdminLink(
-		'admin.php?wcpay-connect=1&_wpnonce=' +
-			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
-			'&wcpay-reset-account=true&redirect_to_settings_page=true'
-	);
+export const resetWooPaymentsAccount = async () => {
+	try {
+		const response = await apiFetch( {
+			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
+			method: 'POST',
+		} );
+		return response;
+	} catch ( error ) {
+		throw error;
+	}
 };
 
 export const getWooPaymentsSetupLiveAccountLink = () => {
