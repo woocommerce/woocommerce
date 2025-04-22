@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Move generateUniqueId to @woocommerce/utils package.
