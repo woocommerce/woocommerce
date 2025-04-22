@@ -100,6 +100,11 @@ class Quote extends Abstract_Block_Renderer {
 			)
 		)['declarations'];
 
+		// Set the text align attribute to the wrapper if present.
+		if ( isset( $parsed_block['attrs']['textAlign'] ) ) {
+			$table_styles['text-align'] = $parsed_block['attrs']['textAlign'];
+		}
+
 		$table_styles['border-collapse'] = 'separate'; // Needed for the border radius to work.
 
 		// Add default background size.
