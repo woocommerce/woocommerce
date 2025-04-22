@@ -117,10 +117,6 @@ $dialog-padding: 20px;
 	}
 }
 
-@mixin gradient($direction) {
-	background: linear-gradient(to $direction, var(--wp--preset--color--base) 25%, transparent);
-}
-
 @mixin horizontal-thumbnails {
 	.wc-block-product-gallery-thumbnails__thumbnail {
 		height: 100%;
@@ -161,50 +157,36 @@ $dialog-padding: 20px;
 		object-fit: contain;
 	}
 
-	&::before,
-	&::after {
-		content: "";
-		position: absolute;
-		opacity: 0;
-		transition: opacity 0.2s linear;
-		pointer-events: none;
-	}
-
 	&.wc-block-product-gallery-thumbnails--overflow {
-		&-top::before,
-		&-bottom::after {
-			left: 0;
-			height: $thumbnails-gradient-size;
-			width: 100%;
-			opacity: 1;
+		$gradient-size: 14%;
+		$gradient-mid-step-size: 6%;
+		$gradient-mid-step: rgba(0, 0, 0, 0.3);
+
+		$gradient: transparent 0,  $gradient-mid-step $gradient-mid-step-size, rgb(0, 0, 0) $gradient-size;
+		$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size), $gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
+
+		&-top {
+			mask-image: linear-gradient(to bottom, $gradient);
 		}
 
-		&-top::before {
-			top: 0;
-			@include gradient(bottom);
+		&-bottom {
+			mask-image: linear-gradient(to top, $gradient);
 		}
 
-		&-bottom::after {
-			bottom: 0;
-			@include gradient(top);
+		&-top.wc-block-product-gallery-thumbnails--overflow-bottom {
+			mask-image: linear-gradient(to bottom, $gradient, $gradient-end);
 		}
 
-		&-right::after,
-		&-left::before {
-			top: 0;
-			height: 100%;
-			width: $thumbnails-gradient-size;
-			opacity: 1;
+		&-left {
+			mask-image: linear-gradient(to right, $gradient);
 		}
 
-		&-left::before {
-			left: 0;
-			@include gradient(right);
+		&-right {
+			mask-image: linear-gradient(to left, $gradient);
 		}
 
-		&-right::after {
-			right: 0;
-			@include gradient(left);
+		&-left.wc-block-product-gallery-thumbnails--overflow-right {
+			mask-image: linear-gradient(to right, $gradient, $gradient-end);
 		}
 	}
 }

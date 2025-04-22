@@ -32,8 +32,11 @@ function wc_template_redirect() {
 
 	// When on the checkout with an empty cart, redirect to cart page.
 	if ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
-		wp_safe_redirect( wc_get_cart_url() );
-		exit;
+		// Only redirect if we're not already on the cart page to prevent infinite loops.
+		if ( ! is_cart() ) {
+			wp_safe_redirect( wc_get_cart_url() );
+			exit;
+		}
 	}
 
 	// Logout endpoint under My Account page. Logging out requires a valid nonce.
