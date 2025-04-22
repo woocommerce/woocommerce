@@ -333,8 +333,8 @@ class ShippingController {
 	 * Registers the Local Pickup shipping method used by the Checkout Block.
 	 */
 	public function register_local_pickup() {
-		if ( CartCheckoutUtils::is_checkout_block_default() && method_exists( wc(), 'shipping' ) && method_exists( wc()->shipping, 'register_shipping_method' ) ) {
-			wc()->shipping->register_shipping_method( new PickupLocation() );
+		if ( CartCheckoutUtils::is_checkout_block_default() && method_exists( WC(), 'shipping' ) && method_exists( WC()->shipping, 'register_shipping_method' ) ) {
+			WC()->shipping->register_shipping_method( new PickupLocation() );
 		}
 	}
 
