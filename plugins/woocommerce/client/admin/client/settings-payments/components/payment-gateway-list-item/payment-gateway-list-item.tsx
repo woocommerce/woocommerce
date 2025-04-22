@@ -108,6 +108,10 @@ export const PaymentGatewayListItem = ( {
 						) : (
 							<StatusBadge status={ determineGatewayStatus() } />
 						) }
+						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
+						{ gateway._suggestion_id && (
+							<OfficialBadge variant="expanded" />
+						) }
 						{ gateway.supports?.includes( 'subscriptions' ) && (
 							<Tooltip
 								placement="top"
@@ -129,10 +133,6 @@ export const PaymentGatewayListItem = ( {
 									/>
 								}
 							/>
-						) }
-						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
-						{ gateway._suggestion_id && (
-							<OfficialBadge variant="expanded" />
 						) }
 					</span>
 					<span
