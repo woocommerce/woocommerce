@@ -48,12 +48,14 @@ if [ -n "$changedFiles" ]; then
     while read job; do
 		command=$(echo $job | jq --raw-output '( "pnpm --filter=" + .projectName + " " + .command )')
 		echo -n "-> Executing '$command' ($iteration of $iterations) "
+		start=$SECONDS
 		result=$($command 2>&1)
+		duration=$(( SECONDS - start ))
 		if [ $? -ne 0 ]; then
 			echo "[ERR] (aborting, please run manually to troubleshoot)"
 			exit 1
 		fi
-		echo "[OK]"
+		echo "($duration sec.) [OK]"
 		iteration=$(expr $iteration + 1)
 	done < <(echo $lintingJobs | jq --compact-output '.[]')
 fi

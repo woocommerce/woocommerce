@@ -5,6 +5,8 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { FormStepBlock } from '@woocommerce/blocks/checkout/form-step';
 import clsx from 'clsx';
 import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
+import { useCheckoutAddress } from '@woocommerce/base-context';
+import { useFormFields } from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
@@ -23,7 +25,12 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
-	if ( ORDER_FORM_KEYS.length === 0 ) {
+	const { defaultFields } = useCheckoutAddress();
+	const formFields = useFormFields( ORDER_FORM_KEYS, defaultFields, 'order' );
+	if (
+		formFields.length === 0 ||
+		formFields.every( ( field ) => !! field.hidden )
+	) {
 		return null;
 	}
 

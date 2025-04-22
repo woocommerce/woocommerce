@@ -200,6 +200,9 @@ const blocks = {
 	'product-reviews-title': {
 		customDir: 'product-reviews/inner-blocks/reviews-title',
 	},
+	'product-review-form': {
+		customDir: 'product-reviews/inner-blocks/review-form',
+	},
 };
 
 /**

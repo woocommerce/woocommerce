@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix missing closing tag for notice inside the Product Collection block.
