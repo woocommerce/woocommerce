@@ -3,11 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
-use WooCommerce\Admin\Experimental_Abtest;
 
 defined( 'ABSPATH' ) || exit;
 /**

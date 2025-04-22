@@ -31,6 +31,7 @@ import {
 	changeUrl,
 	PREFIX_QUERY_ARG_FILTER_TYPE,
 	PREFIX_QUERY_ARG_QUERY_TYPE,
+	generateUniqueId,
 } from '@woocommerce/utils';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
@@ -50,7 +51,6 @@ import {
 	isQueryArgsEqual,
 	parseTaxonomyToGenerateURL,
 	formatSlug,
-	generateUniqueId,
 } from './utils';
 import { BlockAttributes, DisplayOption, GetNotice } from './types';
 import CheckboxFilter from './checkbox-filter';

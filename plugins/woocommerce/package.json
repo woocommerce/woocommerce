@@ -39,7 +39,7 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
-		"lint:changes:branch:php": "pnpm lint:php:changes:branch",
+		"lint:changes:branch:php": "XDEBUG_MODE=off pnpm lint:php:changes:branch",
 		"lint:lang:js": "eslint . --ext=js,ts",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
@@ -72,7 +72,7 @@
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:watch": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit-watcher watch --verbose",
-		"test:plugincheck": "wp-env run tests-cli wp plugin check woocommerce",
+		"test:plugincheck": "wp-env run tests-cli wp plugin check ${PLUGIN_SLUG:-woocommerce}",
 		"test:unit": "pnpm test:php",
 		"test:unit:watch": "pnpm test:php:watch",
 		"test:unit:env": "pnpm test:php:env",
@@ -580,6 +580,7 @@
 					],
 					"changes": [
 						"patterns/**/*.php",
+						"includes/**/*.php",
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html"
@@ -746,7 +747,7 @@
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10",
+		"wireit": "0.14.12",
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {

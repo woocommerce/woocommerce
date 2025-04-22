@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Block Patterns cache: ensure that relative path are used.
