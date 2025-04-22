@@ -114,41 +114,16 @@ class WC_Product_CSV_Importer_Controller {
 	 *
 	 * @throws \Exception When file validation fails.
 	 */
-	protected static function check_file_path( string $path ): void {
-		$wp_filesystem = FilesystemUtil::get_wp_filesystem();
-
-		// File must exist and be readable.
-		$is_valid_file = $wp_filesystem->is_readable( $path );
-
-		// Check that file is within an allowed location.
-		if ( $is_valid_file ) {
-			$is_valid_file = self::file_is_in_directory( $path, $wp_filesystem->abspath() );
-			if ( ! $is_valid_file ) {
-				$upload_dir    = wp_get_upload_dir();
-				$is_valid_file = false === $upload_dir['error'] && self::file_is_in_directory( $path, $upload_dir['basedir'] );
-			}
-		}
-
-		if ( ! $is_valid_file ) {
+	protected static function validate_file_path( string $path ): void {
+		try {
+			FilesystemUtil::validate_upload_file_path( $path );
+		} catch ( \Exception $e ) {
 			throw new \Exception( esc_html__( 'File path provided for import is invalid.', 'woocommerce' ) );
 		}
 
 		if ( ! self::is_file_valid_csv( $path ) ) {
 			throw new \Exception( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
-	}
-
-	/**
-	 * Check if a given file is inside a given directory.
-	 *
-	 * @param string $file_path The full path of the file to check.
-	 * @param string $directory The path of the directory to check.
-	 * @return bool True if the file is inside the directory.
-	 */
-	private static function file_is_in_directory( string $file_path, string $directory ): bool {
-		$file_path = (string) new URL( $file_path ); // This resolves '/../' sequences.
-		$file_path = preg_replace( '/^file:\\/\\//', '', $file_path );
-		return 0 === stripos( wp_normalize_path( $file_path ), trailingslashit( wp_normalize_path( $directory ) ) );
 	}
 
 	/**
@@ -351,7 +326,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		try {
 			$file = wc_clean( wp_unslash( $_POST['file'] ?? '' ) ); // PHPCS: input var ok.
-			self::check_file_path( $file );
+			self::validate_file_path( $file );
 
 			$params = array(
 				'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
@@ -499,7 +474,7 @@ class WC_Product_CSV_Importer_Controller {
 		try {
 			if ( ! empty( $file_url ) ) {
 				$path = ABSPATH . $file_url;
-				self::check_file_path( $path );
+				self::validate_file_path( $path );
 			} else {
 				$csv_import_util = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );
 				$upload          = $csv_import_util->handle_csv_upload( 'product', 'import', self::get_valid_csv_filetypes() );
@@ -517,7 +492,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function mapping_form() {
 		check_admin_referer( 'woocommerce-csv-importer' );
-		self::check_file_path( $this->file );
+		self::validate_file_path( $this->file );
 
 		$args = array(
 			'lines'              => 1,
@@ -556,7 +531,7 @@ class WC_Product_CSV_Importer_Controller {
 		// Displaying this page triggers Ajax action to run the import with a valid nonce,
 		// therefore this page needs to be nonce protected as well.
 		check_admin_referer( 'woocommerce-csv-importer' );
-		self::check_file_path( $this->file );
+		self::validate_file_path( $this->file );
 
 		if ( ! empty( $_POST['map_from'] ) && ! empty( $_POST['map_to'] ) ) {
 			$mapping_from = wc_clean( wp_unslash( $_POST['map_from'] ) );
