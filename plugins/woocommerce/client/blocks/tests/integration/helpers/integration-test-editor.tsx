@@ -55,23 +55,6 @@ export function Editor( {
 	settings?: Partial< EditorSettings & EditorBlockListSettings >;
 } ) {
 	const [ currentBlocks, updateBlocks ] = useState( testBlocks );
-	const { getFormatTypes } = useSelect( richTextStore, [] );
-
-	useEffect( () => {
-		return () => {
-			getBlockTypes().forEach( ( { name } ) => {
-				// Unregister all blocks except for WooCommerce blocks.
-				if ( name.includes( 'woocommerce' ) ) {
-					return;
-				}
-
-				unregisterBlockType( name );
-			} );
-			getFormatTypes().forEach( ( { name } ) =>
-				unregisterFormatType( name )
-			);
-		};
-	}, [ getFormatTypes ] );
 
 	return (
 		<BlockEditorProvider
@@ -86,21 +69,23 @@ export function Editor( {
 	);
 }
 
+let areCoreBlocksRegistered = false;
+
 /**
  * Registers the core block, creates the test block instances, and then instantiates the Editor.
  *
- * @param testBlocks    Block or array of block settings for blocks to be tested.
- * @param useCoreBlocks Defaults to true. If false, core blocks will not be registered.
- * @param settings      Any additional editor settings to be passed to the editor.
+ * @param testBlocks Block or array of block settings for blocks to be tested.
+ * @param settings   Any additional editor settings to be passed to the editor.
  */
 export async function initializeEditor(
 	testBlocks: BlockAttributes | BlockAttributes[],
-	useCoreBlocks = true,
 	settings: Partial< EditorSettings & EditorBlockListSettings > = {}
 ) {
-	if ( useCoreBlocks ) {
+	if ( ! areCoreBlocksRegistered ) {
 		registerCoreBlocks();
+		areCoreBlocksRegistered = true;
 	}
+
 	const blocks: BlockAttributes[] = Array.isArray( testBlocks )
 		? testBlocks
 		: [ testBlocks ];
