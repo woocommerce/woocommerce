@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-variation-selector-item",
-	"version": "1.0.0",
 	"title": "Variation Selector Item Template (Experimental)",
 	"description": "A list item template that represents an attribute within the Variation Selector block.",
 	"category": "woocommerce-product-elements",

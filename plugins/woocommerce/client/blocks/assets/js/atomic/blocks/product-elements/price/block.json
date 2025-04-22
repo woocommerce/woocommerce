@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-price",
-	"version": "1.0.0",
 	"title": "Product Price",
 	"description": "Display the price of a product.",
 	"category": "woocommerce-product-elements",
@@ -22,7 +21,30 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"supports": {
-		"html": false
+		"html": false,
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"link": false,
+			"__experimentalSkipSerialization": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalSkipSerialization": true,
+			"__experimentalLetterSpacing": true
+		},
+		"__experimentalSelector": ".wp-block-woocommerce-product-price .wc-block-components-product-price",
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
 	},
 	"ancestor": [
 		"woocommerce/all-products",

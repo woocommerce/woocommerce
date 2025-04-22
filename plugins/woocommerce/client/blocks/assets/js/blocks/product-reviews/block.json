@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/blockified-product-reviews",
-	"version": "1.0.0",
 	"icon": "admin-comments",
 	"title": "Blockified Product Reviews",
 	"description": "Display a product's reviews",

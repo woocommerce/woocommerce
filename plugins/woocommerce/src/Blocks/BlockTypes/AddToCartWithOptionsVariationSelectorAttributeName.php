@@ -18,6 +18,16 @@ class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute-name';
 
 	/**
+	 * Disable the frontend script for this block type, it's built with script modules.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null
@@ -58,6 +68,8 @@ class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
 		);
 
 		$label_text = esc_html( wc_attribute_label( $attribute_name ) );
+
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		return sprintf(
 			'<label %s>%s</label>',

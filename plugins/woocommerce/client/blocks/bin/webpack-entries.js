@@ -191,13 +191,17 @@ const blocks = {
 	'blockified-product-reviews': {
 		customDir: 'product-reviews',
 	},
+	'product-specifications': {
+		customDir: 'product-specifications',
+	},
 	'product-review-rating': {
 		customDir: 'product-reviews/inner-blocks/review-rating',
-		isExperimental: true,
 	},
 	'product-reviews-title': {
 		customDir: 'product-reviews/inner-blocks/reviews-title',
-		isExperimental: true,
+	},
+	'product-review-form': {
+		customDir: 'product-reviews/inner-blocks/review-form',
 	},
 };
 
@@ -272,6 +276,8 @@ const frontendScriptModuleBlocksToSkip = [
 	'add-to-cart-with-options',
 	'add-to-cart-with-options-quantity-selector',
 	'add-to-cart-with-options-variation-selector',
+	'add-to-cart-with-options-variation-selector-item',
+	'add-to-cart-with-options-variation-selector-attribute-name',
 	'add-to-cart-with-options-variation-selector-attribute-options',
 	'add-to-cart-with-options-grouped-product-selector',
 	'add-to-cart-with-options-grouped-product-selector-item',
@@ -287,6 +293,21 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 		)
 	),
 } );
+
+const stylingEntriesArray = Object.entries(
+	getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
+		...blocks,
+		...genericBlocks,
+		...cartAndCheckoutBlocks,
+	} )
+).filter( ( [ blockName ] ) => {
+	// TODO - we need to fix style building for script modules to happen within that build instead of here.
+	// If this block introduces a style import it will **not** be built currently.
+	return blockName !== 'add-to-cart-with-options';
+} );
+
+// convert back to object
+const stylingEntries = Object.fromEntries( stylingEntriesArray );
 
 const entries = {
 	styling: {
@@ -306,15 +327,11 @@ const entries = {
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 
-		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
-			...blocks,
-			...genericBlocks,
-			...cartAndCheckoutBlocks,
-		} ),
-
 		// Templates
 		'wc-blocks-classic-template-revert-button-style':
 			'./assets/js/templates/revert-button/index.tsx',
+
+		...stylingEntries,
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',

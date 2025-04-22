@@ -20,6 +20,7 @@ const RadioControl = ( {
 	options = [],
 	disabled = false,
 	highlightChecked = false,
+	descriptionStackingDirection = 'row',
 }: RadioControlProps ): JSX.Element | null => {
 	const instanceId = useInstanceId( RadioControl );
 	const radioControlId = id || instanceId;
@@ -62,6 +63,9 @@ const RadioControl = ( {
 						}
 					} }
 					disabled={ disabled }
+					descriptionStackingDirection={
+						descriptionStackingDirection
+					}
 				/>
 			) ) }
 		</div>

@@ -212,7 +212,7 @@ class ZipExportedSchema {
 	 */
 	private function create_json_schema_file() {
 		$schema_file = $this->get_working_dir_path( 'woo-blueprint.json' );
-		$this->wp_filesystem_put_contents( $schema_file, json_encode( $this->schema, JSON_PRETTY_PRINT ) );
+		$this->wp_filesystem_put_contents( $schema_file, wp_json_encode( $this->schema, JSON_PRETTY_PRINT ) );
 		return $schema_file;
 	}
 
