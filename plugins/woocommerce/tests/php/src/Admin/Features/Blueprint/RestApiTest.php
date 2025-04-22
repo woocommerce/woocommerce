@@ -47,7 +47,9 @@ class RestApiTest extends WP_Test_REST_TestCase {
 				),
 			)
 		);
-		file_put_contents( $this->temp_file, $blueprint_content );
+		global $wp_filesystem;
+		WP_Filesystem();
+		$wp_filesystem->put_contents( $this->temp_file, $blueprint_content );
 	}
 
 
@@ -61,7 +63,7 @@ class RestApiTest extends WP_Test_REST_TestCase {
 
 		// Clean up temporary file.
 		if ( file_exists( $this->temp_file ) ) {
-			unlink( $this->temp_file );
+			wp_delete_file( $this->temp_file );
 		}
 
 		remove_all_filters( 'pre_option_woocommerce_coming_soon' );
