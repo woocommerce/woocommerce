@@ -318,11 +318,8 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		if ( $this->block_email_editor_enabled ) {
-			$context                    = array();
-			$context['recipient_email'] = $this->get_recipient();
-			$editor_container           = Email_Editor_Container::container();
-			$this->personalizer         = $editor_container->get( Personalizer::class );
-			$this->personalizer->set_context( $context );
+			$editor_container   = Email_Editor_Container::container();
+			$this->personalizer = $editor_container->get( Personalizer::class );
 		}
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
