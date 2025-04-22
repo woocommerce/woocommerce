@@ -69,8 +69,8 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 }: {
 	productType: string;
 } ) => {
-	const themeTemplatePartPaths = getSetting(
-		'themeTemplatePartPaths',
+	const addToCartWithOptionsTemplatePartIds = getSetting(
+		'addToCartWithOptionsTemplatePartIds',
 		{}
 	) as Record< string, string | null >;
 
@@ -85,22 +85,13 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 				};
 			}
 
-			const templatePartSlug = `${ productType }-product-add-to-cart-with-options`;
-			const themeTemplatePartId = `${ currentTheme }//${ templatePartSlug }`;
-			const wooCommerceTemplatePartId = `woocommerce/woocommerce//${ templatePartSlug }`;
-
-			const themeTemplatePartExists =
-				themeTemplatePartPaths &&
-				productType in themeTemplatePartPaths &&
-				themeTemplatePartPaths[ productType ] !== null;
-
 			return {
-				templatePartId: themeTemplatePartExists
-					? themeTemplatePartId
-					: wooCommerceTemplatePartId,
+				templatePartId:
+					addToCartWithOptionsTemplatePartIds?.[ productType ] ||
+					null,
 			};
 		},
-		[ productType, themeTemplatePartPaths ]
+		[ productType, addToCartWithOptionsTemplatePartIds ]
 	);
 
 	const blockProps = useBlockProps();
