@@ -3,7 +3,6 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -117,11 +116,19 @@ export const createKycAccountSession = async (
 	apiURL: string,
 	poEligible: boolean
 ): Promise< AccountKycResult > => {
+	const selfAssessmentData = fromDotNotation( data );
+	const requestData: Record< string, unknown > = {
+		progressive: poEligible,
+	};
+
+	// Only pass the self assessment data if at least one field is set.
+	if ( Object.keys( selfAssessmentData ).length > 0 ) {
+		requestData.self_assessment = selfAssessmentData;
+	}
+
 	return await apiFetch< AccountKycResult >( {
-		url: addQueryArgs( apiURL, {
-			self_assessment: fromDotNotation( data ),
-			progressive: poEligible,
-		} ),
+		url: apiURL,
 		method: 'POST',
+		data: requestData,
 	} );
 };

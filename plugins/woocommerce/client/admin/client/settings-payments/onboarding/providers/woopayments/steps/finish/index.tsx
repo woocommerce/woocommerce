@@ -13,11 +13,11 @@ import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
 
 export const FinishStep: React.FC = () => {
-	const { context } = useOnboardingContext();
+	const { context, closeModal } = useOnboardingContext();
 
 	return (
 		<>
-			<WooPaymentsStepHeader onClose={ () => {} } />
+			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step--content">
 				<div className="settings-payments-onboarding-modal__step--content-finish">
 					<h1 className="settings-payments-onboarding-modal__step--content-finish-title">
@@ -52,7 +52,7 @@ export const FinishStep: React.FC = () => {
 					<Button
 						variant="secondary"
 						className="settings-payments-onboarding-modal__step--content-finish-secondary-button"
-						onClick={ () => {} }
+						onClick={ closeModal }
 					>
 						{ __( 'Close this window', 'woocommerce' ) }
 					</Button>

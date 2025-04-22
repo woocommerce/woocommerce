@@ -286,7 +286,7 @@ export const SettingsPaymentsMethods = () => {
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'WooCommerce Settings', 'woocommerce' ) } />
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
 					<Route
@@ -343,7 +343,7 @@ export const SettingsPaymentsOfflineWrapper = () => {
 export const SettingsPaymentsWooCommercePaymentsWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'WooCommerce Settings', 'woocommerce' ) } />
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
 				<SettingsPaymentsWooCommercePaymentsChunk />
 			</Suspense>

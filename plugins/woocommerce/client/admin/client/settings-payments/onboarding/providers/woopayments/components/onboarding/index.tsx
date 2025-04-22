@@ -3,12 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { Spinner } from '@wordpress/components';
 import { useEffect } from 'react';
 
 /**
  * Internal dependencies
  */
+import StripeSpinner from '../stripe-spinner';
 import Stepper from '~/settings-payments/onboarding/components/stepper';
 import { useOnboardingContext } from '../../data/onboarding-context';
 
@@ -35,7 +35,7 @@ export default function WooPaymentsOnboarding(): React.ReactNode {
 	if ( isLoading ) {
 		return (
 			<div className="settings-payments-onboarding-modal__loading">
-				<Spinner />
+				<StripeSpinner />
 			</div>
 		);
 	}

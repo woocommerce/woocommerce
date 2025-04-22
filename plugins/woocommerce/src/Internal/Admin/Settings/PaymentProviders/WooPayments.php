@@ -55,8 +55,9 @@ class WooPayments extends PaymentGateway {
 			)
 		);
 
-		// If the WooPayments installed version is less than 9.2.0, we can't use the in-context onboarding flows.
-		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, '9.2.0', '<' ) ) {
+		// If the WooPayments installed version is less than 9.3.0, we can't use the in-context onboarding flows
+		// due to our dependency on the newly introduced REST API endpoints.
+		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, '9.3.0', '<' ) ) {
 			return $details;
 		}
 

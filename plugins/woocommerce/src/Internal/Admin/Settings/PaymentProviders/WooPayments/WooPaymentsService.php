@@ -578,7 +578,7 @@ class WooPaymentsService {
 		// Call the WooPayments API to get the KYC session.
 		$account_session = $this->proxy->call_static(
 			Utils::class,
-			'rest_endpoint_get_request',
+			'rest_endpoint_post_request',
 			'/wc/v3/payments/onboarding/kyc/session',
 			array(
 				'progressive'     => $progressive ? 'true' : 'false',
@@ -633,6 +633,40 @@ class WooPaymentsService {
 
 		// Mark the business verification step as completed.
 		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+
+		return $response;
+	}
+
+	/**
+	 * Finish the onboarding KYC account session.
+	 *
+	 * @param string $from   Optional. Where in the UI the request is coming from.
+	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
+	 * @param string $source Optional. The source for the current onboarding flow.
+	 *                       If not provided, it will identify the source as the WC Admin Payments settings.
+	 *
+	 * @return array The response from the WooPayments API.
+	 * @throws Exception If the KYC session could not be finished or there was an error.
+	 */
+	public function reset_onboarding( string $from = '', string $source = '' ): array {
+		// Call the WooPayments API to reset onboarding.
+		$response = $this->proxy->call_static(
+			Utils::class,
+			'rest_endpoint_post_request',
+			'/wc/v3/payments/onboarding/reset',
+			array(
+				'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+				'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			throw new Exception( esc_html( $response->get_error_message() ) );
+		}
+
+		if ( ! is_array( $response ) || empty( $response['success'] ) ) {
+			throw new Exception( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
+		}
 
 		return $response;
 	}

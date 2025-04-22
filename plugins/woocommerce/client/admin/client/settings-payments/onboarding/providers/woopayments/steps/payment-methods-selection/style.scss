@@ -1,3 +1,7 @@
+#payment_methods.settings-payments-onboarding-modal__step .settings-payments-onboarding-modal__step--content {
+	padding: 16px 32px 16px 0;
+}
+
 .settings-payments-onboarding-modal__step--content {
 	.settings-payments-methods__container {
 		width: 100%;
@@ -180,7 +184,7 @@
 				}
 
 				@media screen and (max-width: $break-medium) {
-					padding: $gap;
+					padding: 0;
 				}
 
 				.woocommerce-list {

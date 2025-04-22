@@ -12,6 +12,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	woopaymentsOnboardingStore,
 	WooPaymentsOnboardingStepContent,
+	paymentSettingsStore,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 
@@ -59,6 +60,10 @@ export const OnboardingProvider: React.FC< {
 	const { invalidateResolutionForStoreSelector } = useDispatch(
 		woopaymentsOnboardingStore
 	);
+
+	// Make UI refresh when plugin is installed.
+	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
+		useDispatch( paymentSettingsStore );
 
 	// Initial data fetch from store
 	const { storeData, isStoreLoading } = useSelect(
@@ -246,6 +251,10 @@ export const OnboardingProvider: React.FC< {
 					// Refresh the onboarding steps to get the latest data after closing the modal.
 					// This is to avoid showing the loader next time, but still have fresh data.
 					refreshOnboardingSteps();
+
+					// Invalidate the getPaymentProviders store selector to ensure the latest data is fetched.
+					// This is important to ensure that the payment providers buttons are up to date.
+					invalidatePaymentGateways( 'getPaymentProviders' );
 				},
 			} }
 		>
