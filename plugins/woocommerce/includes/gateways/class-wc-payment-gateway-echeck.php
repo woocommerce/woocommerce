@@ -5,7 +5,7 @@
  * @package WooCommerce\Gateways
  */
 
-use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,7 +26,7 @@ class WC_Payment_Gateway_ECheck extends WC_Payment_Gateway {
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
-		if ( $this->supports( PaymentGatewaySupportedFeatures::TOKENIZATION ) && is_checkout() ) {
+		if ( $this->supports( PaymentGatewayFeatures::TOKENIZATION ) && is_checkout() ) {
 			$this->tokenization_script();
 			$this->saved_payment_methods();
 			$this->form();

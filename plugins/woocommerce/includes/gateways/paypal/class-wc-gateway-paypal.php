@@ -11,7 +11,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -90,8 +90,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		/* translators: %s: Link to WC system status page */
 		$this->method_description = __( 'PayPal Standard redirects customers to PayPal to enter their payment information.', 'woocommerce' );
 		$this->supports           = array(
-			PaymentGatewaySupportedFeatures::PRODUCTS,
-			PaymentGatewaySupportedFeatures::REFUNDS,
+			PaymentGatewayFeatures::PRODUCTS,
+			PaymentGatewayFeatures::REFUNDS,
 		);
 
 		// Load the settings.

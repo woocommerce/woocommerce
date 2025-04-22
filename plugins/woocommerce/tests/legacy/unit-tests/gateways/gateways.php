@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Gateways
  */
 
-use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
 
 /**
  * Unit tests for gateways.
@@ -18,7 +18,7 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 	public function test_supports() {
 		$gateway = new WC_Mock_Payment_Gateway();
 
-		$this->assertTrue( $gateway->supports( PaymentGatewaySupportedFeatures::PRODUCTS ) );
+		$this->assertTrue( $gateway->supports( PaymentGatewayFeatures::PRODUCTS ) );
 		$this->assertFalse( $gateway->supports( 'made-up-feature' ) );
 	}
 

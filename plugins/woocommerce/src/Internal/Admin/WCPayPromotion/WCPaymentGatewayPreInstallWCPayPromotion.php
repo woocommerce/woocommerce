@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
-use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -47,22 +47,22 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 			// We include all features here, even if some of them are behind settings, since this is for info only.
 			$this->supports = array(
 				// Regular features.
-				PaymentGatewaySupportedFeatures::PRODUCTS,
-				PaymentGatewaySupportedFeatures::REFUNDS,
+				PaymentGatewayFeatures::PRODUCTS,
+				PaymentGatewayFeatures::REFUNDS,
 				// Subscriptions features.
-				PaymentGatewaySupportedFeatures::SUBSCRIPTIONS,
-				PaymentGatewaySupportedFeatures::MULTIPLE_SUBSCRIPTIONS,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_CANCELLATION,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_REACTIVATION,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_SUSPENSION,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_AMOUNT_CHANGES,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_DATE_CHANGES,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_ADMIN,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_CUSTOMER,
-				PaymentGatewaySupportedFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE,
+				PaymentGatewayFeatures::SUBSCRIPTIONS,
+				PaymentGatewayFeatures::MULTIPLE_SUBSCRIPTIONS,
+				PaymentGatewayFeatures::SUBSCRIPTION_CANCELLATION,
+				PaymentGatewayFeatures::SUBSCRIPTION_REACTIVATION,
+				PaymentGatewayFeatures::SUBSCRIPTION_SUSPENSION,
+				PaymentGatewayFeatures::SUBSCRIPTION_AMOUNT_CHANGES,
+				PaymentGatewayFeatures::SUBSCRIPTION_DATE_CHANGES,
+				PaymentGatewayFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_ADMIN,
+				PaymentGatewayFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_CUSTOMER,
+				PaymentGatewayFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE,
 				// Saved cards features.
-				PaymentGatewaySupportedFeatures::TOKENIZATION,
-				PaymentGatewaySupportedFeatures::ADD_PAYMENT_METHODS,
+				PaymentGatewayFeatures::TOKENIZATION,
+				PaymentGatewayFeatures::ADD_PAYMENT_METHODS,
 			);
 		}
 

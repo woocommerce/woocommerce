@@ -8,7 +8,7 @@
  * @package WooCommerce\Classes\Payment
  */
 
-use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -328,7 +328,7 @@ All at %6$s
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif ( $gateway->supports( PaymentGatewaySupportedFeatures::ADD_PAYMENT_METHODS ) || $gateway->supports( PaymentGatewaySupportedFeatures::TOKENIZATION ) ) {
+				} elseif ( $gateway->supports( PaymentGatewayFeatures::ADD_PAYMENT_METHODS ) || $gateway->supports( PaymentGatewayFeatures::TOKENIZATION ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}
