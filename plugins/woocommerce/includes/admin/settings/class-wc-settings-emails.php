@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Email\EmailColors;
 use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
+use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -210,7 +211,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
 			$email_notifications_field = 'email_notification_block_emails';
-			$email_notifications_desc  = __( 'Manage email notifications sent from WooCommerce below or click on \'Edit template\' to customize your email template design.', 'woocommerce' );
+			$email_notifications_desc  = null;
 		} else {
 			$email_notifications_field = 'email_notification';
 			/* translators: %s: help description with link to WP Mail logging and support page. */
@@ -646,10 +647,19 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 			);
 		}
+		// Create URL for email editor template mode.
+		$edit_template_url = null;
+		if ( $email ) {
+			$email_post        = $email_post_manager->get_email_post( $email->id );
+			$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
+			$edit_template_url = admin_url( 'post.php?post=' . $email_post->ID . '&action=edit&template=' . $email_template_id );
+		}
+
 		?>
 		<div
 			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event woocommerce-email-listing-listview"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
+			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
 		></div>
 		<div>
 			<p><?php echo wp_kses_post( wpautop( wptexturize( $desc_help_text ) ) ); ?></p>

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { generateUniqueId } from '@woocommerce/utils';
+
+/**
  * Internal dependencies
  */
 import {
@@ -8,10 +13,6 @@ import {
 	EventObserversType,
 } from './types';
 
-export function generateUniqueId() {
-	return Math.floor( Math.random() * Date.now() ).toString();
-}
-
 export const actions = {
 	addEventCallback: (
 		eventType: string,
@@ -19,7 +20,7 @@ export const actions = {
 		priority = 10
 	): ActionType => {
 		return {
-			id: generateUniqueId(),
+			id: generateUniqueId().toString(),
 			type: ACTION.ADD_EVENT_CALLBACK,
 			eventType,
 			callback,

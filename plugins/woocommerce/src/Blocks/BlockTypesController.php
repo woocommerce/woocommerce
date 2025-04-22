@@ -284,7 +284,7 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
-		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
+		if ( ! is_string( $content ) || ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
 
@@ -532,6 +532,7 @@ final class BlockTypesController {
 			$block_types[] = 'Reviews\ProductReviews';
 			$block_types[] = 'Reviews\ProductReviewRating';
 			$block_types[] = 'Reviews\ProductReviewsTitle';
+			$block_types[] = 'Reviews\ProductReviewForm';
 		}
 
 		/**
