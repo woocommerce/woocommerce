@@ -578,8 +578,9 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
-		$this->order_query_args['created_via'] = explode( ',', $created_via );
-		$this->has_filter                      = true;
+		$this->order_query_args['created_via'] = array_map( 'trim', explode( ',', $created_via ) );
+
+		$this->has_filter = true;
 	}
 
 	/**
