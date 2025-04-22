@@ -140,7 +140,10 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
-		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually();
+		$managing_stock = $product->managing_stock();
+		$stock_quantity = $product->get_stock_quantity();
+
+		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ( ( $managing_stock && $stock_quantity > 1 ) || ! $managing_stock ) && ! $product->is_sold_individually();
 
 		ob_start();
 
