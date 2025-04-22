@@ -288,7 +288,7 @@ export const decouplePaymentMethodsState = (
 /**
  * Checks whether a payment method should be rendered.
  */
-export const shouldRenderPaymentMethod = (
+export const shouldRenderPaymentMethodInMainList = (
 	method: RecommendedPaymentMethod,
 	method_enabled: boolean
 ) => {

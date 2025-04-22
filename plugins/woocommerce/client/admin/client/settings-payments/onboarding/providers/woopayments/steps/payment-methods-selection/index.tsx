@@ -17,7 +17,7 @@ import {
 	combineRequestMethods,
 	combinePaymentMethodsState,
 	decouplePaymentMethodsState,
-	shouldRenderPaymentMethod,
+	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
 import './style.scss';
 
@@ -120,7 +120,7 @@ export default function PaymentMethodsSelection() {
 									__( 'Show more (%s)', 'woocommerce' ),
 									recommendedPaymentMethods?.filter(
 										( method ) =>
-											! shouldRenderPaymentMethod(
+											! shouldRenderPaymentMethodInMainList(
 												method,
 												paymentMethodsState[ method.id ]
 											)
