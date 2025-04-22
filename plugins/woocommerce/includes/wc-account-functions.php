@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -123,7 +124,7 @@ function wc_get_account_menu_items() {
 	if ( isset( $items['payment-methods'] ) ) {
 		$support_payment_methods = false;
 		foreach ( WC()->payment_gateways->get_available_payment_gateways() as $gateway ) {
-			if ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
+			if ( $gateway->supports( PaymentGatewaySupportedFeatures::ADD_PAYMENT_METHODS ) || $gateway->supports( PaymentGatewaySupportedFeatures::TOKENIZATION ) ) {
 				$support_payment_methods = true;
 				break;
 			}

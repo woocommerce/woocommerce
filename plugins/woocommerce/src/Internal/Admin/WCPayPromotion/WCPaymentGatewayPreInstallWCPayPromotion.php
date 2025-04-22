@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
+use Automattic\WooCommerce\Enums\PaymentGatewaySupportedFeatures;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -45,22 +47,22 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 			// We include all features here, even if some of them are behind settings, since this is for info only.
 			$this->supports = array(
 				// Regular features.
-				'products',
-				'refunds',
+				PaymentGatewaySupportedFeatures::PRODUCTS,
+				PaymentGatewaySupportedFeatures::REFUNDS,
 				// Subscriptions features.
-				'subscriptions',
-				'multiple_subscriptions',
-				'subscription_cancellation',
-				'subscription_reactivation',
-				'subscription_suspension',
-				'subscription_amount_changes',
-				'subscription_date_changes',
-				'subscription_payment_method_change_admin',
-				'subscription_payment_method_change_customer',
-				'subscription_payment_method_change',
+				PaymentGatewaySupportedFeatures::SUBSCRIPTIONS,
+				PaymentGatewaySupportedFeatures::MULTIPLE_SUBSCRIPTIONS,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_CANCELLATION,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_REACTIVATION,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_SUSPENSION,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_AMOUNT_CHANGES,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_DATE_CHANGES,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_ADMIN,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_CUSTOMER,
+				PaymentGatewaySupportedFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE,
 				// Saved cards features.
-				'tokenization',
-				'add_payment_method',
+				PaymentGatewaySupportedFeatures::TOKENIZATION,
+				PaymentGatewaySupportedFeatures::ADD_PAYMENT_METHODS,
 			);
 		}
 
