@@ -10,6 +10,9 @@ use Automattic\WooCommerce\Enums\ProductType;
  * AddToCartWithOptionsQuantitySelector class.
  */
 class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -205,15 +208,5 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 		$product = $previous_product;
 
 		return $form;
-	}
-
-	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

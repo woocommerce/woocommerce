@@ -64,7 +64,7 @@
 		"lint:ci": "pnpm run lint:js && pnpm run lint:css",
 		"lint:css": "stylelint '**/*.scss' --cache --cache-location=node_modules/.cache/stylelint",
 		"lint:css-fix": "stylelint '**/*.scss' --fix",
-		"lint:js": "wp-scripts lint-js --ext=js,ts,tsx --cache --cache-location=node_modules/.cache/eslint",
+		"lint:js": "WP_EXPERIMENTAL_MODULES=true wp-scripts lint-js --ext=js,ts,tsx --cache --cache-location=node_modules/.cache/eslint",
 		"lint:js:report": "pnpm run lint:js -- --output-file eslint_report.json --ext=js,ts,tsx --format json",
 		"lint:js-fix": "eslint assets/js --ext=js,jsx,ts,tsx --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
@@ -184,7 +184,7 @@
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/private-apis": "wp-6.7",
 		"@wordpress/rich-text": "wp-6.6",
-		"@wordpress/scripts": "30.6.0",
+		"@wordpress/scripts": "30.13.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"ajv-cli": "3.3.x",
 		"allure-playwright": "^2.9.2",
@@ -370,6 +370,10 @@
 				"BABEL_ENV": {
 					"external": true,
 					"default": "default"
+				},
+				"WP_EXPERIMENTAL_MODULES": {
+					"external": true,
+					"default": "true"
 				}
 			},
 			"files": [
@@ -409,7 +413,13 @@
 		},
 		"watch:build:project:bundle": {
 			"command": "webpack --watch",
-			"service": true
+			"service": true,
+			"env": {
+				"WP_EXPERIMENTAL_MODULES": {
+					"external": true,
+					"default": "true"
+				}
+			}
 		},
 		"watch:build:storybook": {
 			"command": "storybook dev  -c ./storybook -p 6006 --ci",
