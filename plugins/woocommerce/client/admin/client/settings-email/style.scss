@@ -21,6 +21,27 @@
 	.woocommerce-email-listing-recipients {
 		white-space: wrap;
 	}
+	.woocommerce-email-listing-description {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+
+		.woocommerce-email-listing-edit-template-button {
+			margin-top: -$grid-unit-10;
+			margin-left: $grid-unit-10;
+		}
+
+		@include breakpoint( "<600px" ) {
+			flex-direction: column;
+			justify-content: flex-start;
+
+			.woocommerce-email-listing-edit-template-button {
+				margin-top: 0;
+				margin-bottom: $grid-unit-10;
+				width: fit-content;
+			}
+		}
+	}
 }
 
 .woocommerce-email-listing-recipients-tooltip {
