@@ -1,1 +1,1 @@
-export { BankAccountsTable } from './bank-accounts-table';
+export { BankAccountsList } from './bank-accounts-list';

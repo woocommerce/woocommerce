@@ -8,8 +8,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { BankAccount } from './bank-accounts-table';
+import { BankAccount } from './types';
 import { getDefaultRoutingField } from './utils';
+import './bank-account-modal.scss';
 
 interface Props {
 	account: BankAccount | null;
@@ -57,6 +58,7 @@ export const BankAccountModal = ( {
 
 	return (
 		<Modal
+			className="bank-account-modal"
 			title={
 				account
 					? __( 'Edit bank account', 'woocommerce' )
