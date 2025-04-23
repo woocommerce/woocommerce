@@ -74,49 +74,6 @@ export const SettingsPaymentsOffline = () => {
 					sortedOfflinePaymentGateways || offlinePaymentGateways
 				}
 			/>
-
-			<br />
-			<br />
-
-			<BankAccountsList
-				initialAccounts={ [
-					{
-						id: 'acc-1',
-						account_name: 'Red Potato Shop Inc',
-						account_number: '123456789',
-						bank_name: 'Bank of America',
-						routing_number: '111000025',
-						sort_code: '123456',
-						iban: 'US12345678901234567890',
-						bic: 'BOFAUS3N',
-					},
-					{
-						id: 'acc-2',
-						account_name: 'Sarah Lee',
-						account_number: '654321098',
-						bank_name: 'Commonwealth Bank',
-						routing_number: '062000',
-						sort_code: '062000',
-						iban: 'AU12345678901234567890',
-						bic: 'CTBAAU2S',
-					},
-					{
-						id: 'acc-3',
-						account_name: 'Max Müller',
-						account_number: 'DE44500105175407324931',
-						bank_name: 'Deutsche Bank',
-						routing_number: '50010517',
-						sort_code: '50010517',
-						iban: 'DE44500105175407324931',
-						bic: 'DEUTDEFF',
-					},
-				] }
-				onChange={ ( updatedAccounts ) =>
-					console.log( 'Updated accounts:', updatedAccounts )
-				}
-				updateOrdering={ () => {} }
-				defaultCountry="US"
-			/>
 		</div>
 	);
 };
