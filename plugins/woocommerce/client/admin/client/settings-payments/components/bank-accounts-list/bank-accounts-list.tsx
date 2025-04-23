@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, MenuGroup, MenuItem } from '@wordpress/components';
+import { Button, MenuGroup, MenuItem, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { EllipsisMenu } from '@woocommerce/components';
 import { useState } from 'react';
@@ -22,21 +22,24 @@ function generateId() {
 	return Math.random().toString( 36 ).substring( 2, 10 );
 }
 interface Props {
-	accounts: BankAccount[];
+	initialAccounts: BankAccount[];
 	onChange: ( accounts: BankAccount[] ) => void;
 	updateOrdering: ( accounts: BankAccount[] ) => void;
 	defaultCountry: string;
 }
 
 export const BankAccountsList = ( {
-	accounts,
+	initialAccounts,
 	onChange,
 	updateOrdering,
 	defaultCountry,
 }: Props ) => {
+	const [ accounts, setAccounts ] = useState( initialAccounts );
 	const [ selectedAccount, setSelectedAccount ] =
 		useState< BankAccount | null >( null );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	const [ accountToDelete, setAccountToDelete ] =
+		useState< BankAccount | null >( null );
 
 	const openModal = ( account: BankAccount | null = null ) => {
 		setSelectedAccount( account );
@@ -44,18 +47,29 @@ export const BankAccountsList = ( {
 	};
 
 	const handleSave = ( updated: BankAccount ) => {
-		onChange(
-			accounts.some( ( acc ) => acc.id === updated.id )
-				? accounts.map( ( acc ) =>
-						acc.id === updated.id ? updated : acc
-				  )
-				: [ ...accounts, { ...updated, id: generateId() } ]
-		);
+		const newAccounts = accounts.some( ( acc ) => acc.id === updated.id )
+			? accounts.map( ( acc ) =>
+					acc.id === updated.id ? updated : acc
+			  )
+			: [ ...accounts, { ...updated, id: generateId() } ];
+		setAccounts( newAccounts );
+		onChange( newAccounts );
 		setIsModalOpen( false );
 	};
 
-	const handleDelete = ( accountId: string ) => {
-		onChange( accounts.filter( ( acc ) => acc.id !== accountId ) );
+	const confirmDelete = () => {
+		if ( ! accountToDelete ) return;
+		const newAccounts = accounts.filter(
+			( acc ) => acc.id !== accountToDelete.id
+		);
+		setAccounts( newAccounts );
+		onChange( newAccounts );
+		setAccountToDelete( null );
+	};
+
+	const handleUpdateOrdering = ( newAccounts: BankAccount[] ) => {
+		setAccounts( newAccounts );
+		updateOrdering( newAccounts );
 	};
 
 	return (
@@ -63,7 +77,7 @@ export const BankAccountsList = ( {
 			<SortableContainer< BankAccount >
 				items={ accounts }
 				className={ 'bank-accounts__list' }
-				setItems={ updateOrdering }
+				setItems={ handleUpdateOrdering }
 			>
 				<div className="bank-accounts__list-header">
 					<div className="bank-accounts__list-item-inner">
@@ -113,7 +127,9 @@ export const BankAccountsList = ( {
 											<MenuItem
 												isDestructive
 												onClick={ () =>
-													handleDelete( account.id )
+													setAccountToDelete(
+														account
+													)
 												}
 											>
 												{ __(
@@ -145,6 +161,43 @@ export const BankAccountsList = ( {
 					onSave={ handleSave }
 					defaultCountry={ defaultCountry }
 				/>
+			) }
+
+			{ accountToDelete && (
+				<Modal
+					title={ __( 'Delete account', 'woocommerce' ) }
+					onRequestClose={ () => setAccountToDelete( null ) }
+					shouldCloseOnClickOutside={ false }
+				>
+					<p>
+						{ __(
+							'Are you sure you want to delete this bank account?',
+							'woocommerce'
+						) }
+					</p>
+					<div
+						style={ {
+							display: 'flex',
+							justifyContent: 'flex-end',
+							gap: '8px',
+							marginTop: '16px',
+						} }
+					>
+						<Button
+							variant="secondary"
+							onClick={ () => setAccountToDelete( null ) }
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							variant="primary"
+							isDestructive
+							onClick={ confirmDelete }
+						>
+							{ __( 'Delete', 'woocommerce' ) }
+						</Button>
+					</div>
+				</Modal>
 			) }
 		</>
 	);

@@ -14,7 +14,7 @@ import {
 import './settings-payments-offline.scss';
 import './settings-payments-body.scss';
 import { OfflinePaymentGateways } from './components/offline-payment-gateways';
-import { BankAccountsList } from '~/settings-payments/components/bank-accounts-table';
+import { BankAccountsList } from '~/settings-payments/components/bank-accounts-list';
 
 /**
  * A component for managing offline payment gateways in WooCommerce.
@@ -79,7 +79,7 @@ export const SettingsPaymentsOffline = () => {
 			<br />
 
 			<BankAccountsList
-				accounts={ [
+				initialAccounts={ [
 					{
 						id: 'acc-1',
 						account_name: 'Red Potato Shop Inc',
@@ -114,6 +114,7 @@ export const SettingsPaymentsOffline = () => {
 				onChange={ ( updatedAccounts ) =>
 					console.log( 'Updated accounts:', updatedAccounts )
 				}
+				updateOrdering={ () => {} }
 				defaultCountry="US"
 			/>
 		</div>
