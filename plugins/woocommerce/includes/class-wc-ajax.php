@@ -257,7 +257,7 @@ class WC_AJAX {
 				 * @param array $fragments The fragments to be sent to the client.
 				 * @return array The filtered fragments.
 				 */
-				'fragments' => apply_filters(
+				'fragments' => apply_filters( // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 					'woocommerce_add_to_cart_fragments',
 					array(
 						'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
