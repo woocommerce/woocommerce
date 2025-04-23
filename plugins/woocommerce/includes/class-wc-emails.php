@@ -11,6 +11,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -810,7 +811,7 @@ class WC_Emails {
 		}
 
 		// If this is a variation but stock is managed at the parent level, use the parent product for the notification.
-		if ( $product->is_type( 'variation' ) && 'parent' === $product->get_manage_stock() ) {
+		if ( $product->is_type( ProductType::VARIATION ) && 'parent' === $product->get_manage_stock() ) {
 			$parent_product = wc_get_product( $product->get_parent_id() );
 			if ( $parent_product ) {
 				$product = $parent_product;
