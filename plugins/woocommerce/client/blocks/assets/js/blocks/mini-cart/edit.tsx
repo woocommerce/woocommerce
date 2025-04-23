@@ -33,7 +33,7 @@ import QuantityBadge from './quantity-badge';
 import { defaultColorItem } from './utils/defaults';
 import { migrateAttributesToColorPanel } from './utils/data';
 import './editor.scss';
-import { useApplyEditorStyles } from '../../shared/hooks/use-theme-colors';
+import { useThemeColors } from '../../shared/hooks/use-theme-colors';
 
 export interface Attributes {
 	miniCartIcon: 'cart' | 'bag' | 'bag-alt';
@@ -97,8 +97,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	) as string;
 
 	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
-	useApplyEditorStyles(
-		'mini-cart-quantity-badge-foreground-color',
+	useThemeColors(
+		'mini-cart-badge',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-mini-cart__badge) {
 				color: ${ editorBackgroundColor };
