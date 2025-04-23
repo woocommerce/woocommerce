@@ -19,12 +19,39 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	private ShippingController $shipping_controller;
 
 	/**
+	 * The old checkout page ID.
+	 *
+	 * @var int $original_checkout_page_id
+	 */
+	private $original_checkout_page_id;
+
+	/**
+	 * The new checkout page ID.
+	 *
+	 * @var int $block_checkout_page_id
+	 */
+	private $block_checkout_page_id;
+
+	/**
 	 * Initialize the registry instance.
 	 *
 	 * @return void
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		// Local pickup only works with the checkout block.
+		$this->original_checkout_page_id = get_option( 'woocommerce_checkout_page_id' );
+		$this->block_checkout_page_id    = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_title'   => 'Checkout',
+				'post_content' => '<!-- wp:woocommerce/checkout /-->',
+				'post_status'  => 'publish',
+			)
+		);
+		update_option( 'woocommerce_checkout_page_id', $this->block_checkout_page_id );
+
 		$this->shipping_controller = new ShippingController(
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
@@ -33,6 +60,12 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
 		WC()->customer->set_shipping_country( '' );
+	}
+
+	protected function tearDown(): void {
+		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
+		wp_delete_post( $this->block_checkout_page_id );
+		parent::tearDown();
 	}
 
 	/**
@@ -95,9 +128,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 * Test that register_local_pickup handles missing WC()->shipping and other dependencies gracefully.
 	 */
 	public function test_register_local_pickup_also_handles_missing_dependencies() {
-		$wc_backup  = WC();
-		$mock_utils = $this->getMockBuilder( \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::class )->getMock();
-		$mock_utils->method( 'is_checkout_block_default' )->willReturn( true );
+		$wc_backup   = WC();
 		$logger_mock = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
 		// We need this to make sure our mock logger is getting returned.
 		add_filter(
