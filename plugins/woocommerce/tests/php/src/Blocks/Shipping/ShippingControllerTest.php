@@ -62,6 +62,11 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		WC()->customer->set_shipping_country( '' );
 	}
 
+	/**
+	 * Tear down the test.
+	 *
+	 * @return void
+	 */
 	protected function tearDown(): void {
 		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
 		wp_delete_post( $this->block_checkout_page_id );
