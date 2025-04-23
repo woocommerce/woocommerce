@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer completed order email (initial block content)
+ * Customer POS completed order email (initial block content)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *

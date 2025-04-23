@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer refunded order email (inital block version)
+ * Customer POS refunded order email (inital block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
