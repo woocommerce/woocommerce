@@ -105,10 +105,6 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 
-				if ( $this->block_email_editor_enabled ) {
-					$this->personalizer->set_context( $this->prepare_context_data( $this->personalizer->get_context() ) );
-				}
-
 				$email_already_sent = $order->get_new_order_email_sent();
 			}
 

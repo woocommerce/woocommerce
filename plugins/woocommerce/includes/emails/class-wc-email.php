@@ -284,6 +284,13 @@ class WC_Email extends WC_Settings_API {
 	public $template_block_content = 'emails/block/general-block-email.php';
 
 	/**
+	 * Indicates whether the context is already set to avoid repeated configuration.
+	 *
+	 * @var bool
+	 */
+	protected $context_set = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -480,11 +487,36 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Ensure the personalization context is ready.
+	 *
+	 * This method ensures the Personalizer context is set correctly before emails are generated.
+	 * It skips context reconfiguration if it's already set.
+	 *
+	 * @return void
+	 */
+	protected function ensure_personalization_context_is_set(): void {
+		if ( $this->context_set ) {
+			// Context is already set, skip reconfiguration.
+			return;
+		}
+
+		if ( $this->block_email_editor_enabled && isset( $this->personalizer ) ) {
+			$current_context = $this->personalizer->get_context();
+			$updated_context = $this->prepare_context_data( $current_context );
+			$this->personalizer->set_context( $updated_context );
+		}
+
+		$this->context_set = true;
+	}
+
+	/**
 	 * Get email subject.
 	 *
 	 * @return string
 	 */
 	public function get_subject() {
+		$this->ensure_personalization_context_is_set();
+
 		/**
 		 * Provides an opportunity to inspect and modify subject for the email.
 		 *
@@ -509,6 +541,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_preheader() {
+		$this->ensure_personalization_context_is_set();
+
 		/**
 		 * Provides an opportunity to inspect and modify preheader for the email.
 		 *
@@ -781,6 +815,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content() {
+		$this->ensure_personalization_context_is_set();
 		$this->sending = true;
 
 		$block_email_content = $this->get_block_email_html_content();

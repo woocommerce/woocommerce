@@ -81,13 +81,24 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_subject() {
+			$this->ensure_personalization_context_is_set();
+
 			if ( $this->object->has_status( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ) ) {
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
+
+				if ( $this->block_email_editor_enabled ) {
+					$subject = $this->personalizer->personalize_content( $subject );
+				}
 
 				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
 			}
 
 			$subject = $this->get_option( 'subject', $this->get_default_subject() );
+
+			if ( $this->block_email_editor_enabled ) {
+				$subject = $this->personalizer->personalize_content( $subject );
+			}
+
 			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object, $this );
 		}
 
@@ -136,10 +147,6 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				$this->recipient                      = $this->object->get_billing_email();
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
-			}
-
-			if ( $this->block_email_editor_enabled ) {
-				$this->personalizer->set_context( $this->prepare_context_data( $this->personalizer->get_context() ) );
 			}
 
 			if ( $this->get_recipient() ) {
