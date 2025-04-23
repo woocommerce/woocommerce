@@ -50,13 +50,16 @@ export default {
 		headingLgFontWeight: '400',
 		headingMdFontSize: '20px',
 		headingMdFontWeight: '400',
-		headingSmFontSize: '16px',
+		headingSmFontSize: '13px',
 		headingSmFontWeight: '600',
 		headingXsFontSize: '12px',
 		headingXsFontWeight: '600',
 		bodyMdFontWeight: '400',
 		bodyMdFontSize: '16px',
-		bodySmFontSize: '14px',
+		bodySmFontSize: '13px',
 		bodySmFontWeight: '400',
+		labelSmFontSize: '12px', // badge font size to match WPDS
+		labelSmFontWeight: '200', // badges font weight to match WPDS
+		labelMdFontSize: '13px',
 	},
 };
