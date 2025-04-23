@@ -238,6 +238,9 @@ class WC_AJAX {
 
 	/**
 	 * Get a refreshed cart fragment, including the mini cart HTML.
+	 *
+	 * @param array $args Optional. Additional arguments.
+	 * @return void
 	 */
 	public static function get_refreshed_fragments( $args = array() ) {
 		ob_start();
@@ -248,6 +251,12 @@ class WC_AJAX {
 
 		$data = array_merge(
 			array(
+				/**
+				 * Filters the fragments to be sent to the client.
+				 *
+				 * @param array $fragments The fragments to be sent to the client.
+				 * @return array The filtered fragments.
+				 */
 				'fragments' => apply_filters(
 					'woocommerce_add_to_cart_fragments',
 					array(
@@ -483,20 +492,35 @@ class WC_AJAX {
 			return;
 		}
 
-		$products_to_add = array();
+		$product_id_param       = ArrayUtil::get_value_or_default( $_POST, 'product_id' );
+		$product_quantity_param = ArrayUtil::get_value_or_default( $_POST, 'quantity' );
+		$products_to_add        = array();
+
 		// Check if product_id and quantity are arrays.
-		if ( is_array( $_POST['product_id'] ) ) {
+		if ( is_array( $product_id_param ) ) {
 			// For each product_id, add the quantity to the products_to_add array.
-			foreach ( $_POST['product_id'] as $index => $product_id ) {
+			foreach ( $product_id_param as $index => $product_id ) {
 				$products_to_add[] = array(
-					'product_id' => apply_filters( 'woocommerce_add_to_cart_product_id', absint( $product_id ) ),
-					'quantity'   => empty( $_POST['quantity'][ $index ] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'][ $index ] ) ),
+					/**
+					 * Filters the product ID to be added to the cart.
+					 *
+					 * @param int $product_id The product ID.
+					 * @return int The filtered product ID.
+					 */
+					'product_id' => apply_filters( 'woocommerce_add_to_cart_product_id', absint( $product_id ) ), // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+					'quantity'   => empty( $product_quantity_param[ $index ] ) ? 1 : wc_stock_amount( wp_unslash( $product_quantity_param[ $index ] ) ),
 				);
 			}
 		} else {
 			$products_to_add[] = array(
-				'product_id' => apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) ),
-				'quantity'   => empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'] ) ),
+				/**
+				 * Filters the product ID to be added to the cart.
+				 *
+				 * @param int $product_id The product ID.
+				 * @return int The filtered product ID.
+				 */
+				'product_id' => apply_filters( 'woocommerce_add_to_cart_product_id', absint( $product_id_param ) ), // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+				'quantity'   => empty( $product_quantity_param ) ? 1 : wc_stock_amount( wp_unslash( $product_quantity_param ) ),
 			);
 		}
 
@@ -504,8 +528,16 @@ class WC_AJAX {
 			$product_id = $product_to_add['product_id'];
 			$quantity   = $product_to_add['quantity'];
 
-			$product           = wc_get_product( $product_id );
-			$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+			$product = wc_get_product( $product_id );
+			/**
+			 * Filters whether the product can be added to the cart.
+			 *
+			 * @param bool $passed_validation Whether the product can be added to the cart.
+			 * @param int $product_id The product ID.
+			 * @param int $quantity The quantity.
+			 * @return bool The filtered result.
+			 */
+			$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			$product_status    = get_post_status( $product_id );
 			$variation_id      = 0;
 			$variation         = array();
@@ -521,13 +553,26 @@ class WC_AJAX {
 				if ( $cart_item_key ) {
 					$cart_item = WC()->cart->get_cart_item( $cart_item_key );
 
-					do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+					/**
+					 * Fires when a product is added to the cart via AJAX.
+					 *
+					 * @param int $product_id The product ID.
+					 * @return void
+					 */
+					do_action( 'woocommerce_ajax_added_to_cart', $product_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 				}
 			} else {
 				// If there was an error adding to the cart, redirect to the product page to show any errors.
 				$data = array(
 					'error'       => true,
-					'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
+					/**
+					 * Filters the URL to redirect to after an error occurs while adding a product to the cart via AJAX.
+					 *
+					 * @param string $product_url The URL to redirect to.
+					 * @param int $product_id The product ID.
+					 * @return string The filtered URL.
+					 */
+					'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ), // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 				);
 
 				wp_send_json( $data );
