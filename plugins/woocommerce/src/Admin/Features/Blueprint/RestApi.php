@@ -7,13 +7,8 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 use Automattic\WooCommerce\Blueprint\ExportSchema;
-use Automattic\WooCommerce\Blueprint\ImportSchema;
-use Automattic\WooCommerce\Blueprint\ResultFormatters\JsonResultFormatter;
 use Automattic\WooCommerce\Blueprint\ImportStep;
-use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\ZipExportedSchema;
-use RecursiveArrayIterator;
-use RecursiveIteratorIterator;
 
 /**
  * Class RestApi
@@ -65,7 +60,7 @@ class RestApi {
 					'callback'            => array( $this, 'export' ),
 					'permission_callback' => array( $this, 'check_permission' ),
 					'args'                => array(
-						'steps'         => array(
+						'steps' => array(
 							'description' => __( 'A list of plugins to install', 'woocommerce' ),
 							'type'        => 'object',
 							'properties'  => array(
@@ -90,12 +85,6 @@ class RestApi {
 							),
 							'default'     => array(),
 							'required'    => true,
-						),
-						'export_as_zip' => array(
-							'description' => __( 'Export as a zip file', 'woocommerce' ),
-							'type'        => 'boolean',
-							'default'     => false,
-							'required'    => false,
 						),
 					),
 				),
@@ -145,8 +134,7 @@ class RestApi {
 		$payload = $request->get_param( 'steps' );
 		$steps   = $this->steps_payload_to_blueprint_steps( $payload );
 
-		$export_as_zip = $request->get_param( 'export_as_zip' );
-		$exporter      = new ExportSchema();
+		$exporter = new ExportSchema();
 
 		if ( isset( $payload['plugins'] ) ) {
 			$exporter->on_before_export(
@@ -174,18 +162,12 @@ class RestApi {
 			);
 		}
 
-		$data = $exporter->export( $steps, $export_as_zip );
-
-		if ( $export_as_zip ) {
-			$zip  = new ZipExportedSchema( $data );
-			$data = $zip->zip();
-			$data = site_url( str_replace( ABSPATH, '', $data ) );
-		}
+		$data = $exporter->export( $steps );
 
 		return new \WP_HTTP_Response(
 			array(
 				'data' => $data,
-				'type' => $export_as_zip ? 'zip' : 'json',
+				'type' => 'json',
 			)
 		);
 	}
@@ -226,37 +208,6 @@ class RestApi {
 		return $blueprint_steps;
 	}
 
-
-	/**
-	 * Get list of settings that will be overridden by the import.
-	 *
-	 * @param array $requested_steps List of steps from the import schema.
-	 * @return array List of settings that will be overridden.
-	 */
-	private function get_settings_to_overwrite( array $requested_steps ): array {
-		$settings_map = array(
-			'setWCSettings'            => __( 'Settings', 'woocommerce' ),
-			'setWCCoreProfilerOptions' => __( 'Core Profiler Options', 'woocommerce' ),
-			'setWCPaymentGateways'     => __( 'Payment Gateways', 'woocommerce' ),
-			'setWCShipping'            => __( 'Shipping', 'woocommerce' ),
-			'setWCTaskOptions'         => __( 'Task Options', 'woocommerce' ),
-			'setWCTaxRates'            => __( 'Tax Rates', 'woocommerce' ),
-			'installPlugin'            => __( 'Plugins', 'woocommerce' ),
-			'installTheme'             => __( 'Themes', 'woocommerce' ),
-		);
-
-		$settings = array();
-		foreach ( $requested_steps as $step ) {
-			$step_name = $step->meta->alias ?? $step->step;
-			if ( isset( $settings_map[ $step_name ] )
-			&& ! in_array( $settings_map[ $step_name ], $settings, true ) ) {
-				$settings[] = $settings_map[ $step_name ];
-			}
-		}
-
-		return $settings;
-	}
-
 	/**
 	 * Import a single step.
 	 *
@@ -292,81 +243,6 @@ class RestApi {
 			'success'  => $result->is_success(),
 			'messages' => $result->get_messages(),
 		);
-	}
-
-
-
-	/**
-	 * Get the schema for the queue endpoint.
-	 *
-	 * @return array
-	 */
-	public function get_queue_response_schema() {
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'queue',
-			'type'       => 'object',
-			'properties' => array(
-				'reference'             => array(
-					'type' => 'string',
-				),
-				'process_nonce'         => array(
-					'type' => 'string',
-				),
-				'settings_to_overwrite' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-				'error_type'            => array(
-					'type'    => 'string',
-					'default' => null,
-					'enum'    => array( 'upload', 'schema_validation', 'conflict' ),
-				),
-				'errors'                => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-			),
-		);
-
-		return $schema;
-	}
-
-	/**
-	 * Get the schema for the process endpoint.
-	 *
-	 * @return array
-	 */
-	public function get_process_response_schema() {
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'process',
-			'type'       => 'object',
-			'properties' => array(
-				'processed' => array(
-					'type' => 'boolean',
-				),
-				'message'   => array(
-					'type' => 'string',
-				),
-				'data'      => array(
-					'type'       => 'object',
-					'properties' => array(
-						'redirect' => array(
-							'type' => 'string',
-						),
-						'result'   => array(
-							'type' => 'array',
-						),
-					),
-				),
-			),
-		);
-		return $schema;
 	}
 
 	/**
