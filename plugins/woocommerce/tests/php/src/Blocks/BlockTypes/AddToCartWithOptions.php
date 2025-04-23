@@ -208,7 +208,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$simple_product->set_stock_quantity( 1 );
 		$simple_product->save();
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
-		$this->assertStringNotContainsString( 'data-block-name="woocommerce/add-to-cart-with-options-quantity-selector"', $markup, 'The Add to Cart with Options form does not contains a quantity selector block for products with manage stock set to true and stock quantity set to 1.' );
+		$this->assertStringNotContainsString( 'data-block-name="woocommerce/add-to-cart-with-options-quantity-selector"', $markup, 'The Add to Cart with Options form does not contain a quantity selector block for products with manage stock set to true and stock quantity set to 1.' );
 
 		$simple_product->set_stock_quantity( 10 );
 		$simple_product->save();
