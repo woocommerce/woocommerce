@@ -3,6 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import clsx from 'clsx';
+import type { BlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -34,15 +35,14 @@ const getAlignClass = ( align?: string ) => {
 	return '';
 };
 
-export const Edit = ( {
-	attributes,
-}: {
-	attributes: { layout: { verticalAlignment: string }; align: string };
-} ) => {
+export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const blockProps = useBlockProps( {
 		className: 'wc-block-product-gallery-large-image-next-previous__button',
 	} );
 
+	// We're passing blockProps to buttons because they're the main block content.
+	// However, alignment has to be applied to the container hence we're handling
+	// these attributes "manually" here.
 	const verticalAlign = attributes?.layout?.verticalAlignment;
 	const verticalAlignClass = getVerticalAlignmentClass( verticalAlign );
 	const horizontalAlign = attributes?.align;
