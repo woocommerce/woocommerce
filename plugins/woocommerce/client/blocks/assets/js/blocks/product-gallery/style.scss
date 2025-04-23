@@ -116,6 +116,19 @@ $dialog-padding: 20px;
 	}
 }
 
+@mixin vertical-thumbnails {
+	.wc-block-product-gallery-thumbnails__scrollable {
+		flex-direction: column;
+	}
+
+	@for $i from 10 through 50 {
+		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
+			flex-basis: calc($i * 1%);
+			aspect-ratio: 1 / calc(100 / $i);
+		}
+	}
+}
+
 @mixin horizontal-thumbnails {
 	.wc-block-product-gallery-thumbnails__thumbnail {
 		height: 100%;
@@ -130,6 +143,10 @@ $dialog-padding: 20px;
 
 .wc-block-product-gallery-thumbnails {
 	position: relative;
+
+	// Use the vertical thumbnails as a default. The default layout attributes from block.json are not set
+	// until manipulated hence the need for the mixin.
+	@include vertical-thumbnails;
 
 	&__scrollable {
 		height: 100%;
@@ -208,19 +225,8 @@ $dialog-padding: 20px;
 }
 
 // Percentage width
-.is-nowrap .wc-block-product-gallery-thumbnails,
 .is-horizontal .wc-block-product-gallery-thumbnails {
-	&__scrollable {
-		flex-direction: column;
-	}
-
-	// These are min - max range values for thumbnails size.
-	@for $i from 10 through 50 {
-		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
-			flex-basis: calc($i * 1%);
-			aspect-ratio: 1 / calc(100 / $i);
-		}
-	}
+	@include vertical-thumbnails;
 }
 
 .is-vertical .wc-block-product-gallery-thumbnails {
@@ -313,17 +319,17 @@ body.wc-block-product-gallery-dialog-open {
 // - Thumbnails appear below the main gallery image and are arranged horizontally in a row
 // - Next/Previous buttons are hidden
 @include breakpoint("<600px") {
+	.is-vertical.wc-block-product-gallery,
+	.is-horizontal.wc-block-product-gallery,
 	.wc-block-product-gallery {
 		@include horizontal-thumbnails;
-
-		.wc-block-product-gallery__gallery-area {
-			flex-direction: column;
-		}
+		flex-direction: column;
 
 		.wc-block-product-gallery-large-image-next-previous {
 			display: none;
 		}
 
+		// Fixed size for thumbnails on mobile.
 		.wc-block-product-gallery-thumbnails {
 			order: 1;
 			width: 100%;

@@ -11,6 +11,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -763,6 +764,14 @@ class WC_Emails {
 			return;
 		}
 
+		// If this is a variation but stock is managed at the parent level, use the parent product for the notification.
+		if ( $product->is_type( 'variation' ) && 'parent' === $product->get_manage_stock() ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+			if ( $parent_product ) {
+				$product = $parent_product;
+			}
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		$message = sprintf(
 			/* translators: 1: product name 2: items in stock */
@@ -799,6 +808,14 @@ class WC_Emails {
 		 */
 		if ( false === apply_filters( 'woocommerce_should_send_no_stock_notification', true, $product->get_id() ) ) {
 			return;
+		}
+
+		// If this is a variation but stock is managed at the parent level, use the parent product for the notification.
+		if ( $product->is_type( ProductType::VARIATION ) && 'parent' === $product->get_manage_stock() ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+			if ( $parent_product ) {
+				$product = $parent_product;
+			}
 		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
