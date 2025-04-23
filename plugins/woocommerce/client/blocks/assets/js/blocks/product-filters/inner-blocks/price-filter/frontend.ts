@@ -8,7 +8,7 @@ import * as iAPI from '@wordpress/interactivity';
  * Internal dependencies
  */
 import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
-import { formatPrice, getCurrency } from '../../utils';
+import { formatPrice, getCurrency } from '../../utils/price-currency';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
 

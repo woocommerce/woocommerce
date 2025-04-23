@@ -35,17 +35,20 @@ class ProductFilters extends AbstractBlock {
 		global $pagenow;
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
-		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
-		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
-		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
-
 		$canonical_url_no_pagination = get_pagenum_link( 1 );
 		if ( is_singular() ) {
 			$canonical_url_no_pagination = get_permalink();
 		}
 
-		$this->asset_data_registry->add( 'canonicalUrl', html_entity_decode( $canonical_url_no_pagination ) );
+		$this->interactivity_api_config->initialize_shared_config();
+
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			[
+				'canonicalUrl'     => html_entity_decode( $canonical_url_no_pagination ),
+				'isProductArchive' => is_shop() || is_product_taxonomy(),
+			]
+		);
 	}
 
 	/**

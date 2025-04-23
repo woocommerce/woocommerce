@@ -21,7 +21,7 @@ import {
  * Internal dependencies
  */
 import { BlockAttributes, EditProps } from './types';
-import { getInnerBlockByName } from '../../utils';
+import { getInnerBlockByName } from '../../utils/get-inner-block-by-name';
 
 let displayStyleOptions: Block[] = [];
 

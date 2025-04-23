@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
-
+use Automattic\WooCommerce\Blocks\InteractivityAPIConfig;
 /**
  * Mini-Cart class.
  *
@@ -74,12 +74,13 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Constructor.
 	 *
-	 * @param AssetApi            $asset_api Instance of the asset API.
-	 * @param AssetDataRegistry   $asset_data_registry Instance of the asset data registry.
-	 * @param IntegrationRegistry $integration_registry Instance of the integration registry.
+	 * @param AssetApi               $asset_api Instance of the asset API.
+	 * @param AssetDataRegistry      $asset_data_registry Instance of the asset data registry.
+	 * @param IntegrationRegistry    $integration_registry Instance of the integration registry.
+	 * @param InteractivityAPIConfig $interactivity_api_config Instance of the interactivity API config.
 	 */
-	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry ) {
-		parent::__construct( $asset_api, $asset_data_registry, $integration_registry, $this->block_name );
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, InteractivityAPIConfig $interactivity_api_config ) {
+		parent::__construct( $asset_api, $asset_data_registry, $integration_registry, $interactivity_api_config, $this->block_name );
 	}
 
 	/**

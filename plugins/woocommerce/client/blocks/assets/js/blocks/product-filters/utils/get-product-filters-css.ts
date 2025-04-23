@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getColorsFromBlockSupports } from '.';
+import { getColorsFromBlockSupports } from './get-colors-from-block-supports';
 import type { BlockAttributes } from '../types';
 
 const isNull = < T >( term: T | null ): term is null => {

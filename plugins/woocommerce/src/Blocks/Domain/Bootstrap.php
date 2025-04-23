@@ -37,6 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
+use Automattic\WooCommerce\Blocks\InteractivityAPIConfig;
 
 
 /**
@@ -237,9 +238,10 @@ class Bootstrap {
 		$this->container->register(
 			BlockTypesController::class,
 			function ( Container $container ) {
-				$asset_api           = $container->get( AssetApi::class );
-				$asset_data_registry = $container->get( AssetDataRegistry::class );
-				return new BlockTypesController( $asset_api, $asset_data_registry );
+				$asset_api                = $container->get( AssetApi::class );
+				$asset_data_registry      = $container->get( AssetDataRegistry::class );
+				$interactivity_api_config = $container->get( InteractivityAPIConfig::class );
+				return new BlockTypesController( $asset_api, $asset_data_registry, $interactivity_api_config );
 			}
 		);
 		$this->container->register(
@@ -401,6 +403,12 @@ class Bootstrap {
 			BlockTemplatesController::class,
 			function () {
 				return new BlockTemplatesController();
+			}
+		);
+		$this->container->register(
+			InteractivityAPIConfig::class,
+			function () {
+				return new InteractivityAPIConfig();
 			}
 		);
 	}
