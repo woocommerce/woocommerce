@@ -95,7 +95,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			await thumbnailsBlock.click();
 			await editor.openDocumentSettingsSidebar();
 
-			await expect( thumbnailsSizeInput ).toHaveValue( '33' );
+			await expect( thumbnailsSizeInput ).toHaveValue( '25' );
 			await expect( async () => {
 				const largeImageBox = await largeImageBlock.boundingBox();
 				const thumbnailsBox = await thumbnailsBlock.boundingBox();
@@ -103,7 +103,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
 				expect( thumbnailsWidth ).toBeCloseTo(
-					largeImageWidth * 0.33,
+					largeImageWidth * 0.25,
 					0
 				);
 			} ).toPass( { timeout: 3_000 } );
@@ -171,7 +171,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			await thumbnailsBlock.click();
 			await editor.openDocumentSettingsSidebar();
 
-			await expect( thumbnailsSizeInput ).toHaveValue( '33' );
+			await expect( thumbnailsSizeInput ).toHaveValue( '25' );
 			await expect( async () => {
 				// Set size to 10%
 				await thumbnailsSizeInput.fill( '50' );

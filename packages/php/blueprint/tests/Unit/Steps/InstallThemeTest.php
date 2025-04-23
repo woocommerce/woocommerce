@@ -11,22 +11,22 @@ class InstallThemeTest extends TestCase {
 	 * Test the constructor and JSON preparation.
 	 */
 	public function testConstructorAndPrepareJsonArray() {
-		$slug = 'my-theme';
+		$slug     = 'my-theme';
 		$resource = 'https://example.com/my-theme.zip';
-		$options = array( 'activate' => true );
+		$options  = array( 'activate' => true );
 
-		$installTheme = new InstallTheme( $slug, $resource, $options );
+		$install_theme = new InstallTheme( $slug, $resource, $options );
 
 		$expected_array = array(
-			'step'         => 'installTheme',
+			'step'      => 'installTheme',
 			'themeData' => array(
 				'resource' => $resource,
 				'slug'     => $slug,
 			),
-			'options'      => $options,
+			'options'   => $options,
 		);
 
-		$this->assertEquals( $expected_array, $installTheme->prepare_json_array() );
+		$this->assertEquals( $expected_array, $install_theme->prepare_json_array() );
 	}
 
 	/**
@@ -43,22 +43,22 @@ class InstallThemeTest extends TestCase {
 		$expected_schema = array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'         => array(
+				'step'      => array(
 					'type' => 'string',
 					'enum' => array( 'installTheme' ),
 				),
 				'themeData' => array(
-					"anyOf" => [
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/VFSReference.php",
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/LiteralReference.php",
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/CorePluginReference.php",
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/CoreThemeReference.php",
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/UrlReference.php",
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/GitDirectoryReference.php",
-						require __DIR__ . "/../../../src/Steps/schemas/definitions/DirectoryLiteralReference.php",
-					]
+					'anyOf' => array(
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/VFSReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/LiteralReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/CorePluginReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/CoreThemeReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/UrlReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/GitDirectoryReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/DirectoryLiteralReference.php',
+					),
 				),
-				'options'      => array(
+				'options'   => array(
 					'type'       => 'object',
 					'properties' => array(
 						'activate' => array(

@@ -26,7 +26,7 @@ class ImportActivatePlugin implements StepProcessor {
 		// phpcs:ignore
 		$plugin_path = $schema->pluginPath;
 
-		$activate = $this->wp_activate_plugin($plugin_path);
+		$activate = $this->wp_activate_plugin( $plugin_path );
 
 		if ( $this->is_wp_error( $activate ) ) {
 			$result->add_error( "Unable to activate {$plugin_path}." );

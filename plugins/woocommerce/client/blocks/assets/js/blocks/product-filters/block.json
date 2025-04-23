@@ -36,7 +36,6 @@
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId", "query", "queryId" ],
-	"viewScript": "wc-product-filters-frontend",
 	"attributes": {
 		"isPreview": {
 			"type": "boolean",
@@ -47,5 +46,8 @@
 		"attributes": {
 			"isPreview": true
 		}
-	}
+	},
+	"viewScriptModule": "woocommerce/product-filters",
+	"style": "file:../woocommerce/product-filters-style.css",
+	"editorStyle": "file:../woocommerce/product-filters-editor.css"
 }

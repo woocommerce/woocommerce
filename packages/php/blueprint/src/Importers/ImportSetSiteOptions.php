@@ -27,7 +27,7 @@ class ImportSetSiteOptions implements StepProcessor {
 	public function process( $schema ): StepProcessorResult {
 		$result = StepProcessorResult::success( SetSiteOptions::get_step_name() );
 		foreach ( $schema->options as $key => $value ) {
-			$value = json_decode( json_encode( $value ), true );
+			$value   = json_decode( wp_json_encode( $value ), true );
 			$updated = $this->wp_update_option( $key, $value );
 
 			if ( $updated ) {

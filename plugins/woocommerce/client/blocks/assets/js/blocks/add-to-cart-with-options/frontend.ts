@@ -10,11 +10,18 @@ type Context = {
 	productId: number;
 	variation: CartVariationItem[];
 	quantity: number;
+	tempQuantity: number;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: wooState } = store< WooCommerce >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
 
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
@@ -63,13 +70,18 @@ const addToCartWithOptionsStore = store(
 					{ lock: universalLock }
 				);
 
-				const {
-					productId: id,
-					quantity,
-					variation,
-				} = getContext< Context >();
+				const { productId, quantity, variation } =
+					getContext< Context >();
+				const product = wooState.cart?.items.find(
+					( item ) => item.id === productId
+				);
+				const currentQuantity = product?.quantity || 0;
 
-				yield actions.addCartItem( { id, quantity, variation } );
+				yield actions.addCartItem( {
+					id: productId,
+					quantity: currentQuantity + quantity,
+					variation,
+				} );
 			},
 		},
 	}
