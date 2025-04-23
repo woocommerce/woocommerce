@@ -1164,6 +1164,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		)
 	);
 
+	$related_posts = is_array( $related_posts ) ? $related_posts : array();
+
 	if ( apply_filters( 'woocommerce_product_related_posts_shuffle', true ) ) {
 		shuffle( $related_posts );
 	}
