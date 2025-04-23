@@ -116,8 +116,8 @@ class ImportSetSiteOptionsTest extends TestCase {
 
 		$messages = $result->get_messages( 'warn' );
 		$this->assertCount( 2, $messages );
-		$this->assertEquals( "Cannot modify 'admin_email' option: restricted for security reasons.", $messages[0]['message'] );
-		$this->assertEquals( "Cannot modify 'active_plugins' option: restricted for security reasons.", $messages[1]['message'] );
+		$this->assertEquals( "Cannot modify 'admin_email' option: Modifying is restricted for this key.", $messages[0]['message'] );
+		$this->assertEquals( "Cannot modify 'active_plugins' option: Modifying is restricted for this key.", $messages[1]['message'] );
 		$this->assertNotEquals( get_option( 'admin_email' ), 'danger@example.com' );
 		$this->assertNotEquals( get_option( 'active_plugins' ), array( 'fake-plugin/fake-plugin.php' ) );
 	}

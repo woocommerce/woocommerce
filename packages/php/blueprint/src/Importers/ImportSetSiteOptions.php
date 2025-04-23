@@ -51,7 +51,7 @@ class ImportSetSiteOptions implements StepProcessor {
 		foreach ( $schema->options as $key => $value ) {
 			// Skip if the option should not be modified.
 			if ( in_array( $key, self::RESTRICTED_OPTIONS, true ) ) {
-				$result->add_warn( "Cannot modify '{$key}' option: restricted for security reasons." );
+				$result->add_warn( "Cannot modify '{$key}' option: Modifying is restricted for this key." );
 				continue;
 			}
 
