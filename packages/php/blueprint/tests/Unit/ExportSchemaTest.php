@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blueprint\ExportSchema;
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Exporters\EmptySetSiteOptionsExporter;
 use Automattic\WooCommerce\Blueprint\Tests\TestCase;
 use Mockery;
-use Mockery\Mock;
+use WP_Error;
 
 /**
  * Class ExportSchemaTest
@@ -70,18 +70,16 @@ class ExportSchemaTest extends TestCase {
 	}
 
 	/**
-	 * Test that it throws an exception when the landing page path is invalid.
+	 * Test that it returns a WP_Error when the landing page path is invalid.
 	 */
-	public function test_throw_exception_when_landing_page_path_is_invalid() {
-		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Invalid loading page path.' );
-
+	public function test_returns_wp_error_when_landing_page_path_is_invalid() {
 		$exporter = $this->get_mock( true );
 		$exporter->shouldReceive( 'wp_apply_filters' )
 			->with( 'wooblueprint_export_landingpage', Mockery::any() )
 			->andReturn( 'invalid-path' );
 
-		$exporter->export();
+		$result = $exporter->export();
+		$this->assertInstanceOf( WP_Error::class, $result );
 	}
 
 	/**

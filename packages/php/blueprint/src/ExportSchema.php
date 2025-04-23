@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
+use WP_Error;
 
 /**
  * Class ExportSchema
@@ -37,9 +38,7 @@ class ExportSchema {
 	 *
 	 * @param string[] $steps Array of step names to export, optional.
 	 *
-	 * @return array The exported schema array.
-	 *
-	 * @throws \InvalidArgumentException If the landing page path is invalid.
+	 * @return array|WP_Error The exported schema array or a WP_Error if the export fails.
 	 */
 	public function export( $steps = array() ) {
 		$loading_page_path = $this->wp_apply_filters( 'wooblueprint_export_landingpage', '/' );
@@ -55,7 +54,7 @@ class ExportSchema {
 		 * - invalid-path
 		 */
 		if ( ! preg_match( '#^/$|^/[^/].*#', $loading_page_path ) ) {
-			throw new \InvalidArgumentException( 'Invalid loading page path.' );
+			return new WP_Error( 'wooblueprint_invalid_landing_page_path', 'Invalid loading page path.' );
 		}
 
 		$schema = array(
