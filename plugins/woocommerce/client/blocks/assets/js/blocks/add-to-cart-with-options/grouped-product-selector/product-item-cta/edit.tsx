@@ -8,6 +8,11 @@ import { isSiteEditorPage } from '@woocommerce/utils';
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import QuantityStepper from '../../components/quantity-stepper';
+
 const CTA = () => {
 	const { isLoading, product } = useProductDataContext();
 	const isSiteEditor = useSelect(
@@ -38,34 +43,7 @@ const CTA = () => {
 				/>
 			);
 		}
-		return (
-			<div className="quantity wc-block-components-quantity-selector">
-				<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
-					-
-				</button>
-				<input
-					style={
-						// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
-						! isSiteEditor
-							? {
-									backgroundColor: '#ffffff',
-									lineHeight: 'normal',
-									minHeight: 'unset',
-									boxSizing: 'unset',
-									borderRadius: 'unset',
-							  }
-							: {}
-					}
-					type="number"
-					value="1"
-					className="input-text qty text"
-					readOnly
-				/>
-				<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">
-					+
-				</button>
-			</div>
-		);
+		return <QuantityStepper isSiteEditor={ isSiteEditor } />;
 	}
 
 	return (
