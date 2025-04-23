@@ -364,8 +364,8 @@ class WC_Session_Handler extends WC_Session {
 	 * Save data and delete guest session.
 	 *
 	 * @param string|mixed $old_session_key Optional session ID prior to user log-in.  If $old_session_key is not tied
-	 *                                      to a user, the session will be deleted tied to that key will be deleted with the
-	 *                                      assumption that it was migrated to the current session being saved.
+	 *                                      to a user, the session will be deleted with the assumption that it was migrated
+	 *                                      to the current session being saved.
 	 */
 	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
